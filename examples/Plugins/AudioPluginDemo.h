@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -23,24 +23,28 @@
 
  BEGIN_JUCE_PIP_METADATA
 
- name:             AudioPluginDemo
- version:          1.0.0
- vendor:           JUCE
- website:          http://juce.com
- description:      Synthesiser audio plugin.
+ name:                  AudioPluginDemo
+ version:               1.0.0
+ vendor:                JUCE
+ website:               http://juce.com
+ description:           Synthesiser audio plugin.
 
- dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
-                   juce_audio_plugin_client, juce_audio_processors,
-                   juce_audio_utils, juce_core, juce_data_structures,
-                   juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2017, vs2019, linux_make, xcode_iphone, androidstudio
+ dependencies:          juce_audio_basics, juce_audio_devices, juce_audio_formats,
+                        juce_audio_plugin_client, juce_audio_processors,
+                        juce_audio_utils, juce_core, juce_data_structures,
+                        juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
+ exporters:             xcode_mac, vs2017, vs2019, linux_make, xcode_iphone, androidstudio
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+ moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
- type:             AudioProcessor
- mainClass:        JuceDemoPluginAudioProcessor
+ type:                  AudioProcessor
+ mainClass:             JuceDemoPluginAudioProcessor
 
- useLocalCopy:     1
+ useLocalCopy:          1
+
+ pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn, pluginProducesMidiOut,
+                        pluginEditorRequiresKeys
+ extraPluginFormats:    AUv3
 
  END_JUCE_PIP_METADATA
 
@@ -177,12 +181,10 @@ public:
     //==============================================================================
     JuceDemoPluginAudioProcessor()
         : AudioProcessor (getBusesProperties()),
-    state (*this, nullptr, "state",
-           { std::make_unique<AudioParameterFloat> ("gain", "Gain", NormalisableRange<float> (0.0f, 1.0f), 0.9f),
-             std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
+          state (*this, nullptr, "state",
+                 { std::make_unique<AudioParameterFloat> ("gain",  "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
+                   std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
-        lastPosInfo.resetToDefault();
-
         // Add a sub-tree to store the state of our UI
         state.state.addChild ({ "uiState", { { "width",  400 }, { "height", 200 } }, {} }, -1, nullptr);
 
@@ -271,7 +273,7 @@ public:
     }
 
     //==============================================================================
-    const String getName() const override                             { return JucePlugin_Name; }
+    const String getName() const override                             { return "AudioPluginDemo"; }
     bool acceptsMidi() const override                                 { return true; }
     bool producesMidi() const override                                { return true; }
     double getTailLengthSeconds() const override                      { return 0.0; }
@@ -302,11 +304,50 @@ public:
     //==============================================================================
     void updateTrackProperties (const TrackProperties& properties) override
     {
-        trackProperties = properties;
+        {
+            const ScopedLock sl (trackPropertiesLock);
+            trackProperties = properties;
+        }
 
-        if (auto* editor = dynamic_cast<JuceDemoPluginAudioProcessorEditor*> (getActiveEditor()))
-            editor->updateTrackProperties ();
+        MessageManager::callAsync ([this]
+        {
+            if (auto* editor = dynamic_cast<JuceDemoPluginAudioProcessorEditor*> (getActiveEditor()))
+                 editor->updateTrackProperties();
+        });
     }
+
+    TrackProperties getTrackProperties() const
+    {
+        const ScopedLock sl (trackPropertiesLock);
+        return trackProperties;
+    }
+
+    class SpinLockedPosInfo
+    {
+    public:
+        SpinLockedPosInfo() { info.resetToDefault(); }
+
+        // Wait-free, but setting new info may fail if the main thread is currently
+        // calling `get`. This is unlikely to matter in practice because
+        // we'll be calling `set` much more frequently than `get`.
+        void set (const AudioPlayHead::CurrentPositionInfo& newInfo)
+        {
+            const juce::SpinLock::ScopedTryLockType lock (mutex);
+
+            if (lock.isLocked())
+                info = newInfo;
+        }
+
+        AudioPlayHead::CurrentPositionInfo get() const noexcept
+        {
+            const juce::SpinLock::ScopedLockType lock (mutex);
+            return info;
+        }
+
+    private:
+        juce::SpinLock mutex;
+        AudioPlayHead::CurrentPositionInfo info;
+    };
 
     //==============================================================================
     // These properties are public so that our editor component can access them
@@ -319,13 +360,10 @@ public:
 
     // this keeps a copy of the last set of time info that was acquired during an audio
     // callback - the UI component will read this and display it.
-    AudioPlayHead::CurrentPositionInfo lastPosInfo;
+    SpinLockedPosInfo lastPosInfo;
 
     // Our plug-in's current state
     AudioProcessorValueTreeState state;
-
-    // Current track colour and name
-    TrackProperties trackProperties;
 
 private:
     //==============================================================================
@@ -409,7 +447,7 @@ private:
 
         void timerCallback() override
         {
-            updateTimecodeDisplay (getProcessor().lastPosInfo);
+            updateTimecodeDisplay (getProcessor().lastPosInfo.get());
         }
 
         void hostMIDIControllerIsAvailable (bool controllerIsAvailable) override
@@ -430,7 +468,7 @@ private:
 
         void updateTrackProperties()
         {
-            auto trackColour = getProcessor().trackProperties.colour;
+            auto trackColour = getProcessor().getTrackProperties().colour;
             auto& lf = getLookAndFeel();
 
             backgroundColour = (trackColour == Colour() ? lf.findColour (ResizableWindow::backgroundColourId)
@@ -592,6 +630,9 @@ private:
 
     Synthesiser synth;
 
+    CriticalSection trackPropertiesLock;
+    TrackProperties trackProperties;
+
     void initialiseSynth()
     {
         auto numVoices = 8;
@@ -606,19 +647,23 @@ private:
 
     void updateCurrentTimeInfoFromHost()
     {
-        if (auto* ph = getPlayHead())
+        const auto newInfo = [&]
         {
-            AudioPlayHead::CurrentPositionInfo newTime;
-
-            if (ph->getCurrentPosition (newTime))
+            if (auto* ph = getPlayHead())
             {
-                lastPosInfo = newTime;  // Successfully got the current time from the host..
-                return;
-            }
-        }
+                AudioPlayHead::CurrentPositionInfo result;
 
-        // If the host fails to provide the current time, we'll just reset our copy to a default..
-        lastPosInfo.resetToDefault();
+                if (ph->getCurrentPosition (result))
+                    return result;
+            }
+
+            // If the host fails to provide the current time, we'll just use default values
+            AudioPlayHead::CurrentPositionInfo result;
+            result.resetToDefault();
+            return result;
+        }();
+
+        lastPosInfo.set (newInfo);
     }
 
     static BusesProperties getBusesProperties()

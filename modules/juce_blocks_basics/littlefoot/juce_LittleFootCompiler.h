@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -20,10 +20,7 @@
   ==============================================================================
 */
 
-#if JUCE_MSVC
- #pragma warning (push)
- #pragma warning (disable: 4702)
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
 namespace littlefoot
 {
@@ -85,6 +82,31 @@ struct Compiler
     Program getCompiledProgram() const noexcept
     {
         return Program (compiledObjectCode.begin(), (uint32) compiledObjectCode.size());
+    }
+
+    static File resolveIncludePath (String include, Array<File> searchPaths)
+    {
+        if (File::isAbsolutePath (include) && File (include).existsAsFile())
+            return { include };
+
+        auto fileName = include.fromLastOccurrenceOf ("/", false, false);
+
+        for (auto path : searchPaths)
+        {
+            if (path == File())
+                continue;
+
+            if (! path.isDirectory())
+                path = path.getParentDirectory();
+
+            if (path.getChildFile (include).existsAsFile())
+                return path.getChildFile (include);
+
+            if (path.getChildFile (fileName).existsAsFile())
+                return path.getChildFile (fileName);
+        }
+
+        return {};
     }
 
     /** After a successful call to compile(), this contains the bytecode generated.
@@ -522,27 +544,12 @@ private:
                 return {};
             }
 
-            if (File::isAbsolutePath (include) && File (include).existsAsFile())
-                return { include };
+            auto path = Compiler::resolveIncludePath (include, searchPaths);
 
-            auto fileName = include.fromLastOccurrenceOf ("/", false, false);
+            if (! path.existsAsFile())
+                location.throwError ("File not found: " + include);
 
-            for (auto path : searchPaths)
-            {
-                if (path == File())
-                    continue;
-
-                if (! path.isDirectory())
-                    path = path.getParentDirectory();
-
-                if (path.getChildFile (include).existsAsFile())
-                    return path.getChildFile (include);
-
-                if (path.getChildFile (fileName).existsAsFile())
-                    return path.getChildFile (fileName);
-            }
-
-            location.throwError ("File not found: " + include);
+            return path;
         }
 
         //TODO:   should there be a max array size?
@@ -2444,6 +2451,4 @@ private:
 
 }
 
-#if JUCE_MSVC
- #pragma warning (pop)
-#endif
+JUCE_END_IGNORE_WARNINGS_MSVC

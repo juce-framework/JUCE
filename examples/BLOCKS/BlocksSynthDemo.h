@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -411,7 +411,7 @@ public:
             }
             else
             {
-                if (squareWaveY[x - 1] == 1)
+                if (x > 0 && squareWaveY[x - 1] == 1)
                     squareWaveY[x - 1] = 255;
 
                 squareWaveY[x] = 13;
@@ -643,7 +643,7 @@ public:
             detachActiveBlock();
 
         // Get the array of currently connected Block objects from the PhysicalTopologySource
-        auto blocks = topologySource.getCurrentTopology().blocks;
+        auto blocks = topologySource.getBlocks();
 
         // Iterate over the array of Block objects
         for (auto b : blocks)
@@ -665,8 +665,8 @@ public:
                 if (auto grid = activeBlock->getLEDGrid())
                 {
                     // Work out scale factors to translate X and Y touches to LED indexes
-                    scaleX = static_cast<float> (grid->getNumColumns() - 1) / activeBlock->getWidth();
-                    scaleY = static_cast<float> (grid->getNumRows() - 1)    / activeBlock->getHeight();
+                    scaleX = static_cast<float> (grid->getNumColumns() - 1) / (float) activeBlock->getWidth();
+                    scaleY = static_cast<float> (grid->getNumRows()    - 1) / (float) activeBlock->getHeight();
 
                     setLEDProgram (*activeBlock);
                 }
@@ -731,7 +731,7 @@ private:
                                             layout.touchColour);
 
                     // Send pitch change and pressure values to the Audio class
-                    audio.pitchChange (midiChannel, (touch.x - touch.startX) / activeBlock->getWidth());
+                    audio.pitchChange (midiChannel, (touch.x - touch.startX) / (float) activeBlock->getWidth());
                     audio.pressureChange (midiChannel, touch.z);
                 }
 
@@ -785,7 +785,7 @@ private:
         if (currentMode == waveformSelectionMode)
         {
             // Set the LEDGrid program
-            block.setProgram (new WaveshapeProgram (block));
+            block.setProgram (std::make_unique<WaveshapeProgram>(block));
 
             // Initialise the program
             if (auto* waveshapeProgram = getWaveshapeProgram())
@@ -797,7 +797,7 @@ private:
         else if (currentMode == playMode)
         {
             // Set the LEDGrid program
-            auto error = block.setProgram (new DrumPadGridProgram (block));
+            auto error = block.setProgram (std::make_unique<DrumPadGridProgram>(block));
 
             if (error.failed())
             {

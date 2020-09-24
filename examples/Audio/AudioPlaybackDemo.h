@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -116,7 +116,7 @@ public:
         if (thumbnail.getTotalLength() > 0)
         {
             auto newScale = jmax (0.001, thumbnail.getTotalLength() * (1.0 - jlimit (0.0, 0.99, amount)));
-            auto timeAtCentre = xToTime (getWidth() / 2.0f);
+            auto timeAtCentre = xToTime ((float) getWidth() / 2.0f);
 
             setRange ({ timeAtCentre - newScale * 0.5, timeAtCentre + newScale * 0.5 });
         }
@@ -229,12 +229,12 @@ private:
         if (visibleRange.getLength() <= 0)
             return 0;
 
-        return getWidth() * (float) ((time - visibleRange.getStart()) / visibleRange.getLength());
+        return (float) getWidth() * (float) ((time - visibleRange.getStart()) / visibleRange.getLength());
     }
 
     double xToTime (const float x) const
     {
-        return (x / getWidth()) * (visibleRange.getLength()) + visibleRange.getStart();
+        return (x / (float) getWidth()) * (visibleRange.getLength()) + visibleRange.getStart();
     }
 
     bool canMoveTransport() const noexcept

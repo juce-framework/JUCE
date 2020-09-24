@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -551,7 +551,7 @@ BigInteger& BigInteger::operator*= (const BigInteger& other)
         {
             auto uv = (uint64) totalValues[i + j] + (uint64) values[j] * (uint64) mValues[i] + (uint64) c;
             totalValues[i + j] = (uint32) uv;
-            c = uv >> 32;
+            c = static_cast<uint32> (uv >> 32);
         }
 
         totalValues[i + n + 1] = c;

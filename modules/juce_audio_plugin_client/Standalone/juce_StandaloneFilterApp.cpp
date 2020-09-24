@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -24,7 +23,7 @@
   ==============================================================================
 */
 
-#include "../../juce_core/system/juce_TargetPlatform.h"
+#include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #include "../utility/juce_IncludeSystemHeaders.h"
@@ -40,8 +39,6 @@
 // standalone JUCEApplication class for your app to use. If you don't
 // set it then by default we'll just create a simple one as below.
 #if ! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP
-
-extern juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
 #include "juce_StandaloneFilterWindow.h"
 
@@ -159,7 +156,6 @@ void JUCE_CALLTYPE juce_switchToHostApplication()
         holder->switchToHostApplication();
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_basics
 Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 {
     if (auto holder = StandalonePluginHolder::getInstance())
@@ -167,7 +163,6 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 
     return Image();
 }
-#endif
 #endif
 
 #endif

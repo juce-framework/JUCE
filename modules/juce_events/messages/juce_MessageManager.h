@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -27,11 +27,6 @@ class MessageManagerLock;
 class ThreadPoolJob;
 class ActionListener;
 class ActionBroadcaster;
-
-//==============================================================================
-#if JUCE_MODULE_AVAILABLE_juce_opengl
-class OpenGLContext;
-#endif
 
 //==============================================================================
 /** See MessageManager::callFunctionOnMessageThread() for use of this function type. */

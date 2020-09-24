@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -351,14 +351,13 @@ private:
     //==============================================================================
     void expectContainsRPN (const MidiBuffer& midiBuffer, MidiRPNMessage expected)
     {
-        MidiBuffer::Iterator iter (midiBuffer);
-        MidiMessage midiMessage;
         MidiRPNMessage result = MidiRPNMessage();
         MidiRPNDetector detector;
-        int samplePosition; // not actually used, so no need to initialise.
 
-        while (iter.getNextEvent (midiMessage, samplePosition))
+        for (const auto metadata : midiBuffer)
         {
+            const auto midiMessage = metadata.getMessage();
+
             if (detector.parseControllerMessage (midiMessage.getChannel(),
                                                  midiMessage.getControllerNumber(),
                                                  midiMessage.getControllerValue(),

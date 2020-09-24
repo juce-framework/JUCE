@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -84,15 +84,13 @@
   #include <windows.devices.midi.h>
   #include <windows.devices.enumeration.h>
 
-  #pragma warning (push)
-  #pragma warning (disable: 4265)
+  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4265)
   #include <wrl/event.h>
-  #pragma warning (pop)
+  JUCE_END_IGNORE_WARNINGS_MSVC
 
-  #pragma warning (push)
-  #pragma warning (disable: 4467)
+  JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4467)
   #include <robuffer.h>
-  #pragma warning (pop)
+  JUCE_END_IGNORE_WARNINGS_MSVC
  #endif
 
  #if JUCE_ASIO
@@ -169,7 +167,13 @@
    #error "Oboe cannot be enabled at the same time as openSL! Please disable JUCE_USE_ANDROID_OPENSLES"
   #endif
 
-  #include <oboe/Oboe.h>
+  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter",
+                                       "-Wzero-as-null-pointer-constant",
+                                       "-Winconsistent-missing-destructor-override",
+                                       "-Wshadow-field-in-constructor",
+                                       "-Wshadow-field")
+   #include <oboe/Oboe.h>
+  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #endif
 
 #endif
@@ -231,13 +235,18 @@
  #include "native/juce_android_Audio.cpp"
  #include "native/juce_android_Midi.cpp"
 
- #if JUCE_USE_ANDROID_OPENSLES
-  #include "native/juce_android_OpenSL.cpp"
+ #if JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE
+  #include "native/juce_android_HighPerformanceAudioHelpers.h"
+
+  #if JUCE_USE_ANDROID_OPENSLES
+   #include "native/juce_android_OpenSL.cpp"
+  #endif
+
+  #if JUCE_USE_ANDROID_OBOE
+   #include "native/juce_android_Oboe.cpp"
+  #endif
  #endif
 
- #if JUCE_USE_ANDROID_OBOE
-  #include "native/juce_android_Oboe.cpp"
- #endif
 #endif
 
 #if ! JUCE_SYSTEMAUDIOVOL_IMPLEMENTED

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -403,8 +403,8 @@ public:
                 if (auto grid = activeBlock->getLEDGrid())
                 {
                     // Work out scale factors to translate X and Y touches to LED indexes
-                    scaleX = (float) (grid->getNumColumns() - 1) / activeBlock->getWidth();
-                    scaleY = (float) (grid->getNumRows() - 1)    / activeBlock->getHeight();
+                    scaleX = (float) (grid->getNumColumns() - 1) / (float) activeBlock->getWidth();
+                    scaleY = (float) (grid->getNumRows() - 1)    / (float) activeBlock->getHeight();
 
                     setLEDProgram (*activeBlock);
                 }
@@ -511,14 +511,14 @@ private:
     {
         if (currentMode == canvas)
         {
-            block.setProgram (new BitmapLEDProgram (block));
+            block.setProgram (std::make_unique<BitmapLEDProgram>(block));
 
             // Redraw any previously drawn LEDs
             redrawLEDs();
         }
         else if (currentMode == colourPalette)
         {
-            block.setProgram (new DrumPadGridProgram (block));
+            block.setProgram (std::make_unique <DrumPadGridProgram>(block));
 
             // Setup the grid layout
             if (auto* program = getPaletteProgram())

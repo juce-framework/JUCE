@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -257,8 +257,8 @@ public:
     }
 
 private:
-    static inline const String* getString (const ValueUnion& data) noexcept { return reinterpret_cast<const String*> (data.stringValue); }
-    static inline String* getString (ValueUnion& data) noexcept             { return reinterpret_cast<String*> (data.stringValue); }
+    static const String* getString (const ValueUnion& data) noexcept { return reinterpret_cast<const String*> (data.stringValue); }
+    static String* getString (ValueUnion& data) noexcept             { return reinterpret_cast<String*> (data.stringValue); }
 };
 
 //==============================================================================

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -345,14 +345,16 @@ static const char* getButtonNameForFunction (ControlButton::ButtonFunction fn) n
         case BF::button6:       return "6";
         case BF::button7:       return "7";
 
-        case BF::velocitySensitivity:   return "Velocity Sensitivity";
-        case BF::glideSensitivity:      return "Glide Sensitivity";
-        case BF::slideSensitivity:      return "Slide Sensitivity";
-        case BF::pressSensitivity:      return "Press Sensitivity";
-        case BF::liftSensitivity:       return "Lift Sensitivity";
-        case BF::fixedVelocity: return "Fixed Velocity";
-        case BF::glideLock:     return "Glide Lock";
-        case BF::pianoMode:     return "Piano Mode";
+        case BF::velocitySensitivity:  return "Velocity Sensitivity";
+        case BF::glideSensitivity:     return "Glide Sensitivity";
+        case BF::slideSensitivity:     return "Slide Sensitivity";
+        case BF::pressSensitivity:     return "Press Sensitivity";
+        case BF::liftSensitivity:      return "Lift Sensitivity";
+        case BF::fixedVelocity:        return "Fixed Velocity";
+        case BF::glideLock:            return "Glide Lock";
+        case BF::pianoMode:            return "Piano Mode";
+
+        default:  break;
     }
 
     jassertfalse;

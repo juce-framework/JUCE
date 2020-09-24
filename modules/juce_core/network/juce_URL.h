@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -337,25 +337,24 @@ public:
                                  returning a response (ignored for Android which follows up to 5 redirects)
         @param httpRequestCmd    Specify which HTTP Request to use. If this is empty, then doPostRequest
                                  will determine the HTTP request.
-        @returns    an input stream that the caller must delete, or a null pointer if there was an
-                    error trying to open it.
+        @returns    a valid input stream, or nullptr if there was an error trying to open it.
      */
-    InputStream* createInputStream (bool doPostLikeRequest,
-                                    OpenStreamProgressCallback* progressCallback = nullptr,
-                                    void* progressCallbackContext = nullptr,
-                                    String extraHeaders = {},
-                                    int connectionTimeOutMs = 0,
-                                    StringPairArray* responseHeaders = nullptr,
-                                    int* statusCode = nullptr,
-                                    int numRedirectsToFollow = 5,
-                                    String httpRequestCmd = {}) const;
+    std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
+                                                    OpenStreamProgressCallback* progressCallback = nullptr,
+                                                    void* progressCallbackContext = nullptr,
+                                                    String extraHeaders = {},
+                                                    int connectionTimeOutMs = 0,
+                                                    StringPairArray* responseHeaders = nullptr,
+                                                    int* statusCode = nullptr,
+                                                    int numRedirectsToFollow = 5,
+                                                    String httpRequestCmd = {}) const;
 
     /** Attempts to open an output stream to a URL for writing
 
         This method can only be used for certain scheme types such as local files
         and content:// URIs on Android.
     */
-    OutputStream* createOutputStream() const;
+    std::unique_ptr<OutputStream> createOutputStream() const;
 
     //==============================================================================
     /** Represents a download task.
@@ -415,7 +414,7 @@ public:
 
     private:
         friend class URL;
-        static DownloadTask* createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
+        static std::unique_ptr<DownloadTask> createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
 
     public:
        #if JUCE_IOS
@@ -436,10 +435,10 @@ public:
         using a native OS background network task. Such tasks automatically deal with
         network re-connections and continuing your download while your app is suspended.
     */
-    DownloadTask* downloadToFile (const File& targetLocation,
-                                  String extraHeaders = String(),
-                                  DownloadTask::Listener* listener = nullptr,
-                                  bool usePostCommand = false);
+    std::unique_ptr<DownloadTask> downloadToFile (const File& targetLocation,
+                                                  String extraHeaders = String(),
+                                                  DownloadTask::Listener* listener = nullptr,
+                                                  bool usePostCommand = false);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
@@ -478,9 +477,6 @@ public:
 
         If it fails, or if the text that it reads can't be parsed as XML, this will
         return nullptr.
-
-        When it returns a valid XmlElement object, the caller is responsible for deleting
-        this object when no longer needed.
 
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.

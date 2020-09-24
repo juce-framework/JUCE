@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -92,10 +91,10 @@ void GeneratedCode::removeCallback (const String& returnType, const String& prot
 void GeneratedCode::addImageResourceLoader (const String& imageMemberName, const String& resourceName)
 {
     privateMemberDeclarations
-        << "Image " << imageMemberName << ";\n";
+        << "juce::Image " << imageMemberName << ";\n";
 
     if (resourceName.isNotEmpty())
-        constructorCode << imageMemberName << " = ImageCache::getFromMemory ("
+        constructorCode << imageMemberName << " = juce::ImageCache::getFromMemory ("
                         << resourceName << ", " << resourceName << "Size);\n";
 }
 
@@ -135,7 +134,7 @@ String GeneratedCode::getCallbackDefinitions() const
         CallbackMethod* const cm = callbacks.getUnchecked(i);
 
         const String userCodeBlockName ("User"
-            + CodeHelpers::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
+            + build_tools::makeValidIdentifier (cm->prototype.upToFirstOccurrenceOf ("(", false, false),
                                                 true, true, false).trim());
 
         if (userCodeBlockName.isNotEmpty() && cm->hasPrePostUserSections)
@@ -168,8 +167,8 @@ String GeneratedCode::getClassDeclaration() const
 
     parentClassLines = getCleanedStringArray (parentClassLines);
 
-    if (parentClassLines.contains ("public Button", false))
-        parentClassLines.removeString ("public Component", false);
+    if (parentClassLines.contains ("public juce::Button", false))
+        parentClassLines.removeString ("public juce::Component", false);
 
     String r ("class ");
     r << className << "  : ";
@@ -335,7 +334,7 @@ void GeneratedCode::applyToCode (String& code, const File& targetFile, const Str
     replaceTemplate (code, "method_definitions", getCallbackDefinitions());
 
     replaceTemplate (code, "include_juce", CodeHelpers::createIncludePathIncludeStatement (Project::getJuceSourceHFilename()));
-    
+
     replaceTemplate (code, "include_files_h", getIncludeFileCode (includeFilesH, targetFile));
     replaceTemplate (code, "include_files_cpp", getIncludeFileCode (includeFilesCPP, targetFile));
 

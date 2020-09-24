@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -70,7 +70,7 @@ bool BlocksVersion::evaluate (const String& versionString)
 
     jassert (result);
 
-    auto toInt = [](const std::sub_match<const char*> match)
+    auto toInt = [] (const std::sub_match<const char*> match)
     {
         return std::atoi (match.str().c_str());
     };
@@ -108,7 +108,7 @@ bool BlocksVersion::isGreaterThan (const BlocksVersion& other) const
 
 bool BlocksVersion::releaseTypeGreaterThan (const BlocksVersion& other) const
 {
-    auto getReleaseTypePriority = [](const BlocksVersion& version)
+    auto getReleaseTypePriority = [] (const BlocksVersion& version)
     {
         String releaseTypes[4] = { "alpha", "beta", "rc", {} };
 

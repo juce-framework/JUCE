@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -19,6 +19,8 @@
 
   ==============================================================================
 */
+
+#pragma once
 
 namespace juce
 {
@@ -37,7 +39,7 @@ namespace juce
 #endif
 
 /** This macro defines the C calling convention used as the standard for JUCE calls. */
-#if JUCE_MSVC
+#if JUCE_WINDOWS
  #define JUCE_CALLTYPE   __stdcall
  #define JUCE_CDECL      __cdecl
 #else
@@ -90,6 +92,26 @@ namespace juce
 
 #ifndef JUCE_ANALYZER_NORETURN
  #define JUCE_ANALYZER_NORETURN
+#endif
+
+/** Used to silence Wimplicit-fallthrough on Clang and GCC where available
+    as there are a few places in the codebase where we need to do this
+    deliberately and want to ignore the warning.
+*/
+#if JUCE_CLANG
+ #if __has_cpp_attribute(clang::fallthrough)
+  #define JUCE_FALLTHROUGH [[clang::fallthrough]];
+ #else
+  #define JUCE_FALLTHROUGH
+ #endif
+#elif JUCE_GCC
+ #if __GNUC__ >= 7
+  #define JUCE_FALLTHROUGH [[gnu::fallthrough]];
+ #else
+  #define JUCE_FALLTHROUGH
+ #endif
+#else
+ #define JUCE_FALLTHROUGH
 #endif
 
 //==============================================================================

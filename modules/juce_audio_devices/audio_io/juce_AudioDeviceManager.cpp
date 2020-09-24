@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -124,18 +124,29 @@ void AudioDeviceManager::audioDeviceListChanged()
 {
     if (currentAudioDevice != nullptr)
     {
-        auto isCurrentDeviceStillAvailable = [&]
+        auto currentDeviceStillAvailable = [&]
         {
-            for (auto* dt : availableDeviceTypes)
-                if (currentAudioDevice->getTypeName() == dt->getTypeName())
-                    for (auto& dn : dt->getDeviceNames())
-                        if (currentAudioDevice->getName() == dn)
+            auto currentTypeName = currentAudioDevice->getTypeName();
+            auto currentDeviceName = currentAudioDevice->getName();
+
+            for (auto* deviceType : availableDeviceTypes)
+            {
+                if (currentTypeName == deviceType->getTypeName())
+                {
+                    for (auto& deviceName : deviceType->getDeviceNames (true))
+                        if (currentDeviceName == deviceName)
                             return true;
 
-            return false;
-        };
+                    for (auto& deviceName : deviceType->getDeviceNames (false))
+                        if (currentDeviceName == deviceName)
+                            return true;
+                }
+            }
 
-        if (! isCurrentDeviceStillAvailable())
+            return false;
+        }();
+
+        if (! currentDeviceStillAvailable)
         {
             closeAudioDevice();
 
@@ -506,7 +517,7 @@ AudioIODeviceType* AudioDeviceManager::getCurrentDeviceTypeObject() const
 
 static void updateSetupChannels (AudioDeviceManager::AudioDeviceSetup& setup, int defaultNumIns, int defaultNumOuts)
 {
-    auto updateChannels = [](const String& deviceName, BigInteger& channels, int defaultNumChannels)
+    auto updateChannels = [] (const String& deviceName, BigInteger& channels, int defaultNumChannels)
     {
         if (deviceName.isEmpty())
         {

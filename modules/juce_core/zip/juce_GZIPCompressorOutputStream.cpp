@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -92,7 +92,7 @@ private:
             {
                 case Z_STREAM_END:
                     finished = true;
-                    // Deliberate fall-through..
+                    JUCE_FALLTHROUGH
                 case Z_OK:
                 {
                     data += dataSize - stream.avail_in;

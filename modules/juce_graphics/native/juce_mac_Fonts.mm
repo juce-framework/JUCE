@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -189,6 +188,7 @@ namespace CoreTextTypeLayout
         {
             case AttributedString::none:        return kCTLineBreakByClipping;
             case AttributedString::byChar:      return kCTLineBreakByCharWrapping;
+            case AttributedString::byWord:
             default:                            return kCTLineBreakByWordWrapping;
         }
     }
@@ -199,6 +199,7 @@ namespace CoreTextTypeLayout
         {
             case AttributedString::rightToLeft:   return kCTWritingDirectionRightToLeft;
             case AttributedString::leftToRight:   return kCTWritingDirectionLeftToRight;
+            case AttributedString::natural:
             default:                              return kCTWritingDirectionNatural;
         }
     }
@@ -207,7 +208,7 @@ namespace CoreTextTypeLayout
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
        #if JUCE_IOS
-        auto rgbColourSpace = CGColorSpaceCreateDeviceRGB();
+        auto rgbColourSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
        #endif
 
         auto attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
@@ -584,10 +585,24 @@ public:
         CFRelease (numberRef);
     }
 
-    // The implementation of at least one overridden function needs to be outside
-    // of the class definition to avoid spurious warning messages when dynamically
-    // loading libraries at runtime on macOS...
-    ~OSXTypeface() override;
+    ~OSXTypeface() override
+    {
+        if (attributedStringAtts != nullptr)
+            CFRelease (attributedStringAtts);
+
+        if (fontRef != nullptr)
+        {
+           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
+            if (dataCopy.getSize() != 0)
+                CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
+           #endif
+
+            CGFontRelease (fontRef);
+        }
+
+        if (ctFontRef != nullptr)
+            CFRelease (ctFontRef);
+    }
 
     float getAscent() const override                 { return ascent; }
     float getDescent() const override                { return 1.0f - ascent; }
@@ -716,25 +731,6 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSXTypeface)
 };
-
-OSXTypeface::~OSXTypeface()
-{
-    if (attributedStringAtts != nullptr)
-        CFRelease (attributedStringAtts);
-
-    if (fontRef != nullptr)
-    {
-       #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-        if (dataCopy.getSize() != 0)
-            CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
-       #endif
-
-        CGFontRelease (fontRef);
-    }
-
-    if (ctFontRef != nullptr)
-        CFRelease (ctFontRef);
-}
 
 CTFontRef getCTFontFromTypeface (const Font& f)
 {

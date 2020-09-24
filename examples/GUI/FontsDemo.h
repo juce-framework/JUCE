@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -197,8 +197,8 @@ public:
         AttributedString s;
         s.setWordWrap (AttributedString::none);
         s.setJustification (Justification::centredLeft);
-        s.append (font.getTypefaceName(), font.withHeight (height * 0.7f), Colours::black);
-        s.append ("   " + font.getTypefaceName(), Font (height * 0.5f, Font::italic), Colours::grey);
+        s.append (font.getTypefaceName(), font.withHeight ((float) height * 0.7f), Colours::black);
+        s.append ("   " + font.getTypefaceName(), Font ((float) height * 0.5f, Font::italic), Colours::grey);
 
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
     }

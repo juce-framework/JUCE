@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -167,9 +167,9 @@ struct ConnectedDeviceGroup  : private AsyncUpdater,
             TouchSurface::Touch touch;
 
             touch.index             = (int) touchIndex.get();
-            touch.x                 = position.x.toUnipolarFloat();
-            touch.y                 = position.y.toUnipolarFloat();
-            touch.z                 = position.z.toUnipolarFloat();
+            touch.x                 = (float) position.x.toUnipolarFloat();
+            touch.y                 = (float) position.y.toUnipolarFloat();
+            touch.z                 = (float) position.z.toUnipolarFloat();
             touch.xVelocity         = velocity.vx.toBipolarFloat();
             touch.yVelocity         = velocity.vy.toBipolarFloat();
             touch.zVelocity         = velocity.vz.toBipolarFloat();

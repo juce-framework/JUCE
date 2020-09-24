@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -321,7 +321,7 @@ void MemoryBlock::loadFromHexString (StringRef hex)
 
     for (;;)
     {
-        int byte = 0;
+        juce_wchar byte = 0;
 
         for (int loop = 2; --loop >= 0;)
         {

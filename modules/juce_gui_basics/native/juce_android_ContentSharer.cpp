@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -27,60 +26,46 @@ namespace juce
 {
 
 //==============================================================================
-// This byte-code is generated from native/javacore/app/com/roli/juce/JuceSharingContentProvider.java with min sdk version 16
+// This byte-code is generated from native/java/app/com/rmsl/juce/JuceContentProviderCursor.java with min sdk version 16
 // See juce_core/native/java/README.txt on how to generate this byte-code.
-static const uint8 javaJuceSharingContentProvider[] =
-{31,139,8,8,96,160,247,93,0,3,74,97,118,97,68,101,120,66,121,116,101,67,111,100,101,46,100,101,120,0,149,151,93,108,20,85,20,
-199,207,157,153,157,253,236,178,91,170,20,145,178,229,83,80,216,242,165,96,5,11,45,72,183,91,139,161,52,218,190,56,221,157,148,
-129,221,153,101,102,118,133,23,2,106,162,209,196,24,125,64,19,73,48,33,106,140,15,36,26,227,131,49,152,24,163,241,65,77,148,248,
-160,209,152,152,24,193,68,227,131,6,37,241,127,63,118,219,173,197,232,194,111,238,185,231,156,123,238,185,231,222,153,206,
-148,237,19,137,190,173,219,105,239,208,216,231,67,47,106,177,200,154,39,135,207,172,189,226,63,113,230,173,189,99,175,63,244,
-123,185,131,168,70,68,39,38,182,117,146,250,157,79,17,141,146,212,223,4,46,48,34,110,252,3,109,4,237,103,26,209,82,222,71,171,
-163,189,132,203,80,156,40,103,16,125,111,18,253,4,126,6,191,129,107,224,58,232,137,18,245,130,53,96,3,216,2,14,131,6,120,25,188,
-11,190,1,191,128,100,140,104,19,112,192,235,224,50,184,6,110,193,28,187,192,3,192,6,117,240,52,120,6,60,15,206,130,115,224,
-101,240,10,120,3,188,9,222,6,159,128,175,192,183,224,42,136,38,136,214,129,33,48,5,60,240,8,56,5,206,130,87,193,69,240,54,120,
-31,124,12,62,5,95,130,31,192,21,240,43,248,19,24,73,162,197,96,57,88,5,242,224,78,176,27,12,131,7,65,9,56,224,56,56,9,78,129,
-199,192,83,0,101,37,148,142,16,138,208,37,148,159,176,45,148,6,139,64,6,100,73,238,193,98,208,165,246,229,102,176,4,116,147,
-220,143,91,193,106,176,134,228,190,240,223,195,168,189,166,228,10,228,152,154,235,4,100,148,65,236,231,105,165,71,233,233,89,200,
-248,47,108,252,23,83,50,247,143,170,60,94,48,229,92,205,3,179,92,201,231,249,62,43,249,53,200,43,148,124,17,242,42,37,191,11,
-121,165,146,63,130,220,171,228,47,32,231,148,252,181,41,215,177,120,78,14,93,42,135,4,170,181,85,212,42,69,247,137,122,201,126,
-82,245,83,168,214,157,196,215,28,19,99,13,172,176,143,248,154,22,137,190,9,253,58,17,51,45,250,9,81,105,222,74,125,2,255,214,
-171,120,36,218,36,109,16,109,156,238,17,241,101,220,20,42,113,187,104,53,186,67,180,58,109,20,45,163,77,202,190,89,180,81,218,
-34,90,131,182,171,252,250,213,184,93,162,53,105,183,26,191,71,237,253,1,177,231,49,149,151,172,185,169,106,193,247,171,15,157,
-109,50,61,113,94,178,170,70,77,251,0,236,35,202,158,82,118,109,142,253,32,236,211,202,206,245,157,144,187,83,179,114,111,74,
-158,201,13,41,238,31,17,250,231,146,114,142,41,198,168,150,211,104,128,38,53,126,66,117,120,242,179,118,46,41,207,137,151,209,
-225,127,8,91,89,235,139,146,198,210,34,119,83,248,92,104,197,208,97,53,104,32,50,169,105,136,17,129,149,231,117,49,41,215,121,
-8,241,107,227,113,210,54,167,17,139,137,92,222,73,202,181,214,50,60,183,149,168,79,45,195,207,253,84,198,16,59,25,17,167,154,
-232,189,164,90,7,246,155,199,229,249,125,152,148,117,24,239,53,104,57,171,245,165,104,139,145,162,30,150,197,222,247,176,117,
-34,183,152,152,39,78,186,170,212,103,173,56,89,68,150,119,211,229,57,58,77,100,133,103,86,83,151,153,157,239,251,121,243,117,
-252,203,124,166,26,115,37,41,239,233,241,45,24,163,241,49,131,145,20,237,128,159,155,225,51,165,88,143,150,101,157,184,222,118,
-189,3,215,117,76,222,227,89,17,167,19,126,188,202,140,174,183,205,221,48,121,5,111,60,119,68,172,33,158,154,173,89,206,160,182,
-223,29,243,250,59,230,245,121,55,138,168,89,220,161,186,144,179,226,94,213,148,28,17,109,151,208,102,91,122,93,84,47,218,58,
-151,89,209,231,232,170,205,170,216,252,126,202,42,61,151,155,177,179,202,175,139,204,123,28,215,9,119,19,27,38,99,184,88,44,82,
-132,95,139,196,10,180,162,80,47,217,135,142,88,190,227,206,12,122,110,104,187,225,65,223,107,56,101,219,223,116,212,106,88,
-196,138,164,193,85,231,254,102,81,252,168,183,104,185,101,223,115,202,249,146,28,146,159,55,180,159,86,220,200,101,194,170,212,
-237,160,159,214,255,195,193,183,131,252,158,32,176,195,253,78,197,30,178,131,146,239,212,66,15,177,150,182,92,203,86,104,77,
-91,129,157,31,172,251,129,215,54,77,203,52,106,133,190,115,162,233,144,109,57,184,118,152,63,236,59,115,195,121,65,158,207,53,
-54,29,216,126,131,103,221,59,215,116,208,242,75,118,101,126,50,59,139,37,175,154,247,189,138,147,63,138,210,229,111,92,191,213,
-77,161,153,203,189,255,127,104,123,122,27,254,115,128,126,90,89,44,91,149,134,115,44,111,185,174,23,90,161,227,185,249,125,110,
-169,226,5,220,187,98,5,216,131,158,5,124,134,93,23,25,75,123,239,2,246,81,187,58,173,28,248,54,118,22,249,41,201,87,44,119,
-38,63,54,125,212,46,133,237,186,67,33,207,174,159,210,237,197,160,174,133,86,72,108,130,244,137,97,156,184,137,2,25,19,5,33,225,
-236,77,20,113,112,39,138,5,28,92,126,29,38,54,73,139,167,22,152,37,105,149,74,118,16,236,175,88,51,1,69,248,98,109,74,150,
-188,74,189,234,222,111,85,237,128,150,170,195,198,171,214,204,101,144,187,149,169,167,205,52,55,173,125,13,168,105,89,155,253,
-62,59,196,164,182,85,29,63,89,67,220,155,218,140,99,53,219,229,1,168,179,77,253,64,221,246,79,146,89,182,43,118,104,83,196,22,
-97,151,204,216,225,66,39,141,210,51,237,83,68,209,231,18,25,71,188,32,164,56,191,142,123,135,177,66,211,113,145,104,72,70,197,
-43,29,35,163,106,5,199,40,93,117,170,54,119,71,212,16,149,53,170,94,25,67,93,84,129,98,158,59,136,184,200,33,234,185,114,113,
-29,30,82,110,221,124,240,104,174,192,168,89,225,17,74,212,124,143,239,45,14,0,69,142,203,101,224,118,173,87,144,71,128,229,72,
-75,71,75,220,227,163,254,113,212,54,28,243,203,124,246,240,136,19,144,201,175,171,251,200,172,215,202,124,118,189,238,59,252,
-82,161,72,131,63,21,200,20,77,64,155,244,3,219,215,71,211,27,119,109,164,187,40,154,222,53,73,203,140,3,219,7,118,72,213,42,173,
-111,32,154,158,196,147,24,38,178,244,194,208,190,104,154,30,99,90,97,39,20,14,205,176,2,250,227,90,97,20,205,16,156,168,170,
-21,238,22,166,134,20,138,58,254,116,108,156,26,193,147,119,36,50,178,103,104,223,126,97,157,50,10,163,34,150,214,193,70,186,83,
-90,90,91,107,100,239,94,114,75,83,88,166,45,98,35,183,106,221,137,238,36,105,26,195,159,238,103,115,145,211,167,141,75,49,237,
-81,141,76,246,93,140,171,53,174,142,157,57,109,60,30,103,80,39,216,133,56,49,35,110,104,73,232,46,9,93,147,69,236,199,56,99,127,
-129,139,9,198,62,0,95,129,171,224,124,146,177,31,193,75,41,249,110,75,234,89,222,108,155,223,30,252,57,223,252,254,208,105,
-246,27,196,160,217,239,16,222,54,191,69,76,154,253,30,209,51,82,230,127,207,88,78,190,75,15,64,54,115,82,207,223,161,88,70,190,
-103,139,119,228,156,156,151,127,191,232,202,159,191,243,24,57,57,31,127,47,34,53,86,188,123,101,100,174,252,91,233,111,138,244,
-241,33,100,13,0,0,0,0};
+static const uint8 javaJuceContentProviderCursor[] =
+{31,139,8,8,191,114,161,94,0,3,106,97,118,97,74,117,99,101,67,111,110,116,101,110,116,80,114,111,118,105,100,101,114,67,117,
+114,115,111,114,46,100,101,120,0,117,147,177,111,211,64,20,198,223,157,157,148,150,54,164,192,208,14,64,144,16,18,67,235,138,2,
+75,40,162,10,44,150,65,149,2,25,218,233,176,173,198,37,241,69,182,19,121,96,160,21,136,37,19,98,234,80,85,149,152,88,24,248,
+3,24,146,63,130,141,137,129,13,169,99,7,190,203,157,33,18,194,210,207,247,222,229,189,239,157,206,95,130,48,159,91,91,191,75,227,
+60,200,143,134,239,247,151,62,189,43,175,127,249,246,235,241,215,241,112,231,231,193,237,135,22,81,143,136,242,214,157,139,
+100,158,99,78,84,37,189,95,2,159,129,13,70,128,129,83,179,127,102,242,27,120,157,129,71,224,16,156,128,143,96,12,126,128,69,232,
+93,6,75,224,10,184,14,238,129,13,224,130,16,188,4,3,174,245,44,51,79,205,152,53,171,101,206,86,54,241,27,20,206,152,120,136,
+248,156,137,63,32,134,12,45,76,206,166,187,148,230,28,169,125,62,201,249,159,156,209,188,201,23,77,93,241,187,122,134,38,40,225,
+52,42,124,197,245,252,94,141,104,147,182,113,95,21,76,208,83,222,114,125,86,89,101,168,109,162,162,183,134,46,86,249,71,215,
+158,228,54,149,239,71,113,148,61,32,230,210,85,183,239,135,13,25,103,97,156,109,37,114,16,5,97,210,232,39,169,76,86,247,196,64,
+208,53,79,196,65,34,163,192,9,68,38,94,136,52,116,158,136,44,137,114,93,84,167,91,158,47,187,78,210,77,59,206,30,164,156,255,
+234,213,137,181,136,183,92,178,90,174,135,192,163,75,59,158,154,225,116,68,188,235,52,33,26,239,214,169,228,119,100,26,210,121,
+95,118,250,221,248,169,232,134,41,45,251,90,176,217,22,73,33,215,80,101,1,217,109,153,102,52,171,222,207,228,115,52,218,89,
+59,74,233,38,191,48,63,83,217,88,161,85,194,178,141,139,224,184,28,190,255,218,30,113,126,192,201,98,223,249,130,185,27,54,181,
+22,222,227,83,254,43,60,49,50,235,180,15,11,47,150,167,252,200,106,186,95,121,146,85,255,122,134,215,180,190,242,169,101,106,
+212,119,165,154,238,157,124,243,170,142,213,255,224,55,143,234,50,200,64,3,0,0,0,0};
+
+// This byte-code is generated from native/java/app/com/rmsl/juce/JuceContentProviderFileObserver.java with min sdk version 16
+// See juce_core/native/java/README.txt on how to generate this byte-code.
+static const uint8 javaJuceContentProviderFileObserver[] =
+{31,139,8,8,194,122,161,94,0,3,106,97,118,97,74,117,99,101,67,111,110,116,101,110,116,80,114,111,118,105,100,101,114,70,105,
+108,101,79,98,115,101,114,118,101,114,46,100,101,120,0,133,147,205,107,19,65,24,198,223,249,72,98,171,46,105,235,69,16,201,65,81,
+68,221,136,10,66,84,144,250,65,194,130,197,212,32,5,15,155,100,104,182,38,187,97,119,141,241,32,126,30,196,147,23,79,246,216,
+131,120,202,77,169,80,212,191,64,193,66,143,30,60,138,255,130,62,179,51,165,219,147,129,223,188,239,188,239,204,179,179,179,79,
+186,106,60,93,61,123,158,54,159,255,248,112,97,210,120,124,98,237,251,177,7,109,245,115,253,225,198,159,47,243,171,135,198,130,
+104,72,68,227,214,185,89,178,191,45,78,116,128,76,189,8,62,3,169,235,128,129,61,204,204,203,204,204,171,24,142,99,207,2,226,
+4,124,4,159,192,6,248,5,254,130,42,250,87,193,13,224,129,91,224,14,184,11,30,129,23,224,21,120,3,222,130,53,240,158,27,125,110,
+159,95,176,231,41,233,51,216,249,75,44,152,178,249,107,228,211,54,95,69,190,215,230,239,144,11,40,57,153,150,200,222,81,100,
+170,166,190,47,139,68,51,185,200,237,93,8,27,191,218,66,17,138,186,54,225,230,44,195,42,209,149,194,18,238,206,201,58,250,121,
+235,182,215,172,160,191,200,137,159,113,172,158,204,246,50,251,62,38,151,89,103,251,29,139,23,131,48,72,47,19,171,19,107,208,
+145,198,253,142,154,143,194,84,133,233,66,28,141,130,174,138,175,7,125,117,179,157,168,120,164,226,211,43,254,200,167,131,158,
+31,118,227,40,232,186,81,226,230,219,53,114,189,78,52,112,227,65,210,119,87,32,229,254,71,175,70,179,158,150,116,251,126,184,
+236,54,211,56,8,151,107,196,90,36,90,117,143,100,171,97,70,175,142,2,134,195,29,35,213,236,249,241,110,161,107,35,148,169,160,
+178,32,123,81,146,210,148,30,23,163,219,137,34,57,240,147,123,84,138,66,179,76,14,253,180,71,50,237,5,9,29,21,229,185,153,146,
+115,233,20,157,228,206,92,201,89,194,21,113,70,156,61,125,34,191,113,246,12,223,143,253,198,101,237,183,223,133,229,226,182,103,
+121,206,183,34,231,93,153,243,111,129,118,60,92,164,29,31,179,138,217,175,189,204,202,102,141,246,24,175,24,125,237,111,97,
+215,104,15,80,197,236,205,252,81,54,185,254,255,252,3,243,31,208,130,120,3,0,0,0,0};
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -127,7 +112,6 @@ public:
         : owner (ownerToUse),
           cursor (GlobalRef (LocalRef<jobject> (env->NewObject (JuceContentProviderCursor,
                                                                 JuceContentProviderCursor.constructor,
-                                                                contentProvider.get(),
                                                                 reinterpret_cast<jlong> (this),
                                                                 resultColumns.get()))))
     {
@@ -156,13 +140,13 @@ private:
     //==============================================================================
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      METHOD (addRow,      "addRow", "([Ljava/lang/Object;)V") \
-     METHOD (constructor, "<init>", "(Lcom/roli/juce/JuceSharingContentProvider;J[Ljava/lang/String;)V") \
+     METHOD (constructor, "<init>", "(J[Ljava/lang/String;)V") \
      CALLBACK (contentSharerCursorClosed, "contentSharerCursorClosed", "(J)V") \
 
-    DECLARE_JNI_CLASS (JuceContentProviderCursor, "com/roli/juce/JuceSharingContentProvider$ProviderCursor")
+    DECLARE_JNI_CLASS_WITH_BYTECODE (JuceContentProviderCursor, "com/rmsl/juce/JuceContentProviderCursor", 16, javaJuceContentProviderCursor, sizeof (javaJuceContentProviderCursor))
     #undef JNI_CLASS_MEMBERS
 
-    static void JNICALL contentSharerCursorClosed(JNIEnv*, jobject, jlong host)
+    static void JNICALL contentSharerCursorClosed (JNIEnv*, jobject, jlong host)
     {
         if (auto* myself = reinterpret_cast<AndroidContentSharerCursor*> (host))
             myself->cursorClosed();
@@ -190,7 +174,6 @@ public:
           filepath (filepathToUse),
           fileObserver (GlobalRef (LocalRef<jobject> (env->NewObject (JuceContentProviderFileObserver,
                                                                       JuceContentProviderFileObserver.constructor,
-                                                                      contentProvider.get(),
                                                                       reinterpret_cast<jlong> (this),
                                                                       javaString (filepath).get(),
                                                                       open | access | closeWrite | closeNoWrite))))
@@ -244,12 +227,12 @@ private:
 
     //==============================================================================
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-     METHOD (constructor,   "<init>",        "(Lcom/roli/juce/JuceSharingContentProvider;JLjava/lang/String;I)V") \
+     METHOD (constructor,   "<init>",        "(JLjava/lang/String;I)V") \
      METHOD (startWatching, "startWatching", "()V") \
      METHOD (stopWatching,  "stopWatching",  "()V") \
      CALLBACK (contentSharerFileObserverEvent, "contentSharerFileObserverEvent", "(JILjava/lang/String;)V") \
 
-    DECLARE_JNI_CLASS (JuceContentProviderFileObserver, "com/roli/juce/JuceSharingContentProvider$ProviderFileObserver")
+    DECLARE_JNI_CLASS_WITH_BYTECODE (JuceContentProviderFileObserver, "com/rmsl/juce/JuceContentProviderFileObserver", 16, javaJuceContentProviderFileObserver, sizeof (javaJuceContentProviderFileObserver))
     #undef JNI_CLASS_MEMBERS
 
     static void JNICALL contentSharerFileObserverEvent (JNIEnv*, jobject /*fileObserver*/, jlong host, int event, jstring path)
@@ -550,11 +533,8 @@ public:
     }
 
     jobject query (const LocalRef<jobject>& contentProvider, const LocalRef<jobject>& uri,
-                   const LocalRef<jobjectArray>& projection, const LocalRef<jobject>& selection,
-                   const LocalRef<jobjectArray>& selectionArgs, const LocalRef<jobject>& sortOrder)
+                   const LocalRef<jobjectArray>& projection)
     {
-        ignoreUnused (selection, selectionArgs, sortOrder);
-
         StringArray requestedColumns = javaStringArrayToJuce (projection);
         StringArray supportedColumns = getSupportedColumns();
 
@@ -804,6 +784,48 @@ private:
         return assetFileDescriptors.getReference (assetFileDescriptors.size() - 1).get();
     }
 
+    StringArray filterMimeTypes (const StringArray& mimeTypes, const String& filter)
+    {
+        String filterToUse (filter.removeCharacters ("*"));
+
+        if (filterToUse.isEmpty() || filterToUse == "/")
+            return mimeTypes;
+
+        StringArray result;
+
+        for (const auto& type : mimeTypes)
+            if (String (type).contains (filterToUse))
+                result.add (type);
+
+        return result;
+    }
+
+    String getCommonMimeType (const StringArray& mimeTypes)
+    {
+        if (mimeTypes.isEmpty())
+            return "*/*";
+
+        auto commonMime = mimeTypes[0];
+        bool lookForCommonGroup = false;
+
+        for (int i = 1; i < mimeTypes.size(); ++i)
+        {
+            if (mimeTypes[i] == commonMime)
+                continue;
+
+            if (! lookForCommonGroup)
+            {
+                lookForCommonGroup = true;
+                commonMime = commonMime.upToFirstOccurrenceOf ("/", true, false);
+            }
+
+            if (! mimeTypes[i].startsWith (commonMime))
+                return "*/*";
+        }
+
+        return lookForCommonGroup ? commonMime + "*" : commonMime;
+    }
+
     ContentSharer& owner;
     String packageName;
     String uriBase;
@@ -829,26 +851,19 @@ private:
 
     //==============================================================================
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-     CALLBACK (contentSharerQuery,          "contentSharerQuery",          "(Landroid/net/Uri;[Ljava/lang/String;Ljava/lang/String;[Ljava/lang/String;Ljava/lang/String;)Landroid/database/Cursor;") \
+     CALLBACK (contentSharerQuery,          "contentSharerQuery",          "(Landroid/net/Uri;[Ljava/lang/String;)Landroid/database/Cursor;") \
      CALLBACK (contentSharerOpenFile,       "contentSharerOpenFile",       "(Landroid/net/Uri;Ljava/lang/String;)Landroid/content/res/AssetFileDescriptor;") \
      CALLBACK (contentSharerGetStreamTypes, "contentSharerGetStreamTypes", "(Landroid/net/Uri;Ljava/lang/String;)[Ljava/lang/String;") \
 
-
-    DECLARE_JNI_CLASS_WITH_BYTECODE (JuceSharingContentProvider, "com/roli/juce/JuceSharingContentProvider", 16, javaJuceSharingContentProvider, sizeof (javaJuceSharingContentProvider))
+    DECLARE_JNI_CLASS_WITH_MIN_SDK (JuceSharingContentProvider, "com/rmsl/juce/JuceSharingContentProvider", 16)
     #undef JNI_CLASS_MEMBERS
 
-    static jobject JNICALL contentSharerQuery (JNIEnv*, jobject contentProvider, jobject uri, jobjectArray projection,
-                                               jobject selection, jobjectArray selectionArgs, jobject sortOrder)
+    static jobject JNICALL contentSharerQuery (JNIEnv*, jobject contentProvider, jobject uri, jobjectArray projection)
     {
         if (auto *pimpl = (ContentSharer::ContentSharerNativeImpl *) ContentSharer::getInstance ()->pimpl.get ())
             return pimpl->query (LocalRef<jobject> (static_cast<jobject> (contentProvider)),
                                  LocalRef<jobject> (static_cast<jobject> (uri)),
-                                 LocalRef<jobjectArray> (
-                                         static_cast<jobjectArray> (projection)),
-                                 LocalRef<jobject> (static_cast<jobject> (selection)),
-                                 LocalRef<jobjectArray> (
-                                         static_cast<jobjectArray> (selectionArgs)),
-                                 LocalRef<jobject> (static_cast<jobject> (sortOrder)));
+                                 LocalRef<jobjectArray> (static_cast<jobjectArray> (projection)));
 
         return nullptr;
     }

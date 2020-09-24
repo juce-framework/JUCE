@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -220,22 +220,9 @@ namespace CoreMidiHelpers
 
         if (! hasEnabledNetworkSession)
         {
-            auto iOSVersion = nsStringToJuce ([[UIDevice currentDevice] systemVersion]);
-            auto majorVersion = StringArray::fromTokens (iOSVersion, ".", {})[0].getIntValue();
-
-            if (majorVersion == 13)
-            {
-                // From the Xcode 11 release notes known issues:
-                // Attempting to create an MIDINetworkSession in a simulated device running
-                // iOS 13 won’t succeed. (54484923)
-                jassertfalse;
-            }
-            else
-            {
-                MIDINetworkSession* session = [MIDINetworkSession defaultSession];
-                session.enabled = YES;
-                session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
-            }
+            MIDINetworkSession* session = [MIDINetworkSession defaultSession];
+            session.enabled = YES;
+            session.connectionPolicy = MIDINetworkConnectionPolicy_Anyone;
 
             hasEnabledNetworkSession = true;
         }

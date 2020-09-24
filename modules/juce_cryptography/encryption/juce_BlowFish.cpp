@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -338,7 +337,7 @@ bool BlowFish::apply (void* data, size_t size, void (BlowFish::*op) (uint32&, ui
 int BlowFish::pad (void* data, size_t size, size_t bufferSize) noexcept
 {
     // add padding according to https://tools.ietf.org/html/rfc2898#section-6.1.1
-    const uint8 paddingSize = 8u - (size % 8u);
+    const uint8 paddingSize = static_cast<uint8> (8u - (size % 8u));
     auto n = size + paddingSize;
 
     if (n > bufferSize)
