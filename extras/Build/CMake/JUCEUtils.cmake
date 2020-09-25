@@ -1560,7 +1560,7 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_AUExportPrefix=$<TARGET_PROPERTY:${target},JUCE_AU_EXPORT_PREFIX>
         JucePlugin_AUExportPrefixQuoted="$<TARGET_PROPERTY:${target},JUCE_AU_EXPORT_PREFIX>"
         JucePlugin_AUManufacturerCode=JucePlugin_ManufacturerCode
-        JucePlugin_CFBundleIdentifier="$<TARGET_PROPERTY:${target},JUCE_BUNDLE_ID>"
+        JucePlugin_CFBundleIdentifier=$<TARGET_PROPERTY:${target},JUCE_BUNDLE_ID>
         JucePlugin_AAXIdentifier=$<TARGET_PROPERTY:${target},JUCE_AAX_IDENTIFIER>
         JucePlugin_AAXManufacturerCode=JucePlugin_ManufacturerCode
         JucePlugin_AAXProductId=JucePlugin_PluginCode
