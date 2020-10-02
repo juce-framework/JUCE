@@ -83,7 +83,7 @@
   #include "native/juce_win32_DirectSound.cpp"
  #endif
 
- #if JUCE_USE_WINRT_MIDI && JUCE_MSVC
+ #if JUCE_USE_WINRT_MIDI && (JUCE_MSVC || JUCE_CLANG)
   /* If you cannot find any of the header files below then you are probably
      attempting to use the Windows 10 Bluetooth Low Energy API. For this to work you
      need to install version 10.0.14393.0 of the Windows Standalone SDK and you may
