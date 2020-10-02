@@ -1368,11 +1368,12 @@ function(_juce_set_plugin_folder_property shared_target wrapper_target)
     get_target_property(folder_to_use "${shared_target}" FOLDER)
 
     if(folder_to_use STREQUAL "folder_to_use-NOTFOUND")
-        set(folder_to_use "${shared_target}")
-    else()
-        set(folder_to_use "${folder_to_use}/${shared_target}")
+        set_target_properties("${shared_target}" PROPERTIES FOLDER "${shared_target}")
+    elseif(NOT folder_to_use MATCHES ".*${shared_target}$")
+        set_target_properties("${shared_target}" PROPERTIES FOLDER "${folder_to_use}/${shared_target}")
     endif()
 
+    get_target_property(folder_to_use "${shared_target}" FOLDER)
     set_target_properties("${wrapper_target}" PROPERTIES FOLDER "${folder_to_use}")
 endfunction()
 
