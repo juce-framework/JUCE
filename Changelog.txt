@@ -1,0 +1,2 @@
+https://github.com/AnonA2/Juce3LegacyPullRequestCompiled/tree/master
+This contains compiled legacy apps for OS X 10.7.
