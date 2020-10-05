@@ -3,6 +3,9 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.3
+  - Fixed version numbers in project files
+
 Version 6.0.2
   - Added support for macOS 11 and arm64
   - Added Windows IAudioClient3 support for low latency audio drivers
