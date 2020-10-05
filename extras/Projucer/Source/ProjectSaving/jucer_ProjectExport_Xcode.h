@@ -2580,13 +2580,8 @@ private:
 
         for (const auto& subprojectInfo : subprojects)
         {
-            String subprojectPath (subprojectInfo.first);
-
-            if (! subprojectPath.endsWith (".xcodeproj"))
-                subprojectPath += ".xcodeproj";
-
-            File subprojectFile = File::isAbsolutePath (subprojectPath) ? subprojectPath
-                                                                        : getTargetFolder().getChildFile (subprojectPath);
+            auto subprojectFile = getTargetFolder().getChildFile (subprojectInfo.first.endsWith (".xcodeproj") ? subprojectInfo.first
+                                                                                                               : subprojectInfo.first + ".xcodeproj");
 
             if (! subprojectFile.isDirectory())
                 continue;
@@ -2607,8 +2602,12 @@ private:
             if (availableBuildProducts.empty())
                 continue;
 
-            auto subprojectFileType = getFileType (subprojectFile.getFullPathName());
-            auto subprojectFileID = addFileOrFolderReference (subprojectFile.getFullPathName(), "<group>", subprojectFileType);
+            auto subprojectPath = build_tools::RelativePath (subprojectFile,
+                                                             getTargetFolder(),
+                                                             build_tools::RelativePath::buildTargetFolder).toUnixStyle();
+
+            auto subprojectFileType = getFileType (subprojectPath);
+            auto subprojectFileID = addFileOrFolderReference (subprojectPath, "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
             StringArray proxyIDs;
