@@ -35,7 +35,7 @@
 
   ID:                 juce_audio_processors
   vendor:             juce
-  version:            6.0.2
+  version:            6.0.3
   name:               JUCE audio processor classes
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
   website:            http://www.juce.com/juce
