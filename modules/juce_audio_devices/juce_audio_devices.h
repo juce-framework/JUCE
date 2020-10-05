@@ -32,7 +32,7 @@
 
   ID:                 juce_audio_devices
   vendor:             juce
-  version:            6.0.1
+  version:            6.0.2
   name:               JUCE audio and MIDI I/O device classes
   description:        Classes to play and record from audio and MIDI I/O devices
   website:            http://www.juce.com/juce
