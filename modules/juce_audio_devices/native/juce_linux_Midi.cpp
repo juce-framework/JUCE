@@ -648,6 +648,8 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
 //==============================================================================
 #else
 
+class MidiInput::Pimpl {};
+
 // (These are just stub functions if ALSA is unavailable...)
 MidiInput::MidiInput (const String& deviceName, const String& deviceID)
     : deviceInfo (deviceName, deviceID)
@@ -664,6 +666,8 @@ std::unique_ptr<MidiInput> MidiInput::createNewDevice (const String&, MidiInputC
 StringArray MidiInput::getDevices()                                                       { return {}; }
 int MidiInput::getDefaultDeviceIndex()                                                    { return 0;}
 std::unique_ptr<MidiInput> MidiInput::openDevice (int, MidiInputCallback*)                { return {}; }
+
+class MidiOutput::Pimpl {};
 
 MidiOutput::~MidiOutput()                                                                 {}
 void MidiOutput::sendMessageNow (const MidiMessage&)                                      {}
