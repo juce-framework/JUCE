@@ -350,17 +350,17 @@ DECLARE_JNI_CLASS_WITH_MIN_SDK (JuceMidiPort, "com/rmsl/juce/JuceMidiSupport$Juc
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================
-class AndroidMidiInput
+class MidiInput::Pimpl
 {
 public:
-    AndroidMidiInput (MidiInput* midiInput, int deviceID, juce::MidiInputCallback* midiInputCallback, jobject deviceManager)
+    Pimpl (MidiInput* midiInput, int deviceID, juce::MidiInputCallback* midiInputCallback, jobject deviceManager)
         : juceMidiInput (midiInput), callback (midiInputCallback), midiConcatenator (2048),
           javaMidiDevice (LocalRef<jobject>(getEnv()->CallObjectMethod (deviceManager, MidiDeviceManager.openMidiInputPortWithID,
                                                                         (jint) deviceID, (jlong) this)))
     {
     }
 
-    ~AndroidMidiInput()
+    ~Pimpl()
     {
         if (jobject d = javaMidiDevice.get())
         {
@@ -416,7 +416,7 @@ public:
     static void handleReceive (JNIEnv*, jobject, jlong host, jbyteArray byteArray,
                                jint offset, jint len, jlong timestamp)
     {
-        auto* myself = reinterpret_cast<AndroidMidiInput*> (host);
+        auto* myself = reinterpret_cast<Pimpl*> (host);
 
         myself->handleMidi (byteArray, offset, len, timestamp);
     }
@@ -429,15 +429,15 @@ private:
 };
 
 //==============================================================================
-class AndroidMidiOutput
+class MidiOutput::Pimpl
 {
 public:
-    AndroidMidiOutput (const LocalRef<jobject>& midiDevice)
+    Pimpl (const LocalRef<jobject>& midiDevice)
         : javaMidiDevice (midiDevice)
     {
     }
 
-    ~AndroidMidiOutput()
+    ~Pimpl()
     {
         if (jobject d = javaMidiDevice.get())
         {
@@ -468,7 +468,7 @@ private:
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- CALLBACK (AndroidMidiInput::handleReceive, "handleReceive", "(J[BIIJ)V" )
+ CALLBACK (MidiInput::Pimpl::handleReceive, "handleReceive", "(J[BIIJ)V" )
 
 DECLARE_JNI_CLASS_WITH_MIN_SDK (JuceMidiInputPort, "com/rmsl/juce/JuceMidiSupport$JuceMidiInputPort", 23)
 #undef JNI_CLASS_MEMBERS
@@ -509,11 +509,11 @@ public:
         return {};
     }
 
-    AndroidMidiInput* openMidiInputPortWithID (int deviceID, MidiInput* juceMidiInput, juce::MidiInputCallback* callback)
+    MidiInput::Pimpl* openMidiInputPortWithID (int deviceID, MidiInput* juceMidiInput, juce::MidiInputCallback* callback)
     {
         if (auto dm = deviceManager.get())
         {
-            std::unique_ptr<AndroidMidiInput> androidMidiInput (new AndroidMidiInput (juceMidiInput, deviceID, callback, dm));
+            auto androidMidiInput = std::make_unique<MidiInput::Pimpl> (juceMidiInput, deviceID, callback, dm);
 
             if (androidMidiInput->isOpen())
                 return androidMidiInput.release();
@@ -522,11 +522,11 @@ public:
         return nullptr;
     }
 
-    AndroidMidiOutput* openMidiOutputPortWithID (int deviceID)
+    MidiOutput::Pimpl* openMidiOutputPortWithID (int deviceID)
     {
         if (auto dm = deviceManager.get())
             if (auto javaMidiPort = getEnv()->CallObjectMethod (dm, MidiDeviceManager.openMidiOutputPortWithID, (jint) deviceID))
-                return new AndroidMidiOutput (LocalRef<jobject>(javaMidiPort));
+                return new MidiOutput::Pimpl (LocalRef<jobject>(javaMidiPort));
 
         return nullptr;
     }
@@ -564,7 +564,7 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier
 
     if (auto* port = manager.openMidiInputPortWithID (deviceIdentifier.getIntValue(), midiInput.get(), callback))
     {
-        midiInput->internal = port;
+        midiInput->internal.reset (port);
         midiInput->setName (port->getName());
 
         return midiInput;
@@ -601,20 +601,17 @@ MidiInput::MidiInput (const String& deviceName, const String& deviceIdentifier)
 {
 }
 
-MidiInput::~MidiInput()
-{
-    delete reinterpret_cast<AndroidMidiInput*> (internal);
-}
+MidiInput::~MidiInput() = default;
 
 void MidiInput::start()
 {
-    if (auto* mi = reinterpret_cast<AndroidMidiInput*> (internal))
+    if (auto* mi = internal.get())
         mi->start();
 }
 
 void MidiInput::stop()
 {
-    if (auto* mi = reinterpret_cast<AndroidMidiInput*> (internal))
+    if (auto* mi = internal.get())
         mi->stop();
 }
 
@@ -646,7 +643,7 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (const String& deviceIdentifi
     if (auto* port = manager.openMidiOutputPortWithID (deviceIdentifier.getIntValue()))
     {
         std::unique_ptr<MidiOutput> midiOutput (new MidiOutput ({}, deviceIdentifier));
-        midiOutput->internal = port;
+        midiOutput->internal.reset (port);
         midiOutput->setName (port->getName());
 
         return midiOutput;
@@ -681,13 +678,11 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (int index)
 MidiOutput::~MidiOutput()
 {
     stopBackgroundThread();
-
-    delete reinterpret_cast<AndroidMidiOutput*> (internal);
 }
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    if (auto* androidMidi = reinterpret_cast<AndroidMidiOutput*>(internal))
+    if (auto* androidMidi = internal.get())
     {
         auto* env = getEnv();
         auto messageSize = message.getRawDataSize();

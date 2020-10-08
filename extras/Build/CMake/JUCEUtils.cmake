@@ -123,6 +123,9 @@ set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
     CACHE INTERNAL "The path to the folder holding this file and other resources")
 
 include("${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake")
+include("${JUCE_CMAKE_UTILS_DIR}/JUCECheckAtomic.cmake")
+
+_juce_create_atomic_target(juce_atomic_wrapper)
 
 # Tries to discover the target platform architecture, which is necessary for
 # naming VST3 bundle folders correctly.
@@ -413,9 +416,12 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
             -I "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
             -isysroot "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
             "${au_rez_sources}"
+            -useDF
             -o "${au_rez_output}"
-        DEPENDS "${au_rez_input}" "${secret_au_plugindefines}"
+        DEPENDS "${secret_au_plugindefines}"
         VERBATIM)
+
+    set(au_resource_directory "$<TARGET_BUNDLE_DIR:${au_target}>/Contents/Resources")
 endfunction()
 
 # ==================================================================================================
@@ -515,6 +521,8 @@ function(juce_add_module module_path)
     if(${module_name} STREQUAL "juce_core")
         _juce_add_standard_defs(${module_name})
 
+        target_link_libraries(juce_core INTERFACE juce::juce_atomic_wrapper)
+
         if(CMAKE_SYSTEM_NAME STREQUAL "Android")
             target_sources(juce_core INTERFACE "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
             target_include_directories(juce_core INTERFACE "${ANDROID_NDK}/sources/android/cpufeatures")
@@ -604,6 +612,15 @@ function(juce_add_module module_path)
 
     _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)
     target_link_libraries(${module_name} INTERFACE ${module_dependencies})
+
+    _juce_get_metadata("${metadata_dict}" searchpaths module_searchpaths)
+
+    if(NOT module_searchpaths STREQUAL "")
+        foreach(module_searchpath IN LISTS module_searchpaths)
+            target_include_directories(${module_name}
+                INTERFACE "${module_path}/${module_searchpath}")
+        endforeach()
+    endif()
 
     if(JUCE_ARG_INSTALL_PATH)
         install(DIRECTORY "${module_path}" DESTINATION "${JUCE_ARG_INSTALL_PATH}")
@@ -734,7 +751,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content PLUGIN_CODE                          ${target} JUCE_PLUGIN_CODE)
     _juce_append_target_property(file_content IPHONE_SCREEN_ORIENTATIONS           ${target} JUCE_IPHONE_SCREEN_ORIENTATIONS)
     _juce_append_target_property(file_content IPAD_SCREEN_ORIENTATIONS             ${target} JUCE_IPAD_SCREEN_ORIENTATIONS)
-    _juce_append_target_property(file_content PLUGIN_NAME                          ${target} JUCE_PRODUCT_NAME)
+    _juce_append_target_property(file_content PLUGIN_NAME                          ${target} JUCE_PLUGIN_NAME)
     _juce_append_target_property(file_content PLUGIN_MANUFACTURER                  ${target} JUCE_COMPANY_NAME)
     _juce_append_target_property(file_content PLUGIN_DESCRIPTION                   ${target} JUCE_DESCRIPTION)
     _juce_append_target_property(file_content PLUGIN_AU_EXPORT_PREFIX              ${target} JUCE_AU_EXPORT_PREFIX)
@@ -1192,7 +1209,7 @@ endfunction()
 function(_juce_add_unity_script_file shared_target out_var)
     set(script_in "${JUCE_CMAKE_UTILS_DIR}/UnityPluginGUIScript.cs.in")
 
-    get_target_property(plugin_name ${shared_target} JUCE_PRODUCT_NAME)
+    get_target_property(plugin_name ${shared_target} JUCE_PLUGIN_NAME)
     get_target_property(plugin_vendor ${shared_target} JUCE_COMPANY_NAME)
     get_target_property(plugin_description ${shared_target} JUCE_DESCRIPTION)
 
@@ -1351,11 +1368,12 @@ function(_juce_set_plugin_folder_property shared_target wrapper_target)
     get_target_property(folder_to_use "${shared_target}" FOLDER)
 
     if(folder_to_use STREQUAL "folder_to_use-NOTFOUND")
-        set(folder_to_use "${shared_target}")
-    else()
-        set(folder_to_use "${folder_to_use}/${shared_target}")
+        set_target_properties("${shared_target}" PROPERTIES FOLDER "${shared_target}")
+    elseif(NOT folder_to_use MATCHES ".*${shared_target}$")
+        set_target_properties("${shared_target}" PROPERTIES FOLDER "${folder_to_use}/${shared_target}")
     endif()
 
+    get_target_property(folder_to_use "${shared_target}" FOLDER)
     set_target_properties("${wrapper_target}" PROPERTIES FOLDER "${folder_to_use}")
 endfunction()
 
@@ -1530,7 +1548,7 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_IsMidiEffect=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_IS_MIDI_EFFECT>>
         JucePlugin_WantsMidiInput=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_NEEDS_MIDI_INPUT>>
         JucePlugin_EditorRequiresKeyboardFocus=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_EDITOR_WANTS_KEYBOARD_FOCUS>>
-        JucePlugin_Name="$<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>"
+        JucePlugin_Name="$<TARGET_PROPERTY:${target},JUCE_PLUGIN_NAME>"
         JucePlugin_Desc="$<TARGET_PROPERTY:${target},JUCE_DESCRIPTION>"
         JucePlugin_Version=${project_version_string}
         JucePlugin_VersionString="${project_version_string}"
@@ -1543,7 +1561,7 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_AUExportPrefix=$<TARGET_PROPERTY:${target},JUCE_AU_EXPORT_PREFIX>
         JucePlugin_AUExportPrefixQuoted="$<TARGET_PROPERTY:${target},JUCE_AU_EXPORT_PREFIX>"
         JucePlugin_AUManufacturerCode=JucePlugin_ManufacturerCode
-        JucePlugin_CFBundleIdentifier="$<TARGET_PROPERTY:${target},JUCE_BUNDLE_ID>"
+        JucePlugin_CFBundleIdentifier=$<TARGET_PROPERTY:${target},JUCE_BUNDLE_ID>
         JucePlugin_AAXIdentifier=$<TARGET_PROPERTY:${target},JUCE_AAX_IDENTIFIER>
         JucePlugin_AAXManufacturerCode=JucePlugin_ManufacturerCode
         JucePlugin_AAXProductId=JucePlugin_PluginCode
@@ -1637,6 +1655,7 @@ function(_juce_set_fallback_properties target)
 
     get_target_property(output_name ${target} JUCE_PRODUCT_NAME)
     _juce_set_property_if_not_set(${target} DESCRIPTION "${output_name}")
+    _juce_set_property_if_not_set(${target} PLUGIN_NAME "${output_name}")
 
     get_target_property(real_company_name ${target} JUCE_COMPANY_NAME)
     _juce_set_property_if_not_set(${target} BUNDLE_ID "com.${real_company_name}.${target}")
@@ -1858,6 +1877,7 @@ function(_juce_initialise_target target)
         APP_SANDBOX_ENABLED
         APP_SANDBOX_INHERIT
 
+        PLUGIN_NAME
         PLUGIN_MANUFACTURER_CODE
         PLUGIN_CODE
         DESCRIPTION

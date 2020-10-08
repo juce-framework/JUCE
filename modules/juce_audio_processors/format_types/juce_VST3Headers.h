@@ -56,7 +56,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wpedantic",
                                      "-Wextra",
                                      "-Wclass-memaccess",
-                                     "-Wmissing-prototypes")
+                                     "-Wmissing-prototypes",
+                                     "-Wtype-limits")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values

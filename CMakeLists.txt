@@ -23,7 +23,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(JUCE VERSION 6.0.1 LANGUAGES C CXX)
+project(JUCE VERSION 6.0.3 LANGUAGES C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
@@ -125,6 +125,7 @@ configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
 install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_BINARY_DIR}/JUCEConfig.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/JUCECheckAtomic.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEUtils.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/LaunchScreen.storyboard"
               "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in"

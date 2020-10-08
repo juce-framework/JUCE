@@ -92,12 +92,12 @@ SampleType BallisticsFilter<SampleType>::processSample (int channel, SampleType 
 {
     jassert (isPositiveAndBelow (channel, yold.size()));
 
-    SampleType cte = (inputValue > yold[(size_t) channel] ? cteAT : cteRL);
-
     if (levelType == LevelCalculationType::RMS)
         inputValue *= inputValue;
     else
         inputValue = std::abs (inputValue);
+
+    SampleType cte = (inputValue > yold[(size_t) channel] ? cteAT : cteRL);
 
     SampleType result = inputValue + cte * (yold[(size_t) channel] - inputValue);
     yold[(size_t) channel] = result;
