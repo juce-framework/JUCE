@@ -1217,6 +1217,7 @@ Image JucerDocumentEditor::createComponentLayerSnapshot() const
 const int gridSnapMenuItemBase = 0x8723620;
 const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
+PopupMenu createGUIEditorMenu();
 PopupMenu createGUIEditorMenu()
 {
     PopupMenu menu;
@@ -1293,6 +1294,7 @@ PopupMenu createGUIEditorMenu()
 
         menu.addSubMenu ("Component Overlay", overlays, holder != nullptr);
     }
+
     return menu;
 }
 

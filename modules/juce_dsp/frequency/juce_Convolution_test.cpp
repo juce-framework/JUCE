@@ -63,7 +63,7 @@ class ConvolutionTest  : public UnitTest
         result.clear();
 
         auto** channels = result.getArrayOfWritePointers();
-        std::for_each (channels, channels + result.getNumChannels(), [&] (auto* channel)
+        std::for_each (channels, channels + result.getNumChannels(), [length] (auto* channel)
         {
             std::fill (channel, channel + length, 1.0f);
         });
@@ -238,7 +238,7 @@ public:
         AudioBlock<float> block { buffer };
         ProcessContextReplacing<float> context { block };
 
-        const auto impulseData = [&]
+        const auto impulseData = []
         {
             Random random;
             AudioBuffer<float> result (2, 1000);
@@ -361,15 +361,17 @@ public:
             const auto numChannels = copy.getNumChannels();
             const auto numSamples = copy.getNumSamples();
 
-            const auto factor = 0.125f / std::sqrt (std::accumulate (channels, channels + numChannels, 0.0f, [&] (auto max, auto* channel)
+            const auto factor = 0.125f / std::sqrt (std::accumulate (channels, channels + numChannels, 0.0f,
+                                                                     [numSamples] (auto max, auto* channel)
             {
-                return juce::jmax (max, std::accumulate (channel, channel + numSamples, 0.0f, [] (auto sum, auto sample)
+                return juce::jmax (max, std::accumulate (channel, channel + numSamples, 0.0f,
+                                                         [] (auto sum, auto sample)
                 {
                     return sum + sample * sample;
                 }));
             }));
 
-            std::for_each (channels, channels + numChannels, [&] (auto* channel)
+            std::for_each (channels, channels + numChannels, [factor, numSamples] (auto* channel)
             {
                 FloatVectorOperations::multiply (channel, factor, numSamples);
             });

@@ -116,10 +116,11 @@ private:
             if (undoManager != nullptr)
                 undoManager->beginNewTransaction();
 
-            CallOutBox::launchAsynchronously (new PopupColourSelector (colourValue,
-                                                                       defaultColour,
-                                                                       canResetToDefault),
-                                              getScreenBounds(), nullptr);
+            CallOutBox::launchAsynchronously (std::make_unique<PopupColourSelector> (colourValue,
+                                                                                     defaultColour,
+                                                                                     canResetToDefault),
+                                              getScreenBounds(),
+                                              nullptr);
         }
 
     private:

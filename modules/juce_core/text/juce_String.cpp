@@ -68,7 +68,7 @@ public:
     static CharPointerType createUninitialisedBytes (size_t numBytes)
     {
         numBytes = (numBytes + 3) & ~(size_t) 3;
-        auto s = reinterpret_cast<StringHolder*> (new char [sizeof (StringHolder) - sizeof (CharType) + numBytes]);
+        auto s = unalignedPointerCast<StringHolder*> (new char [sizeof (StringHolder) - sizeof (CharType) + numBytes]);
         s->refCount.value = 0;
         s->allocatedNumBytes = numBytes;
         return CharPointerType (s->text);
@@ -210,7 +210,7 @@ private:
     static StringHolder* bufferFromText (const CharPointerType text) noexcept
     {
         // (Can't use offsetof() here because of warnings about this not being a POD)
-        return reinterpret_cast<StringHolder*> (reinterpret_cast<char*> (text.getAddress())
+        return unalignedPointerCast<StringHolder*> (reinterpret_cast<char*> (text.getAddress())
                     - (reinterpret_cast<size_t> (reinterpret_cast<StringHolder*> (128)->text) - 128));
     }
 
@@ -1991,7 +1991,7 @@ String String::createStringFromData (const void* const unknownData, int size)
 
         StringCreationHelper builder ((size_t) numChars);
 
-        auto src = reinterpret_cast<const uint16*> (data + 2);
+        auto src = unalignedPointerCast<const uint16*> (data + 2);
 
         if (CharPointer_UTF16::isByteOrderMarkBigEndian (data))
         {
@@ -2061,19 +2061,19 @@ struct StringEncodingConverter
 template <>
 struct StringEncodingConverter<CharPointer_UTF8, CharPointer_UTF8>
 {
-    static CharPointer_UTF8 convert (const String& source) noexcept   { return CharPointer_UTF8 (reinterpret_cast<CharPointer_UTF8::CharType*> (source.getCharPointer().getAddress())); }
+    static CharPointer_UTF8 convert (const String& source) noexcept   { return CharPointer_UTF8 (unalignedPointerCast<CharPointer_UTF8::CharType*> (source.getCharPointer().getAddress())); }
 };
 
 template <>
 struct StringEncodingConverter<CharPointer_UTF16, CharPointer_UTF16>
 {
-    static CharPointer_UTF16 convert (const String& source) noexcept  { return CharPointer_UTF16 (reinterpret_cast<CharPointer_UTF16::CharType*> (source.getCharPointer().getAddress())); }
+    static CharPointer_UTF16 convert (const String& source) noexcept  { return CharPointer_UTF16 (unalignedPointerCast<CharPointer_UTF16::CharType*> (source.getCharPointer().getAddress())); }
 };
 
 template <>
 struct StringEncodingConverter<CharPointer_UTF32, CharPointer_UTF32>
 {
-    static CharPointer_UTF32 convert (const String& source) noexcept  { return CharPointer_UTF32 (reinterpret_cast<CharPointer_UTF32::CharType*> (source.getCharPointer().getAddress())); }
+    static CharPointer_UTF32 convert (const String& source) noexcept  { return CharPointer_UTF32 (unalignedPointerCast<CharPointer_UTF32::CharType*> (source.getCharPointer().getAddress())); }
 };
 
 CharPointer_UTF8  String::toUTF8()  const { return StringEncodingConverter<CharPointerType, CharPointer_UTF8 >::convert (*this); }

@@ -767,7 +767,7 @@ private:
 
     bool deviceIsOpen = false, isStarted = false, buffersCreated = false;
     std::atomic<bool> calledback { false };
-    bool littleEndian = false, postOutput = true, needToReset = false;
+    bool postOutput = true, needToReset = false;
     bool insideControlPanelModalLoop = false;
     bool shouldUsePreferredSize = false;
     int xruns = 0;
@@ -1638,11 +1638,6 @@ void sendASIODeviceChangeToListeners (ASIOAudioIODeviceType* type)
 {
     if (type != nullptr)
         type->sendDeviceChangeToListeners();
-}
-
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ASIO()
-{
-    return new ASIOAudioIODeviceType();
 }
 
 } // namespace juce

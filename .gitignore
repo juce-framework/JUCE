@@ -64,4 +64,4 @@ extras/Projucer/JUCECompileEngine.dylib
 **/cmake-build*
 
 .vscode
-build
+/build

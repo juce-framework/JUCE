@@ -164,12 +164,16 @@ public:
     /** Deprecated. */
     static std::unique_ptr<MidiInput> openDevice (int, MidiInputCallback*);
 
+    /** @internal */
+    class Pimpl;
+
 private:
     //==============================================================================
     explicit MidiInput (const String&, const String&);
 
     MidiDeviceInfo deviceInfo;
-    void* internal = nullptr;
+
+    std::unique_ptr<Pimpl> internal;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiInput)
 };
@@ -350,6 +354,9 @@ public:
     /** Deprecated. */
     static std::unique_ptr<MidiOutput> openDevice (int);
 
+    /** @internal */
+    class Pimpl;
+
 private:
     //==============================================================================
     struct PendingMessage
@@ -368,7 +375,9 @@ private:
     void run() override;
 
     MidiDeviceInfo deviceInfo;
-    void* internal = nullptr;
+
+    std::unique_ptr<Pimpl> internal;
+
     CriticalSection lock;
     PendingMessage* firstMessage = nullptr;
 

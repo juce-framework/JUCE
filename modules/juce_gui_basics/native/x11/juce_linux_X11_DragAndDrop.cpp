@@ -198,7 +198,7 @@ public:
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
-        auto dndCurrentVersion = static_cast<unsigned long> (clientMsg.data.l[1] & 0xff000000) >> 24;
+        auto dndCurrentVersion = (static_cast<unsigned long> (clientMsg.data.l[1]) & 0xff000000) >> 24;
 
         if (dndCurrentVersion < 3 || dndCurrentVersion > XWindowSystemUtilities::Atoms::DndVersion)
         {

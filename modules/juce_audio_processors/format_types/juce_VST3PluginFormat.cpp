@@ -921,6 +921,7 @@ private:
             }
             else
             {
+                // this is required for some plug-ins which don't export the dll entry point function
                 return true;
             }
 
@@ -2969,9 +2970,10 @@ private:
         midiOutputs->clear();
 
         if (acceptsMidi())
-            MidiEventList::toEventList (*midiInputs, midiBuffer,
-                                        destination.inputParameterChanges,
-                                        midiMapping);
+            MidiEventList::hostToPluginEventList (*midiInputs,
+                                                  midiBuffer,
+                                                  destination.inputParameterChanges,
+                                                  midiMapping);
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;

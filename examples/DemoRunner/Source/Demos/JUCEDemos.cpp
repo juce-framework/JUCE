@@ -169,10 +169,6 @@ AudioDeviceManager& getSharedAudioDeviceManager (int numInputChannels, int numOu
 }
 
 //==============================================================================
-// need to split this into two files otherwise VS will fall over
-void registerDemos_One() noexcept;
-void registerDemos_Two() noexcept;
-
 void registerAllDemos() noexcept
 {
     registerDemos_One();

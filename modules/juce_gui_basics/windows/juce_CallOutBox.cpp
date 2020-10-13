@@ -40,9 +40,7 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
     else
     {
         setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
-
         updatePosition (area, Desktop::getInstance().getDisplays().findDisplayForRect (area).userArea);
-
         addToDesktop (ComponentPeer::windowIsTemporary);
 
         startTimer (100);
@@ -51,15 +49,14 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
     creationTime = Time::getCurrentTime();
 }
 
-CallOutBox::~CallOutBox() = default;
-
 //==============================================================================
 class CallOutBoxCallback  : public ModalComponentManager::Callback,
                             private Timer
 {
 public:
-    CallOutBoxCallback (Component* c, const Rectangle<int>& area, Component* parent)
-        : content (c), callout (*c, area, parent)
+    CallOutBoxCallback (std::unique_ptr<Component> c, const Rectangle<int>& area, Component* parent)
+        : content (std::move (c)),
+          callout (*content, area, parent)
     {
         callout.setVisible (true);
         callout.enterModalState (true, this);
@@ -80,11 +77,11 @@ public:
     JUCE_DECLARE_NON_COPYABLE (CallOutBoxCallback)
 };
 
-CallOutBox& CallOutBox::launchAsynchronously (Component* content, Rectangle<int> area, Component* parent)
+CallOutBox& CallOutBox::launchAsynchronously (std::unique_ptr<Component> content, Rectangle<int> area, Component* parent)
 {
     jassert (content != nullptr); // must be a valid content component!
 
-    return (new CallOutBoxCallback (content, area, parent))->callout;
+    return (new CallOutBoxCallback (std::move (content), area, parent))->callout;
 }
 
 //==============================================================================
@@ -99,7 +96,11 @@ int CallOutBox::getBorderSize() const noexcept
     return jmax (getLookAndFeel().getCallOutBoxBorderSize (*this), (int) arrowSize);
 }
 
-void CallOutBox::lookAndFeelChanged() { resized(); repaint(); }
+void CallOutBox::lookAndFeelChanged()
+{
+    resized();
+    repaint();
+}
 
 void CallOutBox::paint (Graphics& g)
 {
@@ -158,7 +159,7 @@ void CallOutBox::setDismissalMouseClicksAreAlwaysConsumed (bool b) noexcept
     dismissalMouseClicksAreAlwaysConsumed = b;
 }
 
-enum { callOutBoxDismissCommandId = 0x4f83a04b };
+static constexpr int callOutBoxDismissCommandId = 0x4f83a04b;
 
 void CallOutBox::handleCommandMessage (int commandId)
 {
@@ -193,9 +194,8 @@ void CallOutBox::updatePosition (const Rectangle<int>& newAreaToPointTo, const R
     availableArea = newAreaToFitIn;
 
     auto borderSpace = getBorderSize();
-
-    Rectangle<int> newBounds (content.getWidth()  + borderSpace * 2,
-                              content.getHeight() + borderSpace * 2);
+    auto newBounds = getLocalArea (&content, Rectangle<int> (content.getWidth()  + borderSpace * 2,
+                                                             content.getHeight() + borderSpace * 2));
 
     auto hw = newBounds.getWidth() / 2;
     auto hh = newBounds.getHeight() / 2;
@@ -250,7 +250,7 @@ void CallOutBox::refreshPath()
 
     const float gap = 4.5f;
 
-    outline.addBubble (content.getBounds().toFloat().expanded (gap, gap),
+    outline.addBubble (getLocalArea (&content, content.getLocalBounds().toFloat()).expanded (gap, gap),
                        getLocalBounds().toFloat(),
                        targetPoint - getPosition().toFloat(),
                        getLookAndFeel().getCallOutBoxCornerSize (*this), arrowSize * 0.7f);

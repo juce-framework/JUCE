@@ -45,6 +45,7 @@ public:
         addAndMakeVisible (viewport);
         viewport.setScrollBarsShown (true, false);
         viewport.setViewedComponent (&messagesListComponent, false);
+        viewport.setWantsKeyboardFocus (false);
 
         setOpaque (true);
     }
