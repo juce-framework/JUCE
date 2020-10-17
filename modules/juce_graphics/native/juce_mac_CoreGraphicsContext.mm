@@ -984,24 +984,28 @@ CGContextRef juce_getImageContext (const Image& image)
  Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
                                                 void* nsColorSpace)
  {
-     const CGFloat components[] = {colour.getFloatRed(), colour.getFloatGreen(),
-                                   colour.getFloatBlue(),
-                                   colour.getFloatAlpha()};
-     auto* sourceColor = [NSColor colorWithSRGBRed:components[0]
-                                             green:components[1]
-                                              blue:components[2]
-                                             alpha:components[3]];
-     auto* destColor =
-         [sourceColor colorUsingColorSpace:(NSColorSpace*)(nsColorSpace)];
-     const auto numComp = CGColorGetNumberOfComponents ([destColor CGColor]);
-     if (numComp != 4)
+     JUCE_AUTORELEASEPOOL
      {
-         // colourspace different than RGB?
-         jassertfalse;
-         return colour;
+         const CGFloat components[] = {
+             colour.getFloatRed(), colour.getFloatGreen(),
+             colour.getFloatBlue(),
+             colour.getFloatAlpha()};
+         auto* sourceColor = [NSColor colorWithSRGBRed:components[0]
+                                                 green:components[1]
+                                                  blue:components[2]
+                                                 alpha:components[3]];
+         auto* destColor =
+             [sourceColor colorUsingColorSpace:(NSColorSpace*)(nsColorSpace)];
+         const auto numComp = CGColorGetNumberOfComponents([destColor CGColor]);
+         if (numComp != 4)
+         {
+             // colourspace different than RGB?
+             jassertfalse;
+             return colour;
+         }
+         auto* c = CGColorGetComponents([destColor CGColor]);
+         return Colour::fromFloatRGBA((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
      }
-     auto* c = CGColorGetComponents ([destColor CGColor]);
-     return Colour::fromFloatRGBA ((float)c[0], (float)c[1], (float)c[2], (float)c[3]);
  }
 
  void juce_convertColourGradientToDisplayColourSpace (ColourGradient& gradient,
