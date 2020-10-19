@@ -831,9 +831,9 @@ public:
                 showPopupMenu();
             }
             else if (canDoubleClickToValue()
-                     && (singleClickModifiers != ModifierKeys() && e.mods.withoutMouseButtons() == singleClickModifiers))
+                     || (singleClickModifiers != ModifierKeys() && e.mods.withoutMouseButtons() == singleClickModifiers))
             {
-                mouseDoubleClick();
+                setDoubleClickValue();
             }
             else if (normRange.end > normRange.start)
             {
@@ -1041,10 +1041,13 @@ public:
     void mouseDoubleClick()
     {
         if (canDoubleClickToValue())
-        {
-            DragInProgress drag (*this);
-            setValue (doubleClickReturnValue, sendNotificationSync);
-        }
+            setDoubleClickValue();
+    }
+
+    void setDoubleClickValue()
+    {
+        DragInProgress drag (*this);
+        setValue (doubleClickReturnValue, sendNotificationSync);
     }
 
     double getMouseWheelDelta (double value, double wheelAmount)
