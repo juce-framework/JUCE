@@ -131,6 +131,10 @@ public:
     ~Native() override
     {
         exitModalState (0);
+
+        if (preview != nullptr)
+            preview->removeFromDesktop();
+
         removeFromDesktop();
 
         if (panel != nil)
