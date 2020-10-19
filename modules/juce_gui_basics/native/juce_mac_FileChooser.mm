@@ -171,6 +171,9 @@ public:
 
             enterModalState (true);
             [panel beginWithCompletionHandler:CreateObjCBlock (this, &Native::finished)];
+
+            if (preview != nullptr)
+                preview->toFront (true);
         }
     }
 
