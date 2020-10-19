@@ -830,8 +830,7 @@ public:
             {
                 showPopupMenu();
             }
-            else if (canDoubleClickToValue()
-                     || (singleClickModifiers != ModifierKeys() && e.mods.withoutMouseButtons() == singleClickModifiers))
+            else if ((singleClickModifiers != ModifierKeys() && e.mods.withoutMouseButtons() == singleClickModifiers))
             {
                 setDoubleClickValue();
             }
