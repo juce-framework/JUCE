@@ -83,7 +83,7 @@ public:
 
         if (! isSave)
         {
-            NSOpenPanel* openPanel = (NSOpenPanel*) panel;
+            auto* openPanel = static_cast<NSOpenPanel*> (panel);
 
             [openPanel setCanChooseDirectories: selectsDirectories];
             [openPanel setCanChooseFiles: selectsFiles];
@@ -101,6 +101,12 @@ public:
             preview->setVisible (true);
 
             [panel setAccessoryView: nsViewPreview];
+
+            if (! isSave)
+            {
+                auto* openPanel = static_cast<NSOpenPanel*> (panel);
+                [openPanel setAccessoryViewDisclosed: YES];
+            }
         }
 
         if (isSave || selectsDirectories)
@@ -315,7 +321,7 @@ private:
 };
 
 FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                        FilePreviewComponent* preview)
+                                                     FilePreviewComponent* preview)
 {
     return new FileChooser::Native (owner, flags, preview);
 }
