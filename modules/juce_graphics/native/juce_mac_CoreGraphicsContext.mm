@@ -984,6 +984,9 @@ CGContextRef juce_getImageContext (const Image& image)
  Colour juce_convertColourToDisplayColourSpace (const Colour& colour,
                                                 void* nsColorSpace)
  {
+     if (nsColorSpace == nullptr)
+         return colour;
+
      JUCE_AUTORELEASEPOOL
      {
          const CGFloat components[] = {
@@ -1019,6 +1022,9 @@ CGContextRef juce_getImageContext (const Image& image)
  Image juce_returnImageWithNativeColourSpace (const Image& src,
                                               void* nsColorSpace)
  {
+     if (nsColorSpace == nullptr)
+         return src;
+
      // display color space based on profile
      const auto nativeSpace = ((NSColorSpace*)nsColorSpace).CGColorSpace;
      // to CIImage
