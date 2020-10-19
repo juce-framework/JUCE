@@ -412,8 +412,11 @@ private:
 
         const Remover remover (*this);
 
-        if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista)
+        if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista
+            && customComponent == nullptr)
+        {
             return openDialogVistaAndUp (async);
+        }
 
         return openDialogPreVista (async);
     }
