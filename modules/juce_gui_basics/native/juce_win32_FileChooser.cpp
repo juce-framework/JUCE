@@ -420,18 +420,33 @@ private:
 
     void run() override
     {
+        // We use a functor rather than a lambda here because
+        // we want to move ownership of the Ptr into the function
+        // object, and C++11 doesn't support general lambda capture
+        struct AsyncCallback
+        {
+            AsyncCallback (Ptr p, Array<URL> r)
+                : ptr (std::move (p)),
+                  results (std::move (r)) {}
+
+            void operator()()
+            {
+                ptr->results = std::move (results);
+
+                if (ptr->owner != nullptr)
+                    ptr->owner->exitModalState (ptr->results.size() > 0 ? 1 : 0);
+            }
+
+            Ptr ptr;
+            Array<URL> results;
+        };
+
         // as long as the thread is running, don't delete this class
         Ptr safeThis (this);
         threadHasReference.signal();
 
         auto r = openDialog (true);
-        MessageManager::callAsync ([safeThis, r]
-        {
-            safeThis->results = r;
-
-            if (safeThis->owner != nullptr)
-                safeThis->owner->exitModalState (r.size() > 0 ? 1 : 0);
-        });
+        MessageManager::callAsync (AsyncCallback (std::move (safeThis), std::move (r)));
     }
 
     static HashMap<HWND, Win32NativeFileChooser*>& getNativeDialogList()
