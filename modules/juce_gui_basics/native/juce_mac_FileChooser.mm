@@ -182,7 +182,7 @@ public:
         std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
 
         if (JUCEApplicationBase::isStandaloneApp())
-            tempMenu.reset (new TemporaryMainMenuWithStandardCommands());
+            tempMenu = std::make_unique<TemporaryMainMenuWithStandardCommands> (preview);
 
         jassert (panel != nil);
         auto result = [panel runModal];
@@ -191,13 +191,7 @@ public:
 
     bool canModalEventBeSentToComponent (const Component* targetComponent) override
     {
-        if (targetComponent == nullptr)
-            return false;
-
-        if (targetComponent == preview)
-            return true;
-
-        return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
+        return TemporaryMainMenuWithStandardCommands::checkModalEvent (preview, targetComponent);
     }
 
 private:
