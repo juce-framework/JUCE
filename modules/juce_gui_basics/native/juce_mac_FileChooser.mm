@@ -97,10 +97,10 @@ public:
         if (preview != nullptr)
         {
             nsViewPreview = [[NSView alloc] initWithFrame: makeNSRect (preview->getLocalBounds())];
+            [panel setAccessoryView: nsViewPreview];
+
             preview->addToDesktop (0, (void*) nsViewPreview);
             preview->setVisible (true);
-
-            [panel setAccessoryView: nsViewPreview];
 
             if (! isSave)
             {
@@ -186,6 +186,9 @@ public:
     {
         if (targetComponent == nullptr)
             return false;
+
+        if (targetComponent == preview)
+            return true;
 
         return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
     }
