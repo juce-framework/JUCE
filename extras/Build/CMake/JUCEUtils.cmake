@@ -1013,7 +1013,7 @@ function(_juce_generate_icon source_target dest_target)
 
     if(generated_icon)
         target_sources(${dest_target} PRIVATE ${generated_icon})
-        set_target_properties(${source_target} PROPERTIES
+        set_target_properties(${source_target} ${dest_target} PROPERTIES
             JUCE_ICON_FILE "${generated_icon}"
             RESOURCE "${generated_icon}")
     endif()
