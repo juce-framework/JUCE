@@ -254,25 +254,31 @@ private:
 
     void panelSelectionDidChange (id sender)
     {
+        jassert (sender == panel);
+        ignoreUnused (sender);
+
         // NB: would need to extend FilePreviewComponent to handle the full list rather than just the first one
         if (preview != nullptr)
-            preview->selectedFileChanged (File (getSelectedPaths (sender)[0]));
+            preview->selectedFileChanged (File (getSelectedPaths()[0]));
     }
 
-    static StringArray getSelectedPaths (id sender)
+    StringArray getSelectedPaths() const
     {
+        if (panel == nullptr)
+            return {};
+
         StringArray paths;
 
-        if ([sender isKindOfClass: [NSOpenPanel class]])
+        if (isSave)
         {
-            NSArray* urls = [(NSOpenPanel*) sender URLs];
+            paths.add (nsStringToJuce ([[panel URL] path]));
+        }
+        else
+        {
+            auto* urls = [(NSOpenPanel*) panel URLs];
 
             for (NSUInteger i = 0; i < [urls count]; ++i)
                 paths.add (nsStringToJuce ([[urls objectAtIndex: i] path]));
-        }
-        else if ([sender isKindOfClass: [NSSavePanel class]])
-        {
-            paths.add (nsStringToJuce ([[(NSSavePanel*) sender URL] path]));
         }
 
         return paths;
