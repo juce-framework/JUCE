@@ -495,6 +495,13 @@ attributes directly to these creation functions, rather than adding them later.
     hosting plugins. Using this parameter should be preferred over using
     `target_compile_definitions` to manually set the `JUCE_PLUGINHOST_AU` preprocessor definition.
 
+- `USE_LEGACY_COMPATIBILITY_PLUGIN_CODE`
+  - May be either TRUE or FALSE (defaults to FALSE). If TRUE, will override the value of the
+    preprocessor definition "JucePlugin_ManufacturerCode" with the hex equivalent of "proj". This
+    option exists to maintain compatiblity with a previous, buggy version of JUCE's CMake support
+    which mishandled the manufacturer code property. Most projects should leave this option set to
+    its default value.
+
 - `COPY_PLUGIN_AFTER_BUILD`
   - Whether or not to install the plugin to the current system after building. False by default.
     If you want all of the plugins in a subdirectory to be installed automatically after building,
