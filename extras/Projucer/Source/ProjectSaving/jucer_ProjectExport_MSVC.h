@@ -122,8 +122,8 @@ public:
         rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
                                    getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::windows), TargetOS::windows);
 
-        araPathValueWrapper.init ({ settings, Ids::araPath, nullptr },
-                                  getAppSettings().getStoredPath (Ids::araPath, TargetOS::windows), TargetOS::windows);
+        araPathValueWrapper.init ({ settings, Ids::araFolder, nullptr },
+                                  getAppSettings().getStoredPath (Ids::araFolder, TargetOS::windows), TargetOS::windows);
     }
 
     //==============================================================================

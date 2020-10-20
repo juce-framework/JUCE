@@ -100,6 +100,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
  #include <public.sdk/source/vst/vsteditcontroller.h>
  #include <public.sdk/source/vst/vstpresetfile.h>
 
+ #include "pslextensions/ipslviewembedding.h"
 #else
  // needed for VST_VERSION
  #include <pluginterfaces/vst/vsttypes.h>
@@ -141,6 +142,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
  #if VST_VERSION >= 0x03060c   // 3.6.12
   #include <public.sdk/source/vst/hosting/pluginterfacesupport.cpp>
  #endif
+
+ #include "pslextensions/ipslviewembedding.h"
 
 //==============================================================================
 namespace Steinberg

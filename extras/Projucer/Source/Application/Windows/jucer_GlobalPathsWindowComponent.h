@@ -274,7 +274,7 @@ private:
         vstPathValue              = settings.getStoredPath (Ids::vstLegacyPath, os);
         rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
-        araPathValue              = settings.getStoredPath (Ids::araPath, os);
+        araPathValue              = settings.getStoredPath (Ids::araFolder, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
         androidNDKPathValue       = settings.getStoredPath (Ids::androidNDKPath, os);
         clionExePathValue         = settings.getStoredPath (Ids::clionExePath, os);

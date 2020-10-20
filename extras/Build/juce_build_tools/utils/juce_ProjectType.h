@@ -273,11 +273,18 @@ namespace build_tools
         {
             switch (targetType)
             {
+                case Target::VSTPlugIn:
                 case Target::VST3PlugIn:
+                case Target::AAXPlugIn:
+                case Target::RTASPlugIn:
                 case Target::AudioUnitPlugIn:
+                case Target::AudioUnitv3PlugIn:
+                case Target::StandalonePlugIn:
+                case Target::UnityPlugIn:
                 case Target::SharedCodeTarget:
                 case Target::AggregateTarget:
                     return true;
+
                 case Target::GUIApp:
                 case Target::ConsoleApp:
                 case Target::StaticLibrary:
