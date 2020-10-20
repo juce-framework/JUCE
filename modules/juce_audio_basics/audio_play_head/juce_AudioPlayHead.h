@@ -81,6 +81,13 @@ public:
         /** For timecode, the position of the start of the timeline, in seconds from 00:00:00:00. */
         double editOriginTime;
 
+        /** The current play position, in samples from the start of processing.
+            Without looping.
+            Note - this value may be unavailable on some hosts.
+            @see isContinuousValid.
+         */
+        int64 continuousTimeInSamples;
+
         /** The current play position, in units of quarter-notes. */
         double ppqPosition;
 
@@ -120,6 +127,9 @@ public:
 
         /** True if the transport is currently looping. */
         bool isLooping;
+
+        /** True if the continuous time is valid/supported. */
+        bool isContinuousValid;
 
         //==============================================================================
         bool operator== (const CurrentPositionInfo& other) const noexcept
