@@ -550,8 +550,8 @@ JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
 class TemporaryMainMenuWithStandardCommands
 {
 public:
-    TemporaryMainMenuWithStandardCommands()
-        : oldMenu (MenuBarModel::getMacMainMenu())
+    explicit TemporaryMainMenuWithStandardCommands (FilePreviewComponent* filePreviewComponent)
+        : oldMenu (MenuBarModel::getMacMainMenu()), dummyModalComponent (filePreviewComponent)
     {
         if (auto* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
             oldAppleMenu = std::make_unique<PopupMenu> (*appleMenu);
@@ -601,8 +601,17 @@ public:
         MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu.get(), oldRecentItems);
     }
 
+    static bool checkModalEvent (FilePreviewComponent* preview, const Component* targetComponent)
+    {
+        if (targetComponent == nullptr)
+            return false;
+
+        return (targetComponent == preview
+               || targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr);
+    }
+
 private:
-    MenuBarModel* const oldMenu;
+    MenuBarModel* const oldMenu = nullptr;
     std::unique_ptr<PopupMenu> oldAppleMenu;
     String oldRecentItems;
     NSInteger editMenuIndex;
@@ -615,8 +624,17 @@ private:
     // recursive when file dialogs are involved
     struct SilentDummyModalComp  : public Component
     {
-        SilentDummyModalComp() {}
+        explicit SilentDummyModalComp (FilePreviewComponent* p)
+            : preview (p) {}
+
         void inputAttemptWhenModal() override {}
+
+        bool canModalEventBeSentToComponent (const Component* targetComponent) override
+        {
+            return checkModalEvent (preview, targetComponent);
+        }
+
+        FilePreviewComponent* preview = nullptr;
     };
 
     SilentDummyModalComp dummyModalComponent;

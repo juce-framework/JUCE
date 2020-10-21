@@ -424,6 +424,9 @@ public:
         rates.addUsingDefaultSort (defaultSampleRate);
         mixFormatChannelMask = format.dwChannelMask;
 
+        if (isExclusiveMode (deviceMode))
+            findSupportedFormat (tempClient, defaultSampleRate, mixFormatChannelMask, format);
+
         querySupportedBufferSizes (format, tempClient);
         querySupportedSampleRates (format, tempClient);
     }

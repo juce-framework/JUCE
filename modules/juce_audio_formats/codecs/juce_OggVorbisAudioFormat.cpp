@@ -48,7 +48,8 @@ namespace OggVorbisNamespace
                                       "-Wswitch-default",
                                       "-Wredundant-decls",
                                       "-Wmisleading-indentation",
-                                      "-Wmissing-prototypes")
+                                      "-Wmissing-prototypes",
+                                      "-Wcast-align")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"

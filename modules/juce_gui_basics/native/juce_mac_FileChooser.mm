@@ -83,7 +83,7 @@ public:
 
         if (! isSave)
         {
-            NSOpenPanel* openPanel = (NSOpenPanel*) panel;
+            auto* openPanel = static_cast<NSOpenPanel*> (panel);
 
             [openPanel setCanChooseDirectories: selectsDirectories];
             [openPanel setCanChooseFiles: selectsFiles];
@@ -97,10 +97,16 @@ public:
         if (preview != nullptr)
         {
             nsViewPreview = [[NSView alloc] initWithFrame: makeNSRect (preview->getLocalBounds())];
+            [panel setAccessoryView: nsViewPreview];
+
             preview->addToDesktop (0, (void*) nsViewPreview);
             preview->setVisible (true);
 
-            [panel setAccessoryView: nsViewPreview];
+            if (! isSave)
+            {
+                auto* openPanel = static_cast<NSOpenPanel*> (panel);
+                [openPanel setAccessoryViewDisclosed: YES];
+            }
         }
 
         if (isSave || selectsDirectories)
@@ -125,6 +131,10 @@ public:
     ~Native() override
     {
         exitModalState (0);
+
+        if (preview != nullptr)
+            preview->removeFromDesktop();
+
         removeFromDesktop();
 
         if (panel != nil)
@@ -161,6 +171,9 @@ public:
 
             enterModalState (true);
             [panel beginWithCompletionHandler:CreateObjCBlock (this, &Native::finished)];
+
+            if (preview != nullptr)
+                preview->toFront (true);
         }
     }
 
@@ -169,7 +182,7 @@ public:
         std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
 
         if (JUCEApplicationBase::isStandaloneApp())
-            tempMenu.reset (new TemporaryMainMenuWithStandardCommands());
+            tempMenu = std::make_unique<TemporaryMainMenuWithStandardCommands> (preview);
 
         jassert (panel != nil);
         auto result = [panel runModal];
@@ -178,10 +191,7 @@ public:
 
     bool canModalEventBeSentToComponent (const Component* targetComponent) override
     {
-        if (targetComponent == nullptr)
-            return false;
-
-        return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
+        return TemporaryMainMenuWithStandardCommands::checkModalEvent (preview, targetComponent);
     }
 
 private:
@@ -315,7 +325,7 @@ private:
 };
 
 FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                        FilePreviewComponent* preview)
+                                                     FilePreviewComponent* preview)
 {
     return new FileChooser::Native (owner, flags, preview);
 }

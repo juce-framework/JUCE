@@ -119,6 +119,30 @@ provisioning profiles, which is achieved by passing the `-allowProvisioningUpdat
 
     cmake --build build-ios --target <targetName> -- -allowProvisioningUpdates
 
+#### Archiving for iOS
+
+CMake's out-of-the-box archiving behaviour doesn't always work as expected, especially for targets
+that depend on static libraries (such as targets added with `juce_add_binary_data`). Xcode may
+generate these libraries into a 'DerivedData' directory, but then omit this directory from the
+library search paths later in the build.
+
+If the "Product -> Archive" action isn't working, the following steps may help correct the issue:
+
+- On your static library, explicitly set the `ARCHIVE_OUTPUT_DIRECTORY` property.
+  ```
+  set_target_properties(my_static_lib_target PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "./")
+  ```
+- Now, the Archive build should complete without linker errors, but the archived product may still
+  be hidden in the Organizer window. To fix this issue, set the following properties on the target
+  representing the actual iOS app. If your target was added with `juce_add_gui_app`, pass the same
+  target name. Otherwise, if your target was added with `juce_add_plugin` you may need to append
+  `_Standalone` to the target name, to specify the standalone plugin target.
+  ```
+  set_target_properties(my_ios_app_target PROPERTIES
+      XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+      XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
+  ```
+
 ### Building universal binaries for macOS
 
 Building universal binaries that will run on both arm64 and x86_64 can be achieved by
@@ -379,6 +403,12 @@ attributes directly to these creation functions, rather than adding them later.
     space-separated list. Valid values are `Standalone Unity VST3 AU AUv3 AAX VST`. `AU` and `AUv3`
     plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
     without first calling `juce_set_aax_sdk_path` or `juce_set_vst2_sdk_path` respectively.
+
+- `PLUGIN_NAME`
+  - The name of the plugin. In a DAW environment, this is the name that will be displayed to the
+    user when they go to load a plugin. This name may differ from the name of the physical plugin
+    file (to set the name of the plugin file, use the `PRODUCT_NAME` option). If not specified,
+    the `PLUGIN_NAME` will default to match the `PRODUCT_NAME`.
 
 - `PLUGIN_MANUFACTURER_CODE`
   - A four-character unique ID for your company. For AU compatibility, this must contain at least

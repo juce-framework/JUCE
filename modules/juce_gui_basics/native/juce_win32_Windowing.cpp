@@ -3176,10 +3176,7 @@ private:
             updateKeyModifiers();
 
             if (hwnd == GetActiveWindow())
-            {
-                handleKeyPress (key, 0);
-                return true;
-            }
+                return handleKeyPress (key, 0);
         }
 
         return false;

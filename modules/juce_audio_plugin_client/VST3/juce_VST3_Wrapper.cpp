@@ -2810,7 +2810,7 @@ public:
 
        #if JucePlugin_ProducesMidiOutput
         if (isMidiOutputBusEnabled && data.outputEvents != nullptr)
-            MidiEventList::toEventList (*data.outputEvents, midiBuffer);
+            MidiEventList::pluginToHostEventList (*data.outputEvents, midiBuffer);
        #endif
 
         return kResultTrue;

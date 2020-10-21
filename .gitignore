@@ -64,7 +64,7 @@ extras/Projucer/JUCECompileEngine.dylib
 **/cmake-build*
 
 .vscode
-build
+/build
 
 # ARAPluginDemo build output
 examples/ARA/*/Builds*

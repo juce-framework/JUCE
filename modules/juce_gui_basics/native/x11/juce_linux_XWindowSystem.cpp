@@ -1165,7 +1165,7 @@ namespace ClipboardHelpers
                 numDataItems = 2;
                 propertyFormat = 32; // atoms are 32-bit
                 data.calloc (numDataItems * 4);
-                Atom* atoms = reinterpret_cast<Atom*> (data.getData());
+                Atom* atoms = unalignedPointerCast<Atom*> (data.getData());
                 atoms[0] = XWindowSystem::getInstance()->getAtoms().utf8String;
                 atoms[1] = XA_STRING;
 
@@ -1224,7 +1224,7 @@ ComponentPeer* getPeerFor (::Window windowH)
         X11Symbols::getInstance()->xFindContext (display, (XID) windowH, windowHandleXContext, &peer);
     }
 
-    return reinterpret_cast<ComponentPeer*> (peer);
+    return unalignedPointerCast<ComponentPeer*> (peer);
 }
 
 //==============================================================================
@@ -2998,7 +2998,7 @@ void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer<::Window>* peer, XKe
                 if (sym >= XK_F1 && sym <= XK_F35)
                 {
                     keyPressed = true;
-                    keyCode = (sym & 0xff) | Keys::extendedKeyModifier;
+                    keyCode = static_cast<int> ((sym & 0xff) | Keys::extendedKeyModifier);
                 }
                 break;
         }

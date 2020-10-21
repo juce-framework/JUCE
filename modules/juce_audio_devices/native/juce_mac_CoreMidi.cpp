@@ -393,6 +393,12 @@ namespace CoreMidiHelpers
     }
 }
 
+class MidiInput::Pimpl : public CoreMidiHelpers::MidiPortAndCallback
+{
+public:
+    using MidiPortAndCallback::MidiPortAndCallback;
+};
+
 //==============================================================================
 Array<MidiDeviceInfo> MidiInput::getAvailableDevices()
 {
@@ -424,7 +430,7 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier
                 if (CHECK_ERROR (MIDIObjectGetStringProperty (endpoint, kMIDIPropertyName, &cfName.cfString)))
                 {
                     MIDIPortRef port;
-                    auto mpc = std::make_unique<MidiPortAndCallback> (*callback);
+                    auto mpc = std::make_unique<Pimpl> (*callback);
 
                     if (CHECK_ERROR (MIDIInputPortCreate (client, cfName.cfString, midiInputProc, mpc.get(), &port)))
                     {
@@ -435,10 +441,11 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier
                             std::unique_ptr<MidiInput> midiInput (new MidiInput (endpointInfo.name, endpointInfo.identifier));
 
                             mpc->input = midiInput.get();
-                            midiInput->internal = mpc.get();
+                            auto* ptr = mpc.get();
+                            midiInput->internal = std::move (mpc);
 
                             const ScopedLock sl (callbackLock);
-                            activeCallbacks.add (mpc.release());
+                            activeCallbacks.add (ptr);
 
                             return midiInput;
                         }
@@ -462,7 +469,7 @@ std::unique_ptr<MidiInput> MidiInput::createNewDevice (const String& deviceName,
 
     if (auto client = getGlobalMidiClient())
     {
-        auto mpc = std::make_unique<MidiPortAndCallback> (*callback);
+        auto mpc = std::make_unique<Pimpl> (*callback);
         mpc->active = false;
 
         MIDIEndpointRef endpoint;
@@ -491,10 +498,11 @@ std::unique_ptr<MidiInput> MidiInput::createNewDevice (const String& deviceName,
                 std::unique_ptr<MidiInput> midiInput (new MidiInput (deviceName, String (deviceIdentifier)));
 
                 mpc->input = midiInput.get();
-                midiInput->internal = mpc.get();
+                auto* ptr = mpc.get();
+                midiInput->internal = std::move (mpc);
 
                 const ScopedLock sl (callbackLock);
-                activeCallbacks.add (mpc.release());
+                activeCallbacks.add (ptr);
 
                 return midiInput;
             }
@@ -529,24 +537,27 @@ MidiInput::MidiInput (const String& deviceName, const String& deviceIdentifier)
 {
 }
 
-MidiInput::~MidiInput()
-{
-    delete static_cast<CoreMidiHelpers::MidiPortAndCallback*> (internal);
-}
+MidiInput::~MidiInput() = default;
 
 void MidiInput::start()
 {
     const ScopedLock sl (CoreMidiHelpers::callbackLock);
-    static_cast<CoreMidiHelpers::MidiPortAndCallback*> (internal)->active = true;
+    internal->active = true;
 }
 
 void MidiInput::stop()
 {
     const ScopedLock sl (CoreMidiHelpers::callbackLock);
-    static_cast<CoreMidiHelpers::MidiPortAndCallback*> (internal)->active = false;
+    internal->active = false;
 }
 
 //==============================================================================
+class MidiOutput::Pimpl : public CoreMidiHelpers::MidiPortAndEndpoint
+{
+public:
+    using MidiPortAndEndpoint::MidiPortAndEndpoint;
+};
+
 Array<MidiDeviceInfo> MidiOutput::getAvailableDevices()
 {
     return CoreMidiHelpers::findDevices (false);
@@ -581,7 +592,7 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (const String& deviceIdentifi
                     if (CHECK_ERROR (MIDIOutputPortCreate (client, cfName.cfString, &port)))
                     {
                         std::unique_ptr<MidiOutput> midiOutput (new MidiOutput (endpointInfo.name, endpointInfo.identifier));
-                        midiOutput->internal = new MidiPortAndEndpoint (port, endpoint);
+                        midiOutput->internal = std::make_unique<Pimpl> (port, endpoint);
 
                         return midiOutput;
                     }
@@ -622,7 +633,7 @@ std::unique_ptr<MidiOutput> MidiOutput::createNewDevice (const String& deviceNam
             if (CHECK_ERROR (MIDIObjectSetIntegerProperty (endpoint, kMIDIPropertyUniqueID, (SInt32) deviceIdentifier)))
             {
                 std::unique_ptr<MidiOutput> midiOutput (new MidiOutput (deviceName, String (deviceIdentifier)));
-                midiOutput->internal = new MidiPortAndEndpoint (0, endpoint);
+                midiOutput->internal = std::make_unique<Pimpl> ((UInt32) 0, endpoint);
 
                 return midiOutput;
             }
@@ -655,8 +666,6 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (int index)
 MidiOutput::~MidiOutput()
 {
     stopBackgroundThread();
-
-    delete static_cast<CoreMidiHelpers::MidiPortAndEndpoint*> (internal);
 }
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
@@ -715,7 +724,7 @@ void MidiOutput::sendMessageNow (const MidiMessage& message)
         return;
     }
 
-    static_cast<CoreMidiHelpers::MidiPortAndEndpoint*> (internal)->send (packetToSend);
+    internal->send (packetToSend);
 }
 
 #undef CHECK_ERROR

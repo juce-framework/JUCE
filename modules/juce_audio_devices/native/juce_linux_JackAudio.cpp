@@ -186,10 +186,10 @@ public:
             const StringArray inputChannels (getInputChannelNames());
             for (int i = 0; i < inputChannels.size(); ++i)
             {
-                String inputName;
-                inputName << "in_" << ++totalNumberOfInputChannels;
+                String inputChannelName;
+                inputChannelName << "in_" << ++totalNumberOfInputChannels;
 
-                inputPorts.add (juce::jack_port_register (client, inputName.toUTF8(),
+                inputPorts.add (juce::jack_port_register (client, inputChannelName.toUTF8(),
                                                           JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0));
             }
 
@@ -197,10 +197,10 @@ public:
             const StringArray outputChannels (getOutputChannelNames());
             for (int i = 0; i < outputChannels.size(); ++i)
             {
-                String outputName;
-                outputName << "out_" << ++totalNumberOfOutputChannels;
+                String outputChannelName;
+                outputChannelName << "out_" << ++totalNumberOfOutputChannels;
 
-                outputPorts.add (juce::jack_port_register (client, outputName.toUTF8(),
+                outputPorts.add (juce::jack_port_register (client, outputChannelName.toUTF8(),
                                                            JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0));
             }
 

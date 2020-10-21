@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#include <juce_core/system/juce_TargetPlatform.h>
+
 #if JucePlugin_Build_Standalone
 
 #if ! JUCE_MODULE_AVAILABLE_juce_audio_utils
