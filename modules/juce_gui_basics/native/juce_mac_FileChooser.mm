@@ -61,13 +61,16 @@ public:
           selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
           selectsFiles       ((flags & FileBrowserComponent::canSelectFiles)         != 0),
           isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
-          selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0),
-          panel (isSave ? [[NSSavePanel alloc] init] : [[NSOpenPanel alloc] init])
+          selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0)
     {
         setBounds (0, 0, 0, 0);
         setOpaque (true);
 
         static DelegateClass cls;
+        static SafeSavePanel ssp;
+        static SafeOpenPanel sop;
+
+        panel = isSave ? [ssp.createInstance() init] : [sop.createInstance() init];
 
         delegate = [cls.createInstance() init];
         object_setInstanceVariable (delegate, "cppObject", this);
@@ -166,6 +169,8 @@ public:
     {
         if (panel != nil)
         {
+            jassert ([panel preventsApplicationTerminationWhenModal]);
+
             setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
             addToDesktop (0);
 
@@ -179,6 +184,8 @@ public:
 
     void runModally() override
     {
+        jassert ([panel preventsApplicationTerminationWhenModal]);
+
         std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
 
         if (JUCEApplicationBase::isStandaloneApp())
@@ -228,7 +235,7 @@ private:
             }
             else
             {
-                auto* openPanel = (NSOpenPanel*) panel;
+                auto* openPanel = static_cast<NSOpenPanel*> (panel);
                 auto urls = [openPanel URLs];
 
                 for (unsigned int i = 0; i < [urls count]; ++i)
@@ -275,7 +282,7 @@ private:
         }
         else
         {
-            auto* urls = [(NSOpenPanel*) panel URLs];
+            auto* urls = [static_cast<NSOpenPanel*> (panel) URLs];
 
             for (NSUInteger i = 0; i < [urls count]; ++i)
                 paths.add (nsStringToJuce ([[urls objectAtIndex: i] path]));
@@ -296,10 +303,35 @@ private:
     StringArray filters;
     String startingDirectory, filename;
 
-    //==============================================================================
-    struct DelegateClass : ObjCClass<DelegateType>
+    static BOOL preventsApplicationTerminationWhenModal() { return YES; }
+
+    template <typename Base>
+    struct SafeModalPanel : public ObjCClass<Base>
     {
-        DelegateClass()  : ObjCClass<DelegateType> ("JUCEFileChooser_")
+        explicit SafeModalPanel (const char* name) : ObjCClass<Base> (name)
+        {
+            this->addMethod (@selector (preventsApplicationTerminationWhenModal),
+                             preventsApplicationTerminationWhenModal,
+                             "c@:");
+
+            this->registerClass();
+        }
+    };
+
+    struct SafeSavePanel : SafeModalPanel<NSSavePanel>
+    {
+        SafeSavePanel() : SafeModalPanel ("SaveSavePanel_") {}
+    };
+
+    struct SafeOpenPanel : SafeModalPanel<NSOpenPanel>
+    {
+        SafeOpenPanel() : SafeModalPanel ("SaveOpenPanel_") {}
+    };
+
+    //==============================================================================
+    struct DelegateClass : public ObjCClass<DelegateType>
+    {
+        DelegateClass() : ObjCClass<DelegateType> ("JUCEFileChooser_")
         {
             addIvar<Native*> ("cppObject");
 
