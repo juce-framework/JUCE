@@ -66,13 +66,14 @@ public:
         setBounds (0, 0, 0, 0);
         setOpaque (true);
 
-        static DelegateClass cls;
-        static SafeSavePanel ssp;
-        static SafeOpenPanel sop;
+        static DelegateClass delegateClass;
+        static SafeSavePanel safeSavePanel;
+        static SafeOpenPanel safeOpenPanel;
 
-        panel = isSave ? [ssp.createInstance() init] : [sop.createInstance() init];
+        panel = isSave ? [safeSavePanel.createInstance() init]
+                       : [safeOpenPanel.createInstance() init];
 
-        delegate = [cls.createInstance() init];
+        delegate = [delegateClass.createInstance() init];
         object_setInstanceVariable (delegate, "cppObject", this);
 
         [panel setDelegate: delegate];
@@ -169,8 +170,6 @@ public:
     {
         if (panel != nil)
         {
-            jassert ([panel preventsApplicationTerminationWhenModal]);
-
             setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
             addToDesktop (0);
 
@@ -184,7 +183,7 @@ public:
 
     void runModally() override
     {
-        jassert ([panel preventsApplicationTerminationWhenModal]);
+        ensurePanelSafe();
 
         std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
 
@@ -302,6 +301,18 @@ private:
 
     StringArray filters;
     String startingDirectory, filename;
+
+    void ensurePanelSafe()
+    {
+        // If you hit this, something (probably the plugin host) has modified the panel,
+        // allowing the application to terminate while the panel's modal loop is running.
+        // This is a very bad idea! Quitting from within the panel's modal loop may cause
+        // your plugin/app destructor to run directly from within `runModally`, which will
+        // dispose all app resources while they're still in use.
+        // A safer alternative is to invoke the FileChooser with `launchAsync`, rather than
+        // using the modal launchers.
+        jassert ([panel preventsApplicationTerminationWhenModal]);
+    }
 
     static BOOL preventsApplicationTerminationWhenModal() { return YES; }
 
