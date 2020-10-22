@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#include <juce_core/system/juce_TargetPlatform.h>
+
 #if JucePlugin_Build_AU
 
 #include <juce_core/system/juce_CompilerWarnings.h>

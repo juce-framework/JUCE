@@ -317,6 +317,12 @@ Timer::Timer (const Timer&) noexcept {}
 
 Timer::~Timer()
 {
+    // If you're destroying a timer on a background thread, make sure the timer has
+    // been stopped before execution reaches this point. A simple way to achieve this
+    // is to add a call to `stopTimer()` to the destructor of your class which inherits
+    // from Timer.
+    jassert (MessageManager::existsAndIsCurrentThread() || ! isTimerRunning());
+
     stopTimer();
 }
 
