@@ -498,7 +498,7 @@ private:
                                  + "\nFramesPerCallback = " + String (stream->getFramesPerCallback())
                                  + "\nBytesPerFrame = " + String (stream->getBytesPerFrame())
                                  + "\nBytesPerSample = " + String (stream->getBytesPerSample())
-                                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency)
+                                 + "\nPerformanceMode = " + getOboeString (stream->getPerformanceMode())
                                  + "\ngetDeviceId = " + String (stream->getDeviceId()));
             }
         }
@@ -591,7 +591,7 @@ private:
                  + "\nFramesPerCallback = " + (stream != nullptr ? String (stream->getFramesPerCallback()) : String ("?"))
                  + "\nBytesPerFrame = " + (stream != nullptr ? String (stream->getBytesPerFrame()) : String ("?"))
                  + "\nBytesPerSample = " + (stream != nullptr ? String (stream->getBytesPerSample()) : String ("?"))
-                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
+                 + "\nPerformanceMode = " + (stream != nullptr ? getOboeString (stream->getPerformanceMode()) : String ("?")));
         }
 
         void close()
@@ -878,7 +878,7 @@ private:
                  + "\nFramesPerCallback = " + (stream != nullptr ? String (stream->getFramesPerCallback()) : String ("?"))
                  + "\nBytesPerFrame = " + (stream != nullptr ? String (stream->getBytesPerFrame()) : String ("?"))
                  + "\nBytesPerSample = " + (stream != nullptr ? String (stream->getBytesPerSample()) : String ("?"))
-                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency)
+                 + "\nPerformanceMode = " + (stream != nullptr ? getOboeString (stream->getPerformanceMode()) : String ("?"))
                  + "\ngetDeviceId = " + (stream != nullptr ? String (stream->getDeviceId()) : String ("?")));
         }
 

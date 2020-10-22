@@ -2135,7 +2135,7 @@ bool TextEditor::keyStateChanged (const bool isKeyDown)
 }
 
 //==============================================================================
-void TextEditor::focusGained (FocusChangeType)
+void TextEditor::focusGained (FocusChangeType cause)
 {
     newTransaction();
 
@@ -2146,6 +2146,9 @@ void TextEditor::focusGained (FocusChangeType)
     }
 
     checkFocus();
+
+    if (cause == FocusChangeType::focusChangedByMouseClick && selectAllTextWhenFocused)
+        wasFocused = false;
 
     repaint();
     updateCaretPosition();

@@ -3,6 +3,12 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.4
+  - Improved the Projucer update mechanism
+  - Fixed an AUv3 parameter normalisation issue
+  - Fixed WASAPI exclusive mode sample rate selection bug
+  - Fixed a Linux build issue when omitting ALSA
+
 Version 6.0.3
   - Fixed version numbers in project files
 
