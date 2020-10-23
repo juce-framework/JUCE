@@ -302,7 +302,7 @@ namespace build_tools
         {
             addPlistDictionaryKey (*dict, "sandboxSafe", true);
         }
-        else
+        else if (!isPaceProtected)
         {
             dict->createNewChildElement ("key")->addTextElement ("resourceUsage");
             auto* resourceUsageDict = dict->createNewChildElement ("dict");

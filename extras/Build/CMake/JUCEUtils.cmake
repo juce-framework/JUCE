@@ -757,6 +757,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content PLUGIN_AU_EXPORT_PREFIX              ${target} JUCE_AU_EXPORT_PREFIX)
     _juce_append_target_property(file_content PLUGIN_AU_MAIN_TYPE                  ${target} JUCE_AU_MAIN_TYPE_CODE)
     _juce_append_target_property(file_content IS_AU_SANDBOX_SAFE                   ${target} JUCE_AU_SANDBOX_SAFE)
+    _juce_append_target_property(file_content IS_PACE_PROTECTED                    ${target} JUCE_PACE_PROTECTED)
     _juce_append_target_property(file_content IS_PLUGIN_SYNTH                      ${target} JUCE_IS_SYNTH)
     _juce_append_target_property(file_content HARDENED_RUNTIME_ENABLED             ${target} JUCE_HARDENED_RUNTIME_ENABLED)
     _juce_append_target_property(file_content APP_SANDBOX_ENABLED                  ${target} JUCE_APP_SANDBOX_ENABLED)
@@ -1718,6 +1719,7 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_OUTS 16)
 
     _juce_set_property_if_not_set(${target} AU_SANDBOX_SAFE FALSE)
+    _juce_set_property_if_not_set(${target} PACE_PROTECTED FALSE)
 
     _juce_set_property_if_not_set(${target} HARDENED_RUNTIME_ENABLED NO)
     _juce_set_property_if_not_set(${target} APP_SANDBOX_ENABLED NO)
@@ -1901,6 +1903,7 @@ function(_juce_initialise_target target)
         AU_MAIN_TYPE
         AU_EXPORT_PREFIX
         AU_SANDBOX_SAFE
+        PACE_PROTECTED
         AAX_CATEGORY
         PLUGINHOST_AU                   # Set this true if you want to host AU plugins
         USE_LEGACY_COMPATIBILITY_PLUGIN_CODE

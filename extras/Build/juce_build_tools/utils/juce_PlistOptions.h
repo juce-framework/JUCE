@@ -88,6 +88,7 @@ namespace build_tools
         String pluginAUExportPrefix;
         String auMainType;
         bool isAuSandboxSafe                    = false;
+        bool isPaceProtected                    = false;
         bool isPluginSynth                      = false;
 
     private:

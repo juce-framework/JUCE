@@ -259,6 +259,7 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("PLUGIN_AU_EXPORT_PREFIX",              result.pluginAUExportPrefix);
     updateField ("PLUGIN_AU_MAIN_TYPE",                  result.auMainType);
     updateField ("IS_AU_SANDBOX_SAFE",                   result.isAuSandboxSafe);
+    updateField ("IS_PACE_PROTECTED",                    result.isPaceProtected);
     updateField ("IS_PLUGIN_SYNTH",                      result.isPluginSynth);
     updateField ("BUNDLE_ID",                            result.bundleIdentifier);
     updateField ("ICON_FILE",                            result.iconFile);
