@@ -653,6 +653,7 @@ Result Project::loadDocument (const File& file)
 
     setChangedFlag (false);
 
+    updateExporterWarnings();
     updateLicenseWarning();
 
     return Result::ok();
@@ -828,6 +829,20 @@ void Project::updateModuleWarnings()
     updateModuleNotFoundWarning (moduleNotFound);
 }
 
+void Project::updateExporterWarnings()
+{
+    auto isClionPresent = [this]()
+    {
+        for (ExporterIterator exporter (*this); exporter.next();)
+            if (exporter->isCLion())
+                return true;
+
+        return false;
+    }();
+
+    updateCLionWarning (isClionPresent);
+}
+
 void Project::updateCppStandardWarning (bool showWarning)
 {
     if (showWarning)
@@ -891,6 +906,14 @@ void Project::updateOldProjucerWarning (bool showWarning)
         addProjectMessage (ProjectMessages::Ids::oldProjucer, {});
     else
         removeProjectMessage (ProjectMessages::Ids::oldProjucer);
+}
+
+void Project::updateCLionWarning (bool showWarning)
+{
+    if (showWarning)
+        addProjectMessage (ProjectMessages::Ids::cLion, {});
+    else
+        removeProjectMessage (ProjectMessages::Ids::cLion);
 }
 
 void Project::updateModuleNotFoundWarning (bool showWarning)
@@ -1050,6 +1073,8 @@ void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
 
     if (child.getType() == Ids::MODULE)
         updateModuleWarnings();
+    else if (parent.getType() == Ids::EXPORTFORMATS)
+        updateExporterWarnings();
 
     changed();
 }
@@ -1060,6 +1085,8 @@ void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int in
 
     if (child.getType() == Ids::MODULE)
         updateModuleWarnings();
+    else if (parent.getType() == Ids::EXPORTFORMATS)
+        updateExporterWarnings();
 
     changed();
 }
