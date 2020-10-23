@@ -79,4 +79,5 @@ function(_juce_create_atomic_target target_name)
     endif()
 
     file(REMOVE "${test_file_name}")
+    file(REMOVE_RECURSE "${test_bindir}")
 endfunction()
