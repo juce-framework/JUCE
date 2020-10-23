@@ -1069,6 +1069,21 @@ private:
                 if (! shouldUseGNUExtensions())
                     out << "    CXX_EXTENSIONS OFF" << newLine;
 
+                if (targetAttributeKeys.contains ("MTL_HEADER_SEARCH_PATHS"))
+                {
+                    auto pathsString = targetAttributes["MTL_HEADER_SEARCH_PATHS"].trim().substring (1).dropLastCharacters (1);
+
+                    pathsString = pathsString.replace ("\"$(inherited)\"", {})
+                                             .replace ("$(HOME)", "$ENV{HOME}")
+                                             .replace ("~", "$ENV{HOME}");
+
+                    auto paths = StringArray::fromTokens (pathsString, ",\"\t\\", {});
+                    paths.removeEmptyStrings();
+
+                    out << "    XCODE_ATTRIBUTE_MTL_HEADER_SEARCH_PATHS" << " " << paths.joinIntoString (" ").quoted() << newLine;
+                    targetAttributeKeys.removeString ("MTL_HEADER_SEARCH_PATHS");
+                }
+
                 for (auto& key : targetAttributeKeys)
                     out << "    XCODE_ATTRIBUTE_" << key << " " << targetAttributes[key] << newLine;
 
