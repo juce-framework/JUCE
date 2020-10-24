@@ -472,10 +472,13 @@ void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool)
 
 void Displays::findDisplays (float masterScale)
 {
-    displays = XWindowSystem::getInstance()->findDisplays (masterScale);
+    if (XWindowSystem::getInstance()->getDisplay() != nullptr)
+    {
+        displays = XWindowSystem::getInstance()->findDisplays (masterScale);
 
-    if (! displays.isEmpty())
-        updateToLogical();
+        if (! displays.isEmpty())
+            updateToLogical();
+    }
 }
 
 bool Desktop::canUseSemiTransparentWindows() noexcept
