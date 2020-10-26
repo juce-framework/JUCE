@@ -178,7 +178,7 @@ namespace
        #elif JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
         timeval micro;
         gettimeofday (&micro, nullptr);
-        return micro.tv_usec * 1000.0;
+        return (double) micro.tv_usec * 1000.0;
        #elif JUCE_MAC
         UnsignedWide micro;
         Microseconds (&micro);
@@ -446,8 +446,8 @@ private:
             }
             else
             {
-                entry->range.low  = curEntry / (float) numEntries;
-                entry->range.high = (curEntry + 1) / (float) numEntries;
+                entry->range.low  = (float) curEntry / (float) numEntries;
+                entry->range.high = (float) (curEntry + 1) / (float) numEntries;
 
                 entry->range.inclusiveLow  = true;
                 entry->range.inclusiveHigh = (curEntry == numEntries - 1);
@@ -2878,8 +2878,8 @@ public:
             {
                 X11Symbols::getInstance()->xMoveResizeWindow (display, pluginWindow,
                                                               pos.getX(), pos.getY(),
-                                                              static_cast<unsigned int> (roundToInt (getWidth()  * nativeScaleFactor)),
-                                                              static_cast<unsigned int> (roundToInt (getHeight() * nativeScaleFactor)));
+                                                              static_cast<unsigned int> (roundToInt ((float) getWidth()  * nativeScaleFactor)),
+                                                              static_cast<unsigned int> (roundToInt ((float) getHeight() * nativeScaleFactor)));
 
                 X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
                 X11Symbols::getInstance()->xFlush (display);
@@ -3170,8 +3170,8 @@ private:
             X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
        #endif
 
-        w = roundToInt (w / nativeScaleFactor);
-        h = roundToInt (h / nativeScaleFactor);
+        w = roundToInt ((float) w / nativeScaleFactor);
+        h = roundToInt ((float) h / nativeScaleFactor);
 
         // double-check it's not too tiny
         w = jmax (w, 32);
