@@ -753,7 +753,7 @@ public:
         virtual ~LookAndFeelMethods() = default;
 
         /** Fills the background of a popup menu component. */
-        virtual void drawPopupMenuBackground (Graphics&, int width, int height) = 0;
+        virtual void drawPopupMenuBackground (Graphics&, int width, int height, Component* targetComponent) = 0;
 
         /** Draws one of the items in a popup menu. */
         virtual void drawPopupMenuItem (Graphics&, const Rectangle<int>& area,
@@ -762,17 +762,20 @@ public:
                                         const String& text,
                                         const String& shortcutKeyText,
                                         const Drawable* icon,
-                                        const Colour* textColour) = 0;
+                                        const Colour* textColour,
+                                        Component* targetComponent) = 0;
 
         virtual void drawPopupMenuSectionHeader (Graphics&, const Rectangle<int>& area,
-                                                 const String& sectionName) = 0;
+                                                 const String& sectionName,
+                                                 Component* targetComponent) = 0;
 
         /** Returns the size and style of font to use in popup menus. */
         virtual Font getPopupMenuFont() = 0;
 
         virtual void drawPopupMenuUpDownArrow (Graphics&,
                                                int width, int height,
-                                               bool isScrollUpArrow) = 0;
+                                               bool isScrollUpArrow,
+                                               Component* targetComponent) = 0;
 
         /** Finds the best size for an item in a popup menu. */
         virtual void getIdealPopupMenuItemSize (const String& text,

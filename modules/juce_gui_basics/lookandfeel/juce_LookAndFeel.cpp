@@ -86,6 +86,14 @@ Colour LookAndFeel::findColour (int colourID) const noexcept
     return Colours::black;
 }
 
+Colour LookAndFeel::findColour (int colourId, Component* targetComponent) const noexcept
+{
+    if (targetComponent)
+        return targetComponent->findColour (colourId);
+
+    return findColour (colourId);
+}
+
 void LookAndFeel::setColour (int colourID, Colour newColour) noexcept
 {
     const ColourSetting c = { colourID, newColour };

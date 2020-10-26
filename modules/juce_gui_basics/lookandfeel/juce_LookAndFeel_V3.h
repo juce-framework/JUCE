@@ -57,7 +57,7 @@ public:
 
     void drawKeymapChangeButton (Graphics&, int width, int height, Button& button, const String& keyDescription) override;
 
-    void drawPopupMenuBackground (Graphics&, int width, int height) override;
+    void drawPopupMenuBackground (Graphics&, int width, int height, Component* targetComponent) override;
     void drawMenuBarBackground (Graphics&, int width, int height, bool, MenuBarComponent&) override;
 
     int getTabButtonOverlap (int tabDepth) override;

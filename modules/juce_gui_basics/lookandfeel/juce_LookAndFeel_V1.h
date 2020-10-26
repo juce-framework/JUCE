@@ -68,7 +68,7 @@ public:
     void drawTextEditorOutline (Graphics&, int width, int height, TextEditor&) override;
 
     //==============================================================================
-    void drawPopupMenuBackground (Graphics&, int width, int height) override;
+    void drawPopupMenuBackground (Graphics&, int width, int height, Component* targetComponent) override;
     void drawMenuBarBackground (Graphics&, int width, int height, bool isMouseOverBar, MenuBarComponent&) override;
 
     //==============================================================================

@@ -296,9 +296,9 @@ ImageEffectFilter* LookAndFeel_V1::getScrollbarEffect()
 
 
 //==============================================================================
-void LookAndFeel_V1::drawPopupMenuBackground (Graphics& g, int width, int height)
+void LookAndFeel_V1::drawPopupMenuBackground (Graphics& g, int width, int height, Component* targetComponent)
 {
-    g.fillAll (findColour (PopupMenu::backgroundColourId));
+    g.fillAll (findColour (PopupMenu::backgroundColourId, targetComponent));
 
     g.setColour (Colours::black.withAlpha (0.6f));
     g.drawRect (0, 0, width, height);

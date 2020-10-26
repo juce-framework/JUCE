@@ -890,9 +890,9 @@ void LookAndFeel_V2::getIdealPopupMenuItemSize (const String& text, const bool i
     }
 }
 
-void LookAndFeel_V2::drawPopupMenuBackground (Graphics& g, int width, int height)
+void LookAndFeel_V2::drawPopupMenuBackground (Graphics& g, int width, int height, Component* targetComponent)
 {
-    auto background = findColour (PopupMenu::backgroundColourId);
+    auto background = findColour (PopupMenu::backgroundColourId, targetComponent);
 
     g.fillAll (background);
     g.setColour (background.overlaidWith (Colour (0x2badd8e6)));
@@ -901,14 +901,14 @@ void LookAndFeel_V2::drawPopupMenuBackground (Graphics& g, int width, int height
         g.fillRect (0, i, width, 1);
 
    #if ! JUCE_MAC
-    g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.6f));
+    g.setColour (findColour (PopupMenu::textColourId, targetComponent).withAlpha (0.6f));
     g.drawRect (0, 0, width, height);
    #endif
 }
 
-void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g, int width, int height, bool isScrollUpArrow)
+void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g, int width, int height, bool isScrollUpArrow, Component* targetComponent)
 {
-    auto background = findColour (PopupMenu::backgroundColourId);
+    auto background = findColour (PopupMenu::backgroundColourId, targetComponent);
 
     g.setGradientFill (ColourGradient (background, 0.0f, (float) height * 0.5f,
                                        background.withAlpha (0.0f),
@@ -927,7 +927,7 @@ void LookAndFeel_V2::drawPopupMenuUpDownArrow (Graphics& g, int width, int heigh
                    hw + arrowW, y1,
                    hw, y2);
 
-    g.setColour (findColour (PopupMenu::textColourId).withAlpha (0.5f));
+    g.setColour (findColour (PopupMenu::textColourId, targetComponent).withAlpha (0.5f));
     g.fillPath (p);
 }
 
@@ -936,7 +936,8 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
                                         const bool isHighlighted, const bool isTicked,
                                         const bool hasSubMenu, const String& text,
                                         const String& shortcutKeyText,
-                                        const Drawable* icon, const Colour* const textColourToUse)
+                                        const Drawable* icon, const Colour* const textColourToUse,
+                                        Component* targetComponent)
 {
     if (isSeparator)
     {
@@ -951,7 +952,7 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
     }
     else
     {
-        auto textColour = findColour (PopupMenu::textColourId);
+        auto textColour = findColour (PopupMenu::textColourId, targetComponent);
 
         if (textColourToUse != nullptr)
             textColour = *textColourToUse;
@@ -960,10 +961,10 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
 
         if (isHighlighted)
         {
-            g.setColour (findColour (PopupMenu::highlightedBackgroundColourId));
+            g.setColour (findColour (PopupMenu::highlightedBackgroundColourId, targetComponent));
             g.fillRect (r);
 
-            g.setColour (findColour (PopupMenu::highlightedTextColourId));
+            g.setColour (findColour (PopupMenu::highlightedTextColourId, targetComponent));
         }
         else
         {
@@ -1024,10 +1025,10 @@ void LookAndFeel_V2::drawPopupMenuItem (Graphics& g, const Rectangle<int>& area,
     }
 }
 
-void LookAndFeel_V2::drawPopupMenuSectionHeader (Graphics& g, const Rectangle<int>& area, const String& sectionName)
+void LookAndFeel_V2::drawPopupMenuSectionHeader (Graphics& g, const Rectangle<int>& area, const String& sectionName, Component* targetComponent)
 {
     g.setFont (getPopupMenuFont().boldened());
-    g.setColour (findColour (PopupMenu::headerTextColourId));
+    g.setColour (findColour (PopupMenu::headerTextColourId, targetComponent));
 
     g.drawFittedText (sectionName,
                       area.getX() + 12, area.getY(), area.getWidth() - 16, (int) ((float) area.getHeight() * 0.8f),

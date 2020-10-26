@@ -152,6 +152,15 @@ public:
     */
     Colour findColour (int colourId) const noexcept;
 
+    /** Looks for a colour that has been registered with the given colour ID number.
+
+        If a targetComponent is given (e.g. for a PopupMenu), the colour will be looked up.
+        Otherwise the normal findColour() method will be used.
+
+        @see Component::findColour()
+     */
+    Colour findColour (int colourId, Component* targetComponent) const noexcept;
+
     /** Registers a colour to be used for a particular purpose.
         For more details, see the comments for findColour().
         @see findColour, Component::findColour, Component::setColour
