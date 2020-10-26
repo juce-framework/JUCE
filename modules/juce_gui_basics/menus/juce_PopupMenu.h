@@ -179,6 +179,9 @@ public:
         /** True if this menu item is a section header. */
         bool isSectionHeader = false;
 
+        /** True if this is the final item in the current column. */
+        bool shouldBreakAfter = false;
+
         /** Sets the isTicked flag (and returns a reference to this item to allow chaining). */
         Item& setTicked (bool shouldBeTicked = true) & noexcept;
         /** Sets the isEnabled flag (and returns a reference to this item to allow chaining). */
@@ -409,6 +412,15 @@ public:
         into named groups.
     */
     void addSectionHeader (String title);
+
+    /** Adds a column break to the menu, to help break it up into sections.
+        Subsequent items will be placed in a new column, rather than being appended
+        to the current column.
+
+        If a menu contains explicit column breaks, the menu will never add additional
+        breaks.
+    */
+    void addColumnBreak();
 
     /** Returns the number of items that the menu currently contains.
         (This doesn't count separators).

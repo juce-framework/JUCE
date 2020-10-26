@@ -749,6 +749,28 @@ struct MenuWindow  : public Component
 
     void layoutMenuItems (const int maxMenuW, const int maxMenuH, int& width, int& height)
     {
+        // Ensure we don't try to add an empty column after the final item
+        if (auto* last = items.getLast())
+            last->item.shouldBreakAfter = false;
+
+        const auto isBreak = [] (const ItemComponent* item) { return item->item.shouldBreakAfter; };
+        const auto numBreaks = static_cast<int> (std::count_if (items.begin(), items.end(), isBreak));
+        numColumns = numBreaks + 1;
+
+        if (numBreaks == 0)
+            insertColumnBreaks (maxMenuW, maxMenuH);
+
+        workOutManualSize (maxMenuW);
+        auto actualH = jmin (contentHeight, maxMenuH);
+
+        needsToScroll = contentHeight > actualH;
+
+        width = updateYPositions();
+        height = actualH + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2;
+    }
+
+    void insertColumnBreaks (const int maxMenuW, const int maxMenuH)
+    {
         numColumns = options.getMinimumNumColumns();
         contentHeight = 0;
 
@@ -766,24 +788,74 @@ struct MenuWindow  : public Component
             }
 
             if (totalW > maxMenuW / 2
-                 || contentHeight < maxMenuH
-                 || numColumns >= maximumNumColumns)
+                || contentHeight < maxMenuH
+                || numColumns >= maximumNumColumns)
                 break;
 
             ++numColumns;
         }
 
-        auto actualH = jmin (contentHeight, maxMenuH);
+        const auto itemsPerColumn = (items.size() + numColumns - 1) / numColumns;
 
-        needsToScroll = contentHeight > actualH;
+        for (auto i = 0;; i += itemsPerColumn)
+        {
+            const auto breakIndex = i + itemsPerColumn - 1;
 
-        width = updateYPositions();
-        height = actualH + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2;
+            if (breakIndex >= items.size())
+                break;
+
+            items[breakIndex]->item.shouldBreakAfter = true;
+        }
+
+        if (! items.isEmpty())
+            (*std::prev (items.end()))->item.shouldBreakAfter = false;
+    }
+
+    int correctColumnWidths (const int maxMenuW)
+    {
+        auto totalW = std::accumulate (columnWidths.begin(), columnWidths.end(), 0);
+        const auto minWidth = jmin (maxMenuW, options.getMinimumWidth());
+
+        if (totalW < minWidth)
+        {
+            totalW = minWidth;
+
+            for (auto& column : columnWidths)
+                column = totalW / numColumns;
+        }
+
+        return totalW;
+    }
+
+    void workOutManualSize (const int maxMenuW)
+    {
+        contentHeight = 0;
+        columnWidths.clear();
+
+        for (auto it = items.begin(), end = items.end(); it != end;)
+        {
+            const auto isBreak = [] (const ItemComponent* item) { return item->item.shouldBreakAfter; };
+            const auto nextBreak = std::find_if (it, end, isBreak);
+            const auto columnEnd = nextBreak == end ? end : std::next (nextBreak);
+
+            const auto getMaxWidth = [] (int acc, const ItemComponent* item) { return jmax (acc, item->getWidth()); };
+            const auto colW = std::accumulate (it, columnEnd, options.getStandardItemHeight(), getMaxWidth);
+            const auto adjustedColW = jmin (maxMenuW / jmax (1, numColumns - 2),
+                                            colW + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2);
+
+            const auto sumHeight = [] (int acc, const ItemComponent* item) { return acc + item->getHeight(); };
+            const auto colH = std::accumulate (it, columnEnd, 0, sumHeight);
+
+            contentHeight = jmax (contentHeight, colH);
+            columnWidths.add (adjustedColW);
+            it = columnEnd;
+        }
+
+        correctColumnWidths (maxMenuW);
     }
 
     int workOutBestSize (const int maxMenuW)
     {
-        int totalW = 0;
         contentHeight = 0;
         int childNum = 0;
 
@@ -804,24 +876,12 @@ struct MenuWindow  : public Component
                          colW + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2);
 
             columnWidths.set (col, colW);
-            totalW += colW;
             contentHeight = jmax (contentHeight, colH);
 
             childNum += numChildren;
         }
 
-        // width must never be larger than the screen
-        auto minWidth = jmin (maxMenuW, options.getMinimumWidth());
-
-        if (totalW < minWidth)
-        {
-            totalW = minWidth;
-
-            for (int col = 0; col < numColumns; ++col)
-                columnWidths.set (0, totalW / numColumns);
-        }
-
-        return totalW;
+        return correctColumnWidths (maxMenuW);
     }
 
     void ensureItemIsVisible (const int itemID, int wantedY)
@@ -924,34 +984,31 @@ struct MenuWindow  : public Component
 
     int updateYPositions()
     {
-        int x = 0;
-        int childNum = 0;
-
         const auto separatorWidth = getLookAndFeel().getPopupMenuColumnSeparatorWidthWithOptions (options);
+        const auto initialY = getLookAndFeel().getPopupMenuBorderSizeWithOptions (options)
+                              - (childYOffset + (getY() - windowPos.getY()));
 
-        for (int col = 0; col < numColumns; ++col)
+        auto col = 0;
+        auto x = 0;
+        auto y = initialY;
+
+        for (const auto& item : items)
         {
-            auto numChildren = jmin (items.size() - childNum,
-                                     (items.size() + numColumns - 1) / numColumns);
+            jassert (col < columnWidths.size());
+            const auto columnWidth = columnWidths[col];
+            item->setBounds (x, y, columnWidth, item->getHeight());
+            y += item->getHeight();
 
-            auto colW = columnWidths[col];
-            auto y = getLookAndFeel().getPopupMenuBorderSizeWithOptions (options)
-                      - (childYOffset + (getY() - windowPos.getY()));
-
-            for (int i = 0; i < numChildren; ++i)
+            if (item->item.shouldBreakAfter)
             {
-                auto* c = items.getUnchecked (childNum + i);
-                c->setBounds (x, y, colW, c->getHeight());
-                y += c->getHeight();
+                col += 1;
+                x += columnWidth + separatorWidth;
+                y = initialY;
             }
-
-            x += colW + separatorWidth;
-            childNum += numChildren;
         }
 
-        x -= separatorWidth;
-
-        return x;
+        return std::accumulate (columnWidths.begin(), columnWidths.end(), 0)
+               + (separatorWidth * (columnWidths.size() - 1));
     }
 
     void setCurrentlyHighlightedChild (ItemComponent* child)
@@ -1405,9 +1462,9 @@ PopupMenu::Item::Item (const Item& other)
     isEnabled (other.isEnabled),
     isTicked (other.isTicked),
     isSeparator (other.isSeparator),
-    isSectionHeader (other.isSectionHeader)
-{
-}
+    isSectionHeader (other.isSectionHeader),
+    shouldBreakAfter (other.shouldBreakAfter)
+{}
 
 PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
 {
@@ -1425,6 +1482,7 @@ PopupMenu::Item& PopupMenu::Item::operator= (const Item& other)
     isTicked = other.isTicked;
     isSeparator = other.isSeparator;
     isSectionHeader = other.isSectionHeader;
+    shouldBreakAfter = other.shouldBreakAfter;
     return *this;
 }
 
@@ -1683,6 +1741,12 @@ void PopupMenu::addSectionHeader (String title)
     i.itemID = 0;
     i.isSectionHeader = true;
     addItem (std::move (i));
+}
+
+void PopupMenu::addColumnBreak()
+{
+    if (! items.isEmpty())
+        std::prev (items.end())->shouldBreakAfter = true;
 }
 
 //==============================================================================
