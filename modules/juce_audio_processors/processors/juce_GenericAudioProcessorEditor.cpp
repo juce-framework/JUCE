@@ -74,7 +74,7 @@ private:
             parameterValueHasChanged = 1;
     }
 
-    void audioProcessorChanged (AudioProcessor*) override {}
+    void audioProcessorChanged (AudioProcessor*, int) override {}
 
     //==============================================================================
     void timerCallback() override

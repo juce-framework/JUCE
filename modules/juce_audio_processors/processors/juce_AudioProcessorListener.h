@@ -61,6 +61,8 @@ public:
     /** Called to indicate that something else in the plugin has changed, like its
         program, number of parameters, etc.
 
+        @param flags - indicate what changed.
+
         IMPORTANT NOTE: This will be called synchronously, and many audio processors will
         call it during their audio callback. This means that not only has your handler code
         got to be completely thread-safe, but it's also got to be VERY fast, and avoid
@@ -68,7 +70,7 @@ public:
         to trigger an AsyncUpdater or ChangeBroadcaster which you can respond to later on the
         message thread.
     */
-    virtual void audioProcessorChanged (AudioProcessor* processor) = 0;
+    virtual void audioProcessorChanged (AudioProcessor* processor, int flags = Flags::any) = 0;
 
     /** Indicates that a parameter change gesture has started.
 
@@ -104,6 +106,23 @@ public:
     */
     virtual void audioProcessorParameterChangeGestureEnd (AudioProcessor* processor,
                                                           int parameterIndex);
+    
+    //==============================================================================
+    /** Flags that represent specific update(s) to be used by audioProcessorChanged */
+    enum Flags
+    {
+        /** No explicit update */
+        any                                     = 0,
+
+        /** Parameter descriptor update. */
+        parametersUpdate                        = 1,
+
+        /** Program/Preset update. */
+        programUpdate                           = 2,
+
+        /** Latency update. */
+        latencyUpdate                           = 4
+    };
 };
 
 } // namespace juce

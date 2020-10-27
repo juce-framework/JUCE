@@ -1393,24 +1393,28 @@ namespace AAXClasses
                 SetParameterNormalizedValue (paramID, (double) newValue);
         }
 
-        void audioProcessorChanged (AudioProcessor* processor) override
+        void audioProcessorChanged (AudioProcessor* processor, int flags) override
         {
             ++mNumPlugInChanges;
 
-            auto numParameters = juceParameters.getNumParameters();
-
-            for (int i = 0; i < numParameters; ++i)
+            if (flags & AudioProcessorListener::Flags::parametersUpdate)
             {
-                if (auto* p = mParameterManager.GetParameterByID (getAAXParamIDFromJuceIndex (i)))
-                {
-                    auto newName = juceParameters.getParamForIndex (i)->getName (31);
+                auto numParameters = juceParameters.getNumParameters();
 
-                    if (p->Name() != newName.toRawUTF8())
-                        p->SetName (AAX_CString (newName.toRawUTF8()));
+                for (int i = 0; i < numParameters; ++i)
+                {
+                    if (auto* p = mParameterManager.GetParameterByID (getAAXParamIDFromJuceIndex (i)))
+                    {
+                        auto newName = juceParameters.getParamForIndex (i)->getName (31);
+
+                        if (p->Name() != newName.toRawUTF8())
+                            p->SetName (AAX_CString (newName.toRawUTF8()));
+                    }
                 }
             }
 
-            check (Controller()->SetSignalLatency (processor->getLatencySamples()));
+            if (flags & AudioProcessorListener::Flags::latencyUpdate)
+                check (Controller()->SetSignalLatency (processor->getLatencySamples()));
         }
 
         void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int parameterIndex) override
