@@ -970,23 +970,41 @@ public:
         paramChanged (audioProcessor->getVSTParamIDForIndex (index), newValue);
     }
 
-    void audioProcessorChanged (AudioProcessor*) override
+    void audioProcessorChanged (AudioProcessor*, const int flags) override
     {
-        auto numParameters = parameters.getParameterCount();
+        using Flags = AudioProcessorListener::Flags;
+        int32 vstFlags = 0;
 
-        for (int32 i = 0; i < numParameters; ++i)
-            if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
-                param->updateParameterInfo();
-
-        if (auto* pluginInstance = getPluginInstance())
+        if (flags & Flags::parametersUpdate)
         {
-            if (pluginInstance->getNumPrograms() > 1)
-                EditController::setParamNormalized (JuceAudioProcessor::paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                                                                         / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
+            vstFlags |= Vst::kParamValuesChanged;
+            auto numParameters = parameters.getParameterCount();
+
+            for (int32 i = 0; i < numParameters; ++i)
+                if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
+                    param->updateParameterInfo();
+        }
+
+        if (flags & Flags::programUpdate)
+        {
+            vstFlags |= Vst::kParamTitlesChanged;
+            if (auto* pluginInstance = getPluginInstance())
+            {
+                if (pluginInstance->getNumPrograms() > 1)
+                    EditController::setParamNormalized (
+                        JuceAudioProcessor::paramPreset,
+                        static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                            / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1));
+            }
+        }
+
+        if (flags & Flags::latencyUpdate)
+        {
+            vstFlags = Vst::kLatencyChanged;
         }
 
         if (componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (Vst::kLatencyChanged | Vst::kParamValuesChanged | Vst::kParamTitlesChanged);
+            componentHandler->restartComponent (vstFlags);
     }
 
     void parameterValueChanged (int, float newValue) override
@@ -1079,7 +1097,7 @@ private:
             initialiseMidiControllerMappings();
            #endif
 
-            audioProcessorChanged (pluginInstance);
+            audioProcessorChanged (pluginInstance, AudioProcessorListener::parametersUpdate);
         }
     }
 

@@ -1066,8 +1066,10 @@ public:
 
         It sends a hint to the host that something like the program, number of parameters,
         etc, has changed, and that it should update itself.
+
+        @param flags - context of change. @see AudioProcessorListener::Flags
     */
-    void updateHostDisplay();
+    void updateHostDisplay (int flags = AudioProcessorListener::Flags::any);
 
     //==============================================================================
     /** Adds a parameter to the AudioProcessor.
