@@ -171,7 +171,7 @@ public:
         if (fullScreen != shouldBeFullScreen)
         {
             if (shouldBeFullScreen)
-                r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+                r = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
 
             if (! r.isEmpty())
                 setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
@@ -424,7 +424,7 @@ private:
 
         Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
 
-        auto newScaleFactor = Desktop::getInstance().getDisplays().findDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical).scale
+        auto newScaleFactor = Desktop::getInstance().getDisplays().getDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical)->scale
                                  / Desktop::getInstance().getGlobalScaleFactor();
 
         if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
@@ -467,7 +467,7 @@ JUCE_API void JUCE_CALLTYPE Process::hide()                   {}
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool)
 {
     if (enableOrDisable)
-        comp->setBounds (getDisplays().findDisplayForRect (comp->getScreenBounds()).totalArea);
+        comp->setBounds (getDisplays().getDisplayForRect (comp->getScreenBounds())->totalArea);
 }
 
 void Displays::findDisplays (float masterScale)

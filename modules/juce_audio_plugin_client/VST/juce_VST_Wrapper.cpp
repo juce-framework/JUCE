@@ -1096,7 +1096,7 @@ public:
             {
                 auto screenBounds = peer->localToGlobal (peer->getBounds());
 
-                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds, false).scale
+                auto scale = Desktop::getInstance().getDisplays().getDisplayForRect (screenBounds, false)->scale
                                          / Desktop::getInstance().getGlobalScaleFactor();
 
                 setContentScaleFactor ((float) scale);

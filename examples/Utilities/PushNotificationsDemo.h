@@ -162,7 +162,7 @@ public:
         mainTabs.addTab ("Local",  colour, &localNotificationsTabs, false);
         mainTabs.addTab ("Remote", colour, &remoteView,             false);
 
-        auto userArea = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        auto userArea = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
       #if JUCE_ANDROID || JUCE_IOS
         setSize (userArea.getWidth(), userArea.getHeight());
       #else

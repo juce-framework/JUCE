@@ -40,7 +40,7 @@ CallOutBox::CallOutBox (Component& c, Rectangle<int> area, Component* const pare
     else
     {
         setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
-        updatePosition (area, Desktop::getInstance().getDisplays().findDisplayForRect (area).userArea);
+        updatePosition (area, Desktop::getInstance().getDisplays().getDisplayForRect (area)->userArea);
         addToDesktop (ComponentPeer::windowIsTemporary);
 
         startTimer (100);

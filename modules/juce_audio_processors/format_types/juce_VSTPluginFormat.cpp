@@ -3234,7 +3234,7 @@ private:
     bool willCauseRecursiveResize (int w, int h)
     {
         auto newScreenBounds = Rectangle<int> (w, h).withPosition (getScreenPosition());
-        return Desktop::getInstance().getDisplays().findDisplayForRect (newScreenBounds).scale != nativeScaleFactor;
+        return Desktop::getInstance().getDisplays().getDisplayForRect (newScreenBounds)->scale != nativeScaleFactor;
     }
 
     bool isWindowSizeCorrectForPlugin (int w, int h)
