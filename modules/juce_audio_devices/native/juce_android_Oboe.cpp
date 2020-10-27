@@ -383,6 +383,15 @@ private:
     {
         auto bufferSizeHint = AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint();
 
+        // providing a callback is required on some devices to get a FAST track, so we pass an
+        // empty one to the temp stream to get the best available buffer size
+        struct DummyCallback  : public oboe::AudioStreamCallback
+        {
+            oboe::DataCallbackResult onAudioReady (oboe::AudioStream*, void*, int32_t) override  { return oboe::DataCallbackResult::Stop; }
+        };
+
+        DummyCallback callback;
+
         // NB: Exclusive mode could be rejected if a device is already opened in that mode, so to get
         //     reliable results, only use this function when a device is closed.
         //     We initially try to open a stream with a buffer size returned from
@@ -395,7 +404,7 @@ private:
                                                   getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
                                                   (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
                                                   bufferSizeHint,
-                                                  nullptr);
+                                                  &callback);
 
         if (auto* nativeStream = tempStream.getNativeStream())
             return nativeStream->getFramesPerBurst();
@@ -498,7 +507,7 @@ private:
                                  + "\nFramesPerCallback = " + String (stream->getFramesPerCallback())
                                  + "\nBytesPerFrame = " + String (stream->getBytesPerFrame())
                                  + "\nBytesPerSample = " + String (stream->getBytesPerSample())
-                                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency)
+                                 + "\nPerformanceMode = " + getOboeString (stream->getPerformanceMode())
                                  + "\ngetDeviceId = " + String (stream->getDeviceId()));
             }
         }
@@ -591,7 +600,7 @@ private:
                  + "\nFramesPerCallback = " + (stream != nullptr ? String (stream->getFramesPerCallback()) : String ("?"))
                  + "\nBytesPerFrame = " + (stream != nullptr ? String (stream->getBytesPerFrame()) : String ("?"))
                  + "\nBytesPerSample = " + (stream != nullptr ? String (stream->getBytesPerSample()) : String ("?"))
-                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
+                 + "\nPerformanceMode = " + (stream != nullptr ? getOboeString (stream->getPerformanceMode()) : String ("?")));
         }
 
         void close()
@@ -878,7 +887,7 @@ private:
                  + "\nFramesPerCallback = " + (stream != nullptr ? String (stream->getFramesPerCallback()) : String ("?"))
                  + "\nBytesPerFrame = " + (stream != nullptr ? String (stream->getBytesPerFrame()) : String ("?"))
                  + "\nBytesPerSample = " + (stream != nullptr ? String (stream->getBytesPerSample()) : String ("?"))
-                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency)
+                 + "\nPerformanceMode = " + (stream != nullptr ? getOboeString (stream->getPerformanceMode()) : String ("?"))
                  + "\ngetDeviceId = " + (stream != nullptr ? String (stream->getDeviceId()) : String ("?")));
         }
 

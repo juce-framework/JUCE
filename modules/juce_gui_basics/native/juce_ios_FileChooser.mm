@@ -112,7 +112,7 @@ public:
                 return;
             }
 
-            auto chooserBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+            auto chooserBounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
             setBounds (chooserBounds);
 
             setAlwaysOnTop (true);

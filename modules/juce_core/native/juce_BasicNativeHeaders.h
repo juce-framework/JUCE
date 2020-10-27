@@ -132,7 +132,7 @@
  #define STRICT 1
  #define WIN32_LEAN_AND_MEAN 1
  #if JUCE_MINGW
-  #define _WIN32_WINNT 0x0501
+  #define _WIN32_WINNT 0x0600
  #else
   #define _WIN32_WINNT 0x0602
  #endif

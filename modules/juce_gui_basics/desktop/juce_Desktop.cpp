@@ -331,4 +331,9 @@ void Desktop::setGlobalScaleFactor (float newScaleFactor) noexcept
     }
 }
 
+bool Desktop::isHeadless() const noexcept
+{
+    return displays->displays.isEmpty();
+}
+
 } // namespace juce

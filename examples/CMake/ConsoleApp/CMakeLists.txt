@@ -48,8 +48,9 @@ juce_add_console_app(ConsoleAppExample
 # although it doesn't really affect executable targets). Finally, we supply a list of source files
 # that will be built into the target. This is a standard CMake command.
 
-target_sources(ConsoleAppExample PRIVATE
-    Main.cpp)
+target_sources(ConsoleAppExample
+    PRIVATE
+        Main.cpp)
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
@@ -58,10 +59,11 @@ target_sources(ConsoleAppExample PRIVATE
 # definitions will be visible both to your code, and also the JUCE module code, so for new
 # definitions, pick unique names that are unlikely to collide! This is a standard CMake command.
 
-target_compile_definitions(ConsoleAppExample PRIVATE
-    # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
-    JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_console_app` call
-    JUCE_USE_CURL=0)    # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_console_app` call
+target_compile_definitions(ConsoleAppExample
+    PRIVATE
+        # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
+        JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_console_app` call
+        JUCE_USE_CURL=0)    # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_console_app` call
 
 # If the target needs extra binary assets, they can be added here. The first argument is the name of
 # a new static library target that will include all the binary resources. There is an optional
@@ -77,6 +79,10 @@ target_compile_definitions(ConsoleAppExample PRIVATE
 # resolved automatically. If you'd generated a binary data target above, you would need to link to
 # it here too. This is a standard CMake command.
 
-target_link_libraries(ConsoleAppExample PRIVATE
-    # ConsoleAppData            # If you'd created a binary data target, you'd link to it here
-    juce::juce_core)
+target_link_libraries(ConsoleAppExample
+    PRIVATE
+        # ConsoleAppData            # If you'd created a binary data target, you'd link to it here
+        juce::juce_core
+    PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_warning_flags)

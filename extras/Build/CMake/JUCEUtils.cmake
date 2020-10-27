@@ -1527,8 +1527,14 @@ function(_juce_configure_plugin_targets target)
     get_target_property(project_version_string ${target} JUCE_VERSION)
     _juce_version_code(${project_version_string} project_version_hex)
 
-    get_target_property(project_manufacturer_code ${target} JUCE_PLUGIN_MANUFACTURERER_CODE)
+    get_target_property(project_manufacturer_code ${target} JUCE_PLUGIN_MANUFACTURER_CODE)
     get_target_property(project_plugin_code ${target} JUCE_PLUGIN_CODE)
+
+    get_target_property(use_legacy_compatibility_plugin_code ${target} JUCE_USE_LEGACY_COMPATIBILITY_PLUGIN_CODE)
+
+    if(use_legacy_compatibility_plugin_code)
+        set(project_manufacturer_code "project_manufacturer_code-NOTFOUND")
+    endif()
 
     _juce_to_char_literal(${project_manufacturer_code} project_manufacturer_code)
     _juce_to_char_literal(${project_plugin_code} project_plugin_code)
@@ -1897,6 +1903,7 @@ function(_juce_initialise_target target)
         AU_SANDBOX_SAFE
         AAX_CATEGORY
         PLUGINHOST_AU                   # Set this true if you want to host AU plugins
+        USE_LEGACY_COMPATIBILITY_PLUGIN_CODE
 
         VST_COPY_DIR
         VST3_COPY_DIR

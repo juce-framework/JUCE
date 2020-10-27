@@ -452,7 +452,7 @@ struct Component::ComponentHelpers
         if (auto* p = comp.getParentComponent())
             return p->getLocalBounds();
 
-        return Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        return Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
     }
 
     static void releaseAllCachedImageResources (Component& c)
@@ -1059,7 +1059,7 @@ int Component::getParentHeight() const noexcept
 
 Rectangle<int> Component::getParentMonitorArea() const
 {
-    return Desktop::getInstance().getDisplays().findDisplayForRect (getScreenBounds()).userArea;
+    return Desktop::getInstance().getDisplays().getDisplayForRect (getScreenBounds())->userArea;
 }
 
 int Component::getScreenX() const                       { return getScreenPosition().x; }
