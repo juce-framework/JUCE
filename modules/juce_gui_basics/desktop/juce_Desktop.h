@@ -325,6 +325,10 @@ public:
     bool isOrientationEnabled (DisplayOrientation orientation) const noexcept;
 
     //==============================================================================
+    /** Returns the Displays object representing the connected displays.
+
+        @see Displays
+    */
     const Displays& getDisplays() const noexcept        { return *displays; }
 
     //==============================================================================
