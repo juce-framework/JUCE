@@ -351,6 +351,10 @@ public:
     static bool isOSXDarkModeActive();
    #endif
 
+    //==============================================================================
+    /** Returns true on a headless system where there are no connected displays. */
+    bool isHeadless() const noexcept;
+
 private:
     //==============================================================================
     static Desktop* instance;
