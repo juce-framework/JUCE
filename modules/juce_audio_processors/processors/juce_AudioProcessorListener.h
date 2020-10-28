@@ -45,6 +45,23 @@ public:
     virtual ~AudioProcessorListener() = default;
 
     //==============================================================================
+    /** Flags that represent specific update(s) to be used by audioProcessorChanged */
+    enum Flags
+    {
+        /** No explicit update */
+        any                                     = 0,
+
+        /** Parameter descriptor update. */
+        parametersUpdate                        = 1,
+
+        /** Program/Preset update. */
+        programUpdate                           = 2,
+
+        /** Latency update. */
+        latencyUpdate                           = 4
+    };
+
+    //==============================================================================
     /** Receives a callback when a parameter is changed.
 
         IMPORTANT NOTE: This will be called synchronously when a parameter changes, and
@@ -106,23 +123,6 @@ public:
     */
     virtual void audioProcessorParameterChangeGestureEnd (AudioProcessor* processor,
                                                           int parameterIndex);
-    
-    //==============================================================================
-    /** Flags that represent specific update(s) to be used by audioProcessorChanged */
-    enum Flags
-    {
-        /** No explicit update */
-        any                                     = 0,
-
-        /** Parameter descriptor update. */
-        parametersUpdate                        = 1,
-
-        /** Program/Preset update. */
-        programUpdate                           = 2,
-
-        /** Latency update. */
-        latencyUpdate                           = 4
-    };
 };
 
 } // namespace juce
