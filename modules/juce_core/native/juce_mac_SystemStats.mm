@@ -121,10 +121,21 @@ static String getOSXVersion()
 {
     JUCE_AUTORELEASEPOOL
     {
-        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:
-                                    nsStringLiteral ("/System/Library/CoreServices/SystemVersion.plist")];
+        const String systemVersionPlist ("/System/Library/CoreServices/SystemVersion.plist");
 
-        return nsStringToJuce ([dict objectForKey: nsStringLiteral ("ProductVersion")]);
+       #if (defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_13)
+        NSError* error = nullptr;
+        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL: createNSURLFromFile (systemVersionPlist)
+                                                                 error: &error];
+       #else
+        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (systemVersionPlist)];
+       #endif
+
+        if (dict != nullptr)
+            return nsStringToJuce (dict[nsStringLiteral ("ProductVersion")]);
+
+        jassertfalse;
+        return {};
     }
 }
 #endif
