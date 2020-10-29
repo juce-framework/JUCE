@@ -73,7 +73,7 @@ void InterprocessConnectionServer::run()
 
         if (clientSocket != nullptr)
             if (auto* newConnection = createConnectionObject())
-                newConnection->initialiseWithSocket (clientSocket.release());
+                newConnection->initialiseWithSocket (std::move (clientSocket));
     }
 }
 

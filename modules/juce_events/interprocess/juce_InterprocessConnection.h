@@ -43,6 +43,9 @@ class MemoryBlock;
     To act as a socket server and create connections for one or more client, see the
     InterprocessConnectionServer class.
 
+    IMPORTANT NOTE: Your derived Connection class *must* call `disconnect` in its destructor
+    in order to cancel any pending messages before the class is destroyed.
+
     @see InterprocessConnectionServer, Socket, NamedPipe
 
     @tags{Events}
@@ -117,7 +120,11 @@ public:
     */
     bool createPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, bool mustNotExist = false);
 
-    /** Disconnects and closes any currently-open sockets or pipes. */
+    /** Disconnects and closes any currently-open sockets or pipes.
+
+        Derived classes *must* call this in their destructors in order to avoid undefined
+        behaviour.
+    */
     void disconnect();
 
     /** True if a socket or pipe is currently active. */
@@ -187,8 +194,9 @@ private:
     int pipeReceiveMessageTimeout = -1;
 
     friend class InterprocessConnectionServer;
-    void initialiseWithSocket (StreamingSocket*);
-    void initialiseWithPipe (NamedPipe*);
+    void initialise();
+    void initialiseWithSocket (std::unique_ptr<StreamingSocket>);
+    void initialiseWithPipe (std::unique_ptr<NamedPipe>);
     void deletePipeAndSocket();
     void connectionMadeInt();
     void connectionLostInt();
@@ -200,10 +208,12 @@ private:
     std::unique_ptr<ConnectionThread> thread;
     std::atomic<bool> threadIsRunning { false };
 
+    class SafeAction;
+    std::shared_ptr<SafeAction> safeAction;
+
     void runThread();
     int writeData (void*, int);
 
-    JUCE_DECLARE_WEAK_REFERENCEABLE (InterprocessConnection)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterprocessConnection)
 };
 
