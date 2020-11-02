@@ -647,16 +647,13 @@ namespace Visuals
 }
 
 //================================= X11 - Bitmap ===============================
-static std::unordered_map<::Window, int> shmPaintsPendingMap;
-
 class XBitmapImage  : public ImagePixelData
 {
 public:
-    XBitmapImage (::Display* d, Image::PixelFormat format, int w, int h,
+    XBitmapImage (Image::PixelFormat format, int w, int h,
                   bool clearImage, unsigned int imageDepth_, Visual* visual)
         : ImagePixelData (format, w, h),
-          imageDepth (imageDepth_),
-          display (d)
+          imageDepth (imageDepth_)
     {
         jassert (format == Image::RGB || format == Image::ARGB);
 
@@ -811,6 +808,11 @@ public:
     {
         XWindowSystemUtilities::ScopedXLock xLock;
 
+       #if JUCE_USE_XSHM
+        if (isUsingXShm())
+            XWindowSystem::getInstance()->addPendingPaintForWindow (window);
+       #endif
+
         if (gc == None)
         {
             XGCValues gcvalues;
@@ -860,10 +862,7 @@ public:
         // blit results to screen.
        #if JUCE_USE_XSHM
         if (isUsingXShm())
-        {
             X11Symbols::getInstance()->xShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
-            ++shmPaintsPendingMap[window];
-        }
         else
        #endif
             X11Symbols::getInstance()->xPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
@@ -882,7 +881,7 @@ private:
     int pixelStride, lineStride;
     uint8* imageData = nullptr;
     GC gc = None;
-    ::Display* display = nullptr;
+    ::Display* display = XWindowSystem::getInstance()->getDisplay();
 
    #if JUCE_USE_XSHM
     XShmSegmentInfo segmentInfo;
@@ -1309,6 +1308,13 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
+    auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
+
+    auto visualAndDepth = displayVisuals->getBestVisualForWindow ((styleFlags & ComponentPeer::windowIsSemiTransparent) != 0);
+
+    auto colormap = X11Symbols::getInstance()->xCreateColormap (display, root, visualAndDepth.visual, AllocNone);
+    X11Symbols::getInstance()->xInstallColormap (display, colormap);
+
     // Set up the window attributes
     XSetWindowAttributes swa;
     swa.border_pixel = 0;
@@ -1317,11 +1323,9 @@ static int getAllEventsMask (bool ignoresMouseClicks)
     swa.override_redirect = ((styleFlags & ComponentPeer::windowIsTemporary) != 0) ? True : False;
     swa.event_mask = getAllEventsMask (styleFlags & ComponentPeer::windowIgnoresMouseClicks);
 
-    auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
-
     auto windowH = X11Symbols::getInstance()->xCreateWindow (display, parentToAddTo != 0 ? parentToAddTo : root,
                                                              0, 0, 1, 1,
-                                                             0, depth, InputOutput, visual,
+                                                             0, visualAndDepth.depth, InputOutput, visualAndDepth.visual,
                                                              CWBorderPixel | CWColormap | CWBackPixmap | CWEventMask | CWOverrideRedirect,
                                                              &swa);
 
@@ -1427,7 +1431,10 @@ void XWindowSystem::destroyWindow (::Window windowH)
                                                          &event) == True)
     {}
 
-    shmPaintsPendingMap.erase (windowH);
+   #if JUCE_USE_XSHM
+    if (XSHMHelpers::isShmAvailable (display))
+        shmPaintsPendingMap.erase (windowH);
+   #endif
 }
 
 //==============================================================================
@@ -1812,16 +1819,18 @@ bool XWindowSystem::canUseARGBImages() const
     return canUseARGB;
 }
 
-Image XWindowSystem::createImage (int width, int height, bool argb) const
+Image XWindowSystem::createImage (bool isSemiTransparent, int width, int height, bool argb) const
 {
+    auto visualAndDepth = displayVisuals->getBestVisualForWindow (isSemiTransparent);
+
    #if JUCE_USE_XSHM
-    return Image (new XBitmapImage (display, argb ? Image::ARGB : Image::RGB,
+    return Image (new XBitmapImage (argb ? Image::ARGB : Image::RGB,
    #else
-    return Image (new XBitmapImage (display, Image::RGB,
+    return Image (new XBitmapImage (Image::RGB,
    #endif
                                     (width + 31) & ~31,
                                     (height + 31) & ~31,
-                                    false, (unsigned int) depth, visual));
+                                    false, (unsigned int) visualAndDepth.depth, visualAndDepth.visual));
 }
 
 void XWindowSystem::blitToWindow (::Window windowH, Image image, Rectangle<int> destinationRect, Rectangle<int> totalRect) const
@@ -1837,20 +1846,47 @@ void XWindowSystem::blitToWindow (::Window windowH, Image image, Rectangle<int> 
                            destinationRect.getX() - totalRect.getX(), destinationRect.getY() - totalRect.getY());
 }
 
-int XWindowSystem::getNumPaintsPending (::Window windowH) const
+void XWindowSystem::processPendingPaintsForWindow (::Window windowH)
 {
    #if JUCE_USE_XSHM
-    if (shmPaintsPendingMap[windowH] != 0)
+    if (! XSHMHelpers::isShmAvailable (display))
+        return;
+
+    if (getNumPaintsPendingForWindow (windowH) > 0)
     {
         XWindowSystemUtilities::ScopedXLock xLock;
 
         XEvent evt;
         while (X11Symbols::getInstance()->xCheckTypedWindowEvent (display, windowH, shmCompletionEvent, &evt))
-            --shmPaintsPendingMap[windowH];
+            removePendingPaintForWindow (windowH);
     }
    #endif
+}
 
-    return shmPaintsPendingMap[windowH];
+int XWindowSystem::getNumPaintsPendingForWindow (::Window windowH)
+{
+   #if JUCE_USE_XSHM
+    if (XSHMHelpers::isShmAvailable (display))
+        return shmPaintsPendingMap[windowH];
+   #endif
+
+    return 0;
+}
+
+void XWindowSystem::addPendingPaintForWindow (::Window windowH)
+{
+   #if JUCE_USE_XSHM
+    if (XSHMHelpers::isShmAvailable (display))
+        ++shmPaintsPendingMap[windowH];
+   #endif
+}
+
+void XWindowSystem::removePendingPaintForWindow (::Window windowH)
+{
+   #if JUCE_USE_XSHM
+    if (XSHMHelpers::isShmAvailable (display))
+        --shmPaintsPendingMap[windowH];
+   #endif
 }
 
 void XWindowSystem::setScreenSaverEnabled (bool enabled) const
@@ -2699,6 +2735,40 @@ long XWindowSystem::getUserTime (::Window windowH) const
     return result;
 }
 
+XWindowSystem::DisplayVisuals::DisplayVisuals (::Display* xDisplay)
+{
+    auto findVisualWithDepthOrNull = [&] (int desiredDepth) -> Visual*
+    {
+        int matchedDepth = 0;
+        auto* visual = Visuals::findVisualFormat (xDisplay, desiredDepth, matchedDepth);
+
+        if (desiredDepth == matchedDepth)
+            return visual;
+
+        return nullptr;
+    };
+
+    visual16Bit = findVisualWithDepthOrNull (16);
+    visual24Bit = findVisualWithDepthOrNull (24);
+    visual32Bit = findVisualWithDepthOrNull (32);
+}
+
+XWindowSystem::VisualAndDepth XWindowSystem::DisplayVisuals::getBestVisualForWindow (bool isSemiTransparent) const
+{
+    if (isSemiTransparent && visual32Bit != nullptr)
+        return { visual32Bit, 32 };
+
+    if (visual24Bit != nullptr)
+        return { visual24Bit, 24 };
+
+    return { visual16Bit, 16 };
+}
+
+bool XWindowSystem::DisplayVisuals::isValid() const noexcept
+{
+    return (visual32Bit != nullptr || visual24Bit != nullptr || visual16Bit != nullptr);
+}
+
 //==============================================================================
 bool XWindowSystem::initialiseXDisplay()
 {
@@ -2736,7 +2806,8 @@ bool XWindowSystem::initialiseXDisplay()
 
     // Create our message window (this will never be mapped)
     auto screen = X11Symbols::getInstance()->xDefaultScreen (display);
-    juce_messageWindowHandle = X11Symbols::getInstance()->xCreateWindow (display, X11Symbols::getInstance()->xRootWindow (display, screen),
+    auto root = X11Symbols::getInstance()->xRootWindow (display, screen);
+    juce_messageWindowHandle = X11Symbols::getInstance()->xCreateWindow (display, root,
                                                                          0, 0, 1, 1, 0, 0, InputOnly,
                                                                          X11Symbols::getInstance()->xDefaultVisual (display, screen),
                                                                          CWEventMask, &swa);
@@ -2745,22 +2816,6 @@ bool XWindowSystem::initialiseXDisplay()
 
     atoms = XWindowSystemUtilities::Atoms (display);
 
-    // Get defaults for various properties
-    auto root = X11Symbols::getInstance()->xRootWindow (display, screen);
-
-    // Try to obtain a 32-bit visual or fallback to 24 or 16
-    visual = Visuals::findVisualFormat (display, 32, depth);
-
-    if (visual == nullptr)
-    {
-        Logger::outputDebugString ("ERROR: System doesn't support 32, 24 or 16 bit RGB display.\n");
-        Process::terminate();
-    }
-
-    // Create and install a colormap suitable for our visual
-    colormap = X11Symbols::getInstance()->xCreateColormap (display, root, visual, AllocNone);
-    X11Symbols::getInstance()->xInstallColormap (display, colormap);
-
     initialisePointerMap();
     updateModifierMappings();
 
@@ -2768,6 +2823,14 @@ bool XWindowSystem::initialiseXDisplay()
     if (XSHMHelpers::isShmAvailable (display))
         shmCompletionEvent = X11Symbols::getInstance()->xShmGetEventBase (display) + ShmCompletion;
    #endif
+
+    displayVisuals = std::make_unique<DisplayVisuals> (display);
+
+    if (! displayVisuals->isValid())
+    {
+        Logger::outputDebugString ("ERROR: System doesn't support 32, 24 or 16 bit RGB display.\n");
+        Process::terminate();
+    }
 
     // Setup input event handler
     LinuxEventLoop::registerFdCallback (X11Symbols::getInstance()->xConnectionNumber (display),
@@ -2816,10 +2879,10 @@ void XWindowSystem::destroyXDisplay()
         X11Symbols::getInstance()->xSync (display, True);
 
         LinuxEventLoop::unregisterFdCallback (X11Symbols::getInstance()->xConnectionNumber (display));
-        visual = nullptr;
 
         X11Symbols::getInstance()->xCloseDisplay (display);
         display = nullptr;
+        displayVisuals = nullptr;
     }
 }
 
@@ -2898,7 +2961,7 @@ void XWindowSystem::handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEv
                 XWindowSystemUtilities::ScopedXLock xLock;
 
                 if (event.xany.type == shmCompletionEvent)
-                    --shmPaintsPendingMap[(::Window) peer->getNativeHandle()];
+                    XWindowSystem::getInstance()->removePendingPaintForWindow ((::Window) peer->getNativeHandle());
             }
            #endif
             break;

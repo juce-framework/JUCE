@@ -330,11 +330,17 @@ private:
     class LinuxRepaintManager   : public Timer
     {
     public:
-        LinuxRepaintManager (LinuxComponentPeer& p)  : peer (p)  {}
+        LinuxRepaintManager (LinuxComponentPeer& p)
+            : peer (p),
+              isSemiTransparentWindow ((peer.getStyleFlags() & ComponentPeer::windowIsSemiTransparent) != 0)
+        {
+        }
 
         void timerCallback() override
         {
-            if (XWindowSystem::getInstance()->getNumPaintsPending (peer.windowH) > 0)
+            XWindowSystem::getInstance()->processPendingPaintsForWindow (peer.windowH);
+
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
                 return;
 
             if (! regionsNeedingRepaint.isEmpty())
@@ -359,7 +365,7 @@ private:
 
         void performAnyPendingRepaintsNow()
         {
-            if (XWindowSystem::getInstance()->getNumPaintsPending (peer.windowH) > 0)
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
             {
                 startTimer (repaintTimerPeriod);
                 return;
@@ -374,7 +380,8 @@ private:
                 if (image.isNull() || image.getWidth() < totalArea.getWidth()
                      || image.getHeight() < totalArea.getHeight())
                 {
-                    image = XWindowSystem::getInstance()->createImage (totalArea.getWidth(), totalArea.getHeight(),
+                    image = XWindowSystem::getInstance()->createImage (isSemiTransparentWindow,
+                                                                       totalArea.getWidth(), totalArea.getHeight(),
                                                                        useARGBImagesForRendering);
                 }
 
@@ -407,6 +414,7 @@ private:
         enum { repaintTimerPeriod = 1000 / 100 };
 
         LinuxComponentPeer& peer;
+        const bool isSemiTransparentWindow;
         Image image;
         uint32 lastTimeImageUsed = 0;
         RectangleList<int> regionsNeedingRepaint;
