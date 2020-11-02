@@ -195,7 +195,15 @@ NSRect makeNSRect (const RectangleType& r) noexcept
 
 #if JUCE_INTEL
  template <typename T>
- struct NeedsStret { static constexpr auto value = sizeof (T) > 16; };
+ struct NeedsStret
+ {
+    #if JUCE_32BIT
+     static constexpr auto value = sizeof (T) > 8;
+    #else
+     static constexpr auto value = sizeof (T) > 16;
+    #endif
+ };
+
  template<>
  struct NeedsStret<void> { static constexpr auto value = false; };
 
