@@ -30,6 +30,10 @@ namespace juce
 
 #if JUCE_DEBUG && ! defined (JUCE_DEBUG_XERRORS)
  #define JUCE_DEBUG_XERRORS 1
+
+ #if ! defined (JUCE_DEBUG_XERRORS_SYNCHRONOUSLY)
+  #define JUCE_DEBUG_XERRORS_SYNCHRONOUSLY 1
+ #endif
 #endif
 
 #if JUCE_MODULE_AVAILABLE_juce_gui_extra
@@ -2718,6 +2722,10 @@ bool XWindowSystem::initialiseXDisplay()
     // No X Server running
     if (display == nullptr)
         return false;
+
+   #if JUCE_DEBUG_XERRORS_SYNCHRONOUSLY
+    X11Symbols::getInstance()->xSynchronize (display, True);
+   #endif
 
     // Create a context to store user data associated with Windows we create
     windowHandleXContext = (XContext) X11Symbols::getInstance()->xrmUniqueQuark();

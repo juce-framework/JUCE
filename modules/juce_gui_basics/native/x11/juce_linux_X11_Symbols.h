@@ -453,6 +453,10 @@ public:
                                          (::Display*, Bool),
                                          void)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSynchronize, xSynchronize,
+                                         (::Display*, Bool),
+                                         int)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XTranslateCoordinates, xTranslateCoordinates,
                                          (::Display*, ::Window, ::Window, int, int, int*, int*, ::Window*),
                                          Bool)
