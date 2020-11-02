@@ -120,12 +120,18 @@ public:
     */
     bool createPipe (const String& pipeName, int pipeReceiveMessageTimeoutMs, bool mustNotExist = false);
 
+    /** Whether the disconnect call should trigger callbacks. */
+    enum class Notify { no, yes };
+
     /** Disconnects and closes any currently-open sockets or pipes.
 
         Derived classes *must* call this in their destructors in order to avoid undefined
         behaviour.
+
+        @param timeoutMs      the time in ms to wait before killing the thread by force
+        @param notify         whether or not to call `connectionLost`
     */
-    void disconnect();
+    void disconnect (int timeoutMs = -1, Notify notify = Notify::yes);
 
     /** True if a socket or pipe is currently active. */
     bool isConnected() const;

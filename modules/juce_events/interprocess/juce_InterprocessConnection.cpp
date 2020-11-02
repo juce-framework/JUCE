@@ -89,7 +89,7 @@ InterprocessConnection::~InterprocessConnection()
     jassert (! safeAction->isSafe());
 
     callbackConnectionState = false;
-    disconnect();
+    disconnect (4000, Notify::no);
     thread.reset();
 }
 
@@ -145,7 +145,7 @@ bool InterprocessConnection::createPipe (const String& pipeName, int timeoutMs, 
     return false;
 }
 
-void InterprocessConnection::disconnect()
+void InterprocessConnection::disconnect (int timeoutMs, Notify notify)
 {
     thread->signalThreadShouldExit();
 
@@ -155,10 +155,13 @@ void InterprocessConnection::disconnect()
         if (pipe != nullptr)    pipe->close();
     }
 
-    thread->stopThread (4000);
+    thread->stopThread (timeoutMs);
     deletePipeAndSocket();
-    connectionLostInt();
 
+    if (notify == Notify::yes)
+        connectionLostInt();
+
+    callbackConnectionState = false;
     safeAction->setSafe (false);
 }
 
