@@ -1359,8 +1359,7 @@ public:
                                                                 .toUnixStyle());
             }
 
-            // TODO JUCE_ARA there is no CONFIGURATION_BUILD_DIR setting in Xcode, SYMROOT seems to be intended here?
-            //s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
+            s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
             s.set ("SYMROOT", addQuotesIfRequired (configurationBuildDir));
 
             if (type == AggregateTarget && ! owner.isiOS())
