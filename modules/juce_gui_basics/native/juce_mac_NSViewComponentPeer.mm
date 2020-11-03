@@ -869,7 +869,7 @@ public:
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
-            CoreGraphicsContext context (cg, (float) [view frame].size.height);
+            CoreGraphicsContext context (cg, (float) [view frame].size.height, displayScale);
             invokePaint (context);
         }
         else
