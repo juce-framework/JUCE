@@ -1986,7 +1986,8 @@ private:
         AudioIODeviceCombiner& owner;
         std::unique_ptr<CoreAudioIODevice> device;
         int inputIndex = 0, numInputChans = 0, outputIndex = 0, numOutputChans = 0;
-        bool useInputs = false, useOutputs = false, isWaitingForInput = false;
+        bool useInputs = false, useOutputs = false;
+        std::atomic<bool> isWaitingForInput { false };
         AbstractFifo inputFifo { 32 }, outputFifo { 32 };
         bool done = false;
 
