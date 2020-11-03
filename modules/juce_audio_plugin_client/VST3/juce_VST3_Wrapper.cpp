@@ -970,12 +970,12 @@ public:
         paramChanged (audioProcessor->getVSTParamIDForIndex (index), newValue);
     }
 
-    void audioProcessorChanged (AudioProcessor*, const int flags) override
+    void audioProcessorChanged (AudioProcessor*, const int whatChanged) override
     {
         using Flags = AudioProcessorListener::Flags;
         int32 vstFlags = 0;
 
-        if (flags & Flags::parametersUpdate)
+        if (whatChanged & Flags::parametersUpdate)
         {
             vstFlags |= Vst::kParamValuesChanged;
             auto numParameters = parameters.getParameterCount();
@@ -985,7 +985,7 @@ public:
                     param->updateParameterInfo();
         }
 
-        if (flags & Flags::programUpdate)
+        if (whatChanged & Flags::programUpdate)
         {
             vstFlags |= Vst::kParamTitlesChanged;
             if (auto* pluginInstance = getPluginInstance())
@@ -998,7 +998,7 @@ public:
             }
         }
 
-        if (flags & Flags::latencyUpdate)
+        if (whatChanged & Flags::latencyUpdate)
         {
             vstFlags = Vst::kLatencyChanged;
         }
