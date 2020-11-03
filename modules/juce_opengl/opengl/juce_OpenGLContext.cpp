@@ -438,7 +438,6 @@ public:
         if (hasInitialised)
         {
             [nativeContext->view update];
-            renderFrame();
         }
        #endif
     }
