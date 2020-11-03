@@ -126,9 +126,12 @@ public:
     bool canUseSemiTransparentWindows() const;
     bool canUseARGBImages() const;
 
-    int getNumPaintsPending (::Window windowH) const;
+    int getNumPaintsPendingForWindow (::Window windowH);
+    void processPendingPaintsForWindow (::Window windowH);
+    void addPendingPaintForWindow (::Window windowH);
+    void removePendingPaintForWindow (::Window windowH);
 
-    Image createImage (int width, int height, bool argb) const;
+    Image createImage (bool isSemiTransparentWindow, int width, int height, bool argb) const;
     void blitToWindow (::Window windowH, Image image, Rectangle<int> destinationRect, Rectangle<int> totalRect) const;
 
     void setScreenSaverEnabled (bool enabled) const;
@@ -171,6 +174,24 @@ private:
     ~XWindowSystem();
 
     //==============================================================================
+    struct VisualAndDepth
+    {
+        Visual* visual;
+        int depth;
+    };
+
+    struct DisplayVisuals
+    {
+        explicit DisplayVisuals (::Display* d);
+
+        VisualAndDepth getBestVisualForWindow (bool isSemiTransparent) const;
+        bool isValid() const noexcept;
+
+        Visual* visual16Bit = nullptr;
+        Visual* visual24Bit = nullptr;
+        Visual* visual32Bit = nullptr;
+    };
+
     bool initialiseXDisplay();
     void destroyXDisplay();
 
@@ -217,10 +238,13 @@ private:
 
     XWindowSystemUtilities::Atoms atoms;
     ::Display* display = nullptr;
-    Colormap colormap = {};
-    Visual* visual = nullptr;
+    std::unique_ptr<DisplayVisuals> displayVisuals;
 
-    int depth = 0, shmCompletionEvent = 0;
+   #if JUCE_USE_XSHM
+    std::map<::Window, int> shmPaintsPendingMap;
+   #endif
+
+    int shmCompletionEvent = 0;
     int pointerMap[5] = {};
     String localClipboardContent;
 

@@ -181,6 +181,7 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xSetWMNormalHints,           "XSetWMNormalHints"),
                        makeSymbolBinding (xStringListToTextProperty,   "XStringListToTextProperty"),
                        makeSymbolBinding (xSync,                       "XSync"),
+                       makeSymbolBinding (xSynchronize,                "XSynchronize"),
                        makeSymbolBinding (xTranslateCoordinates,       "XTranslateCoordinates"),
                        makeSymbolBinding (xrmUniqueQuark,              "XrmUniqueQuark"),
                        makeSymbolBinding (xUngrabPointer,              "XUngrabPointer"),
