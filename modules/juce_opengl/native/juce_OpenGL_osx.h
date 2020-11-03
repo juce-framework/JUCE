@@ -72,6 +72,7 @@ public:
         [renderContext setView: nil];
         [view setOpenGLContext: nil];
         [view release];
+        [colourSpace release];
     }
 
     static void createAttribs (NSOpenGLPixelFormatAttribute* attribs, OpenGLVersion version,
@@ -233,7 +234,8 @@ public:
 
     void* updateColourSpace()
     {
-        colourSpace = [[[view window] screen] colorSpace];
+        [colourSpace release];
+        colourSpace = [[[[view window] screen] colorSpace] retain];
         return colourSpace;
     }
 
