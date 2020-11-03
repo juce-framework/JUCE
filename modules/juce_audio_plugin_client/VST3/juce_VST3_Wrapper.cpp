@@ -973,11 +973,11 @@ public:
     void audioProcessorChanged (AudioProcessor*, const int whatChanged) override
     {
         using Flags = AudioProcessorListener::Flags;
-        int32 vstFlags = 0;
+        int32 flags = 0;
 
         if (whatChanged & Flags::parametersUpdate)
         {
-            vstFlags |= Vst::kParamValuesChanged;
+            flags |= Vst::kParamValuesChanged;
             auto numParameters = parameters.getParameterCount();
 
             for (int32 i = 0; i < numParameters; ++i)
@@ -987,7 +987,7 @@ public:
 
         if (whatChanged & Flags::programUpdate)
         {
-            vstFlags |= Vst::kParamTitlesChanged;
+            flags |= Vst::kParamTitlesChanged;
             if (auto* pluginInstance = getPluginInstance())
             {
                 if (pluginInstance->getNumPrograms() > 1)
@@ -1000,11 +1000,11 @@ public:
 
         if (whatChanged & Flags::latencyUpdate)
         {
-            vstFlags = Vst::kLatencyChanged;
+            flags = Vst::kLatencyChanged;
         }
 
         if (componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (vstFlags);
+            componentHandler->restartComponent (flags);
     }
 
     void parameterValueChanged (int, float newValue) override
