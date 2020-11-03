@@ -419,7 +419,7 @@ void AudioProcessor::setLatencySamples (int newLatency)
     if (latencySamples != newLatency)
     {
         latencySamples = newLatency;
-        updateHostDisplay();
+        updateHostDisplay (AudioProcessorListener::Flags::latencyUpdate);
     }
 }
 
@@ -436,11 +436,11 @@ AudioProcessorListener* AudioProcessor::getListenerLocked (int index) const noex
     return listeners[index];
 }
 
-void AudioProcessor::updateHostDisplay()
+void AudioProcessor::updateHostDisplay (const int flags)
 {
     for (int i = listeners.size(); --i >= 0;)
         if (auto l = getListenerLocked (i))
-            l->audioProcessorChanged (this);
+            l->audioProcessorChanged (this, flags);
 }
 
 void AudioProcessor::checkForDuplicateParamID (AudioProcessorParameter* param)
