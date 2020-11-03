@@ -2134,14 +2134,19 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
 
     Atom hints = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WORKAREA");
 
-    auto getWorkAreaPropertyData = [&] (int screenNum) -> unsigned char*
+    auto getWorkAreaPropertyData = [&] (int screenNum) -> std::unique_ptr<unsigned char[]>
     {
         if (hints != None)
         {
             XWindowSystemUtilities::GetXProperty prop (X11Symbols::getInstance()->xRootWindow (display, screenNum), hints, 0, 4, false, XA_CARDINAL);
 
             if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
-                return prop.data;
+            {
+                auto data = std::make_unique<unsigned char[]>(prop.actualFormat * prop.numItems);
+
+                memcpy (data.get(), prop.data, prop.actualFormat * prop.numItems);
+                return data;
+            }
         }
 
         return nullptr;
@@ -2252,14 +2257,15 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
 
             for (int i = 0; i < numMonitors; ++i)
             {
-                if (auto* positionData = getWorkAreaPropertyData (i))
+                if (auto positionData = getWorkAreaPropertyData (i))
                 {
                     std::array<long, 4> position;
 
+                    size_t readPos{};
                     for (auto& p : position)
                     {
-                        memcpy (&p, positionData, sizeof (long));
-                        positionData += sizeof (long);
+                        memcpy (&p, positionData.get() + readPos, sizeof (long));
+                        readPos += sizeof (long);
                     }
 
                     Displays::Display d;
