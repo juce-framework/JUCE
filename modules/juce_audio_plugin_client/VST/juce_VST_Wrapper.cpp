@@ -1210,8 +1210,8 @@ public:
                     auto scale = Desktop::getInstance().getGlobalScaleFactor();
 
                     X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
-                                                              static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
-                                                              static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
+                                                              static_cast<unsigned int> (roundToInt ((float) pos.getWidth()  * scale)),
+                                                              static_cast<unsigned int> (roundToInt ((float) pos.getHeight() * scale)));
                    #endif
 
                    #if JUCE_MAC
