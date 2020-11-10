@@ -1500,9 +1500,6 @@ void AudioProcessorParameter::setValueNotifyingHost (float newValue)
 
 void AudioProcessorParameter::beginChangeGesture()
 {
-    // This method can't be used until the parameter has been attached to a processor!
-    jassert (processor != nullptr && parameterIndex >= 0);
-
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     // This means you've called beginChangeGesture twice in succession without
     // a matching call to endChangeGesture. That might be fine in most hosts,
@@ -1529,9 +1526,6 @@ void AudioProcessorParameter::beginChangeGesture()
 
 void AudioProcessorParameter::endChangeGesture()
 {
-    // This method can't be used until the parameter has been attached to a processor!
-    jassert (processor != nullptr && parameterIndex >= 0);
-
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING
     // This means you've called endChangeGesture without having previously
     // called beginChangeGesture. That might be fine in most hosts, but it
