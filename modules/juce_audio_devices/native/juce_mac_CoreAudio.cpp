@@ -1506,7 +1506,7 @@ public:
         for (auto* d : devices)
             lat = jmax (lat, d->device->getOutputLatencyInSamples());
 
-        return lat + currentBufferSize * 2;
+        return lat;
     }
 
     int getInputLatencyInSamples() override
@@ -1516,7 +1516,7 @@ public:
         for (auto* d : devices)
             lat = jmax (lat, d->device->getInputLatencyInSamples());
 
-        return lat + currentBufferSize * 2;
+        return lat;
     }
 
     void start (AudioIODeviceCallback* newCallback) override
