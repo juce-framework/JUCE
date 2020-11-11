@@ -547,7 +547,7 @@ private:
                 auto screenRectangle = Rectangle<int>::leftTopRightBottom (dialogScreenRect.left,  dialogScreenRect.top,
                                                                            dialogScreenRect.right, dialogScreenRect.bottom);
 
-                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenRectangle, true).scale;
+                auto scale = Desktop::getInstance().getDisplays().getDisplayForRect (screenRectangle, true)->scale;
                 auto physicalComponentWidth = roundToInt (safeCustomComponent->getWidth() * scale);
 
                 SetWindowPos (hdlg, nullptr, screenRectangle.getX(), screenRectangle.getY(),
@@ -700,7 +700,7 @@ public:
           nativeFileChooser (new Win32NativeFileChooser (this, flags, previewComp, fileChooser.startingFile,
                                                          fileChooser.title, fileChooser.filters))
     {
-        auto mainMon = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        auto mainMon = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
 
         setBounds (mainMon.getX() + mainMon.getWidth() / 4,
                    mainMon.getY() + mainMon.getHeight() / 4,

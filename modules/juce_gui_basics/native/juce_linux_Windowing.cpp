@@ -171,7 +171,7 @@ public:
         if (fullScreen != shouldBeFullScreen)
         {
             if (shouldBeFullScreen)
-                r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+                r = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
 
             if (! r.isEmpty())
                 setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
@@ -330,11 +330,17 @@ private:
     class LinuxRepaintManager   : public Timer
     {
     public:
-        LinuxRepaintManager (LinuxComponentPeer& p)  : peer (p)  {}
+        LinuxRepaintManager (LinuxComponentPeer& p)
+            : peer (p),
+              isSemiTransparentWindow ((peer.getStyleFlags() & ComponentPeer::windowIsSemiTransparent) != 0)
+        {
+        }
 
         void timerCallback() override
         {
-            if (XWindowSystem::getInstance()->getNumPaintsPending (peer.windowH) > 0)
+            XWindowSystem::getInstance()->processPendingPaintsForWindow (peer.windowH);
+
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
                 return;
 
             if (! regionsNeedingRepaint.isEmpty())
@@ -359,7 +365,7 @@ private:
 
         void performAnyPendingRepaintsNow()
         {
-            if (XWindowSystem::getInstance()->getNumPaintsPending (peer.windowH) > 0)
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
             {
                 startTimer (repaintTimerPeriod);
                 return;
@@ -374,7 +380,8 @@ private:
                 if (image.isNull() || image.getWidth() < totalArea.getWidth()
                      || image.getHeight() < totalArea.getHeight())
                 {
-                    image = XWindowSystem::getInstance()->createImage (totalArea.getWidth(), totalArea.getHeight(),
+                    image = XWindowSystem::getInstance()->createImage (isSemiTransparentWindow,
+                                                                       totalArea.getWidth(), totalArea.getHeight(),
                                                                        useARGBImagesForRendering);
                 }
 
@@ -407,6 +414,7 @@ private:
         enum { repaintTimerPeriod = 1000 / 100 };
 
         LinuxComponentPeer& peer;
+        const bool isSemiTransparentWindow;
         Image image;
         uint32 lastTimeImageUsed = 0;
         RectangleList<int> regionsNeedingRepaint;
@@ -424,7 +432,7 @@ private:
 
         Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
 
-        auto newScaleFactor = Desktop::getInstance().getDisplays().findDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical).scale
+        auto newScaleFactor = Desktop::getInstance().getDisplays().getDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical)->scale
                                  / Desktop::getInstance().getGlobalScaleFactor();
 
         if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
@@ -467,15 +475,18 @@ JUCE_API void JUCE_CALLTYPE Process::hide()                   {}
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool)
 {
     if (enableOrDisable)
-        comp->setBounds (getDisplays().findDisplayForRect (comp->getScreenBounds()).totalArea);
+        comp->setBounds (getDisplays().getDisplayForRect (comp->getScreenBounds())->totalArea);
 }
 
 void Displays::findDisplays (float masterScale)
 {
-    displays = XWindowSystem::getInstance()->findDisplays (masterScale);
+    if (XWindowSystem::getInstance()->getDisplay() != nullptr)
+    {
+        displays = XWindowSystem::getInstance()->findDisplays (masterScale);
 
-    if (! displays.isEmpty())
-        updateToLogical();
+        if (! displays.isEmpty())
+            updateToLogical();
+    }
 }
 
 bool Desktop::canUseSemiTransparentWindows() noexcept

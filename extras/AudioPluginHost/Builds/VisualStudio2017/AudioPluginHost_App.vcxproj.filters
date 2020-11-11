@@ -467,18 +467,6 @@
     <Filter Include="JUCE Modules\juce_opengl">
       <UniqueIdentifier>{9FBFF5E5-56F1-34A1-2C85-F760DA2B1EB7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_video\capture">
-      <UniqueIdentifier>{CB8DF3B2-0409-6D59-C5D4-A034EBB7F973}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_video\native">
-      <UniqueIdentifier>{7774F72F-C951-B8AB-E927-E34AD23C52C8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_video\playback">
-      <UniqueIdentifier>{658BADF8-7095-C722-F9EC-9F36E8818187}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_video">
-      <UniqueIdentifier>{2C58F450-CD01-0231-2F16-0D4D68565164}</UniqueIdentifier>
-    </Filter>
     <Filter Include="JUCE Modules">
       <UniqueIdentifier>{FE955B6B-68AC-AA07-70D8-2413F6DB65C8}</UniqueIdentifier>
     </Filter>
@@ -2653,18 +2641,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_opengl\juce_opengl.mm">
       <Filter>JUCE Modules\juce_opengl</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
-      <Filter>JUCE Modules\juce_video\capture</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\playback\juce_VideoComponent.cpp">
-      <Filter>JUCE Modules\juce_video\playback</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\juce_video.cpp">
-      <Filter>JUCE Modules\juce_video</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_video\juce_video.mm">
-      <Filter>JUCE Modules\juce_video</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -2708,9 +2684,6 @@
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp">
-      <Filter>JUCE Library Code</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
   </ItemGroup>
@@ -5129,36 +5102,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h">
       <Filter>JUCE Modules\juce_opengl</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h">
-      <Filter>JUCE Modules\juce_video\capture</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h">
-      <Filter>JUCE Modules\juce_video\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_Video.h">
-      <Filter>JUCE Modules\juce_video\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_ios_CameraDevice.h">
-      <Filter>JUCE Modules\juce_video\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.h">
-      <Filter>JUCE Modules\juce_video\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_Video.h">
-      <Filter>JUCE Modules\juce_video\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_CameraDevice.h">
-      <Filter>JUCE Modules\juce_video\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_Video.h">
-      <Filter>JUCE Modules\juce_video\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_VideoComponent.h">
-      <Filter>JUCE Modules\juce_video\playback</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_video\juce_video.h">
-      <Filter>JUCE Modules\juce_video</Filter>
     </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
       <Filter>JUCE Library Code</Filter>

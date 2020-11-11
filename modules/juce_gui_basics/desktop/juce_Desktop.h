@@ -325,6 +325,10 @@ public:
     bool isOrientationEnabled (DisplayOrientation orientation) const noexcept;
 
     //==============================================================================
+    /** Returns the Displays object representing the connected displays.
+
+        @see Displays
+    */
     const Displays& getDisplays() const noexcept        { return *displays; }
 
     //==============================================================================
@@ -346,6 +350,10 @@ public:
     /** OSX-specific function to check for the "dark" title-bar and menu mode. */
     static bool isOSXDarkModeActive();
    #endif
+
+    //==============================================================================
+    /** Returns true on a headless system where there are no connected displays. */
+    bool isHeadless() const noexcept;
 
 private:
     //==============================================================================

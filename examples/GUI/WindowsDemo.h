@@ -334,7 +334,7 @@ private:
                                        | RectanglePlacement::doNotResize);
 
         auto result = placement.appliedTo (area, Desktop::getInstance().getDisplays()
-                                                         .getMainDisplay().userArea.reduced (20));
+                                                         .getPrimaryDisplay()->userArea.reduced (20));
         dw->setBounds (result);
 
         dw->setResizable (true, ! native);
@@ -355,7 +355,7 @@ private:
                                        | RectanglePlacement::doNotResize);
 
         auto result = placement.appliedTo (area, Desktop::getInstance().getDisplays()
-                                                         .getMainDisplay().userArea.reduced (20));
+                                                         .getPrimaryDisplay()->userArea.reduced (20));
         balls->setBounds (result);
 
         balls->setVisible (true);

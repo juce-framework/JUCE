@@ -497,6 +497,166 @@ struct MiscPage   : public Component
 };
 
 //==============================================================================
+struct MenuPage   : public Component
+{
+    MenuPage()
+    {
+        addAndMakeVisible (shortMenuButton);
+        shortMenuButton.onClick = [&]
+        {
+            PopupMenu menu;
+            menu.addItem ("Single Item", nullptr);
+            menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (shortMenuButton));
+        };
+
+        addAndMakeVisible (longMenuButton);
+        longMenuButton.onClick = [&]
+        {
+            PopupMenu menu;
+
+            for (auto i = 0; i < 40; ++i)
+                menu.addItem ("Item " + String (i), nullptr);
+
+            menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (longMenuButton));
+        };
+
+        addAndMakeVisible (multiColumnMenuButton);
+        multiColumnMenuButton.onClick = [&]
+        {
+            PopupMenu menu;
+
+            for (auto i = 0; i < 200; ++i)
+                menu.addItem ("Item " + String (i), nullptr);
+
+            menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (multiColumnMenuButton)
+                                                    .withMinimumNumColumns (2)
+                                                    .withMaximumNumColumns (4));
+        };
+
+        addAndMakeVisible (customItemButton);
+        customItemButton.onClick = [&]
+        {
+            struct CustomComponent  : public PopupMenu::CustomComponent
+            {
+                CustomComponent (int widthIn, int heightIn, Colour backgroundIn)
+                    : idealWidth (widthIn), idealHeight (heightIn), background (backgroundIn)
+                {}
+
+                void getIdealSize (int& width, int& height) override
+                {
+                    width = idealWidth;
+                    height = idealHeight;
+                }
+
+                void paint (Graphics& g) override { g.fillAll (background); }
+
+                int idealWidth = 0;
+                int idealHeight = 0;
+                Colour background;
+            };
+
+            PopupMenu menu;
+
+            menu.addCustomItem (-1, std::make_unique<CustomComponent> (100,  20, Colours::darkred));
+            menu.addCustomItem (-1, std::make_unique<CustomComponent> (20,  100, Colours::darkgreen));
+            menu.addCustomItem (-1, std::make_unique<CustomComponent> (100, 100, Colours::darkblue));
+            menu.addCustomItem (-1, std::make_unique<CustomComponent> (100,  50, Colours::darkcyan));
+            menu.addCustomItem (-1, std::make_unique<CustomComponent> (50,  100, Colours::darkmagenta));
+
+            menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (customItemButton)
+                                                    .withMinimumNumColumns (5));
+        };
+
+        addAndMakeVisible (fancyThemeButton);
+        fancyThemeButton.setLookAndFeel (&popupLookAndFeel);
+        fancyThemeButton.onClick = [&]
+        {
+            const auto colour = Colour::fromHSL (randomColourGenerator.nextFloat(), 0.5f, 0.5f, 1.0f);
+            fancyThemeButton.setColour (TextButton::buttonColourId, colour);
+
+            const int columnLengths[] { 5, 10, 7, 3 };
+
+            PopupMenu menu;
+            menu.setLookAndFeel (&popupLookAndFeel);
+
+            for (auto length : columnLengths)
+            {
+                for (auto i = 0; i < length; ++i)
+                    menu.addItem ("Item " + String (i), nullptr);
+
+                menu.addColumnBreak();
+            }
+
+            menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (&fancyThemeButton));
+        };
+    }
+
+    void resized() override
+    {
+        const auto makeItem = [] (Component& comp)
+        {
+            return FlexItem { comp }.withWidth (200).withHeight (24).withMargin ({ 4 });
+        };
+
+        FlexBox box;
+        box.flexDirection = FlexBox::Direction::column;
+        box.items = { makeItem (shortMenuButton),
+                      makeItem (longMenuButton),
+                      makeItem (multiColumnMenuButton),
+                      makeItem (customItemButton),
+                      makeItem (fancyThemeButton) };
+
+        box.performLayout (getLocalBounds());
+    }
+
+    struct PopupMenuLookAndFeel : public LookAndFeel_V4
+    {
+        void drawPopupMenuColumnSeparatorWithOptions (Graphics& g,
+                                                      const Rectangle<int>& bounds,
+                                                      const PopupMenu::Options& opt)
+        {
+            if (auto* target = opt.getTargetComponent())
+            {
+                const auto baseColour = target->findColour (TextButton::buttonColourId);
+                g.setColour (baseColour.brighter (0.4f));
+
+                const float dashes[] { 5.0f, 5.0f };
+                const auto centre = bounds.toFloat().getCentre();
+
+                g.drawDashedLine ({ centre.withY ((float) bounds.getY()),
+                                    centre.withY ((float) bounds.getBottom()) },
+                                  dashes,
+                                  numElementsInArray (dashes),
+                                  3.0f);
+            }
+        }
+
+        void drawPopupMenuBackgroundWithOptions (Graphics& g, int, int, const PopupMenu::Options& opt)
+        {
+            if (auto* target = opt.getTargetComponent())
+            {
+                g.fillAll (target->findColour (TextButton::buttonColourId));
+            }
+        }
+
+        // Return the amount of space that should be left between popup menu columns.
+        int getPopupMenuColumnSeparatorWidthWithOptions (const PopupMenu::Options&)
+        {
+            return 10;
+        }
+    };
+
+    Random randomColourGenerator;
+    PopupMenuLookAndFeel popupLookAndFeel;
+
+    TextButton shortMenuButton       { "Short" },
+               longMenuButton        { "Long" },
+               multiColumnMenuButton { "Multi Column" },
+               customItemButton      { "Custom Items" },
+               fancyThemeButton      { "Fancy Theme with Column Breaks" };
+};
+
+//==============================================================================
 class ToolbarDemoComp   : public Component,
                           private Slider::Listener
 {
@@ -1282,6 +1442,7 @@ struct DemoTabbedComponent  : public TabbedComponent
         addTab ("Sliders",     colour, new SlidersPage(),                                 true);
         addTab ("Toolbars",    colour, new ToolbarDemoComp(),                             true);
         addTab ("Misc",        colour, new MiscPage(),                                    true);
+        addTab ("Menus",       colour, new MenuPage(),                                    true);
         addTab ("Tables",      colour, new TableDemoComponent(),                          true);
         addTab ("Drag & Drop", colour, new DragAndDropDemo(),                             true);
 

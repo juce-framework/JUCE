@@ -52,7 +52,7 @@ public:
             auto pos = topComp->getLocalPoint (&owner, Point<int>());
 
             Rectangle<int> r (pos.x, pos.y, owner.getWidth(), owner.getHeight());
-            r *= Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            r *= Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
 
             getEnv()->CallVoidMethod (view, AndroidView.layout, r.getX(), r.getY(),
                                       r.getRight(), r.getBottom());

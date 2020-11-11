@@ -117,7 +117,7 @@ static std::map<String, String> getPluginFileTokenReplacements (const String& na
     auto processorHInclude = CodeHelpers::createIncludeStatement (processorHFile, processorCppFile);
     auto editorHInclude    = CodeHelpers::createIncludeStatement (editorHFile, processorCppFile);
 
-    auto processorClassName = build_tools::makeValidIdentifier (name, true, true, false) + "AudioProcessor";
+    auto processorClassName = build_tools::makeValidIdentifier (name, false, true, false) + "AudioProcessor";
     processorClassName = processorClassName.substring (0, 1).toUpperCase() + processorClassName.substring (1);
     auto editorClassName = processorClassName + "Editor";
 

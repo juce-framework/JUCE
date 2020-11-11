@@ -21,10 +21,6 @@
 			isa = PBXBuildFile;
 			fileRef = 942A0F04EFB8D0B2FF9780BA;
 		};
-		AF42316D915057E930A5624E = {
-			isa = PBXBuildFile;
-			fileRef = A4B568E26157FC282214976F;
-		};
 		E3CB85BA817BC9E3942A8AB0 = {
 			isa = PBXBuildFile;
 			fileRef = 9F9B445E6755CAA19E4344ED;
@@ -40,10 +36,6 @@
 		B0D5475F716126465FCE1586 = {
 			isa = PBXBuildFile;
 			fileRef = CFFA8E9A7820C5A27B4393C9;
-		};
-		3470F40DA5D68EC217872906 = {
-			isa = PBXBuildFile;
-			fileRef = 31D55A751C790CB81F58DDB7;
 		};
 		E092A70431B046BF1F50A482 = {
 			isa = PBXBuildFile;
@@ -173,10 +165,6 @@
 			isa = PBXBuildFile;
 			fileRef = 37E4D5C341406B7072120006;
 		};
-		84BAFE82A102D9C350672689 = {
-			isa = PBXBuildFile;
-			fileRef = 29D746FC68F69751796671A2;
-		};
 		03FA420AACDD03D50AA16E4A = {
 			isa = PBXFileReference;
 			lastKnownFileType = wrapper.framework;
@@ -212,13 +200,6 @@
 			path = ../../JuceLibraryCode/BinaryData.h;
 			sourceTree = "SOURCE_ROOT";
 		};
-		29D746FC68F69751796671A2 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.objcpp;
-			name = "include_juce_video.mm";
-			path = "../../JuceLibraryCode/include_juce_video.mm";
-			sourceTree = "SOURCE_ROOT";
-		};
 		29E0972229FB44D969035B4E = {
 			isa = PBXFileReference;
 			lastKnownFileType = folder.assetcatalog;
@@ -245,13 +226,6 @@
 			lastKnownFileType = wrapper.framework;
 			name = CoreGraphics.framework;
 			path = System/Library/Frameworks/CoreGraphics.framework;
-			sourceTree = SDKROOT;
-		};
-		31D55A751C790CB81F58DDB7 = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.framework;
-			name = CoreMedia.framework;
-			path = System/Library/Frameworks/CoreMedia.framework;
 			sourceTree = SDKROOT;
 		};
 		36689CA4EFC2AF183A0848AE = {
@@ -492,13 +466,6 @@
 			path = System/Library/Frameworks/CoreAudio.framework;
 			sourceTree = SDKROOT;
 		};
-		A4B568E26157FC282214976F = {
-			isa = PBXFileReference;
-			lastKnownFileType = wrapper.framework;
-			name = AVKit.framework;
-			path = System/Library/Frameworks/AVKit.framework;
-			sourceTree = SDKROOT;
-		};
 		A5DFC13E4F09134B0D226A3E = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -589,13 +556,6 @@
 			name = AudioToolbox.framework;
 			path = System/Library/Frameworks/AudioToolbox.framework;
 			sourceTree = SDKROOT;
-		};
-		DDE115D3084ACA6DD6AA4471 = {
-			isa = PBXFileReference;
-			lastKnownFileType = file;
-			name = "juce_video";
-			path = "../../../../modules/juce_video";
-			sourceTree = "SOURCE_ROOT";
 		};
 		E68018DE199135B7F738FB17 = {
 			isa = PBXFileReference;
@@ -714,7 +674,6 @@
 				938AE72315C6C93949F6220E,
 				F299BECFB2AEA6105F014848,
 				81C1A7770E082F56FE5A90A7,
-				DDE115D3084ACA6DD6AA4471,
 			);
 			name = "JUCE Modules";
 			sourceTree = "<group>";
@@ -738,7 +697,6 @@
 				8FE7B37CDE0818DB27BDDEBD,
 				2BE6C2DFD6EBB9A89109AEB5,
 				37E4D5C341406B7072120006,
-				29D746FC68F69751796671A2,
 				A5E7CA8A71D049BE2BD33861,
 			);
 			name = "JUCE Library Code";
@@ -761,12 +719,10 @@
 				86CA337014D3F67E906FFD28,
 				D4EBC17BDB7F88CCBC76730B,
 				942A0F04EFB8D0B2FF9780BA,
-				A4B568E26157FC282214976F,
 				9F9B445E6755CAA19E4344ED,
 				E68018DE199135B7F738FB17,
 				2F7D965A1284CEF0B20EB657,
 				CFFA8E9A7820C5A27B4393C9,
-				31D55A751C790CB81F58DDB7,
 				5AF0CA7CDFCA90B4DE1F55C3,
 				7D924E83DABA5B54205C52F4,
 				66643EDF46AE8C5B7956B91D,
@@ -845,7 +801,6 @@
 					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
 					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
 					"JUCE_MODULE_AVAILABLE_juce_opengl=1",
-					"JUCE_MODULE_AVAILABLE_juce_video=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_WASAPI=1",
 					"JUCE_DIRECTSOUND=1",
@@ -858,7 +813,6 @@
 					"JUCE_USE_CDREADER=0",
 					"JUCE_USE_CDBURNER=0",
 					"JUCE_WEB_BROWSER=0",
-					"JUCE_USE_CAMERA=0",
 					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -928,7 +882,6 @@
 					"JUCE_MODULE_AVAILABLE_juce_gui_basics=1",
 					"JUCE_MODULE_AVAILABLE_juce_gui_extra=1",
 					"JUCE_MODULE_AVAILABLE_juce_opengl=1",
-					"JUCE_MODULE_AVAILABLE_juce_video=1",
 					"JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1",
 					"JUCE_WASAPI=1",
 					"JUCE_DIRECTSOUND=1",
@@ -941,7 +894,6 @@
 					"JUCE_USE_CDREADER=0",
 					"JUCE_USE_CDBURNER=0",
 					"JUCE_WEB_BROWSER=0",
-					"JUCE_USE_CAMERA=0",
 					"JUCE_STANDALONE_APPLICATION=1",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1121,7 +1073,6 @@
 				2C3D221D2AA87F07B3F1044D,
 				C38D14DC58F1941DD5E4BF60,
 				2727A191DB1BAAC9C04B9081,
-				84BAFE82A102D9C350672689,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1132,12 +1083,10 @@
 				73E371F1B912FCCAE0CD7E5D,
 				21D330A5B13178B12BEAFC3C,
 				851C1165C9E4ACDD19C56A96,
-				AF42316D915057E930A5624E,
 				E3CB85BA817BC9E3942A8AB0,
 				70580743C3D5695F065FF698,
 				1570FCC5CDB7A44DF0077E39,
 				B0D5475F716126465FCE1586,
-				3470F40DA5D68EC217872906,
 				E092A70431B046BF1F50A482,
 				C81D59C798F9F1F1A549FF07,
 				92EE84159C7027A137F06204,

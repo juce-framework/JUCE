@@ -184,7 +184,7 @@ public:
     void updateWindowPosition (Rectangle<int> bounds)
     {
         view.frame = convertToCGRect (bounds);
-        glLayer.contentsScale = (CGFloat) (Desktop::getInstance().getDisplays().getMainDisplay().scale
+        glLayer.contentsScale = (CGFloat) (Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale
                                             / component.getDesktopScaleFactor());
 
         if (lastBounds != bounds)

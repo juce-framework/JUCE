@@ -1654,7 +1654,7 @@ public:
         // if the calling thread is DPI-aware but we are invalidating a non-DPI aware window RECT, we actually have to
         // divide the bounds by the scale factor as it will get multiplied for the virtualised paint callback...
         if (isPerMonitorDPIAwareThread() && ! isPerMonitorDPIAwareWindow (hwnd))
-            scale = 1.0 / Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            scale = 1.0 / Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
        #endif
 
         auto scaled = area.toDouble() * scale;
@@ -2175,9 +2175,9 @@ private:
                 auto bounds = component.getBounds();
 
                 if (bounds.isEmpty())
-                    scaleFactor = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+                    scaleFactor = Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
                 else
-                    scaleFactor = Desktop::getInstance().getDisplays().findDisplayForRect (bounds).scale;
+                    scaleFactor = Desktop::getInstance().getDisplays().getDisplayForRect (bounds)->scale;
 
                 scaleFactor /= Desktop::getInstance().getGlobalScaleFactor();
             }
@@ -3419,7 +3419,7 @@ private:
 
         if (fullScreen && ! isMinimised())
             setWindowPos (hwnd, ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays()
-                                                                                              .findDisplayForRect (component.getScreenBounds()).userArea),
+                                                                                              .getDisplayForRect (component.getScreenBounds())->userArea),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
     }
 
@@ -4455,7 +4455,7 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
         tlw->setUsingNativeTitleBar (! enableOrDisable);
 
     if (enableOrDisable)
-        kioskModeComp->setBounds (getDisplays().findDisplayForRect (kioskModeComp->getScreenBounds()).totalArea);
+        kioskModeComp->setBounds (getDisplays().getDisplayForRect (kioskModeComp->getScreenBounds())->totalArea);
 }
 
 void Desktop::allowedOrientationsChanged() {}
@@ -4508,7 +4508,7 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
             return retVal;
     }
 
-    return &Desktop::getInstance().getDisplays().getMainDisplay();
+    return Desktop::getInstance().getDisplays().getPrimaryDisplay();
 }
 
 //==============================================================================

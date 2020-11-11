@@ -258,7 +258,7 @@ public:
           fullScreen (false),
           navBarsHidden (false),
           sizeAllocated (0),
-          scale ((float) Desktop::getInstance().getDisplays().getMainDisplay().scale)
+          scale ((float) Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale)
     {
         auto* env = getEnv();
 
@@ -546,7 +546,7 @@ public:
             setNavBarsHidden (false);
         }
 
-        Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getMainDisplay().userArea
+        Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea
                                              : lastNonFullscreenBounds);
 
         if ((! shouldBeFullScreen) && r.isEmpty())
@@ -1428,7 +1428,7 @@ public:
         if (newBounds != oldBounds)
         {
             auto& displays = Desktop::getInstance().getDisplays();
-            auto& mainDisplay = displays.getMainDisplay();
+            auto& mainDisplay = *displays.getPrimaryDisplay();
 
             Rectangle<int> userArea = newBounds / mainDisplay.scale;
 

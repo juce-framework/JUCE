@@ -53,7 +53,7 @@ protected:
 
 public:
     //==============================================================================
-    static String getDisplayName()        { return "CLion (beta)"; }
+    static String getDisplayName()        { return "CLion [Deprecated]"; }
     static String getValueTreeTypeName()  { return "CLION"; }
     static String getTargetFolderName()   { return "CLion"; }
 
@@ -131,7 +131,19 @@ public:
     {
         String description;
 
-        description << "The " << getDisplayName() << " exporter produces a single CMakeLists.txt file with "
+        description << "*****" << newLine
+                    << newLine
+                    << "This exporter is deprecated." << newLine
+                    << newLine
+                    << "CLion can open any CMake-based projects and JUCE's direct CMake support provides a much more "
+                    << "flexible way of configuring CMake. To get started using JUCE with CMake please see the guide in "
+                    << "the 'docs/CMake API.md' file in the JUCE source code." << newLine
+                    << newLine
+                    << "This exporter will no longer be updated and will eventually be removed from the Projucer." << newLine
+                    << newLine
+                    << "*****" << newLine
+                    << newLine
+                    << "This CLion exporter produces a single CMakeLists.txt file with "
                     << "multiple platform dependent sections, where the configuration for each section "
                     << "is inherited from other exporters added to this project." << newLine
                     << newLine
@@ -1068,6 +1080,21 @@ private:
 
                 if (! shouldUseGNUExtensions())
                     out << "    CXX_EXTENSIONS OFF" << newLine;
+
+                if (targetAttributeKeys.contains ("MTL_HEADER_SEARCH_PATHS"))
+                {
+                    auto pathsString = targetAttributes["MTL_HEADER_SEARCH_PATHS"].trim().substring (1).dropLastCharacters (1);
+
+                    pathsString = pathsString.replace ("\"$(inherited)\"", {})
+                                             .replace ("$(HOME)", "$ENV{HOME}")
+                                             .replace ("~", "$ENV{HOME}");
+
+                    auto paths = StringArray::fromTokens (pathsString, ",\"\t\\", {});
+                    paths.removeEmptyStrings();
+
+                    out << "    XCODE_ATTRIBUTE_MTL_HEADER_SEARCH_PATHS" << " " << paths.joinIntoString (" ").quoted() << newLine;
+                    targetAttributeKeys.removeString ("MTL_HEADER_SEARCH_PATHS");
+                }
 
                 for (auto& key : targetAttributeKeys)
                     out << "    XCODE_ATTRIBUTE_" << key << " " << targetAttributes[key] << newLine;
