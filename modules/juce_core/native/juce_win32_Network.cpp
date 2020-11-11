@@ -588,6 +588,10 @@ void IPAddress::findAllAddresses (Array<IPAddress>& result, bool includeIPv6)
     }
 }
 
+#if JUCE_WINDOWS
+#pragma comment(lib, "Iphlpapi.lib")
+#endif 
+
 IPAddress IPAddress::getInterfaceBroadcastAddress (const IPAddress& ip)
 {
 	IPAddress broadcastAddress;
