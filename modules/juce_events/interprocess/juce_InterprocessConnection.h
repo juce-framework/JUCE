@@ -191,7 +191,7 @@ public:
 
 private:
     //==============================================================================
-    CriticalSection pipeAndSocketLock;
+    ReadWriteLock pipeAndSocketLock;
     std::unique_ptr<StreamingSocket> socket;
     std::unique_ptr<NamedPipe> pipe;
     bool callbackConnectionState = false;
