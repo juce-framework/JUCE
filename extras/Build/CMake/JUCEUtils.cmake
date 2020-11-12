@@ -426,6 +426,22 @@ endfunction()
 
 # ==================================================================================================
 
+# Takes a target, a link visibility, and a variable-length list of framework
+# names. On macOS, finds the requested frameworks using `find_library` and
+# links them. On iOS, links directly with `-framework Name`.
+function(_juce_link_frameworks target visibility)
+    foreach(framework IN LISTS ARGN)
+        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            find_library("juce_found_${framework}" "${framework}" REQUIRED)
+            target_link_libraries("${target}" "${visibility}" "${juce_found_${framework}}")
+        elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+            target_link_libraries("${target}" "${visibility}" "-framework ${framework}")
+        endif()
+    endforeach()
+endfunction()
+
+# ==================================================================================================
+
 function(_juce_add_plugin_wrapper_target)
     set(one_value_args FORMAT PATH OUT_PATH INSTALL_EXPORT)
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
@@ -444,17 +460,13 @@ function(_juce_add_plugin_wrapper_target)
     install(TARGETS "${target_name}" EXPORT "${JUCE_ARG_INSTALL_EXPORT}")
 
     if(JUCE_ARG_FORMAT STREQUAL "AUv3")
-        find_library(AUv3_AVFoundation AVFoundation REQUIRED)
-        target_link_libraries("${target_name}" INTERFACE ${AUv3_AVFoundation})
+        _juce_link_frameworks("${target_name}" INTERFACE AVFoundation)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            find_library(AUv3_AudioUnit AudioUnit REQUIRED)
-            target_link_libraries("${target_name}" INTERFACE ${AUv3_AudioUnit})
+            _juce_link_frameworks("${target_name}" INTERFACE AudioUnit)
         endif()
     elseif(JUCE_ARG_FORMAT STREQUAL "AU")
-        find_library(AU_AudioUnit AudioUnit REQUIRED)
-        find_library(AU_CoreAudioKit CoreAudioKit REQUIRED)
-        target_link_libraries("${target_name}" INTERFACE ${AU_AudioUnit} ${AU_CoreAudioKit})
+        _juce_link_frameworks("${target_name}" INTERFACE AudioUnit CoreAudioKit)
     endif()
 endfunction()
 
@@ -567,8 +579,7 @@ function(juce_add_module module_path)
                 continue()
             endif()
 
-            find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
-            target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
+            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" OSXLibs)
@@ -580,8 +591,7 @@ function(juce_add_module module_path)
                 continue()
             endif()
 
-            find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
-            target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
+            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" iOSLibs)
@@ -676,15 +686,13 @@ function(_juce_link_optional_libraries target)
         get_target_property(needs_storekit ${target} JUCE_NEEDS_STORE_KIT)
 
         if(needs_storekit)
-            find_library(${target}_StoreKit StoreKit REQUIRED)
-            target_link_libraries(${target} PRIVATE ${${target}_StoreKit})
+            _juce_link_frameworks("${target}" PRIVATE StoreKit)
         endif()
 
         get_target_property(needs_camera ${target} JUCE_CAMERA_PERMISSION_ENABLED)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND needs_camera)
-            find_library(${target}_ImageIO ImageIO REQUIRED)
-            target_link_libraries(${target} PRIVATE ${${target}_ImageIO})
+            _juce_link_frameworks("${target}" PRIVATE ImageIO)
         endif()
     endif()
 endfunction()
@@ -1980,13 +1988,11 @@ function(_juce_initialise_target target)
         target_compile_definitions(${target} PUBLIC JUCE_PLUGINHOST_AU=1)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-            find_library(AU_CoreAudioKit CoreAudioKit REQUIRED)
-            target_link_libraries(${target} PRIVATE ${AU_CoreAudioKit})
+            _juce_link_frameworks("${target}" PRIVATE CoreAudioKit)
         endif()
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            find_library(AU_AudioUnit AudioUnit REQUIRED)
-            target_link_libraries(${target} PRIVATE ${AU_AudioUnit})
+            _juce_link_frameworks("${target}" PRIVATE AudioUnit)
         endif()
     endif()
 
