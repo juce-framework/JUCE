@@ -149,10 +149,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
             CACHE INTERNAL "The target architecture, used to name internal folders in VST3 bundles")
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_program(JUCE_RC_COMPILER Rez NO_DEFAULT_PATHS PATHS "/Applications/Xcode.app/Contents/Developer/usr/bin")
+    find_program(JUCE_XCRUN xcrun)
 
-    if(NOT JUCE_RC_COMPILER)
-        message(WARNING "failed to find Rez; older resource-based AU plug-ins may not work correctly")
+    if(NOT JUCE_XCRUN)
+        message(WARNING "failed to find xcrun; older resource-based AU plug-ins may not work correctly")
     endif()
 endif()
 
@@ -365,7 +365,7 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_au_resource_fork shared_code_target au_target)
-    if(NOT JUCE_RC_COMPILER)
+    if(NOT JUCE_XCRUN)
         return()
     endif()
 
@@ -408,7 +408,7 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
         VERBATIM)
 
     add_custom_command(OUTPUT "${au_rez_output}"
-        COMMAND "${JUCE_RC_COMPILER}"
+        COMMAND "${JUCE_XCRUN}" Rez
             -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64"
             -I "${secret_au_resource_dir}"
             -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
