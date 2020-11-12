@@ -1513,14 +1513,23 @@ function(_juce_configure_plugin_targets target)
 
     get_target_property(enabled_formats ${target} JUCE_FORMATS)
 
-    if((VST IN_LIST enabled_formats) AND (NOT TARGET juce_vst2_sdk))
+    set(active_formats)
+    _juce_get_platform_plugin_kinds(plugin_kinds)
+
+    foreach(kind IN LISTS plugin_kinds)
+        if(kind IN_LIST enabled_formats)
+            list(APPEND active_formats "${kind}")
+        endif()
+    endforeach()
+
+    if((VST IN_LIST active_formats) AND (NOT TARGET juce_vst2_sdk))
         message(FATAL_ERROR "Use juce_set_vst2_sdk_path to set up the VST sdk before adding VST targets")
-    elseif((AAX IN_LIST enabled_formats) AND (NOT TARGET juce_aax_sdk))
+    elseif((AAX IN_LIST active_formats) AND (NOT TARGET juce_aax_sdk))
         message(FATAL_ERROR "Use juce_set_aax_sdk_path to set up the AAX sdk before adding AAX targets")
     endif()
 
     _juce_add_standard_defs(${target})
-    _juce_add_plugin_definitions(${target} PRIVATE ${enabled_formats})
+    _juce_add_plugin_definitions(${target} PRIVATE ${active_formats})
 
     # The plugin wrappers need to know what other modules are available, especially
     # juce_audio_utils and juce_gui_basics. We achieve this by searching for
@@ -1596,12 +1605,8 @@ function(_juce_configure_plugin_targets target)
     add_custom_target(${target}_All)
     _juce_set_plugin_folder_property("${target}" "${target}_All")
 
-    _juce_get_platform_plugin_kinds(plugin_kinds)
-
-    foreach(kind IN LISTS plugin_kinds)
-        if(kind IN_LIST enabled_formats)
-            _juce_link_plugin_wrapper(${target} ${kind})
-        endif()
+    foreach(kind IN LISTS active_formats)
+        _juce_link_plugin_wrapper(${target} ${kind})
 
         if(TARGET ${target}_${kind})
             list(APPEND active_plugin_targets ${target}_${kind})
