@@ -703,7 +703,7 @@ function(_juce_get_module_definitions target filter out_var)
     set(compile_defs $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>>)
 
     if(filter)
-        set(${out_var} $<FILTER:${compile_defs},INCLUDE,JUCE_MODULE_AVAILABLE_> PARENT_SCOPE)
+        set(${out_var} $<FILTER:${compile_defs},EXCLUDE,JucePlugin_Build_|JUCE_SHARED_CODE> PARENT_SCOPE)
     else()
         set(${out_var} ${compile_defs} PARENT_SCOPE)
     endif()
