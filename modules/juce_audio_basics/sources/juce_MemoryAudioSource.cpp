@@ -67,7 +67,7 @@ void MemoryAudioSource::getNextAudioBlock (const AudioSourceChannelInfo& bufferT
     if (pos < m)
         dst.clear (bufferToFill.startSample + pos, m - pos);
 
-    position = (i % n);
+    position = i);
 }
 
 //==============================================================================
