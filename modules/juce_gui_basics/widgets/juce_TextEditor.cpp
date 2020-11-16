@@ -1730,10 +1730,13 @@ void TextEditor::paintOverChildren (Graphics& g)
         g.setColour (colourForTextWhenEmpty);
         g.setFont (getFont());
 
-        g.drawText (textToShowWhenEmpty,
-                    leftIndent, topIndent,
-                    viewport->getWidth() - leftIndent, getHeight() - topIndent,
-                    justification, true);
+        Rectangle<int> textBounds (leftIndent,
+                                   topIndent,
+                                   viewport->getWidth() - leftIndent,
+                                   getHeight() - topIndent);
+
+        if (! textBounds.isEmpty())
+            g.drawText (textToShowWhenEmpty, textBounds, justification, true);
     }
 
     getLookAndFeel().drawTextEditorOutline (g, getWidth(), getHeight(), *this);
