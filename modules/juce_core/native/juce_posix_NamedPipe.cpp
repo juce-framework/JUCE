@@ -154,7 +154,7 @@ private:
     bool openPipe (bool isInput, uint32 timeoutEnd)
     {
         auto& pipe = isInput ? pipeIn : pipeOut;
-        int flags = isInput ? O_RDWR | O_NONBLOCK : O_WRONLY;
+        int flags = (isInput ? O_RDWR : O_WRONLY) | O_NONBLOCK;
 
         const String& pipeName = isInput ? (createdPipe ? pipeInName : pipeOutName)
                                          : (createdPipe ? pipeOutName : pipeInName);
