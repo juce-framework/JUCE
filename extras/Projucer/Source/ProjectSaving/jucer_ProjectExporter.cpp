@@ -414,7 +414,7 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguratio
     addTargetSpecificPreprocessorDefs (defs, targetType);
 
     if (! project.shouldUseAppConfig())
-        defs = mergePreprocessorDefs (defs, project.getAppConfigDefs());
+        defs = mergePreprocessorDefs (project.getAppConfigDefs(), defs);
 
     return defs;
 }
