@@ -26,6 +26,12 @@
 struct CameraDevice::Pimpl
 {
    #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
+    #define JUCE_USE_NEW_APPLE_CAMERA_API 1
+   #else
+    #define JUCE_USE_NEW_APPLE_CAMERA_API 0
+   #endif
+
+   #if JUCE_USE_NEW_APPLE_CAMERA_API
     class PostCatalinaPhotoOutput
     {
     public:
@@ -95,22 +101,21 @@ struct CameraDevice::Pimpl
 
             static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* photo, NSError* error)
             {
-                String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
-                ignoreUnused (errorString);
-
-                JUCE_CAMERA_LOG ("didFinishProcessingPhoto(), error = " + errorString);
-
                 if (error != nil)
                 {
-                    JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
+                    String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
+                    ignoreUnused (errorString);
+
+                    JUCE_CAMERA_LOG ("Still picture capture failed, error: " + errorString);
                     jassertfalse;
+
                     return;
                 }
 
                 auto* imageData = [photo fileDataRepresentation];
                 auto image = ImageFileFormat::loadFrom (imageData.bytes, (size_t) imageData.length);
 
-                getOwner (self).imageCaptureFinished (image);;
+                getOwner (self).imageCaptureFinished (image);
             }
 
             static Pimpl& getOwner (id self) { return *getIvar<Pimpl*> (self, "owner"); }
@@ -129,8 +134,15 @@ struct CameraDevice::Pimpl
             if (imageOutput != nil)
                 return;
 
+            const auto codecType =
+                                  #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_13
+                                   AVVideoCodecTypeJPEG;
+                                  #else
+                                   AVVideoCodecJPEG;
+                                  #endif
+
             imageOutput = [[AVCaptureStillImageOutput alloc] init];
-            auto imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: AVVideoCodecJPEG, AVVideoCodecKey, nil];
+            auto imageSettings = [[NSDictionary alloc] initWithObjectsAndKeys: codecType, AVVideoCodecKey, nil];
             [imageOutput setOutputSettings: imageSettings];
             [imageSettings release];
             [s addOutput: imageOutput];
@@ -203,10 +215,8 @@ struct CameraDevice::Pimpl
         callbackDelegate = (id<AVCaptureFileOutputRecordingDelegate>) [cls.createInstance() init];
         DelegateClass::setOwner (callbackDelegate, this);
 
-        SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
-
         [[NSNotificationCenter defaultCenter] addObserver: callbackDelegate
-                                                 selector: runtimeErrorSel
+                                                 selector: DelegateClass::runtimeErrorSel()
                                                      name: AVCaptureSessionRuntimeErrorNotification
                                                    object: session];
     }
@@ -225,6 +235,12 @@ struct CameraDevice::Pimpl
 
     //==============================================================================
     bool openedOk() const noexcept       { return openingError.isEmpty(); }
+
+    void startSession()
+    {
+        if (! [session isRunning])
+            [session startRunning];
+    }
 
     void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
     {
@@ -246,6 +262,7 @@ struct CameraDevice::Pimpl
         firstPresentationTime = Time::getCurrentTime();
         file.deleteFile();
 
+        startSession();
         isRecording = true;
         [fileOutput startRecordingToOutputFileURL: createNSURLFromFile (file)
                                 recordingDelegate: callbackDelegate];
@@ -297,6 +314,23 @@ struct CameraDevice::Pimpl
         return session;
     }
 
+    NSView* createVideoCapturePreview()
+    {
+        // The video preview must be created before the capture session is
+        // started. Make sure you haven't called `addListener`,
+        // `startRecordingToFile`, or `takeStillPicture` before calling this
+        // function.
+        jassert (! [session isRunning]);
+        startSession();
+
+        JUCE_AUTORELEASEPOOL
+        {
+            NSView* view = [[NSView alloc] init];
+            [view setLayer: [AVCaptureVideoPreviewLayer layerWithSession: getCaptureSession()]];
+            return view;
+        }
+    }
+
 private:
     //==============================================================================
     struct DelegateClass  : public ObjCClass<NSObject>
@@ -311,14 +345,15 @@ private:
             addMethod (@selector (captureOutput:didResumeRecordingToOutputFileAtURL: fromConnections:),       didResumeRecordingToOutputFileAtURL,  "v@:@@@");
             addMethod (@selector (captureOutput:willFinishRecordingToOutputFileAtURL:fromConnections:error:), willFinishRecordingToOutputFileAtURL, "v@:@@@@");
 
-            SEL runtimeErrorSel = NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:"));
-            addMethod (runtimeErrorSel, sessionRuntimeError, "v@:@");
+            addMethod (runtimeErrorSel(), sessionRuntimeError, "v@:@");
 
             registerClass();
         }
 
         static void setOwner (id self, Pimpl* owner)   { object_setInstanceVariable (self, "owner", owner); }
         static Pimpl& getOwner (id self)               { return *getIvar<Pimpl*> (self, "owner"); }
+
+        static SEL runtimeErrorSel()    { return NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:")); }
 
     private:
         static void didStartRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}
@@ -480,6 +515,8 @@ private:
     {
         refreshIfNeeded();
 
+        startSession();
+
         if (auto* videoConnection = getVideoConnection())
             imageOutput.triggerImageCapture (*this);
     }
@@ -498,7 +535,7 @@ private:
 
     AVCaptureSession* session = nil;
     AVCaptureMovieFileOutput* fileOutput = nil;
-   #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
+   #if JUCE_USE_NEW_APPLE_CAMERA_API
     PostCatalinaPhotoOutput imageOutput;
    #else
     PreCatalinaStillImageOutput imageOutput;
@@ -525,20 +562,7 @@ struct CameraDevice::ViewerComponent  : public NSViewComponent
 {
     ViewerComponent (CameraDevice& device)
     {
-        JUCE_AUTORELEASEPOOL
-        {
-            AVCaptureVideoPreviewLayer* previewLayer = [[AVCaptureVideoPreviewLayer alloc] init];
-            AVCaptureSession* session = device.pimpl->getCaptureSession();
-
-            [session stopRunning];
-            [previewLayer setSession: session];
-            [session startRunning];
-
-            NSView* view = [[NSView alloc] init];
-            [view setLayer: previewLayer];
-
-            setView (view);
-        }
+        setView (device.pimpl->createVideoCapturePreview());
     }
 
     ~ViewerComponent()
@@ -553,3 +577,5 @@ String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
+
+#undef JUCE_USE_NEW_APPLE_CAMERA_API
