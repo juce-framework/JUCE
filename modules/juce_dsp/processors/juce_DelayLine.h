@@ -23,6 +23,10 @@
   ==============================================================================
 */
 
+#ifdef JUCE_LINUX
+  #undef None // Defined in X11/X.h, clashes with struct None below
+#endif
+
 namespace juce
 {
 namespace dsp
