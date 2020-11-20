@@ -41,6 +41,7 @@ bool NamedPipe::openExisting (const String& pipeName)
 
 bool NamedPipe::isOpen() const
 {
+    ScopedReadLock sl (lock);
     return pimpl != nullptr;
 }
 
@@ -55,6 +56,7 @@ bool NamedPipe::createNewPipe (const String& pipeName, bool mustNotExist)
 
 String NamedPipe::getName() const
 {
+    ScopedReadLock sl (lock);
     return currentPipeName;
 }
 

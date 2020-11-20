@@ -181,14 +181,20 @@ private:
 
 void NamedPipe::close()
 {
-    if (pimpl != nullptr)
     {
-        pimpl->stopReadOperation = true;
+        ScopedReadLock sl (lock);
 
-        char buffer[1] = { 0 };
-        ssize_t done = ::write (pimpl->pipeIn, buffer, 1);
-        ignoreUnused (done);
+        if (pimpl != nullptr)
+        {
+            pimpl->stopReadOperation = true;
 
+            char buffer[1] = { 0 };
+            ssize_t done = ::write (pimpl->pipeIn, buffer, 1);
+            ignoreUnused (done);
+        }
+    }
+
+    {
         ScopedWriteLock sl (lock);
         pimpl.reset();
     }
