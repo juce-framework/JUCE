@@ -1150,7 +1150,10 @@ private:
     bool waitForIO (OverlappedEvent& over, int timeOutMilliseconds)
     {
         if (shouldStop)
+        {
+            CancelIo (pipeH);
             return false;
+        }
 
         HANDLE handles[] = { over.over.hEvent, cancelEvent };
         DWORD waitResult = WaitForMultipleObjects (2, handles, FALSE,
