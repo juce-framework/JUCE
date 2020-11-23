@@ -357,6 +357,7 @@ namespace Ids
     DECLARE_ID (pluginAAXDisableMultiMono);
     DECLARE_ID (pluginVSTNumMidiInputs);
     DECLARE_ID (pluginVSTNumMidiOutputs);
+    DECLARE_ID (suppressPlistResourceUsage);
     DECLARE_ID (exporters);
     DECLARE_ID (website);
     DECLARE_ID (mainClass);

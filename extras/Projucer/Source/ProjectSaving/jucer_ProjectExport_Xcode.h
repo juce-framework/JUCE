@@ -181,7 +181,8 @@ public:
           keepCustomXcodeSchemesValue                  (settings, Ids::keepCustomXcodeSchemes,                  getUndoManager()),
           useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager()),
           customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
-          exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager())
+          exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager()),
+          suppressPlistResourceUsage                   (settings, Ids::suppressPlistResourceUsage,              getUndoManager())
     {
         if (iOS)
         {
@@ -267,6 +268,8 @@ public:
     bool isFileSharingEnabled() const                       { return uiFileSharingEnabledValue.get(); }
     bool isDocumentBrowserEnabled() const                   { return uiSupportsDocumentBrowserValue.get(); }
     bool isStatusBarHidden() const                          { return uiStatusBarHiddenValue.get(); }
+
+    bool getSuppressPlistResourceUsage() const              { return suppressPlistResourceUsage.get(); }
 
     String getDocumentExtensionsString() const              { return documentExtensionsValue.get(); }
 
@@ -566,6 +569,12 @@ public:
 
         props.add (new TextPropertyComponent (pListPrefixHeaderValue, "PList Prefix Header", 512, false),
                    "Header file containing definitions used in plist file (see PList Preprocess).");
+
+        props.add (new ChoicePropertyComponent (suppressPlistResourceUsage, "Suppress AudioUnit Plist resourceUsage Key"),
+                   "Suppress the resourceUsage key in the target's generated Plist. This is useful for AU"
+                   " plugins that must access resources which cannot be declared in the resourceUsage block, such"
+                   " as UNIX domain sockets. In particular, PACE-protected AU plugins may require this option to be enabled"
+                   " in order for the plugin to load in GarageBand.");
 
         props.add (new TextPropertyComponent (extraFrameworksValue, "Extra System Frameworks", 2048, false),
                    "A comma-separated list of extra system frameworks that should be added to the build. "
@@ -1742,6 +1751,7 @@ public:
             options.auMainType                      = owner.project.getAUMainTypeString();
             options.isAuSandboxSafe                 = owner.project.isAUSandBoxSafe();
             options.isPluginSynth                   = owner.project.isPluginSynth();
+            options.suppressResourceUsage           = owner.getSuppressPlistResourceUsage();
 
             options.write (infoPlistFile);
         }
@@ -1951,7 +1961,7 @@ private:
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
-                     exporterBundleIdentifierValue;
+                     exporterBundleIdentifierValue, suppressPlistResourceUsage;
 
     static String sanitisePath (const String& path)
     {
