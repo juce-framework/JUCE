@@ -328,7 +328,7 @@ endfunction()
 function(_juce_get_platform_plugin_kinds out)
     set(result Standalone)
 
-    if(APPLE)
+    if(APPLE AND (CMAKE_GENERATOR STREQUAL "Xcode"))
         list(APPEND result AUv3)
     endif()
 
