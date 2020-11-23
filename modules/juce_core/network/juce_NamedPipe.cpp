@@ -210,11 +210,6 @@ private:
                 pipe.openExisting (pipeName);
         }
 
-        ~NamedPipeThread()
-        {
-            stopThread (100);
-        }
-
         NamedPipe pipe;
         const String& pipeName;
         WaitableEvent& workCompleted;
@@ -230,6 +225,11 @@ private:
             : NamedPipeThread ("NamePipeSender", pName, shouldCreatePipe, completed),
               sendData (sData)
         {}
+
+        ~SenderThread() override
+        {
+            stopThread (100);
+        }
 
         void run() override
         {
@@ -247,6 +247,11 @@ private:
                         WaitableEvent& completed)
             : NamedPipeThread ("NamePipeSender", pName, shouldCreatePipe, completed)
         {}
+
+        ~ReceiverThread() override
+        {
+            stopThread (100);
+        }
 
         void run() override
         {
