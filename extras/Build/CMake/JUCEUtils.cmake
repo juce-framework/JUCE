@@ -1316,9 +1316,9 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
         _juce_copy_after_build(${shared_code_target} ${target_name} "${output_path}" JUCE_AU_COPY_DIR)
     elseif(kind STREQUAL "AUv3")
         set_target_properties(${target_name} PROPERTIES
+            XCODE_PRODUCT_TYPE "com.apple.product-type.app-extension"
             BUNDLE_EXTENSION appex
             XCODE_ATTRIBUTE_WRAPPER_EXTENSION appex
-            XCODE_ATTRIBUTE_PRODUCT_TYPE "com.apple.product-type.app-extension"
             XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE YES)
     elseif(kind STREQUAL "AAX")
         set_target_properties(${target_name} PROPERTIES
@@ -1625,10 +1625,6 @@ function(_juce_configure_plugin_targets target)
 
     if(TARGET ${target}_AAX)
         target_link_libraries(${target}_AAX PRIVATE juce_aax_sdk)
-    endif()
-
-    if(TARGET ${target}_AUv3)
-        target_link_libraries(${target}_AUv3 PUBLIC -fapplication-extension "-e _NSExtensionMain")
     endif()
 
     if((TARGET ${target}_AUv3) AND (TARGET ${target}_Standalone))
