@@ -1107,7 +1107,7 @@ function(_juce_configure_bundle source_target dest_target)
     if(juce_kind_string STREQUAL "AUv3 AppExtension")
         get_target_property(source_bundle_id ${source_target} JUCE_BUNDLE_ID)
 
-        if(source_bundle_id MATCHES "\\.(.*)$")
+        if(source_bundle_id MATCHES "\\.([^.]+)$")
             set_target_properties(${dest_target} PROPERTIES
                 XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER
                     "${source_bundle_id}.${CMAKE_MATCH_1}AUv3")
