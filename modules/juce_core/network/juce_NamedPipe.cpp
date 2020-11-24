@@ -77,7 +77,7 @@ public:
 
     void runTest() override
     {
-        const String pipeName ("TestPipe");
+        const auto pipeName = "TestPipe" + String ((intptr_t) Thread::getCurrentThreadId());
 
         beginTest ("Pre test cleanup");
         {
