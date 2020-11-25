@@ -997,8 +997,7 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath, TargetOS::getThisOS()).get().toString()) << newLine
-              << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
+        props << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
         return replaceLineFeeds (props, getNewLineString());
     }

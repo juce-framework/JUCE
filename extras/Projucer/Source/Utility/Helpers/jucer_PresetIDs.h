@@ -216,7 +216,6 @@ namespace Ids
     DECLARE_ID (androidCustomApplicationClass);
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
-    DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidOboeRepositoryPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
