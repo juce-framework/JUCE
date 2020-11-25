@@ -250,20 +250,24 @@ OwnedArray<LibraryModule> ProjectSaver::getModules()
     OwnedArray<LibraryModule> modules;
     project.getEnabledModules().createRequiredModules (modules);
 
+    auto isCommandLine = ProjucerApplication::getApp().isRunningCommandLine;
+
     for (auto* module : modules)
     {
         if (! module->isValid())
         {
-            addError ("At least one of your JUCE module paths is invalid!\n"
-                      "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder.");
+            addError (String ("At least one of your JUCE module paths is invalid!\n")
+                + (isCommandLine ? "Please ensure each module path points to the correct JUCE modules folder."
+                                 : "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder."));
 
             return {};
         }
 
         if (project.getEnabledModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
         {
-            addError ("At least one of your modules has missing dependencies!\n"
-                      "Please go to the settings page of the highlighted modules and add the required dependencies.");
+            addError (String ("At least one of your modules has missing dependencies!\n")
+                + (isCommandLine ? "Please add the required dependencies, or run the command again with the \"--fix-missing-dependencies\" option."
+                                 : "Please go to the settings page of the highlighted modules and add the required dependencies."));
 
             return {};
         }
