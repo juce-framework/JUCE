@@ -1836,7 +1836,7 @@ private:
         {
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
-            s.add ("android.permission.ACCESS_COARSE_LOCATION");
+            s.add ("android.permission.ACCESS_FINE_LOCATION");
         }
 
         if (androidExternalReadPermission.get())
