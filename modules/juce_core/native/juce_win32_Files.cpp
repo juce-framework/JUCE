@@ -975,7 +975,7 @@ public:
     Pimpl (const String& pipeName, const bool createPipe, bool mustNotExist)
         : filename ("\\\\.\\pipe\\" + File::createLegalFileName (pipeName)),
           pipeH (INVALID_HANDLE_VALUE),
-          cancelEvent (CreateEvent (nullptr, FALSE, FALSE, nullptr)),
+          cancelEvent (CreateEvent (nullptr, TRUE, FALSE, nullptr)),
           connected (false), ownsPipe (createPipe), shouldStop (false)
     {
         if (createPipe)
@@ -1157,7 +1157,7 @@ private:
         }
 
         HANDLE handles[] = { over.over.hEvent, cancelEvent };
-        DWORD waitResult = WaitForMultipleObjects (2, handles, FALSE,
+        DWORD waitResult = WaitForMultipleObjects (numElementsInArray (handles), handles, FALSE,
                                                    timeOutMilliseconds >= 0 ? (DWORD) timeOutMilliseconds
                                                                             : INFINITE);
 
