@@ -44,6 +44,7 @@
 
 //==============================================================================
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cmath>
 #include <condition_variable>
@@ -110,7 +111,6 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 
 #if JUCE_ANDROID
  #include <cstring>
- #include <atomic>
  #include <byteswap.h>
 #endif
 

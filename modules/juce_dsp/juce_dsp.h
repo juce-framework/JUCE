@@ -101,10 +101,7 @@
  #endif
 #endif
 
-#include <atomic>
 #include <complex>
-#include <cmath>
-#include <array>
 
 
 //==============================================================================
