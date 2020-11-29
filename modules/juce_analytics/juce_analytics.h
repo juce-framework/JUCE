@@ -51,7 +51,6 @@
 #pragma once
 #define JUCE_ANALYTICS_H_INCLUDED
 
-#include <queue>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include "destinations/juce_AnalyticsDestination.h"
