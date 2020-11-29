@@ -80,6 +80,10 @@ struct CachedImageList  : public ReferenceCountedObject,
             }
 
             c = images.add (new CachedImage (*this, pixelData));
+            // A single image taking more than the maximum cache size means it would be purged the next time
+            // -any- other image is inserted, then would be re-inserted on next use, then likely purged again,
+            // ad infinitum, greatly reducing graphics performance.
+            jassert (c->imageSize < maxCacheSize);
             totalSize += c->imageSize;
 
             while (totalSize > maxCacheSize && images.size() > 1 && totalSize > 0)
