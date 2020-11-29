@@ -78,6 +78,55 @@ static NSMutableURLRequest* getRequestForURL (const String& url, const StringArr
     return nullptr;
 }
 
+#if JUCE_MAC
+
+#if JUCE_USE_WKWEBVIEW
+ using WebViewBase = ObjCClass<WKWebView>;
+#else
+ using WebViewBase = ObjCClass<WebView>;
+#endif
+
+struct WebViewKeyEquivalentResponder : public WebViewBase
+{
+    WebViewKeyEquivalentResponder()
+        : WebViewBase ("WebViewKeyEquivalentResponder_")
+    {
+        addIvar<WebViewKeyEquivalentResponder*> ("owner");
+        addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
+        registerClass();
+    }
+
+private:
+    static WebViewKeyEquivalentResponder* getOwner (id self)
+    {
+        return getIvar<WebViewKeyEquivalentResponder*> (self, "owner");
+    }
+
+    static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
+    {
+        NSResponder* first = [[self window] firstResponder];
+
+        if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask)
+        {
+            auto sendAction = [&] (SEL actionSelector) -> BOOL
+            {
+                return [NSApp sendAction: actionSelector
+                                      to: first
+                                    from: self];
+            };
+
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"x"])  return sendAction (@selector (cut:));
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"c"])  return sendAction (@selector (copy:));
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"v"])  return sendAction (@selector (paste:));
+            if ([[event charactersIgnoringModifiers] isEqualToString: @"a"])  return sendAction (@selector (selectAll:));
+        }
+
+        return sendSuperclassMessage<BOOL> (self, selector, event);
+    }
+};
+
+#endif
+
 #if JUCE_USE_WKWEBVIEW
 
 struct WebViewDelegateClass  : public ObjCClass<NSObject>
@@ -96,8 +145,7 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
                               windowFeatures:),                                           createWebView,                   "@@:@@@@");
 
        #if WKWEBVIEW_OPENPANEL_SUPPORTED
-        addMethod (@selector (webView:runOpenPanelWithParameters:
-                              initiatedByFrame:completionHandler:),                      runOpenPanel,                    "v@:@@@@");
+        addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:), runOpenPanel, "v@:@@@@");
        #endif
 
         registerClass();
@@ -211,12 +259,17 @@ public:
 
        #if JUCE_MAC
         auto frame = NSMakeRect (0, 0, 100.0f, 100.0f);
+
+        static WebViewKeyEquivalentResponder webviewClass;
+        webView = (WKWebView*) webviewClass.createInstance();
+
+        webView = [webView initWithFrame: frame
+                           configuration: config];
        #else
         auto frame = CGRectMake (0, 0, 100.0f, 100.0f);
-       #endif
-
         webView = [[WKWebView alloc] initWithFrame: frame
                                      configuration: config];
+       #endif
 
         static WebViewDelegateClass cls;
         webViewDelegate = [cls.createInstance() init];
@@ -269,37 +322,6 @@ private:
 #else
 
 #if JUCE_MAC
-
-struct WebViewKeyEquivalentResponder : public ObjCClass<WebView>
-{
-    WebViewKeyEquivalentResponder() : ObjCClass<WebView> ("WebViewKeyEquivalentResponder_")
-    {
-        addIvar<WebViewKeyEquivalentResponder*> ("owner");
-        addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
-        registerClass();
-    }
-
-private:
-    static WebViewKeyEquivalentResponder* getOwner (id self)
-    {
-        return getIvar<WebViewKeyEquivalentResponder*> (self, "owner");
-    }
-
-    static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
-    {
-        NSResponder* first = [[self window] firstResponder];
-
-        if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask)
-        {
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"x"]) return [NSApp sendAction:@selector(cut:)       to:first from:self];
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"c"]) return [NSApp sendAction:@selector(copy:)      to:first from:self];
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"v"]) return [NSApp sendAction:@selector(paste:)     to:first from:self];
-            if ([[event charactersIgnoringModifiers] isEqualToString:@"a"]) return [NSApp sendAction:@selector(selectAll:) to:first from:self];
-        }
-
-        return sendSuperclassMessage<BOOL> (self, selector, event);
-    }
-};
 
 struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
 {
