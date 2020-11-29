@@ -32,7 +32,7 @@ namespace
 {
     static const char* const iOSDefaultVersion = "9.3";
     static const StringArray iOSVersions { "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                           "11.0", "12.0", "13.0" };
+                                           "11.0", "12.0", "13.0", "14.0" };
 
     enum class MacOSVersion
     {

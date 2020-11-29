@@ -89,7 +89,7 @@ InterprocessConnection::~InterprocessConnection()
     jassert (! safeAction->isSafe());
 
     callbackConnectionState = false;
-    disconnect();
+    disconnect (4000, Notify::no);
     thread.reset();
 }
 
@@ -103,7 +103,7 @@ bool InterprocessConnection::connectToSocket (const String& hostName,
 
     if (s->connect (hostName, portNumber, timeOutMillisecs))
     {
-        const ScopedLock sl (pipeAndSocketLock);
+        const ScopedWriteLock sl (pipeAndSocketLock);
         initialiseWithSocket (std::move (s));
         return true;
     }
@@ -119,7 +119,7 @@ bool InterprocessConnection::connectToPipe (const String& pipeName, int timeoutM
 
     if (newPipe->openExisting (pipeName))
     {
-        const ScopedLock sl (pipeAndSocketLock);
+        const ScopedWriteLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = timeoutMs;
         initialiseWithPipe (std::move (newPipe));
         return true;
@@ -136,7 +136,7 @@ bool InterprocessConnection::createPipe (const String& pipeName, int timeoutMs, 
 
     if (newPipe->createNewPipe (pipeName, mustNotExist))
     {
-        const ScopedLock sl (pipeAndSocketLock);
+        const ScopedWriteLock sl (pipeAndSocketLock);
         pipeReceiveMessageTimeout = timeoutMs;
         initialiseWithPipe (std::move (newPipe));
         return true;
@@ -145,33 +145,36 @@ bool InterprocessConnection::createPipe (const String& pipeName, int timeoutMs, 
     return false;
 }
 
-void InterprocessConnection::disconnect()
+void InterprocessConnection::disconnect (int timeoutMs, Notify notify)
 {
     thread->signalThreadShouldExit();
 
     {
-        const ScopedLock sl (pipeAndSocketLock);
+        const ScopedReadLock sl (pipeAndSocketLock);
         if (socket != nullptr)  socket->close();
         if (pipe != nullptr)    pipe->close();
     }
 
-    thread->stopThread (4000);
+    thread->stopThread (timeoutMs);
     deletePipeAndSocket();
-    connectionLostInt();
 
+    if (notify == Notify::yes)
+        connectionLostInt();
+
+    callbackConnectionState = false;
     safeAction->setSafe (false);
 }
 
 void InterprocessConnection::deletePipeAndSocket()
 {
-    const ScopedLock sl (pipeAndSocketLock);
+    const ScopedWriteLock sl (pipeAndSocketLock);
     socket.reset();
     pipe.reset();
 }
 
 bool InterprocessConnection::isConnected() const
 {
-    const ScopedLock sl (pipeAndSocketLock);
+    const ScopedReadLock sl (pipeAndSocketLock);
 
     return ((socket != nullptr && socket->isConnected())
               || (pipe != nullptr && pipe->isOpen()))
@@ -181,7 +184,7 @@ bool InterprocessConnection::isConnected() const
 String InterprocessConnection::getConnectedHostName() const
 {
     {
-        const ScopedLock sl (pipeAndSocketLock);
+        const ScopedReadLock sl (pipeAndSocketLock);
 
         if (pipe == nullptr && socket == nullptr)
             return {};
@@ -208,7 +211,7 @@ bool InterprocessConnection::sendMessage (const MemoryBlock& message)
 
 int InterprocessConnection::writeData (void* data, int dataSize)
 {
-    const ScopedLock sl (pipeAndSocketLock);
+    const ScopedReadLock sl (pipeAndSocketLock);
 
     if (socket != nullptr)
         return socket->write (data, dataSize);
@@ -323,6 +326,8 @@ void InterprocessConnection::deliverDataInt (const MemoryBlock& data)
 //==============================================================================
 int InterprocessConnection::readData (void* data, int num)
 {
+    const ScopedReadLock sl (pipeAndSocketLock);
+
     if (socket != nullptr)
         return socket->read (data, num, true);
 
