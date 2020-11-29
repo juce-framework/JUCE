@@ -54,7 +54,7 @@ namespace build_tools
     }
 
     String makeValidIdentifier (String s,
-                                bool capitalise,
+                                bool makeCamelCase,
                                 bool removeColons,
                                 bool allowTemplates,
                                 bool allowAsterisks = false);
