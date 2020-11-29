@@ -2168,24 +2168,39 @@ ModifierKeys XWindowSystem::getNativeRealtimeModifiers() const
     return ModifierKeys::currentModifiers;
 }
 
+static bool hasWorkAreaData (const XWindowSystemUtilities::GetXProperty& prop)
+{
+    return prop.success
+        && prop.actualType == XA_CARDINAL
+        && prop.actualFormat == 32
+        && prop.numItems == 4
+        && prop.data != nullptr;
+}
+
+static Rectangle<int> getWorkArea (const XWindowSystemUtilities::GetXProperty& prop)
+{
+    if (hasWorkAreaData (prop))
+    {
+        auto* positionData = prop.data;
+        std::array<long, 4> position;
+
+        for (auto& p : position)
+        {
+            memcpy (&p, positionData, sizeof (long));
+            positionData += sizeof (long);
+        }
+
+        return { (int) position[0], (int) position[1],
+                 (int) position[2], (int) position[3] };
+    }
+
+    return {};
+}
+
 Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
 {
     Array<Displays::Display> displays;
-
-    Atom hints = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WORKAREA");
-
-    auto getWorkAreaPropertyData = [&] (int screenNum) -> unsigned char*
-    {
-        if (hints != None)
-        {
-            XWindowSystemUtilities::GetXProperty prop (X11Symbols::getInstance()->xRootWindow (display, screenNum), hints, 0, 4, false, XA_CARDINAL);
-
-            if (prop.success && prop.actualType == XA_CARDINAL && prop.actualFormat == 32 && prop.numItems == 4)
-                return prop.data;
-        }
-
-        return nullptr;
-    };
+    auto workAreaHints = XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_WORKAREA");
 
    #if JUCE_USE_XRANDR
     {
@@ -2198,11 +2213,13 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
 
             for (int i = 0; i < numMonitors; ++i)
             {
-                if (getWorkAreaPropertyData (i) == nullptr)
+                auto rootWindow = X11Symbols::getInstance()->xRootWindow (display, i);
+                XWindowSystemUtilities::GetXProperty prop (rootWindow, workAreaHints, 0, 4, false, XA_CARDINAL);
+
+                if (! hasWorkAreaData (prop))
                     continue;
 
-                if (auto* screens = X11Symbols::getInstance()->xRRGetScreenResources (display,
-                                                                                      X11Symbols::getInstance()->xRootWindow (display, i)))
+                if (auto* screens = X11Symbols::getInstance()->xRRGetScreenResources (display, rootWindow))
                 {
                     for (int j = 0; j < screens->noutput; ++j)
                     {
@@ -2286,25 +2303,22 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
     if (displays.isEmpty())
    #endif
     {
-        if (hints != None)
+        if (workAreaHints != None)
         {
             auto numMonitors = X11Symbols::getInstance()->xScreenCount (display);
 
             for (int i = 0; i < numMonitors; ++i)
             {
-                if (auto* positionData = getWorkAreaPropertyData (i))
+                XWindowSystemUtilities::GetXProperty prop (X11Symbols::getInstance()->xRootWindow (display, i),
+                                                           workAreaHints, 0, 4, false, XA_CARDINAL);
+
+                auto workArea = getWorkArea (prop);
+
+                if (! workArea.isEmpty())
                 {
-                    std::array<long, 4> position;
-
-                    for (auto& p : position)
-                    {
-                        memcpy (&p, positionData, sizeof (long));
-                        positionData += sizeof (long);
-                    }
-
                     Displays::Display d;
-                    d.totalArea = { (int) position[0], (int) position[1],
-                                    (int) position[2], (int) position[3] };
+
+                    d.totalArea = workArea;
                     d.isMain = displays.isEmpty();
                     d.scale = masterScale;
                     d.dpi = DisplayHelpers::getDisplayDPI (display, i);
