@@ -157,12 +157,12 @@ private:
 #define JUCE_COMRESULT  HRESULT __stdcall
 
 //==============================================================================
-template <class ComClass>
-class ComBaseClassHelperBase   : public ComClass
+template <class First, class... ComClasses>
+class ComBaseClassHelperBase   : public First, public ComClasses...
 {
 public:
     ComBaseClassHelperBase (unsigned int initialRefCount)  : refCount (initialRefCount) {}
-    virtual ~ComBaseClassHelperBase() {}
+    virtual ~ComBaseClassHelperBase() = default;
 
     ULONG __stdcall AddRef()    { return ++refCount; }
     ULONG __stdcall Release()   { auto r = --refCount; if (r == 0) delete this; return r; }
@@ -173,7 +173,7 @@ protected:
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
         if (refId == __uuidof (IUnknown))
-            return castToType<IUnknown> (result);
+            return castToType<First> (result);
 
         *result = nullptr;
         return E_NOINTERFACE;
@@ -182,7 +182,10 @@ protected:
     template <class Type>
     JUCE_COMRESULT castToType (void** result)
     {
-        this->AddRef(); *result = dynamic_cast<Type*> (this); return S_OK;
+        this->AddRef();
+        *result = dynamic_cast<Type*> (this);
+
+        return S_OK;
     }
 };
 
@@ -190,19 +193,32 @@ protected:
 
     @tags{Core}
 */
-template <class ComClass>
-class ComBaseClassHelper   : public ComBaseClassHelperBase<ComClass>
+template <class... ComClasses>
+class ComBaseClassHelper   : public ComBaseClassHelperBase<ComClasses...>
 {
 public:
-    ComBaseClassHelper (unsigned int initialRefCount = 1) : ComBaseClassHelperBase<ComClass> (initialRefCount) {}
-    ~ComBaseClassHelper() {}
+    ComBaseClassHelper (unsigned int initialRefCount = 1) : ComBaseClassHelperBase<ComClasses...> (initialRefCount) {}
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
-        if (refId == __uuidof (ComClass))
-            return this->template castToType<ComClass> (result);
+        return queryInterfaceWithType (refId, result, Tag<ComClasses>{}...);
+    }
 
-        return ComBaseClassHelperBase<ComClass>::QueryInterface (refId, result);
+private:
+    JUCE_COMRESULT queryInterfaceWithType (REFIID refId, void** result)
+    {
+        return ComBaseClassHelperBase<ComClasses...>::QueryInterface (refId, result);
+    }
+
+    template <typename S> struct Tag {};
+
+    template <typename T, typename... Ts>
+    JUCE_COMRESULT queryInterfaceWithType (REFIID refId, void** result, Tag<T>, Tag<Ts>...)
+    {
+        if (refId == __uuidof (T))
+            return this->template castToType<T> (result);
+
+        return queryInterfaceWithType (refId, result, Tag<Ts>{}...);
     }
 };
 
