@@ -149,10 +149,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
             CACHE INTERNAL "The target architecture, used to name internal folders in VST3 bundles")
     endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_program(JUCE_RC_COMPILER Rez NO_DEFAULT_PATHS PATHS "/Applications/Xcode.app/Contents/Developer/usr/bin")
+    find_program(JUCE_XCRUN xcrun)
 
-    if(NOT JUCE_RC_COMPILER)
-        message(WARNING "failed to find Rez; older resource-based AU plug-ins may not work correctly")
+    if(NOT JUCE_XCRUN)
+        message(WARNING "failed to find xcrun; older resource-based AU plug-ins may not work correctly")
     endif()
 endif()
 
@@ -328,7 +328,7 @@ endfunction()
 function(_juce_get_platform_plugin_kinds out)
     set(result Standalone)
 
-    if(APPLE)
+    if(APPLE AND (CMAKE_GENERATOR STREQUAL "Xcode"))
         list(APPEND result AUv3)
     endif()
 
@@ -365,7 +365,7 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_add_au_resource_fork shared_code_target au_target)
-    if(NOT JUCE_RC_COMPILER)
+    if(NOT JUCE_XCRUN)
         return()
     endif()
 
@@ -408,7 +408,7 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
         VERBATIM)
 
     add_custom_command(OUTPUT "${au_rez_output}"
-        COMMAND "${JUCE_RC_COMPILER}"
+        COMMAND "${JUCE_XCRUN}" Rez
             -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64"
             -I "${secret_au_resource_dir}"
             -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
@@ -422,6 +422,22 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
         VERBATIM)
 
     set(au_resource_directory "$<TARGET_BUNDLE_DIR:${au_target}>/Contents/Resources")
+endfunction()
+
+# ==================================================================================================
+
+# Takes a target, a link visibility, and a variable-length list of framework
+# names. On macOS, finds the requested frameworks using `find_library` and
+# links them. On iOS, links directly with `-framework Name`.
+function(_juce_link_frameworks target visibility)
+    foreach(framework IN LISTS ARGN)
+        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+            find_library("juce_found_${framework}" "${framework}" REQUIRED)
+            target_link_libraries("${target}" "${visibility}" "${juce_found_${framework}}")
+        elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+            target_link_libraries("${target}" "${visibility}" "-framework ${framework}")
+        endif()
+    endforeach()
 endfunction()
 
 # ==================================================================================================
@@ -444,17 +460,13 @@ function(_juce_add_plugin_wrapper_target)
     install(TARGETS "${target_name}" EXPORT "${JUCE_ARG_INSTALL_EXPORT}")
 
     if(JUCE_ARG_FORMAT STREQUAL "AUv3")
-        find_library(AUv3_AVFoundation AVFoundation REQUIRED)
-        target_link_libraries("${target_name}" INTERFACE ${AUv3_AVFoundation})
+        _juce_link_frameworks("${target_name}" INTERFACE AVFoundation)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            find_library(AUv3_AudioUnit AudioUnit REQUIRED)
-            target_link_libraries("${target_name}" INTERFACE ${AUv3_AudioUnit})
+            _juce_link_frameworks("${target_name}" INTERFACE AudioUnit)
         endif()
     elseif(JUCE_ARG_FORMAT STREQUAL "AU")
-        find_library(AU_AudioUnit AudioUnit REQUIRED)
-        find_library(AU_CoreAudioKit CoreAudioKit REQUIRED)
-        target_link_libraries("${target_name}" INTERFACE ${AU_AudioUnit} ${AU_CoreAudioKit})
+        _juce_link_frameworks("${target_name}" INTERFACE AudioUnit CoreAudioKit)
     endif()
 endfunction()
 
@@ -567,8 +579,7 @@ function(juce_add_module module_path)
                 continue()
             endif()
 
-            find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
-            target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
+            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" OSXLibs)
@@ -580,8 +591,7 @@ function(juce_add_module module_path)
                 continue()
             endif()
 
-            find_library("${module_name}_${module_framework}" ${module_framework} REQUIRED)
-            target_link_libraries(${module_name} INTERFACE "${${module_name}_${module_framework}}")
+            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" iOSLibs)
@@ -676,15 +686,13 @@ function(_juce_link_optional_libraries target)
         get_target_property(needs_storekit ${target} JUCE_NEEDS_STORE_KIT)
 
         if(needs_storekit)
-            find_library(${target}_StoreKit StoreKit REQUIRED)
-            target_link_libraries(${target} PRIVATE ${${target}_StoreKit})
+            _juce_link_frameworks("${target}" PRIVATE StoreKit)
         endif()
 
         get_target_property(needs_camera ${target} JUCE_CAMERA_PERMISSION_ENABLED)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "iOS" AND needs_camera)
-            find_library(${target}_ImageIO ImageIO REQUIRED)
-            target_link_libraries(${target} PRIVATE ${${target}_ImageIO})
+            _juce_link_frameworks("${target}" PRIVATE ImageIO)
         endif()
     endif()
 endfunction()
@@ -695,7 +703,7 @@ function(_juce_get_module_definitions target filter out_var)
     set(compile_defs $<TARGET_GENEX_EVAL:${target},$<TARGET_PROPERTY:${target},COMPILE_DEFINITIONS>>)
 
     if(filter)
-        set(${out_var} $<FILTER:${compile_defs},INCLUDE,JUCE_MODULE_AVAILABLE_> PARENT_SCOPE)
+        set(${out_var} $<FILTER:${compile_defs},EXCLUDE,JucePlugin_Build_|JUCE_SHARED_CODE> PARENT_SCOPE)
     else()
         set(${out_var} ${compile_defs} PARENT_SCOPE)
     endif()
@@ -758,6 +766,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content PLUGIN_AU_MAIN_TYPE                  ${target} JUCE_AU_MAIN_TYPE_CODE)
     _juce_append_target_property(file_content IS_AU_SANDBOX_SAFE                   ${target} JUCE_AU_SANDBOX_SAFE)
     _juce_append_target_property(file_content IS_PLUGIN_SYNTH                      ${target} JUCE_IS_SYNTH)
+    _juce_append_target_property(file_content SUPPRESS_AU_PLIST_RESOURCE_USAGE     ${target} JUCE_SUPPRESS_AU_PLIST_RESOURCE_USAGE)
     _juce_append_target_property(file_content HARDENED_RUNTIME_ENABLED             ${target} JUCE_HARDENED_RUNTIME_ENABLED)
     _juce_append_target_property(file_content APP_SANDBOX_ENABLED                  ${target} JUCE_APP_SANDBOX_ENABLED)
     _juce_append_target_property(file_content APP_SANDBOX_INHERIT                  ${target} JUCE_APP_SANDBOX_INHERIT)
@@ -1099,7 +1108,7 @@ function(_juce_configure_bundle source_target dest_target)
     if(juce_kind_string STREQUAL "AUv3 AppExtension")
         get_target_property(source_bundle_id ${source_target} JUCE_BUNDLE_ID)
 
-        if(source_bundle_id MATCHES "\\.(.*)$")
+        if(source_bundle_id MATCHES "\\.([^.]+)$")
             set_target_properties(${dest_target} PROPERTIES
                 XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER
                     "${source_bundle_id}.${CMAKE_MATCH_1}AUv3")
@@ -1308,9 +1317,9 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
         _juce_copy_after_build(${shared_code_target} ${target_name} "${output_path}" JUCE_AU_COPY_DIR)
     elseif(kind STREQUAL "AUv3")
         set_target_properties(${target_name} PROPERTIES
+            XCODE_PRODUCT_TYPE "com.apple.product-type.app-extension"
             BUNDLE_EXTENSION appex
             XCODE_ATTRIBUTE_WRAPPER_EXTENSION appex
-            XCODE_ATTRIBUTE_PRODUCT_TYPE "com.apple.product-type.app-extension"
             XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE YES)
     elseif(kind STREQUAL "AAX")
         set_target_properties(${target_name} PROPERTIES
@@ -1505,14 +1514,23 @@ function(_juce_configure_plugin_targets target)
 
     get_target_property(enabled_formats ${target} JUCE_FORMATS)
 
-    if((VST IN_LIST enabled_formats) AND (NOT TARGET juce_vst2_sdk))
+    set(active_formats)
+    _juce_get_platform_plugin_kinds(plugin_kinds)
+
+    foreach(kind IN LISTS plugin_kinds)
+        if(kind IN_LIST enabled_formats)
+            list(APPEND active_formats "${kind}")
+        endif()
+    endforeach()
+
+    if((VST IN_LIST active_formats) AND (NOT TARGET juce_vst2_sdk))
         message(FATAL_ERROR "Use juce_set_vst2_sdk_path to set up the VST sdk before adding VST targets")
-    elseif((AAX IN_LIST enabled_formats) AND (NOT TARGET juce_aax_sdk))
+    elseif((AAX IN_LIST active_formats) AND (NOT TARGET juce_aax_sdk))
         message(FATAL_ERROR "Use juce_set_aax_sdk_path to set up the AAX sdk before adding AAX targets")
     endif()
 
     _juce_add_standard_defs(${target})
-    _juce_add_plugin_definitions(${target} PRIVATE ${enabled_formats})
+    _juce_add_plugin_definitions(${target} PRIVATE ${active_formats})
 
     # The plugin wrappers need to know what other modules are available, especially
     # juce_audio_utils and juce_gui_basics. We achieve this by searching for
@@ -1588,12 +1606,8 @@ function(_juce_configure_plugin_targets target)
     add_custom_target(${target}_All)
     _juce_set_plugin_folder_property("${target}" "${target}_All")
 
-    _juce_get_platform_plugin_kinds(plugin_kinds)
-
-    foreach(kind IN LISTS plugin_kinds)
-        if(kind IN_LIST enabled_formats)
-            _juce_link_plugin_wrapper(${target} ${kind})
-        endif()
+    foreach(kind IN LISTS active_formats)
+        _juce_link_plugin_wrapper(${target} ${kind})
 
         if(TARGET ${target}_${kind})
             list(APPEND active_plugin_targets ${target}_${kind})
@@ -1612,10 +1626,6 @@ function(_juce_configure_plugin_targets target)
 
     if(TARGET ${target}_AAX)
         target_link_libraries(${target}_AAX PRIVATE juce_aax_sdk)
-    endif()
-
-    if(TARGET ${target}_AUv3)
-        target_link_libraries(${target}_AUv3 PUBLIC -fapplication-extension "-e _NSExtensionMain")
     endif()
 
     if((TARGET ${target}_AUv3) AND (TARGET ${target}_Standalone))
@@ -1718,6 +1728,8 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} VST_NUM_MIDI_OUTS 16)
 
     _juce_set_property_if_not_set(${target} AU_SANDBOX_SAFE FALSE)
+
+    _juce_set_property_if_not_set(${target} SUPPRESS_AU_PLIST_RESOURCE_USAGE FALSE)
 
     _juce_set_property_if_not_set(${target} HARDENED_RUNTIME_ENABLED NO)
     _juce_set_property_if_not_set(${target} APP_SANDBOX_ENABLED NO)
@@ -1901,6 +1913,7 @@ function(_juce_initialise_target target)
         AU_MAIN_TYPE
         AU_EXPORT_PREFIX
         AU_SANDBOX_SAFE
+        SUPPRESS_AU_PLIST_RESOURCE_USAGE
         AAX_CATEGORY
         PLUGINHOST_AU                   # Set this true if you want to host AU plugins
         USE_LEGACY_COMPATIBILITY_PLUGIN_CODE
@@ -1980,13 +1993,11 @@ function(_juce_initialise_target target)
         target_compile_definitions(${target} PUBLIC JUCE_PLUGINHOST_AU=1)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
-            find_library(AU_CoreAudioKit CoreAudioKit REQUIRED)
-            target_link_libraries(${target} PRIVATE ${AU_CoreAudioKit})
+            _juce_link_frameworks("${target}" PRIVATE CoreAudioKit)
         endif()
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            find_library(AU_AudioUnit AudioUnit REQUIRED)
-            target_link_libraries(${target} PRIVATE ${AU_AudioUnit})
+            _juce_link_frameworks("${target}" PRIVATE AudioUnit)
         endif()
     endif()
 

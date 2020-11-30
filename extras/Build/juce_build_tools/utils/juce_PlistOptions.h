@@ -89,6 +89,7 @@ namespace build_tools
         String auMainType;
         bool isAuSandboxSafe                    = false;
         bool isPluginSynth                      = false;
+        bool suppressResourceUsage              = false;
 
     private:
         void write (MemoryOutputStream&) const;

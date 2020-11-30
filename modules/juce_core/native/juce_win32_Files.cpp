@@ -975,7 +975,7 @@ public:
     Pimpl (const String& pipeName, const bool createPipe, bool mustNotExist)
         : filename ("\\\\.\\pipe\\" + File::createLegalFileName (pipeName)),
           pipeH (INVALID_HANDLE_VALUE),
-          cancelEvent (CreateEvent (nullptr, FALSE, FALSE, nullptr)),
+          cancelEvent (CreateEvent (nullptr, TRUE, FALSE, nullptr)),
           connected (false), ownsPipe (createPipe), shouldStop (false)
     {
         if (createPipe)
@@ -1071,14 +1071,12 @@ public:
                 return 0;
 
             OverlappedEvent over;
-            unsigned long numRead;
+            unsigned long numRead = 0;
 
             if (ReadFile (pipeH, destBuffer, (DWORD) maxBytesToRead, &numRead, &over.over))
                 return (int) numRead;
 
-            const DWORD lastError = GetLastError();
-
-            if (lastError == ERROR_IO_PENDING)
+            if (GetLastError() == ERROR_IO_PENDING)
             {
                 if (! waitForIO (over, timeOutMilliseconds))
                     return -1;
@@ -1087,7 +1085,9 @@ public:
                     return (int) numRead;
             }
 
-            if (ownsPipe && (GetLastError() == ERROR_BROKEN_PIPE || GetLastError() == ERROR_PIPE_NOT_CONNECTED))
+            const auto lastError = GetLastError();
+
+            if (ownsPipe && (lastError == ERROR_BROKEN_PIPE || lastError == ERROR_PIPE_NOT_CONNECTED))
                 disconnectPipe();
             else
                 break;
@@ -1127,7 +1127,8 @@ public:
 
     const String filename;
     HANDLE pipeH, cancelEvent;
-    bool connected, ownsPipe, shouldStop;
+    bool connected, ownsPipe;
+    std::atomic<bool> shouldStop;
     CriticalSection createFileLock;
 
 private:
@@ -1150,10 +1151,13 @@ private:
     bool waitForIO (OverlappedEvent& over, int timeOutMilliseconds)
     {
         if (shouldStop)
+        {
+            CancelIo (pipeH);
             return false;
+        }
 
         HANDLE handles[] = { over.over.hEvent, cancelEvent };
-        DWORD waitResult = WaitForMultipleObjects (2, handles, FALSE,
+        DWORD waitResult = WaitForMultipleObjects (numElementsInArray (handles), handles, FALSE,
                                                    timeOutMilliseconds >= 0 ? (DWORD) timeOutMilliseconds
                                                                             : INFINITE);
 
@@ -1169,11 +1173,17 @@ private:
 
 void NamedPipe::close()
 {
-    if (pimpl != nullptr)
     {
-        pimpl->shouldStop = true;
-        SetEvent (pimpl->cancelEvent);
+        ScopedReadLock sl (lock);
 
+        if (pimpl != nullptr)
+        {
+            pimpl->shouldStop = true;
+            SetEvent (pimpl->cancelEvent);
+        }
+    }
+
+    {
         ScopedWriteLock sl (lock);
         pimpl.reset();
     }
@@ -1181,22 +1191,19 @@ void NamedPipe::close()
 
 bool NamedPipe::openInternal (const String& pipeName, const bool createPipe, bool mustNotExist)
 {
-    pimpl.reset (new Pimpl (pipeName, createPipe, mustNotExist));
+    auto newPimpl = std::make_unique<Pimpl> (pipeName, createPipe, mustNotExist);
 
     if (createPipe)
     {
-        if (pimpl->pipeH == INVALID_HANDLE_VALUE)
-        {
-            pimpl.reset();
+        if (newPimpl->pipeH == INVALID_HANDLE_VALUE)
             return false;
-        }
     }
-    else if (! pimpl->connect (200))
+    else if (! newPimpl->connect (200))
     {
-        pimpl.reset();
         return false;
     }
 
+    pimpl = std::move (newPimpl);
     return true;
 }
 

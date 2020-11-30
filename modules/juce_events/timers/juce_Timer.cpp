@@ -321,7 +321,9 @@ Timer::~Timer()
     // been stopped before execution reaches this point. A simple way to achieve this
     // is to add a call to `stopTimer()` to the destructor of your class which inherits
     // from Timer.
-    jassert (MessageManager::existsAndIsCurrentThread() || ! isTimerRunning());
+    jassert (! isTimerRunning()
+             || MessageManager::getInstanceWithoutCreating() == nullptr
+             || MessageManager::getInstanceWithoutCreating()->currentThreadHasLockedMessageManager());
 
     stopTimer();
 }

@@ -253,7 +253,7 @@ public:
 
         Note: This is the latency of the convolution engine, not the latency
         associated with the current impulse response choice that has to be
-        considered separately (linear phase filters, for eaxmple).
+        considered separately (linear phase filters, for example).
     */
     int getLatency() const;
 
