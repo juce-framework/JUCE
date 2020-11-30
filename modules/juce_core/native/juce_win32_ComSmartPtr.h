@@ -50,6 +50,10 @@ namespace juce
  #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
 #endif
 
+#define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown
+#define JUCE_COMRESULT                   HRESULT STDMETHODCALLTYPE
+#define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
+
 inline GUID uuidFromString (const char* s) noexcept
 {
     uint32 ints[4] = {};
@@ -154,9 +158,6 @@ private:
 };
 
 //==============================================================================
-#define JUCE_COMRESULT  HRESULT __stdcall
-
-//==============================================================================
 template <class First, class... ComClasses>
 class ComBaseClassHelperBase   : public First, public ComClasses...
 {
@@ -164,8 +165,8 @@ public:
     ComBaseClassHelperBase (unsigned int initialRefCount)  : refCount (initialRefCount) {}
     virtual ~ComBaseClassHelperBase() = default;
 
-    ULONG __stdcall AddRef()    { return ++refCount; }
-    ULONG __stdcall Release()   { auto r = --refCount; if (r == 0) delete this; return r; }
+    ULONG STDMETHODCALLTYPE AddRef()    { return ++refCount; }
+    ULONG STDMETHODCALLTYPE Release()   { auto r = --refCount; if (r == 0) delete this; return r; }
 
 protected:
     ULONG refCount;

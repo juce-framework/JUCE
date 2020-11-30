@@ -782,9 +782,9 @@ private:
     public:
         virtual ~DeviceCallbackHandler() {};
 
-        virtual HRESULT addDevice (IDeviceInformation*) = 0;
-        virtual HRESULT removeDevice (IDeviceInformationUpdate*) = 0;
-        virtual HRESULT updateDevice (IDeviceInformationUpdate*) = 0;
+        JUCE_COMCALL addDevice (IDeviceInformation*) = 0;
+        JUCE_COMCALL removeDevice (IDeviceInformationUpdate*) = 0;
+        JUCE_COMCALL updateDevice (IDeviceInformationUpdate*) = 0;
 
         bool attach (HSTRING deviceSelector, DeviceInformationKind infoKind)
         {
