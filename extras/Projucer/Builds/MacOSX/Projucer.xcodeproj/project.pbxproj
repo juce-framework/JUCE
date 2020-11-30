@@ -49,6 +49,10 @@
 			isa = PBXBuildFile;
 			fileRef = 842427CFE565F3FCE5B99174;
 		};
+		DD0FF38F7E8DE0220D73671D = {
+			isa = PBXBuildFile;
+			fileRef = BF006EF584FB274FF0319E08;
+		};
 		49C22786B54C5DC94E4654B8 = {
 			isa = PBXBuildFile;
 			fileRef = E96597BBC6A98255B51B94DC;
@@ -1924,6 +1928,13 @@
 			path = "../../Source/Settings/jucer_AppearanceSettings.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		BF006EF584FB274FF0319E08 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Foundation.framework;
+			path = System/Library/Frameworks/Foundation.framework;
+			sourceTree = SDKROOT;
+		};
 		BF301C2E545AEB4AC112C176 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -3106,6 +3117,7 @@
 				E983E6DDE3318B872EBE347F,
 				8F7BE18698ADCEF51CDE4A5C,
 				842427CFE565F3FCE5B99174,
+				BF006EF584FB274FF0319E08,
 				E96597BBC6A98255B51B94DC,
 				431D30038CBF67F80E8B3A13,
 				9F01BA9942D038EA8B5289A8,
@@ -3482,6 +3494,7 @@
 				091A57B4B9CE623E75E9A756,
 				FAB47E69F7D9DCE1F906AA07,
 				0E884E47A637D6C65154699A,
+				DD0FF38F7E8DE0220D73671D,
 				49C22786B54C5DC94E4654B8,
 				CDEF9FF2D119476D707305DF,
 				96EC6315E1B3F1A109F84BAF,
