@@ -49,9 +49,12 @@
 #endif
 
 #if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
+ #define JUCE_IPP_AVAILABLE 1
+#endif
+
+#if JUCE_IPP_AVAILABLE
  #include <ippcore.h>
  #include <ipps.h>
- #define JUCE_IPP_AVAILABLE 1
 #endif
 
 #include "containers/juce_FixedSizeFunction.h"

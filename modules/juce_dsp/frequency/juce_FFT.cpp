@@ -803,12 +803,7 @@ struct IntelFFT  : public FFT::Instance
 FFT::EngineImpl<IntelFFT> fftwEngine;
 #endif
 
-//==============================================================================
-//==============================================================================
-// Visual Studio should define no more than one of these, depending on the
-// setting at 'Project' > 'Properties' > 'Configuration Properties' > 'Intel
-// Performance Libraries' > 'Use Intel(R) IPP'
-#if _IPP_SEQUENTIAL_STATIC || _IPP_SEQUENTIAL_DYNAMIC || _IPP_PARALLEL_STATIC || _IPP_PARALLEL_DYNAMIC
+#if JUCE_IPP_AVAILABLE
 class IntelPerformancePrimitivesFFT : public FFT::Instance
 {
 public:
@@ -900,7 +895,7 @@ private:
             return { std::move (specBuf), IppPtr (ippsMalloc_8u (workSize)), specPtr };
         }
 
-        Context() noexcept = default;
+        Context() noexcept {}
 
         Context (IppPtr&& spec, IppPtr&& work, typename Traits::Spec* ptr) noexcept
             : specBuf (std::move (spec)), workBuf (std::move (work)), specPtr (ptr)
