@@ -106,7 +106,15 @@ private:
     {
         NSResponder* first = [[self window] firstResponder];
 
-        if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask)
+       #if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
+        constexpr auto mask = NSEventModifierFlagDeviceIndependentFlagsMask;
+        constexpr auto key  = NSEventModifierFlagCommand;
+       #else
+        constexpr auto mask = NSDeviceIndependentModifierFlagsMask;
+        constexpr auto key  = NSCommandKeyMask;
+       #endif
+
+        if (([event modifierFlags] & mask) == key)
         {
             auto sendAction = [&] (SEL actionSelector) -> BOOL
             {
