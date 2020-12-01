@@ -3240,7 +3240,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 1200; "
+        attributes << "{ LastUpgradeCheck = 1220; "
                    << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
                    <<"; ";
 
