@@ -948,7 +948,7 @@ public:
         auto msSinceLastRepaint = (lastRepaintTime >= now) ? now - lastRepaintTime
                                                            : (std::numeric_limits<uint32>::max() - lastRepaintTime) + now;
 
-        static uint32 minimumRepaintInterval = 1000 / 32; // 30fps - The interval is intentionally slightly smaller so that 
+        static uint32 minimumRepaintInterval = 1000 / 32; // 30fps - The interval is intentionally slightly smaller 
 
         // When windows are being resized, artificially throttling high-frequency repaints helps
         // to stop the event queue getting clogged, and keeps everything working smoothly.
