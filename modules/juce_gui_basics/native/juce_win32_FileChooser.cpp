@@ -234,8 +234,12 @@ private:
             };
 
             LPWSTR ptr = nullptr;
-            item.GetDisplayName (SIGDN_URL, &ptr);
-            return std::unique_ptr<WCHAR, Free> { ptr };
+
+            if (item.GetDisplayName (SIGDN_FILESYSPATH, &ptr) != S_OK)
+                return URL();
+
+            const auto path = std::unique_ptr<WCHAR, Free> { ptr };
+            return URL (File (String (path.get())));
         };
 
         if (isSave)
@@ -262,7 +266,12 @@ private:
             if (item == nullptr)
                 return {};
 
-            return { URL (String (getUrl (*item).get())) };
+            const auto url = getUrl (*item);
+
+            if (url.isEmpty())
+                return {};
+
+            return { url };
         }
 
         const auto dialog = [&]
@@ -298,7 +307,12 @@ private:
             items->GetItemAt (i, scope.resetAndGetPointerAddress());
 
             if (scope != nullptr)
-                result.add (String (getUrl (*scope).get()));
+            {
+                const auto url = getUrl (*scope);
+
+                if (! url.isEmpty())
+                    result.add (url);
+            }
         }
 
         return result;

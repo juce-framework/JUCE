@@ -69,6 +69,10 @@
 			isa = PBXBuildFile;
 			fileRef = B457EE687507BF1DEEA7581F;
 		};
+		FE22E1AF24FA9ED43E983B81 = {
+			isa = PBXBuildFile;
+			fileRef = 5F0ADA39C70C892758A941F6;
+		};
 		59F4F23BFFDAB414B4801F85 = {
 			isa = PBXBuildFile;
 			fileRef = 29E0972229FB44D969035B4E;
@@ -318,6 +322,13 @@
 			name = "include_juce_data_structures.mm";
 			path = "../../JuceLibraryCode/include_juce_data_structures.mm";
 			sourceTree = "SOURCE_ROOT";
+		};
+		5F0ADA39C70C892758A941F6 = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder;
+			name = Assets;
+			path = ../../../../examples/Assets;
+			sourceTree = "<group>";
 		};
 		5FBD6C402617272052BB4D81 = {
 			isa = PBXFileReference;
@@ -705,6 +716,7 @@
 		A97EE73C79DA3F729D46AF48 = {
 			isa = PBXGroup;
 			children = (
+				5F0ADA39C70C892758A941F6,
 				57DF618F1DE781556B7AFC32,
 				29E0972229FB44D969035B4E,
 				F58EBA72DA53F75945B91321,
@@ -1042,6 +1054,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE22E1AF24FA9ED43E983B81,
 				59F4F23BFFDAB414B4801F85,
 				E283262A07376A7EDFCEAF6F,
 				443244451A0F2064D4767337,

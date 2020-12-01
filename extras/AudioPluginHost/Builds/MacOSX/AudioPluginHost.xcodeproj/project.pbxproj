@@ -45,6 +45,10 @@
 			isa = PBXBuildFile;
 			fileRef = B8774D8AD307D798831C0DF7;
 		};
+		9056B642BEF870098DE344E5 = {
+			isa = PBXBuildFile;
+			fileRef = 03FA420AACDD03D50AA16E4A;
+		};
 		68FBFDA1FE637B3EDA09A592 = {
 			isa = PBXBuildFile;
 			fileRef = 4DF6E6E41E10965AD169143B;
@@ -60,6 +64,10 @@
 		4DB15177DDC357F4503F88CF = {
 			isa = PBXBuildFile;
 			fileRef = B457EE687507BF1DEEA7581F;
+		};
+		FE22E1AF24FA9ED43E983B81 = {
+			isa = PBXBuildFile;
+			fileRef = 5F0ADA39C70C892758A941F6;
 		};
 		D92C7BF86C9CCF6B4D14F809 = {
 			isa = PBXBuildFile;
@@ -152,6 +160,13 @@
 		2727A191DB1BAAC9C04B9081 = {
 			isa = PBXBuildFile;
 			fileRef = 37E4D5C341406B7072120006;
+		};
+		03FA420AACDD03D50AA16E4A = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Foundation.framework;
+			path = System/Library/Frameworks/Foundation.framework;
+			sourceTree = SDKROOT;
 		};
 		04AABCD3491318FB32E844B4 = {
 			isa = PBXFileReference;
@@ -299,6 +314,13 @@
 			name = "include_juce_data_structures.mm";
 			path = "../../JuceLibraryCode/include_juce_data_structures.mm";
 			sourceTree = "SOURCE_ROOT";
+		};
+		5F0ADA39C70C892758A941F6 = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder;
+			name = Assets;
+			path = ../../../../examples/Assets;
+			sourceTree = "<group>";
 		};
 		5FBD6C402617272052BB4D81 = {
 			isa = PBXFileReference;
@@ -672,6 +694,7 @@
 		A97EE73C79DA3F729D46AF48 = {
 			isa = PBXGroup;
 			children = (
+				5F0ADA39C70C892758A941F6,
 				57DF618F1DE781556B7AFC32,
 				7DA35787B5F6F7440D667CC8,
 				2A6983F82B13F9E8B10299AE,
@@ -691,6 +714,7 @@
 				E68018DE199135B7F738FB17,
 				5AF0CA7CDFCA90B4DE1F55C3,
 				B8774D8AD307D798831C0DF7,
+				03FA420AACDD03D50AA16E4A,
 				4DF6E6E41E10965AD169143B,
 				D313CF37B25D7FD313C4F336,
 				89309C0C5F3269BD06BE7F27,
@@ -1002,6 +1026,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE22E1AF24FA9ED43E983B81,
 				D92C7BF86C9CCF6B4D14F809,
 				443244451A0F2064D4767337,
 			);
@@ -1048,6 +1073,7 @@
 				70580743C3D5695F065FF698,
 				E092A70431B046BF1F50A482,
 				E2BAA7CFC729809530FD71EE,
+				9056B642BEF870098DE344E5,
 				68FBFDA1FE637B3EDA09A592,
 				BBA1733CF8B064A5FD0B4CF4,
 				A02C9F4C4B840C27B6CAFEBD,

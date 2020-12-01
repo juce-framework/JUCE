@@ -632,12 +632,20 @@ void UIViewComponentPeer::setBounds (const Rectangle<int>& newBounds, const bool
 
 Rectangle<int> UIViewComponentPeer::getBounds (const bool global) const
 {
-    CGRect r = view.frame;
+    auto r = view.frame;
 
-    if (global && view.window != nil)
+    if (global)
     {
-        r = [view convertRect: r toView: view.window];
-        r = [view.window convertRect: r toWindow: nil];
+        if (view.window != nil)
+        {
+            r = [view convertRect: r toView: view.window];
+            r = [view.window convertRect: r toWindow: nil];
+        }
+        else if (window != nil)
+        {
+            r.origin.x += window.frame.origin.x;
+            r.origin.y += window.frame.origin.y;
+        }
     }
 
     return convertToRectInt (r);
