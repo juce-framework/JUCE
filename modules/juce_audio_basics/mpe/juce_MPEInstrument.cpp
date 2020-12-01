@@ -65,6 +65,10 @@ void MPEInstrument::setZoneLayout (MPEZoneLayout newLayout)
     const ScopedLock sl (lock);
     legacyMode.isEnabled = false;
     zoneLayout = newLayout;
+
+    std::fill_n (pressureDimension.lastValueReceivedOnChannel, 16, MPEValue::minValue());
+    std::fill_n (pitchbendDimension.lastValueReceivedOnChannel, 16, MPEValue::centreValue());
+    std::fill_n (timbreDimension.lastValueReceivedOnChannel, 16, MPEValue::centreValue());
 }
 
 //==============================================================================
