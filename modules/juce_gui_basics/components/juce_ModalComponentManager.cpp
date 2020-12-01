@@ -89,6 +89,14 @@ ModalComponentManager::ModalComponentManager()
 
 ModalComponentManager::~ModalComponentManager()
 {
+    for (int i = stack.size(); --i >= 0;)
+    {
+         auto* item = stack.getUnchecked(i);
+         std::unique_ptr<ModalItem> deleter(stack.removeAndReturn(i));
+         Component::SafePointer<Component> compToDelete(item->autoDelete ? item->component : nullptr);
+         compToDelete.deleteAndZero();
+    }
+    
     stack.clear();
     clearSingletonInstance();
 }
