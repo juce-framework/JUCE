@@ -471,7 +471,7 @@ struct AppleFFT  : public FFT::Instance
 
         inoutData[size] = 0.0f;
         vDSP_fft_zrip (fftSetup, &splitInOut, 2, order, kFFTDirection_Forward);
-        vDSP_vsmul (inoutData, 1, &forwardNormalisation, inoutData, 1, static_cast<size_t> (size << 1));
+        vDSP_vsmul (inoutData, 1, &forwardNormalisation, inoutData, 1, static_cast<size_t> (size));
 
         mirrorResult (inout, ignoreNegativeFreqs);
     }
@@ -489,8 +489,7 @@ struct AppleFFT  : public FFT::Instance
             inout[0] = Complex<float> (inout[0].real(), inout[size >> 1].real());
 
         vDSP_fft_zrip (fftSetup, &splitInOut, 2, order, kFFTDirection_Inverse);
-        vDSP_vsmul (inoutData, 1, &inverseNormalisation, inoutData, 1, static_cast<size_t> (size << 1));
-        vDSP_vclr (inoutData + size, 1, static_cast<size_t> (size));
+        vDSP_vsmul (inoutData, 1, &inverseNormalisation, inoutData, 1, static_cast<size_t> (size));
     }
 
 private:
