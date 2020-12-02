@@ -410,7 +410,7 @@ struct MenuWindow  : public Component
             }
             else
             {
-                hide (nullptr, false);
+                hide (nullptr, true);
             }
         }
     }
@@ -621,26 +621,22 @@ struct MenuWindow  : public Component
 
     bool doesAnyJuceCompHaveFocus()
     {
-        bool anyFocused = Process::isForegroundProcess();
+        if (! Process::isForegroundProcess())
+            return false;
 
-        if (anyFocused && Component::getCurrentlyFocusedComponent() == nullptr)
+        if (Component::getCurrentlyFocusedComponent() != nullptr)
+            return true;
+
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
         {
-            // because no component at all may have focus, our test here will
-            // only be triggered when something has focus and then loses it.
-            anyFocused = ! hasAnyJuceCompHadFocus;
-
-            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+            if (ComponentPeer::getPeer (i)->isFocused())
             {
-                if (ComponentPeer::getPeer (i)->isFocused())
-                {
-                    anyFocused = true;
-                    hasAnyJuceCompHadFocus = true;
-                    break;
-                }
+                hasAnyJuceCompHadFocus = true;
+                return true;
             }
         }
 
-        return anyFocused;
+        return ! hasAnyJuceCompHadFocus;
     }
 
     //==============================================================================
@@ -1869,7 +1865,16 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         // (this would be the place to fade out the component, if that's what's required)
         component.reset();
 
-        if (! PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
+        const auto prevFocusedIsNotMinimised = [&]
+        {
+            if (auto* comp = prevFocused.get())
+                if (auto* peer = comp->getPeer())
+                    return ! peer->isMinimised();
+
+            return false;
+        };
+
+        if (! PopupMenuSettings::menuWasHiddenBecauseOfAppChange && prevFocusedIsNotMinimised())
         {
             if (prevTopLevel != nullptr)
                 prevTopLevel->toFront (true);

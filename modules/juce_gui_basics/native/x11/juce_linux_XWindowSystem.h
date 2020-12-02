@@ -85,7 +85,7 @@ namespace XWindowSystemUtilities
 
         static constexpr unsigned long DndVersion = 3;
 
-        Atom protocols, protocolList[3], changeState, state, userTime, activeWin, pid, windowType, windowState,
+        Atom protocols, protocolList[3], changeState, state, userTime, activeWin, pid, windowType, windowState, windowStateHidden,
              XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus, XdndDrop, XdndFinished, XdndSelection,
              XdndTypeList, XdndActionList, XdndActionDescription, XdndActionCopy, XdndActionPrivate,
              XembedMsgType, XembedInfo, allowedActions[5], allowedMimeTypes[4], utf8String, clipboard, targets;
@@ -229,6 +229,7 @@ private:
     void handleExposeEvent          (LinuxComponentPeer<::Window>*, XExposeEvent&) const;
     void handleConfigureNotifyEvent (LinuxComponentPeer<::Window>*, XConfigureEvent&) const;
     void handleGravityNotify        (LinuxComponentPeer<::Window>*) const;
+    void propertyNotifyEvent        (LinuxComponentPeer<::Window>*, const XPropertyEvent& ) const;
     void handleMappingNotify        (XMappingEvent&) const;
     void handleClientMessageEvent   (LinuxComponentPeer<::Window>*, XClientMessageEvent&, XEvent&) const;
     void handleXEmbedMessage        (LinuxComponentPeer<::Window>*, XClientMessageEvent&) const;

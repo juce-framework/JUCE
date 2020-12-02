@@ -1775,6 +1775,8 @@ private:
     {
         if (auto* p = getOwner (self))
         {
+            p->sendModalInputAttemptIfBlocked();
+
             if (p->isAlwaysOnTop)
             {
                 // there is a bug when restoring minimised always on top windows so we need
