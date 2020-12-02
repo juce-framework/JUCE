@@ -41,6 +41,10 @@
 			isa = PBXBuildFile;
 			fileRef = EE758AD71415EB31BD3E82F3;
 		};
+		CC782AABFA20787BABBCED90 = {
+			isa = PBXBuildFile;
+			fileRef = E1BB9D521BF6C055F5B88628;
+		};
 		9031C69145EE085B60904363 = {
 			isa = PBXBuildFile;
 			fileRef = 43775DC3D9F7917846EA5327;
@@ -350,6 +354,13 @@
 			path = "../../../../modules/juce_audio_processors";
 			sourceTree = "SOURCE_ROOT";
 		};
+		E1BB9D521BF6C055F5B88628 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Foundation.framework;
+			path = System/Library/Frameworks/Foundation.framework;
+			sourceTree = SDKROOT;
+		};
 		E575FE2AD2F19FA6AEB536C2 = {
 			isa = PBXFileReference;
 			lastKnownFileType = file;
@@ -452,6 +463,7 @@
 				24D90B40648CC05A9B1AA55B,
 				12C680C68A15B9A590264B18,
 				EE758AD71415EB31BD3E82F3,
+				E1BB9D521BF6C055F5B88628,
 				43775DC3D9F7917846EA5327,
 				0A58FDDF6FB9253F51939A52,
 				3058871156B921B9E5946C4F,
@@ -763,6 +775,7 @@
 				71863EE98034AB7C3CBCAA81,
 				5923A711C0020F2CDD598714,
 				3825E8984D8F6AA00DDC6BAC,
+				CC782AABFA20787BABBCED90,
 				9031C69145EE085B60904363,
 				F8099BB77DC0D01DCCC6AFB9,
 				537E779F6008999191B2920A,

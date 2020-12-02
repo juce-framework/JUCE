@@ -13,6 +13,10 @@
 			isa = PBXBuildFile;
 			fileRef = 57DDB771ED96A256F190ADF8;
 		};
+		C17566E1AACD033B3DD74E9F = {
+			isa = PBXBuildFile;
+			fileRef = 6AA23C81496E022290EB2A0C;
+		};
 		0D53D8B0AEE37C02C147344B = {
 			isa = PBXBuildFile;
 			fileRef = F769CD634476C91F4C9D0596;
@@ -48,6 +52,13 @@
 			lastKnownFileType = wrapper.framework;
 			name = Cocoa.framework;
 			path = System/Library/Frameworks/Cocoa.framework;
+			sourceTree = SDKROOT;
+		};
+		6AA23C81496E022290EB2A0C = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Foundation.framework;
+			path = System/Library/Frameworks/Foundation.framework;
 			sourceTree = SDKROOT;
 		};
 		799073185F72F5FAD05253C3 = {
@@ -130,6 +141,7 @@
 			isa = PBXGroup;
 			children = (
 				57DDB771ED96A256F190ADF8,
+				6AA23C81496E022290EB2A0C,
 				F769CD634476C91F4C9D0596,
 			);
 			name = Frameworks;
@@ -398,6 +410,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B72EFB0E9D74CA7227F6CAB,
+				C17566E1AACD033B3DD74E9F,
 				0D53D8B0AEE37C02C147344B,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
