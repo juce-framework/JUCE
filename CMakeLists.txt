@@ -23,7 +23,7 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(JUCE VERSION 6.0.4 LANGUAGES C CXX)
+project(JUCE VERSION 6.0.5 LANGUAGES C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 

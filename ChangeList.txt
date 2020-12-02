@@ -3,6 +3,14 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.5
+  - Added more support for styling PopupMenus
+  - Fixed some race conditions in the IPC and name named pipe classes
+  - Implemented multiple FileChooser improvements
+  - Added compatibility with the latest Android SDK
+  - Prevented CoreAudio glitches before accepting audio access permissions
+  - Made reading MIDI and audio files more robust
+
 Version 6.0.4
   - Improved the Projucer update mechanism
   - Fixed an AUv3 parameter normalisation issue
