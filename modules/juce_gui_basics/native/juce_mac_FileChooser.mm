@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -62,15 +61,19 @@ public:
           selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
           selectsFiles       ((flags & FileBrowserComponent::canSelectFiles)         != 0),
           isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
-          selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0),
-          panel (isSave ? [[NSSavePanel alloc] init] : [[NSOpenPanel alloc] init])
+          selectMultiple     ((flags & FileBrowserComponent::canSelectMultipleItems) != 0)
     {
         setBounds (0, 0, 0, 0);
         setOpaque (true);
 
-        static DelegateClass cls;
+        static DelegateClass delegateClass;
+        static SafeSavePanel safeSavePanel;
+        static SafeOpenPanel safeOpenPanel;
 
-        delegate = [cls.createInstance() init];
+        panel = isSave ? [safeSavePanel.createInstance() init]
+                       : [safeOpenPanel.createInstance() init];
+
+        delegate = [delegateClass.createInstance() init];
         object_setInstanceVariable (delegate, "cppObject", this);
 
         [panel setDelegate: delegate];
@@ -84,7 +87,7 @@ public:
 
         if (! isSave)
         {
-            NSOpenPanel* openPanel = (NSOpenPanel*) panel;
+            auto* openPanel = static_cast<NSOpenPanel*> (panel);
 
             [openPanel setCanChooseDirectories: selectsDirectories];
             [openPanel setCanChooseFiles: selectsFiles];
@@ -98,10 +101,16 @@ public:
         if (preview != nullptr)
         {
             nsViewPreview = [[NSView alloc] initWithFrame: makeNSRect (preview->getLocalBounds())];
+            [panel setAccessoryView: nsViewPreview];
+
             preview->addToDesktop (0, (void*) nsViewPreview);
             preview->setVisible (true);
 
-            [panel setAccessoryView: nsViewPreview];
+            if (! isSave)
+            {
+                auto* openPanel = static_cast<NSOpenPanel*> (panel);
+                [openPanel setAccessoryViewDisclosed: YES];
+            }
         }
 
         if (isSave || selectsDirectories)
@@ -126,6 +135,10 @@ public:
     ~Native() override
     {
         exitModalState (0);
+
+        if (preview != nullptr)
+            preview->removeFromDesktop();
+
         removeFromDesktop();
 
         if (panel != nil)
@@ -162,15 +175,20 @@ public:
 
             enterModalState (true);
             [panel beginWithCompletionHandler:CreateObjCBlock (this, &Native::finished)];
+
+            if (preview != nullptr)
+                preview->toFront (true);
         }
     }
 
     void runModally() override
     {
+        ensurePanelSafe();
+
         std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
 
         if (JUCEApplicationBase::isStandaloneApp())
-            tempMenu.reset (new TemporaryMainMenuWithStandardCommands());
+            tempMenu = std::make_unique<TemporaryMainMenuWithStandardCommands> (preview);
 
         jassert (panel != nil);
         auto result = [panel runModal];
@@ -179,10 +197,7 @@ public:
 
     bool canModalEventBeSentToComponent (const Component* targetComponent) override
     {
-        if (targetComponent == nullptr)
-            return false;
-
-        return targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr;
+        return TemporaryMainMenuWithStandardCommands::checkModalEvent (preview, targetComponent);
     }
 
 private:
@@ -219,7 +234,7 @@ private:
             }
             else
             {
-                auto* openPanel = (NSOpenPanel*) panel;
+                auto* openPanel = static_cast<NSOpenPanel*> (panel);
                 auto urls = [openPanel URLs];
 
                 for (unsigned int i = 0; i < [urls count]; ++i)
@@ -245,25 +260,31 @@ private:
 
     void panelSelectionDidChange (id sender)
     {
+        jassert (sender == panel);
+        ignoreUnused (sender);
+
         // NB: would need to extend FilePreviewComponent to handle the full list rather than just the first one
         if (preview != nullptr)
-            preview->selectedFileChanged (File (getSelectedPaths (sender)[0]));
+            preview->selectedFileChanged (File (getSelectedPaths()[0]));
     }
 
-    static StringArray getSelectedPaths (id sender)
+    StringArray getSelectedPaths() const
     {
+        if (panel == nullptr)
+            return {};
+
         StringArray paths;
 
-        if ([sender isKindOfClass: [NSOpenPanel class]])
+        if (isSave)
         {
-            NSArray* urls = [(NSOpenPanel*) sender URLs];
+            paths.add (nsStringToJuce ([[panel URL] path]));
+        }
+        else
+        {
+            auto* urls = [static_cast<NSOpenPanel*> (panel) URLs];
 
             for (NSUInteger i = 0; i < [urls count]; ++i)
                 paths.add (nsStringToJuce ([[urls objectAtIndex: i] path]));
-        }
-        else if ([sender isKindOfClass: [NSSavePanel class]])
-        {
-            paths.add (nsStringToJuce ([[(NSSavePanel*) sender URL] path]));
         }
 
         return paths;
@@ -281,10 +302,47 @@ private:
     StringArray filters;
     String startingDirectory, filename;
 
-    //==============================================================================
-    struct DelegateClass : ObjCClass<DelegateType>
+    void ensurePanelSafe()
     {
-        DelegateClass()  : ObjCClass <DelegateType> ("JUCEFileChooser_")
+        // If you hit this, something (probably the plugin host) has modified the panel,
+        // allowing the application to terminate while the panel's modal loop is running.
+        // This is a very bad idea! Quitting from within the panel's modal loop may cause
+        // your plugin/app destructor to run directly from within `runModally`, which will
+        // dispose all app resources while they're still in use.
+        // A safer alternative is to invoke the FileChooser with `launchAsync`, rather than
+        // using the modal launchers.
+        jassert ([panel preventsApplicationTerminationWhenModal]);
+    }
+
+    static BOOL preventsApplicationTerminationWhenModal() { return YES; }
+
+    template <typename Base>
+    struct SafeModalPanel : public ObjCClass<Base>
+    {
+        explicit SafeModalPanel (const char* name) : ObjCClass<Base> (name)
+        {
+            this->addMethod (@selector (preventsApplicationTerminationWhenModal),
+                             preventsApplicationTerminationWhenModal,
+                             "c@:");
+
+            this->registerClass();
+        }
+    };
+
+    struct SafeSavePanel : SafeModalPanel<NSSavePanel>
+    {
+        SafeSavePanel() : SafeModalPanel ("SaveSavePanel_") {}
+    };
+
+    struct SafeOpenPanel : SafeModalPanel<NSOpenPanel>
+    {
+        SafeOpenPanel() : SafeModalPanel ("SaveOpenPanel_") {}
+    };
+
+    //==============================================================================
+    struct DelegateClass : public ObjCClass<DelegateType>
+    {
+        DelegateClass() : ObjCClass<DelegateType> ("JUCEFileChooser_")
         {
             addIvar<Native*> ("cppObject");
 
@@ -316,7 +374,7 @@ private:
 };
 
 FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                        FilePreviewComponent* preview)
+                                                     FilePreviewComponent* preview)
 {
     return new FileChooser::Native (owner, flags, preview);
 }

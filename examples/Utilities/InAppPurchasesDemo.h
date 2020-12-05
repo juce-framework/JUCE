@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -38,6 +38,7 @@
  exporters:        xcode_mac, xcode_iphone, androidstudio
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+                   JUCE_IN_APP_PURCHASES=1
 
  type:             Component
  mainClass:        InAppPurchasesDemo
@@ -55,7 +56,7 @@
 /*
     To finish the setup of this demo, do the following in the Projucer project:
 
-    1. In the project settings, set the "Bundle Identifier" to com.roli.juceInAppPurchaseSample
+    1. In the project settings, set the "Bundle Identifier" to com.rmsl.juceInAppPurchaseSample
     2. In the Android exporter settings, change the following settings:
          - "In-App Billing" - Enabled
          - "Key Signing: key.store" - path to InAppPurchase.keystore file in examples/Assets/Signing
@@ -91,7 +92,7 @@ public:
                           VoiceProduct {"jb",     "JB",     false,  false, false, "Retrieving price..." } });
     }
 
-    ~VoicePurchases()
+    ~VoicePurchases() override
     {
         InAppPurchases::getInstance()->removeListener (this);
     }
@@ -274,7 +275,7 @@ public:
         Rectangle<int> r (0, 0, w, h);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColour (lf.findColour (isSelected ? (int) TextEditor::highlightColourId : (int) ListBox::backgroundColourId));
         g.fillRect (r);
 
         g.setColour (lf.findColour (ListBox::textColourId));
@@ -395,11 +396,8 @@ public:
 
                 setInterceptsMouseClicks (! hasBeenPurchased, ! hasBeenPurchased);
 
-                if (auto* assetStream = createAssetInputStream (String ("Purchases/" + String (imageResourceName)).toRawUTF8()))
-                {
-                    std::unique_ptr<InputStream> fileStream (assetStream);
+                if (auto fileStream = createAssetInputStream (String ("Purchases/" + String (imageResourceName)).toRawUTF8()))
                     avatar = PNGImageFormat().decodeImage (*fileStream);
-                }
             }
         }
     private:
@@ -463,7 +461,7 @@ public:
         auto r = Rectangle<int> (0, 0, w, h).reduced (4);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColour (lf.findColour (isSelected ? (int) TextEditor::highlightColourId : (int) ListBox::backgroundColourId));
         g.fillRect (r);
     }
 
@@ -512,14 +510,14 @@ public:
         soundNames = purchases.getVoiceNames();
 
        #if JUCE_ANDROID || JUCE_IOS
-        auto screenBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        auto screenBounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
         setSize (screenBounds.getWidth(), screenBounds.getHeight());
        #else
         setSize (800, 600);
        #endif
     }
 
-    ~InAppPurchasesDemo()
+    ~InAppPurchasesDemo() override
     {
         dm.closeAudioDevice();
         dm.removeAudioCallback (&player);
@@ -569,10 +567,8 @@ private:
         {
             auto assetName = "Purchases/" + soundNames[idx] + String (phraseListBox.getSelectedRow()) + ".ogg";
 
-            if (auto* assetStream = createAssetInputStream (assetName.toRawUTF8()))
+            if (auto fileStream = createAssetInputStream (assetName.toRawUTF8()))
             {
-                std::unique_ptr<InputStream> fileStream (assetStream);
-
                 currentPhraseData.reset();
                 fileStream->readIntoMemoryBlock (currentPhraseData);
 

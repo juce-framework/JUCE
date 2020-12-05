@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -23,24 +23,27 @@
 
  BEGIN_JUCE_PIP_METADATA
 
- name:             AUv3SynthPlugin
- version:          1.0.0
- vendor:           JUCE
- website:          http://juce.com
- description:      AUv3 synthesiser audio plugin.
+ name:                  AUv3SynthPlugin
+ version:               1.0.0
+ vendor:                JUCE
+ website:               http://juce.com
+ description:           AUv3 synthesiser audio plugin.
 
- dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
-                   juce_audio_plugin_client, juce_audio_processors,
-                   juce_audio_utils, juce_core, juce_data_structures,
-                   juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, xcode_iphone
+ dependencies:          juce_audio_basics, juce_audio_devices, juce_audio_formats,
+                        juce_audio_plugin_client, juce_audio_processors,
+                        juce_audio_utils, juce_core, juce_data_structures,
+                        juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
+ exporters:             xcode_mac, xcode_iphone
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+ moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
- type:             AudioProcessor
- mainClass:        AUv3SynthProcessor
+ type:                  AudioProcessor
+ mainClass:             AUv3SynthProcessor
 
- useLocalCopy:     1
+ useLocalCopy:          1
+
+ pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn
+ extraPluginFormats:    AUv3
 
  END_JUCE_PIP_METADATA
 
@@ -112,7 +115,7 @@ public:
 
         sliderPos = (sliderPos - minSliderPos) / static_cast<float> (width);
 
-        auto knobPos = static_cast<int> (sliderPos * r.getWidth());
+        auto knobPos = static_cast<int> (sliderPos * (float) r.getWidth());
 
         g.setColour (sliderActivePart);
         g.fillRect (backgroundBar.removeFromLeft (knobPos));
@@ -180,11 +183,11 @@ class AUv3SynthEditor   : public AudioProcessorEditor,
 {
 public:
     //==============================================================================
-    AUv3SynthEditor (AudioProcessor& processor)
-        :   AudioProcessorEditor (processor),
-            roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
+    AUv3SynthEditor (AudioProcessor& processorIn)
+        : AudioProcessorEditor (processorIn),
+          roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
     {
-        LookAndFeel::setDefaultLookAndFeel (&materialLookAndFeel);
+        setLookAndFeel (&materialLookAndFeel);
 
         roomSizeSlider.setValue (getParameterValue ("roomSize"), NotificationType::dontSendNotification);
 
@@ -195,10 +198,8 @@ public:
         roomSizeSlider.setRange (0.0, 1.0);
         addAndMakeVisible (roomSizeSlider);
 
-        if (auto* assetStream = createAssetInputStream ("proaudio.path"))
+        if (auto fileStream = createAssetInputStream ("proaudio.path"))
         {
-            std::unique_ptr<InputStream> fileStream (assetStream);
-
             Path proAudioPath;
             proAudioPath.loadPathFromStream (*fileStream);
             proAudioIcon.setPath (proAudioPath);
@@ -210,6 +211,11 @@ public:
 
         setSize (600, 400);
         startTimer (100);
+    }
+
+    ~AUv3SynthEditor() override
+    {
+        setLookAndFeel (nullptr);
     }
 
     //==============================================================================
@@ -258,9 +264,9 @@ private:
     //==============================================================================
     AudioProcessorParameter* getParameter (const String& paramId)
     {
-        if (auto* processor = getAudioProcessor())
+        if (auto* audioProcessor = getAudioProcessor())
         {
-            auto& params = processor->getParameters();
+            auto& params = audioProcessor->getParameters();
 
             for (auto p : params)
             {
@@ -355,13 +361,14 @@ public:
             reverb.processStereo (buffer.getWritePointer (0), buffer.getWritePointer (1), buffer.getNumSamples());
     }
 
+    using AudioProcessor::processBlock;
+
     //==============================================================================
     void releaseResources() override                                            { currentRecording.setSize (1, 1); }
 
     //==============================================================================
     bool acceptsMidi() const override                                           { return true; }
     bool producesMidi() const override                                          { return false; }
-    bool silenceInProducesSilenceOut() const override                           { return false; }
     double getTailLengthSeconds() const override                                { return 0.0; }
 
     //==============================================================================
@@ -382,6 +389,7 @@ public:
             case 1:  return "Singing";
             case 2:  return "Pinched Balloon";
             case 3:  return "Gazeebo";
+            default: break;
         }
 
         return "<Unknown>";
@@ -407,17 +415,18 @@ public:
         roomSizeParam->setValueNotifyingHost    (stream.readFloat());
 
     }
+
 private:
     //==============================================================================
     void loadNewSampleBinary (const void* data, int dataSize, const char* format)
     {
-        auto* soundBuffer = new MemoryInputStream (data, static_cast<std::size_t> (dataSize), false);
-        loadNewSample (soundBuffer, format);
+        auto soundBuffer = std::make_unique<MemoryInputStream> (data, static_cast<std::size_t> (dataSize), false);
+        loadNewSample (std::move (soundBuffer), format);
     }
 
-    void loadNewSample (InputStream* soundBuffer, const char* format)
+    void loadNewSample (std::unique_ptr<InputStream> soundBuffer, const char* format)
     {
-        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer, true));
+        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer.release(), true));
 
         BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);

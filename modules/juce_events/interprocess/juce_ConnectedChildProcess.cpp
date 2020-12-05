@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -30,7 +30,7 @@ static const char* killMessage  = "__ipc_k_";
 static const char* pingMessage  = "__ipc_p_";
 enum { specialMessageSize = 8, defaultTimeoutMs = 8000 };
 
-static inline bool isMessageType (const MemoryBlock& mb, const char* messageType) noexcept
+static bool isMessageType (const MemoryBlock& mb, const char* messageType) noexcept
 {
     return mb.matches (messageType, (size_t) specialMessageSize);
 }

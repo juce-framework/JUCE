@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -28,11 +28,11 @@ static String jucePermissionToAndroidPermission (RuntimePermissions::PermissionI
 {
     switch (permission)
     {
-        case RuntimePermissions::recordAudio:            return "android.permission.RECORD_AUDIO";
-        case RuntimePermissions::bluetoothMidi:          return "android.permission.ACCESS_COARSE_LOCATION";
-        case RuntimePermissions::readExternalStorage:    return "android.permission.READ_EXTERNAL_STORAGE";
-        case RuntimePermissions::writeExternalStorage:   return "android.permission.WRITE_EXTERNAL_STORAGE";
-        case RuntimePermissions::camera:                 return "android.permission.CAMERA";
+        case RuntimePermissions::recordAudio:           return "android.permission.RECORD_AUDIO";
+        case RuntimePermissions::bluetoothMidi:         return "android.permission.ACCESS_FINE_LOCATION";
+        case RuntimePermissions::readExternalStorage:   return "android.permission.READ_EXTERNAL_STORAGE";
+        case RuntimePermissions::writeExternalStorage:  return "android.permission.WRITE_EXTERNAL_STORAGE";
+        case RuntimePermissions::camera:                return "android.permission.CAMERA";
     }
 
     // invalid permission
@@ -42,11 +42,11 @@ static String jucePermissionToAndroidPermission (RuntimePermissions::PermissionI
 
 static RuntimePermissions::PermissionID androidPermissionToJucePermission (const String& permission)
 {
-    if      (permission == "android.permission.RECORD_AUDIO")             return RuntimePermissions::recordAudio;
-    else if (permission == "android.permission.ACCESS_COARSE_LOCATION")   return RuntimePermissions::bluetoothMidi;
-    else if (permission == "android.permission.READ_EXTERNAL_STORAGE")    return RuntimePermissions::readExternalStorage;
-    else if (permission == "android.permission.WRITE_EXTERNAL_STORAGE")   return RuntimePermissions::writeExternalStorage;
-    else if (permission == "android.permission.CAMERA")                   return RuntimePermissions::camera;
+    if      (permission == "android.permission.RECORD_AUDIO")            return RuntimePermissions::recordAudio;
+    else if (permission == "android.permission.ACCESS_FINE_LOCATION")    return RuntimePermissions::bluetoothMidi;
+    else if (permission == "android.permission.READ_EXTERNAL_STORAGE")   return RuntimePermissions::readExternalStorage;
+    else if (permission == "android.permission.WRITE_EXTERNAL_STORAGE")  return RuntimePermissions::writeExternalStorage;
+    else if (permission == "android.permission.CAMERA")                  return RuntimePermissions::camera;
 
     return static_cast<RuntimePermissions::PermissionID> (-1);
 }

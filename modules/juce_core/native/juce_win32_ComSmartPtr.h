@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -56,7 +56,7 @@ inline GUID uuidFromString (const char* s) noexcept
 
     for (uint32 digitIndex = 0; digitIndex < 32;)
     {
-        auto c = *s++;
+        auto c = (uint32) *s++;
         uint32 digit;
 
         if (c >= '0' && c <= '9')       digit = c - '0';
@@ -114,7 +114,7 @@ public:
 
     HRESULT CoCreateInstance (REFCLSID classUUID, DWORD dwClsContext = CLSCTX_INPROC_SERVER)
     {
-        auto hr = ::CoCreateInstance (classUUID, 0, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
+        auto hr = ::CoCreateInstance (classUUID, nullptr, dwClsContext, __uuidof (ComClass), (void**) resetAndGetPointerAddress());
         jassert (hr != CO_E_NOTINITIALIZED); // You haven't called CoInitialize for the current thread!
         return hr;
     }
@@ -132,6 +132,17 @@ public:
     HRESULT QueryInterface (ComSmartPtr<OtherComClass>& destObject) const
     {
         return this->QueryInterface (__uuidof (OtherComClass), destObject);
+    }
+
+    template<class OtherComClass>
+    ComSmartPtr<OtherComClass> getInterface() const
+    {
+        ComSmartPtr<OtherComClass> destObject;
+
+        if (QueryInterface (destObject) == S_OK)
+            return destObject;
+
+        return nullptr;
     }
 
 private:

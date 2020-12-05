@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -40,14 +40,14 @@ namespace AndroidStatsHelpers
     DECLARE_JNI_CLASS (JavaLocale, "java/util/Locale")
     #undef JNI_CLASS_MEMBERS
 
-    static inline String getSystemProperty (const String& name)
+    static String getSystemProperty (const String& name)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->CallStaticObjectMethod (SystemClass,
                                                                                           SystemClass.getProperty,
                                                                                           javaString (name).get())));
     }
 
-    static inline String getLocaleValue (bool isRegion)
+    static String getLocaleValue (bool isRegion)
     {
         auto* env = getEnv();
         LocalRef<jobject> locale (env->CallStaticObjectMethod (JavaLocale, JavaLocale.getDefault));
@@ -58,7 +58,7 @@ namespace AndroidStatsHelpers
         return juceString (LocalRef<jstring> ((jstring) stringResult));
     }
 
-    static inline String getAndroidOsBuildValue (const char* fieldName)
+    static String getAndroidOsBuildValue (const char* fieldName)
     {
         return juceString (LocalRef<jstring> ((jstring) getEnv()->GetStaticObjectField (
                             AndroidBuild, getEnv()->GetStaticFieldID (AndroidBuild, fieldName, "Ljava/lang/String;"))));

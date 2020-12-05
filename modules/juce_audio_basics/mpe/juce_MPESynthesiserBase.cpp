@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -110,48 +110,32 @@ void MPESynthesiserBase::renderNextBlock (AudioBuffer<floatType>& outputAudio,
     // you must set the sample rate before using this!
     jassert (sampleRate != 0);
 
-    MidiBuffer::Iterator midiIterator (inputMidi);
-    midiIterator.setNextSamplePosition (startSample);
-
-    bool firstEvent = true;
-    int midiEventPos;
-    MidiMessage m;
-
     const ScopedLock sl (noteStateLock);
 
-    while (numSamples > 0)
+    auto prevSample = startSample;
+    const auto endSample = startSample + numSamples;
+
+    for (auto it = inputMidi.findNextSamplePosition (startSample); it != inputMidi.cend(); ++it)
     {
-        if (! midiIterator.getNextEvent (m, midiEventPos))
-        {
-            renderNextSubBlock (outputAudio, startSample, numSamples);
-            return;
-        }
+        const auto metadata = *it;
 
-        auto samplesToNextMidiMessage = midiEventPos - startSample;
-
-        if (samplesToNextMidiMessage >= numSamples)
-        {
-            renderNextSubBlock (outputAudio, startSample, numSamples);
-            handleMidiEvent (m);
+        if (metadata.samplePosition >= endSample)
             break;
-        }
 
-        if (samplesToNextMidiMessage < ((firstEvent && ! subBlockSubdivisionIsStrict) ? 1 : minimumSubBlockSize))
+        const auto smallBlockAllowed = (prevSample == startSample && ! subBlockSubdivisionIsStrict);
+        const auto thisBlockSize = smallBlockAllowed ? 1 : minimumSubBlockSize;
+
+        if (metadata.samplePosition >= prevSample + thisBlockSize)
         {
-            handleMidiEvent (m);
-            continue;
+            renderNextSubBlock (outputAudio, prevSample, metadata.samplePosition - prevSample);
+            prevSample = metadata.samplePosition;
         }
 
-        firstEvent = false;
-
-        renderNextSubBlock (outputAudio, startSample, samplesToNextMidiMessage);
-        handleMidiEvent (m);
-        startSample += samplesToNextMidiMessage;
-        numSamples  -= samplesToNextMidiMessage;
+        handleMidiEvent (metadata.getMessage());
     }
 
-    while (midiIterator.getNextEvent (m, midiEventPos))
-        handleMidiEvent (m);
+    if (prevSample < endSample)
+        renderNextSubBlock (outputAudio, prevSample, endSample - prevSample);
 }
 
 // explicit instantiation for supported float types:
@@ -176,5 +160,217 @@ void MPESynthesiserBase::setMinimumRenderingSubdivisionSize (int numSamples, boo
     minimumSubBlockSize = numSamples;
     subBlockSubdivisionIsStrict = shouldBeStrict;
 }
+
+#if JUCE_UNIT_TESTS
+
+namespace
+{
+    class MpeSynthesiserBaseTests : public UnitTest
+    {
+        enum class CallbackKind { process, midi };
+
+        struct StartAndLength
+        {
+            StartAndLength (int s, int l) : start (s), length (l) {}
+
+            int start  = 0;
+            int length = 0;
+
+            std::tuple<const int&, const int&> tie() const noexcept { return std::tie (start, length); }
+
+            bool operator== (const StartAndLength& other) const noexcept { return tie() == other.tie(); }
+            bool operator!= (const StartAndLength& other) const noexcept { return tie() != other.tie(); }
+
+            bool operator< (const StartAndLength& other) const noexcept { return tie() < other.tie(); }
+        };
+
+        struct Events
+        {
+            std::vector<StartAndLength> blocks;
+            std::vector<MidiMessage> messages;
+            std::vector<CallbackKind> order;
+        };
+
+        class MockSynthesiser  : public MPESynthesiserBase
+        {
+        public:
+            Events events;
+
+            void handleMidiEvent (const MidiMessage& m) override
+            {
+                events.messages.emplace_back (m);
+                events.order.emplace_back (CallbackKind::midi);
+            }
+
+        private:
+            using MPESynthesiserBase::renderNextSubBlock;
+
+            void renderNextSubBlock (AudioBuffer<float>&,
+                                     int startSample,
+                                     int numSamples) override
+            {
+                events.blocks.push_back ({ startSample, numSamples });
+                events.order.emplace_back (CallbackKind::process);
+            }
+        };
+
+        static MidiBuffer makeTestBuffer (const int bufferLength)
+        {
+            MidiBuffer result;
+
+            for (int i = 0; i != bufferLength; ++i)
+                result.addEvent ({}, i);
+
+            return result;
+        }
+
+    public:
+        MpeSynthesiserBaseTests()
+            : UnitTest ("MPE Synthesiser Base", UnitTestCategories::midi) {}
+
+        void runTest() override
+        {
+            const auto sumBlockLengths = [] (const std::vector<StartAndLength>& b)
+            {
+                const auto addBlock = [] (int acc, const StartAndLength& info) { return acc + info.length; };
+                return std::accumulate (b.begin(), b.end(), 0, addBlock);
+            };
+
+            beginTest ("Rendering sparse subblocks works");
+            {
+                const int blockSize = 512;
+                const auto midi = [&] { MidiBuffer b; b.addEvent ({}, blockSize / 2); return b; }();
+                AudioBuffer<float> audio (1, blockSize);
+
+                const auto processEvents = [&] (int start, int length)
+                {
+                    MockSynthesiser synth;
+                    synth.setMinimumRenderingSubdivisionSize (1, false);
+                    synth.setCurrentPlaybackSampleRate (44100);
+                    synth.renderNextBlock (audio, midi, start, length);
+                    return synth.events;
+                };
+
+                {
+                    const auto e = processEvents (0, blockSize);
+                    expect (e.blocks.size() == 2);
+                    expect (e.messages.size() == 1);
+                    expect (std::is_sorted (e.blocks.begin(), e.blocks.end()));
+                    expect (sumBlockLengths (e.blocks) == blockSize);
+                    expect (e.order == std::vector<CallbackKind> { CallbackKind::process,
+                                                                   CallbackKind::midi,
+                                                                   CallbackKind::process });
+                }
+            }
+
+            beginTest ("Rendering subblocks processes only contained midi events");
+            {
+                const int blockSize = 512;
+                const auto midi = makeTestBuffer (blockSize);
+                AudioBuffer<float> audio (1, blockSize);
+
+                const auto processEvents = [&] (int start, int length)
+                {
+                    MockSynthesiser synth;
+                    synth.setMinimumRenderingSubdivisionSize (1, false);
+                    synth.setCurrentPlaybackSampleRate (44100);
+                    synth.renderNextBlock (audio, midi, start, length);
+                    return synth.events;
+                };
+
+                {
+                    const int subBlockLength = 0;
+                    const auto e = processEvents (0, subBlockLength);
+                    expect (e.blocks.size() == 0);
+                    expect (e.messages.size() == 0);
+                    expect (std::is_sorted (e.blocks.begin(), e.blocks.end()));
+                    expect (sumBlockLengths (e.blocks) == subBlockLength);
+                }
+
+                {
+                    const int subBlockLength = 0;
+                    const auto e = processEvents (1, subBlockLength);
+                    expect (e.blocks.size() == 0);
+                    expect (e.messages.size() == 0);
+                    expect (std::is_sorted (e.blocks.begin(), e.blocks.end()));
+                    expect (sumBlockLengths (e.blocks) == subBlockLength);
+                }
+
+                {
+                    const int subBlockLength = 1;
+                    const auto e = processEvents (1, subBlockLength);
+                    expect (e.blocks.size() == 1);
+                    expect (e.messages.size() == 1);
+                    expect (std::is_sorted (e.blocks.begin(), e.blocks.end()));
+                    expect (sumBlockLengths (e.blocks) == subBlockLength);
+                    expect (e.order == std::vector<CallbackKind> { CallbackKind::midi,
+                                                                   CallbackKind::process });
+                }
+
+                {
+                    const auto e = processEvents (0, blockSize);
+                    expect (e.blocks.size() == blockSize);
+                    expect (e.messages.size() == blockSize);
+                    expect (std::is_sorted (e.blocks.begin(), e.blocks.end()));
+                    expect (sumBlockLengths (e.blocks) == blockSize);
+                    expect (e.order.front() == CallbackKind::midi);
+                }
+            }
+
+            beginTest ("Subblocks respect their minimum size");
+            {
+                const int blockSize = 512;
+                const auto midi = makeTestBuffer (blockSize);
+                AudioBuffer<float> audio (1, blockSize);
+
+                const auto blockLengthsAreValid = [] (const std::vector<StartAndLength>& info, int minLength, bool strict)
+                {
+                    if (info.size() <= 1)
+                        return true;
+
+                    const auto lengthIsValid = [&] (const StartAndLength& s) { return minLength <= s.length; };
+                    const auto begin = strict ? info.begin() : std::next (info.begin());
+                    // The final block is allowed to be shorter than the minLength
+                    return std::all_of (begin, std::prev (info.end()), lengthIsValid);
+                };
+
+                for (auto strict : { false, true })
+                {
+                    for (auto subblockSize : { 1, 16, 32, 64, 1024 })
+                    {
+                        MockSynthesiser synth;
+                        synth.setMinimumRenderingSubdivisionSize (subblockSize, strict);
+                        synth.setCurrentPlaybackSampleRate (44100);
+                        synth.renderNextBlock (audio, midi, 0, blockSize);
+
+                        const auto& e = synth.events;
+                        expectWithinAbsoluteError (float (e.blocks.size()),
+                                                   std::ceil ((float) blockSize / (float) subblockSize),
+                                                   1.0f);
+                        expect (e.messages.size() == blockSize);
+                        expect (std::is_sorted (e.blocks.begin(), e.blocks.end()));
+                        expect (sumBlockLengths (e.blocks) == blockSize);
+                        expect (blockLengthsAreValid (e.blocks, subblockSize, strict));
+                    }
+                }
+
+                {
+                    MockSynthesiser synth;
+                    synth.setMinimumRenderingSubdivisionSize (32, true);
+                    synth.setCurrentPlaybackSampleRate (44100);
+                    synth.renderNextBlock (audio, MidiBuffer{}, 0, 16);
+
+                    expect (synth.events.blocks == std::vector<StartAndLength> { { 0, 16 } });
+                    expect (synth.events.order == std::vector<CallbackKind> { CallbackKind::process });
+                    expect (synth.events.messages.empty());
+                }
+            }
+        }
+    };
+
+    MpeSynthesiserBaseTests mpeSynthesiserBaseTests;
+}
+
+#endif
 
 } // namespace juce

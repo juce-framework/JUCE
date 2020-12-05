@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -37,7 +36,11 @@ protected:
     public:
         MakeBuildConfiguration (Project& p, const ValueTree& settings, const ProjectExporter& e)
             : BuildConfiguration (p, settings, e),
-              architectureTypeValue (config, Ids::linuxArchitecture, getUndoManager(), String())
+              architectureTypeValue     (config, Ids::linuxArchitecture,          getUndoManager(), String()),
+              pluginBinaryCopyStepValue (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), true),
+              vstBinaryLocation         (config, Ids::vstBinaryLocation,          getUndoManager(), "$(HOME)/.vst"),
+              vst3BinaryLocation        (config, Ids::vst3BinaryLocation,         getUndoManager(), "$(HOME)/.vst3"),
+              unityPluginBinaryLocation (config, Ids::unityPluginBinaryLocation,  getUndoManager(), "$(HOME)/UnityPlugins")
         {
             linkTimeOptimisationValue.setDefault (false);
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
@@ -52,6 +55,29 @@ protected:
                                                     { "<None>",     "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
                                                     { { String() }, "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
                        "Specifies the 32/64-bit architecture to use.");
+
+            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildUnityPlugin());
+
+            if (isBuildingAnyPlugins)
+            {
+                props.add (new ChoicePropertyComponent (pluginBinaryCopyStepValue, "Enable Plugin Copy Step"),
+                           "Enable this to copy plugin binaries to a specified folder after building.");
+
+                if (project.shouldBuildVST3())
+                    props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
+                                                                        1024, false),
+                               "The folder in which the compiled VST3 binary should be placed.");
+
+                if (project.shouldBuildUnityPlugin())
+                    props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
+                                                                        1024, false),
+                               "The folder in which the compiled Unity plugin binary and associated C# GUI script should be placed.");
+
+                if (project.shouldBuildVST())
+                    props.add (new TextPropertyComponentWithEnablement (vstBinaryLocation, pluginBinaryCopyStepValue, "VST (Legacy) Binary Location",
+                                                                        1024, false),
+                               "The folder in which the compiled legacy VST binary should be placed.");
+            }
         }
 
         String getModuleLibraryArchName() const override
@@ -71,10 +97,16 @@ protected:
             return "${JUCE_ARCH_LABEL}";
         }
 
-        String getArchitectureTypeString() const    { return architectureTypeValue.get(); }
+        String getArchitectureTypeString() const           { return architectureTypeValue.get(); }
 
+        bool isPluginBinaryCopyStepEnabled() const         { return pluginBinaryCopyStepValue.get(); }
+        String getVSTBinaryLocationString() const          { return vstBinaryLocation.get(); }
+        String getVST3BinaryLocationString() const         { return vst3BinaryLocation.get(); }
+        String getUnityPluginBinaryLocationString() const  { return unityPluginBinaryLocation.get(); }
+
+    private:
         //==============================================================================
-        ValueWithDefault architectureTypeValue;
+        ValueWithDefault architectureTypeValue, pluginBinaryCopyStepValue, vstBinaryLocation, vst3BinaryLocation, unityPluginBinaryLocation;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -84,11 +116,11 @@ protected:
 
 public:
     //==============================================================================
-    class MakefileTarget : public ProjectType::Target
+    class MakefileTarget : public build_tools::ProjectType::Target
     {
     public:
-        MakefileTarget (ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
-            : ProjectType::Target (targetType), owner (exporter)
+        MakefileTarget (build_tools::ProjectType::Target::Type targetType, const MakefileProjectExporter& exporter)
+            : build_tools::ProjectType::Target (targetType), owner (exporter)
         {}
 
         StringArray getCompilerFlags() const
@@ -122,7 +154,7 @@ public:
         StringPairArray getDefines (const BuildConfiguration& config) const
         {
             StringPairArray result;
-            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, ProjectType::Target::unspecified).getAllKeys();
+            auto commonOptionKeys = owner.getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified).getAllKeys();
             auto targetSpecific = owner.getAllPreprocessorDefs (config, type);
 
             for (auto& key : targetSpecific.getAllKeys())
@@ -137,17 +169,11 @@ public:
             if (type == AggregateTarget) // the aggregate target should not specify any settings at all!
                 return {};               // it just defines dependencies on the other targets.
 
-            StringArray defines;
-            auto defs = getDefines (config);
-
-            for (auto& key : defs.getAllKeys())
-                defines.add ("-D" + key + "=" + defs[key]);
-
             StringArray s;
 
             auto cppflagsVarName = "JUCE_CPPFLAGS_" + getTargetVarName();
 
-            s.add (cppflagsVarName + " := " + defines.joinIntoString (" "));
+            s.add (cppflagsVarName + " := " + createGCCPreprocessorFlags (getDefines (config)));
 
             auto cflags = getCompilerFlags();
 
@@ -168,22 +194,53 @@ public:
             else
                 targetName = targetName.upToLastOccurrenceOf (".", false, false) + getTargetFileSuffix();
 
+            if (type == VST3PlugIn)
+            {
+                s.add ("JUCE_VST3DIR := " + escapeSpaces (targetName).upToLastOccurrenceOf (".", false, false) + ".vst3");
+                s.add ("VST3_PLATFORM_ARCH := $(shell $(CXX) make_helpers/arch_detection.cpp 2>&1 | tr '\\n' ' ' | sed \"s/.*JUCE_ARCH \\([a-zA-Z0-9_-]*\\).*/\\1/\")");
+                s.add ("JUCE_VST3SUBDIR := Contents/$(VST3_PLATFORM_ARCH)-linux");
+
+                targetName = "$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)/" + targetName;
+            }
+            else if (type == UnityPlugIn)
+            {
+                s.add ("JUCE_UNITYDIR := Unity");
+                targetName = "$(JUCE_UNITYDIR)/" + targetName;
+            }
+
             s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeSpaces (targetName));
+
+            if (config.isPluginBinaryCopyStepEnabled() && (type == VST3PlugIn || type == VSTPlugIn || type == UnityPlugIn))
+            {
+                String copyCmd ("JUCE_COPYCMD_" + getTargetVarName() + String (" := $(JUCE_OUTDIR)/"));
+
+                if (type == VST3PlugIn)
+                {
+                    s.add ("JUCE_VST3DESTDIR := " + config.getVST3BinaryLocationString());
+                    s.add (copyCmd + "$(JUCE_VST3DIR) $(JUCE_VST3DESTDIR)");
+                }
+                else if (type == VSTPlugIn)
+                {
+                    s.add ("JUCE_VSTDESTDIR := " + config.getVSTBinaryLocationString());
+                    s.add (copyCmd + escapeSpaces (targetName) + " $(JUCE_VSTDESTDIR)");
+                }
+                else if (type == UnityPlugIn)
+                {
+                    s.add ("JUCE_UNITYDESTDIR := " + config.getUnityPluginBinaryLocationString());
+                    s.add (copyCmd + "$(JUCE_UNITYDIR)/. $(JUCE_UNITYDESTDIR)");
+                }
+            }
 
             return s;
         }
 
         String getTargetFileSuffix() const
         {
-            switch (type)
-            {
-                case VSTPlugIn:
-                case UnityPlugIn:
-                case DynamicLibrary:        return ".so";
-                case SharedCodeTarget:
-                case StaticLibrary:         return ".a";
-                default:                    break;
-            }
+            if (type == VSTPlugIn || type == VST3PlugIn || type == UnityPlugIn || type == DynamicLibrary)
+                return ".so";
+
+            if (type == SharedCodeTarget || type == StaticLibrary)
+                return ".a";
 
             return {};
         }
@@ -198,7 +255,8 @@ public:
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
             for (auto& f : filesToCompile)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), RelativePath::buildTargetFolder })) << " \\" << newLine;
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder }))
+                    << " \\" << newLine;
 
             out << newLine;
         }
@@ -210,14 +268,14 @@ public:
 
             for (auto& f : filesToCompile)
             {
-                RelativePath relativePath (f.first, owner.getTargetFolder(), RelativePath::buildTargetFolder);
+                build_tools::RelativePath relativePath (f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
 
                 out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (relativePath)) << ": " << escapeSpaces (relativePath.toUnixStyle()) << newLine
                     << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                                                                            << newLine
                     << "\t@echo \"Compiling " << relativePath.getFileName() << "\""                                                                   << newLine
                     << (relativePath.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
                     << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ")"
-                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""        << newLine
+                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""      << newLine
                     << newLine;
             }
         }
@@ -260,16 +318,10 @@ public:
                 << "\t-$(V_AT)mkdir -p $(JUCE_LIBDIR)" << newLine
                 << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)" << newLine;
 
-            if (type == UnityPlugIn)
-            {
-                auto scriptName = owner.getProject().getUnityScriptName();
-
-                RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
-                                         owner.getTargetFolder(),
-                                         RelativePath::projectFolder);
-
-                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/" + scriptName << newLine;
-            }
+            if (type == VST3PlugIn)
+                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)" << newLine;
+            else if (type == UnityPlugIn)
+                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_UNITYDIR)" << newLine;
 
             if (owner.projectType.isStaticLibrary() || type == SharedCodeTarget)
             {
@@ -293,6 +345,29 @@ public:
                 out << "$(RESOURCES) $(TARGET_ARCH)" << newLine;
             }
 
+            if (type == VST3PlugIn)
+            {
+                out << "\t-$(V_AT)mkdir -p $(JUCE_VST3DESTDIR)" << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST3)"   << newLine;
+            }
+            else if (type == VSTPlugIn)
+            {
+                out << "\t-$(V_AT)mkdir -p $(JUCE_VSTDESTDIR)" << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST)"   << newLine;
+            }
+            else if (type == UnityPlugIn)
+            {
+                auto scriptName = owner.getProject().getUnityScriptName();
+
+                build_tools::RelativePath scriptPath (owner.getProject().getGeneratedCodeFolder().getChildFile (scriptName),
+                                                      owner.getTargetFolder(),
+                                                      build_tools::RelativePath::projectFolder);
+
+                out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/$(JUCE_UNITYDIR)" << newLine
+                    << "\t-$(V_AT)mkdir -p $(JUCE_UNITYDESTDIR)"                                       << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_UNITY_PLUGIN)"                                  << newLine;
+            }
+
             out << newLine;
         }
 
@@ -300,10 +375,9 @@ public:
     };
 
     //==============================================================================
-    static const char* getNameLinux()           { return "Linux Makefile"; }
-    static const char* getValueTreeTypeName()   { return "LINUX_MAKE"; }
-
-    String getExtraPkgConfigString() const      { return extraPkgConfigValue.get(); }
+    static String getDisplayName()        { return "Linux Makefile"; }
+    static String getValueTreeTypeName()  { return "LINUX_MAKE"; }
+    static String getTargetFolderName()   { return "LinuxMakefile"; }
 
     static MakefileProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
@@ -318,9 +392,8 @@ public:
         : ProjectExporter (p, t),
           extraPkgConfigValue (settings, Ids::linuxExtraPkgConfig, getUndoManager())
     {
-        name = getNameLinux();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
+        name = getDisplayName();
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
     }
 
     //==============================================================================
@@ -343,20 +416,28 @@ public:
     bool isOSX() const override                             { return false; }
     bool isiOS() const override                             { return false; }
 
-    bool supportsTargetType (ProjectType::Target::Type type) const override
+    String getNewLineString() const override                { return "\n"; }
+
+    bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         switch (type)
         {
-            case ProjectType::Target::GUIApp:
-            case ProjectType::Target::ConsoleApp:
-            case ProjectType::Target::StaticLibrary:
-            case ProjectType::Target::SharedCodeTarget:
-            case ProjectType::Target::AggregateTarget:
-            case ProjectType::Target::VSTPlugIn:
-            case ProjectType::Target::StandalonePlugIn:
-            case ProjectType::Target::DynamicLibrary:
-            case ProjectType::Target::UnityPlugIn:
+            case build_tools::ProjectType::Target::GUIApp:
+            case build_tools::ProjectType::Target::ConsoleApp:
+            case build_tools::ProjectType::Target::StaticLibrary:
+            case build_tools::ProjectType::Target::SharedCodeTarget:
+            case build_tools::ProjectType::Target::AggregateTarget:
+            case build_tools::ProjectType::Target::VSTPlugIn:
+            case build_tools::ProjectType::Target::VST3PlugIn:
+            case build_tools::ProjectType::Target::StandalonePlugIn:
+            case build_tools::ProjectType::Target::DynamicLibrary:
+            case build_tools::ProjectType::Target::UnityPlugIn:
                 return true;
+            case build_tools::ProjectType::Target::AAXPlugIn:
+            case build_tools::ProjectType::Target::RTASPlugIn:
+            case build_tools::ProjectType::Target::AudioUnitPlugIn:
+            case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
+            case build_tools::ProjectType::Target::unspecified:
             default:
                 break;
         }
@@ -383,8 +464,8 @@ public:
         {
             auto fileType = target->getTargetFileType();
 
-            if (fileType == ProjectType::Target::sharedLibraryOrDLL
-             || fileType == ProjectType::Target::pluginBundle)
+            if (fileType == build_tools::ProjectType::Target::sharedLibraryOrDLL
+             || fileType == build_tools::ProjectType::Target::pluginBundle)
                 return true;
         }
 
@@ -394,26 +475,28 @@ public:
     //==============================================================================
     void create (const OwnedArray<LibraryModule>&) const override
     {
-        MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        build_tools::writeStreamToFile (getTargetFolder().getChildFile ("Makefile"), [&] (MemoryOutputStream& mo)
+        {
+            mo.setNewLineString (getNewLineString());
+            writeMakefile (mo);
+        });
 
-        writeMakefile (mo);
-
-        overwriteFileIfDifferentOrThrow (getTargetFolder().getChildFile ("Makefile"), mo);
+        if (project.shouldBuildVST3())
+        {
+            auto helperDir = getTargetFolder().getChildFile ("make_helpers");
+            helperDir.createDirectory();
+            build_tools::overwriteFileIfDifferentOrThrow (helperDir.getChildFile ("arch_detection.cpp"),
+                                                          BinaryData::juce_runtime_arch_detection_cpp);
+        }
     }
 
     //==============================================================================
-    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override
+    void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) override
     {
-        callForAllSupportedTargets ([this] (ProjectType::Target::Type targetType)
+        callForAllSupportedTargets ([this] (build_tools::ProjectType::Target::Type targetType)
                                     {
-                                        if (MakefileTarget* target = new MakefileTarget (targetType, *this))
-                                        {
-                                            if (targetType == ProjectType::Target::AggregateTarget)
-                                                targets.insert (0, target);
-                                            else
-                                                targets.add (target);
-                                        }
+                                        targets.insert (targetType == build_tools::ProjectType::Target::AggregateTarget ? 0 : -1,
+                                                        new MakefileTarget (targetType, *this));
                                     });
 
         // If you hit this assert, you tried to generate a project for an exporter
@@ -441,50 +524,51 @@ private:
             result.set ("NDEBUG", "1");
         }
 
-        result = mergePreprocessorDefs (result, getAllPreprocessorDefs (config, ProjectType::Target::unspecified));
+        result = mergePreprocessorDefs (result, getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified));
 
         return result;
     }
 
-    StringArray getPackages() const
+    StringArray getExtraPkgConfigPackages() const
     {
-        StringArray packages;
-        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        auto packages = StringArray::fromTokens (extraPkgConfigValue.get().toString(), " ", "\"'");
         packages.removeEmptyStrings();
 
-        packages.addArray (linuxPackages);
+        return packages;
+    }
 
-        if (isWebBrowserComponentEnabled())
-        {
-            packages.add ("webkit2gtk-4.0");
-            packages.add ("gtk+-x11-3.0");
-        }
+    StringArray getCompilePackages() const
+    {
+        auto packages = getLinuxPackages (PackageDependencyType::compile);
+        packages.addArray (getExtraPkgConfigPackages());
 
-        // don't add libcurl if curl symbols are loaded at runtime
-        if (isCurlEnabled() && ! isLoadCurlSymbolsLazilyEnabled())
-            packages.add ("libcurl");
+        return packages;
+    }
 
-        packages.removeDuplicates (false);
+    StringArray getLinkPackages() const
+    {
+        auto packages = getLinuxPackages (PackageDependencyType::link);
+        packages.addArray (getExtraPkgConfigPackages());
 
         return packages;
     }
 
     String getPreprocessorPkgConfigFlags() const
     {
-        auto packages = getPackages();
+        auto compilePackages = getCompilePackages();
 
-        if (packages.size() > 0)
-            return "$(shell pkg-config --cflags " + packages.joinIntoString (" ") + ")";
+        if (compilePackages.size() > 0)
+            return "$(shell pkg-config --cflags " + compilePackages.joinIntoString (" ") + ")";
 
         return {};
     }
 
     String getLinkerPkgConfigFlags() const
     {
-        auto packages = getPackages();
+        auto linkPackages = getLinkPackages();
 
-        if (packages.size() > 0)
-            return "$(shell pkg-config --libs " + packages.joinIntoString (" ") + ")";
+        if (linkPackages.size() > 0)
+            return "$(shell pkg-config --libs " + linkPackages.joinIntoString (" ") + ")";
 
         return {};
     }
@@ -493,7 +577,7 @@ private:
     {
         StringArray result;
 
-        if (linuxLibs.contains("pthread"))
+        if (linuxLibs.contains ("pthread"))
             result.add ("-pthread");
 
         return result;
@@ -553,7 +637,7 @@ private:
         StringArray result;
 
         for (auto& path : searchPaths)
-            result.add (FileHelpers::unixStylePath (replacePreprocessorTokens (config, path)));
+            result.add (build_tools::unixStylePath (replacePreprocessorTokens (config, path)));
 
         return result;
     }
@@ -585,8 +669,7 @@ private:
     {
         auto result = makefileExtraLinkerFlags;
 
-        if (! config.isDebug())
-            result.add ("-fvisibility=hidden");
+        result.add ("-fvisibility=hidden");
 
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");
@@ -599,34 +682,10 @@ private:
         return result;
     }
 
-    bool isWebBrowserComponentEnabled() const
-    {
-        static String guiExtrasModule ("juce_gui_extra");
-
-        return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
-                && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
-    }
-
-    bool isCurlEnabled() const
-    {
-        static String juceCoreModule ("juce_core");
-
-        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
-                && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
-    }
-
-    bool isLoadCurlSymbolsLazilyEnabled() const
-    {
-        static String juceCoreModule ("juce_core");
-
-        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
-                && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
-    }
-
     //==============================================================================
     void writeDefineFlags (OutputStream& out, const MakeBuildConfiguration& config) const
     {
-        out << createGCCPreprocessorFlags (mergePreprocessorDefs (getDefines (config), getAllPreprocessorDefs (config, ProjectType::Target::unspecified)));
+        out << createGCCPreprocessorFlags (mergePreprocessorDefs (getDefines (config), getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified)));
     }
 
     void writePkgConfigFlags (OutputStream& out) const
@@ -692,7 +751,7 @@ private:
         {
             if (auto* target = targets.getUnchecked (i))
             {
-                if (target->type == ProjectType::Target::AggregateTarget)
+                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
                 {
                     StringArray dependencies;
                     MemoryOutputStream subTargetLines;
@@ -703,7 +762,7 @@ private:
 
                         if (auto* dependency = targets.getUnchecked (j))
                         {
-                            if (dependency->type != ProjectType::Target::SharedCodeTarget)
+                            if (dependency->type != build_tools::ProjectType::Target::SharedCodeTarget)
                             {
                                 auto phonyName = dependency->getPhonyName();
 
@@ -735,8 +794,8 @@ private:
 
         if (config.getTargetBinaryRelativePathString().isNotEmpty())
         {
-            RelativePath binaryPath (config.getTargetBinaryRelativePathString(), RelativePath::projectFolder);
-            outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), RelativePath::buildTargetFolder).toUnixStyle();
+            build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(), build_tools::RelativePath::projectFolder);
+            outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), build_tools::RelativePath::buildTargetFolder).toUnixStyle();
         }
 
         out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName()) << ")" << newLine
@@ -797,7 +856,7 @@ private:
         {
             if (auto* target = targets.getUnchecked (i))
             {
-                if (target->type == ProjectType::Target::AggregateTarget)
+                if (target->type == build_tools::ProjectType::Target::AggregateTarget)
                     continue;
 
                 out << "-include $(OBJECTS_" << target->getTargetVarName()
@@ -899,7 +958,9 @@ private:
 
         writeCompilerFlagSchemes (out, filesToCompile);
 
-        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files, MakefileTarget* target, const Project& p) -> Array<std::pair<File, String>>
+        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files,
+                                     MakefileTarget* target,
+                                     const Project& p) -> Array<std::pair<File, String>>
         {
             Array<std::pair<File, String>> targetFiles;
 
@@ -917,7 +978,7 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        writeTargetLines (out, getPackages());
+        writeTargetLines (out, getLinkPackages());
 
         for (auto target : targets)
             target->addFiles (out, getFilesForTarget (filesToCompile, target, project));
@@ -943,7 +1004,7 @@ private:
         return "-march=native";
     }
 
-    String getObjectFileFor (const RelativePath& file) const
+    String getObjectFileFor (const build_tools::RelativePath& file) const
     {
         return file.getFileNameWithoutExtension()
                 + "_" + String::toHexString (file.toUnixStyle().hashCode()) + ".o";
@@ -959,8 +1020,8 @@ private:
             return phonyTargetLine.toString();
 
         for (auto target : targets)
-            if (target->type != ProjectType::Target::SharedCodeTarget
-                   && target->type != ProjectType::Target::AggregateTarget)
+            if (target->type != build_tools::ProjectType::Target::SharedCodeTarget
+                && target->type != build_tools::ProjectType::Target::AggregateTarget)
                 phonyTargetLine << " " << target->getPhonyName();
 
         return phonyTargetLine.toString();

@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -369,7 +368,7 @@ public:
 
                     if (parseNextNumber (d, num, false))
                     {
-                        auto angle = degreesToRadians (num.getFloatValue());
+                        auto angle = degreesToRadians (parseSafeFloat (num));
 
                         if (parseNextFlag (d, flagValue))
                         {
@@ -461,7 +460,7 @@ private:
     }
 
     //==============================================================================
-    void parseSubElements (const XmlPath& xml, DrawableComposite& parentDrawable, const bool shouldParseClip = true)
+    void parseSubElements (const XmlPath& xml, DrawableComposite& parentDrawable, bool shouldParseClip = true)
     {
         forEachXmlChildElement (*xml, e)
         {
@@ -619,7 +618,7 @@ private:
         line.lineTo (x2, y2);
     }
 
-    void parsePolygon (const XmlPath& xml, const bool isPolyline, Path& path) const
+    void parsePolygon (const XmlPath& xml, bool isPolyline, Path& path) const
     {
         auto pointsAtt = xml->getStringAttribute ("points");
         auto points = pointsAtt.getCharPointer();
@@ -684,7 +683,7 @@ private:
 
     //==============================================================================
     Drawable* parseShape (const XmlPath& xml, Path& path,
-                          const bool shouldParseTransform = true,
+                          bool shouldParseTransform = true,
                           AffineTransform* additonalTransform = nullptr) const
     {
         if (shouldParseTransform && xml->hasAttribute ("transform"))
@@ -836,14 +835,14 @@ private:
                 auto col = parseColour (fillXml.getChild (e), "stop-color", Colours::black);
 
                 auto opacity = getStyleAttribute (fillXml.getChild (e), "stop-opacity", "1");
-                col = col.withMultipliedAlpha (jlimit (0.0f, 1.0f, opacity.getFloatValue()));
+                col = col.withMultipliedAlpha (jlimit (0.0f, 1.0f, parseSafeFloat (opacity)));
 
-                double offset = e->getDoubleAttribute ("offset");
+                auto offset = parseSafeFloat (e->getStringAttribute ("offset"));
 
                 if (e->getStringAttribute ("offset").containsChar ('%'))
-                    offset *= 0.01;
+                    offset *= 0.01f;
 
-                cg.addColour (jlimit (0.0, 1.0, offset), col);
+                cg.addColour (jlimit (0.0f, 1.0f, offset), col);
                 result = true;
             }
         }
@@ -984,10 +983,10 @@ private:
         float opacity = 1.0f;
 
         if (overallOpacity.isNotEmpty())
-            opacity = jlimit (0.0f, 1.0f, overallOpacity.getFloatValue());
+            opacity = jlimit (0.0f, 1.0f, parseSafeFloat (overallOpacity));
 
         if (fillOpacity.isNotEmpty())
-            opacity *= (jlimit (0.0f, 1.0f, fillOpacity.getFloatValue()));
+            opacity *= jlimit (0.0f, 1.0f, parseSafeFloat (fillOpacity));
 
         String fill (getStyleAttribute (xml, fillAttribute));
         String urlID = parseURL (fill);
@@ -1024,7 +1023,8 @@ private:
 
     float getStrokeWidth (const String& strokeWidth) const noexcept
     {
-        return transform.getScaleFactor() * getCoordLength (strokeWidth, viewBoxW);
+        auto transformScale = std::sqrt (std::abs (transform.getDeterminant()));
+        return transformScale * getCoordLength (strokeWidth, viewBoxW);
     }
 
     PathStrokeType getStrokeFor (const XmlPath& xml) const
@@ -1035,11 +1035,10 @@ private:
     }
 
     //==============================================================================
-
     Drawable* useText (const XmlPath& xml) const
     {
-        auto translation = AffineTransform::translation ((float) xml->getDoubleAttribute ("x", 0.0),
-                                                         (float) xml->getDoubleAttribute ("y", 0.0));
+        auto translation = AffineTransform::translation (parseSafeFloat (xml->getStringAttribute ("x")),
+                                                         parseSafeFloat (xml->getStringAttribute ("y")));
 
         UseTextOp op = { this, &translation, nullptr };
 
@@ -1099,7 +1098,7 @@ private:
                     dt->setTransform (transform);
 
                 dt->setColour (parseColour (xml, "fill", Colours::black)
-                                 .withMultipliedAlpha (getStyleAttribute (xml, "fill-opacity", "1").getFloatValue()));
+                                 .withMultipliedAlpha (parseSafeFloat (getStyleAttribute (xml, "fill-opacity", "1"))));
 
                 Rectangle<float> bounds (xCoords[0], yCoords[0] - font.getAscent(),
                                          font.getStringWidthFloat (text), font.getHeight());
@@ -1138,8 +1137,8 @@ private:
     //==============================================================================
     Drawable* useImage (const XmlPath& xml) const
     {
-        auto translation = AffineTransform::translation ((float) xml->getDoubleAttribute ("x", 0.0),
-                                                         (float) xml->getDoubleAttribute ("y", 0.0));
+        auto translation = AffineTransform::translation (parseSafeFloat (xml->getStringAttribute ("x")),
+                                                         parseSafeFloat (xml->getStringAttribute ("y")));
 
         UseImageOp op = { this, &translation, nullptr };
 
@@ -1197,7 +1196,7 @@ private:
             auto linkedFile = originalFile.getParentDirectory().getChildFile (link);
 
             if (linkedFile.existsAsFile())
-                inputStream.reset (linkedFile.createInputStream());
+                inputStream = linkedFile.createInputStream();
         }
 
         if (inputStream != nullptr)
@@ -1210,10 +1209,13 @@ private:
 
                 setCommonAttributes (*di, xml);
 
-                Rectangle<float> imageBounds ((float) xml->getDoubleAttribute ("x", 0.0),                  (float) xml->getDoubleAttribute ("y", 0.0),
-                                              (float) xml->getDoubleAttribute ("width", image.getWidth()), (float) xml->getDoubleAttribute ("height", image.getHeight()));
+                Rectangle<float> imageBounds (parseSafeFloat (xml->getStringAttribute ("x")),
+                                              parseSafeFloat (xml->getStringAttribute ("y")),
+                                              parseSafeFloat (xml->getStringAttribute ("width",  String (image.getWidth()))),
+                                              parseSafeFloat (xml->getStringAttribute ("height", String (image.getHeight()))));
 
-                di->setImage (image.rescaled ((int) imageBounds.getWidth(), (int) imageBounds.getHeight()));
+                di->setImage (image.rescaled ((int) imageBounds.getWidth(),
+                                              (int) imageBounds.getHeight()));
 
                 di->setTransformToFit (imageBounds, RectanglePlacement (parsePlacementFlags (xml->getStringAttribute ("preserveAspectRatio").trim())));
 
@@ -1237,7 +1239,7 @@ private:
     }
 
     //==============================================================================
-    bool parseCoord (String::CharPointerType& s, float& value, const bool allowUnits, const bool isX) const
+    bool parseCoord (String::CharPointerType& s, float& value, bool allowUnits, bool isX) const
     {
         String number;
 
@@ -1251,13 +1253,13 @@ private:
         return true;
     }
 
-    bool parseCoords (String::CharPointerType& s, Point<float>& p, const bool allowUnits) const
+    bool parseCoords (String::CharPointerType& s, Point<float>& p, bool allowUnits) const
     {
         return parseCoord (s, p.x, allowUnits, true)
             && parseCoord (s, p.y, allowUnits, false);
     }
 
-    bool parseCoordsOrSkip (String::CharPointerType& s, Point<float>& p, const bool allowUnits) const
+    bool parseCoordsOrSkip (String::CharPointerType& s, Point<float>& p, bool allowUnits) const
     {
         if (parseCoords (s, p, allowUnits))
             return true;
@@ -1268,8 +1270,8 @@ private:
 
     float getCoordLength (const String& s, const float sizeForProportions) const noexcept
     {
-        float n = s.getFloatValue();
-        const int len = s.length();
+        auto n = parseSafeFloat (s);
+        auto len = s.length();
 
         if (len > 2)
         {
@@ -1293,13 +1295,19 @@ private:
         return getCoordLength (xml->getStringAttribute (attName), sizeForProportions);
     }
 
-    void getCoordList (Array<float>& coords, const String& list, bool allowUnits, const bool isX) const
+    void getCoordList (Array<float>& coords, const String& list, bool allowUnits, bool isX) const
     {
         auto text = list.getCharPointer();
         float value;
 
         while (parseCoord (text, value, allowUnits, isX))
             coords.add (value);
+    }
+
+    static float parseSafeFloat (const String& s)
+    {
+        auto n = s.getFloatValue();
+        return (std::isnan (n) || std::isinf (n)) ? 0.0f : n;
     }
 
     //==============================================================================
@@ -1452,7 +1460,7 @@ private:
         return CharacterFunctions::isDigit (c) || c == '-' || c == '+';
     }
 
-    static bool parseNextNumber (String::CharPointerType& text, String& value, const bool allowUnits)
+    static bool parseNextNumber (String::CharPointerType& text, String& value, bool allowUnits)
     {
         auto s = text;
 
@@ -1525,16 +1533,18 @@ private:
 
         if (text.startsWithChar ('#'))
         {
-            uint32 hex[6] = { 0 };
+            uint32 hex[8] = { 0 };
+            hex[6] = hex[7] = 15;
+
             int numChars = 0;
             auto s = text.getCharPointer();
 
-            while (numChars < 6)
+            while (numChars < 8)
             {
                 auto hexValue = CharacterFunctions::getHexDigitValue (*++s);
 
                 if (hexValue >= 0)
-                    hex [numChars++] = (uint32) hexValue;
+                    hex[numChars++] = (uint32) hexValue;
                 else
                     break;
             }
@@ -1546,30 +1556,53 @@ private:
 
             return Colour ((uint8) ((hex[0] << 4) + hex[1]),
                            (uint8) ((hex[2] << 4) + hex[3]),
-                           (uint8) ((hex[4] << 4) + hex[5]));
+                           (uint8) ((hex[4] << 4) + hex[5]),
+                           (uint8) ((hex[6] << 4) + hex[7]));
         }
 
-        if (text.startsWith ("rgb"))
+        if (text.startsWith ("rgb") || text.startsWith ("hsl"))
         {
-            auto openBracket = text.indexOfChar ('(');
-            auto closeBracket = text.indexOfChar (openBracket, ')');
-
-            if (openBracket >= 3 && closeBracket > openBracket)
+            auto tokens = [&text]
             {
-                StringArray tokens;
-                tokens.addTokens (text.substring (openBracket + 1, closeBracket), ",", "");
-                tokens.trim();
-                tokens.removeEmptyStrings();
+                auto openBracket = text.indexOfChar ('(');
+                auto closeBracket = text.indexOfChar (openBracket, ')');
 
-                if (tokens[0].containsChar ('%'))
-                    return Colour ((uint8) roundToInt (2.55 * tokens[0].getDoubleValue()),
-                                   (uint8) roundToInt (2.55 * tokens[1].getDoubleValue()),
-                                   (uint8) roundToInt (2.55 * tokens[2].getDoubleValue()));
+                StringArray arr;
 
-                return Colour ((uint8) tokens[0].getIntValue(),
-                               (uint8) tokens[1].getIntValue(),
-                               (uint8) tokens[2].getIntValue());
-            }
+                if (openBracket >= 3 && closeBracket > openBracket)
+                {
+                    arr.addTokens (text.substring (openBracket + 1, closeBracket), ",", "");
+                    arr.trim();
+                    arr.removeEmptyStrings();
+                }
+
+                return arr;
+            }();
+
+            auto alpha = [&tokens, &text]
+            {
+                if ((text.startsWith ("rgba") || text.startsWith ("hsla")) && tokens.size() == 4)
+                    return parseSafeFloat (tokens[3]);
+
+                return 1.0f;
+            }();
+
+            if (text.startsWith ("hsl"))
+                return Colour::fromHSL (parseSafeFloat (tokens[0]) / 360.0f,
+                                        parseSafeFloat (tokens[1]) / 100.0f,
+                                        parseSafeFloat (tokens[2]) / 100.0f,
+                                        alpha);
+
+            if (tokens[0].containsChar ('%'))
+                return Colour ((uint8) roundToInt (2.55f * parseSafeFloat (tokens[0])),
+                               (uint8) roundToInt (2.55f * parseSafeFloat (tokens[1])),
+                               (uint8) roundToInt (2.55f * parseSafeFloat (tokens[2])),
+                               alpha);
+
+            return Colour ((uint8) tokens[0].getIntValue(),
+                           (uint8) tokens[1].getIntValue(),
+                           (uint8) tokens[2].getIntValue(),
+                           alpha);
         }
 
         if (text == "inherit")
@@ -1598,7 +1631,7 @@ private:
             float numbers[6];
 
             for (int i = 0; i < numElementsInArray (numbers); ++i)
-                numbers[i] = tokens[i].getFloatValue();
+                numbers[i] = parseSafeFloat (tokens[i]);
 
             AffineTransform trans;
 

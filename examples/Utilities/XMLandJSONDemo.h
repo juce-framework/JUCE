@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -75,7 +75,7 @@ public:
 
         // use a "colour" attribute in the xml tag for this node to set the text colour..
         g.setColour (Colour::fromString (xml.getStringAttribute ("colour", "ff000000")));
-        g.setFont (height * 0.7f);
+        g.setFont ((float) height * 0.7f);
 
         // draw the xml element's tag name..
         g.drawText (xml.getTagName(),
@@ -145,7 +145,7 @@ public:
             g.fillAll (Colours::blue.withAlpha (0.3f));
 
         g.setColour (Colours::black);
-        g.setFont (height * 0.7f);
+        g.setFont ((float) height * 0.7f);
 
         // draw the element's tag name..
         g.drawText (getText(),

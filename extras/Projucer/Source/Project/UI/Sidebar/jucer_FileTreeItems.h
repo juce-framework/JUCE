@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -29,7 +28,7 @@
 
 //==============================================================================
 class FileTreeItemBase   : public JucerTreeViewBase,
-                           public ValueTree::Listener
+                           private ValueTree::Listener
 {
 public:
     FileTreeItemBase (const Project::Item& projectItem)
@@ -118,7 +117,7 @@ public:
             {
                 auto f = filesToTrash.getUnchecked(i);
 
-                om.closeFile (f, false);
+                om.closeFile (f, OpenDocumentManager::SaveIfNeeded::no);
 
                 if (! f.moveToTrash())
                 {
@@ -137,7 +136,7 @@ public:
                                 pcc->hideEditor();
                     }
 
-                    om.closeFile (itemToRemove->getFile(), false);
+                    om.closeFile (itemToRemove->getFile(), OpenDocumentManager::SaveIfNeeded::no);
                     itemToRemove->deleteItem();
                 }
             }
@@ -234,17 +233,6 @@ public:
         setOpen (wasOpen);
         return nullptr;
     }
-
-    //==============================================================================
-    void valueTreePropertyChanged (ValueTree& tree, const Identifier&) override
-    {
-        if (tree == item.state)
-            repaintItem();
-    }
-
-    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { treeChildrenChanged (parentTree); }
-    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { treeChildrenChanged (parentTree); }
-    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { treeChildrenChanged (parentTree); }
 
     //==============================================================================
     bool mightContainSubItems() override                { return item.getNumChildren() > 0; }
@@ -348,6 +336,17 @@ public:
     Project::Item item;
 
 protected:
+    //==============================================================================
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier&) override
+    {
+        if (tree == item.state)
+            repaintItem();
+    }
+
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree&) override         { treeChildrenChanged (parentTree); }
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree&, int) override  { treeChildrenChanged (parentTree); }
+    void valueTreeChildOrderChanged (ValueTree& parentTree, int, int) override    { treeChildrenChanged (parentTree); }
+
     bool isFileMissing;
 
     virtual FileTreeItemBase* createSubItem (const Project::Item& node) = 0;
@@ -564,16 +563,11 @@ public:
         m.addItem (4, "Rename File...");
         m.addSeparator();
 
-        if (auto* group = dynamic_cast<GroupItem*> (getParentItem()))
-        {
-            if (group->isRoot())
-            {
-                m.addItem (5, "Binary Resource", true, item.shouldBeAddedToBinaryResources());
-                m.addItem (6, "Xcode Resource",  true, item.shouldBeAddedToXcodeResources());
-                m.addItem (7, "Compile",         true, item.shouldBeCompiled());
-                m.addSeparator();
-            }
-        }
+        m.addItem (5, "Binary Resource", true, item.shouldBeAddedToBinaryResources());
+        m.addItem (6, "Xcode Resource", true, item.shouldBeAddedToXcodeResources());
+        m.addItem (7, "Compile", item.isSourceFile(), item.shouldBeCompiled());
+        m.addItem (8, "Skip PCH", item.shouldBeCompiled(), item.shouldSkipPCH());
+        m.addSeparator();
 
         m.addItem (3, "Delete");
 
@@ -590,13 +584,14 @@ public:
     {
         switch (resultCode)
         {
-            case 1:     getFile().startAsProcess(); break;
-            case 2:     revealInFinder(); break;
-            case 3:     deleteAllSelectedItems(); break;
-            case 4:     triggerAsyncRename (item); break;
-            case 5:     item.getShouldAddToBinaryResourcesValue().setValue (! item.shouldBeAddedToBinaryResources()); break;
-            case 6:     item.getShouldAddToXcodeResourcesValue().setValue (! item.shouldBeAddedToXcodeResources()); break;
-            case 7:     item.getShouldCompileValue().setValue (! item.shouldBeCompiled()); break;
+            case 1:  getFile().startAsProcess(); break;
+            case 2:  revealInFinder(); break;
+            case 3:  deleteAllSelectedItems(); break;
+            case 4:  triggerAsyncRename (item); break;
+            case 5:  item.getShouldAddToBinaryResourcesValue().setValue (! item.shouldBeAddedToBinaryResources()); break;
+            case 6:  item.getShouldAddToXcodeResourcesValue().setValue (! item.shouldBeAddedToXcodeResources()); break;
+            case 7:  item.getShouldCompileValue().setValue (! item.shouldBeCompiled()); break;
+            case 8:  item.getShouldSkipPCHValue().setValue (! item.shouldSkipPCH()); break;
 
             default:
                 if (auto* parentGroup = dynamic_cast<GroupItem*> (getParentProjectItem()))

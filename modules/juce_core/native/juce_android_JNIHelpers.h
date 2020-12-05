@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -149,7 +149,7 @@ private:
     //==============================================================================
     jobject obj = nullptr;
 
-    static inline jobject retain (jobject obj, JNIEnv* env)
+    static jobject retain (jobject obj, JNIEnv* env)
     {
         return obj == nullptr ? nullptr : env->NewGlobalRef (obj);
     }
@@ -983,7 +983,7 @@ public:
 //==============================================================================
 // Allows you to start an activity without requiring to have an activity
 void startAndroidActivityForResult (const LocalRef<jobject>& intent, int requestCode,
-                                    std::function<void(int, int, LocalRef<jobject>)> && callback);
+                                    std::function<void (int, int, LocalRef<jobject>)> && callback);
 
 //==============================================================================
 bool androidHasSystemFeature (const String& property);

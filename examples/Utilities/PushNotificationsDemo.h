@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -34,9 +34,10 @@
                    juce_audio_processors, juce_audio_utils, juce_core,
                    juce_data_structures, juce_events, juce_graphics,
                    juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2019, xcode_iphone, androidstudio
+ exporters:        xcode_mac, xcode_iphone, androidstudio
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+                   JUCE_PUSH_NOTIFICATIONS=1
 
  type:             Component
  mainClass:        PushNotificationsDemo
@@ -96,7 +97,7 @@ The following steps are only necessary if you have a custom activity defined:
 
 6. Ensure that you override onNewIntent() function in the same way as it is done in JuceActivity.java:
 
-package com.roli.juce;
+package com.rmsl.juce;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -161,7 +162,7 @@ public:
         mainTabs.addTab ("Local",  colour, &localNotificationsTabs, false);
         mainTabs.addTab ("Remote", colour, &remoteView,             false);
 
-        auto userArea = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        auto userArea = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
       #if JUCE_ANDROID || JUCE_IOS
         setSize (userArea.getWidth(), userArea.getHeight());
       #else
@@ -238,7 +239,7 @@ public:
        #endif
     }
 
-    ~PushNotificationsDemo()
+    ~PushNotificationsDemo() override
     {
         PushNotifications::getInstance()->removeListener (this);
 

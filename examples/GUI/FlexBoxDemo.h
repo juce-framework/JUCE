@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -49,9 +49,9 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-struct DemoFlexPanel   : public juce::Component
+struct DemoFlexPanel   : public Component
 {
-    DemoFlexPanel (juce::Colour col, FlexItem& item)
+    DemoFlexPanel (Colour col, FlexItem& item)
         : flexItem (item), colour (col)
     {
         int x = 70;
@@ -118,6 +118,7 @@ struct DemoFlexPanel   : public juce::Component
             case 3:  flexItem.alignSelf = FlexItem::AlignSelf::flexEnd;   break;
             case 4:  flexItem.alignSelf = FlexItem::AlignSelf::center;    break;
             case 5:  flexItem.alignSelf = FlexItem::AlignSelf::stretch;   break;
+            default: break;
         }
 
         refreshLayout();
@@ -154,7 +155,7 @@ struct DemoFlexPanel   : public juce::Component
     TextEditor flexOrderEditor, flexGrowEditor, flexShrinkEditor, flexBasisEditor;
     ComboBox alignSelfCombo;
 
-    juce::Colour colour;
+    Colour colour;
     OwnedArray<Label> labels;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoFlexPanel)

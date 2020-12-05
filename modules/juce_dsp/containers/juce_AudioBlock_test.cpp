@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -300,7 +299,7 @@ public:
         beginTest ("Process");
         {
             resetBlocks();
-            AudioBlock<SampleType>::process (block, otherBlock, [](SampleType x) { return x + (NumericType) 1.0; });
+            AudioBlock<SampleType>::process (block, otherBlock, [] (SampleType x) { return x + (NumericType) 1.0; });
             expect (otherBlock.getSample (0, 4) == SampleType (6.0));
             expect (otherBlock.getSample (1, 4) == SampleType (12.0));
         }
@@ -355,6 +354,7 @@ private:
         expectEquals (otherBuffer.getSample (1, 2), block.getSample (1, 3));
     }
 
+   #if JUCE_USE_SIMD
     template <typename T = SampleType>
     SIMDVoid<T> copyingTests()
     {
@@ -397,6 +397,7 @@ private:
             expectEquals (block.getSample (1, 3).get (1), numericData.getSample (1, (int) ((numSIMDElements * 2) + 1)));
         }
     }
+   #endif
 
     //==============================================================================
     template <typename T = SampleType>
@@ -492,8 +493,11 @@ private:
 
 static AudioBlockUnitTests<float> audioBlockFloatUnitTests;
 static AudioBlockUnitTests<double> audioBlockDoubleUnitTests;
+
+#if JUCE_USE_SIMD
 static AudioBlockUnitTests<SIMDRegister<float>> audioBlockSIMDFloatUnitTests;
 static AudioBlockUnitTests<SIMDRegister<double>> audioBlockSIMDDoubleUnitTests;
+#endif
 
 } // namespace dsp
 } // namespace juce

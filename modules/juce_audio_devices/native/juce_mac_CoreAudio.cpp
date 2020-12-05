@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -29,10 +29,7 @@ namespace juce
  #define JUCE_COREAUDIOLOG(a)
 #endif
 
-#ifdef __clang__
- #pragma clang diagnostic push
- #pragma clang diagnostic ignored "-Wnonnull" // avoid some spurious 10.11 SDK warnings
-#endif
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnonnull")
 
 //==============================================================================
 struct SystemVol
@@ -124,9 +121,7 @@ private:
     }
 };
 
-#ifdef __clang__
- #pragma clang diagnostic pop
-#endif
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #define JUCE_SYSTEMAUDIOVOL_IMPLEMENTED 1
 float JUCE_CALLTYPE SystemAudioVolume::getGain()              { return SystemVol (kAudioHardwareServiceDeviceProperty_VirtualMasterVolume).getGain(); }
@@ -1668,11 +1663,16 @@ private:
     void readInput (AudioBuffer<float>& buffer, const int numSamples, const int blockSizeMs)
     {
         for (auto* d : devices)
-            d->done = (d->numInputChans == 0);
+            d->done = (d->numInputChans == 0 || d->isWaitingForInput);
 
-        for (int tries = 5;;)
+        float totalWaitTimeMs = blockSizeMs * 5.0f;
+        constexpr int numReadAttempts = 6;
+        auto sumPower2s = [] (int maxPower) { return (1 << (maxPower + 1)) - 1; };
+        float waitTime = totalWaitTimeMs / (float) sumPower2s (numReadAttempts - 2);
+
+        for (int numReadAttemptsRemaining = numReadAttempts;;)
         {
-            bool anyRemaining = false;
+            bool anySamplesRemaining = false;
 
             for (auto* d : devices)
             {
@@ -1684,17 +1684,20 @@ private:
                         d->done = true;
                     }
                     else
-                        anyRemaining = true;
+                    {
+                        anySamplesRemaining = true;
+                    }
                 }
             }
 
-            if (! anyRemaining)
+            if (! anySamplesRemaining)
                 return;
 
-            if (--tries == 0)
+            if (--numReadAttemptsRemaining == 0)
                 break;
 
-            wait (blockSizeMs);
+            wait (jmax (1, roundToInt (waitTime)));
+            waitTime *= 2.0f;
         }
 
         for (auto* d : devices)
@@ -1722,7 +1725,9 @@ private:
                         d->done = true;
                     }
                     else
+                    {
                         anyRemaining = true;
+                    }
                 }
             }
 
@@ -1813,6 +1818,8 @@ private:
             numInputChans  = useInputs  ? device->getActiveInputChannels().countNumberOfSetBits()  : 0;
             numOutputChans = useOutputs ? device->getActiveOutputChannels().countNumberOfSetBits() : 0;
 
+            isWaitingForInput = numInputChans > 0;
+
             inputIndex = channelIndex;
             outputIndex = channelIndex + numInputChans;
 
@@ -1897,6 +1904,8 @@ private:
         {
             if (numInputChannels > 0)
             {
+                isWaitingForInput = false;
+
                 int start1, size1, start2, size2;
                 inputFifo.prepareToWrite (numSamples, start1, size1, start2, size2);
 
@@ -1978,6 +1987,7 @@ private:
         std::unique_ptr<CoreAudioIODevice> device;
         int inputIndex = 0, numInputChans = 0, outputIndex = 0, numOutputChans = 0;
         bool useInputs = false, useOutputs = false;
+        std::atomic<bool> isWaitingForInput { false };
         AbstractFifo inputFifo { 32 }, outputFifo { 32 };
         bool done = false;
 
@@ -2238,12 +2248,6 @@ private:
 };
 
 };
-
-//==============================================================================
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()
-{
-    return new CoreAudioClasses::CoreAudioIODeviceType();
-}
 
 #undef JUCE_COREAUDIOLOG
 

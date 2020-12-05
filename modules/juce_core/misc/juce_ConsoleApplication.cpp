@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -23,12 +23,12 @@
 namespace juce
 {
 
-static inline File resolveFilename (const String& name)
+static File resolveFilename (const String& name)
 {
     return File::getCurrentWorkingDirectory().getChildFile (name.unquoted());
 }
 
-static inline File checkFileExists (const File& f)
+static File checkFileExists (const File& f)
 {
     if (! f.exists())
         ConsoleApplication::fail ("Could not find file: " + f.getFullPathName());
@@ -36,7 +36,7 @@ static inline File checkFileExists (const File& f)
     return f;
 }
 
-static inline File checkFolderExists (const File& f)
+static File checkFolderExists (const File& f)
 {
     if (! f.isDirectory())
         ConsoleApplication::fail ("Could not find folder: " + f.getFullPathName());
@@ -44,7 +44,7 @@ static inline File checkFolderExists (const File& f)
     return f;
 }
 
-static inline File resolveFilenameForOption (const ArgumentList& args, StringRef option, const String& filename)
+static File resolveFilenameForOption (const ArgumentList& args, StringRef option, const String& filename)
 {
     if (filename.isEmpty())
     {
@@ -75,9 +75,9 @@ File ArgumentList::Argument::resolveAsExistingFolder() const
     return f;
 }
 
-static inline bool isShortOptionFormat (StringRef s)  { return s[0] == '-' && s[1] != '-'; }
-static inline bool isLongOptionFormat  (StringRef s)  { return s[0] == '-' && s[1] == '-' && s[2] != '-'; }
-static inline bool isOptionFormat      (StringRef s)  { return s[0] == '-'; }
+static bool isShortOptionFormat (StringRef s)  { return s[0] == '-' && s[1] != '-'; }
+static bool isLongOptionFormat  (StringRef s)  { return s[0] == '-' && s[1] == '-' && s[2] != '-'; }
+static bool isOptionFormat      (StringRef s)  { return s[0] == '-'; }
 
 bool ArgumentList::Argument::isLongOption() const     { return isLongOptionFormat (text); }
 bool ArgumentList::Argument::isShortOption() const    { return isShortOptionFormat (text); }
@@ -141,7 +141,7 @@ ArgumentList::ArgumentList (String exeName, StringArray args)
     args.removeEmptyStrings();
 
     for (auto& a : args)
-        arguments.add ({ a });
+        arguments.add ({ a.unquoted() });
 }
 
 ArgumentList::ArgumentList (int argc, char* argv[])
@@ -168,7 +168,7 @@ int ArgumentList::indexOfOption (StringRef option) const
     jassert (option == String (option).trim()); // passing non-trimmed strings will always fail to find a match!
 
     for (int i = 0; i < arguments.size(); ++i)
-        if (arguments.getReference(i) == option)
+        if (arguments.getReference (i) == option)
             return i;
 
     return -1;

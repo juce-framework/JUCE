@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -36,24 +35,21 @@ namespace juce
 namespace OggVorbisNamespace
 {
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
- #if JUCE_MSVC
-  #pragma warning (push)
-  #pragma warning (disable: 4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459)
- #elif JUCE_CLANG
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wconversion"
-  #pragma clang diagnostic ignored "-Wshadow"
-  #pragma clang diagnostic ignored "-Wdeprecated-register"
-  #if __has_warning("-Wzero-as-null-pointer-constant")
-   #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
-  #endif
- #elif JUCE_GCC
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wconversion"
-  #pragma GCC diagnostic ignored "-Wshadow"
-  #pragma GCC diagnostic ignored "-Wsign-conversion"
-  #pragma GCC diagnostic ignored "-Wzero-as-null-pointer-constant"
- #endif
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459)
+
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
+                                      "-Wshadow",
+                                      "-Wfloat-conversion",
+                                      "-Wdeprecated-register",
+                                      "-Wdeprecated-declarations",
+                                      "-Wswitch-enum",
+                                      "-Wzero-as-null-pointer-constant",
+                                      "-Wsign-conversion",
+                                      "-Wswitch-default",
+                                      "-Wredundant-decls",
+                                      "-Wmisleading-indentation",
+                                      "-Wmissing-prototypes",
+                                      "-Wcast-align")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
@@ -61,35 +57,30 @@ namespace OggVorbisNamespace
 
  #include "oggvorbis/bitwise.c"
  #include "oggvorbis/framing.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/analysis.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/bitrate.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/block.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/codebook.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/envelope.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/floor0.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/floor1.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/info.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/lpc.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/lsp.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/mapping0.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/mdct.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/psy.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/registry.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/res0.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/sharedbook.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/smallft.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/synthesis.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/vorbisenc.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/vorbisfile.c"
- #include "oggvorbis/libvorbis-1.3.2/lib/window.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/analysis.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/bitrate.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/block.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/codebook.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/envelope.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/floor0.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/floor1.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/info.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/lpc.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/lsp.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/mapping0.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/mdct.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/psy.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/registry.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/res0.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/sharedbook.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/smallft.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/synthesis.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/vorbisenc.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/vorbisfile.c"
+ #include "oggvorbis/libvorbis-1.3.7/lib/window.c"
 
- #if JUCE_MSVC
-  #pragma warning (pop)
- #elif JUCE_CLANG
-  #pragma clang diagnostic pop
- #elif JUCE_GCC
-  #pragma GCC diagnostic pop
- #endif
+ JUCE_END_IGNORE_WARNINGS_MSVC
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #else
  #include <vorbis/vorbisenc.h>
  #include <vorbis/codec.h>
@@ -146,7 +137,7 @@ public:
             lengthInSamples = (uint32) ov_pcm_total (&ovFile, -1);
             numChannels = (unsigned int) info->channels;
             bitsPerSample = 16;
-            sampleRate = info->rate;
+            sampleRate = (double) info->rate;
 
             reservoir.setSize ((int) numChannels, (int) jmin (lengthInSamples, (int64) 4096));
         }
@@ -208,7 +199,7 @@ public:
                 while (numToRead > 0)
                 {
                     float** dataIn = nullptr;
-                    auto samps = ov_read_float (&ovFile, &dataIn, numToRead, &bitStream);
+                    auto samps = static_cast<int> (ov_read_float (&ovFile, &dataIn, numToRead, &bitStream));
 
                     if (samps <= 0)
                         break;
@@ -287,7 +278,7 @@ public:
         vorbis_info_init (&vi);
 
         if (vorbis_encode_init_vbr (&vi, (int) numChans, (int) rate,
-                                    jlimit (0.0f, 1.0f, qualityIndex * 0.1f)) == 0)
+                                    jlimit (0.0f, 1.0f, (float) qualityIndex * 0.1f)) == 0)
         {
             vorbis_comment_init (&vc);
 
@@ -490,12 +481,12 @@ StringArray OggVorbisAudioFormat::getQualityOptions()
 
 int OggVorbisAudioFormat::estimateOggFileQuality (const File& source)
 {
-    if (auto* in = source.createInputStream())
+    if (auto in = source.createInputStream())
     {
-        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in, true)))
+        if (auto r = std::unique_ptr<AudioFormatReader> (createReaderFor (in.release(), true)))
         {
-            auto lengthSecs = r->lengthInSamples / r->sampleRate;
-            auto approxBitsPerSecond = (int) (source.getSize() * 8 / lengthSecs);
+            auto lengthSecs = (double) r->lengthInSamples / r->sampleRate;
+            auto approxBitsPerSecond = (int) ((double) source.getSize() * 8 / lengthSecs);
 
             auto qualities = getQualityOptions();
             int bestIndex = 0;

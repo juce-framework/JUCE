@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -541,7 +541,7 @@ private:
     {
         if (stream == nullptr)
         {
-            stream.reset (file.createInputStream());
+            stream = file.createInputStream();
 
             if (stream == nullptr)
                 return false;
@@ -577,7 +577,7 @@ private:
         target.writeInt ((int) checksum);
         target.writeInt ((int) (uint32) compressedSize);
         target.writeInt ((int) (uint32) uncompressedSize);
-        target.writeShort ((short) storedPathname.toUTF8().sizeInBytes() - 1);
+        target.writeShort (static_cast<short> (storedPathname.toUTF8().sizeInBytes() - 1));
         target.writeShort (0); // extra field length
     }
 

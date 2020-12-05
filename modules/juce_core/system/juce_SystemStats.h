@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -52,9 +52,6 @@ public:
         Android         = 0x0800,
         iOS             = 0x1000,
 
-        MacOSX_10_4     = MacOSX | 4,
-        MacOSX_10_5     = MacOSX | 5,
-        MacOSX_10_6     = MacOSX | 6,
         MacOSX_10_7     = MacOSX | 7,
         MacOSX_10_8     = MacOSX | 8,
         MacOSX_10_9     = MacOSX | 9,
@@ -63,6 +60,8 @@ public:
         MacOSX_10_12    = MacOSX | 12,
         MacOSX_10_13    = MacOSX | 13,
         MacOSX_10_14    = MacOSX | 14,
+        MacOSX_10_15    = MacOSX | 15,
+        MacOSX_11_0     = MacOSX | 16,
 
         Win2000         = Windows | 1,
         WinXP           = Windows | 2,

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -154,7 +154,7 @@ private:
     bool openPipe (bool isInput, uint32 timeoutEnd)
     {
         auto& pipe = isInput ? pipeIn : pipeOut;
-        int flags = isInput ? O_RDWR | O_NONBLOCK : O_WRONLY;
+        int flags = (isInput ? O_RDWR : O_WRONLY) | O_NONBLOCK;
 
         const String& pipeName = isInput ? (createdPipe ? pipeInName : pipeOutName)
                                          : (createdPipe ? pipeOutName : pipeInName);
@@ -181,14 +181,20 @@ private:
 
 void NamedPipe::close()
 {
-    if (pimpl != nullptr)
     {
-        pimpl->stopReadOperation = true;
+        ScopedReadLock sl (lock);
 
-        char buffer[1] = { 0 };
-        ssize_t done = ::write (pimpl->pipeIn, buffer, 1);
-        ignoreUnused (done);
+        if (pimpl != nullptr)
+        {
+            pimpl->stopReadOperation = true;
 
+            char buffer[1] = { 0 };
+            ssize_t done = ::write (pimpl->pipeIn, buffer, 1);
+            ignoreUnused (done);
+        }
+    }
+
+    {
         ScopedWriteLock sl (lock);
         pimpl.reset();
     }

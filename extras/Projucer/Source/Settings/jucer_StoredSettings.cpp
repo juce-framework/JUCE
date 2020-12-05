@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -181,8 +180,7 @@ void StoredSettings::updateOldProjectSettingsFiles()
     auto newProjectSettingsDir = projucerSettingsDirectory.getChildFile ("ProjectSettings");
     newProjectSettingsDir.createDirectory();
 
-    DirectoryIterator iter (projucerSettingsDirectory, false, "*.settings");
-    while (iter.next())
+    for (const auto& iter : RangedDirectoryIterator (projucerSettingsDirectory, false, "*.settings"))
     {
         auto f = iter.getFile();
         auto oldFileName = f.getFileName();
@@ -281,10 +279,6 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
     {
         fileToCheckFor = "pluginterfaces/vst2.x/aeffect.h";
     }
-    if (key == Ids::vst3Path)
-    {
-        fileToCheckFor = "base/source/baseiids.cpp";
-    }
     else if (key == Ids::rtasPath)
     {
         fileToCheckFor = "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses/CEffectProcessMIDI.cpp";
@@ -299,14 +293,6 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
         fileToCheckFor = "platform-tools/adb.exe";
        #else
         fileToCheckFor = "platform-tools/adb";
-       #endif
-    }
-    else if (key == Ids::androidNDKPath)
-    {
-       #if JUCE_WINDOWS
-        fileToCheckFor = "ndk-depends.cmd";
-       #else
-        fileToCheckFor = "ndk-depends";
        #endif
     }
     else if (key == Ids::defaultJuceModulePath)
@@ -363,18 +349,9 @@ void StoredSettings::checkJUCEPaths()
         projectDefaults.getPropertyAsValue (Ids::defaultJuceModulePath, nullptr) = File (juceFolder).getChildFile ("modules").getFullPathName();
 }
 
-bool StoredSettings::shouldAskUserToSetJUCEPath() noexcept
+bool StoredSettings::isJUCEPathIncorrect()
 {
-    if (! isGlobalPathValid ({}, Ids::jucePath, getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString())
-        && getGlobalProperties().getValue ("dontAskAboutJUCEPath", {}).isEmpty())
-        return true;
-
-    return false;
-}
-
-void StoredSettings::setDontAskAboutJUCEPathAgain() noexcept
-{
-    getGlobalProperties().setValue ("dontAskAboutJUCEPath", 1);
+    return ! isGlobalPathValid ({}, Ids::jucePath, getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get().toString());
 }
 
 static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
@@ -391,7 +368,7 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
     {
         return (os == TargetOS::windows ? "C:\\modules" : "~/modules");
     }
-    else if (key == Ids::vstLegacyPath || key == Ids::vst3Path)
+    else if (key == Ids::vstLegacyPath)
     {
         return {};
     }
@@ -415,10 +392,6 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 
         jassertfalse;
         return {};
-    }
-    else if (key == Ids::androidNDKPath)
-    {
-        return getFallbackPathForOS (Ids::androidSDKPath, os) + File::getSeparatorChar() + "ndk-bundle";
     }
     else if (key == Ids::clionExePath)
     {

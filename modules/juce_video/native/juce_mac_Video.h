@@ -2,22 +2,23 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2018 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
-   Permission is granted to use this software under the terms of either:
-   a) the GPL v2 (or any later version)
-   b) the Affero GPL v3
+   JUCE is an open source library subject to commercial or open-source
+   licensing.
 
-   Details of these licenses can be found at: www.gnu.org/licenses
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
-   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-   A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
-   ------------------------------------------------------------------------------
+   Or: You may also use this code under the terms of the GPL v3 (see
+   www.gnu.org/licenses).
 
-   To release a closed-source product which uses JUCE, commercial licenses are
-   available: visit www.juce.com for more information.
+   JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
+   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE
+   DISCLAIMED.
 
   ==============================================================================
 */
@@ -82,7 +83,7 @@ struct VideoComponent::Pimpl   : public Base
         return Result::fail ("Couldn't open movie");
     }
 
-    void loadAsync (const URL& url, std::function<void(const URL&, Result)> callback)
+    void loadAsync (const URL& url, std::function<void (const URL&, Result)> callback)
     {
         if (url.isEmpty())
         {
@@ -204,10 +205,9 @@ private:
         {
             JucePlayerStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerStatusObserverClass_")
             {
-               #pragma clang diagnostic push
-               #pragma clang diagnostic ignored "-Wundeclared-selector"
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged, "v@:@@@?");
-               #pragma clang diagnostic pop
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<PlayerAsyncInitialiser*> ("owner");
 
@@ -249,10 +249,9 @@ private:
         {
             JucePlayerItemPlaybackStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemPlaybackStatusObserverClass_")
             {
-               #pragma clang diagnostic push
-               #pragma clang diagnostic ignored "-Wundeclared-selector"
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (processNotification:), notificationReceived, "v@:@");
-               #pragma clang diagnostic pop
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<PlayerControllerBase*> ("owner");
 
@@ -305,10 +304,9 @@ private:
             {
                 JucePlayerItemPreparationStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemStatusObserverClass_")
                 {
-                   #pragma clang diagnostic push
-                   #pragma clang diagnostic ignored "-Wundeclared-selector"
+                    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                     addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged, "v@:@@@?");
-                   #pragma clang diagnostic pop
+                    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                     addIvar<PlayerAsyncInitialiser*> ("owner");
 
@@ -348,7 +346,7 @@ private:
                         }
                         else if (newStatus == AVPlayerItemStatusReadyToPlay)
                         {
-                            owner.notifyOwnerPreparationFinished (url, Result::ok(), owner.player.release());
+                            owner.notifyOwnerPreparationFinished (url, Result::ok(), owner.player.get());
                         }
                         else
                         {
@@ -394,8 +392,11 @@ private:
                             notifyOwnerPreparationFinished (url, Result::fail (errorMessage), nullptr);
                             return;
                         }
+
+                        case AVKeyValueStatusUnknown:
+                        case AVKeyValueStatusLoading:
                         default:
-                        {}
+                            break;
                     }
                 }
 
@@ -499,21 +500,19 @@ private:
 
         void attachPlaybackObserver()
         {
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSNotificationCenter defaultCenter] addObserver: playerItemPlaybackStatusObserver.get()
                                                      selector: @selector (processNotification:)
                                                          name: AVPlayerItemDidPlayToEndTimeNotification
                                                        object: [crtp().getPlayer() currentItem]];
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         void detachPlaybackObserver()
         {
-           #pragma clang diagnostic push
-           #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSNotificationCenter defaultCenter] removeObserver: playerItemPlaybackStatusObserver.get()];
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
     private:
@@ -745,7 +744,7 @@ private:
         private:
             static void layoutSubviews (id self, SEL)
             {
-                sendSuperclassMessage (self, @selector (layoutSubviews));
+                sendSuperclassMessage<void> (self, @selector (layoutSubviews));
 
                 UIView* asUIView = (UIView*) self;
 
@@ -778,7 +777,7 @@ private:
 
     PlayerController playerController;
 
-    std::function<void(const URL&, Result)> loadFinishedCallback;
+    std::function<void (const URL&, Result)> loadFinishedCallback;
 
     double playSpeedMult = 1.0;
 

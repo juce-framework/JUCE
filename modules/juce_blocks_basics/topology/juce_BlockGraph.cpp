@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2019 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -23,7 +23,7 @@
 namespace juce
 {
 
-BlockGraph::BlockGraph (const BlockTopology t, std::function<bool(Block::Ptr)> filterIn)
+BlockGraph::BlockGraph (const BlockTopology t, std::function<bool (Block::Ptr)> filterIn)
     : topology (t), filter (std::move (filterIn))
 {
     buildGraph();

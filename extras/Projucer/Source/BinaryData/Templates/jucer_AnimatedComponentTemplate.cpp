@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-  ==============================================================================
-*/
-
 %%include_corresponding_header%%
 
 //==============================================================================
@@ -29,10 +21,10 @@ void %%content_component_class%%::update()
 }
 
 //==============================================================================
-void %%content_component_class%%::paint (Graphics& g)
+void %%content_component_class%%::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
     // You can add your drawing code here!
 }

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -27,37 +27,37 @@ namespace juce
 {
 
 //==============================================================================
-static inline String nsStringToJuce (NSString* s)
+inline String nsStringToJuce (NSString* s)
 {
     return CharPointer_UTF8 ([s UTF8String]);
 }
 
-static inline NSString* juceStringToNS (const String& s)
+inline NSString* juceStringToNS (const String& s)
 {
     return [NSString stringWithUTF8String: s.toUTF8()];
 }
 
-static inline NSString* nsStringLiteral (const char* const s) noexcept
+inline NSString* nsStringLiteral (const char* const s) noexcept
 {
     return [NSString stringWithUTF8String: s];
 }
 
-static inline NSString* nsEmptyString() noexcept
+inline NSString* nsEmptyString() noexcept
 {
     return [NSString string];
 }
 
-static inline NSURL* createNSURLFromFile (const String& f)
+inline NSURL* createNSURLFromFile (const String& f)
 {
     return [NSURL fileURLWithPath: juceStringToNS (f)];
 }
 
-static inline NSURL* createNSURLFromFile (const File& f)
+inline NSURL* createNSURLFromFile (const File& f)
 {
     return createNSURLFromFile (f.getFullPathName());
 }
 
-static inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
+inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
 {
     auto array = [[NSMutableArray alloc] init];
 
@@ -67,9 +67,9 @@ static inline NSArray* createNSArrayFromStringArray (const StringArray& strings)
     return [array autorelease];
 }
 
-static NSArray* varArrayToNSArray (const var& varToParse);
+inline NSArray* varArrayToNSArray (const var& varToParse);
 
-static NSDictionary* varObjectToNSDictionary (const var& varToParse)
+inline NSDictionary* varObjectToNSDictionary (const var& varToParse)
 {
     auto dictionary = [NSMutableDictionary dictionary];
 
@@ -109,7 +109,7 @@ static NSDictionary* varObjectToNSDictionary (const var& varToParse)
     return dictionary;
 }
 
-static NSArray* varArrayToNSArray (const var& varToParse)
+inline NSArray* varArrayToNSArray (const var& varToParse)
 {
     jassert (varToParse.isArray());
 
@@ -145,9 +145,9 @@ static NSArray* varArrayToNSArray (const var& varToParse)
     return array;
 }
 
-static var nsObjectToVar (NSObject* array);
+var nsObjectToVar (NSObject* array);
 
-static var nsDictionaryToVar (NSDictionary* dictionary)
+inline var nsDictionaryToVar (NSDictionary* dictionary)
 {
     DynamicObject::Ptr dynamicObject (new DynamicObject());
 
@@ -157,7 +157,7 @@ static var nsDictionaryToVar (NSDictionary* dictionary)
     return var (dynamicObject.get());
 }
 
-static var nsArrayToVar (NSArray* array)
+inline var nsArrayToVar (NSArray* array)
 {
     Array<var> resultArray;
 
@@ -167,7 +167,7 @@ static var nsArrayToVar (NSArray* array)
     return var (resultArray);
 }
 
-static var nsObjectToVar (NSObject* obj)
+inline var nsObjectToVar (NSObject* obj)
 {
     if ([obj isKindOfClass: [NSString class]])          return nsStringToJuce ((NSString*) obj);
     else if ([obj isKindOfClass: [NSNumber class]])     return nsStringToJuce ([(NSNumber*) obj stringValue]);
@@ -184,7 +184,7 @@ static var nsObjectToVar (NSObject* obj)
 
 #if JUCE_MAC
 template <typename RectangleType>
-static NSRect makeNSRect (const RectangleType& r) noexcept
+NSRect makeNSRect (const RectangleType& r) noexcept
 {
     return NSMakeRect (static_cast<CGFloat> (r.getX()),
                        static_cast<CGFloat> (r.getY()),
@@ -192,28 +192,40 @@ static NSRect makeNSRect (const RectangleType& r) noexcept
                        static_cast<CGFloat> (r.getHeight()));
 }
 #endif
-#if JUCE_MAC || JUCE_IOS
 
-// This is necessary as on iOS builds, some arguments may be passed on registers
-// depending on the argument type. The re-cast objc_msgSendSuper to a function
-// take the same arguments as the target method.
-template <typename ReturnValue, typename... Params>
-static inline ReturnValue ObjCMsgSendSuper (struct objc_super* s, SEL sel, Params... params)
+#if JUCE_INTEL
+ template <typename T>
+ struct NeedsStret
+ {
+    #if JUCE_32BIT
+     static constexpr auto value = sizeof (T) > 8;
+    #else
+     static constexpr auto value = sizeof (T) > 16;
+    #endif
+ };
+
+ template<>
+ struct NeedsStret<void> { static constexpr auto value = false; };
+
+ template <typename T, bool b = NeedsStret<T>::value>
+ struct MetaSuperFn { static constexpr auto value = objc_msgSendSuper_stret; };
+
+ template <typename T>
+ struct MetaSuperFn<T, false> { static constexpr auto value = objc_msgSendSuper; };
+#else
+ template <typename>
+ struct MetaSuperFn { static constexpr auto value = objc_msgSendSuper; };
+#endif
+
+template <typename SuperType, typename ReturnType, typename... Params>
+static ReturnType ObjCMsgSendSuper (id self, SEL sel, Params... params)
 {
-    using SuperFn = ReturnValue (*)(struct objc_super*, SEL, Params...);
-    SuperFn fn = reinterpret_cast<SuperFn> (objc_msgSendSuper);
-    return fn (s, sel, params...);
+    using SuperFn = ReturnType (*) (struct objc_super*, SEL, Params...);
+    const auto fn = reinterpret_cast<SuperFn> (MetaSuperFn<ReturnType>::value);
+
+    objc_super s = { self, [SuperType class] };
+    return fn (&s, sel, params...);
 }
-
-// These hacks are a workaround for newer Xcode builds which by default prevent calls to these objc functions..
-typedef id (*MsgSendSuperFn) (struct objc_super*, SEL, ...);
-static inline MsgSendSuperFn getMsgSendSuperFn() noexcept   { return (MsgSendSuperFn) (void*) objc_msgSendSuper; }
-
-#if ! JUCE_IOS
-typedef double (*MsgSendFPRetFn) (id, SEL op, ...);
-static inline MsgSendFPRetFn getMsgSendFPRetFn() noexcept   { return (MsgSendFPRetFn) (void*) objc_msgSend_fpret; }
-#endif
-#endif
 
 //==============================================================================
 struct NSObjectDeleter
@@ -235,7 +247,10 @@ struct ObjCClass
 
     ~ObjCClass()
     {
-        objc_disposeClassPair (cls);
+        auto kvoSubclassName = String ("NSKVONotifying_") + class_getName (cls);
+
+        if (objc_getClass (kvoSubclassName.toUTF8()) == nullptr)
+            objc_disposeClassPair (cls);
     }
 
     void registerClass()
@@ -286,13 +301,11 @@ struct ObjCClass
         jassert (b); ignoreUnused (b);
     }
 
-   #if JUCE_MAC || JUCE_IOS
-    static id sendSuperclassMessage (id self, SEL selector)
+    template <typename ReturnType, typename... Params>
+    static ReturnType sendSuperclassMessage (id self, SEL sel, Params... params)
     {
-        objc_super s = { self, [SuperclassType class] };
-        return getMsgSendSuperFn() (&s, selector);
+        return ObjCMsgSendSuper<SuperclassType, ReturnType, Params...> (self, sel, params...);
     }
-   #endif
 
     template <typename Type>
     static Type getIvar (id self, const char* name)
@@ -323,25 +336,20 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
     {
         addIvar<JuceClass*> ("cppObject");
 
-       #pragma clang diagnostic push
-       #pragma clang diagnostic ignored "-Wundeclared-selector"
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         addMethod (@selector (initWithJuceObject:), initWithJuceObject, "@@:@");
-       #pragma clang diagnostic pop
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         addMethod (@selector (dealloc),             dealloc,            "v@:");
-
 
         registerClass();
     }
 
     static id initWithJuceObject (id _self, SEL, JuceClass* obj)
     {
-        NSObject* self = _self;
-
-        objc_super s = { self, [NSObject class] };
-        self = ObjCMsgSendSuper<NSObject*> (&s, @selector(init));
-
+        NSObject* self = sendSuperclassMessage<NSObject*> (_self, @selector (init));
         object_setInstanceVariable (self, "cppObject", obj);
+
         return self;
     }
 
@@ -353,10 +361,8 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
             object_setInstanceVariable (_self, "cppObject", nullptr);
         }
 
-        objc_super s = { _self, [NSObject class] };
-        ObjCMsgSendSuper<void> (&s, @selector(dealloc));
+        sendSuperclassMessage<void> (_self, @selector (dealloc));
     }
-
 
     static ObjCLifetimeManagedClass objCLifetimeManagedClass;
 };
@@ -370,10 +376,9 @@ ObjCLifetimeManagedClass<Class> ObjCLifetimeManagedClass<Class>::objCLifetimeMan
 template <typename Class>
 NSObject* createNSObjectFromJuceClass (Class* obj)
 {
-   #pragma clang diagnostic push
-   #pragma clang diagnostic ignored "-Wobjc-method-access"
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
     return [ObjCLifetimeManagedClass<Class>::objCLifetimeManagedClass.createInstance() initWithJuceObject:obj];
-   #pragma clang diagnostic pop
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 }
 
 // Get the JUCE class instance that was tied to the life-time of an NSObject with the

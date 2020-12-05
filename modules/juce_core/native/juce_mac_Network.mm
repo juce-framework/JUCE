@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -192,11 +192,11 @@ public:
 
         while (numBytes > 0)
         {
-            const int available = jmin (numBytes, (int) [data length]);
+            const ScopedLock sl (dataLock);
+            auto available = jmin (numBytes, (int) [data length]);
 
             if (available > 0)
             {
-                const ScopedLock sl (dataLock);
                 [data getBytes: dest length: (NSUInteger) available];
                 [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
 
@@ -209,6 +209,7 @@ public:
                 if (hasFailed || hasFinished)
                     break;
 
+                const ScopedUnlock ul (dataLock);
                 Thread::sleep (1);
             }
         }
@@ -647,12 +648,12 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
 HashMap<String, BackgroundDownloadTask*, DefaultHashFunctions, CriticalSection> BackgroundDownloadTask::activeSessions;
 
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool usePostRequest)
+std::unique_ptr<URL::DownloadTask> URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool usePostRequest)
 {
     std::unique_ptr<BackgroundDownloadTask> downloadTask (new BackgroundDownloadTask (*this, targetLocation, extraHeaders, listener, usePostRequest));
 
     if (downloadTask->initOK() && downloadTask->connect())
-        return downloadTask.release();
+        return downloadTask;
 
     return nullptr;
 }
@@ -662,7 +663,7 @@ void URL::DownloadTask::juce_iosURLSessionNotify (const String& identifier)
     BackgroundDownloadTask::invokeNotify (identifier);
 }
 #else
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool usePost)
+std::unique_ptr<URL::DownloadTask> URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool usePost)
 {
     return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, usePost);
 }
@@ -675,8 +676,7 @@ URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extra
 // so we'll turn off deprecation warnings. This code will be removed at some point
 // in the future.
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated"
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated")
 
 //==============================================================================
 class URLConnectionState   : public Thread
@@ -747,11 +747,11 @@ public:
 
         while (numBytes > 0)
         {
-            const int available = jmin (numBytes, (int) [data length]);
+            const ScopedLock sl (dataLock);
+            auto available = jmin (numBytes, (int) [data length]);
 
             if (available > 0)
             {
-                const ScopedLock sl (dataLock);
                 [data getBytes: dest length: (NSUInteger) available];
                 [data replaceBytesInRange: NSMakeRange (0, (NSUInteger) available) withBytes: nil length: 0];
 
@@ -764,6 +764,7 @@ public:
                 if (hasFailed || hasFinished)
                     break;
 
+                const ScopedUnlock sul (dataLock);
                 Thread::sleep (1);
             }
         }
@@ -928,12 +929,12 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (URLConnectionState)
 };
 
-URL::DownloadTask* URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool shouldUsePost)
+std::unique_ptr<URL::DownloadTask> URL::downloadToFile (const File& targetLocation, String extraHeaders, DownloadTask::Listener* listener, bool shouldUsePost)
 {
     return URL::DownloadTask::createFallbackDownloader (*this, targetLocation, extraHeaders, listener, shouldUsePost);
 }
 
-#pragma clang diagnostic pop
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #endif
 

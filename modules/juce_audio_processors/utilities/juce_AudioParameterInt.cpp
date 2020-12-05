@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -30,15 +29,15 @@ namespace juce
 AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameToUse,
                                       int minValue, int maxValue, int def,
                                       const String& labelToUse,
-                                      std::function<String(int, int)> stringFromInt,
-                                      std::function<int(const String&)> intFromString)
+                                      std::function<String (int, int)> stringFromInt,
+                                      std::function<int (const String&)> intFromString)
    : RangedAudioParameter (idToUse, nameToUse, labelToUse),
      range ([minValue, maxValue]
             {
                 NormalisableRange<float> rangeWithInterval { (float) minValue, (float) maxValue,
-                                                             [](float start, float end, float v) { return jlimit (start, end, v * (end - start) + start); },
-                                                             [](float start, float end, float v) { return jlimit (0.0f, 1.0f, (v - start) / (end - start)); },
-                                                             [](float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };
+                                                             [] (float start, float end, float v) { return jlimit (start, end, v * (end - start) + start); },
+                                                             [] (float start, float end, float v) { return jlimit (0.0f, 1.0f, (v - start) / (end - start)); },
+                                                             [] (float start, float end, float v) { return (float) roundToInt (juce::jlimit (start, end, v)); } };
                  rangeWithInterval.interval = 1.0f;
                  return rangeWithInterval;
             }()),

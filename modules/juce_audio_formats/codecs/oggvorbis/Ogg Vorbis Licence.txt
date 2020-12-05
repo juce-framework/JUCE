@@ -1,23 +1,25 @@
 =====================================================================
 
-I've incorporated Ogg-Vorbis directly into the JUCE codebase because it makes
+Ogg-Vorbis is incorporated directly into the JUCE codebase because it makes
 things much easier than having to make all your builds link correctly to
 the appropriate libraries on every different platform.
 
-I've made minimal changes to the Ogg-Vorbis code - just tweaked a few include 
-paths to make it build smoothly, and added some headers to allow you to exclude 
-it from the build.
+There are minimal changes to the Ogg-Vorbis code - a few include paths have
+been changed to make it build smoothly, and some headers have been added to
+allow you to exclude it from the build. Any significant code modifications
+are marked clearly by "JUCE CHANGE STARTS HERE" and "JUCE_CHANGE_ENDS_HERE"
+comments.
 
 =====================================================================
 
-The following license is the BSD-style license that comes with the
-Ogg-Vorbis distribution, and which applies just to the header files I've
-included in this directory. For more info, and to get the rest of the
-distribution, visit the Ogg-Vorbis homepage: www.vorbis.com
+The following license is the BSD-style license that comes with the Ogg-Vorbis
+distribution, and which applies just to the header files included in this
+directory. For more info, and to get the rest of the distribution, visit the
+Ogg-Vorbis homepage: https://xiph.org/vorbis
 
 =====================================================================
 
-Copyright (c) 2002-2004 Xiph.org Foundation
+Copyright (c) 2002-2020 Xiph.org Foundation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions

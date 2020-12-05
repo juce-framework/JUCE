@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -37,8 +36,8 @@ public:
         : item (group),
           header (item.getName(), { getIcons().openFolder, Colours::transparentBlack })
     {
-        list.setHeaderComponent (new ListBoxHeader ( { "File", "Binary Resource", "Xcode Resource", "Compile", "Compiler Flag Scheme" },
-                                                     { 0.3f, 0.15f, 0.15f, 0.15f, 0.25f } ));
+        list.setHeaderComponent (std::make_unique<ListBoxHeader> (Array<String> { "File", "Binary Resource", "Xcode Resource", "Compile", "Skip PCH", "Compiler Flag Scheme" },
+                                                                  Array<float>  {  0.25f,  0.125f,            0.125f,           0.125f,    0.125f,     0.25f }));
         list.setModel (this);
         list.setColour (ListBox::backgroundColourId, Colours::transparentBlack);
         addAndMakeVisible (list);
@@ -137,9 +136,14 @@ private:
         {
             if (item.isFile())
             {
-                addAndMakeVisible (compileButton);
-                compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
-                compileButton.onStateChange = [this] { compilerFlagSchemeSelector.setVisible (compileButton.getToggleState()); };
+                auto isSourceFile = item.isSourceFile();
+
+                if (isSourceFile)
+                {
+                    addAndMakeVisible (compileButton);
+                    compileButton.getToggleStateValue().referTo (item.getShouldCompileValue());
+                    compileButton.onStateChange = [this] { compileEnablementChanged(); };
+                }
 
                 addAndMakeVisible (binaryResourceButton);
                 binaryResourceButton.getToggleStateValue().referTo (item.getShouldAddToBinaryResourcesValue());
@@ -147,8 +151,15 @@ private:
                 addAndMakeVisible (xcodeResourceButton);
                 xcodeResourceButton.getToggleStateValue().referTo (item.getShouldAddToXcodeResourcesValue());
 
-                addChildComponent (compilerFlagSchemeSelector);
-                compilerFlagSchemeSelector.setVisible (compileButton.getToggleState());
+                if (isSourceFile)
+                {
+                    addChildComponent (skipPCHButton);
+                    skipPCHButton.getToggleStateValue().referTo (item.getShouldSkipPCHValue());
+
+                    addChildComponent (compilerFlagSchemeSelector);
+
+                    compileEnablementChanged();
+                }
             }
         }
 
@@ -156,7 +167,7 @@ private:
         {
             if (header != nullptr)
             {
-                auto textBounds = getLocalBounds().removeFromLeft (roundToInt (header->getProportionAtIndex (0) * getWidth()));
+                auto textBounds = getLocalBounds().removeFromLeft (roundToInt (header->getProportionAtIndex (0) * (float) getWidth()));
 
                 auto iconBounds = textBounds.removeFromLeft (25);
 
@@ -176,14 +187,15 @@ private:
             if (header != nullptr)
             {
                 auto bounds = getLocalBounds();
-                auto width = getWidth();
+                auto width = (float) getWidth();
 
                 bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (0) * width));
 
                 binaryResourceButton.setBounds       (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (1) * width)));
                 xcodeResourceButton.setBounds        (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (2) * width)));
                 compileButton.setBounds              (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (3) * width)));
-                compilerFlagSchemeSelector.setBounds (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (4) * width)));
+                skipPCHButton.setBounds              (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (4) * width)));
+                compilerFlagSchemeSelector.setBounds (bounds.removeFromLeft (roundToInt (header->getProportionAtIndex (5) * width)));
             }
         }
 
@@ -332,10 +344,18 @@ private:
             Label newSchemeLabel;
         };
 
+        void compileEnablementChanged()
+        {
+            auto shouldBeCompiled = compileButton.getToggleState();
+
+            skipPCHButton.setVisible (shouldBeCompiled);
+            compilerFlagSchemeSelector.setVisible (shouldBeCompiled);
+        }
+
         //==============================================================================
         ListBoxHeader* header;
 
-        ToggleButton compileButton, binaryResourceButton, xcodeResourceButton;
+        ToggleButton compileButton, binaryResourceButton, xcodeResourceButton, skipPCHButton;
         CompilerFlagSchemeSelector compilerFlagSchemeSelector;
     };
 

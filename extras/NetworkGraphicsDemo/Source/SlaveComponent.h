@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -66,7 +65,7 @@ public:
         startTimer (2000);
     }
 
-    ~SlaveCanvasComponent()
+    ~SlaveCanvasComponent() override
     {
         OSCReceiver::removeListener (this);
     }
@@ -81,8 +80,8 @@ private:
             OSCMessage message (userInputOSCAddress);
 
             message.addString (clientName);
-            message.addFloat32 (e.position.x * clientArea.getWidth()  / getWidth()  + clientArea.getX());
-            message.addFloat32 (e.position.y * clientArea.getHeight() / getHeight() + clientArea.getY());
+            message.addFloat32 (e.position.x * clientArea.getWidth()  / (float) getWidth()  + clientArea.getX());
+            message.addFloat32 (e.position.y * clientArea.getHeight() / (float) getHeight() + clientArea.getY());
 
             send (message);
         }
@@ -126,8 +125,8 @@ private:
     //==============================================================================
     String getMachineInfoToDisplay() const
     {
-        auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (getScreenBounds().getCentre());
-        return getOSName() + "   " + String (display.dpi) + "   "  + String (display.scale);
+        auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (getScreenBounds().getCentre());
+        return getOSName() + "   " + String (display->dpi) + "   "  + String (display->scale);
     }
 
     static String getOSName()
@@ -181,8 +180,8 @@ private:
         if (auto client = canvas.findClient (clientName))
         {
             auto screenBounds = getScreenBounds();
-            auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (screenBounds.getCentre());
-            return ((screenBounds - display.userArea.getCentre()).toFloat() / (client->scaleFactor * display.dpi / display.scale)) + client->centre;
+            auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (screenBounds.getCentre());
+            return ((screenBounds - display->userArea.getCentre()).toFloat() / (client->scaleFactor * display->dpi / display->scale)) + client->centre;
         }
 
         return {};
@@ -192,8 +191,8 @@ private:
     {
         if (auto client = canvas.findClient (clientName))
         {
-            auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (getScreenBounds().getCentre());
-            return (display.userArea.toFloat() / (client->scaleFactor * display.dpi / display.scale)).withCentre (client->centre);
+            auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (getScreenBounds().getCentre());
+            return (display->userArea.toFloat() / (client->scaleFactor * display->dpi / display->scale)).withCentre (client->centre);
         }
 
         return {};

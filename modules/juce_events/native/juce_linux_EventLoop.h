@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -38,7 +38,7 @@ namespace LinuxEventLoop
                              file descriptor. The possible values for this are defined in
                              <poll.h>
     */
-    void registerFdCallback (int fd, std::function<void(int)> readCallback, short eventMask = 1 /*POLLIN*/);
+    void registerFdCallback (int fd, std::function<void (int)> readCallback, short eventMask = 1 /*POLLIN*/);
 
     /** Unregisters a previously registered file descriptor.
 

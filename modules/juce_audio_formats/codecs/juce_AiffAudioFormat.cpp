@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -168,10 +167,11 @@ namespace AiffFileHelpers
 
             switch (key)
             {
-                case minor:     keyString = "minor";        break;
-                case major:     keyString = "major";        break;
-                case neither:   keyString = "neither";      break;
-                case both:      keyString = "both";         break;
+                case minor:     keyString = "minor";   break;
+                case major:     keyString = "major";   break;
+                case neither:   keyString = "neither"; break;
+                case both:      keyString = "both";    break;
+                default:                               break;
             }
 
             if (keyString != nullptr)
@@ -334,7 +334,7 @@ namespace AiffFileHelpers
                     out.writeIntBigEndian (offset);
 
                     auto labelLength = jmin ((size_t) 254, label.getNumBytesAsUTF8()); // seems to need null terminator even though it's a pstring
-                    out.writeByte ((char) labelLength + 1);
+                    out.writeByte (static_cast<char> (labelLength + 1));
                     out.write (label.toUTF8(), labelLength);
                     out.writeByte (0);
 
@@ -367,7 +367,7 @@ namespace AiffFileHelpers
                     auto comment = values.getValue (prefix + "Text", String());
                     auto commentLength = jmin (comment.getNumBytesAsUTF8(), (size_t) 65534);
 
-                    out.writeShortBigEndian ((short) commentLength + 1);
+                    out.writeShortBigEndian (static_cast<short> (commentLength + 1));
                     out.write (comment.toUTF8(), commentLength);
                     out.writeByte (0);
 
@@ -975,7 +975,7 @@ AudioFormatReader* AiffAudioFormat::createReaderFor (InputStream* sourceStream, 
 
 MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (const File& file)
 {
-    return createMemoryMappedReader (file.createInputStream());
+    return createMemoryMappedReader (file.createInputStream().release());
 }
 
 MemoryMappedAudioFormatReader* AiffAudioFormat::createMemoryMappedReader (FileInputStream* fin)

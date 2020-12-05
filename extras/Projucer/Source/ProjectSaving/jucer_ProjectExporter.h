@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -28,6 +27,8 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
+#include "../Utility/Helpers/jucer_ValueWithDefaultWrapper.h"
+#include "../Project/Modules/jucer_Modules.h"
 
 class ProjectSaver;
 
@@ -36,40 +37,26 @@ class ProjectExporter  : private Value::Listener
 {
 public:
     ProjectExporter (Project&, const ValueTree& settings);
-    virtual ~ProjectExporter() override;
+    virtual ~ProjectExporter() override = default;
 
+    //==============================================================================
     struct ExporterTypeInfo
     {
-        String name;
-        const void* iconData;
-        int iconDataSize;
+        Identifier identifier;
+        String displayName;
+        String targetFolder;
 
-        Image getIcon() const
-        {
-            Image image (Image::ARGB, 200, 200, true);
-            Graphics g (image);
-
-            std::unique_ptr<Drawable> svgDrawable (Drawable::createFromImageData (iconData, (size_t) iconDataSize));
-
-            svgDrawable->drawWithin (g, image.getBounds().toFloat(), RectanglePlacement::fillDestination, 1.0f);
-
-            return image;
-        }
+        Image icon;
     };
 
-    static StringArray getExporterNames();
-    static StringArray getExporterValueTreeNames();
-    static Array<ExporterTypeInfo> getExporterTypes();
-    static String getValueTreeNameForExporter (const String& exporterName);
-    static String getTargetFolderForExporter (const String& exporterValueTreeName);
-    static StringArray getAllDefaultBuildsFolders();
+    static std::vector<ExporterTypeInfo> getExporterTypeInfos();
+    static ExporterTypeInfo getTypeInfoForExporter (const Identifier& exporterIdentifier);
+    static ExporterTypeInfo getCurrentPlatformExporterTypeInfo();
 
-    static ProjectExporter* createNewExporter (Project&, const int index);
-    static ProjectExporter* createNewExporter (Project&, const String& name);
-    static ProjectExporter* createExporter (Project&, const ValueTree& settings);
+    static std::unique_ptr<ProjectExporter> createNewExporter (Project&, const Identifier& exporterIdentifier);
+    static std::unique_ptr<ProjectExporter> createExporterFromSettings (Project&, const ValueTree& settings);
+
     static bool canProjectBeLaunched (Project*);
-
-    static String getCurrentPlatformExporterName();
 
     //==============================================================================
     // capabilities of exporter
@@ -81,8 +68,9 @@ public:
     virtual bool shouldFileBeCompiledByDefault (const File& path) const;
     virtual bool canCopeWithDuplicateFiles() = 0;
     virtual bool supportsUserDefinedConfigurations() const = 0; // false if exporter only supports two configs Debug and Release
-    virtual void updateDeprecatedProjectSettingsInteractively();
-    virtual void initialiseDependencyPathValues() {}
+    virtual void updateDeprecatedSettings()               {}
+    virtual void updateDeprecatedSettingsInteractively()  {}
+    virtual void initialiseDependencyPathValues()         {}
 
     // IDE targeted by exporter
     virtual bool isXcode() const         = 0;
@@ -99,22 +87,25 @@ public:
     virtual bool isOSX() const     = 0;
     virtual bool isiOS() const     = 0;
 
-    virtual String getDescription()   { return {}; }
+    virtual String getNewLineString() const = 0;
+    virtual String getDescription()  { return {}; }
+
+    virtual bool supportsPrecompiledHeaders() const  { return false; }
 
     //==============================================================================
     // cross-platform audio plug-ins supported by exporter
-    virtual bool supportsTargetType (ProjectType::Target::Type type) const = 0;
+    virtual bool supportsTargetType (build_tools::ProjectType::Target::Type type) const = 0;
 
-    inline bool shouldBuildTargetType (ProjectType::Target::Type type) const
+    inline bool shouldBuildTargetType (build_tools::ProjectType::Target::Type type) const
     {
         return project.shouldBuildTargetType (type) && supportsTargetType (type);
     }
 
-    inline void callForAllSupportedTargets (std::function<void (ProjectType::Target::Type)> callback)
+    inline void callForAllSupportedTargets (std::function<void (build_tools::ProjectType::Target::Type)> callback)
     {
-        for (int i = 0; i < ProjectType::Target::unspecified; ++i)
-            if (shouldBuildTargetType (static_cast<ProjectType::Target::Type> (i)))
-                callback (static_cast<ProjectType::Target::Type> (i));
+        for (int i = 0; i < build_tools::ProjectType::Target::unspecified; ++i)
+            if (shouldBuildTargetType (static_cast<build_tools::ProjectType::Target::Type> (i)))
+                callback (static_cast<build_tools::ProjectType::Target::Type> (i));
     }
 
     //==============================================================================
@@ -132,7 +123,7 @@ public:
     }
 
     //==============================================================================
-    String getName() const;
+    String getUniqueName() const;
     File getTargetFolder() const;
 
     Project& getProject() noexcept                        { return project; }
@@ -153,10 +144,9 @@ public:
 
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
-    String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.wrappedValue.get(); }
-    String getVST3PathString() const                      { return vst3PathValueWrapper.wrappedValue.get(); }
-    String getAAXPathString() const                       { return aaxPathValueWrapper.wrappedValue.get(); }
-    String getRTASPathString() const                      { return rtasPathValueWrapper.wrappedValue.get(); }
+    String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.getCurrentValue(); }
+    String getAAXPathString() const                       { return aaxPathValueWrapper.getCurrentValue(); }
+    String getRTASPathString() const                      { return rtasPathValueWrapper.getCurrentValue(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -166,22 +156,22 @@ public:
 
     TargetOS::OS getTargetOSForExporter() const;
 
-    RelativePath getLegacyModulePath (const String& moduleID) const;
+    build_tools::RelativePath getLegacyModulePath (const String& moduleID) const;
     String getLegacyModulePath() const;
 
     // Returns a path to the actual module folder itself
-    RelativePath getModuleFolderRelativeToProject (const String& moduleID) const;
+    build_tools::RelativePath getModuleFolderRelativeToProject (const String& moduleID) const;
     void updateOldModulePaths();
 
-    RelativePath rebaseFromProjectFolderToBuildTarget (const RelativePath& path) const;
-    void addToExtraSearchPaths (const RelativePath& pathFromProjectFolder, int index = -1);
-    void addToModuleLibPaths   (const RelativePath& pathFromProjectFolder);
+    build_tools::RelativePath rebaseFromProjectFolderToBuildTarget (const build_tools::RelativePath& path) const;
+    void addToExtraSearchPaths (const build_tools::RelativePath& pathFromProjectFolder, int index = -1);
+    void addToModuleLibPaths   (const build_tools::RelativePath& pathFromProjectFolder);
 
-    void addProjectPathToBuildPathList (StringArray&, const RelativePath&, int index = -1) const;
+    void addProjectPathToBuildPathList (StringArray&, const build_tools::RelativePath&, int index = -1) const;
 
     std::unique_ptr<Drawable> getBigIcon() const;
     std::unique_ptr<Drawable> getSmallIcon() const;
-    Image getBestIconForSize (int size, bool returnNullIfNothingBigEnough) const;
+    build_tools::Icons getIcons() const { return { getSmallIcon(), getBigIcon() }; }
 
     String getExporterIdentifierMacro() const
     {
@@ -190,21 +180,8 @@ public:
     }
 
     // An exception that can be thrown by the create() method.
-    class SaveError
-    {
-    public:
-        SaveError (const String& error) : message (error)
-        {}
-
-        SaveError (const File& fileThatFailedToWrite)
-            : message ("Can't write to the file: " + fileThatFailedToWrite.getFullPathName())
-        {}
-
-        String message;
-    };
-
     void createPropertyEditors (PropertyListBuilder&);
-    void addSettingsForProjectType (const ProjectType&);
+    void addSettingsForProjectType (const build_tools::ProjectType&);
 
     //==============================================================================
     void copyMainGroupFromProject();
@@ -214,6 +191,14 @@ public:
 
     //==============================================================================
     StringArray linuxLibs, linuxPackages, makefileExtraLinkerFlags;
+
+    enum class PackageDependencyType
+    {
+        compile,
+        link
+    };
+
+    StringArray getLinuxPackages (PackageDependencyType type) const;
 
     //==============================================================================
     StringPairArray msvcExtraPreprocessorDefs;
@@ -264,7 +249,12 @@ public:
 
         String getLibrarySearchPathString() const              { return librarySearchPathValue.get(); }
         StringArray getLibrarySearchPaths() const;
-        String getGCCLibraryPathFlags() const;
+
+        String getPrecompiledHeaderFilename() const            { return "JucePrecompiledHeader_" + getName(); }
+        static String getSkipPrecompiledHeaderDefine()         { return "JUCE_SKIP_PRECOMPILED_HEADER"; }
+
+        bool shouldUsePrecompiledHeaderFile() const            { return usePrecompiledHeaderFileValue.get(); }
+        String getPrecompiledHeaderFileContent() const;
 
         //==============================================================================
         Value getValue (const Identifier& nm)                  { return config.getPropertyAsValue (nm, getUndoManager()); }
@@ -285,7 +275,8 @@ public:
 
     protected:
         ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, recommendedWarningsValue, optimisationLevelValue,
-                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue;
+                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue,
+                         usePrecompiledHeaderFileValue, precompiledHeaderFileValue;
 
     private:
         std::map<String, StringArray> recommendedCompilerWarningFlags;
@@ -347,11 +338,11 @@ public:
     String getExporterPreprocessorDefsString() const    { return extraPPDefsValue.get(); }
 
     // includes exporter, project + config defs
-    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const ProjectType::Target::Type targetType) const;
-    // includes exporter + project defs..
+    StringPairArray getAllPreprocessorDefs (const BuildConfiguration& config, const build_tools::ProjectType::Target::Type targetType) const;
+    // includes exporter + project defs
     StringPairArray getAllPreprocessorDefs() const;
 
-    void addTargetSpecificPreprocessorDefs (StringPairArray& defs, const ProjectType::Target::Type targetType) const;
+    void addTargetSpecificPreprocessorDefs (StringPairArray& defs, const build_tools::ProjectType::Target::Type targetType) const;
 
     String replacePreprocessorTokens (const BuildConfiguration&, const String& sourceString) const;
 
@@ -367,46 +358,26 @@ public:
         gccOfast  = 6
     };
 
+    bool isPCHEnabledForAnyConfigurations() const
+    {
+        if (supportsPrecompiledHeaders())
+            for (ConstConfigIterator config (*this); config.next();)
+                if (config->shouldUsePrecompiledHeaderFile())
+                    return true;
+
+        return false;
+    }
+
 protected:
     //==============================================================================
     String name;
     Project& project;
-    const ProjectType& projectType;
+    const build_tools::ProjectType& projectType;
     const String projectName;
     const File projectFolder;
 
     //==============================================================================
-    // Wraps a ValueWithDefault object that has a default which depends on a global value.
-    // Used for the VST3, RTAS and AAX project-specific path options.
-    struct ValueWithDefaultWrapper  : public Value::Listener
-    {
-        void init (const ValueWithDefault& vwd, ValueWithDefault global, TargetOS::OS targetOS)
-        {
-            wrappedValue = vwd;
-            globalValue = global.getPropertyAsValue();
-            globalIdentifier = global.getPropertyID();
-            os = targetOS;
-
-            if (wrappedValue.get() == var())
-                wrappedValue.resetToDefault();
-
-            globalValue.addListener (this);
-            valueChanged (globalValue);
-        }
-
-        void valueChanged (Value&) override
-        {
-            wrappedValue.setDefault (getAppSettings().getStoredPath (globalIdentifier, os).get());
-        }
-
-        ValueWithDefault wrappedValue;
-        Value globalValue;
-
-        Identifier globalIdentifier;
-        TargetOS::OS os;
-    };
-
-    ValueWithDefaultWrapper vstLegacyPathValueWrapper, vst3PathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
+    ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
@@ -426,25 +397,13 @@ protected:
     static String getStaticLibbedFilename (String name)   { return addSuffix (addLibPrefix (name), ".a"); }
     static String getDynamicLibbedFilename (String name)  { return addSuffix (addLibPrefix (name), ".so"); }
 
-    virtual void addPlatformSpecificSettingsForProjectType (const ProjectType&) = 0;
+    virtual void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) = 0;
 
     //==============================================================================
-    static void overwriteFileIfDifferentOrThrow (const File& file, const MemoryOutputStream& newData)
-    {
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
-            throw SaveError (file);
-    }
-
-    static void overwriteFileIfDifferentOrThrow (const File& file, const String& newData)
-    {
-        if (! FileHelpers::overwriteFileWithNewDataIfDifferent (file, newData))
-            throw SaveError (file);
-    }
-
     static void createDirectoryOrThrow (const File& dirToCreate)
     {
         if (! dirToCreate.createDirectory())
-            throw SaveError ("Can't create folder: " + dirToCreate.getFullPathName());
+            throw build_tools::SaveError ("Can't create folder: " + dirToCreate.getFullPathName());
     }
 
     static void writeXmlOrThrow (const XmlElement& xml, const File& file, const String& encoding,
@@ -457,10 +416,8 @@ protected:
 
         MemoryOutputStream mo (8192);
         xml.writeTo (mo, format);
-        overwriteFileIfDifferentOrThrow (file, mo);
+        build_tools::overwriteFileIfDifferentOrThrow (file, mo);
     }
-
-    static Image rescaleImageForIcon (Drawable&, int iconSize);
 
 private:
     //==============================================================================
@@ -485,8 +442,7 @@ private:
     void addVSTPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
     void addLegacyVSTFolderToPathIfSpecified();
-    RelativePath getInternalVST3SDKPath();
-    void addVST3FolderToPath();
+    build_tools::RelativePath getInternalVST3SDKPath();
     void addAAXFoldersToPath();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)

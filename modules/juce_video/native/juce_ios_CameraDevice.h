@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -24,9 +23,14 @@
   ==============================================================================
 */
 
+#if (defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10_0)
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+ #define JUCE_DEPRECATION_IGNORED 1
+#endif
+
 struct CameraDevice::Pimpl
 {
-    using InternalOpenCameraResultCallback = std::function<void(const String& /*cameraId*/, const String& /*error*/)>;
+    using InternalOpenCameraResultCallback = std::function<void (const String& /*cameraId*/, const String& /*error*/)>;
 
     Pimpl (CameraDevice& ownerToUse, const String& cameraIdToUse, int /*index*/,
            int /*minWidth*/, int /*minHeight*/, int /*maxWidth*/, int /*maxHeight*/,
@@ -75,7 +79,7 @@ struct CameraDevice::Pimpl
 
     bool openedOk() const noexcept { return captureSession.openedOk(); }
 
-    void takeStillPicture (std::function<void(const Image&)> pictureTakenCallbackToUse)
+    void takeStillPicture (std::function<void (const Image&)> pictureTakenCallbackToUse)
     {
         if (pictureTakenCallbackToUse == nullptr)
         {
@@ -262,31 +266,27 @@ private:
             videoFrameRateRangesString << frameRateRangeToString (range);
         JUCE_CAMERA_LOG (videoFrameRateRangesString);
 
-        JUCE_CAMERA_LOG ("Video binned: " + String (int(format.videoBinned)));
+        JUCE_CAMERA_LOG ("Video binned: " + String (int (format.videoBinned)));
 
-       #if defined (__IPHONE_8_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
-        if (iosVersion.major >= 8)
+        JUCE_CAMERA_LOG ("Video HDR supported: " + String (int (format.videoHDRSupported)));
+        JUCE_CAMERA_LOG ("High resolution still image dimensions: " + getHighResStillImgDimensionsString (format.highResolutionStillImageDimensions));
+        JUCE_CAMERA_LOG ("Min ISO: " + String (format.minISO));
+        JUCE_CAMERA_LOG ("Max ISO: " + String (format.maxISO));
+        JUCE_CAMERA_LOG ("Min exposure duration: " + cmTimeToString (format.minExposureDuration));
+
+        String autoFocusSystemString;
+        switch (format.autoFocusSystem)
         {
-            JUCE_CAMERA_LOG ("Video HDR supported: " + String (int (format.videoHDRSupported)));
-            JUCE_CAMERA_LOG ("High resolution still image dimensions: " + getHighResStillImgDimensionsString (format.highResolutionStillImageDimensions));
-            JUCE_CAMERA_LOG ("Min ISO: " + String (format.minISO));
-            JUCE_CAMERA_LOG ("Max ISO: " + String (format.maxISO));
-            JUCE_CAMERA_LOG ("Min exposure duration: " + cmTimeToString (format.minExposureDuration));
-
-            String autoFocusSystemString;
-            switch (format.autoFocusSystem)
-            {
-                case AVCaptureAutoFocusSystemPhaseDetection:    autoFocusSystemString = "PhaseDetection";    break;
-                case AVCaptureAutoFocusSystemContrastDetection: autoFocusSystemString = "ContrastDetection"; break;
-                default: autoFocusSystemString = "None";
-            }
-            JUCE_CAMERA_LOG ("Auto focus system: " + autoFocusSystemString);
-
-            JUCE_CAMERA_LOG ("Standard (iOS 5.0) video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeStandard]));
-            JUCE_CAMERA_LOG ("Cinematic video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeCinematic]));
-            JUCE_CAMERA_LOG ("Auto video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeAuto]));
+            case AVCaptureAutoFocusSystemPhaseDetection:    autoFocusSystemString = "PhaseDetection";    break;
+            case AVCaptureAutoFocusSystemContrastDetection: autoFocusSystemString = "ContrastDetection"; break;
+            case AVCaptureAutoFocusSystemNone:
+            default:                                        autoFocusSystemString = "None";
         }
-       #endif
+        JUCE_CAMERA_LOG ("Auto focus system: " + autoFocusSystemString);
+
+        JUCE_CAMERA_LOG ("Standard (iOS 5.0) video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeStandard]));
+        JUCE_CAMERA_LOG ("Cinematic video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeCinematic]));
+        JUCE_CAMERA_LOG ("Auto video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeAuto]));
 
        #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
         if (iosVersion.major >= 11)
@@ -338,8 +338,7 @@ private:
             delegate.reset ([cls.createInstance() init]);
             SessionDelegateClass::setOwner (delegate.get(), this);
 
-          #pragma clang diagnostic push
-          #pragma clang diagnostic ignored "-Wundeclared-selector"
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSNotificationCenter defaultCenter] addObserver: delegate.get()
                                                      selector: @selector (sessionDidStartRunning:)
                                                          name: AVCaptureSessionDidStartRunningNotification
@@ -364,7 +363,7 @@ private:
                                                      selector: @selector (sessionInterruptionEnded:)
                                                          name: AVCaptureSessionInterruptionEndedNotification
                                                        object: captureSession.get()];
-           #pragma clang diagnostic pop
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             dispatch_async (captureSessionQueue,^
                             {
@@ -525,14 +524,13 @@ private:
         {
             SessionDelegateClass()  : ObjCClass<NSObject> ("SessionDelegateClass_")
             {
-               #pragma clang diagnostic push
-               #pragma clang diagnostic ignored "-Wundeclared-selector"
+                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (sessionDidStartRunning:),   started,           "v@:@");
                 addMethod (@selector (sessionDidStopRunning:),    stopped,           "v@:@");
                 addMethod (@selector (sessionRuntimeError:),      runtimeError,      "v@:@");
                 addMethod (@selector (sessionWasInterrupted:),    interrupted,       "v@:@");
                 addMethod (@selector (sessionInterruptionEnded:), interruptionEnded, "v@:@");
-               #pragma clang diagnostic pop
+                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<CaptureSession*> ("owner");
 
@@ -646,6 +644,8 @@ private:
                     [stillImageOutput captureStillImageAsynchronouslyFromConnection: connection completionHandler:
                          ^(CMSampleBufferRef imageSampleBuffer, NSError* error)
                          {
+                             takingPicture = false;
+
                              if (error != nil)
                              {
                                  JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
@@ -659,7 +659,7 @@ private:
 
                              callListeners (image);
 
-                             MessageManager::callAsync ([this, image]() { notifyPictureTaken (image); });
+                             MessageManager::callAsync ([this, image] { notifyPictureTaken (image); });
                          }];
                 }
                 else
@@ -813,6 +813,8 @@ private:
 
                 static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* capturePhoto, NSError* error)
                 {
+                    getOwner (self).takingPicture = false;
+
                     String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
                     ignoreUnused (errorString);
 
@@ -869,6 +871,10 @@ private:
                             CGContextScaleCTM (context, targetSize.height / origHeight, -targetSize.width / origWidth);
                             CGContextTranslateCTM (context, -targetSize.width, -targetSize.height);
                             break;
+                        case kCGImagePropertyOrientationUpMirrored:
+                        case kCGImagePropertyOrientationDownMirrored:
+                        case kCGImagePropertyOrientationLeftMirrored:
+                        case kCGImagePropertyOrientationRightMirrored:
                         default:
                             // Not implemented.
                             jassertfalse;
@@ -912,6 +918,8 @@ private:
                                                                   AVCaptureResolvedPhotoSettings*, AVCaptureBracketedStillImageSettings*,
                                                                   NSError* error)
                 {
+                    getOwner (self).takingPicture = false;
+
                     String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
                     ignoreUnused (errorString);
 
@@ -963,8 +971,6 @@ private:
 
             void notifyPictureTaken (const Image& image)
             {
-                takingPicture = false;
-
                 captureSession.notifyPictureTaken (image);
             }
 
@@ -1190,6 +1196,9 @@ private:
     {
         const ScopedLock sl (listenerLock);
         listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+
+        if (listeners.size() == 1)
+            triggerStillPictureCapture();
     }
 
     void notifyPictureTaken (const Image& image)
@@ -1214,7 +1223,7 @@ private:
     CriticalSection listenerLock;
     ListenerList<Listener> listeners;
 
-    std::function<void(const Image&)> pictureTakenCallback;
+    std::function<void (const Image&)> pictureTakenCallback;
 
     CaptureSession captureSession;
 
@@ -1264,7 +1273,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
     private:
         static void layoutSubviews (id self, SEL)
         {
-            sendSuperclassMessage (self, @selector (layoutSubviews));
+            sendSuperclassMessage<void> (self, @selector (layoutSubviews));
 
             UIView* asUIView = (UIView*) self;
 
@@ -1329,3 +1338,7 @@ String CameraDevice::getFileExtension()
 {
     return ".mov";
 }
+
+#if JUCE_DEPRECATION_IGNORED
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+#endif

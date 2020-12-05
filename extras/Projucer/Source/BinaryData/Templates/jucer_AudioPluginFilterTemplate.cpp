@@ -1,9 +1,7 @@
 /*
   ==============================================================================
 
-    This file was auto-generated!
-
-    It contains the basic framework code for a JUCE plugin processor.
+    This file contains the basic framework code for a JUCE plugin processor.
 
   ==============================================================================
 */
@@ -16,9 +14,9 @@
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
+                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        )
 #endif
@@ -30,7 +28,7 @@
 }
 
 //==============================================================================
-const String %%filter_class_name%%::getName() const
+const juce::String %%filter_class_name%%::getName() const
 {
     return JucePlugin_Name;
 }
@@ -82,12 +80,12 @@ void %%filter_class_name%%::setCurrentProgram (int index)
 {
 }
 
-const String %%filter_class_name%%::getProgramName (int index)
+const juce::String %%filter_class_name%%::getProgramName (int index)
 {
     return {};
 }
 
-void %%filter_class_name%%::changeProgramName (int index, const String& newName)
+void %%filter_class_name%%::changeProgramName (int index, const juce::String& newName)
 {
 }
 
@@ -108,13 +106,13 @@ void %%filter_class_name%%::releaseResources()
 bool %%filter_class_name%%::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
-    ignoreUnused (layouts);
+    juce::ignoreUnused (layouts);
     return true;
   #else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
-    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
     // This checks if the input layout matches the output layout
@@ -128,9 +126,9 @@ bool %%filter_class_name%%::isBusesLayoutSupported (const BusesLayout& layouts) 
 }
 #endif
 
-void %%filter_class_name%%::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void %%filter_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    ScopedNoDenormals noDenormals;
+    juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
@@ -163,13 +161,13 @@ bool %%filter_class_name%%::hasEditor() const
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* %%filter_class_name%%::createEditor()
+juce::AudioProcessorEditor* %%filter_class_name%%::createEditor()
 {
     return new %%editor_class_name%% (*this);
 }
 
 //==============================================================================
-void %%filter_class_name%%::getStateInformation (MemoryBlock& destData)
+void %%filter_class_name%%::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
@@ -184,7 +182,7 @@ void %%filter_class_name%%::setStateInformation (const void* data, int sizeInByt
 
 //==============================================================================
 // This creates new instances of the plugin..
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new %%filter_class_name%%();
 }

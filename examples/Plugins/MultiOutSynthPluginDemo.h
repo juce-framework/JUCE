@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -23,24 +23,26 @@
 
  BEGIN_JUCE_PIP_METADATA
 
- name:             MultiOutSynthPlugin
- version:          1.0.0
- vendor:           JUCE
- website:          http://juce.com
- description:      Multi-out synthesiser audio plugin.
+ name:                  MultiOutSynthPlugin
+ version:               1.0.0
+ vendor:                JUCE
+ website:               http://juce.com
+ description:           Multi-out synthesiser audio plugin.
 
- dependencies:     juce_audio_basics, juce_audio_devices, juce_audio_formats,
-                   juce_audio_plugin_client, juce_audio_processors,
-                   juce_audio_utils, juce_core, juce_data_structures,
-                   juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2019
+ dependencies:          juce_audio_basics, juce_audio_devices, juce_audio_formats,
+                        juce_audio_plugin_client, juce_audio_processors,
+                        juce_audio_utils, juce_core, juce_data_structures,
+                        juce_events, juce_graphics, juce_gui_basics, juce_gui_extra
+ exporters:             xcode_mac, vs2019
 
- moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
+ moduleFlags:           JUCE_STRICT_REFCOUNTEDPOINTER=1
 
- type:             AudioProcessor
- mainClass:        MultiOutSynth
+ type:                  AudioProcessor
+ mainClass:             MultiOutSynth
 
- useLocalCopy:     1
+ useLocalCopy:          1
+
+ pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn
 
  END_JUCE_PIP_METADATA
 
@@ -94,8 +96,6 @@ public:
         loadNewSample (createAssetInputStream ("singing.ogg"), "ogg");
     }
 
-    ~MultiOutSynth() {}
-
     //==============================================================================
     bool canAddBus    (bool isInput) const override   { return (! isInput && getBusCount (false) < maxMidiChannel); }
     bool canRemoveBus (bool isInput) const override   { return (! isInput && getBusCount (false) > 1); }
@@ -124,6 +124,8 @@ public:
         }
     }
 
+    using AudioProcessor::processBlock;
+
     //==============================================================================
     AudioProcessorEditor* createEditor() override          { return new GenericAudioProcessorEditor (*this); }
     bool hasEditor() const override                        { return true; }
@@ -147,19 +149,22 @@ private:
     //==============================================================================
     static MidiBuffer filterMidiMessagesForChannel (const MidiBuffer& input, int channel)
     {
-        MidiMessage msg;
-        int samplePosition;
         MidiBuffer output;
 
-        for (MidiBuffer::Iterator it (input); it.getNextEvent (msg, samplePosition);)
-            if (msg.getChannel() == channel) output.addEvent (msg, samplePosition);
+        for (const auto metadata : input)
+        {
+            const auto message = metadata.getMessage();
+
+            if (message.getChannel() == channel)
+                output.addEvent (message, metadata.samplePosition);
+        }
 
         return output;
     }
 
-    void loadNewSample (InputStream* soundBuffer, const char* format)
+    void loadNewSample (std::unique_ptr<InputStream> soundBuffer, const char* format)
     {
-        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer, true));
+        std::unique_ptr<AudioFormatReader> formatReader (formatManager.findFormatForFileExtension (format)->createReaderFor (soundBuffer.release(), true));
 
         BigInteger midiNotes;
         midiNotes.setRange (0, 126, true);

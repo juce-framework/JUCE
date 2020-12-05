@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -114,12 +114,21 @@ struct InternalRunLoop
 public:
     InternalRunLoop()
     {
-        fdReadCallbacks.reserve (8);
+        fdReadCallbacks.reserve (16);
     }
 
-    void registerFdCallback (int fd, std::function<void(int)>&& cb, short eventMask)
+    void registerFdCallback (int fd, std::function<void (int)>&& cb, short eventMask)
     {
         const ScopedLock sl (lock);
+
+        if (shouldDeferModifyingReadCallbacks)
+        {
+            deferredReadCallbackModifications.emplace_back ([this, fd, cb, eventMask]() mutable
+                                                            {
+                                                                registerFdCallback (fd, std::move (cb), eventMask);
+                                                            });
+            return;
+        }
 
         fdReadCallbacks.push_back ({ fd, std::move (cb) });
         pfds.push_back ({ fd, eventMask, 0 });
@@ -129,8 +138,14 @@ public:
     {
         const ScopedLock sl (lock);
 
+        if (shouldDeferModifyingReadCallbacks)
         {
-            auto removePredicate = [=] (const std::pair<int, std::function<void(int)>>& cb)  { return cb.first == fd; };
+            deferredReadCallbackModifications.emplace_back ([this, fd] { unregisterFdCallback (fd); });
+            return;
+        }
+
+        {
+            auto removePredicate = [=] (const std::pair<int, std::function<void (int)>>& cb)  { return cb.first == fd; };
 
             fdReadCallbacks.erase (std::remove_if (std::begin (fdReadCallbacks), std::end (fdReadCallbacks), removePredicate),
                                    std::end (fdReadCallbacks));
@@ -166,7 +181,23 @@ public:
             {
                 if (fdAndCallback.first == fd)
                 {
-                    fdAndCallback.second (fd);
+                    {
+                        ScopedValueSetter<bool> insideFdReadCallback (shouldDeferModifyingReadCallbacks, true);
+                        fdAndCallback.second (fd);
+                    }
+
+                    if (! deferredReadCallbackModifications.empty())
+                    {
+                        for (auto& deferredRegisterEvent : deferredReadCallbackModifications)
+                            deferredRegisterEvent();
+
+                        deferredReadCallbackModifications.clear();
+
+                        // elements may have been removed from the fdReadCallbacks/pfds array so we really need
+                        // to call poll again
+                        return true;
+                    }
+
                     eventWasSent = true;
                 }
             }
@@ -180,14 +211,23 @@ public:
         poll (&pfds.front(), static_cast<nfds_t> (pfds.size()), timeoutMs);
     }
 
+    std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks()
+    {
+        const ScopedLock sl (lock);
+        return fdReadCallbacks;
+    }
+
     //==============================================================================
     JUCE_DECLARE_SINGLETON (InternalRunLoop, false)
 
 private:
     CriticalSection lock;
 
-    std::vector<std::pair<int, std::function<void(int)>>> fdReadCallbacks;
+    std::vector<std::pair<int, std::function<void (int)>>> fdReadCallbacks;
     std::vector<pollfd> pfds;
+
+    bool shouldDeferModifyingReadCallbacks = false;
+    std::vector<std::function<void()>> deferredReadCallbackModifications;
 };
 
 JUCE_IMPLEMENT_SINGLETON (InternalRunLoop)
@@ -271,7 +311,7 @@ bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMes
 }
 
 //==============================================================================
-void LinuxEventLoop::registerFdCallback (int fd, std::function<void(int)> readCallback, short eventMask)
+void LinuxEventLoop::registerFdCallback (int fd, std::function<void (int)> readCallback, short eventMask)
 {
     if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
         runLoop->registerFdCallback (fd, std::move (readCallback), eventMask);
@@ -284,3 +324,14 @@ void LinuxEventLoop::unregisterFdCallback (int fd)
 }
 
 } // namespace juce
+
+JUCE_API std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks()
+{
+    using namespace juce;
+
+    if (auto* runLoop = InternalRunLoop::getInstanceWithoutCreating())
+        return runLoop->getFdReadCallbacks();
+
+    jassertfalse;
+    return {};
+}

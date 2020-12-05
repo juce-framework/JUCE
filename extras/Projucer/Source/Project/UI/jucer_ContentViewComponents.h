@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -61,7 +60,7 @@ public:
         for (auto s : columnHeaders)
         {
             addAndMakeVisible (headers.add (new Label (s, s)));
-            widths.add (1.0f / columnHeaders.size());
+            widths.add (1.0f / (float) columnHeaders.size());
         }
 
         setSize (200, 40);
@@ -91,7 +90,7 @@ public:
         auto index = 0;
         for (auto h : headers)
         {
-            auto headerWidth = roundToInt (width * widths.getUnchecked (index));
+            auto headerWidth = roundToInt ((float) width * widths.getUnchecked (index));
             h->setBounds (bounds.removeFromLeft (headerWidth));
             ++index;
         }
@@ -115,7 +114,7 @@ public:
         for (int i = 0; i < index; ++i)
             prop += widths.getUnchecked (i);
 
-        return roundToInt (prop * getWidth());
+        return roundToInt (prop * (float) getWidth());
     }
 
     float getProportionAtIndex (int index)
@@ -179,10 +178,10 @@ public:
 
     void clicked() override
     {
-        auto* w = new InfoWindow (info);
+        auto w = std::make_unique<InfoWindow> (info);
         w->setSize (width, w->getHeight() * numLines + 10);
 
-        CallOutBox::launchAsynchronously (w, getScreenBounds(), nullptr);
+        CallOutBox::launchAsynchronously (std::move (w), getScreenBounds(), nullptr);
     }
 
     using Button::clicked;
@@ -224,7 +223,7 @@ private:
 
             g.setColour (findColour (defaultTextColourId));
             g.setFont (Font (14.0f));
-            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 10, 1.0f);
+            g.drawFittedText (stringToDisplay, getLocalBounds(), Justification::centred, 15, 0.75f);
         }
 
         String stringToDisplay;
@@ -373,7 +372,7 @@ private:
         if (availableTextWidth == 0)
             return 0;
 
-        return static_cast<int> (nameWidth / availableTextWidth);
+        return static_cast<int> (nameWidth / (float) availableTextWidth);
     }
 
     //==============================================================================

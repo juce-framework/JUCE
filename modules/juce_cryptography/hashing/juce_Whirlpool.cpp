@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -93,7 +92,7 @@ private:
                 bufferBits = bufferPos = 0;
             }
 
-            buffer[bufferPos] = (uint8_t) (b << (8 - bufferRem));
+            buffer[bufferPos] = static_cast<uint8_t> (b << (8 - bufferRem));
             bufferBits += bufferRem;
 
             numBits -= 8;
@@ -103,7 +102,7 @@ private:
         if (numBits > 0)
         {
             b = (source[sourcePos] << sourceGap) & 0xff;
-            buffer[bufferPos] |= (b >> bufferRem);
+            buffer[bufferPos] = static_cast<uint8_t> (buffer[bufferPos] | (b >> bufferRem));
         }
         else
         {
@@ -126,7 +125,7 @@ private:
                 bufferBits = bufferPos = 0;
             }
 
-            buffer[bufferPos] = (uint8_t) (b << (8 - bufferRem));
+            buffer[bufferPos] = static_cast<uint8_t> (b << (8 - bufferRem));
             bufferBits += numBits;
         }
     }
@@ -134,7 +133,8 @@ private:
     void finalize (uint8_t* result) noexcept
     {
         // append a '1'-bit
-        buffer[bufferPos++] |= 0x80u >> (bufferBits & 7);
+        buffer[bufferPos] = static_cast<uint8_t> (buffer[bufferPos] | (0x80u >> (bufferBits & 7)));
+        bufferPos++;
 
         // pad with zero bits to complete (N*(64*8) - (32*8)) bits
         if (bufferPos > 32)

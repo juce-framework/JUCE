@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -477,20 +477,5 @@ private:
 //==============================================================================
 extern bool isOboeAvailable();
 extern bool isOpenSLAvailable();
-
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Android()
-{
-   #if JUCE_USE_ANDROID_OBOE
-    if (isOboeAvailable())
-        return nullptr;
-   #endif
-
-   #if JUCE_USE_ANDROID_OPENSLES
-    if (isOpenSLAvailable())
-        return nullptr;
-   #endif
-
-    return new AndroidAudioIODeviceType();
-}
 
 } // namespace juce

@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -26,18 +25,97 @@
 
 #pragma once
 
-#include "jucer_ProjectType.h"
+#include "../Application/UserAccount/jucer_LicenseController.h"
+#include "Modules/jucer_AvailableModulesList.h"
 
 class ProjectExporter;
 class LibraryModule;
-class EnabledModuleList;
-class AvailableModuleList;
-class ProjectContentComponent;
+class EnabledModulesList;
 class CompileEngineSettings;
+
+namespace ProjectMessages
+{
+    namespace Ids
+    {
+       #define DECLARE_ID(name)  static const Identifier name (#name)
+
+        DECLARE_ID (projectMessages);
+
+        DECLARE_ID (incompatibleLicense);
+        DECLARE_ID (cppStandard);
+        DECLARE_ID (moduleNotFound);
+        DECLARE_ID (jucePath);
+        DECLARE_ID (jucerFileModified);
+        DECLARE_ID (missingModuleDependencies);
+        DECLARE_ID (oldProjucer);
+        DECLARE_ID (cLion);
+        DECLARE_ID (newVersionAvailable);
+
+        DECLARE_ID (notification);
+        DECLARE_ID (warning);
+
+        DECLARE_ID (isVisible);
+
+       #undef DECLARE_ID
+    }
+
+    inline Identifier getTypeForMessage (const Identifier& message)
+    {
+        static Identifier warnings[] = { Ids::incompatibleLicense, Ids::cppStandard, Ids::moduleNotFound,
+                                         Ids::jucePath, Ids::jucerFileModified, Ids::missingModuleDependencies,
+                                         Ids::oldProjucer, Ids::cLion };
+
+        if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
+            return Ids::warning;
+
+        if (message == Ids::newVersionAvailable)
+            return Ids::notification;
+
+        jassertfalse;
+        return {};
+    }
+
+    inline String getTitleForMessage (const Identifier& message)
+    {
+        if (message == Ids::incompatibleLicense)        return "Incompatible License and Splash Screen Setting";
+        if (message == Ids::cppStandard)                return "C++ Standard";
+        if (message == Ids::moduleNotFound)             return "Module Not Found";
+        if (message == Ids::jucePath)                   return "JUCE Path";
+        if (message == Ids::jucerFileModified)          return "Project File Modified";
+        if (message == Ids::missingModuleDependencies)  return "Missing Module Dependencies";
+        if (message == Ids::oldProjucer)                return "Projucer Out of Date";
+        if (message == Ids::newVersionAvailable)        return "New Version Available";
+        if (message == Ids::cLion)                      return "Deprecated Exporter";
+
+        jassertfalse;
+        return {};
+    }
+
+    inline String getDescriptionForMessage (const Identifier& message)
+    {
+        if (message == Ids::incompatibleLicense)        return "Save and export is disabled.";
+        if (message == Ids::cppStandard)                return "Module(s) have a higher C++ standard requirement than the project.";
+        if (message == Ids::moduleNotFound)             return "Module(s) could not be found at the specified paths.";
+        if (message == Ids::jucePath)                   return "The path to your JUCE folder is incorrect.";
+        if (message == Ids::jucerFileModified)          return "The .jucer file has been modified since the last save.";
+        if (message == Ids::missingModuleDependencies)  return "Module(s) have missing dependencies.";
+        if (message == Ids::oldProjucer)                return "The version of the Projucer you are using is out of date.";
+        if (message == Ids::newVersionAvailable)        return "A new version of JUCE is available to download.";
+        if (message == Ids::cLion)                      return "The CLion exporter is deprecated. Use JUCE's CMake support instead.";
+
+        jassertfalse;
+        return {};
+    }
+
+    using MessageAction = std::pair<String, std::function<void()>>;
+}
 
 //==============================================================================
 class Project  : public FileBasedDocument,
-                 public ValueTree::Listener
+                 private ValueTree::Listener,
+                 private LicenseController::LicenseStateListener,
+                 private ChangeListener,
+                 private AvailableModulesList::Listener
 {
 public:
     //==============================================================================
@@ -45,12 +123,14 @@ public:
     ~Project() override;
 
     //==============================================================================
-    // FileBasedDocument stuff..
     String getDocumentTitle() override;
     Result loadDocument (const File& file) override;
     Result saveDocument (const File& file) override;
-    Result saveProject (const File& file, bool isCommandLineApp);
-    Result saveResourcesOnly (const File& file);
+
+    Result saveProject (ProjectExporter* exporterToSave = nullptr);
+    Result saveResourcesOnly();
+    Result openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst);
+
     File getLastDocumentOpened() override;
     void setLastDocumentOpened (const File& file) override;
 
@@ -68,6 +148,7 @@ public:
     File getBinaryDataHeaderFile() const                        { return getBinaryDataCppFile (0).withFileExtension (".h"); }
 
     static String getAppConfigFilename()                        { return "AppConfig.h"; }
+    static String getPluginDefinesFilename()                    { return "JucePluginDefines.h"; }
     static String getJuceSourceHFilename()                      { return "JuceHeader.h"; }
 
     //==============================================================================
@@ -89,7 +170,7 @@ public:
     Value getProjectValue (const Identifier& name)       { return projectRoot.getPropertyAsValue (name, getUndoManagerFor (projectRoot)); }
     var   getProjectVar   (const Identifier& name) const { return projectRoot.getProperty        (name); }
 
-    const ProjectType& getProjectType() const;
+    const build_tools::ProjectType& getProjectType() const;
     String getProjectTypeString() const                  { return projectTypeValue.get(); }
     void setProjectType (const String& newProjectType)   { projectTypeValue = newProjectType; }
 
@@ -100,8 +181,8 @@ public:
     String getProjectLineFeed() const                    { return projectLineFeedValue.get(); }
 
     String getVersionString() const                      { return versionValue.get(); }
-    String getVersionAsHex() const;
-    int getVersionAsHexInteger() const;
+    String getVersionAsHex() const                       { return build_tools::getVersionAsHex (getVersionString()); }
+    int getVersionAsHexInteger() const                   { return build_tools::getVersionAsHexInteger (getVersionString()); }
     void setProjectVersion (const String& newVersion)    { versionValue = newVersion; }
 
     String getBundleIdentifierString() const             { return bundleIdentifierValue.get(); }
@@ -123,8 +204,10 @@ public:
     String getBinaryDataNamespaceString() const          { return binaryDataNamespaceValue.get(); }
 
     bool shouldDisplaySplashScreen() const               { return displaySplashScreenValue.get(); }
-    bool shouldReportAppUsage() const                    { return reportAppUsageValue.get(); }
     String getSplashScreenColourString() const           { return splashScreenColourValue.get(); }
+
+    static StringArray getCppStandardStrings()           { return { "C++11", "C++14", "C++17", "Use Latest" }; }
+    static Array<var> getCppStandardVars()               { return { "11",    "14",    "17",    "latest" }; }
 
     String getCppStandardString() const                  { return cppStandardValue.get(); }
 
@@ -132,8 +215,11 @@ public:
     void addCompilerFlagScheme (const String&);
     void removeCompilerFlagScheme (const String&);
 
-    String getPostExportShellCommandPosixString() const     { return postExportShellCommandPosixValue.get(); }
-    String getPostExportShellCommandWinString() const       { return postExportShellCommandWinValue.get(); }
+    String getPostExportShellCommandPosixString() const  { return postExportShellCommandPosixValue.get(); }
+    String getPostExportShellCommandWinString() const    { return postExportShellCommandWinValue.get(); }
+
+    bool shouldUseAppConfig() const                      { return useAppConfigValue.get(); }
+    bool shouldAddUsingNamespaceToJuceHeader() const     { return addUsingNamespaceToJuceHeader.get(); }
 
     //==============================================================================
     String getPluginNameString() const                { return pluginNameValue.get(); }
@@ -207,8 +293,8 @@ public:
     int getAAXCategory() const noexcept;
     int getRTASCategory() const noexcept;
 
-    String getIAATypeCode();
-    String getIAAPluginName();
+    String getIAATypeCode() const;
+    String getIAAPluginName() const;
 
     String getUnityScriptName() const    { return addUnityPluginPrefixIfNecessary (getProjectNameString()) + "_UnityScript.cs"; }
     static String addUnityPluginPrefixIfNecessary (const String& name)
@@ -225,11 +311,14 @@ public:
     bool isVST3PluginHost();
 
     //==============================================================================
-    bool shouldBuildTargetType (ProjectType::Target::Type targetType) const noexcept;
-    static ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
+    bool shouldBuildTargetType (build_tools::ProjectType::Target::Type targetType) const noexcept;
+    static build_tools::ProjectType::Target::Type getTargetTypeFromFilePath (const File& file, bool returnSharedTargetIfNoValidSuffix);
 
     //==============================================================================
     void updateDeprecatedProjectSettingsInteractively();
+
+    StringPairArray getAppConfigDefs();
+    StringPairArray getAudioPluginFlags() const;
 
     //==============================================================================
     class Item
@@ -252,6 +341,7 @@ public:
         bool isGroup() const;
         bool isMainGroup() const;
         bool isImageFile() const;
+        bool isSourceFile() const;
 
         String getID() const;
         void setID (const String& newID);
@@ -266,7 +356,7 @@ public:
         File getFile() const;
         String getFilePath() const;
         void setFile (const File& file);
-        void setFile (const RelativePath& file);
+        void setFile (const build_tools::RelativePath& file);
         File determineGroupFolder() const;
         bool renameFile (const File& newFile);
 
@@ -286,6 +376,9 @@ public:
 
         bool isModuleCode() const;
 
+        Value getShouldSkipPCHValue();
+        bool shouldSkipPCH() const;
+
         Value getCompilerFlagSchemeValue();
         String getCompilerFlagSchemeString() const;
 
@@ -303,11 +396,11 @@ public:
         bool addFileAtIndex (const File& file, int insertIndex, bool shouldCompile);
         bool addFileRetainingSortOrder (const File& file, bool shouldCompile);
         void addFileUnchecked (const File& file, int insertIndex, bool shouldCompile);
-        bool addRelativeFile (const RelativePath& file, int insertIndex, bool shouldCompile);
+        bool addRelativeFile (const build_tools::RelativePath& file, int insertIndex, bool shouldCompile);
         void removeItemFromProject();
         void sortAlphabetically (bool keepGroupsAtStart, bool recursive);
         Item findItemForFile (const File& file) const;
-        bool containsChildForFile (const RelativePath& file) const;
+        bool containsChildForFile (const build_tools::RelativePath& file) const;
 
         Item getParent() const;
         Item createCopy();
@@ -334,8 +427,8 @@ public:
     //==============================================================================
     ValueTree getExporters();
     int getNumExporters();
-    ProjectExporter* createExporter (int index);
-    void addNewExporter (const String& exporterName);
+    std::unique_ptr<ProjectExporter> createExporter (int index);
+    void addNewExporter (const Identifier& exporterIdentifier);
     void createExporterForCurrentPlatform();
 
     struct ExporterIterator
@@ -367,24 +460,15 @@ public:
     bool isConfigFlagEnabled (const String& name, bool defaultIsEnabled = false) const;
 
     //==============================================================================
-    EnabledModuleList& getEnabledModules();
+    EnabledModulesList& getEnabledModules();
 
-    AvailableModuleList& getExporterPathsModuleList();
+    AvailableModulesList& getExporterPathsModulesList()  { return exporterPathsModulesList; }
     void rescanExporterPathModules (bool async = false);
 
     std::pair<String, File> getModuleWithID (const String&);
 
     //==============================================================================
-    String getFileTemplate (const String& templateName);
-
-    //==============================================================================
     PropertiesFile& getStoredProperties() const;
-
-    //==============================================================================
-    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
-    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
-    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override;
-    void valueTreeChildOrderChanged (ValueTree&, int, int) override;
 
     //==============================================================================
     UndoManager* getUndoManagerFor (const ValueTree&) const             { return nullptr; }
@@ -394,38 +478,68 @@ public:
     static const char* projectFileExtension;
 
     //==============================================================================
-    bool hasProjectBeenModified();
-    void updateModificationTime() { modificationTime = getFile().getLastModificationTime(); }
+    bool updateCachedFileState();
+    String getCachedFileStateContent() const noexcept  { return cachedFileState.second; }
+
+    String serialiseProjectXml (std::unique_ptr<XmlElement>) const;
 
     //==============================================================================
-    String getUniqueTargetFolderSuffixForExporter (const String& exporterName, const String& baseTargetFolder);
+    String getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& baseTargetFolder);
 
     //==============================================================================
-    bool isCurrentlySaving() const noexcept        { return isSaving; }
-    bool shouldWaitAfterSaving = false;
-    String specifiedExporterToSave = {};
+    bool isCurrentlySaving() const noexcept              { return isSaving; }
 
-    //==============================================================================
     bool isTemporaryProject() const noexcept             { return tempDirectory != File(); }
     File getTemporaryDirectory() const noexcept          { return tempDirectory; }
     void setTemporaryDirectory (const File&) noexcept;
 
-    void setOpenInIDEAfterSaving (bool open) noexcept    { openInIDEAfterSaving = open; }
-    bool shouldOpenInIDEAfterSaving() const noexcept     { return openInIDEAfterSaving; }
-
-    //==============================================================================
-    bool shouldSendGUIBuilderAnalyticsEvent() noexcept;
-
     //==============================================================================
     CompileEngineSettings& getCompileEngineSettings()    { return *compileEngineSettings; }
 
+    //==============================================================================
+    ValueTree getProjectMessages() const  { return projectMessages; }
+
+    void addProjectMessage (const Identifier& messageToAdd, std::vector<ProjectMessages::MessageAction>&& messageActions);
+    void removeProjectMessage (const Identifier& messageToRemove);
+
+    std::vector<ProjectMessages::MessageAction> getMessageActions (const Identifier& message);
+
+    //==============================================================================
+    bool hasIncompatibleLicenseTypeAndSplashScreenSetting() const;
+    bool isFileModificationCheckPending() const;
+    bool isSaveAndExportDisabled() const;
+
 private:
+    //==============================================================================
+    void valueTreePropertyChanged (ValueTree&, const Identifier&) override;
+    void valueTreeChildAdded (ValueTree&, ValueTree&) override;
+    void valueTreeChildRemoved (ValueTree&, ValueTree&, int) override;
+    void valueTreeChildOrderChanged (ValueTree&, int, int) override;
+
+    //==============================================================================
+    struct ProjectFileModificationPoller  : private Timer
+    {
+        ProjectFileModificationPoller (Project& p);
+        bool isCheckPending() const noexcept  { return pending; }
+
+    private:
+        void timerCallback() override;
+        void reset();
+
+        void resaveProject();
+        void reloadProjectFromDisk();
+
+        Project& project;
+        bool pending = false;
+    };
+
+    //==============================================================================
     ValueTree projectRoot  { Ids::JUCERPROJECT };
 
     ValueWithDefault projectNameValue, projectUIDValue, projectLineFeedValue, projectTypeValue, versionValue, bundleIdentifierValue, companyNameValue,
-                     companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, reportAppUsageValue, splashScreenColourValue, cppStandardValue,
+                     companyCopyrightValue, companyWebsiteValue, companyEmailValue, displaySplashScreenValue, splashScreenColourValue, cppStandardValue,
                      headerSearchPathsValue, preprocessorDefsValue, userNotesValue, maxBinaryFileSizeValue, includeBinaryDataInJuceHeaderValue, binaryDataNamespaceValue,
-                     compilerFlagSchemesValue, postExportShellCommandPosixValue, postExportShellCommandWinValue;
+                     compilerFlagSchemesValue, postExportShellCommandPosixValue, postExportShellCommandWinValue, useAppConfigValue, addUsingNamespaceToJuceHeader;
 
     ValueWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                      pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
@@ -434,8 +548,12 @@ private:
 
     //==============================================================================
     std::unique_ptr<CompileEngineSettings> compileEngineSettings;
-    std::unique_ptr<EnabledModuleList> enabledModuleList;
-    std::unique_ptr<AvailableModuleList> exporterPathsModuleList;
+    std::unique_ptr<EnabledModulesList> enabledModulesList;
+
+    AvailableModulesList exporterPathsModulesList;
+
+    //==============================================================================
+    void updateDeprecatedProjectSettings();
 
     //==============================================================================
     bool shouldWriteLegacyPluginFormatSettings = false;
@@ -452,20 +570,14 @@ private:
     void updatePluginCategories();
 
     //==============================================================================
-    File tempDirectory = {};
-    bool openInIDEAfterSaving = false;
+    File tempDirectory;
+    std::pair<Time, String> cachedFileState;
 
-    void askUserWhereToSaveProject();
-    void moveTemporaryDirectory (const File&);
-    bool saveProjectRootToFile();
-
-    //==============================================================================
-    bool hasSentGUIBuilderAnalyticsEvent = false;
+    void saveAndMoveTemporaryProject (bool openInIDE);
 
     //==============================================================================
     friend class Item;
     bool isSaving = false;
-    Time modificationTime;
     StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================
@@ -488,7 +600,29 @@ private:
     void moveOldPropertyFromProjectToAllExporters (Identifier name);
     void removeDefunctExporters();
     void updateOldModulePaths();
-    void warnAboutOldProjucerVersion();
 
+    //==============================================================================
+    void licenseStateChanged() override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
+    void availableModulesChanged (AvailableModulesList*) override;
+
+    void updateLicenseWarning();
+    void updateJUCEPathWarning();
+
+    void updateModuleWarnings();
+    void updateExporterWarnings();
+    void updateCppStandardWarning (bool showWarning);
+    void updateMissingModuleDependenciesWarning (bool showWarning);
+    void updateOldProjucerWarning (bool showWarning);
+    void updateCLionWarning (bool showWarning);
+    void updateModuleNotFoundWarning (bool showWarning);
+
+    ValueTree projectMessages { ProjectMessages::Ids::projectMessages, {},
+                                { { ProjectMessages::Ids::notification, {} }, { ProjectMessages::Ids::warning, {} } } };
+    std::map<Identifier, std::vector<ProjectMessages::MessageAction>> messageActions;
+
+    ProjectFileModificationPoller fileModificationPoller { *this };
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
 };

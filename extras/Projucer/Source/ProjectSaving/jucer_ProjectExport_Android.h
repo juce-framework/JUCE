@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -49,24 +48,16 @@ public:
     bool canCopeWithDuplicateFiles() override               { return false; }
     bool supportsUserDefinedConfigurations() const override { return true; }
 
-    bool supportsTargetType (ProjectType::Target::Type type) const override
-    {
-        switch (type)
-        {
-            case ProjectType::Target::GUIApp:
-            case ProjectType::Target::StaticLibrary:
-            case ProjectType::Target::DynamicLibrary:
-            case ProjectType::Target::StandalonePlugIn:
-                return true;
-            default:
-                break;
-        }
+    String getNewLineString() const override     { return "\n"; }
 
-        return false;
+    bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
+    {
+        return type == build_tools::ProjectType::Target::GUIApp || type == build_tools::ProjectType::Target::StaticLibrary
+              || type == build_tools::ProjectType::Target::DynamicLibrary || type == build_tools::ProjectType::Target::StandalonePlugIn;
     }
 
     //==============================================================================
-    void addPlatformSpecificSettingsForProjectType (const ProjectType&) override
+    void addPlatformSpecificSettingsForProjectType (const build_tools::ProjectType&) override
     {
         // no-op.
     }
@@ -81,17 +72,19 @@ public:
         createOtherExporterProperties (props);
     }
 
-    static const char* getName()                         { return "Android"; }
-    static const char* getValueTreeTypeName()            { return "ANDROIDSTUDIO"; }
-    static const char* getDefaultActivityClass()         { return "com.roli.juce.JuceActivity"; }
-    static const char* getDefaultApplicationClass()      { return "com.roli.juce.JuceApp"; }
+    static String getDisplayName()        { return "Android"; }
+    static String getValueTreeTypeName()  { return "ANDROIDSTUDIO"; }
+    static String getTargetFolderName()   { return "Android"; }
+
+    static const char* getDefaultActivityClass()     { return "com.rmsl.juce.JuceActivity"; }
+    static const char* getDefaultApplicationClass()  { return "com.rmsl.juce.JuceApp"; }
 
     static AndroidProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))
             return new AndroidProjectExporter (projectToUse, settingsToUse);
 
-        return nullptr;
+        return {};
     }
 
     //==============================================================================
@@ -119,7 +112,7 @@ public:
           androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
-          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "29"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
@@ -140,14 +133,13 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "5.4.1"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "6.1.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "3.5.3"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "4.0.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
-        name = getName();
-
-        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderForExporter (getValueTreeTypeName()));
+        name = getDisplayName();
+        targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
     }
 
     //==============================================================================
@@ -246,20 +238,20 @@ public:
 
     void writeFile (const File& gradleProjectFolder, const String& filePath, const String& fileContent) const
     {
-        MemoryOutputStream outStream;
-        outStream.setNewLineString ("\n");
-
-        outStream << fileContent;
-        overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
+        build_tools::writeStreamToFile (gradleProjectFolder.getChildFile (filePath), [&] (MemoryOutputStream& mo)
+        {
+            mo.setNewLineString (getNewLineString());
+            mo << fileContent;
+        });
     }
 
     void writeBinaryFile (const File& gradleProjectFolder, const String& filePath, const char* binaryData, const int binarySize) const
     {
-        MemoryOutputStream outStream;
-        outStream.setNewLineString ("\n");
-
-        outStream.write (binaryData, static_cast<size_t> (binarySize));
-        overwriteFileIfDifferentOrThrow (gradleProjectFolder.getChildFile (filePath), outStream);
+        build_tools::writeStreamToFile (gradleProjectFolder.getChildFile (filePath), [&] (MemoryOutputStream& mo)
+        {
+            mo.setNewLineString (getNewLineString());
+            mo.write (binaryData, static_cast<size_t> (binarySize));
+        });
     }
 
 protected:
@@ -348,212 +340,247 @@ protected:
 private:
     void writeCmakeFile (const File& file) const
     {
-        MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
-
-        mo << "# Automatically generated makefile, created by the Projucer" << newLine
-           << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
-           << newLine;
-
-        mo << "cmake_minimum_required(VERSION 3.4.1)" << newLine << newLine;
-
-        if (! isLibrary())
-            mo << "SET(BINARY_NAME \"juce_jni\")" << newLine << newLine;
-
-        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
+        build_tools::writeStreamToFile (file, [&] (MemoryOutputStream& mo)
         {
-            String oboePath (androidOboeRepositoryPath.get().toString().trim().quoted());
+            mo.setNewLineString (getNewLineString());
 
-            mo << "SET(OBOE_DIR " << oboePath << ")" << newLine << newLine;
-            mo << "add_subdirectory (${OBOE_DIR} ./oboe)" << newLine << newLine;
-        }
+            mo << "# Automatically generated makefile, created by the Projucer" << newLine
+               << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
+               << newLine;
 
-        String cpufeaturesPath ("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c");
-        mo << "add_library(\"cpufeatures\" STATIC \"" << cpufeaturesPath << "\")" << newLine
-           << "set_source_files_properties(\"" << cpufeaturesPath << "\" PROPERTIES COMPILE_FLAGS \"-Wno-sign-conversion -Wno-gnu-statement-expression\")" << newLine << newLine;
+            mo << "cmake_minimum_required(VERSION 3.4.1)" << newLine << newLine;
 
-        {
-            auto projectDefines = getEscapedPreprocessorDefs (getProjectPreprocessorDefs());
-            if (projectDefines.size() > 0)
-                mo << "add_definitions(" << projectDefines.joinIntoString (" ") << ")" << newLine << newLine;
-        }
+            if (! isLibrary())
+                mo << "set(BINARY_NAME \"juce_jni\")" << newLine << newLine;
 
-        {
-            mo << "include_directories( AFTER" << newLine;
+            auto useOboe = project.getEnabledModules().isModuleEnabled ("juce_audio_devices")
+                          && project.isConfigFlagEnabled ("JUCE_USE_ANDROID_OBOE", true);
 
-            for (auto& path : extraSearchPaths)
-                mo << "    \"" << escapeDirectoryForCmake (path) << "\"" << newLine;
+            if (useOboe)
+            {
+                auto oboePath = [&]
+                {
+                    auto oboeDir = androidOboeRepositoryPath.get().toString().trim();
 
-            mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
+                    if (oboeDir.isEmpty())
+                        oboeDir = getModuleFolderRelativeToProject ("juce_audio_devices").getChildFile ("native")
+                                                                                         .getChildFile ("oboe")
+                                                                                         .rebased (getProject().getProjectFolder(), getTargetFolder(),
+                                                                                                   build_tools::RelativePath::buildTargetFolder)
+                                                                                         .toUnixStyle();
 
-            if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
-                mo << "    \"${OBOE_DIR}/include\"" << newLine;
+                    // CMakeLists.txt is in the "app" subfolder
+                    if (! build_tools::isAbsolutePath (oboeDir))
+                        oboeDir = "../" + oboeDir;
 
+                    return expandHomeFolderToken (oboeDir);
+                }();
+
+                mo << "set(OBOE_DIR " << oboePath.quoted() << ")" << newLine << newLine;
+                mo << "add_subdirectory (${OBOE_DIR} ./oboe)" << newLine << newLine;
+            }
+
+            String cpufeaturesPath ("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c");
+            mo << "add_library(\"cpufeatures\" STATIC \"" << cpufeaturesPath << "\")" << newLine
+               << "set_source_files_properties(\"" << cpufeaturesPath << "\" PROPERTIES COMPILE_FLAGS \"-Wno-sign-conversion -Wno-gnu-statement-expression\")" << newLine << newLine;
+
+            {
+                auto projectDefines = getEscapedPreprocessorDefs (getProjectPreprocessorDefs());
+                if (projectDefines.size() > 0)
+                    mo << "add_definitions(" << projectDefines.joinIntoString (" ") << ")" << newLine << newLine;
+            }
+
+            {
+                mo << "include_directories( AFTER" << newLine;
+
+                for (auto& path : extraSearchPaths)
+                    mo << "    \"" << escapeDirectoryForCmake (path) << "\"" << newLine;
+
+                mo << "    \"${ANDROID_NDK}/sources/android/cpufeatures\"" << newLine;
+
+                mo << ")" << newLine << newLine;
+            }
+
+            auto cfgExtraLinkerFlags = getExtraLinkerFlagsString();
+            if (cfgExtraLinkerFlags.isNotEmpty())
+            {
+                mo << "set( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
+                mo << "set( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
+            }
+
+            mo << "enable_language(ASM)" << newLine << newLine;
+
+            auto userLibraries = StringArray::fromTokens (getExternalLibrariesString(), ";", "");
+            userLibraries.addArray (androidLibs);
+
+            if (getNumConfigurations() > 0)
+            {
+                bool first = true;
+
+                for (ConstConfigIterator config (*this); config.next();)
+                {
+                    auto& cfg            = dynamic_cast<const AndroidBuildConfiguration&> (*config);
+                    auto libSearchPaths  = cfg.getLibrarySearchPaths();
+                    auto cfgDefines      = getConfigPreprocessorDefs (cfg);
+                    auto cfgHeaderPaths  = cfg.getHeaderSearchPaths();
+                    auto cfgLibraryPaths = cfg.getLibrarySearchPaths();
+
+                    if (! isLibrary() && libSearchPaths.size() == 0 && cfgDefines.size() == 0
+                        && cfgHeaderPaths.size() == 0 && cfgLibraryPaths.size() == 0)
+                        continue;
+
+                    mo << (first ? "if" : "elseif") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+
+                    if (isLibrary())
+                    {
+                        mo << "    set(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
+
+                        auto binaryLocation = cfg.getTargetBinaryRelativePathString();
+
+                        if (binaryLocation.isNotEmpty())
+                        {
+                            auto locationRelativeToCmake = build_tools::RelativePath (binaryLocation, build_tools::RelativePath::projectFolder)
+                                .rebased (getProject().getFile().getParentDirectory(),
+                                          file.getParentDirectory(), build_tools::RelativePath::buildTargetFolder);
+
+                            mo << "    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"" << "../../../../" << locationRelativeToCmake.toUnixStyle() << "\")" << newLine;
+                        }
+                    }
+
+                    writeCmakePathLines (mo, "    ", "link_directories(", libSearchPaths);
+
+                    if (cfgDefines.size() > 0)
+                        mo << "    add_definitions(" << getEscapedPreprocessorDefs (cfgDefines).joinIntoString (" ") << ")" << newLine;
+
+                    writeCmakePathLines (mo, "    ", "include_directories( AFTER", cfgHeaderPaths);
+
+                    if (userLibraries.size() > 0)
+                    {
+                        for (auto& lib : userLibraries)
+                        {
+                            String findLibraryCmd;
+                            findLibraryCmd << "find_library(" << lib.toLowerCase().replaceCharacter (L' ', L'_')
+                                           << " \"" << lib << "\" PATHS";
+
+                            writeCmakePathLines (mo, "    ", findLibraryCmd, cfgLibraryPaths, "    NO_CMAKE_FIND_ROOT_PATH)");
+                        }
+
+                        mo << newLine;
+                    }
+
+                    if (cfg.isLinkTimeOptimisationEnabled())
+                    {
+                        // There's no MIPS support for LTO
+                        String mipsCondition ("NOT (ANDROID_ABI STREQUAL \"mips\" OR ANDROID_ABI STREQUAL \"mips64\")");
+                        mo << "    if(" << mipsCondition << ")" << newLine;
+                        StringArray cmakeVariables ("CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS", "CMAKE_EXE_LINKER_FLAGS");
+
+                        for (auto& variable : cmakeVariables)
+                        {
+                            auto configVariable = variable + "_" + cfg.getProductFlavourCMakeIdentifier();
+                            mo << "        set(" << configVariable << " \"${" << configVariable << "} -flto\")" << newLine;
+                        }
+
+                        mo << "    endif()" << newLine;
+                    }
+
+                    first = false;
+                }
+
+                if (! first)
+                {
+                    ProjectExporter::BuildConfiguration::Ptr config (getConfiguration(0));
+
+                    if (config)
+                    {
+                        if (dynamic_cast<const AndroidBuildConfiguration*> (config.get()) != nullptr)
+                        {
+                            mo << "else()" << newLine;
+                            mo << "    message( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
+                            mo << "endif()" << newLine << newLine;
+                        }
+                    }
+                }
+            }
+
+            Array<build_tools::RelativePath> excludeFromBuild;
+            Array<std::pair<build_tools::RelativePath, String>> extraCompilerFlags;
+
+            mo << "add_library( ${BINARY_NAME}" << newLine;
+            mo << newLine;
+            mo << "    " << (getProject().getProjectType().isStaticLibrary() ? "STATIC" : "SHARED") << newLine;
+            mo << newLine;
+            addCompileUnits (mo, excludeFromBuild, extraCompilerFlags);
             mo << ")" << newLine << newLine;
-        }
 
-        auto cfgExtraLinkerFlags = getExtraLinkerFlagsString();
-        if (cfgExtraLinkerFlags.isNotEmpty())
-        {
-            mo << "SET( JUCE_LDFLAGS \"" << cfgExtraLinkerFlags.replace ("\"", "\\\"") << "\")" << newLine;
-            mo << "SET( CMAKE_SHARED_LINKER_FLAGS  \"${CMAKE_EXE_LINKER_FLAGS} ${JUCE_LDFLAGS}\")" << newLine << newLine;
-        }
+            if (excludeFromBuild.size() > 0)
+            {
+                for (auto& exclude : excludeFromBuild)
+                    mo << "set_source_files_properties(\"" << exclude.toUnixStyle() << "\" PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
 
-        mo << "enable_language(ASM)" << newLine << newLine;
+                mo << newLine;
+            }
 
-        auto userLibraries = StringArray::fromTokens (getExternalLibrariesString(), ";", "");
-        userLibraries.addArray (androidLibs);
+            if (! extraCompilerFlags.isEmpty())
+            {
+                for (auto& extra : extraCompilerFlags)
+                    mo << "set_source_files_properties(\"" << extra.first.toUnixStyle() << "\" PROPERTIES COMPILE_FLAGS " << extra.second << " )" << newLine;
 
-        if (getNumConfigurations() > 0)
-        {
-            bool first = true;
+                mo << newLine;
+            }
+
+            auto flags = getProjectCompilerFlags();
+
+            if (flags.size() > 0)
+                mo << "target_compile_options( ${BINARY_NAME} PRIVATE " << flags.joinIntoString (" ") << " )" << newLine << newLine;
 
             for (ConstConfigIterator config (*this); config.next();)
             {
-                auto& cfg            = dynamic_cast<const AndroidBuildConfiguration&> (*config);
-                auto libSearchPaths  = cfg.getLibrarySearchPaths();
-                auto cfgDefines      = getConfigPreprocessorDefs (cfg);
-                auto cfgHeaderPaths  = cfg.getHeaderSearchPaths();
-                auto cfgLibraryPaths = cfg.getLibrarySearchPaths();
+                auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
-                if (! isLibrary() && libSearchPaths.size() == 0 && cfgDefines.size() == 0
-                       && cfgHeaderPaths.size() == 0 && cfgLibraryPaths.size() == 0)
-                    continue;
+                mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine;
+                mo << "    target_compile_options( ${BINARY_NAME} PRIVATE";
 
-                mo << (first ? "IF" : "ELSEIF") << "(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() <<"\")" << newLine;
+                for (auto& flag : cfg.getRecommendedCompilerWarningFlags())
+                    mo << " " << flag;
 
-                if (isLibrary())
-                {
-                    mo << "    SET(BINARY_NAME \"" << getNativeModuleBinaryName (cfg) << "\")" << newLine;
-
-                    auto binaryLocation = cfg.getTargetBinaryRelativePathString();
-
-                    if (binaryLocation.isNotEmpty())
-                    {
-                        auto locationRelativeToCmake = RelativePath (binaryLocation, RelativePath::projectFolder)
-                                                        .rebased (getProject().getFile().getParentDirectory(),
-                                                                  file.getParentDirectory(), RelativePath::buildTargetFolder);
-
-                        mo << "    SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY \"" << "../../../../" << locationRelativeToCmake.toUnixStyle() << "\")" << newLine;
-                    }
-                }
-
-                writeCmakePathLines (mo, "    ", "link_directories(", libSearchPaths);
-
-                if (cfgDefines.size() > 0)
-                    mo << "    add_definitions(" << getEscapedPreprocessorDefs (cfgDefines).joinIntoString (" ") << ")" << newLine;
-
-                writeCmakePathLines (mo, "    ", "include_directories( AFTER", cfgHeaderPaths);
-
-                if (userLibraries.size() > 0)
-                {
-                    for (auto& lib : userLibraries)
-                    {
-                        String findLibraryCmd;
-                        findLibraryCmd << "find_library(" << lib.toLowerCase().replaceCharacter (L' ', L'_')
-                            << " \"" << lib << "\" PATHS";
-
-                        writeCmakePathLines (mo, "    ", findLibraryCmd, cfgLibraryPaths, "    NO_CMAKE_FIND_ROOT_PATH)");
-                    }
-
-                    mo << newLine;
-                }
-
-                if (cfg.isLinkTimeOptimisationEnabled())
-                {
-                    // There's no MIPS support for LTO
-                    String mipsCondition ("NOT (ANDROID_ABI STREQUAL \"mips\" OR ANDROID_ABI STREQUAL \"mips64\")");
-                    mo << "    if(" << mipsCondition << ")" << newLine;
-                    StringArray cmakeVariables ("CMAKE_C_FLAGS", "CMAKE_CXX_FLAGS", "CMAKE_EXE_LINKER_FLAGS");
-
-                    for (auto& variable : cmakeVariables)
-                    {
-                        auto configVariable = variable + "_" + cfg.getProductFlavourCMakeIdentifier();
-                        mo << "        SET(" << configVariable << " \"${" << configVariable << "} -flto\")" << newLine;
-                    }
-
-                    mo << "    ENDIF(" << mipsCondition << ")" << newLine;
-                }
-
-                first = false;
+                mo << ")" << newLine;
+                mo << "endif()" << newLine << newLine;
             }
 
-            if (! first)
+            auto libraries = getAndroidLibraries();
+            if (libraries.size() > 0)
             {
-                ProjectExporter::BuildConfiguration::Ptr config (getConfiguration(0));
+                for (auto& lib : libraries)
+                    mo << "find_library(" << lib.toLowerCase().replaceCharacter (L' ', L'_') << " \"" << lib << "\")" << newLine;
 
-                if (config)
-                {
-                    if (auto* cfg = dynamic_cast<const AndroidBuildConfiguration*> (config.get()))
-                    {
-                        mo << "ELSE(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine;
-                        mo << "    MESSAGE( FATAL_ERROR \"No matching build-configuration found.\" )" << newLine;
-                        mo << "ENDIF(JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg->getProductFlavourCMakeIdentifier() <<"\")" << newLine << newLine;
-                    }
-                }
+                mo << newLine;
             }
-        }
 
-        Array<RelativePath> excludeFromBuild;
-        Array<std::pair<RelativePath, String>> extraCompilerFlags;
+            libraries.addArray (userLibraries);
+            mo << "target_link_libraries( ${BINARY_NAME}";
+            if (libraries.size() > 0)
+            {
+                mo << newLine << newLine;
 
-        mo << "add_library( ${BINARY_NAME}" << newLine;
-        mo << newLine;
-        mo << "    " << (getProject().getProjectType().isStaticLibrary() ? "STATIC" : "SHARED") << newLine;
-        mo << newLine;
-        addCompileUnits (mo, excludeFromBuild, extraCompilerFlags);
-        mo << ")" << newLine << newLine;
+                for (auto& lib : libraries)
+                    mo << "    ${" << lib.toLowerCase().replaceCharacter (L' ', L'_') << "}" << newLine;
 
-        if (excludeFromBuild.size() > 0)
-        {
-            for (auto& exclude : excludeFromBuild)
-                mo << "set_source_files_properties(\"" << exclude.toUnixStyle() << "\" PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+                mo << "    \"cpufeatures\"" << newLine;
+            }
 
-            mo << newLine;
-        }
+            if (useOboe)
+                mo << "    \"oboe\"" << newLine;
 
-        if (! extraCompilerFlags.isEmpty())
-        {
-            for (auto& extra : extraCompilerFlags)
-                mo << "set_source_files_properties(\"" << extra.first.toUnixStyle() << "\" PROPERTIES COMPILE_FLAGS " << extra.second << " )" << newLine;
-
-            mo << newLine;
-        }
-
-        auto libraries = getAndroidLibraries();
-        if (libraries.size() > 0)
-        {
-            for (auto& lib : libraries)
-                mo << "find_library(" << lib.toLowerCase().replaceCharacter (L' ', L'_') << " \"" << lib << "\")" << newLine;
-
-            mo << newLine;
-        }
-
-        libraries.addArray (userLibraries);
-        mo << "target_link_libraries( ${BINARY_NAME}";
-        if (libraries.size() > 0)
-        {
-            mo << newLine << newLine;
-
-            for (auto& lib : libraries)
-                mo << "    ${" << lib.toLowerCase().replaceCharacter (L' ', L'_') << "}" << newLine;
-
-            mo << "    \"cpufeatures\"" << newLine;
-        }
-
-        if (project.getConfigFlag ("JUCE_USE_ANDROID_OBOE").get())
-            mo << "    \"oboe\"" << newLine;
-
-        mo << ")" << newLine;
-
-        overwriteFileIfDifferentOrThrow (file, mo);
+            mo << ")" << newLine;
+        });
     }
 
     //==============================================================================
     String getGradleSettingsFileContent() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "rootProject.name = " << "\'" << projectName << "\'" << newLine;
         mo << (isLibrary() ? "include ':lib'" : "include ':app'");
@@ -569,7 +596,7 @@ private:
     String getProjectBuildGradleFileContent() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
@@ -596,7 +623,7 @@ private:
     String getAppBuildGradleFileContent (const OwnedArray<LibraryModule>& modules) const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "apply plugin: 'com.android." << (isLibrary() ? "library" : "application") << "'" << newLine << newLine;
 
@@ -628,7 +655,7 @@ private:
     String getAndroidProductFlavours() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    flavorDimensions \"default\"" << newLine;
         mo << "    productFlavors {" << newLine;
@@ -658,9 +685,6 @@ private:
             mo << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                << "=-O" << cfg.getGCCOptimisationFlag();
 
-            for (auto& flag : cfg.getRecommendedCompilerWarningFlags())
-                mo << " " << flag;
-
             mo << "\""
                << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                << "=-O" << cfg.getGCCOptimisationFlag()
@@ -680,7 +704,7 @@ private:
     String getAndroidSigningConfig() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         auto keyStoreFilePath = androidKeyStore.get().toString().replace ("${user.home}", "${System.properties['user.home']}")
                                                                 .replace ("/", "${File.separator}");
@@ -702,13 +726,11 @@ private:
     {
         auto bundleIdentifier  = project.getBundleIdentifierString().toLowerCase();
         auto cmakeDefs         = getCmakeDefinitions();
-        auto cFlags            = getProjectCompilerFlags();
-        auto cxxFlags          = getProjectCxxCompilerFlags();
         auto minSdkVersion     = static_cast<int> (androidMinimumSDK.get());
         auto targetSdkVersion  = static_cast<int> (androidTargetSDK.get());
 
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    defaultConfig {"                                               << newLine;
 
@@ -723,12 +745,6 @@ private:
 
         mo << "                arguments " << cmakeDefs.joinIntoString (", ")     << newLine;
 
-        if (cFlags.size() > 0)
-            mo << "                cFlags "   << cFlags.joinIntoString (", ")     << newLine;
-
-        if (cxxFlags.size() > 0)
-            mo << "                cppFlags " << cxxFlags.joinIntoString (", ")   << newLine;
-
         mo << "            }"                                                     << newLine;
         mo << "        }"                                                         << newLine;
         mo << "    }"                                                             << newLine;
@@ -739,7 +755,7 @@ private:
     String getAndroidBuildTypes() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    buildTypes {"                                                  << newLine;
 
@@ -770,7 +786,7 @@ private:
     String getAndroidVariantFilter() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    variantFilter { variant ->"            << newLine;
         mo << "        def names = variant.flavors*.name" << newLine;
@@ -793,7 +809,7 @@ private:
     String getAndroidProjectRepositories() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         auto repositories = StringArray::fromLines (androidProjectRepositories.get().toString());
 
@@ -813,7 +829,7 @@ private:
     String getAndroidRepositories() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         auto repositories = StringArray::fromLines (androidRepositories.get().toString());
 
@@ -830,7 +846,7 @@ private:
     String getAndroidDependencies() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    dependencies {" << newLine;
 
@@ -857,7 +873,7 @@ private:
     String getApplyPlugins() const
     {
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         if (areRemoteNotificationsEnabled())
             mo << "apply plugin: 'com.google.gms.google-services'" << newLine;
@@ -871,7 +887,7 @@ private:
         {
             auto appFolder = getTargetFolder().getChildFile ("app");
 
-            RelativePath relativePath (source, appFolder, RelativePath::buildTargetFolder);
+            build_tools::RelativePath relativePath (source, appFolder, build_tools::RelativePath::buildTargetFolder);
             javaSourceSets.add (relativePath.toUnixStyle());
         }
     }
@@ -885,7 +901,7 @@ private:
             if (m->getID() == moduleID)
             {
                 auto javaFolder = m->getFolder().getChildFile ("native").getChildFile ("javaopt");
-                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
                 return;
             }
         }
@@ -900,13 +916,14 @@ private:
         {
             auto javaFolder = module->getFolder().getChildFile ("native").getChildFile ("javacore");
 
-            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("init"));
+            addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("init"));
 
             if (! isLibrary())
-                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile("app"));
+                addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
         }
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics") && getActivityClassString() == getDefaultActivityClass())
+        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics")
+            && (getActivityClassString() == getDefaultActivityClass() || isContentSharingEnabled()))
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
         if (areRemoteNotificationsEnabled())
@@ -916,12 +933,12 @@ private:
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_product_unlocking");
 
         MemoryOutputStream mo;
-        mo.setNewLineString ("\n");
+        mo.setNewLineString (getNewLineString());
 
         mo << "    sourceSets {" << newLine;
-        mo << getSourceSetStringFor ("main.java.srcDirs", javaSourceSets);
+        mo << getSourceSetStringFor ("main.java.srcDirs", javaSourceSets, getNewLineString());
         mo << newLine;
-        mo << getSourceSetStringFor ("main.res.srcDirs", resourceSets);
+        mo << getSourceSetStringFor ("main.res.srcDirs", resourceSets, getNewLineString());
         mo << "    }" << newLine;
 
         return mo.toString();
@@ -941,9 +958,9 @@ private:
             {
                 auto appFolder = getTargetFolder().getChildFile ("app");
 
-                auto relativePath = RelativePath (folder, RelativePath::projectFolder)
+                auto relativePath = build_tools::RelativePath (folder, build_tools::RelativePath::projectFolder)
                                         .rebased (getProject().getProjectFolder(), appFolder,
-                                                  RelativePath::buildTargetFolder);
+                                                  build_tools::RelativePath::buildTargetFolder);
 
                 sourceSets.add (relativePath.toUnixStyle());
             }
@@ -952,7 +969,7 @@ private:
         return sourceSets;
     }
 
-    static String getSourceSetStringFor (const String& type, const StringArray& srcDirs)
+    static String getSourceSetStringFor (const String& type, const StringArray& srcDirs, const String& newLineString)
     {
         String s;
 
@@ -972,7 +989,7 @@ private:
 
         s << "]"     << newLine;
 
-        return replaceLineFeeds (s, "\n");
+        return replaceLineFeeds (s, newLineString);
     }
 
     //==============================================================================
@@ -980,10 +997,9 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath, TargetOS::getThisOS()).get().toString()) << newLine
-              << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
+        props << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
-        return replaceLineFeeds (props, "\n");
+        return replaceLineFeeds (props, getNewLineString());
     }
 
     String getGradleWrapperPropertiesFileContent() const
@@ -1040,13 +1056,13 @@ private:
         props.add (new TextPropertyComponent (androidCustomActivityClass, "Custom Android Activity", 256, false),
                    "If not empty, specifies the Android Activity class name stored in the app's manifest which "
                    "should be used instead of Android's default Activity. If you specify a custom Activity "
-                   "then you should implement onNewIntent() function like the one in com.roli.juce.JuceActivity, if "
+                   "then you should implement onNewIntent() function like the one in com.rmsl.juce.JuceActivity, if "
                    "you wish to be able to handle push notification events.");
 
         props.add (new TextPropertyComponent (androidCustomApplicationClass, "Custom Android Application", 256, false),
                    "If not empty, specifies the Android Application class name stored in the app's manifest which "
                    "should be used instead of JUCE's default JuceApp class. If you specify a custom App then you must "
-                   "call com.roli.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
+                   "call com.rmsl.juce.Java.initialiseJUCE somewhere in your code before calling any JUCE functions.");
 
         props.add (new TextPropertyComponent (androidVersionCode, "Android Version Code", 32, false),
                    "An integer value that represents the version of the application code, relative to other versions.");
@@ -1064,9 +1080,10 @@ private:
     //==============================================================================
     void createManifestExporterProperties (PropertyListBuilder& props)
     {
-        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Oboe Repository Path", 2048, false),
-                   "Path to the root of Oboe repository. Make sure to point Oboe repository to "
-                   "commit with SHA c5c3cc17f78974bf005bf33a2de1a093ac55cc07 before building.");
+        props.add (new TextPropertyComponent (androidOboeRepositoryPath, "Custom Oboe Repository", 2048, false),
+                   "Path to the root of Oboe repository. This path can be absolute, or relative to the build directory. "
+                   "Make sure to point Oboe repository to commit with SHA c5c3cc17f78974bf005bf33a2de1a093ac55cc07 before building. "
+                   "Leave blank to use the version of Oboe distributed with JUCE.");
 
         props.add (new ChoicePropertyComponent (androidInternetNeeded, "Internet Access"),
                    "If enabled, this will set the android.permission.INTERNET flag in the manifest.");
@@ -1223,6 +1240,8 @@ private:
 
     bool isInAppBillingEnabled() const          { return androidInAppBillingPermission.get(); }
 
+    bool isContentSharingEnabled() const        { return androidEnableContentSharing.get(); }
+
     String getJNIActivityClassName() const
     {
         return getActivityClassString().replaceCharacter ('.', '/');
@@ -1282,34 +1301,33 @@ private:
         {
             createDirectoryOrThrow (file.getParentDirectory());
 
-            PNGImageFormat png;
+            build_tools::writeStreamToFile (file, [&] (MemoryOutputStream& mo)
+            {
+                mo.setNewLineString (getNewLineString());
 
-            MemoryOutputStream mo;
-            mo.setNewLineString ("\n");
+                PNGImageFormat png;
 
-            if (! png.writeImageToStream (im, mo))
-                throw SaveError ("Can't generate Android icon file");
-
-            overwriteFileIfDifferentOrThrow (file, mo);
+                if (! png.writeImageToStream (im, mo))
+                    throw build_tools::SaveError ("Can't generate Android icon file");
+            });
         }
     }
 
     void writeIcons (const File& folder) const
     {
-        std::unique_ptr<Drawable> bigIcon (getBigIcon());
-        std::unique_ptr<Drawable> smallIcon (getSmallIcon());
+        const auto icons = getIcons();
 
-        if (bigIcon != nullptr && smallIcon != nullptr)
+        if (icons.big != nullptr && icons.small != nullptr)
         {
-            auto step = jmax (bigIcon->getWidth(), bigIcon->getHeight()) / 8;
-            writeIcon (folder.getChildFile ("drawable-xhdpi/icon.png"), getBestIconForSize (step * 8, false));
-            writeIcon (folder.getChildFile ("drawable-hdpi/icon.png"),  getBestIconForSize (step * 6, false));
-            writeIcon (folder.getChildFile ("drawable-mdpi/icon.png"),  getBestIconForSize (step * 4, false));
-            writeIcon (folder.getChildFile ("drawable-ldpi/icon.png"),  getBestIconForSize (step * 3, false));
+            auto step = jmax (icons.big->getWidth(), icons.big->getHeight()) / 8;
+            writeIcon (folder.getChildFile ("drawable-xhdpi/icon.png"), build_tools::getBestIconForSize (icons, step * 8, false));
+            writeIcon (folder.getChildFile ("drawable-hdpi/icon.png"),  build_tools::getBestIconForSize (icons, step * 6, false));
+            writeIcon (folder.getChildFile ("drawable-mdpi/icon.png"),  build_tools::getBestIconForSize (icons, step * 4, false));
+            writeIcon (folder.getChildFile ("drawable-ldpi/icon.png"),  build_tools::getBestIconForSize (icons, step * 3, false));
         }
-        else if (auto* icon = (bigIcon != nullptr ? bigIcon.get() : smallIcon.get()))
+        else if (auto* icon = (icons.big != nullptr ? icons.big.get() : icons.small.get()))
         {
-            writeIcon (folder.getChildFile ("drawable-mdpi/icon.png"), rescaleImageForIcon (*icon, icon->getWidth()));
+            writeIcon (folder.getChildFile ("drawable-mdpi/icon.png"), build_tools::rescaleImageForIcon (*icon, icon->getWidth()));
         }
     }
 
@@ -1333,17 +1351,17 @@ private:
 
     //==============================================================================
     void addCompileUnits (const Project::Item& projectItem, MemoryOutputStream& mo,
-                          Array<RelativePath>& excludeFromBuild, Array<std::pair<RelativePath, String>>& extraCompilerFlags) const
+                          Array<build_tools::RelativePath>& excludeFromBuild, Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         if (projectItem.isGroup())
         {
             for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                addCompileUnits (projectItem.getChild(i), mo, excludeFromBuild, extraCompilerFlags);
+                addCompileUnits (projectItem.getChild (i), mo, excludeFromBuild, extraCompilerFlags);
         }
         else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (*this))
         {
             auto f = projectItem.getFile();
-            RelativePath file (f, getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
+            build_tools::RelativePath file (f, getTargetFolder().getChildFile ("app"), build_tools::RelativePath::buildTargetFolder);
 
             auto targetType = getProject().getTargetTypeFromFilePath (f, true);
 
@@ -1351,8 +1369,8 @@ private:
 
             if ((! projectItem.shouldBeCompiled()) || (! shouldFileBeCompiledByDefault (f))
                 || (getProject().isAudioPluginProject()
-                    && targetType != ProjectType::Target::SharedCodeTarget
-                    && targetType != ProjectType::Target::StandalonePlugIn))
+                    && targetType != build_tools::ProjectType::Target::SharedCodeTarget
+                    && targetType != build_tools::ProjectType::Target::StandalonePlugIn))
             {
                 excludeFromBuild.add (file);
             }
@@ -1366,8 +1384,8 @@ private:
         }
     }
 
-    void addCompileUnits (MemoryOutputStream& mo, Array<RelativePath>& excludeFromBuild,
-                          Array<std::pair<RelativePath, String>>& extraCompilerFlags) const
+    void addCompileUnits (MemoryOutputStream& mo, Array<build_tools::RelativePath>& excludeFromBuild,
+                          Array<std::pair<build_tools::RelativePath, String>>& extraCompilerFlags) const
     {
         for (int i = 0; i < getAllGroups().size(); ++i)
             addCompileUnits (getAllGroups().getReference(i), mo, excludeFromBuild, extraCompilerFlags);
@@ -1388,6 +1406,19 @@ private:
         cmakeArgs.add ("\"-DANDROID_ARM_MODE=arm\"");
         cmakeArgs.add ("\"-DANDROID_ARM_NEON=TRUE\"");
 
+        auto cppStandard = [this]
+        {
+            auto projectStandard = project.getCppStandardString();
+
+            if (projectStandard == "latest")
+                return String ("17");
+
+            return projectStandard;
+        }();
+
+        cmakeArgs.add ("\"-DCMAKE_CXX_STANDARD=" + cppStandard + "\"");
+        cmakeArgs.add ("\"-DCMAKE_CXX_EXTENSIONS=" + String (shouldUseGNUExtensions() ? "ON" : "OFF") + "\"");
+
         return cmakeArgs;
     }
 
@@ -1400,34 +1431,11 @@ private:
         return cFlags;
     }
 
-    StringArray getAndroidCxxCompilerFlags() const
-    {
-        auto cxxFlags = getAndroidCompilerFlags();
-
-        auto cppStandard = project.getCppStandardString();
-
-        if (cppStandard == "latest" || cppStandard == "17") // C++17 flag isn't supported yet so use 1z for now
-            cppStandard = "1z";
-
-        cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
-
-        cxxFlags.add (cppStandard.quoted());
-
-        return cxxFlags;
-    }
-
     StringArray getProjectCompilerFlags() const
     {
         auto cFlags = getAndroidCompilerFlags();
         cFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
         return cFlags;
-    }
-
-    StringArray getProjectCxxCompilerFlags() const
-    {
-        auto cxxFlags = getAndroidCxxCompilerFlags();
-        cxxFlags.addArray (getEscapedFlags (StringArray::fromTokens (getExtraCompilerFlagsString(), true)));
-        return cxxFlags;
     }
 
     //==============================================================================
@@ -1447,13 +1455,16 @@ private:
         if (isInAppBillingEnabled())
             defines.set ("JUCE_IN_APP_PURCHASES", "1");
 
+        if (isContentSharingEnabled())
+            defines.set ("JUCE_CONTENT_SHARING", "1");
+
         if (supportsGLv3())
             defines.set ("JUCE_ANDROID_GL_ES_VERSION_3_0", "1");
 
         if (areRemoteNotificationsEnabled())
         {
-            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseInstanceIdService");
-            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_roli_juce_JuceFirebaseMessagingService");
+            defines.set ("JUCE_FIREBASE_INSTANCE_ID_SERVICE_CLASSNAME", "com_rmsl_juce_JuceFirebaseInstanceIdService");
+            defines.set ("JUCE_FIREBASE_MESSAGING_SERVICE_CLASSNAME", "com_rmsl_juce_JuceFirebaseMessagingService");
         }
 
         return defines;
@@ -1468,7 +1479,7 @@ private:
 
     StringPairArray getConfigPreprocessorDefs (const BuildConfiguration& config) const
     {
-        auto cfgDefines = config.getUniquePreprocessorDefs();
+        auto cfgDefines = getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified);
 
         if (config.isDebug())
         {
@@ -1509,8 +1520,8 @@ private:
     String escapeDirectoryForCmake (const String& path) const
     {
         auto relative =
-            RelativePath (path, RelativePath::buildTargetFolder)
-                .rebased (getTargetFolder(), getTargetFolder().getChildFile ("app"), RelativePath::buildTargetFolder);
+            build_tools::RelativePath (path, build_tools::RelativePath::buildTargetFolder)
+                .rebased (getTargetFolder(), getTargetFolder().getChildFile ("app"), build_tools::RelativePath::buildTargetFolder);
 
         return relative.toUnixStyle();
     }
@@ -1541,7 +1552,8 @@ private:
             if (value.isNotEmpty())
             {
                 value = value.replace ("\"", "\\\"");
-                if (value.containsChar (L' '))
+
+                if (value.containsChar (L' ') && ! value.startsWith ("\\\"") && ! value.endsWith ("\\\""))
                     value = "\\\"" + value + "\\\"";
 
                 escaped += ("=" + value);
@@ -1612,6 +1624,7 @@ private:
                 screens->setAttribute ("android:normalScreens", "true");
                 screens->setAttribute ("android:largeScreens", "true");
                 screens->setAttribute ("android:anyDensity", "true");
+                screens->setAttribute ("android:xlargeScreens", "true");
             }
         }
     }
@@ -1758,12 +1771,12 @@ private:
         if (areRemoteNotificationsEnabled())
         {
             auto* service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseMessagingService");
+            service->setAttribute ("android:name", "com.rmsl.juce.JuceFirebaseMessagingService");
             auto* intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.MESSAGING_EVENT");
 
             service = application.createNewChildElement ("service");
-            service->setAttribute ("android:name", "com.roli.juce.JuceFirebaseInstanceIdService");
+            service->setAttribute ("android:name", "com.rmsl.juce.JuceFirebaseInstanceIdService");
             intentFilter = service->createNewChildElement ("intent-filter");
             intentFilter->createNewChildElement ("action")->setAttribute ("android:name", "com.google.firebase.INSTANCE_ID_EVENT");
 
@@ -1775,14 +1788,14 @@ private:
 
     void createProviderElement (XmlElement& application) const
     {
-        if (androidEnableContentSharing.get())
+        if (isContentSharingEnabled())
         {
             auto* provider = application.createNewChildElement ("provider");
 
-            provider->setAttribute ("android:name", "com.roli.juce.JuceSharingContentProvider");
+            provider->setAttribute ("android:name", "com.rmsl.juce.JuceSharingContentProvider");
             provider->setAttribute ("android:authorities", project.getBundleIdentifierString().toLowerCase() + ".sharingcontentprovider");
             provider->setAttribute ("android:grantUriPermissions", "true");
-            provider->setAttribute ("android:exported", "false");
+            provider->setAttribute ("android:exported", "true");
         }
     }
 
@@ -1822,7 +1835,7 @@ private:
         {
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
-            s.add ("android.permission.ACCESS_COARSE_LOCATION");
+            s.add ("android.permission.ACCESS_FINE_LOCATION");
         }
 
         if (androidExternalReadPermission.get())
@@ -1867,13 +1880,3 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };
-
-inline ProjectExporter* createAndroidExporter (Project& p, const ValueTree& t)
-{
-    return new AndroidProjectExporter (p, t);
-}
-
-inline ProjectExporter* createAndroidExporterForSetting (Project& p, const ValueTree& t)
-{
-    return AndroidProjectExporter::createForSettings (p, t);
-}

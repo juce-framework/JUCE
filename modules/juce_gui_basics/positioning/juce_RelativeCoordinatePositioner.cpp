@@ -2,17 +2,16 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 5 End-User License
-   Agreement and JUCE 5 Privacy Policy (both updated and effective as of the
-   27th April 2017).
+   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
+   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
 
-   End User License Agreement: www.juce.com/juce-5-licence
-   Privacy Policy: www.juce.com/juce-5-privacy-policy
+   End User License Agreement: www.juce.com/juce-6-licence
+   Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
    www.gnu.org/licenses).
@@ -33,12 +32,10 @@ struct MarkerListScope  : public Expression::Scope
 
     Expression getSymbolValue (const String& symbol) const override
     {
-        switch (RelativeCoordinate::StandardStrings::getTypeOf (symbol))
-        {
-            case RelativeCoordinate::StandardStrings::width:  return Expression ((double) component.getWidth());
-            case RelativeCoordinate::StandardStrings::height: return Expression ((double) component.getHeight());
-            default: break;
-        }
+        auto type = RelativeCoordinate::StandardStrings::getTypeOf (symbol);
+
+        if (type == RelativeCoordinate::StandardStrings::width)   return Expression ((double) component.getWidth());
+        if (type == RelativeCoordinate::StandardStrings::height)  return Expression ((double) component.getHeight());
 
         MarkerList* list;
 
@@ -116,6 +113,8 @@ Expression RelativeCoordinatePositionerBase::ComponentScope::getSymbolValue (con
         case RelativeCoordinate::StandardStrings::height: return Expression ((double) component.getHeight());
         case RelativeCoordinate::StandardStrings::right:  return Expression ((double) component.getRight());
         case RelativeCoordinate::StandardStrings::bottom: return Expression ((double) component.getBottom());
+        case RelativeCoordinate::StandardStrings::parent:
+        case RelativeCoordinate::StandardStrings::unknown:
         default: break;
     }
 
@@ -180,6 +179,8 @@ public:
                 positioner.registerComponentListener (component);
                 break;
 
+            case RelativeCoordinate::StandardStrings::parent:
+            case RelativeCoordinate::StandardStrings::unknown:
             default:
                 if (auto* parent = component.getParentComponent())
                 {

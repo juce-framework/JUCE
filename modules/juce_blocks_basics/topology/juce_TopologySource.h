@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2017 - ROLI Ltd.
+   Copyright (c) 2020 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -43,6 +43,9 @@ public:
     /** Returns true, if the TopologySource is currently trying to connect the block devices */
     virtual bool isActive() const = 0;
 
+    /** Returns true if the topology is locked externally.*/
+    virtual bool isLockedFromOutside() const = 0;
+
     //==============================================================================
     /** Used to receive callbacks for topology changes */
     struct Listener
@@ -69,6 +72,12 @@ public:
 
     /** Invoke this to force touches-off on all physical devices. */
     virtual void cancelAllActiveTouches() noexcept {}
+
+    /** Gets blocks from the current topology. */
+    Block::Array getBlocks() const { return getCurrentTopology().blocks; }
+
+    /**Gets a block with given uid from the current topology*/
+    Block::Ptr getBlockWithUID (Block::UID uid) const { return getCurrentTopology().getBlockWithUID (uid); }
 
 protected:
     //==============================================================================
