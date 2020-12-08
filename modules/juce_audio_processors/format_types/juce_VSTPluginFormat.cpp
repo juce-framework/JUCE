@@ -55,6 +55,7 @@ namespace Vst2
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 
 #include "juce_VSTMidiEventList.h"
@@ -1768,9 +1769,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                 {
                     if (i != oldProg)
                     {
-                        auto prog = (const fxProgram*) (((const char*) (set->programs)) + i * progLen);
+                        auto prog = addBytesToPointer (set->programs, i * progLen);
 
-                        if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
+                        if (getAddressDifference (prog, set) >= (int) dataSize)
                             return false;
 
                         if (fxbSwap (set->numPrograms) > 0)
@@ -1784,9 +1785,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                 if (fxbSwap (set->numPrograms) > 0)
                     setCurrentProgram (oldProg);
 
-                auto prog = (const fxProgram*) (((const char*) (set->programs)) + oldProg * progLen);
+                auto prog = addBytesToPointer (set->programs, oldProg * progLen);
 
-                if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
+                if (getAddressDifference (prog, set) >= (int) dataSize)
                     return false;
 
                 if (! restoreProgramSettings (prog))
@@ -1906,14 +1907,14 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                 auto oldProgram = getCurrentProgram();
 
                 if (oldProgram >= 0)
-                    setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + oldProgram * progLen));
+                    setParamsInProgramBlock (addBytesToPointer (set->programs, oldProgram * progLen));
 
                 for (int i = 0; i < numPrograms; ++i)
                 {
                     if (i != oldProgram)
                     {
                         setCurrentProgram (i);
-                        setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + i * progLen));
+                        setParamsInProgramBlock (addBytesToPointer (set->programs, i * progLen));
                     }
                 }
 
@@ -2591,7 +2592,7 @@ private:
 
         getCurrentProgramName().copyToUTF8 ((char*) dest.getData(), 63);
 
-        auto p = (float*) (((char*) dest.getData()) + 64);
+        auto p = unalignedPointerCast<float*> (((char*) dest.getData()) + 64);
 
         for (int i = 0; i < numParameters; ++i)
             if (auto* param = getParameters()[i])
@@ -2602,7 +2603,7 @@ private:
     {
         changeProgramName (getCurrentProgram(), (const char*) m.getData());
 
-        auto p = (float*) (((char*) m.getData()) + 64);
+        auto p = unalignedPointerCast<float*> (((char*) m.getData()) + 64);
         auto numParameters = getParameters().size();
 
         for (int i = 0; i < numParameters; ++i)
@@ -3743,6 +3744,7 @@ void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 } // namespace juce
 
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif
