@@ -132,7 +132,7 @@ static String getOSXVersion()
        #endif
 
         if (dict != nullptr)
-            return nsStringToJuce (dict[nsStringLiteral ("ProductVersion")]);
+            return nsStringToJuce ([dict objectForKey: nsStringLiteral ("ProductVersion")]);
 
         jassertfalse;
         return {};
