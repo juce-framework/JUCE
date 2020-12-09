@@ -153,7 +153,7 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation,    "v@:@@@");
 
        #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
-        addMethod (@selector (webView:webViewDidClose:),                                  webViewDidClose,                 "v@:@");
+        addMethod (@selector (webViewDidClose:),                                          webViewDidClose,                 "v@:@");
        #endif
 
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
