@@ -109,7 +109,8 @@ namespace
     static const char* const osxArch_Native         = "Native";
     static const char* const osxArch_32BitUniversal = "32BitUniversal";
     static const char* const osxArch_64BitUniversal = "64BitUniversal";
-    static const char* const osxArch_64Bit          = "64BitIntel";
+    static const char* const osxArch_64Bit          = "64Bit";
+    static const char* const osxArch_64BitIntel     = "64BitIntel";
 }
 
 //==============================================================================
@@ -1385,6 +1386,7 @@ public:
             s.set ("PRODUCT_BUNDLE_IDENTIFIER", getBundleIdentifier());
 
             auto arch = (! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? osxArch_64Bit
+                        : type == Target::AAXPlugIn                            ? osxArch_64BitIntel
                                                                                : config.getOSXArchitectureString();
 
             if      (arch == osxArch_Native)           s.set ("ARCHS", "\"$(NATIVE_ARCH_ACTUAL)\"");
@@ -1395,6 +1397,7 @@ public:
                 s.set ("\"ARCHS[sdk=macosx10.14]\"", "\"$(ARCHS_STANDARD)\"");
             }
             else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
+            else if (arch == osxArch_64BitIntel )      s.set ("ARCHS", "\"x86_64\"");
 
             if (! owner.isiOS())
             {
