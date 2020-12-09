@@ -38,7 +38,10 @@ struct JuceMainMenuBarHolder : private DeletedAtShutdown
 
         auto appMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Apple")];
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [NSApp performSelector: @selector (setAppleMenu:) withObject: appMenu];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         [mainMenuBar setSubmenu: appMenu forItem: item];
         [appMenu release];
 
@@ -282,9 +285,11 @@ public:
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             auto item = [[NSMenuItem alloc] initWithTitle: text
                                                    action: @selector (menuItemInvoked:)
                                             keyEquivalent: nsEmptyString()];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             [item setTag: topLevelIndex];
             [item setEnabled: i.isEnabled];
@@ -515,7 +520,10 @@ private:
         {
             addIvar<JuceMainMenuHandler*> ("owner");
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (menuItemInvoked:),  menuItemInvoked, "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
             addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate, "v@:@");
 
             addProtocol (@protocol (NSMenuDelegate));

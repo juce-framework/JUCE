@@ -198,7 +198,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:didRegisterUserNotificationSettings:");
+    SEL selector = @selector (application:didRegisterUserNotificationSettings:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -216,7 +216,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:didRegisterForRemoteNotificationsWithDeviceToken:");
+    SEL selector = @selector (application:didRegisterForRemoteNotificationsWithDeviceToken:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -234,7 +234,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:didFailToRegisterForRemoteNotificationsWithError:");
+    SEL selector = @selector (application:didFailToRegisterForRemoteNotificationsWithError:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -252,7 +252,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:didReceiveRemoteNotification:");
+    SEL selector = @selector (application:didReceiveRemoteNotification:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -271,7 +271,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:didReceiveRemoteNotification:fetchCompletionHandler:");
+    SEL selector = @selector (application:didReceiveRemoteNotification:fetchCompletionHandler:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -292,7 +292,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:");
+    SEL selector = @selector (application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -313,7 +313,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:didReceiveLocalNotification:");
+    SEL selector = @selector (application:didReceiveLocalNotification:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -332,7 +332,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:handleActionWithIdentifier:forLocalNotification:completionHandler:");
+    SEL selector = @selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -354,7 +354,7 @@ namespace juce
 {
     ignoreUnused (application);
 
-    SEL selector = NSSelectorFromString (@"application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:");
+    SEL selector = @selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -377,7 +377,7 @@ namespace juce
 {
     ignoreUnused (center);
 
-    SEL selector = NSSelectorFromString (@"userNotificationCenter:willPresentNotification:withCompletionHandler:");
+    SEL selector = @selector (userNotificationCenter:willPresentNotification:withCompletionHandler:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
@@ -397,7 +397,7 @@ namespace juce
 {
     ignoreUnused (center);
 
-    SEL selector = NSSelectorFromString (@"userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:");
+    SEL selector = @selector (userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:);
 
     if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
     {
