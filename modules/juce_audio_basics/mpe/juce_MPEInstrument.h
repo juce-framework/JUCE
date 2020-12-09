@@ -376,6 +376,8 @@ private:
     LegacyMode legacyMode;
     MPEDimension pitchbendDimension, pressureDimension, timbreDimension;
 
+    void resetLastReceivedValues();
+
     void updateDimension (int midiChannel, MPEDimension&, MPEValue);
     void updateDimensionMaster (bool, MPEDimension&, MPEValue);
     void updateDimensionForNote (MPENote&, MPEDimension&, MPEValue);
