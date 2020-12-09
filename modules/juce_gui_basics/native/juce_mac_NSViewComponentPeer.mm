@@ -1632,7 +1632,7 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
         addMethod (@selector (windowWillMiniaturize:),        windowWillMiniaturize,      "v@:@");
         addMethod (@selector (windowDidDeminiaturize:),       windowDidDeminiaturize,     "v@:@");
-        addMethod (@selector (wantsDefaultClipping:),         wantsDefaultClipping,       "c@:");
+        addMethod (@selector (wantsDefaultClipping),          wantsDefaultClipping,       "c@:");
         addMethod (@selector (worksWhenModal),                worksWhenModal,             "c@:");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
         addMethod (@selector (keyDown:),                      keyDown,                    "v@:@");
