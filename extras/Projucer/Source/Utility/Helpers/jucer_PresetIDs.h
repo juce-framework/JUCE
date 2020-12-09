@@ -358,6 +358,7 @@ namespace Ids
     DECLARE_ID (pluginVSTNumMidiInputs);
     DECLARE_ID (pluginVSTNumMidiOutputs);
     DECLARE_ID (suppressPlistResourceUsage);
+    DECLARE_ID (useLegacyBuildSystem);
     DECLARE_ID (exporters);
     DECLARE_ID (website);
     DECLARE_ID (mainClass);

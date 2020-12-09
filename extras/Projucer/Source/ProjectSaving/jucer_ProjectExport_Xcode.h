@@ -182,7 +182,8 @@ public:
           useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager()),
           customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
           exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager()),
-          suppressPlistResourceUsage                   (settings, Ids::suppressPlistResourceUsage,              getUndoManager())
+          suppressPlistResourceUsageValue              (settings, Ids::suppressPlistResourceUsage,              getUndoManager()),
+          useLegacyBuildSystemValue                    (settings, Ids::useLegacyBuildSystem,                    getUndoManager())
     {
         if (iOS)
         {
@@ -269,7 +270,9 @@ public:
     bool isDocumentBrowserEnabled() const                   { return uiSupportsDocumentBrowserValue.get(); }
     bool isStatusBarHidden() const                          { return uiStatusBarHiddenValue.get(); }
 
-    bool getSuppressPlistResourceUsage() const              { return suppressPlistResourceUsage.get(); }
+    bool getSuppressPlistResourceUsage() const              { return suppressPlistResourceUsageValue.get(); }
+
+    bool shouldUseLegacyBuildSystem() const                 { return useLegacyBuildSystemValue.get(); }
 
     String getDocumentExtensionsString() const              { return documentExtensionsValue.get(); }
 
@@ -391,6 +394,11 @@ public:
                        "A comma-separated list of file extensions for documents that your app can open. "
                        "Using a leading '.' is optional, and the extensions are not case-sensitive.");
         }
+
+        props.add (new ChoicePropertyComponent (useLegacyBuildSystemValue, "Use Legacy Build System"),
+                   "Enable this to use the deprecated \"Legacy Build System\" in Xcode 10 and above. "
+                   "This may fix build issues that were introduced with the new build system in Xcode 10 and subsequently fixed in Xcode 10.2, "
+                   "however the new build system is recommended for apps targeting Apple silicon.");
 
         if (isOSX())
         {
@@ -570,7 +578,7 @@ public:
         props.add (new TextPropertyComponent (pListPrefixHeaderValue, "PList Prefix Header", 512, false),
                    "Header file containing definitions used in plist file (see PList Preprocess).");
 
-        props.add (new ChoicePropertyComponent (suppressPlistResourceUsage, "Suppress AudioUnit Plist resourceUsage Key"),
+        props.add (new ChoicePropertyComponent (suppressPlistResourceUsageValue, "Suppress AudioUnit Plist resourceUsage Key"),
                    "Suppress the resourceUsage key in the target's generated Plist. This is useful for AU"
                    " plugins that must access resources which cannot be declared in the resourceUsage block, such"
                    " as UNIX domain sockets. In particular, PACE-protected AU plugins may require this option to be enabled"
@@ -668,9 +676,6 @@ public:
                                         [this] (MemoryOutputStream& mo) { writeProjectFile (mo); });
 
         writeInfoPlistFiles();
-
-        // This forces the project to use the legacy build system to workaround Xcode 10 issues,
-        // hopefully these will be fixed in the future and this can be removed...
         writeWorkspaceSettings();
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
@@ -1961,7 +1966,7 @@ private:
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
-                     exporterBundleIdentifierValue, suppressPlistResourceUsage;
+                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;
 
     static String sanitisePath (const String& path)
     {
@@ -2312,21 +2317,28 @@ private:
                                                     .getChildFile ("xcshareddata")
                                                     .getChildFile ("WorkspaceSettings.xcsettings");
 
-        build_tools::writeStreamToFile (settingsFile, [this] (MemoryOutputStream& mo)
+        if (shouldUseLegacyBuildSystem())
         {
-            mo.setNewLineString (getNewLineString());
+            build_tools::writeStreamToFile (settingsFile, [this] (MemoryOutputStream& mo)
+            {
+                mo.setNewLineString (getNewLineString());
 
-            mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"              << newLine
-               << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
-               << "<plist version=\"1.0\">"                                 << newLine
-               << "<dict>"                                                  << newLine
-               << "\t" << "<key>BuildSystemType</key>"                      << newLine
-               << "\t" << "<string>Original</string>"                       << newLine
-               << "\t" << "<key>DisableBuildSystemDeprecationWarning</key>" << newLine
-               << "\t" << "<true/>"                                         << newLine
-               << "</dict>"                                                 << newLine
-               << "</plist>"                                                << newLine;
-        });
+                mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"              << newLine
+                   << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
+                   << "<plist version=\"1.0\">"                                 << newLine
+                   << "<dict>"                                                  << newLine
+                   << "\t" << "<key>BuildSystemType</key>"                      << newLine
+                   << "\t" << "<string>Original</string>"                       << newLine
+                   << "\t" << "<key>DisableBuildSystemDeprecationWarning</key>" << newLine
+                   << "\t" << "<true/>"                                         << newLine
+                   << "</dict>"                                                 << newLine
+                   << "</plist>"                                                << newLine;
+            });
+        }
+        else
+        {
+            settingsFile.deleteFile();
+        }
     }
 
     void writeInfoPlistFiles() const
