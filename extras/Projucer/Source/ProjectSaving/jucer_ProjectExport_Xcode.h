@@ -1455,7 +1455,6 @@ public:
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
 
-
             auto flags = (config.getRecommendedCompilerWarningFlags().joinIntoString (" ")
                              + " " + owner.getExtraCompilerFlagsString()).trim();
             flags = owner.replacePreprocessorTokens (config, flags);
