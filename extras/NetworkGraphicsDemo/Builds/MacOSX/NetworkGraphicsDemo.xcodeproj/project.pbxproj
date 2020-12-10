@@ -676,8 +676,8 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -685,12 +685,13 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../modules",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.NetworkGraphicsDemo;
 				PRODUCT_NAME = "JUCE Network Graphics Demo";
 				USE_HEADERMAP = NO;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Debug;
@@ -743,8 +744,8 @@
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -753,12 +754,13 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.9;
 				MTL_HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../../modules",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.NetworkGraphicsDemo;
 				PRODUCT_NAME = "JUCE Network Graphics Demo";
 				USE_HEADERMAP = NO;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Release;
