@@ -1159,7 +1159,7 @@ public:
             v->setProperty ("isa", "PBXFileReference", nullptr);
             v->setProperty ("explicitFileType", fileType, nullptr);
             v->setProperty ("includeInIndex", (int) 0, nullptr);
-            v->setProperty ("path", sanitisePath (binaryName), nullptr);
+            v->setProperty ("path", binaryName, nullptr);
             v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
             owner.pbxFileReferences.add (v);
         }
@@ -1504,10 +1504,11 @@ public:
 
                 build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
                                                       build_tools::RelativePath::projectFolder);
-                configurationBuildDir = sanitisePath (binaryPath.rebased (owner.projectFolder,
-                                                                          owner.getTargetFolder(),
-                                                                          build_tools::RelativePath::buildTargetFolder)
-                                                                .toUnixStyle());
+
+                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
+                                                                        owner.getTargetFolder(),
+                                                                        build_tools::RelativePath::buildTargetFolder)
+                                                              .toUnixStyle());
             }
 
             s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
@@ -1789,8 +1790,7 @@ public:
 
             for (auto& path : paths)
             {
-                // Xcode 10 can't deal with search paths starting with "~" so we need to replace them here...
-                path = owner.replacePreprocessorTokens (config, sanitisePath (path));
+                path = owner.replacePreprocessorTokens (config, expandPath (path));
 
                 if (path.containsChar (' '))
                     path = "\"\\\"" + path + "\\\"\""; // crazy double quotes required when there are spaces..
@@ -1967,10 +1967,10 @@ private:
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                      exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;
 
-    static String sanitisePath (const String& path)
+    static String expandPath (const String& path)
     {
-        if (path.startsWithChar ('~'))
-            return "$(HOME)" + path.substring (1);
+        if (! File::isAbsolutePath (path))  return "$(SRCROOT)/" + path;
+        if (path.startsWithChar ('~'))      return "$(HOME)" + path.substring (1);
 
         return path;
     }
@@ -2385,7 +2385,7 @@ private:
             searchPath = srcRoot + searchPath;
         }
 
-        return sanitisePath (searchPath);
+        return expandPath (searchPath);
     }
 
     String getCodeSigningIdentity (const XcodeBuildConfiguration& config) const
