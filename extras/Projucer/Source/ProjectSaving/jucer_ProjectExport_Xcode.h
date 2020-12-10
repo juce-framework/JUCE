@@ -1398,6 +1398,19 @@ public:
             s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
 
+            auto frameworksToSkip = [this]() -> String
+            {
+                const String openGLFramework (owner.iOS ? "OpenGLES" : "OpenGL");
+
+                if (owner.xcodeFrameworks.contains (openGLFramework))
+                    return openGLFramework;
+
+                return {};
+            }();
+
+            if (frameworksToSkip.isNotEmpty())
+                s.set ("VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS", frameworksToSkip);
+
             auto frameworkSearchPaths = getFrameworkSearchPaths (config);
 
             if (! frameworkSearchPaths.isEmpty())
