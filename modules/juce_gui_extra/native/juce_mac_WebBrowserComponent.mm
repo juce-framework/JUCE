@@ -30,6 +30,10 @@ namespace juce
 
  #define JUCE_USE_WKWEBVIEW 1
 
+ #if (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)
+  #define WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED 1
+ #endif
+
  #if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
   #define WKWEBVIEW_OPENPANEL_SUPPORTED 1
  #endif
@@ -148,7 +152,10 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:didFailNavigation:withError:),                      didFailNavigation,               "v@:@@@");
         addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation,    "v@:@@@");
 
+       #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
         addMethod (@selector (webView:webViewDidClose:),                                  webViewDidClose,                 "v@:@");
+       #endif
+
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
                               windowFeatures:),                                           createWebView,                   "@@:@@@@");
 
@@ -200,10 +207,12 @@ private:
         displayError (getOwner (self), error);
     }
 
+   #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
     static void webViewDidClose (id self, SEL, WKWebView*)
     {
         getOwner (self)->windowCloseRequest();
     }
+   #endif
 
     static WKWebView* createWebView (id self, SEL, WKWebView*, WKWebViewConfiguration*,
                                      WKNavigationAction* navigationAction, WKWindowFeatures*)
