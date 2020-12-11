@@ -55,9 +55,8 @@ public:
 
             if (currentPacketLen == Utils::getNumWordsForMessageType (nextPacket.front()))
             {
-                callback (View (nextPacket.data()), time);
+                callback (View (nextPacket.data()), timeStamp);
                 currentPacketLen = 0;
-                time = timeStamp;
             }
         });
     }
@@ -65,7 +64,6 @@ public:
 private:
     std::array<uint32_t, 4> nextPacket;
     size_t currentPacketLen = 0;
-    double time = 0.0;
 };
 
 //==============================================================================
