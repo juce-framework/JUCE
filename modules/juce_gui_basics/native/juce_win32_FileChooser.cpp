@@ -167,6 +167,11 @@ private:
     Atomic<HWND> nativeDialogRef;
     Atomic<int>  shouldCancel;
 
+    struct FreeLPWSTR
+    {
+        void operator() (LPWSTR ptr) const noexcept { CoTaskMemFree (ptr); }
+    };
+
     bool showDialog (IFileDialog& dialog, bool async) const
     {
         FILEOPENDIALOGOPTIONS flags = {};
@@ -193,7 +198,17 @@ private:
         PIDLIST_ABSOLUTE pidl = {};
 
         if (FAILED (SHParseDisplayName (initialPath.toWideCharPointer(), nullptr, &pidl, SFGAO_FOLDER, nullptr)))
-            return false;
+        {
+            LPWSTR ptr = nullptr;
+            auto result = SHGetKnownFolderPath (FOLDERID_Desktop, 0, nullptr, &ptr);
+            std::unique_ptr<WCHAR, FreeLPWSTR> desktopPath (ptr);
+
+            if (FAILED (result))
+                return false;
+
+            if (FAILED (SHParseDisplayName (desktopPath.get(), nullptr, &pidl, SFGAO_FOLDER, nullptr)))
+                return false;
+        }
 
         const auto item = [&]
         {
@@ -228,17 +243,12 @@ private:
     {
         const auto getUrl = [] (IShellItem& item)
         {
-            struct Free
-            {
-                void operator() (LPWSTR ptr) const noexcept { CoTaskMemFree (ptr); }
-            };
-
             LPWSTR ptr = nullptr;
 
             if (item.GetDisplayName (SIGDN_FILESYSPATH, &ptr) != S_OK)
                 return URL();
 
-            const auto path = std::unique_ptr<WCHAR, Free> { ptr };
+            const auto path = std::unique_ptr<WCHAR, FreeLPWSTR> { ptr };
             return URL (File (String (path.get())));
         };
 
