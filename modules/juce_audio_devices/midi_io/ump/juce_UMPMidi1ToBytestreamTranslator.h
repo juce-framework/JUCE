@@ -121,25 +121,25 @@ private:
     {
         switch (getSysEx7Kind (packet[0]))
         {
-            case SysEx7::Kind::Complete:
+            case SysEx7::Kind::complete:
                 startSysExMessage (time);
                 pushBytes (packet);
                 terminateSysExMessage (callback);
                 break;
 
-            case SysEx7::Kind::Begin:
+            case SysEx7::Kind::begin:
                 startSysExMessage (time);
                 pushBytes (packet);
                 break;
 
-            case SysEx7::Kind::Continue:
+            case SysEx7::Kind::continuation:
                 if (pendingSysExData.empty())
                     break;
 
                 pushBytes (packet);
                 break;
 
-            case SysEx7::Kind::End:
+            case SysEx7::Kind::end:
                 if (pendingSysExData.empty())
                     break;
 
@@ -196,7 +196,7 @@ private:
             return false;
 
         const auto kind = getSysEx7Kind (word);
-        return kind == SysEx7::Kind::Continue || kind == SysEx7::Kind::End;
+        return kind == SysEx7::Kind::continuation || kind == SysEx7::Kind::end;
     }
 
     static bool isSystemRealTime (uint32_t word)
