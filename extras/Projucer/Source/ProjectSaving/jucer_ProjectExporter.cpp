@@ -431,6 +431,7 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs (const BuildConfiguratio
 {
     auto defs = mergePreprocessorDefs (config.getAllPreprocessorDefs(),
                                        parsePreprocessorDefs (getExporterPreprocessorDefsString()));
+
     addDefaultPreprocessorDefs (defs);
     addTargetSpecificPreprocessorDefs (defs, targetType);
 
@@ -491,8 +492,8 @@ void ProjectExporter::addDefaultPreprocessorDefs (StringPairArray& defs) const
 String ProjectExporter::replacePreprocessorTokens (const ProjectExporter::BuildConfiguration& config,
                                                    const String& sourceString) const
 {
-    return build_tools::replacePreprocessorDefs (getAllPreprocessorDefs (config,
-                                                 build_tools::ProjectType::Target::unspecified), sourceString);
+    return build_tools::replacePreprocessorDefs (getAllPreprocessorDefs (config, build_tools::ProjectType::Target::unspecified),
+                                                 sourceString);
 }
 
 void ProjectExporter::copyMainGroupFromProject()
