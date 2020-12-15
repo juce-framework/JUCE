@@ -503,28 +503,34 @@ private:
 
     void setupAccentColour()
     {
-        paramControls.accentColourSelector = new ColourSelector();
-        paramControls.accentColourSelector->setName ("accent colour");
-        paramControls.accentColourSelector->setCurrentColour (paramControls.accentColourButton.findColour (TextButton::buttonColourId));
-        paramControls.accentColourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-        paramControls.accentColourSelector->setSize (200, 200);
-        paramControls.accentColourSelector->addComponentListener (this);
-        paramControls.accentColourSelector->addChangeListener (this);
+        auto accentColourSelector = std::make_unique<ColourSelector>();
 
-        CallOutBox::launchAsynchronously (paramControls.accentColourSelector, paramControls.accentColourButton.getScreenBounds(), nullptr);
+        accentColourSelector->setName ("accent colour");
+        accentColourSelector->setCurrentColour (paramControls.accentColourButton.findColour (TextButton::buttonColourId));
+        accentColourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+        accentColourSelector->setSize (200, 200);
+        accentColourSelector->addComponentListener (this);
+        accentColourSelector->addChangeListener (this);
+
+        paramControls.accentColourSelector = accentColourSelector.get();
+
+        CallOutBox::launchAsynchronously (std::move (accentColourSelector), paramControls.accentColourButton.getScreenBounds(), nullptr);
     }
 
     void setupLedColour()
     {
-        paramControls.ledColourSelector = new ColourSelector();
-        paramControls.ledColourSelector->setName ("led colour");
-        paramControls.ledColourSelector->setCurrentColour (paramControls.ledColourButton.findColour (TextButton::buttonColourId));
-        paramControls.ledColourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
-        paramControls.ledColourSelector->setSize (200, 200);
-        paramControls.ledColourSelector->addComponentListener (this);
-        paramControls.ledColourSelector->addChangeListener (this);
+        auto ledColourSelector = std::make_unique<ColourSelector>();
 
-        CallOutBox::launchAsynchronously (paramControls.ledColourSelector, paramControls.accentColourButton.getScreenBounds(), nullptr);
+        ledColourSelector->setName ("led colour");
+        ledColourSelector->setCurrentColour (paramControls.ledColourButton.findColour (TextButton::buttonColourId));
+        ledColourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
+        ledColourSelector->setSize (200, 200);
+        ledColourSelector->addComponentListener (this);
+        ledColourSelector->addChangeListener (this);
+
+        paramControls.ledColourSelector = ledColourSelector.get();
+
+        CallOutBox::launchAsynchronously (std::move (ledColourSelector), paramControls.accentColourButton.getScreenBounds(), nullptr);
     }
 
     void changeListenerCallback (ChangeBroadcaster* source) override
