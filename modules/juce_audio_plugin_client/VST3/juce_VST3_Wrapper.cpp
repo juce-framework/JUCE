@@ -918,20 +918,18 @@ public:
 
         if (auto* pluginInstance = getPluginInstance())
         {
-            auto newNumPrograms = pluginInstance->getNumPrograms();
+            auto numPrograms = pluginInstance->getNumPrograms();
 
-            if (newNumPrograms != lastNumPrograms)
+            if (numPrograms > 1)
             {
-                if (newNumPrograms > 1)
-                {
-                    auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                      / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1);
+                auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                    / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1);
 
-                    EditController::setParamNormalized (JuceAudioProcessor::paramPreset, paramValue);
+                if (paramValue != EditController::getParamNormalized(JuceAudioProcessor::paramPreset))
+                {
+                    EditController::setParamNormalized(JuceAudioProcessor::paramPreset, paramValue);
                     flags |= Vst::kParamValuesChanged;
                 }
-
-                lastNumPrograms = newNumPrograms;
             }
 
             auto newLatencySamples = pluginInstance->getLatencySamples();
@@ -990,7 +988,7 @@ private:
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
 
-    int lastNumPrograms = 0, lastLatencySamples = 0;
+    int lastLatencySamples = 0;
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
