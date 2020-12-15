@@ -1,6 +1,32 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+Xcode projects generated using the Projucer will now use the "New Build System"
+instead of the "Legacy Build System" by default.
+
+Possible Issues
+---------------
+Xcode 10.0 - 10.2 has some known issues when using the new build system such as
+JUCE modules not rebuilding correctly when modified, issue and file navigation
+not working, and breakpoints not being reliably set or hit.
+
+Workaround
+----------
+If you are using an affected version of Xcode then you can enable the "Use
+Legacy Build System" setting in the Projucer Xcode exporter to go back to the
+previous behaviour.
+
+Rationale
+---------
+The legacy build system has issues building arm64 binaries for Apple silicon
+and will eventually be removed altogether.
+
+
 Version 6.0.5
 =============
 
