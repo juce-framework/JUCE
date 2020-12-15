@@ -6,6 +6,28 @@ Develop
 
 Change
 ------
+The `juce_blocks_basics` module was removed.
+
+Possible Issues
+---------------
+Projects depending on `juce_blocks_basics` will not build.
+
+Workaround
+----------
+The BLOCKS API is now located in a separate repository:
+https://github.com/WeAreROLI/roli_blocks_basics
+Projects which used to depend on `juce_blocks_basics` can use
+`roli_blocks_basics` instead.
+
+Rationale
+---------
+ROLI is no longer involved with the development of JUCE. Therefore, development
+on the BLOCKS API has been moved out of the JUCE repository, and to a new
+repository managed by ROLI.
+
+
+Change
+------
 The live build functionality of the Projucer has been removed.
 
 Possible Issues

@@ -83,8 +83,8 @@ but if you would like to contribute any changes please contact us.
 
 ## License
 
-The core JUCE modules (juce_audio_basics, juce_audio_devices, juce_blocks_basics, juce_core
-and juce_events) are permissively licensed under the terms of the
+The core JUCE modules (juce_audio_basics, juce_audio_devices, juce_core and juce_events)
+are permissively licensed under the terms of the
 [ISC license](http://www.isc.org/downloads/software-support-policy/isc-license/).
 Other modules are covered by a
 [GPL/Commercial license](https://www.gnu.org/licenses/gpl-3.0.en.html).

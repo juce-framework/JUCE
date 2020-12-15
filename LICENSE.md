@@ -24,8 +24,8 @@ JUCE IS PROVIDED "AS IS" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER
 EXPRESSED OR IMPLIED, INCLUDING WARRANTY OF MERCHANTABILITY AND FITNESS FOR A
 PARTICULAR PURPOSE, ARE DISCLAIMED.
 
-The juce_audio_basics, juce_audio_devices, juce_blocks_basics, juce_core and
-juce_events modules are permissively licensed under the terms of the [ISC
+The juce_audio_basics, juce_audio_devices, juce_core and juce_events modules
+are permissively licensed under the terms of the [ISC
 license](http://www.isc.org/downloads/software-support-policy/isc-license).
 
 For more information, visit the website:
