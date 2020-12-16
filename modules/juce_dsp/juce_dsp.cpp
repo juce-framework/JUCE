@@ -57,8 +57,6 @@
  #include <ipps.h>
 #endif
 
-#include "containers/juce_FixedSizeFunction.h"
-
 #include "processors/juce_FIRFilter.cpp"
 #include "processors/juce_IIRFilter.cpp"
 #include "processors/juce_FirstOrderTPTFilter.cpp"

@@ -40,16 +40,16 @@ struct SysEx7
     enum class Kind : uint8_t
     {
         /** The whole message fits in a single 2-word packet. */
-        Complete    = 0,
+        complete     = 0,
 
         /** The packet begins a SysEx message that will continue in subsequent packets. */
-        Begin       = 1,
+        begin        = 1,
 
         /** The packet is a continuation of an ongoing SysEx message. */
-        Continue    = 2,
+        continuation = 2,
 
         /** The packet terminates an ongoing SysEx message. */
-        End         = 3
+        end          = 3
     };
 
     struct PacketBytes

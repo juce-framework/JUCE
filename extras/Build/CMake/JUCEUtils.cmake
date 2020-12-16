@@ -2244,12 +2244,12 @@ function(juce_set_aax_sdk_path path)
     endif()
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        add_library(juce_aax_sdk STATIC IMPORTED)
+        add_library(juce_aax_sdk STATIC IMPORTED GLOBAL)
         set_target_properties(juce_aax_sdk PROPERTIES
             IMPORTED_LOCATION_DEBUG "${path}/Libs/Debug/libAAXLibrary_libcpp.a"
             IMPORTED_LOCATION "${path}/Libs/Release/libAAXLibrary_libcpp.a")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        add_library(juce_aax_sdk INTERFACE IMPORTED)
+        add_library(juce_aax_sdk INTERFACE IMPORTED GLOBAL)
     else()
         return()
     endif()
@@ -2273,7 +2273,7 @@ function(juce_set_vst2_sdk_path path)
         message(FATAL_ERROR "Could not find VST2 SDK at the specified path: ${path}")
     endif()
 
-    add_library(juce_vst2_sdk INTERFACE IMPORTED)
+    add_library(juce_vst2_sdk INTERFACE IMPORTED GLOBAL)
 
     # This is a bit of a hack, but we really need the VST2 paths to always follow the VST3 paths.
     target_include_directories(juce_vst2_sdk INTERFACE

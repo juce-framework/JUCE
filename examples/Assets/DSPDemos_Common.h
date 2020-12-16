@@ -587,37 +587,42 @@ private:
         {
             audioFileReader.stop();
 
-            if (fileChooser == nullptr)
+            if (fileChooser != nullptr)
+                return;
+
+            SafePointer<AudioPlayerHeader> safeThis (this);
+
+            if (! RuntimePermissions::isGranted (RuntimePermissions::readExternalStorage))
             {
-                SafePointer<AudioPlayerHeader> safeThis (this);
-
-                if (! RuntimePermissions::isGranted (RuntimePermissions::readExternalStorage))
-                {
-                    RuntimePermissions::request (RuntimePermissions::readExternalStorage,
-                                                 [safeThis] (bool granted) mutable
-                                                 {
-                                                     if (granted)
-                                                         safeThis->openFile();
-                                                 });
-                    return;
-                }
-
-                fileChooser.reset (new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif"));
-
-                fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
-                                          [safeThis] (const FileChooser& fc) mutable
-                                          {
-                                              if (safeThis != nullptr && fc.getURLResults().size() > 0)
-                                              {
-                                                  auto u = fc.getURLResult();
-
-                                                  if (! safeThis->audioFileReader.loadURL (u))
-                                                      NativeMessageBox::showOkCancelBox (AlertWindow::WarningIcon, "Error loading file", "Unable to load audio file", nullptr, nullptr);
-                                                  else
-                                                      safeThis->thumbnailComp.setCurrentURL (u);
-                                              }
-                                          }, nullptr);
+                RuntimePermissions::request (RuntimePermissions::readExternalStorage,
+                                             [safeThis] (bool granted) mutable
+                                             {
+                                                 if (granted)
+                                                     safeThis->openFile();
+                                             });
+                return;
             }
+
+            fileChooser.reset (new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif"));
+
+            fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
+                                      [safeThis] (const FileChooser& fc) mutable
+                                      {
+                                          if (safeThis == nullptr)
+                                              return;
+
+                                          if (fc.getURLResults().size() > 0)
+                                          {
+                                              auto u = fc.getURLResult();
+
+                                              if (! safeThis->audioFileReader.loadURL (u))
+                                                  NativeMessageBox::showOkCancelBox (AlertWindow::WarningIcon, "Error loading file", "Unable to load audio file", nullptr, nullptr);
+                                              else
+                                                  safeThis->thumbnailComp.setCurrentURL (u);
+                                          }
+
+                                          safeThis->fileChooser = nullptr;
+                                      }, nullptr);
         }
 
         void changeListenerCallback (ChangeBroadcaster*) override
