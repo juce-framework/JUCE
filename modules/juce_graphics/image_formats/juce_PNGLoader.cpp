@@ -73,6 +73,10 @@ namespace pnglibNamespace
   #define PNG_ARM_NEON_SUPPORTED
  #endif
 
+ #ifndef Byte
+  using Byte = uint8_t;
+ #endif
+
   #define PNG_16BIT_SUPPORTED
   #define PNG_ALIGNED_MEMORY_SUPPORTED
   #define PNG_BENIGN_ERRORS_SUPPORTED

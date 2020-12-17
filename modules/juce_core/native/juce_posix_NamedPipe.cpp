@@ -23,6 +23,8 @@
 namespace juce
 {
 
+#if ! JUCE_WASM
+
 class NamedPipe::Pimpl
 {
 public:
@@ -240,5 +242,7 @@ int NamedPipe::write (const void* sourceBuffer, int numBytesToWrite, int timeOut
     ScopedReadLock sl (lock);
     return pimpl != nullptr ? pimpl->write (static_cast<const char*> (sourceBuffer), numBytesToWrite, timeOutMilliseconds) : -1;
 }
+
+#endif
 
 } // namespace juce
