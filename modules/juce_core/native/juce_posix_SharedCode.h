@@ -1240,7 +1240,7 @@ struct HighResolutionTimer::Pimpl
 
     ~Pimpl()
     {
-        jassert (! isRunning);
+        jassert (periodMs == 0);
         stop();
     }
 
@@ -1253,8 +1253,6 @@ struct HighResolutionTimer::Pimpl
                 stop();
 
                 periodMs = newPeriod;
-                destroyThread = false;
-                isRunning = true;
 
                 if (pthread_create (&thread, nullptr, timerThread, this) == 0)
                     setThreadToRealtime (thread, (uint64) newPeriod);
@@ -1264,27 +1262,16 @@ struct HighResolutionTimer::Pimpl
             else
             {
                 periodMs = newPeriod;
-                isRunning = true;
-                destroyThread = false;
             }
         }
     }
 
     void stop()
     {
-        isRunning = false;
+        periodMs = 0;
 
-        if (thread == pthread_t())
+        if (thread == pthread_t() || thread == pthread_self())
             return;
-
-        if (thread == pthread_self())
-        {
-            periodMs = 3600000;
-            return;
-        }
-
-        isRunning = false;
-        destroyThread = true;
 
         pthread_mutex_lock (&timerMutex);
         pthread_cond_signal (&stopCond);
@@ -1301,7 +1288,6 @@ private:
     pthread_t thread = {};
     pthread_cond_t stopCond;
     pthread_mutex_t timerMutex;
-    std::atomic<bool> destroyThread { false }, isRunning { false };
 
     static void* timerThread (void* param)
     {
@@ -1321,16 +1307,15 @@ private:
 
         pthread_mutex_lock (&timerMutex);
 
-        while (! destroyThread)
+        while (periodMs != 0)
         {
             clock.next();
-            while (! destroyThread && clock.wait (stopCond, timerMutex));
+            while (periodMs != 0 && clock.wait (stopCond, timerMutex));
 
-            if (destroyThread)
+            if (periodMs == 0)
                 break;
 
-            if (isRunning)
-                owner.hiResTimerCallback();
+            owner.hiResTimerCallback();
 
             auto newPeriod = periodMs.load();
 
