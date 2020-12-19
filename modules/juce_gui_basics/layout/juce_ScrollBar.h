@@ -396,6 +396,10 @@ public:
     /** @internal */
     void lookAndFeelChanged() override;
     /** @internal */
+    void mouseEnter (const MouseEvent&) override;
+    /** @internal */
+    void mouseExit (const MouseEvent&) override;
+    /** @internal */
     void mouseDown (const MouseEvent&) override;
     /** @internal */
     void mouseDrag (const MouseEvent&) override;
@@ -427,6 +431,9 @@ private:
     void timerCallback() override;
     bool getVisibility() const noexcept;
 
+    Atomic<bool> mouseIsOver { false };
+    Atomic<bool> mouseIsDown { false };
+    
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScrollBar)
 };
 

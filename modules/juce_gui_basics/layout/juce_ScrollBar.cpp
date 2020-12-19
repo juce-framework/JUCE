@@ -252,10 +252,10 @@ void ScrollBar::paint (Graphics& g)
 
         if (vertical)
             lf.drawScrollbar (g, *this, 0, thumbAreaStart, getWidth(), thumbAreaSize,
-                              vertical, thumbStart, thumb, isMouseOver(), isMouseButtonDown());
+                              vertical, thumbStart, thumb, mouseIsOver.get(), mouseIsDown.get());
         else
             lf.drawScrollbar (g, *this, thumbAreaStart, 0, thumbAreaSize, getHeight(),
-                              vertical, thumbStart, thumb, isMouseOver(), isMouseButtonDown());
+                              vertical, thumbStart, thumb, mouseIsOver.get(), mouseIsDown.get());
     }
 }
 
@@ -331,6 +331,18 @@ void ScrollBar::parentHierarchyChanged()
     lookAndFeelChanged();
 }
 
+void ScrollBar::mouseEnter (const MouseEvent& e)
+{
+    mouseIsOver.set (true);
+    repaint ();
+}
+
+void ScrollBar::mouseExit (const MouseEvent& e)
+{
+    mouseIsOver.set (false);
+    repaint ();
+}
+
 void ScrollBar::mouseDown (const MouseEvent& e)
 {
     isDraggingThumb = false;
@@ -353,6 +365,9 @@ void ScrollBar::mouseDown (const MouseEvent& e)
         isDraggingThumb = (thumbAreaSize > getLookAndFeel().getMinimumScrollbarThumbSize (*this))
                             && (thumbAreaSize > thumbSize);
     }
+    
+    mouseIsDown.set(true);
+    repaint ();
 }
 
 void ScrollBar::mouseDrag (const MouseEvent& e)
@@ -375,7 +390,8 @@ void ScrollBar::mouseUp (const MouseEvent&)
 {
     isDraggingThumb = false;
     stopTimer();
-    repaint();
+    mouseIsDown.set(false);
+    repaint ();
 }
 
 void ScrollBar::mouseWheelMove (const MouseEvent&, const MouseWheelDetails& wheel)

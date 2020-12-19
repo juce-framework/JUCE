@@ -65,3 +65,4 @@ extras/Projucer/JUCECompileEngine.dylib
 
 .vscode
 /build
+Projucer.app
