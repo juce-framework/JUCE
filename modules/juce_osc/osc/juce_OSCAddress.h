@@ -36,11 +36,11 @@ namespace juce
     Only a subset of ASCII characters are allowed in OSC addresses; see
     OpenSoundControl 1.0 specification for details.
 
-    OSC addresses can be used to register OSCMessageListener objects to an
+    OSC addresses can be used to register ListenerWithOSCAddress objects to an
     OSCReceiver if you wish them to only listen to certain messages with
     matching OSC address patterns.
 
-    @see OSCMessageListener, OSCAddressPattern, OSCMessage
+    @see OSCReceiver, OSCAddressPattern, OSCMessage
 
     @tags{OSC}
 */

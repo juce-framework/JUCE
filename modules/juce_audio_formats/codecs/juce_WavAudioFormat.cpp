@@ -993,10 +993,12 @@ public:
                     input->skipNextBytes (2);
                     bitsPerSample = (unsigned int) (int) input->readShort();
 
-                    if (bitsPerSample > 64)
+                    if (bitsPerSample > 64 && (int) sampleRate != 0)
                     {
                         bytesPerFrame = bytesPerSec / (int) sampleRate;
-                        bitsPerSample = 8 * (unsigned int) bytesPerFrame / numChannels;
+
+                        if (numChannels != 0)
+                            bitsPerSample = 8 * (unsigned int) bytesPerFrame / numChannels;
                     }
                     else
                     {

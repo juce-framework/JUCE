@@ -1394,9 +1394,11 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
     props.add (new TextPropertyComponent (pluginManufacturerValue, "Plugin Manufacturer", 256, false),
                "The name of your company (cannot be blank).");
     props.add (new TextPropertyComponent (pluginManufacturerCodeValue, "Plugin Manufacturer Code", 4, false),
-               "A four-character unique ID for your company. Note that for AU compatibility, this must contain at least one upper-case letter!");
+               "A four-character unique ID for your company. Note that for AU compatibility, this must contain at least one upper-case letter!"
+               " GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case.");
     props.add (new TextPropertyComponent (pluginCodeValue, "Plugin Code", 4, false),
-               "A four-character unique ID for your plugin. Note that for AU compatibility, this must contain at least one upper-case letter!");
+               "A four-character unique ID for your plugin. Note that for AU compatibility, this must contain exactly one upper-case letter!"
+               " GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case.");
     props.add (new TextPropertyComponent (pluginChannelConfigsValue, "Plugin Channel Configurations", 1024, false),
                "This list is a comma-separated set list in the form {numIns, numOuts} and each pair indicates a valid plug-in "
                "configuration. For example {1, 1}, {2, 2} means that the plugin can be used either with 1 input and 1 output, "

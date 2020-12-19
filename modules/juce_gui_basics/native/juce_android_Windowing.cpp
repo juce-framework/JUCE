@@ -1667,4 +1667,25 @@ const int KeyPress::stopKey         = extendedKeyModifier + 46;
 const int KeyPress::fastForwardKey  = extendedKeyModifier + 47;
 const int KeyPress::rewindKey       = extendedKeyModifier + 48;
 
+//==============================================================================
+struct JuceActivityNewIntentListener
+{
+    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+     CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V")
+
+     DECLARE_JNI_CLASS (JavaActivity, JUCE_PUSH_NOTIFICATIONS_ACTIVITY)
+    #undef JNI_CLASS_MEMBERS
+
+    static void JNICALL appNewIntent (JNIEnv*, jobject /*activity*/, jobject intentData)
+    {
+       #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
+        juce_handleNotificationIntent (static_cast<void*> (intentData));
+       #else
+        juce::ignoreUnused (intentData);
+       #endif
+    }
+};
+
+JuceActivityNewIntentListener::JavaActivity_Class JuceActivityNewIntentListener::JavaActivity;
+
 } // namespace juce

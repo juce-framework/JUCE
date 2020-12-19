@@ -30,6 +30,10 @@ namespace juce
 
  #define JUCE_USE_WKWEBVIEW 1
 
+ #if (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)
+  #define WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED 1
+ #endif
+
  #if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
   #define WKWEBVIEW_OPENPANEL_SUPPORTED 1
  #endif
@@ -106,7 +110,15 @@ private:
     {
         NSResponder* first = [[self window] firstResponder];
 
-        if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask)
+       #if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
+        constexpr auto mask = NSEventModifierFlagDeviceIndependentFlagsMask;
+        constexpr auto key  = NSEventModifierFlagCommand;
+       #else
+        constexpr auto mask = NSDeviceIndependentModifierFlagsMask;
+        constexpr auto key  = NSCommandKeyMask;
+       #endif
+
+        if (([event modifierFlags] & mask) == key)
         {
             auto sendAction = [&] (SEL actionSelector) -> BOOL
             {
@@ -140,7 +152,10 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:didFailNavigation:withError:),                      didFailNavigation,               "v@:@@@");
         addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation,    "v@:@@@");
 
-        addMethod (@selector (webView:webViewDidClose:),                                  webViewDidClose,                 "v@:@");
+       #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
+        addMethod (@selector (webViewDidClose:),                                          webViewDidClose,                 "v@:@");
+       #endif
+
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
                               windowFeatures:),                                           createWebView,                   "@@:@@@@");
 
@@ -192,10 +207,12 @@ private:
         displayError (getOwner (self), error);
     }
 
+   #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
     static void webViewDidClose (id self, SEL, WKWebView*)
     {
         getOwner (self)->windowCloseRequest();
     }
+   #endif
 
     static WKWebView* createWebView (id self, SEL, WKWebView*, WKWebViewConfiguration*,
                                      WKNavigationAction* navigationAction, WKWindowFeatures*)
@@ -548,10 +565,12 @@ public:
 
     void mouseMove (const MouseEvent&)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         // WebKit doesn't capture mouse-moves itself, so it seems the only way to make
         // them work is to push them via this non-public method..
         if ([webView respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
             [webView performSelector:    @selector (_updateMouseoverWithFakeEvent)];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
 private:

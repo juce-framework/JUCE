@@ -43,20 +43,24 @@ public:
 
         NSNotificationCenter* center = [NSNotificationCenter defaultCenter];
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [center addObserver: delegate selector: @selector (mainMenuTrackingBegan:)
                        name: NSMenuDidBeginTrackingNotification object: nil];
         [center addObserver: delegate selector: @selector (mainMenuTrackingEnded:)
                        name: NSMenuDidEndTrackingNotification object: nil];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (JUCEApplicationBase::isStandaloneApp())
         {
             [NSApp setDelegate: delegate];
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSDistributedNotificationCenter defaultCenter] addObserver: delegate
                                                                 selector: @selector (broadcastMessageCallback:)
                                                                     name: getBroadcastEventName()
                                                                   object: nil
                                                       suspensionBehavior: NSNotificationSuspensionBehaviorDeliverImmediately];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
         else
         {
@@ -103,7 +107,6 @@ private:
         AppDelegateClass()  : ObjCClass<NSObject> ("JUCEAppDelegate_")
         {
             addMethod (@selector (applicationWillFinishLaunching:), applicationWillFinishLaunching, "v@:@");
-            addMethod (@selector (getUrl:withReplyEvent:),          getUrl_withReplyEvent,          "v@:@@");
             addMethod (@selector (applicationShouldTerminate:),     applicationShouldTerminate,     "I@:@");
             addMethod (@selector (applicationWillTerminate:),       applicationWillTerminate,       "v@:@");
             addMethod (@selector (application:openFile:),           application_openFile,           "c@:@@");
@@ -111,17 +114,25 @@ private:
             addMethod (@selector (applicationDidBecomeActive:),     applicationDidBecomeActive,     "v@:@");
             addMethod (@selector (applicationDidResignActive:),     applicationDidResignActive,     "v@:@");
             addMethod (@selector (applicationWillUnhide:),          applicationWillUnhide,          "v@:@");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (getUrl:withReplyEvent:),          getUrl_withReplyEvent,          "v@:@@");
             addMethod (@selector (broadcastMessageCallback:),       broadcastMessageCallback,       "v@:@");
             addMethod (@selector (mainMenuTrackingBegan:),          mainMenuTrackingBegan,          "v@:@");
             addMethod (@selector (mainMenuTrackingEnded:),          mainMenuTrackingEnded,          "v@:@");
             addMethod (@selector (dummyMethod),                     dummyMethod,                    "v@:");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
            #if JUCE_PUSH_NOTIFICATIONS
             //==============================================================================
             addIvar<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>*> ("pushNotificationsDelegate");
 
             addMethod (@selector (applicationDidFinishLaunching:),                                applicationDidFinishLaunching,          "v@:@");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (setPushNotificationsDelegate:),                                 setPushNotificationsDelegate,           "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
             addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), registeredForRemoteNotifications,       "v@:@@");
             addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), failedToRegisterForRemoteNotifications, "v@:@@");
             addMethod (@selector (application:didReceiveRemoteNotification:),                     didReceiveRemoteNotification,           "v@:@@");
@@ -133,10 +144,12 @@ private:
     private:
         static void applicationWillFinishLaunching (id self, SEL, NSNotification*)
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             [[NSAppleEventManager sharedAppleEventManager] setEventHandler: self
                                                                andSelector: @selector (getUrl:withReplyEvent:)
                                                              forEventClass: kInternetEventClass
                                                                 andEventID: kAEGetURL];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
        #if JUCE_PUSH_NOTIFICATIONS
@@ -263,7 +276,7 @@ private:
         {
             auto* delegate = getPushNotificationsDelegate (self);
 
-            SEL selector = NSSelectorFromString (@"application:didRegisterForRemoteNotificationsWithDeviceToken:");
+            SEL selector = @selector (application:didRegisterForRemoteNotificationsWithDeviceToken:);
 
             if (delegate != nil && [delegate respondsToSelector: selector])
             {
@@ -281,7 +294,7 @@ private:
         {
             auto* delegate = getPushNotificationsDelegate (self);
 
-            SEL selector = NSSelectorFromString (@"application:didFailToRegisterForRemoteNotificationsWithError:");
+            SEL selector =  @selector (application:didFailToRegisterForRemoteNotificationsWithError:);
 
             if (delegate != nil && [delegate respondsToSelector: selector])
             {
@@ -299,7 +312,7 @@ private:
         {
             auto* delegate = getPushNotificationsDelegate (self);
 
-            SEL selector = NSSelectorFromString (@"application:didReceiveRemoteNotification:");
+            SEL selector =  @selector (application:didReceiveRemoteNotification:);
 
             if (delegate != nil && [delegate respondsToSelector: selector])
             {
@@ -487,8 +500,10 @@ struct MountedVolumeListChangeDetector::Pimpl
 
         NSNotificationCenter* nc = [[NSWorkspace sharedWorkspace] notificationCenter];
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [nc addObserver: delegate selector: @selector (changed:) name: NSWorkspaceDidMountNotification   object: nil];
         [nc addObserver: delegate selector: @selector (changed:) name: NSWorkspaceDidUnmountNotification object: nil];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     ~Pimpl()
@@ -506,7 +521,11 @@ private:
         ObserverClass()  : ObjCClass<NSObject> ("JUCEDriveObserver_")
         {
             addIvar<Pimpl*> ("owner");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (changed:), changed, "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
             addProtocol (@protocol (NSTextInput));
             registerClass();
         }

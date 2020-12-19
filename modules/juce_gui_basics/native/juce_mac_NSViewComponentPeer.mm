@@ -99,8 +99,12 @@ public:
 
         notificationCenter = [NSNotificationCenter defaultCenter];
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        SEL frameChangedSelector = @selector (frameChanged:);
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         [notificationCenter  addObserver: view
-                                selector: @selector (frameChanged:)
+                                selector: frameChangedSelector
                                     name: NSViewFrameDidChangeNotification
                                   object: view];
 
@@ -171,12 +175,12 @@ public:
            #endif
 
             [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
+                                    selector: frameChangedSelector
                                         name: NSWindowDidMoveNotification
                                       object: window];
 
             [notificationCenter  addObserver: view
-                                    selector: @selector (frameChanged:)
+                                    selector: frameChangedSelector
                                         name: NSWindowDidMiniaturizeNotification
                                       object: window];
 
@@ -1613,9 +1617,7 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (isOpaque),                      isOpaque,                   "c@:");
         addMethod (@selector (drawRect:),                     drawRect,                   "v@:", @encode (NSRect));
         addMethod (@selector (mouseDown:),                    mouseDown,                  "v@:@");
-        addMethod (@selector (asyncMouseDown:),               asyncMouseDown,             "v@:@");
         addMethod (@selector (mouseUp:),                      mouseUp,                    "v@:@");
-        addMethod (@selector (asyncMouseUp:),                 asyncMouseUp,               "v@:@");
         addMethod (@selector (mouseDragged:),                 mouseDragged,               "v@:@");
         addMethod (@selector (mouseMoved:),                   mouseMoved,                 "v@:@");
         addMethod (@selector (mouseEntered:),                 mouseEntered,               "v@:@");
@@ -1629,10 +1631,9 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (scrollWheel:),                  scrollWheel,                "v@:@");
         addMethod (@selector (magnifyWithEvent:),             magnify,                    "v@:@");
         addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse,          "c@:@");
-        addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
         addMethod (@selector (windowWillMiniaturize:),        windowWillMiniaturize,      "v@:@");
         addMethod (@selector (windowDidDeminiaturize:),       windowDidDeminiaturize,     "v@:@");
-        addMethod (@selector (wantsDefaultClipping:),         wantsDefaultClipping,       "c@:");
+        addMethod (@selector (wantsDefaultClipping),          wantsDefaultClipping,       "c@:");
         addMethod (@selector (worksWhenModal),                worksWhenModal,             "c@:");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
         addMethod (@selector (keyDown:),                      keyDown,                    "v@:@");
@@ -1670,6 +1671,12 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
 
         addMethod (@selector (viewWillMoveToWindow:),         willMoveToWindow,           "v@:@");
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        addMethod (@selector (asyncMouseDown:),               asyncMouseDown,             "v@:@");
+        addMethod (@selector (asyncMouseUp:),                 asyncMouseUp,               "v@:@");
+        addMethod (@selector (frameChanged:),                 frameChanged,               "v@:@");
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         addProtocol (@protocol (NSTextInput));
 
         registerClass();
@@ -1684,27 +1691,39 @@ private:
     static void mouseDown (id self, SEL s, NSEvent* ev)
     {
         if (JUCEApplicationBase::isStandaloneApp())
+        {
             asyncMouseDown (self, s, ev);
+        }
         else
+        {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             // In some host situations, the host will stop modal loops from working
             // correctly if they're called from a mouse event, so we'll trigger
             // the event asynchronously..
             [self performSelectorOnMainThread: @selector (asyncMouseDown:)
                                    withObject: ev
                                 waitUntilDone: NO];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }
     }
 
     static void mouseUp (id self, SEL s, NSEvent* ev)
     {
         if (JUCEApplicationBase::isStandaloneApp())
+        {
             asyncMouseUp (self, s, ev);
+        }
         else
+        {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             // In some host situations, the host will stop modal loops from working
             // correctly if they're called from a mouse event, so we'll trigger
             // the event asynchronously..
             [self performSelectorOnMainThread: @selector (asyncMouseUp:)
                                    withObject: ev
                                 waitUntilDone: NO];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }
     }
 
     static void asyncMouseDown   (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseDown  (ev); }

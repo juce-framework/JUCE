@@ -412,11 +412,13 @@ attributes directly to these creation functions, rather than adding them later.
 
 - `PLUGIN_MANUFACTURER_CODE`
   - A four-character unique ID for your company. For AU compatibility, this must contain at least
-    one upper-case letter.
+    one upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the
+    remaining letters to be lower-case.
 
 - `PLUGIN_CODE`
-  - A four-character unique ID for your plugin. For AU compatibility, this must contain at least
-    one upper-case letter.
+  - A four-character unique ID for your plugin. For AU compatibility, this must contain exactly one
+    upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the remaining
+    letters to be lower-case.
 
 - `DESCRIPTION`
   - A short description of your plugin.

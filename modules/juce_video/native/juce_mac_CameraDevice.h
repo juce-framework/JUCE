@@ -215,10 +215,12 @@ struct CameraDevice::Pimpl
         callbackDelegate = (id<AVCaptureFileOutputRecordingDelegate>) [cls.createInstance() init];
         DelegateClass::setOwner (callbackDelegate, this);
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [[NSNotificationCenter defaultCenter] addObserver: callbackDelegate
-                                                 selector: DelegateClass::runtimeErrorSel()
+                                                 selector: @selector (captureSessionRuntimeError:)
                                                      name: AVCaptureSessionRuntimeErrorNotification
                                                    object: session];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     ~Pimpl()
@@ -345,15 +347,15 @@ private:
             addMethod (@selector (captureOutput:didResumeRecordingToOutputFileAtURL: fromConnections:),       didResumeRecordingToOutputFileAtURL,  "v@:@@@");
             addMethod (@selector (captureOutput:willFinishRecordingToOutputFileAtURL:fromConnections:error:), willFinishRecordingToOutputFileAtURL, "v@:@@@@");
 
-            addMethod (runtimeErrorSel(), sessionRuntimeError, "v@:@");
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (captureSessionRuntimeError:), sessionRuntimeError, "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
         }
 
         static void setOwner (id self, Pimpl* owner)   { object_setInstanceVariable (self, "owner", owner); }
         static Pimpl& getOwner (id self)               { return *getIvar<Pimpl*> (self, "owner"); }
-
-        static SEL runtimeErrorSel()    { return NSSelectorFromString (nsStringLiteral ("captureSessionRuntimeError:")); }
 
     private:
         static void didStartRecordingToOutputFileAtURL (id, SEL, AVCaptureFileOutput*, NSURL*, NSArray*) {}

@@ -350,12 +350,14 @@ private:
         auto keys = defines.getAllKeys();
         auto values = defines.getAllValues();
 
+        const auto escapedQuote = isWindows() ? "\\\"" : "\\\\\"";
+
         for (int i = 0; i < defines.size(); ++i)
         {
             auto result = keys[i];
 
             if (values[i].isNotEmpty())
-                result += "=" + values[i];
+                result += "=\"" + values[i].replace ("\"", escapedQuote) + "\"";
 
             defs.add (result);
         }
@@ -569,7 +571,7 @@ private:
                 for (auto& def : getDefines (config, target))
                 {
                     if (! def.containsChar ('='))
-                            def << '=';
+                        def << '=';
 
                     flags.add ("-D" + def);
                 }

@@ -182,7 +182,8 @@ public:
           useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager()),
           customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
           exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager()),
-          suppressPlistResourceUsage                   (settings, Ids::suppressPlistResourceUsage,              getUndoManager())
+          suppressPlistResourceUsageValue              (settings, Ids::suppressPlistResourceUsage,              getUndoManager()),
+          useLegacyBuildSystemValue                    (settings, Ids::useLegacyBuildSystem,                    getUndoManager())
     {
         if (iOS)
         {
@@ -269,7 +270,9 @@ public:
     bool isDocumentBrowserEnabled() const                   { return uiSupportsDocumentBrowserValue.get(); }
     bool isStatusBarHidden() const                          { return uiStatusBarHiddenValue.get(); }
 
-    bool getSuppressPlistResourceUsage() const              { return suppressPlistResourceUsage.get(); }
+    bool getSuppressPlistResourceUsage() const              { return suppressPlistResourceUsageValue.get(); }
+
+    bool shouldUseLegacyBuildSystem() const                 { return useLegacyBuildSystemValue.get(); }
 
     String getDocumentExtensionsString() const              { return documentExtensionsValue.get(); }
 
@@ -391,6 +394,11 @@ public:
                        "A comma-separated list of file extensions for documents that your app can open. "
                        "Using a leading '.' is optional, and the extensions are not case-sensitive.");
         }
+
+        props.add (new ChoicePropertyComponent (useLegacyBuildSystemValue, "Use Legacy Build System"),
+                   "Enable this to use the deprecated \"Legacy Build System\" in Xcode 10 and above. "
+                   "This may fix build issues that were introduced with the new build system in Xcode 10 and subsequently fixed in Xcode 10.2, "
+                   "however the new build system is recommended for apps targeting Apple silicon.");
 
         if (isOSX())
         {
@@ -570,7 +578,7 @@ public:
         props.add (new TextPropertyComponent (pListPrefixHeaderValue, "PList Prefix Header", 512, false),
                    "Header file containing definitions used in plist file (see PList Preprocess).");
 
-        props.add (new ChoicePropertyComponent (suppressPlistResourceUsage, "Suppress AudioUnit Plist resourceUsage Key"),
+        props.add (new ChoicePropertyComponent (suppressPlistResourceUsageValue, "Suppress AudioUnit Plist resourceUsage Key"),
                    "Suppress the resourceUsage key in the target's generated Plist. This is useful for AU"
                    " plugins that must access resources which cannot be declared in the resourceUsage block, such"
                    " as UNIX domain sockets. In particular, PACE-protected AU plugins may require this option to be enabled"
@@ -668,9 +676,6 @@ public:
                                         [this] (MemoryOutputStream& mo) { writeProjectFile (mo); });
 
         writeInfoPlistFiles();
-
-        // This forces the project to use the legacy build system to workaround Xcode 10 issues,
-        // hopefully these will be fixed in the future and this can be removed...
         writeWorkspaceSettings();
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
@@ -1154,7 +1159,7 @@ public:
             v->setProperty ("isa", "PBXFileReference", nullptr);
             v->setProperty ("explicitFileType", fileType, nullptr);
             v->setProperty ("includeInIndex", (int) 0, nullptr);
-            v->setProperty ("path", sanitisePath (binaryName), nullptr);
+            v->setProperty ("path", binaryName, nullptr);
             v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
             owner.pbxFileReferences.add (v);
         }
@@ -1393,6 +1398,19 @@ public:
             s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
 
+            auto frameworksToSkip = [this]() -> String
+            {
+                const String openGLFramework (owner.iOS ? "OpenGLES" : "OpenGL");
+
+                if (owner.xcodeFrameworks.contains (openGLFramework))
+                    return openGLFramework;
+
+                return {};
+            }();
+
+            if (frameworksToSkip.isNotEmpty())
+                s.set ("VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS", frameworksToSkip);
+
             auto frameworkSearchPaths = getFrameworkSearchPaths (config);
 
             if (! frameworkSearchPaths.isEmpty())
@@ -1450,7 +1468,6 @@ public:
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
 
-
             auto flags = (config.getRecommendedCompilerWarningFlags().joinIntoString (" ")
                              + " " + owner.getExtraCompilerFlagsString()).trim();
             flags = owner.replacePreprocessorTokens (config, flags);
@@ -1500,10 +1517,11 @@ public:
 
                 build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
                                                       build_tools::RelativePath::projectFolder);
-                configurationBuildDir = sanitisePath (binaryPath.rebased (owner.projectFolder,
-                                                                          owner.getTargetFolder(),
-                                                                          build_tools::RelativePath::buildTargetFolder)
-                                                                .toUnixStyle());
+
+                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
+                                                                        owner.getTargetFolder(),
+                                                                        build_tools::RelativePath::buildTargetFolder)
+                                                              .toUnixStyle());
             }
 
             s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
@@ -1785,8 +1803,7 @@ public:
 
             for (auto& path : paths)
             {
-                // Xcode 10 can't deal with search paths starting with "~" so we need to replace them here...
-                path = owner.replacePreprocessorTokens (config, sanitisePath (path));
+                path = owner.replacePreprocessorTokens (config, expandPath (path));
 
                 if (path.containsChar (' '))
                     path = "\"\\\"" + path + "\\\"\""; // crazy double quotes required when there are spaces..
@@ -1961,12 +1978,12 @@ private:
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
-                     exporterBundleIdentifierValue, suppressPlistResourceUsage;
+                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;
 
-    static String sanitisePath (const String& path)
+    static String expandPath (const String& path)
     {
-        if (path.startsWithChar ('~'))
-            return "$(HOME)" + path.substring (1);
+        if (! File::isAbsolutePath (path))  return "$(SRCROOT)/" + path;
+        if (path.startsWithChar ('~'))      return "$(HOME)" + path.substring (1);
 
         return path;
     }
@@ -2312,21 +2329,28 @@ private:
                                                     .getChildFile ("xcshareddata")
                                                     .getChildFile ("WorkspaceSettings.xcsettings");
 
-        build_tools::writeStreamToFile (settingsFile, [this] (MemoryOutputStream& mo)
+        if (shouldUseLegacyBuildSystem())
         {
-            mo.setNewLineString (getNewLineString());
+            build_tools::writeStreamToFile (settingsFile, [this] (MemoryOutputStream& mo)
+            {
+                mo.setNewLineString (getNewLineString());
 
-            mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"              << newLine
-               << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
-               << "<plist version=\"1.0\">"                                 << newLine
-               << "<dict>"                                                  << newLine
-               << "\t" << "<key>BuildSystemType</key>"                      << newLine
-               << "\t" << "<string>Original</string>"                       << newLine
-               << "\t" << "<key>DisableBuildSystemDeprecationWarning</key>" << newLine
-               << "\t" << "<true/>"                                         << newLine
-               << "</dict>"                                                 << newLine
-               << "</plist>"                                                << newLine;
-        });
+                mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"              << newLine
+                   << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
+                   << "<plist version=\"1.0\">"                                 << newLine
+                   << "<dict>"                                                  << newLine
+                   << "\t" << "<key>BuildSystemType</key>"                      << newLine
+                   << "\t" << "<string>Original</string>"                       << newLine
+                   << "\t" << "<key>DisableBuildSystemDeprecationWarning</key>" << newLine
+                   << "\t" << "<true/>"                                         << newLine
+                   << "</dict>"                                                 << newLine
+                   << "</plist>"                                                << newLine;
+            });
+        }
+        else
+        {
+            settingsFile.deleteFile();
+        }
     }
 
     void writeInfoPlistFiles() const
@@ -2374,7 +2398,7 @@ private:
             searchPath = srcRoot + searchPath;
         }
 
-        return sanitisePath (searchPath);
+        return expandPath (searchPath);
     }
 
     String getCodeSigningIdentity (const XcodeBuildConfiguration& config) const
@@ -3240,7 +3264,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 1200; "
+        attributes << "{ LastUpgradeCheck = 1230; "
                    << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
                    <<"; ";
 
