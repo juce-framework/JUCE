@@ -1649,8 +1649,12 @@ public:
 
             for (auto flag : customFlags)
             {
-                s.set (flag.upToFirstOccurrenceOf ("=", false, false).trim(),
-                       flag.fromFirstOccurrenceOf ("=", false, false).trim().quoted());
+                bool inQuote = false;
+                int equalsPos;
+                for (equalsPos = 0; inQuote || flag[equalsPos] != '='; ++equalsPos)
+                    if (flag[equalsPos] == '"')
+                        inQuote = ! inQuote;
+                s.set (flag.substring (0, equalsPos).trim(), flag.substring (equalsPos + 1).trim());
             }
 
             return s;
