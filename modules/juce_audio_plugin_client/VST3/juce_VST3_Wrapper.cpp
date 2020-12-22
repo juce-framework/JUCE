@@ -233,7 +233,19 @@ public:
 
     static Vst::UnitID getUnitID (const AudioProcessorParameterGroup* group)
     {
-        return group == nullptr ? Vst::kRootUnitId : group->getID().hashCode();
+        if (group == nullptr || group->getParent() == nullptr)
+            return Vst::kRootUnitId;
+
+        // From the VST3 docs:
+        // Up to 2^31 parameters can be exported with id range [0, 2147483648]
+        // (the range [2147483649, 429496729] is reserved for host application).
+        auto unitID = group->getID().hashCode() & 0x7fffffff;
+
+        // If you hit this assertion then your group ID is hashing to a value
+        // reserved by the VST3 SDK. Use a different group ID.
+        jassert (unitID != Vst::kRootUnitId);
+
+        return unitID;
     }
 
     int getNumParameters() const noexcept             { return vstParamIDs.size(); }
@@ -262,6 +274,21 @@ private:
     void setupParameters()
     {
         parameterGroups = audioProcessor->getParameterTree().getSubgroups (true);
+
+       #if JUCE_DEBUG
+        auto allGroups = parameterGroups;
+        allGroups.add (&audioProcessor->getParameterTree());
+        std::unordered_set<Vst::UnitID> unitIDs;
+
+        for (auto* group : allGroups)
+        {
+            auto insertResult = unitIDs.insert (getUnitID (group));
+
+            // If you hit this assertion then either a group ID is not unique or
+            // you are very unlucky and a hashed group ID is not unique
+            jassert (insertResult.second);
+        }
+       #endif
 
        #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
         const bool forceLegacyParamIDs = true;

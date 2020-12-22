@@ -443,6 +443,24 @@ void AudioProcessor::checkForDuplicateParamID (AudioProcessorParameter* param)
    #endif
 }
 
+void AudioProcessor::checkForDuplicateGroupIDs (const AudioProcessorParameterGroup& newGroup)
+{
+    ignoreUnused (newGroup);
+
+   #if JUCE_DEBUG
+    auto groups = newGroup.getSubgroups (true);
+    groups.add (&newGroup);
+
+    for (auto* group : groups)
+    {
+        auto insertResult = groupIDs.insert (group->getID());
+
+        // If you hit this assertion then a group ID is not unique
+        jassert (insertResult.second);
+    }
+   #endif
+}
+
 const Array<AudioProcessorParameter*>& AudioProcessor::getParameters() const   { return flatParameterList; }
 const AudioProcessorParameterGroup& AudioProcessor::getParameterTree() const   { return parameterTree; }
 
@@ -461,6 +479,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
 void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
 {
     jassert (group != nullptr);
+    checkForDuplicateGroupIDs (*group);
 
     auto oldSize = flatParameterList.size();
     flatParameterList.addArray (group->getParameters (true));
@@ -481,9 +500,12 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
 {
    #if JUCE_DEBUG
     paramIDs.clear();
+    groupIDs.clear();
    #endif
 
     parameterTree = std::move (newTree);
+    checkForDuplicateGroupIDs (parameterTree);
+
     flatParameterList = parameterTree.getParameters (true);
 
     for (int i = 0; i < flatParameterList.size(); ++i)
