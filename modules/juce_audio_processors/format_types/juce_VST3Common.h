@@ -82,7 +82,8 @@ inline void toString128 (Steinberg::Vst::String128 result, const char* source)
 
 inline void toString128 (Steinberg::Vst::String128 result, const juce::String& source)
 {
-    Steinberg::UString (result, 128).fromAscii (source.toUTF8());
+    // see https://forum.juce.com/t/bug-with-utf8-vst3-parameter-value-and-a-fix/42565
+    Steinberg::UString (result, 128).assign((Steinberg::char16*)source.toUTF16().getAddress());
 }
 
 inline Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
