@@ -1654,7 +1654,10 @@ public:
                 for (equalsPos = 0; inQuote || flag[equalsPos] != '='; ++equalsPos)
                     if (flag[equalsPos] == '"')
                         inQuote = ! inQuote;
-                s.set (flag.substring (0, equalsPos).trim(), flag.substring (equalsPos + 1).trim());
+                auto value = flag.substring (equalsPos + 1).trim();
+                if (! value.startsWithChar ('"'))
+                    value = value.quoted();
+                s.set (flag.substring (0, equalsPos).trim(), value);
             }
 
             return s;
