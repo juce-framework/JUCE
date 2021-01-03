@@ -1649,12 +1649,16 @@ public:
 
             for (auto flag : customFlags)
             {
-                bool inQuote = false;
-                int equalsPos;
-                for (equalsPos = 0; inQuote || flag[equalsPos] != '='; ++equalsPos)
-                    if (flag[equalsPos] == '"')
-                        inQuote = ! inQuote;
-                s.set (flag.substring (0, equalsPos).trim(), flag.substring (equalsPos + 1).trim());
+                const auto firstParenthesis = flag.indexOf ("]");
+                const auto firstEqualSign = flag.indexOf ("=");
+                auto valueFirstChar = firstEqualSign + 1;
+                while (firstParenthesis != -1 && valueFirstChar < firstParenthesis)
+                {
+                    auto nextEqual = flag.substring (valueFirstChar).indexOf ("=") + 1;
+                    valueFirstChar += nextEqual;
+                }
+                auto key = flag.substring (0, valueFirstChar - 1).trim();
+                s.set (firstParenthesis != -1 ? key.quoted() : key, flag.substring (valueFirstChar).trim().quoted());
             }
 
             return s;
