@@ -4590,14 +4590,17 @@ void Displays::findDisplays (float masterScale)
     }
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    updateToLogical();
-   #else
-    for (auto& d : displays)
-    {
-        d.totalArea /= masterScale;
-        d.userArea  /= masterScale;
-    }
+    if (isPerMonitorDPIAwareThread())
+        updateToLogical();
+    else
    #endif
+    {
+        for (auto& d : displays)
+        {
+            d.totalArea /= masterScale;
+            d.userArea  /= masterScale;
+        }
+    }
 }
 
 //==============================================================================
