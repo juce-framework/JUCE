@@ -431,15 +431,20 @@ private:
             return;
 
         Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
+        const auto& desktop = Desktop::getInstance();
 
-        auto newScaleFactor = Desktop::getInstance().getDisplays().getDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical)->scale
-                                 / Desktop::getInstance().getGlobalScaleFactor();
-
-        if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
+        if (auto* display = desktop.getDisplays().getDisplayForRect (newBounds.translated (translation.x, translation.y),
+                                                                     isPhysical))
         {
-            currentScaleFactor = newScaleFactor;
-            scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
+            auto newScaleFactor = display->scale / desktop.getGlobalScaleFactor();
+
+            if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
+            {
+                currentScaleFactor = newScaleFactor;
+                scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
+            }
         }
+
     }
 
     //==============================================================================
