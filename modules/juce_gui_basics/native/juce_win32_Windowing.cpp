@@ -1417,8 +1417,7 @@ public:
         if (auto parentH = GetParent (hwnd))
         {
             auto r = getWindowRect (parentH);
-            auto localBounds = Rectangle<int>::leftTopRightBottom (bounds.left, bounds.top,
-                                                                   bounds.right, bounds.bottom).translated (-r.left, -r.top);
+            auto localBounds = rectangleFromRECT (bounds).translated (-r.left, -r.top);
 
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareWindow (hwnd))
