@@ -594,19 +594,13 @@ public:
 
         bool setNormalized (Vst::ParamValue v) override
         {
-            Vst::ParamValue program = v * info.stepCount;
-
-            if (! isPositiveAndBelow ((int) program, owner.getNumPrograms()))
+            if (! isPositiveAndBelow ((int) toPlain (v), owner.getNumPrograms())
+                || v == valueNormalized)
                 return false;
 
-            if (valueNormalized != v)
-            {
-                valueNormalized = v;
-                changed();
-                return true;
-            }
-
-            return false;
+            valueNormalized = v;
+            changed();
+            return true;
         }
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
@@ -954,7 +948,10 @@ public:
 
                 if (paramValue != EditController::getParamNormalized (JuceAudioProcessor::paramPreset))
                 {
-                    EditController::setParamNormalized (JuceAudioProcessor::paramPreset, paramValue);
+                    beginEdit (JuceAudioProcessor::paramPreset);
+                    paramChanged (JuceAudioProcessor::paramPreset, (float) paramValue);
+                    endEdit (JuceAudioProcessor::paramPreset);
+
                     flags |= Vst::kParamValuesChanged;
                 }
             }
