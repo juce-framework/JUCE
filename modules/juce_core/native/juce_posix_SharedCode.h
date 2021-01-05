@@ -1334,9 +1334,15 @@ private:
         const auto thread = pthread_self();
 
        #if JUCE_MAC || JUCE_IOS
+        mach_timebase_info_data_t timebase;
+        mach_timebase_info (&timebase);
+
+        const auto ticksPerMs = ((double) timebase.denom * 1000000.0) / (double) timebase.numer;
+        const auto periodTicks = (uint32_t) (ticksPerMs * periodMs);
+
         thread_time_constraint_policy_data_t policy;
-        policy.period      = (uint32_t) (periodMs * 1000000);
-        policy.computation = 50000;
+        policy.period      = periodTicks;
+        policy.computation = jmin ((uint32_t) 50000, policy.period);
         policy.constraint  = policy.period;
         policy.preemptible = true;
 
