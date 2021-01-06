@@ -362,7 +362,9 @@ static void setDPIAwareness()
     if (! JUCEApplicationBase::isStandaloneApp())
         return;
 
-    HMODULE shcoreModule = GetModuleHandleA ("SHCore.dll");
+    const auto shcore = "SHCore.dll";
+    LoadLibraryA (shcore);
+    const auto shcoreModule = GetModuleHandleA (shcore);
 
     if (shcoreModule != nullptr)
     {
