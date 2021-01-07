@@ -237,6 +237,7 @@ protected:
             case AudioFormat::Float:
                 break;
 
+            case AudioFormat::Invalid:
             default:
                 return Result::ErrorInvalidFormat;
         }
