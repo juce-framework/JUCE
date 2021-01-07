@@ -164,6 +164,7 @@ public:
 
     //==============================================================================
     void handleWindowMessage (LinuxComponentPeer* peer, XEvent& event) const;
+    bool isParentWindowOf (::Window windowH, ::Window possibleChild) const;
 
     //==============================================================================
     JUCE_DECLARE_SINGLETON (XWindowSystem, false)
@@ -197,7 +198,6 @@ private:
     //==============================================================================
     ::Window getFocusWindow (::Window windowH) const;
 
-    bool isParentWindowOf (::Window windowH, ::Window possibleChild) const;
     bool isFrontWindow (::Window windowH) const;
 
     //==============================================================================
@@ -232,6 +232,10 @@ private:
     void handleMappingNotify        (XMappingEvent&) const;
     void handleClientMessageEvent   (LinuxComponentPeer*, XClientMessageEvent&, XEvent&) const;
     void handleXEmbedMessage        (LinuxComponentPeer*, XClientMessageEvent&) const;
+
+    void dismissBlockingModals      (LinuxComponentPeer* peer) const;
+
+    static void windowMessageReceive (XEvent&);
 
     //==============================================================================
     bool xIsAvailable = false;

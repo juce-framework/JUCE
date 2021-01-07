@@ -38,7 +38,7 @@ public:
         : ComponentPeer (comp, windowStyleFlags),
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
-        // it's dangerous to create a window on a thread other than the message thread..
+        // it's dangerous to create a window on a thread other than the message thread.
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         if (isAlwaysOnTop)
@@ -56,7 +56,7 @@ public:
 
     ~LinuxComponentPeer() override
     {
-        // it's dangerous to delete a window on a thread other than the message thread..
+        // it's dangerous to delete a window on a thread other than the message thread.
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         repainter = nullptr;
@@ -66,10 +66,15 @@ public:
             --numAlwaysOnTopPeers;
     }
 
+    ::Window getWindowHandle() const noexcept
+    {
+        return windowH;
+    }
+
     //==============================================================================
     void* getNativeHandle() const override
     {
-        return (void*) windowH;
+        return reinterpret_cast<void*> (getWindowHandle());
     }
 
     //==============================================================================
@@ -443,7 +448,6 @@ private:
                 scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
             }
         }
-
     }
 
     //==============================================================================

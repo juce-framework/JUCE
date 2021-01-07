@@ -163,12 +163,6 @@ XWindowSystemUtilities::GetXProperty::~GetXProperty()
 }
 
 //==============================================================================
-using WindowMessageReceiveCallback = void (*) (XEvent&);
-using SelectionRequestCallback     = void (*) (XSelectionRequestEvent&);
-
-static WindowMessageReceiveCallback dispatchWindowMessage = nullptr;
-SelectionRequestCallback handleSelectionRequest = nullptr;
-
 ::Window juce_messageWindowHandle;
 XContext windowHandleXContext;
 
@@ -1204,20 +1198,6 @@ namespace ClipboardHelpers
         X11Symbols::getInstance()->xSendEvent (evt.display, evt.requestor, 0, NoEventMask, (XEvent*) &reply);
     }
 }
-
-//==============================================================================
-typedef void (*SelectionRequestCallback) (XSelectionRequestEvent&);
-extern SelectionRequestCallback handleSelectionRequest;
-
-struct ClipboardCallbackInitialiser
-{
-    ClipboardCallbackInitialiser()
-    {
-        handleSelectionRequest = ClipboardHelpers::handleSelection;
-    }
-};
-
-static ClipboardCallbackInitialiser clipboardInitialiser;
 
 //==============================================================================
 ComponentPeer* getPeerFor (::Window windowH)
@@ -2806,13 +2786,14 @@ bool XWindowSystem::initialiseXDisplay()
     // Create a context to store user data associated with Windows we create
     windowHandleXContext = (XContext) X11Symbols::getInstance()->xrmUniqueQuark();
 
-    // We're only interested in client messages for this window, which are always sent
-    XSetWindowAttributes swa;
-    swa.event_mask = NoEventMask;
-
     // Create our message window (this will never be mapped)
     auto screen = X11Symbols::getInstance()->xDefaultScreen (display);
     auto root = X11Symbols::getInstance()->xRootWindow (display, screen);
+    X11Symbols::getInstance()->xSelectInput (display, root, SubstructureNotifyMask);
+
+    // We're only interested in client messages for this window, which are always sent
+    XSetWindowAttributes swa;
+    swa.event_mask = NoEventMask;
     juce_messageWindowHandle = X11Symbols::getInstance()->xCreateWindow (display, root,
                                                                          0, 0, 1, 1, 0, 0, InputOnly,
                                                                          X11Symbols::getInstance()->xDefaultVisual (display, screen),
@@ -2855,15 +2836,13 @@ bool XWindowSystem::initialiseXDisplay()
                                                     X11Symbols::getInstance()->xNextEvent (display, &evt);
                                                 }
 
-                                                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle
-                                                    && handleSelectionRequest != nullptr)
+                                                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
                                                 {
-                                                    handleSelectionRequest (evt.xselectionrequest);
+                                                    ClipboardHelpers::handleSelection (evt.xselectionrequest);
                                                 }
-                                                else if (evt.xany.window != juce_messageWindowHandle
-                                                         && dispatchWindowMessage != nullptr)
+                                                else if (evt.xany.window != juce_messageWindowHandle)
                                                 {
-                                                    dispatchWindowMessage (evt);
+                                                    windowMessageReceive (evt);
                                                 }
 
                                             } while (display != nullptr);
@@ -3312,6 +3291,13 @@ void XWindowSystem::handleExposeEvent (LinuxComponentPeer* peer, XExposeEvent& e
     }
 }
 
+void XWindowSystem::dismissBlockingModals (LinuxComponentPeer* peer) const
+{
+    if (peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
+        if (auto* currentModalComp = Component::getCurrentlyModalComponent())
+            currentModalComp->inputAttemptWhenModal();
+}
+
 void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfigureEvent& confEvent) const
 {
     peer->updateWindowBounds();
@@ -3319,12 +3305,8 @@ void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfi
     peer->handleMovedOrResized();
 
     // if the native title bar is dragged, need to tell any active menus, etc.
-    if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) != 0
-          && peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
-    {
-        if (auto* currentModalComp = Component::getCurrentlyModalComponent())
-            currentModalComp->inputAttemptWhenModal();
-    }
+    if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) != 0)
+        dismissBlockingModals (peer);
 
     auto windowH = (::Window) peer->getNativeHandle();
 
@@ -3366,9 +3348,8 @@ void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XProper
         return std::find (data, end, atoms.windowStateHidden) != end;
     };
 
-    if ((isStateChangeEvent() || isHidden()) && peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
-        if (auto* currentModalComp = Component::getCurrentlyModalComponent())
-            currentModalComp->inputAttemptWhenModal();
+    if (isStateChangeEvent() || isHidden())
+        dismissBlockingModals (peer);
 }
 
 void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const
@@ -3476,39 +3457,39 @@ void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer* peer, XClientMessag
 }
 
 //==============================================================================
-namespace WindowingHelpers
+void XWindowSystem::windowMessageReceive (XEvent& event)
 {
-    static void windowMessageReceive (XEvent& event)
+    if (event.xany.window != None)
     {
-        if (event.xany.window != None)
+       #if JUCE_X11_SUPPORTS_XEMBED
+        if (! juce_handleXEmbedEvent (nullptr, &event))
+       #endif
         {
-           #if JUCE_X11_SUPPORTS_XEMBED
-            if (! juce_handleXEmbedEvent (nullptr, &event))
-           #endif
+            if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (event.xany.window)))
             {
-                if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (event.xany.window)))
-                    XWindowSystem::getInstance()->handleWindowMessage (peer, event);
+                XWindowSystem::getInstance()->handleWindowMessage (peer, event);
+                return;
             }
+
+            if (event.type != ConfigureNotify)
+                return;
+
+            const auto* instance = XWindowSystem::getInstance();
+
+            for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)))
+                    if (instance->isParentWindowOf (event.xconfigure.window, linuxPeer->getWindowHandle()))
+                        instance->dismissBlockingModals (linuxPeer);
         }
-        else if (event.xany.type == KeymapNotify)
-        {
-            auto& keymapEvent = (const XKeymapEvent&) event.xkeymap;
-            memcpy (Keys::keyStates, keymapEvent.key_vector, 32);
-        }
+    }
+    else if (event.xany.type == KeymapNotify)
+    {
+        auto& keymapEvent = (const XKeymapEvent&) event.xkeymap;
+        memcpy (Keys::keyStates, keymapEvent.key_vector, 32);
     }
 }
 
-struct WindowingCallbackInitialiser
-{
-    WindowingCallbackInitialiser()
-    {
-        dispatchWindowMessage = WindowingHelpers::windowMessageReceive;
-    }
-};
-
-static WindowingCallbackInitialiser windowingInitialiser;
-
-
+//==============================================================================
 JUCE_IMPLEMENT_SINGLETON (XWindowSystem)
 
 } // namespace juce
