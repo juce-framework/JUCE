@@ -876,13 +876,18 @@ public:
                     drawRect (cg, rect, displayScale);
                     CGContextRestoreGState (cg);
                 }
-
-                return;
             }
         }
+        else
        #endif
+        {
+            drawRect (cg, r, displayScale);
+        }
 
-        drawRect (cg, r, displayScale);
+        // transparent NSWindows with a drop-shadow need to redraw their shadow when the content
+        // changes to avoid stale shadows being drawn behind the window
+        if (! isSharedWindow && ! [window isOpaque] && [window hasShadow])
+            [window invalidateShadow];
     }
 
     void drawRect (CGContextRef cg, NSRect r, float displayScale)
