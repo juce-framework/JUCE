@@ -59,10 +59,10 @@ DataCallbackResult AudioStream::fireDataCallback(void *audioData, int32_t numFra
     }
 
     DataCallbackResult result;
-    if (mStreamCallback == nullptr) {
-        result = onDefaultCallback(audioData, numFrames);
+    if (mDataCallback) {
+        result = mDataCallback->onAudioReady(this, audioData, numFrames);
     } else {
-        result = mStreamCallback->onAudioReady(this, audioData, numFrames);
+        result = onDefaultCallback(audioData, numFrames);
     }
     // On Oreo, we might get called after returning stop.
     // So block that here.

@@ -46,6 +46,7 @@ public:
     Result requestStop() override;
 
 protected:
+    Result requestStop_l();
 
     Result updateServiceFrameCounter() override;
 
