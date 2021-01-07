@@ -1232,7 +1232,7 @@ ComponentPeer* getPeerFor (::Window windowH)
 }
 
 //==============================================================================
-static std::unordered_map<LinuxComponentPeer<::Window>*, X11DragState> dragAndDropStateMap;
+static std::unordered_map<LinuxComponentPeer*, X11DragState> dragAndDropStateMap;
 
 XWindowSystem::XWindowSystem()
 {
@@ -1296,7 +1296,7 @@ static int getAllEventsMask (bool ignoresMouseClicks)
              | (ignoresMouseClicks ? 0 : (ButtonPressMask | ButtonReleaseMask));
 }
 
-::Window XWindowSystem::createWindow (::Window parentToAddTo, LinuxComponentPeer<::Window>* peer) const
+::Window XWindowSystem::createWindow (::Window parentToAddTo, LinuxComponentPeer* peer) const
 {
     if (! xIsAvailable)
     {
@@ -1398,7 +1398,7 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 
 void XWindowSystem::destroyWindow (::Window windowH)
 {
-    auto* peer = dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowH));
+    auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
 
     if (peer == nullptr)
     {
@@ -1746,7 +1746,7 @@ bool XWindowSystem::isFocused (::Window windowH) const
     jassert (windowH != 0);
 
    #if JUCE_X11_SUPPORTS_XEMBED
-    if (auto w = (::Window) juce_getCurrentFocusWindow (dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowH))))
+    if (auto w = (::Window) juce_getCurrentFocusWindow (dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH))))
         return w;
    #endif
 
@@ -2384,7 +2384,7 @@ void XWindowSystem::deleteKeyProxy (::Window keyProxy) const
     {}
 }
 
-bool XWindowSystem::externalDragFileInit (LinuxComponentPeer<::Window>* peer, const StringArray& files, bool, std::function<void()>&& callback) const
+bool XWindowSystem::externalDragFileInit (LinuxComponentPeer* peer, const StringArray& files, bool, std::function<void()>&& callback) const
 {
     auto& dragState = dragAndDropStateMap[peer];
 
@@ -2404,7 +2404,7 @@ bool XWindowSystem::externalDragFileInit (LinuxComponentPeer<::Window>* peer, co
     return dragState.externalDragInit ((::Window) peer->getNativeHandle(), false, uriList.joinIntoString ("\r\n"), std::move (callback));
 }
 
-bool XWindowSystem::externalDragTextInit (LinuxComponentPeer<::Window>* peer, const String& text, std::function<void()>&& callback) const
+bool XWindowSystem::externalDragTextInit (LinuxComponentPeer* peer, const String& text, std::function<void()>&& callback) const
 {
     auto& dragState = dragAndDropStateMap[peer];
 
@@ -2499,9 +2499,9 @@ bool XWindowSystem::isFrontWindow (::Window windowH) const
     {
         for (int i = (int) windowListSize; --i >= 0;)
         {
-            if (auto* peer = dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowList[i])))
+            if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowList[i])))
             {
-                result = (peer == dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowH)));
+                result = (peer == dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH)));
                 break;
             }
         }
@@ -2936,7 +2936,7 @@ static int64 getEventTime (const EventType& t)
     return getEventTime (t.time);
 }
 
-void XWindowSystem::handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEvent& event) const
+void XWindowSystem::handleWindowMessage (LinuxComponentPeer* peer, XEvent& event) const
 {
     switch (event.xany.type)
     {
@@ -2984,7 +2984,7 @@ void XWindowSystem::handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEv
     }
 }
 
-void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer<::Window>* peer, XKeyEvent& keyEvent) const
+void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer* peer, XKeyEvent& keyEvent) const
 {
     auto oldMods = ModifierKeys::currentModifiers;
 
@@ -3104,7 +3104,7 @@ void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer<::Window>* peer, XKe
         peer->handleKeyPress (keyCode, unicodeChar);
 }
 
-void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer<::Window>* peer, const XKeyEvent& keyEvent) const
+void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer* peer, const XKeyEvent& keyEvent) const
 {
     auto isKeyReleasePartOfAutoRepeat = [&]() -> bool
     {
@@ -3143,7 +3143,7 @@ void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer<::Window>* peer, c
     }
 }
 
-void XWindowSystem::handleWheelEvent (LinuxComponentPeer<::Window>* peer, const XButtonPressedEvent& buttonPressEvent, float amount) const
+void XWindowSystem::handleWheelEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent, float amount) const
 {
     MouseWheelDetails wheel;
     wheel.deltaX = 0.0f;
@@ -3156,7 +3156,7 @@ void XWindowSystem::handleWheelEvent (LinuxComponentPeer<::Window>* peer, const 
                             getEventTime (buttonPressEvent), wheel);
 }
 
-void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag) const
+void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag) const
 {
     ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (buttonModifierFlag);
     peer->toFront (true);
@@ -3165,7 +3165,7 @@ void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, 
                             MouseInputSource::invalidOrientation, getEventTime (buttonPressEvent), {});
 }
 
-void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, const XButtonPressedEvent& buttonPressEvent) const
+void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent) const
 {
     updateKeyModifiers ((int) buttonPressEvent.state);
 
@@ -3185,7 +3185,7 @@ void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, 
     }
 }
 
-void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer<::Window>* peer, const XButtonReleasedEvent& buttonRelEvent) const
+void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XButtonReleasedEvent& buttonRelEvent) const
 {
     updateKeyModifiers ((int) buttonRelEvent.state);
 
@@ -3214,7 +3214,7 @@ void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer<::Window>* peer
                             ModifierKeys::currentModifiers, MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (buttonRelEvent));
 }
 
-void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer<::Window>* peer, const XPointerMovedEvent& movedEvent) const
+void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, const XPointerMovedEvent& movedEvent) const
 {
     updateKeyModifiers ((int) movedEvent.state);
 
@@ -3228,7 +3228,7 @@ void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer<::Window>* peer,
                             MouseInputSource::invalidOrientation, getEventTime (movedEvent));
 }
 
-void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer<::Window>* peer, const XEnterWindowEvent& enterEvent) const
+void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer* peer, const XEnterWindowEvent& enterEvent) const
 {
     if (peer->getParentWindow() != 0)
         peer->updateWindowBounds();
@@ -3242,7 +3242,7 @@ void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer<::Window>* peer, 
     }
 }
 
-void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer<::Window>* peer, const XLeaveWindowEvent& leaveEvent) const
+void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer* peer, const XLeaveWindowEvent& leaveEvent) const
 {
     // Suppress the normal leave if we've got a pointer grab, or if
     // it's a bogus one caused by clicking a mouse button when running
@@ -3257,7 +3257,7 @@ void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer<::Window>* peer, 
     }
 }
 
-void XWindowSystem::handleFocusInEvent (LinuxComponentPeer<::Window>* peer) const
+void XWindowSystem::handleFocusInEvent (LinuxComponentPeer* peer) const
 {
     peer->isActiveApplication = true;
 
@@ -3268,7 +3268,7 @@ void XWindowSystem::handleFocusInEvent (LinuxComponentPeer<::Window>* peer) cons
     }
 }
 
-void XWindowSystem::handleFocusOutEvent (LinuxComponentPeer<::Window>* peer) const
+void XWindowSystem::handleFocusOutEvent (LinuxComponentPeer* peer) const
 {
     if (! isFocused ((::Window) peer->getNativeHandle()) && peer->focused)
     {
@@ -3279,7 +3279,7 @@ void XWindowSystem::handleFocusOutEvent (LinuxComponentPeer<::Window>* peer) con
     }
 }
 
-void XWindowSystem::handleExposeEvent (LinuxComponentPeer<::Window>* peer, XExposeEvent& exposeEvent) const
+void XWindowSystem::handleExposeEvent (LinuxComponentPeer* peer, XExposeEvent& exposeEvent) const
 {
     // Batch together all pending expose events
     XEvent nextEvent;
@@ -3321,7 +3321,7 @@ void XWindowSystem::handleExposeEvent (LinuxComponentPeer<::Window>* peer, XExpo
     }
 }
 
-void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer<::Window>* peer, XConfigureEvent& confEvent) const
+void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfigureEvent& confEvent) const
 {
     peer->updateWindowBounds();
     peer->updateBorderSize();
@@ -3341,14 +3341,14 @@ void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer<::Window>* pe
         peer->handleBroughtToFront();
 }
 
-void XWindowSystem::handleGravityNotify (LinuxComponentPeer<::Window>* peer) const
+void XWindowSystem::handleGravityNotify (LinuxComponentPeer* peer) const
 {
     peer->updateWindowBounds();
     peer->updateBorderSize();
     peer->handleMovedOrResized();
 }
 
-void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer<::Window>* peer, const XPropertyEvent& event) const
+void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XPropertyEvent& event) const
 {
     const auto isStateChangeEvent = [&]
     {
@@ -3391,7 +3391,7 @@ void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const
     }
 }
 
-void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer<::Window>* peer, XClientMessageEvent& clientMsg, XEvent& event) const
+void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer* peer, XClientMessageEvent& clientMsg, XEvent& event) const
 {
     if (clientMsg.message_type == atoms.protocols && clientMsg.format == 32)
     {
@@ -3463,7 +3463,7 @@ void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer<::Window>* peer
     }
 }
 
-void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer<::Window>* peer, XClientMessageEvent& clientMsg) const
+void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer* peer, XClientMessageEvent& clientMsg) const
 {
     switch (clientMsg.data.l[1])
     {
@@ -3495,7 +3495,7 @@ namespace WindowingHelpers
             if (! juce_handleXEmbedEvent (nullptr, &event))
            #endif
             {
-                if (auto* peer = dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (event.xany.window)))
+                if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (event.xany.window)))
                     XWindowSystem::getInstance()->handleWindowMessage (peer, event);
             }
         }
