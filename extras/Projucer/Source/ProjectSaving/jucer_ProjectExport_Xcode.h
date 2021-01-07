@@ -47,6 +47,7 @@ namespace
         v10_15,
         v10_16,
         v11_0,
+        v11_1,
     };
 
     static const char* const getName (MacOSVersion m)
@@ -64,6 +65,7 @@ namespace
             case MacOSVersion::v10_15:  return "10.15";
             case MacOSVersion::v10_16:  return "10.16";
             case MacOSVersion::v11_0:   return "11.0";
+            case MacOSVersion::v11_1:   return "11.1";
             default:                    break;
         }
 
@@ -74,7 +76,7 @@ namespace
     static String getDisplayName (MacOSVersion m) { return getName (m) + String (" SDK"); }
     static String getRootName    (MacOSVersion m) { return String ("macosx") + getName (m); }
 
-    constexpr auto nextMacOSVersion       = (MacOSVersion) ((int) MacOSVersion::v11_0 + 1);
+    constexpr auto nextMacOSVersion       = (MacOSVersion) ((int) MacOSVersion::v11_1 + 1);
     constexpr auto oldestDeploymentTarget = MacOSVersion::v10_7;
     constexpr auto macOSDefaultVersion    = MacOSVersion::v10_11;
     constexpr auto oldestSDKVersion       = MacOSVersion::v10_11;
