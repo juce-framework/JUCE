@@ -943,14 +943,18 @@ public:
 
             if (numPrograms > 1)
             {
-                auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                  / static_cast<Vst::ParamValue> (numPrograms - 1);
+                const auto currentProgram = pluginInstance->getCurrentProgram();
 
-                if (paramValue != EditController::getParamNormalized (JuceAudioProcessor::paramPreset))
+                if ((numPrograms != lastProgramParameterState.numPrograms) || (currentProgram != lastProgramParameterState.currentProgram))
                 {
+                    auto paramValue = static_cast<Vst::ParamValue> (currentProgram)
+                                      / static_cast<Vst::ParamValue> (numPrograms - 1);
                     beginEdit (JuceAudioProcessor::paramPreset);
                     paramChanged (JuceAudioProcessor::paramPreset, (float) paramValue);
                     endEdit (JuceAudioProcessor::paramPreset);
+
+                    lastProgramParameterState.numPrograms = numPrograms;
+                    lastProgramParameterState.currentProgram = currentProgram;
 
                     flags |= Vst::kParamValuesChanged;
                 }
@@ -1013,6 +1017,12 @@ private:
                       inSetupProcessing { false };
 
     int lastLatencySamples = 0;
+    struct ProgramParameterState
+    {
+        int numPrograms = 0;
+        int currentProgram = 0;
+    };
+    ProgramParameterState lastProgramParameterState;
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
@@ -2584,6 +2594,11 @@ public:
                     {
                         auto numPrograms  = pluginInstance->getNumPrograms();
                         auto programValue = roundToInt (value * (jmax (0, numPrograms - 1)));
+                        // remember the state of the program change parameter (in a way that avoids rounding errors)
+                        // so that setCurrentProgram() can synchronously call updateHostDisplay() without triggering
+                        // spurious edits to the program change parameter.
+                        juceVST3EditController->lastProgramParameterState.numPrograms = numPrograms;
+                        juceVST3EditController->lastProgramParameterState.currentProgram = programValue;
 
                         if (numPrograms > 1 && isPositiveAndBelow (programValue, numPrograms)
                              && programValue != pluginInstance->getCurrentProgram())
