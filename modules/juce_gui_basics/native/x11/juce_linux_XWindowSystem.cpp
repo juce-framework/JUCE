@@ -42,6 +42,21 @@ namespace juce
  #define JUCE_X11_SUPPORTS_XEMBED 0
 #endif
 
+namespace
+{
+    struct XFreeDeleter
+    {
+        void operator() (void* ptr) const
+        {
+            if (ptr != nullptr)
+                X11Symbols::getInstance()->xFree (ptr);
+        }
+    };
+
+    template <typename Data>
+    std::unique_ptr<Data, XFreeDeleter> makeXFreePtr (Data* raw) { return std::unique_ptr<Data, XFreeDeleter> (raw); }
+}
+
 //==============================================================================
 XWindowSystemUtilities::ScopedXLock::ScopedXLock()
 {
@@ -556,18 +571,16 @@ namespace Visuals
             desiredMask |= VisualBitsPerRGBMask;
         }
 
-        if (auto* xvinfos = X11Symbols::getInstance()->xGetVisualInfo (display, desiredMask, &desiredVisual, &numVisuals))
+        if (auto xvinfos = makeXFreePtr (X11Symbols::getInstance()->xGetVisualInfo (display, desiredMask, &desiredVisual, &numVisuals)))
         {
             for (int i = 0; i < numVisuals; i++)
             {
-                if (xvinfos[i].depth == desiredDepth)
+                if (xvinfos.get()[i].depth == desiredDepth)
                 {
-                    visual = xvinfos[i].visual;
+                    visual = xvinfos.get()[i].visual;
                     break;
                 }
             }
-
-            X11Symbols::getInstance()->xFree (xvinfos);
         }
 
         return visual;
@@ -593,9 +606,9 @@ namespace Visuals
                         desiredVisual.depth = 32;
                         desiredVisual.bits_per_rgb = 8;
 
-                        if (auto xvinfos = X11Symbols::getInstance()->xGetVisualInfo (display,
-                                                                                      VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
-                                                                                      &desiredVisual, &numVisuals))
+                        if (auto xvinfos = makeXFreePtr (X11Symbols::getInstance()->xGetVisualInfo (display,
+                                                                                                    VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
+                                                                                                    &desiredVisual, &numVisuals)))
                         {
                             for (int i = 0; i < numVisuals; ++i)
                             {
@@ -610,8 +623,6 @@ namespace Visuals
                                     break;
                                 }
                             }
-
-                            X11Symbols::getInstance()->xFree (xvinfos);
                         }
                     }
                 }
@@ -993,13 +1004,8 @@ namespace DisplayHelpers
         {
             int numScreens;
 
-            if (auto* xinfo = X11Symbols::getInstance()->xineramaQueryScreens (display, &numScreens))
-            {
-                Array<XineramaScreenInfo> infos (xinfo, numScreens);
-                X11Symbols::getInstance()->xFree (xinfo);
-
-                return infos;
-            }
+            if (auto xinfo = makeXFreePtr (X11Symbols::getInstance()->xineramaQueryScreens (display, &numScreens)))
+                return { xinfo.get(), numScreens };
         }
 
         return {};
@@ -1023,9 +1029,9 @@ namespace PixmapHelpers
             for (int x = 0; x < (int) width; ++x)
                 colour[index++] = image.getPixelAt (x, y).getARGB();
 
-        auto* ximage = X11Symbols::getInstance()->xCreateImage (display, (Visual*) CopyFromParent, 24, ZPixmap,
-                                                                0, reinterpret_cast<const char*> (colour.getData()),
-                                                                width, height, 32, 0);
+        auto ximage = makeXFreePtr (X11Symbols::getInstance()->xCreateImage (display, (Visual*) CopyFromParent, 24, ZPixmap,
+                                                                             0, reinterpret_cast<const char*> (colour.getData()),
+                                                                             width, height, 32, 0));
 
         auto pixmap = X11Symbols::getInstance()->xCreatePixmap (display,
                                                                 X11Symbols::getInstance()->xDefaultRootWindow (display),
@@ -1033,9 +1039,8 @@ namespace PixmapHelpers
 
         auto gc = X11Symbols::getInstance()->xCreateGC (display, pixmap, 0, nullptr);
 
-        X11Symbols::getInstance()->xPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
+        X11Symbols::getInstance()->xPutImage (display, pixmap, gc, ximage.get(), 0, 0, 0, 0, width, height);
         X11Symbols::getInstance()->xFreeGC (display, gc);
-        X11Symbols::getInstance()->xFree (ximage);
 
         return pixmap;
     }
@@ -1343,26 +1348,24 @@ static int getAllEventsMask (bool ignoresMouseClicks)
     }
 
     // Set window manager hints
-    if (auto* wmHints = X11Symbols::getInstance()->xAllocWMHints())
+    if (auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xAllocWMHints()))
     {
         wmHints->flags = InputHint | StateHint;
         wmHints->input = True;
         wmHints->initial_state = NormalState;
-        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-        X11Symbols::getInstance()->xFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints.get());
     }
 
     // Set class hint
     if (auto* app = JUCEApplicationBase::getInstance())
     {
-        if (auto* classHint = X11Symbols::getInstance()->xAllocClassHint())
+        if (auto classHint = makeXFreePtr (X11Symbols::getInstance()->xAllocClassHint()))
         {
             auto appName = app->getApplicationName();
             classHint->res_name  = (char*) appName.getCharPointer().getAddress();
             classHint->res_class = (char*) appName.getCharPointer().getAddress();
 
-            X11Symbols::getInstance()->xSetClassHint (display, windowH, classHint);
-            X11Symbols::getInstance()->xFree (classHint);
+            X11Symbols::getInstance()->xSetClassHint (display, windowH, classHint.get());
         }
     }
 
@@ -1479,10 +1482,10 @@ void XWindowSystem::setIcon (::Window windowH, const Image& newIcon) const
 
     deleteIconPixmaps (windowH);
 
-    auto* wmHints = X11Symbols::getInstance()->xGetWMHints (display, windowH);
+    auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xGetWMHints (display, windowH));
 
     if (wmHints == nullptr)
-        wmHints = X11Symbols::getInstance()->xAllocWMHints();
+        wmHints = makeXFreePtr (X11Symbols::getInstance()->xAllocWMHints());
 
     if (wmHints != nullptr)
     {
@@ -1490,8 +1493,7 @@ void XWindowSystem::setIcon (::Window windowH, const Image& newIcon) const
         wmHints->icon_pixmap = PixmapHelpers::createColourPixmapFromImage (display, newIcon);
         wmHints->icon_mask = PixmapHelpers::createMaskPixmapFromImage (display, newIcon);
 
-        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-        X11Symbols::getInstance()->xFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints.get());
     }
 
     X11Symbols::getInstance()->xSync (display, False);
@@ -1545,7 +1547,7 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
 
         XWindowSystemUtilities::ScopedXLock xLock;
 
-        if (auto* hints = X11Symbols::getInstance()->xAllocSizeHints())
+        if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
         {
             hints->flags  = USSize | USPosition;
             hints->x      = newBounds.getX();
@@ -1560,8 +1562,7 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
                 hints->flags |= PMinSize | PMaxSize;
             }
 
-            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints);
-            X11Symbols::getInstance()->xFree (hints);
+            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
         }
 
         auto windowBorder = peer->getFrameSize();
@@ -2458,29 +2459,24 @@ String XWindowSystem::getTextFromClipboard() const
 //==============================================================================
 bool XWindowSystem::isParentWindowOf (::Window windowH, ::Window possibleChild) const
 {
-    if (windowH != 0 && possibleChild != 0)
-    {
-        if (possibleChild == windowH)
-            return true;
+    if (windowH == 0 || possibleChild == 0)
+        return false;
 
-        Window* windowList = nullptr;
-        uint32 windowListSize = 0;
-        Window parent, root;
+    if (possibleChild == windowH)
+        return true;
 
-        XWindowSystemUtilities::ScopedXLock xLock;
-        if (X11Symbols::getInstance()->xQueryTree (display, possibleChild, &root, &parent, &windowList, &windowListSize) != 0)
-        {
-            if (windowList != nullptr)
-                X11Symbols::getInstance()->xFree (windowList);
+    Window* windowList = nullptr;
+    uint32 windowListSize = 0;
+    Window parent, root;
 
-            if (parent == root)
-                return false;
+    XWindowSystemUtilities::ScopedXLock xLock;
+    const auto result = X11Symbols::getInstance()->xQueryTree (display, possibleChild, &root, &parent, &windowList, &windowListSize);
+    const auto deleter = makeXFreePtr (windowList);
 
-            return isParentWindowOf (windowH, parent);
-        }
-    }
+    if (result == 0 || parent == root)
+        return false;
 
-    return false;
+    return isParentWindowOf (windowH, parent);
 }
 
 bool XWindowSystem::isFrontWindow (::Window windowH) const
@@ -2489,28 +2485,24 @@ bool XWindowSystem::isFrontWindow (::Window windowH) const
 
     Window* windowList = nullptr;
     uint32 windowListSize = 0;
-    bool result = false;
 
     XWindowSystemUtilities::ScopedXLock xLock;
     Window parent;
     auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
 
-    if (X11Symbols::getInstance()->xQueryTree (display, root, &root, &parent, &windowList, &windowListSize) != 0)
+    const auto queryResult = X11Symbols::getInstance()->xQueryTree (display, root, &root, &parent, &windowList, &windowListSize);
+    const auto deleter = makeXFreePtr (windowList);
+
+    if (queryResult == 0)
+        return false;
+
+    for (int i = (int) windowListSize; --i >= 0;)
     {
-        for (int i = (int) windowListSize; --i >= 0;)
-        {
-            if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowList[i])))
-            {
-                result = (peer == dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH)));
-                break;
-            }
-        }
+        if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowList[i])))
+            return peer == dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
     }
 
-    if (windowList != nullptr)
-        X11Symbols::getInstance()->xFree (windowList);
-
-    return result;
+    return false;
 }
 
 void XWindowSystem::xchangeProperty (::Window windowH, Atom property, Atom type, int format, const void* data, int numElements) const
@@ -2687,7 +2679,7 @@ void XWindowSystem::deleteIconPixmaps (::Window windowH) const
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
-    if (auto* wmHints = X11Symbols::getInstance()->xGetWMHints (display, windowH))
+    if (auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xGetWMHints (display, windowH)))
     {
         if ((wmHints->flags & IconPixmapHint) != 0)
         {
@@ -2701,8 +2693,7 @@ void XWindowSystem::deleteIconPixmaps (::Window windowH) const
             X11Symbols::getInstance()->xFreePixmap (display, wmHints->icon_mask);
         }
 
-        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-        X11Symbols::getInstance()->xFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints.get());
     }
 }
 
