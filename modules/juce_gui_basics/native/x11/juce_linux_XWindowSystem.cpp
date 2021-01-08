@@ -2046,7 +2046,7 @@ void* createDraggingHandCursor()
         0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,98,22,203,
         114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59
     };
-    size_t dragHandDataSize = 99;
+    static constexpr auto dragHandDataSize = numElementsInArray (dragHandData);
 
     return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), { 8, 7 }).create();
 }
@@ -2089,7 +2089,7 @@ void* XWindowSystem::createStandardMouseCursor (MouseCursor::StandardCursorType 
                 86,91,202,142,12,108,212,87,235,174,15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,
                 252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0
             };
-            static constexpr int copyCursorSize = 119;
+            static constexpr auto copyCursorSize = numElementsInArray (copyCursorData);
 
             return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
         }
