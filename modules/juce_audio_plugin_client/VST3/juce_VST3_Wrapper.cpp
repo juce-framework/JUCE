@@ -614,15 +614,21 @@ public:
         {
             auto programValue = roundToInt (toPlain (v));
 
-            if (! isPositiveAndBelow (programValue, owner.getNumPrograms())
-                || programValue == owner.getCurrentProgram())
-                return false;
+            if (isPositiveAndBelow (programValue, owner.getNumPrograms()))
+            {
+                if (programValue != owner.getCurrentProgram())
+                    owner.setCurrentProgram (programValue);
 
-            valueNormalized = v;
-            owner.setCurrentProgram (programValue);
-            changed();
+                if (valueNormalized != v)
+                {
+                    valueNormalized = v;
+                    changed();
 
-            return true;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
