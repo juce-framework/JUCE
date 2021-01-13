@@ -943,9 +943,8 @@ public:
                     invokePaint (*context);
                 }
 
-                CGColorSpaceRef colourSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
-                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace, false);
-                CGColorSpaceRelease (colourSpace);
+                detail::ColorSpacePtr colourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
+                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace.get(), false);
                 CGContextDrawImage (cg, CGRectMake (r.origin.x, r.origin.y, clipW, clipH), image);
                 CGImageRelease (image);
             }
