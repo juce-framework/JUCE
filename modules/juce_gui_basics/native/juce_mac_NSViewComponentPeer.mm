@@ -1646,6 +1646,7 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (wantsDefaultClipping),          wantsDefaultClipping,       "c@:");
         addMethod (@selector (worksWhenModal),                worksWhenModal,             "c@:");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
+        addMethod (@selector (viewWillDraw),                  viewWillDraw,               "v@:");
         addMethod (@selector (keyDown:),                      keyDown,                    "v@:@");
         addMethod (@selector (keyUp:),                        keyUp,                      "v@:@");
         addMethod (@selector (insertText:),                   insertText,                 "v@:@");
@@ -1757,6 +1758,18 @@ private:
     static void drawRect (id self, SEL, NSRect r)              { if (auto* p = getOwner (self)) p->drawRect (r); }
     static void frameChanged (id self, SEL, NSNotification*)   { if (auto* p = getOwner (self)) p->redirectMovedOrResized(); }
     static void viewDidMoveToWindow (id self, SEL)             { if (auto* p = getOwner (self)) p->viewMovedToWindow(); }
+
+    static void viewWillDraw (id self, SEL)
+    {
+        // Without setting contentsFormat macOS Big Sur will always set the invalid area
+        // to be the entire frame.
+       #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
+        CALayer* layer = ((NSView*) self).layer;
+        layer.contentsFormat = kCAContentsFormatRGBA8Uint;
+       #endif
+
+        sendSuperclassMessage<void> (self, @selector (viewWillDraw));
+    }
 
     static void windowWillMiniaturize (id self, SEL, NSNotification*)
     {
