@@ -45,6 +45,13 @@ struct BytestreamToBytestreamHandler : public BytestreamInputHandler
     BytestreamToBytestreamHandler (MidiInput& i, MidiInputCallback& c)
         : input (i), callback (c), concatenator (2048) {}
 
+    /**
+        Provides an `operator()` which can create an input handler for a given
+        MidiInput.
+
+        All handler classes should have a similar Factory to facilitate
+        creation of handlers in generic contexts.
+    */
     class Factory
     {
     public:
@@ -85,6 +92,13 @@ struct BytestreamToUMPHandler : public BytestreamInputHandler
     BytestreamToUMPHandler (PacketProtocol protocol, Receiver& c)
         : recipient (c), dispatcher (protocol, 2048) {}
 
+    /**
+        Provides an `operator()` which can create an input handler for a given
+        MidiInput.
+
+        All handler classes should have a similar Factory to facilitate
+        creation of handlers in generic contexts.
+    */
     class Factory
     {
     public:

@@ -25,6 +25,12 @@ namespace juce
 namespace universal_midi_packets
 {
 
+/**
+    This struct acts as a single-file namespace for Univeral MIDI Packet
+    functionality related to 7-bit SysEx.
+
+    @tags{Audio}
+*/
 struct SysEx7
 {
     /** Returns the number of 64-bit packets required to hold a series of
@@ -52,6 +58,7 @@ struct SysEx7
         end          = 3
     };
 
+    /** Holds the bytes from a single SysEx-7 packet. */
     struct PacketBytes
     {
         std::array<uint8_t, 6> data;
