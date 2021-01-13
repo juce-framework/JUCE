@@ -91,6 +91,13 @@ public:
             return kDefaultTopMarginInBursts;
         }
 
+        // On some devices, you can open a mono stream but it is actually running in stereo!
+        virtual bool isMonoMMapActuallyStereo() const {
+            return false;
+        }
+
+        virtual bool isAAudioMMapPossible(const AudioStreamBuilder &builder) const;
+
         static constexpr int32_t kDefaultBottomMarginInBursts = 0;
         static constexpr int32_t kDefaultTopMarginInBursts = 0;
 
@@ -98,9 +105,13 @@ public:
         // b/129545119 | AAudio Legacy allows setBufferSizeInFrames too low
         // Fixed in Q
         static constexpr int32_t kLegacyBottomMarginInBursts = 1;
+        static constexpr int32_t kCommonNativeRate = 48000; // very typical native sample rate
     };
 
 private:
+
+    static constexpr int32_t kChannelCountMono = 1;
+    static constexpr int32_t kChannelCountStereo = 2;
 
     std::unique_ptr<DeviceQuirks> mDeviceQuirks{};
 

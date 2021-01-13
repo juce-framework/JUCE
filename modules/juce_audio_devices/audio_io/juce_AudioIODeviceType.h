@@ -80,9 +80,8 @@ public:
 
         The scanForDevices() method must have been called to create this list.
 
-        @param wantInputNames     only really used by DirectSound where devices are split up
-                                  into inputs and outputs, this indicates whether to use
-                                  the input or output name to refer to a pair of devices.
+        @param wantInputNames    for devices which have separate inputs and outputs
+                                 this determines which list of names is returned
     */
     virtual StringArray getDeviceNames (bool wantInputNames = false) const = 0;
 

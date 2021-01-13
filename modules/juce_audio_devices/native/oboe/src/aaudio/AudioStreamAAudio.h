@@ -109,13 +109,22 @@ protected:
     void logUnsupportedAttributes();
 
 private:
+    // Must call under mLock. And stream must NOT be nullptr.
+    Result requestStop_l(AAudioStream *stream);
+
+    // Time to sleep in order to prevent a race condition with a callback after a close().
+    // Two milliseconds may be enough but 10 msec is even safer.
+    static constexpr int kDelayBeforeCloseMillis = 10;
 
     std::atomic<bool>    mCallbackThreadEnabled;
 
-    // pointer to the underlying AAudio stream, valid if open, null if closed
+    // pointer to the underlying 'C' AAudio stream, valid if open, null if closed
     std::atomic<AAudioStream *> mAAudioStream{nullptr};
 
     static AAudioLoader *mLibLoader;
+
+    // We may not use this but it is so small that it is not worth allocating dynamically.
+    AudioStreamErrorCallback mDefaultErrorCallback;
 };
 
 } // namespace oboe

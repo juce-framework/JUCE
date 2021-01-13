@@ -16,27 +16,25 @@
 
 #include <unistd.h>
 #include "FlowGraphNode.h"
-#include "MonoToMultiConverter.h"
+#include "MultiToMonoConverter.h"
 
 using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 
-MonoToMultiConverter::MonoToMultiConverter(int32_t outputChannelCount)
-        : input(*this, 1)
-        , output(*this, outputChannelCount) {
+MultiToMonoConverter::MultiToMonoConverter(int32_t inputChannelCount)
+        : input(*this, inputChannelCount)
+        , output(*this, 1) {
 }
 
-MonoToMultiConverter::~MonoToMultiConverter() { }
+MultiToMonoConverter::~MultiToMonoConverter() { }
 
-int32_t MonoToMultiConverter::onProcess(int32_t numFrames) {
+int32_t MultiToMonoConverter::onProcess(int32_t numFrames) {
     const float *inputBuffer = input.getBuffer();
     float *outputBuffer = output.getBuffer();
-    int32_t channelCount = output.getSamplesPerFrame();
+    int32_t channelCount = input.getSamplesPerFrame();
     for (int i = 0; i < numFrames; i++) {
-        // read one, write many
-        float sample = *inputBuffer++;
-        for (int channel = 0; channel < channelCount; channel++) {
-            *outputBuffer++ = sample;
-        }
+        // read first channel of multi stream, write many
+        *outputBuffer++ = *inputBuffer;
+        inputBuffer += channelCount;
     }
     return numFrames;
 }

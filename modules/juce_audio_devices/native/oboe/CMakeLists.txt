@@ -26,10 +26,12 @@ set (oboe_sources
     src/fifo/FifoController.cpp
     src/fifo/FifoControllerBase.cpp
     src/fifo/FifoControllerIndirect.cpp
-        src/flowgraph/FlowGraphNode.cpp
+    src/flowgraph/FlowGraphNode.cpp
+    src/flowgraph/ChannelCountConverter.cpp
     src/flowgraph/ClipToRange.cpp
     src/flowgraph/ManyToMultiConverter.cpp
     src/flowgraph/MonoToMultiConverter.cpp
+    src/flowgraph/MultiToMonoConverter.cpp
     src/flowgraph/RampLinear.cpp
     src/flowgraph/SampleRateConverter.cpp
     src/flowgraph/SinkFloat.cpp
@@ -77,7 +79,7 @@ set_target_properties(oboe PROPERTIES CXX_STANDARD 14 CXX_STANDARD_REQUIRED TRUE
 
 # JUCE CHANGE ENDS HERE
 
-# Enable logging for debug builds
+# Enable logging of D,V for debug builds
 target_compile_definitions(oboe PUBLIC $<$<CONFIG:DEBUG>:OBOE_ENABLE_LOGGING=1>)
 
 target_link_libraries(oboe PRIVATE log OpenSLES)
