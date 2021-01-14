@@ -322,7 +322,7 @@ private:
             return cancelledError;
 
         int statusCode = 0;
-        auto urlStream = url.createInputStream (isPOST, nullptr, nullptr,
+        auto urlStream = url.createInputStream (isPOST, nullptr,
                                                 accountEnquiryTask->getExtraHeaders(),
                                                 5000, nullptr, &statusCode);
 

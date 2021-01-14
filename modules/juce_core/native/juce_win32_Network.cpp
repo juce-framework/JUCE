@@ -75,7 +75,7 @@ public:
                 return false;
         }
 
-        String address = url.toString (! isPost);
+        String address = url.toString (true);
 
         while (numRedirectsToFollow-- >= 0)
         {

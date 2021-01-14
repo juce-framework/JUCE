@@ -1101,7 +1101,7 @@ private:
     {
         jassert (connection == nullptr);
 
-        if (NSURL* nsURL = [NSURL URLWithString: juceStringToNS (url.toString (! isPost))])
+        if (NSURL* nsURL = [NSURL URLWithString: juceStringToNS (url.toString (true))])
         {
             if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: nsURL
                                                                    cachePolicy: NSURLRequestReloadIgnoringLocalCacheData

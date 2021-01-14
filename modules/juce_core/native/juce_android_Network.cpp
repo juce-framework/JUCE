@@ -373,7 +373,7 @@ public:
         }
         else
         {
-            String address = url.toString (! isPost);
+            String address = url.toString (true);
 
             if (! address.contains ("://"))
                 address = "http://" + address;
