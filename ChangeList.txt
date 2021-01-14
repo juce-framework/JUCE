@@ -3,6 +3,10 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.7
+  - Fixed a macOS drawing issue
+  - Updated the DemoRunner bundle ID
+
 Version 6.0.6
   - Moved to the new CoreMIDI API on supported platforms
   - Added support for the "New Build System" in Xcode
