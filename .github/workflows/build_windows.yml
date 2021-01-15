@@ -13,8 +13,9 @@ jobs:
     - name: Build Debug
       shell: bash
       run: |
+        rm -Rf cmake-build
         cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target AudioPerformanceTests
+        cmake --build cmake-build --target AudioPerformanceTest
         cmake --build cmake-build --target AudioPluginHost
         cmake --build cmake-build --target BinaryBuilder
         cmake --build cmake-build --target DemoRunner
@@ -29,8 +30,9 @@ jobs:
     - name: Build Release
       shell: bash
       run: |
+        rm -Rf cmake-build
         cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target AudioPerformanceTests
+        cmake --build cmake-build --target AudioPerformanceTest
         cmake --build cmake-build --target AudioPluginHost
         cmake --build cmake-build --target BinaryBuilder
         cmake --build cmake-build --target DemoRunner
