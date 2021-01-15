@@ -1,0 +1,20 @@
+name: Windows Builds
+
+on:
+  push
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  windows_build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Build JUCE
+      shell: bash
+      run: |
+        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake --build cmake-build --target DemoRunner

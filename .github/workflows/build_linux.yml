@@ -1,0 +1,28 @@
+name: Linux Builds
+
+on:
+  push
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  linux_build:
+    runs-on: ubuntu-18.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Linux dependencies
+      run: |
+        sudo apt-get install zlib1g-dev libpng-dev libcurl3-dev libcurl4-openssl-dev libssl-dev
+        sudo apt-get install libasound2-dev libfreetype6-dev libxcomposite-dev libxcursor-dev
+        sudo apt-get install libxinerama-dev libxrandr-dev libxrender-dev libx11-dev
+        sudo apt-get install x11proto-randr-dev x11proto-render-dev x11proto-xinerama-dev
+        sudo apt-get install freeglut3-dev mesa-common-dev
+
+    - name: Build JUCE
+      shell: bash
+      run: |
+        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+        cmake --build cmake-build --target DemoRunner
