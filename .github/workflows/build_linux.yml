@@ -12,18 +12,18 @@ jobs:
         - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      working-directory: /juce
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-          cmake --build cmake-build --target AudioPerformanceTest -- -j4
+      run: cmake --build cmake-build --target AudioPerformanceTest --config Debug -- -j4
     - name: Build Release
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build cmake-build --target AudioPerformanceTest -- -j4
+      run: cmake --build cmake-build --target AudioPerformanceTest --config Release -- -j4
 
   AudioPluginHost:
     runs-on: ubuntu-18.04
@@ -33,18 +33,18 @@ jobs:
         - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      working-directory: /juce
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-          cmake --build cmake-build --target AudioPluginHost -- -j4
+      run: cmake --build cmake-build --target AudioPluginHost --config Debug -- -j4
     - name: Build Release
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build cmake-build --target AudioPluginHost -- -j4
+      run: cmake --build cmake-build --target AudioPluginHost --config Release -- -j4
 
   BinaryBuilder:
     runs-on: ubuntu-18.04
@@ -54,18 +54,18 @@ jobs:
         - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      working-directory: /juce
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-          cmake --build cmake-build --target BinaryBuilder -- -j4
+      run: cmake --build cmake-build --target BinaryBuilder --config Debug -- -j4
     - name: Build Release
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build cmake-build --target BinaryBuilder -- -j4
+      run: cmake --build cmake-build --target BinaryBuilder --config Release -- -j4
 
   DemoRunner:
     runs-on: ubuntu-18.04
@@ -75,18 +75,18 @@ jobs:
         - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      working-directory: /juce
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-          cmake --build cmake-build --target DemoRunner -- -j4
+      run: cmake --build cmake-build --target DemoRunner --config Debug -- -j4
     - name: Build Release
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build cmake-build --target DemoRunner -- -j4
+      run: cmake --build cmake-build --target DemoRunner --config Release -- -j4
 
   NetworkGraphicsDemo:
     runs-on: ubuntu-18.04
@@ -96,18 +96,18 @@ jobs:
         - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      working-directory: /juce
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-          cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
+      run: cmake --build cmake-build --target NetworkGraphicsDemo --config Debug -- -j4
     - name: Build Release
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
+      run: cmake --build cmake-build --target NetworkGraphicsDemo --config Release -- -j4
 
   Projucer:
     runs-on: ubuntu-18.04
@@ -117,18 +117,18 @@ jobs:
         - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      working-directory: /juce
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-          cmake --build cmake-build --target Projucer -- -j4
+      run: cmake --build cmake-build --target Projucer --config Debug -- -j4
     - name: Build Release
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build cmake-build --target Projucer -- -j4
+      run: cmake --build cmake-build --target Projucer --config Release -- -j4
 
   UnitTestRunner:
     runs-on: ubuntu-18.04
@@ -138,21 +138,23 @@ jobs:
         - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      working-directory: /juce
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-          cmake --build cmake-build --target UnitTestRunner -- -j4
+      run: cmake --build cmake-build --target UnitTestRunner --config Debug -- -j4
     - name: Unit Tests Debug
       shell: bash
+      working-directory: /juce
       run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
     - name: Build Release
       shell: bash
       working-directory: /juce
-      run: |
-          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-          cmake --build cmake-build --target UnitTestRunner -- -j4
+      run: cmake --build cmake-build --target UnitTestRunner --config Release -- -j4
     - name: Unit Tests Release
       shell: bash
+      working-directory: /juce
       run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner

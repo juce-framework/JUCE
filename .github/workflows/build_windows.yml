@@ -8,109 +8,102 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target AudioPerformanceTest
+      run: cmake --build cmake-build --target AudioPerformanceTest --config Debug
     - name: Build Release
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target AudioPerformanceTest
+      run: cmake --build cmake-build --target AudioPerformanceTest --config Release
 
   AudioPluginHost:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Build Debug
+    - name: Configure
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target AudioPluginHost
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
+   - name: Build Debug
+      shell: bash
+      run: cmake --build cmake-build --target AudioPluginHost --config Debug
     - name: Build Release
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target AudioPluginHost
+      run: cmake --build cmake-build --target AudioPluginHost --config Release
 
   BinaryBuilder:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target BinaryBuilder
+      run: cmake --build cmake-build --target BinaryBuilder --config Debug
     - name: Build Release
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target BinaryBuilder
+      run: cmake --build cmake-build --target BinaryBuilder --config Release
 
   DemoRunner:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target DemoRunner
+      run: cmake --build cmake-build --target DemoRunner --config Debug
     - name: Build Release
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target DemoRunner
+      run: cmake --build cmake-build --target DemoRunner --config Release
 
   NetworkGraphicsDemo:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target NetworkGraphicsDemo
+      run: cmake --build cmake-build --target NetworkGraphicsDemo --config Debug
     - name: Build Release
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target NetworkGraphicsDemo
+      run: cmake --build cmake-build --target NetworkGraphicsDemo --config Release
 
   Projucer:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target Projucer
+      run: cmake --build cmake-build --target Projucer --config Debug
     - name: Build Release
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target Projucer
+      run: cmake --build cmake-build --target Projucer --config Release
 
   UnitTestRunner:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Configure
+      shell: bash
+      run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
     - name: Build Debug
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build --target UnitTestRunner
+      run: cmake --build cmake-build --target UnitTestRunner --config Debug
     - name: Unit Tests Debug
       shell: bash
-      run: cmake-build\extras\UnitTestRunner\UnitTestRunner_artefacts\Debug\UnitTestRunner.exe
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner.exe
     - name: Build Release
       shell: bash
-      run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build --target UnitTestRunner
+      run: cmake --build cmake-build --target UnitTestRunner --config Release
     - name: Unit Tests Release
       shell: bash
-      run: cmake-build\extras\UnitTestRunner\UnitTestRunner_artefacts\Release\UnitTestRunner.exe
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner.exe
