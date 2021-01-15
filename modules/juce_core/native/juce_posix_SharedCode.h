@@ -532,12 +532,12 @@ String SystemStats::getEnvironmentVariable (const String& name, const String& de
     return defaultValue;
 }
 
-bool SystemStats::setEnvironmentVariable(const String& name, const String& value)
+bool SystemStats::setEnvironmentVariable (const String& name, const String& value)
 {
     return ::setenv (name.toUTF8(), value.toUTF8(), 1) ? true : false;
 }
 
-bool SystemStats::removeEnvironmentVariable(const String& name)
+bool SystemStats::removeEnvironmentVariable (const String& name)
 {
     return ::unsetenv (name.toUTF8()) ? true : false;
 }
@@ -1122,7 +1122,7 @@ public:
                 }
             }
         }
-        
+
         startProcess(args, streamFlags, env, [](const String& exe, const Array<char*>& argv, const Array<char*>& env)
         {
             execve (exe.toRawUTF8(), argv.getRawDataPointer(), env.getRawDataPointer());
@@ -1131,9 +1131,6 @@ public:
 
     ~ActiveProcess()
     {
-        if (readHandle != nullptr)
-            fclose (readHandle);
-
         if (pipeHandle != 0)
             close (pipeHandle);
     }
@@ -1221,24 +1218,22 @@ public:
     {
         jassert (dest != nullptr && numBytes > 0);
 
-        #ifdef fdopen
-         #error // some crazy 3rd party headers (e.g. zlib) define this function as NULL!
-        #endif
-
-        if (readHandle == nullptr && childPID != 0)
-            readHandle = fdopen (pipeHandle, "r");
-
-        if (readHandle != nullptr)
+        if (pipeHandle != 0 && childPID != 0)
         {
             for (;;)
             {
-                auto numBytesRead = (int) fread (dest, 1, (size_t) numBytes, readHandle);
+                auto numBytesRead = (int) ::read (pipeHandle, dest, (size_t) numBytes);
 
-                if (numBytesRead > 0 || feof (readHandle))
+                if (numBytesRead >= 0)
+                {
+                    if (numBytesRead == 0)
+                        Thread::sleep(1);
+                    
                     return numBytesRead;
+                }
 
-                // signal occurred during fread() so try again
-                if (ferror (readHandle) && errno == EINTR)
+                // signal occurred during read() so try again
+                if (errno == EINTR)
                     continue;
 
                 break;
@@ -1276,7 +1271,6 @@ public:
     int childPID = 0;
     int pipeHandle = 0;
     int exitCode = -1;
-    FILE* readHandle = {};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ActiveProcess)
 };
