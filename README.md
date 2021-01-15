@@ -8,6 +8,10 @@ which supports exporting projects for Xcode (macOS and iOS), Visual Studio, Andr
 Code::Blocks, CLion and Linux Makefiles as well as containing a source code editor and
 live-coding engine which can be used for rapid prototyping.
 
+![macOS Builds](https://github.com/kunitoki/JUCE/workflows/macOS%20Builds/badge.svg)
+![Windows Builds](https://github.com/kunitoki/JUCE/workflows/Windows%20Builds/badge.svg)
+![Linux Builds](https://github.com/kunitoki/JUCE/workflows/Linux%20Builds/badge.svg)
+
 ## Getting Started
 
 The JUCE repository contains a [master](https://github.com/juce-framework/JUCE/tree/master)
