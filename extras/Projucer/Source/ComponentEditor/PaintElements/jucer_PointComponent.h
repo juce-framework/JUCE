@@ -57,10 +57,10 @@ public:
     void paint (Graphics& g) override
     {
         g.setColour (Colours::white);
-        g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 2.0f);
+        g.drawEllipse (2.0f, 2.0f, (float) getWidth() - 4.0f, (float) getHeight() - 4.0f, 2.0f);
 
         g.setColour (Colours::black);
-        g.drawEllipse (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 2.0f);
+        g.drawEllipse (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 2.0f);
     }
 
     //==============================================================================

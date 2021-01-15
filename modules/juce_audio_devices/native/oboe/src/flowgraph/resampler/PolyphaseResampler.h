@@ -25,8 +25,8 @@
 
 namespace resampler {
 /**
- * Resample that is optimized for a reduced ratio of sample rates.
- * All of the coefficients for eacxh possible phase value are precalculated.
+ * Resampler that is optimized for a reduced ratio of sample rates.
+ * All of the coefficients for each possible phase value are pre-calculated.
  */
 class PolyphaseResampler : public MultiChannelResampler {
 public:

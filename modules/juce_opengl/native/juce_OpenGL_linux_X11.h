@@ -126,13 +126,17 @@ public:
 
     ~NativeContext()
     {
-        juce_LinuxRemoveRepaintListener (component.getPeer(), &dummy);
-
-        if (embeddedWindow != 0)
+        if (auto* peer = component.getPeer())
         {
-            XWindowSystemUtilities::ScopedXLock xLock;
-            X11Symbols::getInstance()->xUnmapWindow (display, embeddedWindow);
-            X11Symbols::getInstance()->xDestroyWindow (display, embeddedWindow);
+            juce_LinuxRemoveRepaintListener (peer, &dummy);
+
+            if (embeddedWindow != 0)
+            {
+                XWindowSystemUtilities::ScopedXLock xLock;
+                X11Symbols::getInstance()->xUnmapWindow (display, embeddedWindow);
+                X11Symbols::getInstance()->xDestroyWindow (display, embeddedWindow);
+                X11Symbols::getInstance()->xSync (display, True);
+            }
         }
 
         if (bestVisual != nullptr)
@@ -233,7 +237,7 @@ private:
     GLXContext renderContext = {};
     Window embeddedWindow = {};
 
-    int swapFrames = 0;
+    int swapFrames = 1;
     Rectangle<int> bounds;
     XVisualInfo* bestVisual = nullptr;
     void* contextToShareWith;

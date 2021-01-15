@@ -485,7 +485,7 @@ public:
                 if (total != 0 || ! isRunning())
                     break;
 			
-                Thread::yield();
+                Thread::sleep (1);
             }
             else
             {

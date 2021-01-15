@@ -18,11 +18,11 @@
 #include "FlowGraphNode.h"
 #include "MonoToMultiConverter.h"
 
-using namespace flowgraph;
+using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 
-MonoToMultiConverter::MonoToMultiConverter(int32_t channelCount)
+MonoToMultiConverter::MonoToMultiConverter(int32_t outputChannelCount)
         : input(*this, 1)
-        , output(*this, channelCount) {
+        , output(*this, outputChannelCount) {
 }
 
 MonoToMultiConverter::~MonoToMultiConverter() { }

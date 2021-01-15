@@ -32,34 +32,77 @@ namespace
 {
     static const char* const iOSDefaultVersion = "9.3";
     static const StringArray iOSVersions { "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                           "11.0", "12.0", "13.0" };
+                                           "11.0", "12.0", "13.0", "14.0" };
 
-    static const int oldestDeploymentTarget  = 7;
-    static const int defaultDeploymentTarget = 11;
-    static const int oldestSDKVersion        = 11;
-    static const int currentSDKVersion       = 15;
-    static const int minimumAUv3SDKVersion   = 11;
+    enum class MacOSVersion
+    {
+        v10_7,
+        v10_8,
+        v10_9,
+        v10_10,
+        v10_11,
+        v10_12,
+        v10_13,
+        v10_14,
+        v10_15,
+        v10_16,
+        v11_0,
+        v11_1,
+    };
 
-    static String getVersionName    (int version)  { return "10." + String (version); }
-    static String getSDKDisplayName (int version)  { return getVersionName (version) + " SDK"; }
-    static String getSDKRootName    (int version)  { return "macosx" + getVersionName (version); }
+    static const char* const getName (MacOSVersion m)
+    {
+        switch (m)
+        {
+            case MacOSVersion::v10_7:   return "10.7";
+            case MacOSVersion::v10_8:   return "10.8";
+            case MacOSVersion::v10_9:   return "10.9";
+            case MacOSVersion::v10_10:  return "10.10";
+            case MacOSVersion::v10_11:  return "10.11";
+            case MacOSVersion::v10_12:  return "10.12";
+            case MacOSVersion::v10_13:  return "10.13";
+            case MacOSVersion::v10_14:  return "10.14";
+            case MacOSVersion::v10_15:  return "10.15";
+            case MacOSVersion::v10_16:  return "10.16";
+            case MacOSVersion::v11_0:   return "11.0";
+            case MacOSVersion::v11_1:   return "11.1";
+            default:                    break;
+        }
+
+        jassertfalse;
+        return "";
+    }
+
+    static String getDisplayName (MacOSVersion m) { return getName (m) + String (" SDK"); }
+    static String getRootName    (MacOSVersion m) { return String ("macosx") + getName (m); }
+
+    constexpr auto nextMacOSVersion       = (MacOSVersion) ((int) MacOSVersion::v11_1 + 1);
+    constexpr auto oldestDeploymentTarget = MacOSVersion::v10_7;
+    constexpr auto macOSDefaultVersion    = MacOSVersion::v10_11;
+    constexpr auto oldestSDKVersion       = MacOSVersion::v10_11;
+    constexpr auto minimumAUv3SDKVersion  = MacOSVersion::v10_11;
+
+    static MacOSVersion& operator++ (MacOSVersion& m)
+    {
+        return m = (MacOSVersion) ((int) m + 1);
+    }
 
     static String getOSXSDKVersion (const String& sdkVersion)
     {
-        for (int v = oldestSDKVersion; v <= currentSDKVersion; ++v)
-            if (sdkVersion == getSDKDisplayName (v))
-                return getSDKRootName (v);
+        for (auto v = oldestSDKVersion; v != nextMacOSVersion; ++v)
+            if (sdkVersion == getDisplayName (v))
+                return getRootName (v);
 
         return "macosx";
     }
 
-    template<class ContainerType>
-    static ContainerType getSDKChoiceList (int oldestVersion, bool displayName)
+    template <class ContainerType>
+    static ContainerType getSDKChoiceList (MacOSVersion oldestVersion, bool displayName)
     {
         ContainerType container;
 
-        for (int v = oldestVersion; v <= currentSDKVersion; ++v)
-            container.add (displayName ? getSDKDisplayName (v) : getVersionName (v));
+        for (auto v = oldestVersion; v != nextMacOSVersion; ++v)
+            container.add (displayName ? getDisplayName (v) : getName (v));
 
         return container;
     }
@@ -76,7 +119,7 @@ class XcodeProjectExporter  : public ProjectExporter
 {
 public:
     //==============================================================================
-    static String getDisplayNameMac()        { return "Xcode (MacOSX)"; }
+    static String getDisplayNameMac()        { return "Xcode (macOS)"; }
     static String getDisplayNameiOS()        { return "Xcode (iOS)"; }
 
     static String getTargetFolderNameMac()   { return "MacOSX"; }
@@ -94,6 +137,7 @@ public:
           pListPrefixHeaderValue                       (settings, Ids::pListPrefixHeader,                       getUndoManager()),
           pListPreprocessValue                         (settings, Ids::pListPreprocess,                         getUndoManager()),
           subprojectsValue                             (settings, Ids::xcodeSubprojects,                        getUndoManager()),
+          validArchsValue                              (settings, Ids::xcodeValidArchs,                         getUndoManager(), getAllArchs(), ","),
           extraFrameworksValue                         (settings, Ids::extraFrameworks,                         getUndoManager()),
           frameworkSearchPathsValue                    (settings, Ids::frameworkSearchPaths,                    getUndoManager()),
           extraCustomFrameworksValue                   (settings, Ids::extraCustomFrameworks,                   getUndoManager()),
@@ -117,8 +161,8 @@ public:
           cameraPermissionNeededValue                  (settings, Ids::cameraPermissionNeeded,                  getUndoManager()),
           cameraPermissionTextValue                    (settings, Ids::cameraPermissionText,                    getUndoManager(),
                                                         "This app requires access to the camera to function correctly."),
-          iosBluetoothPermissionNeededValue            (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
-          iosBluetoothPermissionTextValue              (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
+          bluetoothPermissionNeededValue               (settings, Ids::iosBluetoothPermissionNeeded,            getUndoManager()),
+          bluetoothPermissionTextValue                 (settings, Ids::iosBluetoothPermissionText,              getUndoManager(),
                                                         "This app requires access to Bluetooth to function correctly."),
           sendAppleEventsPermissionNeededValue         (settings, Ids::sendAppleEventsPermissionNeeded, getUndoManager()),
           sendAppleEventsPermissionTextValue           (settings, Ids::sendAppleEventsPermissionText, getUndoManager(),
@@ -139,7 +183,9 @@ public:
           keepCustomXcodeSchemesValue                  (settings, Ids::keepCustomXcodeSchemes,                  getUndoManager()),
           useHeaderMapValue                            (settings, Ids::useHeaderMap,                            getUndoManager()),
           customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
-          exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager())
+          exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager()),
+          suppressPlistResourceUsageValue              (settings, Ids::suppressPlistResourceUsage,              getUndoManager()),
+          useLegacyBuildSystemValue                    (settings, Ids::useLegacyBuildSystem,                    getUndoManager())
     {
         if (iOS)
         {
@@ -184,6 +230,8 @@ public:
                                                                        "UIInterfaceOrientationLandscapeLeft",
                                                                        "UIInterfaceOrientationLandscapeRight" }; }
 
+    Array<var> getAllArchs() const                          { return { "i386", "x86_64", "arm64", "arm64e"}; }
+
     Array<var> getiPhoneScreenOrientations() const          { return *iPhoneScreenOrientationValue.get().getArray(); }
     Array<var> getiPadScreenOrientations() const            { return *iPadScreenOrientationValue.get().getArray(); }
 
@@ -199,14 +247,16 @@ public:
     bool isAppSandboxInhertianceEnabled() const             { return appSandboxInheritanceValue.get(); }
     Array<var> getAppSandboxOptions() const                 { return *appSandboxOptionsValue.get().getArray(); }
 
+    Array<var> getValidArchs() const                        { return *validArchsValue.get().getArray(); }
+
     bool isMicrophonePermissionEnabled() const              { return microphonePermissionNeededValue.get(); }
     String getMicrophonePermissionsTextString() const       { return microphonePermissionsTextValue.get(); }
 
     bool isCameraPermissionEnabled() const                  { return cameraPermissionNeededValue.get(); }
     String getCameraPermissionTextString() const            { return cameraPermissionTextValue.get(); }
 
-    bool isBluetoothPermissionEnabled() const               { return iosBluetoothPermissionNeededValue.get(); }
-    String getBluetoothPermissionTextString() const         { return iosBluetoothPermissionTextValue.get(); }
+    bool isBluetoothPermissionEnabled() const               { return bluetoothPermissionNeededValue.get(); }
+    String getBluetoothPermissionTextString() const         { return bluetoothPermissionTextValue.get(); }
 
     bool isSendAppleEventsPermissionEnabled() const         { return sendAppleEventsPermissionNeededValue.get(); }
     String getSendAppleEventsPermissionTextString() const   { return sendAppleEventsPermissionTextValue.get(); }
@@ -221,6 +271,10 @@ public:
     bool isFileSharingEnabled() const                       { return uiFileSharingEnabledValue.get(); }
     bool isDocumentBrowserEnabled() const                   { return uiSupportsDocumentBrowserValue.get(); }
     bool isStatusBarHidden() const                          { return uiStatusBarHiddenValue.get(); }
+
+    bool getSuppressPlistResourceUsage() const              { return suppressPlistResourceUsageValue.get(); }
+
+    bool shouldUseLegacyBuildSystem() const                 { return useLegacyBuildSystemValue.get(); }
 
     String getDocumentExtensionsString() const              { return documentExtensionsValue.get(); }
 
@@ -248,6 +302,10 @@ public:
     bool isLinux() const override                           { return false; }
     bool isOSX() const override                             { return ! iOS; }
     bool isiOS() const override                             { return iOS; }
+
+    bool supportsPrecompiledHeaders() const override        { return true; }
+
+    String getNewLineString() const override                { return "\n"; }
 
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
@@ -339,8 +397,17 @@ public:
                        "Using a leading '.' is optional, and the extensions are not case-sensitive.");
         }
 
+        props.add (new ChoicePropertyComponent (useLegacyBuildSystemValue, "Use Legacy Build System"),
+                   "Enable this to use the deprecated \"Legacy Build System\" in Xcode 10 and above. "
+                   "This may fix build issues that were introduced with the new build system in Xcode 10 and subsequently fixed in Xcode 10.2, "
+                   "however the new build system is recommended for apps targeting Apple silicon.");
+
         if (isOSX())
         {
+            props.add (new MultiChoicePropertyComponent (validArchsValue, "Valid Architectures", getAllArchs(), getAllArchs()),
+                       "The full set of architectures which this project may target. "
+                       "Each configuration will build for the intersection of this property, and the per-configuration macOS Architecture property");
+
             props.add (new ChoicePropertyComponent (appSandboxValue, "Use App Sandbox"),
                        "Enable this to use the app sandbox.");
 
@@ -455,17 +522,15 @@ public:
                                                             "Camera Access Text", 1024, false),
                    "A short description of why your app requires camera access.");
 
-        if (iOS)
-        {
-            props.add (new ChoicePropertyComponent (iosBluetoothPermissionNeededValue, "Bluetooth Access"),
-                       "Enable this to allow your app to use Bluetooth on iOS 13.0 and above. "
-                       "The user of your app will be prompted to grant Bluetooth access permissions.");
+        props.add (new ChoicePropertyComponent (bluetoothPermissionNeededValue, "Bluetooth Access"),
+                   "Enable this to allow your app to use Bluetooth on iOS 13.0 and above, and macOS 11.0 and above. "
+                   "The user of your app will be prompted to grant Bluetooth access permissions.");
 
-            props.add (new TextPropertyComponentWithEnablement (iosBluetoothPermissionTextValue, iosBluetoothPermissionNeededValue,
-                                                                "Bluetooth Access Text", 1024, false),
-                       "A short description of why your app requires Bluetooth access.");
-        }
-        else
+        props.add (new TextPropertyComponentWithEnablement (bluetoothPermissionTextValue, bluetoothPermissionNeededValue,
+                                                            "Bluetooth Access Text", 1024, false),
+                   "A short description of why your app requires Bluetooth access.");
+
+        if (! iOS)
         {
             props.add (new ChoicePropertyComponent (sendAppleEventsPermissionNeededValue, "Send Apple Events"),
                        "Enable this to allow your app to send Apple events. "
@@ -514,6 +579,12 @@ public:
 
         props.add (new TextPropertyComponent (pListPrefixHeaderValue, "PList Prefix Header", 512, false),
                    "Header file containing definitions used in plist file (see PList Preprocess).");
+
+        props.add (new ChoicePropertyComponent (suppressPlistResourceUsageValue, "Suppress AudioUnit Plist resourceUsage Key"),
+                   "Suppress the resourceUsage key in the target's generated Plist. This is useful for AU"
+                   " plugins that must access resources which cannot be declared in the resourceUsage block, such"
+                   " as UNIX domain sockets. In particular, PACE-protected AU plugins may require this option to be enabled"
+                   " in order for the plugin to load in GarageBand.");
 
         props.add (new TextPropertyComponent (extraFrameworksValue, "Extra System Frameworks", 2048, false),
                    "A comma-separated list of extra system frameworks that should be added to the build. "
@@ -607,9 +678,6 @@ public:
                                         [this] (MemoryOutputStream& mo) { writeProjectFile (mo); });
 
         writeInfoPlistFiles();
-
-        // This forces the project to use the legacy build system to workaround Xcode 10 issues,
-        // hopefully these will be fixed in the future and this can be removed...
         writeWorkspaceSettings();
 
         // Deleting the .rsrc files can be needed to force Xcode to update the version number.
@@ -641,7 +709,7 @@ public:
         if (hasInvalidPostBuildScript())
         {
             String alertWindowText = iOS ? "Your Xcode (iOS) Exporter settings use an invalid post-build script. Click 'Update' to remove it."
-                                         : "Your Xcode (OSX) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
+                                         : "Your Xcode (macOS) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
                                            "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX/RTAS Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
                                            "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
 
@@ -680,7 +748,7 @@ protected:
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
               osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager()),
-              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), getSDKDisplayName (defaultDeploymentTarget)),
+              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), getDisplayName (macOSDefaultVersion)),
               iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iOSDefaultVersion),
               osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
@@ -723,23 +791,23 @@ protected:
             }
             else
             {
-                props.add (new ChoicePropertyComponent (osxSDKVersion, "OSX Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
-                                                                                               getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
+                props.add (new ChoicePropertyComponent (osxSDKVersion, "macOS Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
+                                                                                                 getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
                            "The version of the macOS SDK to link against. If \"Default\" is selected then the Xcode default will be used.");
 
-                props.add (new ChoicePropertyComponent (osxDeploymentTarget, "OSX Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
-                                                                                                      getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
-                           "The minimum version of OSX that the target binary will be compatible with.");
+                props.add (new ChoicePropertyComponent (osxDeploymentTarget, "macOS Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
+                                                                                                        getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
+                           "The minimum version of macOS that the target binary will be compatible with.");
 
-                props.add (new ChoicePropertyComponent (osxArchitecture, "OSX Architecture",
-                                                        { "Native architecture of build machine", "Universal Binary (32-bit)", "Universal Binary (32/64-bit)", "64-bit Intel" },
-                                                        { osxArch_Native,                          osxArch_32BitUniversal,      osxArch_64BitUniversal,         osxArch_64Bit }),
-                           "The type of OSX binary that will be produced.");
+                props.add (new ChoicePropertyComponent (osxArchitecture, "macOS Architecture",
+                                                        { "Native architecture of build machine", "Standard 32-bit",        "Standard 32/64-bit",   "Standard 64-bit" },
+                                                        { osxArch_Native,                          osxArch_32BitUniversal,  osxArch_64BitUniversal, osxArch_64Bit }),
+                           "The type of macOS binary that will be produced.");
             }
 
             props.add (new TextPropertyComponent (customXcodeFlags, "Custom Xcode Flags", 8192, true),
                        "A comma-separated list of custom Xcode setting flags which will be appended to the list of generated flags, "
-                       "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5, VALID_ARCHS = \"ppc i386 x86_64\"");
+                       "e.g. MACOSX_DEPLOYMENT_TARGET_i386 = 10.5");
 
             props.add (new TextPropertyComponent (plistPreprocessorDefinitions, "PList Preprocessor Definitions", 2048, true),
                        "Preprocessor definitions used during PList preprocessing (see PList Preprocess).");
@@ -1093,7 +1161,7 @@ public:
             v->setProperty ("isa", "PBXFileReference", nullptr);
             v->setProperty ("explicitFileType", fileType, nullptr);
             v->setProperty ("includeInIndex", (int) 0, nullptr);
-            v->setProperty ("path", sanitisePath (binaryName), nullptr);
+            v->setProperty ("path", binaryName, nullptr);
             v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
             owner.pbxFileReferences.add (v);
         }
@@ -1309,10 +1377,41 @@ public:
             else if (arch == osxArch_64BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_64_BIT)\"");
             else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
 
+            if (! owner.isiOS())
+            {
+                auto validArchs = owner.getValidArchs();
+
+                if (! validArchs.isEmpty())
+                {
+                    const auto joined = std::accumulate (validArchs.begin(),
+                                                         validArchs.end(),
+                                                         String(),
+                                                         [] (String str, const var& v) { return str + v.toString() + " "; });
+
+                    s.set ("VALID_ARCHS", joined.trim().quoted());
+                }
+            }
+
             StringArray headerPaths (getHeaderSearchPaths (config));
+
+            s.set ("MTL_HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
+
             headerPaths.add ("\"$(inherited)\"");
             s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
             s.set ("USE_HEADERMAP", String (static_cast<bool> (config.exporter.settings.getProperty ("useHeaderMap")) ? "YES" : "NO"));
+
+            auto frameworksToSkip = [this]() -> String
+            {
+                const String openGLFramework (owner.iOS ? "OpenGLES" : "OpenGL");
+
+                if (owner.xcodeFrameworks.contains (openGLFramework))
+                    return openGLFramework;
+
+                return {};
+            }();
+
+            if (frameworksToSkip.isNotEmpty())
+                s.set ("VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS", frameworksToSkip);
 
             auto frameworkSearchPaths = getFrameworkSearchPaths (config);
 
@@ -1320,6 +1419,23 @@ public:
                 s.set ("FRAMEWORK_SEARCH_PATHS", String ("(") + frameworkSearchPaths.joinIntoString (", ") + ", \"$(inherited)\")");
 
             s.set ("GCC_OPTIMIZATION_LEVEL", config.getGCCOptimisationFlag());
+
+            if (config.shouldUsePrecompiledHeaderFile())
+            {
+                s.set ("GCC_PRECOMPILE_PREFIX_HEADER", "YES");
+
+                auto pchFileContent = config.getPrecompiledHeaderFileContent();
+
+                if (pchFileContent.isNotEmpty())
+                {
+                    auto pchFilename = config.getPrecompiledHeaderFilename() + ".h";
+
+                    build_tools::writeStreamToFile (owner.getTargetFolder().getChildFile (pchFilename),
+                                                    [&] (MemoryOutputStream& mo) { mo << pchFileContent; });
+
+                    s.set ("GCC_PREFIX_HEADER", pchFilename);
+                }
+            }
 
             if (shouldCreatePList())
             {
@@ -1353,7 +1469,6 @@ public:
 
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
-
 
             auto flags = (config.getRecommendedCompilerWarningFlags().joinIntoString (" ")
                              + " " + owner.getExtraCompilerFlagsString()).trim();
@@ -1404,10 +1519,11 @@ public:
 
                 build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
                                                       build_tools::RelativePath::projectFolder);
-                configurationBuildDir = sanitisePath (binaryPath.rebased (owner.projectFolder,
-                                                                          owner.getTargetFolder(),
-                                                                          build_tools::RelativePath::buildTargetFolder)
-                                                                .toUnixStyle());
+
+                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
+                                                                        owner.getTargetFolder(),
+                                                                        build_tools::RelativePath::buildTargetFolder)
+                                                              .toUnixStyle());
             }
 
             s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
@@ -1655,6 +1771,7 @@ public:
             options.auMainType                      = owner.project.getAUMainTypeString();
             options.isAuSandboxSafe                 = owner.project.isAUSandBoxSafe();
             options.isPluginSynth                   = owner.project.isPluginSynth();
+            options.suppressResourceUsage           = owner.getSuppressPlistResourceUsage();
 
             options.write (infoPlistFile);
         }
@@ -1688,8 +1805,7 @@ public:
 
             for (auto& path : paths)
             {
-                // Xcode 10 can't deal with search paths starting with "~" so we need to replace them here...
-                path = owner.replacePreprocessorTokens (config, sanitisePath (path));
+                path = owner.replacePreprocessorTokens (config, expandPath (path));
 
                 if (path.containsChar (' '))
                     path = "\"\\\"" + path + "\\\"\""; // crazy double quotes required when there are spaces..
@@ -1813,13 +1929,14 @@ public:
 
         String getOSXDeploymentTarget (const String& deploymentTarget) const
         {
-            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion : oldestDeploymentTarget);
+            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
+                                                                 : oldestDeploymentTarget);
 
-            for (int v = minVersion; v <= currentSDKVersion; ++v)
-                if (deploymentTarget == getSDKDisplayName (v))
-                    return getVersionName (v);
+            for (auto v = minVersion; v != nextMacOSVersion; ++v)
+                if (deploymentTarget == getDisplayName (v))
+                    return ::getName (v);
 
-            return getVersionName (minVersion);
+            return ::getName (minVersion);
         }
 
         //==============================================================================
@@ -1849,6 +1966,7 @@ private:
 
     ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
                      subprojectsValue,
+                     validArchsValue,
                      extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
                      postbuildCommandValue, prebuildCommandValue,
                      duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
@@ -1857,17 +1975,17 @@ private:
                      hardenedRuntimeValue, hardenedRuntimeOptionsValue,
                      microphonePermissionNeededValue, microphonePermissionsTextValue,
                      cameraPermissionNeededValue, cameraPermissionTextValue,
-                     iosBluetoothPermissionNeededValue, iosBluetoothPermissionTextValue,
+                     bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
                      sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
-                     exporterBundleIdentifierValue;
+                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;
 
-    static String sanitisePath (const String& path)
+    static String expandPath (const String& path)
     {
-        if (path.startsWithChar ('~'))
-            return "$(HOME)" + path.substring (1);
+        if (! File::isAbsolutePath (path))  return "$(SRCROOT)/" + path;
+        if (path.startsWithChar ('~'))      return "$(HOME)" + path.substring (1);
 
         return path;
     }
@@ -1907,8 +2025,7 @@ private:
                     writeDefaultLaunchStoryboardFile();
                 else if (getProject().getProjectFolder().getChildFile (customLaunchStoryboard).existsAsFile())
                     addLaunchStoryboardFileReference (build_tools::RelativePath (customLaunchStoryboard, build_tools::RelativePath::projectFolder)
-                                                          .rebased (getProject().getProjectFolder(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
-                                                          .toUnixStyle());
+                                                          .rebased (getProject().getProjectFolder(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder));
             }
         }
         else
@@ -1985,7 +2102,7 @@ private:
 
         build_tools::RelativePath menuNibPath (menuNibFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
         addFileReference (menuNibPath.toUnixStyle());
-        resourceIDs.add (addBuildFile (menuNibPath, false, false));
+        resourceIDs.add (addBuildFile (FileOptions().withRelativePath (menuNibPath)));
         resourceFileRefs.add (createFileRefID (menuNibPath));
     }
 
@@ -1995,7 +2112,7 @@ private:
         {
             build_tools::RelativePath iconPath (iconFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
             addFileReference (iconPath.toUnixStyle());
-            resourceIDs.add (addBuildFile (iconPath, false, false));
+            resourceIDs.add (addBuildFile (FileOptions().withRelativePath (iconPath)));
             resourceFileRefs.add (createFileRefID (iconPath));
         }
     }
@@ -2148,7 +2265,8 @@ private:
 
             auto path = scriptPath.toUnixStyle();
             auto refID = addFileReference (path);
-            auto fileID = addBuildFile (path, refID, false, false);
+            auto fileID = addBuildFile (FileOptions().withPath (path)
+                                                     .withFileRefID (refID));
 
             resourceIDs.add (fileID);
             resourceFileRefs.add (refID);
@@ -2213,19 +2331,28 @@ private:
                                                     .getChildFile ("xcshareddata")
                                                     .getChildFile ("WorkspaceSettings.xcsettings");
 
-        build_tools::writeStreamToFile (settingsFile, [] (MemoryOutputStream& mo)
+        if (shouldUseLegacyBuildSystem())
         {
-            mo.setNewLineString ("\n");
+            build_tools::writeStreamToFile (settingsFile, [this] (MemoryOutputStream& mo)
+            {
+                mo.setNewLineString (getNewLineString());
 
-            mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << newLine
-               << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
-               << "<plist version=\"1.0\">"                    << newLine
-               << "<dict>"                                     << newLine
-               << "\t" << "<key>BuildSystemType</key>"         << newLine
-               << "\t" << "<string>Original</string>"          << newLine
-               << "</dict>"                                    << newLine
-               << "</plist>"                                   << newLine;
-        });
+                mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"              << newLine
+                   << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
+                   << "<plist version=\"1.0\">"                                 << newLine
+                   << "<dict>"                                                  << newLine
+                   << "\t" << "<key>BuildSystemType</key>"                      << newLine
+                   << "\t" << "<string>Original</string>"                       << newLine
+                   << "\t" << "<key>DisableBuildSystemDeprecationWarning</key>" << newLine
+                   << "\t" << "<true/>"                                         << newLine
+                   << "</dict>"                                                 << newLine
+                   << "</plist>"                                                << newLine;
+            });
+        }
+        else
+        {
+            settingsFile.deleteFile();
+        }
     }
 
     void writeInfoPlistFiles() const
@@ -2273,7 +2400,7 @@ private:
             searchPath = srcRoot + searchPath;
         }
 
-        return sanitisePath (searchPath);
+        return expandPath (searchPath);
     }
 
     String getCodeSigningIdentity (const XcodeBuildConfiguration& config) const
@@ -2489,13 +2616,8 @@ private:
 
         for (const auto& subprojectInfo : subprojects)
         {
-            String subprojectPath (subprojectInfo.first);
-
-            if (! subprojectPath.endsWith (".xcodeproj"))
-                subprojectPath += ".xcodeproj";
-
-            File subprojectFile = File::isAbsolutePath (subprojectPath) ? subprojectPath
-                                                                        : getTargetFolder().getChildFile (subprojectPath);
+            auto subprojectFile = getTargetFolder().getChildFile (subprojectInfo.first.endsWith (".xcodeproj") ? subprojectInfo.first
+                                                                                                               : subprojectInfo.first + ".xcodeproj");
 
             if (! subprojectFile.isDirectory())
                 continue;
@@ -2516,15 +2638,19 @@ private:
             if (availableBuildProducts.empty())
                 continue;
 
-            auto subprojectFileType = getFileType (build_tools::RelativePath (subprojectFile.getFullPathName(), build_tools::RelativePath::buildTargetFolder));
-            auto subprojectFileID = addFileOrFolderReference (subprojectFile.getFullPathName(), "<group>", subprojectFileType);
+            auto subprojectPath = build_tools::RelativePath (subprojectFile,
+                                                             getTargetFolder(),
+                                                             build_tools::RelativePath::buildTargetFolder).toUnixStyle();
+
+            auto subprojectFileType = getFileType (subprojectPath);
+            auto subprojectFileID = addFileOrFolderReference (subprojectPath, "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
             StringArray proxyIDs;
 
             for (auto& buildProduct : availableBuildProducts)
             {
-                auto buildProductFileType = getFileType (build_tools::RelativePath (buildProduct.second, build_tools::RelativePath::projectFolder));
+                auto buildProductFileType = getFileType (buildProduct.second);
 
                 auto containerID = addContainerItemProxy (subprojectFileID, buildProduct.first);
                 auto proxyID = addReferenceProxy (containerID, buildProduct.second, buildProductFileType);
@@ -2532,7 +2658,9 @@ private:
 
                 if (buildProductFileType == "archive.ar" || buildProductFileType == "wrapper.framework")
                 {
-                    auto buildFileID = addBuildFile (buildProduct.second, proxyID, false, true);
+                    auto buildFileID = addBuildFile (FileOptions().withPath (buildProduct.second)
+                                                                  .withFileRefID (proxyID)
+                                                                  .withInhibitWarningsEnabled (true));
 
                     for (auto& target : targets)
                         target->frameworkIDs.add (buildFileID);
@@ -2579,7 +2707,9 @@ private:
 
         addFileOrFolderReference (folderPath, "<group>", fileType);
 
-        resourceIDs.add (addBuildFile (folderPath, fileRefID, false, false));
+        resourceIDs.add (addBuildFile (FileOptions().withPath (folderPath)
+                                                    .withFileRefID (fileRefID)));
+
         resourceFileRefs.add (createFileRefID (folderPath));
     }
 
@@ -2624,38 +2754,6 @@ private:
         output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
     }
 
-    String addBuildFile (const String& path, const String& fileRefID, bool addToSourceBuildPhase, bool inhibitWarnings,
-                         XcodeTarget* xcodeTarget = nullptr, String compilerFlags = {}) const
-    {
-        auto fileID = createID (path + "buildref");
-
-        if (addToSourceBuildPhase)
-        {
-            if (xcodeTarget != nullptr)
-                xcodeTarget->sourceIDs.add (fileID);
-            else
-                sourceIDs.add (fileID);
-        }
-
-        auto* v = new ValueTree (fileID);
-        v->setProperty ("isa", "PBXBuildFile", nullptr);
-        v->setProperty ("fileRef", fileRefID, nullptr);
-
-        if (inhibitWarnings)
-            compilerFlags += " -w";
-
-        if (compilerFlags.isNotEmpty())
-            v->setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags.trim() + "\"; }", nullptr);
-
-        pbxBuildFiles.add (v);
-        return fileID;
-    }
-
-    String addBuildFile (const build_tools::RelativePath& path, bool addToSourceBuildPhase, bool inhibitWarnings, XcodeTarget* xcodeTarget = nullptr) const
-    {
-        return addBuildFile (path.toUnixStyle(), createFileRefID (path), addToSourceBuildPhase, inhibitWarnings, xcodeTarget);
-    }
-
     String addFileReference (String pathString) const
     {
         String sourceTree ("SOURCE_ROOT");
@@ -2671,9 +2769,7 @@ private:
             sourceTree = "<absolute>";
         }
 
-        auto fileType = getFileType (path);
-
-        return addFileOrFolderReference (pathString, sourceTree, fileType);
+        return addFileOrFolderReference (pathString, sourceTree, getFileType (pathString));
     }
 
     void checkAndAddFileReference (std::unique_ptr<ValueTree> v) const
@@ -2747,8 +2843,34 @@ public:
     }
 
 private:
-    static String getFileType (const build_tools::RelativePath& file)
+    struct FileOptions
     {
+        FileOptions& withPath (const String& p)                             { path = p;                  return *this; }
+        FileOptions& withRelativePath (const build_tools::RelativePath& p)  { path = p.toUnixStyle();    return *this; }
+        FileOptions& withFileRefID (const String& fid)                      { fileRefID = fid;           return *this; }
+        FileOptions& withCompilerFlags (const String& f)                    { compilerFlags = f;         return *this; }
+        FileOptions& withCompilationEnabled (bool e)                        { compile = e;               return *this; }
+        FileOptions& withAddToBinaryResourcesEnabled (bool e)               { addToBinaryResources = e;  return *this; }
+        FileOptions& withAddToXcodeResourcesEnabled (bool e)                { addToXcodeResources = e;   return *this; }
+        FileOptions& withInhibitWarningsEnabled (bool e)                    { inhibitWarnings = e;       return *this; }
+        FileOptions& withSkipPCHEnabled (bool e)                            { skipPCH = e;               return *this; }
+        FileOptions& withXcodeTarget (XcodeTarget* t)                       { xcodeTarget = t;           return *this; }
+
+        String path;
+        String fileRefID;
+        String compilerFlags;
+        bool compile = false;
+        bool addToBinaryResources = false;
+        bool addToXcodeResources = false;
+        bool inhibitWarnings = false;
+        bool skipPCH = false;
+        XcodeTarget* xcodeTarget = nullptr;
+    };
+
+    static String getFileType (const String& filePath)
+    {
+        build_tools::RelativePath file (filePath, build_tools::RelativePath::unknown);
+
         if (file.hasFileExtension (cppFileExtensions))      return "sourcecode.cpp.cpp";
         if (file.hasFileExtension (".mm"))                  return "sourcecode.cpp.objcpp";
         if (file.hasFileExtension (".m"))                   return "sourcecode.c.objc";
@@ -2772,23 +2894,17 @@ private:
         return "file" + file.getFileExtension();
     }
 
-    String addFile (const build_tools::RelativePath& path, bool shouldBeCompiled, bool shouldBeAddedToBinaryResources,
-                    bool shouldBeAddedToXcodeResources, bool inhibitWarnings, XcodeTarget* xcodeTarget, const String& compilerFlags) const
+    String addFile (const FileOptions& opts) const
     {
-        auto pathAsString = path.toUnixStyle();
-        auto refID = addFileReference (path.toUnixStyle());
+        auto refID = addFileReference (opts.path);
 
-        if (shouldBeCompiled)
+        if (opts.compile || opts.addToXcodeResources)
         {
-            addBuildFile (pathAsString, refID, true, inhibitWarnings, xcodeTarget, compilerFlags);
-        }
-        else if (! shouldBeAddedToBinaryResources || shouldBeAddedToXcodeResources)
-        {
-            auto fileType = getFileType (path);
+            auto fileID = addBuildFile (FileOptions (opts).withFileRefID (refID));
 
-            if (shouldBeAddedToXcodeResources)
+            if (opts.addToXcodeResources)
             {
-                resourceIDs.add (addBuildFile (pathAsString, refID, false, false));
+                resourceIDs.add (fileID);
                 resourceFileRefs.add (refID);
             }
         }
@@ -2796,16 +2912,50 @@ private:
         return refID;
     }
 
+    String addBuildFile (const FileOptions& opts) const
+    {
+        auto fileID = createID (opts.path + "buildref");
+
+        if (opts.compile)
+        {
+            if (opts.xcodeTarget != nullptr)
+                opts.xcodeTarget->sourceIDs.add (fileID);
+            else
+                sourceIDs.add (fileID);
+        }
+
+        auto* v = new ValueTree (fileID);
+        v->setProperty ("isa", "PBXBuildFile", nullptr);
+        v->setProperty ("fileRef", opts.fileRefID.isEmpty() ? createFileRefID (opts.path)
+                                                            : opts.fileRefID,
+                        nullptr);
+
+        auto compilerFlags = [&opts]
+        {
+            return (opts.compilerFlags
+                    + (opts.inhibitWarnings ? " -w" : String())
+                    + (opts.skipPCH ? " -D" + BuildConfiguration::getSkipPrecompiledHeaderDefine() : String())).trim();
+        }();
+
+        if (compilerFlags.isNotEmpty())
+            v->setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags + "\"; }", nullptr);
+
+        pbxBuildFiles.add (v);
+        return fileID;
+    }
+
     String addRezFile (const Project::Item& projectItem, const build_tools::RelativePath& path) const
     {
-        auto pathAsString = path.toUnixStyle();
         auto refID = addFileReference (path.toUnixStyle());
 
         if (projectItem.isModuleCode())
         {
             if (auto* xcodeTarget = getTargetOfType (getProject().getTargetTypeFromFilePath (projectItem.getFile(), false)))
             {
-                auto rezFileID = addBuildFile (pathAsString, refID, false, false, xcodeTarget);
+                auto rezFileID = addBuildFile (FileOptions().withRelativePath (path)
+                                                            .withFileRefID (refID)
+                                                            .withXcodeTarget (xcodeTarget));
+
                 xcodeTarget->rezFileIDs.add (rezFileID);
 
                 return refID;
@@ -2837,7 +2987,7 @@ private:
         build_tools::overwriteFileIfDifferentOrThrow (entitlementsFile, options.getEntitlementsFileContent());
 
         build_tools::RelativePath entitlementsPath (entitlementsFile, getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
-        addFile (entitlementsPath, false, false, false, false, nullptr, {});
+        addFile (FileOptions().withRelativePath (entitlementsPath));
     }
 
     String addProjectItem (const Project::Item& projectItem) const
@@ -2881,12 +3031,14 @@ private:
             if (projectItem.isModuleCode() && projectItem.shouldBeCompiled())
                 xcodeTarget = getTargetOfType (project.getTargetTypeFromFilePath (projectItem.getFile(), false));
 
-            return addFile (path, projectItem.shouldBeCompiled(),
-                            projectItem.shouldBeAddedToBinaryResources(),
-                            projectItem.shouldBeAddedToXcodeResources(),
-                            projectItem.shouldInhibitWarnings(),
-                            xcodeTarget,
-                            compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get());
+            return addFile (FileOptions().withRelativePath (path)
+                                         .withCompilerFlags (compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get())
+                                         .withCompilationEnabled (projectItem.shouldBeCompiled())
+                                         .withAddToBinaryResourcesEnabled (projectItem.shouldBeAddedToBinaryResources())
+                                         .withAddToXcodeResourcesEnabled (projectItem.shouldBeAddedToXcodeResources())
+                                         .withInhibitWarningsEnabled (projectItem.shouldInhibitWarnings())
+                                         .withSkipPCHEnabled (isPCHEnabledForAnyConfigurations() && projectItem.shouldSkipPCH())
+                                         .withXcodeTarget (xcodeTarget));
         }
 
         return {};
@@ -2908,7 +3060,8 @@ private:
         addFileReference (((File::isAbsolutePath (frameworkName) || isRelativePath) ? "" : "${SDKROOT}/") + path);
         frameworkFileIDs.add (fileRefID);
 
-        return addBuildFile (path, fileRefID, false, false);
+        return addBuildFile (FileOptions().withPath (path)
+                                          .withFileRefID (fileRefID));
     }
 
     String addCustomFramework (String frameworkPath) const
@@ -2918,19 +3071,20 @@ private:
 
         auto fileRefID = createFileRefID (frameworkPath);
 
-        auto fileType = getFileType (build_tools::RelativePath (frameworkPath, build_tools::RelativePath::projectFolder));
+        auto fileType = getFileType (frameworkPath);
         addFileOrFolderReference (frameworkPath, "<group>", fileType);
 
         frameworkFileIDs.add (fileRefID);
 
-        return addBuildFile (frameworkPath, fileRefID, false, false);
+        return addBuildFile (FileOptions().withPath (frameworkPath)
+                                          .withFileRefID (fileRefID));
     }
 
     String addEmbeddedFramework (const String& path) const
     {
         auto fileRefID = createFileRefID (path);
 
-        auto fileType = getFileType (build_tools::RelativePath (path, build_tools::RelativePath::projectFolder));
+        auto fileType = getFileType (path);
         addFileOrFolderReference (path, "<group>", fileType);
 
         auto fileID = createID (path + "buildref");
@@ -3112,7 +3266,7 @@ private:
     {
         String attributes;
 
-        attributes << "{ LastUpgradeCheck = 1100; "
+        attributes << "{ LastUpgradeCheck = 1230; "
                    << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
                    <<"; ";
 
@@ -3143,13 +3297,16 @@ private:
 
         addLaunchStoryboardFileReference (build_tools::RelativePath (storyboardFile,
                                                                      getTargetFolder(),
-                                                                     build_tools::RelativePath::buildTargetFolder).toUnixStyle());
+                                                                     build_tools::RelativePath::buildTargetFolder));
     }
 
-    void addLaunchStoryboardFileReference (const String& relativePath) const
+    void addLaunchStoryboardFileReference (const build_tools::RelativePath& relativePath) const
     {
-        auto refID  = addFileReference (relativePath);
-        auto fileID = addBuildFile (relativePath, refID, false, false);
+        auto path = relativePath.toUnixStyle();
+
+        auto refID  = addFileReference (path);
+        auto fileID = addBuildFile (FileOptions().withPath (path)
+                                                 .withFileRefID (refID));
 
         resourceIDs.add (fileID);
         resourceFileRefs.add (refID);
@@ -3161,7 +3318,7 @@ private:
                                                                             getTargetFolder(),
                                                                             project.getProjectFilenameRootString());
         addFileReference (assetsPath.toUnixStyle());
-        resourceIDs.add (addBuildFile (assetsPath, false, false));
+        resourceIDs.add (addBuildFile (FileOptions().withRelativePath (assetsPath)));
         resourceFileRefs.add (createFileRefID (assetsPath));
     }
 
@@ -3194,8 +3351,8 @@ private:
     }
 
     String createFileRefID (const build_tools::RelativePath& path) const { return createFileRefID (path.toUnixStyle()); }
-    String createFileRefID (const String& path) const           { return createID ("__fileref_" + path); }
-    String getIDForGroup (const Project::Item& item) const      { return createID (item.getID()); }
+    String createFileRefID (const String& path) const                    { return createID ("__fileref_" + path); }
+    String getIDForGroup (const Project::Item& item) const               { return createID (item.getID()); }
 
     bool shouldFileBeCompiledByDefault (const File& file) const override
     {

@@ -532,10 +532,10 @@ void Graphics::fillCheckerBoard (Rectangle<float> area, float checkWidth, float 
 
             if (! clipped.isEmpty())
             {
-                const int checkNumX = (int) ((clipped.getX() - area.getX()) / checkWidth);
-                const int checkNumY = (int) ((clipped.getY() - area.getY()) / checkHeight);
-                const float startX = area.getX() + checkNumX * checkWidth;
-                const float startY = area.getY() + checkNumY * checkHeight;
+                const int checkNumX = (int) (((float) clipped.getX() - area.getX()) / checkWidth);
+                const int checkNumY = (int) (((float) clipped.getY() - area.getY()) / checkHeight);
+                const float startX = area.getX() + (float) checkNumX * checkWidth;
+                const float startY = area.getY() + (float) checkNumY * checkHeight;
                 const float right  = (float) clipped.getRight();
                 const float bottom = (float) clipped.getBottom();
 
@@ -666,7 +666,7 @@ void Graphics::drawImage (const Image& imageToDraw,
 {
     if (imageToDraw.isValid() && context.clipRegionIntersects (coordsToRectangle (dx, dy, dw, dh)))
         drawImageTransformed (imageToDraw.getClippedImage (coordsToRectangle (sx, sy, sw, sh)),
-                              AffineTransform::scale (dw / (float) sw, dh / (float) sh)
+                              AffineTransform::scale ((float) dw / (float) sw, (float) dh / (float) sh)
                                               .translated ((float) dx, (float) dy),
                               fillAlphaChannelWithCurrentBrush);
 }

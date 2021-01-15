@@ -47,7 +47,7 @@ public:
     const std::vector<Asset> assets;
 
 private:
-    VersionInfo() = default;
+    VersionInfo (String version, String releaseNotes, std::vector<Asset> assets);
 
     static std::unique_ptr<VersionInfo> fetch (const String&);
 };

@@ -33,8 +33,8 @@ public:
     GroupComponentHandler()
         : ComponentTypeHandler ("Group Box", "juce::GroupComponent", typeid (GroupComponent), 200, 150)
     {
-        registerColour (GroupComponent::outlineColourId, "outline", "outlinecol");
-        registerColour (GroupComponent::textColourId, "text", "textcol");
+        registerColour (juce::GroupComponent::outlineColourId, "outline", "outlinecol");
+        registerColour (juce::GroupComponent::textColourId, "text", "textcol");
     }
 
     Component* createNewComponent (JucerDocument*) override

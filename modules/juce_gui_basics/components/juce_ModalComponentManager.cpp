@@ -35,6 +35,12 @@ struct ModalComponentManager::ModalItem  : public ComponentMovementWatcher
         jassert (comp != nullptr);
     }
 
+    ~ModalItem() override
+    {
+        if (autoDelete)
+            std::unique_ptr<Component> componentDeleter (component);
+    }
+
     void componentMovedOrResized (bool, bool) override {}
 
     using ComponentMovementWatcher::componentMovedOrResized;

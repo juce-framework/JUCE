@@ -102,7 +102,7 @@ private:
 
         burgerButton.setBounds (r.removeFromRight (40).withSizeKeepingCentre (20, 20));
 
-        titleLabel.setFont (Font (getHeight() * 0.5f, Font::plain));
+        titleLabel.setFont (Font ((float) getHeight() * 0.5f, Font::plain));
         titleLabel.setBounds (r);
     }
 

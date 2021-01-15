@@ -19,13 +19,13 @@
 #include "FlowGraphNode.h"
 #include "SinkFloat.h"
 
-using namespace flowgraph;
+using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 
 SinkFloat::SinkFloat(int32_t channelCount)
         : FlowGraphSink(channelCount) {
 }
 
-int32_t SinkFloat::read(int64_t framePosition, void *data, int32_t numFrames) {
+int32_t SinkFloat::read(void *data, int32_t numFrames) {
     // printf("SinkFloat::read(,,%d)\n", numFrames);
     float *floatData = (float *) data;
     int32_t channelCount = input.getSamplesPerFrame();
@@ -33,7 +33,7 @@ int32_t SinkFloat::read(int64_t framePosition, void *data, int32_t numFrames) {
     int32_t framesLeft = numFrames;
     while (framesLeft > 0) {
         // Run the graph and pull data through the input port.
-        int32_t framesPulled = pullData(framePosition, framesLeft);
+        int32_t framesPulled = pullData(framesLeft);
         // printf("SinkFloat::read: framesLeft = %d, framesPulled = %d\n", framesLeft, framesPulled);
         if (framesPulled <= 0) {
             break;
@@ -43,7 +43,6 @@ int32_t SinkFloat::read(int64_t framePosition, void *data, int32_t numFrames) {
         memcpy(floatData, signal, numSamples * sizeof(float));
         floatData += numSamples;
         framesLeft -= framesPulled;
-        framePosition += framesPulled;
     }
     // printf("SinkFloat returning %d\n", numFrames - framesLeft);
     return numFrames - framesLeft;

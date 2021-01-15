@@ -27,14 +27,14 @@ DrumPadGridProgram::DrumPadGridProgram (Block& b)  : Program (b) {}
 
 int DrumPadGridProgram::getPadIndex (float posX, float posY) const
 {
-    posX = jmin (0.99f, posX / block.getWidth());
-    posY = jmin (0.99f, posY / block.getHeight());
+    posX = jmin (0.99f, posX / (float) block.getWidth());
+    posY = jmin (0.99f, posY / (float) block.getHeight());
 
     const uint32 offset  = block.getDataByte (visiblePads_byte) ? numColumns1_byte : numColumns0_byte;
     const int numColumns = block.getDataByte (offset + numColumns0_byte);
     const int numRows    = block.getDataByte (offset + numRows0_byte);
 
-    return int (posX * numColumns) + int (posY * numRows) * numColumns;
+    return int (posX * (float) numColumns) + int (posY * (float) numRows) * numColumns;
 }
 
 void DrumPadGridProgram::startTouch (float startX, float startY)
@@ -65,8 +65,8 @@ void DrumPadGridProgram::sendTouch (float x, float y, float z, LEDColour colour)
     Block::ProgramEventMessage e;
 
     e.values[0] = 0x20000000
-                    + (jlimit (0, 255, roundToInt (x * (255.0f / block.getWidth())))  << 16)
-                    + (jlimit (0, 255, roundToInt (y * (255.0f / block.getHeight()))) << 8)
+                    + (jlimit (0, 255, roundToInt (x * (255.0f / (float) block.getWidth())))  << 16)
+                    + (jlimit (0, 255, roundToInt (y * (255.0f / (float) block.getHeight()))) << 8)
                     +  jlimit (0, 255, roundToInt (z * 255.0f));
 
     e.values[1] = (int32) colour.getARGB();

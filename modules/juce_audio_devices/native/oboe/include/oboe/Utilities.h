@@ -19,6 +19,7 @@
 
 #include <unistd.h>
 #include <sys/types.h>
+#include <string>
 #include "oboe/Definitions.h"
 
 namespace oboe {
@@ -57,6 +58,19 @@ int32_t convertFormatToSizeInBytes(AudioFormat format);
  */
 template <typename FromType>
 const char * convertToText(FromType input);
+
+/**
+ * @param name
+ * @return the value of a named system property in a string or empty string
+ */
+std::string getPropertyString(const char * name);
+
+/**
+ * @param name
+ * @param defaultValue
+ * @return integer value associated with a property or the default value
+ */
+int getPropertyInteger(const char * name, int defaultValue);
 
 /**
  * Return the version of the SDK that is currently running.

@@ -88,7 +88,7 @@ public:
             g.setColour (isBlacklisted ? Colours::red
                                        : columnId == nameCol ? defaultTextColour
                                                              : defaultTextColour.interpolatedWith (Colours::transparentBlack, 0.3f));
-            g.setFont (Font (height * 0.7f, Font::bold));
+            g.setFont (Font ((float) height * 0.7f, Font::bold));
             g.drawFittedText (text, 4, 0, width - 6, height, Justification::centredLeft, 1, 0.9f);
         }
     }
@@ -262,7 +262,7 @@ static bool canShowFolderForPlugin (KnownPluginList& list, int index)
 static void showFolderForPlugin (KnownPluginList& list, int index)
 {
     if (canShowFolderForPlugin (list, index))
-        File (list.getTypes()[index].fileOrIdentifier).getParentDirectory().startAsProcess();
+        File (list.getTypes()[index].fileOrIdentifier).revealToUser();
 }
 
 void PluginListComponent::removeMissingPlugins()

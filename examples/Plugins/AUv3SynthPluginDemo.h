@@ -115,7 +115,7 @@ public:
 
         sliderPos = (sliderPos - minSliderPos) / static_cast<float> (width);
 
-        auto knobPos = static_cast<int> (sliderPos * r.getWidth());
+        auto knobPos = static_cast<int> (sliderPos * (float) r.getWidth());
 
         g.setColour (sliderActivePart);
         g.fillRect (backgroundBar.removeFromLeft (knobPos));
@@ -187,7 +187,7 @@ public:
         : AudioProcessorEditor (processorIn),
           roomSizeSlider (Slider::LinearHorizontal, Slider::NoTextBox)
     {
-        LookAndFeel::setDefaultLookAndFeel (&materialLookAndFeel);
+        setLookAndFeel (&materialLookAndFeel);
 
         roomSizeSlider.setValue (getParameterValue ("roomSize"), NotificationType::dontSendNotification);
 
@@ -211,6 +211,11 @@ public:
 
         setSize (600, 400);
         startTimer (100);
+    }
+
+    ~AUv3SynthEditor() override
+    {
+        setLookAndFeel (nullptr);
     }
 
     //==============================================================================

@@ -31,15 +31,14 @@ static int numAlwaysOnTopPeers = 0;
 bool juce_areThereAnyAlwaysOnTopWindows()  { return numAlwaysOnTopPeers > 0; }
 
 //==============================================================================
-template<typename WindowHandleType>
 class LinuxComponentPeer  : public ComponentPeer
 {
 public:
-    LinuxComponentPeer (Component& comp, int windowStyleFlags, WindowHandleType parentToAddTo)
+    LinuxComponentPeer (Component& comp, int windowStyleFlags, ::Window parentToAddTo)
         : ComponentPeer (comp, windowStyleFlags),
           isAlwaysOnTop (comp.isAlwaysOnTop())
     {
-        // it's dangerous to create a window on a thread other than the message thread..
+        // it's dangerous to create a window on a thread other than the message thread.
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         if (isAlwaysOnTop)
@@ -57,7 +56,7 @@ public:
 
     ~LinuxComponentPeer() override
     {
-        // it's dangerous to delete a window on a thread other than the message thread..
+        // it's dangerous to delete a window on a thread other than the message thread.
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
         repainter = nullptr;
@@ -67,10 +66,15 @@ public:
             --numAlwaysOnTopPeers;
     }
 
+    ::Window getWindowHandle() const noexcept
+    {
+        return windowH;
+    }
+
     //==============================================================================
     void* getNativeHandle() const override
     {
-        return (void*) windowH;
+        return reinterpret_cast<void*> (getWindowHandle());
     }
 
     //==============================================================================
@@ -171,7 +175,7 @@ public:
         if (fullScreen != shouldBeFullScreen)
         {
             if (shouldBeFullScreen)
-                r = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+                r = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
 
             if (! r.isEmpty())
                 setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
@@ -295,8 +299,8 @@ public:
     }
 
     //==============================================================================
-    WindowHandleType getParentWindow()                 { return parentWindow; }
-    void setParentWindow (WindowHandleType newParent)  { parentWindow = newParent; }
+    ::Window getParentWindow()                         { return parentWindow; }
+    void setParentWindow (::Window newParent)          { parentWindow = newParent; }
 
     //==============================================================================
     void updateWindowBounds()
@@ -330,11 +334,17 @@ private:
     class LinuxRepaintManager   : public Timer
     {
     public:
-        LinuxRepaintManager (LinuxComponentPeer& p)  : peer (p)  {}
+        LinuxRepaintManager (LinuxComponentPeer& p)
+            : peer (p),
+              isSemiTransparentWindow ((peer.getStyleFlags() & ComponentPeer::windowIsSemiTransparent) != 0)
+        {
+        }
 
         void timerCallback() override
         {
-            if (XWindowSystem::getInstance()->getNumPaintsPending (peer.windowH) > 0)
+            XWindowSystem::getInstance()->processPendingPaintsForWindow (peer.windowH);
+
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
                 return;
 
             if (! regionsNeedingRepaint.isEmpty())
@@ -359,7 +369,7 @@ private:
 
         void performAnyPendingRepaintsNow()
         {
-            if (XWindowSystem::getInstance()->getNumPaintsPending (peer.windowH) > 0)
+            if (XWindowSystem::getInstance()->getNumPaintsPendingForWindow (peer.windowH) > 0)
             {
                 startTimer (repaintTimerPeriod);
                 return;
@@ -374,7 +384,8 @@ private:
                 if (image.isNull() || image.getWidth() < totalArea.getWidth()
                      || image.getHeight() < totalArea.getHeight())
                 {
-                    image = XWindowSystem::getInstance()->createImage (totalArea.getWidth(), totalArea.getHeight(),
+                    image = XWindowSystem::getInstance()->createImage (isSemiTransparentWindow,
+                                                                       totalArea.getWidth(), totalArea.getHeight(),
                                                                        useARGBImagesForRendering);
                 }
 
@@ -407,6 +418,7 @@ private:
         enum { repaintTimerPeriod = 1000 / 100 };
 
         LinuxComponentPeer& peer;
+        const bool isSemiTransparentWindow;
         Image image;
         uint32 lastTimeImageUsed = 0;
         RectangleList<int> regionsNeedingRepaint;
@@ -423,21 +435,25 @@ private:
             return;
 
         Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
+        const auto& desktop = Desktop::getInstance();
 
-        auto newScaleFactor = Desktop::getInstance().getDisplays().findDisplayForRect (newBounds.translated (translation.x, translation.y), isPhysical).scale
-                                 / Desktop::getInstance().getGlobalScaleFactor();
-
-        if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
+        if (auto* display = desktop.getDisplays().getDisplayForRect (newBounds.translated (translation.x, translation.y),
+                                                                     isPhysical))
         {
-            currentScaleFactor = newScaleFactor;
-            scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
+            auto newScaleFactor = display->scale / desktop.getGlobalScaleFactor();
+
+            if (! approximatelyEqual (newScaleFactor, currentScaleFactor))
+            {
+                currentScaleFactor = newScaleFactor;
+                scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (currentScaleFactor); });
+            }
         }
     }
 
     //==============================================================================
     std::unique_ptr<LinuxRepaintManager> repainter;
 
-    WindowHandleType windowH = {}, parentWindow = {}, keyProxy = {};
+    ::Window windowH = {}, parentWindow = {};
     Rectangle<int> bounds;
     BorderSize<int> windowBorder;
     bool fullScreen = false, isAlwaysOnTop = false;
@@ -448,17 +464,16 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LinuxComponentPeer)
 };
 
-template<typename WindowHandleType>
-bool LinuxComponentPeer<WindowHandleType>::isActiveApplication = false;
+bool LinuxComponentPeer::isActiveApplication = false;
 
 //==============================================================================
 ComponentPeer* Component::createNewPeer (int styleFlags, void* nativeWindowToAttachTo)
 {
-    return new LinuxComponentPeer<::Window> (*this, styleFlags, (::Window) nativeWindowToAttachTo);
+    return new LinuxComponentPeer (*this, styleFlags, (::Window) nativeWindowToAttachTo);
 }
 
 //==============================================================================
-JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()    { return LinuxComponentPeer<::Window>::isActiveApplication; }
+JUCE_API bool JUCE_CALLTYPE Process::isForegroundProcess()    { return LinuxComponentPeer::isActiveApplication; }
 
 JUCE_API void JUCE_CALLTYPE Process::makeForegroundProcess()  {}
 JUCE_API void JUCE_CALLTYPE Process::hide()                   {}
@@ -467,15 +482,18 @@ JUCE_API void JUCE_CALLTYPE Process::hide()                   {}
 void Desktop::setKioskComponent (Component* comp, bool enableOrDisable, bool)
 {
     if (enableOrDisable)
-        comp->setBounds (getDisplays().findDisplayForRect (comp->getScreenBounds()).totalArea);
+        comp->setBounds (getDisplays().getDisplayForRect (comp->getScreenBounds())->totalArea);
 }
 
 void Displays::findDisplays (float masterScale)
 {
-    displays = XWindowSystem::getInstance()->findDisplays (masterScale);
+    if (XWindowSystem::getInstance()->getDisplay() != nullptr)
+    {
+        displays = XWindowSystem::getInstance()->findDisplays (masterScale);
 
-    if (! displays.isEmpty())
-        updateToLogical();
+        if (! displays.isEmpty())
+            updateToLogical();
+    }
 }
 
 bool Desktop::canUseSemiTransparentWindows() noexcept
@@ -555,15 +573,14 @@ void MouseCursor::showInWindow (ComponentPeer* peer) const
 }
 
 //==============================================================================
-template<typename WindowHandleType>
-static LinuxComponentPeer<WindowHandleType>* getPeerForDragEvent (Component* sourceComp)
+static LinuxComponentPeer* getPeerForDragEvent (Component* sourceComp)
 {
     if (sourceComp == nullptr)
         if (auto* draggingSource = Desktop::getInstance().getDraggingMouseSource (0))
             sourceComp = draggingSource->getComponentUnderMouse();
 
     if (sourceComp != nullptr)
-        if (auto* lp = dynamic_cast<LinuxComponentPeer<::Window>*> (sourceComp->getPeer()))
+        if (auto* lp = dynamic_cast<LinuxComponentPeer*> (sourceComp->getPeer()))
             return lp;
 
     jassertfalse;  // This method must be called in response to a component's mouseDown or mouseDrag event!
@@ -576,7 +593,7 @@ bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& fi
     if (files.isEmpty())
         return false;
 
-    if (auto* peer = getPeerForDragEvent<::Window> (sourceComp))
+    if (auto* peer = getPeerForDragEvent (sourceComp))
         return XWindowSystem::getInstance()->externalDragFileInit (peer, files, canMoveFiles, std::move (callback));
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!
@@ -590,7 +607,7 @@ bool DragAndDropContainer::performExternalDragDropOfText (const String& text, Co
     if (text.isEmpty())
         return false;
 
-    if (auto* peer = getPeerForDragEvent<::Window> (sourceComp))
+    if (auto* peer = getPeerForDragEvent (sourceComp))
         return XWindowSystem::getInstance()->externalDragTextInit (peer, text, std::move (callback));
 
     // This method must be called in response to a component's mouseDown or mouseDrag event!
@@ -672,13 +689,13 @@ Image juce_createIconForFile (const File&)
 
 void juce_LinuxAddRepaintListener (ComponentPeer* peer, Component* dummy)
 {
-    if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer<::Window>*> (peer))
+    if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
         linuxPeer->addOpenGLRepaintListener (dummy);
 }
 
 void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy)
 {
-    if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer<::Window>*> (peer))
+    if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
         linuxPeer->removeOpenGLRepaintListener (dummy);
 }
 

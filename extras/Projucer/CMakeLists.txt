@@ -158,7 +158,8 @@ juce_add_binary_data(ProjucerData SOURCES
     ../Build/CMake/PIPComponent.cpp.in
     ../Build/CMake/PIPConsole.cpp.in
     ../Build/CMake/RecentFilesMenuTemplate.nib
-    ../Build/CMake/UnityPluginGUIScript.cs.in)
+    ../Build/CMake/UnityPluginGUIScript.cs.in
+    ../Build/CMake/juce_runtime_arch_detection.cpp)
 
 target_link_libraries(Projucer PRIVATE
     ProjucerData

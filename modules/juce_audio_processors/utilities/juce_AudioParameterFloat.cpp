@@ -44,7 +44,7 @@ AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& n
 
             if (range.interval != 0.0f)
             {
-                if (approximatelyEqual (std::abs (range.interval - (int) range.interval), 0.0f))
+                if (approximatelyEqual (std::abs (range.interval - std::floor (range.interval)), 0.0f))
                     return 0;
 
                 auto v = std::abs (roundToInt (range.interval * pow (10, numDecimalPlaces)));

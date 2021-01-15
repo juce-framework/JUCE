@@ -124,6 +124,10 @@ public:
     */
     void setIgnoresCase (bool shouldIgnoreCase);
 
+    /** Indicates whether a case-insensitive search is used when looking up a key string.
+    */
+    bool getIgnoresCase() const noexcept;
+
     //==============================================================================
     /** Returns a descriptive string containing the items.
         This is handy for dumping the contents of an array.
@@ -139,6 +143,9 @@ public:
     */
     void minimiseStorageOverheads();
 
+    //==============================================================================
+    /** Adds the contents of a map to this StringPairArray. */
+    void addMap (const std::map<String, String>& mapToAdd);
 
 private:
     //==============================================================================

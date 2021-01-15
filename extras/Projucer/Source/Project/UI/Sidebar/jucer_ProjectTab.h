@@ -206,14 +206,14 @@ public:
         jassert (isPositiveAndBelow (panelIndex, concertinaPanel.getNumPanels()));
 
         concertinaPanel.setPanelSize (concertinaPanel.getPanel (panelIndex),
-                                      roundToInt (prop * (concertinaPanel.getHeight() - 90)), false);
+                                      roundToInt (prop * (float) (concertinaPanel.getHeight() - 90)), false);
     }
 
     float getPanelHeightProportion (int panelIndex)
     {
         jassert (isPositiveAndBelow (panelIndex, concertinaPanel.getNumPanels()));
 
-        return ((float) (concertinaPanel.getPanel (panelIndex)->getHeight()) / (concertinaPanel.getHeight() - 90));
+        return ((float) (concertinaPanel.getPanel (panelIndex)->getHeight()) / (float) (concertinaPanel.getHeight() - 90));
     }
 
 private:

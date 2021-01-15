@@ -38,7 +38,10 @@ struct JuceMainMenuBarHolder : private DeletedAtShutdown
 
         auto appMenu = [[NSMenu alloc] initWithTitle: nsStringLiteral ("Apple")];
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [NSApp performSelector: @selector (setAppleMenu:) withObject: appMenu];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
         [mainMenuBar setSubmenu: appMenu forItem: item];
         [appMenu release];
 
@@ -282,9 +285,11 @@ public:
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             auto item = [[NSMenuItem alloc] initWithTitle: text
                                                    action: @selector (menuItemInvoked:)
                                             keyEquivalent: nsEmptyString()];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             [item setTag: topLevelIndex];
             [item setEnabled: i.isEnabled];
@@ -515,7 +520,10 @@ private:
         {
             addIvar<JuceMainMenuHandler*> ("owner");
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (menuItemInvoked:),  menuItemInvoked, "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
             addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate, "v@:@");
 
             addProtocol (@protocol (NSMenuDelegate));
@@ -534,30 +542,7 @@ private:
             auto owner = getIvar<JuceMainMenuHandler*> (self, "owner");
 
             if (auto* juceItem = getJuceClassFromNSObject<PopupMenu::Item> ([item representedObject]))
-            {
-                // If the menu is being triggered by a keypress, the OS will have picked it up before we had a chance to offer it to
-                // our own components, which may have wanted to intercept it. So, rather than dispatching directly, we'll feed it back
-                // into the focused component and let it trigger the menu item indirectly.
-                NSEvent* e = [NSApp currentEvent];
-
-                if ([e type] == NSEventTypeKeyDown || [e type] == NSEventTypeKeyUp)
-                {
-                    if (auto* focused = juce::Component::getCurrentlyFocusedComponent())
-                    {
-                        if (auto peer = dynamic_cast<juce::NSViewComponentPeer*> (focused->getPeer()))
-                        {
-                            if ([e type] == NSEventTypeKeyDown)
-                                peer->redirectKeyDown (e);
-                            else
-                                peer->redirectKeyUp (e);
-
-                            return;
-                        }
-                    }
-                }
-
                 owner->invoke (*juceItem, static_cast<int> ([item tag]));
-            }
         }
 
         static void menuNeedsUpdate (id self, SEL, NSMenu* menu)
@@ -573,8 +558,8 @@ JuceMainMenuHandler* JuceMainMenuHandler::instance = nullptr;
 class TemporaryMainMenuWithStandardCommands
 {
 public:
-    TemporaryMainMenuWithStandardCommands()
-        : oldMenu (MenuBarModel::getMacMainMenu())
+    explicit TemporaryMainMenuWithStandardCommands (FilePreviewComponent* filePreviewComponent)
+        : oldMenu (MenuBarModel::getMacMainMenu()), dummyModalComponent (filePreviewComponent)
     {
         if (auto* appleMenu = MenuBarModel::getMacExtraAppleItemsMenu())
             oldAppleMenu = std::make_unique<PopupMenu> (*appleMenu);
@@ -624,8 +609,17 @@ public:
         MenuBarModel::setMacMainMenu (oldMenu, oldAppleMenu.get(), oldRecentItems);
     }
 
+    static bool checkModalEvent (FilePreviewComponent* preview, const Component* targetComponent)
+    {
+        if (targetComponent == nullptr)
+            return false;
+
+        return (targetComponent == preview
+               || targetComponent->findParentComponentOfClass<FilePreviewComponent>() != nullptr);
+    }
+
 private:
-    MenuBarModel* const oldMenu;
+    MenuBarModel* const oldMenu = nullptr;
     std::unique_ptr<PopupMenu> oldAppleMenu;
     String oldRecentItems;
     NSInteger editMenuIndex;
@@ -638,8 +632,17 @@ private:
     // recursive when file dialogs are involved
     struct SilentDummyModalComp  : public Component
     {
-        SilentDummyModalComp() {}
+        explicit SilentDummyModalComp (FilePreviewComponent* p)
+            : preview (p) {}
+
         void inputAttemptWhenModal() override {}
+
+        bool canModalEventBeSentToComponent (const Component* targetComponent) override
+        {
+            return checkModalEvent (preview, targetComponent);
+        }
+
+        FilePreviewComponent* preview = nullptr;
     };
 
     SilentDummyModalComp dummyModalComponent;

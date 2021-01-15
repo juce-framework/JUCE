@@ -403,8 +403,8 @@ public:
                 if (auto grid = activeBlock->getLEDGrid())
                 {
                     // Work out scale factors to translate X and Y touches to LED indexes
-                    scaleX = (float) (grid->getNumColumns() - 1) / activeBlock->getWidth();
-                    scaleY = (float) (grid->getNumRows() - 1)    / activeBlock->getHeight();
+                    scaleX = (float) (grid->getNumColumns() - 1) / (float) activeBlock->getWidth();
+                    scaleY = (float) (grid->getNumRows() - 1)    / (float) activeBlock->getHeight();
 
                     setLEDProgram (*activeBlock);
                 }

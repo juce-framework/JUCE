@@ -83,7 +83,7 @@ protected:
 
     void changed() const
     {
-        jassert (routine.getDocument() != 0);
+        jassert (routine.getDocument() != nullptr);
         routine.getDocument()->changed();
     }
 

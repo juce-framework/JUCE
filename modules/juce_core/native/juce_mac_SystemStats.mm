@@ -121,10 +121,21 @@ static String getOSXVersion()
 {
     JUCE_AUTORELEASEPOOL
     {
-        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile:
-                                    nsStringLiteral ("/System/Library/CoreServices/SystemVersion.plist")];
+        const String systemVersionPlist ("/System/Library/CoreServices/SystemVersion.plist");
 
-        return nsStringToJuce ([dict objectForKey: nsStringLiteral ("ProductVersion")]);
+       #if (defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_13)
+        NSError* error = nullptr;
+        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfURL: createNSURLFromFile (systemVersionPlist)
+                                                                 error: &error];
+       #else
+        NSDictionary* dict = [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (systemVersionPlist)];
+       #endif
+
+        if (dict != nullptr)
+            return nsStringToJuce ([dict objectForKey: nsStringLiteral ("ProductVersion")]);
+
+        jassertfalse;
+        return {};
     }
 }
 #endif
@@ -137,11 +148,17 @@ SystemStats::OperatingSystemType SystemStats::getOperatingSystemType()
     StringArray parts;
     parts.addTokens (getOSXVersion(), ".", StringRef());
 
-    jassert (parts[0].getIntValue() == 10);
-    const int major = parts[1].getIntValue();
-    jassert (major > 2);
+    const auto major = parts[0].getIntValue();
+    const auto minor = parts[1].getIntValue();
 
-    return (OperatingSystemType) (major + MacOSX_10_4 - 4);
+    if (major == 10)
+    {
+        jassert (minor > 2);
+        return (OperatingSystemType) (minor + MacOSX_10_7 - 7);
+    }
+
+    jassert (major == 11);
+    return MacOS_11;
    #endif
 }
 
@@ -199,10 +216,8 @@ bool SystemStats::isOperatingSystem64Bit()
 {
    #if JUCE_IOS
     return false;
-   #elif JUCE_64BIT
-    return true;
    #else
-    return getOperatingSystemType() >= MacOSX_10_6;
+    return true;
    #endif
 }
 

@@ -581,7 +581,7 @@ void GlyphArrangement::splitLines (const String& text, Font font, int startIndex
         // allowing for unevenness in the lengths due to differently sized words.
         const float lineLengthUnevennessAllowance = 80.0f;
 
-        if (numLines > (lineWidth + lineLengthUnevennessAllowance) / width || newFontHeight < 8.0f)
+        if ((float) numLines > (lineWidth + lineLengthUnevennessAllowance) / width || newFontHeight < 8.0f)
             break;
     }
 
@@ -591,7 +591,7 @@ void GlyphArrangement::splitLines (const String& text, Font font, int startIndex
     int lineIndex = 0;
     auto lineY = y;
     auto widthPerLine = jmin (width / minimumHorizontalScale,
-                              lineWidth / numLines);
+                              lineWidth / (float) numLines);
 
     while (lineY < y + height)
     {

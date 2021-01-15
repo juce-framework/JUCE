@@ -665,8 +665,8 @@ public:
                 if (auto grid = activeBlock->getLEDGrid())
                 {
                     // Work out scale factors to translate X and Y touches to LED indexes
-                    scaleX = static_cast<float> (grid->getNumColumns() - 1) / activeBlock->getWidth();
-                    scaleY = static_cast<float> (grid->getNumRows() - 1)    / activeBlock->getHeight();
+                    scaleX = static_cast<float> (grid->getNumColumns() - 1) / (float) activeBlock->getWidth();
+                    scaleY = static_cast<float> (grid->getNumRows()    - 1) / (float) activeBlock->getHeight();
 
                     setLEDProgram (*activeBlock);
                 }
@@ -731,7 +731,7 @@ private:
                                             layout.touchColour);
 
                     // Send pitch change and pressure values to the Audio class
-                    audio.pitchChange (midiChannel, (touch.x - touch.startX) / activeBlock->getWidth());
+                    audio.pitchChange (midiChannel, (touch.x - touch.startX) / (float) activeBlock->getWidth());
                     audio.pressureChange (midiChannel, touch.z);
                 }
 

@@ -150,7 +150,7 @@ private:
                 const auto charArea = codeEditor->getCharacterBounds (startPosition);
                 const int height = charArea.getHeight() + 8;
 
-                Font f (height * 0.7f);
+                Font f ((float) height * 0.7f);
 
                 const int width = jmin (height * 2 + f.getStringWidth (launchButton.getName()),
                                         jmax (120, codeEditor->proportionOfWidth (0.2f)));
@@ -191,7 +191,7 @@ private:
                    .draw (g, r.removeFromLeft (getHeight()).toFloat(), false);
 
                 g.setColour (Colours::white);
-                g.setFont (getHeight() * 0.7f);
+                g.setFont ((float) getHeight() * 0.7f);
                 g.drawFittedText (getName(), r, Justification::centredLeft, 1);
             }
 
@@ -324,9 +324,9 @@ private:
             g.fillRect (getLocalBounds().withTrimmedBottom (lineOffset));
 
             Path path;
-            const float bottomY = getHeight() - (lineOffset / 2.0f);
+            const float bottomY = (float) getHeight() - ((float) lineOffset / 2.0f);
             path.addTriangle ((float) arrowXMin, bottomY,
-                              (arrowXMax + arrowXMin) / 2.0f, (float) lineOffset,
+                              (float) (arrowXMax + arrowXMin) / 2.0f, (float) lineOffset,
                               (float) arrowXMax, bottomY);
 
             g.setColour (diagColour.withAlpha (0.8f));

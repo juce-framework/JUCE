@@ -119,8 +119,8 @@ struct CachedImageList  : public ReferenceCountedObject,
             t.textureID = texture.getTextureID();
             t.imageWidth = pixelData->width;
             t.imageHeight = pixelData->height;
-            t.fullWidthProportion  = t.imageWidth  / (float) texture.getWidth();
-            t.fullHeightProportion = t.imageHeight / (float) texture.getHeight();
+            t.fullWidthProportion  = (float) t.imageWidth  / (float) texture.getWidth();
+            t.fullHeightProportion = (float) t.imageHeight / (float) texture.getHeight();
 
             lastUsed = Time::getCurrentTime();
             return t;
@@ -646,16 +646,16 @@ struct ShaderPrograms  : public ReferenceCountedObject
                         float targetX, float targetY, bool isForTiling) const
         {
             auto t = trans.translated (-targetX, -targetY)
-                          .inverted().scaled (fullWidthProportion / imageWidth,
-                                              fullHeightProportion / imageHeight);
+                          .inverted().scaled (fullWidthProportion  / (float) imageWidth,
+                                              fullHeightProportion / (float) imageHeight);
 
             const GLfloat m[] = { t.mat00, t.mat01, t.mat02, t.mat10, t.mat11, t.mat12 };
             matrix.set (m, 6);
 
             if (isForTiling)
             {
-                fullWidthProportion -= 0.5f / imageWidth;
-                fullHeightProportion -= 0.5f / imageHeight;
+                fullWidthProportion  -= 0.5f / (float) imageWidth;
+                fullHeightProportion -= 0.5f / (float) imageHeight;
             }
 
             imageLimits.set (fullWidthProportion, fullHeightProportion);
@@ -1422,8 +1422,8 @@ struct GLState
             textureCache.bindTextureForGradient (activeTextures, g);
         }
 
-        auto t = transform.translated (0.5f - target.bounds.getX(),
-                                       0.5f - target.bounds.getY());
+        auto t = transform.translated (0.5f - (float) target.bounds.getX(),
+                                       0.5f - (float) target.bounds.getY());
         auto p1 = g.point1.transformedBy (t);
         auto p2 = g.point2.transformedBy (t);
         auto p3 = Point<float> (g.point1.x + (g.point2.y - g.point1.y),

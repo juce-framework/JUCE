@@ -71,7 +71,7 @@ void HyperlinkButton::setURL (const URL& newURL) noexcept
 Font HyperlinkButton::getFontToUse() const
 {
     if (resizeFont)
-        return font.withHeight (getHeight() * 0.7f);
+        return font.withHeight ((float) getHeight() * 0.7f);
 
     return font;
 }

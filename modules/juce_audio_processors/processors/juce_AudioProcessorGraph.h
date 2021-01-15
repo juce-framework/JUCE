@@ -403,6 +403,24 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    struct PrepareSettings
+    {
+        ProcessingPrecision precision = ProcessingPrecision::singlePrecision;
+        double sampleRate             = 0.0;
+        int blockSize                 = 0;
+        bool valid                    = false;
+
+        using Tied = std::tuple<const ProcessingPrecision&,
+                                const double&,
+                                const int&,
+                                const bool&>;
+
+        Tied tie() const noexcept { return std::tie (precision, sampleRate, blockSize, valid); }
+
+        bool operator== (const PrepareSettings& other) const noexcept { return tie() == other.tie(); }
+        bool operator!= (const PrepareSettings& other) const noexcept { return tie() != other.tie(); }
+    };
+
     //==============================================================================
     ReferenceCountedArray<Node> nodes;
     NodeID lastNodeID = {};
@@ -412,11 +430,14 @@ private:
     std::unique_ptr<RenderSequenceFloat> renderSequenceFloat;
     std::unique_ptr<RenderSequenceDouble> renderSequenceDouble;
 
+    PrepareSettings prepareSettings;
+
     friend class AudioGraphIOProcessor;
 
     std::atomic<bool> isPrepared { false };
 
     void topologyChanged();
+    void unprepare();
     void handleAsyncUpdate() override;
     void clearRenderingSequence();
     void buildRenderingSequence();

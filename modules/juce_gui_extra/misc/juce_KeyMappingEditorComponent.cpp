@@ -88,7 +88,7 @@ public:
         if (keyNum < 0)
             setSize (h, h);
         else
-            setSize (jlimit (h * 4, h * 8, 6 + Font (h * 0.6f).getStringWidth (getName())), h);
+            setSize (jlimit (h * 4, h * 8, 6 + Font ((float) h * 0.6f).getStringWidth (getName())), h);
     }
 
     //==============================================================================
@@ -240,7 +240,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setFont (getHeight() * 0.7f);
+        g.setFont ((float) getHeight() * 0.7f);
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawFittedText (TRANS (owner.getCommandManager().getNameOfCommand (commandID)),
@@ -307,7 +307,7 @@ public:
 
     void paintItem (Graphics& g, int width, int height) override
     {
-        g.setFont (Font (height * 0.7f, Font::bold));
+        g.setFont (Font ((float) height * 0.7f, Font::bold));
         g.setColour (owner.findColour (KeyMappingEditorComponent::textColourId));
 
         g.drawText (TRANS (categoryName), 2, 0, width - 2, height, Justification::centredLeft, true);

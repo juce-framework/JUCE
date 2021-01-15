@@ -71,12 +71,11 @@ static void destroyObject (SLObjectType object)
         (*object)->Destroy (object);
 }
 
-template <>
-struct ContainerDeletePolicy<const SLObjectItf_* const>
+struct SLObjectItfFree
 {
-    static void destroy (SLObjectItf object)
+    void operator() (SLObjectItf obj) const noexcept
     {
-        destroyObject (object);
+        destroyObject (obj);
     }
 };
 
@@ -112,7 +111,7 @@ private:
         ControlBlock() = default;
         ControlBlock (SLObjectItf o) : ptr (o) {}
 
-        std::unique_ptr<const SLObjectItf_* const> ptr;
+        std::unique_ptr<const SLObjectItf_* const, SLObjectItfFree> ptr;
     };
 
     ReferenceCountedObjectPtr<ControlBlock> cb;
@@ -1120,11 +1119,6 @@ const char* const OpenSLAudioIODevice::openSLTypeName = "Android OpenSL";
 
 //==============================================================================
 bool isOpenSLAvailable()  { return OpenSLAudioDeviceType::isOpenSLAvailable(); }
-
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_OpenSLES()
-{
-    return isOpenSLAvailable() ? new OpenSLAudioDeviceType() : nullptr;
-}
 
 //==============================================================================
 class SLRealtimeThread

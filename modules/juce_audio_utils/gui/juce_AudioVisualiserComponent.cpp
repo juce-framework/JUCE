@@ -178,7 +178,7 @@ void AudioVisualiserComponent::paint (Graphics& g)
     g.fillAll (backgroundColour);
 
     auto r = getLocalBounds().toFloat();
-    auto channelHeight = r.getHeight() / channels.size();
+    auto channelHeight = r.getHeight() / (float) channels.size();
 
     g.setColour (waveformColour);
 

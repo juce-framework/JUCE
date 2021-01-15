@@ -283,9 +283,6 @@ String SystemStats::getOperatingSystemName()
         case Android:           JUCE_FALLTHROUGH
         case iOS:               JUCE_FALLTHROUGH
 
-        case MacOSX_10_4:       JUCE_FALLTHROUGH
-        case MacOSX_10_5:       JUCE_FALLTHROUGH
-        case MacOSX_10_6:       JUCE_FALLTHROUGH
         case MacOSX_10_7:       JUCE_FALLTHROUGH
         case MacOSX_10_8:       JUCE_FALLTHROUGH
         case MacOSX_10_9:       JUCE_FALLTHROUGH

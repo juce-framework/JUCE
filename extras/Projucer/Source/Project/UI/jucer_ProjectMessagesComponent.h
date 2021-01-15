@@ -45,6 +45,7 @@ public:
         addAndMakeVisible (viewport);
         viewport.setScrollBarsShown (true, false);
         viewport.setViewedComponent (&messagesListComponent, false);
+        viewport.setWantsKeyboardFocus (false);
 
         setOpaque (true);
     }
@@ -218,7 +219,7 @@ private:
                 {
                     auto buttonBounds = bounds.removeFromBottom (buttonHeight);
 
-                    auto buttonWidth = roundToInt (buttonBounds.getWidth() / 3.5f);
+                    auto buttonWidth = roundToInt ((float) buttonBounds.getWidth() / 3.5f);
                     auto requiredWidth = (numButtons * buttonWidth) + ((numButtons - 1) * buttonSpacing);
                     buttonBounds.reduce ((buttonBounds.getWidth() - requiredWidth) / 2, 0);
 

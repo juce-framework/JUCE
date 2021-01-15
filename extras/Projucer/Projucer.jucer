@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
-              jucerVersion="6.0.0" version="6.0.0" bundleIdentifier="com.juce.theprojucer"
-              splashScreenColour="Dark" displaySplashScreen="0" reportAppUsage="0"
-              companyName="Raw Material Software Limited" companyCopyright="Raw Material Software Limited"
-              cppLanguageStandard="11" useAppConfig="0" addUsingNamespaceToJuceHeader="1">
+              version="6.0.7" bundleIdentifier="com.juce.theprojucer" splashScreenColour="Dark"
+              displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
+              companyCopyright="Raw Material Software Limited" cppLanguageStandard="11"
+              useAppConfig="0" addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="Zrx1Gl"
@@ -290,6 +290,8 @@
             file="Source/BinaryData/colourscheme_dark.xml"/>
       <FILE id="bvFank" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
+      <FILE id="SDFoQY" name="juce_runtime_arch_detection.cpp" compile="0" resource="1"
+            file="../Build/CMake/juce_runtime_arch_detection.cpp"/>
     </GROUP>
     <GROUP id="{A5AE7471-B900-FD9D-8DE7-2FB68D11AE30}" name="CodeEditor">
       <FILE id="w3ka6n" name="jucer_DocumentEditorComponent.cpp" compile="1"

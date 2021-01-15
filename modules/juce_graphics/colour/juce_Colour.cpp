@@ -46,11 +46,11 @@ namespace ColourHelpers
 
         if (hi > 0)
         {
-            auto invDiff = 1.0f / (hi - lo);
+            auto invDiff = 1.0f / (float) (hi - lo);
 
-            auto red   = (hi - r) * invDiff;
-            auto green = (hi - g) * invDiff;
-            auto blue  = (hi - b) * invDiff;
+            auto red   = (float) (hi - r) * invDiff;
+            auto green = (float) (hi - g) * invDiff;
+            auto blue  = (float) (hi - b) * invDiff;
 
             if      (r == hi)  hue = blue - green;
             else if (g == hi)  hue = 2.0f + red - blue;
@@ -79,12 +79,12 @@ namespace ColourHelpers
 
             if (hi > 0)
             {
-                lightness = ((hi + lo) / 2.0f) / 255.0f;
+                lightness = ((float) (hi + lo) / 2.0f) / 255.0f;
 
                 if (lightness > 0.0f)
                     hue = getHue (col);
 
-                saturation = (hi - lo) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
+                saturation = (float) (hi - lo) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
             }
         }
 
@@ -136,12 +136,12 @@ namespace ColourHelpers
 
             if (hi > 0)
             {
-                saturation = (hi - lo) / (float) hi;
+                saturation = (float) (hi - lo) / (float) hi;
 
                 if (saturation > 0.0f)
                     hue = getHue (col);
 
-                brightness = hi / 255.0f;
+                brightness = (float) hi / 255.0f;
             }
         }
 

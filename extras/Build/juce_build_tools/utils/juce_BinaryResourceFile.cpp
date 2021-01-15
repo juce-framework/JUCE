@@ -248,10 +248,10 @@ namespace build_tools
             auto r = writeHeader (mo);
 
             if (r.failed())
-                return { r };
+                return { r, {} };
 
             if (! overwriteFileWithNewDataIfDifferent (headerFile, mo))
-                return { Result::fail ("Can't write to file: " + headerFile.getFullPathName()) };
+                return { Result::fail ("Can't write to file: " + headerFile.getFullPathName()), {} };
 
             filesCreated.add (headerFile);
         }

@@ -24,15 +24,16 @@ namespace oboe {
 class AudioStream;
 
 /**
- * AudioStreamCallback defines a callback interface for:
- *
- * 1) moving data to/from an audio stream using `onAudioReady`
+ * AudioStreamDataCallback defines a callback interface for
+ * moving data to/from an audio stream using `onAudioReady`
  * 2) being alerted when a stream has an error using `onError*` methods
  *
+ * It is used with AudioStreamBuilder::setDataCallback().
  */
-class AudioStreamCallback {
+
+class AudioStreamDataCallback {
 public:
-    virtual ~AudioStreamCallback() = default;
+    virtual ~AudioStreamDataCallback() = default;
 
     /**
      * A buffer is ready for processing.
@@ -75,21 +76,64 @@ public:
      * If you need to move data, eg. MIDI commands, in or out of the callback function then
      * we recommend the use of non-blocking techniques such as an atomic FIFO.
      *
-     * @param oboeStream pointer to the associated stream
+     * @param audioStream pointer to the associated stream
      * @param audioData buffer containing input data or a place to put output data
      * @param numFrames number of frames to be processed
      * @return DataCallbackResult::Continue or DataCallbackResult::Stop
      */
     virtual DataCallbackResult onAudioReady(
-            AudioStream *oboeStream,
+            AudioStream *audioStream,
             void *audioData,
             int32_t numFrames) = 0;
+};
+
+/**
+ * AudioStreamErrorCallback defines a callback interface for
+ * being alerted when a stream has an error or is disconnected
+ * using `onError*` methods.
+ *
+ * It is used with AudioStreamBuilder::setErrorCallback().
+ */
+class AudioStreamErrorCallback {
+public:
+    virtual ~AudioStreamErrorCallback() = default;
 
     /**
-     * This will be called when an error occurs on a stream or when the stream is disconnected.
+     * This will be called before other `onError` methods when an error occurs on a stream,
+     * such as when the stream is disconnected.
      *
-     * Note that this will be called on a different thread than the onAudioReady() thread.
-     * This thread will be created by Oboe.
+     * It can be used to override and customize the normal error processing.
+     * Use of this method is considered an advanced technique.
+     * It might, for example, be used if an app want to use a high level lock when
+     * closing and reopening a stream.
+     * Or it might be used when an app want to signal a management thread that handles
+     * all of the stream state.
+     *
+     * If this method returns false it indicates that the stream has *not been stopped and closed
+     * by the application. In this case it will be stopped by Oboe in the following way:
+     * onErrorBeforeClose() will be called, then the stream will be closed and onErrorAfterClose()
+     * will be closed.
+     *
+     * If this method returns true it indicates that the stream *has* been stopped and closed
+     * by the application and Oboe will not do this.
+     * In that case, the app MUST stop() and close() the stream.
+     *
+     * This method will be called on a thread created by Oboe.
+     *
+     * @param audioStream pointer to the associated stream
+     * @param error
+     * @return true if the stream has been stopped and closed, false if not
+     */
+    virtual bool onError(AudioStream* /* audioStream */, Result /* error */) {
+        return false;
+    }
+
+    /**
+     * This will be called when an error occurs on a stream,
+     * such as when the stream is disconnected,
+     * and if onError() returns false (indicating that the error has not already been handled).
+     *
+     * Note that this will be called on a thread created by Oboe.
      *
      * The underlying stream will already be stopped by Oboe but not yet closed.
      * So the stream can be queried.
@@ -97,25 +141,47 @@ public:
      * Do not close or delete the stream in this method because it will be
      * closed after this method returns.
      *
-     * @param oboeStream pointer to the associated stream
+     * @param audioStream pointer to the associated stream
      * @param error
      */
-    virtual void onErrorBeforeClose(AudioStream* /* oboeStream */, Result /* error */) {}
+    virtual void onErrorBeforeClose(AudioStream* /* audioStream */, Result /* error */) {}
 
     /**
-     * This will be called when an error occurs on a stream or when the stream is disconnected.
+     * This will be called when an error occurs on a stream,
+     * such as when the stream is disconnected,
+     * and if onError() returns false (indicating that the error has not already been handled).
+     *
      * The underlying AAudio or OpenSL ES stream will already be stopped AND closed by Oboe.
      * So the underlying stream cannot be referenced.
      * But you can still query most parameters.
      *
      * This callback could be used to reopen a new stream on another device.
-     * You can safely delete the old AudioStream in this method.
      *
-     * @param oboeStream pointer to the associated stream
+     * @param audioStream pointer to the associated stream
      * @param error
      */
-    virtual void onErrorAfterClose(AudioStream* /* oboeStream */, Result /* error */) {}
+    virtual void onErrorAfterClose(AudioStream* /* audioStream */, Result /* error */) {}
 
+};
+
+/**
+ * AudioStreamCallback defines a callback interface for:
+ *
+ * 1) moving data to/from an audio stream using `onAudioReady`
+ * 2) being alerted when a stream has an error using `onError*` methods
+ *
+ * It is used with AudioStreamBuilder::setCallback().
+ *
+ * It combines the interfaces defined by AudioStreamDataCallback and AudioStreamErrorCallback.
+ * This was the original callback object. We now recommend using the individual interfaces
+ * and using setDataCallback() and setErrorCallback().
+ *
+ * @deprecated Use `AudioStreamDataCallback` and `AudioStreamErrorCallback` instead
+ */
+class AudioStreamCallback : public AudioStreamDataCallback,
+                            public AudioStreamErrorCallback {
+public:
+    virtual ~AudioStreamCallback() = default;
 };
 
 } // namespace oboe

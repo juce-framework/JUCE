@@ -23,6 +23,14 @@
 namespace juce
 {
 
+float DirectoryEntry::getEstimatedProgress() const
+{
+    if (auto it = iterator.lock())
+        return it->getEstimatedProgress();
+
+    return 0.0f;
+}
+
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
@@ -37,6 +45,7 @@ RangedDirectoryIterator::RangedDirectoryIterator (const File& directory,
                                        wildCard,
                                        whatToLookFor))
 {
+    entry.iterator = iterator;
     increment();
 }
 

@@ -125,13 +125,13 @@ namespace build_tools
         if (cameraPermissionEnabled)
             addPlistDictionaryKey (*dict, "NSCameraUsageDescription", cameraPermissionText);
 
+        if (bluetoothPermissionEnabled)
+            addPlistDictionaryKey (*dict, "NSBluetoothAlwaysUsageDescription", bluetoothPermissionText);
+
         if (iOS)
         {
             if (bluetoothPermissionEnabled)
-            {
-                addPlistDictionaryKey (*dict, "NSBluetoothAlwaysUsageDescription", bluetoothPermissionText);
                 addPlistDictionaryKey (*dict, "NSBluetoothPeripheralUsageDescription", bluetoothPermissionText); // needed for pre iOS 13.0
-            }
 
             addPlistDictionaryKey (*dict, "LSRequiresIPhoneOS", true);
 
@@ -302,7 +302,7 @@ namespace build_tools
         {
             addPlistDictionaryKey (*dict, "sandboxSafe", true);
         }
-        else
+        else if (! suppressResourceUsage)
         {
             dict->createNewChildElement ("key")->addTextElement ("resourceUsage");
             auto* resourceUsageDict = dict->createNewChildElement ("dict");

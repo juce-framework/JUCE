@@ -154,9 +154,13 @@ public:
 
             if (openGLversion >= openGL3_2)
             {
-                glBlitFramebuffer (0, 0, lastBounds.getWidth(), lastBounds.getHeight(),
-                                   0, 0, lastBounds.getWidth(), lastBounds.getHeight(),
-                                   GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                auto w = roundToInt (lastBounds.getWidth()  * glLayer.contentsScale);
+                auto h = roundToInt (lastBounds.getHeight() * glLayer.contentsScale);
+
+                glBlitFramebuffer (0, 0, w, h,
+                                   0, 0, w, h,
+                                   GL_COLOR_BUFFER_BIT,
+                                   GL_NEAREST);
             }
             else
             {
@@ -180,7 +184,7 @@ public:
     void updateWindowPosition (Rectangle<int> bounds)
     {
         view.frame = convertToCGRect (bounds);
-        glLayer.contentsScale = (CGFloat) (Desktop::getInstance().getDisplays().getMainDisplay().scale
+        glLayer.contentsScale = (CGFloat) (Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale
                                             / component.getDesktopScaleFactor());
 
         if (lastBounds != bounds)

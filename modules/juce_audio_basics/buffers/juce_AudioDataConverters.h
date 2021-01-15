@@ -528,8 +528,8 @@ public:
                 if (v < mn)  mn = v;
             }
 
-            return Range<float> (mn * (float) (1.0 / (1.0 + (double) Int32::maxValue)),
-                                 mx * (float) (1.0 / (1.0 + (double) Int32::maxValue)));
+            return Range<float> ((float) mn * (float) (1.0 / (1.0 + (double) Int32::maxValue)),
+                                 (float) mx * (float) (1.0 / (1.0 + (double) Int32::maxValue)));
         }
 
         /** Scans a block of data, returning the lowest and highest levels as floats */

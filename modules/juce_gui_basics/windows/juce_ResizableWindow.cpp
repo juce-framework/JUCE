@@ -63,12 +63,12 @@ void ResizableWindow::initialise (const bool shouldAddToDesktop)
     /*
       ==========================================================================
 
-       In accordance with the terms of the JUCE 5 End-Use License Agreement, the
+       In accordance with the terms of the JUCE 6 End-Use License Agreement, the
        JUCE Code in SECTION A cannot be removed, changed or otherwise rendered
        ineffective unless you have a JUCE Indie or Pro license, or are using
        JUCE under the GPL v3 license.
 
-       End User License Agreement: www.juce.com/juce-5-licence
+       End User License Agreement: www.juce.com/juce-6-licence
 
       ==========================================================================
     */
@@ -564,7 +564,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
         if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
         {
-            auto screen = desktop.getDisplays().findDisplayForRect (newPos).userArea;
+            auto screen = desktop.getDisplays().getDisplayForRect (newPos)->userArea;
 
             newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
                             jmin (newPos.getHeight(), screen.getHeight()));

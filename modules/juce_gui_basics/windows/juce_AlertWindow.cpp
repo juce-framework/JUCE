@@ -239,7 +239,7 @@ public:
         setFont (font);
         setText (message, false);
 
-        bestWidth = 2 * (int) std::sqrt (font.getHeight() * font.getStringWidth (message));
+        bestWidth = 2 * (int) std::sqrt (font.getHeight() * (float) font.getStringWidth (message));
     }
 
     void updateLayout (const int width)
@@ -249,7 +249,7 @@ public:
         s.append (getText(), getFont());
 
         TextLayout text;
-        text.createLayoutWithBalancedLineLengths (s, width - 8.0f);
+        text.createLayoutWithBalancedLineLengths (s, (float) width - 8.0f);
         setSize (width, jmin (width, (int) (text.getHeight() + getFont().getHeight())));
     }
 
@@ -355,8 +355,8 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     auto wid = jmax (messageFont.getStringWidth (text),
                      messageFont.getStringWidth (getName()));
 
-    auto sw = (int) std::sqrt (messageFont.getHeight() * wid);
-    auto w = jmin (300 + sw * 2, (int) (getParentWidth() * 0.7f));
+    auto sw = (int) std::sqrt (messageFont.getHeight() * (float) wid);
+    auto w = jmin (300 + sw * 2, (int) ((float) getParentWidth() * 0.7f));
     const int edgeGap = 10;
     const int labelHeight = 18;
     int iconSpace = 0;
@@ -382,7 +382,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     }
 
     w = jmax (350, (int) textLayout.getWidth() + iconSpace + edgeGap * 4);
-    w = jmin (w, (int) (getParentWidth() * 0.7f));
+    w = jmin (w, (int) ((float) getParentWidth() * 0.7f));
 
     auto textLayoutH = (int) textLayout.getHeight();
     auto textBottom = 16 + titleH + textLayoutH;
@@ -412,12 +412,12 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
     for (auto* tb : textBlocks)
         w = jmax (w, static_cast<const AlertTextComp*> (tb)->bestWidth);
 
-    w = jmin (w, (int) (getParentWidth() * 0.7f));
+    w = jmin (w, (int) ((float) getParentWidth() * 0.7f));
 
     for (auto* tb : textBlocks)
     {
         auto* ac = static_cast<AlertTextComp*> (tb);
-        ac->updateLayout ((int) (w * 0.8f));
+        ac->updateLayout ((int) ((float) w * 0.8f));
         h += ac->getHeight() + 10;
     }
 
@@ -443,7 +443,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
         totalWidth += b->getWidth() + spacer;
 
     auto x = (w - totalWidth) / 2;
-    auto y = (int) (getHeight() * 0.95f);
+    auto y = (int) ((float) getHeight() * 0.95f);
 
     for (auto* c : buttons)
     {
