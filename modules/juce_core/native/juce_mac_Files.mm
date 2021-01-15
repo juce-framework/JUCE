@@ -112,7 +112,7 @@ namespace MacFileHelpers
     }
    #endif
 
-    bool openDocument(const String& fileName, const String& parameters, const Array<char*>* enviroment = nullptr)
+    bool openDocument(const String& fileName, const String& parameters, const Array<char*>* environment = nullptr)
     {
         JUCE_AUTORELEASEPOOL
         {
@@ -130,39 +130,82 @@ namespace MacFileHelpers
             return true;
            #endif
           #else
-            NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
+            auto workspace = [NSWorkspace sharedWorkspace];
+            bool isUrl = filenameAsURL && ![[filenameAsURL scheme] hasPrefix:@"file"];
 
-            if (parameters.isEmpty())
-                // NB: the length check here is because of strange failures involving long filenames,
-                // probably due to filesystem name length limitations..
-                return (fileName.length() < 1024 && [workspace openFile: juceStringToNS (fileName)])
-                        || [workspace openURL: filenameAsURL];
-
-            const File file (fileName);
-
-            if (file.isBundle())
+            if (! isUrl)
             {
-                StringArray params;
-                params.addTokens (parameters, true);
+                const File file (fileName);
 
-                NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
+                if (file.isBundle() && file.getFileExtension().equalsIgnoreCase (".app"))
+                {
+                    StringArray params;
+                    params.addTokens (parameters, true);
 
-                NSMutableArray* paramArray = [[NSMutableArray new] autorelease];
+                    NSMutableArray* paramArray = [[NSMutableArray new] autorelease];
+                    for (int i = 0; i < params.size(); ++i)
+                        [paramArray addObject: juceStringToNS (params[i])];
 
-                for (int i = 0; i < params.size(); ++i)
-                    [paramArray addObject: juceStringToNS (params[i])];
+                    NSMutableDictionary* envDict = [[NSMutableDictionary new] autorelease];
+                    if (environment)
+                    {
+                        for (int i = 0; i < environment->size(); ++i)
+                        {
+                            if (environment->getUnchecked (i) == nullptr)
+                                continue;
 
-                [dict setObject: paramArray
-                         forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationArguments")];
+                            auto keyValue = String (const_cast<const char*> (environment->getUnchecked (i)));
+                         
+                            [envDict setObject: juceStringToNS (keyValue.fromFirstOccurrenceOf ("=", false, false))
+                                        forKey: juceStringToNS (keyValue.upToFirstOccurrenceOf ("=", false, false))];
+                        }
+                    }
 
-                return [workspace launchApplicationAtURL: filenameAsURL
-                                                 options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
-                                           configuration: dict
-                                                   error: nil];
+                   #if (defined MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
+                    auto config = [NSWorkspaceOpenConfiguration configuration];
+                    [config setCreatesNewApplicationInstance: YES];
+                    config.arguments = paramArray;
+
+                    if (environment)
+                        config.environment = envDict;
+
+                    [workspace openApplicationAtURL: filenameAsURL
+                                  configuration: config
+                                  completionHandler: nil];
+                    return true;
+                   #else
+                    NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
+
+                    if (params.size())
+                    {
+                        [dict setObject: paramArray
+                                 forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationArguments")];
+                    }
+
+                    if (environment)
+                    {
+                        [dict setObject: envDict
+                                 forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationEnvironment")];
+                    }
+
+                    return [workspace launchApplicationAtURL: filenameAsURL
+                                                     options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
+                                               configuration: dict
+                                                       error: nil];
+                   #endif
+                }
             }
 
-            if (file.exists())
-                return MacFileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters, enviroment);
+            auto fileManager = [NSFileManager defaultManager];
+
+            if (isUrl || File (fileName).isDirectory() || ! [fileManager isExecutableFileAtPath: fileNameAsNS])
+                // NB: the length check here is because of strange failures involving long filenames,
+                // probably due to filesystem name length limitations..
+                return (fileName.length() < 1024 && [workspace openFile: fileNameAsNS])
+                        || [workspace openURL: filenameAsURL];
+
+            if (File (fileName).exists())
+                return MacFileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters, environment);
 
             return false;
           #endif
