@@ -3,9 +3,6 @@ name: macOS Builds
 on:
   push
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   macos_build:
     runs-on: macos-latest
@@ -13,8 +10,22 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Build JUCE
+    - name: Build Debug
       shell: bash
       run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-        cmake --build cmake-build --target DemoRunner
+        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+        cmake --build cmake-build -- -j8
+
+    - name: Unit Tests Debug
+      shell: bash
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
+
+    - name: Build Release
+      shell: bash
+      run: |
+        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+        cmake --build cmake-build -- -j8
+
+    - name: Unit Tests Release
+      shell: bash
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner

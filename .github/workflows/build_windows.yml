@@ -3,9 +3,6 @@ name: Windows Builds
 on:
   push
 
-env:
-  BUILD_TYPE: Release
-
 jobs:
   windows_build:
     runs-on: windows-latest
@@ -13,8 +10,23 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Build JUCE
+    - name: Build Debug
       shell: bash
       run: |
-        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-        cmake --build cmake-build --target DemoRunner
+        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+        cmake --build cmake-build
+
+    - name: Unit Tests Debug
+      shell: bash
+      run: cmake-build/examples/DemoRunner/DemoRunner_artefacts/Debug/UnitTestRunner.exe
+
+    - name: Build Release
+      shell: bash
+      run: |
+        cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+        cmake --build cmake-build
+        cmake-build/examples/DemoRunner/DemoRunner_artefacts/Release/UnitTestRunner.exe
+
+    - name: Unit Tests Release
+      shell: bash
+      run: cmake-build/examples/DemoRunner/DemoRunner_artefacts/Release/UnitTestRunner.exe
