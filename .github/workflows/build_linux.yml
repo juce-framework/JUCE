@@ -9,7 +9,7 @@ jobs:
     container:
       image: kunitoki/juce:latest
       volumes:
-        - $GITHUB_WORKSPACE:/juce
+        - ${{ github.workspace }}:/juce
     steps:
     - uses: actions/checkout@v2
     - name: Build Debug
