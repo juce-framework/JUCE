@@ -25,73 +25,134 @@ jobs:
           cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
           cmake --build cmake-build --target AudioPerformanceTest -- -j4
 
-  # linux_debug:
-  #   runs-on: ubuntu-18.04
+  AudioPluginHost:
+    runs-on: ubuntu-18.04
+    container:
+      image: kunitoki/juce:latest
+      volumes:
+        - ${{ github.workspace }}:/juce
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Debug
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build cmake-build --target AudioPluginHost -- -j4
+    - name: Build Release
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build cmake-build --target AudioPluginHost -- -j4
 
-  #   steps:
-  #   - uses: actions/checkout@v2
+  BinaryBuilder:
+    runs-on: ubuntu-18.04
+    container:
+      image: kunitoki/juce:latest
+      volumes:
+        - ${{ github.workspace }}:/juce
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Debug
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build cmake-build --target BinaryBuilder -- -j4
+    - name: Build Release
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build cmake-build --target BinaryBuilder -- -j4
 
-  #   - uses: addnab/docker-run-action@v1
-  #     with:
-  #       image: kunitoki/juce:latest
-  #       options: -v $GITHUB_WORKSPACE:/work
-  #       run: |
-  #         echo "first line"
+  DemoRunner:
+    runs-on: ubuntu-18.04
+    container:
+      image: kunitoki/juce:latest
+      volumes:
+        - ${{ github.workspace }}:/juce
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Debug
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build cmake-build --target DemoRunner -- -j4
+    - name: Build Release
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build cmake-build --target DemoRunner -- -j4
 
-  #   - name: Set up Linux dependencies
-  #     run: |
-  #       sudo apt-get install zlib1g-dev libpng-dev libcurl3-dev libcurl4-openssl-dev libssl-dev
-  #       sudo apt-get install libasound2-dev libfreetype6-dev libxcomposite-dev libxcursor-dev
-  #       sudo apt-get install libxinerama-dev libxrandr-dev libxrender-dev libx11-dev
-  #       sudo apt-get install x11proto-randr-dev x11proto-render-dev x11proto-xinerama-dev
-  #       sudo apt-get install freeglut3-dev mesa-common-dev libglu1-mesa-dev libwebkit2gtk-4.0-dev
-  #       sudo apt-get install libgtk-3-dev libjack-jackd2-dev ladspa-sdk
+  NetworkGraphicsDemo:
+    runs-on: ubuntu-18.04
+    container:
+      image: kunitoki/juce:latest
+      volumes:
+        - ${{ github.workspace }}:/juce
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Debug
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
+    - name: Build Release
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
 
-  #   - name: Build Debug
-  #     shell: bash
-  #     run: |
-  #       rm -Rf cmake-build
-  #       cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-  #       cmake --build cmake-build --target AudioPerformanceTest -- -j4
-  #       cmake --build cmake-build --target AudioPluginHost -- -j4
-  #       cmake --build cmake-build --target BinaryBuilder -- -j4
-  #       cmake --build cmake-build --target DemoRunner -- -j4
-  #       cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
-  #       cmake --build cmake-build --target Projucer -- -j4
-  #       cmake --build cmake-build --target UnitTestRunner -- -j4
+  Projucer:
+    runs-on: ubuntu-18.04
+    container:
+      image: kunitoki/juce:latest
+      volumes:
+        - ${{ github.workspace }}:/juce
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Debug
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build cmake-build --target Projucer -- -j4
+    - name: Build Release
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build cmake-build --target Projucer -- -j4
 
-  #   - name: Unit Tests Debug
-  #     shell: bash
-  #     run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
-
-  # linux_release:
-  #   runs-on: ubuntu-18.04
-
-  #   steps:
-  #   - uses: actions/checkout@v2
-
-  #   - name: Set up Linux dependencies
-  #     run: |
-  #       sudo apt-get install zlib1g-dev libpng-dev libcurl3-dev libcurl4-openssl-dev libssl-dev
-  #       sudo apt-get install libasound2-dev libfreetype6-dev libxcomposite-dev libxcursor-dev
-  #       sudo apt-get install libxinerama-dev libxrandr-dev libxrender-dev libx11-dev
-  #       sudo apt-get install x11proto-randr-dev x11proto-render-dev x11proto-xinerama-dev
-  #       sudo apt-get install freeglut3-dev mesa-common-dev libglu1-mesa-dev libwebkit2gtk-4.0-dev
-  #       sudo apt-get install libgtk-3-dev libjack-jackd2-dev ladspa-sdk
-
-  #   - name: Build Release
-  #     shell: bash
-  #     run: |
-  #       rm -Rf cmake-build
-  #       cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-  #       cmake --build cmake-build --target AudioPerformanceTest -- -j4
-  #       cmake --build cmake-build --target AudioPluginHost -- -j4
-  #       cmake --build cmake-build --target BinaryBuilder -- -j4
-  #       cmake --build cmake-build --target DemoRunner -- -j4
-  #       cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
-  #       cmake --build cmake-build --target Projucer -- -j4
-  #       cmake --build cmake-build --target UnitTestRunner -- -j4
-
-  #   - name: Unit Tests Release
-  #     shell: bash
-  #     run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner
+  UnitTestRunner:
+    runs-on: ubuntu-18.04
+    container:
+      image: kunitoki/juce:latest
+      volumes:
+        - ${{ github.workspace }}:/juce
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Debug
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build cmake-build --target UnitTestRunner -- -j4
+    - name: Unit Tests Debug
+      shell: bash
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
+    - name: Build Release
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build cmake-build --target UnitTestRunner -- -j4
+    - name: Unit Tests Release
+      shell: bash
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner
