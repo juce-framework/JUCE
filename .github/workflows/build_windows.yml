@@ -25,7 +25,7 @@ jobs:
     - name: Configure
       shell: bash
       run: cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON
-   - name: Build Debug
+    - name: Build Debug
       shell: bash
       run: cmake --build cmake-build --target AudioPluginHost --config Debug
     - name: Build Release
