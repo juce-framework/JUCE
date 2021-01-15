@@ -10,20 +10,20 @@ jobs:
       image: kunitoki/juce:latest
       volumes:
         - $GITHUB_WORKSPACE:/juce
-      steps:
-      - uses: actions/checkout@v2
-      - name: Build Debug
-        shell: bash
-        working-directory: /juce
-        run: |
-            cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-            cmake --build cmake-build --target AudioPerformanceTest -- -j4
-      - name: Build Release
-        shell: bash
-        working-directory: /juce
-        run: |
-            cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-            cmake --build cmake-build --target AudioPerformanceTest -- -j4
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build Debug
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
+          cmake --build cmake-build --target AudioPerformanceTest -- -j4
+    - name: Build Release
+      shell: bash
+      working-directory: /juce
+      run: |
+          cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
+          cmake --build cmake-build --target AudioPerformanceTest -- -j4
 
   # linux_debug:
   #   runs-on: ubuntu-18.04
