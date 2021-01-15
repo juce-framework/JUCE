@@ -105,7 +105,7 @@ jobs:
         cmake --build cmake-build --target UnitTestRunner -- -j4
     - name: Unit Tests Debug
       shell: bash
-      run: cmake-build/examples/DemoRunner/DemoRunner_artefacts/Debug/UnitTestRunner
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
     - name: Build Release
       shell: bash
       run: |
@@ -113,6 +113,6 @@ jobs:
         cmake --build cmake-build --target UnitTestRunner -- -j4
     - name: Unit Tests Release
       shell: bash
-      run: cmake-build/examples/DemoRunner/DemoRunner_artefacts/Release/UnitTestRunner
+      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner
 
 

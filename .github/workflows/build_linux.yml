@@ -5,8 +5,8 @@ on:
 
 jobs:
   AudioPerformanceTest:
+    runs-on: ubuntu-18.04
     container:
-      runs-on: ubuntu-18.04
       image: kunitoki/juce:latest
       volumes:
         - $GITHUB_WORKSPACE:/juce
