@@ -19,7 +19,7 @@ jobs:
         sudo apt-get install libasound2-dev libfreetype6-dev libxcomposite-dev libxcursor-dev
         sudo apt-get install libxinerama-dev libxrandr-dev libxrender-dev libx11-dev
         sudo apt-get install x11proto-randr-dev x11proto-render-dev x11proto-xinerama-dev
-        sudo apt-get install freeglut3-dev mesa-common-dev
+        sudo apt-get install freeglut3-dev mesa-common-dev webkit2gtk gtk+-x11
 
     - name: Build JUCE
       shell: bash
