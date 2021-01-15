@@ -26,6 +26,8 @@
 #include "opensles/AudioStreamOpenSLES.h"
 #include "QuirksManager.h"
 
+bool oboe::OboeGlobals::mWorkaroundsEnabled = true;
+
 namespace oboe {
 
 /**
@@ -78,14 +80,19 @@ AudioStream *AudioStreamBuilder::build() {
 }
 
 bool AudioStreamBuilder::isCompatible(AudioStreamBase &other) {
-    return getSampleRate() == other.getSampleRate()
-           && getFormat() == other.getFormat()
-           && getChannelCount() == other.getChannelCount();
+    return (getSampleRate() == oboe::Unspecified || getSampleRate() == other.getSampleRate())
+           && (getFormat() == (AudioFormat)oboe::Unspecified || getFormat() == other.getFormat())
+           && (getFramesPerDataCallback() == oboe::Unspecified || getFramesPerDataCallback() == other.getFramesPerDataCallback())
+           && (getChannelCount() == oboe::Unspecified || getChannelCount() == other.getChannelCount());
 }
 
 Result AudioStreamBuilder::openStream(AudioStream **streamPP) {
-    Result result = Result::OK;
-    LOGD("%s() %s -------- %s --------",
+    auto result = isValidConfig();
+    if (result != Result::OK) {
+        return result;
+    }
+
+    LOGI("%s() %s -------- %s --------",
          __func__, getDirection() == Direction::Input ? "INPUT" : "OUTPUT", getVersionText());
 
     if (streamPP == nullptr) {
@@ -109,7 +116,7 @@ Result AudioStreamBuilder::openStream(AudioStream **streamPP) {
         }
 
         if (isCompatible(*tempStream)) {
-            // Everything matches so we can just use the child stream directly.
+            // The child stream would work as the requested stream so we can just use it directly.
             *streamPP = tempStream;
             return result;
         } else {
@@ -124,9 +131,12 @@ Result AudioStreamBuilder::openStream(AudioStream **streamPP) {
             if (getSampleRate() == oboe::Unspecified) {
                 parentBuilder.setSampleRate(tempStream->getSampleRate());
             }
+            if (getFramesPerDataCallback() == oboe::Unspecified) {
+                parentBuilder.setFramesPerCallback(tempStream->getFramesPerDataCallback());
+            }
 
             // Use childStream in a FilterAudioStream.
-            LOGD("%s() create a FilterAudioStream for data conversion.", __func__);
+            LOGI("%s() create a FilterAudioStream for data conversion.", __func__);
             FilterAudioStream *filterStream = new FilterAudioStream(parentBuilder, tempStream);
             result = filterStream->configureFlowGraph();
             if (result !=  Result::OK) {
@@ -178,9 +188,29 @@ Result AudioStreamBuilder::openStream(AudioStream **streamPP) {
 
 Result AudioStreamBuilder::openManagedStream(oboe::ManagedStream &stream) {
     stream.reset();
+    auto result = isValidConfig();
+    if (result != Result::OK) {
+        return result;
+    }
     AudioStream *streamptr;
-    auto result = openStream(&streamptr);
+    result = openStream(&streamptr);
     stream.reset(streamptr);
+    return result;
+}
+
+Result AudioStreamBuilder::openStream(std::shared_ptr<AudioStream> &sharedStream) {
+    sharedStream.reset();
+    auto result = isValidConfig();
+    if (result != Result::OK) {
+        return result;
+    }
+    AudioStream *streamptr;
+    result = openStream(&streamptr);
+    if (result == Result::OK) {
+        sharedStream.reset(streamptr);
+        // Save a weak_ptr in the stream for use with callbacks.
+        streamptr->setWeakThis(sharedStream);
+    }
     return result;
 }
 

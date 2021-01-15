@@ -33,10 +33,10 @@ public:
     TextButtonHandler()
         : ButtonHandler ("Text Button", "juce::TextButton", typeid (TextButton), 150, 24)
     {
-        registerColour (TextButton::buttonColourId, "background (normal)", "bgColOff");
-        registerColour (TextButton::buttonOnColourId, "background (on)", "bgColOn");
-        registerColour (TextButton::textColourOffId, "text colour (normal)", "textCol");
-        registerColour (TextButton::textColourOnId, "text colour (on)", "textColOn");
+        registerColour (juce::TextButton::buttonColourId, "background (normal)", "bgColOff");
+        registerColour (juce::TextButton::buttonOnColourId, "background (on)", "bgColOn");
+        registerColour (juce::TextButton::textColourOffId, "text colour (normal)", "textCol");
+        registerColour (juce::TextButton::textColourOnId, "text colour (on)", "textColOn");
     }
 
     Component* createNewComponent (JucerDocument*) override

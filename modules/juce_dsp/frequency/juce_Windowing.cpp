@@ -136,10 +136,11 @@ void WindowingFunction<FloatType>::fillWindowingTables (FloatType* samples, size
         case kaiser:
         {
             const double factor = 1.0 / SpecialFunctions::besselI0 (beta);
+            const auto doubleSize = (double) size;
 
             for (size_t i = 0; i < size; ++i)
-                samples[i] = static_cast<FloatType> (SpecialFunctions::besselI0 (beta * std::sqrt (1.0 - std::pow ((i - 0.5 * (size - 1.0))
-                                                                                                                     / ( 0.5 * (size - 1.0)), 2.0)))
+                samples[i] = static_cast<FloatType> (SpecialFunctions::besselI0 (beta * std::sqrt (1.0 - std::pow (((double) i - 0.5 * (doubleSize - 1.0))
+                                                                                                                     / ( 0.5 * (doubleSize - 1.0)), 2.0)))
                                                       * factor);
         }
         break;

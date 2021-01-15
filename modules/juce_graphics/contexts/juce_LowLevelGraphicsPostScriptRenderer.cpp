@@ -50,7 +50,7 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
     stateStack.add (new SavedState());
     stateStack.getLast()->clip = Rectangle<int> (totalWidth_, totalHeight_);
 
-    const float scale = jmin ((520.0f / totalWidth_), (750.0f / totalHeight));
+    const float scale = jmin ((520.0f / (float) totalWidth_), (750.0f / (float) totalHeight));
 
     out << "%!PS-Adobe-3.0 EPSF-3.0"
            "\n%%BoundingBox: 0 0 600 824"

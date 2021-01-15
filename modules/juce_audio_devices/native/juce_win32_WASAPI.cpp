@@ -208,6 +208,29 @@ enum AUDCLNT_SHAREMODE
     AUDCLNT_SHAREMODE_EXCLUSIVE
 };
 
+enum AUDIO_STREAM_CATEGORY
+{
+    AudioCategory_Other = 0,
+    AudioCategory_ForegroundOnlyMedia,
+    AudioCategory_BackgroundCapableMedia,
+    AudioCategory_Communications,
+    AudioCategory_Alerts,
+    AudioCategory_SoundEffects,
+    AudioCategory_GameEffects,
+    AudioCategory_GameMedia,
+    AudioCategory_GameChat,
+    AudioCategory_Speech,
+    AudioCategory_Movie,
+    AudioCategory_Media
+};
+
+struct AudioClientProperties
+{
+    UINT32                  cbSize;
+    BOOL                    bIsOffload;
+    AUDIO_STREAM_CATEGORY   eCategory;
+};
+
 JUCE_IUNKNOWNCLASS (IAudioClient, "1CB9AD4C-DBFA-4c32-B178-C2F568A703B2")
 {
     JUCE_COMCALL Initialize (AUDCLNT_SHAREMODE, DWORD, REFERENCE_TIME, REFERENCE_TIME, const WAVEFORMATEX*, LPCGUID) = 0;
@@ -222,6 +245,20 @@ JUCE_IUNKNOWNCLASS (IAudioClient, "1CB9AD4C-DBFA-4c32-B178-C2F568A703B2")
     JUCE_COMCALL Reset() = 0;
     JUCE_COMCALL SetEventHandle (HANDLE) = 0;
     JUCE_COMCALL GetService (REFIID, void**) = 0;
+};
+
+JUCE_COMCLASS (IAudioClient2, "726778CD-F60A-4eda-82DE-E47610CD78AA") : public IAudioClient
+{
+    JUCE_COMCALL IsOffloadCapable (AUDIO_STREAM_CATEGORY, BOOL*) = 0;
+    JUCE_COMCALL SetClientProperties (const AudioClientProperties*) = 0;
+    JUCE_COMCALL GetBufferSizeLimits (const WAVEFORMATEX*, BOOL, REFERENCE_TIME*, REFERENCE_TIME*) = 0;
+};
+
+JUCE_COMCLASS (IAudioClient3, "1CB9AD4C-DBFA-4c32-B178-C2F568A703B2") : public IAudioClient2
+{
+    JUCE_COMCALL GetSharedModeEnginePeriod (const WAVEFORMATEX*, UINT32*, UINT32*, UINT32*, UINT32*) = 0;
+    JUCE_COMCALL GetCurrentSharedModeEnginePeriod (WAVEFORMATEX**, UINT32*) = 0;
+    JUCE_COMCALL InitializeSharedAudioStream (DWORD, UINT32, const WAVEFORMATEX*, LPCGUID) = 0;
 };
 
 JUCE_IUNKNOWNCLASS (IAudioCaptureClient, "C8ADBD64-E71E-48a0-A4DE-185C395CD317")
@@ -322,87 +359,76 @@ String getDeviceID (IMMDevice* device)
     return s;
 }
 
-EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
+static EDataFlow getDataFlow (const ComSmartPtr<IMMDevice>& device)
 {
     EDataFlow flow = eRender;
-    ComSmartPtr<IMMEndpoint> endPoint;
-    if (check (device.QueryInterface (endPoint)))
-        (void) check (endPoint->GetDataFlow (&flow));
+    if (auto endpoint = device.getInterface<IMMEndpoint>())
+        (void) check (endpoint->GetDataFlow (&flow));
 
     return flow;
 }
 
-int refTimeToSamples (const REFERENCE_TIME& t, double sampleRate) noexcept
+static int refTimeToSamples (const REFERENCE_TIME& t, double sampleRate) noexcept
 {
     return roundToInt (sampleRate * ((double) t) * 0.0000001);
 }
 
-REFERENCE_TIME samplesToRefTime (int numSamples, double sampleRate) noexcept
+static REFERENCE_TIME samplesToRefTime (int numSamples, double sampleRate) noexcept
 {
     return (REFERENCE_TIME) ((numSamples * 10000.0 * 1000.0 / sampleRate) + 0.5);
 }
 
-void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* src) noexcept
+static void copyWavFormat (WAVEFORMATEXTENSIBLE& dest, const WAVEFORMATEX* src) noexcept
 {
     memcpy (&dest, src, src->wFormatTag == WAVE_FORMAT_EXTENSIBLE ? sizeof (WAVEFORMATEXTENSIBLE)
                                                                   : sizeof (WAVEFORMATEX));
+}
+
+static bool isExclusiveMode (WASAPIDeviceMode deviceMode) noexcept
+{
+    return deviceMode == WASAPIDeviceMode::exclusive;
+}
+
+static bool isLowLatencyMode (WASAPIDeviceMode deviceMode) noexcept
+{
+    return deviceMode == WASAPIDeviceMode::sharedLowLatency;
+}
+
+static bool supportsSampleRateConversion (WASAPIDeviceMode deviceMode) noexcept
+{
+    return deviceMode == WASAPIDeviceMode::shared;
 }
 
 //==============================================================================
 class WASAPIDeviceBase
 {
 public:
-    WASAPIDeviceBase (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode)
-        : device (d), useExclusiveMode (exclusiveMode)
+    WASAPIDeviceBase (const ComSmartPtr<IMMDevice>& d, WASAPIDeviceMode mode)
+        : device (d),
+          deviceMode (mode)
     {
         clientEvent = CreateEvent (nullptr, false, false, nullptr);
 
         ComSmartPtr<IAudioClient> tempClient (createClient());
+
         if (tempClient == nullptr)
             return;
 
-        REFERENCE_TIME defaultPeriod, minPeriod;
-        if (! check (tempClient->GetDevicePeriod (&defaultPeriod, &minPeriod)))
-            return;
-
-        WAVEFORMATEX* mixFormat = nullptr;
-        if (! check (tempClient->GetMixFormat (&mixFormat)))
-            return;
-
         WAVEFORMATEXTENSIBLE format;
-        copyWavFormat (format, mixFormat);
-        CoTaskMemFree (mixFormat);
+
+        if (! getClientMixFormat (tempClient, format))
+            return;
 
         actualNumChannels = numChannels = format.Format.nChannels;
         defaultSampleRate = format.Format.nSamplesPerSec;
-        minBufferSize = refTimeToSamples (minPeriod, defaultSampleRate);
-        defaultBufferSize = refTimeToSamples (defaultPeriod, defaultSampleRate);
+        rates.addUsingDefaultSort (defaultSampleRate);
         mixFormatChannelMask = format.dwChannelMask;
 
-        rates.addUsingDefaultSort (defaultSampleRate);
+        if (isExclusiveMode (deviceMode))
+            findSupportedFormat (tempClient, defaultSampleRate, mixFormatChannelMask, format);
 
-        if (useExclusiveMode
-             && findSupportedFormat (tempClient, defaultSampleRate, format.dwChannelMask, format))
-        {
-            // Got a format that is supported by the device so we can ask what sample rates are supported (in whatever format)
-        }
-
-        for (auto rate : { 8000, 11025, 16000, 22050, 32000,
-                           44100, 48000, 88200, 96000, 176400,
-                           192000, 352800, 384000, 705600, 768000 })
-       {
-            if (rates.contains (rate))
-                continue;
-
-            format.Format.nSamplesPerSec  = (DWORD) rate;
-            format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nChannels * format.Format.wBitsPerSample / 8);
-
-            if (SUCCEEDED (tempClient->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
-                                                                           : AUDCLNT_SHAREMODE_SHARED,
-                                                          (WAVEFORMATEX*) &format, 0)))
-                if (! rates.contains (rate))
-                    rates.addUsingDefaultSort (rate);
-        }
+        querySupportedBufferSizes (format, tempClient);
+        querySupportedSampleRates (format, tempClient);
     }
 
     virtual ~WASAPIDeviceBase()
@@ -487,11 +513,14 @@ public:
     //==============================================================================
     ComSmartPtr<IMMDevice> device;
     ComSmartPtr<IAudioClient> client;
+
+    WASAPIDeviceMode deviceMode;
+
     double sampleRate = 0, defaultSampleRate = 0;
     int numChannels = 0, actualNumChannels = 0;
     int minBufferSize = 0, defaultBufferSize = 0, latencySamples = 0;
+    int lowLatencyBufferSizeMultiple = 0, lowLatencyMaxBufferSize = 0;
     DWORD mixFormatChannelMask = 0;
-    const bool useExclusiveMode;
     Array<double> rates;
     HANDLE clientEvent = {};
     BigInteger channels;
@@ -582,6 +611,84 @@ private:
         return newClient;
     }
 
+    static bool getClientMixFormat (ComSmartPtr<IAudioClient>& client, WAVEFORMATEXTENSIBLE& format)
+    {
+        WAVEFORMATEX* mixFormat = nullptr;
+
+        if (! check (client->GetMixFormat (&mixFormat)))
+            return false;
+
+        copyWavFormat (format, mixFormat);
+        CoTaskMemFree (mixFormat);
+
+        return true;
+    }
+
+    //==============================================================================
+    void querySupportedBufferSizes (WAVEFORMATEXTENSIBLE format, ComSmartPtr<IAudioClient>& audioClient)
+    {
+        if (isLowLatencyMode (deviceMode))
+        {
+            if (auto audioClient3 = audioClient.getInterface<IAudioClient3>())
+            {
+                UINT32 defaultPeriod = 0, fundamentalPeriod = 0, minPeriod = 0, maxPeriod = 0;
+
+                if (check (audioClient3->GetSharedModeEnginePeriod ((WAVEFORMATEX*) &format,
+                                                                    &defaultPeriod,
+                                                                    &fundamentalPeriod,
+                                                                    &minPeriod,
+                                                                    &maxPeriod)))
+                {
+                    minBufferSize = minPeriod;
+                    defaultBufferSize = defaultPeriod;
+                    lowLatencyMaxBufferSize = maxPeriod;
+                    lowLatencyBufferSizeMultiple = fundamentalPeriod;
+                }
+            }
+        }
+        else
+        {
+            REFERENCE_TIME defaultPeriod, minPeriod;
+
+            if (! check (audioClient->GetDevicePeriod (&defaultPeriod, &minPeriod)))
+                return;
+
+            minBufferSize = refTimeToSamples (minPeriod, defaultSampleRate);
+            defaultBufferSize = refTimeToSamples (defaultPeriod, defaultSampleRate);
+        }
+    }
+
+    void querySupportedSampleRates (WAVEFORMATEXTENSIBLE format, ComSmartPtr<IAudioClient>& audioClient)
+    {
+        for (auto rate : { 8000, 11025, 16000, 22050, 32000,
+                           44100, 48000, 88200, 96000, 176400,
+                           192000, 352800, 384000, 705600, 768000 })
+        {
+            if (rates.contains (rate))
+                continue;
+
+            format.Format.nSamplesPerSec  = (DWORD) rate;
+            format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nChannels * format.Format.wBitsPerSample / 8);
+
+            WAVEFORMATEX* nearestFormat = nullptr;
+
+            if (SUCCEEDED (audioClient->IsFormatSupported (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
+                                                                                        : AUDCLNT_SHAREMODE_SHARED,
+                                                           (WAVEFORMATEX*) &format,
+                                                           isExclusiveMode (deviceMode) ? nullptr
+                                                                                        : &nearestFormat)))
+            {
+                if (nearestFormat != nullptr)
+                    rate = nearestFormat->nSamplesPerSec;
+
+                if (! rates.contains (rate))
+                    rates.addUsingDefaultSort (rate);
+            }
+
+            CoTaskMemFree (nearestFormat);
+        }
+    }
+
     struct AudioSampleFormat
     {
         bool useFloat;
@@ -613,22 +720,35 @@ private:
         format.SubFormat                   = sampleFormat.useFloat ? KSDATAFORMAT_SUBTYPE_IEEE_FLOAT : KSDATAFORMAT_SUBTYPE_PCM;
         format.dwChannelMask               = newMixFormatChannelMask;
 
-        WAVEFORMATEXTENSIBLE* nearestFormat = nullptr;
+        WAVEFORMATEX* nearestFormat = nullptr;
 
-        HRESULT hr = clientToUse->IsFormatSupported (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE
-                                                                      : AUDCLNT_SHAREMODE_SHARED,
+        HRESULT hr = clientToUse->IsFormatSupported (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
+                                                                                  : AUDCLNT_SHAREMODE_SHARED,
                                                      (WAVEFORMATEX*) &format,
-                                                     useExclusiveMode ? nullptr : (WAVEFORMATEX**) &nearestFormat);
+                                                     isExclusiveMode (deviceMode) ? nullptr
+                                                                                  : &nearestFormat);
         logFailure (hr);
 
-        if (hr == S_FALSE && format.Format.nSamplesPerSec == nearestFormat->Format.nSamplesPerSec)
+        auto supportsSRC = supportsSampleRateConversion (deviceMode);
+
+        if (hr == S_FALSE
+            && nearestFormat != nullptr
+            && (format.Format.nSamplesPerSec == nearestFormat->nSamplesPerSec
+                || supportsSRC))
         {
-            copyWavFormat (format, (const WAVEFORMATEX*) nearestFormat);
+            copyWavFormat (format, nearestFormat);
+
+            if (supportsSRC)
+            {
+                format.Format.nSamplesPerSec  = (DWORD) newSampleRate;
+                format.Format.nAvgBytesPerSec = (DWORD) (format.Format.nSamplesPerSec * format.Format.nBlockAlign);
+            }
+
             hr = S_OK;
         }
 
         CoTaskMemFree (nearestFormat);
-        return check (hr);
+        return hr == S_OK;
     }
 
     bool findSupportedFormat (IAudioClient* clientToUse, double newSampleRate,
@@ -652,50 +772,88 @@ private:
         return false;
     }
 
+    DWORD getStreamFlags()
+    {
+        DWORD streamFlags = 0x40000; /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/
+
+        if (supportsSampleRateConversion (deviceMode))
+            streamFlags |= (0x80000000    /*AUDCLNT_STREAMFLAGS_AUTOCONVERTPCM*/
+                            | 0x8000000); /*AUDCLNT_STREAMFLAGS_SRC_DEFAULT_QUALITY*/
+
+        return streamFlags;
+    }
+
+    bool initialiseLowLatencyClient (int bufferSizeSamples, WAVEFORMATEXTENSIBLE format)
+    {
+        if (auto audioClient3 = client.getInterface<IAudioClient3>())
+            return check (audioClient3->InitializeSharedAudioStream (getStreamFlags(),
+                                                                     bufferSizeSamples,
+                                                                     (WAVEFORMATEX*) &format,
+                                                                     nullptr));
+
+        return false;
+    }
+
+    bool initialiseStandardClient (int bufferSizeSamples, WAVEFORMATEXTENSIBLE format)
+    {
+        REFERENCE_TIME defaultPeriod = 0, minPeriod = 0;
+
+        check (client->GetDevicePeriod (&defaultPeriod, &minPeriod));
+
+        if (isExclusiveMode (deviceMode) && bufferSizeSamples > 0)
+            defaultPeriod = jmax (minPeriod, samplesToRefTime (bufferSizeSamples, format.Format.nSamplesPerSec));
+
+        for (;;)
+        {
+            GUID session;
+            auto hr = client->Initialize (isExclusiveMode (deviceMode) ? AUDCLNT_SHAREMODE_EXCLUSIVE
+                                                                       : AUDCLNT_SHAREMODE_SHARED,
+                                          getStreamFlags(),
+                                          defaultPeriod,
+                                          isExclusiveMode (deviceMode) ? defaultPeriod : 0,
+                                          (WAVEFORMATEX*) &format,
+                                          &session);
+
+            if (check (hr))
+                return true;
+
+            // Handle the "alignment dance" : http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875(v=vs.85).aspx (see Remarks)
+            if (hr != MAKE_HRESULT (1, 0x889, 0x19)) // AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED
+                break;
+
+            UINT32 numFrames = 0;
+            if (! check (client->GetBufferSize (&numFrames)))
+                break;
+
+            // Recreate client
+            client = nullptr;
+            client = createClient();
+
+            defaultPeriod = samplesToRefTime (numFrames, format.Format.nSamplesPerSec);
+        }
+
+        return false;
+    }
+
     bool tryInitialisingWithBufferSize (int bufferSizeSamples)
     {
         WAVEFORMATEXTENSIBLE format;
 
         if (findSupportedFormat (client, sampleRate, mixFormatChannelMask, format))
         {
-            REFERENCE_TIME defaultPeriod = 0, minPeriod = 0;
+            auto isInitialised = isLowLatencyMode (deviceMode) ? initialiseLowLatencyClient (bufferSizeSamples, format)
+                                                               : initialiseStandardClient   (bufferSizeSamples, format);
 
-            check (client->GetDevicePeriod (&defaultPeriod, &minPeriod));
-
-            if (useExclusiveMode && bufferSizeSamples > 0)
-                defaultPeriod = jmax (minPeriod, samplesToRefTime (bufferSizeSamples, format.Format.nSamplesPerSec));
-
-            for (;;)
+            if (isInitialised)
             {
-                GUID session;
-                HRESULT hr = client->Initialize (useExclusiveMode ? AUDCLNT_SHAREMODE_EXCLUSIVE : AUDCLNT_SHAREMODE_SHARED,
-                                                 0x40000 /*AUDCLNT_STREAMFLAGS_EVENTCALLBACK*/,
-                                                 defaultPeriod, useExclusiveMode ? defaultPeriod : 0, (WAVEFORMATEX*) &format, &session);
+                actualNumChannels  = format.Format.nChannels;
+                const bool isFloat = format.Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format.SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
+                bytesPerSample     = format.Format.wBitsPerSample / 8;
+                bytesPerFrame      = format.Format.nBlockAlign;
 
-                if (check (hr))
-                {
-                    actualNumChannels  = format.Format.nChannels;
-                    const bool isFloat = format.Format.wFormatTag == WAVE_FORMAT_EXTENSIBLE && format.SubFormat == KSDATAFORMAT_SUBTYPE_IEEE_FLOAT;
-                    bytesPerSample     = format.Format.wBitsPerSample / 8;
-                    bytesPerFrame      = format.Format.nBlockAlign;
+                updateFormat (isFloat);
 
-                    updateFormat (isFloat);
-                    return true;
-                }
-
-                // Handle the "alignment dance" : http://msdn.microsoft.com/en-us/library/windows/desktop/dd370875(v=vs.85).aspx (see Remarks)
-                if (hr != MAKE_HRESULT (1, 0x889, 0x19)) // AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED
-                    break;
-
-                UINT32 numFrames = 0;
-                if (! check (client->GetBufferSize (&numFrames)))
-                    break;
-
-                // Recreate client
-                client = nullptr;
-                client = createClient();
-
-                defaultPeriod = samplesToRefTime (numFrames, format.Format.nSamplesPerSec);
+                return true;
             }
         }
 
@@ -709,8 +867,8 @@ private:
 class WASAPIInputDevice  : public WASAPIDeviceBase
 {
 public:
-    WASAPIInputDevice (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode)
-        : WASAPIDeviceBase (d, exclusiveMode)
+    WASAPIInputDevice (const ComSmartPtr<IMMDevice>& d, WASAPIDeviceMode mode)
+        : WASAPIDeviceBase (d, mode)
     {
     }
 
@@ -872,8 +1030,8 @@ private:
 class WASAPIOutputDevice  : public WASAPIDeviceBase
 {
 public:
-    WASAPIOutputDevice (const ComSmartPtr<IMMDevice>& d, bool exclusiveMode)
-        : WASAPIDeviceBase (d, exclusiveMode)
+    WASAPIOutputDevice (const ComSmartPtr<IMMDevice>& d, WASAPIDeviceMode mode)
+        : WASAPIDeviceBase (d, mode)
     {
     }
 
@@ -931,7 +1089,7 @@ public:
         if (numChannels <= 0)
             return 0;
 
-        if (! useExclusiveMode)
+        if (! isExclusiveMode (deviceMode))
         {
             UINT32 padding = 0;
 
@@ -953,7 +1111,7 @@ public:
         while (bufferSize > 0)
         {
             // This is needed in order not to drop any input data if the output device endpoint buffer was full
-            if ((! useExclusiveMode) && inputDevice != nullptr
+            if ((! isExclusiveMode (deviceMode)) && inputDevice != nullptr
                   && WaitForSingleObject (inputDevice->clientEvent, 0) == WAIT_OBJECT_0)
                 inputDevice->handleDeviceBuffer();
 
@@ -968,7 +1126,7 @@ public:
                 break;
             }
 
-            if (useExclusiveMode && WaitForSingleObject (clientEvent, 1000) == WAIT_TIMEOUT)
+            if (isExclusiveMode (deviceMode) && WaitForSingleObject (clientEvent, 1000) == WAIT_TIMEOUT)
                 break;
 
             uint8* outputData = nullptr;
@@ -1002,12 +1160,12 @@ public:
                          const String& typeName,
                          const String& outputDeviceID,
                          const String& inputDeviceID,
-                         bool exclusiveMode)
+                         WASAPIDeviceMode mode)
         : AudioIODevice (deviceName, typeName),
           Thread ("JUCE WASAPI"),
           outputDeviceId (outputDeviceID),
           inputDeviceId (inputDeviceID),
-          useExclusiveMode (exclusiveMode)
+          deviceMode (mode)
     {
     }
 
@@ -1026,21 +1184,48 @@ public:
         {
             jassert (inputDevice != nullptr || outputDevice != nullptr);
 
+            sampleRates.clear();
+
             if (inputDevice != nullptr && outputDevice != nullptr)
             {
                 defaultSampleRate = jmin (inputDevice->defaultSampleRate, outputDevice->defaultSampleRate);
-                minBufferSize = jmin (inputDevice->minBufferSize, outputDevice->minBufferSize);
+                minBufferSize = jmax (inputDevice->minBufferSize, outputDevice->minBufferSize);
                 defaultBufferSize = jmax (inputDevice->defaultBufferSize, outputDevice->defaultBufferSize);
-                sampleRates = inputDevice->rates;
-                sampleRates.removeValuesNotIn (outputDevice->rates);
+
+                if (isLowLatencyMode (deviceMode))
+                {
+                    lowLatencyMaxBufferSize = jmin (inputDevice->lowLatencyMaxBufferSize, outputDevice->lowLatencyMaxBufferSize);
+                    lowLatencyBufferSizeMultiple = jmax (inputDevice->lowLatencyBufferSizeMultiple, outputDevice->lowLatencyBufferSizeMultiple);
+                }
+
+                sampleRates.addArray (inputDevice->rates);
+
+                if (supportsSampleRateConversion (deviceMode))
+                {
+                    for (auto r : outputDevice->rates)
+                        if (! sampleRates.contains (r))
+                            sampleRates.addUsingDefaultSort (r);
+                }
+                else
+                {
+                    sampleRates.removeValuesNotIn (outputDevice->rates);
+                }
             }
             else
             {
-                WASAPIDeviceBase* d = inputDevice != nullptr ? static_cast<WASAPIDeviceBase*> (inputDevice.get())
-                                                             : static_cast<WASAPIDeviceBase*> (outputDevice.get());
+                auto* d = inputDevice != nullptr ? static_cast<WASAPIDeviceBase*> (inputDevice.get())
+                                                 : static_cast<WASAPIDeviceBase*> (outputDevice.get());
+
                 defaultSampleRate = d->defaultSampleRate;
                 minBufferSize = d->minBufferSize;
                 defaultBufferSize = d->defaultBufferSize;
+
+                if (isLowLatencyMode (deviceMode))
+                {
+                    lowLatencyMaxBufferSize = d->lowLatencyMaxBufferSize;
+                    lowLatencyBufferSizeMultiple = d->lowLatencyBufferSizeMultiple;
+                }
+
                 sampleRates = d->rates;
             }
 
@@ -1050,13 +1235,28 @@ public:
             if (minBufferSize != defaultBufferSize)
                 bufferSizes.addUsingDefaultSort (minBufferSize);
 
-            int n = 64;
-            for (int i = 0; i < 40; ++i)
+            if (isLowLatencyMode (deviceMode))
             {
-                if (n >= minBufferSize && n <= 2048 && ! bufferSizes.contains (n))
-                    bufferSizes.addUsingDefaultSort (n);
+                auto size = minBufferSize;
 
-                n += (n < 512) ? 32 : (n < 1024 ? 64 : 128);
+                while (size < lowLatencyMaxBufferSize)
+                {
+                    size += lowLatencyBufferSizeMultiple;
+
+                    if (! bufferSizes.contains (size))
+                        bufferSizes.addUsingDefaultSort (size);
+                }
+            }
+            else
+            {
+                int n = 64;
+                for (int i = 0; i < 40; ++i)
+                {
+                    if (n >= minBufferSize && n <= 2048 && ! bufferSizes.contains (n))
+                        bufferSizes.addUsingDefaultSort (n);
+
+                    n += (n < 512) ? 32 : (n < 1024 ? 64 : 128);
+                }
             }
 
             return true;
@@ -1131,7 +1331,7 @@ public:
             return lastError;
         }
 
-        if (useExclusiveMode)
+        if (isExclusiveMode (deviceMode))
         {
             // This is to make sure that the callback uses actualBufferSize in case of exclusive mode
             if (inputDevice != nullptr && outputDevice != nullptr && inputDevice->actualBufferSize != outputDevice->actualBufferSize)
@@ -1297,7 +1497,7 @@ public:
                 }
                 else
                 {
-                    if (useExclusiveMode && WaitForSingleObject (inputDevice->clientEvent, 0) == WAIT_OBJECT_0)
+                    if (isExclusiveMode (deviceMode) && WaitForSingleObject (inputDevice->clientEvent, 0) == WAIT_OBJECT_0)
                         inputDevice->handleDeviceBuffer();
                 }
 
@@ -1347,9 +1547,10 @@ private:
     // Device stats...
     std::unique_ptr<WASAPIInputDevice> inputDevice;
     std::unique_ptr<WASAPIOutputDevice> outputDevice;
-    const bool useExclusiveMode;
+    WASAPIDeviceMode deviceMode;
     double defaultSampleRate = 0;
     int minBufferSize = 0, defaultBufferSize = 0;
+    int lowLatencyMaxBufferSize = 0, lowLatencyBufferSizeMultiple = 0;
     int latencyIn = 0, latencyOut = 0;
     Array<double> sampleRates;
     Array<int> bufferSizes;
@@ -1399,9 +1600,9 @@ private:
             auto flow = getDataFlow (device);
 
             if (deviceId == inputDeviceId && flow == eCapture)
-                inputDevice.reset (new WASAPIInputDevice (device, useExclusiveMode));
+                inputDevice.reset (new WASAPIInputDevice (device, deviceMode));
             else if (deviceId == outputDeviceId && flow == eRender)
-                outputDevice.reset (new WASAPIOutputDevice (device, useExclusiveMode));
+                outputDevice.reset (new WASAPIOutputDevice (device, deviceMode));
         }
 
         return (outputDeviceId.isEmpty() || (outputDevice != nullptr && outputDevice->isOk()))
@@ -1458,10 +1659,10 @@ class WASAPIAudioIODeviceType  : public AudioIODeviceType,
                                  private DeviceChangeDetector
 {
 public:
-    WASAPIAudioIODeviceType (bool exclusive)
-        : AudioIODeviceType (exclusive ? "Windows Audio (Exclusive Mode)" : "Windows Audio"),
+    WASAPIAudioIODeviceType (WASAPIDeviceMode mode)
+        : AudioIODeviceType (getDeviceTypename (mode)),
           DeviceChangeDetector (L"Windows Audio"),
-          exclusiveMode (exclusive)
+          deviceMode (mode)
     {
     }
 
@@ -1529,7 +1730,7 @@ public:
                                                    getTypeName(),
                                                    outputDeviceIds [outputIndex],
                                                    inputDeviceIds [inputIndex],
-                                                   exclusiveMode));
+                                                   deviceMode));
 
             if (! device->initialise())
                 device = nullptr;
@@ -1543,7 +1744,7 @@ public:
     StringArray inputDeviceNames, inputDeviceIds;
 
 private:
-    const bool exclusiveMode;
+    WASAPIDeviceMode deviceMode;
     bool hasScanned = false;
     ComSmartPtr<IMMDeviceEnumerator> enumerator;
 
@@ -1699,6 +1900,17 @@ private:
     }
 
     //==============================================================================
+    static String getDeviceTypename (WASAPIDeviceMode mode)
+    {
+        if (mode == WASAPIDeviceMode::shared)            return "Windows Audio";
+        if (mode == WASAPIDeviceMode::sharedLowLatency)  return "Windows Audio (Low Latency Mode)";
+        if (mode == WASAPIDeviceMode::exclusive)         return "Windows Audio (Exclusive Mode)";
+
+        jassertfalse;
+        return {};
+    }
+
+    //==============================================================================
     JUCE_DECLARE_WEAK_REFERENCEABLE (WASAPIAudioIODeviceType)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIAudioIODeviceType)
 };
@@ -1754,19 +1966,6 @@ struct MMDeviceMasterVolume
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MMDeviceMasterVolume)
 };
 
-}
-
-//==============================================================================
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_WASAPI (bool exclusiveMode)
-{
-   #if ! JUCE_WASAPI_EXCLUSIVE
-    if (exclusiveMode)
-        return nullptr;
-   #endif
-
-    return SystemStats::getOperatingSystemType() >= SystemStats::WinVista
-                ? new WasapiClasses::WASAPIAudioIODeviceType (exclusiveMode)
-                : nullptr;
 }
 
 //==============================================================================

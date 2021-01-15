@@ -122,10 +122,35 @@ public:
         bool isLooping;
 
         //==============================================================================
-        bool operator== (const CurrentPositionInfo& other) const noexcept;
-        bool operator!= (const CurrentPositionInfo& other) const noexcept;
+        bool operator== (const CurrentPositionInfo& other) const noexcept
+        {
+            return timeInSamples == other.timeInSamples
+                && ppqPosition == other.ppqPosition
+                && editOriginTime == other.editOriginTime
+                && ppqPositionOfLastBarStart == other.ppqPositionOfLastBarStart
+                && frameRate == other.frameRate
+                && isPlaying == other.isPlaying
+                && isRecording == other.isRecording
+                && bpm == other.bpm
+                && timeSigNumerator == other.timeSigNumerator
+                && timeSigDenominator == other.timeSigDenominator
+                && ppqLoopStart == other.ppqLoopStart
+                && ppqLoopEnd == other.ppqLoopEnd
+                && isLooping == other.isLooping;
+        }
 
-        void resetToDefault();
+        bool operator!= (const CurrentPositionInfo& other) const noexcept
+        {
+            return ! operator== (other);
+        }
+
+        void resetToDefault()
+        {
+            zerostruct (*this);
+            timeSigNumerator = 4;
+            timeSigDenominator = 4;
+            bpm = 120;
+        }
     };
 
     //==============================================================================

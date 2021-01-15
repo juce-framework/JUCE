@@ -49,6 +49,10 @@ public:
     bool loadAllSymbols();
 
     //==============================================================================
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XAllocClassHint, xAllocClassHint,
+                                         (),
+                                         XClassHint*)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XAllocSizeHints, xAllocSizeHints,
                                          (),
                                          XSizeHints*)
@@ -405,6 +409,10 @@ public:
                                          (::Display*, ::Window, Bool, long, XEvent*),
                                          Status)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetClassHint, xSetClassHint,
+                                         (::Display*, ::Window, XClassHint*),
+                                         void)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetErrorHandler, xSetErrorHandler,
                                          (XErrorHandler),
                                          XErrorHandler)
@@ -444,6 +452,10 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSync, xSync,
                                          (::Display*, Bool),
                                          void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSynchronize, xSynchronize,
+                                         (::Display*, Bool),
+                                         int)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XTranslateCoordinates, xTranslateCoordinates,
                                          (::Display*, ::Window, ::Window, int, int, int*, int*, ::Window*),
@@ -578,19 +590,19 @@ private:
     }
 
     //==============================================================================
-    DynamicLibrary xLib { "libX11.so" }, xextLib { "libXext.so" };
+    DynamicLibrary xLib { "libX11.so.6" }, xextLib { "libXext.so.6" };
 
    #if JUCE_USE_XCURSOR
-    DynamicLibrary xcursorLib  { "libXcursor.so" };
+    DynamicLibrary xcursorLib  { "libXcursor.so.1" };
    #endif
    #if JUCE_USE_XINERAMA
-    DynamicLibrary xineramaLib { "libXinerama.so" };
+    DynamicLibrary xineramaLib { "libXinerama.so.1" };
    #endif
    #if JUCE_USE_XRENDER
-    DynamicLibrary xrenderLib  { "libXrender.so" };
+    DynamicLibrary xrenderLib  { "libXrender.so.1" };
    #endif
    #if JUCE_USE_XRANDR
-    DynamicLibrary xrandrLib   { "libXrandr.so" };
+    DynamicLibrary xrandrLib   { "libXrandr.so.2" };
    #endif
 
     //==============================================================================

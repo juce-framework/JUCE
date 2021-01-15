@@ -79,8 +79,8 @@ struct IntegerWithBitSize
                                     : (uint32) (value >> (numBits - 8)));
     }
 
-    float toUnipolarFloat() const noexcept      { return value / (float) maxValue; }
-    float toBipolarFloat() const noexcept       { return static_cast<int32> (value << (32 - numBits)) / (float) 0x80000000u; }
+    float toUnipolarFloat() const noexcept      { return (float) value / (float) maxValue; }
+    float toBipolarFloat() const noexcept       { return (float) static_cast<int32> (value << (32 - numBits)) / (float) 0x80000000u; }
 
     static IntegerWithBitSize fromUnipolarFloat (float value) noexcept
     {

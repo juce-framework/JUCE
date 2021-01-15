@@ -43,11 +43,12 @@ namespace juce
     @code
     void mouseUp (const MouseEvent&)
     {
-        FoobarContentComp* content = new FoobarContentComp();
+        auto content = std::make_unique<FoobarContentComp>();
         content->setSize (300, 300);
 
-        CallOutBox& myBox
-            = CallOutBox::launchAsynchronously (content, getScreenBounds(), nullptr);
+        auto& myBox = CallOutBox::launchAsynchronously (std::move (content),
+                                                        getScreenBounds(),
+                                                        nullptr);
     }
     @endcode
 
@@ -76,9 +77,6 @@ public:
     CallOutBox (Component& contentComponent,
                 Rectangle<int> areaToPointTo,
                 Component* parentComponent);
-
-    /** Destructor. */
-    ~CallOutBox() override;
 
     //==============================================================================
     /** Changes the base width of the arrow. */
@@ -109,15 +107,13 @@ public:
         @param contentComponent     the component to display inside the call-out. This should
                                     already have a size set (although the call-out will also
                                     update itself when the component's size is changed later).
-                                    This component will be owned by the callout box and deleted
-                                    later when the box is dismissed.
         @param areaToPointTo        the area that the call-out's arrow should point towards. If
                                     a parentComponent is supplied, then this is relative to that
                                     parent; otherwise, it's a global screen coord.
         @param parentComponent      if not a nullptr, this is the component to add the call-out to.
                                     If this is a nullptr, the call-out will be added to the desktop.
     */
-    static CallOutBox& launchAsynchronously (Component* contentComponent,
+    static CallOutBox& launchAsynchronously (std::unique_ptr<Component> contentComponent,
                                              Rectangle<int> areaToPointTo,
                                              Component* parentComponent);
 

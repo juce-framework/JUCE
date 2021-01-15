@@ -242,7 +242,7 @@ private:
             }
         }
 
-        return num < 4 ? 0.0f : total / (num * (float) standardHeight);
+        return num < 4 ? 0.0f : total / ((float) num * (float) standardHeight);
     }
 
     enum { standardHeight = 100 };

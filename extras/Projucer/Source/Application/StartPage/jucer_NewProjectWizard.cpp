@@ -117,7 +117,7 @@ static std::map<String, String> getPluginFileTokenReplacements (const String& na
     auto processorHInclude = CodeHelpers::createIncludeStatement (processorHFile, processorCppFile);
     auto editorHInclude    = CodeHelpers::createIncludeStatement (editorHFile, processorCppFile);
 
-    auto processorClassName = build_tools::makeValidIdentifier (name, true, true, false) + "AudioProcessor";
+    auto processorClassName = build_tools::makeValidIdentifier (name, false, true, false) + "AudioProcessor";
     processorClassName = processorClassName.substring (0, 1).toUpperCase() + processorClassName.substring (1);
     auto editorClassName = processorClassName + "Editor";
 
@@ -185,9 +185,14 @@ static void addModules (Project& project, Array<var> modules, const String& modu
     AvailableModulesList list;
     list.scanPaths ({ modulePath });
 
+    auto& projectModules = project.getEnabledModules();
+
     for (auto& mod : list.getAllModules())
         if (modules.contains (mod.first))
-            project.getEnabledModules().addModule (mod.second, false, useGlobalPath);
+            projectModules.addModule (mod.second, false, useGlobalPath);
+
+    for (auto& mod : projectModules.getModulesWithMissingDependencies())
+        projectModules.tryToFixMissingDependencies (mod);
 }
 
 static void addExporters (Project& project, Array<var> exporters)

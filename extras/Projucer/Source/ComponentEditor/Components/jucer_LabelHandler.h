@@ -33,12 +33,12 @@ public:
     LabelHandler()
         : ComponentTypeHandler ("Label", "juce::Label", typeid (Label), 150, 24)
     {
-        registerColour (Label::backgroundColourId, "background", "bkgCol");
-        registerColour (Label::textColourId, "text", "textCol");
-        registerColour (Label::outlineColourId, "outline", "outlineCol");
-        registerColour (TextEditor::textColourId, "editor text", "edTextCol");
-        registerColour (TextEditor::backgroundColourId, "editor bkg", "edBkgCol");
-        registerColour (TextEditor::highlightColourId, "highlight", "hiliteCol");
+        registerColour (juce::Label::backgroundColourId, "background", "bkgCol");
+        registerColour (juce::Label::textColourId, "text", "textCol");
+        registerColour (juce::Label::outlineColourId, "outline", "outlineCol");
+        registerColour (juce::TextEditor::textColourId, "editor text", "edTextCol");
+        registerColour (juce::TextEditor::backgroundColourId, "editor bkg", "edBkgCol");
+        registerColour (juce::TextEditor::highlightColourId, "highlight", "hiliteCol");
     }
 
     Component* createNewComponent (JucerDocument*) override

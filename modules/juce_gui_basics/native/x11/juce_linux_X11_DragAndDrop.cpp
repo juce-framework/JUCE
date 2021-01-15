@@ -198,7 +198,7 @@ public:
         srcMimeTypeAtomList.clear();
 
         dragAndDropCurrentMimeType = 0;
-        auto dndCurrentVersion = static_cast<unsigned long> (clientMsg.data.l[1] & 0xff000000) >> 24;
+        auto dndCurrentVersion = (static_cast<unsigned long> (clientMsg.data.l[1]) & 0xff000000) >> 24;
 
         if (dndCurrentVersion < 3 || dndCurrentVersion > XWindowSystemUtilities::Atoms::DndVersion)
         {
@@ -287,8 +287,11 @@ public:
 
             if (XWindowSystemUtilities::Atoms::isMimeTypeFile (getDisplay(), dragAndDropCurrentMimeType))
             {
-                for (int i = 0; i < lines.size(); ++i)
-                    dragInfo.files.add (URL::removeEscapeChars (lines[i].replace ("file://", String(), true)));
+                for (const auto& line : lines)
+                {
+                    const auto escaped = line.replace ("+", "%2B").replace ("file://", String(), true);
+                    dragInfo.files.add (URL::removeEscapeChars (escaped));
+                }
 
                 dragInfo.files.trim();
                 dragInfo.files.removeEmptyStrings();

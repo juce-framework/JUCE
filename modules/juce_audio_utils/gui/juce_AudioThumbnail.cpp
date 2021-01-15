@@ -753,7 +753,7 @@ int AudioThumbnail::getNumChannels() const noexcept
 
 double AudioThumbnail::getTotalLength() const noexcept
 {
-    return sampleRate > 0 ? (totalSamples / sampleRate) : 0;
+    return sampleRate > 0 ? ((double) totalSamples / sampleRate) : 0.0;
 }
 
 bool AudioThumbnail::isFullyLoaded() const noexcept
@@ -763,7 +763,7 @@ bool AudioThumbnail::isFullyLoaded() const noexcept
 
 double AudioThumbnail::getProportionComplete() const noexcept
 {
-    return jlimit (0.0, 1.0, numSamplesFinished / (double) jmax ((int64) 1, totalSamples.load()));
+    return jlimit (0.0, 1.0, (double) numSamplesFinished / (double) jmax ((int64) 1, totalSamples.load()));
 }
 
 int64 AudioThumbnail::getNumSamplesFinished() const noexcept
@@ -779,7 +779,7 @@ float AudioThumbnail::getApproximatePeak() const
     for (auto* c : channels)
         peak = jmax (peak, c->getPeak());
 
-    return jlimit (0, 127, peak) / 127.0f;
+    return (float) jlimit (0, 127, peak) / 127.0f;
 }
 
 void AudioThumbnail::getApproximateMinMax (double startTime, double endTime, int channelIndex,

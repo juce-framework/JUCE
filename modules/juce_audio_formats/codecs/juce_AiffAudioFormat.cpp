@@ -67,25 +67,25 @@ namespace AiffFileHelpers
         Loop sustainLoop;
         Loop releaseLoop;
 
-        void copyTo (StringPairArray& values) const
+        void copyTo (std::map<String, String>& values) const
         {
-            values.set ("MidiUnityNote",        String (baseNote));
-            values.set ("Detune",               String (detune));
+            values.emplace ("MidiUnityNote",        String (baseNote));
+            values.emplace ("Detune",               String (detune));
 
-            values.set ("LowNote",              String (lowNote));
-            values.set ("HighNote",             String (highNote));
-            values.set ("LowVelocity",          String (lowVelocity));
-            values.set ("HighVelocity",         String (highVelocity));
+            values.emplace ("LowNote",              String (lowNote));
+            values.emplace ("HighNote",             String (highNote));
+            values.emplace ("LowVelocity",          String (lowVelocity));
+            values.emplace ("HighVelocity",         String (highVelocity));
 
-            values.set ("Gain",                 String ((int16) ByteOrder::swapIfLittleEndian ((uint16) gain)));
+            values.emplace ("Gain",                 String ((int16) ByteOrder::swapIfLittleEndian ((uint16) gain)));
 
-            values.set ("NumSampleLoops",       String (2));        // always 2 with AIFF, WAV can have more
-            values.set ("Loop0Type",            String (ByteOrder::swapIfLittleEndian (sustainLoop.type)));
-            values.set ("Loop0StartIdentifier", String (ByteOrder::swapIfLittleEndian (sustainLoop.startIdentifier)));
-            values.set ("Loop0EndIdentifier",   String (ByteOrder::swapIfLittleEndian (sustainLoop.endIdentifier)));
-            values.set ("Loop1Type",            String (ByteOrder::swapIfLittleEndian (releaseLoop.type)));
-            values.set ("Loop1StartIdentifier", String (ByteOrder::swapIfLittleEndian (releaseLoop.startIdentifier)));
-            values.set ("Loop1EndIdentifier",   String (ByteOrder::swapIfLittleEndian (releaseLoop.endIdentifier)));
+            values.emplace ("NumSampleLoops",       String (2));        // always 2 with AIFF, WAV can have more
+            values.emplace ("Loop0Type",            String (ByteOrder::swapIfLittleEndian (sustainLoop.type)));
+            values.emplace ("Loop0StartIdentifier", String (ByteOrder::swapIfLittleEndian (sustainLoop.startIdentifier)));
+            values.emplace ("Loop0EndIdentifier",   String (ByteOrder::swapIfLittleEndian (sustainLoop.endIdentifier)));
+            values.emplace ("Loop1Type",            String (ByteOrder::swapIfLittleEndian (releaseLoop.type)));
+            values.emplace ("Loop1StartIdentifier", String (ByteOrder::swapIfLittleEndian (releaseLoop.startIdentifier)));
+            values.emplace ("Loop1EndIdentifier",   String (ByteOrder::swapIfLittleEndian (releaseLoop.endIdentifier)));
         }
 
         static uint16 getValue16 (const StringPairArray& values, const char* name, const char* def)
@@ -149,7 +149,7 @@ namespace AiffFileHelpers
             input.read (unknown, sizeof (unknown));
         }
 
-        void addToMetadata (StringPairArray& metadata) const
+        void addToMetadata (std::map<String, String>& metadata) const
         {
             const bool rootNoteSet = rootNote != 0;
 
@@ -157,11 +157,11 @@ namespace AiffFileHelpers
             setBoolFlag (metadata, AiffAudioFormat::appleRootSet, rootNoteSet);
 
             if (rootNoteSet)
-                metadata.set (AiffAudioFormat::appleRootNote,   String (rootNote));
+                metadata.emplace (AiffAudioFormat::appleRootNote,   String (rootNote));
 
-            metadata.set (AiffAudioFormat::appleBeats,          String (numBeats));
-            metadata.set (AiffAudioFormat::appleDenominator,    String (timeSigDen));
-            metadata.set (AiffAudioFormat::appleNumerator,      String (timeSigNum));
+            metadata.emplace (AiffAudioFormat::appleBeats,          String (numBeats));
+            metadata.emplace (AiffAudioFormat::appleDenominator,    String (timeSigDen));
+            metadata.emplace (AiffAudioFormat::appleNumerator,      String (timeSigNum));
 
             const char* keyString = nullptr;
 
@@ -175,12 +175,14 @@ namespace AiffFileHelpers
             }
 
             if (keyString != nullptr)
-                metadata.set (AiffAudioFormat::appleKey, keyString);
+                metadata.emplace (AiffAudioFormat::appleKey, keyString);
         }
 
-        void setBoolFlag (StringPairArray& values, const char* name, bool shouldBeSet) const
+        void setBoolFlag (std::map<String, String>& values,
+                          const char* name,
+                          bool shouldBeSet) const
         {
-            values.set (name, shouldBeSet ? "1" : "0");
+            values.emplace (name, shouldBeSet ? "1" : "0");
         }
 
         uint32 flags;
@@ -388,6 +390,17 @@ public:
     {
         using namespace AiffFileHelpers;
 
+        std::map<String, String> metadataValuesMap;
+
+        for (int i = 0; i != metadataValues.size(); ++i)
+        {
+            metadataValuesMap.emplace (metadataValues.getAllKeys().getReference (i),
+                                       metadataValues.getAllValues().getReference (i));
+        }
+
+        // If this fails, there were duplicate keys in the metadata
+        jassert ((size_t) metadataValuesMap.size() == (size_t) metadataValues.size());
+
         if (input->readInt() == chunkName ("FORM"))
         {
             auto len = input->readIntBigEndian();
@@ -479,8 +492,8 @@ public:
                         auto numCues = (uint16) input->readShortBigEndian();
 
                         // these two are always the same for AIFF-read files
-                        metadataValues.set ("NumCuePoints", String (numCues));
-                        metadataValues.set ("NumCueLabels", String (numCues));
+                        metadataValuesMap.emplace ("NumCuePoints", String (numCues));
+                        metadataValuesMap.emplace ("NumCueLabels", String (numCues));
 
                         for (uint16 i = 0; i < numCues; ++i)
                         {
@@ -497,18 +510,18 @@ public:
                                 input->readByte();
 
                             auto prefixCue = "Cue" + String (i);
-                            metadataValues.set (prefixCue + "Identifier", String (identifier));
-                            metadataValues.set (prefixCue + "Offset", String (offset));
+                            metadataValuesMap.emplace (prefixCue + "Identifier", String (identifier));
+                            metadataValuesMap.emplace (prefixCue + "Offset", String (offset));
 
                             auto prefixLabel = "CueLabel" + String (i);
-                            metadataValues.set (prefixLabel + "Identifier", String (identifier));
-                            metadataValues.set (prefixLabel + "Text", textBlock.toString());
+                            metadataValuesMap.emplace (prefixLabel + "Identifier", String (identifier));
+                            metadataValuesMap.emplace (prefixLabel + "Text", textBlock.toString());
                         }
                     }
                     else if (type == chunkName ("COMT"))
                     {
                         auto numNotes = (uint16) input->readShortBigEndian();
-                        metadataValues.set ("NumCueNotes", String (numNotes));
+                        metadataValuesMap.emplace ("NumCueNotes", String (numNotes));
 
                         for (uint16 i = 0; i < numNotes; ++i)
                         {
@@ -520,9 +533,9 @@ public:
                             input->readIntoMemoryBlock (textBlock, stringLength + (stringLength & 1));
 
                             auto prefix = "CueNote" + String (i);
-                            metadataValues.set (prefix + "TimeStamp", String (timestamp));
-                            metadataValues.set (prefix + "Identifier", String (identifier));
-                            metadataValues.set (prefix + "Text", textBlock.toString());
+                            metadataValuesMap.emplace (prefix + "TimeStamp", String (timestamp));
+                            metadataValuesMap.emplace (prefix + "Identifier", String (identifier));
+                            metadataValuesMap.emplace (prefix + "Text", textBlock.toString());
                         }
                     }
                     else if (type == chunkName ("INST"))
@@ -530,16 +543,16 @@ public:
                         HeapBlock<InstChunk> inst;
                         inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                         input->read (inst, (int) length);
-                        inst->copyTo (metadataValues);
+                        inst->copyTo (metadataValuesMap);
                     }
                     else if (type == chunkName ("basc"))
                     {
-                        AiffFileHelpers::BASCChunk (*input).addToMetadata (metadataValues);
+                        AiffFileHelpers::BASCChunk (*input).addToMetadata (metadataValuesMap);
                     }
                     else if (type == chunkName ("cate"))
                     {
-                        metadataValues.set (AiffAudioFormat::appleTag,
-                                            AiffFileHelpers::CATEChunk::read (*input, length));
+                        metadataValuesMap.emplace (AiffAudioFormat::appleTag,
+                                                  AiffFileHelpers::CATEChunk::read (*input, length));
                     }
                     else if ((hasGotVer && hasGotData && hasGotType)
                               || chunkEnd < input->getPosition()
@@ -553,8 +566,10 @@ public:
             }
         }
 
-        if (metadataValues.size() > 0)
-            metadataValues.set ("MetaDataSource", "AIFF");
+        if (metadataValuesMap.size() > 0)
+            metadataValuesMap.emplace ("MetaDataSource", "AIFF");
+
+        metadataValues.addMap (metadataValuesMap);
     }
 
     //==============================================================================

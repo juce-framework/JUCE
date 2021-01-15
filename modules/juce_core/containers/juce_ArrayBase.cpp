@@ -87,14 +87,14 @@ namespace ArrayBaseTestsHelpers
     };
 }
 
-bool operator== (const ArrayBaseTestsHelpers::TriviallyCopyableType& tct,
-                 const ArrayBaseTestsHelpers::NonTriviallyCopyableType& ntct)
+static bool operator== (const ArrayBaseTestsHelpers::TriviallyCopyableType& tct,
+                        const ArrayBaseTestsHelpers::NonTriviallyCopyableType& ntct)
 {
     return tct.getValue() == ntct.getValue();
 }
 
-bool operator== (const ArrayBaseTestsHelpers::NonTriviallyCopyableType& ntct,
-                 const ArrayBaseTestsHelpers::TriviallyCopyableType& tct)
+static bool operator== (const ArrayBaseTestsHelpers::NonTriviallyCopyableType& ntct,
+                        const ArrayBaseTestsHelpers::TriviallyCopyableType& tct)
 {
     return tct == ntct;
 }

@@ -77,7 +77,7 @@ public:
     /** Returns whether the type of the OSCArgument is blob. */
     bool isBlob() const noexcept            { return type == OSCTypes::blob; }
 
-    /** Returns whether the type of the OSCArgument is blob. */
+    /** Returns whether the type of the OSCArgument is colour. */
     bool isColour() const noexcept          { return type == OSCTypes::colour; }
 
     /** Returns the value of the OSCArgument as an int32.

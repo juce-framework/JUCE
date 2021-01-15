@@ -23,14 +23,13 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(JUCE VERSION 6.0.0 LANGUAGES C CXX)
+project(JUCE VERSION 6.0.7 LANGUAGES C CXX)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 set(JUCE_MODULES_DIR "${JUCE_SOURCE_DIR}/modules" CACHE INTERNAL
     "The path to JUCE modules")
 
-include(extras/Build/CMake/JUCEHelperTargets.cmake)
 include(extras/Build/CMake/JUCEUtils.cmake)
 
 juce_disable_default_flags()
@@ -46,6 +45,16 @@ option(JUCE_COPY_PLUGIN_AFTER_BUILD
 set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD ${JUCE_COPY_PLUGIN_AFTER_BUILD})
 
 set(CMAKE_CXX_EXTENSIONS FALSE)
+
+# This option controls whether dummy targets are added to the build, where these targets contain all
+# of the source files for each JUCE module. If you're planning to use an IDE and want to be able to
+# browse all of JUCE's source files, this may be useful. However, it will increase the size of
+# generated IDE projects and might slow down configuration a bit. If you enable this, you should
+# probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists,
+# otherwise the module sources will be added directly to the top level of the project, instead of in
+# a nice 'Modules' subfolder.
+
+option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" OFF)
 
 add_subdirectory(modules)
 add_subdirectory(extras/Build)
@@ -96,8 +105,6 @@ write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
 set(JUCE_INSTALL_DESTINATION "lib/cmake/JUCE-${JUCE_VERSION}" CACHE STRING
     "The location, relative to the install prefix, where the JUCE config file will be installed")
 
-install(EXPORT JUCE NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
-set(JUCE_EXPORT_FILE_NAME "JUCE.cmake")
 set(JUCE_MODULE_PATH "include/JUCE-${JUCE_VERSION}/modules")
 set(UTILS_INSTALL_DIR "${JUCE_INSTALL_DESTINATION}")
 set(JUCEAIDE_PATH "${JUCE_TOOL_INSTALL_DIR}/${JUCE_JUCEAIDE_NAME}")
@@ -106,9 +113,7 @@ configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
     PATH_VARS UTILS_INSTALL_DIR JUCEAIDE_PATH JUCE_MODULE_PATH
     INSTALL_DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
-set(JUCE_EXPORT_FILE_NAME "JUCEBuildTree.cmake")
 set(JUCE_MODULE_PATH "${JUCE_MODULES_DIR}")
-export(EXPORT JUCE NAMESPACE juce:: FILE "${JUCE_EXPORT_FILE_NAME}")
 set(UTILS_INSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extras/Build/CMake")
 get_target_property(JUCEAIDE_PATH juceaide IMPORTED_LOCATION)
 configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
@@ -119,6 +124,9 @@ configure_package_config_file("${JUCE_CMAKE_UTILS_DIR}/JUCEConfig.cmake.in"
 
 install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_BINARY_DIR}/JUCEConfig.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/JUCECheckAtomic.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/JUCEUtils.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/LaunchScreen.storyboard"
               "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in"
               "${JUCE_CMAKE_UTILS_DIR}/PIPComponent.cpp.in"
@@ -126,5 +134,5 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/RecentFilesMenuTemplate.nib"
               "${JUCE_CMAKE_UTILS_DIR}/UnityPluginGUIScript.cs.in"
               "${JUCE_CMAKE_UTILS_DIR}/copyDir.cmake"
-              "${JUCE_CMAKE_UTILS_DIR}/JUCEUtils.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")

@@ -78,7 +78,7 @@ public:
             g.setColour (findColour (defaultTextColourId));
         }
 
-        g.setFont (height * 0.6f);
+        g.setFont ((float) height * 0.6f);
         g.drawText (returnValues [row] + " " + baseClasses [row] + "::" + methods [row],
                     30, 0, width - 32, height,
                     Justification::centredLeft, true);
@@ -1037,7 +1037,7 @@ bool JucerDocumentEditor::perform (const InvocationInfo& info)
                 else if (info.commandID == JucerCommandIDs::compOverlay100)
                     amount = 100;
 
-                document->setComponentOverlayOpacity (amount * 0.01f);
+                document->setComponentOverlayOpacity ((float) amount * 0.01f);
             }
             break;
 
@@ -1217,6 +1217,7 @@ Image JucerDocumentEditor::createComponentLayerSnapshot() const
 const int gridSnapMenuItemBase = 0x8723620;
 const int snapSizes[] = { 2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32 };
 
+PopupMenu createGUIEditorMenu();
 PopupMenu createGUIEditorMenu()
 {
     PopupMenu menu;
@@ -1293,6 +1294,7 @@ PopupMenu createGUIEditorMenu()
 
         menu.addSubMenu ("Component Overlay", overlays, holder != nullptr);
     }
+
     return menu;
 }
 

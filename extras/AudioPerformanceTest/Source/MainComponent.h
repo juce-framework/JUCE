@@ -245,13 +245,13 @@ private:
     //==============================================================================
     static double getPreciseTimeMs() noexcept
     {
-        return 1000.0 * Time::getHighResolutionTicks() / (double) Time::getHighResolutionTicksPerSecond();
+        return 1000.0 * (double) Time::getHighResolutionTicks() / (double) Time::getHighResolutionTicksPerSecond();
     }
 
     //==============================================================================
     double getPhysicalTimeLimitMs() const noexcept
     {
-        return 1000.0 * a.size() / currentSampleRate;
+        return 1000.0 * (double) a.size() / currentSampleRate;
     }
 
     //==============================================================================

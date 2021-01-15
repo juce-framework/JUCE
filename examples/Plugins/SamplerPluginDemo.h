@@ -463,11 +463,11 @@ private:
             nextSamplePos = begin;
             nextDirection = Direction::forward;
 
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
         }
 
         if (samplerSound->getLoopMode() == LoopMode::none)
-            return { nextSamplePos, nextDirection };
+            return std::tuple<double, Direction> (nextSamplePos, nextDirection);
 
         if (nextDirection == Direction::forward && end < nextSamplePos && !isTailingOff())
         {
@@ -479,7 +479,7 @@ private:
                 nextDirection = Direction::backward;
             }
         }
-        return { nextSamplePos, nextDirection };
+        return std::tuple<double, Direction> (nextSamplePos, nextDirection);
     }
 
     std::shared_ptr<const MPESamplerSound> samplerSound;
@@ -1005,7 +1005,7 @@ public:
     double getSampleLengthSeconds() const
     {
         if (auto r = getSampleReader())
-            return r->lengthInSamples / r->sampleRate;
+            return (double) r->lengthInSamples / r->sampleRate;
 
         return 1.0;
     }
@@ -1538,7 +1538,7 @@ private:
     void paint (Graphics& g) override
     {
         auto minDivisionWidth = 50.0f;
-        auto maxDivisions     = getWidth() / minDivisionWidth;
+        auto maxDivisions     = (float) getWidth() / minDivisionWidth;
 
         auto lookFeel = dynamic_cast<LookAndFeel_V4*> (&getLookAndFeel());
         auto bg = lookFeel->getCurrentColourScheme()
@@ -1593,7 +1593,7 @@ private:
     {
         // Work out the scale of the new range
         auto unitDistance = 100.0f;
-        auto scaleFactor  = 1.0 / std::pow (2, e.getDistanceFromDragStartY() / unitDistance);
+        auto scaleFactor  = 1.0 / std::pow (2, (float) e.getDistanceFromDragStartY() / unitDistance);
 
         // Now position it so that the mouse continues to point at the same
         // place on the ruler.
@@ -1811,14 +1811,18 @@ private:
 
     void sampleReaderChanged (std::shared_ptr<AudioFormatReaderFactory> value) override
     {
-        if (value == nullptr)
-            thumbnail.clear();
-        else
+        if (value != nullptr)
         {
-            auto reader = value->make (dataModel.getAudioFormatManager());
-            thumbnail.setReader (reader.release(), currentHashCode);
-            currentHashCode += 1;
+            if (auto reader = value->make (dataModel.getAudioFormatManager()))
+            {
+                thumbnail.setReader (reader.release(), currentHashCode);
+                currentHashCode += 1;
+
+                return;
+            }
         }
+
+        thumbnail.clear();
     }
 
     void visibleRangeChanged (Range<double>) override
@@ -1926,10 +1930,15 @@ public:
 
         auto setReader = [this] (const FileChooser& fc)
         {
-            undoManager.beginNewTransaction();
-            auto readerFactory = new FileAudioFormatReaderFactory (fc.getResult());
-            dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
-                                       &undoManager);
+            const auto result = fc.getResult();
+
+            if (result != File())
+            {
+                undoManager.beginNewTransaction();
+                auto readerFactory = new FileAudioFormatReaderFactory (result);
+                dataModel.setSampleReader (std::unique_ptr<AudioFormatReaderFactory> (readerFactory),
+                                           &undoManager);
+            }
         };
 
         loadNewSampleButton.onClick = [this, setReader]
@@ -2110,6 +2119,8 @@ public:
         AudioFormatManager manager;
         manager.registerBasicFormats();
         auto reader = readerFactory->make (manager);
+        jassert (reader != nullptr); // Failed to load resource!
+
         auto sound = samplerSound;
         auto sample = std::unique_ptr<Sample> (new Sample (*reader, 10.0));
         auto lengthInSeconds = sample->getLength() / sample->getSampleRate();
@@ -2240,9 +2251,8 @@ public:
                                              nullptr,
                                              move (newSamplerVoices)));
         }
-        else
+        else if (auto reader = fact->make (formatManager))
         {
-            auto reader = fact->make (formatManager);
             commands.push (SetSampleCommand (move (fact),
                                              std::unique_ptr<Sample> (new Sample (*reader, 10.0)),
                                              move (newSamplerVoices)));

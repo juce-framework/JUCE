@@ -19,7 +19,7 @@
 #include "FlowGraphNode.h"
 #include "ClipToRange.h"
 
-using namespace flowgraph;
+using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 
 ClipToRange::ClipToRange(int32_t channelCount)
         : FlowGraphFilter(channelCount) {

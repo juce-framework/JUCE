@@ -33,8 +33,8 @@ public:
     TreeViewHandler()
         : ComponentTypeHandler ("TreeView", "juce::TreeView", typeid (DemoTreeView), 150, 150)
     {
-        registerColour (TreeView::backgroundColourId, "background", "backgroundColour");
-        registerColour (TreeView::linesColourId, "lines", "linecol");
+        registerColour (juce::TreeView::backgroundColourId, "background", "backgroundColour");
+        registerColour (juce::TreeView::linesColourId, "lines", "linecol");
     }
 
     Component* createNewComponent (JucerDocument*) override
@@ -146,7 +146,7 @@ private:
                     g.fillAll (Colours::lightblue);
 
                 g.setColour (Colours::black);
-                g.setFont (height * 0.7f);
+                g.setFont ((float) height * 0.7f);
                 g.drawText (name, 4, 0, width - 4, height, Justification::centredLeft, true);
             }
 

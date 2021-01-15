@@ -373,6 +373,9 @@
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_OpenGLComponentTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\Build\CMake\juce_runtime_arch_detection.cpp">
+      <Filter>Projucer\BinaryData</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\CodeEditor\jucer_DocumentEditorComponent.cpp">
       <Filter>Projucer\CodeEditor</Filter>
     </ClCompile>

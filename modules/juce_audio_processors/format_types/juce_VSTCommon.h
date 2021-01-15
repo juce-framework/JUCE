@@ -27,13 +27,6 @@ namespace juce
 {
 
 //==============================================================================
-#if JUCE_BIG_ENDIAN
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (a | (((uint32) b) << 8) | (((uint32) c) << 16) | (((uint32) d) << 24))
-#else
- #define JUCE_MULTICHAR_CONSTANT(a, b, c, d) (d | (((uint32) c) << 8) | (((uint32) b) << 16) | (((uint32) a) << 24))
-#endif
-
-//==============================================================================
 /** Structure for VST speaker mappings
 
     @tags{Audio}

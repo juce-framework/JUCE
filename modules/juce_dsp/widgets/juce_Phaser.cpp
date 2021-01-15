@@ -68,7 +68,7 @@ void Phaser<SampleType>::setCentreFrequency (SampleType newCentreHz)
     jassert (isPositiveAndBelow (newCentreHz, static_cast<SampleType> (sampleRate * 0.5)));
 
     centreFrequency = newCentreHz;
-    normCentreFrequency = mapToLog10 (centreFrequency, static_cast<SampleType> (20.0), static_cast<SampleType> (jmin (20000.0, 0.49 * sampleRate)));
+    normCentreFrequency = mapFromLog10 (centreFrequency, static_cast<SampleType> (20.0), static_cast<SampleType> (jmin (20000.0, 0.49 * sampleRate)));
 }
 
 template <typename SampleType>

@@ -18,7 +18,6 @@
 #define NATIVEOBOE_FIFOCONTROLLERBASE_H
 
 #include <stdint.h>
-#include <sys/types.h>
 
 namespace oboe {
 

@@ -217,7 +217,7 @@ private:
         delete getIvar<std::function<void()>*> (self, "callback");
         delete getIvar<NSDragOperation*> (self, "operation");
 
-        sendSuperclassMessage (self, @selector (dealloc));
+        sendSuperclassMessage<void> (self, @selector (dealloc));
     }
 
     static void provideDataForType (id self, SEL, NSPasteboard* sender, NSPasteboardItem*, NSString* type)

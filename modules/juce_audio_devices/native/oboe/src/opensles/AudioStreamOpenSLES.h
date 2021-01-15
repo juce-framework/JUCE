@@ -50,7 +50,6 @@ public:
     virtual ~AudioStreamOpenSLES() = default;
 
     virtual Result open() override;
-    virtual Result close() override;
 
     /**
      * Query the current state, eg. OBOE_STREAM_STATE_PAUSING
@@ -80,6 +79,9 @@ public:
 
 protected:
 
+    // This must be called under mLock.
+    Result close_l();
+
     SLuint32 channelCountToChannelMaskDefault(int channelCount) const;
 
     virtual Result onBeforeDestroy() { return Result::OK; }
@@ -100,7 +102,7 @@ protected:
     PerformanceMode convertPerformanceMode(SLuint32 openslMode) const;
     SLuint32 convertPerformanceMode(PerformanceMode oboeMode) const;
 
-    Result configureBufferSizes();
+    Result configureBufferSizes(int32_t sampleRate);
 
     void logUnsupportedAttributes();
 
@@ -112,7 +114,7 @@ protected:
         mState.store(state);
     }
 
-    int64_t getFramesProcessedByServer() const;
+    int64_t getFramesProcessedByServer();
 
     // OpenSLES stuff
     SLObjectItf                   mObjectInterface = nullptr;

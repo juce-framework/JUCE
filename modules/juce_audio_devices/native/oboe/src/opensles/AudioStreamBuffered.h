@@ -60,7 +60,7 @@ protected:
     DataCallbackResult onDefaultCallback(void *audioData, int numFrames) override;
 
     // If there is no callback then we need a FIFO between the App and OpenSL ES.
-    bool usingFIFO() const { return getCallback() == nullptr; }
+    bool usingFIFO() const { return !isDataCallbackSpecified(); }
 
     virtual Result updateServiceFrameCounter() = 0;
 
@@ -74,7 +74,11 @@ private:
     void markCallbackTime(int32_t numFrames);
 
     // Read or write to the FIFO.
-    ResultWithValue<int32_t> transfer(void *buffer, int32_t numFrames, int64_t timeoutNanoseconds);
+    // Only pass one pointer and set the other to nullptr.
+    ResultWithValue<int32_t> transfer(void *readBuffer,
+            const void *writeBuffer,
+            int32_t numFrames,
+            int64_t timeoutNanoseconds);
 
     void incrementXRunCount() {
         ++mXRunCount;

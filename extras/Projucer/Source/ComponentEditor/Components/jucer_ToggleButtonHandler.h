@@ -33,7 +33,7 @@ public:
     ToggleButtonHandler()
         : ButtonHandler ("Toggle Button", "juce::ToggleButton", typeid (ToggleButton), 150, 24)
     {
-        registerColour (ToggleButton::textColourId, "text colour", "txtcol");
+        registerColour (juce::ToggleButton::textColourId, "text colour", "txtcol");
     }
 
     Component* createNewComponent (JucerDocument*) override

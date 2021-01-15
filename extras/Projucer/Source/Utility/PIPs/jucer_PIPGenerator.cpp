@@ -319,15 +319,6 @@ void PIPGenerator::addModules (ValueTree& jucerTree)
     auto modules = StringArray::fromTokens (metadata[Ids::dependencies_].toString(), ",", {});
     modules.trim();
 
-    auto projectType = metadata[Ids::type].toString();
-
-    if (projectType == "Console")
-        modules.mergeArray (getModulesRequiredForConsole());
-    else if (projectType == "Component")
-        modules.mergeArray (getModulesRequiredForComponent());
-    else if (projectType == "AudioProcessor")
-        modules.mergeArray (getModulesRequiredForAudioProcessor());
-
     for (auto& m : modules)
         modulesTree.addChild (createModuleChild (m.trim()), -1, nullptr);
 

@@ -127,7 +127,7 @@ public:
                               getAppSettings().getStoredPath (Ids::defaultJuceModulePath, TargetOS::getThisOS()),
                               TargetOS::getThisOS());
 
-        panel.addProperties (buildPropertyList());
+        panel.addProperties (buildPropertyList(), 2);
         addAndMakeVisible (panel);
     }
 

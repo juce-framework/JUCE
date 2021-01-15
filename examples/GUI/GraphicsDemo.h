@@ -125,8 +125,8 @@ public:
 
     AffineTransform getTransform()
     {
-        auto hw = 0.5f * getWidth();
-        auto hh = 0.5f * getHeight();
+        auto hw = 0.5f * (float) getWidth();
+        auto hh = 0.5f * (float) getHeight();
 
         AffineTransform t;
 
@@ -197,7 +197,7 @@ public:
                           "Time: " + String (averageTimeMs, 2)
                             + " ms\nEffective FPS: " + String (effectiveFPS, 1)
                             + "\nActual FPS: " + String (averageActualFPS, 1),
-                          0, 10.0f, getWidth() - 10.0f, (float) getHeight(), Justification::topRight, 3);
+                          0, 10.0f, (float) getWidth() - 10.0f, (float) getHeight(), Justification::topRight, 3);
 
         g.setColour (Colours::white.withAlpha (0.5f));
         g.fillRect (ga.getBoundingBox (0, ga.getNumGlyphs(), true).getSmallestIntegerContainer().expanded (4));
@@ -213,8 +213,8 @@ public:
         auto w = getWidth()  / 2;
         auto h = getHeight() / 2;
 
-        auto x = (int) (w * clipRectX.getValue());
-        auto y = (int) (h * clipRectY.getValue());
+        auto x = (int) ((float) w * clipRectX.getValue());
+        auto y = (int) ((float) h * clipRectY.getValue());
 
         g.reduceClipRegion (x, y, w, h);
     }
@@ -239,12 +239,12 @@ public:
         if (! clipImage.isValid())
             createClipImage();
 
-        AffineTransform transform (AffineTransform::translation (clipImage.getWidth()  / -2.0f,
-                                                                 clipImage.getHeight() / -2.0f)
+        AffineTransform transform (AffineTransform::translation ((float) clipImage.getWidth()  / -2.0f,
+                                                                 (float) clipImage.getHeight() / -2.0f)
                                    .rotated (clipImageAngle.getValue() * MathConstants<float>::twoPi)
                                    .scaled (2.0f + clipImageSize.getValue() * 3.0f)
-                                   .translated (getWidth()  * 0.5f,
-                                                getHeight() * 0.5f));
+                                   .translated ((float) getWidth()  * 0.5f,
+                                                (float) getHeight() * 0.5f));
 
         g.reduceClipRegion (clipImage, transform);
     }
@@ -297,17 +297,17 @@ public:
         g.fillRect (-rectSize, -rectSize, rectSize, rectSize);
 
         g.setGradientFill (ColourGradient (colour1, 10.0f, (float) -rectSize,
-                                           colour2, 10.0f + rectSize, 0.0f, false));
+                                           colour2, 10.0f + (float) rectSize, 0.0f, false));
         g.setOpacity (getAlpha());
         g.fillRect (10, -rectSize, rectSize, rectSize);
 
-        g.setGradientFill (ColourGradient (colour1, rectSize * -0.5f, 10.0f + rectSize * 0.5f,
-                                           colour2, 0, 10.0f + rectSize, true));
+        g.setGradientFill (ColourGradient (colour1, (float) rectSize * -0.5f, 10.0f + (float) rectSize * 0.5f,
+                                           colour2, 0, 10.0f + (float) rectSize, true));
         g.setOpacity (getAlpha());
         g.fillRect (-rectSize, 10, rectSize, rectSize);
 
         g.setGradientFill (ColourGradient (colour1, 10.0f, 10.0f,
-                                           colour2, 10.0f + rectSize, 10.0f + rectSize, false));
+                                           colour2, 10.0f + (float) rectSize, 10.0f + (float) rectSize, false));
         g.setOpacity (getAlpha());
         g.drawRect (10, 10, rectSize, rectSize, 5);
     }
@@ -349,10 +349,10 @@ public:
             Colour c2 (gradientColours[3].getValue(), gradientColours[4].getValue(), gradientColours[5].getValue(), 1.0f);
             Colour c3 (gradientColours[6].getValue(), gradientColours[7].getValue(), gradientColours[8].getValue(), 1.0f);
 
-            auto x1 = gradientPositions[0].getValue() * getWidth()  * 0.25f;
-            auto y1 = gradientPositions[1].getValue() * getHeight() * 0.25f;
-            auto x2 = gradientPositions[2].getValue() * getWidth()  * 0.75f;
-            auto y2 = gradientPositions[3].getValue() * getHeight() * 0.75f;
+            auto x1 = gradientPositions[0].getValue() * (float) getWidth()  * 0.25f;
+            auto y1 = gradientPositions[1].getValue() * (float) getHeight() * 0.25f;
+            auto x2 = gradientPositions[2].getValue() * (float) getWidth()  * 0.75f;
+            auto y2 = gradientPositions[3].getValue() * (float) getHeight() * 0.75f;
 
             ColourGradient gradient (c1, x1, y1,
                                      c2, x2, y2,
@@ -530,8 +530,8 @@ public:
 
             for (int x = 0; x < getWidth(); ++x)
             {
-                auto y = getHeight() * 0.3f;
-                auto length = y * std::abs (std::sin (x / 100.0f + 2.0f * pos));
+                auto y = (float) getHeight() * 0.3f;
+                auto length = y * std::abs (std::sin ((float) x / 100.0f + 2.0f * pos));
                 verticalLines.addWithoutMerging (Rectangle<float> ((float) x, y - length * 0.5f, 1.0f, length));
             }
 
@@ -547,8 +547,8 @@ public:
 
             for (int y = 0; y < getHeight(); ++y)
             {
-                auto x = getWidth() * 0.3f;
-                auto length = x * std::abs (std::sin (y / 100.0f + 2.0f * pos));
+                auto x = (float) getWidth() * 0.3f;
+                auto length = x * std::abs (std::sin ((float) y / 100.0f + 2.0f * pos));
                 horizontalLines.addWithoutMerging (Rectangle<float> (x - length * 0.5f, (float) y, length, 1.0f));
             }
 

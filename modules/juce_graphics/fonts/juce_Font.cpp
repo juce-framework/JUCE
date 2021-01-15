@@ -636,7 +636,7 @@ float Font::getStringWidthFloat (const String& text) const
     auto w = getTypeface()->getStringWidth (text);
 
     if (font->kerning != 0.0f)
-        w += font->kerning * text.length();
+        w += font->kerning * (float) text.length();
 
     return w * font->height * font->horizontalScale;
 }
@@ -657,7 +657,7 @@ void Font::getGlyphPositions (const String& text, Array<int>& glyphs, Array<floa
         if (font->kerning != 0.0f)
         {
             for (int i = 0; i < num; ++i)
-                x[i] = (x[i] + i * font->kerning) * scale;
+                x[i] = (x[i] + (float) i * font->kerning) * scale;
         }
         else
         {

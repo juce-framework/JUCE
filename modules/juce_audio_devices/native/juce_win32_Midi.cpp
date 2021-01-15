@@ -29,37 +29,39 @@
 namespace juce
 {
 
+class MidiInput::Pimpl
+{
+public:
+    virtual ~Pimpl() noexcept = default;
+
+    virtual String getDeviceIdentifier() = 0;
+    virtual String getDeviceName() = 0;
+
+    virtual void start() = 0;
+    virtual void stop() = 0;
+};
+
+class MidiOutput::Pimpl
+{
+public:
+    virtual ~Pimpl() noexcept = default;
+
+    virtual String getDeviceIdentifier() = 0;
+    virtual String getDeviceName() = 0;
+
+    virtual void sendMessageNow (const MidiMessage&) = 0;
+};
+
 struct MidiServiceType
 {
-    struct InputWrapper
-    {
-        virtual ~InputWrapper() {}
-
-        virtual String getDeviceIdentifier() = 0;
-        virtual String getDeviceName() = 0;
-
-        virtual void start() = 0;
-        virtual void stop() = 0;
-    };
-
-    struct OutputWrapper
-    {
-        virtual ~OutputWrapper() {}
-
-        virtual String getDeviceIdentifier() = 0;
-        virtual String getDeviceName() = 0;
-
-        virtual void sendMessageNow (const MidiMessage&) = 0;
-    };
-
-    MidiServiceType() {}
-    virtual ~MidiServiceType() {}
+    MidiServiceType() = default;
+    virtual ~MidiServiceType() noexcept = default;
 
     virtual Array<MidiDeviceInfo> getAvailableDevices (bool) = 0;
     virtual MidiDeviceInfo getDefaultDevice (bool) = 0;
 
-    virtual InputWrapper*  createInputWrapper  (MidiInput&, const String&, MidiInputCallback&) = 0;
-    virtual OutputWrapper* createOutputWrapper (const String&) = 0;
+    virtual MidiInput::Pimpl*  createInputWrapper  (MidiInput&, const String&, MidiInputCallback&) = 0;
+    virtual MidiOutput::Pimpl* createOutputWrapper (const String&) = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiServiceType)
 };
@@ -82,12 +84,12 @@ struct Win32MidiService  : public MidiServiceType,
                        : Win32OutputWrapper::getDefaultDevice();
     }
 
-    InputWrapper* createInputWrapper (MidiInput& input, const String& deviceIdentifier, MidiInputCallback& callback) override
+    MidiInput::Pimpl* createInputWrapper (MidiInput& input, const String& deviceIdentifier, MidiInputCallback& callback) override
     {
         return new Win32InputWrapper (*this, input, deviceIdentifier, callback);
     }
 
-    OutputWrapper* createOutputWrapper (const String& deviceIdentifier) override
+    MidiOutput::Pimpl* createOutputWrapper (const String& deviceIdentifier) override
     {
         return new Win32OutputWrapper (*this, deviceIdentifier);
     }
@@ -384,7 +386,7 @@ private:
         }
     };
 
-    struct Win32InputWrapper  : public InputWrapper,
+    struct Win32InputWrapper  : public MidiInput::Pimpl,
                                 public Win32MidiDeviceQuery<Win32InputWrapper>
     {
         Win32InputWrapper (Win32MidiService& parentService, MidiInput& midiInput, const String& deviceIdentifier, MidiInputCallback& c)
@@ -508,7 +510,7 @@ private:
     };
 
     //==============================================================================
-    struct Win32OutputWrapper  : public OutputWrapper,
+    struct Win32OutputWrapper  : public MidiOutput::Pimpl,
                                  public Win32MidiDeviceQuery<Win32OutputWrapper>
     {
         Win32OutputWrapper (Win32MidiService& p, const String& deviceIdentifier)
@@ -763,12 +765,12 @@ public:
                        : outputDeviceWatcher->getDefaultDevice();
     }
 
-    InputWrapper* createInputWrapper (MidiInput& input, const String& deviceIdentifier, MidiInputCallback& callback) override
+    MidiInput::Pimpl* createInputWrapper (MidiInput& input, const String& deviceIdentifier, MidiInputCallback& callback) override
     {
         return new WinRTInputWrapper (*this, input, deviceIdentifier, callback);
     }
 
-    OutputWrapper* createOutputWrapper (const String& deviceIdentifier) override
+    MidiOutput::Pimpl* createOutputWrapper (const String& deviceIdentifier) override
     {
         return new WinRTOutputWrapper (*this, deviceIdentifier);
     }
@@ -1554,7 +1556,7 @@ private:
     };
 
     //==============================================================================
-    struct WinRTInputWrapper final  : public InputWrapper,
+    struct WinRTInputWrapper final  : public MidiInput::Pimpl,
                                       private WinRTIOWrapper<IMidiInPortStatics, IMidiInPort>
 
     {
@@ -1708,7 +1710,7 @@ private:
     };
 
     //==============================================================================
-    struct WinRTOutputWrapper final  : public OutputWrapper,
+    struct WinRTOutputWrapper final  : public MidiOutput::Pimpl,
                                        private WinRTIOWrapper <IMidiOutPortStatics, IMidiOutPort>
     {
         WinRTOutputWrapper (WinRTMidiService& service, const String& deviceIdentifier)
@@ -1865,7 +1867,7 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier
         return {};
 
     std::unique_ptr<MidiInput> in (new MidiInput ({}, deviceIdentifier));
-    std::unique_ptr<MidiServiceType::InputWrapper> wrapper;
+    std::unique_ptr<Pimpl> wrapper;
 
     try
     {
@@ -1877,7 +1879,7 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier
     }
 
     in->setName (wrapper->getDeviceName());
-    in->internal = wrapper.release();
+    in->internal = std::move (wrapper);
 
     return in;
 }
@@ -1907,13 +1909,10 @@ MidiInput::MidiInput (const String& deviceName, const String& deviceIdentifier)
 {
 }
 
-MidiInput::~MidiInput()
-{
-    delete static_cast<MidiServiceType::InputWrapper*> (internal);
-}
+MidiInput::~MidiInput() = default;
 
-void MidiInput::start()   { static_cast<MidiServiceType::InputWrapper*> (internal)->start(); }
-void MidiInput::stop()    { static_cast<MidiServiceType::InputWrapper*> (internal)->stop(); }
+void MidiInput::start()   { internal->start(); }
+void MidiInput::stop()    { internal->stop(); }
 
 //==============================================================================
 Array<MidiDeviceInfo> MidiOutput::getAvailableDevices()
@@ -1931,7 +1930,7 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (const String& deviceIdentifi
     if (deviceIdentifier.isEmpty())
         return {};
 
-    std::unique_ptr<MidiServiceType::OutputWrapper> wrapper;
+    std::unique_ptr<Pimpl> wrapper;
 
     try
     {
@@ -1945,7 +1944,7 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (const String& deviceIdentifi
     std::unique_ptr<MidiOutput> out;
     out.reset (new MidiOutput (wrapper->getDeviceName(), deviceIdentifier));
 
-    out->internal = wrapper.release();
+    out->internal = std::move (wrapper);
 
     return out;
 }
@@ -1973,12 +1972,11 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (int index)
 MidiOutput::~MidiOutput()
 {
     stopBackgroundThread();
-    delete static_cast<MidiServiceType::OutputWrapper*> (internal);
 }
 
 void MidiOutput::sendMessageNow (const MidiMessage& message)
 {
-    static_cast<MidiServiceType::OutputWrapper*> (internal)->sendMessageNow (message);
+    internal->sendMessageNow (message);
 }
 
 } // namespace juce

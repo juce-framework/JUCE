@@ -132,8 +132,8 @@ public:
             uint64 diff = laterTimeTagRaw - currentTimeTagRaw;
             double acceptableErrorInSeconds = 0.000001; // definitely not audible anymore.
 
-            expect (diff / float (1ULL << 32) < deltaInSeconds + acceptableErrorInSeconds );
-            expect (diff / float (1ULL << 32) > deltaInSeconds - acceptableErrorInSeconds );
+            expect ((float) diff / float (1ULL << 32) < deltaInSeconds + acceptableErrorInSeconds );
+            expect ((float) diff / float (1ULL << 32) > deltaInSeconds - acceptableErrorInSeconds );
 
             // round trip:
 

@@ -139,7 +139,7 @@ struct GraphEditorPanel::PinComponent   : public Component,
 
         auto colour = (pin.isMIDI() ? Colours::red : Colours::green);
 
-        g.setColour (colour.withRotatedHue (busIdx / 5.0f));
+        g.setColour (colour.withRotatedHue ((float) busIdx / 5.0f));
         g.fillPath (p);
     }
 
@@ -963,7 +963,7 @@ struct GraphDocumentComponent::TooltipBar   : public Component,
 
     void paint (Graphics& g) override
     {
-        g.setFont (Font (getHeight() * 0.7f, Font::bold));
+        g.setFont (Font ((float) getHeight() * 0.7f, Font::bold));
         g.setColour (Colours::black);
         g.drawFittedText (tip, 10, 0, getWidth() - 12, getHeight(), Justification::centredLeft, 1);
     }
@@ -1189,11 +1189,8 @@ void GraphDocumentComponent::init()
 
     if (isOnTouchDevice())
     {
-        if (isOnTouchDevice())
-        {
-            titleBarComponent.reset (new TitleBarComponent (*this));
-            addAndMakeVisible (titleBarComponent.get());
-        }
+        titleBarComponent.reset (new TitleBarComponent (*this));
+        addAndMakeVisible (titleBarComponent.get());
 
         pluginListBoxModel.reset (new PluginListBoxModel (pluginListBox, pluginList));
 
@@ -1206,11 +1203,8 @@ void GraphDocumentComponent::init()
                                                                               0, 2, 0, 2,
                                                                               true, true, true, false));
 
-        if (isOnTouchDevice())
-        {
-            addAndMakeVisible (pluginListSidePanel);
-            addAndMakeVisible (mobileSettingsSidePanel);
-        }
+        addAndMakeVisible (pluginListSidePanel);
+        addAndMakeVisible (mobileSettingsSidePanel);
     }
 }
 

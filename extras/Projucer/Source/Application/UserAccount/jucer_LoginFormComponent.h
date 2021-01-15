@@ -104,8 +104,8 @@ public:
         passwordBox.setBounds (bounds.removeFromTop (textEditorHeight));
         bounds.removeFromTop (spacing * 2);
 
-        emailBox.setFont (Font (textEditorHeight / 2.5f));
-        passwordBox.setFont (Font (textEditorHeight / 2.5f));
+        emailBox.setFont (Font ((float) textEditorHeight / 2.5f));
+        passwordBox.setFont (Font ((float) textEditorHeight / 2.5f));
 
         logInButton.setBounds (bounds.removeFromTop (textEditorHeight));
 

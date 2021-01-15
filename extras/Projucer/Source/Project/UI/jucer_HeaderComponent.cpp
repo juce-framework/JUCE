@@ -70,7 +70,7 @@ HeaderComponent::~HeaderComponent()
 void HeaderComponent::resized()
 {
     auto bounds = getLocalBounds();
-    configLabel.setFont ({ bounds.getHeight() / 3.0f });
+    configLabel.setFont ({ (float) bounds.getHeight() / 3.0f });
 
     {
         auto headerBounds = bounds.removeFromLeft (tabsWidth);
@@ -96,11 +96,11 @@ void HeaderComponent::resized()
         saveAndOpenInIDEButton.setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
 
         exporterBounds.removeFromRight (5);
-        exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt (exporterBounds.getHeight() / 1.8f)));
+        exporterBox.setBounds (exporterBounds.removeFromBottom (roundToInt ((float) exporterBounds.getHeight() / 1.8f)));
         configLabel.setBounds (exporterBounds);
     }
 
-    userAvatar.setBounds (bounds.removeFromRight (userAvatar.isDisplaingGPLLogo() ? roundToInt (bounds.getHeight() * 1.9f)
+    userAvatar.setBounds (bounds.removeFromRight (userAvatar.isDisplaingGPLLogo() ? roundToInt ((float) bounds.getHeight() * 1.9f)
                                                                                   : bounds.getHeight()).reduced (2));
 }
 
@@ -277,13 +277,22 @@ void HeaderComponent::initialiseButtons()
     {
         if (project != nullptr)
         {
-            if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
+            if (project->isSaveAndExportDisabled())
             {
-                auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
-                                                          .getChildWithName (ProjectMessages::Ids::incompatibleLicense);
+                auto setWarningVisible = [this] (const Identifier& identifier)
+                {
+                    auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
+                                                              .getChildWithName (identifier);
 
-                if (child.isValid())
-                    child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
+                    if (child.isValid())
+                        child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
+                };
+
+                if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
+                    setWarningVisible (ProjectMessages::Ids::incompatibleLicense);
+
+                if (project->isFileModificationCheckPending())
+                    setWarningVisible (ProjectMessages::Ids::jucerFileModified);
             }
             else
             {

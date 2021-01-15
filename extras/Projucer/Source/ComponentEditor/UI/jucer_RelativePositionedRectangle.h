@@ -74,8 +74,8 @@ public:
     */
     PositionedRectangle() noexcept
         : x (0.0), y (0.0), w (0.0), h (0.0),
-          xMode (anchorAtLeftOrTop | absoluteFromParentTopLeft),
-          yMode (anchorAtLeftOrTop | absoluteFromParentTopLeft),
+          xMode ((int) anchorAtLeftOrTop | (int) absoluteFromParentTopLeft),
+          yMode ((int) anchorAtLeftOrTop | (int) absoluteFromParentTopLeft),
           wMode (absoluteSize), hMode (absoluteSize)
     {
     }
@@ -283,23 +283,23 @@ public:
                    const SizeMode widthMode, const SizeMode heightMode,
                    const Rectangle<int>& target) noexcept
     {
-        if (xMode != (xAnchor | xMode_) || wMode != widthMode)
+        if (xMode != ((int) xAnchor | (int) xMode_) || wMode != widthMode)
         {
             double tx, tw;
             applyPosAndSize (tx, tw, x, w, xMode, wMode, target.getX(), target.getWidth());
 
-            xMode = (uint8) (xAnchor | xMode_);
+            xMode = (uint8) ((int) xAnchor | (int) xMode_);
             wMode = (uint8) widthMode;
 
             updatePosAndSize (x, w, tx, tw, xMode, wMode, target.getX(), target.getWidth());
         }
 
-        if (yMode != (yAnchor | yMode_) || hMode != heightMode)
+        if (yMode != ((int) yAnchor | (int) yMode_) || hMode != heightMode)
         {
             double ty, th;
             applyPosAndSize (ty, th, y, h, yMode, hMode, target.getY(), target.getHeight());
 
-            yMode = (uint8) (yAnchor | yMode_);
+            yMode = (uint8) ((int) yAnchor | (int) yMode_);
             hMode = (uint8) heightMode;
 
             updatePosAndSize (y, h, ty, th, yMode, hMode, target.getY(), target.getHeight());

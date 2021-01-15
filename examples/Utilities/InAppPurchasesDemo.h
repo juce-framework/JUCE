@@ -275,7 +275,7 @@ public:
         Rectangle<int> r (0, 0, w, h);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColour (lf.findColour (isSelected ? (int) TextEditor::highlightColourId : (int) ListBox::backgroundColourId));
         g.fillRect (r);
 
         g.setColour (lf.findColour (ListBox::textColourId));
@@ -461,7 +461,7 @@ public:
         auto r = Rectangle<int> (0, 0, w, h).reduced (4);
 
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
-        g.setColour (lf.findColour (isSelected ? TextEditor::highlightColourId : ListBox::backgroundColourId));
+        g.setColour (lf.findColour (isSelected ? (int) TextEditor::highlightColourId : (int) ListBox::backgroundColourId));
         g.fillRect (r);
     }
 
@@ -510,7 +510,7 @@ public:
         soundNames = purchases.getVoiceNames();
 
        #if JUCE_ANDROID || JUCE_IOS
-        auto screenBounds = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+        auto screenBounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
         setSize (screenBounds.getWidth(), screenBounds.getHeight());
        #else
         setSize (800, 600);

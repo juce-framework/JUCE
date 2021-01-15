@@ -52,7 +52,13 @@ public:
     static ComponentTypeHandler* getHandlerFor (Component& component);
 
     //==============================================================================
-    virtual String getXmlTagName() const noexcept             { return className.toUpperCase(); }
+    virtual String getXmlTagName() const noexcept
+    {
+        if (className.startsWith ("juce::"))
+            return className.substring (6).toUpperCase();
+
+        return className.toUpperCase();
+    }
 
     static ComponentTypeHandler* getHandlerForXmlTag (const String& tagName);
 

@@ -114,7 +114,7 @@ public:
         // (Our component is opaque, so we must completely fill the background with a solid colour)
         g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 
-        auto centreY = getHeight() / 2.0f;
+        auto centreY = (float) getHeight() / 2.0f;
         auto radius = amplitude * 200.0f;
 
         if (radius >= 0.0f)
@@ -131,8 +131,8 @@ public:
         Path wavePath;
         wavePath.startNewSubPath (0, centreY);
 
-        for (auto x = 1.0f; x < getWidth(); ++x)
-            wavePath.lineTo (x, centreY + amplitude * getHeight() * 2.0f
+        for (auto x = 1.0f; x < (float) getWidth(); ++x)
+            wavePath.lineTo (x, centreY + amplitude * (float) getHeight() * 2.0f
                                             * std::sin (x * frequency * 0.0001f));
 
         g.setColour (getLookAndFeel().findColour (Slider::thumbColourId));
@@ -149,8 +149,8 @@ public:
     {
         lastMousePosition = e.position;
 
-        frequency = (getHeight() - e.y) * 10.0f;
-        amplitude = jmin (0.9f, 0.2f * e.position.x / getWidth());
+        frequency = (float) (getHeight() - e.y) * 10.0f;
+        amplitude = jmin (0.9f, 0.2f * e.position.x / (float) getWidth());
 
         phaseDelta = (float) (MathConstants<double>::twoPi * frequency / sampleRate);
 

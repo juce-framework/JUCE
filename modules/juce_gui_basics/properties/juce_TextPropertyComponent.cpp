@@ -103,7 +103,7 @@ public:
             g.setFont (labelFont);
 
             g.drawFittedText (textToDisplayWhenEmpty, textArea, getJustificationType(),
-                              jmax (1, (int) (textArea.getHeight() / labelFont.getHeight())),
+                              jmax (1, (int) ((float) textArea.getHeight() / labelFont.getHeight())),
                               getMinimumHorizontalScale());
         }
     }

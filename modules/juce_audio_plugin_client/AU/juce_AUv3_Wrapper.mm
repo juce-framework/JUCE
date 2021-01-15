@@ -39,9 +39,6 @@
 #endif
 
 #if JUCE_IOS
- #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_9_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_9_0)
-  #error AUv3 needs Deployment Target iOS 9.0 or higher to compile
- #endif
  #if (defined __IPHONE_11_0) && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
   #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
   #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
@@ -143,14 +140,12 @@ public:
 
     virtual NSDictionary<NSString*, id>* getFullState()
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        return ObjCMsgSendSuper<NSDictionary<NSString*, id>*> (&s, @selector (fullState));
+        return ObjCMsgSendSuper<AUAudioUnit, NSDictionary<NSString*, id>*> (getAudioUnit(), @selector (fullState));
     }
 
     virtual void setFullState (NSDictionary<NSString*, id>* state)
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        ObjCMsgSendSuper<void, NSDictionary<NSString*, id>*> (&s, @selector (setFullState:), state);
+        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (setFullState:), state);
     }
 
     virtual AUParameterTree* getParameterTree()                            = 0;
@@ -179,14 +174,12 @@ public:
 
     virtual bool getShouldBypassEffect()
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        return (ObjCMsgSendSuper<BOOL> (&s, @selector (shouldBypassEffect)) == YES);
+        return (ObjCMsgSendSuper<AUAudioUnit, BOOL> (getAudioUnit(), @selector (shouldBypassEffect)) == YES);
     }
 
     virtual void setShouldBypassEffect (bool shouldBypass)
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        ObjCMsgSendSuper<void, BOOL> (&s, @selector (setShouldBypassEffect:), shouldBypass ? YES : NO);
+        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (setShouldBypassEffect:), shouldBypass ? YES : NO);
     }
 
     //==============================================================================
@@ -195,14 +188,12 @@ public:
 
     virtual bool allocateRenderResourcesAndReturnError (NSError **outError)
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        return (ObjCMsgSendSuper<BOOL, NSError**> (&s, @selector (allocateRenderResourcesAndReturnError:), outError) == YES);
+        return (ObjCMsgSendSuper<AUAudioUnit, BOOL, NSError**> (getAudioUnit(), @selector (allocateRenderResourcesAndReturnError:), outError) == YES);
     }
 
     virtual void deallocateRenderResources()
     {
-        objc_super s = { getAudioUnit(), [AUAudioUnit class] };
-        ObjCMsgSendSuper<void> (&s, @selector (deallocateRenderResources));
+        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (deallocateRenderResources));
     }
 
     //==============================================================================
@@ -294,9 +285,8 @@ private:
         {
             AUAudioUnit* self = _self;
 
-            objc_super s = { self, [AUAudioUnit class] };
-            self = ObjCMsgSendSuper<AUAudioUnit*, AudioComponentDescription,
-                                    AudioComponentInstantiationOptions, NSError**> (&s, @selector(initWithComponentDescription:options:error:), descr, options, error);
+            self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
+                                    AudioComponentInstantiationOptions, NSError**> (self, @selector (initWithComponentDescription:options:error:), descr, options, error);
 
             JuceAudioUnitv3Base* juceAU = JuceAudioUnitv3Base::create (self, descr, options, error);
 
@@ -308,9 +298,8 @@ private:
         {
             AUAudioUnit* self = _self;
 
-            objc_super s = { self, [AUAudioUnit class] };
-            self = ObjCMsgSendSuper<AUAudioUnit*, AudioComponentDescription,
-                                    AudioComponentInstantiationOptions, NSError**> (&s, @selector(initWithComponentDescription:options:error:), descr, options, error);
+            self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
+                                    AudioComponentInstantiationOptions, NSError**> (self, @selector(initWithComponentDescription:options:error:), descr, options, error);
 
 
             setThis (self, juceAU);
@@ -1422,7 +1411,10 @@ private:
                     const AUParameterEvent& paramEvent = event->parameter;
 
                     if (auto* p = getJuceParameterForAUAddress (paramEvent.parameterAddress))
-                        setAudioProcessorParameter (p, paramEvent.value);
+                    {
+                        auto normalisedValue = paramEvent.value / getMaximumParameterValue (p);
+                        setAudioProcessorParameter (p, normalisedValue);
+                    }
                 }
                 break;
 

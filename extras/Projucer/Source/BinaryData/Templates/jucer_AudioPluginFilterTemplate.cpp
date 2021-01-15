@@ -111,6 +111,8 @@ bool %%filter_class_name%%::isBusesLayoutSupported (const BusesLayout& layouts) 
   #else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
+    // Some plugin hosts, such as certain GarageBand versions, will only
+    // load plugins that support stereo bus layouts.
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
      && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
