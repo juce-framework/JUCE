@@ -149,7 +149,9 @@ jobs:
     - name: Unit Tests Debug
       shell: bash
       working-directory: /juce
-      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
+      run: |
+        find . -name UnitTestRunner -type f
+      #run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
     - name: Build Release
       shell: bash
       working-directory: /juce
@@ -157,4 +159,6 @@ jobs:
     - name: Unit Tests Release
       shell: bash
       working-directory: /juce
-      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner
+      run: |
+        find . -name UnitTestRunner -type f
+      #run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner

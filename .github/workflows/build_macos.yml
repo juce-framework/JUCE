@@ -100,10 +100,14 @@ jobs:
       run: cmake --build cmake-build --target UnitTestRunner --config Debug -- -j4
     - name: Unit Tests Debug
       shell: bash
-      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
+      run: |
+        find . -name UnitTestRunner -type f
+      # cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Debug/UnitTestRunner
     - name: Build Release
       shell: bash
       run: cmake --build cmake-build --target UnitTestRunner --config Release -- -j4
     - name: Unit Tests Release
       shell: bash
-      run: cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner
+      run: |
+        find . -name UnitTestRunner -type f
+      # cmake-build/extras/UnitTestRunner/UnitTestRunner_artefacts/Release/UnitTestRunner
