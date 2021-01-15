@@ -14,7 +14,13 @@ jobs:
       shell: bash
       run: |
         cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Debug
-        cmake --build cmake-build -- -j8
+        cmake --build cmake-build --target AudioPerformanceTests -- -j4
+        cmake --build cmake-build --target AudioPluginHost -- -j4
+        cmake --build cmake-build --target BinaryBuilder -- -j4
+        cmake --build cmake-build --target DemoRunner -- -j4
+        cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
+        cmake --build cmake-build --target Projucer -- -j4
+        cmake --build cmake-build --target UnitTestRunner -- -j4
 
     - name: Unit Tests Debug
       shell: bash
@@ -24,7 +30,13 @@ jobs:
       shell: bash
       run: |
         cmake -B cmake-build -DJUCE_BUILD_EXAMPLES=ON -DJUCE_BUILD_EXTRAS=ON -DCMAKE_BUILD_TYPE=Release
-        cmake --build cmake-build -- -j8
+        cmake --build cmake-build --target AudioPerformanceTests -- -j4
+        cmake --build cmake-build --target AudioPluginHost -- -j4
+        cmake --build cmake-build --target BinaryBuilder -- -j4
+        cmake --build cmake-build --target DemoRunner -- -j4
+        cmake --build cmake-build --target NetworkGraphicsDemo -- -j4
+        cmake --build cmake-build --target Projucer -- -j4
+        cmake --build cmake-build --target UnitTestRunner -- -j4
 
     - name: Unit Tests Release
       shell: bash
