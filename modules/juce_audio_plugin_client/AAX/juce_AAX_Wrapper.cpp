@@ -43,7 +43,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wpragma-pack",
                                      "-Wzero-as-null-pointer-constant",
                                      "-Winconsistent-missing-destructor-override",
-                                     "-Wfour-char-constants")
+                                     "-Wfour-char-constants",
+                                     "-Wtautological-overlap-compare")
 
 #include <AAX_Version.h>
 

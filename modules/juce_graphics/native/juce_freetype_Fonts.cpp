@@ -197,7 +197,7 @@ public:
     {
         for (auto& path : paths)
         {
-            for (const auto iter : RangedDirectoryIterator (File::getCurrentWorkingDirectory().getChildFile (path), true))
+            for (const auto& iter : RangedDirectoryIterator (File::getCurrentWorkingDirectory().getChildFile (path), true))
                 if (iter.getFile().hasFileExtension ("ttf;pfb;pcf;otf"))
                     scanFont (iter.getFile());
         }
@@ -325,7 +325,7 @@ public:
 
                 if (getGlyphShape (destShape, face->glyph->outline, scale))
                 {
-                    addGlyph (character, destShape, face->glyph->metrics.horiAdvance * scale);
+                    addGlyph (character, destShape, (float) face->glyph->metrics.horiAdvance * scale);
 
                     if ((face->face_flags & FT_FACE_FLAG_KERNING) != 0)
                         addKerning (face, (uint32) character, glyphIndex);
@@ -355,15 +355,15 @@ private:
 
             for (int p = startPoint; p <= endPoint; ++p)
             {
-                auto x = scaleX * points[p].x;
-                auto y = scaleY * points[p].y;
+                auto x = scaleX * (float) points[p].x;
+                auto y = scaleY * (float) points[p].y;
 
                 if (p == startPoint)
                 {
                     if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
                     {
-                        auto x2 = scaleX * points [endPoint].x;
-                        auto y2 = scaleY * points [endPoint].y;
+                        auto x2 = scaleX * (float) points[endPoint].x;
+                        auto y2 = scaleY * (float) points[endPoint].y;
 
                         if (FT_CURVE_TAG (tags[endPoint]) != FT_Curve_Tag_On)
                         {
@@ -387,8 +387,8 @@ private:
                 else if (FT_CURVE_TAG (tags[p]) == FT_Curve_Tag_Conic)
                 {
                     const int nextIndex = (p == endPoint) ? startPoint : p + 1;
-                    auto x2 = scaleX * points [nextIndex].x;
-                    auto y2 = scaleY * points [nextIndex].y;
+                    auto x2 = scaleX * (float) points[nextIndex].x;
+                    auto y2 = scaleY * (float) points[nextIndex].y;
 
                     if (FT_CURVE_TAG (tags [nextIndex]) == FT_Curve_Tag_Conic)
                     {
@@ -412,10 +412,10 @@ private:
                          || FT_CURVE_TAG (tags[next2]) != FT_Curve_Tag_On)
                         return false;
 
-                    auto x2 = scaleX * points [next1].x;
-                    auto y2 = scaleY * points [next1].y;
-                    auto x3 = scaleX * points [next2].x;
-                    auto y3 = scaleY * points [next2].y;
+                    auto x2 = scaleX * (float) points[next1].x;
+                    auto y2 = scaleY * (float) points[next1].y;
+                    auto x3 = scaleX * (float) points[next2].x;
+                    auto y3 = scaleY * (float) points[next2].y;
 
                     destShape.cubicTo (x, y, x2, y2, x3, y3);
                     p += 2;
@@ -441,7 +441,7 @@ private:
 
             if (FT_Get_Kerning (face, glyphIndex, rightGlyphIndex, ft_kerning_unscaled, &kerning) == 0
                    && kerning.x != 0)
-                addKerningPair ((juce_wchar) character, (juce_wchar) rightCharCode, kerning.x / height);
+                addKerningPair ((juce_wchar) character, (juce_wchar) rightCharCode, (float) kerning.x / height);
 
             rightCharCode = FT_Get_Next_Char (face, rightCharCode, &rightGlyphIndex);
         }

@@ -51,7 +51,7 @@ public:
         }
         else
         {
-            maxSize = roundToInt (toolbarThickness * fixedSize);
+            maxSize = roundToInt ((float) toolbarThickness * fixedSize);
             minSize = drawBar ? maxSize : jmin (4, maxSize);
             preferredSize = maxSize;
 
@@ -87,9 +87,9 @@ public:
             auto thickness = 0.2f;
 
             if (isToolbarVertical())
-                g.fillRect (w * 0.1f, h * (0.5f - thickness * 0.5f), w * 0.8f, h * thickness);
+                g.fillRect ((float) w * 0.1f, (float) h * (0.5f - thickness * 0.5f), (float) w * 0.8f, (float) h * thickness);
             else
-                g.fillRect (w * (0.5f - thickness * 0.5f), h * 0.1f, w * thickness, h * 0.8f);
+                g.fillRect ((float) w * (0.5f - thickness * 0.5f), (float) h * 0.1f, (float) w * thickness, (float) h * 0.8f);
         }
 
         if (getEditingMode() != normalMode && ! drawBar)
@@ -106,33 +106,33 @@ public:
 
                 if (isToolbarVertical())
                 {
-                    x1 = w * 0.5f;
-                    y1 = h * 0.4f;
+                    x1 = (float) w * 0.5f;
+                    y1 = (float) h * 0.4f;
                     x2 = x1;
-                    y2 = indentX * 2.0f;
+                    y2 = (float) indentX * 2.0f;
 
                     x3 = x1;
-                    y3 = h * 0.6f;
+                    y3 = (float) h * 0.6f;
                     x4 = x1;
-                    y4 = h - y2;
+                    y4 = (float) h - y2;
 
-                    hw = w * 0.15f;
-                    hl = w * 0.2f;
+                    hw = (float) w * 0.15f;
+                    hl = (float) w * 0.2f;
                 }
                 else
                 {
-                    x1 = w * 0.4f;
-                    y1 = h * 0.5f;
-                    x2 = indentX * 2.0f;
+                    x1 = (float) w * 0.4f;
+                    y1 = (float) h * 0.5f;
+                    x2 = (float) indentX * 2.0f;
                     y2 = y1;
 
-                    x3 = w * 0.6f;
+                    x3 = (float) w * 0.6f;
                     y3 = y1;
-                    x4 = w - x2;
+                    x4 = (float) w - x2;
                     y4 = y1;
 
-                    hw = h * 0.15f;
-                    hl = h * 0.2f;
+                    hw = (float) h * 0.15f;
+                    hl = (float) h * 0.2f;
                 }
 
                 Path p;

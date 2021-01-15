@@ -18,7 +18,6 @@
 #define OBOE_INTEGER_RATIO_H
 
 #include <sys/types.h>
-#include <vector>
 
 namespace resampler {
 
@@ -46,7 +45,6 @@ public:
 private:
     int32_t mNumerator;
     int32_t mDenominator;
-    static const std::vector<int> kPrimes;
 };
 
 }

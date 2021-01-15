@@ -209,7 +209,7 @@ public:
         auto noteDistance = float (getWidth()) / 128;
         for (auto i = 0; i < 128; ++i)
         {
-            auto x = noteDistance * i;
+            auto x = noteDistance * (float) i;
             auto noteHeight = int (MidiMessage::isMidiNoteBlack (i) ? 0.7 * getHeight() : getHeight());
 
             g.setColour (MidiMessage::isMidiNoteBlack (i) ? Colours::white : Colours::grey);
@@ -302,8 +302,8 @@ private:
     Point<float> getCentrePositionForNote (MPENote note) const
     {
         auto n = float (note.initialNote) + float (note.totalPitchbendInSemitones);
-        auto x = getWidth() * n / 128;
-        auto y = getHeight() * (1 - note.timbre.asUnsignedFloat());
+        auto x = (float) getWidth() * n / 128;
+        auto y = (float) getHeight() * (1 - note.timbre.asUnsignedFloat());
 
         return { x, y };
     }
@@ -656,8 +656,8 @@ private:
 
             auto xPos = zone.isLowerZone() ? 0 : zone.getLastMemberChannel() - 1;
 
-            Rectangle<int> zoneRect { int (channelWidth * (xPos)), 20,
-                                      int (channelWidth * (zone.numMemberChannels + 1)), getHeight() - 20 };
+            Rectangle<int> zoneRect { int (channelWidth * (float) xPos), 20,
+                                      int (channelWidth * (float) (zone.numMemberChannels + 1)), getHeight() - 20 };
 
             g.setColour (zoneColour);
             g.drawRect (zoneRect, 3);
@@ -680,8 +680,8 @@ private:
         auto numChannels  = legacyModeChannelRange.getEnd() - startChannel - 1;
 
 
-        Rectangle<int> zoneRect (int (getChannelRectangleWidth() * startChannel), 0,
-                                 int (getChannelRectangleWidth() * numChannels), getHeight());
+        Rectangle<int> zoneRect (int (getChannelRectangleWidth() * (float) startChannel), 0,
+                                 int (getChannelRectangleWidth() * (float) numChannels), getHeight());
 
         zoneRect.removeFromTop (20);
 
@@ -694,7 +694,7 @@ private:
     //==============================================================================
     float getChannelRectangleWidth() const noexcept
     {
-        return float (getWidth()) / numMidiChannels;
+        return (float) getWidth() / (float) numMidiChannels;
     }
 
     //==============================================================================

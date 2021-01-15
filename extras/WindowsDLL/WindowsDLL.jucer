@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="IvabE4" name="WindowsDLL" projectType="library" juceLinkage="none"
-              bundleIdentifier="com.juce.jucedll" jucerVersion="6.0.0" defines="JUCE_DLL_BUILD=1"
+              bundleIdentifier="com.juce.jucedll" defines="JUCE_DLL_BUILD=1"
               displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
-              companyCopyright="Raw Material Software Limited" useAppConfig="0" addUsingNamespaceToJuceHeader="1">
+              companyCopyright="Raw Material Software Limited" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <VS2019 targetFolder="Builds/VisualStudio2019">
       <CONFIGURATIONS>

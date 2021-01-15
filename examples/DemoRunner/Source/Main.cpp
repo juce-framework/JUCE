@@ -131,10 +131,10 @@ private:
             setFullScreen (true);
             Desktop::getInstance().setOrientationsEnabled (Desktop::rotatedClockwise | Desktop::rotatedAntiClockwise);
            #else
-            setBounds ((int) (0.1f * getParentWidth()),
-                       (int) (0.1f * getParentHeight()),
-                       jmax (850, (int) (0.5f * getParentWidth())),
-                       jmax (600, (int) (0.7f * getParentHeight())));
+            setBounds ((int) (0.1f * (float) getParentWidth()),
+                       (int) (0.1f * (float) getParentHeight()),
+                       jmax (850, (int) (0.5f * (float) getParentWidth())),
+                       jmax (600, (int) (0.7f * (float) getParentHeight())));
            #endif
 
             setContentOwned (new MainComponent(), false);

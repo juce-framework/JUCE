@@ -42,10 +42,12 @@ struct NSViewResizeWatcher
         callback = [cls.createInstance() init];
         ViewFrameChangeCallbackClass::setTarget (callback, this);
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [[NSNotificationCenter defaultCenter]  addObserver: callback
                                                   selector: @selector (frameChanged:)
                                                       name: NSViewFrameDidChangeNotification
                                                     object: view];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     void detachViewWatcher()
@@ -69,7 +71,11 @@ private:
         ViewFrameChangeCallbackClass()  : ObjCClass<NSObject> ("JUCE_NSViewCallback_")
         {
             addIvar<NSViewResizeWatcher*> ("target");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (frameChanged:),  frameChanged, "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
             registerClass();
         }
 

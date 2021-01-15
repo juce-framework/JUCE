@@ -24,7 +24,7 @@
 #include <audio_utils/primitives.h>
 #endif
 
-using namespace flowgraph;
+using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 
 SourceI16::SourceI16(int32_t channelCount)
         : FlowGraphSourceBuffered(channelCount) {

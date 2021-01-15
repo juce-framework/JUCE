@@ -563,16 +563,11 @@ public:
         m.addItem (4, "Rename File...");
         m.addSeparator();
 
-        if (auto* group = dynamic_cast<GroupItem*> (getParentItem()))
-        {
-            if (group->isRoot())
-            {
-                m.addItem (5, "Binary Resource", true, item.shouldBeAddedToBinaryResources());
-                m.addItem (6, "Xcode Resource",  true, item.shouldBeAddedToXcodeResources());
-                m.addItem (7, "Compile",         true, item.shouldBeCompiled());
-                m.addSeparator();
-            }
-        }
+        m.addItem (5, "Binary Resource", true, item.shouldBeAddedToBinaryResources());
+        m.addItem (6, "Xcode Resource", true, item.shouldBeAddedToXcodeResources());
+        m.addItem (7, "Compile", item.isSourceFile(), item.shouldBeCompiled());
+        m.addItem (8, "Skip PCH", item.shouldBeCompiled(), item.shouldSkipPCH());
+        m.addSeparator();
 
         m.addItem (3, "Delete");
 
@@ -589,13 +584,14 @@ public:
     {
         switch (resultCode)
         {
-            case 1:     getFile().startAsProcess(); break;
-            case 2:     revealInFinder(); break;
-            case 3:     deleteAllSelectedItems(); break;
-            case 4:     triggerAsyncRename (item); break;
-            case 5:     item.getShouldAddToBinaryResourcesValue().setValue (! item.shouldBeAddedToBinaryResources()); break;
-            case 6:     item.getShouldAddToXcodeResourcesValue().setValue (! item.shouldBeAddedToXcodeResources()); break;
-            case 7:     item.getShouldCompileValue().setValue (! item.shouldBeCompiled()); break;
+            case 1:  getFile().startAsProcess(); break;
+            case 2:  revealInFinder(); break;
+            case 3:  deleteAllSelectedItems(); break;
+            case 4:  triggerAsyncRename (item); break;
+            case 5:  item.getShouldAddToBinaryResourcesValue().setValue (! item.shouldBeAddedToBinaryResources()); break;
+            case 6:  item.getShouldAddToXcodeResourcesValue().setValue (! item.shouldBeAddedToXcodeResources()); break;
+            case 7:  item.getShouldCompileValue().setValue (! item.shouldBeCompiled()); break;
+            case 8:  item.getShouldSkipPCHValue().setValue (! item.shouldSkipPCH()); break;
 
             default:
                 if (auto* parentGroup = dynamic_cast<GroupItem*> (getParentProjectItem()))

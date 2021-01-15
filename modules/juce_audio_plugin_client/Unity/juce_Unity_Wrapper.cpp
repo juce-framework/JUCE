@@ -23,9 +23,10 @@
   ==============================================================================
 */
 
+#include <juce_core/system/juce_TargetPlatform.h>
+
 #if JucePlugin_Build_Unity
 
-#include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 

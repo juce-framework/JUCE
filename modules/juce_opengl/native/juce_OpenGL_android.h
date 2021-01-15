@@ -231,7 +231,7 @@ public:
             auto env = getEnv();
 
             lastBounds = bounds;
-            auto r = bounds * Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            auto r = bounds * Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
 
             env->CallVoidMethod (surfaceView.get(), JuceOpenGLViewSurface.layout,
                                  (jint) r.getX(), (jint) r.getY(), (jint) r.getRight(), (jint) r.getBottom());

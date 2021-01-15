@@ -20,7 +20,7 @@
 #include "FlowGraphNode.h"
 #include "SourceFloat.h"
 
-using namespace flowgraph;
+using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 
 SourceFloat::SourceFloat(int32_t channelCount)
         : FlowGraphSourceBuffered(channelCount) {

@@ -125,18 +125,18 @@ public:
         //==============================================================================
         auto moduleID = project.getEnabledModules().getModuleID (rowNumber);
 
-        g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (moduleID, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (0) * (float) width)), Justification::centredLeft, 1);
 
         //==============================================================================
         auto version = project.getEnabledModules().getModuleInfo (moduleID).getVersion();
         if (version.isEmpty())
             version = "?";
 
-        g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (version, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (1) * (float) width)), Justification::centredLeft, 1);
 
         //==============================================================================
         g.drawFittedText (String (project.getEnabledModules().shouldCopyModuleFilesLocally (moduleID) ? "Yes" : "No"),
-                          bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * width)), Justification::centredLeft, 1);
+                          bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (2) * (float) width)), Justification::centredLeft, 1);
 
         //==============================================================================
         String pathText;
@@ -155,7 +155,7 @@ public:
             pathText = paths.joinIntoString (", ");
         }
 
-        g.drawFittedText (pathText, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (3) * width)), Justification::centredLeft, 1);
+        g.drawFittedText (pathText, bounds.removeFromLeft (roundToInt (listHeader->getProportionAtIndex (3) * (float) width)), Justification::centredLeft, 1);
     }
 
     void listBoxItemDoubleClicked (int row, const MouseEvent&) override

@@ -167,9 +167,9 @@ struct ConnectedDeviceGroup  : private AsyncUpdater,
             TouchSurface::Touch touch;
 
             touch.index             = (int) touchIndex.get();
-            touch.x                 = position.x.toUnipolarFloat();
-            touch.y                 = position.y.toUnipolarFloat();
-            touch.z                 = position.z.toUnipolarFloat();
+            touch.x                 = (float) position.x.toUnipolarFloat();
+            touch.y                 = (float) position.y.toUnipolarFloat();
+            touch.z                 = (float) position.z.toUnipolarFloat();
             touch.xVelocity         = velocity.vx.toBipolarFloat();
             touch.yVelocity         = velocity.vy.toBipolarFloat();
             touch.zVelocity         = velocity.vz.toBipolarFloat();

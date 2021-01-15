@@ -67,11 +67,11 @@ public:
 
             for (int y = 0; y < height; ++y)
             {
-                auto val = 1.0f - y / (float) height;
+                auto val = 1.0f - (float) y / (float) height;
 
                 for (int x = 0; x < width; ++x)
                 {
-                    auto sat = x / (float) width;
+                    auto sat = (float) x / (float) width;
                     pixels.setPixelColour (x, y, Colour (h, sat, val, 1.0f));
                 }
             }
@@ -92,8 +92,8 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        auto sat =        (e.x - edge) / (float) (getWidth()  - edge * 2);
-        auto val = 1.0f - (e.y - edge) / (float) (getHeight() - edge * 2);
+        auto sat =        (float) (e.x - edge) / (float) (getWidth()  - edge * 2);
+        auto val = 1.0f - (float) (e.y - edge) / (float) (getHeight() - edge * 2);
 
         owner.setSV (sat, val);
     }
@@ -135,9 +135,9 @@ private:
         void paint (Graphics& g) override
         {
             g.setColour (Colour::greyLevel (0.1f));
-            g.drawEllipse (1.0f, 1.0f, getWidth() - 2.0f, getHeight() - 2.0f, 1.0f);
+            g.drawEllipse (1.0f, 1.0f, (float) getWidth() - 2.0f, (float) getHeight() - 2.0f, 1.0f);
             g.setColour (Colour::greyLevel (0.9f));
-            g.drawEllipse (2.0f, 2.0f, getWidth() - 4.0f, getHeight() - 4.0f, 1.0f);
+            g.drawEllipse (2.0f, 2.0f, (float) getWidth() - 4.0f, (float) getHeight() - 4.0f, 1.0f);
         }
     };
 
@@ -195,7 +195,7 @@ public:
 
     void mouseDrag (const MouseEvent& e) override
     {
-        owner.setHue ((e.y - edge) / (float) (getHeight() - edge * 2));
+        owner.setHue ((float) (e.y - edge) / (float) (getHeight() - edge * 2));
     }
 
     void updateIfNeeded()

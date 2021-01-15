@@ -33,12 +33,12 @@ public:
     TextEditorHandler()
         : ComponentTypeHandler ("Text Editor", "juce::TextEditor", typeid (TextEditor), 150, 24)
     {
-        registerColour (TextEditor::textColourId, "text", "textcol");
-        registerColour (TextEditor::backgroundColourId, "background", "bkgcol");
-        registerColour (TextEditor::highlightColourId, "highlight", "hilitecol");
-        registerColour (TextEditor::outlineColourId, "outline", "outlinecol");
-        registerColour (TextEditor::shadowColourId, "shadow", "shadowcol");
-        registerColour (CaretComponent::caretColourId, "caret", "caretcol");
+        registerColour (juce::TextEditor::textColourId, "text", "textcol");
+        registerColour (juce::TextEditor::backgroundColourId, "background", "bkgcol");
+        registerColour (juce::TextEditor::highlightColourId, "highlight", "hilitecol");
+        registerColour (juce::TextEditor::outlineColourId, "outline", "outlinecol");
+        registerColour (juce::TextEditor::shadowColourId, "shadow", "shadowcol");
+        registerColour (juce::CaretComponent::caretColourId, "caret", "caretcol");
     }
 
     Component* createNewComponent (JucerDocument*) override

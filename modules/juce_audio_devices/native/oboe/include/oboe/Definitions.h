@@ -495,6 +495,25 @@ namespace oboe {
         int64_t timestamp; // in nanoseconds
     };
 
+    class OboeGlobals {
+    public:
+
+        static bool areWorkaroundsEnabled() {
+            return mWorkaroundsEnabled;
+        }
+
+        /**
+         * Disable this when writing tests to reproduce bugs in AAudio or OpenSL ES
+         * that have workarounds in Oboe.
+         * @param enabled
+         */
+        static void setWorkaroundsEnabled(bool enabled) {
+            mWorkaroundsEnabled = enabled;
+        }
+
+    private:
+        static bool mWorkaroundsEnabled;
+    };
 } // namespace oboe
 
 #endif // OBOE_DEFINITIONS_H

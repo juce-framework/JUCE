@@ -167,6 +167,12 @@ public:
     /** Converts a screen area to a position relative to the top-left of this component. */
     virtual Rectangle<int> globalToLocal (const Rectangle<int>& screenPosition);
 
+    /** Converts a rectangle relative to the top-left of this component to screen coordinates. */
+    Rectangle<float> localToGlobal (const Rectangle<float>& relativePosition);
+
+    /** Converts a screen area to a position relative to the top-left of this component. */
+    Rectangle<float> globalToLocal (const Rectangle<float>& screenPosition);
+
     /** Returns the area in peer coordinates that is covered by the given sub-comp (which
         may be at any depth)
     */

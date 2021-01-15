@@ -49,9 +49,9 @@
 #include "../Assets/DemoUtilities.h"
 
 //==============================================================================
-struct DemoFlexPanel   : public juce::Component
+struct DemoFlexPanel   : public Component
 {
-    DemoFlexPanel (juce::Colour col, FlexItem& item)
+    DemoFlexPanel (Colour col, FlexItem& item)
         : flexItem (item), colour (col)
     {
         int x = 70;
@@ -155,7 +155,7 @@ struct DemoFlexPanel   : public juce::Component
     TextEditor flexOrderEditor, flexGrowEditor, flexShrinkEditor, flexBasisEditor;
     ComboBox alignSelfCombo;
 
-    juce::Colour colour;
+    Colour colour;
     OwnedArray<Label> labels;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoFlexPanel)

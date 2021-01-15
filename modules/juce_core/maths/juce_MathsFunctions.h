@@ -521,7 +521,8 @@ template <typename FloatType>
 unsigned int truncatePositiveToUnsignedInt (FloatType value) noexcept
 {
     jassert (value >= static_cast<FloatType> (0));
-    jassert (static_cast<FloatType> (value) <= std::numeric_limits<unsigned int>::max());
+    jassert (static_cast<FloatType> (value)
+             <= static_cast<FloatType> (std::numeric_limits<unsigned int>::max()));
 
     return static_cast<unsigned int> (value);
 }

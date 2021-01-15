@@ -223,10 +223,12 @@ struct ViewBasedStatusItem   : public StatusItemContainer
 
         SystemTrayViewClass::frameChanged (view.get(), SEL(), nullptr);
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         [[NSNotificationCenter defaultCenter]  addObserver: view.get()
                                                   selector: @selector (frameChanged:)
                                                       name: NSWindowDidMoveNotification
                                                     object: nil];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     ~ViewBasedStatusItem() override
@@ -312,7 +314,10 @@ struct ViewBasedStatusItem   : public StatusItemContainer
             addMethod (@selector (mouseDown:),      handleEventDown, "v@:@");
             addMethod (@selector (rightMouseDown:), handleEventDown, "v@:@");
             addMethod (@selector (drawRect:),       drawRect,        "v@:@");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (frameChanged:),   frameChanged,    "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
         }

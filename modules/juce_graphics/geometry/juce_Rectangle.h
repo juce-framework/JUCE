@@ -349,10 +349,10 @@ public:
     template <typename FloatType>
     Rectangle operator*= (FloatType scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x * scaleFactor,
-                              pos.y * scaleFactor,
-                              w * scaleFactor,
-                              h * scaleFactor).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x * scaleFactor,
+                              (FloatType) pos.y * scaleFactor,
+                              (FloatType) w * scaleFactor,
+                              (FloatType) h * scaleFactor).copyWithRounding (*this);
         return *this;
     }
 
@@ -364,10 +364,10 @@ public:
     template <typename FloatType>
     Rectangle operator*= (Point<FloatType> scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x * scaleFactor.x,
-                              pos.y * scaleFactor.y,
-                              w * scaleFactor.x,
-                              h * scaleFactor.y).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x * scaleFactor.x,
+                              (FloatType) pos.y * scaleFactor.y,
+                              (FloatType) w * scaleFactor.x,
+                              (FloatType) h * scaleFactor.y).copyWithRounding (*this);
         return *this;
     }
 
@@ -384,10 +384,10 @@ public:
     template <typename FloatType>
     Rectangle operator/= (FloatType scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x / scaleFactor,
-                              pos.y / scaleFactor,
-                              w / scaleFactor,
-                              h / scaleFactor).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x / scaleFactor,
+                              (FloatType) pos.y / scaleFactor,
+                              (FloatType) w / scaleFactor,
+                              (FloatType) h / scaleFactor).copyWithRounding (*this);
         return *this;
     }
 
@@ -395,10 +395,10 @@ public:
     template <typename FloatType>
     Rectangle operator/= (Point<FloatType> scaleFactor) noexcept
     {
-        Rectangle<FloatType> (pos.x / scaleFactor.x,
-                              pos.y / scaleFactor.y,
-                              w / scaleFactor.x,
-                              h / scaleFactor.y).copyWithRounding (*this);
+        Rectangle<FloatType> ((FloatType) pos.x / scaleFactor.x,
+                              (FloatType) pos.y / scaleFactor.y,
+                              (FloatType) w / scaleFactor.x,
+                              (FloatType) h / scaleFactor.y).copyWithRounding (*this);
         return *this;
     }
 
@@ -552,22 +552,22 @@ public:
     template <typename FloatType>
     Point<ValueType> getRelativePoint (FloatType relativeX, FloatType relativeY) const noexcept
     {
-        return { pos.x + static_cast<ValueType> (w * relativeX),
-                 pos.y + static_cast<ValueType> (h * relativeY) };
+        return { pos.x + static_cast<ValueType> ((FloatType) w * relativeX),
+                 pos.y + static_cast<ValueType> ((FloatType) h * relativeY) };
     }
 
     /** Returns a proportion of the width of this rectangle. */
     template <typename FloatType>
     ValueType proportionOfWidth (FloatType proportion) const noexcept
     {
-        return static_cast<ValueType> (w * proportion);
+        return static_cast<ValueType> ((FloatType) w * proportion);
     }
 
     /** Returns a proportion of the height of this rectangle. */
     template <typename FloatType>
     ValueType proportionOfHeight (FloatType proportion) const noexcept
     {
-        return static_cast<ValueType> (h * proportion);
+        return static_cast<ValueType> ((FloatType) h * proportion);
     }
 
     /** Returns a rectangle based on some proportional coordinates relative to this one.

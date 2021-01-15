@@ -26,6 +26,13 @@
 #include "../../Application/jucer_Headers.h"
 #include "jucer_VersionInfo.h"
 
+
+VersionInfo::VersionInfo (String versionIn, String releaseNotesIn, std::vector<Asset> assetsIn)
+    : versionString (std::move (versionIn)),
+      releaseNotes (std::move (releaseNotesIn)),
+      assets (std::move (assetsIn))
+{}
+
 std::unique_ptr<VersionInfo> VersionInfo::fetchFromUpdateServer (const String& versionString)
 {
     return fetch ("tags/" + versionString);
@@ -110,5 +117,5 @@ std::unique_ptr<VersionInfo> VersionInfo::fetch (const String& endpoint)
         }
     }
 
-    return std::unique_ptr<VersionInfo> (new VersionInfo ({ versionString, releaseNotes, std::move (parsedAssets) }));
+    return std::unique_ptr<VersionInfo> (new VersionInfo { versionString, releaseNotes, std::move (parsedAssets) });
 }

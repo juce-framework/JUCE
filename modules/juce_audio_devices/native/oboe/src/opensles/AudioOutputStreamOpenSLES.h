@@ -45,6 +45,7 @@ public:
     Result requestStop() override;
 
 protected:
+    Result requestPause_l();
 
     void setFramesRead(int64_t framesRead);
 

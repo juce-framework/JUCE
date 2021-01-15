@@ -440,25 +440,25 @@ struct Grid::PlacementHelpers
 
         if (alignContent == Grid::AlignContent::spaceBetween)
         {
-            const auto shift = ((rowNumber - 1) * (calculation.remainingHeight / float(numberOfRows - 1)));
+            const auto shift = ((float) (rowNumber - 1) * (calculation.remainingHeight / float(numberOfRows - 1)));
             area.setY (area.getY() + shift);
         }
 
         if (justifyContent == Grid::JustifyContent::spaceBetween)
         {
-            const auto shift = ((columnNumber - 1) * (calculation.remainingWidth / float(numberOfColumns - 1)));
+            const auto shift = ((float) (columnNumber - 1) * (calculation.remainingWidth / float(numberOfColumns - 1)));
             area.setX (area.getX() + shift);
         }
 
         if (alignContent == Grid::AlignContent::spaceEvenly)
         {
-            const auto shift = (rowNumber * (calculation.remainingHeight / float(numberOfRows + 1)));
+            const auto shift = ((float) rowNumber * (calculation.remainingHeight / float(numberOfRows + 1)));
             area.setY (area.getY() + shift);
         }
 
         if (justifyContent == Grid::JustifyContent::spaceEvenly)
         {
-            const auto shift = (columnNumber * (calculation.remainingWidth / float(numberOfColumns + 1)));
+            const auto shift = ((float) columnNumber * (calculation.remainingWidth / float(numberOfColumns + 1)));
             area.setX (area.getX() + shift);
         }
 
@@ -466,7 +466,7 @@ struct Grid::PlacementHelpers
         {
             const auto inbetweenShift = calculation.remainingHeight / float(numberOfRows);
             const auto sidesShift = inbetweenShift / 2;
-            auto shift = (rowNumber - 1) * inbetweenShift + sidesShift;
+            auto shift = (float) (rowNumber - 1) * inbetweenShift + sidesShift;
 
             area.setY (area.getY() + shift);
         }
@@ -475,7 +475,7 @@ struct Grid::PlacementHelpers
         {
             const auto inbetweenShift = calculation.remainingWidth / float(numberOfColumns);
             const auto sidesShift = inbetweenShift / 2;
-            auto shift = (columnNumber - 1) * inbetweenShift + sidesShift;
+            auto shift = (float) (columnNumber - 1) * inbetweenShift + sidesShift;
 
             area.setX (area.getX() + shift);
         }

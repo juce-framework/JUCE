@@ -124,10 +124,10 @@ public:
 
         heapBlockToUseForAllocation.malloc (channelListBytes + extraBytes + channelSize * numberOfChannels);
 
-        auto* chanArray = reinterpret_cast<SampleType**> (heapBlockToUseForAllocation.getData());
+        auto* chanArray = unalignedPointerCast<SampleType**> (heapBlockToUseForAllocation.getData());
         channels = chanArray;
 
-        auto* data = reinterpret_cast<SampleType*> (addBytesToPointer (chanArray, channelListBytes));
+        auto* data = unalignedPointerCast<SampleType*> (addBytesToPointer (chanArray, channelListBytes));
         data = snapPointerToAlignment (data, alignmentInBytes);
 
         for (ChannelCountType i = 0; i < numChannels; ++i)

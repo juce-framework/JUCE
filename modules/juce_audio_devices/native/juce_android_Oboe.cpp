@@ -383,6 +383,15 @@ private:
     {
         auto bufferSizeHint = AndroidHighPerformanceAudioHelpers::getNativeBufferSizeHint();
 
+        // providing a callback is required on some devices to get a FAST track, so we pass an
+        // empty one to the temp stream to get the best available buffer size
+        struct DummyCallback  : public oboe::AudioStreamCallback
+        {
+            oboe::DataCallbackResult onAudioReady (oboe::AudioStream*, void*, int32_t) override  { return oboe::DataCallbackResult::Stop; }
+        };
+
+        DummyCallback callback;
+
         // NB: Exclusive mode could be rejected if a device is already opened in that mode, so to get
         //     reliable results, only use this function when a device is closed.
         //     We initially try to open a stream with a buffer size returned from
@@ -395,7 +404,7 @@ private:
                                                   getAndroidSDKVersion() >= 21 ? oboe::AudioFormat::Float : oboe::AudioFormat::I16,
                                                   (int) AndroidHighPerformanceAudioHelpers::getNativeSampleRate(),
                                                   bufferSizeHint,
-                                                  nullptr);
+                                                  &callback);
 
         if (auto* nativeStream = tempStream.getNativeStream())
             return nativeStream->getFramesPerBurst();
@@ -498,7 +507,7 @@ private:
                                  + "\nFramesPerCallback = " + String (stream->getFramesPerCallback())
                                  + "\nBytesPerFrame = " + String (stream->getBytesPerFrame())
                                  + "\nBytesPerSample = " + String (stream->getBytesPerSample())
-                                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency)
+                                 + "\nPerformanceMode = " + getOboeString (stream->getPerformanceMode())
                                  + "\ngetDeviceId = " + String (stream->getDeviceId()));
             }
         }
@@ -591,7 +600,7 @@ private:
                  + "\nFramesPerCallback = " + (stream != nullptr ? String (stream->getFramesPerCallback()) : String ("?"))
                  + "\nBytesPerFrame = " + (stream != nullptr ? String (stream->getBytesPerFrame()) : String ("?"))
                  + "\nBytesPerSample = " + (stream != nullptr ? String (stream->getBytesPerSample()) : String ("?"))
-                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency));
+                 + "\nPerformanceMode = " + (stream != nullptr ? getOboeString (stream->getPerformanceMode()) : String ("?")));
         }
 
         void close()
@@ -878,7 +887,7 @@ private:
                  + "\nFramesPerCallback = " + (stream != nullptr ? String (stream->getFramesPerCallback()) : String ("?"))
                  + "\nBytesPerFrame = " + (stream != nullptr ? String (stream->getBytesPerFrame()) : String ("?"))
                  + "\nBytesPerSample = " + (stream != nullptr ? String (stream->getBytesPerSample()) : String ("?"))
-                 + "\nPerformanceMode = " + getOboeString (oboe::PerformanceMode::LowLatency)
+                 + "\nPerformanceMode = " + (stream != nullptr ? getOboeString (stream->getPerformanceMode()) : String ("?"))
                  + "\ngetDeviceId = " + (stream != nullptr ? String (stream->getDeviceId()) : String ("?")));
         }
 
@@ -1211,9 +1220,13 @@ public:
         jmethodID getChannelCountsMethod = env->GetMethodID (deviceClass, "getChannelCounts", "()[I");
         jmethodID isSourceMethod         = env->GetMethodID (deviceClass, "isSource", "()Z");
 
-        auto name = juceString ((jstring) env->CallObjectMethod (device, getProductNameMethod));
-        name << deviceTypeToString (env->CallIntMethod (device, getTypeMethod));
-        int id = env->CallIntMethod (device, getIdMethod);
+        auto deviceTypeString = deviceTypeToString (env->CallIntMethod (device, getTypeMethod));
+
+        if (deviceTypeString.isEmpty()) // unknown device
+            return;
+
+        auto name = juceString ((jstring) env->CallObjectMethod (device, getProductNameMethod)) + " " + deviceTypeString;
+        auto id = env->CallIntMethod (device, getIdMethod);
 
         auto jSampleRates = LocalRef<jintArray> ((jintArray) env->CallObjectMethod (device, getSampleRatesMethod));
         auto sampleRates = jintArrayToJuceArray (jSampleRates);
@@ -1222,42 +1235,43 @@ public:
         auto channelCounts = jintArrayToJuceArray (jChannelCounts);
         int numChannels = channelCounts.isEmpty() ? -1 : channelCounts.getLast();
 
-        bool isInput  = env->CallBooleanMethod (device, isSourceMethod);
+        auto isInput  = env->CallBooleanMethod (device, isSourceMethod);
         auto& devices = isInput ? inputDevices : outputDevices;
 
         devices.add ({ name, id, sampleRates, numChannels });
     }
 
-    static const char* deviceTypeToString (int type)
+    static String deviceTypeToString (int type)
     {
         switch (type)
         {
-            case 0:   return "";
-            case 1:   return " built-in earphone speaker";
-            case 2:   return " built-in speaker";
-            case 3:   return " wired headset";
-            case 4:   return " wired headphones";
-            case 5:   return " line analog";
-            case 6:   return " line digital";
-            case 7:   return " Bluetooth device typically used for telephony";
-            case 8:   return " Bluetooth device supporting the A2DP profile";
-            case 9:   return " HDMI";
-            case 10:  return " HDMI audio return channel";
-            case 11:  return " USB device";
-            case 12:  return " USB accessory";
-            case 13:  return " DOCK";
-            case 14:  return " FM";
-            case 15:  return " built-in microphone";
-            case 16:  return " FM tuner";
-            case 17:  return " TV tuner";
-            case 18:  return " telephony";
-            case 19:  return " auxiliary line-level connectors";
-            case 20:  return " IP";
-            case 21:  return " BUS";
-            case 22:  return " USB headset";
-            case 23:  return " hearing aid";
-            case 24:  return " built-in speaker safe";
-            default:  jassertfalse; return ""; // type not supported yet, needs to be added!
+            case 0:   return {};
+            case 1:   return "built-in earphone speaker";
+            case 2:   return "built-in speaker";
+            case 3:   return "wired headset";
+            case 4:   return "wired headphones";
+            case 5:   return "line analog";
+            case 6:   return "line digital";
+            case 7:   return "Bluetooth device typically used for telephony";
+            case 8:   return "Bluetooth device supporting the A2DP profile";
+            case 9:   return "HDMI";
+            case 10:  return "HDMI audio return channel";
+            case 11:  return "USB device";
+            case 12:  return "USB accessory";
+            case 13:  return "DOCK";
+            case 14:  return "FM";
+            case 15:  return "built-in microphone";
+            case 16:  return "FM tuner";
+            case 17:  return "TV tuner";
+            case 18:  return "telephony";
+            case 19:  return "auxiliary line-level connectors";
+            case 20:  return "IP";
+            case 21:  return "BUS";
+            case 22:  return "USB headset";
+            case 23:  return "hearing aid";
+            case 24:  return "built-in speaker safe";
+            case 25:  return {};
+            default:  jassertfalse; return {}; // type not supported yet, needs to be added!
         }
     }
 
@@ -1306,14 +1320,7 @@ public:
 
 const char* const OboeAudioIODevice::oboeTypeName = "Android Oboe";
 
-
-//==============================================================================
 bool isOboeAvailable()  { return OboeAudioIODeviceType::isOboeAvailable(); }
-
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Oboe()
-{
-    return isOboeAvailable() ? new OboeAudioIODeviceType() : nullptr;
-}
 
 //==============================================================================
 class OboeRealtimeThread    : private oboe::AudioStreamCallback

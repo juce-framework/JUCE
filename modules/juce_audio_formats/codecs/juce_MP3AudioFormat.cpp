@@ -492,7 +492,9 @@ struct MP3Frame
         return frequencies[sampleRateIndex];
     }
 
-    void decodeHeader (const uint32 header)
+    enum class ParseSuccessful { no, yes };
+
+    ParseSuccessful decodeHeader (const uint32 header)
     {
         jassert (((header >> 10) & 3) != 3);
 
@@ -527,17 +529,18 @@ struct MP3Frame
             jassertfalse; // This means the file is using "free format". Apparently very few decoders
                           // support this mode, and this one certainly doesn't handle it correctly!
             frameSize = 0;
+            return ParseSuccessful::no;
         }
-        else
+
+        switch (layer)
         {
-            switch (layer)
-            {
-                case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
-                case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
-                case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
-                default: break;
-            }
+            case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
+            case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
+            case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
+            default: break;
         }
+
+        return ParseSuccessful::yes;
     }
 
     int layer, frameSize, numChannels, single;
@@ -1430,7 +1433,11 @@ struct MP3Stream
                 lastFrameSize += nextFrameOffset;
             }
 
-            frame.decodeHeader ((uint32) stream.readIntBigEndian());
+            const auto successful = frame.decodeHeader ((uint32) stream.readIntBigEndian());
+
+            if (successful == MP3Frame::ParseSuccessful::no)
+                return -1;
+
             headerParsed = true;
             frameSize = frame.frameSize;
             isFreeFormat = (frameSize == 0);
@@ -1968,8 +1975,8 @@ private:
             {
                 const uint8 n0 = si.allocation[i][0];
                 const uint8 n1 = si.allocation[i][1];
-                fraction[0][i] = n0 > 0 ? (float) ((-(1 << n0) + getBitsUint16 (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0;
-                fraction[1][i] = n1 > 0 ? (float) ((-(1 << n1) + getBitsUint16 (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0;
+                fraction[0][i] = n0 > 0 ? ((float) (-(1 << n0) + getBitsUint16 (n0 + 1) + 1) * constants.muls[n0 + 1][si.scaleFactor[i][0]]) : 0.0f;
+                fraction[1][i] = n1 > 0 ? ((float) (-(1 << n1) + getBitsUint16 (n1 + 1) + 1) * constants.muls[n1 + 1][si.scaleFactor[i][1]]) : 0.0f;
             }
 
             for (i = jsbound; i < 32; ++i)
@@ -1979,8 +1986,8 @@ private:
                 if (n > 0)
                 {
                     const uint32 w = ((uint32) -(1 << n) + getBitsUint16 (n + 1) + 1);
-                    fraction[0][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][0]]);
-                    fraction[1][i] = (float) (w * constants.muls[n + 1][si.scaleFactor[i][1]]);
+                    fraction[0][i] = ((float) w * constants.muls[n + 1][si.scaleFactor[i][0]]);
+                    fraction[1][i] = ((float) w * constants.muls[n + 1][si.scaleFactor[i][1]]);
                 }
                 else
                     fraction[0][i] = fraction[1][i] = 0;
@@ -1994,7 +2001,7 @@ private:
                 const uint8 j = si.scaleFactor[i][0];
 
                 if (n > 0)
-                    fraction[0][i] = (float) ((-(1 << n) + getBitsUint16 (n + 1) + 1) * constants.muls[n + 1][j]);
+                    fraction[0][i] = ((float) (-(1 << n) + getBitsUint16 (n + 1) + 1) * constants.muls[n + 1][j]);
                 else
                     fraction[0][i] = 0;
             }
@@ -3113,7 +3120,7 @@ private:
                 const int bytesPerFrame = stream.frame.frameSize + 4;
 
                 if (bytesPerFrame == 417 || bytesPerFrame == 418)
-                    numFrames = roundToInt ((streamSize - streamStartPos) / 417.95918); // more accurate for 128k
+                    numFrames = roundToInt ((double) (streamSize - streamStartPos) / 417.95918); // more accurate for 128k
                 else
                     numFrames = (streamSize - streamStartPos) / bytesPerFrame;
             }

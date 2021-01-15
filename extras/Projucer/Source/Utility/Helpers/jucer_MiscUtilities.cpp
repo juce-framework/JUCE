@@ -249,6 +249,15 @@ bool fileNeedsCppSyntaxHighlighting (const File& file)
 }
 
 //==============================================================================
+void writeAutoGenWarningComment (OutputStream& outStream)
+{
+    outStream << "/*" << newLine << newLine
+              << "    IMPORTANT! This file is auto-generated each time you save your" << newLine
+              << "    project - if you alter its contents, your changes may be overwritten!" << newLine
+              << newLine;
+}
+
+//==============================================================================
 StringArray getJUCEModules() noexcept
 {
     static StringArray juceModuleIds =
@@ -357,7 +366,7 @@ bool isJUCEModulesFolder (const File& f)
 }
 
 //==============================================================================
-bool isDivider (const String& line)
+static bool isDivider (const String& line)
 {
     auto afterIndent = line.trim();
 
@@ -376,7 +385,7 @@ bool isDivider (const String& line)
     return false;
 }
 
-int getIndexOfCommentBlockStart (const StringArray& lines, int endIndex)
+static int getIndexOfCommentBlockStart (const StringArray& lines, int endIndex)
 {
     auto endLine = lines[endIndex];
 
@@ -422,7 +431,7 @@ int findBestLineToScrollToForClass (StringArray lines, const String& className, 
 }
 
 //==============================================================================
-var parseJUCEHeaderMetadata (const StringArray& lines)
+static var parseJUCEHeaderMetadata (const StringArray& lines)
 {
     auto* o = new DynamicObject();
     var result (o);
@@ -445,7 +454,7 @@ var parseJUCEHeaderMetadata (const StringArray& lines)
     return result;
 }
 
-String parseMetadataItem (const StringArray& lines, int& index)
+static String parseMetadataItem (const StringArray& lines, int& index)
 {
     String result = lines[index++];
 

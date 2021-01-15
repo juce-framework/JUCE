@@ -23,6 +23,9 @@
 
 #include "FlowGraphNode.h"
 
+namespace FLOWGRAPH_OUTER_NAMESPACE {
+namespace flowgraph {
+
 /**
  * Combine multiple mono inputs into one interleaved multi-channel output.
  */
@@ -45,5 +48,8 @@ public:
 
 private:
 };
+
+} /* namespace flowgraph */
+} /* namespace FLOWGRAPH_OUTER_NAMESPACE */
 
 #endif //FLOWGRAPH_MANY_TO_MULTI_CONVERTER_H

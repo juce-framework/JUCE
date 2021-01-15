@@ -122,7 +122,7 @@ public:
     */
     FloatType get (FloatType index) const noexcept
     {
-        if (index >= getNumPoints())
+        if (index >= (FloatType) getNumPoints())
             index = static_cast<FloatType> (getGuardIndex());
         else if (index < 0)
             index = {};

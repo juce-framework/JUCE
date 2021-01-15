@@ -42,6 +42,7 @@ constexpr int64_t kDefaultTimeoutNanos = (2000 * kNanosPerMillisecond);
  * Base class for Oboe C++ audio stream.
  */
 class AudioStream : public AudioStreamBase {
+    friend class AudioStreamBuilder; // allow access to setWeakThis() and lockWeakThis()
 public:
 
     AudioStream() {}
@@ -392,12 +393,25 @@ public:
      * Swap old callback for new callback.
      * This not atomic.
      * This should only be used internally.
-     * @param streamCallback
-     * @return previous streamCallback
+     * @param dataCallback
+     * @return previous dataCallback
      */
-    AudioStreamCallback *swapCallback(AudioStreamCallback *streamCallback) {
-        AudioStreamCallback *previousCallback = mStreamCallback;
-        mStreamCallback = streamCallback;
+    AudioStreamDataCallback *swapDataCallback(AudioStreamDataCallback *dataCallback) {
+        AudioStreamDataCallback *previousCallback = mDataCallback;
+        mDataCallback = dataCallback;
+        return previousCallback;
+    }
+
+    /*
+     * Swap old callback for new callback.
+     * This not atomic.
+     * This should only be used internally.
+     * @param errorCallback
+     * @return previous errorCallback
+     */
+    AudioStreamErrorCallback *swapErrorCallback(AudioStreamErrorCallback *errorCallback) {
+        AudioStreamErrorCallback *previousCallback = mErrorCallback;
+        mErrorCallback = errorCallback;
         return previousCallback;
     }
 
@@ -417,6 +431,13 @@ public:
      */
     ResultWithValue<int32_t> waitForAvailableFrames(int32_t numFrames,
                                                     int64_t timeoutNanoseconds);
+
+    /**
+     * @return last result passed from an error callback
+     */
+    virtual oboe::Result getLastErrorCallbackResult() const {
+        return mErrorCallbackResult;
+    }
 
 protected:
 
@@ -479,6 +500,23 @@ protected:
         mDataCallbackEnabled = enabled;
     }
 
+    /*
+     * Set a weak_ptr to this stream from the shared_ptr so that we can
+     * later use a shared_ptr in the error callback.
+     */
+    void setWeakThis(std::shared_ptr<oboe::AudioStream> &sharedStream) {
+        mWeakThis = sharedStream;
+    }
+
+    /*
+     * Make a shared_ptr that will prevent this stream from being deleted.
+     */
+    std::shared_ptr<oboe::AudioStream> lockWeakThis() {
+        return mWeakThis.lock();
+    }
+
+    std::weak_ptr<AudioStream> mWeakThis; // weak pointer to this object
+
     /**
      * Number of frames which have been written into the stream
      *
@@ -497,17 +535,21 @@ protected:
 
     std::mutex           mLock; // for synchronizing start/stop/close
 
+    oboe::Result         mErrorCallbackResult = oboe::Result::OK;
+
 private:
+
+    // Log the scheduler if it changes.
+    void                 checkScheduler();
     int                  mPreviousScheduler = -1;
 
     std::atomic<bool>    mDataCallbackEnabled{false};
     std::atomic<bool>    mErrorCallbackCalled{false};
 
-
 };
 
 /**
- * This struct is a stateless functor which closes a audiostream prior to its deletion.
+ * This struct is a stateless functor which closes an AudioStream prior to its deletion.
  * This means it can be used to safely delete a smart pointer referring to an open stream.
  */
     struct StreamDeleterFunctor {

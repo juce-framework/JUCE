@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="3t6YqETY1" name="BinaryBuilder" projectType="consoleapp"
-              juceFolder="../../../juce" jucerVersion="6.0.0" bundleIdentifier="com.juce.binarybuilder"
+              juceFolder="../../../juce" bundleIdentifier="com.juce.binarybuilder"
               displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
-              companyCopyright="Raw Material Software Limited" useAppConfig="0" addUsingNamespaceToJuceHeader="1">
+              companyCopyright="Raw Material Software Limited" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                objCExtraSuffix="OeJtJb">

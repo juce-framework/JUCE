@@ -214,7 +214,7 @@ public:
         auto bounds = getLocalBounds().toFloat();
         auto iconBounds = bounds.removeFromLeft ((float) iconWidth).reduced (7, 5);
 
-        bounds.removeFromRight (buttons.size() * bounds.getHeight());
+        bounds.removeFromRight ((float) buttons.size() * bounds.getHeight());
 
         item.paintIcon    (g, iconBounds);
         item.paintContent (g, bounds.toNearestInt());

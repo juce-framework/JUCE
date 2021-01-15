@@ -35,7 +35,7 @@
 
   ID:                 juce_audio_plugin_client
   vendor:             juce
-  version:            6.0.0
+  version:            6.0.7
   name:               JUCE audio plugin wrapper classes
   description:        Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
   website:            http://www.juce.com/juce
@@ -127,4 +127,5 @@
 #endif
 
 #include "utility/juce_PluginHostType.h"
+#include "utility/juce_CreatePluginFilter.h"
 #include "VST/juce_VSTCallbackHandler.h"

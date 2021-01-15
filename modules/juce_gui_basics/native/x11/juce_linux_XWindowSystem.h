@@ -85,7 +85,7 @@ namespace XWindowSystemUtilities
 
         static constexpr unsigned long DndVersion = 3;
 
-        Atom protocols, protocolList[3], changeState, state, userTime, activeWin, pid, windowType, windowState,
+        Atom protocols, protocolList[3], changeState, state, userTime, activeWin, pid, windowType, windowState, windowStateHidden,
              XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus, XdndDrop, XdndFinished, XdndSelection,
              XdndTypeList, XdndActionList, XdndActionDescription, XdndActionCopy, XdndActionPrivate,
              XembedMsgType, XembedInfo, allowedActions[5], allowedMimeTypes[4], utf8String, clipboard, targets;
@@ -93,14 +93,13 @@ namespace XWindowSystemUtilities
 }
 
 //==============================================================================
-template<typename WindowHandle>
 class LinuxComponentPeer;
 
 class XWindowSystem  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    ::Window createWindow (::Window parentWindow, LinuxComponentPeer<::Window>* peer) const;
+    ::Window createWindow (::Window parentWindow, LinuxComponentPeer* peer) const;
     void destroyWindow    (::Window windowH);
 
     void setTitle (::Window windowH, const String& title) const;
@@ -126,9 +125,12 @@ public:
     bool canUseSemiTransparentWindows() const;
     bool canUseARGBImages() const;
 
-    int getNumPaintsPending (::Window windowH) const;
+    int getNumPaintsPendingForWindow (::Window windowH);
+    void processPendingPaintsForWindow (::Window windowH);
+    void addPendingPaintForWindow (::Window windowH);
+    void removePendingPaintForWindow (::Window windowH);
 
-    Image createImage (int width, int height, bool argb) const;
+    Image createImage (bool isSemiTransparentWindow, int width, int height, bool argb) const;
     void blitToWindow (::Window windowH, Image image, Rectangle<int> destinationRect, Rectangle<int> totalRect) const;
 
     void setScreenSaverEnabled (bool enabled) const;
@@ -149,8 +151,8 @@ public:
     ::Window createKeyProxy (::Window windowH) const;
     void deleteKeyProxy (::Window keyProxy) const;
 
-    bool externalDragFileInit (LinuxComponentPeer<::Window>* peer, const StringArray& files, bool canMove, std::function<void()>&& callback) const;
-    bool externalDragTextInit (LinuxComponentPeer<::Window>* peer, const String& text, std::function<void()>&& callback) const;
+    bool externalDragFileInit (LinuxComponentPeer* peer, const StringArray& files, bool canMove, std::function<void()>&& callback) const;
+    bool externalDragTextInit (LinuxComponentPeer* peer, const String& text, std::function<void()>&& callback) const;
 
     void copyTextToClipboard (const String& clipText);
     String getTextFromClipboard() const;
@@ -161,7 +163,8 @@ public:
     XWindowSystemUtilities::Atoms& getAtoms()  { return atoms; }
 
     //==============================================================================
-    void handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEvent& event) const;
+    void handleWindowMessage (LinuxComponentPeer* peer, XEvent& event) const;
+    bool isParentWindowOf (::Window windowH, ::Window possibleChild) const;
 
     //==============================================================================
     JUCE_DECLARE_SINGLETON (XWindowSystem, false)
@@ -171,13 +174,30 @@ private:
     ~XWindowSystem();
 
     //==============================================================================
+    struct VisualAndDepth
+    {
+        Visual* visual;
+        int depth;
+    };
+
+    struct DisplayVisuals
+    {
+        explicit DisplayVisuals (::Display* d);
+
+        VisualAndDepth getBestVisualForWindow (bool isSemiTransparent) const;
+        bool isValid() const noexcept;
+
+        Visual* visual16Bit = nullptr;
+        Visual* visual24Bit = nullptr;
+        Visual* visual32Bit = nullptr;
+    };
+
     bool initialiseXDisplay();
     void destroyXDisplay();
 
     //==============================================================================
     ::Window getFocusWindow (::Window windowH) const;
 
-    bool isParentWindowOf (::Window windowH, ::Window possibleChild) const;
     bool isFrontWindow (::Window windowH) const;
 
     //==============================================================================
@@ -194,33 +214,41 @@ private:
     long getUserTime (::Window windowH) const;
 
     //==============================================================================
-    void handleKeyPressEvent        (LinuxComponentPeer<::Window>*, XKeyEvent&) const;
-    void handleKeyReleaseEvent      (LinuxComponentPeer<::Window>*, const XKeyEvent&) const;
-    void handleWheelEvent           (LinuxComponentPeer<::Window>*, const XButtonPressedEvent&, float) const;
-    void handleButtonPressEvent     (LinuxComponentPeer<::Window>*, const XButtonPressedEvent&, int) const;
-    void handleButtonPressEvent     (LinuxComponentPeer<::Window>*, const XButtonPressedEvent&) const;
-    void handleButtonReleaseEvent   (LinuxComponentPeer<::Window>*, const XButtonReleasedEvent&) const;
-    void handleMotionNotifyEvent    (LinuxComponentPeer<::Window>*, const XPointerMovedEvent&) const;
-    void handleEnterNotifyEvent     (LinuxComponentPeer<::Window>*, const XEnterWindowEvent&) const;
-    void handleLeaveNotifyEvent     (LinuxComponentPeer<::Window>*, const XLeaveWindowEvent&) const;
-    void handleFocusInEvent         (LinuxComponentPeer<::Window>*) const;
-    void handleFocusOutEvent        (LinuxComponentPeer<::Window>*) const;
-    void handleExposeEvent          (LinuxComponentPeer<::Window>*, XExposeEvent&) const;
-    void handleConfigureNotifyEvent (LinuxComponentPeer<::Window>*, XConfigureEvent&) const;
-    void handleGravityNotify        (LinuxComponentPeer<::Window>*) const;
+    void handleKeyPressEvent        (LinuxComponentPeer*, XKeyEvent&) const;
+    void handleKeyReleaseEvent      (LinuxComponentPeer*, const XKeyEvent&) const;
+    void handleWheelEvent           (LinuxComponentPeer*, const XButtonPressedEvent&, float) const;
+    void handleButtonPressEvent     (LinuxComponentPeer*, const XButtonPressedEvent&, int) const;
+    void handleButtonPressEvent     (LinuxComponentPeer*, const XButtonPressedEvent&) const;
+    void handleButtonReleaseEvent   (LinuxComponentPeer*, const XButtonReleasedEvent&) const;
+    void handleMotionNotifyEvent    (LinuxComponentPeer*, const XPointerMovedEvent&) const;
+    void handleEnterNotifyEvent     (LinuxComponentPeer*, const XEnterWindowEvent&) const;
+    void handleLeaveNotifyEvent     (LinuxComponentPeer*, const XLeaveWindowEvent&) const;
+    void handleFocusInEvent         (LinuxComponentPeer*) const;
+    void handleFocusOutEvent        (LinuxComponentPeer*) const;
+    void handleExposeEvent          (LinuxComponentPeer*, XExposeEvent&) const;
+    void handleConfigureNotifyEvent (LinuxComponentPeer*, XConfigureEvent&) const;
+    void handleGravityNotify        (LinuxComponentPeer*) const;
+    void propertyNotifyEvent        (LinuxComponentPeer*, const XPropertyEvent& ) const;
     void handleMappingNotify        (XMappingEvent&) const;
-    void handleClientMessageEvent   (LinuxComponentPeer<::Window>*, XClientMessageEvent&, XEvent&) const;
-    void handleXEmbedMessage        (LinuxComponentPeer<::Window>*, XClientMessageEvent&) const;
+    void handleClientMessageEvent   (LinuxComponentPeer*, XClientMessageEvent&, XEvent&) const;
+    void handleXEmbedMessage        (LinuxComponentPeer*, XClientMessageEvent&) const;
+
+    void dismissBlockingModals      (LinuxComponentPeer* peer) const;
+
+    static void windowMessageReceive (XEvent&);
 
     //==============================================================================
     bool xIsAvailable = false;
 
     XWindowSystemUtilities::Atoms atoms;
     ::Display* display = nullptr;
-    Colormap colormap = {};
-    Visual* visual = nullptr;
+    std::unique_ptr<DisplayVisuals> displayVisuals;
 
-    int depth = 0, shmCompletionEvent = 0;
+   #if JUCE_USE_XSHM
+    std::map<::Window, int> shmPaintsPendingMap;
+   #endif
+
+    int shmCompletionEvent = 0;
     int pointerMap[5] = {};
     String localClipboardContent;
 

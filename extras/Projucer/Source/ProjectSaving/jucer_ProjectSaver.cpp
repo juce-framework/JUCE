@@ -30,6 +30,8 @@
 static constexpr const char* generatedGroupID = "__jucelibfiles";
 static constexpr const char* generatedGroupUID = "__generatedcode__";
 
+constexpr int jucerFormatVersion = 1;
+
 //==============================================================================
 ProjectSaver::ProjectSaver (Project& p)
     : project (p),
@@ -248,20 +250,24 @@ OwnedArray<LibraryModule> ProjectSaver::getModules()
     OwnedArray<LibraryModule> modules;
     project.getEnabledModules().createRequiredModules (modules);
 
+    auto isCommandLine = ProjucerApplication::getApp().isRunningCommandLine;
+
     for (auto* module : modules)
     {
         if (! module->isValid())
         {
-            addError ("At least one of your JUCE module paths is invalid!\n"
-                      "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder.");
+            addError (String ("At least one of your JUCE module paths is invalid!\n")
+                + (isCommandLine ? "Please ensure each module path points to the correct JUCE modules folder."
+                                 : "Please go to the Modules settings page and ensure each path points to the correct JUCE modules folder."));
 
             return {};
         }
 
         if (project.getEnabledModules().getExtraDependenciesNeeded (module->getID()).size() > 0)
         {
-            addError ("At least one of your modules has missing dependencies!\n"
-                      "Please go to the settings page of the highlighted modules and add the required dependencies.");
+            addError (String ("At least one of your modules has missing dependencies!\n")
+                + (isCommandLine ? "Please add the required dependencies, or run the command again with the \"--fix-missing-dependencies\" option."
+                                 : "Please go to the settings page of the highlighted modules and add the required dependencies."));
 
             return {};
         }
@@ -292,9 +298,9 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
 
         saveBasicProjectItems (modules, loadUserContentFromAppConfig());
         writeProjects (modules, specifiedExporterToSave);
-        runPostExportScript();
+        writeProjectFile();
 
-        project.writeProjectFile();
+        runPostExportScript();
 
         if (generatedCodeFolder.exists())
         {
@@ -311,14 +317,6 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
 }
 
 //==============================================================================
-static void writeAutoGenWarningComment (OutputStream& out)
-{
-    out << "/*" << newLine << newLine
-        << "    IMPORTANT! This file is auto-generated each time you save your" << newLine
-        << "    project - if you alter its contents, your changes may be overwritten!" << newLine
-        << newLine;
-}
-
 void ProjectSaver::writePluginDefines (MemoryOutputStream& out) const
 {
     const auto pluginDefines = getAudioPluginDefines();
@@ -327,9 +325,31 @@ void ProjectSaver::writePluginDefines (MemoryOutputStream& out) const
         return;
 
     writeAutoGenWarningComment (out);
+
     out << "*/" << newLine << newLine
         << "#pragma once" << newLine << newLine
         << pluginDefines << newLine;
+}
+
+void ProjectSaver::writeProjectFile()
+{
+    auto root = project.getProjectRoot();
+
+    root.removeProperty ("jucerVersion", nullptr);
+
+    if ((int) root.getProperty (Ids::jucerFormatVersion, -1) != jucerFormatVersion)
+        root.setProperty (Ids::jucerFormatVersion, jucerFormatVersion, nullptr);
+
+    project.updateCachedFileState();
+
+    auto newSerialisedXml = project.serialiseProjectXml (root.createXml());
+    jassert (newSerialisedXml.isNotEmpty());
+
+    if (newSerialisedXml != project.getCachedFileStateContent())
+    {
+        project.getFile().replaceWithText (newSerialisedXml);
+        project.updateCachedFileState();
+    }
 }
 
 void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules, const String& userContent)
@@ -362,12 +382,12 @@ void ProjectSaver::writeAppConfig (MemoryOutputStream& out, const OwnedArray<Lib
         << "/*" << newLine
         << "  ==============================================================================" << newLine
         << newLine
-        << "   In accordance with the terms of the JUCE 5 End-Use License Agreement, the" << newLine
+        << "   In accordance with the terms of the JUCE 6 End-Use License Agreement, the" << newLine
         << "   JUCE Code in SECTION A cannot be removed, changed or otherwise rendered" << newLine
         << "   ineffective unless you have a JUCE Indie or Pro license, or are using JUCE" << newLine
         << "   under the GPL v3 license." << newLine
         << newLine
-        << "   End User License Agreement: www.juce.com/juce-5-licence" << newLine
+        << "   End User License Agreement: www.juce.com/juce-6-licence" << newLine
         << newLine
         << "  ==============================================================================" << newLine
         << "*/" << newLine

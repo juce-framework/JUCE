@@ -531,7 +531,7 @@ static int rescaleMouseWheelDistance (float distance, int singleStepSize) noexce
     if (distance == 0.0f)
         return 0;
 
-    distance *= 14.0f * singleStepSize;
+    distance *= 14.0f * (float) singleStepSize;
 
     return roundToInt (distance < 0 ? jmin (distance, -1.0f)
                                     : jmax (distance,  1.0f));

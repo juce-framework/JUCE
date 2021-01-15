@@ -209,14 +209,14 @@ int64 Time::getHighResolutionTicksPerSecond() noexcept
 
 double Time::getMillisecondCounterHiRes() noexcept
 {
-    return getHighResolutionTicks() * 0.001;
+    return (double) getHighResolutionTicks() * 0.001;
 }
 
 bool Time::setSystemTimeToThisTime() const
 {
     timeval t;
-    t.tv_sec = millisSinceEpoch / 1000;
-    t.tv_usec = (millisSinceEpoch - t.tv_sec * 1000) * 1000;
+    t.tv_sec = decltype (timeval::tv_sec) (millisSinceEpoch / 1000);
+    t.tv_usec = decltype (timeval::tv_usec) ((millisSinceEpoch - t.tv_sec * 1000) * 1000);
 
     return settimeofday (&t, nullptr) == 0;
 }

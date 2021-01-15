@@ -120,12 +120,22 @@ public:
     Point& operator/= (Point<OtherType> other) noexcept                { *this = *this / other; return *this; }
 
     /** Returns a point whose coordinates are multiplied by a given scalar value. */
-    template <typename FloatType>
-    constexpr Point operator* (FloatType multiplier) const noexcept    { return Point ((ValueType) (x * multiplier), (ValueType) (y * multiplier)); }
+    template <typename OtherType>
+    constexpr Point operator* (OtherType multiplier) const noexcept
+    {
+        using CommonType = typename std::common_type<ValueType, OtherType>::type;
+        return Point ((ValueType) ((CommonType) x * (CommonType) multiplier),
+                      (ValueType) ((CommonType) y * (CommonType) multiplier));
+    }
 
     /** Returns a point whose coordinates are divided by a given scalar value. */
-    template <typename FloatType>
-    constexpr Point operator/ (FloatType divisor) const noexcept       { return Point ((ValueType) (x / divisor), (ValueType) (y / divisor)); }
+    template <typename OtherType>
+    constexpr Point operator/ (OtherType divisor) const noexcept
+    {
+        using CommonType = typename std::common_type<ValueType, OtherType>::type;
+        return Point ((ValueType) ((CommonType) x / (CommonType) divisor),
+                      (ValueType) ((CommonType) y / (CommonType) divisor));
+    }
 
     /** Multiplies the point's coordinates by a scalar value. */
     template <typename FloatType>
@@ -212,8 +222,8 @@ public:
     /** Returns the position of this point, if it is transformed by a given AffineTransform. */
     Point transformedBy (const AffineTransform& transform) const noexcept
     {
-        return Point (static_cast<ValueType> (transform.mat00 * x + transform.mat01 * y + transform.mat02),
-                      static_cast<ValueType> (transform.mat10 * x + transform.mat11 * y + transform.mat12));
+        return Point (static_cast<ValueType> (transform.mat00 * (float) x + transform.mat01 * (float) y + transform.mat02),
+                      static_cast<ValueType> (transform.mat10 * (float) x + transform.mat11 * (float) y + transform.mat12));
     }
 
     //==============================================================================

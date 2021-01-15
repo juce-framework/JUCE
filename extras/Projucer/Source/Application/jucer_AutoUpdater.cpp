@@ -269,7 +269,8 @@ void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const Version
 
             if (! AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Overwrite Existing JUCE Folder?",
                                                 "Do you want to replace the folder\n\n" + targetFolderPath + "\n\nwith the latest version from juce.com?\n\n"
-                                                "This will move the existing folder to " + targetFolderPath + "_old."))
+                                                "This will move the existing folder to " + targetFolderPath + "_old.\n\n"
+                                                "Replacing the folder that contains the currently running Projucer executable may not work on Windows."))
             {
                 return;
             }
@@ -499,7 +500,7 @@ private:
     std::function<void()> completionCallback;
 };
 
-void restartProcess (const File& targetFolder)
+static void restartProcess (const File& targetFolder)
 {
    #if JUCE_MAC || JUCE_LINUX
     #if JUCE_MAC

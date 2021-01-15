@@ -438,7 +438,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
                 if (distance > lo)
                 {
                     auto alpha = (distance > hi) ? 0
-                                                 : (hi - distance) / (float) (hi - lo)
+                                                 : (float) (hi - distance) / (float) (hi - lo)
                                                      + random.nextFloat() * 0.008f;
 
                     dragImage.multiplyAlphaAt (x, y, alpha);

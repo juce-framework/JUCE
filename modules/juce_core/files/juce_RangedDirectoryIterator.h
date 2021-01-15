@@ -53,7 +53,13 @@ public:
     /** True if the item is read-only, false otherwise. */
     bool isReadOnly()           const { return readOnly; }
 
+    /** The estimated proportion of the range that has been visited
+        by the iterator, from 0.0 to 1.0.
+    */
+    float getEstimatedProgress() const;
+
 private:
+    std::weak_ptr<DirectoryIterator> iterator;
     File file;
     Time modTime;
     Time creationTime;

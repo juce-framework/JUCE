@@ -17,12 +17,12 @@
 #ifndef OBOE_FIFOPROCESSOR_H
 #define OBOE_FIFOPROCESSOR_H
 
-#include <unistd.h>
-#include <sys/types.h>
+#include <memory>
+#include <stdint.h>
 
-#include "common/OboeDebug.h"
-#include "FifoControllerBase.h"
 #include "oboe/Definitions.h"
+
+#include "FifoControllerBase.h"
 
 namespace oboe {
 
