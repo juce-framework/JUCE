@@ -1181,7 +1181,12 @@ void Component::sendMovedResizedMessages (bool wasMoved, bool wasResized)
         parentComponent->childBoundsChanged (this);
 
     if (! checker.shouldBailOut())
-        componentListeners.callChecked (checker, [=] (ComponentListener& l) { l.componentMovedOrResized (*this, wasMoved, wasResized); });
+    {
+        componentListeners.callChecked (checker, [this, wasMoved, wasResized] (ComponentListener& l)
+        {
+            l.componentMovedOrResized (*this, wasMoved, wasResized);
+        });
+    }
 }
 
 void Component::setSize (int w, int h)                  { setBounds (getX(), getY(), w, h); }

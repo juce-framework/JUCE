@@ -758,7 +758,7 @@ public:
                         zerostruct (stream); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
                         stream.mSampleRate       = sampleRate;
                         stream.mFormatID         = kAudioFormatLinearPCM;
-                        stream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
+                        stream.mFormatFlags      = (int) kAudioFormatFlagsNativeFloatPacked | (int) kAudioFormatFlagIsNonInterleaved | (int) kAudioFormatFlagsNativeEndian;
                         stream.mFramesPerPacket  = 1;
                         stream.mBytesPerPacket   = 4;
                         stream.mBytesPerFrame    = 4;
