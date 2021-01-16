@@ -1,6 +1,5 @@
 #pragma once
 
-#include "JuceHeader.h"
 #include "MusicalContextView.h"
 
 class RegionSequenceViewContainer;

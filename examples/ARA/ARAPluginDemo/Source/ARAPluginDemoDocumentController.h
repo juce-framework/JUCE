@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_audio_plugin_client/ARA/juce_ARADocumentController.h>
 
 //==============================================================================
 // The document controller is the central point of communication between the ARA host and our plug-in.

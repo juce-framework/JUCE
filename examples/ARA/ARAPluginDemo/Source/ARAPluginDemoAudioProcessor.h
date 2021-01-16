@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 #include <map>
 
 #if ! JucePlugin_Enable_ARA
@@ -11,8 +11,11 @@
 /**
     Processor class for ARAPluginDemo
     In this simple demo we're using a buffered ARA sample reader to pull audio samples
-    from the host and render them without any modifications, effectively making this
-    an ARA enabled pass-through renderer.
+    from the host and per default render them without any modifications, effectively
+    making this an ARA enabled pass-through renderer.
+    The only edit supported by the plug-in is reversing the audio as an example how to
+    use ARA audio modification state, e.g. how it can be shared across multiple
+    ARA playback regions if desired.
 */
 class ARAPluginDemoAudioProcessor     : public juce::AudioProcessor,
                                         public juce::AudioProcessorARAExtension
