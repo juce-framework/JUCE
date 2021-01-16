@@ -4,6 +4,8 @@
 #include "PlaybackRegionView.h"
 #include "MusicalContextView.h"
 
+using namespace juce;
+
 constexpr int kTrackHeight { 80 };
 
 static double lastPixelsPerSecond { 1.0 };

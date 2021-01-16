@@ -2,6 +2,8 @@
 #include "DocumentView.h"
 #include "PlaybackRegionView.h"
 
+using namespace juce;
+
 //==============================================================================
 RegionSequenceViewContainer::RegionSequenceViewContainer (DocumentView& docView, ARARegionSequence* sequence)
     : documentView (docView),

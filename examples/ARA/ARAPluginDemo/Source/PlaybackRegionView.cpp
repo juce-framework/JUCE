@@ -3,6 +3,8 @@
 #include "ARAPluginDemoAudioProcessor.h"
 #include "ARAPluginDemoAudioModification.h"
 
+using namespace juce;
+
 //==============================================================================
 PlaybackRegionView::PlaybackRegionView (RegionSequenceViewContainer& viewContainer, ARAPlaybackRegion* region)
     : regionSequenceViewContainer (viewContainer),

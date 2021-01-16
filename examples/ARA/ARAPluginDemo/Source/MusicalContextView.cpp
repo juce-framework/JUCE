@@ -4,6 +4,8 @@
 #include "ARA_Library/Utilities/ARAPitchInterpretation.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
+using namespace juce;
+
 //==============================================================================
 MusicalContextView::MusicalContextView (DocumentView& docView)
     : documentView (docView),

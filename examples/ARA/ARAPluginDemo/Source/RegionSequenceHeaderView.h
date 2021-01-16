@@ -7,29 +7,29 @@
     RegionSequenceHeaderView
     JUCE component used to display ARA region sequence name, color, and selection state
 */
-class RegionSequenceHeaderView    : public Component,
-                                    private ARAEditorView::Listener,
-                                    private ARARegionSequence::Listener
+class RegionSequenceHeaderView    : public juce::Component,
+                                    private juce::ARAEditorView::Listener,
+                                    private juce::ARARegionSequence::Listener
 {
 public:
-    RegionSequenceHeaderView (ARAEditorView* editorView, ARARegionSequence* regionSequence);
+    RegionSequenceHeaderView (juce::ARAEditorView* editorView, juce::ARARegionSequence* regionSequence);
     ~RegionSequenceHeaderView();
 
-    void paint (Graphics&) override;
+    void paint (juce::Graphics&) override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARAViewSelection& viewSelection) override;
+    void onNewSelection (const juce::ARAViewSelection& viewSelection) override;
 
     // ARARegionSequence::Listener overrides
-    void didUpdateRegionSequenceProperties (ARARegionSequence* regionSequence) override;
-    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
+    void didUpdateRegionSequenceProperties (juce::ARARegionSequence* regionSequence) override;
+    void willDestroyRegionSequence (juce::ARARegionSequence* regionSequence) override;
 
 private:
     void detachFromRegionSequence();
 
 private:
-    ARAEditorView* editorView;
-    ARARegionSequence* regionSequence;
+    juce::ARAEditorView* editorView;
+    juce::ARARegionSequence* regionSequence;
     bool isSelected { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceHeaderView)

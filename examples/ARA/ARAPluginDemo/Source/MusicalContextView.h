@@ -9,10 +9,10 @@ class DocumentView;
     MusicalContextView
     JUCE component used to display musical context data: rulers for song time (in seconds and musical beats) and chords
 */
-class MusicalContextView  : public Component,
-                            private ARAEditorView::Listener,
-                            private ARADocument::Listener,
-                            private ARAMusicalContext::Listener,
+class MusicalContextView  : public juce::Component,
+                            private juce::ARAEditorView::Listener,
+                            private juce::ARADocument::Listener,
+                            private juce::ARAMusicalContext::Listener,
                             private juce::Timer
 {
 public:
@@ -20,25 +20,25 @@ public:
     ~MusicalContextView();
 
     // may return nullptr
-    ARAMusicalContext* getCurrentMusicalContext() const { return musicalContext; }
+    juce::ARAMusicalContext* getCurrentMusicalContext() const { return musicalContext; }
 
-    void paint (Graphics&) override;
+    void paint (juce::Graphics&) override;
 
     // ARAEditorView::Listener overrides
-    void onNewSelection (const ARAViewSelection& viewSelection) override;
+    void onNewSelection (const juce::ARAViewSelection& viewSelection) override;
 
     // ARADocument::Listener overrides
-    void didEndEditing (ARADocument* document) override;
-    void willRemoveMusicalContextFromDocument (ARADocument* document, ARAMusicalContext* musicalContext) override;
-    void didReorderMusicalContextsInDocument (ARADocument* document) override;
-    void willDestroyDocument (ARADocument* document) override;
+    void didEndEditing (juce::ARADocument* document) override;
+    void willRemoveMusicalContextFromDocument (juce::ARADocument* document, juce::ARAMusicalContext* musicalContext) override;
+    void didReorderMusicalContextsInDocument (juce::ARADocument* document) override;
+    void willDestroyDocument (juce::ARADocument* document) override;
 
     // ARAMusicalContext::Listener overrides
-    void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) override;
+    void doUpdateMusicalContextContent (juce::ARAMusicalContext* musicalContext, juce::ARAContentUpdateScopes scopeFlags) override;
 
     // MouseListener overrides
-    void mouseDown (const MouseEvent& event) override;
-    void mouseDoubleClick (const MouseEvent& event) override;
+    void mouseDown (const juce::MouseEvent& event) override;
+    void mouseDoubleClick (const juce::MouseEvent& event) override;
 
     // juce::Timer overrides
     void timerCallback() override;
@@ -50,9 +50,9 @@ private:
 
 private:
     DocumentView& documentView;
-    ARADocument* document;
-    ARAMusicalContext* musicalContext;
-    AudioPlayHead::CurrentPositionInfo lastPaintedPosition;
+    juce::ARADocument* document;
+    juce::ARAMusicalContext* musicalContext;
+    juce::AudioPlayHead::CurrentPositionInfo lastPaintedPosition;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MusicalContextView)
 };

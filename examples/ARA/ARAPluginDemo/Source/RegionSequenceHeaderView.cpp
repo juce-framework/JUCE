@@ -1,5 +1,7 @@
 #include "RegionSequenceHeaderView.h"
 
+using namespace juce;
+
 //==============================================================================
 RegionSequenceHeaderView::RegionSequenceHeaderView (ARAEditorView* view, ARARegionSequence* sequence)
     : editorView (view),
