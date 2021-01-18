@@ -123,6 +123,7 @@ set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
     CACHE INTERNAL "The path to the folder holding this file and other resources")
 
 include("${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake")
+include("${JUCE_CMAKE_UTILS_DIR}/JUCEReflectModuleSources.cmake")
 include("${JUCE_CMAKE_UTILS_DIR}/JUCECheckAtomic.cmake")
 
 _juce_create_atomic_target(juce_atomic_wrapper)
@@ -529,6 +530,7 @@ function(juce_add_module module_path)
     endif()
 
     _juce_add_interface_library(${module_name} ${all_module_sources})
+    _juce_add_module_sources(${module_name} ${module_parent_path})
 
     if(${module_name} STREQUAL "juce_core")
         _juce_add_standard_defs(${module_name})
@@ -1863,6 +1865,8 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_initialise_target target)
+    _juce_reflect_sources()
+
     set(one_value_args
         VERSION
         PRODUCT_NAME
