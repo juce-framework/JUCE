@@ -10,6 +10,7 @@ class DocumentView;
     JUCE component used to display musical context data: rulers for song time (in seconds and musical beats) and chords
 */
 class MusicalContextView  : public juce::Component,
+                            public juce::SettableTooltipClient,
                             private juce::ARAEditorView::Listener,
                             private juce::ARADocument::Listener,
                             private juce::ARAMusicalContext::Listener,

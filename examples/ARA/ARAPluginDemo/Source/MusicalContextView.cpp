@@ -15,6 +15,8 @@ MusicalContextView::MusicalContextView (DocumentView& docView)
     document->addListener (this);
     findMusicalContext();
     lastPaintedPosition.resetToDefault();
+    setTooltip (String ("Rulers showing playback time in seconds, bars+beats and song chords.") + newLine +
+                String ("Double-click to repositon and start host playback (if supported by DAW)."));
     startTimerHz (20);
 }
 

@@ -33,6 +33,8 @@ DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPosit
     playbackRegionsViewport.setViewedComponent (&playbackRegionsView, false);
     addAndMakeVisible (playbackRegionsViewport);
 
+    regionSequenceHeadersTooltipView.setAlwaysOnTop (true);
+    regionSequenceHeadersView.addAndMakeVisible (regionSequenceHeadersTooltipView);
     regionSequenceHeadersViewport.setSize (120, getHeight());
     regionSequenceHeadersViewport.setScrollBarsShown (false, false, false, false);
     regionSequenceHeadersViewport.setViewedComponent (&regionSequenceHeadersView, false);
@@ -168,6 +170,7 @@ void DocumentView::resized()
 
     regionSequenceHeadersViewport.setBounds (0, musicalContextViewHeight, regionSequenceHeadersViewport.getWidth(), playbackRegionsViewport.getMaximumVisibleHeight());
     regionSequenceHeadersView.setBounds (0, 0, regionSequenceHeadersViewport.getWidth(), playbackRegionsView.getHeight());
+    regionSequenceHeadersTooltipView.setBounds (regionSequenceHeadersView.getBounds());
 
     int y = 0;
     for (auto v : regionSequenceViewContainers)
@@ -237,6 +240,18 @@ void DocumentView::rebuildRegionSequenceViewContainers()
 
     regionSequenceViewsAreInvalid = false;
     resized();
+
+    // update region header tooltips
+    const auto total = getDocument()->getRegionSequences<ARARegionSequence>().size();
+    const auto hidden = getARAEditorView()->getHiddenRegionSequences().size();
+    String s ("Showing " + String (regionSequenceViewContainers.size()));
+    if (showOnlySelectedRegionSequences)
+        s += " selected";
+    s += String (" out of ") + String (total - hidden) + String (" tracks");
+    if (hidden)
+        s += String ("(") + String (hidden) + String (" hidden)");
+    s+= String (".");
+    regionSequenceHeadersTooltipView.setTooltip(s);
 }
 
 void DocumentView::calculateTimeRange()

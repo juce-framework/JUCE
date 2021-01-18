@@ -25,8 +25,9 @@ public:
 private:
     std::unique_ptr<DocumentView> documentView;
 
-    juce::TextButton followPlayHeadButton;
+    juce::TooltipWindow tooltip;
     juce::TextButton onlySelectedTracksButton;
+    juce::TextButton followPlayHeadButton;
     juce::Label playheadLinearPositionLabel, playheadMusicalPositionLabel;
     juce::TextButton horizontalZoomInButton, horizontalZoomOutButton;
 

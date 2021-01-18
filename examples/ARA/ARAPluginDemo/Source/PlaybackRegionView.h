@@ -10,6 +10,7 @@
     along with their output waveform, name, color, and selection state
 */
 class PlaybackRegionView  : public juce::Component,
+                            public juce::SettableTooltipClient,
                             public juce::ChangeListener,
                             private juce::ARAEditorView::Listener,
                             private juce::ARADocument::Listener,

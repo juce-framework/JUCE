@@ -104,6 +104,12 @@ private:
         DocumentView& documentView;
     };
 
+    // simple utility class to show a common tooltip for multiple views
+    class TooltipComponent    : public juce::Component,
+                                public juce::SettableTooltipClient
+    {
+    };
+
     // simple utility class to partially sync scroll postions of our view ports
     class ScrollMasterViewport    : public juce::Viewport
     {
@@ -124,6 +130,7 @@ private:
     TimeRangeSelectionView timeRangeSelectionView;
     juce::Viewport regionSequenceHeadersViewport;
     juce::Component regionSequenceHeadersView;
+    TooltipComponent regionSequenceHeadersTooltipView;
     juce::Viewport musicalContextViewport;
     MusicalContextView musicallContextView;
 
