@@ -22,14 +22,14 @@ function(_juce_add_module_sources moduleName containingPath)
     file(GLOB_RECURSE browsable_files "${containingPath}/${moduleName}/*")
     _juce_clean_sources_list("${browsable_files}" clean_list ${moduleName})
     set_property(GLOBAL PROPERTY ${moduleName}_source_files ${clean_list})
+    target_sources(${moduleName} INTERFACE ${clean_list})
 endfunction()
 
 function(_juce_reflect_module_sources moduleName)
-    get_property(path GLOBAL PROPERTY ${moduleName}_containing_path)
     get_property(sourceFiles GLOBAL PROPERTY ${moduleName}_source_files)
+    get_property(path GLOBAL PROPERTY ${moduleName}_containing_path)
     source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${sourceFiles})
     set_source_files_properties(${sourceFiles} PROPERTIES HEADER_FILE_ONLY TRUE)
-    target_sources(${moduleName} INTERFACE ${sourceFiles})
 endfunction()
 
 #Call this when you add a target to update all the sources targets
