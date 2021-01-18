@@ -50,7 +50,7 @@ namespace
         v11_1,
     };
 
-    static const char* const getName (MacOSVersion m)
+    static const char* getName (MacOSVersion m)
     {
         switch (m)
         {
