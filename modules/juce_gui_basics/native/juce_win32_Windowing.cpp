@@ -4115,7 +4115,6 @@ private:
 
             constexpr UINT events[] { WM_MOVE,
                                       WM_SIZE,
-                                      WM_WINDOWPOSCHANGED,
                                       WM_NCPOINTERDOWN,
                                       WM_NCLBUTTONDOWN,
                                       WM_NCRBUTTONDOWN,
@@ -4124,9 +4123,11 @@ private:
             if (std::find (std::begin (events), std::end (events), info->message) == std::end (events))
                 return;
 
+            // windowMayDismissModals could affect the number of active ComponentPeer instances
             for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
-                if (auto* hwndPeer = dynamic_cast<HWNDComponentPeer*> (ComponentPeer::getPeer (i)))
-                    hwndPeer->windowShouldDismissModals (info->hwnd);
+                if (i < ComponentPeer::getNumPeers())
+                    if (auto* hwndPeer = dynamic_cast<HWNDComponentPeer*> (ComponentPeer::getPeer (i)))
+                        hwndPeer->windowShouldDismissModals (info->hwnd);
         }
 
         static LRESULT CALLBACK callWndProc (int nCode, WPARAM wParam, LPARAM lParam)
