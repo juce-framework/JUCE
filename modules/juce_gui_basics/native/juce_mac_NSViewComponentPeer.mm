@@ -217,7 +217,10 @@ public:
         setOwner (view, nullptr);
 
         if ([view superview] != nil)
+        {
+            redirectWillMoveToWindow (nullptr);
             [view removeFromSuperview];
+        }
 
         if (! isSharedWindow)
         {
@@ -715,6 +718,15 @@ public:
     void redirectPaste     (NSObject*) { handleKeyPress (KeyPress ('v', ModifierKeys (ModifierKeys::commandModifier), 'v')); }
     void redirectCut       (NSObject*) { handleKeyPress (KeyPress ('x', ModifierKeys (ModifierKeys::commandModifier), 'x')); }
     void redirectSelectAll (NSObject*) { handleKeyPress (KeyPress ('a', ModifierKeys (ModifierKeys::commandModifier), 'a')); }
+
+    void redirectWillMoveToWindow (NSWindow* newWindow)
+    {
+        if (isSharedWindow && [view window] == window && newWindow == nullptr)
+        {
+            if (auto* comp = safeComponent.get())
+                comp->setVisible (false);
+        }
+    }
 
     void sendMouseEvent (NSEvent* ev)
     {
@@ -1668,6 +1680,8 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (cut:),                          cut,                        "v@:@");
         addMethod (@selector (selectAll:),                    selectAll,                  "v@:@");
 
+        addMethod (@selector (viewWillMoveToWindow:),         willMoveToWindow,           "v@:@");
+
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         addMethod (@selector (asyncMouseDown:),               asyncMouseDown,             "v@:@");
         addMethod (@selector (asyncMouseUp:),                 asyncMouseUp,               "v@:@");
@@ -1735,6 +1749,7 @@ private:
     static void paste            (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectPaste      (s);  }
     static void cut              (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectCut        (s);  }
     static void selectAll        (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectSelectAll  (s);  }
+    static void willMoveToWindow (id self, SEL, NSWindow* w)   { if (auto* p = getOwner (self)) p->redirectWillMoveToWindow (w); }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)          { return YES; }
     static BOOL wantsDefaultClipping (id, SEL)                 { return YES; } // (this is the default, but may want to customise it in future)
