@@ -24,6 +24,12 @@ namespace juce
 {
 namespace universal_midi_packets
 {
+    /**
+        Allows conversion from bytestream- or Universal MIDI Packet-formatted
+        messages to MIDI 1.0 messages in UMP format.
+
+        @tags{Audio}
+    */
     struct ToUMP1Converter
     {
         template <typename Fn>
@@ -39,6 +45,12 @@ namespace universal_midi_packets
         }
     };
 
+    /**
+        Allows conversion from bytestream- or Universal MIDI Packet-formatted
+        messages to MIDI 2.0 messages in UMP format.
+
+        @tags{Audio}
+    */
     struct ToUMP2Converter
     {
         template <typename Fn>
@@ -64,6 +76,14 @@ namespace universal_midi_packets
         Midi1ToMidi2DefaultTranslator translator;
     };
 
+    /**
+        Allows conversion from bytestream- or Universal MIDI Packet-formatted
+        messages to UMP format.
+
+        The packet protocol can be selected using the constructor parameter.
+
+        @tags{Audio}
+    */
     class GenericUMPConverter
     {
     public:
@@ -111,6 +131,12 @@ namespace universal_midi_packets
         const PacketProtocol mode{};
     };
 
+    /**
+        Allows conversion from bytestream- or Universal MIDI Packet-formatted
+        messages to bytestream format.
+
+        @tags{Audio}
+    */
     struct ToBytestreamConverter
     {
         explicit ToBytestreamConverter (int storageSize)

@@ -46,7 +46,7 @@ public:
                             const File& startingFile, const String& titleToUse,
                             const String& filtersToUse)
         : Thread ("Native Win32 FileChooser"),
-          owner (parent), title (titleToUse), filtersString (filtersToUse),
+          owner (parent), title (titleToUse), filtersString (filtersToUse.replaceCharacter (',', ';')),
           selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
           isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
           warnAboutOverwrite ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0),

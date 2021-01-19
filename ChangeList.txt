@@ -3,6 +3,18 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.7
+  - Fixed a macOS drawing issue
+  - Updated the DemoRunner bundle ID
+
+Version 6.0.6
+  - Moved to the new CoreMIDI API on supported platforms
+  - Added support for the "New Build System" in Xcode
+  - Made the audio format readers more robust
+  - Improved the HiResTimer implementation
+  - Fixed a VST3 program parameter issue
+  - Updated to Oboe 1.5 on Android
+
 Version 6.0.5
   - Added more support for styling PopupMenus
   - Fixed some race conditions in the IPC and name named pipe classes

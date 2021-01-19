@@ -86,23 +86,6 @@ namespace Orientations
     }
 }
 
-struct AsyncBoundsUpdater  : public AsyncUpdater
-{
-    AsyncBoundsUpdater (UIViewController* vc)
-        : viewController (vc)
-    {
-    }
-
-    ~AsyncBoundsUpdater() override
-    {
-        cancelPendingUpdate();
-    }
-
-    void handleAsyncUpdate() override;
-
-    UIViewController* viewController;
-};
-
 //==============================================================================
 } // namespace juce
 
@@ -136,8 +119,6 @@ using namespace juce;
 //==============================================================================
 @interface JuceUIViewController : UIViewController
 {
-@public
-    std::unique_ptr<AsyncBoundsUpdater> boundsUpdater;
 }
 
 - (JuceUIViewController*) init;
@@ -287,11 +268,6 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
         juceView->owner->updateScreenBounds();
 }
 
-void AsyncBoundsUpdater::handleAsyncUpdate()
-{
-    sendScreenBoundsUpdate ((JuceUIViewController*) viewController);
-}
-
 static bool isKioskModeView (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
@@ -311,8 +287,6 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 - (JuceUIViewController*) init
 {
     self = [super init];
-
-    boundsUpdater = std::make_unique<AsyncBoundsUpdater> (self);
 
     return self;
 }
@@ -345,12 +319,10 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 - (void) viewWillTransitionToSize: (CGSize) size withTransitionCoordinator: (id<UIViewControllerTransitionCoordinator>) coordinator
 {
     [super viewWillTransitionToSize: size withTransitionCoordinator: coordinator];
-    sendScreenBoundsUpdate (self);
-
-    // On some devices the screen-size isn't yet updated at this point, so also trigger another
-    // async update to double-check..
-    if (boundsUpdater != nullptr)
-        boundsUpdater->triggerAsyncUpdate();
+    [coordinator animateAlongsideTransition: nil completion: ^void (id<UIViewControllerTransitionCoordinatorContext>)
+    {
+        sendScreenBoundsUpdate (self);
+    }];
 }
 
 - (BOOL) prefersStatusBarHidden
@@ -579,8 +551,6 @@ UIViewComponentPeer::~UIViewComponentPeer()
 {
     currentTouches.deleteAllTouchesForPeer (this);
     Desktop::getInstance().removeFocusChangeListener (this);
-
-    ((JuceUIViewController*) controller)->boundsUpdater = nullptr;
 
     view->owner = nullptr;
     [view removeFromSuperview];

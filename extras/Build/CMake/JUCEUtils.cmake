@@ -1103,7 +1103,9 @@ function(_juce_configure_bundle source_target dest_target)
 
     set_target_properties(${dest_target} PROPERTIES
         XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME
-            $<TARGET_PROPERTY:${source_target},JUCE_HARDENED_RUNTIME_ENABLED>)
+            "$<TARGET_PROPERTY:${source_target},JUCE_HARDENED_RUNTIME_ENABLED>"
+        XCODE_ATTRIBUTE_TARGETED_DEVICE_FAMILY
+            "$<TARGET_PROPERTY:${source_target},JUCE_TARGETED_DEVICE_FAMILY>")
 
     if(juce_kind_string STREQUAL "AUv3 AppExtension")
         get_target_property(source_bundle_id ${source_target} JUCE_BUNDLE_ID)
@@ -1765,6 +1767,8 @@ function(_juce_set_fallback_properties target)
         _juce_set_property_if_not_set(${target} AU_MAIN_TYPE kAudioUnitType_Effect)
     endif()
 
+    _juce_set_property_if_not_set(${target} TARGETED_DEVICE_FAMILY "1,2")
+
     set(au_category_codes
         'aufx'
         'aufc'
@@ -1881,6 +1885,7 @@ function(_juce_initialise_target target)
         BACKGROUND_AUDIO_ENABLED        # iOS only
         BACKGROUND_BLE_ENABLED          # iOS only
         CUSTOM_XCASSETS_FOLDER          # iOS only
+        TARGETED_DEVICE_FAMILY          # iOS only
         ICON_BIG
         ICON_SMALL
         COMPANY_COPYRIGHT

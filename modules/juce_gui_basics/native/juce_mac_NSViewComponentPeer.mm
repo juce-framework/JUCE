@@ -844,6 +844,14 @@ public:
         if ([screen respondsToSelector: @selector (backingScaleFactor)])
             displayScale = (float) screen.backingScaleFactor;
 
+        auto invalidateTransparentWindowShadow = [this]
+        {
+            // transparent NSWindows with a drop-shadow need to redraw their shadow when the content
+            // changes to avoid stale shadows being drawn behind the window
+            if (! isSharedWindow && ! [window isOpaque] && [window hasShadow])
+                [window invalidateShadow];
+        };
+
        #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         // This option invokes a separate paint call for each rectangle of the clip region.
         // It's a long story, but this is a basically a workaround for a CGContext not having
@@ -864,18 +872,15 @@ public:
                     drawRect (cg, rect, displayScale);
                     CGContextRestoreGState (cg);
                 }
+
+                invalidateTransparentWindowShadow();
+                return;
             }
         }
-        else
        #endif
-        {
-            drawRect (cg, r, displayScale);
-        }
 
-        // transparent NSWindows with a drop-shadow need to redraw their shadow when the content
-        // changes to avoid stale shadows being drawn behind the window
-        if (! isSharedWindow && ! [window isOpaque] && [window hasShadow])
-            [window invalidateShadow];
+        drawRect (cg, r, displayScale);
+        invalidateTransparentWindowShadow();
     }
 
     void drawRect (CGContextRef cg, NSRect r, float displayScale)
@@ -1629,6 +1634,7 @@ struct JuceNSViewClass   : public ObjCClass<NSView>
         addMethod (@selector (wantsDefaultClipping),          wantsDefaultClipping,       "c@:");
         addMethod (@selector (worksWhenModal),                worksWhenModal,             "c@:");
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,        "v@:");
+        addMethod (@selector (viewWillDraw),                  viewWillDraw,               "v@:");
         addMethod (@selector (keyDown:),                      keyDown,                    "v@:@");
         addMethod (@selector (keyUp:),                        keyUp,                      "v@:@");
         addMethod (@selector (insertText:),                   insertText,                 "v@:@");
@@ -1738,10 +1744,24 @@ private:
     static void frameChanged (id self, SEL, NSNotification*)   { if (auto* p = getOwner (self)) p->redirectMovedOrResized(); }
     static void viewDidMoveToWindow (id self, SEL)             { if (auto* p = getOwner (self)) p->viewMovedToWindow(); }
 
+    static void viewWillDraw (id self, SEL)
+    {
+        // Without setting contentsFormat macOS Big Sur will always set the invalid area
+        // to be the entire frame.
+       #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
+        CALayer* layer = ((NSView*) self).layer;
+        layer.contentsFormat = kCAContentsFormatRGBA8Uint;
+       #endif
+
+        sendSuperclassMessage<void> (self, @selector (viewWillDraw));
+    }
+
     static void windowWillMiniaturize (id self, SEL, NSNotification*)
     {
         if (auto* p = getOwner (self))
         {
+            p->sendModalInputAttemptIfBlocked();
+
             if (p->isAlwaysOnTop)
             {
                 // there is a bug when restoring minimised always on top windows so we need

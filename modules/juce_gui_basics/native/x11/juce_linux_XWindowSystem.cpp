@@ -71,6 +71,7 @@ XWindowSystemUtilities::Atoms::Atoms (::Display* display)
     pid                          = getCreating (display, "_NET_WM_PID");
     windowType                   = getIfExists (display, "_NET_WM_WINDOW_TYPE");
     windowState                  = getIfExists (display, "_NET_WM_STATE");
+    windowStateHidden            = getIfExists (display, "_NET_WM_STATE_HIDDEN");
 
     XdndAware                    = getCreating (display, "XdndAware");
     XdndEnter                    = getCreating (display, "XdndEnter");
@@ -1082,7 +1083,7 @@ namespace ClipboardHelpers
 
             if (prop.success)
             {
-                if (prop.actualType == XWindowSystem::getInstance()->getAtoms().utf8String&& prop.actualFormat == 8)
+                if (prop.actualType == XWindowSystem::getInstance()->getAtoms().utf8String && prop.actualFormat == 8)
                     return String::fromUTF8 ((const char*) prop.data, (int) prop.numItems);
 
                 if (prop.actualType == XA_STRING && prop.actualFormat == 8)
@@ -1291,7 +1292,7 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 {
     return NoEventMask | KeyPressMask | KeyReleaseMask
              | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
-             | ExposureMask | StructureNotifyMask | FocusChangeMask
+             | ExposureMask | StructureNotifyMask | FocusChangeMask | PropertyChangeMask
              | (ignoresMouseClicks ? 0 : (ButtonPressMask | ButtonReleaseMask));
 }
 
@@ -2957,6 +2958,7 @@ void XWindowSystem::handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEv
         case GravityNotify:         handleGravityNotify (peer);                                        break;
         case SelectionClear:        dragAndDropStateMap[peer].handleExternalSelectionClear();          break;
         case SelectionRequest:      dragAndDropStateMap[peer].handleExternalSelectionRequest (event);  break;
+        case PropertyNotify:        propertyNotifyEvent        (peer, event.xproperty);                break;
 
         case CirculateNotify:
         case CreateNotify:
@@ -3344,6 +3346,38 @@ void XWindowSystem::handleGravityNotify (LinuxComponentPeer<::Window>* peer) con
     peer->updateWindowBounds();
     peer->updateBorderSize();
     peer->handleMovedOrResized();
+}
+
+void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer<::Window>* peer, const XPropertyEvent& event) const
+{
+    const auto isStateChangeEvent = [&]
+    {
+        if (event.atom != atoms.state)
+            return false;
+
+        return isMinimised (event.window);
+    };
+
+    const auto isHidden = [&]
+    {
+        if (event.atom != atoms.windowState)
+            return false;
+
+        XWindowSystemUtilities::ScopedXLock xLock;
+        XWindowSystemUtilities::GetXProperty prop (event.window, atoms.windowState, 0, 128, false, XA_ATOM);
+
+        if (! (prop.success && prop.actualFormat == 32 && prop.actualType == XA_ATOM))
+            return false;
+
+        const auto data = reinterpret_cast<const long*> (prop.data);
+        const auto end = data + prop.numItems;
+
+        return std::find (data, end, atoms.windowStateHidden) != end;
+    };
+
+    if ((isStateChangeEvent() || isHidden()) && peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
+        if (auto* currentModalComp = Component::getCurrentlyModalComponent())
+            currentModalComp->inputAttemptWhenModal();
 }
 
 void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const

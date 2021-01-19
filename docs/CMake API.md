@@ -315,6 +315,12 @@ attributes directly to these creation functions, rather than adding them later.
     is specified, the ICON_BIG and ICON_SMALL arguments will not have an effect on iOS, and a launch
     storyboard will not be used.
 
+- `TARGETED_DEVICE_FAMILY`
+  - Specifies the device families on which the product must be capable of running. Allowed values
+    are "1", "2", and "1,2"; these correspond to "iPhone/iPod touch", "iPad", and "iPhone/iPod and
+    iPad" respectively. This will default to "1,2", meaning that the target will target iPhone,
+    iPod, and iPad.
+
 - `ICON_BIG`, `ICON_SMALL`
   - Paths to image files that will be used to generate app icons. If only one of these parameters
     is specified, then that image will be used for all icon resolutions. If both arguments are
