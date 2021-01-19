@@ -91,6 +91,9 @@ protected:
     using ARAMusicalContext::Listener::willUpdateMusicalContextProperties;
     using ARAMusicalContext::Listener::didUpdateMusicalContextProperties;
     using ARAMusicalContext::Listener::doUpdateMusicalContextContent;
+    using ARAMusicalContext::Listener::didAddRegionSequenceToMusicalContext;
+    using ARAMusicalContext::Listener::willRemoveRegionSequenceFromMusicalContext;
+    using ARAMusicalContext::Listener::didReorderRegionSequencesInMusicalContext;
     using ARAMusicalContext::Listener::willDestroyMusicalContext;
 
     // ARARegionSequence::Listener callbacks
@@ -178,6 +181,9 @@ protected:
     void willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept override;
     void didUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
     void doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept override;
+    void didAddRegionSequenceToMusicalContext (ARA::PlugIn::MusicalContext* musicalContext, ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
+    void willRemoveRegionSequenceFromMusicalContext (ARA::PlugIn::MusicalContext* musicalContext, ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
+    void didReorderRegionSequencesInMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
     void willDestroyMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
 
     // RegionSequence notifications, typically not overridden further - instead, override the ARARegionSequence::Listener callbacks below

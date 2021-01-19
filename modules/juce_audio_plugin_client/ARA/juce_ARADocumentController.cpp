@@ -217,6 +217,9 @@ void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalC
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateMusicalContextProperties, MusicalContext*, musicalContext, ARAMusicalContext::PropertiesPtr, newProperties)
 OVERRIDE_TO_NOTIFY_1 (didUpdateMusicalContextProperties, MusicalContext*, musicalContext)
+OVERRIDE_TO_NOTIFY_2 (didAddRegionSequenceToMusicalContext, MusicalContext*, musicalContext, RegionSequence*, regionSequence)
+OVERRIDE_TO_NOTIFY_2 (willRemoveRegionSequenceFromMusicalContext, MusicalContext*, musicalContext, RegionSequence*, regionSequence)
+OVERRIDE_TO_NOTIFY_1 (didReorderRegionSequencesInMusicalContext, MusicalContext*, musicalContext)
 OVERRIDE_TO_NOTIFY_1 (willDestroyMusicalContext, MusicalContext*, musicalContext)
 
 //==============================================================================
