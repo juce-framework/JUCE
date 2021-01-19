@@ -46,7 +46,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
                                      "-Wnullable-to-nonnull-conversion",
                                      "-Wignored-qualifiers",
                                      "-Wfour-char-constants",
-                                     "-Wmissing-prototypes")
+                                     "-Wmissing-prototypes",
+                                     "-Wdeprecated-anon-enum-enum-conversion",
+                                     "-Wambiguous-reversed-operator")
 
 // From MacOS 10.13 and iOS 11 Apple has (sensibly!) stopped defining a whole
 // set of functions with rather generic names. However, we still need a couple

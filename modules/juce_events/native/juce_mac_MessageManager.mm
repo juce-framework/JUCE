@@ -436,17 +436,16 @@ void initialiseNSApplication()
     }
 }
 
-static AppDelegate* appDelegate = nullptr;
+static std::unique_ptr<AppDelegate> appDelegate;
 
 void MessageManager::doPlatformSpecificInitialisation()
 {
     if (appDelegate == nil)
-        appDelegate = new AppDelegate();
+        appDelegate.reset (new AppDelegate());
 }
 
 void MessageManager::doPlatformSpecificShutdown()
 {
-    delete appDelegate;
     appDelegate = nullptr;
 }
 

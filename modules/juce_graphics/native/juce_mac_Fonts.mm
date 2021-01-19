@@ -207,9 +207,7 @@ namespace CoreTextTypeLayout
     //==============================================================================
     static CFAttributedStringRef createCFAttributedString (const AttributedString& text)
     {
-       #if JUCE_IOS
-        auto rgbColourSpace = CGColorSpaceCreateWithName (kCGColorSpaceSRGB);
-       #endif
+        const detail::ColorSpacePtr rgbColourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
 
         auto attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
         auto cfText = text.getText().toCFString();
@@ -260,18 +258,11 @@ namespace CoreTextTypeLayout
             {
                 auto col = attr.colour;
 
-               #if JUCE_IOS
                 const CGFloat components[] = { col.getFloatRed(),
                                                col.getFloatGreen(),
                                                col.getFloatBlue(),
                                                col.getFloatAlpha() };
-                auto colour = CGColorCreate (rgbColourSpace, components);
-               #else
-                auto colour = CGColorCreateGenericRGB (col.getFloatRed(),
-                                                       col.getFloatGreen(),
-                                                       col.getFloatBlue(),
-                                                       col.getFloatAlpha());
-               #endif
+                auto colour = CGColorCreate (rgbColourSpace.get(), components);
 
                 CFAttributedStringSetAttribute (attribString, range, kCTForegroundColorAttributeName, colour);
                 CGColorRelease (colour);
@@ -296,9 +287,6 @@ namespace CoreTextTypeLayout
         CFAttributedStringSetAttribute (attribString, CFRangeMake (0, CFAttributedStringGetLength (attribString)),
                                         kCTParagraphStyleAttributeName, ctParagraphStyleRef);
         CFRelease (ctParagraphStyleRef);
-       #if JUCE_IOS
-        CGColorSpaceRelease (rgbColourSpace);
-       #endif
         return attribString;
     }
 
