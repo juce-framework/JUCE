@@ -28,7 +28,7 @@ public:
     // In typical UI use cases, these internal processors are used inside an ARAPlaybackRegionReader
     // on a separate background thread which already implements buffering - to prevent unnecessary
     // double buffering, set useBufferedAudioSourceReader to false in such cases.
-    explicit ARAPluginDemoAudioProcessor(bool useBufferedAudioSourceReader);
+    explicit ARAPluginDemoAudioProcessor (bool useBufferedAudioSourceReader);
 
     // Getter of current playback state for the UI
     const juce::AudioPlayHead::CurrentPositionInfo& getLastKnownPositionInfo() { return lastPositionInfo; }

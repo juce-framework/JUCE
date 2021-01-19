@@ -172,7 +172,7 @@ void MusicalContextView::paint (juce::Graphics& g)
             chordRect.setLeft (documentView.getPlaybackRegionsViewsXForTime (chordStartTime));
 
             // if we have a chord after this one, use its starting position to end our rect
-            if (std::next(itChord) != chordsReader.end())
+            if (std::next (itChord) != chordsReader.end())
             {
                 const auto nextChordStartTime = tempoConverter.getTimeForQuarter (std::next (itChord)->position);
                 if (nextChordStartTime < visibleRange.getStart())
