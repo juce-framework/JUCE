@@ -253,6 +253,11 @@ public:
         return getParamForVSTParamID (bypassParamID);
     }
 
+    AudioProcessorParameter* getProgramParameter() const noexcept
+    {
+        return getParamForVSTParamID (JuceAudioProcessor::paramPreset);
+    }
+
     static Vst::UnitID getUnitID (const AudioProcessorParameterGroup* group)
     {
         if (group == nullptr || group->getParent() == nullptr)
@@ -359,6 +364,20 @@ private:
             vstParamIDs.add (vstParamID);
             paramMap.set (static_cast<int32> (vstParamID), juceParam);
         }
+
+        auto numPrograms = audioProcessor->getNumPrograms();
+
+        if (numPrograms > 1)
+        {
+            ownedProgramParameter = std::make_unique<AudioParameterInt> ("juceProgramParameter", "Program",
+                                                                         0, numPrograms - 1,
+                                                                         audioProcessor->getCurrentProgram());
+
+            juceParameters.params.add (ownedProgramParameter.get());
+
+            vstParamIDs.add (JuceAudioProcessor::paramPreset);
+            paramMap.set (static_cast<int32> (JuceAudioProcessor::paramPreset), ownedProgramParameter.get());
+        }
     }
 
     Vst::ParamID generateVSTParamIDForParam (AudioProcessorParameter* param)
@@ -386,7 +405,7 @@ private:
     //==============================================================================
     LegacyAudioParametersWrapper juceParameters;
     HashMap<int32, AudioProcessorParameter*> paramMap;
-    std::unique_ptr<AudioProcessorParameter> ownedBypassParameter;
+    std::unique_ptr<AudioProcessorParameter> ownedBypassParameter, ownedProgramParameter;
     Array<const AudioProcessorParameterGroup*> parameterGroups;
 
     JuceAudioProcessor() = delete;
@@ -406,7 +425,6 @@ class JuceVST3EditController : public Vst::EditController,
                                public Presonus::IPlugInViewEmbedding,
                              #endif
                                public AudioProcessorListener,
-                               private AudioProcessorParameter::Listener,
                                public Presonus::IGainReductionInfo
 {
 public:
@@ -652,12 +670,16 @@ public:
 
         bool setNormalized (Vst::ParamValue v) override
         {
-            if (! isPositiveAndBelow ((int) toPlain (v), owner.getNumPrograms())
-                || v == valueNormalized)
+            auto programValue = roundToInt (toPlain (v));
+
+            if (! isPositiveAndBelow (programValue, owner.getNumPrograms())
+                || programValue == owner.getCurrentProgram())
                 return false;
 
             valueNormalized = v;
+            owner.setCurrentProgram (programValue);
             changed();
+
             return true;
         }
 
@@ -754,17 +776,8 @@ public:
     tresult PLUGIN_API setComponentState (IBStream* stream) override
     {
         // Cubase and Nuendo need to inform the host of the current parameter values
-        if (auto* pluginInstance = getPluginInstance())
-        {
-            for (auto vstParamId : audioProcessor->vstParamIDs)
-                setParamNormalized (vstParamId, audioProcessor->getParamForVSTParamID (vstParamId)->getValue());
-
-            auto numPrograms = pluginInstance->getNumPrograms();
-
-            if (numPrograms > 1)
-                setParamNormalized (JuceAudioProcessor::paramPreset, static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                                                         / static_cast<Vst::ParamValue> (numPrograms - 1));
-        }
+        for (auto vstParamId : audioProcessor->vstParamIDs)
+            setParamNormalized (vstParamId, audioProcessor->getParamForVSTParamID (vstParamId)->getValue());
 
         if (auto* handler = getComponentHandler())
             handler->restartComponent (Vst::kParamValuesChanged);
@@ -982,7 +995,7 @@ public:
     }
 
     //==============================================================================
-    void paramChanged (Vst::ParamID vstParamId, float newValue)
+    void paramChanged (Vst::ParamID vstParamId, double newValue)
     {
         if (inParameterChangedCallback.get())
         {
@@ -991,8 +1004,8 @@ public:
         }
 
         // NB: Cubase has problems if performEdit is called without setParamNormalized
-        EditController::setParamNormalized (vstParamId, (double) newValue);
-        performEdit (vstParamId, (double) newValue);
+        EditController::setParamNormalized (vstParamId, newValue);
+        performEdit (vstParamId, newValue);
     }
 
     //==============================================================================
@@ -1039,17 +1052,17 @@ public:
         // TODO: These change detection from main JUCE are redundant to previous.
         if (auto* pluginInstance = getPluginInstance())
         {
-            auto numPrograms = pluginInstance->getNumPrograms();
-
-            if (numPrograms > 1)
+            if (audioProcessor->getProgramParameter() != nullptr)
             {
-                auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                  / static_cast<Vst::ParamValue> (numPrograms - 1);
+                auto currentProgram = pluginInstance->getCurrentProgram();
+                auto paramValue = roundToInt (EditController::normalizedParamToPlain (JuceAudioProcessor::paramPreset,
+                                                                                      EditController::getParamNormalized (JuceAudioProcessor::paramPreset)));
 
-                if (paramValue != EditController::getParamNormalized (JuceAudioProcessor::paramPreset))
+                if (currentProgram != paramValue)
                 {
                     beginEdit (JuceAudioProcessor::paramPreset);
-                    paramChanged (JuceAudioProcessor::paramPreset, (float) paramValue);
+                    paramChanged (JuceAudioProcessor::paramPreset,
+                                  EditController::plainParamToNormalized (JuceAudioProcessor::paramPreset, currentProgram));
                     endEdit (JuceAudioProcessor::paramPreset);
 
                     flags |= Vst::kParamValuesChanged;
@@ -1067,19 +1080,6 @@ public:
 
         if (flags != 0 && componentHandler != nullptr && ! inSetupProcessing)
             componentHandler->restartComponent (flags);
-    }
-
-    void parameterValueChanged (int, float newValue) override
-    {
-        // this can only come from the bypass parameter
-        paramChanged (audioProcessor->bypassParamID, newValue);
-    }
-
-    void parameterGestureChanged (int, bool gestureIsStarting) override
-    {
-        // this can only come from the bypass parameter
-        if (gestureIsStarting) beginEdit (audioProcessor->bypassParamID);
-        else endEdit (audioProcessor->bypassParamID);
     }
 
     //==============================================================================
@@ -1109,6 +1109,37 @@ private:
     Vst::ParamID midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
 
     //==============================================================================
+    struct OwnedParameterListener  : public AudioProcessorParameter::Listener
+    {
+        OwnedParameterListener (JuceVST3EditController& editController,
+                                AudioProcessorParameter& juceParameter,
+                                Vst::ParamID paramID)
+            : owner (editController),
+              vstParamID (paramID)
+        {
+            juceParameter.addListener (this);
+        }
+
+        void parameterValueChanged (int, float newValue) override
+        {
+            owner.paramChanged (vstParamID, newValue);
+        }
+
+        void parameterGestureChanged (int, bool gestureIsStarting) override
+        {
+            if (gestureIsStarting)
+                owner.beginEdit (vstParamID);
+            else
+                owner.endEdit (vstParamID);
+        }
+
+        JuceVST3EditController& owner;
+        Vst::ParamID vstParamID;
+    };
+
+    std::vector<std::unique_ptr<OwnedParameterListener>> ownedParameterListeners;
+
+    //==============================================================================
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
 
@@ -1124,10 +1155,11 @@ private:
         {
             pluginInstance->addListener (this);
 
-            // as the bypass is not part of the regular parameters
-            // we need to listen for it explicitly
+            // as the bypass is not part of the regular parameters we need to listen for it explicitly
             if (! audioProcessor->bypassIsRegularParameter)
-                audioProcessor->getBypassParameter()->addListener (this);
+                ownedParameterListeners.push_back (std::make_unique<OwnedParameterListener> (*this,
+                                                                                             *audioProcessor->getBypassParameter(),
+                                                                                             audioProcessor->bypassParamID));
 
             if (parameters.getParameterCount() <= 0)
             {
@@ -1136,6 +1168,10 @@ private:
                 for (int i = 0; i < n; ++i)
                 {
                     auto vstParamID = audioProcessor->getVSTParamIDForIndex (i);
+
+                    if (vstParamID == JuceAudioProcessor::paramPreset)
+                        continue;
+
                     auto* juceParam = audioProcessor->getParamForVSTParamID (vstParamID);
                     auto* parameterGroup = pluginInstance->getParameterTree().getGroupsForParameter (juceParam).getLast();
                     auto unitID = JuceAudioProcessor::getUnitID (parameterGroup);
@@ -1150,8 +1186,14 @@ private:
                     }
                 }
 
-                if (pluginInstance->getNumPrograms() > 1)
+                if (auto* programParam = audioProcessor->getProgramParameter())
+                {
+                    ownedParameterListeners.push_back (std::make_unique<OwnedParameterListener> (*this,
+                                                                                                 *programParam,
+                                                                                                 JuceAudioProcessor::paramPreset));
+
                     parameters.addParameter (new ProgramChangeParameter (*pluginInstance));
+                }
             }
 
            #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
@@ -2757,20 +2799,11 @@ public:
                 {
                     auto vstParamID = paramQueue->getParameterId();
 
-                    if (vstParamID == JuceAudioProcessor::paramPreset)
-                    {
-                        auto numPrograms  = pluginInstance->getNumPrograms();
-                        auto programValue = roundToInt (value * (jmax (0, numPrograms - 1)));
-
-                        if (numPrograms > 1 && isPositiveAndBelow (programValue, numPrograms)
-                             && programValue != pluginInstance->getCurrentProgram())
-                            pluginInstance->setCurrentProgram (programValue);
-                    }
                    #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
-                    else if (juceVST3EditController != nullptr && juceVST3EditController->isMidiControllerParamID (vstParamID))
+                    if (juceVST3EditController != nullptr && juceVST3EditController->isMidiControllerParamID (vstParamID))
                         addParameterChangeToMidiBuffer (offsetSamples, vstParamID, value);
-                   #endif
                     else
+                   #endif
                     {
                         auto floatValue = static_cast<float> (value);
 
