@@ -255,7 +255,19 @@ public:
 
     static Vst::UnitID getUnitID (const AudioProcessorParameterGroup* group)
     {
-        return group == nullptr ? Vst::kRootUnitId : group->getID().hashCode();
+        if (group == nullptr || group->getParent() == nullptr)
+            return Vst::kRootUnitId;
+
+        // From the VST3 docs:
+        // Up to 2^31 parameters can be exported with id range [0, 2147483648]
+        // (the range [2147483649, 429496729] is reserved for host application).
+        auto unitID = group->getID().hashCode() & 0x7fffffff;
+
+        // If you hit this assertion then your group ID is hashing to a value
+        // reserved by the VST3 SDK. Use a different group ID.
+        jassert (unitID != Vst::kRootUnitId);
+
+        return unitID;
     }
 
     int getNumParameters() const noexcept             { return vstParamIDs.size(); }
@@ -285,6 +297,21 @@ private:
     void setupParameters()
     {
         parameterGroups = audioProcessor->getParameterTree().getSubgroups (true);
+
+       #if JUCE_DEBUG
+        auto allGroups = parameterGroups;
+        allGroups.add (&audioProcessor->getParameterTree());
+        std::unordered_set<Vst::UnitID> unitIDs;
+
+        for (auto* group : allGroups)
+        {
+            auto insertResult = unitIDs.insert (getUnitID (group));
+
+            // If you hit this assertion then either a group ID is not unique or
+            // you are very unlucky and a hashed group ID is not unique
+            jassert (insertResult.second);
+        }
+       #endif
 
        #if JUCE_FORCE_USE_LEGACY_PARAM_IDS
         const bool forceLegacyParamIDs = true;
@@ -625,19 +652,13 @@ public:
 
         bool setNormalized (Vst::ParamValue v) override
         {
-            Vst::ParamValue program = v * info.stepCount;
-
-            if (! isPositiveAndBelow ((int) program, owner.getNumPrograms()))
+            if (! isPositiveAndBelow ((int) toPlain (v), owner.getNumPrograms())
+                || v == valueNormalized)
                 return false;
 
-            if (valueNormalized != v)
-            {
-                valueNormalized = v;
-                changed();
-                return true;
-            }
-
-            return false;
+            valueNormalized = v;
+            changed();
+            return true;
         }
 
         void toString (Vst::ParamValue value, Vst::String128 result) const override
@@ -1018,28 +1039,29 @@ public:
         // TODO: These change detection from main JUCE are redundant to previous.
         if (auto* pluginInstance = getPluginInstance())
         {
-            auto newNumPrograms = pluginInstance->getNumPrograms();
+            auto numPrograms = pluginInstance->getNumPrograms();
 
-            if (newNumPrograms != lastNumPrograms)
+            if (numPrograms > 1)
             {
-                if (newNumPrograms > 1)
-                {
-                    auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
-                                      / static_cast<Vst::ParamValue> (pluginInstance->getNumPrograms() - 1);
+                auto paramValue = static_cast<Vst::ParamValue> (pluginInstance->getCurrentProgram())
+                                  / static_cast<Vst::ParamValue> (numPrograms - 1);
 
-                    EditController::setParamNormalized (JuceAudioProcessor::paramPreset, paramValue);
+                if (paramValue != EditController::getParamNormalized (JuceAudioProcessor::paramPreset))
+                {
+                    beginEdit (JuceAudioProcessor::paramPreset);
+                    paramChanged (JuceAudioProcessor::paramPreset, (float) paramValue);
+                    endEdit (JuceAudioProcessor::paramPreset);
+
                     flags |= Vst::kParamValuesChanged;
                 }
-
-                lastNumPrograms = newNumPrograms;
             }
 
-            auto newLatencySamples = pluginInstance->getLatencySamples();
+            auto latencySamples = pluginInstance->getLatencySamples();
 
-            if (newLatencySamples != lastLatencySamples)
+            if (latencySamples != lastLatencySamples)
             {
                 flags |= Vst::kLatencyChanged;
-                lastLatencySamples = newLatencySamples;
+                lastLatencySamples = latencySamples;
             }
         }
 
@@ -1090,7 +1112,7 @@ private:
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
 
-    int lastNumPrograms = 0, lastLatencySamples = 0;
+    int lastLatencySamples = 0;
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;

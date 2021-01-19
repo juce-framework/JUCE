@@ -287,8 +287,11 @@ public:
 
             if (XWindowSystemUtilities::Atoms::isMimeTypeFile (getDisplay(), dragAndDropCurrentMimeType))
             {
-                for (int i = 0; i < lines.size(); ++i)
-                    dragInfo.files.add (URL::removeEscapeChars (lines[i].replace ("file://", String(), true)));
+                for (const auto& line : lines)
+                {
+                    const auto escaped = line.replace ("+", "%2B").replace ("file://", String(), true);
+                    dragInfo.files.add (URL::removeEscapeChars (escaped));
+                }
 
                 dragInfo.files.trim();
                 dragInfo.files.removeEmptyStrings();

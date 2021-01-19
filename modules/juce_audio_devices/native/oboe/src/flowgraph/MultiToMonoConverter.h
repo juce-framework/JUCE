@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The Android Open Source Project
+ * Copyright 2015 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef FLOWGRAPH_SINK_I24_H
-#define FLOWGRAPH_SINK_I24_H
+#ifndef FLOWGRAPH_MULTI_TO_MONO_CONVERTER_H
+#define FLOWGRAPH_MULTI_TO_MONO_CONVERTER_H
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -26,21 +26,26 @@ namespace FLOWGRAPH_OUTER_NAMESPACE {
 namespace flowgraph {
 
 /**
- * AudioSink that lets you read data as packed 24-bit signed integers.
- * The sample size is 3 bytes.
+ * Convert a multi-channel interleaved stream to a monophonic stream
+ * by extracting channel[0].
  */
-class SinkI24 : public FlowGraphSink {
-public:
-    explicit SinkI24(int32_t channelCount);
+    class MultiToMonoConverter : public FlowGraphNode {
+    public:
+        explicit MultiToMonoConverter(int32_t inputChannelCount);
 
-    int32_t read(void *data, int32_t numFrames) override;
+        virtual ~MultiToMonoConverter();
 
-    const char *getName() override {
-        return "SinkI24";
-    }
-};
+        int32_t onProcess(int32_t numFrames) override;
+
+        const char *getName() override {
+            return "MultiToMonoConverter";
+        }
+
+        FlowGraphPortFloatInput input;
+        FlowGraphPortFloatOutput output;
+    };
 
 } /* namespace flowgraph */
 } /* namespace FLOWGRAPH_OUTER_NAMESPACE */
 
-#endif //FLOWGRAPH_SINK_I24_H
+#endif //FLOWGRAPH_MULTI_TO_MONO_CONVERTER_H

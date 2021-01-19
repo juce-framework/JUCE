@@ -62,9 +62,14 @@ public:
     int32_t getSampleRate() const { return mSampleRate; }
 
     /**
-     * @return the number of frames in each callback or kUnspecified.
+     * @deprecated use `getFramesPerDataCallback` instead.
      */
-    int32_t getFramesPerCallback() const { return mFramesPerCallback; }
+    int32_t getFramesPerCallback() const { return getFramesPerDataCallback(); }
+
+    /**
+     * @return the number of frames in each data callback or kUnspecified.
+     */
+    int32_t getFramesPerDataCallback() const { return mFramesPerCallback; }
 
     /**
      * @return the audio sample format (e.g. Float or I16)
@@ -100,10 +105,35 @@ public:
     int32_t getDeviceId() const { return mDeviceId; }
 
     /**
-     * @return the callback object for this stream, if set.
+     * For internal use only.
+     * @return the data callback object for this stream, if set.
      */
-    AudioStreamCallback* getCallback() const {
-        return mStreamCallback;
+    AudioStreamDataCallback *getDataCallback() const {
+        return mDataCallback;
+    }
+
+    /**
+     * For internal use only.
+     * @return the error callback object for this stream, if set.
+     */
+    AudioStreamErrorCallback *getErrorCallback() const {
+        return mErrorCallback;
+    }
+
+    /**
+     * @return true if a data callback was set for this stream
+     */
+    bool isDataCallbackSpecified() const {
+        return mDataCallback != nullptr;
+    }
+
+    /**
+     * Note that if the app does not set an error callback then a
+     * default one may be provided.
+     * @return true if an error callback was set for this stream
+     */
+    bool isErrorCallbackSpecified() const {
+        return mErrorCallback != nullptr;
     }
 
     /**
@@ -148,9 +178,12 @@ public:
     }
 
 protected:
+    /** The callback which will be fired when new data is ready to be read/written. **/
+    AudioStreamDataCallback        *mDataCallback = nullptr;
 
-    /** The callback which will be fired when new data is ready to be read/written **/
-    AudioStreamCallback            *mStreamCallback = nullptr;
+    /** The callback which will be fired when an error or a disconnect occurs. **/
+    AudioStreamErrorCallback       *mErrorCallback = nullptr;
+
     /** Number of audio frames which will be requested in each callback */
     int32_t                         mFramesPerCallback = kUnspecified;
     /** Stream channel count */
@@ -195,6 +228,32 @@ protected:
     bool                            mFormatConversionAllowed = false;
     // Control whether and how Oboe can convert sample rates to achieve optimal results.
     SampleRateConversionQuality     mSampleRateConversionQuality = SampleRateConversionQuality::None;
+
+    /** Validate stream parameters that might not be checked in lower layers */
+    virtual Result isValidConfig() {
+        switch (mFormat) {
+            case AudioFormat::Unspecified:
+            case AudioFormat::I16:
+            case AudioFormat::Float:
+                break;
+
+            case AudioFormat::Invalid:
+            default:
+                return Result::ErrorInvalidFormat;
+        }
+
+        switch (mSampleRateConversionQuality) {
+            case SampleRateConversionQuality::None:
+            case SampleRateConversionQuality::Fastest:
+            case SampleRateConversionQuality::Low:
+            case SampleRateConversionQuality::Medium:
+            case SampleRateConversionQuality::High:
+            case SampleRateConversionQuality::Best:
+                return Result::OK;
+            default:
+                return Result::ErrorIllegalArgument;
+        }
+    }
 };
 
 } // namespace oboe

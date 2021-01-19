@@ -21,7 +21,9 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include <flowgraph/ChannelCountConverter.h>
 #include <flowgraph/MonoToMultiConverter.h>
+#include <flowgraph/MultiToMonoConverter.h>
 #include <flowgraph/SampleRateConverter.h>
 #include <oboe/Definitions.h>
 #include "AudioSourceCaller.h"
@@ -67,7 +69,9 @@ public:
 private:
     std::unique_ptr<flowgraph::FlowGraphSourceBuffered>    mSource;
     std::unique_ptr<AudioSourceCaller>                 mSourceCaller;
-    std::unique_ptr<flowgraph::MonoToMultiConverter>   mChannelConverter;
+    std::unique_ptr<flowgraph::MonoToMultiConverter>   mMonoToMultiConverter;
+    std::unique_ptr<flowgraph::MultiToMonoConverter>   mMultiToMonoConverter;
+    std::unique_ptr<flowgraph::ChannelCountConverter>  mChannelCountConverter;
     std::unique_ptr<resampler::MultiChannelResampler>  mResampler;
     std::unique_ptr<flowgraph::SampleRateConverter>    mRateConverter;
     std::unique_ptr<flowgraph::FlowGraphSink>              mSink;
@@ -76,8 +80,6 @@ private:
     DataCallbackResult                                 mCallbackResult = DataCallbackResult::Continue;
     AudioStream                                       *mFilterStream = nullptr;
     std::unique_ptr<uint8_t[]>                         mAppBuffer;
-
-    int64_t mFramePosition = 0;
 };
 
 }

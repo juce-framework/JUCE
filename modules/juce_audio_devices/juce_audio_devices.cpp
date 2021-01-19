@@ -47,8 +47,6 @@
 
 #include "native/juce_MidiDataConcatenator.h"
 
-#include <array>
-
 #include "midi_io/ump/juce_UMPProtocols.h"
 #include "midi_io/ump/juce_UMPUtils.h"
 #include "midi_io/ump/juce_UMPacket.h"

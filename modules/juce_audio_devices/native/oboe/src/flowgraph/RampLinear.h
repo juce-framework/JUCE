@@ -23,6 +23,7 @@
 
 #include "FlowGraphNode.h"
 
+namespace FLOWGRAPH_OUTER_NAMESPACE {
 namespace flowgraph {
 
 /**
@@ -92,5 +93,6 @@ private:
 };
 
 } /* namespace flowgraph */
+} /* namespace FLOWGRAPH_OUTER_NAMESPACE */
 
 #endif //FLOWGRAPH_RAMP_LINEAR_H

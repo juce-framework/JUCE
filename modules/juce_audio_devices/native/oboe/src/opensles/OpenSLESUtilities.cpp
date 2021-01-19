@@ -24,42 +24,42 @@ namespace oboe {
 
 const char *getSLErrStr(SLresult code) {
     switch (code) {
-        case 0:
+        case SL_RESULT_SUCCESS:
             return "SL_RESULT_SUCCESS";
-        case 1:
-            return "SL_RESULT_PRECONDITIONS_VIOLATE";
-        case 2:
+        case SL_RESULT_PRECONDITIONS_VIOLATED:
+            return "SL_RESULT_PRECONDITIONS_VIOLATED";
+        case SL_RESULT_PARAMETER_INVALID:
             return "SL_RESULT_PARAMETER_INVALID";
-        case 3:
+        case SL_RESULT_MEMORY_FAILURE:
             return "SL_RESULT_MEMORY_FAILURE";
-        case 4:
+        case SL_RESULT_RESOURCE_ERROR:
             return "SL_RESULT_RESOURCE_ERROR";
-        case 5:
+        case SL_RESULT_RESOURCE_LOST:
             return "SL_RESULT_RESOURCE_LOST";
-        case 6:
+        case SL_RESULT_IO_ERROR:
             return "SL_RESULT_IO_ERROR";
-        case 7:
+        case SL_RESULT_BUFFER_INSUFFICIENT:
             return "SL_RESULT_BUFFER_INSUFFICIENT";
-        case 8:
+        case SL_RESULT_CONTENT_CORRUPTED:
             return "SL_RESULT_CONTENT_CORRUPTED";
-        case 9:
+        case SL_RESULT_CONTENT_UNSUPPORTED:
             return "SL_RESULT_CONTENT_UNSUPPORTED";
-        case 10:
+        case SL_RESULT_CONTENT_NOT_FOUND:
             return "SL_RESULT_CONTENT_NOT_FOUND";
-        case 11:
+        case SL_RESULT_PERMISSION_DENIED:
             return "SL_RESULT_PERMISSION_DENIED";
-        case 12:
+        case SL_RESULT_FEATURE_UNSUPPORTED:
             return "SL_RESULT_FEATURE_UNSUPPORTED";
-        case 13:
+        case SL_RESULT_INTERNAL_ERROR:
             return "SL_RESULT_INTERNAL_ERROR";
-        case 14:
+        case SL_RESULT_UNKNOWN_ERROR:
             return "SL_RESULT_UNKNOWN_ERROR";
-        case 15:
+        case SL_RESULT_OPERATION_ABORTED:
             return "SL_RESULT_OPERATION_ABORTED";
-        case 16:
+        case SL_RESULT_CONTROL_LOST:
             return "SL_RESULT_CONTROL_LOST";
         default:
-            return "Unknown error";
+            return "Unknown SL error";
     }
 }
 
