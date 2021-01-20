@@ -319,6 +319,18 @@ public:
             [webView evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
                      completionHandler: nil];
         }
+        else if (url.trimStart().startsWithIgnoreCase ("file:"))
+        {
+            // URL::getLocalFile() handles unescaping the file path and normalising the
+            // number of leading slashes
+            auto file = URL(url).getLocalFile();
+
+            NSURL *nsUrl = [NSURL fileURLWithPath: juceStringToNS(file.getFullPathName())];
+
+            // setting allowingReadAccessToURL is required to access local files from
+            // a sandboxed app.
+            [webView loadFileURL: nsUrl allowingReadAccessToURL: nsUrl];
+        }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
             [webView loadRequest: request];
