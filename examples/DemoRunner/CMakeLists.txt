@@ -68,4 +68,6 @@ target_link_libraries(DemoRunner PRIVATE
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
-juce_add_bundle_resources_directory(DemoRunner ../Assets)
+foreach(folder IN ITEMS ../Assets ../Audio ../BLOCKS ../DSP ../GUI ../Utilities)
+    juce_add_bundle_resources_directory(DemoRunner ${folder})
+endforeach()
