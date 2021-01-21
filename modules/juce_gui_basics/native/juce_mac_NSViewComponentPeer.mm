@@ -1796,8 +1796,11 @@ private:
         // Without setting contentsFormat macOS Big Sur will always set the invalid area
         // to be the entire frame.
        #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
-        CALayer* layer = ((NSView*) self).layer;
-        layer.contentsFormat = kCAContentsFormatRGBA8Uint;
+        if (NSFoundationVersionNumber > (double) NSFoundationVersionNumber10_11_Max)
+        {
+            CALayer* layer = ((NSView*) self).layer;
+            layer.contentsFormat = kCAContentsFormatRGBA8Uint;
+        }
        #endif
 
         sendSuperclassMessage<void> (self, @selector (viewWillDraw));
