@@ -19,7 +19,7 @@ class PlaybackRegionView  : public juce::Component,
 {
 public:
     PlaybackRegionView (RegionSequenceViewContainer& viewContainer, juce::ARAPlaybackRegion* region);
-    ~PlaybackRegionView();
+    ~PlaybackRegionView() override;
 
     juce::ARAPlaybackRegion* getPlaybackRegion() const { return playbackRegion; }
     juce::Range<double> getTimeRange() const { return playbackRegion->getTimeRange(); }

@@ -17,7 +17,7 @@ class MusicalContextView  : public juce::Component,
 {
 public:
     MusicalContextView (DocumentView& documentView);
-    ~MusicalContextView();
+    ~MusicalContextView() override;
 
     // may return nullptr
     juce::ARAMusicalContext* getCurrentMusicalContext() const { return musicalContext; }

@@ -13,7 +13,7 @@ class RegionSequenceHeaderView    : public juce::Component,
 {
 public:
     RegionSequenceHeaderView (juce::ARAEditorView* editorView, juce::ARARegionSequence* regionSequence);
-    ~RegionSequenceHeaderView();
+    ~RegionSequenceHeaderView() override;
 
     void paint (juce::Graphics&) override;
 

@@ -17,7 +17,7 @@ class RegionSequenceViewContainer : private juce::ARARegionSequence::Listener
 {
 public:
     RegionSequenceViewContainer (DocumentView& documentView, juce::ARARegionSequence* sequence);
-    ~RegionSequenceViewContainer();
+    ~RegionSequenceViewContainer() override;
 
     juce::ARARegionSequence* getRegionSequence() const { return regionSequence; }     // careful: may return nullptr!
     juce::Range<double> getTimeRange() const { return (regionSequence != nullptr) ? regionSequence->getTimeRange() : juce::Range<double>(); }

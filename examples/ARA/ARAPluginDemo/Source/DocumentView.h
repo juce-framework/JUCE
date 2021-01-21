@@ -19,7 +19,7 @@ class DocumentView    : public juce::Component,
 {
 public:
     DocumentView (juce::ARAEditorView* editorView, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo);
-    ~DocumentView();
+    ~DocumentView() override;
 
     // ARAEditorView::Listener overrides
     void onNewSelection (const juce::ARAViewSelection& viewSelection) override;
