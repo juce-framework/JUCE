@@ -255,32 +255,24 @@ public:
     //==============================================================================
     void add (const ElementType& newElement)
     {
-        checkSourceIsNotAMember (&newElement);
-        ensureAllocatedSize (numUsed + 1);
-        addAssumingCapacityIsReady (newElement);
+        addImpl (newElement);
     }
 
     void add (ElementType&& newElement)
     {
-        checkSourceIsNotAMember (&newElement);
-        ensureAllocatedSize (numUsed + 1);
-        addAssumingCapacityIsReady (std::move (newElement));
+        addImpl (std::move (newElement));
     }
 
     template <typename... OtherElements>
-    void add (const ElementType& firstNewElement, OtherElements... otherElements)
+    void add (const ElementType& firstNewElement, OtherElements&&... otherElements)
     {
-        checkSourceIsNotAMember (&firstNewElement);
-        ensureAllocatedSize (numUsed + 1 + (int) sizeof... (otherElements));
-        addAssumingCapacityIsReady (firstNewElement, otherElements...);
+        addImpl (firstNewElement, std::forward<OtherElements> (otherElements)...);
     }
 
     template <typename... OtherElements>
-    void add (ElementType&& firstNewElement, OtherElements... otherElements)
+    void add (ElementType&& firstNewElement, OtherElements&&... otherElements)
     {
-        checkSourceIsNotAMember (&firstNewElement);
-        ensureAllocatedSize (numUsed + 1 + (int) sizeof... (otherElements));
-        addAssumingCapacityIsReady (std::move (firstNewElement), otherElements...);
+        addImpl (std::move (firstNewElement), std::forward<OtherElements> (otherElements)...);
     }
 
     //==============================================================================
@@ -335,7 +327,7 @@ public:
     //==============================================================================
     void insert (int indexToInsertAt, ParameterType newElement, int numberOfTimesToInsertIt)
     {
-        checkSourceIsNotAMember (&newElement);
+        checkSourceIsNotAMember (newElement);
         auto* space = createInsertSpace (indexToInsertAt, numberOfTimesToInsertIt);
 
         for (int i = 0; i < numberOfTimesToInsertIt; ++i)
@@ -561,21 +553,18 @@ private:
     }
 
     //==============================================================================
-    void addAssumingCapacityIsReady (const ElementType& element)   { new (elements + numUsed++) ElementType (element); }
-    void addAssumingCapacityIsReady (ElementType&& element)        { new (elements + numUsed++) ElementType (std::move (element)); }
-
-    template <typename... OtherElements>
-    void addAssumingCapacityIsReady (const ElementType& firstNewElement, OtherElements... otherElements)
+    template <typename... Elements>
+    void addImpl (Elements&&... toAdd)
     {
-        addAssumingCapacityIsReady (firstNewElement);
-        addAssumingCapacityIsReady (otherElements...);
+        ignoreUnused (std::initializer_list<int> { (((void) checkSourceIsNotAMember (toAdd)), 0)... });
+        ensureAllocatedSize (numUsed + (int) sizeof... (toAdd));
+        addAssumingCapacityIsReady (std::forward<Elements> (toAdd)...);
     }
 
-    template <typename... OtherElements>
-    void addAssumingCapacityIsReady (ElementType&& firstNewElement, OtherElements... otherElements)
+    template <typename... Elements>
+    void addAssumingCapacityIsReady (Elements&&... toAdd)
     {
-        addAssumingCapacityIsReady (std::move (firstNewElement));
-        addAssumingCapacityIsReady (otherElements...);
+        ignoreUnused (std::initializer_list<int> { ((void) (new (elements + numUsed++) ElementType (std::forward<Elements> (toAdd))), 0)... });
     }
 
     //==============================================================================
@@ -594,14 +583,14 @@ private:
         new (destination) ElementType (std::move (source));
     }
 
-    void checkSourceIsNotAMember (const ElementType* element)
+    void checkSourceIsNotAMember (const ElementType& element)
     {
         // when you pass a reference to an existing element into a method like add() which
         // may need to reallocate the array to make more space, the incoming reference may
         // be deleted indirectly during the reallocation operation! To work around this,
         // make a local copy of the item you're trying to add (and maybe use std::move to
         // move it into the add() method to avoid any extra overhead)
-        jassert (element < begin() || element >= end());
+        jassert (std::addressof (element) < begin() || end() <= std::addressof (element));
         ignoreUnused (element);
     }
 
