@@ -257,8 +257,8 @@ public:
     }
 
 private:
-    static const String* getString (const ValueUnion& data) noexcept { return reinterpret_cast<const String*> (data.stringValue); }
-    static String* getString (ValueUnion& data) noexcept             { return reinterpret_cast<String*> (data.stringValue); }
+    static const String* getString (const ValueUnion& data) noexcept { return unalignedPointerCast<const String*> (data.stringValue); }
+    static String* getString (ValueUnion& data) noexcept             { return unalignedPointerCast<String*> (data.stringValue); }
 };
 
 //==============================================================================

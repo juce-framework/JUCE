@@ -354,6 +354,7 @@ private:
         expectEquals (otherBuffer.getSample (1, 2), block.getSample (1, 3));
     }
 
+   #if JUCE_USE_SIMD
     template <typename T = SampleType>
     SIMDVoid<T> copyingTests()
     {
@@ -396,6 +397,7 @@ private:
             expectEquals (block.getSample (1, 3).get (1), numericData.getSample (1, (int) ((numSIMDElements * 2) + 1)));
         }
     }
+   #endif
 
     //==============================================================================
     template <typename T = SampleType>
@@ -491,8 +493,11 @@ private:
 
 static AudioBlockUnitTests<float> audioBlockFloatUnitTests;
 static AudioBlockUnitTests<double> audioBlockDoubleUnitTests;
+
+#if JUCE_USE_SIMD
 static AudioBlockUnitTests<SIMDRegister<float>> audioBlockSIMDFloatUnitTests;
 static AudioBlockUnitTests<SIMDRegister<double>> audioBlockSIMDDoubleUnitTests;
+#endif
 
 } // namespace dsp
 } // namespace juce

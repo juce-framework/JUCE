@@ -402,6 +402,16 @@ Rectangle<int> ComponentPeer::globalToLocal (const Rectangle<int>& screenPositio
     return screenPosition.withPosition (globalToLocal (screenPosition.getPosition()));
 }
 
+Rectangle<float> ComponentPeer::localToGlobal (const Rectangle<float>& relativePosition)
+{
+    return relativePosition.withPosition (localToGlobal (relativePosition.getPosition()));
+}
+
+Rectangle<float> ComponentPeer::globalToLocal (const Rectangle<float>& screenPosition)
+{
+    return screenPosition.withPosition (globalToLocal (screenPosition.getPosition()));
+}
+
 Rectangle<int> ComponentPeer::getAreaCoveredBy (Component& subComponent) const
 {
     return ScalingHelpers::scaledScreenPosToUnscaled

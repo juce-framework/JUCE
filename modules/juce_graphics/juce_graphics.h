@@ -35,7 +35,7 @@
 
   ID:                 juce_graphics
   vendor:             juce
-  version:            6.0.1
+  version:            6.0.7
   name:               JUCE graphics classes
   description:        Classes for 2D vector graphics, image loading/saving, font handling, etc.
   website:            http://www.juce.com/juce
@@ -79,7 +79,7 @@
 
 /** Config: JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
 
-    Setting this flag will turn off CoreGraphics font smoothing, which some people
+    Setting this flag will turn off CoreGraphics font smoothing on macOS, which some people
     find makes the text too 'fat' for their taste.
 */
 #ifndef JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING

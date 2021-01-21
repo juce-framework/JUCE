@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <stdint.h>
 
 #include "FifoControllerIndirect.h"
 

@@ -35,7 +35,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            6.0.1
+  version:            6.0.7
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -43,7 +43,7 @@
 
   dependencies:       juce_graphics juce_data_structures
   OSXFrameworks:      Cocoa Carbon QuartzCore
-  iOSFrameworks:      UIKit MobileCoreServices
+  iOSFrameworks:      UIKit CoreServices
 
  END_JUCE_MODULE_DECLARATION
 

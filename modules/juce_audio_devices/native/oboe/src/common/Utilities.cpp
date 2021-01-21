@@ -183,7 +183,7 @@ const char *convertToText<AudioStream*>(AudioStream* stream) {
      <<"BufferCapacity: "<<stream->getBufferCapacityInFrames()<<std::endl
      <<"BufferSize: "<<stream->getBufferSizeInFrames()<<std::endl
      <<"FramesPerBurst: "<< stream->getFramesPerBurst()<<std::endl
-     <<"FramesPerCallback: "<<stream->getFramesPerCallback()<<std::endl
+     <<"FramesPerDataCallback: "<<stream->getFramesPerDataCallback()<<std::endl
      <<"SampleRate: "<<stream->getSampleRate()<<std::endl
      <<"ChannelCount: "<<stream->getChannelCount()<<std::endl
      <<"Format: "<<oboe::convertToText(stream->getFormat())<<std::endl

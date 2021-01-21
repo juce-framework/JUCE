@@ -492,7 +492,9 @@ struct MP3Frame
         return frequencies[sampleRateIndex];
     }
 
-    void decodeHeader (const uint32 header)
+    enum class ParseSuccessful { no, yes };
+
+    ParseSuccessful decodeHeader (const uint32 header)
     {
         jassert (((header >> 10) & 3) != 3);
 
@@ -527,17 +529,18 @@ struct MP3Frame
             jassertfalse; // This means the file is using "free format". Apparently very few decoders
                           // support this mode, and this one certainly doesn't handle it correctly!
             frameSize = 0;
+            return ParseSuccessful::no;
         }
-        else
+
+        switch (layer)
         {
-            switch (layer)
-            {
-                case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
-                case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
-                case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
-                default: break;
-            }
+            case 1: frameSize = (((frameSizes[lsf][0][bitrateIndex] * 12000) / getFrequency() + padding) * 4) - 4; break;
+            case 2: frameSize = (frameSizes[lsf][1][bitrateIndex] * 144000)  / getFrequency() + (padding - 4); break;
+            case 3: frameSize = (bitrateIndex == 0) ? 0 : ((frameSizes[lsf][2][bitrateIndex] * 144000) / (getFrequency() << lsf) + (padding - 4)); break;
+            default: break;
         }
+
+        return ParseSuccessful::yes;
     }
 
     int layer, frameSize, numChannels, single;
@@ -1430,7 +1433,11 @@ struct MP3Stream
                 lastFrameSize += nextFrameOffset;
             }
 
-            frame.decodeHeader ((uint32) stream.readIntBigEndian());
+            const auto successful = frame.decodeHeader ((uint32) stream.readIntBigEndian());
+
+            if (successful == MP3Frame::ParseSuccessful::no)
+                return -1;
+
             headerParsed = true;
             frameSize = frame.frameSize;
             isFreeFormat = (frameSize == 0);

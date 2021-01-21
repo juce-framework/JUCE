@@ -197,9 +197,8 @@ public:
             if (type == VST3PlugIn)
             {
                 s.add ("JUCE_VST3DIR := " + escapeSpaces (targetName).upToLastOccurrenceOf (".", false, false) + ".vst3");
-
-                auto is32Bit = config.getArchitectureTypeString().contains ("m32");
-                s.add (String ("JUCE_VST3SUBDIR := Contents/") + (is32Bit ? "i386" : "x86_64") + "-linux");
+                s.add ("VST3_PLATFORM_ARCH := $(shell $(CXX) make_helpers/arch_detection.cpp 2>&1 | tr '\\n' ' ' | sed \"s/.*JUCE_ARCH \\([a-zA-Z0-9_-]*\\).*/\\1/\")");
+                s.add ("JUCE_VST3SUBDIR := Contents/$(VST3_PLATFORM_ARCH)-linux");
 
                 targetName = "$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)/" + targetName;
             }
@@ -256,7 +255,8 @@ public:
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
             for (auto& f : filesToCompile)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder })) << " \\" << newLine;
+                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder }))
+                    << " \\" << newLine;
 
             out << newLine;
         }
@@ -275,7 +275,7 @@ public:
                     << "\t@echo \"Compiling " << relativePath.getFileName() << "\""                                                                   << newLine
                     << (relativePath.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
                     << "$(" << cppflagsVarName << ") $(" << cflagsVarName << ")"
-                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""        << newLine
+                    << (f.second.isNotEmpty() ? " $(" + owner.getCompilerFlagSchemeVariableName (f.second) + ")" : "") << " -o \"$@\" -c \"$<\""      << newLine
                     << newLine;
             }
         }
@@ -379,8 +379,6 @@ public:
     static String getValueTreeTypeName()  { return "LINUX_MAKE"; }
     static String getTargetFolderName()   { return "LinuxMakefile"; }
 
-    String getExtraPkgConfigString() const      { return extraPkgConfigValue.get(); }
-
     static MakefileProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))
@@ -417,6 +415,8 @@ public:
     bool isLinux() const override                           { return true; }
     bool isOSX() const override                             { return false; }
     bool isiOS() const override                             { return false; }
+
+    String getNewLineString() const override                { return "\n"; }
 
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
@@ -477,9 +477,17 @@ public:
     {
         build_tools::writeStreamToFile (getTargetFolder().getChildFile ("Makefile"), [&] (MemoryOutputStream& mo)
         {
-            mo.setNewLineString ("\n");
+            mo.setNewLineString (getNewLineString());
             writeMakefile (mo);
         });
+
+        if (project.shouldBuildVST3())
+        {
+            auto helperDir = getTargetFolder().getChildFile ("make_helpers");
+            helperDir.createDirectory();
+            build_tools::overwriteFileIfDifferentOrThrow (helperDir.getChildFile ("arch_detection.cpp"),
+                                                          BinaryData::juce_runtime_arch_detection_cpp);
+        }
     }
 
     //==============================================================================
@@ -521,45 +529,46 @@ private:
         return result;
     }
 
-    StringArray getPackages() const
+    StringArray getExtraPkgConfigPackages() const
     {
-        StringArray packages;
-        packages.addTokens (getExtraPkgConfigString(), " ", "\"'");
+        auto packages = StringArray::fromTokens (extraPkgConfigValue.get().toString(), " ", "\"'");
         packages.removeEmptyStrings();
 
-        packages.addArray (linuxPackages);
+        return packages;
+    }
 
-        // don't add libcurl if curl symbols are loaded at runtime
-        if (isCurlEnabled() && ! isLoadCurlSymbolsLazilyEnabled())
-            packages.add ("libcurl");
+    StringArray getCompilePackages() const
+    {
+        auto packages = getLinuxPackages (PackageDependencyType::compile);
+        packages.addArray (getExtraPkgConfigPackages());
 
-        packages.removeDuplicates (false);
+        return packages;
+    }
+
+    StringArray getLinkPackages() const
+    {
+        auto packages = getLinuxPackages (PackageDependencyType::link);
+        packages.addArray (getExtraPkgConfigPackages());
 
         return packages;
     }
 
     String getPreprocessorPkgConfigFlags() const
     {
-        auto packages = getPackages();
+        auto compilePackages = getCompilePackages();
 
-        if (isWebBrowserComponentEnabled())
-        {
-            packages.add ("webkit2gtk-4.0");
-            packages.add ("gtk+-x11-3.0");
-        }
-
-        if (packages.size() > 0)
-            return "$(shell pkg-config --cflags " + packages.joinIntoString (" ") + ")";
+        if (compilePackages.size() > 0)
+            return "$(shell pkg-config --cflags " + compilePackages.joinIntoString (" ") + ")";
 
         return {};
     }
 
     String getLinkerPkgConfigFlags() const
     {
-        auto packages = getPackages();
+        auto linkPackages = getLinkPackages();
 
-        if (packages.size() > 0)
-            return "$(shell pkg-config --libs " + packages.joinIntoString (" ") + ")";
+        if (linkPackages.size() > 0)
+            return "$(shell pkg-config --libs " + linkPackages.joinIntoString (" ") + ")";
 
         return {};
     }
@@ -568,7 +577,7 @@ private:
     {
         StringArray result;
 
-        if (linuxLibs.contains("pthread"))
+        if (linuxLibs.contains ("pthread"))
             result.add ("-pthread");
 
         return result;
@@ -671,30 +680,6 @@ private:
             result.add (replacePreprocessorTokens (config, extraFlags));
 
         return result;
-    }
-
-    bool isWebBrowserComponentEnabled() const
-    {
-        static String guiExtrasModule ("juce_gui_extra");
-
-        return (project.getEnabledModules().isModuleEnabled (guiExtrasModule)
-                && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true));
-    }
-
-    bool isCurlEnabled() const
-    {
-        static String juceCoreModule ("juce_core");
-
-        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
-                && project.isConfigFlagEnabled ("JUCE_USE_CURL", true));
-    }
-
-    bool isLoadCurlSymbolsLazilyEnabled() const
-    {
-        static String juceCoreModule ("juce_core");
-
-        return (project.getEnabledModules().isModuleEnabled (juceCoreModule)
-                && project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false));
     }
 
     //==============================================================================
@@ -973,7 +958,9 @@ private:
 
         writeCompilerFlagSchemes (out, filesToCompile);
 
-        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files, MakefileTarget* target, const Project& p) -> Array<std::pair<File, String>>
+        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files,
+                                     MakefileTarget* target,
+                                     const Project& p) -> Array<std::pair<File, String>>
         {
             Array<std::pair<File, String>> targetFiles;
 
@@ -991,7 +978,7 @@ private:
 
         out << getPhonyTargetLine() << newLine << newLine;
 
-        writeTargetLines (out, getPackages());
+        writeTargetLines (out, getLinkPackages());
 
         for (auto target : targets)
             target->addFiles (out, getFilesForTarget (filesToCompile, target, project));

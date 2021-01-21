@@ -277,13 +277,22 @@ void HeaderComponent::initialiseButtons()
     {
         if (project != nullptr)
         {
-            if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
+            if (project->isSaveAndExportDisabled())
             {
-                auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
-                                                          .getChildWithName (ProjectMessages::Ids::incompatibleLicense);
+                auto setWarningVisible = [this] (const Identifier& identifier)
+                {
+                    auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
+                                                              .getChildWithName (identifier);
 
-                if (child.isValid())
-                    child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
+                    if (child.isValid())
+                        child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
+                };
+
+                if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
+                    setWarningVisible (ProjectMessages::Ids::incompatibleLicense);
+
+                if (project->isFileModificationCheckPending())
+                    setWarningVisible (ProjectMessages::Ids::jucerFileModified);
             }
             else
             {

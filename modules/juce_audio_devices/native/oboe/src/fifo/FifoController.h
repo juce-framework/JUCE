@@ -17,9 +17,10 @@
 #ifndef NATIVEOBOE_FIFOCONTROLLER_H
 #define NATIVEOBOE_FIFOCONTROLLER_H
 
-#include <sys/types.h>
-#include "FifoControllerBase.h"
 #include <atomic>
+#include <stdint.h>
+
+#include "FifoControllerBase.h"
 
 namespace oboe {
 

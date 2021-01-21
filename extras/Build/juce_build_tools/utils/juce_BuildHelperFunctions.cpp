@@ -154,7 +154,7 @@ namespace build_tools
         return v;
     }
 
-    String makeValidIdentifier (String s, bool capitalise, bool removeColons, bool allowTemplates, bool allowAsterisks)
+    String makeValidIdentifier (String s, bool makeCamelCase, bool removeColons, bool allowTemplates, bool allowAsterisks)
     {
         if (s.isEmpty())
             return "unknown";
@@ -187,12 +187,12 @@ namespace build_tools
 
         auto n = words[0];
 
-        if (capitalise)
+        if (makeCamelCase)
             n = n.toLowerCase();
 
         for (int i = 1; i < words.size(); ++i)
         {
-            if (capitalise && words[i].length() > 1)
+            if (makeCamelCase && words[i].length() > 1)
                 n << words[i].substring (0, 1).toUpperCase()
                   << words[i].substring (1).toLowerCase();
             else

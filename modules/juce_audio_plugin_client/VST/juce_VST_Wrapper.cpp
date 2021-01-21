@@ -1096,7 +1096,7 @@ public:
             {
                 auto screenBounds = peer->localToGlobal (peer->getBounds());
 
-                auto scale = Desktop::getInstance().getDisplays().findDisplayForRect (screenBounds, false).scale
+                auto scale = Desktop::getInstance().getDisplays().getDisplayForRect (screenBounds, false)->scale
                                          / Desktop::getInstance().getGlobalScaleFactor();
 
                 setContentScaleFactor ((float) scale);
@@ -1210,8 +1210,8 @@ public:
                     auto scale = Desktop::getInstance().getGlobalScaleFactor();
 
                     X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
-                                                              static_cast<unsigned int> (roundToInt (pos.getWidth()  * scale)),
-                                                              static_cast<unsigned int> (roundToInt (pos.getHeight() * scale)));
+                                                              static_cast<unsigned int> (roundToInt ((float) pos.getWidth()  * scale)),
+                                                              static_cast<unsigned int> (roundToInt ((float) pos.getHeight() * scale)));
                    #endif
 
                    #if JUCE_MAC
@@ -2228,7 +2228,7 @@ namespace
         return pluginEntryPoint (audioMaster);
     }
 
-   #ifndef JUCE_64BIT // (can't compile this on win64, but it's not needed anyway with VST2.4)
+   #if ! defined (JUCE_64BIT) && JUCE_MSVC // (can't compile this on win64, but it's not needed anyway with VST2.4)
     extern "C" __declspec (dllexport) int main (Vst2::audioMasterCallback audioMaster)
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;

@@ -272,7 +272,10 @@ public:
     /** Returns the PopupMenu object associated with the ComboBox.
         Can be useful for adding sub-menus to the ComboBox standard PopupMenu
     */
-    PopupMenu* getRootMenu() { return &currentMenu; }
+    PopupMenu* getRootMenu() noexcept { return &currentMenu; }
+
+    /** Returns the PopupMenu object associated with the ComboBox. */
+    const PopupMenu* getRootMenu() const noexcept { return &currentMenu; }
 
     //==============================================================================
     /**

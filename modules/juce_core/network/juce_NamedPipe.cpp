@@ -41,6 +41,7 @@ bool NamedPipe::openExisting (const String& pipeName)
 
 bool NamedPipe::isOpen() const
 {
+    ScopedReadLock sl (lock);
     return pimpl != nullptr;
 }
 
@@ -55,6 +56,7 @@ bool NamedPipe::createNewPipe (const String& pipeName, bool mustNotExist)
 
 String NamedPipe::getName() const
 {
+    ScopedReadLock sl (lock);
     return currentPipeName;
 }
 
@@ -75,7 +77,7 @@ public:
 
     void runTest() override
     {
-        const String pipeName ("TestPipe");
+        const auto pipeName = "TestPipe" + String ((intptr_t) Thread::getCurrentThreadId());
 
         beginTest ("Pre test cleanup");
         {
@@ -208,11 +210,6 @@ private:
                 pipe.openExisting (pipeName);
         }
 
-        ~NamedPipeThread()
-        {
-            stopThread (100);
-        }
-
         NamedPipe pipe;
         const String& pipeName;
         WaitableEvent& workCompleted;
@@ -228,6 +225,11 @@ private:
             : NamedPipeThread ("NamePipeSender", pName, shouldCreatePipe, completed),
               sendData (sData)
         {}
+
+        ~SenderThread() override
+        {
+            stopThread (100);
+        }
 
         void run() override
         {
@@ -245,6 +247,11 @@ private:
                         WaitableEvent& completed)
             : NamedPipeThread ("NamePipeSender", pName, shouldCreatePipe, completed)
         {}
+
+        ~ReceiverThread() override
+        {
+            stopThread (100);
+        }
 
         void run() override
         {

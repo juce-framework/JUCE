@@ -26,16 +26,18 @@
 namespace juce
 {
 
-static bool exeIsAvailable (const char* const executable)
+static bool exeIsAvailable (String executable)
 {
     ChildProcess child;
-    const bool ok = child.start ("which " + String (executable))
-                      && child.readAllProcessOutput().trim().isNotEmpty();
 
-    child.waitForProcessToFinish (60 * 1000);
-    return ok;
+    if (child.start ("which " + executable))
+    {
+        child.waitForProcessToFinish (60 * 1000);
+        return (child.getExitCode() == 0);
+    }
+
+    return false;
 }
-
 
 class FileChooser::Native    : public FileChooser::Pimpl,
                                private Timer
@@ -67,7 +69,7 @@ public:
         child.start (args, ChildProcess::wantStdOut);
 
         while (child.isRunning())
-            if (! MessageManager::getInstance()->runDispatchLoopUntil(20))
+            if (! MessageManager::getInstance()->runDispatchLoopUntil (20))
                 break;
 
         finish (false);
@@ -186,7 +188,7 @@ private:
         }
 
         args.add (startPath.getFullPathName());
-        args.add (owner.filters.replaceCharacter (';', ' '));
+        args.add ("(" + owner.filters.replaceCharacter (';', ' ') + ")");
     }
 
     void addZenityArgs()
@@ -217,8 +219,7 @@ private:
             StringArray tokens;
             tokens.addTokens (owner.filters, ";,|", "\"");
 
-            for (int i = 0; i < tokens.size(); ++i)
-                args.add ("--file-filter=" + tokens[i]);
+            args.add ("--file-filter=" + tokens.joinIntoString (" "));
         }
 
         if (owner.startingFile.isDirectory())

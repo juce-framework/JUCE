@@ -100,6 +100,8 @@ void ProjucerApplication::initialise (const String& commandLine)
             return;
         }
 
+        doBasicApplicationSetup();
+
         // do further initialisation in a moment when the message loop has started
         triggerAsyncUpdate();
     }
@@ -130,7 +132,7 @@ void ProjucerApplication::initialiseWindows (const String& commandLine)
 
     if (commandLineWithoutNSDebug.trim().isNotEmpty() && ! commandLineWithoutNSDebug.trim().startsWithChar ('-'))
         anotherInstanceStarted (commandLine);
-    else
+    else if (mainWindowList.windows.size() == 0)
         mainWindowList.reopenLastProjects();
 
     mainWindowList.createWindowIfNoneAreOpen();
@@ -138,17 +140,11 @@ void ProjucerApplication::initialiseWindows (const String& commandLine)
 
 void ProjucerApplication::handleAsyncUpdate()
 {
-    licenseController = std::make_unique<LicenseController>();
-
-    LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
-
     rescanJUCEPathModules();
     rescanUserPathModules();
 
     openDocumentManager.registerType (new ProjucerAppClasses::LiveBuildCodeEditorDocument::Type(), 2);
-    childProcessCache.reset (new ChildProcessCache());
 
-    initCommandManager();
     menuModel.reset (new MainMenuModel());
 
    #if JUCE_MAC
@@ -162,13 +158,21 @@ void ProjucerApplication::handleAsyncUpdate()
     updateEditorColourSchemeIfNeeded();
 
     ImageCache::setCacheTimeout (30 * 1000);
-    icons = std::make_unique<Icons>();
     tooltipWindow = std::make_unique<TooltipWindow> (nullptr, 1200);
 
     if (isAutomaticVersionCheckingEnabled())
         LatestVersionCheckerAndUpdater::getInstance()->checkForNewVersion (true);
 
     initialiseWindows (getCommandLineParameters());
+}
+
+void ProjucerApplication::doBasicApplicationSetup()
+{
+    licenseController = std::make_unique<LicenseController>();
+    LookAndFeel::setDefaultLookAndFeel (&lookAndFeel);
+    initCommandManager();
+    childProcessCache = std::make_unique<ChildProcessCache>();
+    icons = std::make_unique<Icons>();
 }
 
 static void deleteTemporaryFiles()
@@ -272,7 +276,12 @@ String ProjucerApplication::getVersionDescription() const
 void ProjucerApplication::anotherInstanceStarted (const String& commandLine)
 {
     if (server == nullptr && ! commandLine.trim().startsWithChar ('-'))
-        openFile (File (commandLine.unquoted()));
+    {
+        ArgumentList list ({}, commandLine);
+
+        for (auto& arg : list.arguments)
+            openFile (arg.resolveAsFile());
+    }
 }
 
 ProjucerApplication& ProjucerApplication::getApp()
@@ -698,7 +707,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     // example doesn't exist?
     jassert (example != File());
 
-    mainWindowList.openFile (example);
+    openFile (example);
 }
 
 //==============================================================================
@@ -1167,7 +1176,7 @@ void ProjucerApplication::createNewProjectFromClipboard()
     {
         errorString = "Clipboard does not contain a valid PIP.";
     }
-    else if (! mainWindowList.openFile (tempFile))
+    else if (! openFile (tempFile))
     {
         errorString = "Couldn't create project from clipboard contents.";
         mainWindowList.closeWindow (mainWindowList.windows.getLast());
@@ -1195,7 +1204,6 @@ void ProjucerApplication::askUserToOpenFile()
 
 bool ProjucerApplication::openFile (const File& file)
 {
-    handleUpdateNowIfNeeded();
     return mainWindowList.openFile (file);
 }
 
@@ -1444,7 +1452,7 @@ void ProjucerApplication::initCommandManager()
     registerGUIEditorCommands();
 }
 
-void rescanModules (AvailableModulesList& list, const Array<File>& paths, bool async)
+static void rescanModules (AvailableModulesList& list, const Array<File>& paths, bool async)
 {
     if (async)
         list.scanPathsAsync (paths);
@@ -1548,13 +1556,13 @@ void ProjucerApplication::setEditorColourScheme (int index, bool saveSetting)
     getCommandManager().commandStatusChanged();
 }
 
-bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
+static bool isEditorColourSchemeADefaultScheme (const StringArray& schemes, int editorColourSchemeIndex)
 {
     auto& schemeName = schemes[editorColourSchemeIndex];
     return (schemeName == "Default (Dark)" || schemeName == "Default (Light)");
 }
 
-int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
+static int getEditorColourSchemeForGUIColourScheme (const StringArray& schemes, int guiColourSchemeIndex)
 {
     auto defaultDarkEditorIndex  = schemes.indexOf ("Default (Dark)");
     auto defaultLightEditorIndex = schemes.indexOf ("Default (Light)");

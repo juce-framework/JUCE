@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-#include "FifoControllerBase.h"
-
-#include <cassert>
-#include <sys/types.h>
 #include <algorithm>
-#include "FifoControllerBase.h"
+#include <cassert>
+#include <stdint.h>
 
-#include "common/OboeDebug.h"
+#include "FifoControllerBase.h"
 
 namespace oboe {
 

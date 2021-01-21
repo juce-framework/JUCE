@@ -42,8 +42,11 @@ public:
     : AudioStream(builder)
     , mChildStream(childStream) {
         // Intercept the callback if used.
-        if (builder.getCallback() != nullptr) {
-            mStreamCallback = mChildStream->swapCallback(this);
+        if (builder.isErrorCallbackSpecified()) {
+            mErrorCallback = mChildStream->swapErrorCallback(this);
+        }
+        if (builder.isDataCallbackSpecified()) {
+            mDataCallback = mChildStream->swapDataCallback(this);
         } else {
             const int size = childStream->getFramesPerBurst() * childStream->getBytesPerFrame();
             mBlockingBuffer = std::make_unique<uint8_t[]>(size);
@@ -52,6 +55,7 @@ public:
         // Copy parameters that may not match builder.
         mBufferCapacityInFrames = mChildStream->getBufferCapacityInFrames();
         mPerformanceMode = mChildStream->getPerformanceMode();
+        mInputPreset = mChildStream->getInputPreset();
     }
 
     virtual ~FilterAudioStream() = default;
@@ -175,30 +179,34 @@ public:
 
     DataCallbackResult onAudioReady(AudioStream *oboeStream,
             void *audioData,
-            int32_t numFrames) override {
-        int32_t framesProcessed;
-        if (oboeStream->getDirection() == Direction::Output) {
-            framesProcessed = mFlowGraph->read(audioData, numFrames, 0 /* timeout */);
-        } else {
-            framesProcessed = mFlowGraph->write(audioData, numFrames);
+            int32_t numFrames) override;
+
+    bool onError(AudioStream * audioStream, Result error) override {
+        if (mErrorCallback != nullptr) {
+            return mErrorCallback->onError(this, error);
         }
-        return (framesProcessed < numFrames)
-                ? DataCallbackResult::Stop
-                : mFlowGraph->getDataCallbackResult();
+        return false;
     }
 
     void onErrorBeforeClose(AudioStream *oboeStream, Result error) override {
-        if (mStreamCallback != nullptr) {
-            mStreamCallback->onErrorBeforeClose(this, error);
+        if (mErrorCallback != nullptr) {
+            mErrorCallback->onErrorBeforeClose(this, error);
         }
     }
 
     void onErrorAfterClose(AudioStream *oboeStream, Result error) override {
         // Close this parent stream because the callback will only close the child.
         AudioStream::close();
-        if (mStreamCallback != nullptr) {
-            mStreamCallback->onErrorAfterClose(this, error);
+        if (mErrorCallback != nullptr) {
+            mErrorCallback->onErrorAfterClose(this, error);
         }
+    }
+
+    /**
+     * @return last result passed from an error callback
+     */
+    oboe::Result getLastErrorCallbackResult() const override {
+        return mChildStream->getLastErrorCallbackResult();
     }
 
 private:

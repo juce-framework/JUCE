@@ -130,7 +130,7 @@ public:
                 auto input = inputSamples[i];
                 auto output = input - lastOutput[channel];
 
-                delay.pushSample ((int) channel, input);
+                delay.pushSample ((int) channel, output);
                 delay.setDelay (delaySamples[i]);
                 output = delay.popSample ((int) channel);
 

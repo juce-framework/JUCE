@@ -89,7 +89,7 @@ namespace build_tools
         String auMainType;
         bool isAuSandboxSafe                    = false;
         bool isPluginSynth                      = false;
-        
+        bool suppressResourceUsage              = false;
         bool isPluginARAEffect                  = false;
 
     private:

@@ -119,6 +119,35 @@ provisioning profiles, which is achieved by passing the `-allowProvisioningUpdat
 
     cmake --build build-ios --target <targetName> -- -allowProvisioningUpdates
 
+#### Archiving for iOS
+
+CMake's out-of-the-box archiving behaviour doesn't always work as expected, especially for targets
+that depend on static libraries (such as targets added with `juce_add_binary_data`). Xcode may
+generate these libraries into a 'DerivedData' directory, but then omit this directory from the
+library search paths later in the build.
+
+If the "Product -> Archive" action isn't working, the following steps may help correct the issue:
+
+- On your static library, explicitly set the `ARCHIVE_OUTPUT_DIRECTORY` property.
+  ```
+  set_target_properties(my_static_lib_target PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "./")
+  ```
+- Now, the Archive build should complete without linker errors, but the archived product may still
+  be hidden in the Organizer window. To fix this issue, set the following properties on the target
+  representing the actual iOS app. If your target was added with `juce_add_gui_app`, pass the same
+  target name. Otherwise, if your target was added with `juce_add_plugin` you may need to append
+  `_Standalone` to the target name, to specify the standalone plugin target.
+  ```
+  set_target_properties(my_ios_app_target PROPERTIES
+      XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+      XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
+  ```
+
+### Building universal binaries for macOS
+
+Building universal binaries that will run on both arm64 and x86_64 can be achieved by
+configuring the CMake project with `"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"`.
+
 ### A note about compile definitions
 
 Module options and plugin options that would previously have been set in the Projucer can be set on
@@ -144,7 +173,48 @@ the newer buses API to specify the desired plugin inputs and outputs.
 
 ## API Reference
 
-### `juce_add_<target>`
+### Options
+
+These flags can be enabled or disabled to change the behaviour of parts of the JUCE build.
+
+These options would normally be configured by either:
+- Supplying an option in the form `-DNAME_OF_OPTION=ON/OFF` to the initial CMake configuration call,
+  or
+- Calling `set(NAME_OF_OPTION ON/OFF)` before including JUCE in your project via `add_subdirectory`
+  or `find_package`.
+
+#### `JUCE_BUILD_EXTRAS`
+
+This controls whether targets are added for the projects in the 'extras' folder, such as the
+Projucer and AudioPluginHost. This is off by default, because you probably won't need these targets
+if you've included JUCE in your own project.
+
+#### `JUCE_BUILD_EXAMPLES`
+
+This controls whether targets are added for the projects in the 'examples' folder, such as the
+DemoRunner and PIPs. This is off by default, because you probably won't need these targets if you've
+included JUCE in your own project.
+
+#### `JUCE_ENABLE_MODULE_SOURCE_GROUPS`
+
+This option controls whether dummy targets are added to the build, where these targets contain all
+of the source files for each module added with `juce_add_module(s)`. If you're planning to use an
+IDE and want to be able to browse all of JUCE's source files, this may be useful. However, it will
+increase the size of generated IDE projects and might slow down configuration a bit. If you enable
+this, you should probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level
+CMakeLists, otherwise the module sources will be added directly to the top level of the project,
+instead of in a nice 'Modules' subfolder.
+
+#### `JUCE_COPY_PLUGIN_AFTER_BUILD`
+
+Controls whether plugin targets should be installed to the system after building. Note that the
+plugin folders may be protected, so the build may require elevated permissions in order for the
+installation to work correctly, or you may need to adjust the permissions of the destination
+folders.
+
+### Functions
+
+#### `juce_add_<target>`
 
     juce_add_gui_app(<target> [KEY value]...)
     juce_add_console_app(<target> [KEY value]...)
@@ -191,10 +261,10 @@ attributes directly to these creation functions, rather than adding them later.
   - The text your app will display when it requests camera permissions.
 
 - `BLUETOOTH_PERMISSION_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+  - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
 
 - `BLUETOOTH_PERMISSION_TEXT`
-  - The text your iOS app will display when it requests bluetooth permissions.
+  - The text your app will display when it requests bluetooth permissions.
 
 - `SEND_APPLE_EVENTS_PERMISSION_ENABLED`
   - May be either TRUE or FALSE. Enable this to allow your app to send Apple events.
@@ -334,13 +404,21 @@ attributes directly to these creation functions, rather than adding them later.
     plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
     without first calling `juce_set_aax_sdk_path` or `juce_set_vst2_sdk_path` respectively.
 
+- `PLUGIN_NAME`
+  - The name of the plugin. In a DAW environment, this is the name that will be displayed to the
+    user when they go to load a plugin. This name may differ from the name of the physical plugin
+    file (to set the name of the plugin file, use the `PRODUCT_NAME` option). If not specified,
+    the `PLUGIN_NAME` will default to match the `PRODUCT_NAME`.
+
 - `PLUGIN_MANUFACTURER_CODE`
   - A four-character unique ID for your company. For AU compatibility, this must contain at least
-    one upper-case letter.
+    one upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the
+    remaining letters to be lower-case.
 
 - `PLUGIN_CODE`
-  - A four-character unique ID for your plugin. For AU compatibility, this must contain at least
-    one upper-case letter.
+  - A four-character unique ID for your plugin. For AU compatibility, this must contain exactly one
+    upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the remaining
+    letters to be lower-case.
 
 - `DESCRIPTION`
   - A short description of your plugin.
@@ -404,6 +482,13 @@ attributes directly to these creation functions, rather than adding them later.
 - `AU_SANDBOX_SAFE`
   - May be either TRUE or FALSE. Adds the appropriate entries to an AU plugin's Info.plist.
 
+- `SUPPRESS_AU_PLIST_RESOURCE_USAGE`
+  - May be either TRUE or FALSE. Defaults to FALSE. Set this to TRUE to disable the `resourceUsage`
+    key in the target's plist. This is useful for AU plugins that must access resources which cannot
+    be declared in the resourceUsage block, such as UNIX domain sockets. In particular,
+    PACE-protected AU plugins may require this option to be enabled in order for the plugin to load
+    in GarageBand.
+
 - `AAX_CATEGORY`
   - Should be one of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
     `AAX_ePlugInCategory_Dynamics`, `AAX_ePlugInCategory_PitchShift`, `AAX_ePlugInCategory_Reverb`,
@@ -418,6 +503,13 @@ attributes directly to these creation functions, rather than adding them later.
     `JUCE_PLUGINHOST_AU=1` to the new target, and will link the macOS frameworks necessary for
     hosting plugins. Using this parameter should be preferred over using
     `target_compile_definitions` to manually set the `JUCE_PLUGINHOST_AU` preprocessor definition.
+
+- `USE_LEGACY_COMPATIBILITY_PLUGIN_CODE`
+  - May be either TRUE or FALSE (defaults to FALSE). If TRUE, will override the value of the
+    preprocessor definition "JucePlugin_ManufacturerCode" with the hex equivalent of "proj". This
+    option exists to maintain compatiblity with a previous, buggy version of JUCE's CMake support
+    which mishandled the manufacturer code property. Most projects should leave this option set to
+    its default value.
 
 - `COPY_PLUGIN_AFTER_BUILD`
   - Whether or not to install the plugin to the current system after building. False by default.
@@ -459,7 +551,7 @@ attributes directly to these creation functions, rather than adding them later.
     Unlike the other `COPY_DIR` arguments, this argument does not have a default value so be sure
     to set it if you have enabled `COPY_PLUGIN_AFTER_BUILD` and the `Unity` format.
 
-### `juce_add_binary_data`
+#### `juce_add_binary_data`
 
     juce_add_binary_data(<name>
         [HEADER_NAME ...]
@@ -481,14 +573,14 @@ and embedded in the resulting static library. This library can be linked as norm
 `target_link_libraries(<otherTarget> PRIVATE <name>)`, and the header can be included using
 `#include <BinaryData.h>`.
 
-### `juce_add_bundle_resources_directory`
+#### `juce_add_bundle_resources_directory`
 
     juce_add_bundle_resources_directory(<target> <folder>)
 
 Copy the entire directory at the location `<folder>` into an Apple bundle's resource directory, i.e.
 the `Resources` directory for a macOS bundle, and the top-level directory of an iOS bundle.
 
-### `juce_generate_juce_header`
+#### `juce_generate_juce_header`
 
     juce_generate_juce_header(<target>)
 
@@ -501,7 +593,7 @@ disabled by setting the compile definitions `DONT_SET_USING_JUCE_NAMESPACE` and
 JuceHeader.h is optional. Instead, module headers can be included directly in source files that
 require them.
 
-### `juce_set_<kind>_sdk_path`
+#### `juce_set_<kind>_sdk_path`
 
     juce_set_aax_sdk_path(<absolute path>)
     juce_set_vst2_sdk_path(<absolute path>)
@@ -510,7 +602,7 @@ Call these functions from your CMakeLists to set up your local AAX and/or VST2 S
 should be called *before* adding any targets that may depend on the AAX/VST2 SDKs (plugin
 hosts, VST2/AAX plugins etc.).
 
-### `juce_add_module`
+#### `juce_add_module`
 
     juce_add_module(<path to module>)
     juce_add_modules(<names of module>...)
@@ -536,7 +628,7 @@ invocation will add a module target named `my_module`, along with an alias named
 This version accepts many module paths, rather than just one. For an example of usage, see the
 CMakeLists in the `modules` directory.
 
-### `juce_add_pip`
+#### `juce_add_pip`
 
     juce_add_pip(<header>)
 
@@ -551,7 +643,7 @@ proof-of-concept, you should prefer the `juce_add_gui_app`, `juce_add_plugin`, o
 `juce_add_console_app` functions, which provide more fine-grained control over the properties of
 your target.
 
-### `juce_disable_default_flags`
+#### `juce_disable_default_flags`
 
     juce_disable_default_flags()
 
@@ -559,23 +651,41 @@ This function sets the `CMAKE_<LANG>_FLAGS_<MODE>` to empty in the current direc
 allowing alternative optimisation/debug flags to be supplied without conflicting with the
 CMake-supplied defaults.
 
-### `juce::juce_recommended_warning_flags`
+### Targets
 
-    target_link_libraries(myTarget PRIVATE juce::juce_recommended_warning_flags)
+#### `juce::juce_recommended_warning_flags`
+
+    target_link_libraries(myTarget PUBLIC juce::juce_recommended_warning_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE warnings when building them.
 
-### `juce::juce_recommended_config_flags`
+This target just sets compiler and linker flags, and doesn't have any associated libraries or
+include directories. When building plugins, it's probably desirable to link this to the shared code
+target with `PUBLIC` visibility, so that all the plugin wrappers inherit the same compile/link
+flags.
 
-    target_link_libraries(myTarget PRIVATE juce::juce_recommended_config_flags)
+#### `juce::juce_recommended_config_flags`
+
+    target_link_libraries(myTarget PUBLIC juce::juce_recommended_config_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE optimisation and debug flags.
 
-### `juce::juce_recommended_lto_flags`
+This target just sets compiler and linker flags, and doesn't have any associated libraries or
+include directories. When building plugins, it's probably desirable to link this to the shared code
+target with `PUBLIC` visibility, so that all the plugin wrappers inherit the same compile/link
+flags.
 
-    target_link_libraries(myTarget PRIVATE juce::juce_recommended_lto_flags)
+#### `juce::juce_recommended_lto_flags`
+
+    target_link_libraries(myTarget PUBLIC juce::juce_recommended_lto_flags)
 
 This is a target which can be linked to other targets using `target_link_libraries`, in order to
 enable the recommended JUCE link time optimisation settings.
+
+This target just sets compiler and linker flags, and doesn't have any associated libraries or
+include directories. When building plugins, it's probably desirable to link this to the shared code
+target with `PUBLIC` visibility, so that all the plugin wrappers inherit the same compile/link
+flags.
+

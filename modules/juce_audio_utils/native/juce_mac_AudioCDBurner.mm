@@ -28,9 +28,9 @@ namespace juce
 
 const int kilobytesPerSecond1x = 176;
 
-struct AudioTrackProducerClass  : public ObjCClass <NSObject>
+struct AudioTrackProducerClass  : public ObjCClass<NSObject>
 {
-    AudioTrackProducerClass()  : ObjCClass <NSObject> ("JUCEAudioTrackProducer_")
+    AudioTrackProducerClass()  : ObjCClass<NSObject> ("JUCEAudioTrackProducer_")
     {
         addIvar<AudioSourceHolder*> ("source");
 
@@ -73,7 +73,7 @@ struct AudioTrackProducerClass  : public ObjCClass <NSObject>
 private:
     static id initWithAudioSourceHolder (id self, SEL, AudioSourceHolder* source)
     {
-        self = sendSuperclassMessage (self, @selector (init));
+        self = sendSuperclassMessage<id> (self, @selector (init));
         object_setInstanceVariable (self, "source", source);
         return self;
     }
@@ -86,7 +86,7 @@ private:
     static void dealloc (id self, SEL)
     {
         delete getSource (self);
-        sendSuperclassMessage (self, @selector (dealloc));
+        sendSuperclassMessage<void> (self, @selector (dealloc));
     }
 
     static void cleanupTrackAfterBurn (id, SEL, DRTrack*) {}

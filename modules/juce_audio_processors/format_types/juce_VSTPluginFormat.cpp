@@ -55,6 +55,7 @@ namespace Vst2
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 
 #include "juce_VSTMidiEventList.h"
@@ -178,7 +179,7 @@ namespace
        #elif JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
         timeval micro;
         gettimeofday (&micro, nullptr);
-        return micro.tv_usec * 1000.0;
+        return (double) micro.tv_usec * 1000.0;
        #elif JUCE_MAC
         UnsignedWide micro;
         Microseconds (&micro);
@@ -446,8 +447,8 @@ private:
             }
             else
             {
-                entry->range.low  = curEntry / (float) numEntries;
-                entry->range.high = (curEntry + 1) / (float) numEntries;
+                entry->range.low  = (float) curEntry / (float) numEntries;
+                entry->range.high = (float) (curEntry + 1) / (float) numEntries;
 
                 entry->range.inclusiveLow  = true;
                 entry->range.inclusiveHigh = (curEntry == numEntries - 1);
@@ -1768,9 +1769,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                 {
                     if (i != oldProg)
                     {
-                        auto prog = (const fxProgram*) (((const char*) (set->programs)) + i * progLen);
+                        auto prog = addBytesToPointer (set->programs, i * progLen);
 
-                        if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
+                        if (getAddressDifference (prog, set) >= (int) dataSize)
                             return false;
 
                         if (fxbSwap (set->numPrograms) > 0)
@@ -1784,9 +1785,9 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                 if (fxbSwap (set->numPrograms) > 0)
                     setCurrentProgram (oldProg);
 
-                auto prog = (const fxProgram*) (((const char*) (set->programs)) + oldProg * progLen);
+                auto prog = addBytesToPointer (set->programs, oldProg * progLen);
 
-                if (((const char*) prog) - ((const char*) set) >= (ssize_t) dataSize)
+                if (getAddressDifference (prog, set) >= (int) dataSize)
                     return false;
 
                 if (! restoreProgramSettings (prog))
@@ -1906,14 +1907,14 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                 auto oldProgram = getCurrentProgram();
 
                 if (oldProgram >= 0)
-                    setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + oldProgram * progLen));
+                    setParamsInProgramBlock (addBytesToPointer (set->programs, oldProgram * progLen));
 
                 for (int i = 0; i < numPrograms; ++i)
                 {
                     if (i != oldProgram)
                     {
                         setCurrentProgram (i);
-                        setParamsInProgramBlock ((fxProgram*) (((char*) (set->programs)) + i * progLen));
+                        setParamsInProgramBlock (addBytesToPointer (set->programs, i * progLen));
                     }
                 }
 
@@ -2591,7 +2592,7 @@ private:
 
         getCurrentProgramName().copyToUTF8 ((char*) dest.getData(), 63);
 
-        auto p = (float*) (((char*) dest.getData()) + 64);
+        auto p = unalignedPointerCast<float*> (((char*) dest.getData()) + 64);
 
         for (int i = 0; i < numParameters; ++i)
             if (auto* param = getParameters()[i])
@@ -2602,7 +2603,7 @@ private:
     {
         changeProgramName (getCurrentProgram(), (const char*) m.getData());
 
-        auto p = (float*) (((char*) m.getData()) + 64);
+        auto p = unalignedPointerCast<float*> (((char*) m.getData()) + 64);
         auto numParameters = getParameters().size();
 
         for (int i = 0; i < numParameters; ++i)
@@ -2878,8 +2879,8 @@ public:
             {
                 X11Symbols::getInstance()->xMoveResizeWindow (display, pluginWindow,
                                                               pos.getX(), pos.getY(),
-                                                              static_cast<unsigned int> (roundToInt (getWidth()  * nativeScaleFactor)),
-                                                              static_cast<unsigned int> (roundToInt (getHeight() * nativeScaleFactor)));
+                                                              static_cast<unsigned int> (roundToInt ((float) getWidth()  * nativeScaleFactor)),
+                                                              static_cast<unsigned int> (roundToInt ((float) getHeight() * nativeScaleFactor)));
 
                 X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
                 X11Symbols::getInstance()->xFlush (display);
@@ -3170,8 +3171,8 @@ private:
             X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
        #endif
 
-        w = roundToInt (w / nativeScaleFactor);
-        h = roundToInt (h / nativeScaleFactor);
+        w = roundToInt ((float) w / nativeScaleFactor);
+        h = roundToInt ((float) h / nativeScaleFactor);
 
         // double-check it's not too tiny
         w = jmax (w, 32);
@@ -3234,7 +3235,7 @@ private:
     bool willCauseRecursiveResize (int w, int h)
     {
         auto newScreenBounds = Rectangle<int> (w, h).withPosition (getScreenPosition());
-        return Desktop::getInstance().getDisplays().findDisplayForRect (newScreenBounds).scale != nativeScaleFactor;
+        return Desktop::getInstance().getDisplays().getDisplayForRect (newScreenBounds)->scale != nativeScaleFactor;
     }
 
     bool isWindowSizeCorrectForPlugin (int w, int h)
@@ -3637,7 +3638,6 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
     FileSearchPath paths;
     paths.add (WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\Software\\VST\\VSTPluginsPath"));
     paths.addIfNotAlreadyThere (programFiles + "\\Steinberg\\VstPlugins");
-    paths.removeNonExistentPaths();
     paths.addIfNotAlreadyThere (programFiles + "\\VstPlugins");
     paths.removeRedundantPaths();
     return paths;
@@ -3744,6 +3744,7 @@ void VSTPluginFormat::aboutToScanVSTShellPlugin (const PluginDescription&) {}
 
 } // namespace juce
 
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif

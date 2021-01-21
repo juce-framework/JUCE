@@ -270,19 +270,19 @@ typename FIR::Coefficients<FloatType>::Ptr
     for (int i = 0; i < hh.size(); ++i)
         c[i] = (float) hh[i];
 
-    double NN;
+    auto NN = [&]
+    {
+        if (n % 2 == 0)
+            return 2.0 * result->getMagnitudeForFrequency (0.5, 1.0);
 
-    if (n % 2 == 0)
-    {
-        NN = 2.0 * result->getMagnitudeForFrequency (0.5, 1.0);
-    }
-    else
-    {
         auto w01 = std::sqrt (kp * kp + (1 - kp * kp) * std::pow (std::cos (MathConstants<double>::pi / (2.0 * n + 1.0)), 2.0));
-        auto om01 = std::acos (-w01);
 
-        NN = -2.0 * result->getMagnitudeForFrequency (om01 / MathConstants<double>::twoPi, 1.0);
-    }
+        if (std::abs (w01) > 1.0)
+            return 2.0 * result->getMagnitudeForFrequency (0.5, 1.0);
+
+        auto om01 = std::acos (-w01);
+        return -2.0 * result->getMagnitudeForFrequency (om01 / MathConstants<double>::twoPi, 1.0);
+    }();
 
     for (int i = 0; i < hh.size(); ++i)
         c[i] = static_cast<FloatType> ((A * hn[i] + B * hnm[i]) / NN);

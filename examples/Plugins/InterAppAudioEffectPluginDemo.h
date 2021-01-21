@@ -349,7 +349,7 @@ private:
             };
             addChildComponent (switchToHostButton);
 
-            auto screenSize = Desktop::getInstance().getDisplays().getMainDisplay().userArea;
+            auto screenSize = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
             setSize (screenSize.getWidth(), screenSize.getHeight());
 
             resized();

@@ -63,7 +63,7 @@ class ConvolutionTest  : public UnitTest
         result.clear();
 
         auto** channels = result.getArrayOfWritePointers();
-        std::for_each (channels, channels + result.getNumChannels(), [&] (auto* channel)
+        std::for_each (channels, channels + result.getNumChannels(), [length] (auto* channel)
         {
             std::fill (channel, channel + length, 1.0f);
         });
@@ -87,6 +87,19 @@ class ConvolutionTest  : public UnitTest
         for (size_t channel = 0; channel != block.getNumChannels(); ++channel)
             for (size_t sample = 0; sample != block.getNumSamples(); ++sample)
                 expect (! std::isnan (block.getSample ((int) channel, (int) sample)));
+    }
+
+    void checkAllChannelsNonZero (const AudioBlock<float>& block)
+    {
+        for (size_t i = 0; i != block.getNumChannels(); ++i)
+        {
+            const auto* channel = block.getChannelPointer (i);
+
+            expect (std::any_of (channel, channel + block.getNumSamples(), [] (float sample)
+            {
+                return sample != 0.0f;
+            }));
+        }
     }
 
     template <typename T>
@@ -168,16 +181,21 @@ class ConvolutionTest  : public UnitTest
             }
         };
 
-        const auto time = Time::getMillisecondCounter();
-
-        // Wait 10 seconds to load the impulse response
-        while (Time::getMillisecondCounter() - time < 10'000)
+        // If we load an IR while the convolution is already running, we'll need to wait
+        // for it to be loaded on a background thread
+        if (initSequence == InitSequence::prepareThenLoad)
         {
-            processBlocksWithDiracImpulse();
+            const auto time = Time::getMillisecondCounter();
 
-            // Check if the impulse response was loaded
-            if (block.getSample (0, 1) != 0.0f)
-                break;
+            // Wait 10 seconds to load the impulse response
+            while (Time::getMillisecondCounter() - time < 10'000)
+            {
+                processBlocksWithDiracImpulse();
+
+                // Check if the impulse response was loaded
+                if (block.getSample (0, 1) != 0.0f)
+                    break;
+            }
         }
 
         // At this point, our convolution should be loaded and the current IR size should
@@ -238,7 +256,7 @@ public:
         AudioBlock<float> block { buffer };
         ProcessContextReplacing<float> context { block };
 
-        const auto impulseData = [&]
+        const auto impulseData = []
         {
             Random random;
             AudioBuffer<float> result (2, 1000);
@@ -326,6 +344,45 @@ public:
             checkForNans (block);
         }
 
+        beginTest ("Convolutions can cope with a change in samplerate and blocksize");
+        {
+            Convolution convolution;
+
+            auto copy = impulseData;
+            convolution.loadImpulseResponse (std::move (copy),
+                                             2000,
+                                             Convolution::Stereo::yes,
+                                             Convolution::Trim::no,
+                                             Convolution::Normalise::yes);
+
+            const dsp::ProcessSpec specs[] = { { 96'000.0, 1024, 2 },
+                                               { 48'000.0, 512, 2 },
+                                               { 44'100.0, 256, 2 } };
+
+            for (const auto& thisSpec : specs)
+            {
+                convolution.prepare (thisSpec);
+
+                expectWithinAbsoluteError ((double) convolution.getCurrentIRSize(),
+                                           thisSpec.sampleRate * 0.5,
+                                           1.0);
+
+                juce::AudioBuffer<float> thisBuffer ((int) thisSpec.numChannels,
+                                                     (int) thisSpec.maximumBlockSize);
+                AudioBlock<float> thisBlock { thisBuffer };
+                ProcessContextReplacing<float> thisContext { thisBlock };
+
+                nTimes (100, [&]
+                {
+                    addDiracImpulse (thisBlock);
+                    convolution.process (thisContext);
+
+                    checkForNans (thisBlock);
+                    checkAllChannelsNonZero (thisBlock);
+                });
+            }
+        }
+
         beginTest ("Short uniform convolutions work");
         {
             const auto ramp = makeRamp (static_cast<int> (spec.maximumBlockSize) / 2);
@@ -361,15 +418,17 @@ public:
             const auto numChannels = copy.getNumChannels();
             const auto numSamples = copy.getNumSamples();
 
-            const auto factor = 0.125f / std::sqrt (std::accumulate (channels, channels + numChannels, 0.0f, [&] (auto max, auto* channel)
+            const auto factor = 0.125f / std::sqrt (std::accumulate (channels, channels + numChannels, 0.0f,
+                                                                     [numSamples] (auto max, auto* channel)
             {
-                return juce::jmax (max, std::accumulate (channel, channel + numSamples, 0.0f, [] (auto sum, auto sample)
+                return juce::jmax (max, std::accumulate (channel, channel + numSamples, 0.0f,
+                                                         [] (auto sum, auto sample)
                 {
                     return sum + sample * sample;
                 }));
             }));
 
-            std::for_each (channels, channels + numChannels, [&] (auto* channel)
+            std::for_each (channels, channels + numChannels, [factor, numSamples] (auto* channel)
             {
                 FloatVectorOperations::multiply (channel, factor, numSamples);
             });

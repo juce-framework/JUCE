@@ -236,14 +236,14 @@ private:
         }
         else if (type == calloutBoxWindow)
         {
-            auto* colourSelector = new ColourSelector();
+            auto colourSelector = std::make_unique<ColourSelector>();
 
             colourSelector->setName ("background");
             colourSelector->setCurrentColour (findColour (TextButton::buttonColourId));
             colourSelector->setColour (ColourSelector::backgroundColourId, Colours::transparentBlack);
             colourSelector->setSize (300, 400);
 
-            CallOutBox::launchAsynchronously (colourSelector, button.getScreenBounds(), nullptr);
+            CallOutBox::launchAsynchronously (std::move (colourSelector), button.getScreenBounds(), nullptr);
         }
         else if (type == extraComponentsAlertWindow)
         {

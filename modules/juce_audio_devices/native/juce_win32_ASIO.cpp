@@ -504,7 +504,7 @@ public:
                 {
                     inBuffers[n] = ioBufferSpace + (currentBlockSizeSamples * n);
 
-                    ASIOChannelInfo channelInfo = { 0 };
+                    ASIOChannelInfo channelInfo = {};
                     channelInfo.channel = i;
                     channelInfo.isInput = 1;
                     asioObject->getChannelInfo (&channelInfo);
@@ -526,7 +526,7 @@ public:
                 {
                     outBuffers[n] = ioBufferSpace + (currentBlockSizeSamples * (numActiveInputChans + n));
 
-                    ASIOChannelInfo channelInfo = { 0 };
+                    ASIOChannelInfo channelInfo = {};
                     channelInfo.channel = i;
                     channelInfo.isInput = 0;
                     asioObject->getChannelInfo (&channelInfo);
@@ -673,10 +673,10 @@ public:
             lastCallback->audioDeviceStopped();
     }
 
-    String getLastError()           { return error; }
-    bool hasControlPanel() const    { return true; }
+    String getLastError() override           { return error; }
+    bool hasControlPanel() const override    { return true; }
 
-    bool showControlPanel()
+    bool showControlPanel() override
     {
         JUCE_ASIO_LOG ("showing control panel");
 
@@ -767,7 +767,7 @@ private:
 
     bool deviceIsOpen = false, isStarted = false, buffersCreated = false;
     std::atomic<bool> calledback { false };
-    bool littleEndian = false, postOutput = true, needToReset = false;
+    bool postOutput = true, needToReset = false;
     bool insideControlPanelModalLoop = false;
     bool shouldUsePreferredSize = false;
     int xruns = 0;
@@ -785,7 +785,7 @@ private:
 
     String getChannelName (int index, bool isInput) const
     {
-        ASIOChannelInfo channelInfo = { 0 };
+        ASIOChannelInfo channelInfo = {};
         channelInfo.channel = index;
         channelInfo.isInput = isInput ? 1 : 0;
         asioObject->getChannelInfo (&channelInfo);
@@ -1065,7 +1065,7 @@ private:
 
         for (int i = 0; i < totalNumOutputChans; ++i)
         {
-            ASIOChannelInfo channelInfo = { 0 };
+            ASIOChannelInfo channelInfo = {};
             channelInfo.channel = i;
             channelInfo.isInput = 0;
             asioObject->getChannelInfo (&channelInfo);
@@ -1638,11 +1638,6 @@ void sendASIODeviceChangeToListeners (ASIOAudioIODeviceType* type)
 {
     if (type != nullptr)
         type->sendDeviceChangeToListeners();
-}
-
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ASIO()
-{
-    return new ASIOAudioIODeviceType();
 }
 
 } // namespace juce

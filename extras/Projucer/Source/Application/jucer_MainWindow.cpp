@@ -666,7 +666,8 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         }
     }
 
-    if (file.hasFileExtension (Project::projectFileExtension))
+    if (file.hasFileExtension (Project::projectFileExtension)
+        || isPIPFile (file))
     {
         WeakReference<Component> previousFrontWindow (getFrontmostWindow());
 
@@ -799,7 +800,7 @@ void MainWindowList::checkWindowBounds (MainWindow& windowToCheck)
     auto ensureWindowIsFullyOnscreen = [&]
     {
         auto windowBounds = windowToCheck.getScreenBounds();
-        auto screenLimits = Desktop::getInstance().getDisplays().findDisplayForRect (windowBounds).userArea;
+        auto screenLimits = Desktop::getInstance().getDisplays().getDisplayForRect (windowBounds)->userArea;
 
         if (auto* peer = windowToCheck.getPeer())
             peer->getFrameSize().subtractFrom (screenLimits);

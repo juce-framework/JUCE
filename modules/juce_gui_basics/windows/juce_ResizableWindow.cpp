@@ -564,7 +564,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
         if (onScreenArea.getWidth() * onScreenArea.getHeight() < 32 * 32)
         {
-            auto screen = desktop.getDisplays().findDisplayForRect (newPos).userArea;
+            auto screen = desktop.getDisplays().getDisplayForRect (newPos)->userArea;
 
             newPos.setSize (jmin (newPos.getWidth(),  screen.getWidth()),
                             jmin (newPos.getHeight(), screen.getHeight()));

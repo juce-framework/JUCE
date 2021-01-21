@@ -186,6 +186,15 @@ ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int widt
 }
 
 //==============================================================================
+struct ScopedCGContextState
+{
+    explicit ScopedCGContextState (CGContextRef c)  : context (c)  { CGContextSaveGState (context); }
+    ~ScopedCGContextState()                                        { CGContextRestoreGState (context); }
+
+    CGContextRef context;
+};
+
+//==============================================================================
 CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h)
     : context (c),
       flipHeight (h),
@@ -194,15 +203,18 @@ CoreGraphicsContext::CoreGraphicsContext (CGContextRef c, float h)
     CGContextRetain (context.get());
     CGContextSaveGState (context.get());
 
+   #if JUCE_MAC
     bool enableFontSmoothing
-            #if JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
-             = false;
-            #else
-             = true;
-            #endif
+                 #if JUCE_DISABLE_COREGRAPHICS_FONT_SMOOTHING
+                  = false;
+                 #else
+                  = true;
+                 #endif
 
     CGContextSetShouldSmoothFonts (context.get(), enableFontSmoothing);
     CGContextSetAllowsFontSmoothing (context.get(), enableFontSmoothing);
+   #endif
+
     CGContextSetShouldAntialias (context.get(), true);
     CGContextSetBlendMode (context.get(), kCGBlendModeNormal);
     rgbColourSpace.reset (CGColorSpaceCreateWithName (kCGColorSpaceSRGB));
@@ -451,26 +463,23 @@ void CoreGraphicsContext::fillCGRect (const CGRect& cgRect, bool replaceExisting
         {
             CGContextFillRect (context.get(), cgRect);
         }
-        else if (state->fillType.isGradient())
-        {
-            CGContextSaveGState (context.get());
-            CGContextClipToRect (context.get(), cgRect);
-            drawGradient();
-            CGContextRestoreGState (context.get());
-        }
         else
         {
-            CGContextSaveGState (context.get());
+            ScopedCGContextState scopedState (context.get());
+
             CGContextClipToRect (context.get(), cgRect);
-            drawImage (state->fillType.image, state->fillType.transform, true);
-            CGContextRestoreGState (context.get());
+
+            if (state->fillType.isGradient())
+                drawGradient();
+            else
+                drawImage (state->fillType.image, state->fillType.transform, true);
         }
     }
 }
 
 void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& transform)
 {
-    CGContextSaveGState (context.get());
+    ScopedCGContextState scopedState (context.get());
 
     if (state->fillType.isColour())
     {
@@ -497,8 +506,6 @@ void CoreGraphicsContext::fillPath (const Path& path, const AffineTransform& tra
         else
             drawImage (state->fillType.image, state->fillType.transform, true);
     }
-
-    CGContextRestoreGState (context.get());
 }
 
 void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTransform& transform)
@@ -515,7 +522,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
                                                                                     : rgbColourSpace.get();
     auto image = detail::ImagePtr { CoreGraphicsPixelData::getCachedImageRef (sourceImage, colourSpace) };
 
-    CGContextSaveGState (context.get());
+    ScopedCGContextState scopedState (context.get());
     CGContextSetAlpha (context.get(), state->fillType.getOpacity());
 
     flip();
@@ -559,8 +566,6 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
     {
         CGContextDrawImage (context.get(), imageRect, image.get());
     }
-
-    CGContextRestoreGState (context.get());
 }
 
 //==============================================================================
@@ -584,19 +589,16 @@ void CoreGraphicsContext::fillRectList (const RectangleList<float>& list)
     {
         CGContextFillRects (context.get(), rects, num);
     }
-    else if (state->fillType.isGradient())
-    {
-        CGContextSaveGState (context.get());
-        CGContextClipToRects (context.get(), rects, num);
-        drawGradient();
-        CGContextRestoreGState (context.get());
-    }
     else
     {
-        CGContextSaveGState (context.get());
+        ScopedCGContextState scopedState (context.get());
+
         CGContextClipToRects (context.get(), rects, num);
-        drawImage (state->fillType.image, state->fillType.transform, true);
-        CGContextRestoreGState (context.get());
+
+        if (state->fillType.isGradient())
+            drawGradient();
+        else
+            drawImage (state->fillType.image, state->fillType.transform, true);
     }
 }
 
@@ -646,7 +648,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
         }
         else
         {
-            CGContextSaveGState (context.get());
+            ScopedCGContextState scopedState (context.get());
 
             flip();
             applyTransform (transform);
@@ -658,8 +660,6 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
             CGGlyph glyphs[1] = { (CGGlyph) glyphNumber };
             CGPoint positions[1] = { { 0.0f, 0.0f } };
             CGContextShowGlyphsAtPositions (context.get(), glyphs, positions, 1);
-
-            CGContextRestoreGState (context.get());
         }
     }
     else
