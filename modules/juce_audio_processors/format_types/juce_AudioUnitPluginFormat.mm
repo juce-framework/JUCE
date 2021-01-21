@@ -25,6 +25,8 @@
 
 #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
 #if JUCE_MAC
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
@@ -243,7 +245,8 @@ namespace AudioUnitFormatHelpers
                         if (Handle h = Get1IndResource (thngType, i))
                         {
                             HLock (h);
-                            const uint32* const types = (const uint32*) *h;
+                            uint32 types[3];
+                            std::memcpy (types, *h, sizeof (types));
 
                             if (types[0] == kAudioUnitType_MusicDevice
                                  || types[0] == kAudioUnitType_MusicEffect
@@ -755,7 +758,7 @@ public:
                         zerostruct (stream); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
                         stream.mSampleRate       = sampleRate;
                         stream.mFormatID         = kAudioFormatLinearPCM;
-                        stream.mFormatFlags      = kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved | kAudioFormatFlagsNativeEndian;
+                        stream.mFormatFlags      = (int) kAudioFormatFlagsNativeFloatPacked | (int) kAudioFormatFlagIsNonInterleaved | (int) kAudioFormatFlagsNativeEndian;
                         stream.mFramesPerPacket  = 1;
                         stream.mBytesPerPacket   = 4;
                         stream.mBytesPerFrame    = 4;
@@ -2907,5 +2910,7 @@ FileSearchPath AudioUnitPluginFormat::getDefaultLocationsToSearch()
 #undef JUCE_AU_LOG
 
 } // namespace juce
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #endif

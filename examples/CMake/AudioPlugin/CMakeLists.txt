@@ -49,7 +49,8 @@ juce_add_plugin(AudioPluginExample
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
     # COPY_PLUGIN_AFTER_BUILD TRUE/FALSE        # Should the plugin be installed to a default location after building?
     PLUGIN_MANUFACTURER_CODE Juce               # A four-character manufacturer id with at least one upper-case character
-    PLUGIN_CODE Dem0                            # A unique four-character plugin id with at least one upper-case character
+    PLUGIN_CODE Dem0                            # A unique four-character plugin id with exactly one upper-case character
+                                                # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "Audio Plugin Example")        # The name of the final executable, which can differ from the target name
 
@@ -62,9 +63,9 @@ juce_add_plugin(AudioPluginExample
 # juce_generate_juce_header(AudioPluginExample)
 
 # `target_sources` adds source files to a target. We pass the target that needs the sources as the
-# first argument, then a visibility parameter for the sources (PRIVATE is normally best practice,
-# although it doesn't really affect executable targets). Finally, we supply a list of source files
-# that will be built into the target. This is a standard CMake command.
+# first argument, then a visibility parameter for the sources which should normally be PRIVATE.
+# Finally, we supply a list of source files that will be built into the target. This is a standard
+# CMake command.
 
 target_sources(AudioPluginExample
     PRIVATE

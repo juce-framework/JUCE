@@ -19,7 +19,7 @@
 #include "FlowGraphNode.h"
 #include "RampLinear.h"
 
-using namespace flowgraph;
+using namespace FLOWGRAPH_OUTER_NAMESPACE::flowgraph;
 
 RampLinear::RampLinear(int32_t channelCount)
         : FlowGraphFilter(channelCount) {

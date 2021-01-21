@@ -272,10 +272,10 @@ struct PushNotificationsDelegate
 
         id<NSApplicationDelegate> appDelegate = [[NSApplication sharedApplication] delegate];
 
-        SEL selector = NSSelectorFromString (@"setPushNotificationsDelegate:");
-
-        if ([appDelegate respondsToSelector: selector])
-            [appDelegate performSelector: selector withObject: delegate.get()];
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        if ([appDelegate respondsToSelector: @selector (setPushNotificationsDelegate:)])
+            [appDelegate performSelector: @selector (setPushNotificationsDelegate:) withObject: delegate.get()];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         [NSUserNotificationCenter defaultUserNotificationCenter].delegate = delegate.get();
     }

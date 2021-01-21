@@ -49,6 +49,10 @@
 			isa = PBXBuildFile;
 			fileRef = 842427CFE565F3FCE5B99174;
 		};
+		DD0FF38F7E8DE0220D73671D = {
+			isa = PBXBuildFile;
+			fileRef = BF006EF584FB274FF0319E08;
+		};
 		49C22786B54C5DC94E4654B8 = {
 			isa = PBXBuildFile;
 			fileRef = E96597BBC6A98255B51B94DC;
@@ -1924,6 +1928,13 @@
 			path = "../../Source/Settings/jucer_AppearanceSettings.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
+		BF006EF584FB274FF0319E08 = {
+			isa = PBXFileReference;
+			lastKnownFileType = wrapper.framework;
+			name = Foundation.framework;
+			path = System/Library/Frameworks/Foundation.framework;
+			sourceTree = SDKROOT;
+		};
 		BF301C2E545AEB4AC112C176 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.cpp.cpp;
@@ -3106,6 +3117,7 @@
 				E983E6DDE3318B872EBE347F,
 				8F7BE18698ADCEF51CDE4A5C,
 				842427CFE565F3FCE5B99174,
+				BF006EF584FB274FF0319E08,
 				E96597BBC6A98255B51B94DC,
 				431D30038CBF67F80E8B3A13,
 				9F01BA9942D038EA8B5289A8,
@@ -3151,20 +3163,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_DEBUG=1",
 					"DEBUG=1",
-					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=6.0.4",
-					"JUCE_APP_VERSION_HEX=0x60004",
-					"JucePlugin_Build_VST=0",
-					"JucePlugin_Build_VST3=0",
-					"JucePlugin_Build_AU=0",
-					"JucePlugin_Build_AUv3=0",
-					"JucePlugin_Build_RTAS=0",
-					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0",
-					"JucePlugin_Build_Unity=0",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x60004",
+					"JUCE_PROJUCER_VERSION=0x60007",
 					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
@@ -3181,12 +3182,23 @@
 					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
 					"JUCE_WEB_BROWSER=0",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCER_XCODE_MAC_F6D2F4CF=1",
+					"JUCE_APP_VERSION=6.0.7",
+					"JUCE_APP_VERSION_HEX=0x60007",
+					"JucePlugin_Build_VST=0",
+					"JucePlugin_Build_VST3=0",
+					"JucePlugin_Build_AU=0",
+					"JucePlugin_Build_AUv3=0",
+					"JucePlugin_Build_RTAS=0",
+					"JucePlugin_Build_AAX=0",
+					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Unity=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../Build",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../Build",
+					"$(SRCROOT)/../../../../modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -3194,14 +3206,15 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../Build",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../Build",
+					"$(SRCROOT)/../../../../modules",
 				);
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wunused-private-field -Wbool-conversion -Wextra-semi -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
 				PRODUCT_NAME = "Projucer";
 				USE_HEADERMAP = NO;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Debug;
@@ -3221,20 +3234,9 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"_NDEBUG=1",
 					"NDEBUG=1",
-					"JUCER_XCODE_MAC_F6D2F4CF=1",
-					"JUCE_APP_VERSION=6.0.4",
-					"JUCE_APP_VERSION_HEX=0x60004",
-					"JucePlugin_Build_VST=0",
-					"JucePlugin_Build_VST3=0",
-					"JucePlugin_Build_AU=0",
-					"JucePlugin_Build_AUv3=0",
-					"JucePlugin_Build_RTAS=0",
-					"JucePlugin_Build_AAX=0",
-					"JucePlugin_Build_Standalone=0",
-					"JucePlugin_Build_Unity=0",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x60004",
+					"JUCE_PROJUCER_VERSION=0x60007",
 					"JUCE_MODULE_AVAILABLE_juce_build_tools=1",
 					"JUCE_MODULE_AVAILABLE_juce_core=1",
 					"JUCE_MODULE_AVAILABLE_juce_cryptography=1",
@@ -3251,12 +3253,23 @@
 					"JUCE_STRICT_REFCOUNTEDPOINTER=1",
 					"JUCE_WEB_BROWSER=0",
 					"JUCE_STANDALONE_APPLICATION=1",
+					"JUCER_XCODE_MAC_F6D2F4CF=1",
+					"JUCE_APP_VERSION=6.0.7",
+					"JUCE_APP_VERSION_HEX=0x60007",
+					"JucePlugin_Build_VST=0",
+					"JucePlugin_Build_VST3=0",
+					"JucePlugin_Build_AU=0",
+					"JucePlugin_Build_AUv3=0",
+					"JucePlugin_Build_RTAS=0",
+					"JucePlugin_Build_AAX=0",
+					"JucePlugin_Build_Standalone=0",
+					"JucePlugin_Build_Unity=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../Build",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../Build",
+					"$(SRCROOT)/../../../../modules",
 					"$(inherited)",
 				);
 				INFOPLIST_FILE = Info-App.plist;
@@ -3264,14 +3277,15 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_HEADER_SEARCH_PATHS = (
-					"../../JuceLibraryCode",
-					"../../../Build",
-					"../../../../modules",
+					"$(SRCROOT)/../../JuceLibraryCode",
+					"$(SRCROOT)/../../../Build",
+					"$(SRCROOT)/../../../../modules",
 				);
 				OTHER_CPLUSPLUSFLAGS = "-Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion -Wconditional-uninitialized -Woverloaded-virtual -Wreorder -Wconstant-conversion -Wsign-conversion -Wunused-private-field -Wbool-conversion -Wextra-semi -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align -Winconsistent-missing-destructor-override -Wshift-sign-overflow -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.theprojucer;
 				PRODUCT_NAME = "Projucer";
 				USE_HEADERMAP = NO;
+				VALIDATE_WORKSPACE_SKIPPED_SDK_FRAMEWORKS = OpenGL;
 				VALID_ARCHS = "i386 x86_64 arm64 arm64e";
 			};
 			name = Release;
@@ -3482,6 +3496,7 @@
 				091A57B4B9CE623E75E9A756,
 				FAB47E69F7D9DCE1F906AA07,
 				0E884E47A637D6C65154699A,
+				DD0FF38F7E8DE0220D73671D,
 				49C22786B54C5DC94E4654B8,
 				CDEF9FF2D119476D707305DF,
 				96EC6315E1B3F1A109F84BAF,
@@ -3508,7 +3523,7 @@
 		74EA481348A24104E6ACE009 = {
 			isa = PBXProject;
 			buildConfigurationList = F90407F24422C589DA251604;
-			attributes = { LastUpgradeCheck = 1200; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 0039FE1A254FE518518BF8B8 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
+			attributes = { LastUpgradeCheck = 1230; ORGANIZATIONNAME = "Raw Material Software Limited"; TargetAttributes = { 0039FE1A254FE518518BF8B8 = { SystemCapabilities = {com.apple.ApplicationGroups.iOS = { enabled = 0; }; com.apple.InAppPurchase = { enabled = 0; }; com.apple.InterAppAudio = { enabled = 0; }; com.apple.Push = { enabled = 0; }; com.apple.Sandbox = { enabled = 0; }; com.apple.HardenedRuntime = { enabled = 0; }; }; }; }; };
 			compatibilityVersion = "Xcode 3.2";
 			hasScannedForEncodings = 0;
 			mainGroup = 3CC531922CC2D398E283A845;

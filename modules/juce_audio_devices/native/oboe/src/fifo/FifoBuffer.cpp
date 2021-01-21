@@ -14,18 +14,14 @@
  * limitations under the License.
  */
 
-#include <stdint.h>
-#include <time.h>
-#include <memory.h>
-#include <cassert>
 #include <algorithm>
+#include <memory.h>
+#include <stdint.h>
 
-#include "common/OboeDebug.h"
 #include "fifo/FifoControllerBase.h"
 #include "fifo/FifoController.h"
 #include "fifo/FifoControllerIndirect.h"
 #include "fifo/FifoBuffer.h"
-#include "common/AudioClock.h"
 
 namespace oboe {
 

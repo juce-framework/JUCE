@@ -90,12 +90,15 @@ namespace
             preferredLineFeed = project->getProjectLineFeed().toRawUTF8();
         }
 
-        void save (bool justSaveResources)
+        void save (bool justSaveResources, bool fixMissingDependencies)
         {
             if (project != nullptr)
             {
                 if (! justSaveResources)
                     rescanModulePathsIfNecessary();
+
+                if (fixMissingDependencies)
+                    tryToFixMissingModuleDependencies();
 
                 auto error = justSaveResources ? project->saveResourcesOnly()
                                                : project->saveProject();
@@ -136,6 +139,14 @@ namespace
                 ProjucerApplication::getApp().rescanUserPathModules();
         }
 
+        void tryToFixMissingModuleDependencies()
+        {
+            auto& modules = project->getEnabledModules();
+
+            for (const auto& m : modules.getModulesWithMissingDependencies())
+                modules.tryToFixMissingDependencies (m);
+        }
+
         std::unique_ptr<Project> project;
     };
 
@@ -152,7 +163,7 @@ namespace
                                         : "Re-saving file: ")
                   << proj.project->getFile().getFullPathName() << std::endl;
 
-        proj.save (justSaveResources);
+        proj.save (justSaveResources, args.containsOption ("--fix-missing-dependencies"));
     }
 
     //==============================================================================
@@ -175,7 +186,7 @@ namespace
         std::cout << "Setting project version: " << version << std::endl;
 
         proj.project->setProjectVersion (version);
-        proj.save (false);
+        proj.save (false, false);
     }
 
     //==============================================================================
@@ -192,7 +203,7 @@ namespace
         std::cout << "Bumping project version to: " << version << std::endl;
 
         proj.project->setProjectVersion (version);
-        proj.save (false);
+        proj.save (false, false);
     }
 
     static void gitTag (const ArgumentList& args)
@@ -700,7 +711,7 @@ namespace
     static bool isValidPathIdentifier (const String& id, const String& os)
     {
         return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
-            || id == "androidSDKPath" || id == "androidNDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
+            || id == "androidSDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
     }
 
     static void setGlobalPath (const ArgumentList& args)
@@ -809,7 +820,7 @@ namespace
                   << "Usage: " << std::endl
                   << std::endl
                   << " " << appName << " --resave project_file" << std::endl
-                  << "    Resaves all files and resources in a project." << std::endl
+                  << "    Resaves all files and resources in a project. Add the \"--fix-missing-dependencies\" option to automatically fix any missing module dependencies." << std::endl
                   << std::endl
                   << " " << appName << " --resave-resources project_file" << std::endl
                   << "    Resaves just the binary resources for a project." << std::endl
@@ -861,7 +872,7 @@ namespace
                   << std::endl
                   << " " << appName << " --set-global-search-path os identifier_to_set new_path" << std::endl
                   << "    Sets the global path for a specified os and identifier. The os should be either osx, windows or linux and the identifiers can be any of the following: "
-                  << "defaultJuceModulePath, defaultUserModulePath, vstLegacyPath, aaxPath (not valid on linux), rtasPath (not valid on linux), androidSDKPath or androidNDKPath. " << std::endl
+                  << "defaultJuceModulePath, defaultUserModulePath, vstLegacyPath, aaxPath (not valid on linux), rtasPath (not valid on linux), or androidSDKPath. " << std::endl
                   << std::endl
                   << " " << appName << " --create-project-from-pip path/to/PIP path/to/output path/to/JUCE/modules (optional) path/to/user/modules (optional)" << std::endl
                   << "    Generates a folder containing a JUCE project in the specified output path using the specified PIP file. Use the optional JUCE and user module paths to override "

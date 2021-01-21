@@ -16,6 +16,7 @@
 
 #include <memory>
 
+#include "OboeDebug.h"
 #include "FilterAudioStream.h"
 
 using namespace oboe;
@@ -90,3 +91,16 @@ ResultWithValue<int32_t> FilterAudioStream::read(void *buffer,
     return ResultWithValue<int32_t>::createBasedOnSign(framesRead);
 }
 
+DataCallbackResult FilterAudioStream::onAudioReady(AudioStream *oboeStream,
+                                void *audioData,
+                                int32_t numFrames) {
+    int32_t framesProcessed;
+    if (oboeStream->getDirection() == Direction::Output) {
+        framesProcessed = mFlowGraph->read(audioData, numFrames, 0 /* timeout */);
+    } else {
+        framesProcessed = mFlowGraph->write(audioData, numFrames);
+    }
+    return (framesProcessed < numFrames)
+           ? DataCallbackResult::Stop
+           : mFlowGraph->getDataCallbackResult();
+}

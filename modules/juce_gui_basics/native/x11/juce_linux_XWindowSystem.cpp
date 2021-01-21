@@ -42,6 +42,21 @@ namespace juce
  #define JUCE_X11_SUPPORTS_XEMBED 0
 #endif
 
+namespace
+{
+    struct XFreeDeleter
+    {
+        void operator() (void* ptr) const
+        {
+            if (ptr != nullptr)
+                X11Symbols::getInstance()->xFree (ptr);
+        }
+    };
+
+    template <typename Data>
+    std::unique_ptr<Data, XFreeDeleter> makeXFreePtr (Data* raw) { return std::unique_ptr<Data, XFreeDeleter> (raw); }
+}
+
 //==============================================================================
 XWindowSystemUtilities::ScopedXLock::ScopedXLock()
 {
@@ -71,6 +86,7 @@ XWindowSystemUtilities::Atoms::Atoms (::Display* display)
     pid                          = getCreating (display, "_NET_WM_PID");
     windowType                   = getIfExists (display, "_NET_WM_WINDOW_TYPE");
     windowState                  = getIfExists (display, "_NET_WM_STATE");
+    windowStateHidden            = getIfExists (display, "_NET_WM_STATE_HIDDEN");
 
     XdndAware                    = getCreating (display, "XdndAware");
     XdndEnter                    = getCreating (display, "XdndEnter");
@@ -147,12 +163,6 @@ XWindowSystemUtilities::GetXProperty::~GetXProperty()
 }
 
 //==============================================================================
-using WindowMessageReceiveCallback = void (*) (XEvent&);
-using SelectionRequestCallback     = void (*) (XSelectionRequestEvent&);
-
-static WindowMessageReceiveCallback dispatchWindowMessage = nullptr;
-SelectionRequestCallback handleSelectionRequest = nullptr;
-
 ::Window juce_messageWindowHandle;
 XContext windowHandleXContext;
 
@@ -555,18 +565,16 @@ namespace Visuals
             desiredMask |= VisualBitsPerRGBMask;
         }
 
-        if (auto* xvinfos = X11Symbols::getInstance()->xGetVisualInfo (display, desiredMask, &desiredVisual, &numVisuals))
+        if (auto xvinfos = makeXFreePtr (X11Symbols::getInstance()->xGetVisualInfo (display, desiredMask, &desiredVisual, &numVisuals)))
         {
             for (int i = 0; i < numVisuals; i++)
             {
-                if (xvinfos[i].depth == desiredDepth)
+                if (xvinfos.get()[i].depth == desiredDepth)
                 {
-                    visual = xvinfos[i].visual;
+                    visual = xvinfos.get()[i].visual;
                     break;
                 }
             }
-
-            X11Symbols::getInstance()->xFree (xvinfos);
         }
 
         return visual;
@@ -592,9 +600,9 @@ namespace Visuals
                         desiredVisual.depth = 32;
                         desiredVisual.bits_per_rgb = 8;
 
-                        if (auto xvinfos = X11Symbols::getInstance()->xGetVisualInfo (display,
-                                                                                      VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
-                                                                                      &desiredVisual, &numVisuals))
+                        if (auto xvinfos = makeXFreePtr (X11Symbols::getInstance()->xGetVisualInfo (display,
+                                                                                                    VisualScreenMask | VisualDepthMask | VisualBitsPerRGBMask,
+                                                                                                    &desiredVisual, &numVisuals)))
                         {
                             for (int i = 0; i < numVisuals; ++i)
                             {
@@ -609,8 +617,6 @@ namespace Visuals
                                     break;
                                 }
                             }
-
-                            X11Symbols::getInstance()->xFree (xvinfos);
                         }
                     }
                 }
@@ -992,13 +998,8 @@ namespace DisplayHelpers
         {
             int numScreens;
 
-            if (auto* xinfo = X11Symbols::getInstance()->xineramaQueryScreens (display, &numScreens))
-            {
-                Array<XineramaScreenInfo> infos (xinfo, numScreens);
-                X11Symbols::getInstance()->xFree (xinfo);
-
-                return infos;
-            }
+            if (auto xinfo = makeXFreePtr (X11Symbols::getInstance()->xineramaQueryScreens (display, &numScreens)))
+                return { xinfo.get(), numScreens };
         }
 
         return {};
@@ -1022,9 +1023,9 @@ namespace PixmapHelpers
             for (int x = 0; x < (int) width; ++x)
                 colour[index++] = image.getPixelAt (x, y).getARGB();
 
-        auto* ximage = X11Symbols::getInstance()->xCreateImage (display, (Visual*) CopyFromParent, 24, ZPixmap,
-                                                                0, reinterpret_cast<const char*> (colour.getData()),
-                                                                width, height, 32, 0);
+        auto ximage = makeXFreePtr (X11Symbols::getInstance()->xCreateImage (display, (Visual*) CopyFromParent, 24, ZPixmap,
+                                                                             0, reinterpret_cast<const char*> (colour.getData()),
+                                                                             width, height, 32, 0));
 
         auto pixmap = X11Symbols::getInstance()->xCreatePixmap (display,
                                                                 X11Symbols::getInstance()->xDefaultRootWindow (display),
@@ -1032,9 +1033,8 @@ namespace PixmapHelpers
 
         auto gc = X11Symbols::getInstance()->xCreateGC (display, pixmap, 0, nullptr);
 
-        X11Symbols::getInstance()->xPutImage (display, pixmap, gc, ximage, 0, 0, 0, 0, width, height);
+        X11Symbols::getInstance()->xPutImage (display, pixmap, gc, ximage.get(), 0, 0, 0, 0, width, height);
         X11Symbols::getInstance()->xFreeGC (display, gc);
-        X11Symbols::getInstance()->xFree (ximage);
 
         return pixmap;
     }
@@ -1082,7 +1082,7 @@ namespace ClipboardHelpers
 
             if (prop.success)
             {
-                if (prop.actualType == XWindowSystem::getInstance()->getAtoms().utf8String&& prop.actualFormat == 8)
+                if (prop.actualType == XWindowSystem::getInstance()->getAtoms().utf8String && prop.actualFormat == 8)
                     return String::fromUTF8 ((const char*) prop.data, (int) prop.numItems);
 
                 if (prop.actualType == XA_STRING && prop.actualFormat == 8)
@@ -1200,20 +1200,6 @@ namespace ClipboardHelpers
 }
 
 //==============================================================================
-typedef void (*SelectionRequestCallback) (XSelectionRequestEvent&);
-extern SelectionRequestCallback handleSelectionRequest;
-
-struct ClipboardCallbackInitialiser
-{
-    ClipboardCallbackInitialiser()
-    {
-        handleSelectionRequest = ClipboardHelpers::handleSelection;
-    }
-};
-
-static ClipboardCallbackInitialiser clipboardInitialiser;
-
-//==============================================================================
 ComponentPeer* getPeerFor (::Window windowH)
 {
     if (windowH == 0)
@@ -1231,7 +1217,7 @@ ComponentPeer* getPeerFor (::Window windowH)
 }
 
 //==============================================================================
-static std::unordered_map<LinuxComponentPeer<::Window>*, X11DragState> dragAndDropStateMap;
+static std::unordered_map<LinuxComponentPeer*, X11DragState> dragAndDropStateMap;
 
 XWindowSystem::XWindowSystem()
 {
@@ -1291,11 +1277,11 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 {
     return NoEventMask | KeyPressMask | KeyReleaseMask
              | EnterWindowMask | LeaveWindowMask | PointerMotionMask | KeymapStateMask
-             | ExposureMask | StructureNotifyMask | FocusChangeMask
+             | ExposureMask | StructureNotifyMask | FocusChangeMask | PropertyChangeMask
              | (ignoresMouseClicks ? 0 : (ButtonPressMask | ButtonReleaseMask));
 }
 
-::Window XWindowSystem::createWindow (::Window parentToAddTo, LinuxComponentPeer<::Window>* peer) const
+::Window XWindowSystem::createWindow (::Window parentToAddTo, LinuxComponentPeer* peer) const
 {
     if (! xIsAvailable)
     {
@@ -1342,26 +1328,24 @@ static int getAllEventsMask (bool ignoresMouseClicks)
     }
 
     // Set window manager hints
-    if (auto* wmHints = X11Symbols::getInstance()->xAllocWMHints())
+    if (auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xAllocWMHints()))
     {
         wmHints->flags = InputHint | StateHint;
         wmHints->input = True;
         wmHints->initial_state = NormalState;
-        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-        X11Symbols::getInstance()->xFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints.get());
     }
 
     // Set class hint
     if (auto* app = JUCEApplicationBase::getInstance())
     {
-        if (auto* classHint = X11Symbols::getInstance()->xAllocClassHint())
+        if (auto classHint = makeXFreePtr (X11Symbols::getInstance()->xAllocClassHint()))
         {
             auto appName = app->getApplicationName();
             classHint->res_name  = (char*) appName.getCharPointer().getAddress();
             classHint->res_class = (char*) appName.getCharPointer().getAddress();
 
-            X11Symbols::getInstance()->xSetClassHint (display, windowH, classHint);
-            X11Symbols::getInstance()->xFree (classHint);
+            X11Symbols::getInstance()->xSetClassHint (display, windowH, classHint.get());
         }
     }
 
@@ -1397,7 +1381,7 @@ static int getAllEventsMask (bool ignoresMouseClicks)
 
 void XWindowSystem::destroyWindow (::Window windowH)
 {
-    auto* peer = dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowH));
+    auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
 
     if (peer == nullptr)
     {
@@ -1478,10 +1462,10 @@ void XWindowSystem::setIcon (::Window windowH, const Image& newIcon) const
 
     deleteIconPixmaps (windowH);
 
-    auto* wmHints = X11Symbols::getInstance()->xGetWMHints (display, windowH);
+    auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xGetWMHints (display, windowH));
 
     if (wmHints == nullptr)
-        wmHints = X11Symbols::getInstance()->xAllocWMHints();
+        wmHints = makeXFreePtr (X11Symbols::getInstance()->xAllocWMHints());
 
     if (wmHints != nullptr)
     {
@@ -1489,8 +1473,7 @@ void XWindowSystem::setIcon (::Window windowH, const Image& newIcon) const
         wmHints->icon_pixmap = PixmapHelpers::createColourPixmapFromImage (display, newIcon);
         wmHints->icon_mask = PixmapHelpers::createMaskPixmapFromImage (display, newIcon);
 
-        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-        X11Symbols::getInstance()->xFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints.get());
     }
 
     X11Symbols::getInstance()->xSync (display, False);
@@ -1544,7 +1527,7 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
 
         XWindowSystemUtilities::ScopedXLock xLock;
 
-        if (auto* hints = X11Symbols::getInstance()->xAllocSizeHints())
+        if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
         {
             hints->flags  = USSize | USPosition;
             hints->x      = newBounds.getX();
@@ -1559,8 +1542,7 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
                 hints->flags |= PMinSize | PMaxSize;
             }
 
-            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints);
-            X11Symbols::getInstance()->xFree (hints);
+            X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
         }
 
         auto windowBorder = peer->getFrameSize();
@@ -1745,7 +1727,7 @@ bool XWindowSystem::isFocused (::Window windowH) const
     jassert (windowH != 0);
 
    #if JUCE_X11_SUPPORTS_XEMBED
-    if (auto w = (::Window) juce_getCurrentFocusWindow (dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowH))))
+    if (auto w = (::Window) juce_getCurrentFocusWindow (dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH))))
         return w;
    #endif
 
@@ -2045,7 +2027,7 @@ void* createDraggingHandCursor()
         0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,98,22,203,
         114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59
     };
-    size_t dragHandDataSize = 99;
+    static constexpr auto dragHandDataSize = numElementsInArray (dragHandData);
 
     return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, dragHandDataSize), { 8, 7 }).create();
 }
@@ -2088,7 +2070,7 @@ void* XWindowSystem::createStandardMouseCursor (MouseCursor::StandardCursorType 
                 86,91,202,142,12,108,212,87,235,174,15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,
                 252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0
             };
-            static constexpr int copyCursorSize = 119;
+            static constexpr auto copyCursorSize = numElementsInArray (copyCursorData);
 
             return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
         }
@@ -2383,7 +2365,7 @@ void XWindowSystem::deleteKeyProxy (::Window keyProxy) const
     {}
 }
 
-bool XWindowSystem::externalDragFileInit (LinuxComponentPeer<::Window>* peer, const StringArray& files, bool, std::function<void()>&& callback) const
+bool XWindowSystem::externalDragFileInit (LinuxComponentPeer* peer, const StringArray& files, bool, std::function<void()>&& callback) const
 {
     auto& dragState = dragAndDropStateMap[peer];
 
@@ -2403,7 +2385,7 @@ bool XWindowSystem::externalDragFileInit (LinuxComponentPeer<::Window>* peer, co
     return dragState.externalDragInit ((::Window) peer->getNativeHandle(), false, uriList.joinIntoString ("\r\n"), std::move (callback));
 }
 
-bool XWindowSystem::externalDragTextInit (LinuxComponentPeer<::Window>* peer, const String& text, std::function<void()>&& callback) const
+bool XWindowSystem::externalDragTextInit (LinuxComponentPeer* peer, const String& text, std::function<void()>&& callback) const
 {
     auto& dragState = dragAndDropStateMap[peer];
 
@@ -2457,29 +2439,24 @@ String XWindowSystem::getTextFromClipboard() const
 //==============================================================================
 bool XWindowSystem::isParentWindowOf (::Window windowH, ::Window possibleChild) const
 {
-    if (windowH != 0 && possibleChild != 0)
-    {
-        if (possibleChild == windowH)
-            return true;
+    if (windowH == 0 || possibleChild == 0)
+        return false;
 
-        Window* windowList = nullptr;
-        uint32 windowListSize = 0;
-        Window parent, root;
+    if (possibleChild == windowH)
+        return true;
 
-        XWindowSystemUtilities::ScopedXLock xLock;
-        if (X11Symbols::getInstance()->xQueryTree (display, possibleChild, &root, &parent, &windowList, &windowListSize) != 0)
-        {
-            if (windowList != nullptr)
-                X11Symbols::getInstance()->xFree (windowList);
+    Window* windowList = nullptr;
+    uint32 windowListSize = 0;
+    Window parent, root;
 
-            if (parent == root)
-                return false;
+    XWindowSystemUtilities::ScopedXLock xLock;
+    const auto result = X11Symbols::getInstance()->xQueryTree (display, possibleChild, &root, &parent, &windowList, &windowListSize);
+    const auto deleter = makeXFreePtr (windowList);
 
-            return isParentWindowOf (windowH, parent);
-        }
-    }
+    if (result == 0 || parent == root)
+        return false;
 
-    return false;
+    return isParentWindowOf (windowH, parent);
 }
 
 bool XWindowSystem::isFrontWindow (::Window windowH) const
@@ -2488,28 +2465,24 @@ bool XWindowSystem::isFrontWindow (::Window windowH) const
 
     Window* windowList = nullptr;
     uint32 windowListSize = 0;
-    bool result = false;
 
     XWindowSystemUtilities::ScopedXLock xLock;
     Window parent;
     auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
 
-    if (X11Symbols::getInstance()->xQueryTree (display, root, &root, &parent, &windowList, &windowListSize) != 0)
+    const auto queryResult = X11Symbols::getInstance()->xQueryTree (display, root, &root, &parent, &windowList, &windowListSize);
+    const auto deleter = makeXFreePtr (windowList);
+
+    if (queryResult == 0)
+        return false;
+
+    for (int i = (int) windowListSize; --i >= 0;)
     {
-        for (int i = (int) windowListSize; --i >= 0;)
-        {
-            if (auto* peer = dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowList[i])))
-            {
-                result = (peer == dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (windowH)));
-                break;
-            }
-        }
+        if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowList[i])))
+            return peer == dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
     }
 
-    if (windowList != nullptr)
-        X11Symbols::getInstance()->xFree (windowList);
-
-    return result;
+    return false;
 }
 
 void XWindowSystem::xchangeProperty (::Window windowH, Atom property, Atom type, int format, const void* data, int numElements) const
@@ -2686,7 +2659,7 @@ void XWindowSystem::deleteIconPixmaps (::Window windowH) const
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
-    if (auto* wmHints = X11Symbols::getInstance()->xGetWMHints (display, windowH))
+    if (auto wmHints = makeXFreePtr (X11Symbols::getInstance()->xGetWMHints (display, windowH)))
     {
         if ((wmHints->flags & IconPixmapHint) != 0)
         {
@@ -2700,8 +2673,7 @@ void XWindowSystem::deleteIconPixmaps (::Window windowH) const
             X11Symbols::getInstance()->xFreePixmap (display, wmHints->icon_mask);
         }
 
-        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints);
-        X11Symbols::getInstance()->xFree (wmHints);
+        X11Symbols::getInstance()->xSetWMHints (display, windowH, wmHints.get());
     }
 }
 
@@ -2814,13 +2786,14 @@ bool XWindowSystem::initialiseXDisplay()
     // Create a context to store user data associated with Windows we create
     windowHandleXContext = (XContext) X11Symbols::getInstance()->xrmUniqueQuark();
 
-    // We're only interested in client messages for this window, which are always sent
-    XSetWindowAttributes swa;
-    swa.event_mask = NoEventMask;
-
     // Create our message window (this will never be mapped)
     auto screen = X11Symbols::getInstance()->xDefaultScreen (display);
     auto root = X11Symbols::getInstance()->xRootWindow (display, screen);
+    X11Symbols::getInstance()->xSelectInput (display, root, SubstructureNotifyMask);
+
+    // We're only interested in client messages for this window, which are always sent
+    XSetWindowAttributes swa;
+    swa.event_mask = NoEventMask;
     juce_messageWindowHandle = X11Symbols::getInstance()->xCreateWindow (display, root,
                                                                          0, 0, 1, 1, 0, 0, InputOnly,
                                                                          X11Symbols::getInstance()->xDefaultVisual (display, screen),
@@ -2863,15 +2836,13 @@ bool XWindowSystem::initialiseXDisplay()
                                                     X11Symbols::getInstance()->xNextEvent (display, &evt);
                                                 }
 
-                                                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle
-                                                    && handleSelectionRequest != nullptr)
+                                                if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
                                                 {
-                                                    handleSelectionRequest (evt.xselectionrequest);
+                                                    ClipboardHelpers::handleSelection (evt.xselectionrequest);
                                                 }
-                                                else if (evt.xany.window != juce_messageWindowHandle
-                                                         && dispatchWindowMessage != nullptr)
+                                                else if (evt.xany.window != juce_messageWindowHandle)
                                                 {
-                                                    dispatchWindowMessage (evt);
+                                                    windowMessageReceive (evt);
                                                 }
 
                                             } while (display != nullptr);
@@ -2935,7 +2906,7 @@ static int64 getEventTime (const EventType& t)
     return getEventTime (t.time);
 }
 
-void XWindowSystem::handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEvent& event) const
+void XWindowSystem::handleWindowMessage (LinuxComponentPeer* peer, XEvent& event) const
 {
     switch (event.xany.type)
     {
@@ -2957,6 +2928,7 @@ void XWindowSystem::handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEv
         case GravityNotify:         handleGravityNotify (peer);                                        break;
         case SelectionClear:        dragAndDropStateMap[peer].handleExternalSelectionClear();          break;
         case SelectionRequest:      dragAndDropStateMap[peer].handleExternalSelectionRequest (event);  break;
+        case PropertyNotify:        propertyNotifyEvent        (peer, event.xproperty);                break;
 
         case CirculateNotify:
         case CreateNotify:
@@ -2982,7 +2954,7 @@ void XWindowSystem::handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEv
     }
 }
 
-void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer<::Window>* peer, XKeyEvent& keyEvent) const
+void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer* peer, XKeyEvent& keyEvent) const
 {
     auto oldMods = ModifierKeys::currentModifiers;
 
@@ -3102,7 +3074,7 @@ void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer<::Window>* peer, XKe
         peer->handleKeyPress (keyCode, unicodeChar);
 }
 
-void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer<::Window>* peer, const XKeyEvent& keyEvent) const
+void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer* peer, const XKeyEvent& keyEvent) const
 {
     auto isKeyReleasePartOfAutoRepeat = [&]() -> bool
     {
@@ -3141,7 +3113,7 @@ void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer<::Window>* peer, c
     }
 }
 
-void XWindowSystem::handleWheelEvent (LinuxComponentPeer<::Window>* peer, const XButtonPressedEvent& buttonPressEvent, float amount) const
+void XWindowSystem::handleWheelEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent, float amount) const
 {
     MouseWheelDetails wheel;
     wheel.deltaX = 0.0f;
@@ -3154,7 +3126,7 @@ void XWindowSystem::handleWheelEvent (LinuxComponentPeer<::Window>* peer, const 
                             getEventTime (buttonPressEvent), wheel);
 }
 
-void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag) const
+void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent, int buttonModifierFlag) const
 {
     ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withFlags (buttonModifierFlag);
     peer->toFront (true);
@@ -3163,7 +3135,7 @@ void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, 
                             MouseInputSource::invalidOrientation, getEventTime (buttonPressEvent), {});
 }
 
-void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, const XButtonPressedEvent& buttonPressEvent) const
+void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer* peer, const XButtonPressedEvent& buttonPressEvent) const
 {
     updateKeyModifiers ((int) buttonPressEvent.state);
 
@@ -3183,7 +3155,7 @@ void XWindowSystem::handleButtonPressEvent (LinuxComponentPeer<::Window>* peer, 
     }
 }
 
-void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer<::Window>* peer, const XButtonReleasedEvent& buttonRelEvent) const
+void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer* peer, const XButtonReleasedEvent& buttonRelEvent) const
 {
     updateKeyModifiers ((int) buttonRelEvent.state);
 
@@ -3212,7 +3184,7 @@ void XWindowSystem::handleButtonReleaseEvent (LinuxComponentPeer<::Window>* peer
                             ModifierKeys::currentModifiers, MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, getEventTime (buttonRelEvent));
 }
 
-void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer<::Window>* peer, const XPointerMovedEvent& movedEvent) const
+void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer* peer, const XPointerMovedEvent& movedEvent) const
 {
     updateKeyModifiers ((int) movedEvent.state);
 
@@ -3226,7 +3198,7 @@ void XWindowSystem::handleMotionNotifyEvent (LinuxComponentPeer<::Window>* peer,
                             MouseInputSource::invalidOrientation, getEventTime (movedEvent));
 }
 
-void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer<::Window>* peer, const XEnterWindowEvent& enterEvent) const
+void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer* peer, const XEnterWindowEvent& enterEvent) const
 {
     if (peer->getParentWindow() != 0)
         peer->updateWindowBounds();
@@ -3240,7 +3212,7 @@ void XWindowSystem::handleEnterNotifyEvent (LinuxComponentPeer<::Window>* peer, 
     }
 }
 
-void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer<::Window>* peer, const XLeaveWindowEvent& leaveEvent) const
+void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer* peer, const XLeaveWindowEvent& leaveEvent) const
 {
     // Suppress the normal leave if we've got a pointer grab, or if
     // it's a bogus one caused by clicking a mouse button when running
@@ -3255,7 +3227,7 @@ void XWindowSystem::handleLeaveNotifyEvent (LinuxComponentPeer<::Window>* peer, 
     }
 }
 
-void XWindowSystem::handleFocusInEvent (LinuxComponentPeer<::Window>* peer) const
+void XWindowSystem::handleFocusInEvent (LinuxComponentPeer* peer) const
 {
     peer->isActiveApplication = true;
 
@@ -3266,7 +3238,7 @@ void XWindowSystem::handleFocusInEvent (LinuxComponentPeer<::Window>* peer) cons
     }
 }
 
-void XWindowSystem::handleFocusOutEvent (LinuxComponentPeer<::Window>* peer) const
+void XWindowSystem::handleFocusOutEvent (LinuxComponentPeer* peer) const
 {
     if (! isFocused ((::Window) peer->getNativeHandle()) && peer->focused)
     {
@@ -3277,7 +3249,7 @@ void XWindowSystem::handleFocusOutEvent (LinuxComponentPeer<::Window>* peer) con
     }
 }
 
-void XWindowSystem::handleExposeEvent (LinuxComponentPeer<::Window>* peer, XExposeEvent& exposeEvent) const
+void XWindowSystem::handleExposeEvent (LinuxComponentPeer* peer, XExposeEvent& exposeEvent) const
 {
     // Batch together all pending expose events
     XEvent nextEvent;
@@ -3319,19 +3291,22 @@ void XWindowSystem::handleExposeEvent (LinuxComponentPeer<::Window>* peer, XExpo
     }
 }
 
-void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer<::Window>* peer, XConfigureEvent& confEvent) const
+void XWindowSystem::dismissBlockingModals (LinuxComponentPeer* peer) const
+{
+    if (peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
+        if (auto* currentModalComp = Component::getCurrentlyModalComponent())
+            currentModalComp->inputAttemptWhenModal();
+}
+
+void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfigureEvent& confEvent) const
 {
     peer->updateWindowBounds();
     peer->updateBorderSize();
     peer->handleMovedOrResized();
 
     // if the native title bar is dragged, need to tell any active menus, etc.
-    if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) != 0
-          && peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
-    {
-        if (auto* currentModalComp = Component::getCurrentlyModalComponent())
-            currentModalComp->inputAttemptWhenModal();
-    }
+    if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) != 0)
+        dismissBlockingModals (peer);
 
     auto windowH = (::Window) peer->getNativeHandle();
 
@@ -3339,11 +3314,42 @@ void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer<::Window>* pe
         peer->handleBroughtToFront();
 }
 
-void XWindowSystem::handleGravityNotify (LinuxComponentPeer<::Window>* peer) const
+void XWindowSystem::handleGravityNotify (LinuxComponentPeer* peer) const
 {
     peer->updateWindowBounds();
     peer->updateBorderSize();
     peer->handleMovedOrResized();
+}
+
+void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XPropertyEvent& event) const
+{
+    const auto isStateChangeEvent = [&]
+    {
+        if (event.atom != atoms.state)
+            return false;
+
+        return isMinimised (event.window);
+    };
+
+    const auto isHidden = [&]
+    {
+        if (event.atom != atoms.windowState)
+            return false;
+
+        XWindowSystemUtilities::ScopedXLock xLock;
+        XWindowSystemUtilities::GetXProperty prop (event.window, atoms.windowState, 0, 128, false, XA_ATOM);
+
+        if (! (prop.success && prop.actualFormat == 32 && prop.actualType == XA_ATOM))
+            return false;
+
+        const auto data = reinterpret_cast<const long*> (prop.data);
+        const auto end = data + prop.numItems;
+
+        return std::find (data, end, atoms.windowStateHidden) != end;
+    };
+
+    if (isStateChangeEvent() || isHidden())
+        dismissBlockingModals (peer);
 }
 
 void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const
@@ -3357,7 +3363,7 @@ void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const
     }
 }
 
-void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer<::Window>* peer, XClientMessageEvent& clientMsg, XEvent& event) const
+void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer* peer, XClientMessageEvent& clientMsg, XEvent& event) const
 {
     if (clientMsg.message_type == atoms.protocols && clientMsg.format == 32)
     {
@@ -3429,7 +3435,7 @@ void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer<::Window>* peer
     }
 }
 
-void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer<::Window>* peer, XClientMessageEvent& clientMsg) const
+void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer* peer, XClientMessageEvent& clientMsg) const
 {
     switch (clientMsg.data.l[1])
     {
@@ -3451,39 +3457,39 @@ void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer<::Window>* peer, XCl
 }
 
 //==============================================================================
-namespace WindowingHelpers
+void XWindowSystem::windowMessageReceive (XEvent& event)
 {
-    static void windowMessageReceive (XEvent& event)
+    if (event.xany.window != None)
     {
-        if (event.xany.window != None)
+       #if JUCE_X11_SUPPORTS_XEMBED
+        if (! juce_handleXEmbedEvent (nullptr, &event))
+       #endif
         {
-           #if JUCE_X11_SUPPORTS_XEMBED
-            if (! juce_handleXEmbedEvent (nullptr, &event))
-           #endif
+            if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (event.xany.window)))
             {
-                if (auto* peer = dynamic_cast<LinuxComponentPeer<::Window>*> (getPeerFor (event.xany.window)))
-                    XWindowSystem::getInstance()->handleWindowMessage (peer, event);
+                XWindowSystem::getInstance()->handleWindowMessage (peer, event);
+                return;
             }
+
+            if (event.type != ConfigureNotify)
+                return;
+
+            const auto* instance = XWindowSystem::getInstance();
+
+            for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)))
+                    if (instance->isParentWindowOf (event.xconfigure.window, linuxPeer->getWindowHandle()))
+                        instance->dismissBlockingModals (linuxPeer);
         }
-        else if (event.xany.type == KeymapNotify)
-        {
-            auto& keymapEvent = (const XKeymapEvent&) event.xkeymap;
-            memcpy (Keys::keyStates, keymapEvent.key_vector, 32);
-        }
+    }
+    else if (event.xany.type == KeymapNotify)
+    {
+        auto& keymapEvent = (const XKeymapEvent&) event.xkeymap;
+        memcpy (Keys::keyStates, keymapEvent.key_vector, 32);
     }
 }
 
-struct WindowingCallbackInitialiser
-{
-    WindowingCallbackInitialiser()
-    {
-        dispatchWindowMessage = WindowingHelpers::windowMessageReceive;
-    }
-};
-
-static WindowingCallbackInitialiser windowingInitialiser;
-
-
+//==============================================================================
 JUCE_IMPLEMENT_SINGLETON (XWindowSystem)
 
 } // namespace juce

@@ -644,6 +644,8 @@ private:
                     [stillImageOutput captureStillImageAsynchronouslyFromConnection: connection completionHandler:
                          ^(CMSampleBufferRef imageSampleBuffer, NSError* error)
                          {
+                             takingPicture = false;
+
                              if (error != nil)
                              {
                                  JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
@@ -657,7 +659,7 @@ private:
 
                              callListeners (image);
 
-                             MessageManager::callAsync ([this, image]() { notifyPictureTaken (image); });
+                             MessageManager::callAsync ([this, image] { notifyPictureTaken (image); });
                          }];
                 }
                 else
@@ -811,6 +813,8 @@ private:
 
                 static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* capturePhoto, NSError* error)
                 {
+                    getOwner (self).takingPicture = false;
+
                     String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
                     ignoreUnused (errorString);
 
@@ -914,6 +918,8 @@ private:
                                                                   AVCaptureResolvedPhotoSettings*, AVCaptureBracketedStillImageSettings*,
                                                                   NSError* error)
                 {
+                    getOwner (self).takingPicture = false;
+
                     String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
                     ignoreUnused (errorString);
 
@@ -965,8 +971,6 @@ private:
 
             void notifyPictureTaken (const Image& image)
             {
-                takingPicture = false;
-
                 captureSession.notifyPictureTaken (image);
             }
 
@@ -1192,6 +1196,9 @@ private:
     {
         const ScopedLock sl (listenerLock);
         listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+
+        if (listeners.size() == 1)
+            triggerStillPictureCapture();
     }
 
     void notifyPictureTaken (const Image& image)

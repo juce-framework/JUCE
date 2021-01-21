@@ -448,7 +448,7 @@ public:
                 if (! isRunning())
                     break;
 
-                Thread::yield();
+                Thread::sleep (1);
             }
             else
             {

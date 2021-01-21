@@ -50,7 +50,6 @@ public:
     virtual ~AudioStreamOpenSLES() = default;
 
     virtual Result open() override;
-    virtual Result close() override;
 
     /**
      * Query the current state, eg. OBOE_STREAM_STATE_PAUSING
@@ -79,6 +78,9 @@ public:
                               int64_t timeoutNanoseconds) override;
 
 protected:
+
+    // This must be called under mLock.
+    Result close_l();
 
     SLuint32 channelCountToChannelMaskDefault(int channelCount) const;
 

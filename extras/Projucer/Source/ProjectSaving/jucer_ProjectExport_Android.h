@@ -112,7 +112,7 @@ public:
           androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
-          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "28"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "29"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
@@ -997,8 +997,7 @@ private:
     {
         String props;
 
-        props << "ndk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidNDKPath, TargetOS::getThisOS()).get().toString()) << newLine
-              << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
+        props << "sdk.dir=" << sanitisePath (getAppSettings().getStoredPath (Ids::androidSDKPath, TargetOS::getThisOS()).get().toString()) << newLine;
 
         return replaceLineFeeds (props, getNewLineString());
     }
@@ -1836,7 +1835,7 @@ private:
         {
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
-            s.add ("android.permission.ACCESS_COARSE_LOCATION");
+            s.add ("android.permission.ACCESS_FINE_LOCATION");
         }
 
         if (androidExternalReadPermission.get())

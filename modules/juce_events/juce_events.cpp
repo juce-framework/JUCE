@@ -73,15 +73,11 @@
 
  #include "native/juce_osx_MessageQueue.h"
 
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-
  #if JUCE_MAC
   #include "native/juce_mac_MessageManager.mm"
  #else
   #include "native/juce_ios_MessageManager.mm"
  #endif
-
- JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #elif JUCE_WINDOWS
  #include "native/juce_win32_Messaging.cpp"

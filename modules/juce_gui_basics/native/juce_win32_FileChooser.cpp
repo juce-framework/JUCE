@@ -46,7 +46,7 @@ public:
                             const File& startingFile, const String& titleToUse,
                             const String& filtersToUse)
         : Thread ("Native Win32 FileChooser"),
-          owner (parent), title (titleToUse), filtersString (filtersToUse),
+          owner (parent), title (titleToUse), filtersString (filtersToUse.replaceCharacter (',', ';')),
           selectsDirectories ((flags & FileBrowserComponent::canSelectDirectories)   != 0),
           isSave             ((flags & FileBrowserComponent::saveMode)               != 0),
           warnAboutOverwrite ((flags & FileBrowserComponent::warnAboutOverwriting)   != 0),
@@ -167,6 +167,11 @@ private:
     Atomic<HWND> nativeDialogRef;
     Atomic<int>  shouldCancel;
 
+    struct FreeLPWSTR
+    {
+        void operator() (LPWSTR ptr) const noexcept { CoTaskMemFree (ptr); }
+    };
+
     bool showDialog (IFileDialog& dialog, bool async) const
     {
         FILEOPENDIALOGOPTIONS flags = {};
@@ -193,7 +198,17 @@ private:
         PIDLIST_ABSOLUTE pidl = {};
 
         if (FAILED (SHParseDisplayName (initialPath.toWideCharPointer(), nullptr, &pidl, SFGAO_FOLDER, nullptr)))
-            return false;
+        {
+            LPWSTR ptr = nullptr;
+            auto result = SHGetKnownFolderPath (FOLDERID_Desktop, 0, nullptr, &ptr);
+            std::unique_ptr<WCHAR, FreeLPWSTR> desktopPath (ptr);
+
+            if (FAILED (result))
+                return false;
+
+            if (FAILED (SHParseDisplayName (desktopPath.get(), nullptr, &pidl, SFGAO_FOLDER, nullptr)))
+                return false;
+        }
 
         const auto item = [&]
         {
@@ -228,14 +243,13 @@ private:
     {
         const auto getUrl = [] (IShellItem& item)
         {
-            struct Free
-            {
-                void operator() (LPWSTR ptr) const noexcept { CoTaskMemFree (ptr); }
-            };
-
             LPWSTR ptr = nullptr;
-            item.GetDisplayName (SIGDN_URL, &ptr);
-            return std::unique_ptr<WCHAR, Free> { ptr };
+
+            if (item.GetDisplayName (SIGDN_FILESYSPATH, &ptr) != S_OK)
+                return URL();
+
+            const auto path = std::unique_ptr<WCHAR, FreeLPWSTR> { ptr };
+            return URL (File (String (path.get())));
         };
 
         if (isSave)
@@ -262,7 +276,12 @@ private:
             if (item == nullptr)
                 return {};
 
-            return { URL (String (getUrl (*item).get())) };
+            const auto url = getUrl (*item);
+
+            if (url.isEmpty())
+                return {};
+
+            return { url };
         }
 
         const auto dialog = [&]
@@ -298,7 +317,12 @@ private:
             items->GetItemAt (i, scope.resetAndGetPointerAddress());
 
             if (scope != nullptr)
-                result.add (String (getUrl (*scope).get()));
+            {
+                const auto url = getUrl (*scope);
+
+                if (! url.isEmpty())
+                    result.add (url);
+            }
         }
 
         return result;

@@ -32,6 +32,9 @@
     <Filter Include="JUCE Modules\juce_audio_devices\audio_io">
       <UniqueIdentifier>{BF23FC10-1D57-2A9B-706F-6DD8A7B593D4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="JUCE Modules\juce_audio_devices\midi_io\ump">
+      <UniqueIdentifier>{386862D5-4DCC-A4B3-5642-60A201E303EF}</UniqueIdentifier>
+    </Filter>
     <Filter Include="JUCE Modules\juce_audio_devices\midi_io">
       <UniqueIdentifier>{092EFC17-7C95-7E04-0ACA-0D61A462EE81}</UniqueIdentifier>
     </Filter>
@@ -565,6 +568,21 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.cpp">
       <Filter>JUCE Modules\juce_audio_devices\audio_io</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPMidi1ToMidi2DefaultTranslator.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPSysEx7.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPTests.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPUtils.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPView.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiDevices.cpp">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClCompile>
@@ -661,6 +679,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\resampler\SincResamplerStereo.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph\resampler</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\ChannelCountConverter.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\ClipToRange.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClCompile>
@@ -671,6 +692,9 @@
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\MonoToMultiConverter.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\MultiToMonoConverter.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\RampLinear.cpp">
@@ -748,7 +772,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_mac_CoreAudio.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_mac_CoreMidi.cpp">
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_mac_CoreMidi.mm">
       <Filter>JUCE Modules\juce_audio_devices\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\juce_win32_ASIO.cpp">
@@ -2679,6 +2703,54 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SystemAudioVolume.h">
       <Filter>JUCE Modules\juce_audio_devices\audio_io</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPacket.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPackets.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPBytestreamInputHandler.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPConversion.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPConverters.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPDispatcher.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPFactory.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPIterator.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPMidi1ToBytestreamTranslator.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPMidi1ToMidi2DefaultTranslator.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPProtocols.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPReceiver.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPSysEx7.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPU32InputHandler.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPUtils.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPView.h">
+      <Filter>JUCE Modules\juce_audio_devices\midi_io\ump</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiDevices.h">
       <Filter>JUCE Modules\juce_audio_devices\midi_io</Filter>
     </ClInclude>
@@ -2805,6 +2877,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\resampler\SincResamplerStereo.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph\resampler</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\ChannelCountConverter.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\ClipToRange.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
@@ -2815,6 +2890,9 @@
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\MonoToMultiConverter.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\MultiToMonoConverter.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\RampLinear.h">

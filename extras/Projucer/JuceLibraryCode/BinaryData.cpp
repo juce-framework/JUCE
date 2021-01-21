@@ -6301,6 +6301,8 @@ static const unsigned char temp_binary_data_38[] =
 "  #else\r\n"
 "    // This is the place where you check if the layout is supported.\r\n"
 "    // In this template code we only support mono or stereo.\r\n"
+"    // Some plugin hosts, such as certain GarageBand versions, will only\r\n"
+"    // load plugins that support stereo bus layouts.\r\n"
 "    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()\r\n"
 "     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())\r\n"
 "        return false;\r\n"
@@ -7594,7 +7596,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
         case 0x27c5a93a:  numBytes = 1355; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 973; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 6090; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x51b49ac5:  numBytes = 6218; return jucer_AudioPluginFilterTemplate_cpp;
         case 0x488afa0a:  numBytes = 2299; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2147; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2065; return jucer_ComponentTemplate_h;

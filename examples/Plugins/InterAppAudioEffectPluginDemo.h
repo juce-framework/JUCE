@@ -176,6 +176,8 @@ public:
         return true;
     }
 
+    using AudioProcessor::processBlock;
+
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
     {
         float gain = *parameters.getRawParameterValue ("gain");
@@ -423,8 +425,8 @@ private:
         //==============================================================================
         bool transportControllable()
         {
-            auto playHead = iaaEffectProcessor.getPlayHead();
-            return playHead != nullptr && playHead->canControlTransport();
+            auto processorPlayHead = iaaEffectProcessor.getPlayHead();
+            return processorPlayHead != nullptr && processorPlayHead->canControlTransport();
         }
 
         //==============================================================================

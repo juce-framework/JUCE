@@ -35,7 +35,7 @@
 
   ID:                 juce_analytics
   vendor:             juce
-  version:            6.0.4
+  version:            6.0.7
   name:               JUCE analytics classes
   description:        Classes to collect analytics and send to destinations
   website:            http://www.juce.com/juce
@@ -51,7 +51,6 @@
 #pragma once
 #define JUCE_ANALYTICS_H_INCLUDED
 
-#include <queue>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include "destinations/juce_AnalyticsDestination.h"

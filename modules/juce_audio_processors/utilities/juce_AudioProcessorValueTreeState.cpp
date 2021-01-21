@@ -162,7 +162,7 @@ private:
             return;
 
         unnormalisedValue = newValue;
-        listeners.call ([=] (Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
+        listeners.call ([this] (Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
         listenersNeedCalling = false;
         needsUpdate = true;
     }

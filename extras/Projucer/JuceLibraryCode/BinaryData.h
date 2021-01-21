@@ -123,7 +123,7 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 973;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 6090;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 6218;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
     const int            jucer_AudioPluginFilterTemplate_hSize = 2299;

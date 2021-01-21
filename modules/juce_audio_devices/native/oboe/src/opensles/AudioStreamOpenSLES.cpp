@@ -134,6 +134,13 @@ Result AudioStreamOpenSLES::configureBufferSizes(int32_t sampleRate) {
 
     if (!usingFIFO()) {
         mBufferCapacityInFrames = mFramesPerBurst * kBufferQueueLength;
+        // Check for overflow.
+        if (mBufferCapacityInFrames <= 0) {
+            mBufferCapacityInFrames = 0;
+            LOGE("AudioStreamOpenSLES::open() numeric overflow because mFramesPerBurst = %d",
+                 mFramesPerBurst);
+            return Result::ErrorOutOfRange;
+        }
         mBufferSizeInFrames = mBufferCapacityInFrames;
     }
 
@@ -208,12 +215,6 @@ void AudioStreamOpenSLES::logUnsupportedAttributes() {
         LOGW("SessionId [AudioStreamBuilder::setSessionId()] "
              "is not supported on OpenSLES streams.");
     }
-
-    // Input Preset
-    if (mInputPreset != InputPreset::VoiceRecognition) {
-        LOGW("InputPreset [AudioStreamBuilder::setInputPreset()] "
-             "is not supported on OpenSLES streams.");
-    }
 }
 
 SLresult AudioStreamOpenSLES::configurePerformanceMode(SLAndroidConfigurationItf configItf) {
@@ -266,7 +267,8 @@ SLresult AudioStreamOpenSLES::updateStreamParameters(SLAndroidConfigurationItf c
     return result;
 }
 
-Result AudioStreamOpenSLES::close() {
+// This is called under mLock.
+Result AudioStreamOpenSLES::close_l() {
     if (mState == StreamState::Closed) {
         return Result::ErrorClosed;
     }
@@ -381,7 +383,7 @@ Result AudioStreamOpenSLES::waitForStateChange(StreamState currentState,
         }
 
         // Did we timeout or did user ask for non-blocking?
-        if (timeoutNanoseconds <= 0) {
+        if (timeLeftNanos <= 0) {
             break;
         }
 

@@ -260,6 +260,7 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("PLUGIN_AU_MAIN_TYPE",                  result.auMainType);
     updateField ("IS_AU_SANDBOX_SAFE",                   result.isAuSandboxSafe);
     updateField ("IS_PLUGIN_SYNTH",                      result.isPluginSynth);
+    updateField ("SUPPRESS_AU_PLIST_RESOURCE_USAGE",     result.suppressResourceUsage);
     updateField ("BUNDLE_ID",                            result.bundleIdentifier);
     updateField ("ICON_FILE",                            result.iconFile);
 
