@@ -116,6 +116,8 @@ void ARADocumentController::internalDidUpdateAudioSourceAnalysisProgress (ARAAud
 
 // some helper macros to ease repeated declaration & implementation of notification functions below:
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
+
 #define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
     static_cast<std::remove_pointer<ModelObjectPtrType>::type::Listener*> (this)->function  (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); \
     static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { try { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); } catch (...) {} })
@@ -313,6 +315,8 @@ void ARADocumentController::internalNotifyPlaybackRegionContentChanged (ARAPlayb
 }
 
 //==============================================================================
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #undef notify_listeners
 #undef OVERRIDE_TO_NOTIFY_1

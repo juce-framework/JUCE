@@ -30,7 +30,9 @@ namespace juce
 }
 
 // Include ARA headers
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
 #include <ARA_Library/PlugIn/ARAPlug.h>
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 namespace juce
 {
