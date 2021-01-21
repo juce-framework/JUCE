@@ -398,27 +398,27 @@ void ARADocumentController::timerCallback()
 
 ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
 : archiveReader (reader), 
-  size (reader->getArchiveSize())
+  size ((int64) reader->getArchiveSize())
 {}
 
 int ARAInputStream::read (void* destBuffer, int maxBytesToRead)
 {
-    const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
-    if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
+    const auto bytesToRead = jmin ((int64) maxBytesToRead, size - position);
+    if (! archiveReader->readBytesFromArchive ((ARA::ARASize) position, (ARA::ARASize) bytesToRead, (ARA::ARAByte*) destBuffer))
     {
         failure = true;
         return 0;
     }
 
     position += bytesToRead;
-    return bytesToRead;
+    return (int) bytesToRead;
 }
 
 bool ARAInputStream::setPosition (int64 newPosition)
 {
     if (newPosition >= (int64) size)
         return false;
-    position = (size_t) newPosition;
+    position = newPosition;
     return true;
 }
 
@@ -433,7 +433,7 @@ ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
 
 bool ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
-    if (!archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
+    if (!archiveWriter->writeBytesToArchive ((ARA::ARASize) position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
 
     position += numberOfBytes;
@@ -444,7 +444,7 @@ bool ARAOutputStream::setPosition (int64 newPosition)
 {
     if (newPosition > (int64) std::numeric_limits<size_t>::max())
         return false;
-    position = (size_t) newPosition;
+    position = newPosition;
     return true;
 }
 

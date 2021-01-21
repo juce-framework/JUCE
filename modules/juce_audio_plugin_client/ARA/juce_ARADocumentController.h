@@ -261,8 +261,8 @@ class ARAInputStream  : public InputStream
 public:
     ARAInputStream (ARA::PlugIn::HostArchiveReader*);
 
-    int64 getPosition() override { return (int64) position; }
-    int64 getTotalLength() override { return (int64) size; }
+    int64 getPosition() override { return position; }
+    int64 getTotalLength() override { return size; }
 
     int read (void*, int) override;
     bool setPosition (int64) override;
@@ -272,8 +272,8 @@ public:
 
 private:
     ARA::PlugIn::HostArchiveReader* archiveReader;
-    size_t position { 0 };
-    size_t size;
+    int64 position { 0 };
+    int64 size;
     bool failure { false };
 };
 
@@ -289,7 +289,7 @@ class ARAOutputStream     : public OutputStream
 public:
     ARAOutputStream (ARA::PlugIn::HostArchiveWriter*);
 
-    int64 getPosition() override { return (int64) position; }
+    int64 getPosition() override { return position; }
     void flush() override {}
 
     bool write (const void*, size_t) override;
@@ -297,6 +297,6 @@ public:
 
 private:
     ARA::PlugIn::HostArchiveWriter* archiveWriter;
-    size_t position { 0 };
+    int64 position { 0 };
 };
 } // namespace juce
