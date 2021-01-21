@@ -13,9 +13,9 @@ ARAPluginDemoAudioProcessor::ARAPluginDemoAudioProcessor (bool useBuffering)
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
+                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
 #else
@@ -27,7 +27,7 @@ ARAPluginDemoAudioProcessor::ARAPluginDemoAudioProcessor (bool useBuffering)
 }
 
 //==============================================================================
-const String ARAPluginDemoAudioProcessor::getName() const
+const juce::String ARAPluginDemoAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
@@ -63,8 +63,8 @@ double ARAPluginDemoAudioProcessor::getTailLengthSeconds() const
 {
     double tail{};
     if (auto playbackRenderer = getARAPlaybackRenderer())
-        for (auto playbackRegion : playbackRenderer->getPlaybackRegions<ARAPlaybackRegion>())
-            tail = jmax (tail, playbackRegion->getTailTime());
+        for (auto playbackRegion : playbackRenderer->getPlaybackRegions<juce::ARAPlaybackRegion>())
+            tail = juce::jmax (tail, playbackRegion->getTailTime());
 
     return tail;
 }
@@ -84,17 +84,17 @@ void ARAPluginDemoAudioProcessor::setCurrentProgram (int /*index*/)
 {
 }
 
-const String ARAPluginDemoAudioProcessor::getProgramName (int /*index*/)
+const juce::String ARAPluginDemoAudioProcessor::getProgramName (int /*index*/)
 {
     return {};
 }
 
-void ARAPluginDemoAudioProcessor::changeProgramName (int /*index*/, const String& /*newName*/)
+void ARAPluginDemoAudioProcessor::changeProgramName (int /*index*/, const juce::String& /*newName*/)
 {
 }
 
 //==============================================================================
-void ARAPluginDemoAudioProcessor::prepareToPlay (double newSampleRate, int /*samplesPerBlock*/)
+void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int /*samplesPerBlock*/)
 {
     if (isARAPlaybackRenderer())
     {
@@ -102,17 +102,17 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double newSampleRate, int /*sam
 
         for (auto playbackRegion : getARAPlaybackRenderer()->getPlaybackRegions())
         {
-            auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
+            auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
             if (audioSourceReaders.count (audioSource) == 0)
             {
-                AudioFormatReader* sourceReader = new ARAAudioSourceReader (audioSource);
+                juce::AudioFormatReader* sourceReader = new juce::ARAAudioSourceReader (audioSource);
 
                 if (useBufferedAudioSourceReader)
                 {
                     // if we're being used in real-time, wrap our source reader in a buffering
                     // reader to avoid blocking while reading samples in processBlock
-                    const int readAheadSize = roundToInt (2.0 * newSampleRate);
-                    sourceReader = new BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
+                    const int readAheadSize = juce::roundToInt (2.0 * sampleRate);
+                    sourceReader = new juce::BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
                 }
 
                 audioSourceReaders.emplace (audioSource, sourceReader);
@@ -120,7 +120,7 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double newSampleRate, int /*sam
         }
 
         if (getARAPlaybackRenderer()->getPlaybackRegions().size() > 1)
-            tempBuffer.reset (new AudioBuffer<float> (getTotalNumOutputChannels(), getBlockSize()));
+            tempBuffer.reset (new juce::AudioBuffer<float> (getTotalNumOutputChannels(), getBlockSize()));
         else
             tempBuffer.reset();
     }
@@ -139,13 +139,15 @@ void ARAPluginDemoAudioProcessor::releaseResources()
 bool ARAPluginDemoAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
-    ignoreUnused (layouts);
+    juce::ignoreUnused (layouts);
     return true;
   #else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
-    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
+    // Some plugin hosts, such as certain GarageBand versions, will only
+    // load plugins that support stereo bus layouts.
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+     && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
     // This checks if the input layout matches the output layout
@@ -159,9 +161,9 @@ bool ARAPluginDemoAudioProcessor::isBusesLayoutSupported (const BusesLayout& lay
 }
 #endif
 
-void ARAPluginDemoAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    ScopedNoDenormals noDenormals;
+    juce::ScopedNoDenormals noDenormals;
 
     bool success = true;
 
@@ -194,8 +196,8 @@ void ARAPluginDemoAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
                 for (auto playbackRegion : getARAPlaybackRenderer()->getPlaybackRegions())
                 {
                     // get the audio source for this region and make sure we have an audio source reader for it
-                    auto audioSource = playbackRegion->getAudioModification()->getAudioSource<ARAAudioSource>();
-                    auto readerIt = audioSourceReaders.find(audioSource);
+                    auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
+                    auto readerIt = audioSourceReaders.find (audioSource);
                     if (readerIt == audioSourceReaders.end())
                     {
                         success = false;
@@ -216,18 +218,18 @@ void ARAPluginDemoAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
                     if (regionEndSample <= sampleStart)
                         continue;
 
-                    int64 startSongSample = jmax (regionStartSample, sampleStart);
-                    int64 endSongSample = jmin (regionEndSample, sampleEnd);
+                    int64 startSongSample = juce::jmax (regionStartSample, sampleStart);
+                    int64 endSongSample = juce::jmin (regionEndSample, sampleEnd);
 
                     // calculate offset between song and audio source samples, clip at region borders in audio source samples
                     // (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
                     int64 offsetToPlaybackRegion = playbackRegion->getStartInAudioModificationSamples() - regionStartSample;
 
-                    int64 startAvailableSourceSamples = jmax (0LL, playbackRegion->getStartInAudioModificationSamples());
-                    int64 endAvailableSourceSamples = jmin (audioSource->getSampleCount(), playbackRegion->getEndInAudioModificationSamples());
+                    int64 startAvailableSourceSamples = juce::jmax (0LL, playbackRegion->getStartInAudioModificationSamples());
+                    int64 endAvailableSourceSamples = juce::jmin (audioSource->getSampleCount(), playbackRegion->getEndInAudioModificationSamples());
 
-                    startSongSample = jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
-                    endSongSample = jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
+                    startSongSample = juce::jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
+                    endSongSample = juce::jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
                     if (endSongSample <= startSongSample)
                         continue;
 
@@ -239,8 +241,8 @@ void ARAPluginDemoAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
                     // if we're using a buffering reader then set the appropriate timeout
                     if (useBufferedAudioSourceReader)
                     {
-                        jassert (dynamic_cast<BufferingAudioReader*> (reader.get()) != nullptr);
-                        auto bufferingReader = static_cast<BufferingAudioReader*> (reader.get());
+                        jassert (dynamic_cast<juce::BufferingAudioReader*> (reader.get()) != nullptr);
+                        auto bufferingReader = static_cast<juce::BufferingAudioReader*> (reader.get());
                         bufferingReader->setReadTimeout (isNonRealtime() ? 100 : 0);
                     }
 
@@ -325,13 +327,22 @@ void ARAPluginDemoAudioProcessor::processBlock (AudioBuffer<float>& buffer, Midi
     lastProcessBlockSucceeded = success;
 }
 
+#if JucePlugin_Enable_ARA
+bool ARAPluginDemoAudioProcessor::didProcessBlockSucceed()
+{
+    // You can use this function to inform the calling code that the
+    // most recent processBlock call didn't output samples as expected.
+    return lastProcessBlockSucceeded;
+}
+#endif
+
 //==============================================================================
 bool ARAPluginDemoAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* ARAPluginDemoAudioProcessor::createEditor()
+juce::AudioProcessorEditor* ARAPluginDemoAudioProcessor::createEditor()
 {
     return new ARAPluginDemoAudioProcessorEditor (*this);
 }
@@ -341,7 +352,7 @@ AudioProcessorEditor* ARAPluginDemoAudioProcessor::createEditor()
 // and the state here in the plug-in instance is limited to view configuration data
 // or other editor settings, of which this sample plug-in has none.
 
-void ARAPluginDemoAudioProcessor::getStateInformation (MemoryBlock& /*destData*/)
+void ARAPluginDemoAudioProcessor::getStateInformation (juce::MemoryBlock& /*destData*/)
 {
 }
 
@@ -351,7 +362,7 @@ void ARAPluginDemoAudioProcessor::setStateInformation (const void* /*data*/, int
 
 //==============================================================================
 // This creates new instances of the plugin..
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new ARAPluginDemoAudioProcessor();
 }
