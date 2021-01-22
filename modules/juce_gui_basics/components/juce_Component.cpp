@@ -489,7 +489,7 @@ Component::~Component()
 
     if (parentComponent != nullptr)
         parentComponent->removeChildComponent (parentComponent->childComponentList.indexOf (this), true, false);
-    else if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
+    else if (hasKeyboardFocus (true))
         giveAwayFocus (currentlyFocusedComponent != this);
 
     if (flags.hasHeavyweightPeerFlag)
@@ -546,11 +546,12 @@ void Component::setVisible (bool shouldBeVisible)
         {
             ComponentHelpers::releaseAllCachedImageResources (*this);
 
-            if (currentlyFocusedComponent == this || isParentOf (currentlyFocusedComponent))
+            if (hasKeyboardFocus (true))
             {
                 if (parentComponent != nullptr)
                     parentComponent->grabKeyboardFocus();
-                else
+
+                if (hasKeyboardFocus (true))
                     giveAwayFocus (true);
             }
         }
