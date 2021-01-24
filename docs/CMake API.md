@@ -197,13 +197,11 @@ included JUCE in your own project.
 
 #### `JUCE_ENABLE_MODULE_SOURCE_GROUPS`
 
-This option controls whether dummy targets are added to the build, where these targets contain all
-of the source files for each module added with `juce_add_module(s)`. If you're planning to use an
-IDE and want to be able to browse all of JUCE's source files, this may be useful. However, it will
-increase the size of generated IDE projects and might slow down configuration a bit. If you enable
-this, you should probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level
-CMakeLists, otherwise the module sources will be added directly to the top level of the project,
-instead of in a nice 'Modules' subfolder.
+This option will make module source files browsable in IDE projects. It has no effect in non-IDE
+projects. This option is off by default, as it will increase the size of generated IDE projects and
+might slow down configuration a bit. If you enable this, you should probably also add
+`set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists as this is required for
+source grouping to work.
 
 #### `JUCE_COPY_PLUGIN_AFTER_BUILD`
 

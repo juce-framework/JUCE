@@ -339,7 +339,7 @@ private:
 
         for (;;)
         {
-            char buffer [8192];
+            char buffer [8192] = "";
             auto num = urlStream->read (buffer, sizeof (buffer));
 
             if (ThreadPoolJob::getCurrentThreadPoolJob()->shouldExit())

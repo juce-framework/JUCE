@@ -49,7 +49,8 @@ public:
 
     /** Creates an array containing a list of strings. */
     template <typename... OtherElements>
-    StringArray (StringRef firstValue, OtherElements... otherValues) : strings (firstValue, otherValues...) {}
+    StringArray (StringRef firstValue, OtherElements&&... otherValues)
+        : strings (firstValue, std::forward<OtherElements> (otherValues)...) {}
 
     /** Creates an array containing a list of strings. */
     StringArray (const std::initializer_list<const char*>& strings);

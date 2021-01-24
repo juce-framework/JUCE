@@ -290,21 +290,23 @@ endfunction()
 
 # ==================================================================================================
 
-function(_juce_module_sources module_path output_path out_var)
+function(_juce_module_sources module_path output_path built_sources other_sources)
     get_filename_component(module_parent_path ${module_path} DIRECTORY)
     get_filename_component(module_glob ${module_path} NAME)
 
-    file(GLOB module_cpp
-        CONFIGURE_DEPENDS LIST_DIRECTORIES false
+    file(GLOB_RECURSE all_module_files
+        CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
         RELATIVE "${module_parent_path}"
-        "${module_path}/${module_glob}*.cpp")
+        "${module_path}/*")
+
+    set(base_path "${module_glob}/${module_glob}")
+
+    set(module_cpp ${all_module_files})
+    list(FILTER module_cpp INCLUDE REGEX "${base_path}[^/]*\\.cpp$")
 
     if(APPLE)
-        file(GLOB module_mm
-            CONFIGURE_DEPENDS LIST_DIRECTORIES false
-            RELATIVE "${module_parent_path}"
-            "${module_path}/${module_glob}*.mm"
-            "${module_path}/${module_glob}*.r")
+        set(module_mm ${all_module_files})
+        list(FILTER module_mm INCLUDE REGEX "${base_path}[^/]*\\.(mm|r)$")
 
         if(module_mm)
             set(module_mm_replaced ${module_mm})
@@ -314,9 +316,15 @@ function(_juce_module_sources module_path output_path out_var)
         endif()
     endif()
 
-    list(TRANSFORM module_cpp PREPEND "${output_path}/")
+    set(headers ${all_module_files})
+    list(REMOVE_ITEM headers ${module_cpp})
 
-    set(${out_var} ${module_cpp} PARENT_SCOPE)
+    foreach(source_list IN ITEMS module_cpp headers)
+        list(TRANSFORM ${source_list} PREPEND "${output_path}/")
+    endforeach()
+
+    set(${built_sources} ${module_cpp} PARENT_SCOPE)
+    set(${other_sources} ${headers} PARENT_SCOPE)
 endfunction()
 
 # ==================================================================================================
@@ -442,30 +450,25 @@ endfunction()
 
 # ==================================================================================================
 
-function(_juce_add_plugin_wrapper_target)
-    set(one_value_args FORMAT PATH OUT_PATH INSTALL_EXPORT)
-    cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
-
-    _juce_module_sources("${JUCE_ARG_PATH}" "${JUCE_ARG_OUT_PATH}" out_var)
+function(_juce_add_plugin_wrapper_target format path out_path)
+    _juce_module_sources("${path}" "${out_path}" out_var headers)
     list(FILTER out_var EXCLUDE REGEX "/juce_audio_plugin_client_utils.cpp$")
-    set(target_name juce_audio_plugin_client_${JUCE_ARG_FORMAT})
+    set(target_name juce_audio_plugin_client_${format})
 
     _juce_add_interface_library("${target_name}" ${out_var})
-    _juce_add_plugin_definitions("${target_name}" INTERFACE ${JUCE_ARG_FORMAT})
+    _juce_add_plugin_definitions("${target_name}" INTERFACE ${format})
     _juce_add_standard_defs("${target_name}")
 
     target_compile_features("${target_name}" INTERFACE cxx_std_11)
     add_library("juce::${target_name}" ALIAS "${target_name}")
 
-    install(TARGETS "${target_name}" EXPORT "${JUCE_ARG_INSTALL_EXPORT}")
-
-    if(JUCE_ARG_FORMAT STREQUAL "AUv3")
+    if(format STREQUAL "AUv3")
         _juce_link_frameworks("${target_name}" INTERFACE AVFoundation)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
             _juce_link_frameworks("${target_name}" INTERFACE AudioUnit)
         endif()
-    elseif(JUCE_ARG_FORMAT STREQUAL "AU")
+    elseif(format STREQUAL "AU")
         _juce_link_frameworks("${target_name}" INTERFACE AudioUnit CoreAudioKit)
     endif()
 endfunction()
@@ -503,15 +506,11 @@ function(juce_add_module module_path)
 
     set(base_path "${module_parent_path}")
 
-    list(APPEND all_module_sources "${base_path}/${module_name}/${module_header_name}")
-
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         _juce_get_platform_plugin_kinds(plugin_kinds)
 
         foreach(kind IN LISTS plugin_kinds)
-            _juce_add_plugin_wrapper_target(FORMAT ${kind}
-                PATH "${module_path}"
-                OUT_PATH "${base_path}")
+            _juce_add_plugin_wrapper_target(${kind} "${module_path}" "${base_path}")
         endforeach()
 
         set(utils_source
@@ -523,12 +522,31 @@ function(juce_add_module module_path)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_audio_plugin_client_utils
                 ALIAS juce_audio_plugin_client_utils)
         endif()
+
+        file(GLOB_RECURSE all_module_files
+            CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
+            RELATIVE "${module_parent_path}"
+            "${module_path}/*")
+
+        set(headers ${all_module_files})
+        list(FILTER headers EXCLUDE REGEX "${module_name}/${module_name}[^/]+\\.(cpp|mm|r)$")
+        list(TRANSFORM headers PREPEND "${module_parent_path}/")
     else()
-        _juce_module_sources("${module_path}" "${base_path}" globbed_sources)
+        _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
         list(APPEND all_module_sources ${globbed_sources})
     endif()
 
     _juce_add_interface_library(${module_name} ${all_module_sources})
+
+    set_property(GLOBAL APPEND PROPERTY _juce_module_names ${module_name})
+
+    set_target_properties(${module_name} PROPERTIES
+        INTERFACE_JUCE_MODULE_HEADERS   "${headers}"
+        INTERFACE_JUCE_MODULE_PATH      "${base_path}")
+
+    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
+        target_sources(${module_name} INTERFACE ${headers})
+    endif()
 
     if(${module_name} STREQUAL "juce_core")
         _juce_add_standard_defs(${module_name})
@@ -638,13 +656,6 @@ function(juce_add_module module_path)
 
     if(JUCE_ARG_ALIAS_NAMESPACE)
         add_library(${JUCE_ARG_ALIAS_NAMESPACE}::${module_name} ALIAS ${module_name})
-    endif()
-
-    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
-        file(GLOB_RECURSE extra_files LIST_DIRECTORIES FALSE "${module_path}/*")
-        add_custom_target(${module_name}_sources SOURCES ${extra_files})
-        set_target_properties(${module_name}_sources PROPERTIES FOLDER Modules)
-        source_group(TREE "${module_path}" FILES ${extra_files})
     endif()
 endfunction()
 
@@ -2008,6 +2019,17 @@ function(_juce_initialise_target target)
 
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
+
+    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
+        get_property(all_modules GLOBAL PROPERTY _juce_module_names)
+
+        foreach(module_name IN LISTS all_modules)
+            get_target_property(path ${module_name} INTERFACE_JUCE_MODULE_PATH)
+            get_target_property(header_files ${module_name} INTERFACE_JUCE_MODULE_HEADERS)
+            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files})
+            set_source_files_properties(${header_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+        endforeach()
+    endif()
 endfunction()
 
 # ==================================================================================================
