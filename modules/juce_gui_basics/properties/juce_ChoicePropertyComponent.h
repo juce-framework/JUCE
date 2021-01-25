@@ -143,8 +143,9 @@ private:
     class RemapperValueSourceWithDefault;
 
     //==============================================================================
-    void createComboBox();
-    void createComboBoxWithDefault (const String&);
+    void initialiseComboBox (const Value&);
+    void refreshChoices();
+    void refreshChoices (const String&);
 
     void changeIndex();
 
