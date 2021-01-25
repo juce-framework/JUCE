@@ -705,9 +705,22 @@ public:
     //==============================================================================
     tresult PLUGIN_API setComponentState (IBStream* stream) override
     {
-        // Cubase and Nuendo need to inform the host of the current parameter values
-        for (auto vstParamId : audioProcessor->vstParamIDs)
-            setParamNormalized (vstParamId, audioProcessor->getParamForVSTParamID (vstParamId)->getValue());
+        if (auto* pluginInstance = getPluginInstance())
+        {
+            for (auto vstParamId : audioProcessor->vstParamIDs)
+            {
+                auto paramValue = [&]
+                {
+                    if (vstParamId == JuceAudioProcessor::paramPreset)
+                        return EditController::plainParamToNormalized (JuceAudioProcessor::paramPreset,
+                                                                       pluginInstance->getCurrentProgram());
+
+                    return (double) audioProcessor->getParamForVSTParamID (vstParamId)->getValue();
+                }();
+
+                setParamNormalized (vstParamId, paramValue);
+            }
+        }
 
         if (auto* handler = getComponentHandler())
             handler->restartComponent (Vst::kParamValuesChanged);
