@@ -1157,25 +1157,26 @@ public:
         //==============================================================================
         void addBuildProduct (const String& fileType, const String& binaryName) const
         {
-            auto* v = new ValueTree (owner.createID (String ("__productFileID") + getName()));
-            v->setProperty ("isa", "PBXFileReference", nullptr);
-            v->setProperty ("explicitFileType", fileType, nullptr);
-            v->setProperty ("includeInIndex", (int) 0, nullptr);
-            v->setProperty ("path", binaryName, nullptr);
-            v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
-            owner.pbxFileReferences.add (v);
+            ValueTree v (owner.createID (String ("__productFileID") + getName()) + " /* " + getName() + " */");
+            v.setProperty ("isa", "PBXFileReference", nullptr);
+            v.setProperty ("explicitFileType", fileType, nullptr);
+            v.setProperty ("includeInIndex", (int) 0, nullptr);
+            v.setProperty ("path", binaryName, nullptr);
+            v.setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
+
+            owner.addObject (v);
         }
 
         //==============================================================================
         String addDependencyFor (const XcodeTarget& dependentTarget)
         {
             auto dependencyID = owner.createID (String ("__dependency") + getName() + dependentTarget.getName());
-            auto* v = new ValueTree (dependencyID);
+            ValueTree v (dependencyID);
+            v.setProperty ("isa", "PBXTargetDependency", nullptr);
+            v.setProperty ("target", getID(), nullptr);
 
-            v->setProperty ("isa", "PBXTargetDependency", nullptr);
-            v->setProperty ("target", getID(), nullptr);
+            owner.addObject (v);
 
-            owner.pbxTargetDependencies.add (v);
             return dependencyID;
         }
 
@@ -1210,56 +1211,55 @@ public:
         {
             auto configID = owner.createID (String ("targetconfigid_") + getName() + String ("_") + configName);
 
-            auto* v = new ValueTree (configID);
-            v->setProperty ("isa", "XCBuildConfiguration", nullptr);
-            v->setProperty ("buildSettings", indentBracedList (buildSettings), nullptr);
-            v->setProperty (Ids::name, configName, nullptr);
+            ValueTree v (configID);
+            v.setProperty ("isa", "XCBuildConfiguration", nullptr);
+            v.setProperty ("buildSettings", indentBracedList (buildSettings), nullptr);
+            v.setProperty (Ids::name, configName, nullptr);
 
             configIDs.add (configID);
-            owner.targetConfigs.add (v);
+
+            owner.addObject (v);
         }
 
         //==============================================================================
         String getTargetAttributes() const
         {
-            auto attributes = getID() + " = { ";
+            StringArray attributes;
 
             auto developmentTeamID = owner.getDevelopmentTeamIDString();
 
             if (developmentTeamID.isNotEmpty())
             {
-                attributes << "DevelopmentTeam = " << developmentTeamID << "; ";
-                attributes << "ProvisioningStyle = Automatic; ";
+                attributes.add ("DevelopmentTeam = " + developmentTeamID);
+                attributes.add ("ProvisioningStyle = Automatic");
             }
 
-            auto appGroupsEnabled      = (owner.iOS && owner.isAppGroupsEnabled()) ? 1 : 0;
-            auto inAppPurchasesEnabled = owner.isInAppPurchasesEnabled() ? 1 : 0;
-            auto interAppAudioEnabled  = (owner.iOS
-                                          && type == Target::StandalonePlugIn
-                                          && owner.getProject().shouldEnableIAA()) ? 1 : 0;
+            std::map<String, bool> capabilities;
 
-            auto pushNotificationsEnabled = owner.isPushNotificationsEnabled() ? 1 : 0;
-            auto sandboxEnabled = ((type == Target::AudioUnitv3PlugIn) || owner.isAppSandboxEnabled()) ? 1 : 0;
-            auto hardendedRuntimeEnabled = owner.isHardenedRuntimeEnabled() ? 1 : 0;
-
-            attributes << "SystemCapabilities = {";
-            attributes << "com.apple.ApplicationGroups.iOS = { enabled = " << appGroupsEnabled << "; }; ";
-            attributes << "com.apple.InAppPurchase = { enabled = " << inAppPurchasesEnabled << "; }; ";
-            attributes << "com.apple.InterAppAudio = { enabled = " << interAppAudioEnabled << "; }; ";
-            attributes << "com.apple.Push = { enabled = " << pushNotificationsEnabled << "; }; ";
-            attributes << "com.apple.Sandbox = { enabled = " << sandboxEnabled << "; }; ";
-            attributes << "com.apple.HardenedRuntime = { enabled = " << hardendedRuntimeEnabled << "; }; ";
+            capabilities["ApplicationGroups.iOS"] = owner.iOS && owner.isAppGroupsEnabled();
+            capabilities["InAppPurchase"]         = owner.isInAppPurchasesEnabled();
+            capabilities["InterAppAudio"]         = owner.iOS && type == Target::StandalonePlugIn && owner.getProject().shouldEnableIAA();
+            capabilities["Push"]                  = owner.isPushNotificationsEnabled();
+            capabilities["Sandbox"]               = type == Target::AudioUnitv3PlugIn || owner.isAppSandboxEnabled();
+            capabilities["HardenedRuntime"]       = owner.isHardenedRuntimeEnabled();
 
             if (owner.iOS && owner.isiCloudPermissionsEnabled())
-                attributes << "com.apple.iCloud = { enabled = 1; }; ";
+                capabilities["com.apple.iCloud"] = true;
 
-            attributes << "}; };";
+            StringArray capabilitiesStrings;
 
-            return attributes;
+            for (auto& capability : capabilities)
+                capabilitiesStrings.add ("com.apple." + capability.first + " = " + indentBracedList ({ String ("enabled = ") + (capability.second ? "1" : "0") }, 4));
+
+            attributes.add ("SystemCapabilities = " + indentBracedList (capabilitiesStrings, 3));
+
+            attributes.sort (false);
+
+            return getID() + " = " + indentBracedList (attributes, 2);
         }
 
         //==============================================================================
-        ValueTree& addBuildPhase (const String& buildPhaseType, const StringArray& fileIds, const StringRef humanReadableName = StringRef())
+        ValueTree addBuildPhase (const String& buildPhaseType, const StringArray& fileIds, const StringRef humanReadableName = StringRef())
         {
             auto buildPhaseName = buildPhaseType + "_" + getName() + "_" + (humanReadableName.isNotEmpty() ? String (humanReadableName) : String ("resbuildphase"));
             auto buildPhaseId (owner.createID (buildPhaseName));
@@ -1270,17 +1270,19 @@ public:
 
             buildPhaseIDs.add (buildPhaseId);
 
-            auto* v = new ValueTree (buildPhaseId);
-            v->setProperty ("isa", buildPhaseType, nullptr);
-            v->setProperty ("buildActionMask", "2147483647", nullptr);
-            v->setProperty ("files", indentParenthesisedList (fileIds), nullptr);
-            v->setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, nullptr);
+            ValueTree v (buildPhaseId);
+            v.setProperty ("isa", buildPhaseType, nullptr);
+            v.setProperty ("buildActionMask", "2147483647", nullptr);
+            v.setProperty ("files", indentParenthesisedList (fileIds), nullptr);
 
             if (humanReadableName.isNotEmpty())
-                v->setProperty ("name", String (humanReadableName), nullptr);
+                v.setProperty ("name", String (humanReadableName), nullptr);
 
-            owner.misc.add (v);
-            return *v;
+            v.setProperty ("runOnlyForDeploymentPostprocessing", (int) 0, nullptr);
+
+            owner.addObject (v);
+
+            return v;
         }
 
         bool shouldCreatePList() const
@@ -1392,9 +1394,14 @@ public:
                 }
             }
 
-            StringArray headerPaths (getHeaderSearchPaths (config));
+            auto headerPaths = getHeaderSearchPaths (config);
 
-            s.set ("MTL_HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
+            auto mtlHeaderPaths = headerPaths;
+
+            for (auto& path : mtlHeaderPaths)
+                path = path.unquoted();
+
+            s.set ("MTL_HEADER_SEARCH_PATHS", mtlHeaderPaths.joinIntoString (" ").quoted());
 
             headerPaths.add ("\"$(inherited)\"");
             s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));
@@ -1781,7 +1788,7 @@ public:
         {
             if (script.trim().isNotEmpty())
             {
-                auto& v = addBuildPhase ("PBXShellScriptBuildPhase", {});
+                auto v = addBuildPhase ("PBXShellScriptBuildPhase", {});
                 v.setProperty (Ids::name, phaseName, nullptr);
                 v.setProperty ("shellPath", "/bin/sh", nullptr);
                 v.setProperty ("shellScript", script.replace ("\\", "\\\\")
@@ -1793,7 +1800,7 @@ public:
 
         void addCopyFilesPhase (const String& phaseName, const StringArray& files, XcodeCopyFilesDestinationIDs dst)
         {
-            auto& v = addBuildPhase ("PBXCopyFilesBuildPhase", files, phaseName);
+            auto v = addBuildPhase ("PBXCopyFilesBuildPhase", files, phaseName);
             v.setProperty ("dstPath", "", nullptr);
             v.setProperty ("dstSubfolderSpec", (int) dst, nullptr);
         }
@@ -1950,38 +1957,6 @@ public:
 
 private:
     //==============================================================================
-    friend class CLionProjectExporter;
-
-    bool xcodeCanUseDwarf;
-    OwnedArray<XcodeTarget> targets;
-
-    mutable OwnedArray<ValueTree> pbxBuildFiles, pbxFileReferences, pbxGroups, pbxTargetDependencies, misc, projectConfigs, targetConfigs;
-    mutable StringArray resourceIDs, sourceIDs, targetIDs;
-    mutable StringArray frameworkFileIDs, embeddedFrameworkIDs, rezFileIDs, resourceFileRefs, subprojectFileIDs;
-    mutable Array<std::pair<String, String>> subprojectReferences;
-    mutable File menuNibFile, iconFile;
-    mutable StringArray buildProducts;
-
-    const bool iOS;
-
-    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
-                     subprojectsValue,
-                     validArchsValue,
-                     extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
-                     postbuildCommandValue, prebuildCommandValue,
-                     duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
-                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
-                     appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
-                     hardenedRuntimeValue, hardenedRuntimeOptionsValue,
-                     microphonePermissionNeededValue, microphonePermissionsTextValue,
-                     cameraPermissionNeededValue, cameraPermissionTextValue,
-                     bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
-                     sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
-                     uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
-                     iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
-                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
-                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;
-
     static String expandPath (const String& path)
     {
         if (! File::isAbsolutePath (path))  return "$(SRCROOT)/" + path;
@@ -2036,7 +2011,7 @@ private:
         addIcons();
         addBuildConfigurations();
 
-        addProjectConfigList (projectConfigs, createID ("__projList"));
+        addProjectConfigList (createID ("__projList"));
 
         {
             StringArray topLevelGroupIDs;
@@ -2063,17 +2038,17 @@ private:
 
             target->addMainBuildProduct();
 
-            auto targetName = target->getName();
-            auto fileID = createID (targetName + String ("__targetbuildref"));
-            auto fileRefID = createID (String ("__productFileID") + targetName);
+            auto targetName = String (target->getName());
+            auto fileID = createID (targetName + "__targetbuildref");
+            auto fileRefID = createID ("__productFileID" + targetName);
 
-            auto* v = new ValueTree (fileID);
-            v->setProperty ("isa", "PBXBuildFile", nullptr);
-            v->setProperty ("fileRef", fileRefID, nullptr);
+            ValueTree v (fileID + " /* " + targetName + " */");
+            v.setProperty ("isa", "PBXBuildFile", nullptr);
+            v.setProperty ("fileRef", fileRefID, nullptr);
 
             target->mainBuildProductID = fileID;
 
-            pbxBuildFiles.add (v);
+            addObject (v);
         }
     }
 
@@ -2124,8 +2099,10 @@ private:
             auto& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
             StringArray settingsLines;
             auto configSettings = getProjectSettings (xcodeConfig);
+            auto keys = configSettings.getAllKeys();
+            keys.sort (false);
 
-            for (auto& key : configSettings.getAllKeys())
+            for (auto& key : keys)
                 settingsLines.add (key + " = " + configSettings[key]);
 
             addProjectConfig (config->getName(), settingsLines);
@@ -2192,14 +2169,16 @@ private:
 
                 auto configSettings = target->getTargetSettings (xcodeConfig);
                 StringArray settingsLines;
+                auto keys = configSettings.getAllKeys();
+                keys.sort (false);
 
-                for (auto& key : configSettings.getAllKeys())
+                for (auto& key : keys)
                     settingsLines.add (key + " = " + configSettings.getValue (key, "\"\""));
 
                 target->addTargetConfig (config->getName(), settingsLines);
             }
 
-            addConfigList (*target, targetConfigs, createID (String ("__configList") + target->getName()));
+            addConfigList (*target, createID (String ("__configList") + target->getName()));
 
             target->addShellScriptBuildPhase ("Pre-build script", getPreBuildScript());
 
@@ -2290,28 +2269,30 @@ private:
         auto targetName = target.getName();
 
         auto targetID = target.getID();
-        auto* v = new ValueTree (targetID);
-        v->setProperty ("isa", target.type == XcodeTarget::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
-        v->setProperty ("buildConfigurationList", createID (String ("__configList") + targetName), nullptr);
+        ValueTree v (targetID);
+        v.setProperty ("isa", target.type == XcodeTarget::AggregateTarget ? "PBXAggregateTarget" : "PBXNativeTarget", nullptr);
+        v.setProperty ("buildConfigurationList", createID (String ("__configList") + targetName), nullptr);
 
-        v->setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
-        v->setProperty ("buildRules", "( )", nullptr);
+        v.setProperty ("buildPhases", indentParenthesisedList (target.buildPhaseIDs), nullptr);
 
-        v->setProperty ("dependencies", indentParenthesisedList (target.dependencyIDs), nullptr);
-        v->setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
+        if (target.type != XcodeTarget::AggregateTarget)
+            v.setProperty ("buildRules", indentParenthesisedList ({}), nullptr);
 
-        v->setProperty ("productName", projectName, nullptr);
+        v.setProperty ("dependencies", indentParenthesisedList (target.dependencyIDs), nullptr);
+        v.setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
+
+        v.setProperty ("productName", projectName, nullptr);
 
         if (target.type != XcodeTarget::AggregateTarget)
         {
-            v->setProperty ("productReference", createID (String ("__productFileID") + targetName), nullptr);
+            v.setProperty ("productReference", createID (String ("__productFileID") + targetName), nullptr);
 
             jassert (target.xcodeProductType.isNotEmpty());
-            v->setProperty ("productType", target.xcodeProductType, nullptr);
+            v.setProperty ("productType", target.xcodeProductType, nullptr);
         }
 
         targetIDs.add (targetID);
-        misc.add (v);
+        addObject (v);
     }
 
     void createIconFile() const
@@ -2669,11 +2650,12 @@ private:
                     {
                         auto fileID = createID (buildProduct.second + "buildref");
 
-                        auto* v = new ValueTree (fileID);
-                        v->setProperty ("isa", "PBXBuildFile", nullptr);
-                        v->setProperty ("fileRef", proxyID, nullptr);
-                        v->setProperty ("settings", "{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
-                        pbxBuildFiles.add (v);
+                        ValueTree v (fileID);
+                        v.setProperty ("isa", "PBXBuildFile", nullptr);
+                        v.setProperty ("fileRef", proxyID, nullptr);
+                        v.setProperty ("settings", "{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
+
+                        addObject (v);
 
                         embeddedFrameworkIDs.add (fileID);
                     }
@@ -2722,39 +2704,68 @@ private:
                   "\tobjectVersion = 46;\n"
                   "\tobjects = {\n";
 
-        Array<ValueTree*> objects;
-        objects.addArray (pbxBuildFiles);
-        objects.addArray (pbxFileReferences);
-        objects.addArray (pbxGroups);
-        objects.addArray (pbxTargetDependencies);
-        objects.addArray (targetConfigs);
-        objects.addArray (projectConfigs);
-        objects.addArray (misc);
+        StringArray objectTypes;
 
-        for (auto* o : objects)
+        for (auto it : objects)
+            objectTypes.add (it.getType().toString());
+
+        objectTypes.sort (false);
+
+        for (const auto& objectType : objectTypes)
         {
-            output << "\t\t" << o->getType().toString() << " = {\n";
+            auto objectsWithType = objects.getChildWithName (objectType);
+            auto requiresSingleLine = objectType == "PBXBuildFile" || objectType == "PBXFileReference";
 
-            for (int j = 0; j < o->getNumProperties(); ++j)
+            output << "\n/* Begin " << objectType << " section */\n";
+
+            for (const auto& o : objectsWithType)
             {
-                auto propertyName = o->getPropertyName(j);
-                auto val = o->getProperty (propertyName).toString();
+                auto label = [&o]() -> String
+                {
+                    if (auto* objName = o.getPropertyPointer ("name"))
+                        return " /* " + objName->toString() + " */";
 
-                if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-_@~\r\n\\#%^`*")
-                                        && ! (val.trimStart().startsWithChar ('(')
-                                                || val.trimStart().startsWithChar ('{'))))
-                    val = "\"" + val + "\"";
+                    return {};
+                }();
 
-                output << "\t\t\t" << propertyName.toString() << " = " << val << ";\n";
+                output << "\t\t" << o.getType().toString() << label << " = {";
+
+                if (! requiresSingleLine)
+                    output << "\n";
+
+                for (int j = 0; j < o.getNumProperties(); ++j)
+                {
+                    auto propertyName = o.getPropertyName (j);
+                    auto val = o.getProperty (propertyName).toString();
+
+                    if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-@~\r\n\\#%^`*")
+                                            && ! (val.trimStart().startsWithChar ('(')
+                                                    || val.trimStart().startsWithChar ('{'))))
+                        val = val.quoted();
+
+                    auto content = propertyName.toString() + " = " + val + ";";
+
+                    if (requiresSingleLine)
+                        content = content + " ";
+                    else
+                        content = "\t\t\t" + content + "\n";
+
+                    output << content;
+                }
+
+                if (! requiresSingleLine)
+                    output << "\t\t";
+
+                output << "};\n";
             }
 
-            output << "\t\t};\n";
+            output << "/* End " << objectType << " section */\n";
         }
 
-        output << "\t};\n\trootObject = " << createID ("__root") << ";\n}\n";
+        output << "\t};\n\trootObject = " << createID ("__root") << " /* Project object */;\n}\n";
     }
 
-    String addFileReference (String pathString) const
+    String addFileReference (String pathString, String fileType = {}) const
     {
         String sourceTree ("SOURCE_ROOT");
         build_tools::RelativePath path (pathString, build_tools::RelativePath::unknown);
@@ -2769,36 +2780,22 @@ private:
             sourceTree = "<absolute>";
         }
 
-        return addFileOrFolderReference (pathString, sourceTree, getFileType (pathString));
-    }
-
-    void checkAndAddFileReference (std::unique_ptr<ValueTree> v) const
-    {
-        auto existing = pbxFileReferences.indexOfSorted (*this, v.get());
-
-        if (existing >= 0)
-        {
-            // If this fails, there's either a string hash collision, or the same file is being added twice (incorrectly)
-            jassert (pbxFileReferences.getUnchecked (existing)->isEquivalentTo (*v));
-        }
-        else
-        {
-            pbxFileReferences.addSorted (*this, v.release());
-        }
+        return addFileOrFolderReference (pathString, sourceTree, fileType.isEmpty() ? getFileType (pathString) : fileType);
     }
 
     String addFileOrFolderReference (const String& pathString, String sourceTree, String fileType) const
     {
         auto fileRefID = createFileRefID (pathString);
+        auto filename = File::createFileWithoutCheckingPath (pathString).getFileName();
 
-        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
-        v->setProperty ("isa", "PBXFileReference", nullptr);
-        v->setProperty ("lastKnownFileType", fileType, nullptr);
-        v->setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
-        v->setProperty ("path", pathString, nullptr);
-        v->setProperty ("sourceTree", sourceTree, nullptr);
+        ValueTree v (fileRefID + " /* " + filename + " */");
+        v.setProperty ("isa", "PBXFileReference", nullptr);
+        v.setProperty ("lastKnownFileType", fileType, nullptr);
+        v.setProperty (Ids::name, pathString.fromLastOccurrenceOf ("/", false, false), nullptr);
+        v.setProperty ("path", pathString, nullptr);
+        v.setProperty ("sourceTree", sourceTree, nullptr);
 
-        checkAndAddFileReference (std::move (v));
+        addObject (v);
 
         return fileRefID;
     }
@@ -2808,14 +2805,14 @@ private:
         auto uniqueString = subprojectID + "_" + itemName;
         auto fileRefID = createFileRefID (uniqueString);
 
-        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
-        v->setProperty ("isa", "PBXContainerItemProxy", nullptr);
-        v->setProperty ("containerPortal", subprojectID, nullptr);
-        v->setProperty ("proxyType", 2, nullptr);
-        v->setProperty ("remoteGlobalIDString", createFileRefID (uniqueString + "_global"), nullptr);
-        v->setProperty ("remoteInfo", itemName, nullptr);
+        ValueTree v (fileRefID);
+        v.setProperty ("isa", "PBXContainerItemProxy", nullptr);
+        v.setProperty ("containerPortal", subprojectID, nullptr);
+        v.setProperty ("proxyType", 2, nullptr);
+        v.setProperty ("remoteGlobalIDString", createFileRefID (uniqueString + "_global"), nullptr);
+        v.setProperty ("remoteInfo", itemName, nullptr);
 
-        checkAndAddFileReference (std::move (v));
+        addObject (v);
 
         return fileRefID;
     }
@@ -2824,22 +2821,16 @@ private:
     {
         auto fileRefID = createFileRefID (containerItemID + "_" + proxyPath);
 
-        std::unique_ptr<ValueTree> v (new ValueTree (fileRefID));
-        v->setProperty ("isa", "PBXReferenceProxy", nullptr);
-        v->setProperty ("fileType", fileType, nullptr);
-        v->setProperty ("path", proxyPath, nullptr);
-        v->setProperty ("remoteRef", containerItemID, nullptr);
-        v->setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
+        ValueTree v (fileRefID);
+        v.setProperty ("isa", "PBXReferenceProxy", nullptr);
+        v.setProperty ("fileType", fileType, nullptr);
+        v.setProperty ("path", proxyPath, nullptr);
+        v.setProperty ("remoteRef", containerItemID, nullptr);
+        v.setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
 
-        checkAndAddFileReference (std::move (v));
+        addObject (v);
 
         return fileRefID;
-    }
-
-public:
-    static int compareElements (const ValueTree* first, const ValueTree* second)
-    {
-        return first->getType().getCharPointer().compare (second->getType().getCharPointer());
     }
 
 private:
@@ -2915,6 +2906,7 @@ private:
     String addBuildFile (const FileOptions& opts) const
     {
         auto fileID = createID (opts.path + "buildref");
+        auto filename = File::createFileWithoutCheckingPath (opts.path).getFileName();
 
         if (opts.compile)
         {
@@ -2924,11 +2916,11 @@ private:
                 sourceIDs.add (fileID);
         }
 
-        auto* v = new ValueTree (fileID);
-        v->setProperty ("isa", "PBXBuildFile", nullptr);
-        v->setProperty ("fileRef", opts.fileRefID.isEmpty() ? createFileRefID (opts.path)
-                                                            : opts.fileRefID,
-                        nullptr);
+        ValueTree v (fileID + " /* " + filename + " */");
+        v.setProperty ("isa", "PBXBuildFile", nullptr);
+        auto fileRefID = opts.fileRefID.isEmpty() ? createFileRefID (opts.path)
+                                                  : opts.fileRefID;
+        v.setProperty ("fileRef", fileRefID, nullptr);
 
         auto compilerFlags = [&opts]
         {
@@ -2938,9 +2930,10 @@ private:
         }();
 
         if (compilerFlags.isNotEmpty())
-            v->setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags + "\"; }", nullptr);
+            v.setProperty ("settings", "{ COMPILER_FLAGS = \"" + compilerFlags + "\"; }", nullptr);
 
-        pbxBuildFiles.add (v);
+        addObject (v);
+
         return fileID;
     }
 
@@ -2993,7 +2986,8 @@ private:
     String addProjectItem (const Project::Item& projectItem) const
     {
         if (modulesGroup != nullptr && projectItem.getParent() == *modulesGroup)
-            return addFileReference (rebaseFromProjectFolderToBuildTarget (getModuleFolderRelativeToProject (projectItem.getName())).toUnixStyle());
+            return addFileReference (rebaseFromProjectFolderToBuildTarget (getModuleFolderRelativeToProject (projectItem.getName())).toUnixStyle(),
+                                     "folder");
 
         if (projectItem.isGroup())
         {
@@ -3083,17 +3077,19 @@ private:
     String addEmbeddedFramework (const String& path) const
     {
         auto fileRefID = createFileRefID (path);
+        auto filename = File::createFileWithoutCheckingPath (path).getFileName();
 
         auto fileType = getFileType (path);
         addFileOrFolderReference (path, "<group>", fileType);
 
         auto fileID = createID (path + "buildref");
 
-        auto* v = new ValueTree (fileID);
-        v->setProperty ("isa", "PBXBuildFile", nullptr);
-        v->setProperty ("fileRef", fileRefID, nullptr);
-        v->setProperty ("settings", "{ ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
-        pbxBuildFiles.add (v);
+        ValueTree v (fileID + " /* " + filename + " */");
+        v.setProperty ("isa", "PBXBuildFile", nullptr);
+        v.setProperty ("fileRef", fileRefID, nullptr);
+        v.setProperty ("settings", "{ ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
+
+        addObject (v);
 
         frameworkFileIDs.add (fileRefID);
 
@@ -3102,12 +3098,13 @@ private:
 
     void addGroup (const String& groupID, const String& groupName, const StringArray& childIDs) const
     {
-        auto* v = new ValueTree (groupID);
-        v->setProperty ("isa", "PBXGroup", nullptr);
-        v->setProperty ("children", indentParenthesisedList (childIDs), nullptr);
-        v->setProperty (Ids::name, groupName, nullptr);
-        v->setProperty ("sourceTree", "<group>", nullptr);
-        pbxGroups.add (v);
+        ValueTree v (groupID);
+        v.setProperty ("isa", "PBXGroup", nullptr);
+        v.setProperty ("children", indentParenthesisedList (childIDs), nullptr);
+        v.setProperty (Ids::name, groupName, nullptr);
+        v.setProperty ("sourceTree", "<group>", nullptr);
+
+        addObject (v);
     }
 
     String addGroup (const Project::Item& item, StringArray& childIDs) const
@@ -3120,54 +3117,55 @@ private:
 
     void addProjectConfig (const String& configName, const StringArray& buildSettings) const
     {
-        auto* v = new ValueTree (createID ("projectconfigid_" + configName));
-        v->setProperty ("isa", "XCBuildConfiguration", nullptr);
-        v->setProperty ("buildSettings", indentBracedList (buildSettings), nullptr);
-        v->setProperty (Ids::name, configName, nullptr);
-        projectConfigs.add (v);
+        ValueTree v (createID ("projectconfigid_" + configName));
+        v.setProperty ("isa", "XCBuildConfiguration", nullptr);
+        v.setProperty ("buildSettings", indentBracedList (buildSettings), nullptr);
+        v.setProperty (Ids::name, configName, nullptr);
+
+        addObject (v);
     }
 
-    void addConfigList (XcodeTarget& target, const OwnedArray <ValueTree>& configsToUse, const String& listID) const
+    void addConfigList (XcodeTarget& target, const String& listID) const
     {
-        auto* v = new ValueTree (listID);
-        v->setProperty ("isa", "XCConfigurationList", nullptr);
-        v->setProperty ("buildConfigurations", indentParenthesisedList (target.configIDs), nullptr);
-        v->setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
+        ValueTree v (listID);
+        v.setProperty ("isa", "XCConfigurationList", nullptr);
+        v.setProperty ("buildConfigurations", indentParenthesisedList (target.configIDs), nullptr);
+        v.setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
+        v.setProperty ("defaultConfigurationName", getConfiguration (0)->getName(), nullptr);
 
-        if (auto* first = configsToUse.getFirst())
-            v->setProperty ("defaultConfigurationName", first->getProperty (Ids::name), nullptr);
-
-        misc.add (v);
+        addObject (v);
     }
 
-    void addProjectConfigList (const OwnedArray <ValueTree>& configsToUse, const String& listID) const
+    void addProjectConfigList (const String& listID) const
     {
+        auto buildConfigs = objects.getChildWithName ("XCBuildConfiguration");
+        jassert (buildConfigs.isValid());
+
         StringArray configIDs;
 
-        for (auto* c : configsToUse)
-            configIDs.add (c->getType().toString());
+        for (const auto& child : buildConfigs)
+            configIDs.add (child.getType().toString());
 
-        auto* v = new ValueTree (listID);
-        v->setProperty ("isa", "XCConfigurationList", nullptr);
-        v->setProperty ("buildConfigurations", indentParenthesisedList (configIDs), nullptr);
-        v->setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
+        ValueTree v (listID);
+        v.setProperty ("isa", "XCConfigurationList", nullptr);
+        v.setProperty ("buildConfigurations", indentParenthesisedList (configIDs), nullptr);
+        v.setProperty ("defaultConfigurationIsVisible", (int) 0, nullptr);
+        v.setProperty ("defaultConfigurationName", getConfiguration (0)->getName(), nullptr);
 
-        if (auto* first = configsToUse.getFirst())
-            v->setProperty ("defaultConfigurationName", first->getProperty (Ids::name), nullptr);
-
-        misc.add (v);
+        addObject (v);
     }
 
     void addProjectObject() const
     {
-        auto* v = new ValueTree (createID ("__root"));
-        v->setProperty ("isa", "PBXProject", nullptr);
-        v->setProperty ("buildConfigurationList", createID ("__projList"), nullptr);
-        v->setProperty ("attributes", getProjectObjectAttributes(), nullptr);
-        v->setProperty ("compatibilityVersion", "Xcode 3.2", nullptr);
-        v->setProperty ("hasScannedForEncodings", (int) 0, nullptr);
-        v->setProperty ("mainGroup", createID ("__mainsourcegroup"), nullptr);
-        v->setProperty ("projectDirPath", "\"\"", nullptr);
+        ValueTree v (createID ("__root"));
+        v.setProperty ("isa", "PBXProject", nullptr);
+        v.setProperty ("attributes", indentBracedList (getProjectObjectAttributes()), nullptr);
+        v.setProperty ("buildConfigurationList", createID ("__projList"), nullptr);
+        v.setProperty ("compatibilityVersion", "Xcode 3.2", nullptr);
+        v.setProperty ("hasScannedForEncodings", (int) 0, nullptr);
+        v.setProperty ("knownRegions", indentParenthesisedList ({ "en", "Base" }), nullptr);
+        v.setProperty ("mainGroup", createID ("__mainsourcegroup"), nullptr);
+        v.setProperty ("projectDirPath", "\"\"", nullptr);
 
         if (! subprojectReferences.isEmpty())
         {
@@ -3176,17 +3174,14 @@ private:
             for (auto& reference : subprojectReferences)
                 projectReferences.add (indentBracedList ({ "ProductGroup = " + reference.first, "ProjectRef = " + reference.second }, 1));
 
-            v->setProperty ("projectReferences", indentParenthesisedList (projectReferences), nullptr);
+            v.setProperty ("projectReferences", indentParenthesisedList (projectReferences), nullptr);
         }
 
-        v->setProperty ("projectRoot", "\"\"", nullptr);
+        v.setProperty ("projectRoot", "\"\"", nullptr);
 
-        auto targetString = "(" + targetIDs.joinIntoString (", ") + ")";
-        v->setProperty ("targets", targetString, nullptr);
+        v.setProperty ("targets", indentParenthesisedList (targetIDs), nullptr);
 
-        v->setProperty ("knownRegions", "(en, Base)", nullptr);
-
-        misc.add (v);
+        addObject (v);
     }
 
     //==============================================================================
@@ -3262,27 +3257,29 @@ private:
         return false;
     }
 
-    String getProjectObjectAttributes() const
+    StringArray getProjectObjectAttributes() const
     {
-        String attributes;
+        std::map<String, String> attributes;
 
-        attributes << "{ LastUpgradeCheck = 1230; "
-                   << "ORGANIZATIONNAME = " << getProject().getCompanyNameString().quoted()
-                   <<"; ";
+        attributes["LastUpgradeCheck"] = "1230";
+        attributes["ORGANIZATIONNAME"] = getProject().getCompanyNameString().quoted();
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())
         {
-            attributes << "TargetAttributes = { ";
+            StringArray targetAttributes;
 
             for (auto& target : targets)
-                attributes << target->getTargetAttributes();
+                targetAttributes.add (target->getTargetAttributes());
 
-            attributes << " }; ";
+            attributes["TargetAttributes"] = indentBracedList (targetAttributes, 1);
         }
 
-        attributes << "}";
+        StringArray result;
 
-        return attributes;
+        for (const auto& attrib : attributes)
+            result.add (attrib.first + " = " + attrib.second);
+
+        return result;
     }
 
     //==============================================================================
@@ -3328,16 +3325,21 @@ private:
 
     static String indentList (StringArray list, char openBracket, char closeBracket, const String& separator, int extraTabs, bool shouldSort)
     {
-        if (list.size() == 0)
-            return openBracket + String (" ") + closeBracket;
+        auto content = [extraTabs, shouldSort, &list, &separator] () -> String
+        {
+            if (list.isEmpty())
+                return "";
 
-        auto tabs = "\n" + String::repeatedString ("\t", extraTabs + 4);
+            if (shouldSort)
+                list.sort (true);
 
-        if (shouldSort)
-            list.sort (true);
+            auto tabs = String::repeatedString ("\t", extraTabs + 4);
+            return tabs + list.joinIntoString (separator + "\n" + tabs) + separator + "\n";
+        }();
 
-        return openBracket + tabs + list.joinIntoString (separator + tabs) + separator
-                   + "\n" + String::repeatedString ("\t", extraTabs + 3) + closeBracket;
+        return openBracket + String ("\n")
+            + content
+            + String::repeatedString ("\t", extraTabs + 3) + closeBracket;
     }
 
     String createID (String rootString) const
@@ -3389,6 +3391,73 @@ private:
             }
         }
     }
+
+    void addObject (ValueTree data) const
+    {
+        if (auto* type = data.getPropertyPointer ("isa"))
+        {
+            auto objs = objects.getOrCreateChildWithName (type->toString(), nullptr);
+            auto objectID = data.getType();
+            auto numChildren = objs.getNumChildren();
+
+            for (int i = 0; i < numChildren; ++i)
+            {
+                auto obj = objs.getChild (i);
+                auto childID = obj.getType();
+
+                if (objectID < childID)
+                {
+                    objs.addChild (data, i, nullptr);
+                    return;
+                }
+
+                if (objectID == childID)
+                {
+                    jassert (obj.isEquivalentTo (data));
+                    return;
+                }
+            }
+
+            objs.appendChild (data, nullptr);
+            return;
+        }
+
+        jassertfalse;
+    }
+
+    //==============================================================================
+    friend class CLionProjectExporter;
+
+    bool xcodeCanUseDwarf;
+    OwnedArray<XcodeTarget> targets;
+
+    mutable ValueTree objects { "objects" };
+
+    mutable StringArray resourceIDs, sourceIDs, targetIDs;
+    mutable StringArray frameworkFileIDs, embeddedFrameworkIDs, rezFileIDs, resourceFileRefs, subprojectFileIDs;
+    mutable Array<std::pair<String, String>> subprojectReferences;
+    mutable File menuNibFile, iconFile;
+    mutable StringArray buildProducts;
+
+    const bool iOS;
+
+    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
+                     subprojectsValue,
+                     validArchsValue,
+                     extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
+                     postbuildCommandValue, prebuildCommandValue,
+                     duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
+                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
+                     appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
+                     hardenedRuntimeValue, hardenedRuntimeOptionsValue,
+                     microphonePermissionNeededValue, microphonePermissionsTextValue,
+                     cameraPermissionNeededValue, cameraPermissionTextValue,
+                     bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
+                     sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
+                     uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
+                     iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
+                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
+                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)
 };
