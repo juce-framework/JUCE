@@ -2278,9 +2278,11 @@ private:
         if (target.type != XcodeTarget::AggregateTarget)
             v.setProperty ("buildRules", indentParenthesisedList ({}), nullptr);
 
-        v.setProperty ("dependencies", indentParenthesisedList (target.dependencyIDs), nullptr);
-        v.setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
+        StringArray allDependencyIDs { subprojectDependencyIDs };
+        allDependencyIDs.addArray (target.dependencyIDs);
+        v.setProperty ("dependencies", indentParenthesisedList (allDependencyIDs), nullptr);
 
+        v.setProperty (Ids::name, target.getXcodeSchemeName(), nullptr);
         v.setProperty ("productName", projectName, nullptr);
 
         if (target.type != XcodeTarget::AggregateTarget)
@@ -2585,33 +2587,41 @@ private:
         auto subprojectLines = StringArray::fromLines (getSubprojectsString());
         subprojectLines.removeEmptyStrings (true);
 
-        Array<std::pair<String, StringArray>> subprojects;
+        struct SubprojectInfo
+        {
+            String path;
+            StringArray buildProducts;
+        };
+
+        std::vector<SubprojectInfo> subprojects;
 
         for (auto& line : subprojectLines)
         {
-            String subprojectName (line.upToFirstOccurrenceOf (":", false, false));
+            String subprojectPath (line.upToFirstOccurrenceOf (":", false, false));
+
+            if (! subprojectPath.endsWith (".xcodeproj"))
+                subprojectPath << ".xcodeproj";
+
             StringArray requestedBuildProducts (StringArray::fromTokens (line.fromFirstOccurrenceOf (":", false, false), ",;|", "\"'"));
             requestedBuildProducts.trim();
-            subprojects.add ({ subprojectName, requestedBuildProducts });
+            subprojects.push_back ({ subprojectPath, requestedBuildProducts });
         }
 
         for (const auto& subprojectInfo : subprojects)
         {
-            auto subprojectFile = getTargetFolder().getChildFile (subprojectInfo.first.endsWith (".xcodeproj") ? subprojectInfo.first
-                                                                                                               : subprojectInfo.first + ".xcodeproj");
+            auto subprojectFile = getTargetFolder().getChildFile (subprojectInfo.path);
 
             if (! subprojectFile.isDirectory())
                 continue;
 
             auto availableBuildProducts = XcodeProjectParser::parseBuildProducts (subprojectFile);
 
-            // If no build products have been specified then we'll take everything
-            if (! subprojectInfo.second.isEmpty())
+            if (! subprojectInfo.buildProducts.isEmpty())
             {
                 auto newEnd = std::remove_if (availableBuildProducts.begin(), availableBuildProducts.end(),
-                                              [&subprojectInfo] (const std::pair<String, String> &item)
+                                              [&subprojectInfo] (const XcodeProjectParser::BuildProduct& item)
                                               {
-                                                  return ! subprojectInfo.second.contains (item.first);
+                                                  return ! subprojectInfo.buildProducts.contains (item.name);
                                               });
                 availableBuildProducts.erase (newEnd, availableBuildProducts.end());
             }
@@ -2627,19 +2637,23 @@ private:
             auto subprojectFileID = addFileOrFolderReference (subprojectPath, "<group>", subprojectFileType);
             subprojectFileIDs.add (subprojectFileID);
 
-            StringArray proxyIDs;
+            StringArray productIDs;
 
             for (auto& buildProduct : availableBuildProducts)
             {
-                auto buildProductFileType = getFileType (buildProduct.second);
+                auto buildProductFileType = getFileType (buildProduct.path);
 
-                auto containerID = addContainerItemProxy (subprojectFileID, buildProduct.first);
-                auto proxyID = addReferenceProxy (containerID, buildProduct.second, buildProductFileType);
-                proxyIDs.add (proxyID);
+                auto dependencyProxyID = addContainerItemProxy (subprojectFileID, buildProduct.name, "1");
+                auto dependencyID = addTargetDependency (dependencyProxyID, buildProduct.name);
+                subprojectDependencyIDs.add (dependencyID);
 
-                if (buildProductFileType == "archive.ar" || buildProductFileType == "wrapper.framework")
+                auto containerItemProxyReferenceID = addContainerItemProxy (subprojectFileID, buildProduct.name, "2");
+                auto proxyID = addReferenceProxy (containerItemProxyReferenceID, buildProduct.path, buildProductFileType);
+                productIDs.add (proxyID);
+
+                if (StringArray { "archive.ar", "compiled.mach-o.dylib", "wrapper.framework" }.contains (buildProductFileType))
                 {
-                    auto buildFileID = addBuildFile (FileOptions().withPath (buildProduct.second)
+                    auto buildFileID = addBuildFile (FileOptions().withPath (buildProduct.path)
                                                                   .withFileRefID (proxyID)
                                                                   .withInhibitWarningsEnabled (true));
 
@@ -2648,9 +2662,9 @@ private:
 
                     if (buildProductFileType == "wrapper.framework")
                     {
-                        auto fileID = createID (buildProduct.second + "buildref");
+                        auto fileID = createID (subprojectPath + "_" + buildProduct.path + "_framework_buildref");
 
-                        ValueTree v (fileID);
+                        ValueTree v (fileID + " /* " + buildProduct.path + " */");
                         v.setProperty ("isa", "PBXBuildFile", nullptr);
                         v.setProperty ("fileRef", proxyID, nullptr);
                         v.setProperty ("settings", "{ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }", nullptr);
@@ -2663,7 +2677,7 @@ private:
             }
 
             auto productGroupID = createFileRefID (subprojectFile.getFullPathName() + "_products");
-            addGroup (productGroupID, "Products", proxyIDs);
+            addGroup (productGroupID, "Products", productIDs);
 
             subprojectReferences.add ({ productGroupID, subprojectFileID });
         }
@@ -2800,37 +2814,51 @@ private:
         return fileRefID;
     }
 
-    String addContainerItemProxy (const String& subprojectID, const String& itemName) const
+    String addContainerItemProxy (const String& subprojectID, const String& itemName, const String& proxyType) const
     {
-        auto uniqueString = subprojectID + "_" + itemName;
-        auto fileRefID = createFileRefID (uniqueString);
+        auto uniqueString = subprojectID + "_" + itemName + "_" + proxyType;
+        auto objectID = createFileRefID (uniqueString);
 
-        ValueTree v (fileRefID);
+        ValueTree v (objectID + " /* PBXContainerItemProxy */");
         v.setProperty ("isa", "PBXContainerItemProxy", nullptr);
         v.setProperty ("containerPortal", subprojectID, nullptr);
-        v.setProperty ("proxyType", 2, nullptr);
+        v.setProperty ("proxyType", proxyType, nullptr);
         v.setProperty ("remoteGlobalIDString", createFileRefID (uniqueString + "_global"), nullptr);
         v.setProperty ("remoteInfo", itemName, nullptr);
 
         addObject (v);
 
-        return fileRefID;
+        return objectID;
     }
 
-    String addReferenceProxy (const String& containerItemID, const String& proxyPath, const String& fileType) const
+    String addTargetDependency (const String& proxyID, const String& itemName) const
     {
-        auto fileRefID = createFileRefID (containerItemID + "_" + proxyPath);
+        auto objectID = createFileRefID (proxyID + "_" + itemName + "_PBXTargetDependency");
 
-        ValueTree v (fileRefID);
+        ValueTree v (objectID);
+        v.setProperty ("isa", "PBXTargetDependency", nullptr);
+        v.setProperty ("name", itemName, nullptr);
+        v.setProperty ("targetProxy", proxyID, nullptr);
+
+        addObject (v);
+
+        return objectID;
+    }
+
+    String addReferenceProxy (const String& remoteRef, const String& path, const String& fileType) const
+    {
+        auto objectID = createFileRefID (remoteRef + "_" + path);
+
+        ValueTree v (objectID + " /* " + path + " */");
         v.setProperty ("isa", "PBXReferenceProxy", nullptr);
         v.setProperty ("fileType", fileType, nullptr);
-        v.setProperty ("path", proxyPath, nullptr);
-        v.setProperty ("remoteRef", containerItemID, nullptr);
+        v.setProperty ("path", path, nullptr);
+        v.setProperty ("remoteRef", remoteRef, nullptr);
         v.setProperty ("sourceTree", "BUILT_PRODUCTS_DIR", nullptr);
 
         addObject (v);
 
-        return fileRefID;
+        return objectID;
     }
 
 private:
@@ -2880,6 +2908,7 @@ private:
         if (file.hasFileExtension ("component;vst;plugin")) return "wrapper.cfbundle";
         if (file.hasFileExtension ("xcodeproj"))            return "wrapper.pb-project";
         if (file.hasFileExtension ("a"))                    return "archive.ar";
+        if (file.hasFileExtension ("dylib"))                return "compiled.mach-o.dylib";
         if (file.hasFileExtension ("xcassets"))             return "folder.assetcatalog";
 
         return "file" + file.getFileExtension();
@@ -3172,7 +3201,7 @@ private:
             StringArray projectReferences;
 
             for (auto& reference : subprojectReferences)
-                projectReferences.add (indentBracedList ({ "ProductGroup = " + reference.first, "ProjectRef = " + reference.second }, 1));
+                projectReferences.add (indentBracedList ({ "ProductGroup = " + reference.productGroup, "ProjectRef = " + reference.projectRef }, 1));
 
             v.setProperty ("projectReferences", indentParenthesisedList (projectReferences), nullptr);
         }
@@ -3433,9 +3462,15 @@ private:
 
     mutable ValueTree objects { "objects" };
 
-    mutable StringArray resourceIDs, sourceIDs, targetIDs;
-    mutable StringArray frameworkFileIDs, embeddedFrameworkIDs, rezFileIDs, resourceFileRefs, subprojectFileIDs;
-    mutable Array<std::pair<String, String>> subprojectReferences;
+    mutable StringArray resourceIDs, sourceIDs, targetIDs, frameworkFileIDs, embeddedFrameworkIDs,
+                        rezFileIDs, resourceFileRefs, subprojectFileIDs, subprojectDependencyIDs;
+
+    struct SubprojectReferenceInfo
+    {
+        String productGroup, projectRef;
+    };
+
+    mutable Array<SubprojectReferenceInfo> subprojectReferences;
     mutable File menuNibFile, iconFile;
     mutable StringArray buildProducts;
 
