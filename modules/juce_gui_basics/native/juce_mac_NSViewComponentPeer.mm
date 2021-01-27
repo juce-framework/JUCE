@@ -1068,6 +1068,11 @@ public:
         grabFocus();
     }
 
+    void resignKeyWindow()
+    {
+        viewFocusLoss();
+    }
+
     bool windowShouldClose()
     {
         if (! isValidPeer (this))
@@ -1432,7 +1437,7 @@ public:
 
     void grabFocus() override
     {
-        if (window != nil)
+        if (window != nil && [window canBecomeKeyWindow])
         {
             [window makeKeyWindow];
             [window makeFirstResponder: view];
@@ -2064,6 +2069,7 @@ struct JuceNSWindowClass   : public ObjCClass<NSWindow>
         addMethod (@selector (canBecomeKeyWindow),                  canBecomeKeyWindow,        "c@:");
         addMethod (@selector (canBecomeMainWindow),                 canBecomeMainWindow,       "c@:");
         addMethod (@selector (becomeKeyWindow),                     becomeKeyWindow,           "v@:");
+        addMethod (@selector (resignKeyWindow),                     resignKeyWindow,           "v@:");
         addMethod (@selector (windowShouldClose:),                  windowShouldClose,         "c@:@");
         addMethod (@selector (constrainFrameRect:toScreen:),        constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
         addMethod (@selector (windowWillResize:toSize:),            windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
@@ -2123,6 +2129,14 @@ private:
             if (! owner->getComponent().isVisible())
                 [(NSWindow*) self orderOut: nil];
         }
+    }
+
+    static void resignKeyWindow (id self, SEL)
+    {
+        sendSuperclassMessage<void> (self, @selector (resignKeyWindow));
+
+        if (auto* owner = getOwner (self))
+            owner->resignKeyWindow();
     }
 
     static BOOL windowShouldClose (id self, SEL, id /*window*/)
