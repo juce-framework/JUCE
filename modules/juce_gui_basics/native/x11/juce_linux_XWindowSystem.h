@@ -234,6 +234,7 @@ private:
     void handleXEmbedMessage        (LinuxComponentPeer*, XClientMessageEvent&) const;
 
     void dismissBlockingModals      (LinuxComponentPeer* peer) const;
+    void dismissBlockingModals      (LinuxComponentPeer* peer, const XConfigureEvent&) const;
 
     static void windowMessageReceive (XEvent&);
 
