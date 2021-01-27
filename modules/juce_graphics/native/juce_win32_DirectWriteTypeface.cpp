@@ -146,7 +146,6 @@ public:
     {
         jassert (fontCollection != nullptr);
 
-        BOOL fontFound = false;
         uint32 fontIndex = 0;
         auto hr = fontCollection->FindFamilyName (font.getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
 
@@ -207,6 +206,7 @@ public:
     }
 
     bool loadedOk() const noexcept          { return dwFontFace != nullptr; }
+    BOOL isFontFound() const noexcept       { return fontFound; }
 
     float getAscent() const                 { return ascent; }
     float getDescent() const                { return 1.0f - ascent; }
@@ -279,6 +279,7 @@ private:
     float unitsToHeightScaleFactor = 1.0f, heightToPointsFactor = 1.0f, ascent = 0;
     int designUnitsPerEm = 0;
     AffineTransform pathTransform;
+    BOOL fontFound = false;
 
     struct PathGeometrySink  : public ComBaseClassHelper<IDWriteGeometrySink>
     {
