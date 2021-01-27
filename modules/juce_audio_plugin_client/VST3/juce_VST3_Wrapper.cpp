@@ -1015,7 +1015,7 @@ private:
     friend struct Param;
 
     //==============================================================================
-    ComSmartPtr<JuceAudioProcessor> audioProcessor;
+    VSTComSmartPtr<JuceAudioProcessor> audioProcessor;
 
     struct MidiController
     {
@@ -1685,7 +1685,7 @@ private:
         //==============================================================================
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
-        ComSmartPtr<JuceVST3EditController> owner;
+        VSTComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
 
         std::unique_ptr<ContentWrapperComponent> component;
@@ -2987,9 +2987,9 @@ private:
     std::atomic<int> refCount { 1 };
 
     AudioProcessor* pluginInstance;
-    ComSmartPtr<Vst::IHostApplication> host;
-    ComSmartPtr<JuceAudioProcessor> comPluginInstance;
-    ComSmartPtr<JuceVST3EditController> juceVST3EditController;
+    VSTComSmartPtr<Vst::IHostApplication> host;
+    VSTComSmartPtr<JuceAudioProcessor> comPluginInstance;
+    VSTComSmartPtr<JuceVST3EditController> juceVST3EditController;
 
     /**
         Since VST3 does not provide a way of knowing the buffer size and sample rate at any point,
@@ -3323,7 +3323,7 @@ private:
     //==============================================================================
     std::atomic<int> refCount { 1 };
     const PFactoryInfo factoryInfo;
-    ComSmartPtr<Vst::IHostApplication> host;
+    VSTComSmartPtr<Vst::IHostApplication> host;
 
     //==============================================================================
     struct ClassEntry
