@@ -1633,7 +1633,7 @@ private:
     {
         auto permissions = getPermissionsRequired();
 
-        forEachXmlChildElementWithTagName (manifest, child, "uses-permission")
+        for (auto* child : manifest.getChildWithTagNameIterator ("uses-permission"))
         {
             permissions.removeString (child->getStringAttribute ("android:name"), false);
         }
@@ -1648,7 +1648,7 @@ private:
         {
             XmlElement* glVersion = nullptr;
 
-            forEachXmlChildElementWithTagName (manifest, child, "uses-feature")
+            for (auto* child : manifest.getChildWithTagNameIterator ("uses-feature"))
             {
                 if (child->getStringAttribute ("android:glEsVersion").isNotEmpty())
                 {

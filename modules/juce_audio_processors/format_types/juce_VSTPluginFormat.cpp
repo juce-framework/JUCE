@@ -382,7 +382,7 @@ private:
         switchValueType.entries.add (new Entry({ TRANS("Off"), Range ("[0, 0.5[") }));
         switchValueType.entries.add (new Entry({ TRANS("On"),  Range ("[0.5, 1]") }));
 
-        forEachXmlChildElement (xml, item)
+        for (auto* item : xml.getChildIterator())
         {
             if (item->hasTagName ("Param"))           parseParam (*item, nullptr, nullptr);
             else if (item->hasTagName ("ValueType"))  parseValueType (*item);
@@ -436,7 +436,7 @@ private:
         int curEntry = 0;
         const int numEntries = item.getNumChildElements();
 
-        forEachXmlChildElementWithTagName (item, entryXml, "Entry")
+        for (auto* entryXml : item.getChildWithTagNameIterator ("Entry"))
         {
             auto entry = new Entry();
             entry->name = entryXml->getStringAttribute ("name");
@@ -465,7 +465,7 @@ private:
         templates.add (temp);
         temp->name = item.getStringAttribute ("name");
 
-        forEachXmlChildElement (item, param)
+        for (auto* param : item.getChildIterator())
             parseParam (*param, nullptr, temp);
     }
 
@@ -514,7 +514,7 @@ private:
         }
         else
         {
-            forEachXmlChildElement (item, subItem)
+            for (auto* subItem : item.getChildIterator())
             {
                 if (subItem->hasTagName ("Param"))       parseParam (*subItem, group, nullptr);
                 else if (subItem->hasTagName ("Group"))  parseGroup (*subItem, group);

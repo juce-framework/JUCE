@@ -306,7 +306,7 @@ void PaintRoutine::paste()
         selectedElements.deselectAll();
         selectedPoints.deselectAll();
 
-        forEachXmlChildElement (*doc, e)
+        for (auto* e : doc->getChildIterator())
             if (PaintElement* newElement = addElementFromXml (*e, -1, true))
                 selectedElements.addToSelection (newElement);
     }
@@ -610,7 +610,7 @@ bool PaintRoutine::loadFromXml (const XmlElement& xml)
 
         clear();
 
-        forEachXmlChildElement (xml, e)
+        for (auto* e : xml.getChildIterator())
             if (auto* newElement = ObjectTypes::createElementForXml (e, this))
                 elements.add (newElement);
 

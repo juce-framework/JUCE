@@ -272,7 +272,7 @@ static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, Audi
 
     if (auto* buses = xml.getChildByName (isInput ? "INPUTS" : "OUTPUTS"))
     {
-        forEachXmlChildElementWithTagName (*buses, e, "BUS")
+        for (auto* e : buses->getChildWithTagNameIterator ("BUS"))
         {
             const int busIdx = e->getIntAttribute ("index");
             maxNumBuses = jmax (maxNumBuses, busIdx + 1);
@@ -377,7 +377,7 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
 {
     PluginDescription pd;
 
-    forEachXmlChildElement (xml, e)
+    for (auto* e : xml.getChildIterator())
     {
         if (pd.loadFromXml (*e))
             break;
@@ -461,13 +461,13 @@ void PluginGraph::restoreFromXml (const XmlElement& xml)
 {
     clear();
 
-    forEachXmlChildElementWithTagName (xml, e, "FILTER")
+    for (auto* e : xml.getChildWithTagNameIterator ("FILTER"))
     {
         createNodeFromXml (*e);
         changed();
     }
 
-    forEachXmlChildElementWithTagName (xml, e, "CONNECTION")
+    for (auto* e : xml.getChildWithTagNameIterator ("CONNECTION"))
     {
         graph.addConnection ({ { NodeID ((uint32) e->getIntAttribute ("srcFilter")), e->getIntAttribute ("srcChannel") },
                                { NodeID ((uint32) e->getIntAttribute ("dstFilter")), e->getIntAttribute ("dstChannel") } });

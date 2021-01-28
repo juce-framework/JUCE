@@ -196,7 +196,7 @@ void PropertySet::restoreFromXml (const XmlElement& xml)
     const ScopedLock sl (lock);
     clear();
 
-    forEachXmlChildElementWithTagName (xml, e, "VALUE")
+    for (auto* e : xml.getChildWithTagNameIterator ("VALUE"))
     {
         if (e->hasAttribute ("name")
              && e->hasAttribute ("val"))

@@ -3243,7 +3243,7 @@ private:
 
     static StringArray parseNamesOfTargetsFromPlist (const XmlElement& dictXML)
     {
-        forEachXmlChildElementWithTagName (dictXML, schemesKey, "key")
+        for (auto* schemesKey : dictXML.getChildWithTagNameIterator ("key"))
         {
             if (schemesKey->getAllSubText().trim().equalsIgnoreCase ("SchemeUserState"))
             {
@@ -3253,7 +3253,7 @@ private:
                     {
                         StringArray names;
 
-                        forEachXmlChildElementWithTagName (*dict, key, "key")
+                        for (auto* key : dict->getChildWithTagNameIterator ("key"))
                             names.add (key->getAllSubText().upToLastOccurrenceOf (".xcscheme", false, false).trim());
 
                         names.sort (false);
