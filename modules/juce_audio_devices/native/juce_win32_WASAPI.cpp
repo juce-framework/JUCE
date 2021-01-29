@@ -886,7 +886,7 @@ public:
         reservoirWritePos = 0;
     }
 
-    template<class SourceType>
+    template <class SourceType>
     void updateFormatWithType (SourceType*) noexcept
     {
         using NativeType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
@@ -1046,7 +1046,7 @@ public:
         renderClient = nullptr;
     }
 
-    template<class DestType>
+    template <class DestType>
     void updateFormatWithType (DestType*)
     {
         using NativeType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;

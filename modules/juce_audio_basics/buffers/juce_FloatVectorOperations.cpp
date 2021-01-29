@@ -353,8 +353,8 @@ namespace FloatVectorHelpers
     union signMask64 { double d; uint64 i; };
 
    #if JUCE_USE_SSE_INTRINSICS || JUCE_USE_ARM_NEON
-    template<int typeSize> struct ModeType    { using Mode = BasicOps32; };
-    template<>             struct ModeType<8> { using Mode = BasicOps64; };
+    template <int typeSize> struct ModeType    { using Mode = BasicOps32; };
+    template <>             struct ModeType<8> { using Mode = BasicOps64; };
 
     template <typename Mode>
     struct MinMax

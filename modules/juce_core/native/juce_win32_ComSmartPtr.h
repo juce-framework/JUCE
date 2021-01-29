@@ -28,7 +28,7 @@ namespace juce
   #undef __uuidof
  #endif
 
- template<typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return {}; } };
+ template <typename Type> struct UUIDGetter { static CLSID get() { jassertfalse; return {}; } };
  #define __uuidof(x)  UUIDGetter<x>::get()
 
  template <>
@@ -38,7 +38,7 @@ namespace juce
  };
 
  #define JUCE_DECLARE_UUID_GETTER(name, uuid) \
-    template<> struct UUIDGetter<name> { static CLSID get()  { return uuidFromString (uuid); } };
+    template <> struct UUIDGetter<name> { static CLSID get()  { return uuidFromString (uuid); } };
 
  #define JUCE_COMCLASS(name, guid) \
     struct name; \
@@ -138,7 +138,7 @@ public:
         return this->QueryInterface (__uuidof (OtherComClass), destObject);
     }
 
-    template<class OtherComClass>
+    template <class OtherComClass>
     ComSmartPtr<OtherComClass> getInterface() const
     {
         ComSmartPtr<OtherComClass> destObject;

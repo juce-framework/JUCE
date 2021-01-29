@@ -436,7 +436,7 @@ public:
 
 private:
     //==============================================================================
-    template<class ArgType>
+    template <class ArgType>
     static String getUriStringFromArgs (ArgType* args)
     {
         if (args != nullptr)

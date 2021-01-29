@@ -96,7 +96,7 @@ public:
 
     //==============================================================================
     /** Processes the input and output buffers supplied in the processing context. */
-    template<typename ProcessContext>
+    template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
         auto&& inBlock  = context.getInputBlock();

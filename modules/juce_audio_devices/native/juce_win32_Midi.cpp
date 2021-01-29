@@ -334,7 +334,7 @@ private:
     };
 
     //==============================================================================
-    template<class WrapperType>
+    template <class WrapperType>
     struct Win32MidiDeviceQuery
     {
         static Array<MidiDeviceInfo> getAvailableDevices()
@@ -891,7 +891,7 @@ private:
             watcher = nullptr;
         }
 
-        template<typename InfoType>
+        template <typename InfoType>
         IInspectable* getValueFromDeviceInfo (String key, InfoType* info)
         {
             __FIMapView_2_HSTRING_IInspectable* properties;
