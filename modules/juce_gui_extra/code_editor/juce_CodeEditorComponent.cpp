@@ -348,9 +348,6 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     setMouseCursor (MouseCursor::IBeamCursor);
     setWantsKeyboardFocus (true);
 
-    lookAndFeelChanged();
-    addAndMakeVisible (caret.get());
-
     addAndMakeVisible (verticalScrollBar);
     verticalScrollBar.setSingleStepSize (1.0);
 
@@ -369,6 +366,8 @@ CodeEditorComponent::CodeEditorComponent (CodeDocument& doc, CodeTokeniser* cons
     verticalScrollBar.addListener (pimpl.get());
     horizontalScrollBar.addListener (pimpl.get());
     document.addListener (pimpl.get());
+
+    lookAndFeelChanged();
 }
 
 CodeEditorComponent::~CodeEditorComponent()
@@ -405,7 +404,10 @@ void CodeEditorComponent::setTemporaryUnderlining (const Array<Range<int>>&)
 
 Rectangle<int> CodeEditorComponent::getCaretRectangle()
 {
-    return getLocalArea (caret.get(), caret->getLocalBounds());
+    if (caret != nullptr)
+        return getLocalArea (caret.get(), caret->getLocalBounds());
+
+    return {};
 }
 
 void CodeEditorComponent::setLineNumbersShown (const bool shouldBeShown)
@@ -582,7 +584,8 @@ void CodeEditorComponent::retokenise (int startIndex, int endIndex)
 //==============================================================================
 void CodeEditorComponent::updateCaretPosition()
 {
-    caret->setCaretPosition (getCharacterBounds (getCaretPos()));
+    if (caret != nullptr)
+        caret->setCaretPosition (getCharacterBounds (getCaretPos()));
 }
 
 void CodeEditorComponent::moveCaretTo (const CodeDocument::Position& newPos, const bool highlighting)
@@ -1318,6 +1321,7 @@ bool CodeEditorComponent::perform (const InvocationInfo& info)
 void CodeEditorComponent::lookAndFeelChanged()
 {
     caret.reset (getLookAndFeel().createCaretComponent (this));
+    addAndMakeVisible (*caret);
 }
 
 bool CodeEditorComponent::performCommand (const CommandID commandID)
