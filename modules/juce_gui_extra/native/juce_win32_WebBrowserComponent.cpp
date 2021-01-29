@@ -531,7 +531,7 @@ private:
                     ComSmartPtr<ICoreWebView2WebResourceRequest> request;
                     args->get_Request (request.resetAndGetPointerAddress());
 
-                    auto uriString = getUriStringFromArgs (request.get());
+                    auto uriString = getUriStringFromArgs<ICoreWebView2WebResourceRequest> (request);
 
                     if (uriString == urlRequest.url
                         || (uriString.endsWith ("/") && uriString.upToLastOccurrenceOf ("/", false, false) == urlRequest.url))
@@ -544,7 +544,7 @@ private:
 
                             ComSmartPtr<IStream> content (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
                                                                                       (UINT) urlRequest.postData.getSize()));
-                            request->put_Content (content.get());
+                            request->put_Content (content);
                         }
 
                         if (! urlRequest.headers.isEmpty())
@@ -672,7 +672,7 @@ private:
 
     void closeWebView()
     {
-        if (webViewController.get() != nullptr)
+        if (webViewController != nullptr)
         {
             webViewController->Close();
             webViewController = nullptr;
