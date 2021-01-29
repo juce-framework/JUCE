@@ -726,7 +726,7 @@ public:
         }
         @endcode
     */
-    Iterator<GetNextElementWithTagName> getChildWithTagNameIterator (const String& name) const
+    Iterator<GetNextElementWithTagName> getChildWithTagNameIterator (StringRef name) const
     {
         return Iterator<GetNextElementWithTagName> { getChildByName (name), name };
     }
