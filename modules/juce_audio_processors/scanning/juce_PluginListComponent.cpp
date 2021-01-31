@@ -262,7 +262,7 @@ static bool canShowFolderForPlugin (KnownPluginList& list, int index)
 static void showFolderForPlugin (KnownPluginList& list, int index)
 {
     if (canShowFolderForPlugin (list, index))
-        File (list.getTypes()[index].fileOrIdentifier).getParentDirectory().startAsProcess();
+        File (list.getTypes()[index].fileOrIdentifier).revealToUser();
 }
 
 void PluginListComponent::removeMissingPlugins()

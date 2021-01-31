@@ -27,35 +27,55 @@ namespace
 {
     const uint8 noLSBValueReceived = 0xff;
     const Range<int> allChannels { 1, 17 };
+
+    template <typename Range, typename Value>
+    void mpeInstrumentFill (Range& range, const Value& value)
+    {
+        std::fill (std::begin (range), std::end (range), value);
+    }
 }
 
 //==============================================================================
 MPEInstrument::MPEInstrument() noexcept
 {
-    std::fill_n (lastPressureLowerBitReceivedOnChannel, 16, noLSBValueReceived);
-    std::fill_n (lastTimbreLowerBitReceivedOnChannel, 16, noLSBValueReceived);
-    std::fill_n (isMemberChannelSustained, 16, false);
+    mpeInstrumentFill (lastPressureLowerBitReceivedOnChannel, noLSBValueReceived);
+    mpeInstrumentFill (lastTimbreLowerBitReceivedOnChannel, noLSBValueReceived);
+    mpeInstrumentFill (isMemberChannelSustained, false);
 
     pitchbendDimension.value = &MPENote::pitchbend;
     pressureDimension.value = &MPENote::pressure;
     timbreDimension.value = &MPENote::timbre;
 
-    // the default value for pressure is 0, for all other dimension it is centre (= default MPEValue)
-    std::fill_n (pressureDimension.lastValueReceivedOnChannel, 16, MPEValue::minValue());
+    resetLastReceivedValues();
 
     legacyMode.isEnabled = false;
     legacyMode.pitchbendRange = 2;
     legacyMode.channelRange = allChannels;
 }
 
-MPEInstrument::~MPEInstrument()
-{
-}
+MPEInstrument::~MPEInstrument() = default;
 
 //==============================================================================
 MPEZoneLayout MPEInstrument::getZoneLayout() const noexcept
 {
     return zoneLayout;
+}
+
+void MPEInstrument::resetLastReceivedValues()
+{
+    struct Defaults
+    {
+        MPEDimension& dimension;
+        MPEValue defaultValue;
+    };
+
+    // The default value for pressure is 0, for all other dimensions it is centre
+    for (const auto& pair : { Defaults { pressureDimension,  MPEValue::minValue() },
+                              Defaults { pitchbendDimension, MPEValue::centreValue() },
+                              Defaults { timbreDimension,    MPEValue::centreValue() } })
+    {
+        mpeInstrumentFill (pair.dimension.lastValueReceivedOnChannel, pair.defaultValue);
+    }
 }
 
 void MPEInstrument::setZoneLayout (MPEZoneLayout newLayout)
@@ -65,6 +85,8 @@ void MPEInstrument::setZoneLayout (MPEZoneLayout newLayout)
     const ScopedLock sl (lock);
     legacyMode.isEnabled = false;
     zoneLayout = newLayout;
+
+    resetLastReceivedValues();
 }
 
 //==============================================================================

@@ -30,9 +30,11 @@ struct PropertyPanel::SectionComponent  : public Component
 {
     SectionComponent (const String& sectionTitle,
                       const Array<PropertyComponent*>& newProperties,
-                      bool sectionIsOpen)
+                      bool sectionIsOpen,
+                      int extraPadding)
         : Component (sectionTitle),
-          isOpen (sectionIsOpen)
+          isOpen (sectionIsOpen),
+          padding (extraPadding)
     {
         lookAndFeelChanged();
 
@@ -63,7 +65,7 @@ struct PropertyPanel::SectionComponent  : public Component
         for (auto* propertyComponent : propertyComps)
         {
             propertyComponent->setBounds (1, y, getWidth() - 2, propertyComponent->getPreferredHeight());
-            y = propertyComponent->getBottom();
+            y = propertyComponent->getBottom() + padding;
         }
     }
 
@@ -78,9 +80,15 @@ struct PropertyPanel::SectionComponent  : public Component
     {
         auto y = titleHeight;
 
-        if (isOpen)
+        auto numComponents = propertyComps.size();
+
+        if (numComponents > 0 && isOpen)
+        {
             for (auto* propertyComponent : propertyComps)
                 y += propertyComponent->getPreferredHeight();
+
+            y += (numComponents - 1) * padding;
+        }
 
         return y;
     }
@@ -122,6 +130,7 @@ struct PropertyPanel::SectionComponent  : public Component
     OwnedArray<PropertyComponent> propertyComps;
     int titleHeight;
     bool isOpen;
+    int padding;
 
     JUCE_DECLARE_NON_COPYABLE (SectionComponent)
 };
@@ -241,26 +250,32 @@ int PropertyPanel::getTotalContentHeight() const
     return propertyHolderComponent->getHeight();
 }
 
-void PropertyPanel::addProperties (const Array<PropertyComponent*>& newProperties)
+void PropertyPanel::addProperties (const Array<PropertyComponent*>& newProperties,
+                                   int extraPaddingBetweenComponents)
 {
     if (isEmpty())
         repaint();
 
-    propertyHolderComponent->insertSection (-1, new SectionComponent (String(), newProperties, true));
+    propertyHolderComponent->insertSection (-1, new SectionComponent ({}, newProperties, true, extraPaddingBetweenComponents));
     updatePropHolderLayout();
 }
 
 void PropertyPanel::addSection (const String& sectionTitle,
                                 const Array<PropertyComponent*>& newProperties,
                                 bool shouldBeOpen,
-                                int indexToInsertAt)
+                                int indexToInsertAt,
+                                int extraPaddingBetweenComponents)
 {
     jassert (sectionTitle.isNotEmpty());
 
     if (isEmpty())
         repaint();
 
-    propertyHolderComponent->insertSection (indexToInsertAt, new SectionComponent (sectionTitle, newProperties, shouldBeOpen));
+    propertyHolderComponent->insertSection (indexToInsertAt, new SectionComponent (sectionTitle,
+                                                                                   newProperties,
+                                                                                   shouldBeOpen,
+                                                                                   extraPaddingBetweenComponents));
+
     updatePropHolderLayout();
 }
 

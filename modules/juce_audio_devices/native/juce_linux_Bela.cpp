@@ -24,12 +24,12 @@ namespace juce
 {
 
 //==============================================================================
-class BelaMidiInput
+class MidiInput::Pimpl
 {
 public:
-    static Array<BelaMidiInput*> midiInputs;
+    static Array<Pimpl*> midiInputs;
 
-    BelaMidiInput (const String& port, MidiInput* input, MidiInputCallback* callback)
+    Pimpl (const String& port, MidiInput* input, MidiInputCallback* callback)
         : midiInput (input), midiPort (port), midiCallback (callback)
     {
         jassert (midiCallback != nullptr);
@@ -38,7 +38,7 @@ public:
         buffer.resize (32);
     }
 
-    ~BelaMidiInput()
+    ~Pimpl()
     {
         stop();
         midiInputs.removeAllInstancesOf (this);
@@ -76,7 +76,7 @@ public:
         }
 
         if (receivedBytes > 0)
-            pushMidiData (receivedBytes);
+            pushMidiData ((int) receivedBytes);
     }
 
     static Array<MidiDeviceInfo> getDevices (bool input)
@@ -141,7 +141,7 @@ private:
             snd_rawmidi_info_t* info;
             snd_rawmidi_info_alloca (&info);
 
-            snd_rawmidi_info_set_device (info, device);
+            snd_rawmidi_info_set_device (info, (unsigned int) device);
             snd_rawmidi_info_set_stream (info, input ? SND_RAWMIDI_STREAM_INPUT
                                                      : SND_RAWMIDI_STREAM_OUTPUT);
 
@@ -173,10 +173,10 @@ private:
     Midi midi;
     MidiDataConcatenator concatenator { 512 };
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BelaMidiInput)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
-Array<BelaMidiInput*> BelaMidiInput::midiInputs;
+Array<MidiInput::Pimpl*> MidiInput::Pimpl::midiInputs;
 
 
 //==============================================================================
@@ -366,7 +366,7 @@ public:
     String getLastError() override    { return lastError; }
 
     //==============================================================================
-    int getCurrentBufferSizeSamples() override            { return actualBufferSize; }
+    int getCurrentBufferSizeSamples() override            { return (int) actualBufferSize; }
     double getCurrentSampleRate() override                { return 44100.0; }
     int getCurrentBitDepth() override                     { return 16; }
     BigInteger getActiveOutputChannels() const override   { BigInteger b; b.setRange (0, actualNumberOfOutputs, true); return b; }
@@ -384,8 +384,8 @@ private:
     bool setup (BelaContext& context)
     {
         actualBufferSize      = context.audioFrames;
-        actualNumberOfInputs  = context.audioInChannels + context.analogInChannels;
-        actualNumberOfOutputs = context.audioOutChannels + context.analogOutChannels;
+        actualNumberOfInputs  = (int) (context.audioInChannels + context.analogInChannels);
+        actualNumberOfOutputs = (int) (context.audioOutChannels + context.analogOutChannels);
         isBelaOpen = true;
         firstCallback = true;
 
@@ -405,7 +405,7 @@ private:
         ScopedLock lock (callbackLock);
 
         // Check for and process and midi
-        for (auto midiInput : BelaMidiInput::midiInputs)
+        for (auto midiInput : MidiInput::Pimpl::midiInputs)
             midiInput->poll();
 
         if (callback != nullptr)
@@ -413,27 +413,29 @@ private:
             jassert (context.audioFrames <= actualBufferSize);
             jassert ((context.flags & BELA_FLAG_INTERLEAVED) == 0);
 
+            using Frames = decltype (context.audioFrames);
+
             // Setup channelInBuffers
             for (int ch = 0; ch < actualNumberOfInputs; ++ch)
             {
                 if (ch < analogChannelStart)
-                    channelInBuffer[ch] = &context.audioIn[ch * context.audioFrames];
+                    channelInBuffer[ch] = &context.audioIn[(Frames) ch * context.audioFrames];
                 else
-                    channelInBuffer[ch] = &context.analogIn[(ch - analogChannelStart) * context.analogFrames];
+                    channelInBuffer[ch] = &context.analogIn[(Frames) (ch - analogChannelStart) * context.analogFrames];
             }
 
             // Setup channelOutBuffers
             for (int ch = 0; ch < actualNumberOfOutputs; ++ch)
             {
                 if (ch < analogChannelStart)
-                    channelOutBuffer[ch] = &context.audioOut[ch * context.audioFrames];
+                    channelOutBuffer[ch] = &context.audioOut[(Frames) ch * context.audioFrames];
                 else
-                    channelOutBuffer[ch] = &context.analogOut[(ch - analogChannelStart) * context.audioFrames];
+                    channelOutBuffer[ch] = &context.analogOut[(Frames) (ch - analogChannelStart) * context.audioFrames];
             }
 
             callback->audioDeviceIOCallback (channelInBuffer.getData(), actualNumberOfInputs,
                                              channelOutBuffer.getData(), actualNumberOfOutputs,
-                                             context.audioFrames);
+                                             (int) context.audioFrames);
         }
     }
 
@@ -522,24 +524,18 @@ struct BelaAudioIODeviceType  : public AudioIODeviceType
 };
 
 //==============================================================================
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_Bela()
-{
-    return new BelaAudioIODeviceType();
-}
-
-//==============================================================================
 MidiInput::MidiInput (const String& deviceName, const String& deviceID)
     : deviceInfo (deviceName, deviceID)
 {
 }
 
-MidiInput::~MidiInput()   { delete static_cast<BelaMidiInput*> (internal); }
-void MidiInput::start()   { static_cast<BelaMidiInput*> (internal)->start(); }
-void MidiInput::stop()    { static_cast<BelaMidiInput*> (internal)->stop(); }
+MidiInput::~MidiInput() = default;
+void MidiInput::start()   { internal->start(); }
+void MidiInput::stop()    { internal->stop(); }
 
 Array<MidiDeviceInfo> MidiInput::getAvailableDevices()
 {
-    return BelaMidiInput::getDevices (true);
+    return Pimpl::getDevices (true);
 }
 
 MidiDeviceInfo MidiInput::getDefaultDevice()
@@ -553,7 +549,7 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (const String& deviceIdentifier
         return {};
 
     std::unique_ptr<MidiInput> midiInput (new MidiInput (deviceIdentifier, deviceIdentifier));
-    midiInput->internal = new BelaMidiInput (deviceIdentifier, midiInput.get(), callback);
+    midiInput->internal = std::make_unique<Pimpl> (deviceIdentifier, midiInput.get(), callback);
 
     return midiInput;
 }
@@ -587,7 +583,8 @@ std::unique_ptr<MidiInput> MidiInput::openDevice (int index, MidiInputCallback* 
 
 //==============================================================================
 // TODO: Add Bela MidiOutput support
-MidiOutput::~MidiOutput()                                                {}
+class MidiOutput::Pimpl {};
+MidiOutput::~MidiOutput() = default;
 void MidiOutput::sendMessageNow (const MidiMessage&)                     {}
 Array<MidiDeviceInfo> MidiOutput::getAvailableDevices()                  { return {}; }
 MidiDeviceInfo MidiOutput::getDefaultDevice()                            { return {}; }

@@ -36,9 +36,10 @@
 
 #include "juce_core.h"
 
-#include <locale>
 #include <cctype>
 #include <cstdarg>
+#include <locale>
+#include <thread>
 
 #if ! JUCE_ANDROID
  #include <sys/timeb.h>

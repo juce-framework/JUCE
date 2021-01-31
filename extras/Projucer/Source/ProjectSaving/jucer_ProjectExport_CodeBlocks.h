@@ -98,6 +98,8 @@ public:
     bool isOSX() const override                      { return false; }
     bool isiOS() const override                      { return false; }
 
+    String getNewLineString() const override         { return isWindows() ? "\r\n" : "\n"; }
+
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
         switch (type)
@@ -299,28 +301,6 @@ private:
     };
 
     //==============================================================================
-
-    StringArray getPackages() const
-    {
-        auto result = linuxPackages;
-
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
-            && project.isConfigFlagEnabled ("JUCE_WEB_BROWSER", true))
-        {
-            result.add ("webkit2gtk-4.0");
-            result.add ("gtk+-x11-3.0");
-        }
-
-        if (project.getEnabledModules().isModuleEnabled ("juce_core")
-            && project.isConfigFlagEnabled ("JUCE_USE_CURL", true)
-            && ! project.isConfigFlagEnabled ("JUCE_LOAD_CURL_SYMBOLS_LAZILY", false))
-            result.add ("libcurl");
-
-        result.removeDuplicates (false);
-
-        return result;
-    }
-
     void addVersion (XmlElement& xml) const
     {
         auto* fileVersion = xml.createNewChildElement ("FileVersion");
@@ -370,12 +350,14 @@ private:
         auto keys = defines.getAllKeys();
         auto values = defines.getAllValues();
 
+        const auto escapedQuote = isWindows() ? "\\\"" : "\\\\\"";
+
         for (int i = 0; i < defines.size(); ++i)
         {
             auto result = keys[i];
 
             if (values[i].isNotEmpty())
-                result += "=" + values[i];
+                result += "=\"" + values[i].replace ("\"", escapedQuote) + "\"";
 
             defs.add (result);
         }
@@ -422,19 +404,20 @@ private:
             if (target.isDynamicLibrary() || getProject().isAudioPluginProject())
                 flags.add ("-fPIC");
 
-            auto packages = getPackages();
+            auto packages = config.exporter.getLinuxPackages (PackageDependencyType::compile);
 
-            if (packages.size() > 0)
+            if (! packages.isEmpty())
             {
                 auto pkgconfigFlags = String ("`pkg-config --cflags");
-                for (auto p : packages)
+
+                for (auto& p : packages)
                     pkgconfigFlags << " " << p;
 
                 pkgconfigFlags << "`";
                 flags.add (pkgconfigFlags);
             }
 
-            if (linuxLibs.contains("pthread"))
+            if (linuxLibs.contains ("pthread"))
                 flags.add ("-pthread");
         }
 
@@ -456,14 +439,14 @@ private:
 
         flags.addTokens (replacePreprocessorTokens (config, getExtraLinkerFlagsString()).trim(), " \n", "\"'");
 
-        auto packages = getPackages();
-
         if (config.exporter.isLinux())
         {
             if (target.isDynamicLibrary())
                 flags.add ("-shared");
 
-            if (packages.size() > 0)
+            auto packages = config.exporter.getLinuxPackages (PackageDependencyType::link);
+
+            if (! packages.isEmpty())
             {
                 String pkgconfigLibs ("`pkg-config --libs");
 
@@ -588,7 +571,7 @@ private:
                 for (auto& def : getDefines (config, target))
                 {
                     if (! def.containsChar ('='))
-                            def << '=';
+                        def << '=';
 
                     flags.add ("-D" + def);
                 }
@@ -802,7 +785,10 @@ private:
         if (hasResourceFile())
         {
             const auto iconFile = getTargetFolder().getChildFile ("icon.ico");
-            build_tools::writeMacIcon (getIcons(), iconFile);
+
+            if (! build_tools::asArray (getIcons()).isEmpty())
+                build_tools::writeWinIcon (getIcons(), iconFile);
+
             auto rcFile = getTargetFolder().getChildFile ("resources.rc");
             MSVCProjectExporterBase::createRCFile (project, iconFile, rcFile);
 

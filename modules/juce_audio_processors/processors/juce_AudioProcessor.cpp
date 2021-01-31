@@ -445,6 +445,24 @@ void AudioProcessor::checkForDuplicateParamID (AudioProcessorParameter* param)
    #endif
 }
 
+void AudioProcessor::checkForDuplicateGroupIDs (const AudioProcessorParameterGroup& newGroup)
+{
+    ignoreUnused (newGroup);
+
+   #if JUCE_DEBUG
+    auto groups = newGroup.getSubgroups (true);
+    groups.add (&newGroup);
+
+    for (auto* group : groups)
+    {
+        auto insertResult = groupIDs.insert (group->getID());
+
+        // If you hit this assertion then a group ID is not unique
+        jassert (insertResult.second);
+    }
+   #endif
+}
+
 const Array<AudioProcessorParameter*>& AudioProcessor::getParameters() const   { return flatParameterList; }
 const AudioProcessorParameterGroup& AudioProcessor::getParameterTree() const   { return parameterTree; }
 
@@ -463,6 +481,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
 void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
 {
     jassert (group != nullptr);
+    checkForDuplicateGroupIDs (*group);
 
     auto oldSize = flatParameterList.size();
     flatParameterList.addArray (group->getParameters (true));
@@ -483,9 +502,12 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
 {
    #if JUCE_DEBUG
     paramIDs.clear();
+    groupIDs.clear();
    #endif
 
     parameterTree = std::move (newTree);
+    checkForDuplicateGroupIDs (parameterTree);
+
     flatParameterList = parameterTree.getParameters (true);
 
     for (int i = 0; i < flatParameterList.size(); ++i)
@@ -1563,37 +1585,6 @@ void AudioProcessorParameter::removeListener (AudioProcessorParameter::Listener*
 {
     const ScopedLock sl (listenerLock);
     listeners.removeFirstMatchingValue (listenerToRemove);
-}
-
-//==============================================================================
-bool AudioPlayHead::CurrentPositionInfo::operator== (const CurrentPositionInfo& other) const noexcept
-{
-    return timeInSamples == other.timeInSamples
-        && ppqPosition == other.ppqPosition
-        && editOriginTime == other.editOriginTime
-        && ppqPositionOfLastBarStart == other.ppqPositionOfLastBarStart
-        && frameRate == other.frameRate
-        && isPlaying == other.isPlaying
-        && isRecording == other.isRecording
-        && bpm == other.bpm
-        && timeSigNumerator == other.timeSigNumerator
-        && timeSigDenominator == other.timeSigDenominator
-        && ppqLoopStart == other.ppqLoopStart
-        && ppqLoopEnd == other.ppqLoopEnd
-        && isLooping == other.isLooping;
-}
-
-bool AudioPlayHead::CurrentPositionInfo::operator!= (const CurrentPositionInfo& other) const noexcept
-{
-    return ! operator== (other);
-}
-
-void AudioPlayHead::CurrentPositionInfo::resetToDefault()
-{
-    zerostruct (*this);
-    timeSigNumerator = 4;
-    timeSigDenominator = 4;
-    bpm = 120;
 }
 
 } // namespace juce

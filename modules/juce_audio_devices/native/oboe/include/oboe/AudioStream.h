@@ -393,12 +393,25 @@ public:
      * Swap old callback for new callback.
      * This not atomic.
      * This should only be used internally.
-     * @param streamCallback
-     * @return previous streamCallback
+     * @param dataCallback
+     * @return previous dataCallback
      */
-    AudioStreamCallback *swapCallback(AudioStreamCallback *streamCallback) {
-        AudioStreamCallback *previousCallback = mStreamCallback;
-        mStreamCallback = streamCallback;
+    AudioStreamDataCallback *swapDataCallback(AudioStreamDataCallback *dataCallback) {
+        AudioStreamDataCallback *previousCallback = mDataCallback;
+        mDataCallback = dataCallback;
+        return previousCallback;
+    }
+
+    /*
+     * Swap old callback for new callback.
+     * This not atomic.
+     * This should only be used internally.
+     * @param errorCallback
+     * @return previous errorCallback
+     */
+    AudioStreamErrorCallback *swapErrorCallback(AudioStreamErrorCallback *errorCallback) {
+        AudioStreamErrorCallback *previousCallback = mErrorCallback;
+        mErrorCallback = errorCallback;
         return previousCallback;
     }
 
@@ -418,6 +431,13 @@ public:
      */
     ResultWithValue<int32_t> waitForAvailableFrames(int32_t numFrames,
                                                     int64_t timeoutNanoseconds);
+
+    /**
+     * @return last result passed from an error callback
+     */
+    virtual oboe::Result getLastErrorCallbackResult() const {
+        return mErrorCallbackResult;
+    }
 
 protected:
 
@@ -515,8 +535,10 @@ protected:
 
     std::mutex           mLock; // for synchronizing start/stop/close
 
+    oboe::Result         mErrorCallbackResult = oboe::Result::OK;
 
 private:
+
     // Log the scheduler if it changes.
     void                 checkScheduler();
     int                  mPreviousScheduler = -1;

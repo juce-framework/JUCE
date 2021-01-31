@@ -78,7 +78,7 @@ namespace build_tools
         }
     } // namespace mac
 
-    void writeMacIcon (const Icons& icons, OutputStream& out)
+    static void writeMacIcon (const Icons& icons, OutputStream& out)
     {
         MemoryOutputStream data;
         auto smallest = std::numeric_limits<int>::max();
@@ -269,7 +269,7 @@ namespace build_tools
         }
     } // namespace win
 
-    void writeWinIcon (const Icons& icons, OutputStream& os)
+    static void writeWinIcon (const Icons& icons, OutputStream& os)
     {
         Array<Image> images;
         int sizes[] = { 16, 32, 48, 256 };
@@ -363,13 +363,14 @@ namespace build_tools
 
     static void createiOSIconFiles (const Icons& icons, File appIconSet)
     {
-        const auto images = asArray (icons);
+        auto* imageToUse = icons.big != nullptr ? icons.big.get()
+                                                : icons.small.get();
 
-        if (! images.isEmpty())
+        if (imageToUse != nullptr)
         {
             for (auto& type : iOSAppIconTypes)
             {
-                auto image = rescaleImageForIcon (*images.getFirst(), type.size);
+                auto image = rescaleImageForIcon (*imageToUse, type.size);
 
                 if (image.hasAlphaChannel())
                 {

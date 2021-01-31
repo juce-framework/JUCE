@@ -60,9 +60,8 @@ namespace MidiBufferHelpers
             if (maxBytes == 1)
                 return 1;
 
-            int n;
-            auto bytesLeft = MidiMessage::readVariableLengthVal (data + 1, n);
-            return jmin (maxBytes, n + 2 + bytesLeft);
+            const auto var = MidiMessage::readVariableLengthValue (data + 1, maxBytes - 1);
+            return jmin (maxBytes, var.value + 2 + var.bytesUsed);
         }
 
         if (byte >= 0x80)

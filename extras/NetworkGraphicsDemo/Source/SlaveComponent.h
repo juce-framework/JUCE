@@ -125,8 +125,8 @@ private:
     //==============================================================================
     String getMachineInfoToDisplay() const
     {
-        auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (getScreenBounds().getCentre());
-        return getOSName() + "   " + String (display.dpi) + "   "  + String (display.scale);
+        auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (getScreenBounds().getCentre());
+        return getOSName() + "   " + String (display->dpi) + "   "  + String (display->scale);
     }
 
     static String getOSName()
@@ -180,8 +180,8 @@ private:
         if (auto client = canvas.findClient (clientName))
         {
             auto screenBounds = getScreenBounds();
-            auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (screenBounds.getCentre());
-            return ((screenBounds - display.userArea.getCentre()).toFloat() / (client->scaleFactor * display.dpi / display.scale)) + client->centre;
+            auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (screenBounds.getCentre());
+            return ((screenBounds - display->userArea.getCentre()).toFloat() / (client->scaleFactor * display->dpi / display->scale)) + client->centre;
         }
 
         return {};
@@ -191,8 +191,8 @@ private:
     {
         if (auto client = canvas.findClient (clientName))
         {
-            auto display = Desktop::getInstance().getDisplays().findDisplayForPoint (getScreenBounds().getCentre());
-            return (display.userArea.toFloat() / (client->scaleFactor * display.dpi / display.scale)).withCentre (client->centre);
+            auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (getScreenBounds().getCentre());
+            return (display->userArea.toFloat() / (client->scaleFactor * display->dpi / display->scale)).withCentre (client->centre);
         }
 
         return {};

@@ -49,6 +49,8 @@ namespace Ids
     DECLARE_ID (companyEmail);
     DECLARE_ID (useAppConfig);
     DECLARE_ID (addUsingNamespaceToJuceHeader);
+    DECLARE_ID (usePrecompiledHeaderFile);
+    DECLARE_ID (precompiledHeaderFile);
     DECLARE_ID (displaySplashScreen);
     DECLARE_ID (splashScreenColour);
     DECLARE_ID (position);
@@ -165,8 +167,10 @@ namespace Ids
     DECLARE_ID (araFolder);
     DECLARE_ID (compile);
     DECLARE_ID (noWarnings);
+    DECLARE_ID (skipPCH);
     DECLARE_ID (resource);
     DECLARE_ID (xcodeResource);
+    DECLARE_ID (xcodeValidArchs);
     DECLARE_ID (className);
     DECLARE_ID (classDesc);
     DECLARE_ID (controlPoint);
@@ -217,7 +221,6 @@ namespace Ids
     DECLARE_ID (androidCustomApplicationClass);
     DECLARE_ID (androidVersionCode);
     DECLARE_ID (androidSDKPath);
-    DECLARE_ID (androidNDKPath);
     DECLARE_ID (androidOboeRepositoryPath);
     DECLARE_ID (androidInternetNeeded);
     DECLARE_ID (androidArchitectures);
@@ -362,6 +365,8 @@ namespace Ids
     DECLARE_ID (pluginARATransformFlags);
     DECLARE_ID (pluginVSTNumMidiInputs);
     DECLARE_ID (pluginVSTNumMidiOutputs);
+    DECLARE_ID (suppressPlistResourceUsage);
+    DECLARE_ID (useLegacyBuildSystem);
     DECLARE_ID (exporters);
     DECLARE_ID (website);
     DECLARE_ID (mainClass);

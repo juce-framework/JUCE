@@ -91,6 +91,7 @@ namespace build_tools
         bool isPluginSynth                      = false;
         
         bool isPluginARAEffect                  = false;
+        bool suppressResourceUsage              = false;
 
     private:
         void write (MemoryOutputStream&) const;

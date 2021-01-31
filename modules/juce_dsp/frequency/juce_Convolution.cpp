@@ -77,14 +77,7 @@ class BackgroundMessageQueue  : private Thread
 public:
     explicit BackgroundMessageQueue (int entries)
         : Thread ("Convolution background loader"), queue (entries)
-    {
-        startThread();
-    }
-
-    ~BackgroundMessageQueue() override
-    {
-        stopThread (-1);
-    }
+    {}
 
     using IncomingCommand = FixedSizeFunction<400, void()>;
 
@@ -93,19 +86,40 @@ public:
     // This function is only safe to call from a single thread at a time.
     bool push (IncomingCommand& command) { return queue.push (command); }
 
+    void popAll()
+    {
+        const ScopedLock lock (popMutex);
+        queue.popAll ([] (IncomingCommand& command) { command(); command = nullptr; });
+    }
+
+    using Thread::startThread;
+    using Thread::stopThread;
+
 private:
     void run() override
     {
         while (! threadShouldExit())
         {
-            if (queue.hasPendingMessages())
+            const auto tryPop = [&]
+            {
+                const ScopedLock lock (popMutex);
+
+                if (! queue.hasPendingMessages())
+                    return false;
+
                 queue.pop ([] (IncomingCommand& command) { command(); command = nullptr;});
-            else
+                return true;
+            };
+
+            if (! tryPop())
                 sleep (10);
         }
     }
 
+    CriticalSection popMutex;
     Queue<IncomingCommand> queue;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BackgroundMessageQueue)
 };
 
 struct ConvolutionMessageQueue::Impl  : public BackgroundMessageQueue
@@ -119,9 +133,14 @@ ConvolutionMessageQueue::ConvolutionMessageQueue()
 
 ConvolutionMessageQueue::ConvolutionMessageQueue (int entries)
     : pimpl (std::make_unique<Impl> (entries))
-{}
+{
+    pimpl->startThread();
+}
 
-ConvolutionMessageQueue::~ConvolutionMessageQueue() noexcept = default;
+ConvolutionMessageQueue::~ConvolutionMessageQueue() noexcept
+{
+    pimpl->stopThread (-1);
+}
 
 ConvolutionMessageQueue::ConvolutionMessageQueue (ConvolutionMessageQueue&&) noexcept = default;
 ConvolutionMessageQueue& ConvolutionMessageQueue::operator= (ConvolutionMessageQueue&&) noexcept = default;
@@ -889,7 +908,6 @@ public:
     std::unique_ptr<MultichannelEngine> getEngine() { return factory.getEngine(); }
 
 private:
-
     template <typename Fn>
     void callLater (Fn&& fn)
     {
@@ -1014,9 +1032,14 @@ public:
 
     void prepare (const ProcessSpec& spec)
     {
+        messageQueue->pimpl->popAll();
         mixer.prepare (spec);
         engineQueue->prepare (spec);
-        installPendingEngine();
+
+        if (auto newEngine = engineQueue->getEngine())
+            currentEngine = std::move (newEngine);
+
+        previousEngine = nullptr;
         jassert (currentEngine != nullptr);
     }
 

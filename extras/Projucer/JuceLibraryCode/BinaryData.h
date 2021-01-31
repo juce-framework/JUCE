@@ -129,7 +129,7 @@ namespace BinaryData
     const int            jucer_AudioPluginEditorTemplate_hSize = 1057;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 6350;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 6478;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
     const int            jucer_AudioPluginFilterTemplate_hSize = 2459;
@@ -197,8 +197,11 @@ namespace BinaryData
     extern const char*   colourscheme_light_xml;
     const int            colourscheme_light_xmlSize = 1050;
 
+    extern const char*   juce_runtime_arch_detection_cpp;
+    const int            juce_runtime_arch_detection_cppSize = 2127;
+
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 63;
+    const int namedResourceListSize = 64;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

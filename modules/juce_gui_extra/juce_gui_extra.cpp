@@ -149,8 +149,6 @@
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
 
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-
  #if JUCE_MAC
   #include "native/juce_mac_NSViewComponent.mm"
   #include "native/juce_mac_AppleRemote.mm"
@@ -164,8 +162,6 @@
  #if JUCE_WEB_BROWSER
   #include "native/juce_mac_WebBrowserComponent.mm"
  #endif
-
- JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 #elif JUCE_WINDOWS

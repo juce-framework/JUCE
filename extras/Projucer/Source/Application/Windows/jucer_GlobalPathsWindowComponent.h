@@ -235,8 +235,6 @@ private:
 
         builder.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS),
                      "This path will be used when writing the local.properties file of an Android project and should point to the Android SDK folder.");
-        builder.add (new FilePathPropertyComponent (androidNDKPathValue, "Android NDK", true, isThisOS),
-                     "This path will be used when writing the local.properties file of an Android project and should point to the Android NDK folder.");
 
         if (isThisOS)
         {
@@ -276,7 +274,6 @@ private:
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
         araPathValue              = settings.getStoredPath (Ids::araPath, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
-        androidNDKPathValue       = settings.getStoredPath (Ids::androidNDKPath, os);
         clionExePathValue         = settings.getStoredPath (Ids::clionExePath, os);
         androidStudioExePathValue = settings.getStoredPath (Ids::androidStudioExePath, os);
     }
@@ -291,7 +288,6 @@ private:
         aaxPathValue             .resetToDefault();
         araPathValue             .resetToDefault();
         androidSDKPathValue      .resetToDefault();
-        androidNDKPathValue      .resetToDefault();
         clionExePathValue        .resetToDefault();
         androidStudioExePathValue.resetToDefault();
 
@@ -302,8 +298,7 @@ private:
     Value selectedOSValue;
 
     ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
-                     vstPathValue, rtasPathValue, aaxPathValue, androidSDKPathValue, androidNDKPathValue,
-                     clionExePathValue, androidStudioExePathValue,
+                     vstPathValue, rtasPathValue, aaxPathValue, androidSDKPathValue, clionExePathValue, androidStudioExePathValue,
                      araPathValue;
 
     Viewport propertyViewport;

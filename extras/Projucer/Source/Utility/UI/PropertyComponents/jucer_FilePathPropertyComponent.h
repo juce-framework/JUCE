@@ -34,7 +34,7 @@
 */
 class FilePathPropertyComponent    : public PropertyComponent,
                                      public FileDragAndDropTarget,
-                                     private Value::Listener
+                                     protected Value::Listener
 {
 public:
     FilePathPropertyComponent (Value valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
@@ -90,6 +90,12 @@ public:
 
         highlightForDragAndDrop = false;
         repaint();
+    }
+
+protected:
+    void valueChanged (Value&) override
+    {
+        updateEditorColour();
     }
 
 private:
@@ -165,11 +171,6 @@ private:
         }
     }
 
-    void valueChanged (Value&) override
-    {
-        updateEditorColour();
-    }
-
     void lookAndFeelChanged() override
     {
         browseButton.setColour (TextButton::buttonColourId, findColour (secondaryButtonBackgroundColourId));
@@ -190,4 +191,41 @@ private:
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilePathPropertyComponent)
+};
+
+//==============================================================================
+class FilePathPropertyComponentWithEnablement  : public FilePathPropertyComponent
+{
+public:
+    FilePathPropertyComponentWithEnablement (ValueWithDefault& valueToControl,
+                                             ValueWithDefault valueToListenTo,
+                                             const String& propertyName,
+                                             bool isDir,
+                                             bool thisOS = true,
+                                             const String& wildcardsToUse = "*",
+                                             const File& relativeRoot = File())
+        : FilePathPropertyComponent (valueToControl,
+                                     propertyName,
+                                     isDir,
+                                     thisOS,
+                                     wildcardsToUse,
+                                     relativeRoot),
+          valueWithDefault (valueToListenTo),
+          value (valueToListenTo.getPropertyAsValue())
+    {
+        value.addListener (this);
+        valueChanged (value);
+    }
+
+    ~FilePathPropertyComponentWithEnablement() override    { value.removeListener (this); }
+
+private:
+    void valueChanged (Value& v) override
+    {
+        FilePathPropertyComponent::valueChanged (v);
+        setEnabled (valueWithDefault.get());
+    }
+
+    ValueWithDefault valueWithDefault;
+    Value value;
 };

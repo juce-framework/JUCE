@@ -266,32 +266,27 @@ private:
             videoFrameRateRangesString << frameRateRangeToString (range);
         JUCE_CAMERA_LOG (videoFrameRateRangesString);
 
-        JUCE_CAMERA_LOG ("Video binned: " + String (int(format.videoBinned)));
+        JUCE_CAMERA_LOG ("Video binned: " + String (int (format.videoBinned)));
 
-       #if defined (__IPHONE_8_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
-        if (iosVersion.major >= 8)
+        JUCE_CAMERA_LOG ("Video HDR supported: " + String (int (format.videoHDRSupported)));
+        JUCE_CAMERA_LOG ("High resolution still image dimensions: " + getHighResStillImgDimensionsString (format.highResolutionStillImageDimensions));
+        JUCE_CAMERA_LOG ("Min ISO: " + String (format.minISO));
+        JUCE_CAMERA_LOG ("Max ISO: " + String (format.maxISO));
+        JUCE_CAMERA_LOG ("Min exposure duration: " + cmTimeToString (format.minExposureDuration));
+
+        String autoFocusSystemString;
+        switch (format.autoFocusSystem)
         {
-            JUCE_CAMERA_LOG ("Video HDR supported: " + String (int (format.videoHDRSupported)));
-            JUCE_CAMERA_LOG ("High resolution still image dimensions: " + getHighResStillImgDimensionsString (format.highResolutionStillImageDimensions));
-            JUCE_CAMERA_LOG ("Min ISO: " + String (format.minISO));
-            JUCE_CAMERA_LOG ("Max ISO: " + String (format.maxISO));
-            JUCE_CAMERA_LOG ("Min exposure duration: " + cmTimeToString (format.minExposureDuration));
-
-            String autoFocusSystemString;
-            switch (format.autoFocusSystem)
-            {
-                case AVCaptureAutoFocusSystemPhaseDetection:    autoFocusSystemString = "PhaseDetection";    break;
-                case AVCaptureAutoFocusSystemContrastDetection: autoFocusSystemString = "ContrastDetection"; break;
-                case AVCaptureAutoFocusSystemNone:
-                default:                                        autoFocusSystemString = "None";
-            }
-            JUCE_CAMERA_LOG ("Auto focus system: " + autoFocusSystemString);
-
-            JUCE_CAMERA_LOG ("Standard (iOS 5.0) video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeStandard]));
-            JUCE_CAMERA_LOG ("Cinematic video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeCinematic]));
-            JUCE_CAMERA_LOG ("Auto video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeAuto]));
+            case AVCaptureAutoFocusSystemPhaseDetection:    autoFocusSystemString = "PhaseDetection";    break;
+            case AVCaptureAutoFocusSystemContrastDetection: autoFocusSystemString = "ContrastDetection"; break;
+            case AVCaptureAutoFocusSystemNone:
+            default:                                        autoFocusSystemString = "None";
         }
-       #endif
+        JUCE_CAMERA_LOG ("Auto focus system: " + autoFocusSystemString);
+
+        JUCE_CAMERA_LOG ("Standard (iOS 5.0) video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeStandard]));
+        JUCE_CAMERA_LOG ("Cinematic video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeCinematic]));
+        JUCE_CAMERA_LOG ("Auto video stabilization supported: " + String ((int) [format isVideoStabilizationModeSupported: AVCaptureVideoStabilizationModeAuto]));
 
        #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
         if (iosVersion.major >= 11)
@@ -649,6 +644,8 @@ private:
                     [stillImageOutput captureStillImageAsynchronouslyFromConnection: connection completionHandler:
                          ^(CMSampleBufferRef imageSampleBuffer, NSError* error)
                          {
+                             takingPicture = false;
+
                              if (error != nil)
                              {
                                  JUCE_CAMERA_LOG ("Still picture capture failed, error: " + nsStringToJuce (error.localizedDescription));
@@ -662,7 +659,7 @@ private:
 
                              callListeners (image);
 
-                             MessageManager::callAsync ([this, image]() { notifyPictureTaken (image); });
+                             MessageManager::callAsync ([this, image] { notifyPictureTaken (image); });
                          }];
                 }
                 else
@@ -816,6 +813,8 @@ private:
 
                 static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* capturePhoto, NSError* error)
                 {
+                    getOwner (self).takingPicture = false;
+
                     String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
                     ignoreUnused (errorString);
 
@@ -919,6 +918,8 @@ private:
                                                                   AVCaptureResolvedPhotoSettings*, AVCaptureBracketedStillImageSettings*,
                                                                   NSError* error)
                 {
+                    getOwner (self).takingPicture = false;
+
                     String errorString = error != nil ? nsStringToJuce (error.localizedDescription) : String();
                     ignoreUnused (errorString);
 
@@ -970,8 +971,6 @@ private:
 
             void notifyPictureTaken (const Image& image)
             {
-                takingPicture = false;
-
                 captureSession.notifyPictureTaken (image);
             }
 
@@ -1197,6 +1196,9 @@ private:
     {
         const ScopedLock sl (listenerLock);
         listeners.call ([=] (Listener& l) { l.imageReceived (image); });
+
+        if (listeners.size() == 1)
+            triggerStillPictureCapture();
     }
 
     void notifyPictureTaken (const Image& image)
@@ -1271,7 +1273,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
     private:
         static void layoutSubviews (id self, SEL)
         {
-            sendSuperclassMessage (self, @selector (layoutSubviews));
+            sendSuperclassMessage<void> (self, @selector (layoutSubviews));
 
             UIView* asUIView = (UIView*) self;
 

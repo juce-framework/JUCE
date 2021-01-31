@@ -134,6 +134,17 @@ public:
         return this->QueryInterface (__uuidof (OtherComClass), destObject);
     }
 
+    template<class OtherComClass>
+    ComSmartPtr<OtherComClass> getInterface() const
+    {
+        ComSmartPtr<OtherComClass> destObject;
+
+        if (QueryInterface (destObject) == S_OK)
+            return destObject;
+
+        return nullptr;
+    }
+
 private:
     ComClass* p = nullptr;
 

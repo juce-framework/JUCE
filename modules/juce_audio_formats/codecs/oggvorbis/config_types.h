@@ -7,4 +7,8 @@ typedef int32_t ogg_int32_t;
 typedef unsigned int ogg_uint32_t;
 typedef int64_t ogg_int64_t;
 
+// JUCE CHANGE STARTS HERE
+typedef unsigned long long ogg_uint64_t;
+// JUCE CHANGE ENDS HERE
+
 #endif

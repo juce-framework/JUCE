@@ -362,7 +362,9 @@ static void setDPIAwareness()
     if (! JUCEApplicationBase::isStandaloneApp())
         return;
 
-    HMODULE shcoreModule = GetModuleHandleA ("SHCore.dll");
+    const auto shcore = "SHCore.dll";
+    LoadLibraryA (shcore);
+    const auto shcoreModule = GetModuleHandleA (shcore);
 
     if (shcoreModule != nullptr)
     {
@@ -1415,8 +1417,7 @@ public:
         if (auto parentH = GetParent (hwnd))
         {
             auto r = getWindowRect (parentH);
-            auto localBounds = Rectangle<int>::leftTopRightBottom (bounds.left, bounds.top,
-                                                                   bounds.right, bounds.bottom).translated (-r.left, -r.top);
+            auto localBounds = rectangleFromRECT (bounds).translated (-r.left, -r.top);
 
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareWindow (hwnd))
@@ -1654,7 +1655,7 @@ public:
         // if the calling thread is DPI-aware but we are invalidating a non-DPI aware window RECT, we actually have to
         // divide the bounds by the scale factor as it will get multiplied for the virtualised paint callback...
         if (isPerMonitorDPIAwareThread() && ! isPerMonitorDPIAwareWindow (hwnd))
-            scale = 1.0 / Desktop::getInstance().getDisplays().getMainDisplay().scale;
+            scale = 1.0 / Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
        #endif
 
         auto scaled = area.toDouble() * scale;
@@ -1795,31 +1796,11 @@ public:
             return peer.getComponent().getLocalPoint (nullptr, screenPos);
         }
 
-        template <typename CharType>
-        void parseFileList (const CharType* names, const SIZE_T totalLen)
-        {
-            for (unsigned int i = 0;;)
-            {
-                unsigned int len = 0;
-
-                while (i + len < totalLen && names[i + len] != 0)
-                    ++len;
-
-                if (len == 0)
-                    break;
-
-                dragInfo.files.add (String (names + i, len));
-                i += len + 1;
-            }
-        }
-
         struct DroppedData
         {
             DroppedData (IDataObject* dataObject, CLIPFORMAT type)
             {
                 FORMATETC format = { type, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
-                STGMEDIUM resetMedium = { TYMED_HGLOBAL, { nullptr }, nullptr };
-                medium = resetMedium;
 
                 if (SUCCEEDED (error = dataObject->GetData (&format, &medium)))
                 {
@@ -1835,10 +1816,32 @@ public:
             }
 
             HRESULT error;
-            STGMEDIUM medium;
+            STGMEDIUM medium { TYMED_HGLOBAL, { nullptr }, nullptr };
             void* data = {};
             SIZE_T dataSize;
         };
+
+        void parseFileList (HDROP dropFiles)
+        {
+            dragInfo.files.clearQuick();
+
+            std::vector<TCHAR> nameBuffer;
+
+            const auto numFiles = DragQueryFile (dropFiles, ~(UINT) 0, nullptr, 0);
+
+            for (UINT i = 0; i < numFiles; ++i)
+            {
+                const auto bufferSize = DragQueryFile (dropFiles, i, nullptr, 0);
+                nameBuffer.clear();
+                nameBuffer.resize (bufferSize + 1, 0); // + 1 for the null terminator
+
+                const auto readCharacters = DragQueryFile (dropFiles, i, nameBuffer.data(), (UINT) nameBuffer.size());
+                ignoreUnused (readCharacters);
+                jassert (readCharacters == bufferSize);
+
+                dragInfo.files.add (String (nameBuffer.data()));
+            }
+        }
 
         HRESULT updateFileList (IDataObject* const dataObject)
         {
@@ -1852,14 +1855,7 @@ public:
 
                 if (SUCCEEDED (fileData.error))
                 {
-                    auto dropFiles = static_cast<const LPDROPFILES> (fileData.data);
-                    const void* const names = addBytesToPointer (dropFiles, sizeof (DROPFILES));
-
-                    if (dropFiles->fWide)
-                        parseFileList (static_cast<const WCHAR*> (names), fileData.dataSize);
-                    else
-                        parseFileList (static_cast<const char*>  (names), fileData.dataSize);
-
+                    parseFileList (static_cast<HDROP> (fileData.data));
                     return S_OK;
                 }
             }
@@ -2175,9 +2171,9 @@ private:
                 auto bounds = component.getBounds();
 
                 if (bounds.isEmpty())
-                    scaleFactor = Desktop::getInstance().getDisplays().getMainDisplay().scale;
+                    scaleFactor = Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
                 else
-                    scaleFactor = Desktop::getInstance().getDisplays().findDisplayForRect (bounds).scale;
+                    scaleFactor = Desktop::getInstance().getDisplays().getDisplayForRect (bounds)->scale;
 
                 scaleFactor /= Desktop::getInstance().getGlobalScaleFactor();
             }
@@ -3176,10 +3172,7 @@ private:
             updateKeyModifiers();
 
             if (hwnd == GetActiveWindow())
-            {
-                handleKeyPress (key, 0);
-                return true;
-            }
+                return handleKeyPress (key, 0);
         }
 
         return false;
@@ -3422,7 +3415,7 @@ private:
 
         if (fullScreen && ! isMinimised())
             setWindowPos (hwnd, ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays()
-                                                                                              .findDisplayForRect (component.getScreenBounds()).userArea),
+                                                                                              .getDisplayForRect (component.getScreenBounds())->userArea),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
     }
 
@@ -4458,7 +4451,7 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
         tlw->setUsingNativeTitleBar (! enableOrDisable);
 
     if (enableOrDisable)
-        kioskModeComp->setBounds (getDisplays().findDisplayForRect (kioskModeComp->getScreenBounds()).totalArea);
+        kioskModeComp->setBounds (getDisplays().getDisplayForRect (kioskModeComp->getScreenBounds())->totalArea);
 }
 
 void Desktop::allowedOrientationsChanged() {}
@@ -4511,21 +4504,26 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
             return retVal;
     }
 
-    return &Desktop::getInstance().getDisplays().getMainDisplay();
+    return Desktop::getInstance().getDisplays().getPrimaryDisplay();
 }
 
 //==============================================================================
 struct MonitorInfo
 {
-    MonitorInfo (bool main, RECT rect, double d) noexcept
-        : isMain (main), bounds (rect), dpi (d) {}
+    MonitorInfo (bool main, RECT totalArea, RECT workArea, double d) noexcept
+        : isMain (main),
+          totalAreaRect (totalArea),
+          workAreaRect (workArea),
+          dpi (d)
+    {
+    }
 
     bool isMain;
-    RECT bounds;
+    RECT totalAreaRect, workAreaRect;
     double dpi;
 };
 
-static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userInfo)
+static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT, LPARAM userInfo)
 {
     MONITORINFO info = {};
     info.cbSize = sizeof (info);
@@ -4542,7 +4540,7 @@ static BOOL CALLBACK enumMonitorsProc (HMONITOR hm, HDC, LPRECT r, LPARAM userIn
             dpi = (dpiX + dpiY) / 2.0;
     }
 
-    ((Array<MonitorInfo>*) userInfo)->add ({ isMain, *r, dpi });
+    ((Array<MonitorInfo>*) userInfo)->add ({ isMain, info.rcMonitor, info.rcWork, dpi });
     return TRUE;
 }
 
@@ -4556,7 +4554,10 @@ void Displays::findDisplays (float masterScale)
     auto globalDPI = getGlobalDPI();
 
     if (monitors.size() == 0)
-        monitors.add ({ true, getWindowRect (GetDesktopWindow()), globalDPI });
+    {
+        auto windowRect = getWindowRect (GetDesktopWindow());
+        monitors.add ({ true, windowRect, windowRect, globalDPI });
+    }
 
     // make sure the first in the list is the main monitor
     for (int i = 1; i < monitors.size(); ++i)
@@ -4580,30 +4581,24 @@ void Displays::findDisplays (float masterScale)
             d.scale = (d.dpi / USER_DEFAULT_SCREEN_DPI) * (masterScale / Desktop::getDefaultMasterScale());
         }
 
-        d.userArea = d.totalArea = Rectangle<int>::leftTopRightBottom (monitor.bounds.left, monitor.bounds.top,
-                                                                       monitor.bounds.right, monitor.bounds.bottom);
-
-        if (d.isMain)
-        {
-            RECT workArea;
-            SystemParametersInfo (SPI_GETWORKAREA, 0, &workArea, 0);
-
-            d.userArea = d.userArea.getIntersection (Rectangle<int>::leftTopRightBottom (workArea.left, workArea.top,
-                                                                                         workArea.right, workArea.bottom));
-        }
+        d.totalArea = rectangleFromRECT (monitor.totalAreaRect);
+        d.userArea  = rectangleFromRECT (monitor.workAreaRect);
 
         displays.add (d);
     }
 
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    updateToLogical();
-   #else
-    for (auto& d : displays)
-    {
-        d.totalArea /= masterScale;
-        d.userArea  /= masterScale;
-    }
+    if (isPerMonitorDPIAwareThread())
+        updateToLogical();
+    else
    #endif
+    {
+        for (auto& d : displays)
+        {
+            d.totalArea /= masterScale;
+            d.userArea  /= masterScale;
+        }
+    }
 }
 
 //==============================================================================

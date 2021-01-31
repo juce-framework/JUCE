@@ -1663,11 +1663,16 @@ private:
     void readInput (AudioBuffer<float>& buffer, const int numSamples, const int blockSizeMs)
     {
         for (auto* d : devices)
-            d->done = (d->numInputChans == 0);
+            d->done = (d->numInputChans == 0 || d->isWaitingForInput);
 
-        for (int tries = 5;;)
+        float totalWaitTimeMs = blockSizeMs * 5.0f;
+        constexpr int numReadAttempts = 6;
+        auto sumPower2s = [] (int maxPower) { return (1 << (maxPower + 1)) - 1; };
+        float waitTime = totalWaitTimeMs / (float) sumPower2s (numReadAttempts - 2);
+
+        for (int numReadAttemptsRemaining = numReadAttempts;;)
         {
-            bool anyRemaining = false;
+            bool anySamplesRemaining = false;
 
             for (auto* d : devices)
             {
@@ -1679,17 +1684,20 @@ private:
                         d->done = true;
                     }
                     else
-                        anyRemaining = true;
+                    {
+                        anySamplesRemaining = true;
+                    }
                 }
             }
 
-            if (! anyRemaining)
+            if (! anySamplesRemaining)
                 return;
 
-            if (--tries == 0)
+            if (--numReadAttemptsRemaining == 0)
                 break;
 
-            wait (blockSizeMs);
+            wait (jmax (1, roundToInt (waitTime)));
+            waitTime *= 2.0f;
         }
 
         for (auto* d : devices)
@@ -1717,7 +1725,9 @@ private:
                         d->done = true;
                     }
                     else
+                    {
                         anyRemaining = true;
+                    }
                 }
             }
 
@@ -1808,6 +1818,8 @@ private:
             numInputChans  = useInputs  ? device->getActiveInputChannels().countNumberOfSetBits()  : 0;
             numOutputChans = useOutputs ? device->getActiveOutputChannels().countNumberOfSetBits() : 0;
 
+            isWaitingForInput = numInputChans > 0;
+
             inputIndex = channelIndex;
             outputIndex = channelIndex + numInputChans;
 
@@ -1892,6 +1904,8 @@ private:
         {
             if (numInputChannels > 0)
             {
+                isWaitingForInput = false;
+
                 int start1, size1, start2, size2;
                 inputFifo.prepareToWrite (numSamples, start1, size1, start2, size2);
 
@@ -1973,6 +1987,7 @@ private:
         std::unique_ptr<CoreAudioIODevice> device;
         int inputIndex = 0, numInputChans = 0, outputIndex = 0, numOutputChans = 0;
         bool useInputs = false, useOutputs = false;
+        std::atomic<bool> isWaitingForInput { false };
         AbstractFifo inputFifo { 32 }, outputFifo { 32 };
         bool done = false;
 
@@ -2233,12 +2248,6 @@ private:
 };
 
 };
-
-//==============================================================================
-AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_CoreAudio()
-{
-    return new CoreAudioClasses::CoreAudioIODeviceType();
-}
 
 #undef JUCE_COREAUDIOLOG
 

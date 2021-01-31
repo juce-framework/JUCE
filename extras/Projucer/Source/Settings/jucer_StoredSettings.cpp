@@ -299,14 +299,6 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
         fileToCheckFor = "platform-tools/adb";
        #endif
     }
-    else if (key == Ids::androidNDKPath)
-    {
-       #if JUCE_WINDOWS
-        fileToCheckFor = "ndk-depends.cmd";
-       #else
-        fileToCheckFor = "ndk-depends";
-       #endif
-    }
     else if (key == Ids::defaultJuceModulePath)
     {
         fileToCheckFor = "juce_core";
@@ -410,10 +402,6 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 
         jassertfalse;
         return {};
-    }
-    else if (key == Ids::androidNDKPath)
-    {
-        return getFallbackPathForOS (Ids::androidSDKPath, os) + File::getSeparatorChar() + "ndk-bundle";
     }
     else if (key == Ids::clionExePath)
     {

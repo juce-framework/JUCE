@@ -438,7 +438,7 @@ private:
             auto& displays = Desktop::getInstance().getDisplays();
             auto* peer = owner.getPeer();
             const double scale = (peer != nullptr ? peer->getPlatformScaleFactor()
-                                                  : displays.getMainDisplay().scale);
+                                                  : displays.getPrimaryDisplay()->scale);
 
             Point<int> topLeftInPeer
                 = (peer != nullptr ? peer->getComponent().getLocalPoint (&owner, Point<int> (0, 0))

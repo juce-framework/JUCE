@@ -141,7 +141,7 @@ ArgumentList::ArgumentList (String exeName, StringArray args)
     args.removeEmptyStrings();
 
     for (auto& a : args)
-        arguments.add ({ a });
+        arguments.add ({ a.unquoted() });
 }
 
 ArgumentList::ArgumentList (int argc, char* argv[])
@@ -168,7 +168,7 @@ int ArgumentList::indexOfOption (StringRef option) const
     jassert (option == String (option).trim()); // passing non-trimmed strings will always fail to find a match!
 
     for (int i = 0; i < arguments.size(); ++i)
-        if (arguments.getReference(i) == option)
+        if (arguments.getReference (i) == option)
             return i;
 
     return -1;

@@ -31,27 +31,22 @@
 AppearanceSettings::AppearanceSettings (bool updateAppWhenChanged)
     : settings ("COLOUR_SCHEME")
 {
-    if (! ProjucerApplication::getApp().isRunningCommandLine)
+    CodeDocument doc;
+    CPlusPlusCodeTokeniser tokeniser;
+    CodeEditorComponent editor (doc, &tokeniser);
+
+    CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
+
+    for (int i = cs.types.size(); --i >= 0;)
     {
-        ProjucerLookAndFeel lf;
-
-        CodeDocument doc;
-        CPlusPlusCodeTokeniser tokeniser;
-        CodeEditorComponent editor (doc, &tokeniser);
-
-        CodeEditorComponent::ColourScheme cs (editor.getColourScheme());
-
-        for (int i = cs.types.size(); --i >= 0;)
-        {
-            auto& t = cs.types.getReference(i);
-            getColourValue (t.name) = t.colour.toString();
-        }
-
-        getCodeFontValue() = getDefaultCodeFont().toString();
-
-        if (updateAppWhenChanged)
-            settings.addListener (this);
+        auto& t = cs.types.getReference(i);
+        getColourValue (t.name) = t.colour.toString();
     }
+
+    getCodeFontValue() = getDefaultCodeFont().toString();
+
+    if (updateAppWhenChanged)
+        settings.addListener (this);
 }
 
 File AppearanceSettings::getSchemesFolder()

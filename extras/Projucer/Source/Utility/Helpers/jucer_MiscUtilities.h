@@ -54,6 +54,8 @@ void setValueIfVoid (Value value, const var& defaultValue);
 
 bool fileNeedsCppSyntaxHighlighting (const File& file);
 
+void writeAutoGenWarningComment (OutputStream& outStream);
+
 StringArray getJUCEModules() noexcept;
 bool isJUCEModule (const String& moduleID) noexcept;
 

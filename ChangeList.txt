@@ -3,6 +3,45 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.7
+  - Fixed a macOS drawing issue
+  - Updated the DemoRunner bundle ID
+
+Version 6.0.6
+  - Moved to the new CoreMIDI API on supported platforms
+  - Added support for the "New Build System" in Xcode
+  - Made the audio format readers more robust
+  - Improved the HiResTimer implementation
+  - Fixed a VST3 program parameter issue
+  - Updated to Oboe 1.5 on Android
+
+Version 6.0.5
+  - Added more support for styling PopupMenus
+  - Fixed some race conditions in the IPC and name named pipe classes
+  - Implemented multiple FileChooser improvements
+  - Added compatibility with the latest Android SDK
+  - Prevented CoreAudio glitches before accepting audio access permissions
+  - Made reading MIDI and audio files more robust
+
+Version 6.0.4
+  - Improved the Projucer update mechanism
+  - Fixed an AUv3 parameter normalisation issue
+  - Fixed WASAPI exclusive mode sample rate selection bug
+  - Fixed a Linux build issue when omitting ALSA
+
+Version 6.0.3
+  - Fixed version numbers in project files
+
+Version 6.0.2
+  - Added support for macOS 11 and arm64
+  - Added Windows IAudioClient3 support for low latency audio drivers
+  - Added Windows and macOS precompiled header support in the Projucer
+  - Improved accessibility support in the macOS menu bar
+  - Fixed VST3 hosting for plug-ins requiring persistent DLL loads
+  - Updated macOS camera capture API
+  - Improved resave diffs in Projucer project files
+  - Fixed some Linux JACK issues
+
 Version 6.0.1
   - Fixed a bug in the Projucer GUI editor causing existing code to be overwritten
   - Updated Android Oboe to 1.4.2

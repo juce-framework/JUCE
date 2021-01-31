@@ -39,13 +39,6 @@ inline void zerostruct (Type& structure) noexcept                   { memset ((v
 template <typename Type>
 inline void deleteAndZero (Type& pointer)                           { delete pointer; pointer = nullptr; }
 
-/** A handy function which adds a number of bytes to any type of pointer and returns the result.
-    This can be useful to avoid casting pointers to a char* and back when you want to move them by
-    a specific number of bytes,
-*/
-template <typename Type, typename IntegerType>
-inline Type* addBytesToPointer (Type* basePointer, IntegerType bytes) noexcept  { return reinterpret_cast<Type*> (const_cast<char*> (reinterpret_cast<const char*> (basePointer)) + bytes); }
-
 /** A handy function to round up a pointer to the nearest multiple of a given number of bytes.
     alignmentBytes must be a power of two. */
 template <typename Type, typename IntegerType>
@@ -81,6 +74,53 @@ template <typename Type>
 inline void writeUnaligned (void* dstPtr, Type value) noexcept
 {
     memcpy (dstPtr, &value, sizeof (Type));
+}
+
+//==============================================================================
+/** Casts a pointer to another type via `void*`, which suppresses the cast-align
+    warning which sometimes arises when casting pointers to types with different
+    alignment.
+    You should only use this when you know for a fact that the input pointer points
+    to a region that has suitable alignment for `Type`, e.g. regions returned from
+    malloc/calloc that should be suitable for any non-over-aligned type.
+*/
+template <typename Type, typename std::enable_if<std::is_pointer<Type>::value, int>::type = 0>
+inline Type unalignedPointerCast (void* ptr) noexcept
+{
+    return reinterpret_cast<Type> (ptr);
+}
+
+/** Casts a pointer to another type via `void*`, which suppresses the cast-align
+    warning which sometimes arises when casting pointers to types with different
+    alignment.
+    You should only use this when you know for a fact that the input pointer points
+    to a region that has suitable alignment for `Type`, e.g. regions returned from
+    malloc/calloc that should be suitable for any non-over-aligned type.
+*/
+template <typename Type, typename std::enable_if<std::is_pointer<Type>::value, int>::type = 0>
+inline Type unalignedPointerCast (const void* ptr) noexcept
+{
+    return reinterpret_cast<Type> (ptr);
+}
+
+/** A handy function which adds a number of bytes to any type of pointer and returns the result.
+    This can be useful to avoid casting pointers to a char* and back when you want to move them by
+    a specific number of bytes,
+*/
+template <typename Type, typename IntegerType>
+inline Type* addBytesToPointer (Type* basePointer, IntegerType bytes) noexcept
+{
+    return unalignedPointerCast<Type*> (reinterpret_cast<char*> (basePointer) + bytes);
+}
+
+/** A handy function which adds a number of bytes to any type of pointer and returns the result.
+    This can be useful to avoid casting pointers to a char* and back when you want to move them by
+    a specific number of bytes,
+*/
+template <typename Type, typename IntegerType>
+inline const Type* addBytesToPointer (const Type* basePointer, IntegerType bytes) noexcept
+{
+    return unalignedPointerCast<const Type*> (reinterpret_cast<const char*> (basePointer) + bytes);
 }
 
 //==============================================================================
@@ -142,5 +182,19 @@ inline void writeUnaligned (void* dstPtr, Type value) noexcept
 #ifndef juce_UseDebuggingNewOperator
  #define juce_UseDebuggingNewOperator
 #endif
+
+ /** Converts an owning raw pointer into a unique_ptr, deriving the
+     type of the unique_ptr automatically.
+
+     This should only be used with pointers to single objects.
+     Do NOT pass a pointer to an array to this function, as the
+     destructor of the unique_ptr will incorrectly call `delete`
+     instead of `delete[]` on the pointer.
+ */
+ template <typename T>
+ std::unique_ptr<T> rawToUniquePtr (T* ptr)
+ {
+     return std::unique_ptr<T> (ptr);
+ }
 
 } // namespace juce
