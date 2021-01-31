@@ -59,10 +59,9 @@ class JUCE_API  PixelARGB
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelARGB() = default;
-    ~PixelARGB() = default;
+    PixelARGB() noexcept = default;
 
-    PixelARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
+    PixelARGB (uint8 a, uint8 r, uint8 g, uint8 b) noexcept
     {
         components.b = b;
         components.g = g;
@@ -72,7 +71,7 @@ public:
 
     //==============================================================================
     /** Returns a uint32 which represents the pixel in a platform dependent format. */
-    forcedinline uint32 getNativeARGB() const noexcept { return internal; }
+    forcedinline uint32 getNativeARGB() const noexcept   { return internal; }
 
     /** Returns a uint32 which will be in argb order as if constructed with the following mask operation
         ((alpha << 24) | (red << 16) | (green << 8) | blue). */
@@ -123,7 +122,7 @@ public:
 
     //==============================================================================
     /** Sets the pixel's colour from individual components. */
-    void setARGB (const uint8 a, const uint8 r, const uint8 g, const uint8 b) noexcept
+    void setARGB (uint8 a, uint8 r, uint8 g, uint8 b) noexcept
     {
         components.b = b;
         components.g = g;
@@ -140,10 +139,10 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        uint32 rb = src.getEvenBytes();
-        uint32 ag = src.getOddBytes();
+        auto rb = src.getEvenBytes();
+        auto ag = src.getOddBytes();
 
-        const uint32 alpha = 0x100 - (ag >> 16);
+        const auto alpha = 0x100 - (ag >> 16);
 
         rb += maskPixelComponents (getEvenBytes() * alpha);
         ag += maskPixelComponents (getOddBytes() * alpha);
@@ -156,7 +155,7 @@ public:
         This takes into account the opacity of the pixel being overlaid, and blends
         it accordingly.
     */
-    forcedinline void blend (const PixelRGB src) noexcept;
+    forcedinline void blend (PixelRGB src) noexcept;
 
 
     /** Blends another pixel onto this one, applying an extra multiplier to its opacity.
@@ -167,10 +166,10 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src, uint32 extraAlpha) noexcept
     {
-        uint32 rb = maskPixelComponents (extraAlpha * src.getEvenBytes());
-        uint32 ag = maskPixelComponents (extraAlpha * src.getOddBytes());
+        auto rb = maskPixelComponents (extraAlpha * src.getEvenBytes());
+        auto ag = maskPixelComponents (extraAlpha * src.getOddBytes());
 
-        const uint32 alpha = 0x100 - (ag >> 16);
+        const auto alpha = 0x100 - (ag >> 16);
 
         rb += maskPixelComponents (getEvenBytes() * alpha);
         ag += maskPixelComponents (getOddBytes() * alpha);
@@ -182,13 +181,13 @@ public:
         between the two, as specified by the amount.
     */
     template <class Pixel>
-    forcedinline void tween (const Pixel& src, const uint32 amount) noexcept
+    forcedinline void tween (const Pixel& src, uint32 amount) noexcept
     {
-        uint32 dEvenBytes = getEvenBytes();
+        auto dEvenBytes = getEvenBytes();
         dEvenBytes += (((src.getEvenBytes() - dEvenBytes) * amount) >> 8);
         dEvenBytes &= 0x00ff00ff;
 
-        uint32 dOddBytes = getOddBytes();
+        auto dOddBytes = getOddBytes();
         dOddBytes += (((src.getOddBytes() - dOddBytes) * amount) >> 8);
         dOddBytes &= 0x00ff00ff;
         dOddBytes <<= 8;
@@ -199,7 +198,7 @@ public:
 
     //==============================================================================
     /** Replaces the colour's alpha value with another one. */
-    forcedinline void setAlpha (const uint8 newAlpha) noexcept
+    forcedinline void setAlpha (uint8 newAlpha) noexcept
     {
         components.a = newAlpha;
     }
@@ -215,18 +214,23 @@ public:
                 | (((((uint32) multiplier) * getEvenBytes()) >> 8) & 0x00ff00ff);
     }
 
-    forcedinline void multiplyAlpha (const float multiplier) noexcept
+    forcedinline void multiplyAlpha (float multiplier) noexcept
     {
         multiplyAlpha ((int) (multiplier * 255.0f));
     }
 
 
-    inline PixelARGB getUnpremultiplied() const noexcept { PixelARGB p (internal); p.unpremultiply(); return p; }
+    inline PixelARGB getUnpremultiplied() const noexcept
+    {
+        PixelARGB p (internal);
+        p.unpremultiply();
+        return p;
+    }
 
     /** Premultiplies the pixel's RGB values by its alpha. */
     forcedinline void premultiply() noexcept
     {
-        const uint32 alpha = components.a;
+        const auto alpha = components.a;
 
         if (alpha < 0xff)
         {
@@ -248,7 +252,7 @@ public:
     /** Unpremultiplies the pixel's RGB values. */
     forcedinline void unpremultiply() noexcept
     {
-        const uint32 alpha = components.a;
+        const auto alpha = components.a;
 
         if (alpha < 0xff)
         {
@@ -271,7 +275,7 @@ public:
     {
         if (components.a < 0xff && components.a > 0)
         {
-            const int newUnpremultipliedLevel = (0xff * ((int) components.r + (int) components.g + (int) components.b) / (3 * components.a));
+            const auto newUnpremultipliedLevel = (0xff * ((int) components.r + (int) components.g + (int) components.b) / (3 * components.a));
 
             components.r = components.g = components.b
                 = (uint8) ((newUnpremultipliedLevel * components.a + 0x7f) >> 8);
@@ -301,7 +305,8 @@ public:
 
 private:
     //==============================================================================
-    PixelARGB (uint32 internalValue) noexcept : internal (internalValue)
+    PixelARGB (uint32 internalValue) noexcept
+        : internal (internalValue)
     {
     }
 
@@ -349,8 +354,7 @@ class JUCE_API  PixelRGB
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelRGB() = default;
-    ~PixelRGB() = default;
+    PixelRGB() noexcept = default;
 
     //==============================================================================
     /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible
@@ -407,7 +411,7 @@ public:
         return value of getOddBytes of the PixelARGB class.
 
         @see PixelARGB::getOddBytes */
-    forcedinline uint32 getOddBytes() const noexcept       { return (uint32)0xff0000 | g; }
+    forcedinline uint32 getOddBytes() const noexcept       { return (uint32) 0xff0000 | g; }
 
     //==============================================================================
     forcedinline uint8 getAlpha() const noexcept    { return 0xff; }
@@ -431,7 +435,7 @@ public:
     }
 
     /** Sets the pixel's colour from individual components. */
-    void setARGB (const uint8, const uint8 red, const uint8 green, const uint8 blue) noexcept
+    void setARGB (uint8, uint8 red, uint8 green, uint8 blue) noexcept
     {
         r = red;
         g = green;
@@ -447,12 +451,12 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        const uint32 alpha = (uint32) (0x100 - src.getAlpha());
+        const auto alpha = (uint32) (0x100 - src.getAlpha());
 
         // getEvenBytes returns 0x00rr00bb on non-android
-        uint32 rb = clampPixelComponents (src.getEvenBytes() + maskPixelComponents (getEvenBytes() * alpha));
+        const auto rb = clampPixelComponents (src.getEvenBytes() + maskPixelComponents (getEvenBytes() * alpha));
         // getOddBytes returns 0x00aa00gg on non-android
-        uint32 ag = clampPixelComponents (src.getOddBytes() + ((g * alpha) >> 8));
+        const auto ag = clampPixelComponents (src.getOddBytes() + ((g * alpha) >> 8));
 
         g = (uint8) (ag & 0xff);
 
@@ -465,7 +469,7 @@ public:
        #endif
     }
 
-    forcedinline void blend (const PixelRGB src) noexcept
+    forcedinline void blend (PixelRGB src) noexcept
     {
         set (src);
     }
@@ -478,10 +482,10 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src, uint32 extraAlpha) noexcept
     {
-        uint32 ag = maskPixelComponents (extraAlpha * src.getOddBytes());
-        uint32 rb = maskPixelComponents (extraAlpha * src.getEvenBytes());
+        auto ag = maskPixelComponents (extraAlpha * src.getOddBytes());
+        auto rb = maskPixelComponents (extraAlpha * src.getEvenBytes());
 
-        const uint32 alpha = 0x100 - (ag >> 16);
+        const auto alpha = 0x100 - (ag >> 16);
 
         ag = clampPixelComponents (ag + (g * alpha >> 8));
         rb = clampPixelComponents (rb + maskPixelComponents (getEvenBytes() * alpha));
@@ -501,12 +505,12 @@ public:
         between the two, as specified by the amount.
     */
     template <class Pixel>
-    forcedinline void tween (const Pixel& src, const uint32 amount) noexcept
+    forcedinline void tween (const Pixel& src, uint32 amount) noexcept
     {
-        uint32 dEvenBytes = getEvenBytes();
+        auto dEvenBytes = getEvenBytes();
         dEvenBytes += (((src.getEvenBytes() - dEvenBytes) * amount) >> 8);
 
-        uint32 dOddBytes = getOddBytes();
+        auto dOddBytes = getOddBytes();
         dOddBytes += (((src.getOddBytes() - dOddBytes) * amount) >> 8);
 
         g = (uint8) (dOddBytes & 0xff);  // dOddBytes =  0x00aa00gg
@@ -522,7 +526,7 @@ public:
 
     //==============================================================================
     /** This method is included for compatibility with the PixelARGB class. */
-    forcedinline void setAlpha (const uint8) noexcept {}
+    forcedinline void setAlpha (uint8) noexcept {}
 
     /** Multiplies the colour's alpha value with another one. */
     forcedinline void multiplyAlpha (int) noexcept {}
@@ -551,7 +555,7 @@ public:
 
 private:
     //==============================================================================
-    PixelRGB (const uint32 internal) noexcept
+    PixelRGB (uint32 internal) noexcept
     {
       #if JUCE_ANDROID
         b = (uint8) (internal >> 16);
@@ -577,7 +581,7 @@ private:
 #endif
 ;
 
-forcedinline void PixelARGB::blend (const PixelRGB src) noexcept
+forcedinline void PixelARGB::blend (PixelRGB src) noexcept
 {
     set (src);
 }
@@ -596,8 +600,7 @@ class JUCE_API  PixelAlpha
 {
 public:
     /** Creates a pixel without defining its colour. */
-    PixelAlpha() = default;
-    ~PixelAlpha() = default;
+    PixelAlpha() noexcept = default;
 
     //==============================================================================
     /** Returns a uint32 which represents the pixel in a platform dependent format which is compatible
@@ -646,7 +649,7 @@ public:
     }
 
     /** Sets the pixel's colour from individual components. */
-    forcedinline void setARGB (const uint8 a_, const uint8 /*r*/, const uint8 /*g*/, const uint8 /*b*/) noexcept
+    forcedinline void setARGB (uint8 a_, uint8, uint8, uint8) noexcept
     {
         a = a_;
     }
@@ -660,7 +663,7 @@ public:
     template <class Pixel>
     forcedinline void blend (const Pixel& src) noexcept
     {
-        const int srcA = src.getAlpha();
+        const auto srcA = src.getAlpha();
         a = (uint8) ((a * (0x100 - srcA) >> 8) + srcA);
     }
 
@@ -673,7 +676,7 @@ public:
     forcedinline void blend (const Pixel& src, uint32 extraAlpha) noexcept
     {
         ++extraAlpha;
-        const int srcAlpha = (int) ((extraAlpha * src.getAlpha()) >> 8);
+        const auto srcAlpha = (int) ((extraAlpha * src.getAlpha()) >> 8);
         a = (uint8) ((a * (0x100 - srcAlpha) >> 8) + srcAlpha);
     }
 
@@ -681,14 +684,14 @@ public:
         between the two, as specified by the amount.
     */
     template <class Pixel>
-    forcedinline void tween (const Pixel& src, const uint32 amount) noexcept
+    forcedinline void tween (const Pixel& src, uint32 amount) noexcept
     {
         a += ((src.getAlpha() - a) * amount) >> 8;
     }
 
     //==============================================================================
     /** Replaces the colour's alpha value with another one. */
-    forcedinline void setAlpha (const uint8 newAlpha) noexcept
+    forcedinline void setAlpha (uint8 newAlpha) noexcept
     {
         a = newAlpha;
     }
@@ -700,7 +703,7 @@ public:
         a = (uint8) ((a * multiplier) >> 8);
     }
 
-    forcedinline void multiplyAlpha (const float multiplier) noexcept
+    forcedinline void multiplyAlpha (float multiplier) noexcept
     {
         a = (uint8) (a * multiplier);
     }
@@ -719,10 +722,8 @@ public:
 
 private:
     //==============================================================================
-    PixelAlpha (const uint32 internal) noexcept
-    {
-        a = (uint8) (internal >> 24);
-    }
+    PixelAlpha (uint32 internal) noexcept
+        : a ((uint8) (internal >> 24)) { }
 
     //==============================================================================
     uint8 a;

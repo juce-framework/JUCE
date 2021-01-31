@@ -63,7 +63,7 @@ struct ProcessorDuplicator
 
     void reset() noexcept      { for (auto* p : processors) p->reset(); }
 
-    template<typename ProcessContext>
+    template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
         jassert ((int) context.getInputBlock().getNumChannels()  <= processors.size());

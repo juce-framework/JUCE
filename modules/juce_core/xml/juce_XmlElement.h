@@ -24,61 +24,6 @@ namespace juce
 {
 
 //==============================================================================
-/** A handy macro to make it easy to iterate all the child elements in an XmlElement.
-
-    The parentXmlElement should be a reference to the parent XML, and the childElementVariableName
-    will be the name of a pointer to each child element.
-
-    E.g. @code
-    XmlElement* myParentXml = createSomeKindOfXmlDocument();
-
-    forEachXmlChildElement (*myParentXml, child)
-    {
-        if (child->hasTagName ("FOO"))
-            doSomethingWithXmlElement (child);
-    }
-
-    @endcode
-
-    @see forEachXmlChildElementWithTagName
-*/
-#define forEachXmlChildElement(parentXmlElement, childElementVariableName) \
-\
-    for (auto* childElementVariableName = (parentXmlElement).getFirstChildElement(); \
-         childElementVariableName != nullptr; \
-         childElementVariableName = childElementVariableName->getNextElement())
-
-/** A macro that makes it easy to iterate all the child elements of an XmlElement
-    which have a specified tag.
-
-    This does the same job as the forEachXmlChildElement macro, but only for those
-    elements that have a particular tag name.
-
-    The parentXmlElement should be a reference to the parent XML, and the childElementVariableName
-    will be the name of a pointer to each child element. The requiredTagName is the
-    tag name to match.
-
-    E.g. @code
-    XmlElement* myParentXml = createSomeKindOfXmlDocument();
-
-    forEachXmlChildElementWithTagName (*myParentXml, child, "MYTAG")
-    {
-        // the child object is now guaranteed to be a <MYTAG> element..
-        doSomethingWithMYTAGElement (child);
-    }
-
-    @endcode
-
-    @see forEachXmlChildElement
-*/
-#define forEachXmlChildElementWithTagName(parentXmlElement, childElementVariableName, requiredTagName) \
-\
-    for (auto* childElementVariableName = (parentXmlElement).getChildByName (requiredTagName); \
-         childElementVariableName != nullptr; \
-         childElementVariableName = childElementVariableName->getNextElementWithTagName (requiredTagName))
-
-
-//==============================================================================
 /** Used to build a tree of elements representing an XML document.
 
     An XML document can be parsed into a tree of XmlElements, each of which
@@ -695,6 +640,102 @@ public:
     /** Checks if a given string is a valid XML name */
     static bool isValidXmlName (StringRef possibleName) noexcept;
 
+private:
+    //==============================================================================
+    struct GetNextElement
+    {
+        XmlElement* getNext (const XmlElement& e) const { return e.getNextElement(); }
+    };
+
+    struct GetNextElementWithTagName
+    {
+        GetNextElementWithTagName() = default;
+        explicit GetNextElementWithTagName (String n) : name (std::move (n)) {}
+        XmlElement* getNext (const XmlElement& e) const { return e.getNextElementWithTagName (name); }
+
+        String name;
+    };
+
+    //==============================================================================
+    template <typename Traits>
+    class Iterator : private Traits
+    {
+    public:
+        using difference_type   = ptrdiff_t;
+        using value_type        = XmlElement*;
+        using pointer           = const value_type*;
+        using reference         = value_type;
+        using iterator_category = std::input_iterator_tag;
+
+        Iterator() = default;
+
+        template <typename... Args>
+        Iterator (XmlElement* e, Args&&... args)
+            : Traits (std::forward<Args> (args)...), element (e) {}
+
+        Iterator begin()    const { return *this; }
+        Iterator end()      const { return Iterator{}; }
+
+        bool operator== (const Iterator& other) const { return element == other.element; }
+        bool operator!= (const Iterator& other) const { return ! operator== (other); }
+
+        reference operator*()  const { return  element; }
+        pointer   operator->() const { return &element; }
+
+        Iterator& operator++()
+        {
+            element = Traits::getNext (*element);
+            return *this;
+        }
+
+        Iterator operator++(int)
+        {
+            auto copy = *this;
+            ++(*this);
+            return copy;
+        }
+
+    private:
+        value_type element = nullptr;
+    };
+
+public:
+    //==============================================================================
+    /** Allows iterating the children of an XmlElement using range-for syntax.
+
+        @code
+        void doSomethingWithXmlChildren (const XmlElement& myParentXml)
+        {
+            for (auto* element : myParentXml.getChildIterator())
+                doSomethingWithXmlElement (element);
+        }
+        @endcode
+    */
+    Iterator<GetNextElement> getChildIterator() const
+    {
+        return Iterator<GetNextElement> { getFirstChildElement() };
+    }
+
+    /** Allows iterating children of an XmlElement with a specific tag using range-for syntax.
+
+        @code
+        void doSomethingWithXmlChildren (const XmlElement& myParentXml)
+        {
+            for (auto* element : myParentXml.getChildWithTagNameIterator ("MYTAG"))
+                doSomethingWithXmlElement (element);
+        }
+        @endcode
+    */
+    Iterator<GetNextElementWithTagName> getChildWithTagNameIterator (StringRef name) const
+    {
+        return Iterator<GetNextElementWithTagName> { getChildByName (name), name };
+    }
+
+    /** This allows us to trigger a warning inside deprecated macros. */
+   #ifndef DOXYGEN
+    JUCE_DEPRECATED_WITH_BODY (void macroBasedForLoop() const noexcept, {})
+   #endif
+
     //==============================================================================
     /** This has been deprecated in favour of the toString() method. */
     JUCE_DEPRECATED (String createDocument (StringRef dtdToUse,
@@ -717,8 +758,8 @@ public:
                                        StringRef encodingType = "UTF-8",
                                        int lineWrapLength = 60) const);
 
-    //==============================================================================
 private:
+    //==============================================================================
     struct XmlAttributeNode
     {
         XmlAttributeNode (const XmlAttributeNode&) noexcept;
@@ -757,5 +798,57 @@ private:
 
     JUCE_LEAK_DETECTOR (XmlElement)
 };
+
+//==============================================================================
+/** DEPRECATED: A handy macro to make it easy to iterate all the child elements in an XmlElement.
+
+    New code should avoid this macro, and instead use getChildIterator directly.
+
+    The parentXmlElement should be a reference to the parent XML, and the childElementVariableName
+    will be the name of a pointer to each child element.
+
+    E.g. @code
+    XmlElement* myParentXml = createSomeKindOfXmlDocument();
+
+    forEachXmlChildElement (*myParentXml, child)
+    {
+        if (child->hasTagName ("FOO"))
+            doSomethingWithXmlElement (child);
+    }
+
+    @endcode
+
+    @see forEachXmlChildElementWithTagName
+*/
+#define forEachXmlChildElement(parentXmlElement, childElementVariableName) \
+    for (auto* (childElementVariableName) : ((parentXmlElement).macroBasedForLoop(), (parentXmlElement).getChildIterator()))
+
+/** DEPRECATED: A macro that makes it easy to iterate all the child elements of an XmlElement
+    which have a specified tag.
+
+    New code should avoid this macro, and instead use getChildWithTagNameIterator directly.
+
+    This does the same job as the forEachXmlChildElement macro, but only for those
+    elements that have a particular tag name.
+
+    The parentXmlElement should be a reference to the parent XML, and the childElementVariableName
+    will be the name of a pointer to each child element. The requiredTagName is the
+    tag name to match.
+
+    E.g. @code
+    XmlElement* myParentXml = createSomeKindOfXmlDocument();
+
+    forEachXmlChildElementWithTagName (*myParentXml, child, "MYTAG")
+    {
+        // the child object is now guaranteed to be a <MYTAG> element..
+        doSomethingWithMYTAGElement (child);
+    }
+
+    @endcode
+
+    @see forEachXmlChildElement
+*/
+#define forEachXmlChildElementWithTagName(parentXmlElement, childElementVariableName, requiredTagName) \
+    for (auto* (childElementVariableName) : ((parentXmlElement).macroBasedForLoop(), (parentXmlElement).getChildWithTagNameIterator ((requiredTagName))))
 
 } // namespace juce

@@ -127,14 +127,14 @@ private:
         clearSingletonInstance();
     }
 
-    template<typename FuncPtr>
+    template <typename FuncPtr>
     struct SymbolBinding
     {
         FuncPtr& func;
         const char* name;
     };
 
-    template<typename FuncPtr>
+    template <typename FuncPtr>
     SymbolBinding<FuncPtr> makeSymbolBinding (FuncPtr& func, const char* name)
     {
         return { func, name };
@@ -152,7 +152,7 @@ private:
         return false;
     }
 
-    template<typename FuncPtr, typename... Args>
+    template <typename FuncPtr, typename... Args>
     bool loadSymbols (DynamicLibrary& lib, SymbolBinding<FuncPtr> binding, Args... args)
     {
         return loadSymbols (lib, binding) && loadSymbols (lib, args...);

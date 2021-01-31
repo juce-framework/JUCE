@@ -95,7 +95,7 @@ public:
                 // create and add sub-items to this node of the tree, corresponding to
                 // each sub-element in the XML..
 
-                forEachXmlChildElement (xml, child)
+                for (auto* child : xml.getChildIterator())
                 {
                     jassert (child != nullptr);
                     addSubItem (new XmlTreeItem (*child));

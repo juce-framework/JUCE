@@ -79,7 +79,6 @@ MidiMessage::VariableLengthValue MidiMessage::readVariableLengthValue (const uin
     // bytes of input to construct a full value, or no terminating byte was
     // found. This implementation only supports variable-length values of up
     // to four bytes.
-    jassertfalse;
     return {};
 }
 
@@ -1225,6 +1224,7 @@ struct MidiMessageTest  : public UnitTest
                 const auto result = MidiMessage::readVariableLengthValue (copy.data(),
                                                                           (int) copy.size());
 
+                expect (result.isValid());
                 expectEquals (result.value, outputs[index]);
                 expectEquals (result.bytesUsed, (int) inputs[index].size());
 
@@ -1252,6 +1252,7 @@ struct MidiMessageTest  : public UnitTest
                 const auto result = MidiMessage::readVariableLengthValue (input.data(),
                                                                           (int) input.size());
 
+                expect (! result.isValid());
                 expectEquals (result.value, 0);
                 expectEquals (result.bytesUsed, 0);
             }

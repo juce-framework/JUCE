@@ -410,7 +410,7 @@ struct MenuWindow  : public Component
             }
             else
             {
-                hide (nullptr, false);
+                hide (nullptr, true);
             }
         }
     }
@@ -621,26 +621,22 @@ struct MenuWindow  : public Component
 
     bool doesAnyJuceCompHaveFocus()
     {
-        bool anyFocused = Process::isForegroundProcess();
+        if (! Process::isForegroundProcess())
+            return false;
 
-        if (anyFocused && Component::getCurrentlyFocusedComponent() == nullptr)
+        if (Component::getCurrentlyFocusedComponent() != nullptr)
+            return true;
+
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
         {
-            // because no component at all may have focus, our test here will
-            // only be triggered when something has focus and then loses it.
-            anyFocused = ! hasAnyJuceCompHadFocus;
-
-            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+            if (ComponentPeer::getPeer (i)->isFocused())
             {
-                if (ComponentPeer::getPeer (i)->isFocused())
-                {
-                    anyFocused = true;
-                    hasAnyJuceCompHadFocus = true;
-                    break;
-                }
+                hasAnyJuceCompHadFocus = true;
+                return true;
             }
         }
 
-        return anyFocused;
+        return ! hasAnyJuceCompHadFocus;
     }
 
     //==============================================================================
@@ -1849,12 +1845,7 @@ Component* PopupMenu::createWindow (const Options& options,
 // This invokes any command manager commands and deletes the menu window when it is dismissed
 struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
 {
-    PopupMenuCompletionCallback()
-        : prevFocused (Component::getCurrentlyFocusedComponent()),
-          prevTopLevel (prevFocused != nullptr ? prevFocused->getTopLevelComponent() : nullptr)
-    {
-        PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
-    }
+    PopupMenuCompletionCallback() = default;
 
     void modalStateFinished (int result) override
     {
@@ -1869,19 +1860,41 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         // (this would be the place to fade out the component, if that's what's required)
         component.reset();
 
-        if (! PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
-        {
-            if (prevTopLevel != nullptr)
-                prevTopLevel->toFront (true);
+        if (PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
+            return;
 
-            if (prevFocused != nullptr && prevFocused->isShowing())
-                prevFocused->grabKeyboardFocus();
+        auto* focusComponent = getComponentToPassFocusTo();
+
+        const auto focusedIsNotMinimised = [focusComponent]
+        {
+            if (focusComponent != nullptr)
+                if (auto* peer = focusComponent->getPeer())
+                    return ! peer->isMinimised();
+
+            return false;
+        }();
+
+        if (focusedIsNotMinimised)
+        {
+            if (auto* topLevel = focusComponent->getTopLevelComponent())
+                topLevel->toFront (true);
+
+            if (focusComponent->isShowing() && ! focusComponent->hasKeyboardFocus (true))
+                focusComponent->grabKeyboardFocus();
         }
+    }
+
+    Component* getComponentToPassFocusTo() const
+    {
+        if (auto* current = Component::getCurrentlyFocusedComponent())
+            return current;
+
+        return prevFocused.get();
     }
 
     ApplicationCommandManager* managerOfChosenCommand = nullptr;
     std::unique_ptr<Component> component;
-    WeakReference<Component> prevFocused, prevTopLevel;
+    WeakReference<Component> prevFocused { Component::getCurrentlyFocusedComponent() };
 
     JUCE_DECLARE_NON_COPYABLE (PopupMenuCompletionCallback)
 };
@@ -1896,6 +1909,8 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
     if (auto* window = createWindow (options, &(callback->managerOfChosenCommand)))
     {
         callback->component.reset (window);
+
+        PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
 
         window->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         window->enterModalState (false, userCallbackDeleter.release());

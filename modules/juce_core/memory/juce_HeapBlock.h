@@ -29,7 +29,7 @@ namespace HeapBlockHelper
     template <bool shouldThrow>
     struct ThrowOnFail          { static void checkPointer (void*) {} };
 
-    template<>
+    template <>
     struct ThrowOnFail<true>    { static void checkPointer (void* data) { if (data == nullptr) throw std::bad_alloc(); } };
 }
 #endif

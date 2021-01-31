@@ -355,24 +355,24 @@ static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
 
 //==============================================================================
 template <class ObjectType>
-class ComSmartPtr
+class VSTComSmartPtr
 {
 public:
-    ComSmartPtr() noexcept : source (nullptr) {}
-    ComSmartPtr (ObjectType* object, bool autoAddRef = true) noexcept  : source (object)    { if (source != nullptr && autoAddRef) source->addRef(); }
-    ComSmartPtr (const ComSmartPtr& other) noexcept : source (other.source)                 { if (source != nullptr) source->addRef(); }
-    ~ComSmartPtr()                                                                          { if (source != nullptr) source->release(); }
+    VSTComSmartPtr() noexcept : source (nullptr) {}
+    VSTComSmartPtr (ObjectType* object, bool autoAddRef = true) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
+    VSTComSmartPtr (const VSTComSmartPtr& other) noexcept : source (other.source)            { if (source != nullptr) source->addRef(); }
+    ~VSTComSmartPtr()                                                                        { if (source != nullptr) source->release(); }
 
     operator ObjectType*() const noexcept    { return source; }
     ObjectType* get() const noexcept         { return source; }
     ObjectType& operator*() const noexcept   { return *source; }
     ObjectType* operator->() const noexcept  { return source; }
 
-    ComSmartPtr& operator= (const ComSmartPtr& other)       { return operator= (other.source); }
+    VSTComSmartPtr& operator= (const VSTComSmartPtr& other)       { return operator= (other.source); }
 
-    ComSmartPtr& operator= (ObjectType* const newObjectToTakePossessionOf)
+    VSTComSmartPtr& operator= (ObjectType* const newObjectToTakePossessionOf)
     {
-        ComSmartPtr p (newObjectToTakePossessionOf);
+        VSTComSmartPtr p (newObjectToTakePossessionOf);
         std::swap (p.source, source);
         return *this;
     }

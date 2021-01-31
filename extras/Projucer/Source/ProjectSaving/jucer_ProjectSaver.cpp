@@ -535,7 +535,7 @@ void ProjectSaver::writeAppHeader (MemoryOutputStream& out, const OwnedArray<Lib
         << " /** If you've hit this error then the version of the Projucer that was used to generate this project is" << newLine
         << "     older than the version of the JUCE modules being included. To fix this error, re-save your project" << newLine
         << "     using the latest version of the Projucer or, if you aren't using the Projucer to manage your project," << newLine
-        << "     remove the JUCE_PROJUCER_VERSION define from the AppConfig.h file." << newLine
+        << "     remove the JUCE_PROJUCER_VERSION define." << newLine
         << " */" << newLine
         << " #error \"This project was last saved using an outdated version of the Projucer! Re-save this project with the latest version to fix this error.\"" << newLine
         << "#endif" << newLine

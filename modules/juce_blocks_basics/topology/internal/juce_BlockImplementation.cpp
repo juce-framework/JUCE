@@ -768,7 +768,7 @@ private:
         sendCommandMessage (BlocksProtocol::saveProgramAsDefault);
     }
 
-    template<int packetBytes, typename PacketBuilderFn>
+    template <int packetBytes, typename PacketBuilderFn>
     bool buildAndSendPacket (PacketBuilderFn buildFn)
     {
         auto index = getDeviceIndex();

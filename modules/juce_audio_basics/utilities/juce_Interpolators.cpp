@@ -37,7 +37,7 @@ public:
     }
 
 private:
-    template<typename InterpolatorType>
+    template <typename InterpolatorType>
     void runInterplatorTests (const String& interpolatorName)
     {
         auto createGaussian = [] (std::vector<float>& destination, float scale, float centreInSamples, float width)

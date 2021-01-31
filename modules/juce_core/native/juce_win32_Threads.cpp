@@ -51,7 +51,7 @@ void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRI
 //==============================================================================
 void JUCE_API juce_threadEntryPoint (void*);
 
-static unsigned int __stdcall threadEntryProc (void* userData)
+static unsigned int STDMETHODCALLTYPE threadEntryProc (void* userData)
 {
     if (juce_messageWindowHandle != nullptr)
         AttachThreadInput (GetWindowThreadProcessId (juce_messageWindowHandle, nullptr),
@@ -557,7 +557,7 @@ struct HighResolutionTimer::Pimpl
 private:
     unsigned int timerID;
 
-    static void __stdcall callbackFunction (UINT, UINT, DWORD_PTR userInfo, DWORD_PTR, DWORD_PTR)
+    static void STDMETHODCALLTYPE callbackFunction (UINT, UINT, DWORD_PTR userInfo, DWORD_PTR, DWORD_PTR)
     {
         if (Pimpl* const timer = reinterpret_cast<Pimpl*> (userInfo))
             if (timer->periodMs != 0)

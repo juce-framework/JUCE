@@ -1050,11 +1050,11 @@ namespace IconConverters
 }
 
 //==============================================================================
-JUCE_COMCLASS (ITipInvocation, "37c994e7-432b-4834-a2f7-dce1f13b834b")  : public IUnknown
+JUCE_IUNKNOWNCLASS (ITipInvocation, "37c994e7-432b-4834-a2f7-dce1f13b834b")
 {
     static CLSID getCLSID() noexcept   { return { 0x4ce576fa, 0x83dc, 0x4f88, { 0x95, 0x1c, 0x9d, 0x07, 0x82, 0xb4, 0xe3, 0x76 } }; }
 
-    virtual HRESULT STDMETHODCALLTYPE Toggle (HWND) = 0;
+    JUCE_COMCALL Toggle (HWND) = 0;
 };
 
 struct OnScreenKeyboard   : public DeletedAtShutdown,
@@ -1150,14 +1150,14 @@ typedef HSTRING_PRIVATE* HSTRING;
 
 struct IInspectable : public IUnknown
 {
-    virtual HRESULT STDMETHODCALLTYPE GetIids (ULONG* ,IID**) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetRuntimeClassName (HSTRING*) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetTrustLevel (void*) = 0;
+    JUCE_COMCALL GetIids (ULONG* ,IID**) = 0;
+    JUCE_COMCALL GetRuntimeClassName (HSTRING*) = 0;
+    JUCE_COMCALL GetTrustLevel (void*) = 0;
 };
 
 JUCE_COMCLASS (IUIViewSettingsInterop, "3694dbf9-8f68-44be-8ff5-195c98ede8a6")  : public IInspectable
 {
-    virtual HRESULT STDMETHODCALLTYPE GetForWindow (HWND, REFIID, void**) = 0;
+    JUCE_COMCALL GetForWindow (HWND, REFIID, void**) = 0;
 };
 
 JUCE_COMCLASS (IUIViewSettings, "c63657f6-8850-470d-88f8-455e16ea2c26")  : public IInspectable
@@ -1168,7 +1168,7 @@ JUCE_COMCLASS (IUIViewSettings, "c63657f6-8850-470d-88f8-455e16ea2c26")  : publi
         Touch = 1
     };
 
-    virtual HRESULT STDMETHODCALLTYPE GetUserInteractionMode (UserInteractionMode*) = 0;
+    JUCE_COMCALL GetUserInteractionMode (UserInteractionMode*) = 0;
 };
 
 
@@ -3841,15 +3841,13 @@ private:
 
     bool sendInputAttemptWhenModalMessage()
     {
-        if (component.isCurrentlyBlockedByAnotherModalComponent())
-        {
-            if (Component* const current = Component::getCurrentlyModalComponent())
-                current->inputAttemptWhenModal();
+        if (! component.isCurrentlyBlockedByAnotherModalComponent())
+            return false;
 
-            return true;
-        }
+        if (auto* current = Component::getCurrentlyModalComponent())
+            current->inputAttemptWhenModal();
 
-        return false;
+        return true;
     }
 
     //==============================================================================
@@ -4074,6 +4072,74 @@ private:
         stopTimer();
     }
 
+    static bool isAncestor (HWND outer, HWND inner)
+    {
+        if (outer == nullptr || inner == nullptr)
+            return false;
+
+        if (outer == inner)
+            return true;
+
+        return isAncestor (outer, GetAncestor (inner, GA_PARENT));
+    }
+
+    void windowShouldDismissModals (HWND originator)
+    {
+        if (isAncestor (originator, hwnd))
+            sendInputAttemptWhenModalMessage();
+    }
+
+    // Unfortunately SetWindowsHookEx only allows us to register a static function as a hook.
+    // To get around this, we keep a static list of listeners which are interested in
+    // top-level window events, and notify all of these listeners from the callback.
+    class TopLevelModalDismissBroadcaster
+    {
+    public:
+        TopLevelModalDismissBroadcaster()
+            : hook (SetWindowsHookEx (WH_CALLWNDPROC,
+                                      callWndProc,
+                                      (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                      GetCurrentThreadId()))
+        {}
+
+        ~TopLevelModalDismissBroadcaster() noexcept
+        {
+            UnhookWindowsHookEx (hook);
+        }
+
+    private:
+        static void processMessage (int nCode, const CWPSTRUCT* info)
+        {
+            if (nCode < 0 || info == nullptr)
+                return;
+
+            constexpr UINT events[] { WM_MOVE,
+                                      WM_SIZE,
+                                      WM_NCPOINTERDOWN,
+                                      WM_NCLBUTTONDOWN,
+                                      WM_NCRBUTTONDOWN,
+                                      WM_NCMBUTTONDOWN };
+
+            if (std::find (std::begin (events), std::end (events), info->message) == std::end (events))
+                return;
+
+            // windowMayDismissModals could affect the number of active ComponentPeer instances
+            for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
+                if (i < ComponentPeer::getNumPeers())
+                    if (auto* hwndPeer = dynamic_cast<HWNDComponentPeer*> (ComponentPeer::getPeer (i)))
+                        hwndPeer->windowShouldDismissModals (info->hwnd);
+        }
+
+        static LRESULT CALLBACK callWndProc (int nCode, WPARAM wParam, LPARAM lParam)
+        {
+            processMessage (nCode, reinterpret_cast<CWPSTRUCT*> (lParam));
+            return CallNextHookEx ({}, nCode, wParam, lParam);
+        }
+
+        HHOOK hook;
+    };
+
+    SharedResourcePointer<TopLevelModalDismissBroadcaster> modalDismissBroadcaster;
     IMEHandler imeHandler;
 
     //==============================================================================

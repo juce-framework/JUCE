@@ -39,17 +39,25 @@ SidePanel::SidePanel (StringRef title, int width, bool positionOnLeft,
     dismissButton.onClick = [this] { showOrHide (false); };
     addAndMakeVisible (dismissButton);
 
-    Desktop::getInstance().addGlobalMouseListener (this);
+    auto& desktop = Desktop::getInstance();
+
+    desktop.addGlobalMouseListener (this);
+    desktop.getAnimator().addChangeListener (this);
 
     if (contentToDisplay != nullptr)
         setContent (contentToDisplay, deleteComponentWhenNoLongerNeeded);
 
     setOpaque (false);
+    setVisible (false);
+    setAlwaysOnTop (true);
 }
 
 SidePanel::~SidePanel()
 {
-    Desktop::getInstance().removeGlobalMouseListener (this);
+    auto& desktop = Desktop::getInstance();
+
+    desktop.removeGlobalMouseListener (this);
+    desktop.getAnimator().removeChangeListener (this);
 
     if (parent != nullptr)
         parent->removeComponentListener (this);
@@ -97,6 +105,9 @@ void SidePanel::showOrHide (bool show)
 
         Desktop::getInstance().getAnimator().animateComponent (this, calculateBoundsInParent (*parent),
                                                                1.0f, 250, true, 1.0, 0.0);
+
+        if (isShowing && ! isVisible())
+            setVisible (true);
 
         if (onPanelShowHide != nullptr)
             onPanelShowHide (isShowing);
@@ -240,6 +251,12 @@ void SidePanel::componentMovedOrResized (Component& component, bool wasMoved, bo
 
     if (wasResized && (&component == parent))
         setBounds (calculateBoundsInParent (component));
+}
+
+void SidePanel::changeListenerCallback (ChangeBroadcaster*)
+{
+    if (isVisible() && ! isShowing && ! Desktop::getInstance().getAnimator().isAnimating (this))
+        setVisible (false);
 }
 
 Rectangle<int> SidePanel::calculateBoundsInParent (Component& parentComp) const

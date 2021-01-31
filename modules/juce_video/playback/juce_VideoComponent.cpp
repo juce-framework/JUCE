@@ -140,7 +140,7 @@ void VideoComponent::timerCallback()
     resized();
 }
 
-template<class FileOrURL>
+template <class FileOrURL>
 Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool loadAsync)
 {
    #if JUCE_ANDROID || JUCE_IOS
