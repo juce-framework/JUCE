@@ -317,7 +317,10 @@ function(_juce_module_sources module_path output_path built_sources other_source
     endif()
 
     set(headers ${all_module_files})
-    list(REMOVE_ITEM headers ${module_cpp})
+
+    if(NOT module_cpp STREQUAL "")
+        list(REMOVE_ITEM headers ${module_cpp})
+    endif()
 
     foreach(source_list IN ITEMS module_cpp headers)
         list(TRANSFORM ${source_list} PREPEND "${output_path}/")
