@@ -36,7 +36,7 @@ namespace dsp
 
     @tags{DSP}
 */
-template<typename ElementType>
+template <typename ElementType>
 class Matrix
 {
 public:

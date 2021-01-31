@@ -131,7 +131,7 @@ struct UnityAudioEffectState
 
     UnityAudioAmbisonicData*   ambisonicData;
 
-    template<typename T>
+    template <typename T>
     inline T* getEffectData() const
     {
         jassert (effectData != nullptr);

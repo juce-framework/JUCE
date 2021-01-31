@@ -385,7 +385,7 @@ bool JucerDocument::loadFromXml (const XmlElement& xml)
         activeExtraMethods.clear();
 
         if (XmlElement* const methods = xml.getChildByName ("METHODS"))
-            forEachXmlChildElementWithTagName (*methods, e, "METHOD")
+            for (auto* e : methods->getChildWithTagNameIterator ("METHOD"))
                 activeExtraMethods.addIfNotAlreadyThere (e->getStringAttribute ("name"));
 
         activeExtraMethods.trim();

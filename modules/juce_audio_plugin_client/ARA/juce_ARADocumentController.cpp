@@ -116,6 +116,8 @@ void ARADocumentController::internalDidUpdateAudioSourceAnalysisProgress (ARAAud
 
 // some helper macros to ease repeated declaration & implementation of notification functions below:
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
+
 #define notify_listeners(function, ModelObjectPtrType, modelObject,  ...) \
     static_cast<std::remove_pointer<ModelObjectPtrType>::type::Listener*> (this)->function  (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); \
     static_cast<ModelObjectPtrType> (modelObject)->notifyListeners ([&] (std::remove_pointer<ModelObjectPtrType>::type::Listener& l) { try { l.function (static_cast<ModelObjectPtrType> (modelObject), ##__VA_ARGS__); } catch (...) {} })
@@ -215,6 +217,9 @@ void ARADocumentController::doUpdateMusicalContextContent (ARA::PlugIn::MusicalC
 
 OVERRIDE_TO_NOTIFY_3 (willUpdateMusicalContextProperties, MusicalContext*, musicalContext, ARAMusicalContext::PropertiesPtr, newProperties)
 OVERRIDE_TO_NOTIFY_1 (didUpdateMusicalContextProperties, MusicalContext*, musicalContext)
+OVERRIDE_TO_NOTIFY_2 (didAddRegionSequenceToMusicalContext, MusicalContext*, musicalContext, RegionSequence*, regionSequence)
+OVERRIDE_TO_NOTIFY_2 (willRemoveRegionSequenceFromMusicalContext, MusicalContext*, musicalContext, RegionSequence*, regionSequence)
+OVERRIDE_TO_NOTIFY_1 (didReorderRegionSequencesInMusicalContext, MusicalContext*, musicalContext)
 OVERRIDE_TO_NOTIFY_1 (willDestroyMusicalContext, MusicalContext*, musicalContext)
 
 //==============================================================================
@@ -314,6 +319,8 @@ void ARADocumentController::internalNotifyPlaybackRegionContentChanged (ARAPlayb
 
 //==============================================================================
 
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
 #undef notify_listeners
 #undef OVERRIDE_TO_NOTIFY_1
 #undef OVERRIDE_TO_NOTIFY_2
@@ -398,27 +405,27 @@ void ARADocumentController::timerCallback()
 
 ARAInputStream::ARAInputStream (ARA::PlugIn::HostArchiveReader* reader)
 : archiveReader (reader), 
-  size (reader->getArchiveSize())
+  size ((int64) reader->getArchiveSize())
 {}
 
 int ARAInputStream::read (void* destBuffer, int maxBytesToRead)
 {
-    const int bytesToRead = std::min (maxBytesToRead, (int) (size - position));
-    if (! archiveReader->readBytesFromArchive (position, bytesToRead, (ARA::ARAByte*) destBuffer))
+    const auto bytesToRead = jmin ((int64) maxBytesToRead, size - position);
+    if (! archiveReader->readBytesFromArchive ((ARA::ARASize) position, (ARA::ARASize) bytesToRead, (ARA::ARAByte*) destBuffer))
     {
         failure = true;
         return 0;
     }
 
     position += bytesToRead;
-    return bytesToRead;
+    return (int) bytesToRead;
 }
 
 bool ARAInputStream::setPosition (int64 newPosition)
 {
     if (newPosition >= (int64) size)
         return false;
-    position = (size_t) newPosition;
+    position = newPosition;
     return true;
 }
 
@@ -433,7 +440,7 @@ ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
 
 bool ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
-    if (!archiveWriter->writeBytesToArchive (position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
+    if (!archiveWriter->writeBytesToArchive ((ARA::ARASize) position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
 
     position += numberOfBytes;
@@ -444,7 +451,7 @@ bool ARAOutputStream::setPosition (int64 newPosition)
 {
     if (newPosition > (int64) std::numeric_limits<size_t>::max())
         return false;
-    position = (size_t) newPosition;
+    position = newPosition;
     return true;
 }
 

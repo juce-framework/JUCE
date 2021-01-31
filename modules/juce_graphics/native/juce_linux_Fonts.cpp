@@ -49,7 +49,7 @@ StringArray FTTypefaceList::getDefaultFontDirectories()
     {
         if (auto fontsInfo = findFontsConfFile())
         {
-            forEachXmlChildElementWithTagName (*fontsInfo, e, "dir")
+            for (auto* e : fontsInfo->getChildWithTagNameIterator ("dir"))
             {
                 auto fontPath = e->getAllSubText().trim();
 

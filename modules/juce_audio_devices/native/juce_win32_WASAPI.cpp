@@ -116,9 +116,6 @@ bool check (HRESULT hr)
  #define KSDATAFORMAT_SUBTYPE_IEEE_FLOAT  uuidFromString ("00000003-0000-0010-8000-00aa00389b71")
 #endif
 
-#define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown
-#define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
-
 enum EDataFlow
 {
     eRender = 0,
@@ -336,10 +333,6 @@ JUCE_IUNKNOWNCLASS (IAudioSessionControl, "F4B1A599-7266-4319-A8CA-E70ACB11E8CD"
     JUCE_COMCALL RegisterAudioSessionNotification (IAudioSessionEvents*) = 0;
     JUCE_COMCALL UnregisterAudioSessionNotification (IAudioSessionEvents*) = 0;
 };
-
-#undef JUCE_COMCALL
-#undef JUCE_COMCLASS
-#undef JUCE_IUNKNOWNCLASS
 
 //==============================================================================
 namespace WasapiClasses
@@ -893,7 +886,7 @@ public:
         reservoirWritePos = 0;
     }
 
-    template<class SourceType>
+    template <class SourceType>
     void updateFormatWithType (SourceType*) noexcept
     {
         using NativeType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
@@ -1053,7 +1046,7 @@ public:
         renderClient = nullptr;
     }
 
-    template<class DestType>
+    template <class DestType>
     void updateFormatWithType (DestType*)
     {
         using NativeType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
@@ -1755,11 +1748,11 @@ private:
         ChangeNotificationClient (WASAPIAudioIODeviceType* d)
             : ComBaseClassHelper<IMMNotificationClient> (0), device (d) {}
 
-        HRESULT STDMETHODCALLTYPE OnDeviceAdded (LPCWSTR)                             { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnDeviceRemoved (LPCWSTR)                           { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnDeviceStateChanged(LPCWSTR, DWORD)                { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnDefaultDeviceChanged (EDataFlow, ERole, LPCWSTR)  { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) { return notify(); }
+        JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             { return notify(); }
+        JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           { return notify(); }
+        JUCE_COMRESULT OnDeviceStateChanged(LPCWSTR, DWORD)                { return notify(); }
+        JUCE_COMRESULT OnDefaultDeviceChanged (EDataFlow, ERole, LPCWSTR)  { return notify(); }
+        JUCE_COMRESULT OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) { return notify(); }
 
     private:
         WeakReference<WASAPIAudioIODeviceType> device;

@@ -3457,6 +3457,17 @@ void XWindowSystem::handleXEmbedMessage (LinuxComponentPeer* peer, XClientMessag
 }
 
 //==============================================================================
+void XWindowSystem::dismissBlockingModals (LinuxComponentPeer* peer, const XConfigureEvent& configure) const
+{
+    if (peer == nullptr)
+        return;
+
+    const auto peerHandle = peer->getWindowHandle();
+
+    if (configure.window != peerHandle && isParentWindowOf (configure.window, peerHandle))
+        dismissBlockingModals (peer);
+}
+
 void XWindowSystem::windowMessageReceive (XEvent& event)
 {
     if (event.xany.window != None)
@@ -3477,9 +3488,8 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
             const auto* instance = XWindowSystem::getInstance();
 
             for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)
-                if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)))
-                    if (instance->isParentWindowOf (event.xconfigure.window, linuxPeer->getWindowHandle()))
-                        instance->dismissBlockingModals (linuxPeer);
+                instance->dismissBlockingModals (dynamic_cast<LinuxComponentPeer*> (ComponentPeer::getPeer (i)),
+                                                 event.xconfigure);
         }
     }
     else if (event.xany.type == KeymapNotify)
