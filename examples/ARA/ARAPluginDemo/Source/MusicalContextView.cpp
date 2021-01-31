@@ -4,6 +4,8 @@
 #include "ARA_Library/Utilities/ARAPitchInterpretation.h"
 #include "ARA_Library/Utilities/ARATimelineConversion.h"
 
+using namespace juce;
+
 //==============================================================================
 MusicalContextView::MusicalContextView (DocumentView& docView)
     : documentView (docView),
@@ -13,6 +15,8 @@ MusicalContextView::MusicalContextView (DocumentView& docView)
     document->addListener (this);
     findMusicalContext();
     lastPaintedPosition.resetToDefault();
+    setTooltip (String ("Rulers showing playback time in seconds, bars+beats and song chords.") + newLine +
+                String ("Double-click to repositon and start host playback (if supported by DAW)."));
     startTimerHz (20);
 }
 
@@ -170,7 +174,7 @@ void MusicalContextView::paint (juce::Graphics& g)
             chordRect.setLeft (documentView.getPlaybackRegionsViewsXForTime (chordStartTime));
 
             // if we have a chord after this one, use its starting position to end our rect
-            if (std::next(itChord) != chordsReader.end())
+            if (std::next (itChord) != chordsReader.end())
             {
                 const auto nextChordStartTime = tempoConverter.getTimeForQuarter (std::next (itChord)->position);
                 if (nextChordStartTime < visibleRange.getStart())

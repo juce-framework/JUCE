@@ -3,6 +3,8 @@
 #include "ARAPluginDemoAudioProcessor.h"
 #include "ARAPluginDemoAudioModification.h"
 
+using namespace juce;
+
 //==============================================================================
 PlaybackRegionView::PlaybackRegionView (RegionSequenceViewContainer& viewContainer, ARAPlaybackRegion* region)
     : regionSequenceViewContainer (viewContainer),
@@ -220,4 +222,8 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     // by deleting the reader, therefore we must clear our "weak" pointer to the reader in this case.
     if (playbackRegionReader->lengthInSamples <= 0)
         playbackRegionReader = nullptr;
+
+    // Update tooltip whenever updating the reader
+    setTooltip ("Playback range " + String (playbackRegion->getStartInPlaybackTime(), 3) + " .. " + String (playbackRegion->getEndInPlaybackTime(), 3) + newLine +
+                "Audio Modification range " + String (playbackRegion->getStartInAudioModificationTime(), 3) + " .. " + String (playbackRegion->getEndInAudioModificationTime(), 3));
 }

@@ -1,8 +1,10 @@
 #pragma once
 
-// Include juce preamble
-#include "JucePluginDefines.h"
-#include <juce_core/juce_core.h>
+// Include juce preamble if built by Projucer (not CMake)
+#if defined (JUCE_PROJUCER_VERSION)
+    #include "JucePluginDefines.h"
+#endif
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 
 #if JucePlugin_Enable_ARA
 
@@ -30,7 +32,9 @@ namespace juce
 }
 
 // Include ARA headers
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
 #include <ARA_Library/PlugIn/ARAPlug.h>
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 namespace juce
 {

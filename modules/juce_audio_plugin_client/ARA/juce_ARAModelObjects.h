@@ -204,6 +204,28 @@ public:
         */
         virtual void doUpdateMusicalContextContent (ARAMusicalContext* musicalContext, ARAContentUpdateScopes scopeFlags) {}
 
+        /** Called after a region sequence is added to the musical context.
+            @param musicalContext The musical context that \p regionSequence was added to.
+            @param regionSequence The region sequence that was added to \p musicalContext.
+        */
+
+        virtual void didAddRegionSequenceToMusicalContext (ARAMusicalContext* musicalContext, ARARegionSequence* regionSequence) {}
+
+        /** Called before a region sequence is removed from the musical context.
+            @param musicalContext The musical context that \p regionSequence will be removed from.
+            @param regionSequence The region sequence that will be removed from \p musicalContext.
+        */
+        virtual void willRemoveRegionSequenceFromMusicalContext (ARAMusicalContext* musicalContext, ARARegionSequence* regionSequence) {}
+
+        /** Called after the region sequences are reordered in an ARA MusicalContext
+
+            Region sequences are sorted by their order index -
+            this callback signals a change in this ordering within the musical context.
+
+            @param musicalContext The musical context with reordered region sequences.
+        */
+        virtual void didReorderRegionSequencesInMusicalContext (ARAMusicalContext* musicalContext) {}
+        
         /** Called before the musical context is destroyed.
             @param musicalContext The musical context that will be destoyed. 
         */
