@@ -1,6 +1,31 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+CharacterFunctions::readDoubleValue now returns values consistent with other
+C++ number parsing libraries. Parsing values smaller than the minimum number
+respresentable in a double will return (+/-)0.0 and parsing values larger than
+the maximum number respresentable in a double will return (+/-)inf.
+
+Possible Issues
+---------------
+Code reading very large or very small numbers may receive values of 0.0 and inf
+rather than nan.
+
+Workaround
+----------
+Where you may be using std::isnan to check the validity of the result you can
+instead use std::isfinite.
+
+Rationale
+---------
+The new behaviour is consistent with other string parsing libraries.
+
+
 Version 6.0.6
 =============
 
