@@ -508,6 +508,7 @@ function(juce_add_module module_path)
     endif()
 
     set(base_path "${module_parent_path}")
+    _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
 
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         _juce_get_platform_plugin_kinds(plugin_kinds)
@@ -526,6 +527,9 @@ function(juce_add_module module_path)
                 ALIAS juce_audio_plugin_client_utils)
         endif()
 
+        _juce_store_module_sources(juce_audio_plugin_client_utils ${base_path}
+                "${headers}" "${globbed_sources}")
+
         file(GLOB_RECURSE all_module_files
             CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
             RELATIVE "${module_parent_path}"
@@ -535,21 +539,11 @@ function(juce_add_module module_path)
         list(FILTER headers EXCLUDE REGEX "${module_name}/${module_name}[^/]+\\.(cpp|mm|r)$")
         list(TRANSFORM headers PREPEND "${module_parent_path}/")
     else()
-        _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
         list(APPEND all_module_sources ${globbed_sources})
     endif()
 
     _juce_add_interface_library(${module_name} ${all_module_sources})
-
-    set_property(GLOBAL APPEND PROPERTY _juce_module_names ${module_name})
-
-    set_target_properties(${module_name} PROPERTIES
-        INTERFACE_JUCE_MODULE_HEADERS   "${headers}"
-        INTERFACE_JUCE_MODULE_PATH      "${base_path}")
-
-    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
-        target_sources(${module_name} INTERFACE ${headers})
-    endif()
+    _juce_store_module_sources(${module_name} ${base_path} "${headers}" "${globbed_sources}")
 
     if(${module_name} STREQUAL "juce_core")
         _juce_add_standard_defs(${module_name})
@@ -1876,6 +1870,34 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_store_module_sources name path headers sources)
+    set_property(GLOBAL APPEND PROPERTY _juce_module_names ${name})
+    set_target_properties(${name} PROPERTIES
+            INTERFACE_JUCE_MODULE_PATH       ${path}
+            INTERFACE_JUCE_MODULE_HEADERS   "${headers}"
+            INTERFACE_JUCE_MODULE_SOURCES   "${sources}")
+
+    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
+        target_sources(${name} INTERFACE ${headers})
+        source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${headers} ${sources})
+    endif()
+endfunction()
+
+function (_juce_load_module_sources)
+    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
+        get_property(all_modules GLOBAL PROPERTY _juce_module_names)
+
+        foreach(module_name IN LISTS all_modules)
+            get_target_property(path ${module_name} INTERFACE_JUCE_MODULE_PATH)
+            get_target_property(header_files ${module_name} INTERFACE_JUCE_MODULE_HEADERS)
+            get_target_property(module_sources ${module_name} INTERFACE_JUCE_MODULE_SOURCES)
+
+            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files} ${module_sources})
+            set_source_files_properties(${header_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+        endforeach()
+    endif()
+endfunction()
+
 function(_juce_initialise_target target)
     set(one_value_args
         VERSION
@@ -2022,17 +2044,7 @@ function(_juce_initialise_target target)
 
     _juce_write_generate_time_info(${target})
     _juce_link_optional_libraries(${target})
-
-    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
-        get_property(all_modules GLOBAL PROPERTY _juce_module_names)
-
-        foreach(module_name IN LISTS all_modules)
-            get_target_property(path ${module_name} INTERFACE_JUCE_MODULE_PATH)
-            get_target_property(header_files ${module_name} INTERFACE_JUCE_MODULE_HEADERS)
-            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files})
-            set_source_files_properties(${header_files} PROPERTIES HEADER_FILE_ONLY TRUE)
-        endforeach()
-    endif()
+    _juce_load_module_sources()
 endfunction()
 
 # ==================================================================================================
