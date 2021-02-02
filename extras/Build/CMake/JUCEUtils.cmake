@@ -509,6 +509,8 @@ function(juce_add_module module_path)
 
     set(base_path "${module_parent_path}")
 
+    _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
+
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         _juce_get_platform_plugin_kinds(plugin_kinds)
 
@@ -530,12 +532,7 @@ function(juce_add_module module_path)
             CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
             RELATIVE "${module_parent_path}"
             "${module_path}/*")
-
-        set(headers ${all_module_files})
-        list(FILTER headers EXCLUDE REGEX "${module_name}/${module_name}[^/]+\\.(cpp|mm|r)$")
-        list(TRANSFORM headers PREPEND "${module_parent_path}/")
     else()
-        _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
         list(APPEND all_module_sources ${globbed_sources})
     endif()
 
@@ -544,6 +541,7 @@ function(juce_add_module module_path)
     set_property(GLOBAL APPEND PROPERTY _juce_module_names ${module_name})
 
     set_target_properties(${module_name} PROPERTIES
+        INTERFACE_JUCE_MODULE_SOURCES   "${globbed_sources}"
         INTERFACE_JUCE_MODULE_HEADERS   "${headers}"
         INTERFACE_JUCE_MODULE_PATH      "${base_path}")
 
@@ -2029,7 +2027,8 @@ function(_juce_initialise_target target)
         foreach(module_name IN LISTS all_modules)
             get_target_property(path ${module_name} INTERFACE_JUCE_MODULE_PATH)
             get_target_property(header_files ${module_name} INTERFACE_JUCE_MODULE_HEADERS)
-            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files})
+            get_target_property(source_files ${module_name} INTERFACE_JUCE_MODULE_SOURCES)
+            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files} ${source_files})
             set_source_files_properties(${header_files} PROPERTIES HEADER_FILE_ONLY TRUE)
         endforeach()
     endif()
