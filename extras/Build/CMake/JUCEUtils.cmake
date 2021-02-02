@@ -1494,29 +1494,6 @@ function(_juce_get_vst3_category_string target out_var)
     set(${out_var} ${result} PARENT_SCOPE)
 endfunction()
 
-function(_juce_get_iaa_type_code target out_var)
-    get_target_property(wants_midi_input ${target} JUCE_NEEDS_MIDI_INPUT)
-    get_target_property(is_synth ${target} JUCE_IS_SYNTH)
-
-    set(result)
-
-    if(wants_midi_input)
-        if(is_synth)
-            set(result "auri")
-        else()
-            set(result "aurm")
-        endif()
-    else()
-        if(is_synth)
-            set(result "aurg")
-        else()
-            set(result "aurx")
-        endif()
-    endif()
-
-    set(${out_var} ${result} PARENT_SCOPE)
-endfunction()
-
 function(_juce_configure_plugin_targets target)
     if(CMAKE_VERSION VERSION_LESS "3.15.0")
         message(FATAL_ERROR "Plugin targets require CMake 3.15 or higher")
@@ -1572,7 +1549,6 @@ function(_juce_configure_plugin_targets target)
     _juce_to_char_literal(${project_plugin_code} project_plugin_code)
 
     _juce_get_vst3_category_string(${target} vst3_category_string)
-    _juce_get_iaa_type_code(${target} iaa_type_code)
 
     target_compile_definitions(${target} PUBLIC
         JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone
