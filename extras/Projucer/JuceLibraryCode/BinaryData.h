@@ -98,12 +98,6 @@ namespace BinaryData
     extern const char*   wizard_StaticLibrary_svg;
     const int            wizard_StaticLibrary_svgSize = 7488;
 
-    extern const char*   jucer_AudioPluginARADocumentControllerTemplate_cpp;
-    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 2017;
-
-    extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
-    const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1437;
-
     extern const char*   jucer_AnimatedComponentSimpleTemplate_h;
     const int            jucer_AnimatedComponentSimpleTemplate_hSize = 1898;
 
@@ -121,6 +115,12 @@ namespace BinaryData
 
     extern const char*   jucer_AudioComponentTemplate_h;
     const int            jucer_AudioComponentTemplate_hSize = 1187;
+
+    extern const char*   jucer_AudioPluginARADocumentControllerTemplate_cpp;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 2017;
+
+    extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1437;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1639;

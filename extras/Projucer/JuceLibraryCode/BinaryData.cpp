@@ -5751,100 +5751,8 @@ static const unsigned char temp_binary_data_29[] =
 
 const char* wizard_StaticLibrary_svg = (const char*) temp_binary_data_29;
 
-//================== jucer_AudioPluginARADocumentControllerTemplate.cpp ==================
-static const unsigned char temp_binary_data_30[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic framework code for an ARA document controller implementation. \r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"%%aradocumentcontroller_headers%%\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"%%aradocumentcontroller_class_name%%::%%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance)\r\n"
-"    : juce::ARADocumentController (instance)\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"%%aradocumentcontroller_class_name%%::~%%aradocumentcontroller_class_name%%()\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"bool %%aradocumentcontroller_class_name%%::doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept\r\n"
-"{\r\n"
-"    // You should use this method to read any persistent data associated with\r\n"
-"    // your ARA model graph stored in an archive using the supplied ARAInputStream. \r\n"
-"    // Be sure to check the ARARestoreObjectsFilter to determine which objects to restore.\r\n"
-"    return true;\r\n"
-"}\r\n"
-"\r\n"
-"bool %%aradocumentcontroller_class_name%%::doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept\r\n"
-"{\r\n"
-"    // You should use this method to write any persistent data associated with\r\n"
-"    // your ARA model graph into the an archive using the supplied ARAOutputStream. \r\n"
-"    // Be sure to check the ARAStoreObjectsFilter to determine which objects to store.\r\n"
-"    return true;\r\n"
-"}\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// This creates new instances of the document controller..\r\n"
-"ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept\r\n"
-"{\r\n"
-"    return new %%aradocumentcontroller_class_name%% (instance);\r\n"
-"};\r\n";
-
-const char* jucer_AudioPluginARADocumentControllerTemplate_cpp = (const char*) temp_binary_data_30;
-
-//================== jucer_AudioPluginARADocumentControllerTemplate.h ==================
-static const unsigned char temp_binary_data_31[] =
-"/*\r\n"
-"  ==============================================================================\r\n"
-"\r\n"
-"    This file was auto-generated!\r\n"
-"\r\n"
-"    It contains the basic framework code for an ARA document controller implementation. \r\n"
-"\r\n"
-"  ==============================================================================\r\n"
-"*/\r\n"
-"\r\n"
-"#pragma once\r\n"
-"\r\n"
-"%%app_headers%%\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"/**\r\n"
-"*/\r\n"
-"class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentController\r\n"
-"{\r\n"
-"public:\r\n"
-"    //==============================================================================\r\n"
-"    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);\r\n"
-"    ~%%aradocumentcontroller_class_name%%();\r\n"
-"\r\n"
-"    //==============================================================================\r\n"
-"    bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;\r\n"
-"    bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// Override document controller methods here\r\n"
-"protected:\r\n"
-"\r\n"
-"\r\n"
-"private:\r\n"
-"    //==============================================================================\r\n"
-"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%aradocumentcontroller_class_name%%)\r\n"
-"};\r\n";
-
-const char* jucer_AudioPluginARADocumentControllerTemplate_h = (const char*) temp_binary_data_31;
-
 //================== jucer_AnimatedComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_32[] =
+static const unsigned char temp_binary_data_30[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -5902,10 +5810,10 @@ static const unsigned char temp_binary_data_32[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AnimatedComponentSimpleTemplate_h = (const char*) temp_binary_data_32;
+const char* jucer_AnimatedComponentSimpleTemplate_h = (const char*) temp_binary_data_30;
 
 //================== jucer_AnimatedComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_33[] =
+static const unsigned char temp_binary_data_31[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -5944,10 +5852,10 @@ static const unsigned char temp_binary_data_33[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_33;
+const char* jucer_AnimatedComponentTemplate_cpp = (const char*) temp_binary_data_31;
 
 //================== jucer_AnimatedComponentTemplate.h ==================
-static const unsigned char temp_binary_data_34[] =
+static const unsigned char temp_binary_data_32[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -5979,10 +5887,10 @@ static const unsigned char temp_binary_data_34[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AnimatedComponentTemplate_h = (const char*) temp_binary_data_34;
+const char* jucer_AnimatedComponentTemplate_h = (const char*) temp_binary_data_32;
 
 //================== jucer_AudioComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_35[] =
+static const unsigned char temp_binary_data_33[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -6078,10 +5986,10 @@ static const unsigned char temp_binary_data_35[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioComponentSimpleTemplate_h = (const char*) temp_binary_data_35;
+const char* jucer_AudioComponentSimpleTemplate_h = (const char*) temp_binary_data_33;
 
 //================== jucer_AudioComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_36[] =
+static const unsigned char temp_binary_data_34[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -6158,10 +6066,10 @@ static const unsigned char temp_binary_data_36[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_36;
+const char* jucer_AudioComponentTemplate_cpp = (const char*) temp_binary_data_34;
 
 //================== jucer_AudioComponentTemplate.h ==================
-static const unsigned char temp_binary_data_37[] =
+static const unsigned char temp_binary_data_35[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -6195,7 +6103,99 @@ static const unsigned char temp_binary_data_37[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioComponentTemplate_h = (const char*) temp_binary_data_37;
+const char* jucer_AudioComponentTemplate_h = (const char*) temp_binary_data_35;
+
+//================== jucer_AudioPluginARADocumentControllerTemplate.cpp ==================
+static const unsigned char temp_binary_data_36[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"    It contains the basic framework code for an ARA document controller implementation. \r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"%%aradocumentcontroller_headers%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"%%aradocumentcontroller_class_name%%::%%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance)\r\n"
+"    : juce::ARADocumentController (instance)\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"%%aradocumentcontroller_class_name%%::~%%aradocumentcontroller_class_name%%()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"bool %%aradocumentcontroller_class_name%%::doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept\r\n"
+"{\r\n"
+"    // You should use this method to read any persistent data associated with\r\n"
+"    // your ARA model graph stored in an archive using the supplied ARAInputStream. \r\n"
+"    // Be sure to check the ARARestoreObjectsFilter to determine which objects to restore.\r\n"
+"    return true;\r\n"
+"}\r\n"
+"\r\n"
+"bool %%aradocumentcontroller_class_name%%::doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept\r\n"
+"{\r\n"
+"    // You should use this method to write any persistent data associated with\r\n"
+"    // your ARA model graph into the an archive using the supplied ARAOutputStream. \r\n"
+"    // Be sure to check the ARAStoreObjectsFilter to determine which objects to store.\r\n"
+"    return true;\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"// This creates new instances of the document controller..\r\n"
+"ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept\r\n"
+"{\r\n"
+"    return new %%aradocumentcontroller_class_name%% (instance);\r\n"
+"};\r\n";
+
+const char* jucer_AudioPluginARADocumentControllerTemplate_cpp = (const char*) temp_binary_data_36;
+
+//================== jucer_AudioPluginARADocumentControllerTemplate.h ==================
+static const unsigned char temp_binary_data_37[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"    It contains the basic framework code for an ARA document controller implementation. \r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"%%app_headers%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"*/\r\n"
+"class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentController\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);\r\n"
+"    ~%%aradocumentcontroller_class_name%%();\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;\r\n"
+"    bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"// Override document controller methods here\r\n"
+"protected:\r\n"
+"\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%aradocumentcontroller_class_name%%)\r\n"
+"};\r\n";
+
+const char* jucer_AudioPluginARADocumentControllerTemplate_h = (const char*) temp_binary_data_37;
 
 //================== jucer_AudioPluginEditorTemplate.cpp ==================
 static const unsigned char temp_binary_data_38[] =
@@ -6268,9 +6268,9 @@ static const unsigned char temp_binary_data_39[] =
 "/**\r\n"
 "*/\r\n"
 "class %%editor_class_name%%  : public juce::AudioProcessorEditor\r\n"
-"#if JucePlugin_Enable_ARA\r\n"
-", public juce::AudioProcessorEditorARAExtension\r\n"
-"#endif\r\n"
+"    #if JucePlugin_Enable_ARA\r\n"
+"                             , public juce::AudioProcessorEditorARAExtension\r\n"
+"    #endif\r\n"
 "{\r\n"
 "public:\r\n"
 "    %%editor_class_name%% (%%filter_class_name%%&);\r\n"
@@ -6512,9 +6512,9 @@ static const unsigned char temp_binary_data_41[] =
 "/**\r\n"
 "*/\r\n"
 "class %%filter_class_name%%  : public juce::AudioProcessor\r\n"
-"#if JucePlugin_Enable_ARA\r\n"
-", public juce::AudioProcessorARAExtension\r\n"
-"#endif\r\n"
+"    #if JucePlugin_Enable_ARA\r\n"
+"                             , public juce::AudioProcessorARAExtension\r\n"
+"    #endif\r\n"
 "{\r\n"
 "public:\r\n"
 "    //==============================================================================\r\n"
@@ -6530,10 +6530,9 @@ static const unsigned char temp_binary_data_41[] =
 "   #endif\r\n"
 "\r\n"
 "    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;\r\n"
-"\r\n"
-"#if JucePlugin_Enable_ARA\r\n"
+"   #if JucePlugin_Enable_ARA\r\n"
 "    bool didProcessBlockSucceed() override;\r\n"
-"#endif\r\n"
+"   #endif\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    juce::AudioProcessorEditor* createEditor() override;\r\n"
@@ -7708,14 +7707,14 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x52a8dfdf:  numBytes = 1859; return wizard_Openfile_svg;
         case 0x58e2ae48:  numBytes = 4551; return wizard_OpenGL_svg;
         case 0xb1da6f9e:  numBytes = 7488; return wizard_StaticLibrary_svg;
-        case 0x744d44d6:  numBytes = 2017; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 1437; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0xd11e6d35:  numBytes = 1898; return jucer_AnimatedComponentSimpleTemplate_h;
         case 0x6cf2645e:  numBytes = 1362; return jucer_AnimatedComponentTemplate_cpp;
         case 0x97b055e3:  numBytes = 1008; return jucer_AnimatedComponentTemplate_h;
         case 0xfb6f6d96:  numBytes = 3554; return jucer_AudioComponentSimpleTemplate_h;
         case 0xafccbd3f:  numBytes = 2941; return jucer_AudioComponentTemplate_cpp;
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
+        case 0x744d44d6:  numBytes = 2017; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = 1437; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0x27c5a93a:  numBytes = 1639; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1094; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6478; return jucer_AudioPluginFilterTemplate_cpp;
@@ -7781,14 +7780,14 @@ const char* namedResourceList[] =
     "wizard_Openfile_svg",
     "wizard_OpenGL_svg",
     "wizard_StaticLibrary_svg",
-    "jucer_AudioPluginARADocumentControllerTemplate_cpp",
-    "jucer_AudioPluginARADocumentControllerTemplate_h",
     "jucer_AnimatedComponentSimpleTemplate_h",
     "jucer_AnimatedComponentTemplate_cpp",
     "jucer_AnimatedComponentTemplate_h",
     "jucer_AudioComponentSimpleTemplate_h",
     "jucer_AudioComponentTemplate_cpp",
     "jucer_AudioComponentTemplate_h",
+    "jucer_AudioPluginARADocumentControllerTemplate_cpp",
+    "jucer_AudioPluginARADocumentControllerTemplate_h",
     "jucer_AudioPluginEditorTemplate_cpp",
     "jucer_AudioPluginEditorTemplate_h",
     "jucer_AudioPluginFilterTemplate_cpp",
@@ -7849,14 +7848,14 @@ const char* originalFilenames[] =
     "wizard_Openfile.svg",
     "wizard_OpenGL.svg",
     "wizard_StaticLibrary.svg",
-    "jucer_AudioPluginARADocumentControllerTemplate.cpp",
-    "jucer_AudioPluginARADocumentControllerTemplate.h",
     "jucer_AnimatedComponentSimpleTemplate.h",
     "jucer_AnimatedComponentTemplate.cpp",
     "jucer_AnimatedComponentTemplate.h",
     "jucer_AudioComponentSimpleTemplate.h",
     "jucer_AudioComponentTemplate.cpp",
     "jucer_AudioComponentTemplate.h",
+    "jucer_AudioPluginARADocumentControllerTemplate.cpp",
+    "jucer_AudioPluginARADocumentControllerTemplate.h",
     "jucer_AudioPluginEditorTemplate.cpp",
     "jucer_AudioPluginEditorTemplate.h",
     "jucer_AudioPluginFilterTemplate.cpp",

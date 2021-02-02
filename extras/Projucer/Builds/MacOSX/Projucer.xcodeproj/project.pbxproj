@@ -493,13 +493,6 @@
 			path = "../../Source/ComponentEditor/jucer_ComponentLayout.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
-		14255FC3793D05E64D81F6BC = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.c.h;
-			name = "jucer_AudioPluginARADocumentControllerTemplate.h";
-			path = "../../Source/BinaryData/Templates/ARA/jucer_AudioPluginARADocumentControllerTemplate.h";
-			sourceTree = "SOURCE_ROOT";
-		};
 		159DE1FEE2099398983CDDF0 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -1480,6 +1473,13 @@
 			path = "../../Source/ComponentEditor/Components/jucer_ToggleButtonHandler.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		8E129499EA2FB8A4944F8701 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.c.h;
+			name = "jucer_AudioPluginARADocumentControllerTemplate.h";
+			path = "../../Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.h";
+			sourceTree = "SOURCE_ROOT";
+		};
 		8F30A53C7FE4BC65171FB3E2 = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -1578,6 +1578,13 @@
 			path = "../../Source/Project/UI/Sidebar/jucer_TabComponents.h";
 			sourceTree = "SOURCE_ROOT";
 		};
+		96A1EC6B50DBD2C526C60338 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.cpp.cpp;
+			name = "jucer_AudioPluginARADocumentControllerTemplate.cpp";
+			path = "../../Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.cpp";
+			sourceTree = "SOURCE_ROOT";
+		};
 		983CFBA01CA8811F30FA7F4C = {
 			isa = PBXFileReference;
 			lastKnownFileType = sourcecode.c.h;
@@ -1604,13 +1611,6 @@
 			lastKnownFileType = file;
 			name = LICENSE;
 			path = ../../Source/BinaryData/gradle/LICENSE;
-			sourceTree = "SOURCE_ROOT";
-		};
-		99F17A17224719DBA7EF91C9 = {
-			isa = PBXFileReference;
-			lastKnownFileType = sourcecode.cpp.cpp;
-			name = "jucer_AudioPluginARADocumentControllerTemplate.cpp";
-			path = "../../Source/BinaryData/Templates/ARA/jucer_AudioPluginARADocumentControllerTemplate.cpp";
 			sourceTree = "SOURCE_ROOT";
 		};
 		9A3B8BBDA8E144A3DF6B9349 = {
@@ -2665,25 +2665,17 @@
 			name = Icons;
 			sourceTree = "<group>";
 		};
-		339CC8EB6F46305DB6DB4B84 = {
-			isa = PBXGroup;
-			children = (
-				99F17A17224719DBA7EF91C9,
-				14255FC3793D05E64D81F6BC,
-			);
-			name = ARA;
-			sourceTree = "<group>";
-		};
 		86B4069D904AB46AC86FB383 = {
 			isa = PBXGroup;
 			children = (
-				339CC8EB6F46305DB6DB4B84,
 				9A3B8BBDA8E144A3DF6B9349,
 				016A6C52B0B93DE29197FF64,
 				D5795F8CAC5876714DAB355F,
 				D4EB334E5186D1584EC63CA4,
 				203FA6AD7EDDF1F9C338CC2A,
 				5BF0374EB908F0476BD8ED42,
+				96A1EC6B50DBD2C526C60338,
+				8E129499EA2FB8A4944F8701,
 				6574A50A8997799705B23465,
 				56177921580A4855917E0205,
 				079802C6AEE7646010766FE8,
