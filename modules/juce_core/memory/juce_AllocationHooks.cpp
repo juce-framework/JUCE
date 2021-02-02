@@ -94,7 +94,7 @@ UnitTestAllocationChecker::UnitTestAllocationChecker (UnitTest& test)
 UnitTestAllocationChecker::~UnitTestAllocationChecker() noexcept
 {
     getAllocationHooksForThread().removeListener (this);
-    unitTest.expectEquals (calls, (size_t) 0, "new or delete was incorrectly called while allocation checker was active");
+    unitTest.expectEquals ((int) calls, 0, "new or delete was incorrectly called while allocation checker was active");
 }
 
 void UnitTestAllocationChecker::newOrDeleteCalled() noexcept { ++calls; }

@@ -581,8 +581,8 @@ public:
         return isPositiveAndBelow (localPos.x, component.getWidth())
             && isPositiveAndBelow (localPos.y, component.getHeight())
             && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
-                                                                    localPos.x * scale,
-                                                                    localPos.y * scale));
+                                                                    (float) localPos.x * scale,
+                                                                    (float) localPos.y * scale));
     }
 
     BorderSize<int> getFrameSize() const override
