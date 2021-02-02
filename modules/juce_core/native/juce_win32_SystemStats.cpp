@@ -363,6 +363,42 @@ String SystemStats::getEnvironmentVariable (const String& name, const String& de
                    CharPointer_wchar_t (buffer + len));
 }
 
+bool SystemStats::setEnvironmentVariable(const String& name, const String& value)
+{
+    return SetEnvironmentVariableW (name.toWideCharPointer(), value.toWideCharPointer()) ? true : false;
+}
+
+bool SystemStats::removeEnvironmentVariable(const String& name)
+{
+    return SetEnvironmentVariableW (name.toWideCharPointer(), nullptr) ? true : false;
+}
+
+StringPairArray SystemStats::getEnvironmentVariables()
+{
+    static CriticalSection environmentMutex;
+    
+    const CriticalSection::ScopedLockType sl (environmentMutex);
+
+    StringPairArray environmentVariables;
+
+    auto freeStrings = [](WCHAR* p) { FreeEnvironmentStrings (p); };
+
+    auto environmentStrings = std::unique_ptr<WCHAR, decltype(freeStrings)>(GetEnvironmentStringsW(), freeStrings);
+
+    for (const WCHAR* name = environmentStrings.get(); name != nullptr && *name != L'\0';)
+    {
+        const String keyValue (name);
+
+        environmentVariables.set (
+            keyValue.upToFirstOccurrenceOf ("=", false, false),
+            keyValue.fromFirstOccurrenceOf ("=", false, false));
+
+        name += keyValue.length() + 1;
+    }
+    
+    return environmentVariables;
+}
+
 //==============================================================================
 uint32 juce_millisecondsSinceStartup() noexcept
 {

@@ -90,7 +90,7 @@ namespace MacFileHelpers
                                 objectAtIndex: 0]);
     }
    #else
-    static bool launchExecutable (const String& pathAndArguments)
+    static bool launchExecutable (const String& pathAndArguments, const Array<char*>* enviroment = nullptr)
     {
         auto cpid = fork();
 
@@ -99,7 +99,7 @@ namespace MacFileHelpers
             const char* const argv[4] = { "/bin/sh", "-c", pathAndArguments.toUTF8(), nullptr };
 
             // Child process
-            if (execve (argv[0], (char**) argv, nullptr) < 0)
+            if (execve (argv[0], (char**) argv, enviroment ? enviroment->getRawDataPointer() : nullptr) < 0)
                 exit (0);
         }
         else
@@ -111,6 +111,106 @@ namespace MacFileHelpers
         return true;
     }
    #endif
+
+    bool openDocument(const String& fileName, const String& parameters, const Array<char*>* environment = nullptr)
+    {
+        JUCE_AUTORELEASEPOOL
+        {
+            NSString* fileNameAsNS (juceStringToNS (fileName));
+            NSURL* filenameAsURL = File::createFileWithoutCheckingPath (fileName).exists() ? [NSURL fileURLWithPath: fileNameAsNS]
+                                                                                           : [NSURL URLWithString: fileNameAsNS];
+
+          #if JUCE_IOS
+            ignoreUnused (parameters);
+
+           #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
+            return [[UIApplication sharedApplication] openURL: filenameAsURL];
+           #else
+            [[UIApplication sharedApplication] openURL: filenameAsURL options: @{} completionHandler: nil];
+            return true;
+           #endif
+          #else
+            auto workspace = [NSWorkspace sharedWorkspace];
+            bool isUrl = filenameAsURL && ![[filenameAsURL scheme] hasPrefix:@"file"];
+
+            if (! isUrl)
+            {
+                const File file (fileName);
+
+                if (file.isBundle() && file.getFileExtension().equalsIgnoreCase (".app"))
+                {
+                    StringArray params;
+                    params.addTokens (parameters, true);
+
+                    NSMutableArray* paramArray = [[NSMutableArray new] autorelease];
+                    for (int i = 0; i < params.size(); ++i)
+                        [paramArray addObject: juceStringToNS (params[i])];
+
+                    NSMutableDictionary* envDict = [[NSMutableDictionary new] autorelease];
+                    if (environment)
+                    {
+                        for (int i = 0; i < environment->size(); ++i)
+                        {
+                            if (environment->getUnchecked (i) == nullptr)
+                                continue;
+
+                            auto keyValue = String (const_cast<const char*> (environment->getUnchecked (i)));
+                         
+                            [envDict setObject: juceStringToNS (keyValue.fromFirstOccurrenceOf ("=", false, false))
+                                        forKey: juceStringToNS (keyValue.upToFirstOccurrenceOf ("=", false, false))];
+                        }
+                    }
+
+                   #if (defined MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
+                    auto config = [NSWorkspaceOpenConfiguration configuration];
+                    [config setCreatesNewApplicationInstance: YES];
+                    config.arguments = paramArray;
+
+                    if (environment)
+                        config.environment = envDict;
+
+                    [workspace openApplicationAtURL: filenameAsURL
+                                  configuration: config
+                                  completionHandler: nil];
+                    return true;
+                   #else
+                    NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
+
+                    if (params.size())
+                    {
+                        [dict setObject: paramArray
+                                 forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationArguments")];
+                    }
+
+                    if (environment)
+                    {
+                        [dict setObject: envDict
+                                 forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationEnvironment")];
+                    }
+
+                    return [workspace launchApplicationAtURL: filenameAsURL
+                                                     options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
+                                               configuration: dict
+                                                       error: nil];
+                   #endif
+                }
+            }
+
+            auto fileManager = [NSFileManager defaultManager];
+
+            if (isUrl || File (fileName).isDirectory() || ! [fileManager isExecutableFileAtPath: fileNameAsNS])
+                // NB: the length check here is because of strange failures involving long filenames,
+                // probably due to filesystem name length limitations..
+                return (fileName.length() < 1024 && [workspace openFile: fileNameAsNS])
+                        || [workspace openURL: filenameAsURL];
+
+            if (File (fileName).exists())
+                return MacFileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters, environment);
+
+            return false;
+          #endif
+        }
+    }
 }
 
 bool File::isOnCDRomDrive() const
@@ -397,67 +497,25 @@ bool DirectoryIterator::NativeIterator::next (String& filenameFound,
 //==============================================================================
 bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters)
 {
-    JUCE_AUTORELEASEPOOL
-    {
-        NSString* fileNameAsNS (juceStringToNS (fileName));
-        NSURL* filenameAsURL = File::createFileWithoutCheckingPath (fileName).exists() ? [NSURL fileURLWithPath: fileNameAsNS]
-                                                                                       : [NSURL URLWithString: fileNameAsNS];
+    return MacFileHelpers::openDocument(fileName, parameters);
+}
 
-      #if JUCE_IOS
-        ignoreUnused (parameters);
+bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters, const StringPairArray& environment)
+{
+    StringArray envValues;
 
-       #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
-        return [[UIApplication sharedApplication] openURL: filenameAsURL];
-       #else
-        [[UIApplication sharedApplication] openURL: filenameAsURL options: @{} completionHandler: nil];
-        return true;
-       #endif
-      #else
-        NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
+    for (const auto& key : environment.getAllKeys())
+        envValues.add (key + "=" + environment.getValue (key, {}));
 
-        if (parameters.isEmpty())
-            return [workspace openURL: filenameAsURL];
+    Array<char*> env;
 
-        const File file (fileName);
+    for (auto& value : envValues)
+        if (value.isNotEmpty())
+            env.add (const_cast<char*> (value.toRawUTF8()));
 
-        if (file.isBundle())
-        {
-            StringArray params;
-            params.addTokens (parameters, true);
-
-            NSMutableArray* paramArray = [[NSMutableArray new] autorelease];
-
-            for (int i = 0; i < params.size(); ++i)
-                [paramArray addObject: juceStringToNS (params[i])];
-
-           #if (defined MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
-            auto config = [NSWorkspaceOpenConfiguration configuration];
-            [config setCreatesNewApplicationInstance: YES];
-            config.arguments = paramArray;
-
-            [workspace openApplicationAtURL: filenameAsURL
-                              configuration: config
-                          completionHandler: nil];
-            return true;
-           #else
-            NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
-
-            [dict setObject: paramArray
-                     forKey: nsStringLiteral ("NSWorkspaceLaunchConfigurationArguments")];
-
-            return [workspace launchApplicationAtURL: filenameAsURL
-                                             options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
-                                       configuration: dict
-                                               error: nil];
-           #endif
-        }
-
-        if (file.exists())
-            return MacFileHelpers::launchExecutable ("\"" + fileName + "\" " + parameters);
-
-        return false;
-      #endif
-    }
+    env.add (nullptr);
+    
+    return MacFileHelpers::openDocument (fileName, parameters, &env);
 }
 
 void File::revealToUser() const

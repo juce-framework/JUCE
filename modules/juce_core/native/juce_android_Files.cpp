@@ -638,6 +638,11 @@ JUCE_API bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const
     return true;
 }
 
+JUCE_API bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& parameters, const StringPairArray&)
+{
+    return openDocument (fileName, parameters);
+}
+
 void File::revealToUser() const
 {
 }

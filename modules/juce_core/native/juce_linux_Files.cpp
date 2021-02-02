@@ -189,7 +189,7 @@ static bool isFileExecutable (const String& filename)
             && access (filename.toUTF8(), X_OK) == 0;
 }
 
-bool Process::openDocument (const String& fileName, const String& parameters)
+static bool openDocumentExternally (const String& fileName, const String& parameters, const Array<char*>* environment = nullptr)
 {
     auto cmdString = fileName.replace (" ", "\\ ", false);
     cmdString << " " << parameters;
@@ -218,11 +218,34 @@ bool Process::openDocument (const String& fileName, const String& parameters)
         setsid();
 
         // Child process
-        execve (argv[0], (char**) argv, environ);
+        execve (argv[0], (char**) argv, environment ? environment->getRawDataPointer() : nullptr);
         exit (0);
     }
 
     return cpid >= 0;
+}
+
+bool Process::openDocument (const String& fileName, const String& parameters)
+{
+    return openDocumentExternally (fileName, parameters);
+}
+
+bool Process::openDocument (const String& fileName, const String& parameters, const StringPairArray& environment)
+{
+    StringArray envValues;
+
+    for (const auto& key : environment.getAllKeys())
+        envValues.add (key + "=" + environment.getValue (key, {}));
+
+    Array<char*> env;
+
+    for (auto& value : envValues)
+        if (value.isNotEmpty())
+            env.add (const_cast<char*> (value.toRawUTF8()));
+
+    env.add (nullptr);
+
+    return openDocumentExternally (fileName, parameters, &env);
 }
 
 void File::revealToUser() const
