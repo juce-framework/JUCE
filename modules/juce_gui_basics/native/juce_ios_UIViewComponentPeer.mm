@@ -386,6 +386,8 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
     hiddenTextView.autocapitalizationType = UITextAutocapitalizationTypeNone;
     hiddenTextView.autocorrectionType = UITextAutocorrectionTypeNo;
+    hiddenTextView.inputAssistantItem.leadingBarButtonGroups = @[];
+    hiddenTextView.inputAssistantItem.trailingBarButtonGroups = @[];
 
     return self;
 }
