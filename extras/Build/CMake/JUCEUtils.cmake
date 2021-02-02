@@ -148,12 +148,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         set(JUCE_LINUX_TARGET_ARCHITECTURE "${target_arch}"
             CACHE INTERNAL "The target architecture, used to name internal folders in VST3 bundles")
     endif()
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-    find_program(JUCE_XCRUN xcrun)
-
-    if(NOT JUCE_XCRUN)
-        message(WARNING "failed to find xcrun; older resource-based AU plug-ins may not work correctly")
-    endif()
 endif()
 
 # We set up default/fallback copy dirs here. If you need different copy dirs, use

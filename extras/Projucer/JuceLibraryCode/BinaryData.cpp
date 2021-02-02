@@ -7604,7 +7604,7 @@ static const unsigned char temp_binary_data_62[] =
 const char* colourscheme_light_xml = (const char*) temp_binary_data_62;
 
 //================== juce_runtime_arch_detection.cpp ==================
-static const unsigned char temp_binary_data_61[] =
+static const unsigned char temp_binary_data_63[] =
 "#if defined(__arm__) || defined(__TARGET_ARCH_ARM) || defined(_M_ARM) || defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
 "\r\n"
 "  #if defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
@@ -7665,7 +7665,7 @@ static const unsigned char temp_binary_data_61[] =
 "\r\n"
 "#endif\r\n";
 
-const char* juce_runtime_arch_detection_cpp = (const char*) temp_binary_data_61;
+const char* juce_runtime_arch_detection_cpp = (const char*) temp_binary_data_63;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
