@@ -4,14 +4,12 @@
 #include "PlaybackRegionView.h"
 #include "MusicalContextView.h"
 
-using namespace juce;
-
 constexpr int kTrackHeight { 80 };
 
 static double lastPixelsPerSecond { 1.0 };
 
 //==============================================================================
-DocumentView::DocumentView (ARAEditorView* ev, const AudioPlayHead::CurrentPositionInfo& posInfo)
+DocumentView::DocumentView (juce::ARAEditorView* ev, const juce::AudioPlayHead::CurrentPositionInfo& posInfo)
     : editorView (ev),
       playbackRegionsViewport (*this),
       playHeadView (*this),
@@ -59,7 +57,7 @@ DocumentView::~DocumentView()
 }
 
 //==============================================================================
-void DocumentView::onNewSelection (const ARAViewSelection& /*viewSelection*/)
+void DocumentView::onNewSelection (const juce::ARAViewSelection& /*viewSelection*/)
 {
     if (showOnlySelectedRegionSequences)
         invalidateRegionSequenceViewContainers();
@@ -67,13 +65,13 @@ void DocumentView::onNewSelection (const ARAViewSelection& /*viewSelection*/)
     timeRangeSelectionView.repaint();
 }
 
-void DocumentView::onHideRegionSequences (std::vector<ARARegionSequence*> const& /*regionSequences*/)
+void DocumentView::onHideRegionSequences (std::vector<juce::ARARegionSequence*> const& /*regionSequences*/)
 {
     if (! showOnlySelectedRegionSequences)
         invalidateRegionSequenceViewContainers();
 }
 
-void DocumentView::didEndEditing (ARADocument* /*document*/)
+void DocumentView::didEndEditing (juce::ARADocument* /*document*/)
 {
     if (regionSequenceViewsAreInvalid)
         rebuildRegionSequenceViewContainers();
@@ -82,7 +80,7 @@ void DocumentView::didEndEditing (ARADocument* /*document*/)
         calculateTimeRange();
 }
 
-void DocumentView::didReorderRegionSequencesInDocument (ARADocument* /*document*/)
+void DocumentView::didReorderRegionSequencesInDocument (juce::ARADocument* /*document*/)
 {
     invalidateRegionSequenceViewContainers();
 }
@@ -93,7 +91,7 @@ void DocumentView::invalidateTimeRange()
     timeRangeIsInvalid = true;
 }
 
-Range<double> DocumentView::getVisibleTimeRange() const
+juce::Range<double> DocumentView::getVisibleTimeRange() const
 {
     const double start = getPlaybackRegionsViewsTimeForX (playbackRegionsViewport.getViewArea().getX());
     const double end = getPlaybackRegionsViewsTimeForX (playbackRegionsViewport.getViewArea().getRight());
@@ -102,7 +100,7 @@ Range<double> DocumentView::getVisibleTimeRange() const
 
 int DocumentView::getPlaybackRegionsViewsXForTime (double time) const
 {
-    return roundToInt ((time - timeRange.getStart()) / timeRange.getLength() * playbackRegionsView.getWidth());
+    return juce::roundToInt ((time - timeRange.getStart()) / timeRange.getLength() * playbackRegionsView.getWidth());
 }
 
 double DocumentView::getPlaybackRegionsViewsTimeForX (int x) const
@@ -132,9 +130,9 @@ void DocumentView::parentHierarchyChanged()
         rebuildRegionSequenceViewContainers();
 }
 
-void DocumentView::paint (Graphics& g)
+void DocumentView::paint (juce::Graphics& g)
 {
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 }
 
 void DocumentView::resized()
@@ -150,20 +148,20 @@ void DocumentView::resized()
 
     // limit max zoom by roughly 2 pixel per sample (we're just assuming some arbitrary high sample rate here),
     // but we also must make sure playbackRegionsViewWidth does not exceed integer range (with additional safety margin for rounding)
-    playbackRegionsViewWidthDbl = jmin (playbackRegionsViewWidthDbl, timeRange.getLength() * 2.0 * 192000.0);
-    playbackRegionsViewWidthDbl = jmin (playbackRegionsViewWidthDbl, static_cast<double> (std::numeric_limits<int>::max() - 1));
-    int playbackRegionsViewWidth = roundToInt (floor (playbackRegionsViewWidthDbl));
+    playbackRegionsViewWidthDbl = juce::jmin (playbackRegionsViewWidthDbl, timeRange.getLength() * 2.0 * 192000.0);
+    playbackRegionsViewWidthDbl = juce::jmin (playbackRegionsViewWidthDbl, static_cast<double> (std::numeric_limits<int>::max() - 1));
+    int playbackRegionsViewWidth = juce::roundToInt (floor (playbackRegionsViewWidthDbl));
 
     // min zoom is limited by covering entire view range
     // TODO JUCE_ARA getScrollBarThickness() should only be substracted if vertical scroll bar is actually visible
     const int minPlaybackRegionsViewWidth = getWidth() - regionSequenceHeaderWidth - playbackRegionsViewport.getScrollBarThickness();
-    playbackRegionsViewWidth = jmax (minPlaybackRegionsViewWidth, playbackRegionsViewWidth);
+    playbackRegionsViewWidth = juce::jmax (minPlaybackRegionsViewWidth, playbackRegionsViewWidth);
     pixelsPerSecond = playbackRegionsViewWidth / timeRange.getLength();
     lastPixelsPerSecond = pixelsPerSecond;
 
     // update sizes and positions of all views
     playbackRegionsViewport.setBounds (regionSequenceHeaderWidth, musicalContextViewHeight, getWidth() - regionSequenceHeaderWidth, getHeight() - musicalContextViewHeight);
-    playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, jmax (kTrackHeight * regionSequenceViewContainers.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
+    playbackRegionsView.setBounds (0, 0, playbackRegionsViewWidth, juce::jmax (kTrackHeight * regionSequenceViewContainers.size(), playbackRegionsViewport.getHeight() - playbackRegionsViewport.getScrollBarThickness()));
 
     musicalContextViewport.setBounds (regionSequenceHeaderWidth, 0, playbackRegionsViewport.getMaximumVisibleWidth(), musicalContextViewHeight);
     musicallContextView.setBounds (0, 0, playbackRegionsViewWidth, musicalContextViewHeight);
@@ -226,12 +224,12 @@ void DocumentView::rebuildRegionSequenceViewContainers()
 
     if (showOnlySelectedRegionSequences)
     {
-        for (auto selectedSequence : getARAEditorView()->getViewSelection().getEffectiveRegionSequences<ARARegionSequence>())
+        for (auto selectedSequence : getARAEditorView()->getViewSelection().getEffectiveRegionSequences<juce::ARARegionSequence>())
             regionSequenceViewContainers.add (new RegionSequenceViewContainer (*this, selectedSequence));
     }
     else    // show all RegionSequences of Document...
     {
-        for (auto regionSequence : getDocument()->getRegionSequences<ARARegionSequence>())
+        for (auto regionSequence : getDocument()->getRegionSequences<juce::ARARegionSequence>())
             if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
                 regionSequenceViewContainers.add (new RegionSequenceViewContainer (*this, regionSequence));
     }
@@ -242,21 +240,21 @@ void DocumentView::rebuildRegionSequenceViewContainers()
     resized();
 
     // update region header tooltips
-    const auto total = getDocument()->getRegionSequences<ARARegionSequence>().size();
+    const auto total = getDocument()->getRegionSequences<juce::ARARegionSequence>().size();
     const auto hidden = getARAEditorView()->getHiddenRegionSequences().size();
-    String s ("Showing " + String (regionSequenceViewContainers.size()));
+    juce::String s ("Showing " + juce::String (regionSequenceViewContainers.size()));
     if (showOnlySelectedRegionSequences)
         s += " selected";
-    s += String (" out of ") + String (total - hidden) + String (" tracks");
+    s += juce::String (" out of ") + juce::String (total - hidden) + juce::String (" tracks");
     if (hidden)
-        s += String ("(") + String (hidden) + String (" hidden)");
-    s+= String (".");
+        s += juce::String ("(") + juce::String (hidden) + juce::String (" hidden)");
+    s+= juce::String (".");
     regionSequenceHeadersTooltipView.setTooltip(s);
 }
 
 void DocumentView::calculateTimeRange()
 {
-    Range<double> newTimeRange;
+    juce::Range<double> newTimeRange;
     if (! regionSequenceViewContainers.isEmpty())
     {
         bool isFirst = true;
@@ -296,7 +294,7 @@ DocumentView::PlayHeadView::PlayHeadView (DocumentView& docView)
 void DocumentView::PlayHeadView::paint (juce::Graphics &g)
 {
     const int playheadX = documentView.getPlaybackRegionsViewsXForTime (documentView.getPlayHeadPositionInfo().timeInSeconds);
-    g.setColour (findColour (ScrollBar::ColourIds::thumbColourId));
+    g.setColour (findColour (juce::ScrollBar::ColourIds::thumbColourId));
     g.fillRect (playheadX, 0, 1, getHeight());
 }
 
@@ -319,7 +317,7 @@ void DocumentView::TimeRangeSelectionView::paint (juce::Graphics& g)
 
 //==============================================================================
 // see https://forum.juce.com/t/viewport-scrollbarmoved-mousewheelmoved/20226
-void DocumentView::ScrollMasterViewport::visibleAreaChanged (const Rectangle<int>& newVisibleArea)
+void DocumentView::ScrollMasterViewport::visibleAreaChanged (const juce::Rectangle<int>& newVisibleArea)
 {
     Viewport::visibleAreaChanged (newVisibleArea);
     
