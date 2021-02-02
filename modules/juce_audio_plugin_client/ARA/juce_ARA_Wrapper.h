@@ -1,18 +1,11 @@
 #pragma once
 
-// Include juce preamble if built by Projucer (not CMake)
-#if defined (JUCE_PROJUCER_VERSION)
-    #include "JucePluginDefines.h"
-#endif
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-
 #if JucePlugin_Enable_ARA
+ // Configure ARA debug support prior to including ARA SDK headers
+ namespace juce
+ {
 
-namespace juce
-{
-
-// Configure ARA debug support prior to including ARA headers
-#if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
+ #if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
 
     #define ARA_ENABLE_INTERNAL_ASSERTS 1
 
@@ -23,21 +16,24 @@ namespace juce
     #define ARA_ENABLE_DEBUG_OUTPUT 1
    #endif
 
-#else
+ #else
 
     #define ARA_ENABLE_INTERNAL_ASSERTS 0
 
-#endif // (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
+ #endif // (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
 
-}
+ } // namespace juce
 
-// Include ARA headers
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
-#include <ARA_Library/PlugIn/ARAPlug.h>
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+ // Include ARA SDK headers
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
 
-namespace juce
-{
+ #include <ARA_Library/PlugIn/ARAPlug.h>
+
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+ // ARA utility functions
+ namespace juce
+ {
     using ARAViewSelection = ARA::PlugIn::ViewSelection;
     using ARAContentUpdateScopes = ARA::ContentUpdateScopes;
     using ARARestoreObjectsFilter = ARA::PlugIn::RestoreObjectsFilter;
@@ -48,6 +44,13 @@ namespace juce
 
     inline Colour convertARAColour (const ARA::ARAColor* colour) { return Colour::fromFloatRGBA (colour->r, colour->g, colour->b, 1.0f); }
     inline Colour convertOptionalARAColour (const ARA::ARAColor* colour, const Colour& fallbackColour = Colour()) { return (colour != nullptr) ? convertARAColour(colour) : fallbackColour; }
-}
+ } // namespace juce
+
+ // Include JUCE_ARA integration headers
+ #include <juce_audio_plugin_client/ARA/juce_ARAModelObjects.h>
+ #include <juce_audio_plugin_client/ARA/juce_ARADocumentController.h>
+ #include <juce_audio_plugin_client/ARA/juce_AudioProcessor_ARAExtensions.h>
+ #include <juce_audio_plugin_client/ARA/juce_ARAAudioReaders.h>
+ #include <juce_audio_plugin_client/ARA/juce_ARAPlugInInstanceRoles.h>
 
 #endif
