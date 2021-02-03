@@ -23,8 +23,8 @@ public:
 //               can provide this if needed. We could get rid of both renderer subclasses otherwise,
 //               in fact we could even go further and hide the instance roles entirely behind
 //               AudioProcessor(Editor)ARAExtension, which is maybe a good way reduce complexity?
-    void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
-    AudioProcessor* getAudioProcessor() const { return audioProcessor; }
+    void setAudioProcessor (AudioProcessor* processor) noexcept { audioProcessor = processor; }
+    AudioProcessor* getAudioProcessor() const noexcept { return audioProcessor; }
 
 // TODO JUCE_ARA see definition of these in .cpp
 //#if ARA_VALIDATE_API_CALLS
@@ -52,8 +52,8 @@ class JUCE_API  ARAEditorRenderer     : public ARA::PlugIn::EditorRenderer
 public:
     using ARA::PlugIn::EditorRenderer::EditorRenderer;
 
-    void setAudioProcessor (AudioProcessor* processor) { audioProcessor = processor; }
-    AudioProcessor* getAudioProcessor() const { return audioProcessor; }
+    void setAudioProcessor (AudioProcessor* processor) noexcept { audioProcessor = processor; }
+    AudioProcessor* getAudioProcessor() const noexcept { return audioProcessor; }
 
 private:
     AudioProcessor* audioProcessor { nullptr };

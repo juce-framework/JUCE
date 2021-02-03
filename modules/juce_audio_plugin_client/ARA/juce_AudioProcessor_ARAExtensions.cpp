@@ -3,21 +3,9 @@
 namespace juce
 {
 
-const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles)
+void AudioProcessorARAExtension::didBindToARA() noexcept
 {
-    ARA::PlugIn::DocumentController* documentController = ARA::PlugIn::fromRef<ARA::PlugIn::DocumentController> (documentControllerRef);
-    ARA_VALIDATE_API_ARGUMENT (documentControllerRef, ARA::PlugIn::DocumentController::isValidDocumentController (documentController));
-
-    // verify this is only called once
-    if (isBoundToARA())
-    {
-        ARA_VALIDATE_API_STATE (false && "binding already established");
-        return nullptr;
-    }
-
-    araPlugInExtension.reset (documentController->createPlugInExtensionWithRoles (knownRoles, assignedRoles));
-
-   #if (! JUCE_DISABLE_ASSERTIONS)
+#if (! JUCE_DISABLE_ASSERTIONS)
     // validate proper subclassing of the instance role classes
     if (isARAPlaybackRenderer())
         jassert (dynamic_cast<ARAPlaybackRenderer*> (getARAPlaybackRenderer()) != nullptr);
@@ -25,16 +13,12 @@ const ARA::ARAPlugInExtensionInstance* AudioProcessorARAExtension::bindToARA (AR
         jassert (dynamic_cast<ARAEditorRenderer*> (getARAEditorRenderer()) != nullptr);
     if (isARAEditorView())
         jassert (dynamic_cast<ARAEditorView*> (getARAEditorView()) != nullptr);
-   #endif
+#endif
 
     if (isARAPlaybackRenderer())
         getARAPlaybackRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
     if (isARAEditorRenderer())
         getARAEditorRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
-
-    didBindToARA();
-
-    return araPlugInExtension->getInstance();
 }
 
 //==============================================================================
