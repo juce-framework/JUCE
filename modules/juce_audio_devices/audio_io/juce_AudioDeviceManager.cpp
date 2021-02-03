@@ -953,7 +953,7 @@ void AudioDeviceManager::removeMidiInputDeviceCallback (const String& identifier
     {
         auto& mc = midiCallbacks.getReference (i);
 
-        if (mc.callback == callbackToRemove && mc.deviceIdentifier == identifier)
+        if (mc.callback == callbackToRemove && (identifier.isEmpty() || mc.deviceIdentifier == identifier))
         {
             const ScopedLock sl (midiCallbackLock);
             midiCallbacks.remove (i);
@@ -1146,12 +1146,20 @@ void AudioDeviceManager::addMidiInputCallback (const String& name, MidiInputCall
 
 void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* callbackToRemove)
 {
-    for (auto& device : MidiInput::getAvailableDevices())
+    
+    if (name.isEmpty())
     {
-        if (device.name == name)
+        removeMidiInputDeviceCallback ({}, callbackToRemove);
+    }
+    else
+    {
+        for (auto& device : MidiInput::getAvailableDevices())
         {
-            removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
-            return;
+            if (device.name == name)
+            {
+                removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
+                return;
+            }
         }
     }
 }
