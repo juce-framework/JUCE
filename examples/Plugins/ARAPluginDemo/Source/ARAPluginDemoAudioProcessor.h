@@ -45,7 +45,7 @@ public:
    #endif
 
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-    bool didProcessBlockSucceed() override;
+    bool didProcessBlockSucceed() const noexcept override;
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;

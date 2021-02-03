@@ -323,7 +323,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 }
 
 #if JucePlugin_Enable_ARA
-bool ARAPluginDemoAudioProcessor::didProcessBlockSucceed()
+bool ARAPluginDemoAudioProcessor::didProcessBlockSucceed() const noexcept
 {
     // You can use this function to inform the calling code that the
     // most recent processBlock call didn't output samples as expected.

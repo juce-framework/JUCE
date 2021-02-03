@@ -29,7 +29,7 @@ public:
     /** Query whether last call to processBlock() was successful.
         TODO JUCE_ARA AudioProcessor::processBlock() should rather return a bool
     */
-    virtual bool didProcessBlockSucceed() = 0;
+    virtual bool didProcessBlockSucceed() const noexcept = 0;
 
     /** Called by the ARA Companion SDK code to bind the plugin instance to an ARA document. */
     const ARA::ARAPlugInExtensionInstance* bindToARA (ARA::ARADocumentControllerRef documentControllerRef, ARA::ARAPlugInInstanceRoleFlags knownRoles, ARA::ARAPlugInInstanceRoleFlags assignedRoles);
