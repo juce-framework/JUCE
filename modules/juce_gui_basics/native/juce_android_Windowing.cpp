@@ -309,6 +309,18 @@ public:
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.gravity, GRAVITY_LEFT | GRAVITY_TOP);
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.windowAnimations, 0x01030000 /* android.R.style.Animation */);
 
+            if (getAndroidSDKVersion() >= 28)
+            {
+                jfieldID layoutInDisplayCutoutModeFieldId = env->GetFieldID (AndroidWindowManagerLayoutParams,
+                                                                             "layoutInDisplayCutoutMode",
+                                                                             "I");
+
+                if (layoutInDisplayCutoutModeFieldId != nullptr)
+                    env->SetIntField (windowLayoutParams.get(),
+                                      layoutInDisplayCutoutModeFieldId,
+                                      LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
+            }
+
             if (Desktop::getInstance().getKioskModeComponent() != nullptr)
                 setNavBarsHidden (true);
 
@@ -953,6 +965,7 @@ private:
     static constexpr int TYPE_APPLICATION = 0x2;
     static constexpr int FLAG_NOT_TOUCH_MODAL = 0x20, FLAG_LAYOUT_IN_SCREEN = 0x100, FLAG_LAYOUT_NO_LIMITS = 0x200;
     static constexpr int PIXEL_FORMAT_OPAQUE = -1, PIXEL_FORMAT_TRANSPARENT = -2;
+    static constexpr int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 0x3;
 
     GlobalRef view, viewGroup, buffer;
     bool viewGroupIsWindow = false, fullScreen = false, navBarsHidden = false;
