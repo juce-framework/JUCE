@@ -313,14 +313,21 @@ void MainComponent::paint (Graphics& g)
 
 void MainComponent::resized()
 {
-    auto bounds = getLocalBounds();
+    auto safeBounds = [this]
+    {
+        auto bounds = getLocalBounds();
 
-    showDemosButton.setBounds (0, 0, 150, contentComponent->getTabBarDepth());
+        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (getScreenBounds()))
+            return display->safeAreaInsets.subtractedFrom (bounds);
+
+        return bounds;
+    }();
+
+    showDemosButton.setBounds (safeBounds.getX(), safeBounds.getY(), 150, contentComponent->getTabBarDepth());
 
     if (isShowingHeavyweightDemo)
     {
-        bounds.removeFromLeft (sidePanelWidth);
-
+        safeBounds.removeFromLeft (sidePanelWidth);
         contentComponent->setTabBarIndent (jmax (0, 150 - sidePanelWidth));
     }
     else
@@ -328,7 +335,7 @@ void MainComponent::resized()
         contentComponent->setTabBarIndent (150);
     }
 
-    contentComponent->setBounds (bounds);
+    contentComponent->setBounds (safeBounds);
 }
 
 void MainComponent::homeButtonClicked()
