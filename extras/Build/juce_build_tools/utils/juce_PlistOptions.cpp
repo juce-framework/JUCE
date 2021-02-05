@@ -203,11 +203,11 @@ namespace build_tools
         {
             if (type != ProjectType::Target::AudioUnitv3PlugIn)
             {
-                // Forcing full screen disables the split screen feature and prevents error ITMS-90475
-                addPlistDictionaryKey (*dict, "UIRequiresFullScreen", true);
-
                 if (statusBarHidden)
                     addPlistDictionaryKey (*dict, "UIStatusBarHidden", true);
+
+                if (requiresFullScreen)
+                    addPlistDictionaryKey (*dict, "UIRequiresFullScreen", true);
 
                 addIosScreenOrientations (*dict);
                 addIosBackgroundModes (*dict);

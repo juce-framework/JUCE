@@ -170,6 +170,7 @@ public:
           uiFileSharingEnabledValue                    (settings, Ids::UIFileSharingEnabled,                    getUndoManager()),
           uiSupportsDocumentBrowserValue               (settings, Ids::UISupportsDocumentBrowser,               getUndoManager()),
           uiStatusBarHiddenValue                       (settings, Ids::UIStatusBarHidden,                       getUndoManager()),
+          uiRequiresFullScreenValue                    (settings, Ids::UIRequiresFullScreen,                    getUndoManager(), true),
           documentExtensionsValue                      (settings, Ids::documentExtensions,                      getUndoManager()),
           iosInAppPurchasesValue                       (settings, Ids::iosInAppPurchases,                       getUndoManager()),
           iosContentSharingValue                       (settings, Ids::iosContentSharing,                       getUndoManager(), true),
@@ -271,6 +272,7 @@ public:
     bool isFileSharingEnabled() const                       { return uiFileSharingEnabledValue.get(); }
     bool isDocumentBrowserEnabled() const                   { return uiSupportsDocumentBrowserValue.get(); }
     bool isStatusBarHidden() const                          { return uiStatusBarHiddenValue.get(); }
+    bool requiresFullScreen() const                         { return uiRequiresFullScreenValue.get(); }
 
     bool getSuppressPlistResourceUsage() const              { return suppressPlistResourceUsageValue.get(); }
 
@@ -389,6 +391,10 @@ public:
 
             props.add (new ChoicePropertyComponent (uiStatusBarHiddenValue, "Status Bar Hidden"),
                        "Enable this to disable the status bar in your app.");
+
+            props.add (new ChoicePropertyComponent (uiRequiresFullScreenValue, "Requires Full Screen"),
+                       "Disable this to enable non-fullscreen views such as Slide Over or Split View in your app. "
+                       "You will also need to enable all orientations.");
         }
         else if (projectType.isGUIApplication())
         {
@@ -1748,6 +1754,7 @@ public:
             options.fileSharingEnabled               = owner.isFileSharingEnabled();
             options.documentBrowserEnabled           = owner.isDocumentBrowserEnabled();
             options.statusBarHidden                  = owner.isStatusBarHidden();
+            options.requiresFullScreen               = owner.requiresFullScreen();
             options.backgroundAudioEnabled           = owner.isBackgroundAudioEnabled();
             options.backgroundBleEnabled             = owner.isBackgroundBleEnabled();
             options.pushNotificationsEnabled         = owner.isPushNotificationsEnabled();
@@ -3489,7 +3496,7 @@ private:
                      cameraPermissionNeededValue, cameraPermissionTextValue,
                      bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
                      sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
-                     uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, documentExtensionsValue, iosInAppPurchasesValue,
+                     uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, uiRequiresFullScreenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                      exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;

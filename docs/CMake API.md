@@ -278,6 +278,9 @@ attributes directly to these creation functions, rather than adding them later.
 
 - `STATUS_BAR_HIDDEN`
   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+  
+ - `REQUIRES_FULL_SCREEN`
+   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
 
 - `BACKGROUND_AUDIO_ENABLED`
   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
