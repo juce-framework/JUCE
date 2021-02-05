@@ -99,7 +99,7 @@ public:
     ~FileChooserDialogBox() override;
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Displays and runs the dialog box modally.
 
         This will show the box with the specified size, returning true if the user
