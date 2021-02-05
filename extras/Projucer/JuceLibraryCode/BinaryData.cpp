@@ -6120,11 +6120,6 @@ static const unsigned char temp_binary_data_36[] =
 "%%aradocumentcontroller_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"%%aradocumentcontroller_class_name%%::%%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance)\r\n"
-"    : juce::ARADocumentController (instance)\r\n"
-"{\r\n"
-"}\r\n"
-"\r\n"
 "%%aradocumentcontroller_class_name%%::~%%aradocumentcontroller_class_name%%()\r\n"
 "{\r\n"
 "}\r\n"
@@ -6147,11 +6142,11 @@ static const unsigned char temp_binary_data_36[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"// This creates new instances of the document controller..\r\n"
-"ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept\r\n"
+"// This creates the static ARAFactory instances for the plugin.\r\n"
+"const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory()\r\n"
 "{\r\n"
-"    return new %%aradocumentcontroller_class_name%% (instance);\r\n"
-"};\r\n";
+"    return juce::ARADocumentController::createARAFactory<%%aradocumentcontroller_class_name%%>();\r\n"
+"}\r\n";
 
 const char* jucer_AudioPluginARADocumentControllerTemplate_cpp = (const char*) temp_binary_data_36;
 
@@ -6169,7 +6164,7 @@ static const unsigned char temp_binary_data_37[] =
 "\r\n"
 "#pragma once\r\n"
 "\r\n"
-"%%app_headers%%\r\n"
+"#include <juce_audio_plugin_client/ARA/juce_ARADocumentController.h>\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/**\r\n"
@@ -6177,18 +6172,18 @@ static const unsigned char temp_binary_data_37[] =
 "class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentController\r\n"
 "{\r\n"
 "public:\r\n"
+"    using juce::ARADocumentController::ARADocumentController;\r\n"
+"\r\n"
 "    //==============================================================================\r\n"
 "    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);\r\n"
 "    ~%%aradocumentcontroller_class_name%%();\r\n"
 "\r\n"
+"protected:\r\n"
 "    //==============================================================================\r\n"
+"    // Override document controller customization methods here\r\n"
+"\r\n"
 "    bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;\r\n"
 "    bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;\r\n"
-"\r\n"
-"//==============================================================================\r\n"
-"// Override document controller methods here\r\n"
-"protected:\r\n"
-"\r\n"
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
@@ -7713,8 +7708,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xfb6f6d96:  numBytes = 3554; return jucer_AudioComponentSimpleTemplate_h;
         case 0xafccbd3f:  numBytes = 2941; return jucer_AudioComponentTemplate_cpp;
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
-        case 0x744d44d6:  numBytes = 2017; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 1437; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0x744d44d6:  numBytes = 1771; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = 1489; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0x27c5a93a:  numBytes = 1639; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1094; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6478; return jucer_AudioPluginFilterTemplate_cpp;

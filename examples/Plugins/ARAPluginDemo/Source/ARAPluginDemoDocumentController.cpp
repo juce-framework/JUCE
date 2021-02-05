@@ -69,8 +69,8 @@ bool ARAPluginDemoDocumentController::doStoreObjectsToStream (juce::ARAOutputStr
 }
 
 //==============================================================================
-// Hook defined by the ARA SDK to create custom subclass
-ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARA::ARADocumentControllerHostInstance* instance) noexcept
+// This creates the static ARAFactory instances for the plugin.
+const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory()
 {
-    return new ARAPluginDemoDocumentController (instance);
+    return juce::ARADocumentController::createARAFactory<ARAPluginDemoDocumentController>();
 }

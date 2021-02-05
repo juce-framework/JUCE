@@ -527,7 +527,7 @@ public:
                     if (auFactory->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
 
-                    auFactory->outFactory = ARA::PlugIn::DocumentController::getARAFactory();
+                    auFactory->outFactory = createARAFactory();
                     return noErr;
                 }
 
