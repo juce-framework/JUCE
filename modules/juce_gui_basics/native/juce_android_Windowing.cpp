@@ -225,6 +225,21 @@ DECLARE_JNI_CLASS (AndroidWindowManagerLayoutParams, "android/view/WindowManager
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getDisplayCutout,     "getDisplayCutout", "()Landroid/view/DisplayCutout;")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindowInsets, "android/view/WindowInsets", 28)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getSafeInsetBottom, "getSafeInsetBottom", "()I") \
+ METHOD (getSafeInsetLeft,   "getSafeInsetLeft",   "()I") \
+ METHOD (getSafeInsetRight,  "getSafeInsetRight",  "()I") \
+ METHOD (getSafeInsetTop,    "getSafeInsetTop",    "()I")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidDisplayCutout, "android/view/DisplayCutout", 28)
+#undef JNI_CLASS_MEMBERS
+
 //==============================================================================
 namespace
 {
@@ -242,6 +257,30 @@ namespace
 
     constexpr int fullScreenFlags = SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
     constexpr int FLAG_NOT_FOCUSABLE = 0x8;
+}
+
+//==============================================================================
+static bool supportsDisplayCutout()
+{
+    return getAndroidSDKVersion() >= 28;
+}
+
+static BorderSize<int> androidDisplayCutoutToBorderSize (LocalRef<jobject> displayCutout, double displayScale)
+{
+    if (displayCutout.get() == nullptr)
+        return {};
+
+    auto* env = getEnv();
+
+    auto getInset = [&] (jmethodID methodID)
+    {
+        return roundToInt (env->CallIntMethod (displayCutout.get(), methodID) / displayScale);
+    };
+
+    return { getInset (AndroidDisplayCutout.getSafeInsetTop),
+             getInset (AndroidDisplayCutout.getSafeInsetLeft),
+             getInset (AndroidDisplayCutout.getSafeInsetBottom),
+             getInset (AndroidDisplayCutout.getSafeInsetRight) };
 }
 
 //==============================================================================
@@ -309,7 +348,7 @@ public:
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.gravity, GRAVITY_LEFT | GRAVITY_TOP);
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.windowAnimations, 0x01030000 /* android.R.style.Animation */);
 
-            if (getAndroidSDKVersion() >= 28)
+            if (supportsDisplayCutout())
             {
                 jfieldID layoutInDisplayCutoutModeFieldId = env->GetFieldID (AndroidWindowManagerLayoutParams,
                                                                              "layoutInDisplayCutoutMode",
@@ -331,6 +370,18 @@ public:
 
             viewGroup = GlobalRef (LocalRef<jobject> (env->CallObjectMethod (activity.get(), AndroidContext.getSystemService, javaString ("window").get())));
             env->CallVoidMethod (viewGroup.get(), AndroidViewManager.addView, view.get(), windowLayoutParams.get());
+        }
+
+        if (supportsDisplayCutout())
+        {
+            jmethodID setOnApplyWindowInsetsListenerMethodId = env->GetMethodID (AndroidView,
+                                                                                 "setOnApplyWindowInsetsListener",
+                                                                                 "(Landroid/view/View$OnApplyWindowInsetsListener;)V");
+
+            if (setOnApplyWindowInsetsListenerMethodId != nullptr)
+                env->CallVoidMethod (view.get(), setOnApplyWindowInsetsListenerMethodId,
+                                     CreateJavaInterface (new ViewWindowInsetsListener,
+                                                          "android/view/View$OnApplyWindowInsetsListener").get());
         }
 
         if (isFocused())
@@ -855,6 +906,61 @@ private:
     static void JNICALL handleKeyboardHiddenJni (JNIEnv*, jobject /*view*/, jlong host)                                          { if (auto* myself = reinterpret_cast<AndroidComponentPeer*> (host)) myself->handleKeyboardHiddenCallback(); }
     static void JNICALL handleAppPausedJni      (JNIEnv*, jobject /*view*/, jlong host)                                          { if (auto* myself = reinterpret_cast<AndroidComponentPeer*> (host)) myself->handleAppPausedCallback(); }
     static void JNICALL handleAppResumedJni     (JNIEnv*, jobject /*view*/, jlong host)                                          { if (auto* myself = reinterpret_cast<AndroidComponentPeer*> (host)) myself->handleAppResumedCallback(); }
+
+    //==============================================================================
+    struct ViewWindowInsetsListener  : public juce::AndroidInterfaceImplementer
+    {
+        jobject onApplyWindowInsets (LocalRef<jobject> v, LocalRef<jobject> insets)
+        {
+            auto* env = getEnv();
+
+            LocalRef<jobject> displayCutout (env->CallObjectMethod (insets.get(), AndroidWindowInsets.getDisplayCutout));
+
+            if (displayCutout != nullptr)
+            {
+                auto& displays = Desktop::getInstance().getDisplays();
+                auto& mainDisplay = *displays.getPrimaryDisplay();
+
+                auto newSafeAreaInsets = androidDisplayCutoutToBorderSize (displayCutout, mainDisplay.scale);
+
+                if (newSafeAreaInsets != mainDisplay.safeAreaInsets)
+                    const_cast<Displays&> (displays).refresh();
+
+                auto* fieldId = env->GetStaticFieldID (AndroidWindowInsets, "CONSUMED", "Landroid/view/WindowInsets");
+                jassert (fieldId != nullptr);
+
+                return env->GetStaticObjectField (AndroidWindowInsets, fieldId);
+            }
+
+            jmethodID onApplyWindowInsetsMethodId = env->GetMethodID (AndroidView,
+                                                                      "onApplyWindowInsets",
+                                                                      "(Landroid/view/WindowInsets;)Landroid/view/WindowInsets;");
+
+            jassert (onApplyWindowInsetsMethodId != nullptr);
+
+            return env->CallObjectMethod (v.get(), onApplyWindowInsetsMethodId, insets.get());
+        }
+
+    private:
+        jobject invoke (jobject proxy, jobject method, jobjectArray args) override
+        {
+            auto* env = getEnv();
+            auto methodName = juce::juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
+
+            if (methodName == "onApplyWindowInsets")
+            {
+                jassert (env->GetArrayLength (args) == 2);
+
+                LocalRef<jobject> windowView (env->GetObjectArrayElement (args, 0));
+                LocalRef<jobject> insets     (env->GetObjectArrayElement (args, 1));
+
+                return onApplyWindowInsets (std::move (windowView), std::move (insets));
+            }
+
+            // invoke base class
+            return AndroidInterfaceImplementer::invoke (proxy, method, args);
+        }
+    };
 
     //==============================================================================
     struct PreallocatedImage  : public ImagePixelData
@@ -1456,6 +1562,26 @@ void Displays::findDisplays (float masterScale)
 
             if (! activityArea.isEmpty())
                 d.userArea = activityArea / d.scale;
+
+            if (supportsDisplayCutout())
+            {
+                jmethodID getRootWindowInsetsMethodId = env->GetMethodID (AndroidView,
+                                                                          "getRootWindowInsets",
+                                                                          "()Landroid/view/WindowInsets;");
+
+                if (getRootWindowInsetsMethodId != nullptr)
+                {
+                    LocalRef<jobject> insets (env->CallObjectMethod (contentView.get(), getRootWindowInsetsMethodId));
+
+                    if (insets != nullptr)
+                    {
+                        LocalRef<jobject> displayCutout (env->CallObjectMethod (insets.get(), AndroidWindowInsets.getDisplayCutout));
+
+                        if (displayCutout.get() != nullptr)
+                            d.safeAreaInsets = androidDisplayCutoutToBorderSize (displayCutout, d.scale);
+                    }
+                }
+            }
 
             static bool hasAddedMainActivityListener = false;
 

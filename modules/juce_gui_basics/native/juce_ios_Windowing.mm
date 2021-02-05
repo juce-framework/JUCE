@@ -661,18 +661,35 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return Orientations::convertToJuce (orientation);
 }
 
+// The most straightforward way of retrieving the screen area available to an iOS app
+// seems to be to create a new window (which will take up all available space) and to
+// query its frame.
+struct TemporaryWindow
+{
+    UIWindow* window = [[UIWindow alloc] init];
+    ~TemporaryWindow() noexcept { [window release]; }
+};
+
 static Rectangle<int> getRecommendedWindowBounds()
 {
-    // The most straightforward way of retrieving the screen area available to an iOS app
-    // seems to be to create a new window (which will take up all available space) and to
-    // query its frame.
-    struct TemporaryWindow
-    {
-        UIWindow* window = [[UIWindow alloc] init];
-        ~TemporaryWindow() noexcept { [window release]; }
-    };
+    return convertToRectInt (TemporaryWindow().window.frame);
+}
 
-    return convertToRectInt (TemporaryWindow{}.window.frame);
+static BorderSize<int> getSafeAreaInsets (float masterScale)
+{
+   #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0
+    UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
+
+    auto getInset = [&] (float original) { return roundToInt (original / masterScale); };
+
+    return { getInset (safeInsets.top),    getInset (safeInsets.left),
+             getInset (safeInsets.bottom), getInset (safeInsets.right) };
+   #else
+    auto statusBarSize = [UIApplication sharedApplication].statusBarFrame.size;
+    auto statusBarHeight = jmin (statusBarSize.width, statusBarSize.height);
+
+    return { roundToInt (statusBarHeight / masterScale), 0, 0, 0 };
+   #endif
 }
 
 void Displays::findDisplays (float masterScale)
@@ -684,6 +701,7 @@ void Displays::findDisplays (float masterScale)
         Display d;
         d.totalArea = convertToRectInt ([s bounds]) / masterScale;
         d.userArea = getRecommendedWindowBounds() / masterScale;
+        d.safeAreaInsets = getSafeAreaInsets (masterScale);
         d.isMain = true;
         d.scale = masterScale * s.scale;
         d.dpi = 160 * d.scale;

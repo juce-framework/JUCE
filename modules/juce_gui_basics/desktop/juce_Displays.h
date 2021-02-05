@@ -45,13 +45,22 @@ public:
         bool isMain;
 
         /** The total area of this display in logical pixels including any OS-dependent objects
-            like the taskbar, menu bar, etc. */
+            like the taskbar, menu bar, etc.
+        */
         Rectangle<int> totalArea;
 
         /** The total area of this display in logical pixels which isn't covered by OS-dependent
             objects like the taskbar, menu bar, etc.
         */
         Rectangle<int> userArea;
+
+        /** Represents the area of this display in logical pixels that is not functional for
+            displaying content.
+
+            On mobile devices this may be the area covered by display cutouts and notches, where
+            you still want to draw a background but should not position important content.
+        */
+        BorderSize<int> safeAreaInsets;
 
         /** The top-left of this display in physical coordinates. */
         Point<int> topLeftPhysical;
