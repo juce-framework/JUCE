@@ -302,11 +302,11 @@ function(_juce_module_sources module_path output_path built_sources other_source
     set(base_path "${module_glob}/${module_glob}")
 
     set(module_cpp ${all_module_files})
-    list(FILTER module_cpp INCLUDE REGEX "${base_path}[^/]*\\.cpp$")
+    list(FILTER module_cpp INCLUDE REGEX "^${base_path}[^/]*\\.cpp$")
 
     if(APPLE)
         set(module_mm ${all_module_files})
-        list(FILTER module_mm INCLUDE REGEX "${base_path}[^/]*\\.(mm|r)$")
+        list(FILTER module_mm INCLUDE REGEX "^${base_path}[^/]*\\.(mm|r)$")
 
         if(module_mm)
             set(module_mm_replaced ${module_mm})
