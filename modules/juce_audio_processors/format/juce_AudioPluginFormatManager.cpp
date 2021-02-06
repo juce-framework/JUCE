@@ -38,7 +38,7 @@ void AudioPluginFormatManager::addDefaultFormats()
     {
         ignoreUnused (format);
 
-       #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS)
+       #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_IOS)
         jassert (dynamic_cast<VSTPluginFormat*> (format) == nullptr);
        #endif
 
@@ -50,7 +50,7 @@ void AudioPluginFormatManager::addDefaultFormats()
         jassert (dynamic_cast<AudioUnitPluginFormat*> (format) == nullptr);
        #endif
 
-       #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+       #if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
         jassert (dynamic_cast<LADSPAPluginFormat*> (format) == nullptr);
        #endif
     }
@@ -60,7 +60,7 @@ void AudioPluginFormatManager::addDefaultFormats()
     formats.add (new AudioUnitPluginFormat());
    #endif
 
-   #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS)
+   #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_IOS)
     formats.add (new VSTPluginFormat());
    #endif
 
@@ -68,7 +68,7 @@ void AudioPluginFormatManager::addDefaultFormats()
     formats.add (new VST3PluginFormat());
    #endif
 
-   #if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+   #if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
     formats.add (new LADSPAPluginFormat());
    #endif
 }

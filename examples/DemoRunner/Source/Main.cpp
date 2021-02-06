@@ -29,7 +29,7 @@
 #include "UI/MainComponent.h"
 
 //==============================================================================
-#if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
+#if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
  // Just add a simple icon to the Window system tray area or Mac menu bar..
  struct DemoTaskbarComponent  : public SystemTrayIconComponent,
                                 private Timer
@@ -96,7 +96,7 @@ public:
     {
         registerAllDemos();
 
-      #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
+      #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         // (This function call is for one of the demos, which involves launching a child process)
         if (invokeChildProcessDemo (commandLine))
             return;
@@ -144,7 +144,7 @@ private:
             setContentOwned (new MainComponent(), false);
             setVisible (true);
 
-           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
+           #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             taskbarIcon.reset (new DemoTaskbarComponent());
            #endif
         }

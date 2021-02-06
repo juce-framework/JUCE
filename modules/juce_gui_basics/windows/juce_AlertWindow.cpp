@@ -28,7 +28,7 @@ namespace juce
 
 static juce_wchar getDefaultPasswordChar() noexcept
 {
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     return 0x2022;
    #else
     return 0x25cf;

@@ -59,7 +59,7 @@
 #include "../../../DSP/WaveShaperTanhDemo.h"
 
 #include "../../../Utilities/Box2DDemo.h"
-#if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
+#if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
  #include "../../../Utilities/ChildProcessDemo.h"
 #endif
 #include "../../../Utilities/CryptographyDemo.h"
@@ -104,7 +104,7 @@ void registerDemos_One() noexcept
     REGISTER_DEMO (WaveShaperTanhDemo,      DSP,       false)
 
     REGISTER_DEMO (Box2DDemo,               Utilities, false)
-   #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
+   #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
     REGISTER_DEMO (ChildProcessDemo,        Utilities, false)
    #endif
     REGISTER_DEMO (CryptographyDemo,        Utilities, false)

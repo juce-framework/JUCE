@@ -702,6 +702,6 @@ private:
         updatePositionSliderAndLabel();
     }
 };
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #error "This demo is not supported on Linux!"
 #endif

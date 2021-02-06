@@ -290,7 +290,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))       return JUCEPluginHost;
     if (hostFilename.containsIgnoreCase   ("Vienna Ensemble Pro"))   return ViennaEnsemblePro;
 
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     if (hostFilename.containsIgnoreCase   ("Ardour"))            return Ardour;
     if (hostFilename.startsWithIgnoreCase ("Waveform"))          return TracktionWaveform;
     if (hostFilename.containsIgnoreCase   ("Tracktion"))         return TracktionGeneric;

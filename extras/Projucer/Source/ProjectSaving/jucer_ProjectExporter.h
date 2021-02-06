@@ -119,6 +119,8 @@ public:
         return isWindows() || isAndroid();
        #elif JUCE_LINUX
         return isLinux() || isAndroid();
+       #elif JUCE_BSD
+        return isLinux();
        #else
         #error
        #endif

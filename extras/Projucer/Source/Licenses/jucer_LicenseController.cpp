@@ -143,7 +143,7 @@ void LicenseController::logout()
     thread.reset();
     updateState ({});
 
-   #if ! JUCE_LINUX
+   #if ! (JUCE_LINUX || JUCE_BSD)
     WebBrowserComponent::clearCookies();
    #endif
 
@@ -187,7 +187,7 @@ void LicenseController::ensureLicenseWebviewIsOpenWithPage (const String& param)
     }
     else
     {
-       #if ! JUCE_LINUX
+       #if ! (JUCE_LINUX || JUCE_BSD)
         WebBrowserComponent::clearCookies();
        #endif
 

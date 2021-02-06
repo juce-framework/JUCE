@@ -253,7 +253,7 @@ namespace juce
  #include "native/juce_win32_DragAndDrop.cpp"
  #include "native/juce_win32_FileChooser.cpp"
 
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include "native/x11/juce_linux_X11_Symbols.cpp"
  #include "native/x11/juce_linux_X11_DragAndDrop.cpp"
 

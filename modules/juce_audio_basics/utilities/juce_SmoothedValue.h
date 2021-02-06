@@ -510,7 +510,7 @@ public:
             expect (referenceData.getSample (0, 10) < sv.getTargetValue());
             expectWithinAbsoluteError (referenceData.getSample (0, 11),
                                        sv.getTargetValue(),
-                                       1.0e-7f);
+                                       2.0e-7f);
 
             auto getUnitData = [] (int numSamplesToGenerate)
             {
@@ -528,7 +528,7 @@ public:
                 for (int i = 0; i < test.getNumSamples(); ++i)
                     expectWithinAbsoluteError (test.getSample (0, i),
                                                reference.getSample (0, i),
-                                               1.0e-7f);
+                                               2.0e-7f);
             };
 
             auto testData = getUnitData (numSamples);

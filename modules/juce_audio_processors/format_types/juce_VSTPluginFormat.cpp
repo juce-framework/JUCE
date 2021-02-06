@@ -173,7 +173,7 @@ namespace
     {
        #if JUCE_WINDOWS
         return timeGetTime() * 1000000.0;
-       #elif JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
+       #elif JUCE_LINUX || JUCE_BSD || JUCE_IOS || JUCE_ANDROID
         timeval micro;
         gettimeofday (&micro, nullptr);
         return (double) micro.tv_usec * 1000.0;
@@ -230,7 +230,7 @@ static pointer_sized_int VSTCALLBACK audioMaster (Vst2::AEffect*, int32, int32, 
 #endif
 
 //==============================================================================
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
 
 namespace
 {
@@ -624,7 +624,7 @@ struct ModuleHandle    : public ReferenceCountedObject
     {
         getActiveModules().add (this);
 
-       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_IOS || JUCE_ANDROID
+       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_IOS || JUCE_ANDROID
         fullParentDirectoryPathName = f.getParentDirectory().getFullPathName();
        #elif JUCE_MAC
         FSRef ref;
@@ -644,7 +644,7 @@ struct ModuleHandle    : public ReferenceCountedObject
     String fullParentDirectoryPathName;
    #endif
 
-  #if JUCE_WINDOWS || JUCE_LINUX || JUCE_ANDROID
+  #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
     DynamicLibrary module;
 
     bool open()
@@ -2108,7 +2108,7 @@ private:
     {
         if (auto* ed = getActiveEditor())
         {
-           #if JUCE_LINUX
+           #if JUCE_LINUX || JUCE_BSD
             const MessageManagerLock mmLock;
            #endif
 
@@ -2742,7 +2742,7 @@ public:
          #endif
           plugin (plug)
     {
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         pluginWindow = None;
         ignoreUnused (pluginRefusesToResize, alreadyInside);
        #elif JUCE_MAC
@@ -2827,7 +2827,7 @@ public:
     {
         if (isOpen)
         {
-           #if JUCE_LINUX
+           #if JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
             {
                 auto clip = g.getClipBounds();
@@ -2861,7 +2861,7 @@ public:
                 ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
                 MoveWindow (pluginHWND, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), TRUE);
             }
-           #elif JUCE_LINUX
+           #elif JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
             {
                 X11Symbols::getInstance()->xMoveResizeWindow (display, pluginWindow,
@@ -2888,7 +2888,7 @@ public:
         if (auto* peer = getTopLevelComponent()->getPeer())
             setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
 
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         SafePointer<VSTPluginWindow> safeThis (this);
 
         MessageManager::callAsync ([this, safeThis]
@@ -2963,7 +2963,7 @@ public:
                 reentrantGuard = false;
             }
 
-           #if JUCE_LINUX
+           #if JUCE_LINUX || JUCE_BSD
             if (pluginWindow == 0)
             {
                 updatePluginWindowHandle();
@@ -2980,7 +2980,7 @@ public:
     {
         ignoreUnused (e);
 
-       #if JUCE_WINDOWS || JUCE_LINUX
+       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         toFront (true);
        #endif
     }
@@ -3138,7 +3138,7 @@ private:
                 }
             }
         }
-       #elif JUCE_LINUX
+       #elif JUCE_LINUX || JUCE_BSD
         updatePluginWindowHandle();
 
         int w = 250, h = 150;
@@ -3206,7 +3206,7 @@ private:
 
             originalWndProc = 0;
             pluginHWND = 0;
-           #elif JUCE_LINUX
+           #elif JUCE_LINUX || JUCE_BSD
             pluginWindow = 0;
            #endif
         }
@@ -3287,7 +3287,7 @@ private:
     }
    #endif
 
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     void updatePluginWindowHandle()
     {
         pluginWindow = getChildWindow ((Window) getWindowHandle());
@@ -3402,7 +3402,7 @@ private:
      HWND pluginHWND = {};
      void* originalWndProc = {};
      int sizeCheckCount = 0;
-    #elif JUCE_LINUX
+    #elif JUCE_LINUX || JUCE_BSD
      ::Display* display = XWindowSystem::getInstance()->getDisplay();
      Window pluginWindow = 0;
     #endif
@@ -3562,7 +3562,7 @@ bool VSTPluginFormat::fileMightContainThisPluginType (const String& fileOrIdenti
     return f.isDirectory() && f.hasFileExtension (".vst");
   #elif JUCE_WINDOWS
     return f.existsAsFile() && f.hasFileExtension (".dll");
-  #elif JUCE_LINUX || JUCE_ANDROID
+  #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
     return f.existsAsFile() && f.hasFileExtension (".so");
   #endif
 }
@@ -3616,7 +3616,7 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_MAC
     return FileSearchPath ("~/Library/Audio/Plug-Ins/VST;/Library/Audio/Plug-Ins/VST");
-   #elif JUCE_LINUX || JUCE_ANDROID
+   #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
     return FileSearchPath (SystemStats::getEnvironmentVariable ("VST_PATH",
                                                                 "/usr/lib/vst;/usr/local/lib/vst;~/.vst")
                              .replace (":", ";"));

@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+#if JUCE_BSD
+extern char** environ;
+#endif
+
 namespace juce
 {
 
@@ -149,8 +153,12 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
         case hostApplicationPath:
         {
+           #if JUCE_BSD
+            return juce_getExecutableFile();
+           #else
             const File f ("/proc/self/exe");
             return f.isSymbolicLink() ? f.getLinkedTarget() : juce_getExecutableFile();
+           #endif
         }
 
         default:

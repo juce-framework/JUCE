@@ -90,7 +90,7 @@
 #include "interprocess/juce_ConnectedChildProcess.h"
 #include "interprocess/juce_NetworkServiceDiscovery.h"
 
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
  #include "native/juce_linux_EventLoop.h"
 #endif
 

@@ -231,7 +231,7 @@ String File::addTrailingSeparator (const String& path)
 }
 
 //==============================================================================
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
  #define NAMES_ARE_CASE_SENSITIVE 1
 #endif
 
@@ -1061,7 +1061,25 @@ public:
         expect (! home.isOnCDRomDrive());
         expect (File::getCurrentWorkingDirectory().exists());
         expect (home.setAsCurrentWorkingDirectory());
-        expect (File::getCurrentWorkingDirectory() == home);
+
+        {
+            auto homeParent = home;
+            bool noSymlinks = true;
+
+            while (! homeParent.isRoot())
+            {
+                if (homeParent.isSymbolicLink())
+                {
+                    noSymlinks = false;
+                    break;
+                }
+
+                homeParent = homeParent.getParentDirectory();
+            }
+
+            if (noSymlinks)
+                expect (File::getCurrentWorkingDirectory() == home);
+        }
 
         {
             Array<File> roots;

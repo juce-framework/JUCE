@@ -88,7 +88,7 @@
   #undef APIENTRY
   #undef CLEAR_TEMP_APIENTRY
  #endif
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include <GL/gl.h>
  #undef KeyPress
 #elif JUCE_IOS

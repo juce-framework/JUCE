@@ -59,7 +59,7 @@ namespace juce
 #endif
 
 //==============================================================================
-#if JUCE_IOS || (JUCE_MAC && JUCE_ARM) || JUCE_LINUX
+#if JUCE_IOS || (JUCE_MAC && JUCE_ARM) || JUCE_LINUX || JUCE_BSD
   /** This will try to break into the debugger if the app is currently being debugged.
       If called by an app that's not being debugged, the behaviour isn't defined - it may
       crash or not, depending on the platform.

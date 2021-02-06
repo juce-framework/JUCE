@@ -182,7 +182,7 @@ void LookAndFeel::setUsingNativeAlertWindows (bool shouldUseNativeAlerts)
 
 bool LookAndFeel::isUsingNativeAlertWindows()
 {
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     return false; // not available currently..
    #else
     return useNativeAlertWindows;

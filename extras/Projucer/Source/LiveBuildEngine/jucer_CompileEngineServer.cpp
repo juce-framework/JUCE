@@ -35,7 +35,7 @@
 #include "jucer_ProjectBuildInfo.h"
 #include "jucer_ClientServerMessages.h"
 
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
  #include <sys/types.h>
  #include <unistd.h>
 #endif

@@ -112,7 +112,7 @@ public:
         static Identifier exporterName (XcodeProjectExporter::getValueTreeTypeNameMac());
        #elif JUCE_WINDOWS
         static Identifier exporterName (CodeBlocksProjectExporter::getValueTreeTypeNameWindows());
-       #elif JUCE_LINUX
+       #elif JUCE_LINUX || JUCE_BSD
         static Identifier exporterName (MakefileProjectExporter::getValueTreeTypeName());
        #else
         static Identifier exporterName;
