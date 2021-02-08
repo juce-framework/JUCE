@@ -273,8 +273,8 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                         if (audioModification->getReversePlayback())
                         {
                             const auto reversedStartInSource = audioSource->getSampleCount() - startInSource - numSamplesToRead;
-                            bufferSuccess = reader->read (&buffer, 0, numSamplesToRead, reversedStartInSource, true, true);
-                            buffer.reverse (0, numSamplesToRead);
+                            bufferSuccess = reader->read (&buffer, startInDestBuffer, numSamplesToRead, reversedStartInSource, true, true);
+                            buffer.reverse (startInDestBuffer, numSamplesToRead);
                         }
                         else
                         {
@@ -308,7 +308,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         // render our ARA editing preview only if in real time
         if (isARAEditorRenderer() && ! isNonRealtime())
         {
-            // no rendering to do here since this sample plug-in does not provide editor rendering
+            // no rendering to do here since this sample plug-in does not provide editor rendering -
             // otherwise, we'd add our signal to the buffer here.
         }
     }
