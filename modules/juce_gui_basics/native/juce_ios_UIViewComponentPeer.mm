@@ -666,7 +666,7 @@ void UIViewComponentPeer::updateScreenBounds()
     auto oldArea = component.getBounds();
     auto oldDesktop = desktop.getDisplays().getPrimaryDisplay()->userArea;
 
-    const_cast<Displays&> (desktop.getDisplays()).refresh();
+    forceDisplayUpdate();
 
     if (fullScreen)
     {

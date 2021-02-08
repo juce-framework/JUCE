@@ -847,7 +847,7 @@ public:
     static int64 touchesDown;
 
     //==============================================================================
-    struct StartupActivityCallbackListener : ActivityLifecycleCallbacks
+    struct StartupActivityCallbackListener  : public ActivityLifecycleCallbacks
     {
         void onActivityStarted (jobject /*activity*/) override
         {
@@ -862,7 +862,7 @@ public:
                 clear();
                 activityCallbackListener.clear();
 
-                const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh();
+                forceDisplayUpdate();
             }
         }
     };
@@ -918,13 +918,11 @@ private:
 
             if (displayCutout != nullptr)
             {
-                auto& displays = Desktop::getInstance().getDisplays();
-                auto& mainDisplay = *displays.getPrimaryDisplay();
-
+                const auto& mainDisplay = *Desktop::getInstance().getDisplays().getPrimaryDisplay();
                 auto newSafeAreaInsets = androidDisplayCutoutToBorderSize (displayCutout, mainDisplay.scale);
 
                 if (newSafeAreaInsets != mainDisplay.safeAreaInsets)
-                    const_cast<Displays&> (displays).refresh();
+                    forceDisplayUpdate();
 
                 auto* fieldId = env->GetStaticFieldID (AndroidWindowInsets, "CONSUMED", "Landroid/view/WindowInsets");
                 jassert (fieldId != nullptr);
@@ -1487,9 +1485,13 @@ private:
 };
 
 //==============================================================================
-class MainActivityWindowLayoutListener   : public LayoutChangeListener
+struct MainActivityWindowLayoutListener   : public LayoutChangeListener
 {
-public:
+    MainActivityWindowLayoutListener (std::function<void()>&& updateDisplaysCb)
+        : forceDisplayUpdate (std::move (updateDisplaysCb))
+    {
+    }
+
     void onLayoutChange (LocalRef<jobject> /*view*/, int left, int top, int right, int bottom,
                          int oldLeft, int oldTop, int oldRight, int oldBottom) override
     {
@@ -1498,15 +1500,15 @@ public:
 
         if (newBounds != oldBounds)
         {
-            auto& displays = Desktop::getInstance().getDisplays();
-            auto& mainDisplay = *displays.getPrimaryDisplay();
-
+            const auto& mainDisplay = *Desktop::getInstance().getDisplays().getPrimaryDisplay();
             auto userArea = (newBounds.toFloat() / mainDisplay.scale).toNearestInt();
 
             if (userArea != mainDisplay.userArea)
-                const_cast<Displays&> (displays).refresh();
+                forceDisplayUpdate();
         }
     }
+
+    std::function<void()> forceDisplayUpdate;
 };
 
 //==============================================================================
@@ -1590,7 +1592,7 @@ void Displays::findDisplays (float masterScale)
                 hasAddedMainActivityListener = true;
 
                 env->CallVoidMethod (contentView.get(), AndroidView.addOnLayoutChangeListener,
-                                     CreateJavaInterface (new MainActivityWindowLayoutListener,
+                                     CreateJavaInterface (new MainActivityWindowLayoutListener ([this] { refresh(); }),
                                                           "android/view/View$OnLayoutChangeListener").get());
             }
         }
