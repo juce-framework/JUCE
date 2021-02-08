@@ -3,13 +3,13 @@
 namespace juce
 {
 
-ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples)
+ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource)
     : AudioFormatReader (nullptr, "ARAAudioSourceReader"),
       audioSourceBeingRead (audioSource)
 {
     jassert (audioSourceBeingRead != nullptr);
 
-    bitsPerSample = use64BitSamples ? 64 : 32;
+    bitsPerSample = 32;
     usesFloatingPointData = true;
     sampleRate = audioSourceBeingRead->getSampleRate();
     numChannels = (unsigned int) audioSourceBeingRead->getChannelCount();
@@ -146,12 +146,13 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
       audioProcessorAraExtension (dynamic_cast<AudioProcessorARAExtension*> (audioProcessor.get()))
 {
     jassert (audioProcessorAraExtension != nullptr);
+    jassert (! audioProcessor->isUsingDoublePrecision());
     audioProcessorAraExtension->bindToARA (ARA::PlugIn::toRef (documentController),
                                            ARA::kARAPlaybackRendererRole | ARA::kARAEditorRendererRole | ARA::kARAEditorViewRole, ARA::kARAPlaybackRendererRole);
 
     sampleRate = audioProcessor->getSampleRate();
     numChannels = static_cast<unsigned int> (audioProcessor->getChannelCountOfBus (false, 0));
-    bitsPerSample = audioProcessor->isUsingDoublePrecision() ? 64 : 32;
+    bitsPerSample = 32;
     usesFloatingPointData = true;
 
     if (playbackRegions.empty())

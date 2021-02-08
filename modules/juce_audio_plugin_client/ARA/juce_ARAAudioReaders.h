@@ -55,10 +55,8 @@ class JUCE_API  ARAAudioSourceReader  : public AudioFormatReader,
                                         private ARAAudioSource::Listener
 {
 public:
-    /** Use an ARAAudioSource to construct an audio source reader that reads
-        either 32 or 64 bit samples from the given \p audioSource.
-    */
-    ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples = false);
+    /** Use an ARAAudioSource to construct an audio source reader for the given \p audioSource. */
+    ARAAudioSourceReader (ARAAudioSource* audioSource);
     virtual ~ARAAudioSourceReader() override;
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
