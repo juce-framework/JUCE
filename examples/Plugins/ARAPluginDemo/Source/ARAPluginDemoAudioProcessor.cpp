@@ -120,7 +120,7 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int /*sample
         }
 
         if (playbackRenderer->getPlaybackRegions().size() > 1)
-            tempBuffer.reset (new juce::AudioBuffer<float> (getTotalNumOutputChannels(), getBlockSize()));
+            tempBuffer.reset (new juce::AudioBuffer<float> (getMainBusNumOutputChannels(), getBlockSize()));
         else
             tempBuffer.reset();
     }
@@ -206,7 +206,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                     const auto& reader = readerIt->second;
 
                     // this simplified test code "rendering" only produces audio if sample rate and channel count match
-                    if ((audioSource->getChannelCount() != getTotalNumOutputChannels()) || (audioSource->getSampleRate() != getSampleRate()))
+                    if ((audioSource->getChannelCount() != getMainBusNumOutputChannels()) || (audioSource->getSampleRate() != getSampleRate()))
                         continue;
 
                     // evaluate region borders in song time, calculate sample range to copy in song time
@@ -265,7 +265,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                     if (didRenderFirstRegion)
                     {
                         // mix local buffer into the output buffer
-                        for (int c = 0; c < getTotalNumOutputChannels(); ++c)
+                        for (int c = 0; c < getMainBusNumOutputChannels(); ++c)
                             buffer.addFrom (c, startInBuffer, *tempBuffer, c, startInBuffer, numSamplesToRead);
                     }
                     else
