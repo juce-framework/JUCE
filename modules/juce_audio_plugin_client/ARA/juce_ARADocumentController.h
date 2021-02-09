@@ -120,7 +120,7 @@ protected:
     ARA::PlugIn::PlaybackRegion* doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept override;
 
     // PlugIn instance role creation - override as needed to return custom subclasses of the base ARA plug-in instance roles.
-    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
+    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override = 0;
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer() noexcept override;
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
 

@@ -1,5 +1,6 @@
 #include "ARAPluginDemoDocumentController.h"
 #include "ARAPluginDemoAudioModification.h"
+#include "ARAPluginDemoPlaybackRenderer.h"
 
 ARA::PlugIn::AudioModification* ARAPluginDemoDocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
@@ -66,6 +67,11 @@ bool ARAPluginDemoDocumentController::doStoreObjectsToStream (juce::ARAOutputStr
     getHostArchivingController()->notifyDocumentArchivingProgress (1.0);
 
     return success;
+}
+
+ARA::PlugIn::PlaybackRenderer* ARAPluginDemoDocumentController::doCreatePlaybackRenderer() noexcept
+{
+    return new PluginDemoPlaybackRenderer (this);
 }
 
 //==============================================================================

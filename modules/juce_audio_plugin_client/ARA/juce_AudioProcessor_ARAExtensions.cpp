@@ -3,6 +3,7 @@
 namespace juce
 {
 
+// ARARenderer draft note: only validation at this point, we could probably get rid of didBindToARA() now?
 void AudioProcessorARAExtension::didBindToARA() noexcept
 {
 #if (! JUCE_DISABLE_ASSERTIONS)
@@ -14,11 +15,6 @@ void AudioProcessorARAExtension::didBindToARA() noexcept
     if (isEditorView())
         jassert (dynamic_cast<ARAEditorView*> (getEditorView()) != nullptr);
 #endif
-
-    if (isPlaybackRenderer())
-        getPlaybackRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
-    if (isEditorRenderer())
-        getEditorRenderer()->setAudioProcessor (dynamic_cast<AudioProcessor*> (this));
 }
 
 //==============================================================================

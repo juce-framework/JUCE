@@ -16,6 +16,8 @@ protected:
     bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;
     bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;
 
+    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPluginDemoDocumentController)
 };

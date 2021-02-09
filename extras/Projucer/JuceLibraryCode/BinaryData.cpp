@@ -6446,15 +6446,6 @@ static const unsigned char temp_binary_data_40[] =
 "    }\r\n"
 "}\r\n"
 "\r\n"
-"#if JucePlugin_Enable_ARA\r\n"
-"bool %%filter_class_name%%::didProcessBlockSucceed()\r\n"
-"{\r\n"
-"    // You can use this function to inform the calling code that the \r\n"
-"    // most recent processBlock call didn't output samples as expected. \r\n"
-"    return true;\r\n"
-"}\r\n"
-"#endif\r\n"
-"\r\n"
 "//==============================================================================\r\n"
 "bool %%filter_class_name%%::hasEditor() const\r\n"
 "{\r\n"
@@ -6525,9 +6516,6 @@ static const unsigned char temp_binary_data_41[] =
 "   #endif\r\n"
 "\r\n"
 "    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;\r\n"
-"   #if JucePlugin_Enable_ARA\r\n"
-"    bool didProcessBlockSucceed() override;\r\n"
-"   #endif\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    juce::AudioProcessorEditor* createEditor() override;\r\n"
@@ -7712,8 +7700,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x3eb8f45b:  numBytes = 1489; return jucer_AudioPluginARADocumentControllerTemplate_h;
         case 0x27c5a93a:  numBytes = 1639; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1094; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 6478; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2500; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 6218; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2414; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2147; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2065; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1524; return jucer_ContentCompSimpleTemplate_h;

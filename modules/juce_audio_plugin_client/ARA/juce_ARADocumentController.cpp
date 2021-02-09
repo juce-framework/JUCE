@@ -289,11 +289,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 
-ARA::PlugIn::PlaybackRenderer* ARADocumentController::doCreatePlaybackRenderer() noexcept
-{
-    return new ARAPlaybackRenderer (this);
-}
-
 ARA::PlugIn::EditorRenderer* ARADocumentController::doCreateEditorRenderer() noexcept
 {
     return new ARAEditorRenderer (this);

@@ -24,11 +24,6 @@ class JUCE_API  AudioProcessorARAExtension  : public ARA::PlugIn::PlugInExtensio
 public:
     using ARA::PlugIn::PlugInExtension::PlugInExtension;
 
-    /** Query whether last call to processBlock() was successful.
-        TODO JUCE_ARA AudioProcessor::processBlock() should rather return a bool
-    */
-    virtual bool didProcessBlockSucceed() const noexcept = 0;
-
     // overloading inherited templated getters to default to juce versions of the returned classes
     template <typename DocumentController_t = ARADocumentController>
     DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::PlugInExtension::getDocumentController<DocumentController_t>(); }
