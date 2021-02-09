@@ -987,10 +987,6 @@ function(_juce_generate_icon source_target dest_target)
     get_target_property(juce_property_icon_big ${source_target} JUCE_ICON_BIG)
     get_target_property(juce_property_icon_small ${source_target} JUCE_ICON_SMALL)
 
-    if(NOT (juce_property_icon_big OR juce_property_icon_small))
-        return()
-    endif()
-
     set(icon_args)
 
     if(juce_property_icon_big)
@@ -1004,22 +1000,34 @@ function(_juce_generate_icon source_target dest_target)
     set(generated_icon)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        if(NOT icon_args)
+            return()
+        endif()
+
         set(generated_icon "${juce_library_code}/Icon.icns")
         # To get compiled properly, we need the icon before the plist is generated!
         _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
         set_source_files_properties(${generated_icon} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        if(NOT icon_args)
+            return()
+        endif()
+
         set(generated_icon "${juce_library_code}/icon.ico")
         _juce_execute_juceaide(winicon "${generated_icon}" ${icon_args})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         get_target_property(generated_icon ${source_target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
-        if(NOT generated_icon)
+        if(icon_args AND (NOT generated_icon))
             set(out_path "${juce_library_code}/${dest_target}")
             set(generated_icon "${out_path}/Images.xcassets")
 
             # To get compiled properly, we need iOS assets at configure time!
             _juce_execute_juceaide(iosassets "${out_path}" ${icon_args})
+        endif()
+
+        if(NOT generated_icon)
+            return()
         endif()
 
         set_target_properties(${dest_target} PROPERTIES
