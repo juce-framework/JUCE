@@ -104,6 +104,13 @@
  #define JUCE_USE_WINDOWS_MEDIA_FORMAT 1
 #endif
 
+/** Config: JUCE_USE_WAVPACK
+    Enables the WavPack audio codec classes (available on all platforms).
+*/
+#ifndef JUCE_USE_WAVPACK
+ #define JUCE_USE_WAVPACK 0
+#endif
+
 #if ! JUCE_MSVC
  #undef JUCE_USE_WINDOWS_MEDIA_FORMAT
  #define JUCE_USE_WINDOWS_MEDIA_FORMAT 0
@@ -126,4 +133,5 @@
 #include "codecs/juce_OggVorbisAudioFormat.h"
 #include "codecs/juce_WavAudioFormat.h"
 #include "codecs/juce_WindowsMediaAudioFormat.h"
+#include "codecs/juce_WavPackAudioFormat.h"
 #include "sampler/juce_Sampler.h"
