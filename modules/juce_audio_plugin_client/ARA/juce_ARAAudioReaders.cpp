@@ -165,7 +165,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
         double regionsStartTime = std::numeric_limits<double>::max();
         double regionsEndTime = std::numeric_limits<double>::lowest();
 
-        for (auto playbackRegion : playbackRegions)
+        for (const auto& playbackRegion : playbackRegions)
         {
             auto playbackRegionTimeRange = playbackRegion->getTimeRange (true);
             regionsStartTime = jmin (regionsStartTime, playbackRegionTimeRange.getStart());
@@ -200,7 +200,7 @@ void ARAPlaybackRegionReader::invalidate()
     if (! isValid())
         return;
 
-    for (auto playbackRegion : audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions<ARAPlaybackRegion>())
+    for (auto& playbackRegion : audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions<ARAPlaybackRegion>())
         playbackRegion->removeListener (this);
 
     audioProcessor->releaseResources();

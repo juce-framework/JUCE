@@ -14,7 +14,7 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
             if (compatibleDocumentArchiveIDString.isNotEmpty())
             {
                 compatibleDocumentArchiveIDStrings = juce::StringArray::fromLines (compatibleDocumentArchiveIDString);
-                for (auto& compatibleID : compatibleDocumentArchiveIDStrings)
+                for (const auto& compatibleID : compatibleDocumentArchiveIDStrings)
                     compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8());
             }
             
@@ -397,7 +397,7 @@ namespace ModelUpdateControllerProgressAdapter
 void ARADocumentController::timerCallback()
 {
     if (! internalAnalysisProgressIsSynced.test_and_set (std::memory_order_release))
-        for (auto audioSource : getDocument()->getAudioSources<ARAAudioSource>())
+        for (auto& audioSource : getDocument()->getAudioSources<ARAAudioSource>())
             audioSource->internalAnalysisProgressTracker.notifyProgress (ModelUpdateControllerProgressAdapter::get(), reinterpret_cast<ARA::ARAAudioSourceHostRef> (audioSource));
 }
 

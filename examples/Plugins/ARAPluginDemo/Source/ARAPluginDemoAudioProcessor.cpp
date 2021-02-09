@@ -63,7 +63,7 @@ double ARAPluginDemoAudioProcessor::getTailLengthSeconds() const
 {
     double tail{};
     if (auto playbackRenderer = getARAPlaybackRenderer())
-        for (auto playbackRegion : playbackRenderer->getPlaybackRegions<juce::ARAPlaybackRegion>())
+        for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions<juce::ARAPlaybackRegion>())
             tail = juce::jmax (tail, playbackRegion->getTailTime());
 
     return tail;
@@ -100,7 +100,7 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int /*sample
     {
         audioSourceReaders.clear();
 
-        for (auto playbackRegion : playbackRenderer->getPlaybackRegions())
+        for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
         {
             auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
             if (audioSourceReaders.count (audioSource) == 0)
@@ -193,7 +193,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
             {
                 const auto sampleStart = timeInSamples;
                 const auto sampleEnd = timeInSamples + buffer.getNumSamples();
-                for (auto playbackRegion : playbackRenderer->getPlaybackRegions())
+                for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
                 {
                     // get the audio source for this region and make sure we have an audio source reader for it
                     const auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
