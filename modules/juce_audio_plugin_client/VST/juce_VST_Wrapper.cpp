@@ -1141,7 +1141,7 @@ public:
             auto newBounds = getLocalBounds();
 
            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.1))
+            if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.001))
                 return;
 
             lastBounds = newBounds;
