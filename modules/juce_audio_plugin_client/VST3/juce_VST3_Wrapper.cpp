@@ -1357,13 +1357,13 @@ private:
 
                         auto transformScale = std::sqrt (std::abs (editor->getTransform().getDeterminant()));
 
-                        auto minW = (double) ((float) constrainer->getMinimumWidth()  * transformScale);
-                        auto maxW = (double) ((float) constrainer->getMaximumWidth()  * transformScale);
-                        auto minH = (double) ((float) constrainer->getMinimumHeight() * transformScale);
-                        auto maxH = (double) ((float) constrainer->getMaximumHeight() * transformScale);
+                        auto minW = (double) constrainer->getMinimumWidth()  * transformScale;
+                        auto maxW = (double) constrainer->getMaximumWidth()  * transformScale;
+                        auto minH = (double) constrainer->getMinimumHeight() * transformScale;
+                        auto maxH = (double) constrainer->getMaximumHeight() * transformScale;
 
-                        auto width  = (double) (rectToCheck->right - rectToCheck->left);
-                        auto height = (double) (rectToCheck->bottom - rectToCheck->top);
+                        auto width  = (double) rectToCheck->right - (double) rectToCheck->left;
+                        auto height = (double) rectToCheck->bottom - (double) rectToCheck->top;
 
                         width  = jlimit (minW, maxW, width);
                         height = jlimit (minH, maxH, height);
