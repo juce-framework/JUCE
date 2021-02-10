@@ -1319,6 +1319,11 @@ private:
 
         tresult PLUGIN_API getSize (ViewRect* size) override
         {
+           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+            if (getHostType().isAbletonLive() && systemWindow == nullptr)
+                return kResultFalse;
+           #endif
+
             if (size != nullptr && component != nullptr)
             {
                 auto editorBounds = component->getSizeToContainChild();
