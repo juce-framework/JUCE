@@ -1567,8 +1567,15 @@ private:
                 {
                     lastBounds = b;
 
-                    const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
-                    resizeHostWindow();
+                    {
+                        const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
+                        resizeHostWindow();
+                    }
+
+                   #if JUCE_LINUX
+                    if (getHostType().isBitwigStudio())
+                        repaint();
+                   #endif
                 }
             }
 
