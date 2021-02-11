@@ -1416,8 +1416,8 @@ public:
 
         if (auto parentH = GetParent (hwnd))
         {
-            auto r = getWindowRect (parentH);
-            auto localBounds = rectangleFromRECT (bounds).translated (-r.left, -r.top);
+            MapWindowPoints (HWND_DESKTOP, parentH, (LPPOINT) &bounds, 2);
+            auto localBounds = rectangleFromRECT (bounds);
 
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareWindow (hwnd))
