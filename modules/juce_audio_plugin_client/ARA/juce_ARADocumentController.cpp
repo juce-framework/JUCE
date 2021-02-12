@@ -7,7 +7,7 @@ namespace juce
 
 ARADocumentController::FactoryConfig::FactoryConfig() noexcept
 {
-    juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
+    const juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
     if (compatibleDocumentArchiveIDString.isNotEmpty())
     {
         compatibleDocumentArchiveIDStrings = juce::StringArray::fromLines (compatibleDocumentArchiveIDString);
@@ -16,7 +16,7 @@ ARADocumentController::FactoryConfig::FactoryConfig() noexcept
     }
     
     // Update analyzeable content types
-    static constexpr ARA::ARAContentType araContentVars[]{
+    static constexpr std::array<ARA::ARAContentType, 6> araContentTypes {
         ARA::kARAContentTypeNotes,
         ARA::kARAContentTypeTempoEntries,
         ARA::kARAContentTypeBarSignatures,
@@ -24,22 +24,21 @@ ARADocumentController::FactoryConfig::FactoryConfig() noexcept
         ARA::kARAContentTypeKeySignatures,
         ARA::kARAContentTypeSheetChords
     };
-    for (size_t i = 0; i < sizeof (araContentVars) / sizeof (araContentVars[0]); ++i)
+    for (size_t i = 0; i < araContentTypes.size(); ++i)
         if (JucePlugin_ARAContentTypes & (1 << i))
-            analyzeableContentTypes.push_back (araContentVars[i]);
+            analyzeableContentTypes.push_back (araContentTypes[i]);
 
     // Update playback transformation flags
-    static constexpr ARA::ARAPlaybackTransformationFlags araPlaybackTransformations[]{
+    static constexpr std::array<ARA::ARAPlaybackTransformationFlags, 4> araPlaybackTransformationFlags {
         ARA::kARAPlaybackTransformationTimestretch,
         ARA::kARAPlaybackTransformationTimestretchReflectingTempo,
         ARA::kARAPlaybackTransformationContentBasedFadeAtTail,
         ARA::kARAPlaybackTransformationContentBasedFadeAtHead
     };
-
     supportedPlaybackTransformationFlags = 0;
-    for (size_t i = 0; i < sizeof (araPlaybackTransformations) / sizeof (araPlaybackTransformations[0]); ++i)
+    for (size_t i = 0; i < araPlaybackTransformationFlags.size(); ++i)
         if (JucePlugin_ARATransformationFlags & (1 << i))
-            supportedPlaybackTransformationFlags |= araPlaybackTransformations[i];
+            supportedPlaybackTransformationFlags |= araPlaybackTransformationFlags[i];
 }
 
 //==============================================================================
