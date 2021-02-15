@@ -312,8 +312,6 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
-
         if (url.trimStart().startsWithIgnoreCase ("javascript:"))
         {
             [webView evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
@@ -321,6 +319,7 @@ public:
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
+            stop();
             [webView loadRequest: request];
         }
     }
