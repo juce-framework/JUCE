@@ -174,8 +174,10 @@ public:
 
         if (fullScreen != shouldBeFullScreen)
         {
+            XWindowSystem::getInstance()->setMaximised (windowH, shouldBeFullScreen);
+
             if (shouldBeFullScreen)
-                r = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
+                r = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
 
             if (! r.isEmpty())
                 setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);

@@ -1851,6 +1851,25 @@ bool XWindowSystem::isMinimised (::Window windowH) const
     return false;
 }
 
+void XWindowSystem::setMaximised (::Window windowH, bool shouldBeMaximised) const
+{
+    const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
+
+    XEvent ev;
+    ev.xclient.window = windowH;
+    ev.xclient.type   = ClientMessage;
+    ev.xclient.format = 32;
+    ev.xclient.message_type = XWindowSystemUtilities::Atoms::getCreating (display, "_NET_WM_STATE");
+    ev.xclient.data.l[0] = shouldBeMaximised;
+    ev.xclient.data.l[1] = (long) XWindowSystemUtilities::Atoms::getCreating (display, "_NET_WM_STATE_MAXIMIZED_HORZ");
+    ev.xclient.data.l[2] = (long) XWindowSystemUtilities::Atoms::getCreating (display, "_NET_WM_STATE_MAXIMIZED_VERT");
+    ev.xclient.data.l[3] = 1;
+    ev.xclient.data.l[4] = 0;
+
+    XWindowSystemUtilities::ScopedXLock xLock;
+    X11Symbols::getInstance()->xSendEvent (display, root, false, SubstructureRedirectMask | SubstructureNotifyMask, &ev);
+}
+
 void XWindowSystem::toFront (::Window windowH, bool) const
 {
     jassert (windowH != 0);
