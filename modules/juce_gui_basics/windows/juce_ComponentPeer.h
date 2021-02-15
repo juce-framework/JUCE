@@ -415,6 +415,8 @@ public:
 
 protected:
     //==============================================================================
+    static void forceDisplayUpdate();
+
     Component& component;
     const int styleFlags;
     Rectangle<int> lastNonFullscreenBounds;
@@ -424,12 +426,14 @@ protected:
 
 private:
     //==============================================================================
+    Component* getTargetForKeyPress();
+
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse = nullptr;
     const uint32 uniqueID;
     bool isWindowMinimised = false;
-    Component* getTargetForKeyPress();
 
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ComponentPeer)
 };
 

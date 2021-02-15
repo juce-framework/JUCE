@@ -125,6 +125,7 @@ public:
     ~FileChooser();
 
     //==============================================================================
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Shows a dialog box to choose a file to open.
 
         This will display the dialog box modally, using an "open file" mode, so that
@@ -180,6 +181,7 @@ public:
         browseForFileToOpen() for more info about the behaviour of this method.
     */
     bool browseForMultipleFilesOrDirectories (FilePreviewComponent* previewComponent = nullptr);
+   #endif
 
     //==============================================================================
     /** Runs a dialog box for the given set of option flags.

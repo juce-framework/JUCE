@@ -93,18 +93,16 @@
    #include <windows.foundation.h>
    #include <windows.foundation.collections.h>
 
-   #pragma warning (push)
-   #pragma warning (disable: 4265)
+   JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4265)
    #include <wrl.h>
    #include <wrl/wrappers/corewrappers.h>
-   #pragma warning (pop)
+   JUCE_END_IGNORE_WARNINGS_MSVC
 
    #include "WebView2.h"
 
-   #pragma warning (push)
-   #pragma warning (disable: 4458)
+   JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
    #include "WebView2EnvironmentOptions.h"
-   #pragma warning (pop)
+   JUCE_END_IGNORE_WARNINGS_MSVC
   #endif
 
  #endif

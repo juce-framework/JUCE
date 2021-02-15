@@ -117,7 +117,7 @@ DialogWindow* DialogWindow::LaunchOptions::launchAsync()
     return d;
 }
 
-#if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
+#if JUCE_MODAL_LOOPS_PERMITTED
 int DialogWindow::LaunchOptions::runModal()
 {
     return launchAsync()->runModalLoop();

@@ -352,7 +352,7 @@ public:
             LocalRef<jobject> bitmap (env->CallStaticObjectMethod (AndroidBitmap, AndroidBitmap.createBitmap, w, h, bitmapConfig.get()));
             LocalRef<jobject> canvas (env->NewObject (AndroidCanvas, AndroidCanvas.create, bitmap.get()));
 
-            env->CallBooleanMethod (matrix.get(), AndroidMatrix.postTranslate, bounds.getX() * -1.0f, bounds.getY() * -1.0f);
+            env->CallBooleanMethod (matrix.get(), AndroidMatrix.postTranslate, (float) -bounds.getX(), (float) -bounds.getY());
             env->CallVoidMethod (canvas.get(), AndroidCanvas.setMatrix, matrix.get());
             env->CallVoidMethod (canvas.get(), AndroidCanvas.drawPath, path.get(), paint.get());
 

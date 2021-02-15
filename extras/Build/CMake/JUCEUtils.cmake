@@ -296,11 +296,11 @@ function(_juce_module_sources module_path output_path built_sources other_source
     set(base_path "${module_glob}/${module_glob}")
 
     set(module_cpp ${all_module_files})
-    list(FILTER module_cpp INCLUDE REGEX "${base_path}[^/]*\\.cpp$")
+    list(FILTER module_cpp INCLUDE REGEX "^${base_path}[^/]*\\.cpp$")
 
     if(APPLE)
         set(module_mm ${all_module_files})
-        list(FILTER module_mm INCLUDE REGEX "${base_path}[^/]*\\.(mm|r)$")
+        list(FILTER module_mm INCLUDE REGEX "^${base_path}[^/]*\\.(mm|r)$")
 
         if(module_mm)
             set(module_mm_replaced ${module_mm})
@@ -311,7 +311,10 @@ function(_juce_module_sources module_path output_path built_sources other_source
     endif()
 
     set(headers ${all_module_files})
-    list(REMOVE_ITEM headers ${module_cpp})
+
+    if(NOT module_cpp STREQUAL "")
+        list(REMOVE_ITEM headers ${module_cpp})
+    endif()
 
     foreach(source_list IN ITEMS module_cpp headers)
         list(TRANSFORM ${source_list} PREPEND "${output_path}/")
@@ -500,6 +503,8 @@ function(juce_add_module module_path)
 
     set(base_path "${module_parent_path}")
 
+    _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
+
     if(${module_name} STREQUAL "juce_audio_plugin_client")
         _juce_get_platform_plugin_kinds(plugin_kinds)
 
@@ -521,12 +526,7 @@ function(juce_add_module module_path)
             CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
             RELATIVE "${module_parent_path}"
             "${module_path}/*")
-
-        set(headers ${all_module_files})
-        list(FILTER headers EXCLUDE REGEX "${module_name}/${module_name}[^/]+\\.(cpp|mm|r)$")
-        list(TRANSFORM headers PREPEND "${module_parent_path}/")
     else()
-        _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
         list(APPEND all_module_sources ${globbed_sources})
     endif()
 
@@ -535,6 +535,7 @@ function(juce_add_module module_path)
     set_property(GLOBAL APPEND PROPERTY _juce_module_names ${module_name})
 
     set_target_properties(${module_name} PROPERTIES
+        INTERFACE_JUCE_MODULE_SOURCES   "${globbed_sources}"
         INTERFACE_JUCE_MODULE_HEADERS   "${headers}"
         INTERFACE_JUCE_MODULE_PATH      "${base_path}")
 
@@ -757,6 +758,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content FILE_SHARING_ENABLED                 ${target} JUCE_FILE_SHARING_ENABLED)
     _juce_append_target_property(file_content DOCUMENT_BROWSER_ENABLED             ${target} JUCE_DOCUMENT_BROWSER_ENABLED)
     _juce_append_target_property(file_content STATUS_BAR_HIDDEN                    ${target} JUCE_STATUS_BAR_HIDDEN)
+    _juce_append_target_property(file_content REQUIRES_FULL_SCREEN                 ${target} JUCE_REQUIRES_FULL_SCREEN)
     _juce_append_target_property(file_content BACKGROUND_AUDIO_ENABLED             ${target} JUCE_BACKGROUND_AUDIO_ENABLED)
     _juce_append_target_property(file_content BACKGROUND_BLE_ENABLED               ${target} JUCE_BACKGROUND_BLE_ENABLED)
     _juce_append_target_property(file_content PUSH_NOTIFICATIONS_ENABLED           ${target} JUCE_PUSH_NOTIFICATIONS_ENABLED)
@@ -979,10 +981,6 @@ function(_juce_generate_icon source_target dest_target)
     get_target_property(juce_property_icon_big ${source_target} JUCE_ICON_BIG)
     get_target_property(juce_property_icon_small ${source_target} JUCE_ICON_SMALL)
 
-    if(NOT (juce_property_icon_big OR juce_property_icon_small))
-        return()
-    endif()
-
     set(icon_args)
 
     if(juce_property_icon_big)
@@ -996,22 +994,34 @@ function(_juce_generate_icon source_target dest_target)
     set(generated_icon)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        if(NOT icon_args)
+            return()
+        endif()
+
         set(generated_icon "${juce_library_code}/Icon.icns")
         # To get compiled properly, we need the icon before the plist is generated!
         _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
         set_source_files_properties(${generated_icon} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        if(NOT icon_args)
+            return()
+        endif()
+
         set(generated_icon "${juce_library_code}/icon.ico")
         _juce_execute_juceaide(winicon "${generated_icon}" ${icon_args})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         get_target_property(generated_icon ${source_target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
-        if(NOT generated_icon)
+        if(icon_args AND (NOT generated_icon))
             set(out_path "${juce_library_code}/${dest_target}")
             set(generated_icon "${out_path}/Images.xcassets")
 
             # To get compiled properly, we need iOS assets at configure time!
             _juce_execute_juceaide(iosassets "${out_path}" ${icon_args})
+        endif()
+
+        if(NOT generated_icon)
+            return()
         endif()
 
         set_target_properties(${dest_target} PROPERTIES
@@ -1487,29 +1497,6 @@ function(_juce_get_vst3_category_string target out_var)
     set(${out_var} ${result} PARENT_SCOPE)
 endfunction()
 
-function(_juce_get_iaa_type_code target out_var)
-    get_target_property(wants_midi_input ${target} JUCE_NEEDS_MIDI_INPUT)
-    get_target_property(is_synth ${target} JUCE_IS_SYNTH)
-
-    set(result)
-
-    if(wants_midi_input)
-        if(is_synth)
-            set(result "auri")
-        else()
-            set(result "aurm")
-        endif()
-    else()
-        if(is_synth)
-            set(result "aurg")
-        else()
-            set(result "aurx")
-        endif()
-    endif()
-
-    set(${out_var} ${result} PARENT_SCOPE)
-endfunction()
-
 function(_juce_configure_plugin_targets target)
     if(CMAKE_VERSION VERSION_LESS "3.15.0")
         message(FATAL_ERROR "Plugin targets require CMake 3.15 or higher")
@@ -1565,7 +1552,6 @@ function(_juce_configure_plugin_targets target)
     _juce_to_char_literal(${project_plugin_code} project_plugin_code)
 
     _juce_get_vst3_category_string(${target} vst3_category_string)
-    _juce_get_iaa_type_code(${target} iaa_type_code)
 
     target_compile_definitions(${target} PUBLIC
         JUCE_STANDALONE_APPLICATION=JucePlugin_Build_Standalone
@@ -2020,7 +2006,8 @@ function(_juce_initialise_target target)
         foreach(module_name IN LISTS all_modules)
             get_target_property(path ${module_name} INTERFACE_JUCE_MODULE_PATH)
             get_target_property(header_files ${module_name} INTERFACE_JUCE_MODULE_HEADERS)
-            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files})
+            get_target_property(source_files ${module_name} INTERFACE_JUCE_MODULE_SOURCES)
+            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files} ${source_files})
             set_source_files_properties(${header_files} PROPERTIES HEADER_FILE_ONLY TRUE)
         endforeach()
     endif()

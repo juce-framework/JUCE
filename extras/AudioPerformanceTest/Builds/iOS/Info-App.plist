@@ -6,7 +6,7 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIViewControllerBasedStatusBarAppearance</key>
-    <false/>
+    <true/>
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
     <key>CFBundleExecutable</key>
@@ -30,8 +30,6 @@
     <key>NSHighResolutionCapable</key>
     <true/>
     <key>UIRequiresFullScreen</key>
-    <true/>
-    <key>UIStatusBarHidden</key>
     <true/>
     <key>UISupportedInterfaceOrientations</key>
     <array>

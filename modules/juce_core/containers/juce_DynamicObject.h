@@ -87,7 +87,7 @@ public:
 
         This is basically the same as calling setProperty (methodName, (var::NativeFunction) myFunction), but
         helps to avoid accidentally invoking the wrong type of var constructor. It also makes
-        the code easier to read,
+        the code easier to read.
     */
     void setMethod (Identifier methodName, var::NativeFunction function);
 

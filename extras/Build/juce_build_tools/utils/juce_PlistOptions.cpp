@@ -134,9 +134,7 @@ namespace build_tools
                 addPlistDictionaryKey (*dict, "NSBluetoothPeripheralUsageDescription", bluetoothPermissionText); // needed for pre iOS 13.0
 
             addPlistDictionaryKey (*dict, "LSRequiresIPhoneOS", true);
-
-            if (type != ProjectType::Target::AudioUnitv3PlugIn)
-                addPlistDictionaryKey (*dict, "UIViewControllerBasedStatusBarAppearance", false);
+            addPlistDictionaryKey (*dict, "UIViewControllerBasedStatusBarAppearance", true);
 
             if (shouldAddStoryboardToProject)
                 addPlistDictionaryKey (*dict, "UILaunchStoryboardName", storyboardName);
@@ -201,16 +199,15 @@ namespace build_tools
         if (documentBrowserEnabled)
             addPlistDictionaryKey (*dict, "UISupportsDocumentBrowser", true);
 
-        if (statusBarHidden && type != ProjectType::Target::AudioUnitv3PlugIn)
-            addPlistDictionaryKey (*dict, "UIStatusBarHidden", true);
-
         if (iOS)
         {
             if (type != ProjectType::Target::AudioUnitv3PlugIn)
             {
-                // Forcing full screen disables the split screen feature and prevents error ITMS-90475
-                addPlistDictionaryKey (*dict, "UIRequiresFullScreen", true);
-                addPlistDictionaryKey (*dict, "UIStatusBarHidden", true);
+                if (statusBarHidden)
+                    addPlistDictionaryKey (*dict, "UIStatusBarHidden", true);
+
+                if (requiresFullScreen)
+                    addPlistDictionaryKey (*dict, "UIRequiresFullScreen", true);
 
                 addIosScreenOrientations (*dict);
                 addIosBackgroundModes (*dict);

@@ -1416,8 +1416,8 @@ public:
 
         if (auto parentH = GetParent (hwnd))
         {
-            auto r = getWindowRect (parentH);
-            auto localBounds = rectangleFromRECT (bounds).translated (-r.left, -r.top);
+            MapWindowPoints (HWND_DESKTOP, parentH, (LPPOINT) &bounds, 2);
+            auto localBounds = rectangleFromRECT (bounds);
 
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareWindow (hwnd))
@@ -2186,7 +2186,7 @@ private:
             // This is needed so that our plugin window gets notified of WM_SETTINGCHANGE messages
             // and can respond to display scale changes
             if (! JUCEApplication::isStandaloneApp())
-                settingChangeCallback = forceDisplayUpdate;
+                settingChangeCallback = ComponentPeer::forceDisplayUpdate;
 
             // Calling this function here is (for some reason) necessary to make Windows
             // correctly enable the menu items that we specify in the wm_initmenu message.
@@ -3417,11 +3417,6 @@ private:
             setWindowPos (hwnd, ScalingHelpers::scaledScreenPosToUnscaled (component, Desktop::getInstance().getDisplays()
                                                                                               .getDisplayForRect (component.getScreenBounds())->userArea),
                           SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSENDCHANGING);
-    }
-
-    static void forceDisplayUpdate()
-    {
-        const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh();
     }
 
     //==============================================================================

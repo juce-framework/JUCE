@@ -23,6 +23,8 @@
 namespace juce
 {
 
+#if ! JUCE_WASM
+
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4389 4018)
 
 #ifndef AI_NUMERICSERV  // (missing in older Mac SDKs)
@@ -857,6 +859,7 @@ struct SocketTests : public UnitTest
 
 static SocketTests socketTests;
 
+#endif
 #endif
 
 } // namespace juce

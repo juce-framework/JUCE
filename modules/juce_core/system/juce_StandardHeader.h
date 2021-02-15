@@ -80,9 +80,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
 #if JUCE_MAC || JUCE_IOS
  #include <libkern/OSAtomic.h>
  #include <xlocale.h>
- #if JUCE_IOS
-  #include <signal.h>
- #endif
+ #include <signal.h>
 #endif
 
 #if JUCE_LINUX
