@@ -1166,16 +1166,24 @@ public:
         sendAUEvent (kAudioUnitEvent_EndParameterChangeGesture, index);
     }
 
-    void audioProcessorChanged (AudioProcessor*) override
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails& details) override
     {
-        PropertyChanged (kAudioUnitProperty_Latency,       kAudioUnitScope_Global, 0);
-        PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
-        PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
-        PropertyChanged (kAudioUnitProperty_ClassInfo,     kAudioUnitScope_Global, 0);
+        if (details.latencyChanged)
+            PropertyChanged (kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
 
-        refreshCurrentPreset();
+        if (details.parameterInfoChanged)
+        {
+            PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
+            PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
+        }
 
-        PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, 0);
+
+        if (details.programChanged)
+        {
+            refreshCurrentPreset();
+            PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
+        }
     }
 
     //==============================================================================

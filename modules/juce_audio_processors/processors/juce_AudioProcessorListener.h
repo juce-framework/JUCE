@@ -57,6 +57,28 @@ public:
                                                  int parameterIndex,
                                                  float newValue) = 0;
 
+    /** Provides details about aspects of an AudioProcessor which have changed.
+    */
+    struct JUCE_API  ChangeDetails
+    {
+        bool latencyChanged = false;
+        bool parameterInfoChanged = false;
+        bool programChanged = false;
+
+        ChangeDetails withLatencyChanged       (bool b) const noexcept { return with (&ChangeDetails::latencyChanged,       b); }
+        ChangeDetails withParameterInfoChanged (bool b) const noexcept { return with (&ChangeDetails::parameterInfoChanged, b); }
+        ChangeDetails withProgramChanged       (bool b) const noexcept { return with (&ChangeDetails::programChanged,       b); }
+
+    private:
+        template <typename Member, typename Value>
+        ChangeDetails with (Member&& member, Value&& value) const noexcept
+        {
+            auto copy = *this;
+            copy.*member = std::forward<Value> (value);
+            return copy;
+        }
+    };
+
     /** Called to indicate that something else in the plugin has changed, like its
         program, number of parameters, etc.
 
@@ -67,7 +89,7 @@ public:
         to trigger an AsyncUpdater or ChangeBroadcaster which you can respond to later on the
         message thread.
     */
-    virtual void audioProcessorChanged (AudioProcessor* processor) = 0;
+    virtual void audioProcessorChanged (AudioProcessor* processor, const ChangeDetails& details) = 0;
 
     /** Indicates that a parameter change gesture has started.
 

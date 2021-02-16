@@ -1822,12 +1822,12 @@ private:
             default:
                 if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_ParameterList)
                 {
-                    updateHostDisplay();
+                    updateHostDisplay (AudioProcessorListener::ChangeDetails().withParameterInfoChanged (true));
                 }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_PresentPreset)
                 {
                     sendAllParametersChangedEvents();
-                    updateHostDisplay();
+                    updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true));
                 }
                 else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency)
                 {

@@ -3179,7 +3179,9 @@ tresult VST3HostContext::restartComponent (Steinberg::int32 flags)
             if (plugin->processor != nullptr)
                 plugin->setLatencySamples (jmax (0, (int) plugin->processor->getLatencySamples()));
 
-        plugin->updateHostDisplay();
+        plugin->updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
+                                                                          .withParameterInfoChanged (true));
+
         return kResultTrue;
     }
 

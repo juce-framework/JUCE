@@ -960,18 +960,21 @@ public:
         paramChanged (audioProcessor->getVSTParamIDForIndex (index), newValue);
     }
 
-    void audioProcessorChanged (AudioProcessor*) override
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails& details) override
     {
         int32 flags = 0;
 
-        for (int32 i = 0; i < parameters.getParameterCount(); ++i)
-            if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
-                if (param->updateParameterInfo() && (flags & Vst::kParamTitlesChanged) == 0)
-                    flags |= Vst::kParamTitlesChanged;
+        if (details.parameterInfoChanged)
+        {
+            for (int32 i = 0; i < parameters.getParameterCount(); ++i)
+                if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
+                    if (param->updateParameterInfo() && (flags & Vst::kParamTitlesChanged) == 0)
+                        flags |= Vst::kParamTitlesChanged;
+        }
 
         if (auto* pluginInstance = getPluginInstance())
         {
-            if (audioProcessor->getProgramParameter() != nullptr)
+            if (details.programChanged && audioProcessor->getProgramParameter() != nullptr)
             {
                 auto currentProgram = pluginInstance->getCurrentProgram();
                 auto paramValue = roundToInt (EditController::normalizedParamToPlain (JuceAudioProcessor::paramPreset,
@@ -990,7 +993,7 @@ public:
 
             auto latencySamples = pluginInstance->getLatencySamples();
 
-            if (latencySamples != lastLatencySamples)
+            if (details.latencyChanged && latencySamples != lastLatencySamples)
             {
                 flags |= Vst::kLatencyChanged;
                 lastLatencySamples = latencySamples;
@@ -1116,7 +1119,7 @@ private:
             initialiseMidiControllerMappings();
            #endif
 
-            audioProcessorChanged (pluginInstance);
+            audioProcessorChanged (pluginInstance, ChangeDetails().withParameterInfoChanged (true));
         }
     }
 

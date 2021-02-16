@@ -254,7 +254,6 @@ struct AbletonLiveHostSpecific
 class JuceVSTWrapper  : public AudioProcessorListener,
                         public AudioPlayHead,
                         private Timer,
-                        private AsyncUpdater,
                         private AudioProcessorParameter::Listener
 {
 private:
@@ -802,19 +801,9 @@ public:
 
     void parameterGestureChanged (int, bool) override {}
 
-    void audioProcessorChanged (AudioProcessor*) override
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails& details) override
     {
-        vstEffect.initialDelay = processor->getLatencySamples();
-        triggerAsyncUpdate();
-    }
-
-    void handleAsyncUpdate() override
-    {
-        if (hostCallback != nullptr)
-        {
-            hostCallback (&vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
-            hostCallback (&vstEffect, Vst2::audioMasterIOChanged,     0, 0, nullptr, 0);
-        }
+        hostChangeUpdater.update (details);
     }
 
     bool getPinProperties (Vst2::VstPinProperties& properties, bool direction, int index) const
@@ -1398,6 +1387,33 @@ public:
 
     //==============================================================================
 private:
+    struct HostChangeUpdater  : private AsyncUpdater
+    {
+        explicit HostChangeUpdater (JuceVSTWrapper& o)  : owner (o) {}
+        ~HostChangeUpdater() override  { cancelPendingUpdate(); }
+
+        void update (const ChangeDetails& details)
+        {
+            if (details.latencyChanged)
+                owner.vstEffect.initialDelay = owner.processor->getLatencySamples();
+
+            if (details.parameterInfoChanged || details.programChanged)
+                triggerAsyncUpdate();
+        }
+
+    private:
+        void handleAsyncUpdate() override
+        {
+            if (auto* callback = owner.hostCallback)
+            {
+                callback (&owner.vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
+                callback (&owner.vstEffect, Vst2::audioMasterIOChanged,     0, 0, nullptr, 0);
+            }
+        }
+
+        JuceVSTWrapper& owner;
+    };
+
     static JuceVSTWrapper* getWrapper (Vst2::AEffect* v) noexcept  { return static_cast<JuceVSTWrapper*> (v->object); }
 
     bool isProcessLevelOffline()
@@ -2120,6 +2136,8 @@ private:
     HeapBlock<Vst2::VstSpeakerArrangement> cachedInArrangement, cachedOutArrangement;
 
     ThreadLocalValue<bool> inParameterChangedCallback;
+
+    HostChangeUpdater hostChangeUpdater { *this };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVSTWrapper)
