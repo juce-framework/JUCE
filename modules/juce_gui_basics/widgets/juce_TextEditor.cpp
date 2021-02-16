@@ -1328,7 +1328,10 @@ void TextEditor::moveCaret (int newCaretPos)
     if (newCaretPos != getCaretPosition())
     {
         caretPosition = newCaretPos;
-        textHolder->restartTimer();
+
+        if (hasKeyboardFocus (false))
+            textHolder->restartTimer();
+
         scrollToMakeSureCursorIsVisible();
         updateCaretPosition();
     }
