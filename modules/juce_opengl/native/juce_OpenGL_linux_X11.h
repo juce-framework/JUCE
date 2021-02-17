@@ -135,7 +135,7 @@ public:
                 XWindowSystemUtilities::ScopedXLock xLock;
                 X11Symbols::getInstance()->xUnmapWindow (display, embeddedWindow);
                 X11Symbols::getInstance()->xDestroyWindow (display, embeddedWindow);
-                X11Symbols::getInstance()->xSync (display, True);
+                X11Symbols::getInstance()->xSync (display, False);
             }
         }
 
