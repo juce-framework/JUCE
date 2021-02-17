@@ -291,7 +291,7 @@ void XmlDocument::skipNextWhiteSpace()
 {
     for (;;)
     {
-        input = input.findEndOfWhitespace();
+        input.incrementToEndOfWhitespace();
 
         if (input.isEmpty())
         {

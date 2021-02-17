@@ -794,6 +794,19 @@ public:
         return -1;
     }
 
+    /** Increments a pointer until it points to the first non-whitespace character
+        in a string.
+
+        If the string contains only whitespace, the pointer will point to the
+        string's null terminator.
+    */
+    template <typename Type>
+    static void incrementToEndOfWhitespace (Type& text) noexcept
+    {
+        while (text.isWhitespace())
+            ++text;
+    }
+
     /** Returns a pointer to the first non-whitespace character in a string.
         If the string contains only whitespace, this will return a pointer
         to its null terminator.
@@ -801,9 +814,7 @@ public:
     template <typename Type>
     static Type findEndOfWhitespace (Type text) noexcept
     {
-        while (text.isWhitespace())
-            ++text;
-
+        incrementToEndOfWhitespace (text);
         return text;
     }
 

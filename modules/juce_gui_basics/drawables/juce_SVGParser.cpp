@@ -415,7 +415,7 @@ public:
             case 'z':
                 path.closeSubPath();
                 last = last2 = subpathStart;
-                d = d.findEndOfWhitespace();
+                d.incrementToEndOfWhitespace();
                 currentCommand = 'M';
                 break;
 
@@ -755,7 +755,7 @@ private:
 
             dashLengths.add (value);
 
-            t = t.findEndOfWhitespace();
+            t.incrementToEndOfWhitespace();
 
             if (*t == ',')
                 ++t;

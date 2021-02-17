@@ -272,7 +272,7 @@ private:
         {
             for (;;)
             {
-                p = p.findEndOfWhitespace();
+                p.incrementToEndOfWhitespace();
 
                 if (*p == '/')
                 {
