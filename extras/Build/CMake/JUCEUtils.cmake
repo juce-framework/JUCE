@@ -1883,6 +1883,7 @@ function(_juce_initialise_target target)
         BACKGROUND_BLE_ENABLED          # iOS only
         CUSTOM_XCASSETS_FOLDER          # iOS only
         TARGETED_DEVICE_FAMILY          # iOS only
+        REQUIRES_FULL_SCREEN            # iOS only
         ICON_BIG
         ICON_SMALL
         COMPANY_COPYRIGHT

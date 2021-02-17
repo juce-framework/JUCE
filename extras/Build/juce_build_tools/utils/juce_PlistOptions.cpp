@@ -206,8 +206,7 @@ namespace build_tools
                 if (statusBarHidden)
                     addPlistDictionaryKey (*dict, "UIStatusBarHidden", true);
 
-                if (requiresFullScreen)
-                    addPlistDictionaryKey (*dict, "UIRequiresFullScreen", true);
+                addPlistDictionaryKey (*dict, "UIRequiresFullScreen", requiresFullScreen);
 
                 addIosScreenOrientations (*dict);
                 addIosBackgroundModes (*dict);
