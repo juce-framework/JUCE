@@ -512,7 +512,7 @@ attributes directly to these creation functions, rather than adding them later.
     in GarageBand.
 
 - `AAX_CATEGORY`
-  - Should be one of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
+  - Should be one or more of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
     `AAX_ePlugInCategory_Dynamics`, `AAX_ePlugInCategory_PitchShift`, `AAX_ePlugInCategory_Reverb`,
     `AAX_ePlugInCategory_Delay`, `AAX_ePlugInCategory_Modulation`, `AAX_ePlugInCategory_Harmonic`,
     `AAX_ePlugInCategory_NoiseReduction`, `AAX_ePlugInCategory_Dither`,
