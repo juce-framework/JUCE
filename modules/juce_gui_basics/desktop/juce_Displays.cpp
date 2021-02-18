@@ -90,28 +90,40 @@ const Displays::Display* Displays::getDisplayForPoint (Point<int> point, bool is
 
 Rectangle<int> Displays::physicalToLogical (Rectangle<int> rect, const Display* useScaleFactorOfDisplay) const noexcept
 {
+    return physicalToLogical (rect.toFloat(), useScaleFactorOfDisplay).toNearestInt();
+}
+
+Rectangle<float> Displays::physicalToLogical (Rectangle<float> rect, const Display* useScaleFactorOfDisplay) const noexcept
+{
     const auto* display = useScaleFactorOfDisplay != nullptr ? useScaleFactorOfDisplay
-                                                             : getDisplayForRect (rect, true);
+                                                             : getDisplayForRect (rect.toNearestInt(), true);
 
     if (display == nullptr)
         return rect;
 
     auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
 
-    return ((rect.toFloat() - display->topLeftPhysical.toFloat()) / (display->scale / globalScale)).toNearestInt() + (display->totalArea.getTopLeft() * globalScale);
+    return ((rect - display->topLeftPhysical.toFloat()) / (display->scale / globalScale))
+            + (display->totalArea.getTopLeft().toFloat() * globalScale);
 }
 
 Rectangle<int> Displays::logicalToPhysical (Rectangle<int> rect, const Display* useScaleFactorOfDisplay) const noexcept
 {
+    return logicalToPhysical (rect.toFloat(), useScaleFactorOfDisplay).toNearestInt();
+}
+
+Rectangle<float> Displays::logicalToPhysical (Rectangle<float> rect, const Display* useScaleFactorOfDisplay) const noexcept
+{
     const auto* display = useScaleFactorOfDisplay != nullptr ? useScaleFactorOfDisplay
-                                                             : getDisplayForRect (rect, false);
+                                                             : getDisplayForRect (rect.toNearestInt(), false);
 
     if (display == nullptr)
         return rect;
 
     auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
 
-    return ((rect.toFloat() - (display->totalArea.getTopLeft().toFloat() * globalScale)) * (display->scale / globalScale)).toNearestInt() + display->topLeftPhysical;
+    return ((rect.toFloat() - (display->totalArea.getTopLeft().toFloat() * globalScale)) * (display->scale / globalScale))
+             + display->topLeftPhysical.toFloat();
 }
 
 template <typename ValueType>
