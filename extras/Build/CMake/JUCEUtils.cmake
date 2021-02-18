@@ -418,14 +418,26 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
         DEPENDS "${defs_file}"
         VERBATIM)
 
+    execute_process(COMMAND xcode-select -p
+        OUTPUT_VARIABLE xcode_developer_path
+        RESULT_VARIABLE result_variable)
+
+    if(result_variable)
+        message(FATAL_ERROR
+            "Failed to locate an active developer directory. "
+            "Run 'xcode-select -s <path to Xcode>' before reconfiguring.")
+    endif()
+
+    string(STRIP "${xcode_developer_path}" xcode_developer_path)
+
     add_custom_command(OUTPUT "${au_rez_output}"
         COMMAND "${JUCE_XCRUN}" Rez
             -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64"
             -I "${secret_au_resource_dir}"
             -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-            -I "/Applications/Xcode.app/Contents/Developer/Extras/CoreAudio/AudioUnits/AUPublic/AUBase"
-            -I "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
-            -isysroot "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+            -I "${xcode_developer_path}/Extras/CoreAudio/AudioUnits/AUPublic/AUBase"
+            -I "${xcode_developer_path}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
+            -isysroot "${xcode_developer_path}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
             "${au_rez_sources}"
             -useDF
             -o "${au_rez_output}"
