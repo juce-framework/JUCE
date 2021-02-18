@@ -1580,11 +1580,6 @@ private:
                     {
                         auto newBounds = getLocalBounds();
 
-                       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-                        if (! lastBounds.isEmpty() && isWithin (newBounds.toDouble().getAspectRatio(), lastBounds.toDouble().getAspectRatio(), 0.001))
-                            return;
-                       #endif
-
                         {
                             const ScopedValueSetter<bool> resizingChildSetter (resizingChild, true);
                             pluginEditor->setBounds (pluginEditor->getLocalArea (this, newBounds).withPosition (0, 0));
