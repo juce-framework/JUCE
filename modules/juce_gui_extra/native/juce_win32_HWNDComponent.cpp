@@ -26,6 +26,8 @@
 namespace juce
 {
 
+void setThreadDPIAwarenessForWindow (HWND);
+
 class HWNDComponent::Pimpl  : public ComponentMovementWatcher
 {
 public:
@@ -44,26 +46,20 @@ public:
         DestroyWindow (hwnd);
     }
 
-    using ComponentMovementWatcher::componentMovedOrResized;
-
-    void componentMovedOrResized (bool wasMoved, bool wasResized) override
+    void componentMovedOrResized (bool, bool) override
     {
-        auto* topComponent = owner.getTopLevelComponent();
-
-        if (auto* peer = owner.getPeer())
+        if (auto* peer = owner.getTopLevelComponent()->getPeer())
         {
-            auto pos = topComponent->getLocalPoint (&owner, Point<int>());
+            auto area = (peer->getAreaCoveredBy (owner).toFloat() * peer->getPlatformScaleFactor()).toNearestInt();
 
-            auto scaled = (Rectangle<int> (pos.x, pos.y, owner.getWidth(), owner.getHeight()).toDouble()
-                            * peer->getPlatformScaleFactor()).getSmallestIntegerContainer();
+            setThreadDPIAwarenessForWindow (hwnd);
 
-            DWORD windowFlags = SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER;
-            if (! wasMoved)    windowFlags |= SWP_NOMOVE;
-            if (! wasResized)  windowFlags |= SWP_NOSIZE;
-
-            SetWindowPos (hwnd, nullptr, scaled.getX(), scaled.getY(), scaled.getWidth(), scaled.getHeight(), windowFlags);
+            SetWindowPos (hwnd, nullptr, area.getX(), area.getY(), area.getWidth(), area.getHeight(),
+                          SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
         }
     }
+
+    using ComponentMovementWatcher::componentMovedOrResized;
 
     void componentPeerChanged() override
     {
@@ -85,12 +81,12 @@ public:
             InvalidateRect (hwnd, nullptr, 0);
      }
 
-    using ComponentMovementWatcher::componentVisibilityChanged;
-
     void componentVisibilityChanged() override
     {
         componentPeerChanged();
     }
+
+    using ComponentMovementWatcher::componentVisibilityChanged;
 
     void componentBroughtToFront (Component& comp) override
     {
@@ -101,11 +97,13 @@ public:
     {
         if (auto* peer = owner.getPeer())
         {
+            setThreadDPIAwarenessForWindow (hwnd);
+
             RECT r;
             GetWindowRect (hwnd, &r);
+            Rectangle<int> windowRectangle (r.right - r.left, r.bottom - r.top);
 
-            return (Rectangle<int>::leftTopRightBottom (r.left, r.top, r.right, r.bottom).toDouble()
-                     / peer->getPlatformScaleFactor()).getSmallestIntegerContainer();
+            return (windowRectangle.toFloat() / peer->getPlatformScaleFactor()).toNearestInt();
         }
 
         return {};
@@ -120,7 +118,8 @@ private:
         {
             auto windowFlags = GetWindowLongPtr (hwnd, -16);
 
-            windowFlags &= ~(WS_POPUP | WS_CHILD);
+            windowFlags &= ~WS_POPUP;
+            windowFlags |= WS_CHILD;
 
             SetWindowLongPtr (hwnd, -16, windowFlags);
             SetParent (hwnd, (HWND) currentPeer->getNativeHandle());
@@ -131,6 +130,7 @@ private:
 
     void removeFromParent()
     {
+        ShowWindow (hwnd, SW_HIDE);
         SetParent (hwnd, NULL);
     }
 
@@ -141,11 +141,10 @@ private:
 };
 
 //==============================================================================
-HWNDComponent::HWNDComponent()
-{
-}
-
+HWNDComponent::HWNDComponent()  {}
 HWNDComponent::~HWNDComponent() {}
+
+void HWNDComponent::paint (Graphics&) {}
 
 void HWNDComponent::setHWND (void* hwnd)
 {

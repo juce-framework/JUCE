@@ -547,44 +547,46 @@ JUCE_API double getScaleFactorForWindow (HWND h)
     return 1.0;
  }
 
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE
- JUCE_API void setThreadDPIAwarenessForWindow (HWND nativeWindow)
- {
-     // NB. Using local functions here because we need to call this method from the plug-in wrappers
-     // which don't load the DPI-awareness functions on startup
-     static SetThreadDPIAwarenessContextFunc        localSetThreadDPIAwarenessContext        = nullptr;
-     static GetWindowDPIAwarenessContextFunc        localGetWindowDPIAwarenessContext        = nullptr;
-     static GetThreadDPIAwarenessContextFunc        localGetThreadDPIAwarenessContext        = nullptr;
-     static GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDPIAwarenessContext = nullptr;
+JUCE_API void setThreadDPIAwarenessForWindow (HWND nativeWindow)
+{
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    // NB. Using local functions here because we need to call this method from the plug-in wrappers
+    // which don't load the DPI-awareness functions on startup
+    static SetThreadDPIAwarenessContextFunc        localSetThreadDPIAwarenessContext        = nullptr;
+    static GetWindowDPIAwarenessContextFunc        localGetWindowDPIAwarenessContext        = nullptr;
+    static GetThreadDPIAwarenessContextFunc        localGetThreadDPIAwarenessContext        = nullptr;
+    static GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDPIAwarenessContext = nullptr;
 
-     static bool hasChecked = false;
-     static bool loadedOK = false;
+    static bool hasChecked = false;
+    static bool loadedOK = false;
 
-     if (! hasChecked)
-     {
-         hasChecked = true;
+    if (! hasChecked)
+    {
+        hasChecked = true;
 
-         localSetThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-         localGetWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-         localGetThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-         localGetAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+        localSetThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+        localGetWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
+        localGetThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+        localGetAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
 
-         loadedOK = (localSetThreadDPIAwarenessContext != nullptr && localGetWindowDPIAwarenessContext != nullptr
-                    && localGetThreadDPIAwarenessContext != nullptr && localGetAwarenessFromDPIAwarenessContext != nullptr);
-     }
+        loadedOK = (localSetThreadDPIAwarenessContext != nullptr && localGetWindowDPIAwarenessContext != nullptr
+                   && localGetThreadDPIAwarenessContext != nullptr && localGetAwarenessFromDPIAwarenessContext != nullptr);
+    }
 
-     if (loadedOK)
-     {
-         auto dpiAwareWindow = localGetAwarenessFromDPIAwarenessContext (localGetWindowDPIAwarenessContext (nativeWindow)) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
-         auto dpiAwareThread = localGetAwarenessFromDPIAwarenessContext (localGetThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+    if (loadedOK)
+    {
+        auto dpiAwareWindow = localGetAwarenessFromDPIAwarenessContext (localGetWindowDPIAwarenessContext (nativeWindow)) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+        auto dpiAwareThread = localGetAwarenessFromDPIAwarenessContext (localGetThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
 
-         if (dpiAwareWindow && ! dpiAwareThread)
-             localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-         else if (! dpiAwareWindow && dpiAwareThread)
-             localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
-     }
- }
-#endif
+        if (dpiAwareWindow && ! dpiAwareThread)
+            localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+        else if (! dpiAwareWindow && dpiAwareThread)
+            localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+    }
+   #else
+    ignoreUnused (nativeWindow);
+   #endif
+}
 
 //==============================================================================
 static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags, bool adjustTopLeft = false)
