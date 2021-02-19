@@ -402,7 +402,7 @@ std::unique_ptr<AudioPluginInstance> InternalPluginFormat::InternalPluginFactory
     const auto begin = descriptions.begin();
     const auto it = std::find_if (begin,
                                   descriptions.end(),
-                                  [&] (const PluginDescription& desc) { return name == desc.name; });
+                                  [&] (const PluginDescription& desc) { return name.equalsIgnoreCase (desc.name); });
 
     if (it == descriptions.end())
         return nullptr;
