@@ -68,7 +68,7 @@ static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexc
 #endif
 
 //==============================================================================
-inline juce::String toString (const Steinberg::char8* string) noexcept       { return juce::String (string); }
+inline juce::String toString (const Steinberg::char8* string) noexcept       { return juce::String (juce::CharPointer_UTF8  ((juce::CharPointer_UTF8::CharType*)  string)); }
 inline juce::String toString (const Steinberg::char16* string) noexcept      { return juce::String (juce::CharPointer_UTF16 ((juce::CharPointer_UTF16::CharType*) string)); }
 
 // NB: The casts are handled by a Steinberg::UString operator
