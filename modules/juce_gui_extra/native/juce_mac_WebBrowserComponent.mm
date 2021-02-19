@@ -312,17 +312,18 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
-
         if (url.trimStart().startsWithIgnoreCase ("javascript:"))
         {
             [webView evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
                      completionHandler: nil];
+
+            return;
         }
-        else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
-        {
+
+        stop();
+
+        if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
             [webView loadRequest: request];
-        }
     }
 
     void goBack()       { [webView goBack]; }
@@ -531,14 +532,15 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
-
         if (url.trimStart().startsWithIgnoreCase ("javascript:"))
         {
-            [webView stringByEvaluatingJavaScriptFromString:
-                juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            [webView stringByEvaluatingJavaScriptFromString: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            return;
         }
-        else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
+
+        stop();
+
+        if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
            #if JUCE_MAC
             [[webView mainFrame] loadRequest: request];
