@@ -97,16 +97,16 @@ public:
     }
 
     //==============================================================================
-    bool canAddBus    (bool isInput) const override   { return (! isInput && getBusCount (false) < maxMidiChannel); }
-    bool canRemoveBus (bool isInput) const override   { return (! isInput && getBusCount (false) > 1); }
+    bool canAddBus    (bool isInput) const override   { return ! isInput; }
+    bool canRemoveBus (bool isInput) const override   { return ! isInput; }
 
     //==============================================================================
     void prepareToPlay (double newSampleRate, int samplesPerBlock) override
     {
         ignoreUnused (samplesPerBlock);
 
-        for (auto midiChannel = 0; midiChannel < maxMidiChannel; ++midiChannel)
-            synth[midiChannel]->setCurrentPlaybackSampleRate (newSampleRate);
+        for (auto* s : synth)
+            s->setCurrentPlaybackSampleRate (newSampleRate);
     }
 
     void releaseResources() override {}
@@ -117,6 +117,9 @@ public:
 
         for (auto busNr = 0; busNr < busCount; ++busNr)
         {
+            if (synth.size() <= busNr)
+                continue;
+
             auto midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
             auto audioBusBuffer = getBusBuffer (buffer, false, busNr);
 
@@ -140,6 +143,15 @@ public:
     void setCurrentProgram (int) override                  {}
     const String getProgramName (int) override             { return {}; }
     void changeProgramName (int, const String&) override   {}
+
+    bool isBusesLayoutSupported (const BusesLayout& layout) const override
+    {
+        for (const auto& bus : layout.outputBuses)
+            if (bus != AudioChannelSet::stereo())
+                return false;
+
+        return layout.inputBuses.isEmpty() && 1 <= layout.outputBuses.size();
+    }
 
     //==============================================================================
     void getStateInformation (MemoryBlock&) override {}
@@ -170,13 +182,13 @@ private:
         midiNotes.setRange (0, 126, true);
         SynthesiserSound::Ptr newSound = new SamplerSound ("Voice", *formatReader, midiNotes, 0x40, 0.0, 0.0, 10.0);
 
-        for (int channel = 0; channel < maxMidiChannel; ++channel)
-            synth[channel]->removeSound (0);
+        for (auto* s : synth)
+            s->removeSound (0);
 
         sound = newSound;
 
-        for (int channel = 0; channel < maxMidiChannel; ++channel)
-            synth[channel]->addSound (sound);
+        for (auto* s : synth)
+            s->addSound (sound);
     }
 
     //==============================================================================
