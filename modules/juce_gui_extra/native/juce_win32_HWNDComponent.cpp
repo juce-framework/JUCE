@@ -46,16 +46,20 @@ public:
         DestroyWindow (hwnd);
     }
 
-    void componentMovedOrResized (bool, bool) override
+    void componentMovedOrResized (bool wasMoved, bool wasResized) override
     {
         if (auto* peer = owner.getTopLevelComponent()->getPeer())
         {
-            auto area = (peer->getAreaCoveredBy (owner).toFloat() * peer->getPlatformScaleFactor()).toNearestInt();
+            auto area = (peer->getAreaCoveredBy (owner).toFloat() * peer->getPlatformScaleFactor()).getSmallestIntegerContainer();
 
             setThreadDPIAwarenessForWindow (hwnd);
 
-            SetWindowPos (hwnd, nullptr, area.getX(), area.getY(), area.getWidth(), area.getHeight(),
-                          SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+            UINT flagsToSend =  SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER;
+
+            if (! wasMoved)   flagsToSend |= SWP_NOMOVE;
+            if (! wasResized) flagsToSend |= SWP_NOSIZE;
+
+            SetWindowPos (hwnd, nullptr, area.getX(), area.getY(), area.getWidth(), area.getHeight(), flagsToSend);
         }
     }
 
