@@ -116,7 +116,7 @@ void MidiBuffer::clear (int startSample, int numSamples)
     auto start = MidiBufferHelpers::findEventAfter (data.begin(), data.end(), startSample - 1);
     auto end   = MidiBufferHelpers::findEventAfter (start,        data.end(), startSample + numSamples - 1);
 
-    data.removeRange ((int) (start - data.begin()), (int) (end - data.begin()));
+    data.removeRange ((int) (start - data.begin()), (int) (end - start));
 }
 
 void MidiBuffer::addEvent (const MidiMessage& m, int sampleNumber)
@@ -235,5 +235,74 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
     samplePosition = metadata.samplePosition;
     return true;
 }
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+struct MidiBufferTest  : public UnitTest
+{
+    MidiBufferTest()
+        : UnitTest ("MidiBuffer", UnitTestCategories::midi)
+    {}
+
+    void runTest() override
+    {
+        beginTest ("Clear messages");
+        {
+            const auto message = MidiMessage::noteOn (1, 64, 0.5f);
+
+            const auto testBuffer = [&]
+            {
+                MidiBuffer buffer;
+                buffer.addEvent (message, 0);
+                buffer.addEvent (message, 10);
+                buffer.addEvent (message, 20);
+                buffer.addEvent (message, 30);
+                return buffer;
+            }();
+
+            {
+                auto buffer = testBuffer;
+                buffer.clear (10, 0);
+                expectEquals (buffer.getNumEvents(), 4);
+            }
+
+            {
+                auto buffer = testBuffer;
+                buffer.clear (10, 1);
+                expectEquals (buffer.getNumEvents(), 3);
+            }
+
+            {
+                auto buffer = testBuffer;
+                buffer.clear (10, 10);
+                expectEquals (buffer.getNumEvents(), 3);
+            }
+
+            {
+                auto buffer = testBuffer;
+                buffer.clear (10, 20);
+                expectEquals (buffer.getNumEvents(), 2);
+            }
+
+            {
+                auto buffer = testBuffer;
+                buffer.clear (10, 30);
+                expectEquals (buffer.getNumEvents(), 1);
+            }
+
+            {
+                auto buffer = testBuffer;
+                buffer.clear (10, 300);
+                expectEquals (buffer.getNumEvents(), 1);
+            }
+        }
+    }
+};
+
+static MidiBufferTest midiBufferTest;
+
+#endif
 
 } // namespace juce
