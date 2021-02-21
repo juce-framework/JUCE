@@ -842,7 +842,7 @@ public:
         ReleaseControl (index + 2);
     }
 
-    void audioProcessorChanged (AudioProcessor*, int) override
+    void audioProcessorChanged (AudioProcessor*) override
     {
         // xxx is there an RTAS equivalent?
     }

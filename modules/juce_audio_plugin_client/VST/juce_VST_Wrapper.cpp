@@ -802,11 +802,9 @@ public:
 
     void parameterGestureChanged (int, bool) override {}
 
-    void audioProcessorChanged (AudioProcessor*, int flags) override
+    void audioProcessorChanged (AudioProcessor*) override
     {
-        lastChangeFlags |= flags;
-        if (flags & AudioProcessorListener::Flags::latencyUpdate)
-            vstEffect.initialDelay = processor->getLatencySamples();
+        vstEffect.initialDelay = processor->getLatencySamples();
         triggerAsyncUpdate();
     }
 
@@ -814,14 +812,9 @@ public:
     {
         if (hostCallback != nullptr)
         {
-            // VST2 doesn't support updating parameters so parametersUpdate flag will be ignored.
-
-            if (lastChangeFlags & AudioProcessorListener::Flags::programUpdate)
-                hostCallback (&vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
-            if (lastChangeFlags & AudioProcessorListener::Flags::latencyUpdate)
-                hostCallback (&vstEffect, Vst2::audioMasterIOChanged, 0, 0, nullptr, 0);
+            hostCallback (&vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
+            hostCallback (&vstEffect, Vst2::audioMasterIOChanged,     0, 0, nullptr, 0);
         }
-        lastChangeFlags &= 0;
     }
 
     bool getPinProperties (Vst2::VstPinProperties& properties, bool direction, int index) const
@@ -2095,7 +2088,6 @@ private:
     double sampleRate = 44100.0;
     int32 blockSize = 1024;
     Vst2::AEffect vstEffect;
-    std::atomic<int> lastChangeFlags {0};
     CriticalSection stateInformationLock;
     juce::MemoryBlock chunkMemory;
     uint32 chunkMemoryTime = 0;

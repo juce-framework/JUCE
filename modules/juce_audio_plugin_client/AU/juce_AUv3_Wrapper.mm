@@ -914,7 +914,7 @@ public:
    #endif
 
     //==============================================================================
-    void audioProcessorChanged (AudioProcessor* processor, int) override
+    void audioProcessorChanged (AudioProcessor* processor) override
     {
         ignoreUnused (processor);
 

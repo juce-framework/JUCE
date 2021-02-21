@@ -1603,8 +1603,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
     void handleAsyncUpdate() override
     {
         // indicates that something about the plugin has changed..
-        // only usage of triggerAsyncUpdate() is by audioMasterUpdateDisplay
-        updateHostDisplay (AudioProcessorListener::Flags::programUpdate);
+        updateHostDisplay();
     }
 
     pointer_sized_int handleCallback (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)

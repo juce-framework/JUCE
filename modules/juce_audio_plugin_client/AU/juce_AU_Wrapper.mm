@@ -1219,24 +1219,16 @@ public:
         sendAUEvent (kAudioUnitEvent_EndParameterChangeGesture, index);
     }
 
-    void audioProcessorChanged (AudioProcessor*, int flags) override
+    void audioProcessorChanged (AudioProcessor*) override
     {
-        if (flags & AudioProcessorListener::Flags::latencyUpdate)
-            PropertyChanged (kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_Latency,       kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ClassInfo,     kAudioUnitScope_Global, 0);
 
-        if (flags & AudioProcessorListener::Flags::parametersUpdate)
-        {
-            PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
-            PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
-        }
+        refreshCurrentPreset();
 
-        PropertyChanged (kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, 0);
-
-        if (flags & AudioProcessorListener::Flags::programUpdate)
-        {
-            refreshCurrentPreset();
-            PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
-        }
+        PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
     }
 
     //==============================================================================
