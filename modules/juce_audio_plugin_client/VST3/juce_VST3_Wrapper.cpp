@@ -1036,23 +1036,23 @@ public:
         paramChanged (audioProcessor->getVSTParamIDForIndex (index), newValue);
     }
 
-    void audioProcessorChanged (AudioProcessor*, const int whatChanged) override
+    void audioProcessorChanged (AudioProcessor*, const int flags) override
     {
         using Flags = AudioProcessorListener::Flags;
-        int32 flags = 0;
+        int32 vstFlags = 0;
 
-        if (whatChanged & Flags::parametersUpdate)
+        if (flags & Flags::parametersUpdate)
         {
-            flags |= Vst::kParamValuesChanged;
+            vstFlags |= Vst::kParamValuesChanged;
             for (int32 i = 0; i < parameters.getParameterCount(); ++i)
                 if (auto* param = dynamic_cast<Param*> (parameters.getParameterByIndex (i)))
-                    if (param->updateParameterInfo() && (flags & Vst::kParamTitlesChanged) == 0)
-                        flags |= Vst::kParamTitlesChanged;
+                    if (param->updateParameterInfo() && (vstFlags & Vst::kParamTitlesChanged) == 0)
+                        vstFlags |= Vst::kParamTitlesChanged;
         }
 
-        if (whatChanged & Flags::programUpdate)
+        if (flags & Flags::programUpdate)
         {
-            flags |= Vst::kParamTitlesChanged;
+            vstFlags |= Vst::kParamTitlesChanged;
             if (auto* pluginInstance = getPluginInstance())
             {
                 if (pluginInstance->getNumPrograms() > 1)
@@ -1063,9 +1063,9 @@ public:
             }
         }
 
-        if (whatChanged & Flags::latencyUpdate)
+        if (flags & Flags::latencyUpdate)
         {
-            flags = Vst::kLatencyChanged;
+            vstFlags = Vst::kLatencyChanged;
         }
 
         // TODO: These change detection from main JUCE are redundant to previous.
@@ -1084,7 +1084,7 @@ public:
                                   EditController::plainParamToNormalized (JuceAudioProcessor::paramPreset, currentProgram));
                     endEdit (JuceAudioProcessor::paramPreset);
 
-                    flags |= Vst::kParamValuesChanged;
+                    vstFlags |= Vst::kParamValuesChanged;
                 }
             }
 
@@ -1092,13 +1092,13 @@ public:
 
             if (latencySamples != lastLatencySamples)
             {
-                flags |= Vst::kLatencyChanged;
+                vstFlags |= Vst::kLatencyChanged;
                 lastLatencySamples = latencySamples;
             }
         }
 
-        if (flags != 0 && componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (flags);
+        if (vstFlags != 0 && componentHandler != nullptr && ! inSetupProcessing)
+            componentHandler->restartComponent (vstFlags);
     }
 
     //==============================================================================
