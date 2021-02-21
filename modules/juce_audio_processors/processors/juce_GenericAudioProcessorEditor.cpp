@@ -73,7 +73,7 @@ private:
             parameterValueHasChanged = 1;
     }
 
-    void audioProcessorChanged (AudioProcessor*) override {}
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails&) override {}
 
     //==============================================================================
     void timerCallback() override

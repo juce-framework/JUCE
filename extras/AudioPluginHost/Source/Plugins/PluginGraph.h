@@ -60,7 +60,7 @@ public:
 
     //==============================================================================
     void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
-    void audioProcessorChanged (AudioProcessor*) override { changed(); }
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails&) override { changed(); }
 
     //==============================================================================
     std::unique_ptr<XmlElement> createXml() const;

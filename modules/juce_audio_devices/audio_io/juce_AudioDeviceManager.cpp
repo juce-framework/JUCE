@@ -1146,12 +1146,19 @@ void AudioDeviceManager::addMidiInputCallback (const String& name, MidiInputCall
 
 void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* callbackToRemove)
 {
-    for (auto& device : MidiInput::getAvailableDevices())
+    if (name.isEmpty())
     {
-        if (device.name == name)
+        removeMidiInputDeviceCallback ({}, callbackToRemove);
+    }
+    else
+    {
+        for (auto& device : MidiInput::getAvailableDevices())
         {
-            removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
-            return;
+            if (device.name == name)
+            {
+                removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
+                return;
+            }
         }
     }
 }

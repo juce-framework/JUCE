@@ -83,7 +83,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 //==============================================================================
 namespace juce
 {
-#if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+#if JUCE_WINDOWS
  extern void setThreadDPIAwarenessForWindow (HWND);
 #endif
 
@@ -1602,8 +1602,8 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
     void handleAsyncUpdate() override
     {
-        // indicates that something about the plugin has changed..
-        updateHostDisplay();
+        updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
+                                                                  .withParameterInfoChanged (true));
     }
 
     pointer_sized_int handleCallback (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
@@ -2865,9 +2865,7 @@ public:
            #if JUCE_WINDOWS
             if (pluginHWND != 0)
             {
-               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
                 setThreadDPIAwarenessForWindow (pluginHWND);
-               #endif
 
                 MoveWindow (pluginHWND, pos.getX(), pos.getY(),
                             roundToInt (getWidth()  * nativeScaleFactor),
@@ -3130,9 +3128,7 @@ private:
                 // very dodgy logic to decide which size is right.
                 if (std::abs (rw - w) > 350 || std::abs (rh - h) > 350)
                 {
-                   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
                     setThreadDPIAwarenessForWindow (pluginHWND);
-                   #endif
 
                     SetWindowPos (pluginHWND, 0,
                                   0, 0, roundToInt (rw * nativeScaleFactor), roundToInt (rh * nativeScaleFactor),

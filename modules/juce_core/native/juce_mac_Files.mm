@@ -201,7 +201,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
             case invokedExecutableFile:
                 if (juce_argv != nullptr && juce_argc > 0)
-                    return File::getCurrentWorkingDirectory().getChildFile (String (juce_argv[0]));
+                    return File::getCurrentWorkingDirectory().getChildFile (CharPointer_UTF8 (juce_argv[0]));
                 // deliberate fall-through...
                 JUCE_FALLTHROUGH
 

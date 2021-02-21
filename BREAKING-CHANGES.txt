@@ -6,6 +6,30 @@ Develop
 
 Change
 ------
+AudioProcessorListener::audioProcessorChanged gained a new parameter describing
+the nature of any change.
+
+Possible Issues
+---------------
+Code using the old function signature will not build until updated to use
+the new signature.
+
+Workaround
+----------
+Listeners should add the new parameter to any overrides of
+audioProcessorChanged.
+
+Rationale
+---------
+The new function signature means that wrappers can be smarter about the
+requests that they make to hosts whenever some aspect of the processor changes.
+In particular, plugin wrappers can now distinguish between changes to latency,
+parameter attributes, and the current program. This means that hosts will no
+longer assume parameters have changed when `setLatencySamples` is called.
+
+
+Change
+------
 CharacterFunctions::readDoubleValue now returns values consistent with other
 C++ number parsing libraries. Parsing values smaller than the minimum number
 respresentable in a double will return (+/-)0.0 and parsing values larger than

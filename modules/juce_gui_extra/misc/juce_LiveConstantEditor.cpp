@@ -213,7 +213,7 @@ void LivePropertyEditorBase::findOriginalValueInCode()
     }
 
     p += (int) (sizeof ("JUCE_LIVE_CONSTANT") - 1);
-    p = p.findEndOfWhitespace();
+    p.incrementToEndOfWhitespace();
 
     if (! CharacterFunctions::find (p, CharPointer_ASCII ("JUCE_LIVE_CONSTANT")).isEmpty())
     {

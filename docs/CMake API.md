@@ -143,6 +143,21 @@ If the "Product -> Archive" action isn't working, the following steps may help c
       XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
   ```
 
+To archive an AUv3 plugin, `XCODE_ATTRIBUTE_INSTALL_PATH` must point to the PlugIns directory of the
+final app bundle but only for the AUv3 target. In code, that might look like this:
+
+    set_target_properties(my_plugin_Standalone PROPERTIES
+        XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
+        XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
+
+    get_target_property(output_name my_plugin_Standalone OUTPUT_NAME)
+
+    # On iOS, the AUv3 should go in <bundle_dir>/PlugIns
+    # On macOS, the AUv3 should go in <bundle_dir>/Contents/PlugIns
+    set_target_properties(my_plugin_AUv3 PROPERTIES
+        XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)/${output_name}.app/PlugIns"
+        XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
+
 ### Building universal binaries for macOS
 
 Building universal binaries that will run on both arm64 and x86_64 can be achieved by
@@ -497,7 +512,7 @@ attributes directly to these creation functions, rather than adding them later.
     in GarageBand.
 
 - `AAX_CATEGORY`
-  - Should be one of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
+  - Should be one or more of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
     `AAX_ePlugInCategory_Dynamics`, `AAX_ePlugInCategory_PitchShift`, `AAX_ePlugInCategory_Reverb`,
     `AAX_ePlugInCategory_Delay`, `AAX_ePlugInCategory_Modulation`, `AAX_ePlugInCategory_Harmonic`,
     `AAX_ePlugInCategory_NoiseReduction`, `AAX_ePlugInCategory_Dither`,

@@ -492,16 +492,17 @@ using SettingChangeCallbackFunc = void (*)(void);
 extern SettingChangeCallbackFunc settingChangeCallback;
 
 //==============================================================================
-static Rectangle<int> rectangleFromRECT (const RECT& r) noexcept    { return { r.left, r.top, r.right - r.left, r.bottom - r.top }; }
-static RECT RECTFromRectangle (const Rectangle<int>& r) noexcept    { return { r.getX(), r.getY(), r.getRight(), r.getBottom() }; }
+static Rectangle<int> rectangleFromRECT (RECT r) noexcept    { return { r.left, r.top, r.right - r.left, r.bottom - r.top }; }
+static RECT RECTFromRectangle (Rectangle<int> r) noexcept    { return { r.getX(), r.getY(), r.getRight(), r.getBottom() }; }
 
-static Point<int> pointFromPOINT (const POINT& p) noexcept          { return { p.x, p.y }; }
-static POINT POINTFromPoint (const Point<int>& p) noexcept          { return { p.x, p.y }; }
+static Point<int> pointFromPOINT (POINT p) noexcept          { return { p.x, p.y }; }
+static POINT POINTFromPoint (Point<int> p) noexcept          { return { p.x, p.y }; }
 
 //==============================================================================
 static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd);
 
-static Rectangle<int> convertPhysicalScreenRectangleToLogical (const Rectangle<int>& r, HWND h) noexcept
+template<typename ValueType>
+static Rectangle<ValueType> convertPhysicalScreenRectangleToLogical (Rectangle<ValueType> r, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
         return Desktop::getInstance().getDisplays().physicalToLogical (r, getCurrentDisplayFromScaleFactor (h));
@@ -509,7 +510,8 @@ static Rectangle<int> convertPhysicalScreenRectangleToLogical (const Rectangle<i
     return r;
 }
 
-static Rectangle<int> convertLogicalScreenRectangleToPhysical (const Rectangle<int>& r, HWND h) noexcept
+template<typename ValueType>
+static Rectangle<ValueType> convertLogicalScreenRectangleToPhysical (Rectangle<ValueType> r, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
         return Desktop::getInstance().getDisplays().logicalToPhysical (r, getCurrentDisplayFromScaleFactor (h));
@@ -517,7 +519,7 @@ static Rectangle<int> convertLogicalScreenRectangleToPhysical (const Rectangle<i
     return r;
 }
 
-static Point<int> convertPhysicalScreenPointToLogical (const Point<int>& p, HWND h) noexcept
+static Point<int> convertPhysicalScreenPointToLogical (Point<int> p, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
         return Desktop::getInstance().getDisplays().physicalToLogical (p, getCurrentDisplayFromScaleFactor (h));
@@ -547,44 +549,46 @@ JUCE_API double getScaleFactorForWindow (HWND h)
     return 1.0;
  }
 
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE
- JUCE_API void setThreadDPIAwarenessForWindow (HWND nativeWindow)
- {
-     // NB. Using local functions here because we need to call this method from the plug-in wrappers
-     // which don't load the DPI-awareness functions on startup
-     static SetThreadDPIAwarenessContextFunc        localSetThreadDPIAwarenessContext        = nullptr;
-     static GetWindowDPIAwarenessContextFunc        localGetWindowDPIAwarenessContext        = nullptr;
-     static GetThreadDPIAwarenessContextFunc        localGetThreadDPIAwarenessContext        = nullptr;
-     static GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDPIAwarenessContext = nullptr;
+JUCE_API void setThreadDPIAwarenessForWindow (HWND nativeWindow)
+{
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    // NB. Using local functions here because we need to call this method from the plug-in wrappers
+    // which don't load the DPI-awareness functions on startup
+    static SetThreadDPIAwarenessContextFunc        localSetThreadDPIAwarenessContext        = nullptr;
+    static GetWindowDPIAwarenessContextFunc        localGetWindowDPIAwarenessContext        = nullptr;
+    static GetThreadDPIAwarenessContextFunc        localGetThreadDPIAwarenessContext        = nullptr;
+    static GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDPIAwarenessContext = nullptr;
 
-     static bool hasChecked = false;
-     static bool loadedOK = false;
+    static bool hasChecked = false;
+    static bool loadedOK = false;
 
-     if (! hasChecked)
-     {
-         hasChecked = true;
+    if (! hasChecked)
+    {
+        hasChecked = true;
 
-         localSetThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-         localGetWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-         localGetThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-         localGetAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+        localSetThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+        localGetWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
+        localGetThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+        localGetAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
 
-         loadedOK = (localSetThreadDPIAwarenessContext != nullptr && localGetWindowDPIAwarenessContext != nullptr
-                    && localGetThreadDPIAwarenessContext != nullptr && localGetAwarenessFromDPIAwarenessContext != nullptr);
-     }
+        loadedOK = (localSetThreadDPIAwarenessContext != nullptr && localGetWindowDPIAwarenessContext != nullptr
+                   && localGetThreadDPIAwarenessContext != nullptr && localGetAwarenessFromDPIAwarenessContext != nullptr);
+    }
 
-     if (loadedOK)
-     {
-         auto dpiAwareWindow = localGetAwarenessFromDPIAwarenessContext (localGetWindowDPIAwarenessContext (nativeWindow)) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
-         auto dpiAwareThread = localGetAwarenessFromDPIAwarenessContext (localGetThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+    if (loadedOK)
+    {
+        auto dpiAwareWindow = localGetAwarenessFromDPIAwarenessContext (localGetWindowDPIAwarenessContext (nativeWindow)) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+        auto dpiAwareThread = localGetAwarenessFromDPIAwarenessContext (localGetThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
 
-         if (dpiAwareWindow && ! dpiAwareThread)
-             localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-         else if (! dpiAwareWindow && dpiAwareThread)
-             localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
-     }
- }
-#endif
+        if (dpiAwareWindow && ! dpiAwareThread)
+            localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+        else if (! dpiAwareWindow && dpiAwareThread)
+            localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+    }
+   #else
+    ignoreUnused (nativeWindow);
+   #endif
+}
 
 //==============================================================================
 static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags, bool adjustTopLeft = false)
@@ -601,15 +605,25 @@ static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags, bool adj
     SetWindowPos (hwnd, nullptr, bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight(), flags);
 }
 
-static RECT getWindowRect (HWND hwnd)
+static RECT getWindowScreenRect (HWND hwnd)
 {
    #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     setThreadDPIAwarenessForWindow (hwnd);
    #endif
 
-    RECT r;
-    GetWindowRect (hwnd, &r);
-    return r;
+    RECT rect;
+    GetWindowRect (hwnd, &rect);
+    return rect;
+}
+
+static RECT getWindowClientRect (HWND hwnd)
+{
+    auto rect = getWindowScreenRect (hwnd);
+
+    if (auto parentH = GetParent (hwnd))
+        MapWindowPoints (HWND_DESKTOP, parentH, (LPPOINT) &rect, 2);
+
+    return rect;
 }
 
 static void setWindowZOrder (HWND hwnd, HWND insertAfter)
@@ -827,7 +841,7 @@ public:
 
         if (transparent)
         {
-            auto windowBounds = getWindowRect (hwnd);
+            auto windowBounds = getWindowScreenRect (hwnd);
 
             POINT p = { -x, -y };
             POINT pos = { windowBounds.left, windowBounds.top };
@@ -878,7 +892,7 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 {
     auto hwnd = (HWND) nativeWindowHandle;
 
-    auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowRect (hwnd)), hwnd);
+    auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)), hwnd);
     const int w = r.getWidth();
     const int h = r.getHeight();
 
@@ -1386,7 +1400,7 @@ public:
         {
             if (auto parentHwnd = GetParent (hwnd))
             {
-                auto parentRect = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowRect (parentHwnd)), hwnd);
+                auto parentRect = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowScreenRect (parentHwnd)), hwnd);
                 newBounds.translate (parentRect.getX(), parentRect.getY());
             }
         }
@@ -1412,27 +1426,27 @@ public:
 
     Rectangle<int> getBounds() const override
     {
-        auto bounds = getWindowRect (hwnd);
-
-        if (auto parentH = GetParent (hwnd))
+        auto bounds = [this]
         {
-            MapWindowPoints (HWND_DESKTOP, parentH, (LPPOINT) &bounds, 2);
-            auto localBounds = rectangleFromRECT (bounds);
+            if (parentToAddTo == nullptr)
+                return convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)), hwnd);
+
+            auto localBounds = rectangleFromRECT (getWindowClientRect (hwnd));
 
            #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareWindow (hwnd))
-                localBounds = (localBounds.toDouble() / getPlatformScaleFactor()).toNearestInt();
+                return (localBounds.toDouble() / getPlatformScaleFactor()).toNearestInt();
            #endif
 
-            return windowBorder.subtractedFrom (localBounds);
-        }
+            return localBounds;
+        }();
 
-        return windowBorder.subtractedFrom (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (bounds), hwnd));
+        return windowBorder.subtractedFrom (bounds);
     }
 
     Point<int> getScreenPosition() const
     {
-        auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowRect (hwnd)), hwnd);
+        auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)), hwnd);
 
         return { r.getX() + windowBorder.getLeft(),
                  r.getY() + windowBorder.getTop() };
@@ -1535,7 +1549,7 @@ public:
 
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override
     {
-        auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowRect (hwnd)), hwnd);
+        auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)), hwnd);
 
         if (! r.withZeroOrigin().contains (localPos))
             return false;
@@ -2304,17 +2318,9 @@ private:
         {
             auto& info = *(ChildWindowClippingInfo*) context;
 
-            auto parent = GetParent (hwnd);
-
-            if (parent == info.peer->hwnd)
+            if (GetParent (hwnd) == info.peer->hwnd)
             {
-                auto r = getWindowRect (hwnd);
-                POINT pos = { r.left, r.top };
-                ScreenToClient (GetParent (hwnd), &pos);
-
-                Rectangle<int> clip (pos.x, pos.y,
-                                     r.right  - r.left,
-                                     r.bottom - r.top);
+                auto clip = rectangleFromRECT (getWindowClientRect (hwnd));
 
                 info.clip->subtract (clip - info.origin);
 
@@ -2395,7 +2401,7 @@ private:
             // it's not possible to have a transparent window with a title bar at the moment!
             jassert (! hasTitleBar());
 
-            auto r = getWindowRect (hwnd);
+            auto r = getWindowScreenRect (hwnd);
             x = y = 0;
             w = r.right - r.left;
             h = r.bottom - r.top;
@@ -3194,17 +3200,19 @@ private:
     {
         if (isConstrainedNativeWindow())
         {
-            auto pos = ScalingHelpers::unscaledScreenPosToScaled (component, convertPhysicalScreenRectangleToLogical (rectangleFromRECT (r), hwnd));
-            auto current = getCurrentScaledBounds();
+            const auto logicalBounds = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (r).toFloat(), hwnd);
+            auto pos = ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
 
-            constrainer->checkBounds (pos, current,
+            const auto original = getCurrentScaledBounds();
+
+            constrainer->checkBounds (pos, original,
                                       Desktop::getInstance().getDisplays().getTotalBounds (true),
                                       wParam == WMSZ_TOP    || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_TOPRIGHT,
                                       wParam == WMSZ_LEFT   || wParam == WMSZ_TOPLEFT    || wParam == WMSZ_BOTTOMLEFT,
                                       wParam == WMSZ_BOTTOM || wParam == WMSZ_BOTTOMLEFT || wParam == WMSZ_BOTTOMRIGHT,
                                       wParam == WMSZ_RIGHT  || wParam == WMSZ_TOPRIGHT   || wParam == WMSZ_BOTTOMRIGHT);
 
-            r = RECTFromRectangle (convertLogicalScreenRectangleToPhysical (ScalingHelpers::scaledScreenPosToUnscaled (component, pos), hwnd));
+            r = RECTFromRectangle (convertLogicalScreenRectangleToPhysical (ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()).toNearestInt(), hwnd));
         }
 
         return TRUE;
@@ -3218,22 +3226,29 @@ private:
                  && (wp.x > -32000 && wp.y > -32000)
                  && ! Component::isMouseButtonDownAnywhere())
             {
-                auto pos = ScalingHelpers::unscaledScreenPosToScaled (component, convertPhysicalScreenRectangleToLogical (rectangleFromRECT ({ wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy }), hwnd));
-                auto current = getCurrentScaledBounds();
+                const auto logicalBounds = convertPhysicalScreenRectangleToLogical (rectangleFromRECT ({ wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy }).toFloat(), hwnd);
+                auto pos = ScalingHelpers::unscaledScreenPosToScaled (component, logicalBounds).toNearestInt();
 
-                constrainer->checkBounds (pos, current,
+                const auto original = getCurrentScaledBounds();
+
+                constrainer->checkBounds (pos, original,
                                           Desktop::getInstance().getDisplays().getTotalBounds (true),
-                                          pos.getY() != current.getY() && pos.getBottom() == current.getBottom(),
-                                          pos.getX() != current.getX() && pos.getRight()  == current.getRight(),
-                                          pos.getY() == current.getY() && pos.getBottom() != current.getBottom(),
-                                          pos.getX() == current.getX() && pos.getRight()  != current.getRight());
+                                          pos.getY() != original.getY() && pos.getBottom() == original.getBottom(),
+                                          pos.getX() != original.getX() && pos.getRight()  == original.getRight(),
+                                          pos.getY() == original.getY() && pos.getBottom() != original.getBottom(),
+                                          pos.getX() == original.getX() && pos.getRight()  != original.getRight());
 
-                pos = convertLogicalScreenRectangleToPhysical (ScalingHelpers::scaledScreenPosToUnscaled (component, pos), hwnd);
+                auto physicalBounds = convertLogicalScreenRectangleToPhysical (ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()), hwnd);
 
-                wp.x  = pos.getX();
-                wp.y  = pos.getY();
-                wp.cx = pos.getWidth();
-                wp.cy = pos.getHeight();
+                auto getNewPositionIfNotRoundingError = [] (int pos, float newPos)
+                {
+                    return (std::abs ((float) pos - newPos) >= 1.0f) ? roundToInt (newPos) : pos;
+                };
+
+                wp.x  = getNewPositionIfNotRoundingError (wp.x,  physicalBounds.getX());
+                wp.y  = getNewPositionIfNotRoundingError (wp.y,  physicalBounds.getY());
+                wp.cx = getNewPositionIfNotRoundingError (wp.cx, physicalBounds.getWidth());
+                wp.cy = getNewPositionIfNotRoundingError (wp.cy, physicalBounds.getHeight());
             }
         }
 
@@ -3263,40 +3278,67 @@ private:
         return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly..
     }
 
+    //==============================================================================
+    struct ChildWindowCallbackData
+    {
+        std::map<HWND, RECT> windowRectsMap;
+        float scaleRatio;
+    };
+
     LRESULT handleDPIChanging (int newDPI, RECT newRect)
     {
         auto newScale = (double) newDPI / USER_DEFAULT_SCREEN_DPI;
 
         if (! approximatelyEqual (scaleFactor, newScale))
         {
-            const ScopedValueSetter<bool> setter (isInDPIChange, true);
-
             auto oldScale = scaleFactor;
             scaleFactor = newScale;
 
-            auto scaleRatio = scaleFactor / oldScale;
-            EnumChildWindows (hwnd, scaleChildHWNDCallback, (LPARAM) &scaleRatio);
+            {
+                const ScopedValueSetter<bool> setter (isInDPIChange, true);
+                setBounds (windowBorder.subtractedFrom (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (newRect), hwnd)), fullScreen);
+            }
 
-            setBounds (windowBorder.subtractedFrom (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (newRect), hwnd)), false);
             updateShadower();
             InvalidateRect (hwnd, nullptr, FALSE);
+
+            ChildWindowCallbackData callbackData;
+            callbackData.scaleRatio = (float) (scaleFactor / oldScale);
+
+            EnumChildWindows (hwnd, getChildWindowRectCallback, (LPARAM) &callbackData);
             scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
+            EnumChildWindows (hwnd, scaleChildWindowCallback, (LPARAM) &callbackData);
         }
 
         return 0;
     }
 
-    static BOOL CALLBACK scaleChildHWNDCallback (HWND hwnd, LPARAM context)
+    static BOOL CALLBACK getChildWindowRectCallback (HWND hwnd, LPARAM data)
     {
-        auto r = getWindowRect (hwnd);
+        auto& callbackData = *(reinterpret_cast<ChildWindowCallbackData*> (data));
 
-        POINT p { r.left, r.top };
-        ScreenToClient (GetParent (hwnd), &p);
+        callbackData.windowRectsMap[hwnd] = getWindowClientRect (hwnd);
+        return TRUE;
+    }
 
-        auto ratio = *(double*) context;
-        SetWindowPos (hwnd, nullptr, roundToInt (p.x * ratio), roundToInt (p.y * ratio),
-                      roundToInt ((r.right - r.left) * ratio), roundToInt ((r.bottom - r.top) * ratio),
-                      SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+    static BOOL CALLBACK scaleChildWindowCallback (HWND hwnd, LPARAM data)
+    {
+        auto& callbackData = *(reinterpret_cast<ChildWindowCallbackData*> (data));
+
+        auto originalBounds = rectangleFromRECT (callbackData.windowRectsMap[hwnd]);
+        auto scaledBounds = (originalBounds.toFloat() * callbackData.scaleRatio).toNearestInt();
+        auto currentBounds = rectangleFromRECT (getWindowClientRect (hwnd));
+
+        if (scaledBounds != currentBounds)
+        {
+            SetWindowPos (hwnd,
+                          nullptr,
+                          scaledBounds.getX(),
+                          scaledBounds.getY(),
+                          scaledBounds.getWidth(),
+                          scaledBounds.getHeight(),
+                          SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+        }
 
         if (auto* peer = getOwnerOfWindow (hwnd))
             peer->handleChildDPIChanging();
@@ -3306,15 +3348,14 @@ private:
 
     void handleChildDPIChanging()
     {
-        const ScopedValueSetter<bool> setter (isInDPIChange, true);
-
         scaleFactor = getScaleFactorForWindow (parentToAddTo);
+        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
 
         updateShadower();
         InvalidateRect (hwnd, nullptr, FALSE);
-        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
     }
 
+    //==============================================================================
     void handleAppActivation (const WPARAM wParam)
     {
         modifiersAtLastCallback = -1;
@@ -3420,7 +3461,7 @@ private:
     }
 
     //==============================================================================
-  #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
+   #if JUCE_MODULE_AVAILABLE_juce_audio_plugin_client
     void setModifierKeyProvider (ModifierKeyProvider* provider) override
     {
         modProvider = provider;
@@ -3432,7 +3473,6 @@ private:
     }
    #endif
 
-    //==============================================================================
 public:
     static LRESULT CALLBACK windowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)
     {
@@ -3474,7 +3514,7 @@ private:
             // LPARAM is relative to this window's top-left but may be on a different monitor so we need to calculate the
             // physical screen position and then convert this to local logical coordinates
             auto localPos = getPOINTFromLParam (lParam);
-            auto r = getWindowRect (hwnd);
+            auto r = getWindowScreenRect (hwnd);
 
             return globalToLocal (Desktop::getInstance().getDisplays().physicalToLogical (pointFromPOINT ({ r.left + localPos.x + roundToInt (windowBorder.getLeft() * scaleFactor),
                                                                                                             r.top  + localPos.y + roundToInt (windowBorder.getTop()  * scaleFactor) })).toFloat());
@@ -4546,7 +4586,7 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
         if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
             bounds = peer->getComponent().getTopLevelComponent()->getBounds();
         else
-            bounds = Desktop::getInstance().getDisplays().physicalToLogical (rectangleFromRECT (getWindowRect (hwnd)));
+            bounds = Desktop::getInstance().getDisplays().physicalToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)));
 
         const Displays::Display* retVal = nullptr;
         int maxArea = -1;
@@ -4618,7 +4658,7 @@ void Displays::findDisplays (float masterScale)
 
     if (monitors.size() == 0)
     {
-        auto windowRect = getWindowRect (GetDesktopWindow());
+        auto windowRect = getWindowScreenRect (GetDesktopWindow());
         monitors.add ({ true, windowRect, windowRect, globalDPI });
     }
 

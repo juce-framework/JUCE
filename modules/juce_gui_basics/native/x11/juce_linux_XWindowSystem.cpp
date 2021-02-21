@@ -932,6 +932,158 @@ private:
 //=============================== X11 - Displays ===============================
 namespace DisplayHelpers
 {
+    template <typename Callback>
+    void parseXSettings (const unsigned char* dataPtr, const size_t bytes, Callback&& callback)
+    {
+        struct Header
+        {
+            CARD8 byteOrder;
+            CARD8 padding[3];
+            CARD32 serial;
+            CARD32 nSettings;
+        };
+
+        auto* data     = dataPtr;
+        size_t byteNum = 0;
+
+        const auto increment = [&] (size_t amount)
+        {
+            data    += amount;
+            byteNum += amount;
+        };
+
+        const auto* header = reinterpret_cast<const Header*> (data);
+        increment (sizeof (Header));
+
+        const auto readCARD16 = [&]() -> CARD16
+        {
+            if (byteNum + sizeof (CARD16) > bytes)
+                return {};
+
+            const auto value = header->byteOrder == MSBFirst ? ByteOrder::bigEndianShort (data)
+                                                             : ByteOrder::littleEndianShort (data);
+            increment (sizeof (CARD16));
+            return value;
+        };
+
+        const auto readCARD32 = [&]() -> CARD32
+        {
+            if (byteNum + sizeof (CARD32) > bytes)
+                return {};
+
+            const auto value = header->byteOrder == MSBFirst ? ByteOrder::bigEndianInt (data)
+                                                             : ByteOrder::littleEndianInt (data);
+            increment (sizeof (CARD32));
+            return value;
+        };
+
+        const auto readString = [&] (size_t nameLen) -> std::string
+        {
+            const auto padded = (nameLen + 3) & (~(size_t) 3);
+
+            if (byteNum + padded > bytes)
+                return {};
+
+            auto* ptr = reinterpret_cast<const char*> (data);
+            const std::string result (ptr, ptr + nameLen);
+            increment (padded);
+            return result;
+        };
+
+        CARD16 setting = 0;
+
+        while (byteNum < bytes && setting < header->nSettings)
+        {
+            const auto type = *reinterpret_cast<const char*> (data);
+            increment (2);
+
+            const auto name   = readString (readCARD16());
+            const auto serial = readCARD32();
+            ignoreUnused (serial);
+
+            enum { XSettingsTypeInteger, XSettingsTypeString, XSettingsTypeColor };
+
+            switch (type)
+            {
+                case XSettingsTypeInteger:
+                {
+                    callback (name, (INT32) readCARD32());
+                    break;
+                }
+
+                case XSettingsTypeString:
+                {
+                    callback (name, readString (readCARD32()));
+                    break;
+                }
+
+                case XSettingsTypeColor:
+                {
+                    // Order is important, these should be kept as separate statements!
+                    const auto r = readCARD16();
+                    const auto g = readCARD16();
+                    const auto b = readCARD16();
+                    const auto a = readCARD16();
+                    callback (name, r, g, b, a);
+                    break;
+                }
+            }
+
+            setting += 1;
+        }
+    }
+
+    double getScalingFactorFromXSettings()
+    {
+        if (auto* display = XWindowSystem::getInstance()->getDisplay())
+        {
+            using namespace XWindowSystemUtilities;
+
+            ScopedXLock xLock;
+
+            const auto selectionWindow = X11Symbols::getInstance()->xGetSelectionOwner (display,
+                                                                                        Atoms::getCreating (display, "_XSETTINGS_S0"));
+
+            if (selectionWindow != None)
+            {
+                const auto xsettingsSettingsAtom = Atoms::getCreating (display, "_XSETTINGS_SETTINGS");
+
+                const GetXProperty prop { selectionWindow,
+                                          xsettingsSettingsAtom,
+                                          0L,
+                                          std::numeric_limits<long>::max(),
+                                          false,
+                                          xsettingsSettingsAtom };
+
+                if (prop.success
+                    && prop.actualType == xsettingsSettingsAtom
+                    && prop.actualFormat == 8)
+                {
+                    struct ExtractRelevantSettings
+                    {
+                        void operator() (const std::string& name, INT32 value)
+                        {
+                            if (name == "Gdk/WindowScalingFactor")
+                                scaleFactor = value;
+                        }
+
+                        void operator() (const std::string&, const std::string&) {}
+                        void operator() (const std::string&, CARD16, CARD16, CARD16, CARD16) {}
+
+                        INT32 scaleFactor = 0;
+                    };
+
+                    ExtractRelevantSettings callback;
+                    parseXSettings (prop.data, prop.numItems, callback);
+
+                    return (double) callback.scaleFactor;
+                }
+            }
+        }
+
+        return 0.0;
+    }
+
     static double getDisplayDPI (::Display* display, int index)
     {
         auto widthMM  = X11Symbols::getInstance()->xDisplayWidthMM  (display, index);
@@ -946,6 +1098,11 @@ namespace DisplayHelpers
 
     static double getDisplayScale (const String& name, double dpi)
     {
+        const auto scaleFactorFromXSettings = getScalingFactorFromXSettings();
+
+        if (scaleFactorFromXSettings > 0.0)
+            return scaleFactorFromXSettings;
+
         if (name.isNotEmpty())
         {
             // Ubuntu and derived distributions now save a per-display scale factor as a configuration
@@ -1692,6 +1849,25 @@ bool XWindowSystem::isMinimised (::Window windowH) const
     }
 
     return false;
+}
+
+void XWindowSystem::setMaximised (::Window windowH, bool shouldBeMaximised) const
+{
+    const auto root = X11Symbols::getInstance()->xRootWindow (display, X11Symbols::getInstance()->xDefaultScreen (display));
+
+    XEvent ev;
+    ev.xclient.window = windowH;
+    ev.xclient.type   = ClientMessage;
+    ev.xclient.format = 32;
+    ev.xclient.message_type = XWindowSystemUtilities::Atoms::getCreating (display, "_NET_WM_STATE");
+    ev.xclient.data.l[0] = shouldBeMaximised;
+    ev.xclient.data.l[1] = (long) XWindowSystemUtilities::Atoms::getCreating (display, "_NET_WM_STATE_MAXIMIZED_HORZ");
+    ev.xclient.data.l[2] = (long) XWindowSystemUtilities::Atoms::getCreating (display, "_NET_WM_STATE_MAXIMIZED_VERT");
+    ev.xclient.data.l[3] = 1;
+    ev.xclient.data.l[4] = 0;
+
+    XWindowSystemUtilities::ScopedXLock xLock;
+    X11Symbols::getInstance()->xSendEvent (display, root, false, SubstructureRedirectMask | SubstructureNotifyMask, &ev);
 }
 
 void XWindowSystem::toFront (::Window windowH, bool) const
