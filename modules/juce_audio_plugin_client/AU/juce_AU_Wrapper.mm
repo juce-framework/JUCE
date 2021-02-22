@@ -2051,10 +2051,12 @@ private:
         addSupportedLayoutTags();
 
         for (int i = 0; i < enabledInputs; ++i)
-            if ((err = syncAudioUnitWithChannelSet (true,  i, juceFilter->getChannelLayoutOfBus (true,  i))) != noErr) return err;
+            if ((err = syncAudioUnitWithChannelSet (true,  i, juceFilter->getChannelLayoutOfBus (true,  i))) != noErr)
+                return err;
 
         for (int i = 0; i < enabledOutputs; ++i)
-            if ((err = syncAudioUnitWithChannelSet (false, i, juceFilter->getChannelLayoutOfBus (false, i))) != noErr) return err;
+            if ((err = syncAudioUnitWithChannelSet (false, i, juceFilter->getChannelLayoutOfBus (false, i))) != noErr)
+                return err;
 
         return noErr;
     }
@@ -2177,7 +2179,7 @@ private:
            #endif
 
             // add discrete layout tags
-            int n = bus->getMaxSupportedChannels(maxChannelsToProbeFor());
+            int n = bus->getMaxSupportedChannels (maxChannelsToProbeFor());
 
             for (int ch = 0; ch < n; ++ch)
             {
