@@ -140,6 +140,8 @@ public:
     {
        #if JUCE_MODAL_LOOPS_PERMITTED
         runModalLoop();
+       #else
+        jassertfalse;
        #endif
     }
 
