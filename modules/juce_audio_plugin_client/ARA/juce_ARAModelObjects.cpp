@@ -28,7 +28,7 @@ Range<double> ARARegionSequence::getTimeRange (bool includeHeadAndTail) const
 
     auto startTime = std::numeric_limits<double>::max();
     auto endTime = std::numeric_limits<double>::lowest();
-    for (const auto& playbackRegion : getPlaybackRegions<ARAPlaybackRegion>())
+    for (const auto& playbackRegion : getPlaybackRegions())
     {
         const auto regionTimeRange = playbackRegion->getTimeRange (includeHeadAndTail);
         startTime = jmin (startTime, regionTimeRange.getStart());
@@ -59,22 +59,22 @@ ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRe
 
 void ARAAudioSource::notifyAnalysisProgressStarted()
 {
-    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressStarted (this);
+    getDocumentController()->internalNotifyAudioSourceAnalysisProgressStarted (this);
 }
 
 void ARAAudioSource::notifyAnalysisProgressUpdated (float progress)
 {
-    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressUpdated (this, progress);
+    getDocumentController()->internalNotifyAudioSourceAnalysisProgressUpdated (this, progress);
 }
 
 void ARAAudioSource::notifyAnalysisProgressCompleted()
 {
-    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceAnalysisProgressCompleted (this);
+    getDocumentController()->internalNotifyAudioSourceAnalysisProgressCompleted (this);
 }
 
 void ARAAudioSource::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    getDocumentController<ARADocumentController>()->internalNotifyAudioSourceContentChanged (this, scopeFlags, notifyARAHost);
+    getDocumentController()->internalNotifyAudioSourceContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 //==============================================================================
@@ -85,7 +85,7 @@ ARAAudioModification::ARAAudioModification (ARAAudioSource* audioSource, ARA::AR
 
 void ARAAudioModification::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    getDocumentController<ARADocumentController>()->internalNotifyAudioModificationContentChanged (this, scopeFlags, notifyARAHost);
+    getDocumentController()->internalNotifyAudioModificationContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 //==============================================================================
@@ -127,7 +127,7 @@ double ARAPlaybackRegion::getTailTime() const
 
 void ARAPlaybackRegion::notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost)
 {
-    getDocumentController<ARADocumentController>()->internalNotifyPlaybackRegionContentChanged (this, scopeFlags, notifyARAHost);
+    getDocumentController()->internalNotifyPlaybackRegionContentChanged (this, scopeFlags, notifyARAHost);
 }
 
 } // namespace juce

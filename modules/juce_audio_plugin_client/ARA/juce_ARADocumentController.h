@@ -5,6 +5,9 @@
 namespace juce
 {
 
+class ARAPlaybackRenderer;
+class ARAEditorRenderer;
+class ARAEditorView;
 class ARAInputStream;
 class ARAOutputStream;
 
@@ -76,6 +79,16 @@ public:
     }
 
     using ARA::PlugIn::DocumentController::DocumentController;
+
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename Document_t = ARADocument>
+    Document_t* getDocument() const noexcept { return ARA::PlugIn::DocumentController::getDocument<Document_t>(); }
+    template <typename PlaybackRenderer_t = ARAPlaybackRenderer>
+    std::vector<PlaybackRenderer_t*> const& getPlaybackRenderers () const noexcept { return ARA::PlugIn::DocumentController::getPlaybackRenderers<PlaybackRenderer_t>(); }
+    template <typename EditorRenderer_t = ARAEditorRenderer>
+    std::vector<EditorRenderer_t*> const& getEditorRenderers () const noexcept { return ARA::PlugIn::DocumentController::getEditorRenderers<EditorRenderer_t>(); }
+    template <typename EditorView_t = ARAEditorView>
+    std::vector<EditorView_t*> const& getEditorViews () const noexcept { return ARA::PlugIn::DocumentController::getEditorViews<EditorView_t>(); }
 
 protected:
     //==============================================================================

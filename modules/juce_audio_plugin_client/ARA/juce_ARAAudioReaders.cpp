@@ -171,7 +171,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARADocumentController* documen
             regionsStartTime = jmin (regionsStartTime, playbackRegionTimeRange.getStart());
             regionsEndTime = jmax (regionsEndTime, playbackRegionTimeRange.getEnd());
 
-            audioProcessorAraExtension->getARAPlaybackRenderer()->addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
+            audioProcessorAraExtension->getPlaybackRenderer()->addPlaybackRegion (ARA::PlugIn::toRef (playbackRegion));
             playbackRegion->addListener (this);
         }
 
@@ -200,7 +200,7 @@ void ARAPlaybackRegionReader::invalidate()
     if (! isValid())
         return;
 
-    for (auto& playbackRegion : audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions<ARAPlaybackRegion>())
+    for (auto& playbackRegion : audioProcessorAraExtension->getPlaybackRenderer()->getPlaybackRegions())
         playbackRegion->removeListener (this);
 
     audioProcessor->releaseResources();
@@ -259,7 +259,7 @@ bool ARAPlaybackRegionReader::getCurrentPosition (CurrentPositionInfo& result)
 
 void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackRegion* playbackRegion, ARAPlaybackRegion::PropertiesPtr newProperties)
 {
-    jassert (ARA::contains (audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (audioProcessorAraExtension->getPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
 
     if ((playbackRegion->getStartInAudioModificationTime() != newProperties->startInModificationTime) ||
         (playbackRegion->getDurationInAudioModificationTime() != newProperties->durationInModificationTime) ||
@@ -274,7 +274,7 @@ void ARAPlaybackRegionReader::willUpdatePlaybackRegionProperties (ARAPlaybackReg
 
 void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion* playbackRegion, ARAContentUpdateScopes scopeFlags)
 {
-    jassert (ARA::contains (audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (audioProcessorAraExtension->getPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
 
     // invalidate if the audio signal is changed
     if (scopeFlags.affectSamples())
@@ -283,7 +283,7 @@ void ARAPlaybackRegionReader::didUpdatePlaybackRegionContent (ARAPlaybackRegion*
 
 void ARAPlaybackRegionReader::willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
 {
-    jassert (ARA::contains (audioProcessorAraExtension->getARAPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
+    jassert (ARA::contains (audioProcessorAraExtension->getPlaybackRenderer()->getPlaybackRegions(), playbackRegion));
 
     invalidate();
 }

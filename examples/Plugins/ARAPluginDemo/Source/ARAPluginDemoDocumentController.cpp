@@ -33,7 +33,7 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
         if (reverseStateChanged)
         {
             audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
-            for (auto araPlaybackRegion : audioModification->getPlaybackRegions<juce::ARAPlaybackRegion>())
+            for (auto araPlaybackRegion : audioModification->getPlaybackRegions())
                 araPlaybackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
         }
     }

@@ -22,33 +22,31 @@ class ARADocumentController;
 class JUCE_API  AudioProcessorARAExtension  : public ARA::PlugIn::PlugInExtension
 {
 public:
-    AudioProcessorARAExtension() = default;
+    using ARA::PlugIn::PlugInExtension::PlugInExtension;
 
     /** Query whether last call to processBlock() was successful.
         TODO JUCE_ARA AudioProcessor::processBlock() should rather return a bool
     */
     virtual bool didProcessBlockSucceed() const noexcept = 0;
 
-    /** Return the ARAPlaybackRenderer instance, if plugin instance fulfills the ARAPlaybackRenderer role. */
-    template<typename PlaybackRenderer_t = ARAPlaybackRenderer>
-    PlaybackRenderer_t* getARAPlaybackRenderer() const noexcept { return static_cast<PlaybackRenderer_t*> (this->getPlaybackRenderer()); }
-
-    /** Return the ARAEditorRenderer instance, if plugin instance fulfills the ARAEditorRenderer role. */
-    template<typename EditorRenderer_t = ARAEditorRenderer>
-    EditorRenderer_t* getARAEditorRenderer() const noexcept { return static_cast<EditorRenderer_t*> (this->getEditorRenderer()); }
-
-    /** Return the ARAEditorView instance, if plugin instance fulfills the ARAEditorView role. */
-    template<typename EditorView_t = ARAEditorView>
-    EditorView_t* getARAEditorView() const noexcept { return static_cast<EditorView_t*> (this->getEditorView()); }
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::PlugInExtension::getDocumentController<DocumentController_t>(); }
+    template <typename PlaybackRenderer_t = ARAPlaybackRenderer>
+    PlaybackRenderer_t* getPlaybackRenderer() const noexcept { return ARA::PlugIn::PlugInExtension::getPlaybackRenderer<PlaybackRenderer_t>(); }
+    template <typename EditorRenderer_t = ARAEditorRenderer>
+    EditorRenderer_t* getEditorRenderer() const noexcept { return ARA::PlugIn::PlugInExtension::getEditorRenderer<EditorRenderer_t>(); }
+    template <typename EditorView_t = ARAEditorView>
+    EditorView_t* getEditorView() const noexcept { return ARA::PlugIn::PlugInExtension::getEditorView<EditorView_t>(); }
 
     /** Returns true if plugin instance fulfills the ARAPlaybackRenderer role. */
-    bool isARAPlaybackRenderer() const noexcept { return getARAPlaybackRenderer() != nullptr; }
+    bool isPlaybackRenderer() const noexcept { return ARA::PlugIn::PlugInExtension::getPlaybackRenderer() != nullptr; }
 
     /** Returns true if plugin instance fulfills the ARAEditorRenderer role. */
-    bool isARAEditorRenderer() const noexcept { return getARAEditorRenderer() != nullptr; }
+    bool isEditorRenderer() const noexcept { return ARA::PlugIn::PlugInExtension::getEditorRenderer() != nullptr; }
 
     /** Returns true if plugin instance fulfills the ARAEditorView role. */
-    bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
+    bool isEditorView() const noexcept { return ARA::PlugIn::PlugInExtension::getEditorView() != nullptr; }
 
 protected:
     /** Optional hook for derived classes to perform any additional initialization that may be needed.
@@ -75,7 +73,7 @@ public:
 
     /** \copydoc AudioProcessorARAExtension::getARAEditorView */
     template<typename EditorView_t = ARAEditorView>
-    EditorView_t* getARAEditorView() const noexcept { return this->araProcessorExtension != nullptr ? this->araProcessorExtension->getARAEditorView<EditorView_t>() : nullptr; }
+    EditorView_t* getARAEditorView() const noexcept { return (this->araProcessorExtension != nullptr) ? this->araProcessorExtension->getEditorView<EditorView_t>() : nullptr; }
     
     /** \copydoc AudioProcessorARAExtension::isARAEditorView */
     bool isARAEditorView() const noexcept { return getARAEditorView() != nullptr; }
