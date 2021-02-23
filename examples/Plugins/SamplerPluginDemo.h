@@ -42,6 +42,8 @@
 
  useLocalCopy:     1
 
+ pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn
+
  END_JUCE_PIP_METADATA
 
 *******************************************************************************/
