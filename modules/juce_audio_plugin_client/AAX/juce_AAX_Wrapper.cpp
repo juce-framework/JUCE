@@ -1128,6 +1128,20 @@ namespace AAXClasses
                 case AAX_eNotificationEvent_EnteringOfflineMode:  pluginInstance->setNonRealtime (true);  break;
                 case AAX_eNotificationEvent_ExitingOfflineMode:   pluginInstance->setNonRealtime (false); break;
 
+                case AAX_eNotificationEvent_ASProcessingState:
+                {
+                    if (data != nullptr && size == sizeof (AAX_EProcessingState))
+                    {
+                        const auto state = *static_cast<const AAX_EProcessingState*> (data);
+                        const auto nonRealtime = state == AAX_eProcessingState_Start
+                                              || state == AAX_eProcessingState_StartPass
+                                              || state == AAX_eProcessingState_BeginPassGroup;
+                        pluginInstance->setNonRealtime (nonRealtime);
+                    }
+
+                    break;
+                }
+
                 case AAX_eNotificationEvent_TrackNameChanged:
                     if (data != nullptr)
                     {
