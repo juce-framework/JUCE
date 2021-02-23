@@ -2201,7 +2201,7 @@ function(juce_add_pip header)
         list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
 
         juce_add_plugin(${JUCE_PIP_NAME}
-            FORMATS AU AUv3 VST3 Standalone ${extra_formats}
+            FORMATS AU AUv3 VST3 Unity Standalone ${extra_formats}
             ${extra_target_args})
     elseif(pip_kind STREQUAL "Component")
         set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPComponent.cpp.in")
