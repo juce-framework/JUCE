@@ -123,11 +123,16 @@ static std::map<String, String> getPluginFileTokenReplacements (const String& na
 
     auto araDocumentControllerCppFile = sourceFolder.getChildFile ("PluginARADocumentController.cpp");
     auto araDocumentControllerHFile   = araDocumentControllerCppFile.withFileExtension (".h");
-    
+    auto araPlaybackRendererCppFile = sourceFolder.getChildFile ("PluginARAPlaybackRenderer.cpp");
+    auto araPlaybackRendererHFile   = araPlaybackRendererCppFile.withFileExtension (".h");
+
     auto araDocumentControllerHInclude = CodeHelpers::createIncludeStatement (araDocumentControllerHFile, araDocumentControllerCppFile);
+    auto araPlaybackRendererHInclude = CodeHelpers::createIncludeStatement (araPlaybackRendererHFile, araPlaybackRendererCppFile);
 
     auto araDocumentControllerClassName = build_tools::makeValidIdentifier (name, true, true, false) + "DocumentController";
     araDocumentControllerClassName = araDocumentControllerClassName.substring (0, 1).toUpperCase() + araDocumentControllerClassName.substring (1);
+    auto araPlaybackRendererClassName = build_tools::makeValidIdentifier (name, true, true, false) + "PlaybackRenderer";
+    araPlaybackRendererClassName = araPlaybackRendererClassName.substring (0, 1).toUpperCase() + araPlaybackRendererClassName.substring (1);
 
     tokenReplacements.insert ({"%%filter_headers%%",     processorHInclude + newLine + editorHInclude });
     tokenReplacements.insert ({"%%filter_class_name%%",  processorClassName });
@@ -136,6 +141,8 @@ static std::map<String, String> getPluginFileTokenReplacements (const String& na
     tokenReplacements.insert ({"%%editor_headers%%",     getJuceHeaderInclude() + newLine + processorHInclude });
     tokenReplacements.insert ({"%%aradocumentcontroller_headers%%",     araDocumentControllerHInclude });
     tokenReplacements.insert ({"%%aradocumentcontroller_class_name%%",  araDocumentControllerClassName });
+    tokenReplacements.insert ({"%%araplaybackrenderer_headers%%",     araPlaybackRendererHInclude });
+    tokenReplacements.insert ({"%%araplaybackrenderer_class_name%%",  araPlaybackRendererClassName });
 
     return tokenReplacements;
 }

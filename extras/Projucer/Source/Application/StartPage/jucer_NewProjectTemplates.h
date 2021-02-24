@@ -54,7 +54,7 @@ namespace NewProjectTemplates
         header,
         headerAndCpp,
         processorAndEditor,
-        processorEditorAndARADocController
+        araPluginFiles
     };
 
     using FilenameAndContent = std::pair<String, String>;
@@ -90,12 +90,12 @@ namespace NewProjectTemplates
     //==============================================================================
     inline var getVarForFileOption (FileCreationOptions opt)
     {
-        if (opt == FileCreationOptions::noFiles)                             return "none";
-        if (opt == FileCreationOptions::main)                                return "main";
-        if (opt == FileCreationOptions::header)                              return "header";
-        if (opt == FileCreationOptions::headerAndCpp)                        return "headercpp";
-        if (opt == FileCreationOptions::processorAndEditor)                  return "processoreditor";
-        if (opt == FileCreationOptions::processorEditorAndARADocController)  return "processoreditoraradoccontroller";
+        if (opt == FileCreationOptions::noFiles)             return "none";
+        if (opt == FileCreationOptions::main)                return "main";
+        if (opt == FileCreationOptions::header)              return "header";
+        if (opt == FileCreationOptions::headerAndCpp)        return "headercpp";
+        if (opt == FileCreationOptions::processorAndEditor)  return "processoreditor";
+        if (opt == FileCreationOptions::araPluginFiles)      return "arapluginfiiles";
 
         jassertfalse;
         return {};
@@ -103,12 +103,12 @@ namespace NewProjectTemplates
 
     inline FileCreationOptions getFileOptionForVar (var opt)
     {
-        if (opt == "none")                             return FileCreationOptions::noFiles;
-        if (opt == "main")                             return FileCreationOptions::main;
-        if (opt == "header")                           return FileCreationOptions::header;
-        if (opt == "headercpp")                        return FileCreationOptions::headerAndCpp;
-        if (opt == "processoreditor")                  return FileCreationOptions::processorAndEditor;
-        if (opt == "processoreditoraradoccontroller")  return FileCreationOptions::processorEditorAndARADocController;
+        if (opt == "none")             return FileCreationOptions::noFiles;
+        if (opt == "main")             return FileCreationOptions::main;
+        if (opt == "header")           return FileCreationOptions::header;
+        if (opt == "headercpp")        return FileCreationOptions::headerAndCpp;
+        if (opt == "processoreditor")  return FileCreationOptions::processorAndEditor;
+        if (opt == "arapluginfiiles")  return FileCreationOptions::araPluginFiles;
 
         jassertfalse;
         return {};
@@ -116,12 +116,12 @@ namespace NewProjectTemplates
 
     inline String getStringForFileOption (FileCreationOptions opt)
     {
-        if (opt == FileCreationOptions::noFiles)                            return "No Files";
-        if (opt == FileCreationOptions::main)                               return "Main.cpp";
-        if (opt == FileCreationOptions::header)                             return "Main.cpp + .h";
-        if (opt == FileCreationOptions::headerAndCpp)                       return "Main.cpp + .h/.cpp ";
-        if (opt == FileCreationOptions::processorAndEditor)                 return "Processor and Editor";
-        if (opt == FileCreationOptions::processorEditorAndARADocController) return "Processor, Editor, and ARA Document Controller";
+        if (opt == FileCreationOptions::noFiles)            return "No Files";
+        if (opt == FileCreationOptions::main)               return "Main.cpp";
+        if (opt == FileCreationOptions::header)             return "Main.cpp + .h";
+        if (opt == FileCreationOptions::headerAndCpp)       return "Main.cpp + .h/.cpp ";
+        if (opt == FileCreationOptions::processorAndEditor) return "Processor and Editor";
+        if (opt == FileCreationOptions::araPluginFiles)     return "ARA Plugin Files";
 
         jassertfalse;
         return {};
@@ -234,19 +234,21 @@ namespace NewProjectTemplates
             },
 
             { ProjectCategory::plugin,
-              "ARA", "Creates an ARA audio plug-in, augmenting the basic audio plug-in with ARA functionality and an empty ARADocumentController.",
+              "ARA", "Creates an ARA audio plug-in, augmenting the basic audio plug-in with ARA functionality.",
               build_tools::ProjectType_ARAAudioPlugin::getTypeName(),
               BinaryData::wizard_AudioPlugin_svg,
               getModulesRequiredForAudioProcessor(),
               {
-                { FileCreationOptions::processorEditorAndARADocController, { { "PluginProcessor.cpp",                "jucer_AudioPluginFilterTemplate_cpp" },
-                                                                             { "PluginProcessor.h",                  "jucer_AudioPluginFilterTemplate_h" },
-                                                                             { "PluginEditor.cpp",                   "jucer_AudioPluginEditorTemplate_cpp" },
-                                                                             { "PluginEditor.h",                     "jucer_AudioPluginEditorTemplate_h" },
-                                                                             { "PluginARADocumentController.cpp",    "jucer_AudioPluginARADocumentControllerTemplate_cpp" },
-                                                                             { "PluginARADocumentController.h",      "jucer_AudioPluginARADocumentControllerTemplate_h" }} }
+                { FileCreationOptions::araPluginFiles, { { "PluginProcessor.cpp",               "jucer_AudioPluginFilterTemplate_cpp" },
+                                                         { "PluginProcessor.h",                 "jucer_AudioPluginFilterTemplate_h" },
+                                                         { "PluginEditor.cpp",                  "jucer_AudioPluginEditorTemplate_cpp" },
+                                                         { "PluginEditor.h",                    "jucer_AudioPluginEditorTemplate_h" },
+                                                         { "PluginARADocumentController.cpp",   "jucer_AudioPluginARADocumentControllerTemplate_cpp" },
+                                                         { "PluginARADocumentController.h",     "jucer_AudioPluginARADocumentControllerTemplate_h" },
+                                                         { "PluginARAPlaybackRenderer.cpp",     "jucer_AudioPluginARAPlaybackRendererTemplate_cpp" },
+                                                         { "PluginARAPlaybackRenderer.h",       "jucer_AudioPluginARAPlaybackRendererTemplate_h" }} }
               },
-              FileCreationOptions::processorEditorAndARADocController
+              FileCreationOptions::araPluginFiles
             },
 
             { ProjectCategory::library,
