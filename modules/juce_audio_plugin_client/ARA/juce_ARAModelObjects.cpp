@@ -110,6 +110,12 @@ Range<double> ARAPlaybackRegion::getTimeRange (bool includeHeadAndTail) const
     return { startTime, endTime };
 }
 
+Range<int64> ARAPlaybackRegion::getSampleRange (double sampleRate, bool includeHeadAndTail) const
+{
+    const auto timeRange = getTimeRange (includeHeadAndTail);
+    return { ARA::samplePositionAtTime (timeRange.getStart(), sampleRate), ARA::samplePositionAtTime (timeRange.getEnd(), sampleRate) };
+}
+
 double ARAPlaybackRegion::getHeadTime() const
 {
     ARA::ARATimeDuration headTime {}, tailTime {};
