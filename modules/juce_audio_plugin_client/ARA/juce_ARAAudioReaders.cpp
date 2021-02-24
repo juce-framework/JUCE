@@ -158,7 +158,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRen
     positionInfo.isPlaying = true;
 
     sampleRate = rate;
-    numChannels = (unsigned int) numChans;  // ARARenderer draft note: AudioFormatReader and AudioProcessor are inconsistent re. signed vs. unsigned channel counts
+    numChannels = (unsigned int) numChans;
     bitsPerSample = 32;
     usesFloatingPointData = true;
 
