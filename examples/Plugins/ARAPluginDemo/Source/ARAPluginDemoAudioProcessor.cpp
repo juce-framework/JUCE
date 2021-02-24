@@ -53,6 +53,7 @@ bool ARAPluginDemoAudioProcessor::isMidiEffect() const
 
 double ARAPluginDemoAudioProcessor::getTailLengthSeconds() const
 {
+    // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::getTailLengthSeconds() method.
     double tail{};
     if (auto playbackRenderer = getPlaybackRenderer())
         for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
@@ -92,8 +93,8 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     const juce::ARARenderer::ProcessSpec processSpec { sampleRate, samplesPerBlock, getMainBusNumOutputChannels() };
     if (auto playbackRenderer = getPlaybackRenderer())
         playbackRenderer->prepareToPlay (processSpec);
-    // since we're using the default implementation which does no editor rendering,
-    // this will be a no-op and would be omitted in actual plug-ins.
+    // This example does not support editor rendering and thus uses the default implementation,
+    // which is a no-op and could be omitted in actual plug-ins to optimize performance.
     if (auto editorRenderer = getEditorRenderer())
         editorRenderer->prepareToPlay (processSpec);
 }
@@ -103,8 +104,8 @@ void ARAPluginDemoAudioProcessor::releaseResources()
     // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::releaseResources() method.
     if (auto playbackRenderer = getPlaybackRenderer())
         playbackRenderer->releaseResources();
-    // since we're using the default implementation which does no editor rendering,
-    // this will be a no-op and would be omitted in actual plug-ins.
+    // This example does not support editor rendering and thus uses the default implementation,
+    // which is a no-op and could be omitted in actual plug-ins to optimize performance.
     if (auto editorRenderer = getEditorRenderer())
         editorRenderer->releaseResources();
 }
@@ -139,32 +140,30 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 {
     juce::ScopedNoDenormals noDenormals;
 
-    // update playback position and state
-    if (auto playhead = getPlayHead())
-    {
-        if (!playhead->getCurrentPosition (lastPositionInfo))
-            lastPositionInfo.resetToDefault();
-    }
+    auto playhead = getPlayHead();
+    if (! playhead || ! playhead->getCurrentPosition (lastPositionInfo))
+        lastPositionInfo.resetToDefault();
 
     if (isBoundToARA())
     {
         // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::processBlockARA() method.
         const juce::ARARenderer::ProcessContext processContext { isNonRealtime(), lastPositionInfo };
         
-        // render our ARA playback regions for this buffer
+        // Render our ARA playback regions for this buffer.
         if (auto playbackRenderer = getPlaybackRenderer())
             playbackRenderer->processBlock (buffer, processContext);
 
-        // render our ARA editor regions and sequences for this buffer
-        // since we're using the default implementation which does no editor rendering,
-        // this will be a no-op and would be omitted in actual plug-ins.
+        // Render our ARA editor regions and sequences for this buffer.
+        // This example does not support editor rendering and thus uses the default implementation,
+        // which is a no-op and could be omitted in actual plug-ins to optimize performance.
         if (auto editorRenderer = getEditorRenderer())
             editorRenderer->processBlock (buffer, processContext);
     }
     else
     {
-        // this sample plug-in requires to be used with ARA - we just pass through otherwise.
-        // in an actual plug-in, proper non-ARA rendering would be invoked here
+        // This example plug-in requires to be used with ARA - we just pass through otherwise.
+        // An actual plug-in might additionally support proper non-ARA usage,
+        // which would then be invoked here.
         processBlockBypassed (buffer, midiMessages);
     }
 }
@@ -181,9 +180,9 @@ juce::AudioProcessorEditor* ARAPluginDemoAudioProcessor::createEditor()
 }
 
 //==============================================================================
-// when using ARA, all model state is stored in the ARA archives,
+// When using ARA, all model state is stored in the ARA archives,
 // and the state here in the plug-in instance is limited to view configuration data
-// or other editor settings, of which this sample plug-in has none.
+// or other editor settings, of which this example plug-in has none.
 
 void ARAPluginDemoAudioProcessor::getStateInformation (juce::MemoryBlock& /*destData*/)
 {

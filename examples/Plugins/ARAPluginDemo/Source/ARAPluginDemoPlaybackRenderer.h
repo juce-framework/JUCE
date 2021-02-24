@@ -16,7 +16,6 @@ public:
     void releaseResources() override;
 
     //==============================================================================
-    /** Processes the input and output samples supplied in the processing context. */
     bool processBlock (juce::AudioBuffer<float>& buffer, const ProcessContext& context) noexcept override;
 
 private:

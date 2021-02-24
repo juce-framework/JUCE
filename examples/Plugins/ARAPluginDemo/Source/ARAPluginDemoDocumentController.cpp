@@ -2,11 +2,18 @@
 #include "ARAPluginDemoAudioModification.h"
 #include "ARAPluginDemoPlaybackRenderer.h"
 
+//==============================================================================
 ARA::PlugIn::AudioModification* ARAPluginDemoDocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
     return new ARAPluginDemoAudioModification (static_cast<juce::ARAAudioSource*> (audioSource), hostRef, static_cast<const juce::ARAAudioModification*> (optionalModificationToClone));
 }
 
+ARA::PlugIn::PlaybackRenderer* ARAPluginDemoDocumentController::doCreatePlaybackRenderer() noexcept
+{
+    return new PluginDemoPlaybackRenderer (this);
+}
+
+//==============================================================================
 bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept
 {
     // start reading data from the archive, starting with the number of audio modifications in the archive
@@ -46,7 +53,7 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
 
 bool ARAPluginDemoDocumentController::doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept
 {
-    // this dummy implementation only deals with audio modification states
+    // this example implementation only deals with audio modification states
     const auto& audioModificationsToPersist{ filter->getAudioModificationsToStore<ARAPluginDemoAudioModification>() };
 
     // write the number of audio modifications we are persisting
@@ -67,11 +74,6 @@ bool ARAPluginDemoDocumentController::doStoreObjectsToStream (juce::ARAOutputStr
     getHostArchivingController()->notifyDocumentArchivingProgress (1.0);
 
     return success;
-}
-
-ARA::PlugIn::PlaybackRenderer* ARAPluginDemoDocumentController::doCreatePlaybackRenderer() noexcept
-{
-    return new PluginDemoPlaybackRenderer (this);
 }
 
 //==============================================================================

@@ -17,8 +17,8 @@ void PluginDemoPlaybackRenderer::prepareToPlay (const ProcessSpec& spec)
 
             if (useBufferedAudioSourceReader)
             {
-                // if we're being used in real-time, wrap our source reader in a buffering
-                // reader to avoid blocking while reading samples in processBlock
+                // If we're being used in real-time, wrap our source reader in a buffering
+                // reader to avoid blocking while reading samples in processBlock.
                 const int readAheadSize = juce::roundToInt (2.0 * processSpec.sampleRate);
                 sourceReader = new juce::BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
             }
@@ -31,13 +31,12 @@ void PluginDemoPlaybackRenderer::prepareToPlay (const ProcessSpec& spec)
         tempBuffer.reset (new juce::AudioBuffer<float> (processSpec.numChannels, processSpec.maximumBlockSize));
     else
         tempBuffer.reset();
-
 }
 
 void PluginDemoPlaybackRenderer::releaseResources()
 {
     audioSourceReaders.clear();
-    tempBuffer = nullptr;
+    tempBuffer.reset();
 }
 
 //==============================================================================
@@ -59,21 +58,23 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
         const auto sampleEnd = timeInSamples + numSamples;
         for (const auto& playbackRegion : getPlaybackRegions())
         {
-            // get the audio source for this region and make sure we have an audio source reader for it
+            // Get the audio source for the region and find the reader for that source.
+            // This simplified example code only produces audio if sample rate and channel count match -
+            // proper plug-in would need to do conversion, see ARA SDK documentation.
             const auto audioSource = playbackRegion->getAudioModification()->getAudioSource();
             const auto readerIt = audioSourceReaders.find (audioSource);
-            if (readerIt == audioSourceReaders.end())
+            if ((audioSource->getChannelCount() != processSpec.numChannels) ||
+                (audioSource->getSampleRate() != processSpec.sampleRate) ||
+                (readerIt == audioSourceReaders.end()))
             {
                 success = false;
                 continue;
             }
             const auto& reader = readerIt->second;
 
-            // this simplified test code "rendering" only produces audio if sample rate and channel count match
-            if ((audioSource->getChannelCount() != numChannels) || (audioSource->getSampleRate() != processSpec.sampleRate))
-                continue;
-
-            // evaluate region borders in song time, calculate sample range to copy in song time
+            // Evaluate region borders in song time, calculate sample range to copy in song time.
+            // Note that this example does not use head- or tailtime, so the includeHeadAndTail
+            // could be set to false in an actual plug-in to optimze.
             const auto regionStartSample = playbackRegion->getStartInPlaybackSamples (processSpec.sampleRate);
             if (sampleEnd <= regionStartSample)
                 continue;
@@ -85,8 +86,8 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
             auto startSongSample = juce::jmax (regionStartSample, sampleStart);
             auto endSongSample = juce::jmin (regionEndSample, sampleEnd);
 
-            // calculate offset between song and audio source samples, clip at region borders in audio source samples
-            // (if a plug-in supports time stretching, it will also need to reflect the stretch factor here)
+            // Calculate offset between song and audio source samples, clip at region borders in audio source samples
+            // (if a plug-in supports time stretching, it will also need to reflect the stretch factor here).
             const auto offsetToPlaybackRegion = playbackRegion->getStartInAudioModificationSamples() - regionStartSample;
 
             const auto startAvailableSourceSamples = juce::jmax (0LL, playbackRegion->getStartInAudioModificationSamples());
@@ -98,7 +99,7 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
             if (numSamplesToRead <= 0)
                 continue;
 
-            // if we're using a buffering reader then set the appropriate timeout
+            // If we're using a buffering reader, set the appropriate timeout.
             if (useBufferedAudioSourceReader)
             {
                 jassert (dynamic_cast<juce::BufferingAudioReader*> (reader.get()) != nullptr);
@@ -106,7 +107,7 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
                 bufferingReader->setReadTimeout (context.isNonRealtime ? 100 : 0);
             }
 
-            // calculate buffer offsets
+            // Calculate buffer offsets and handle reverse playback setting.
             const auto audioModification = playbackRegion->getAudioModification<ARAPluginDemoAudioModification>();
             const bool playReversed = audioModification->getReversePlayback();
             const int startInBuffer = (int) (startSongSample - sampleStart);
@@ -114,8 +115,8 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
             if (playReversed)
                 startInSource = audioSource->getSampleCount() - startInSource - numSamplesToRead;
 
-            // read samples:
-            // first region can write directly into output, later regions need to use local buffer
+            // Read samples:
+            // first region can write directly into output, later regions need to use local buffer.
             auto& readBuffer = (didRenderFirstRegion) ? *tempBuffer : buffer;
             if (!reader->read (&readBuffer, startInBuffer, numSamplesToRead, startInSource, true, true))
             {
@@ -128,13 +129,13 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
 
             if (didRenderFirstRegion)
             {
-                // mix local buffer into the output buffer
+                // Mix local buffer into the output buffer.
                 for (int c = 0; c < numChannels; ++c)
                     buffer.addFrom (c, startInBuffer, *tempBuffer, c, startInBuffer, numSamplesToRead);
             }
             else
             {
-                // clear any excess at start or end of the region
+                // Clear any excess at start or end of the region.
                 if (startInBuffer != 0)
                     buffer.clear (0, startInBuffer);
 
@@ -148,7 +149,7 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
         }
     }
 
-    // if no playback or no region did intersect, clear buffer now
+    // If no playback or no region did intersect, clear buffer now.
     if (! didRenderFirstRegion)
         buffer.clear();
 

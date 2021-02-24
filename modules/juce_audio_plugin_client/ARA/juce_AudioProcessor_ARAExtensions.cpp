@@ -8,12 +8,12 @@ void AudioProcessorARAExtension::didBindToARA() noexcept
 {
 #if (! JUCE_DISABLE_ASSERTIONS)
     // validate proper subclassing of the instance role classes
-    if (isPlaybackRenderer())
-        jassert (dynamic_cast<ARAPlaybackRenderer*> (getPlaybackRenderer()) != nullptr);
-    if (isEditorRenderer())
-        jassert (dynamic_cast<ARAEditorRenderer*> (getEditorRenderer()) != nullptr);
-    if (isEditorView())
-        jassert (dynamic_cast<ARAEditorView*> (getEditorView()) != nullptr);
+    if (auto playbackRenderer = getPlaybackRenderer())
+        jassert (dynamic_cast<ARAPlaybackRenderer*> (playbackRenderer) != nullptr);
+    if (auto editorRenderer = getEditorRenderer())
+        jassert (dynamic_cast<ARAEditorRenderer*> (editorRenderer) != nullptr);
+    if (auto editorView = getEditorView())
+        jassert (dynamic_cast<ARAEditorView*> (editorView) != nullptr);
 #endif
 }
 
