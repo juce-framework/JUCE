@@ -18,7 +18,7 @@ ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource)
 
     audioSourceBeingRead->addListener (this);
     if (audioSourceBeingRead->isSampleAccessEnabled())
-        araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
+        hostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
 }
 
 ARAAudioSourceReader::~ARAAudioSourceReader()
@@ -33,7 +33,7 @@ void ARAAudioSourceReader::invalidate()
     if (! isValid())
         return;
 
-    araHostReader.reset();
+    hostReader.reset();
 
     audioSourceBeingRead->removeListener (this);
     audioSourceBeingRead = nullptr;
@@ -66,7 +66,7 @@ void ARAAudioSourceReader::willEnableAudioSourceSamplesAccess (ARAAudioSource* a
     if (! enable)
     {
         ScopedWriteLock scopedLock (lock);
-        araHostReader.reset();
+        hostReader.reset();
     }
 }
 
@@ -78,7 +78,7 @@ void ARAAudioSourceReader::didEnableAudioSourceSamplesAccess (ARAAudioSource* au
     if (enable && isValid())
     {
         ScopedWriteLock scopedLock (lock);
-        araHostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
+        hostReader.reset (new ARA::PlugIn::HostAudioReader (audioSourceBeingRead));
     }
 }
 
@@ -97,7 +97,7 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
     // If we're invalid or can't enter the lock or audio source access is currently disabled, zero samples and return false
     bool gotReadlock = isValid() ? lock.tryEnterRead() : false;
-    if (! isValid() || ! gotReadlock || (araHostReader == nullptr))
+    if (! isValid() || ! gotReadlock || (hostReader == nullptr))
     {
         if (gotReadlock)
             lock.exitRead();
@@ -128,7 +128,7 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
         }
     }
 
-    bool success = araHostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
+    bool success = hostReader->readAudioSamples (startSampleInFile, numSamples, tmpPtrs.data());
 
     lock.exitRead();
 

@@ -31,7 +31,7 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
 
         // find audio modification to restore the state to (drop state if not to be loaded)
         auto audioModification = filter->getAudioModificationToRestoreStateWithID<ARAPluginDemoAudioModification> (persistentID.getCharPointer());
-        if (!audioModification)
+        if (! audioModification)
             continue;
 
         bool reverseStateChanged = (reverse != audioModification->getReversePlayback());
@@ -41,8 +41,8 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
         if (reverseStateChanged)
         {
             audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
-            for (auto araPlaybackRegion : audioModification->getPlaybackRegions())
-                araPlaybackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
+            for (auto playbackRegion : audioModification->getPlaybackRegions())
+                playbackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
         }
     }
 

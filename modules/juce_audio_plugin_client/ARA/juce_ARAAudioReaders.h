@@ -57,7 +57,7 @@ class JUCE_API  ARAAudioSourceReader  : public AudioFormatReader,
 public:
     /** Use an ARAAudioSource to construct an audio source reader for the given \p audioSource. */
     ARAAudioSourceReader (ARAAudioSource* audioSource);
-    virtual ~ARAAudioSourceReader() override;
+    ~ARAAudioSourceReader() override;
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
@@ -75,7 +75,7 @@ public:
 
 private:
     ARAAudioSource* audioSourceBeingRead;
-    std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
+    std::unique_ptr<ARA::PlugIn::HostAudioReader> hostReader;
     ReadWriteLock lock;
     std::vector<void*> tmpPtrs;
 
@@ -106,8 +106,8 @@ class JUCE_API  ARAPlaybackRegionReader   : public AudioFormatReader,
                                             private ARAPlaybackRegion::Listener
 {
 public:
-    // ARARenderer draft note: we could just let the playback region's document controller create
-    //             the playback renderer, but we then cannot customize it
+    // ARARenderer draft note: we could just let the playback region's document controller
+    //             create the playback renderer, but we then cannot customize it...
     //             (see PluginDemoPlaybackRenderer::useBufferedAudioSourceReader)
     /** Create an ARAPlaybackRegionReader instance to read the given \p playbackRegion,
         using the sample rate and channel count of the underlying ARAAudioSource.
@@ -133,7 +133,7 @@ public:
                              double sampleRate, int numChannels,
                              std::vector<ARAPlaybackRegion*> const& playbackRegions);
 
-    virtual ~ARAPlaybackRegionReader() override;
+    ~ARAPlaybackRegionReader() override;
 
     /** Returns true as long as any of the reader's underlying playback region's haven't changed. */
     bool isValid() const { return (playbackRenderer != nullptr); }

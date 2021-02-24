@@ -45,8 +45,9 @@ public:
 
 protected:
     /** Optional hook for derived classes to perform any additional initialization that may be needed.
-        If overriding this, make sure you call the base class implementation from your override. */
-    virtual void didBindToARA() noexcept override;
+        If overriding this, make sure you call the base class implementation from your override.
+    */
+    void didBindToARA() noexcept override;
     
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorARAExtension)
