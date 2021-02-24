@@ -19,7 +19,7 @@ void PluginDemoPlaybackRenderer::prepareToPlay (const ProcessSpec& spec)
             {
                 // If we're being used in real-time, wrap our source reader in a buffering
                 // reader to avoid blocking while reading samples in processBlock.
-                const int readAheadSize = juce::roundToInt (2.0 * processSpec.sampleRate);
+                const int readAheadSize = juce::jmax (4 * spec.maximumBlockSize, juce::roundToInt (2.0 * processSpec.sampleRate));
                 sourceReader = new juce::BufferingAudioReader (sourceReader, *sharedTimesliceThread, readAheadSize);
             }
 
