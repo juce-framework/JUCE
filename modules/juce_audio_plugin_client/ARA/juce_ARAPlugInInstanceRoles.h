@@ -15,55 +15,18 @@ namespace juce
 class JUCE_API  ARARenderer
 {
 public:
-    //==============================================================================
-    /**
-        This structure is passed into an ARARenderer's prepareToPlay() method, and contains
-        information about various aspects of the context in which it can expect to be called.
-        It closely resembles dsp::ProcessSpec.
-    */
-    struct JUCE_API ProcessSpec
-    {
-        /** The sample rate that will be used for the data that is sent to the renderer. */
-        double sampleRate;
-
-        /** The maximum number of samples that will be in the blocks sent to process() method. */
-        int maximumBlockSize;
-
-        /** The number of channels that the process() method will be expected to handle. */
-        int numChannels;
-
-        // ARARenderer draft note: the example has an extra parameter that we can either add here or keep there:
-        //             useBufferedAudioSourceReader, which guarantees isNonRealtime is always true.
-
-        // ARARenderer draft note: if adding 64 bit support:
-        //bool doublePrecisionProcessing;
-    };
-
-    //==============================================================================
-    /**
-        Contains context information that is passed into an ARARenderer's processBlock() method.
-    */
-    // ARARenderer draft note: we keep the buffers external since we need separate virtual methods for rendering
-    //             because the outer processor may be switched at runtime between 32 and 64 bt operation.
-    //             this however makes this near-empty...
-    struct JUCE_API ProcessContext
-    {
-        bool isNonRealtime;
-
-        // ARARenderer draft note: playback renderers only really need song position and isPlaying,
-        //             editor renderers maybe also ppqLoopStart, ppqLoopEnd and isLooping
-        //             rather using individual iVars might be cleaner but might also require extra struct conversion..
-        //             Also there is an API in VST3 these days to express this but it's not supported in JUCE yet.
-        AudioPlayHead::CurrentPositionInfo& positionInfo;
-    };
-
-public:
     virtual ~ARARenderer() = default;
 
-    //==============================================================================
-    /** Initialises the renderer for playback. */
+    /** Initialises the renderer for playback.
+        @param sampleRate               The sample rate that will be used for the data that is sent to the renderer.
+        @param maximumSamplesPerBlock   The maximum number of samples that will be in the blocks sent to process() method.
+        @param numChannels              The number of channels that the process() method will be expected to handle.
+    */
+    // ARARenderer draft note: if adding 64 bit support, we need to add bool doublePrecisionProcessing here.
+    // ARARenderer draft note: the ARAPluginDemo has an extra parameter that we can either add here or keep there:
+    //                         useBufferedAudioSourceReader, which guarantees isNonRealtime is always true.
     // ARARenderer draft note: what about noexcept - in general for JUCE_ARA, where do we need to insert try/catch guards?
-    virtual void prepareToPlay (const ProcessSpec&) {}
+    virtual void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels) {}
 
     /** Frees render ressources allocated in prepareToPlay(). */
     virtual void releaseResources() {}
@@ -71,14 +34,25 @@ public:
     /** Resets the internal state variables of the renderer. */
     virtual void reset() {}
 
-    //==============================================================================
-    virtual bool processBlock (AudioBuffer<float>& buffer, const ProcessContext& context) noexcept = 0;
-
-    // ARARenderer draft note: should we support 64 bit precision? If so, it would need to become a parameter
-    //             of ProcessSpec, and we would either require clients to do both or offer a default
-    //             implementation of the double case that falls back to float (this might need to
-    //             allocate a buffer for conversion during prepareToPlay...?)
-//  virtual bool processBlock (AudioBuffer<double>& buffer) = 0;
+    /** Renders the output into the given buffer. Returns true if rendering executed without error, false otherwise.
+        @param buffer           The output buffer for the rendering. ARAPlaybackRenderers will replace the sample data,
+                                while ARAEditorRenderer will add to it.
+        @param isNonRealtime    Indicate whether the call is executed under real time constraints.
+                                This may toggle upon each call, and if true might cause the rendering to fail
+                                if required data such as audio source samples could not be obtained in time.
+        @param positionInfo     Current song position, playback state and playback loop location.
+                                There should be no need to access the bpm, timeSig and ppqPosition members in any
+                                ARA renderer since ARA provides that information with random access in its model graph.
+    */
+    // TODO JUCE_ARA There is an API in VST3 now to skip costly calculations for those members of positionInfo
+    //               which we do not need in ARA, but this is not yet supported in JUCE...
+    virtual bool processBlock (AudioBuffer<float>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept = 0;
+    
+    // ARARenderer draft note: should we support 64 bit precision? If so, it would need to become
+    //             an additional parameter of prepareToPlay(), and we would either require clients
+    //             to do both or offer a default implementation of the double case that falls back to
+    //             float (this might need to allocate a buffer for conversion during prepareToPlay...)
+//  virtual bool processBlock (AudioBuffer<double>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo) = 0;
 };
 
 //==============================================================================
@@ -138,7 +112,7 @@ public:
     // Per default, editor renderers will just let the signal pass through unaltered.
     // If you're overriding this to implement actual audio preview, remember to test
     // isNonRealtime of the process context - typically preview is limited to realtime!
-    bool processBlock (AudioBuffer<float>&, const ProcessContext&) noexcept override { return true; }
+    bool processBlock (AudioBuffer<float>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override { return true; }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)

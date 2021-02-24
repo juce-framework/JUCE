@@ -90,18 +90,19 @@ void ARAPluginDemoAudioProcessor::changeProgramName (int /*index*/, const juce::
 void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::prepareToPlay() method.
-    const juce::ARARenderer::ProcessSpec processSpec { sampleRate, samplesPerBlock, getMainBusNumOutputChannels() };
+
     if (auto playbackRenderer = getPlaybackRenderer())
-        playbackRenderer->prepareToPlay (processSpec);
+        playbackRenderer->prepareToPlay (sampleRate, samplesPerBlock, getMainBusNumOutputChannels());
     // This example does not support editor rendering and thus uses the default implementation,
     // which is a no-op and could be omitted in actual plug-ins to optimize performance.
     if (auto editorRenderer = getEditorRenderer())
-        editorRenderer->prepareToPlay (processSpec);
+        editorRenderer->prepareToPlay (sampleRate, samplesPerBlock, getMainBusNumOutputChannels());
 }
 
 void ARAPluginDemoAudioProcessor::releaseResources()
 {
     // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::releaseResources() method.
+
     if (auto playbackRenderer = getPlaybackRenderer())
         playbackRenderer->releaseResources();
     // This example does not support editor rendering and thus uses the default implementation,
@@ -147,17 +148,16 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     if (isBoundToARA())
     {
         // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::processBlockARA() method.
-        const juce::ARARenderer::ProcessContext processContext { isNonRealtime(), lastPositionInfo };
-        
+
         // Render our ARA playback regions for this buffer.
         if (auto playbackRenderer = getPlaybackRenderer())
-            playbackRenderer->processBlock (buffer, processContext);
+            playbackRenderer->processBlock (buffer, isNonRealtime(), lastPositionInfo);
 
         // Render our ARA editor regions and sequences for this buffer.
         // This example does not support editor rendering and thus uses the default implementation,
         // which is a no-op and could be omitted in actual plug-ins to optimize performance.
         if (auto editorRenderer = getEditorRenderer())
-            editorRenderer->processBlock (buffer, processContext);
+            editorRenderer->processBlock (buffer, isNonRealtime(), lastPositionInfo);
     }
     else
     {

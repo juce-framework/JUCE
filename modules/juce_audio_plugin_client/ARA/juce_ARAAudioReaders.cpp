@@ -187,7 +187,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRen
         lengthInSamples = (int64) ((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
     }
 
-    playbackRenderer->prepareToPlay (ARARenderer::ProcessSpec { rate, maximumBlockSize, numChans });
+    playbackRenderer->prepareToPlay (rate, maximumBlockSize, numChans);
 }
 
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()
@@ -226,7 +226,7 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
                 int numSliceSamples = jmin (numSamples, maximumBlockSize);
                 AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
                 positionInfo.timeInSeconds = static_cast<double> (positionInfo.timeInSamples) / sampleRate;
-                success &= playbackRenderer->processBlock (buffer, ARARenderer::ProcessContext { true, positionInfo });
+                success &= playbackRenderer->processBlock (buffer, true, positionInfo);
                 numSamples -= numSliceSamples;
                 startOffsetInDestBuffer += numSliceSamples;
                 positionInfo.timeInSamples += numSliceSamples;

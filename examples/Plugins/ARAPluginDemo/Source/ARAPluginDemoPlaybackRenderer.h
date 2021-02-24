@@ -12,11 +12,11 @@ public:
         : juce::ARAPlaybackRenderer(documentController), useBufferedAudioSourceReader (useBuffering) {}
 
     //==============================================================================
-    void prepareToPlay (const ProcessSpec& spec) override;
+    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels) override;
     void releaseResources() override;
 
     //==============================================================================
-    bool processBlock (juce::AudioBuffer<float>& buffer, const ProcessContext& context) noexcept override;
+    bool processBlock (juce::AudioBuffer<float>& buffer, bool isNonRealtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override;
 
 private:
     //==============================================================================
@@ -33,7 +33,9 @@ private:
     juce::SharedResourcePointer<SharedTimeSliceThread> sharedTimesliceThread;
 
     //==============================================================================
-    ProcessSpec processSpec { 44100.0, 4096, 2 };
+    double sampleRate { 44100.0 };
+    int maximumSamplesPerBlock { 4096 };
+    int numChannels { 1 };
 
     // map of audio sources to buffering audio source readers
     // we'll use them to pull ARA samples from the host as we render
