@@ -76,11 +76,11 @@ public:
     template <typename PlaybackRegion_t = ARAPlaybackRegion>
     std::vector<PlaybackRegion_t*> const& getPlaybackRegions() const noexcept { return ARA::PlugIn::PlaybackRenderer::getPlaybackRegions<PlaybackRegion_t>(); }
 
-// TODO JUCE_ARA see definition of these in .cpp
-//#if ARA_VALIDATE_API_CALLS
-//    void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
-//    void removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
-//#endif
+#if ARA_VALIDATE_API_CALLS
+    void addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+    void removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept override;
+    AudioProcessorARAExtension* araExtension {};
+#endif
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRenderer)

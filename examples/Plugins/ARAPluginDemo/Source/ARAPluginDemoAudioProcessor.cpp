@@ -53,13 +53,11 @@ bool ARAPluginDemoAudioProcessor::isMidiEffect() const
 
 double ARAPluginDemoAudioProcessor::getTailLengthSeconds() const
 {
-    // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::getTailLengthSeconds() method.
-    double tail{};
-    if (auto playbackRenderer = getPlaybackRenderer())
-        for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
-            tail = juce::jmax (tail, playbackRegion->getTailTime());
+    double tail;
+    if (getTailLengthSecondsForARA (tail))
+        return tail;
 
-    return tail;
+    return 0.0;
 }
 
 int ARAPluginDemoAudioProcessor::getNumPrograms()
@@ -89,26 +87,18 @@ void ARAPluginDemoAudioProcessor::changeProgramName (int /*index*/, const juce::
 //==============================================================================
 void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::prepareToPlay() method.
+    if (prepareToPlayForARA (sampleRate, samplesPerBlock, getMainBusNumOutputChannels()))
+        return;
 
-    if (auto playbackRenderer = getPlaybackRenderer())
-        playbackRenderer->prepareToPlay (sampleRate, samplesPerBlock, getMainBusNumOutputChannels());
-    // This example does not support editor rendering and thus uses the default implementation,
-    // which is a no-op and could be omitted in actual plug-ins to optimize performance.
-    if (auto editorRenderer = getEditorRenderer())
-        editorRenderer->prepareToPlay (sampleRate, samplesPerBlock, getMainBusNumOutputChannels());
+    // since we're always bypassing without ARA, we do not need to handle additional ressources here
 }
 
 void ARAPluginDemoAudioProcessor::releaseResources()
 {
-    // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::releaseResources() method.
+    if (releaseResourcesForARA())
+        return;
 
-    if (auto playbackRenderer = getPlaybackRenderer())
-        playbackRenderer->releaseResources();
-    // This example does not support editor rendering and thus uses the default implementation,
-    // which is a no-op and could be omitted in actual plug-ins to optimize performance.
-    if (auto editorRenderer = getEditorRenderer())
-        editorRenderer->releaseResources();
+    // since we're always bypassing without ARA, we do not need to handle additional ressources here
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -145,27 +135,13 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     if (! playhead || ! playhead->getCurrentPosition (lastPositionInfo))
         lastPositionInfo.resetToDefault();
 
-    if (isBoundToARA())
-    {
-        // ARARenderer draft note: this could be moved to a centralized AudioProcessorARAExtension::processBlockARA() method.
+    if (processBlockForARA (buffer, isNonRealtime(), lastPositionInfo))
+        return;
 
-        // Render our ARA playback regions for this buffer.
-        if (auto playbackRenderer = getPlaybackRenderer())
-            playbackRenderer->processBlock (buffer, isNonRealtime(), lastPositionInfo);
-
-        // Render our ARA editor regions and sequences for this buffer.
-        // This example does not support editor rendering and thus uses the default implementation,
-        // which is a no-op and could be omitted in actual plug-ins to optimize performance.
-        if (auto editorRenderer = getEditorRenderer())
-            editorRenderer->processBlock (buffer, isNonRealtime(), lastPositionInfo);
-    }
-    else
-    {
-        // This example plug-in requires to be used with ARA - we just pass through otherwise.
-        // An actual plug-in might additionally support proper non-ARA usage,
-        // which would then be invoked here.
-        processBlockBypassed (buffer, midiMessages);
-    }
+    // This example plug-in requires to be used with ARA - we just pass through otherwise.
+    // An actual plug-in might additionally support proper non-ARA usage,
+    // which would be invoked here.
+    processBlockBypassed (buffer, midiMessages);
 }
 
 //==============================================================================

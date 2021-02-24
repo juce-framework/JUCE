@@ -24,6 +24,7 @@ class JUCE_API  AudioProcessorARAExtension  : public ARA::PlugIn::PlugInExtensio
 public:
     using ARA::PlugIn::PlugInExtension::PlugInExtension;
 
+    //==============================================================================
     // overloading inherited templated getters to default to juce versions of the returned classes
     template <typename DocumentController_t = ARADocumentController>
     DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::PlugInExtension::getDocumentController<DocumentController_t>(); }
@@ -34,6 +35,7 @@ public:
     template <typename EditorView_t = ARAEditorView>
     EditorView_t* getEditorView() const noexcept { return ARA::PlugIn::PlugInExtension::getEditorView<EditorView_t>(); }
 
+    //==============================================================================
     /** Returns true if plugin instance fulfills the ARAPlaybackRenderer role. */
     bool isPlaybackRenderer() const noexcept { return ARA::PlugIn::PlugInExtension::getPlaybackRenderer() != nullptr; }
 
@@ -43,7 +45,45 @@ public:
     /** Returns true if plugin instance fulfills the ARAEditorView role. */
     bool isEditorView() const noexcept { return ARA::PlugIn::PlugInExtension::getEditorView() != nullptr; }
 
+    //==============================================================================
+#if ARA_VALIDATE_API_CALLS
+    bool isPrepared { false };
+#endif
+
 protected:
+    /** Implementation helper for AudioProcessor::getTailLengthSeconds():
+        If bound to ARA, this traverses the instance roles to retrieve the respective tail time
+        and returns true. Otherwise returns false and leaves tailLength unmodified.
+    */
+    bool getTailLengthSecondsForARA (double& tailLength) const;
+
+    /** Implementation helper for AudioProcessor::prepareToPlay():
+        If bound to ARA, this traverses the instance roles to prepare them for play
+        and returns true. Otherwise returns false and does nothing.
+    */
+    bool prepareToPlayForARA (double sampleRate, int samplesPerBlock, int numChannels);
+
+    /** Implementation helper for AudioProcessor::releaseResources():
+        If bound to ARA, this traverses the instance roles to let them release ressources
+        and returns true. Otherwise returns false and does nothing.
+    */
+    bool releaseResourcesForARA();
+
+    /** Implementation helper for AudioProcessor::processBlock():
+        If bound to ARA, this traverses the instance roles to let them process the block
+        and returns true. Otherwise returns false and does nothing.
+        Use this overload if your rendering code already has a current positionInfo available.
+    */
+    bool processBlockForARA (AudioBuffer<float>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo);
+
+    /** Implementation helper for AudioProcessor::processBlock():
+        If bound to ARA, this traverses the instance roles to let them process the block
+        and returns true. Otherwise returns false and does nothing.
+        Use this overload if your rendering code does not have a current positionInfo available.
+    */
+    bool processBlockForARA (AudioBuffer<float>& buffer, bool isNonRealtime, AudioPlayHead* playhead);
+
+    //==============================================================================
     /** Optional hook for derived classes to perform any additional initialization that may be needed.
         If overriding this, make sure you call the base class implementation from your override.
     */
