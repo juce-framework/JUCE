@@ -108,6 +108,8 @@ target_sources(ARAPluginDemo
         Source/ARAPluginDemoAudioProcessorEditor.h
         Source/ARAPluginDemoDocumentController.cpp
         Source/ARAPluginDemoDocumentController.h
+        Source/ARAPluginDemoPlaybackRenderer.cpp
+        Source/ARAPluginDemoPlaybackRenderer.h
         Source/DocumentView.cpp
         Source/DocumentView.h
         Source/MusicalContextView.cpp

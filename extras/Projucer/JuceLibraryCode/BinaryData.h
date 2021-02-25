@@ -117,22 +117,28 @@ namespace BinaryData
     const int            jucer_AudioComponentTemplate_hSize = 1187;
 
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_cpp;
-    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 1771;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_cppSize = 1890;
 
     extern const char*   jucer_AudioPluginARADocumentControllerTemplate_h;
-    const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1489;
+    const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1420;
+
+    extern const char*   jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
+    const int            jucer_AudioPluginARAPlaybackRendererTemplate_cppSize = 3882;
+
+    extern const char*   jucer_AudioPluginARAPlaybackRendererTemplate_h;
+    const int            jucer_AudioPluginARAPlaybackRendererTemplate_hSize = 1481;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
-    const int            jucer_AudioPluginEditorTemplate_cppSize = 1639;
+    const int            jucer_AudioPluginEditorTemplate_cppSize = 1647;
 
     extern const char*   jucer_AudioPluginEditorTemplate_h;
     const int            jucer_AudioPluginEditorTemplate_hSize = 1094;
 
     extern const char*   jucer_AudioPluginFilterTemplate_cpp;
-    const int            jucer_AudioPluginFilterTemplate_cppSize = 6478;
+    const int            jucer_AudioPluginFilterTemplate_cppSize = 7361;
 
     extern const char*   jucer_AudioPluginFilterTemplate_h;
-    const int            jucer_AudioPluginFilterTemplate_hSize = 2500;
+    const int            jucer_AudioPluginFilterTemplate_hSize = 2414;
 
     extern const char*   jucer_ComponentTemplate_cpp;
     const int            jucer_ComponentTemplate_cppSize = 2147;
@@ -201,7 +207,7 @@ namespace BinaryData
     const int            juce_runtime_arch_detection_cppSize = 2127;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 64;
+    const int namedResourceListSize = 66;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

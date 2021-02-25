@@ -6118,10 +6118,12 @@ static const unsigned char temp_binary_data_36[] =
 "*/\r\n"
 "\r\n"
 "%%aradocumentcontroller_headers%%\r\n"
+"%%araplaybackrenderer_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"%%aradocumentcontroller_class_name%%::~%%aradocumentcontroller_class_name%%()\r\n"
+"ARA::PlugIn::PlaybackRenderer* %%aradocumentcontroller_class_name%%::doCreatePlaybackRenderer() noexcept\r\n"
 "{\r\n"
+"    return new %%araplaybackrenderer_class_name%% (this);\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -6164,7 +6166,7 @@ static const unsigned char temp_binary_data_37[] =
 "\r\n"
 "#pragma once\r\n"
 "\r\n"
-"#include <juce_audio_plugin_client/ARA/juce_ARADocumentController.h>\r\n"
+"#include <juce_audio_plugin_client/juce_audio_plugin_client.h>\r\n"
 "\r\n"
 "//==============================================================================\r\n"
 "/**\r\n"
@@ -6172,15 +6174,14 @@ static const unsigned char temp_binary_data_37[] =
 "class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentController\r\n"
 "{\r\n"
 "public:\r\n"
-"    using juce::ARADocumentController::ARADocumentController;\r\n"
-"\r\n"
 "    //==============================================================================\r\n"
-"    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);\r\n"
-"    ~%%aradocumentcontroller_class_name%%();\r\n"
+"    using juce::ARADocumentController::ARADocumentController;\r\n"
 "\r\n"
 "protected:\r\n"
 "    //==============================================================================\r\n"
 "    // Override document controller customization methods here\r\n"
+"\r\n"
+"    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;\r\n"
 "\r\n"
 "    bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;\r\n"
 "    bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;\r\n"
@@ -6192,8 +6193,147 @@ static const unsigned char temp_binary_data_37[] =
 
 const char* jucer_AudioPluginARADocumentControllerTemplate_h = (const char*) temp_binary_data_37;
 
-//================== jucer_AudioPluginEditorTemplate.cpp ==================
+//================== jucer_AudioPluginARAPlaybackRendererTemplate.cpp ==================
 static const unsigned char temp_binary_data_38[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"    It contains the basic framework code for an ARA playback renderer implementation.\r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"%%araplaybackrenderer_headers%%\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"void %%araplaybackrenderer_class_name%%::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans)\r\n"
+"{\r\n"
+"    sampleRate = rate;\r\n"
+"    maximumSamplesPerBlock = maxSamplesPerBlock;\r\n"
+"    numChannels = numChans;\r\n"
+"}\r\n"
+"\r\n"
+"void %%araplaybackrenderer_class_name%%::releaseResources()\r\n"
+"{\r\n"
+"}\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"bool %%araplaybackrenderer_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, bool isNonRealtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept\r\n"
+"{\r\n"
+"    const auto numSamples = buffer.getNumSamples();\r\n"
+"    const auto numChannels = buffer.getNumChannels();\r\n"
+"    jassert (numSamples <= maximumSamplesPerBlock);\r\n"
+"    jassert (numChannels == numChannels);\r\n"
+"    const auto timeInSamples = positionInfo.timeInSamples;\r\n"
+"    const auto isPlaying = positionInfo.isPlaying;\r\n"
+"\r\n"
+"    bool success = true;\r\n"
+"    bool didRenderAnyRegion = false;\r\n"
+"    if (isPlaying)\r\n"
+"    {\r\n"
+"        const auto blockRange = juce::Range<juce::int64>::withStartAndLength (timeInSamples, numSamples);\r\n"
+"        for (const auto& playbackRegion : getPlaybackRegions())\r\n"
+"        {\r\n"
+"            // Evaluate region borders in song time, calculate sample range to render in song time.\r\n"
+"            // Note that this example does not use head- or tailtime, so the includeHeadAndTail\r\n"
+"            // parameter is set to false here - this might need to be adjusted in actual plug-ins.\r\n"
+"            const auto playbackSampleRange = playbackRegion->getSampleRange (sampleRate, false);\r\n"
+"            auto renderRange = blockRange.getIntersectionWith (playbackSampleRange);\r\n"
+"            if (renderRange.isEmpty())\r\n"
+"                continue;\r\n"
+"\r\n"
+"            // Now calculate samples in renderRange for this playback region based on the ARA model graph.\r\n"
+"            // If didRenderAnyRegion is true, add the region's output samples in renderRange to the buffer.\r\n"
+"            // If it is false, the buffer must be initialized so you replace\r\n"
+"            const int numSamples = (int) renderRange.getLength();\r\n"
+"            const int startInBuffer = (int) (renderRange.getStart() - blockRange.getStart());\r\n"
+"            for (int c = 0; c < numChannels; ++c)\r\n"
+"            {\r\n"
+"                auto* channelData = buffer.getWritePointer (c);\r\n"
+"                for (int i = 0; i < numSamples; ++i)\r\n"
+"                {\r\n"
+"                    // ... calculate region output sample at index renderRange.getStart() + i\r\n"
+"                    float sample = 0.0f;\r\n"
+"\r\n"
+"                    if (didRenderAnyRegion)\r\n"
+"                        channelData[startInBuffer + i] += sample;\r\n"
+"                    else\r\n"
+"                        channelData[startInBuffer + i] = sample;\r\n"
+"                }\r\n"
+"            }\r\n"
+"\r\n"
+"            // If rendering first region, clear any excess at start or end of the region.\r\n"
+"            if (! didRenderAnyRegion)\r\n"
+"            {\r\n"
+"                if (startInBuffer != 0)\r\n"
+"                    buffer.clear (0, startInBuffer);\r\n"
+"\r\n"
+"                const int endInBuffer = startInBuffer + numSamples;\r\n"
+"                const int remainingSamples = numSamples - endInBuffer;\r\n"
+"                if (remainingSamples != 0)\r\n"
+"                    buffer.clear (endInBuffer, remainingSamples);\r\n"
+"\r\n"
+"                didRenderAnyRegion = true;\r\n"
+"            }\r\n"
+"        }\r\n"
+"    }\r\n"
+"\r\n"
+"    // If no playback or no region did intersect, clear buffer now.\r\n"
+"    if (! didRenderAnyRegion)\r\n"
+"        buffer.clear();\r\n"
+"\r\n"
+"    return success;\r\n"
+"}\r\n";
+
+const char* jucer_AudioPluginARAPlaybackRendererTemplate_cpp = (const char*) temp_binary_data_38;
+
+//================== jucer_AudioPluginARAPlaybackRendererTemplate.h ==================
+static const unsigned char temp_binary_data_39[] =
+"/*\r\n"
+"  ==============================================================================\r\n"
+"\r\n"
+"    This file was auto-generated!\r\n"
+"\r\n"
+"    It contains the basic framework code for an ARA playback renderer implementation. \r\n"
+"\r\n"
+"  ==============================================================================\r\n"
+"*/\r\n"
+"\r\n"
+"#pragma once\r\n"
+"\r\n"
+"#include <juce_audio_plugin_client/juce_audio_plugin_client.h>\r\n"
+"\r\n"
+"//==============================================================================\r\n"
+"/**\r\n"
+"*/\r\n"
+"class %%araplaybackrenderer_class_name%%  : public juce::ARAPlaybackRenderer\r\n"
+"{\r\n"
+"public:\r\n"
+"    //==============================================================================\r\n"
+"    using juce::ARAPlaybackRenderer::ARAPlaybackRenderer;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels) override;\r\n"
+"    void releaseResources() override;\r\n"
+"\r\n"
+"    //==============================================================================\r\n"
+"    bool processBlock (juce::AudioBuffer<float>& buffer, bool isNonRealtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override;\r\n"
+"\r\n"
+"private:\r\n"
+"    //==============================================================================\r\n"
+"    double sampleRate { 44100.0 };\r\n"
+"    int maximumSamplesPerBlock { 4096 };\r\n"
+"    int numChannels { 1 };\r\n"
+"\r\n"
+"    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%araplaybackrenderer_class_name%%)\r\n"
+"};\r\n";
+
+const char* jucer_AudioPluginARAPlaybackRendererTemplate_h = (const char*) temp_binary_data_39;
+
+//================== jucer_AudioPluginEditorTemplate.cpp ==================
+static const unsigned char temp_binary_data_40[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6206,10 +6346,11 @@ static const unsigned char temp_binary_data_38[] =
 "\r\n"
 "//==============================================================================\r\n"
 "%%editor_class_name%%::%%editor_class_name%% (%%filter_class_name%%& p)\r\n"
-"    : AudioProcessorEditor (&p), audioProcessor (p)\r\n"
+"    : AudioProcessorEditor (&p),\r\n"
 "#if JucePlugin_Enable_ARA\r\n"
-"    , juce::AudioProcessorEditorARAExtension (&p)\r\n"
+"      juce::AudioProcessorEditorARAExtension (&p),\r\n"
 "#endif\r\n"
+"      audioProcessor (p)\r\n"
 "{\r\n"
 "    // Make sure that before the constructor has finished, you've set the\r\n"
 "    // editor's size to whatever you need it to be.\r\n"
@@ -6243,10 +6384,10 @@ static const unsigned char temp_binary_data_38[] =
 "    // subcomponents in your editor..\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_38;
+const char* jucer_AudioPluginEditorTemplate_cpp = (const char*) temp_binary_data_40;
 
 //================== jucer_AudioPluginEditorTemplate.h ==================
-static const unsigned char temp_binary_data_39[] =
+static const unsigned char temp_binary_data_41[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6283,10 +6424,10 @@ static const unsigned char temp_binary_data_39[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%editor_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_39;
+const char* jucer_AudioPluginEditorTemplate_h = (const char*) temp_binary_data_41;
 
 //================== jucer_AudioPluginFilterTemplate.cpp ==================
-static const unsigned char temp_binary_data_40[] =
+static const unsigned char temp_binary_data_42[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6351,6 +6492,12 @@ static const unsigned char temp_binary_data_40[] =
 "\r\n"
 "double %%filter_class_name%%::getTailLengthSeconds() const\r\n"
 "{\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    double tail;\r\n"
+"    if (getTailLengthSecondsForARA (tail))\r\n"
+"        return tail;\r\n"
+"#endif\r\n"
+"\r\n"
 "    return 0.0;\r\n"
 "}\r\n"
 "\r\n"
@@ -6381,12 +6528,22 @@ static const unsigned char temp_binary_data_40[] =
 "//==============================================================================\r\n"
 "void %%filter_class_name%%::prepareToPlay (double sampleRate, int samplesPerBlock)\r\n"
 "{\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    if (prepareToPlayForARA (sampleRate, samplesPerBlock, getMainBusNumOutputChannels()))\r\n"
+"        return;\r\n"
+"#endif\r\n"
+"\r\n"
 "    // Use this method as the place to do any pre-playback\r\n"
 "    // initialisation that you need..\r\n"
 "}\r\n"
 "\r\n"
 "void %%filter_class_name%%::releaseResources()\r\n"
 "{\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    if (releaseResourcesForARA())\r\n"
+"        return;\r\n"
+"#endif\r\n"
+"\r\n"
 "    // When playback stops, you can use this as an opportunity to free up any\r\n"
 "    // spare memory, etc.\r\n"
 "}\r\n"
@@ -6420,6 +6577,12 @@ static const unsigned char temp_binary_data_40[] =
 "void %%filter_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)\r\n"
 "{\r\n"
 "    juce::ScopedNoDenormals noDenormals;\r\n"
+"\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    if (processBlockForARA (buffer, isNonRealtime(), getPlayHead()))\r\n"
+"        return;\r\n"
+"#endif\r\n"
+"\r\n"
 "    auto totalNumInputChannels  = getTotalNumInputChannels();\r\n"
 "    auto totalNumOutputChannels = getTotalNumOutputChannels();\r\n"
 "\r\n"
@@ -6446,15 +6609,6 @@ static const unsigned char temp_binary_data_40[] =
 "    }\r\n"
 "}\r\n"
 "\r\n"
-"#if JucePlugin_Enable_ARA\r\n"
-"bool %%filter_class_name%%::didProcessBlockSucceed()\r\n"
-"{\r\n"
-"    // You can use this function to inform the calling code that the \r\n"
-"    // most recent processBlock call didn't output samples as expected. \r\n"
-"    return true;\r\n"
-"}\r\n"
-"#endif\r\n"
-"\r\n"
 "//==============================================================================\r\n"
 "bool %%filter_class_name%%::hasEditor() const\r\n"
 "{\r\n"
@@ -6469,15 +6623,37 @@ static const unsigned char temp_binary_data_40[] =
 "//==============================================================================\r\n"
 "void %%filter_class_name%%::getStateInformation (juce::MemoryBlock& destData)\r\n"
 "{\r\n"
-"    // You should use this method to store your parameters in the memory block.\r\n"
-"    // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
-"    // as intermediaries to make it easy to save and load complex data.\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    if (isBoundToARA())\r\n"
+"    {\r\n"
+"        // When using ARA, all model state is stored in the ARA archives,\r\n"
+"        // and the state here in the plug-in instance is limited to\r\n"
+"        // view configuration data or other editor settings or remains empty.\r\n"
+"    }\r\n"
+"    else\r\n"
+"#endif\r\n"
+"    {\r\n"
+"        // You should use this method to store your parameters in the memory block.\r\n"
+"        // You could do that either as raw data, or use the XML or ValueTree classes\r\n"
+"        // as intermediaries to make it easy to save and load complex data.\r\n"
+"    }\r\n"
 "}\r\n"
 "\r\n"
 "void %%filter_class_name%%::setStateInformation (const void* data, int sizeInBytes)\r\n"
 "{\r\n"
-"    // You should use this method to restore your parameters from this memory block,\r\n"
-"    // whose contents will have been created by the getStateInformation() call.\r\n"
+"#if JucePlugin_Enable_ARA\r\n"
+"    if (isBoundToARA())\r\n"
+"    {\r\n"
+"        // When using ARA, all model state is stored in the ARA archives,\r\n"
+"        // and the state here in the plug-in instance is limited to\r\n"
+"        // view configuration data or other editor settings or remains empty.\r\n"
+"    }\r\n"
+"    else\r\n"
+"#endif\r\n"
+"    {\r\n"
+"        // You should use this method to restore your parameters from this memory block,\r\n"
+"        // whose contents will have been created by the getStateInformation() call.\r\n"
+"    }\r\n"
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -6487,10 +6663,10 @@ static const unsigned char temp_binary_data_40[] =
 "    return new %%filter_class_name%%();\r\n"
 "}\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_40;
+const char* jucer_AudioPluginFilterTemplate_cpp = (const char*) temp_binary_data_42;
 
 //================== jucer_AudioPluginFilterTemplate.h ==================
-static const unsigned char temp_binary_data_41[] =
+static const unsigned char temp_binary_data_43[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6525,9 +6701,6 @@ static const unsigned char temp_binary_data_41[] =
 "   #endif\r\n"
 "\r\n"
 "    void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;\r\n"
-"   #if JucePlugin_Enable_ARA\r\n"
-"    bool didProcessBlockSucceed() override;\r\n"
-"   #endif\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
 "    juce::AudioProcessorEditor* createEditor() override;\r\n"
@@ -6557,10 +6730,10 @@ static const unsigned char temp_binary_data_41[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%filter_class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_41;
+const char* jucer_AudioPluginFilterTemplate_h = (const char*) temp_binary_data_43;
 
 //================== jucer_ComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_42[] =
+static const unsigned char temp_binary_data_44[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6636,10 +6809,10 @@ static const unsigned char temp_binary_data_42[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_42;
+const char* jucer_ComponentTemplate_cpp = (const char*) temp_binary_data_44;
 
 //================== jucer_ComponentTemplate.h ==================
-static const unsigned char temp_binary_data_43[] =
+static const unsigned char temp_binary_data_45[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6702,10 +6875,10 @@ static const unsigned char temp_binary_data_43[] =
 "//[EndFile] You can add extra defines here...\r\n"
 "//[/EndFile]\r\n";
 
-const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_43;
+const char* jucer_ComponentTemplate_h = (const char*) temp_binary_data_45;
 
 //================== jucer_ContentCompSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_44[] =
+static const unsigned char temp_binary_data_46[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -6755,10 +6928,10 @@ static const unsigned char temp_binary_data_44[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_44;
+const char* jucer_ContentCompSimpleTemplate_h = (const char*) temp_binary_data_46;
 
 //================== jucer_ContentCompTemplate.cpp ==================
-static const unsigned char temp_binary_data_45[] =
+static const unsigned char temp_binary_data_47[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -6789,10 +6962,10 @@ static const unsigned char temp_binary_data_45[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_45;
+const char* jucer_ContentCompTemplate_cpp = (const char*) temp_binary_data_47;
 
 //================== jucer_ContentCompTemplate.h ==================
-static const unsigned char temp_binary_data_46[] =
+static const unsigned char temp_binary_data_48[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -6821,10 +6994,10 @@ static const unsigned char temp_binary_data_46[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_46;
+const char* jucer_ContentCompTemplate_h = (const char*) temp_binary_data_48;
 
 //================== jucer_InlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_47[] =
+static const unsigned char temp_binary_data_49[] =
 "//==============================================================================\r\n"
 "class %%component_class%%  : public juce::Component\r\n"
 "{\r\n"
@@ -6866,10 +7039,10 @@ static const unsigned char temp_binary_data_47[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_47;
+const char* jucer_InlineComponentTemplate_h = (const char*) temp_binary_data_49;
 
 //================== jucer_MainConsoleAppTemplate.cpp ==================
-static const unsigned char temp_binary_data_48[] =
+static const unsigned char temp_binary_data_50[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6890,10 +7063,10 @@ static const unsigned char temp_binary_data_48[] =
 "    return 0;\r\n"
 "}\r\n";
 
-const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_48;
+const char* jucer_MainConsoleAppTemplate_cpp = (const char*) temp_binary_data_50;
 
 //================== jucer_MainTemplate_NoWindow.cpp ==================
-static const unsigned char temp_binary_data_49[] =
+static const unsigned char temp_binary_data_51[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -6946,10 +7119,10 @@ static const unsigned char temp_binary_data_49[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_49;
+const char* jucer_MainTemplate_NoWindow_cpp = (const char*) temp_binary_data_51;
 
 //================== jucer_MainTemplate_Window.cpp ==================
-static const unsigned char temp_binary_data_50[] =
+static const unsigned char temp_binary_data_52[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7055,10 +7228,10 @@ static const unsigned char temp_binary_data_50[] =
 "// This macro generates the main() routine that launches the app.\r\n"
 "START_JUCE_APPLICATION (%%app_class_name%%)\r\n";
 
-const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_50;
+const char* jucer_MainTemplate_Window_cpp = (const char*) temp_binary_data_52;
 
 //================== jucer_NewComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_51[] =
+static const unsigned char temp_binary_data_53[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7111,10 +7284,10 @@ static const unsigned char temp_binary_data_51[] =
 "\r\n"
 "}\r\n";
 
-const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_51;
+const char* jucer_NewComponentTemplate_cpp = (const char*) temp_binary_data_53;
 
 //================== jucer_NewComponentTemplate.h ==================
-static const unsigned char temp_binary_data_52[] =
+static const unsigned char temp_binary_data_54[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7145,10 +7318,10 @@ static const unsigned char temp_binary_data_52[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_52;
+const char* jucer_NewComponentTemplate_h = (const char*) temp_binary_data_54;
 
 //================== jucer_NewCppFileTemplate.cpp ==================
-static const unsigned char temp_binary_data_53[] =
+static const unsigned char temp_binary_data_55[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7161,10 +7334,10 @@ static const unsigned char temp_binary_data_53[] =
 "\r\n"
 "%%include_corresponding_header%%\r\n";
 
-const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_53;
+const char* jucer_NewCppFileTemplate_cpp = (const char*) temp_binary_data_55;
 
 //================== jucer_NewCppFileTemplate.h ==================
-static const unsigned char temp_binary_data_54[] =
+static const unsigned char temp_binary_data_56[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7177,10 +7350,10 @@ static const unsigned char temp_binary_data_54[] =
 "\r\n"
 "#pragma once\r\n";
 
-const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_54;
+const char* jucer_NewCppFileTemplate_h = (const char*) temp_binary_data_56;
 
 //================== jucer_NewInlineComponentTemplate.h ==================
-static const unsigned char temp_binary_data_55[] =
+static const unsigned char temp_binary_data_57[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
@@ -7243,10 +7416,10 @@ static const unsigned char temp_binary_data_55[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_55;
+const char* jucer_NewInlineComponentTemplate_h = (const char*) temp_binary_data_57;
 
 //================== jucer_OpenGLComponentSimpleTemplate.h ==================
-static const unsigned char temp_binary_data_56[] =
+static const unsigned char temp_binary_data_58[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -7315,10 +7488,10 @@ static const unsigned char temp_binary_data_56[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_56;
+const char* jucer_OpenGLComponentSimpleTemplate_h = (const char*) temp_binary_data_58;
 
 //================== jucer_OpenGLComponentTemplate.cpp ==================
-static const unsigned char temp_binary_data_57[] =
+static const unsigned char temp_binary_data_59[] =
 "%%include_corresponding_header%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
@@ -7368,10 +7541,10 @@ static const unsigned char temp_binary_data_57[] =
 "    // update their positions.\r\n"
 "}\r\n";
 
-const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_57;
+const char* jucer_OpenGLComponentTemplate_cpp = (const char*) temp_binary_data_59;
 
 //================== jucer_OpenGLComponentTemplate.h ==================
-static const unsigned char temp_binary_data_58[] =
+static const unsigned char temp_binary_data_60[] =
 "#pragma once\r\n"
 "\r\n"
 "%%include_juce%%\r\n"
@@ -7405,10 +7578,10 @@ static const unsigned char temp_binary_data_58[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%content_component_class%%)\r\n"
 "};\r\n";
 
-const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_58;
+const char* jucer_OpenGLComponentTemplate_h = (const char*) temp_binary_data_60;
 
 //================== jucer_PIPAudioProcessorTemplate.h ==================
-static const unsigned char temp_binary_data_59[] =
+static const unsigned char temp_binary_data_61[] =
 "class %%class_name%%  : public juce::AudioProcessor\r\n"
 "{\r\n"
 "public:\r\n"
@@ -7517,10 +7690,10 @@ static const unsigned char temp_binary_data_59[] =
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%class_name%%)\r\n"
 "};\r\n";
 
-const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_59;
+const char* jucer_PIPAudioProcessorTemplate_h = (const char*) temp_binary_data_61;
 
 //================== jucer_PIPTemplate.h ==================
-static const unsigned char temp_binary_data_60[] =
+static const unsigned char temp_binary_data_62[] =
 "/*******************************************************************************\r\n"
 " The block below describes the properties of this PIP. A PIP is a short snippet\r\n"
 " of code that can be read by the Projucer and used to generate a JUCE project.\r\n"
@@ -7539,10 +7712,10 @@ static const unsigned char temp_binary_data_60[] =
 "//==============================================================================\r\n"
 "%%pip_code%%\r\n";
 
-const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_60;
+const char* jucer_PIPTemplate_h = (const char*) temp_binary_data_62;
 
 //================== colourscheme_dark.xml ==================
-static const unsigned char temp_binary_data_61[] =
+static const unsigned char temp_binary_data_63[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7567,10 +7740,10 @@ static const unsigned char temp_binary_data_61[] =
 "  <COLOUR name=\"Error\" colour=\"FFE60000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_dark_xml = (const char*) temp_binary_data_61;
+const char* colourscheme_dark_xml = (const char*) temp_binary_data_63;
 
 //================== colourscheme_light.xml ==================
-static const unsigned char temp_binary_data_62[] =
+static const unsigned char temp_binary_data_64[] =
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 "\r\n"
 "<COLOUR_SCHEME font=\"&lt;Monospaced&gt;; 13.0\">\r\n"
@@ -7595,10 +7768,10 @@ static const unsigned char temp_binary_data_62[] =
 "  <COLOUR name=\"Error\" colour=\"ffcc0000\"/>\r\n"
 "</COLOUR_SCHEME>\r\n";
 
-const char* colourscheme_light_xml = (const char*) temp_binary_data_62;
+const char* colourscheme_light_xml = (const char*) temp_binary_data_64;
 
 //================== juce_runtime_arch_detection.cpp ==================
-static const unsigned char temp_binary_data_63[] =
+static const unsigned char temp_binary_data_65[] =
 "#if defined(__arm__) || defined(__TARGET_ARCH_ARM) || defined(_M_ARM) || defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
 "\r\n"
 "  #if defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
@@ -7659,7 +7832,7 @@ static const unsigned char temp_binary_data_63[] =
 "\r\n"
 "#endif\r\n";
 
-const char* juce_runtime_arch_detection_cpp = (const char*) temp_binary_data_63;
+const char* juce_runtime_arch_detection_cpp = (const char*) temp_binary_data_65;
 
 
 const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
@@ -7708,12 +7881,14 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xfb6f6d96:  numBytes = 3554; return jucer_AudioComponentSimpleTemplate_h;
         case 0xafccbd3f:  numBytes = 2941; return jucer_AudioComponentTemplate_cpp;
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
-        case 0x744d44d6:  numBytes = 1771; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 1489; return jucer_AudioPluginARADocumentControllerTemplate_h;
-        case 0x27c5a93a:  numBytes = 1639; return jucer_AudioPluginEditorTemplate_cpp;
+        case 0x744d44d6:  numBytes = 1890; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = 1420; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0xea35a37d:  numBytes = 3882; return jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
+        case 0x78a6d0c2:  numBytes = 1481; return jucer_AudioPluginARAPlaybackRendererTemplate_h;
+        case 0x27c5a93a:  numBytes = 1647; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1094; return jucer_AudioPluginEditorTemplate_h;
-        case 0x51b49ac5:  numBytes = 6478; return jucer_AudioPluginFilterTemplate_cpp;
-        case 0x488afa0a:  numBytes = 2500; return jucer_AudioPluginFilterTemplate_h;
+        case 0x51b49ac5:  numBytes = 7361; return jucer_AudioPluginFilterTemplate_cpp;
+        case 0x488afa0a:  numBytes = 2414; return jucer_AudioPluginFilterTemplate_h;
         case 0xabad7041:  numBytes = 2147; return jucer_ComponentTemplate_cpp;
         case 0xfc72fe86:  numBytes = 2065; return jucer_ComponentTemplate_h;
         case 0x1657b643:  numBytes = 1524; return jucer_ContentCompSimpleTemplate_h;
@@ -7783,6 +7958,8 @@ const char* namedResourceList[] =
     "jucer_AudioComponentTemplate_h",
     "jucer_AudioPluginARADocumentControllerTemplate_cpp",
     "jucer_AudioPluginARADocumentControllerTemplate_h",
+    "jucer_AudioPluginARAPlaybackRendererTemplate_cpp",
+    "jucer_AudioPluginARAPlaybackRendererTemplate_h",
     "jucer_AudioPluginEditorTemplate_cpp",
     "jucer_AudioPluginEditorTemplate_h",
     "jucer_AudioPluginFilterTemplate_cpp",
@@ -7851,6 +8028,8 @@ const char* originalFilenames[] =
     "jucer_AudioComponentTemplate.h",
     "jucer_AudioPluginARADocumentControllerTemplate.cpp",
     "jucer_AudioPluginARADocumentControllerTemplate.h",
+    "jucer_AudioPluginARAPlaybackRendererTemplate.cpp",
+    "jucer_AudioPluginARAPlaybackRendererTemplate.h",
     "jucer_AudioPluginEditorTemplate.cpp",
     "jucer_AudioPluginEditorTemplate.h",
     "jucer_AudioPluginFilterTemplate.cpp",

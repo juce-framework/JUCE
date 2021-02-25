@@ -9,10 +9,12 @@
 */
 
 %%aradocumentcontroller_headers%%
+%%araplaybackrenderer_headers%%
 
 //==============================================================================
-%%aradocumentcontroller_class_name%%::~%%aradocumentcontroller_class_name%%()
+ARA::PlugIn::PlaybackRenderer* %%aradocumentcontroller_class_name%%::doCreatePlaybackRenderer() noexcept
 {
+    return new %%araplaybackrenderer_class_name%% (this);
 }
 
 //==============================================================================

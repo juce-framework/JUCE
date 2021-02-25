@@ -144,6 +144,7 @@
 		2BD9B4556479A8A41740BCAE /* jucer_ComponentTemplate.h */ /* jucer_ComponentTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentTemplate.h; path = ../../Source/BinaryData/Templates/jucer_ComponentTemplate.h; sourceTree = SOURCE_ROOT; };
 		2CD34A70B4032C0426F7AA10 /* jucer_MainWindow.h */ /* jucer_MainWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_MainWindow.h; path = ../../Source/Application/jucer_MainWindow.h; sourceTree = SOURCE_ROOT; };
 		2DF5A61F3C497537634773DF /* jucer_ActivityListComponent.h */ /* jucer_ActivityListComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ActivityListComponent.h; path = ../../Source/LiveBuildEngine/UI/jucer_ActivityListComponent.h; sourceTree = SOURCE_ROOT; };
+		2E9CF857DCF1EFEA997B4D5B /* jucer_AudioPluginARAPlaybackRendererTemplate.h */ /* jucer_AudioPluginARAPlaybackRendererTemplate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_AudioPluginARAPlaybackRendererTemplate.h; path = ../../Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.h; sourceTree = SOURCE_ROOT; };
 		2EEB1C074162F363C6599282 /* jucer_CommandLine.h */ /* jucer_CommandLine.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_CommandLine.h; path = ../../Source/Application/jucer_CommandLine.h; sourceTree = SOURCE_ROOT; };
 		2F0A7CA808B2FCCC9ED68992 /* jucer_LicenseQueryThread.h */ /* jucer_LicenseQueryThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_LicenseQueryThread.h; path = ../../Source/Application/UserAccount/jucer_LicenseQueryThread.h; sourceTree = SOURCE_ROOT; };
 		2F373F97E30AC1A0BFC1FC61 /* jucer_FilePropertyComponent.h */ /* jucer_FilePropertyComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FilePropertyComponent.h; path = ../../Source/ComponentEditor/Properties/jucer_FilePropertyComponent.h; sourceTree = SOURCE_ROOT; };
@@ -392,6 +393,7 @@
 		F30DF63DBEFA4BEEF7C369FC /* jucer_LicenseController.h */ /* jucer_LicenseController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_LicenseController.h; path = ../../Source/Application/UserAccount/jucer_LicenseController.h; sourceTree = SOURCE_ROOT; };
 		F313EE01ECE306DB2CFE011D /* UnityPluginGUIScript.cs.in */ /* UnityPluginGUIScript.cs.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = UnityPluginGUIScript.cs.in; path = ../../../Build/CMake/UnityPluginGUIScript.cs.in; sourceTree = SOURCE_ROOT; };
 		F3CC8F26ECCDA6DCD8A284D2 /* jucer_GradientPointComponent.h */ /* jucer_GradientPointComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_GradientPointComponent.h; path = ../../Source/ComponentEditor/PaintElements/jucer_GradientPointComponent.h; sourceTree = SOURCE_ROOT; };
+		F3CCA5545AB7B4B603D0BFEB /* jucer_AudioPluginARAPlaybackRendererTemplate.cpp */ /* jucer_AudioPluginARAPlaybackRendererTemplate.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_AudioPluginARAPlaybackRendererTemplate.cpp; path = ../../Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.cpp; sourceTree = SOURCE_ROOT; };
 		F4FD9BD16ED2700F45A68C4F /* jucer_ComponentBooleanProperty.h */ /* jucer_ComponentBooleanProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ComponentBooleanProperty.h; path = ../../Source/ComponentEditor/Properties/jucer_ComponentBooleanProperty.h; sourceTree = SOURCE_ROOT; };
 		F58B23995765C9FDBE28F871 /* jucer_Modules.cpp */ /* jucer_Modules.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_Modules.cpp; path = ../../Source/Project/Modules/jucer_Modules.cpp; sourceTree = SOURCE_ROOT; };
 		F5DD97B45B8EA60C1ED0DD80 /* jucer_StoredSettings.cpp */ /* jucer_StoredSettings.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_StoredSettings.cpp; path = ../../Source/Settings/jucer_StoredSettings.cpp; sourceTree = SOURCE_ROOT; };
@@ -726,6 +728,8 @@
 				5BF0374EB908F0476BD8ED42,
 				96A1EC6B50DBD2C526C60338,
 				8E129499EA2FB8A4944F8701,
+				F3CCA5545AB7B4B603D0BFEB,
+				2E9CF857DCF1EFEA997B4D5B,
 				6574A50A8997799705B23465,
 				56177921580A4855917E0205,
 				079802C6AEE7646010766FE8,

@@ -16,7 +16,7 @@ ARADocumentController::FactoryConfig::FactoryConfig() noexcept
     }
     
     // Update analyzeable content types
-    static constexpr std::array<ARA::ARAContentType, 6> araContentTypes {
+    static constexpr std::array<ARA::ARAContentType, 6> contentTypes {
         ARA::kARAContentTypeNotes,
         ARA::kARAContentTypeTempoEntries,
         ARA::kARAContentTypeBarSignatures,
@@ -24,21 +24,21 @@ ARADocumentController::FactoryConfig::FactoryConfig() noexcept
         ARA::kARAContentTypeKeySignatures,
         ARA::kARAContentTypeSheetChords
     };
-    for (size_t i = 0; i < araContentTypes.size(); ++i)
+    for (size_t i = 0; i < contentTypes.size(); ++i)
         if (JucePlugin_ARAContentTypes & (1 << i))
-            analyzeableContentTypes.push_back (araContentTypes[i]);
+            analyzeableContentTypes.push_back (contentTypes[i]);
 
     // Update playback transformation flags
-    static constexpr std::array<ARA::ARAPlaybackTransformationFlags, 4> araPlaybackTransformationFlags {
+    static constexpr std::array<ARA::ARAPlaybackTransformationFlags, 4> playbackTransformationFlags {
         ARA::kARAPlaybackTransformationTimestretch,
         ARA::kARAPlaybackTransformationTimestretchReflectingTempo,
         ARA::kARAPlaybackTransformationContentBasedFadeAtTail,
         ARA::kARAPlaybackTransformationContentBasedFadeAtHead
     };
     supportedPlaybackTransformationFlags = 0;
-    for (size_t i = 0; i < araPlaybackTransformationFlags.size(); ++i)
+    for (size_t i = 0; i < playbackTransformationFlags.size(); ++i)
         if (JucePlugin_ARATransformationFlags & (1 << i))
-            supportedPlaybackTransformationFlags |= araPlaybackTransformationFlags[i];
+            supportedPlaybackTransformationFlags |= playbackTransformationFlags[i];
 }
 
 //==============================================================================
@@ -289,11 +289,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 
-ARA::PlugIn::PlaybackRenderer* ARADocumentController::doCreatePlaybackRenderer() noexcept
-{
-    return new ARAPlaybackRenderer (this);
-}
-
 ARA::PlugIn::EditorRenderer* ARADocumentController::doCreateEditorRenderer() noexcept
 {
     return new ARAEditorRenderer (this);
@@ -401,7 +396,7 @@ ARAOutputStream::ARAOutputStream (ARA::PlugIn::HostArchiveWriter* writer)
 
 bool ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
 {
-    if (!archiveWriter->writeBytesToArchive ((ARA::ARASize) position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
+    if (! archiveWriter->writeBytesToArchive ((ARA::ARASize) position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
 
     position += numberOfBytes;

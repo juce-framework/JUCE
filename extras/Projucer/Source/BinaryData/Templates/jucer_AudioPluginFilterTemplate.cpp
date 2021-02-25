@@ -62,6 +62,12 @@ bool %%filter_class_name%%::isMidiEffect() const
 
 double %%filter_class_name%%::getTailLengthSeconds() const
 {
+#if JucePlugin_Enable_ARA
+    double tail;
+    if (getTailLengthSecondsForARA (tail))
+        return tail;
+#endif
+
     return 0.0;
 }
 
@@ -92,12 +98,22 @@ void %%filter_class_name%%::changeProgramName (int index, const juce::String& ne
 //==============================================================================
 void %%filter_class_name%%::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+#if JucePlugin_Enable_ARA
+    if (prepareToPlayForARA (sampleRate, samplesPerBlock, getMainBusNumOutputChannels()))
+        return;
+#endif
+
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 }
 
 void %%filter_class_name%%::releaseResources()
 {
+#if JucePlugin_Enable_ARA
+    if (releaseResourcesForARA())
+        return;
+#endif
+
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
@@ -131,6 +147,12 @@ bool %%filter_class_name%%::isBusesLayoutSupported (const BusesLayout& layouts) 
 void %%filter_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
+
+#if JucePlugin_Enable_ARA
+    if (processBlockForARA (buffer, isNonRealtime(), getPlayHead()))
+        return;
+#endif
+
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
@@ -157,15 +179,6 @@ void %%filter_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce
     }
 }
 
-#if JucePlugin_Enable_ARA
-bool %%filter_class_name%%::didProcessBlockSucceed()
-{
-    // You can use this function to inform the calling code that the 
-    // most recent processBlock call didn't output samples as expected. 
-    return true;
-}
-#endif
-
 //==============================================================================
 bool %%filter_class_name%%::hasEditor() const
 {
@@ -180,15 +193,37 @@ juce::AudioProcessorEditor* %%filter_class_name%%::createEditor()
 //==============================================================================
 void %%filter_class_name%%::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+#if JucePlugin_Enable_ARA
+    if (isBoundToARA())
+    {
+        // When using ARA, all model state is stored in the ARA archives,
+        // and the state here in the plug-in instance is limited to
+        // view configuration data or other editor settings or remains empty.
+    }
+    else
+#endif
+    {
+        // You should use this method to store your parameters in the memory block.
+        // You could do that either as raw data, or use the XML or ValueTree classes
+        // as intermediaries to make it easy to save and load complex data.
+    }
 }
 
 void %%filter_class_name%%::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+#if JucePlugin_Enable_ARA
+    if (isBoundToARA())
+    {
+        // When using ARA, all model state is stored in the ARA archives,
+        // and the state here in the plug-in instance is limited to
+        // view configuration data or other editor settings or remains empty.
+    }
+    else
+#endif
+    {
+        // You should use this method to restore your parameters from this memory block,
+        // whose contents will have been created by the getStateInformation() call.
+    }
 }
 
 //==============================================================================

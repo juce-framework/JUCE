@@ -1,7 +1,7 @@
 #include "PlaybackRegionView.h"
 #include "DocumentView.h"
-#include "ARAPluginDemoAudioProcessor.h"
 #include "ARAPluginDemoAudioModification.h"
+#include "ARAPluginDemoPlaybackRenderer.h"
 
 //==============================================================================
 PlaybackRegionView::PlaybackRegionView (RegionSequenceViewContainer& viewContainer, juce::ARAPlaybackRegion* region)
@@ -200,20 +200,8 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
 {
     destroyPlaybackRegionReader();
 
-    // Create an audio processor for rendering our region
-    // We're disabling buffered audio source reading because the thumb nail cache will do buffering.
-    auto audioProcessor = std::make_unique<ARAPluginDemoAudioProcessor> (false);
-    const auto sampleRate = playbackRegion->getAudioModification()->getAudioSource()->getSampleRate();
-    const auto numChannels = playbackRegion->getAudioModification()->getAudioSource()->getChannelCount();
-    const auto channelSet = juce::AudioChannelSet::canonicalChannelSet (numChannels);
-    for (int i = 0; i < audioProcessor->getBusCount (false); i++)
-        audioProcessor->setChannelLayoutOfBus (false, i, channelSet);
-    audioProcessor->setProcessingPrecision (juce::AudioProcessor::singlePrecision);
-    audioProcessor->setRateAndBufferSizeDetails (sampleRate, 4*1024);
-    audioProcessor->setNonRealtime (true);
-
-    // Create a playback region reader using this processor for our audio thumb
-    playbackRegionReader = new juce::ARAPlaybackRegionReader (std::move (audioProcessor), { playbackRegion });
+    // Create a playback region reader for our region for our audio thumb
+    playbackRegionReader = new juce::ARAPlaybackRegionReader (std::make_unique<PluginDemoPlaybackRenderer> (playbackRegion->getDocumentController(), false), playbackRegion);
     audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegionReader));
 
     // TODO JUCE_ARA see juce_AudioThumbnail.cpp, line 122: AudioThumbnail handles zero-length sources

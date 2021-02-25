@@ -616,6 +616,12 @@ public:
     */
     Range<double> getTimeRange (bool includeHeadAndTail = false) const;
 
+    /** Returns the playback sample range of this playback region.
+        @param includeHeadAndTail Whether or not the range includes the head and tail
+                                  time of all playback regions in the sequence.
+    */
+    Range<int64> getSampleRange (double sampleRate, bool includeHeadAndTail = false) const;
+
     /** Get the head length in seconds before the start of the region's playback time. */
     double getHeadTime() const;
     /** Get the tail length in seconds after the end of the region's playback time. */

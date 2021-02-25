@@ -1,11 +1,19 @@
 #include "ARAPluginDemoDocumentController.h"
 #include "ARAPluginDemoAudioModification.h"
+#include "ARAPluginDemoPlaybackRenderer.h"
 
+//==============================================================================
 ARA::PlugIn::AudioModification* ARAPluginDemoDocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
     return new ARAPluginDemoAudioModification (static_cast<juce::ARAAudioSource*> (audioSource), hostRef, static_cast<const juce::ARAAudioModification*> (optionalModificationToClone));
 }
 
+ARA::PlugIn::PlaybackRenderer* ARAPluginDemoDocumentController::doCreatePlaybackRenderer() noexcept
+{
+    return new PluginDemoPlaybackRenderer (this);
+}
+
+//==============================================================================
 bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept
 {
     // start reading data from the archive, starting with the number of audio modifications in the archive
@@ -23,7 +31,7 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
 
         // find audio modification to restore the state to (drop state if not to be loaded)
         auto audioModification = filter->getAudioModificationToRestoreStateWithID<ARAPluginDemoAudioModification> (persistentID.getCharPointer());
-        if (!audioModification)
+        if (! audioModification)
             continue;
 
         bool reverseStateChanged = (reverse != audioModification->getReversePlayback());
@@ -33,8 +41,8 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
         if (reverseStateChanged)
         {
             audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
-            for (auto araPlaybackRegion : audioModification->getPlaybackRegions())
-                araPlaybackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
+            for (auto playbackRegion : audioModification->getPlaybackRegions())
+                playbackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
         }
     }
 
@@ -45,7 +53,7 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
 
 bool ARAPluginDemoDocumentController::doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept
 {
-    // this dummy implementation only deals with audio modification states
+    // this example implementation only deals with audio modification states
     const auto& audioModificationsToPersist{ filter->getAudioModificationsToStore<ARAPluginDemoAudioModification>() };
 
     // write the number of audio modifications we are persisting
