@@ -1371,18 +1371,17 @@ private:
 
                         if (aspectRatio != 0.0)
                         {
-                            auto adjustWidth = [&]
+                            bool adjustWidth = (width / height > aspectRatio);
+
+                            if (getHostType().type == PluginHostType::SteinbergCubase9)
                             {
                                 auto currentEditorBounds = editor->getBounds().toFloat();
 
-                                auto stretchingBottom = (currentEditorBounds.getBottom() != editorBounds.getBottom());
-                                auto stretchingRight  = (currentEditorBounds.getRight()  != editorBounds.getRight());
-
-                                if (getHostType().isReaper() || stretchingBottom == stretchingRight)
-                                    return currentEditorBounds.getAspectRatio() > (width / height);
-
-                                return stretchingBottom;
-                            }();
+                                if (currentEditorBounds.getWidth() == width && currentEditorBounds.getHeight() != height)
+                                    adjustWidth = true;
+                                else if (currentEditorBounds.getHeight() == height && currentEditorBounds.getWidth() != width)
+                                    adjustWidth = false;
+                            }
 
                             if (adjustWidth)
                             {
