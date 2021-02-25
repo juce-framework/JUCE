@@ -1,8 +1,10 @@
-#include "juce_ARA_audio_plugin.h"
+#include <juce_core/system/juce_TargetPlatform.h>
+#include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Enable_ARA
 
-#define ARA_DEBUG_MESSAGE_PREFIX JucePlugin_Name
+#include "../utility/juce_IncludeSystemHeaders.h"
+#include "../utility/juce_IncludeModuleHeaders.h"
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter", "-Wgnu-zero-variadic-macro-arguments")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
@@ -41,6 +43,8 @@ JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line
    #endif
   }
 #endif
+
+ARA_SETUP_DEBUG_MESSAGE_PREFIX(JucePlugin_Name);
 
  } // namespace juce
 

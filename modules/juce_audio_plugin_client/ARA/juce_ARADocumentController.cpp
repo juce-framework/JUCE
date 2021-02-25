@@ -1,83 +1,44 @@
 #include "juce_ARADocumentController.h"
 
-const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFactoryConfig() noexcept
-{
-    using namespace ARA;
-    using namespace PlugIn;
-
-    class JUCEARAFactoryConfig    : public FactoryConfig
-    {
-    public:
-        JUCEARAFactoryConfig()
-        {
-            juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
-            if (compatibleDocumentArchiveIDString.isNotEmpty())
-            {
-                compatibleDocumentArchiveIDStrings = juce::StringArray::fromLines (compatibleDocumentArchiveIDString);
-                for (auto& compatibleID : compatibleDocumentArchiveIDStrings)
-                    compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8());
-            }
-            
-            // Update analyzeable content types
-            static ARAContentType araContentVars[]{
-                kARAContentTypeNotes,
-                kARAContentTypeTempoEntries,
-                kARAContentTypeBarSignatures,
-                kARAContentTypeStaticTuning,
-                kARAContentTypeKeySignatures,
-                kARAContentTypeSheetChords
-            };
-            for (size_t i = 0; i < sizeof (araContentVars) / sizeof (ARAContentType); ++i)
-                if (JucePlugin_ARAContentTypes & (1 << i))
-                    analyzeableContentTypes.push_back (araContentVars[i]);
-
-            // Update playback transformation flags
-            const static ARAPlaybackTransformationFlags araPlaybackTransformations[]{
-                kARAPlaybackTransformationTimestretch,
-                kARAPlaybackTransformationTimestretchReflectingTempo,
-                kARAPlaybackTransformationContentBasedFadeAtTail,
-                kARAPlaybackTransformationContentBasedFadeAtHead
-            };
-
-            supportedPlaybackTransformationFlags = 0;
-            for (size_t i = 0; i < sizeof (araPlaybackTransformations) / sizeof (ARAPlaybackTransformationFlags); ++i)
-                if (JucePlugin_ARATransformationFlags & (1 << i))
-                    supportedPlaybackTransformationFlags |= araPlaybackTransformations[i];
-        }
-
-        const char* getFactoryID() const noexcept override { return JucePlugin_ARAFactoryID; }
-        const char* getPlugInName() const noexcept override { return JucePlugin_Name; }
-        const char* getManufacturerName() const noexcept override { return JucePlugin_Manufacturer; }
-        const char* getInformationURL() const noexcept override { return JucePlugin_ManufacturerWebsite; }
-        const char* getVersion() const noexcept override { return JucePlugin_VersionString; }
-
-        virtual const char* getDocumentArchiveID() const noexcept override { return JucePlugin_ARADocumentArchiveID; }
-        virtual ARASize getCompatibleDocumentArchiveIDsCount() const noexcept override { return compatibleDocumentArchiveIDs.size(); }
-        virtual const ARAPersistentID* getCompatibleDocumentArchiveIDs() const noexcept override { return compatibleDocumentArchiveIDs.empty() ? nullptr : compatibleDocumentArchiveIDs.data(); }
-
-        virtual ARASize getAnalyzeableContentTypesCount() const noexcept override { return analyzeableContentTypes.size(); }
-        virtual const ARAContentType* getAnalyzeableContentTypes() const noexcept override { return analyzeableContentTypes.empty() ? nullptr : analyzeableContentTypes.data(); }
-
-        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return supportedPlaybackTransformationFlags; }
-
-    private:
-        juce::StringArray compatibleDocumentArchiveIDStrings;
-        std::vector<ARAPersistentID> compatibleDocumentArchiveIDs;
-        std::vector<ARAContentType> analyzeableContentTypes;
-        ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
-    };
-
-    return new JUCEARAFactoryConfig();
-}
-
 namespace juce
 {
 
 //==============================================================================
 
-ARADocumentController::ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance)
-  : DocumentController (instance)
+ARADocumentController::FactoryConfig::FactoryConfig() noexcept
 {
+    const juce::String compatibleDocumentArchiveIDString = JucePlugin_ARACompatibleArchiveIDs;
+    if (compatibleDocumentArchiveIDString.isNotEmpty())
+    {
+        compatibleDocumentArchiveIDStrings = juce::StringArray::fromLines (compatibleDocumentArchiveIDString);
+        for (const auto& compatibleID : compatibleDocumentArchiveIDStrings)
+            compatibleDocumentArchiveIDs.push_back (compatibleID.toRawUTF8());
+    }
+    
+    // Update analyzeable content types
+    static constexpr std::array<ARA::ARAContentType, 6> araContentTypes {
+        ARA::kARAContentTypeNotes,
+        ARA::kARAContentTypeTempoEntries,
+        ARA::kARAContentTypeBarSignatures,
+        ARA::kARAContentTypeStaticTuning,
+        ARA::kARAContentTypeKeySignatures,
+        ARA::kARAContentTypeSheetChords
+    };
+    for (size_t i = 0; i < araContentTypes.size(); ++i)
+        if (JucePlugin_ARAContentTypes & (1 << i))
+            analyzeableContentTypes.push_back (araContentTypes[i]);
+
+    // Update playback transformation flags
+    static constexpr std::array<ARA::ARAPlaybackTransformationFlags, 4> araPlaybackTransformationFlags {
+        ARA::kARAPlaybackTransformationTimestretch,
+        ARA::kARAPlaybackTransformationTimestretchReflectingTempo,
+        ARA::kARAPlaybackTransformationContentBasedFadeAtTail,
+        ARA::kARAPlaybackTransformationContentBasedFadeAtHead
+    };
+    supportedPlaybackTransformationFlags = 0;
+    for (size_t i = 0; i < araPlaybackTransformationFlags.size(); ++i)
+        if (JucePlugin_ARATransformationFlags & (1 << i))
+            supportedPlaybackTransformationFlags |= araPlaybackTransformationFlags[i];
 }
 
 //==============================================================================
@@ -397,7 +358,7 @@ namespace ModelUpdateControllerProgressAdapter
 void ARADocumentController::timerCallback()
 {
     if (! internalAnalysisProgressIsSynced.test_and_set (std::memory_order_release))
-        for (auto audioSource : getDocument()->getAudioSources<ARAAudioSource>())
+        for (auto& audioSource : getDocument()->getAudioSources<ARAAudioSource>())
             audioSource->internalAnalysisProgressTracker.notifyProgress (ModelUpdateControllerProgressAdapter::get(), reinterpret_cast<ARA::ARAAudioSourceHostRef> (audioSource));
 }
 

@@ -8,12 +8,11 @@
 class ARAPluginDemoDocumentController     : public juce::ARADocumentController
 {
 public:
-    ARAPluginDemoDocumentController (const ARA::ARADocumentControllerHostInstance* instance) noexcept
-        :  ARADocumentController (instance)
-    {}
+    using juce::ARADocumentController::ARADocumentController;
 
     ARA::PlugIn::AudioModification* doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept override;
 
+protected:
     bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;
     bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;
 

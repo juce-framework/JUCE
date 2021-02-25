@@ -63,7 +63,7 @@ double ARAPluginDemoAudioProcessor::getTailLengthSeconds() const
 {
     double tail{};
     if (auto playbackRenderer = getARAPlaybackRenderer())
-        for (auto playbackRegion : playbackRenderer->getPlaybackRegions<juce::ARAPlaybackRegion>())
+        for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions<juce::ARAPlaybackRegion>())
             tail = juce::jmax (tail, playbackRegion->getTailTime());
 
     return tail;
@@ -96,11 +96,11 @@ void ARAPluginDemoAudioProcessor::changeProgramName (int /*index*/, const juce::
 //==============================================================================
 void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int /*samplesPerBlock*/)
 {
-    if (isARAPlaybackRenderer())
+    if (auto playbackRenderer = getARAPlaybackRenderer())
     {
         audioSourceReaders.clear();
 
-        for (auto playbackRegion : getARAPlaybackRenderer()->getPlaybackRegions())
+        for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
         {
             auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
             if (audioSourceReaders.count (audioSource) == 0)
@@ -119,8 +119,8 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int /*sample
             }
         }
 
-        if (getARAPlaybackRenderer()->getPlaybackRegions().size() > 1)
-            tempBuffer.reset (new juce::AudioBuffer<float> (getTotalNumOutputChannels(), getBlockSize()));
+        if (playbackRenderer->getPlaybackRegions().size() > 1)
+            tempBuffer.reset (new juce::AudioBuffer<float> (getMainBusNumOutputChannels(), getBlockSize()));
         else
             tempBuffer.reset();
     }
@@ -182,7 +182,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     if (isBoundToARA())
     {
         // render our ARA playback regions for this buffer, realtime or offline
-        if (isARAPlaybackRenderer())
+        if (auto playbackRenderer = getARAPlaybackRenderer())
         {
             jassert (buffer.getNumSamples() <= getBlockSize());
             jassert (isNonRealtime() || useBufferedAudioSourceReader);
@@ -193,7 +193,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
             {
                 const auto sampleStart = timeInSamples;
                 const auto sampleEnd = timeInSamples + buffer.getNumSamples();
-                for (auto playbackRegion : getARAPlaybackRenderer()->getPlaybackRegions())
+                for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
                 {
                     // get the audio source for this region and make sure we have an audio source reader for it
                     const auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
@@ -206,7 +206,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                     const auto& reader = readerIt->second;
 
                     // this simplified test code "rendering" only produces audio if sample rate and channel count match
-                    if ((audioSource->getChannelCount() != getTotalNumOutputChannels()) || (audioSource->getSampleRate() != getSampleRate()))
+                    if ((audioSource->getChannelCount() != getMainBusNumOutputChannels()) || (audioSource->getSampleRate() != getSampleRate()))
                         continue;
 
                     // evaluate region borders in song time, calculate sample range to copy in song time
@@ -230,13 +230,9 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 
                     startSongSample = juce::jmax (startSongSample, startAvailableSourceSamples - offsetToPlaybackRegion);
                     endSongSample = juce::jmin (endSongSample, endAvailableSourceSamples - offsetToPlaybackRegion);
-                    if (endSongSample <= startSongSample)
-                        continue;
-
-                    // calculate buffer offsets
-                    const int startInDestBuffer = (int) (startSongSample - sampleStart);
-                    const auto startInSource = startSongSample + offsetToPlaybackRegion;
                     const int numSamplesToRead = (int) (endSongSample - startSongSample);
+                    if (numSamplesToRead <= 0)
+                        continue;
 
                     // if we're using a buffering reader then set the appropriate timeout
                     if (useBufferedAudioSourceReader)
@@ -246,57 +242,45 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                         bufferingReader->setReadTimeout (isNonRealtime() ? 100 : 0);
                     }
 
-                    // read samples
+                    // calculate buffer offsets
                     const auto audioModification = playbackRegion->getAudioModification<ARAPluginDemoAudioModification>();
-                    bool bufferSuccess;
+                    const bool playReversed = audioModification->getReversePlayback();
+                    const int startInBuffer = (int) (startSongSample - sampleStart);
+                    auto startInSource = startSongSample + offsetToPlaybackRegion;
+                    if (playReversed)
+                        startInSource = audioSource->getSampleCount() - startInSource - numSamplesToRead;
+
+                    // read samples:
+                    // first region can write directly into output, later regions need to use local buffer
+                    auto& readBuffer = (didRenderFirstRegion) ? *tempBuffer : buffer;
+                    if (!reader->read (&readBuffer, startInBuffer, numSamplesToRead, startInSource, true, true))
+                    {
+                        success = false;
+                        continue;
+                    }
+
+                    if (playReversed)
+                        readBuffer.reverse (startInBuffer, numSamplesToRead);
+
                     if (didRenderFirstRegion)
                     {
-                        if (audioModification->getReversePlayback())
-                        {
-                            const auto reversedStartInSource = audioSource->getSampleCount() - startInSource - numSamplesToRead;
-                            bufferSuccess = reader->read (tempBuffer.get(), 0, numSamplesToRead, reversedStartInSource, true, true);
-                            tempBuffer->reverse (0, numSamplesToRead);
-                        }
-                        else
-                        {
-                            // target buffer is initialized, so read region samples into local buffer
-                            bufferSuccess = reader->read (tempBuffer.get(), 0, numSamplesToRead, startInSource, true, true);
-                        }
-                        
-                        // if successful, mix local buffer into the output buffer
-                        if (bufferSuccess)
-                            for (int c = 0; c < getTotalNumOutputChannels(); ++c)
-                                buffer.addFrom (c, startInDestBuffer, *tempBuffer, c, 0, numSamplesToRead);
+                        // mix local buffer into the output buffer
+                        for (int c = 0; c < getMainBusNumOutputChannels(); ++c)
+                            buffer.addFrom (c, startInBuffer, *tempBuffer, c, startInBuffer, numSamplesToRead);
                     }
                     else
                     {
-                        if (audioModification->getReversePlayback())
-                        {
-                            const auto reversedStartInSource = audioSource->getSampleCount() - startInSource - numSamplesToRead;
-                            bufferSuccess = reader->read (&buffer, 0, numSamplesToRead, reversedStartInSource, true, true);
-                            buffer.reverse (0, numSamplesToRead);
-                        }
-                        else
-                        {
-                            // this is the first region to hit the buffer, so initialize its samples
-                            bufferSuccess = reader->read (&buffer, startInDestBuffer, numSamplesToRead, startInSource, true, true);
-                        }
+                        // clear any excess at start or end of the region
+                        if (startInBuffer != 0)
+                            buffer.clear (0, startInBuffer);
 
-                        // if successful, clear any excess at start or end of the region and mark successful buffer initialization
-                        if (bufferSuccess)
-                        {
-                            if (startInDestBuffer != 0)
-                                buffer.clear (0, startInDestBuffer);
+                        const int endInBuffer = startInBuffer + numSamplesToRead;
+                        const int remainingSamples = buffer.getNumSamples() - endInBuffer;
+                        if (remainingSamples != 0)
+                            buffer.clear (endInBuffer, remainingSamples);
 
-                            int samplesWritten = startInDestBuffer + numSamplesToRead;
-                            int remainingSamples = buffer.getNumSamples() - samplesWritten;
-                            if (remainingSamples != 0)
-                                buffer.clear (samplesWritten, remainingSamples);
-
-                            didRenderFirstRegion = true;
-                        }
+                        didRenderFirstRegion = true;
                     }
-                    success &= bufferSuccess;
                 }
             }
 
@@ -308,7 +292,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
         // render our ARA editing preview only if in real time
         if (isARAEditorRenderer() && ! isNonRealtime())
         {
-            // no rendering to do here since this sample plug-in does not provide editor rendering
+            // no rendering to do here since this sample plug-in does not provide editor rendering -
             // otherwise, we'd add our signal to the buffer here.
         }
     }
@@ -323,7 +307,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
 }
 
 #if JucePlugin_Enable_ARA
-bool ARAPluginDemoAudioProcessor::didProcessBlockSucceed()
+bool ARAPluginDemoAudioProcessor::didProcessBlockSucceed() const noexcept
 {
     // You can use this function to inform the calling code that the
     // most recent processBlock call didn't output samples as expected.

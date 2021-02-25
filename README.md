@@ -1,9 +1,9 @@
 # About JUCE_ARA
 
-This repository is an experimental fork of the [JUCE develop branch](https://github.com/juce-framework/JUCE)
-with additions that enable it to generate [ARA plugins](https://www.celemony.com/en/service1/about-celemony/technologies)
-in the VST3 or AudioUnit format.
+This repository is an experimental fork of the [JUCE develop branch](https://github.com/juce-framework/JUCE) with additions that enable it to generate [ARA plug-ins](https://www.celemony.com/en/service1/about-celemony/technologies) in the VST3 or AudioUnit format.
 It is currently being maintained by [Celemony](https://www.celemony.com) and [SoundRadix](https://www.soundradix.com), with the goal of being picked up eventually for main line [JUCE](https://www.juce.com) once the code is stable.
+
+There are two active branches: develop and condensed. They are in sync code-wise, but have different history: while develop is constantly progressing and JUCE changes are merged in, condensed is rebased regularly to always show the shortest path from the original JUCE release to the current state of JUCE_ARA.
 
 Note that Celemony is not endorsing the use of JUCE by providing this fork. JUCE_ARA is a fairly thin adapter to integrate ARA into JUCE, it does not provide any features that would be relevant when using ARA with a different framework. Consequently, the decision whether or not to use JUCE for any given project should be made independently of JUCE_ARA.
 

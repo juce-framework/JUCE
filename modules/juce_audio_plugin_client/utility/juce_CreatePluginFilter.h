@@ -30,6 +30,13 @@
 */
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
+#if JucePlugin_Enable_ARA
+ /** Somewhere in the codebase of your plugin, you need to implement this function
+     by simply returning juce::ARADocumentController::createARAFactory<YourCustomSubclassOfARADocumentController>()
+ */
+ const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory();
+#endif
+
 namespace juce
 {
 

@@ -1866,7 +1866,7 @@ private:
     //---from ARA::IMainFactory-------
     const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
     {
-        return ARA::PlugIn::DocumentController::getARAFactory();
+        return createARAFactory();
     }
     static const FUID iid;
 
@@ -3138,7 +3138,7 @@ private:
 
     const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
     {
-        return ARA::PlugIn::DocumentController::getARAFactory();
+        return createARAFactory();
     }
 
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentController (ARA::ARADocumentControllerRef /*controllerRef*/) SMTG_OVERRIDE

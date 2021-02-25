@@ -1,14 +1,11 @@
 # JUCE_ARA
 
-This repository is an experimental fork of the [JUCE develop branch](https://github.com/juce-framework/JUCE)
-with additions that enable it to generate [ARA plugins](https://www.celemony.com/en/service1/about-celemony/technologies)
-in the VST3 or AudioUnit format.
+This repository is an experimental fork of the [JUCE develop branch](https://github.com/juce-framework/JUCE) with additions that enable it to generate [ARA plugins](https://www.celemony.com/en/service1/about-celemony/technologies) in the VST3 or AudioUnit format.
 It is currently being maintained by [Celemony](https://www.celemony.com) and [SoundRadix](https://www.soundradix.com), with the goal of being picked up eventually for main line [JUCE](https://www.juce.com) once the code is stable.
 
 Note that Celemony is not endorsing the use of JUCE by providing this fork. JUCE_ARA is a fairly thin adapter to integrate ARA into JUCE, it does not provide any features that would be relevant when using ARA with a different framework. Consequently, the decision whether or not to use JUCE for any given project should be made independently of JUCE_ARA.
 
 In order to use this branch you'll need access to the [ARA SDK](http://www.celemony.com/en/service1/about-celemony/technologies) - if you're a developer and would like access to the latest ARA SDK release, send an email to [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
-
 You'll also need to use our ARA-enabled build of the Projucer that's part of this fork.
 For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
@@ -25,8 +22,8 @@ your plugin - by default the `juce::ARADocumentController` will create the ARA m
 but your plugin should override the `doCreate` functions in order to create model objects that suit your purpose. 
 
 For example, in the 
-[`ARAPluginDemoDocumentController`](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/ARAPluginDemoDocumentController.h)
-we override `doCreateAudioModification` in order to return a [custom `juce::ARAAudioModification` subclass](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/ARAPluginDemoAudioModification.h). 
+[`ARAPluginDemoDocumentController`](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/ARAPluginDemoDocumentController.h)
+we override `doCreateAudioModification` in order to return a [custom `juce::ARAAudioModification` subclass](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/ARAPluginDemoAudioModification.h). 
 
 ### ARA Model Objects
 
@@ -100,7 +97,7 @@ private:
 };
 ```
 
-See the [ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/PlaybackRegionView.h)
+See the [ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/PlaybackRegionView.h)
 for an example of several `Listener` implementations in action. 
 
 ### ARA PlugIn Instance Roles
@@ -229,7 +226,7 @@ std::vector<float> readPlaybackRegionSamples (ARAPlaybackRegion* playbackRegion)
 ```
 
 Once created, the our readers can be treated like any other `AudioFormatReader` - the 
-[ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/PlaybackRegionView.h)
+[ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/PlaybackRegionView.h)
 takes advantage of this by giving a `juce::AudioThubnail` instance an `ARAPlaybackRegionReader` to draw a
 visualization of playback region waveform. 
 
@@ -276,7 +273,7 @@ With ARA enabled we can edit various `ARAFactory` properties such as available c
 <img src="https://i.imgur.com/mJoXIxG.png"/>
 
 This should be enough to generate an empty ARA plugin that will appear in an ARA host, such as Studio One or SONAR. 
-For a more complete example of an ARA plugin see the [ARA Plugin Demo](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo) checked in to this repository. 
+For a more complete example of an ARA plugin see the [ARA Plugin Demo](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo) checked in to this repository. 
 
 ## Further Additions
 
