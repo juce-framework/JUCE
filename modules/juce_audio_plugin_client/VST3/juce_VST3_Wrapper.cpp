@@ -767,7 +767,7 @@ public:
     {
         if (auto* pluginInstance = getPluginInstance())
             if (auto* araExtension = dynamic_cast<AudioProcessorARAExtension*> (pluginInstance))
-                return (Steinberg::TBool) araExtension->isARAEditorView();
+                return (Steinberg::TBool) araExtension->isEditorView();
         return (Steinberg::TBool) false;
     }
 

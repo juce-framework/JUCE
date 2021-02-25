@@ -108,7 +108,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments")
 
 ARA::PlugIn::Document* ARADocumentController::doCreateDocument() noexcept
 {
-    return new ARADocument (static_cast<ARADocumentController*> (this));
+    return new ARADocument (this);
 }
 
 void ARADocumentController::willBeginEditing() noexcept
@@ -358,7 +358,7 @@ namespace ModelUpdateControllerProgressAdapter
 void ARADocumentController::timerCallback()
 {
     if (! internalAnalysisProgressIsSynced.test_and_set (std::memory_order_release))
-        for (auto& audioSource : getDocument()->getAudioSources<ARAAudioSource>())
+        for (auto& audioSource : getDocument()->getAudioSources())
             audioSource->internalAnalysisProgressTracker.notifyProgress (ModelUpdateControllerProgressAdapter::get(), reinterpret_cast<ARA::ARAAudioSourceHostRef> (audioSource));
 }
 

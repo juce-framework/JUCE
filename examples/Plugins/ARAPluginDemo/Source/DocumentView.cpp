@@ -229,7 +229,7 @@ void DocumentView::rebuildRegionSequenceViewContainers()
     }
     else    // show all RegionSequences of Document...
     {
-        for (auto regionSequence : getDocument()->getRegionSequences<juce::ARARegionSequence>())
+        for (auto regionSequence : getDocument()->getRegionSequences())
             if (! ARA::contains (getARAEditorView()->getHiddenRegionSequences(), regionSequence))
                 regionSequenceViewContainers.add (new RegionSequenceViewContainer (*this, regionSequence));
     }
@@ -240,7 +240,7 @@ void DocumentView::rebuildRegionSequenceViewContainers()
     resized();
 
     // update region header tooltips
-    const auto total = getDocument()->getRegionSequences<juce::ARARegionSequence>().size();
+    const auto total = getDocument()->getRegionSequences().size();
     const auto hidden = getARAEditorView()->getHiddenRegionSequences().size();
     juce::String s ("Showing " + juce::String (regionSequenceViewContainers.size()));
     if (showOnlySelectedRegionSequences)

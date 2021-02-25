@@ -62,8 +62,8 @@ bool ARAPluginDemoAudioProcessor::isMidiEffect() const
 double ARAPluginDemoAudioProcessor::getTailLengthSeconds() const
 {
     double tail{};
-    if (auto playbackRenderer = getARAPlaybackRenderer())
-        for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions<juce::ARAPlaybackRegion>())
+    if (auto playbackRenderer = getPlaybackRenderer())
+        for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
             tail = juce::jmax (tail, playbackRegion->getTailTime());
 
     return tail;
@@ -102,7 +102,7 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int /*sample
 
         for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
         {
-            auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
+            auto audioSource = playbackRegion->getAudioModification()->getAudioSource();
             if (audioSourceReaders.count (audioSource) == 0)
             {
                 juce::AudioFormatReader* sourceReader = new juce::ARAAudioSourceReader (audioSource);
@@ -128,7 +128,7 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int /*sample
 
 void ARAPluginDemoAudioProcessor::releaseResources()
 {
-    if (isARAPlaybackRenderer())
+    if (isPlaybackRenderer())
     {
         audioSourceReaders.clear();
         tempBuffer = nullptr;
@@ -196,7 +196,7 @@ void ARAPluginDemoAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
                 for (const auto& playbackRegion : playbackRenderer->getPlaybackRegions())
                 {
                     // get the audio source for this region and make sure we have an audio source reader for it
-                    const auto audioSource = playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>();
+                    const auto audioSource = playbackRegion->getAudioModification()->getAudioSource();
                     const auto readerIt = audioSourceReaders.find (audioSource);
                     if (readerIt == audioSourceReaders.end())
                     {

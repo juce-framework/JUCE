@@ -15,9 +15,9 @@ PlaybackRegionView::PlaybackRegionView (RegionSequenceViewContainer& viewContain
     documentView.getARAEditorView()->addListener (this);
     onNewSelection (documentView.getARAEditorView()->getViewSelection());
 
-    playbackRegion->getRegionSequence()->getDocument<juce::ARADocument>()->addListener (this);
-    playbackRegion->getAudioModification<juce::ARAAudioModification>()->addListener (this);
-    playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>()->addListener (this);
+    playbackRegion->getRegionSequence()->getDocument()->addListener (this);
+    playbackRegion->getAudioModification()->addListener (this);
+    playbackRegion->getAudioModification()->getAudioSource()->addListener (this);
     playbackRegion->addListener (this);
 
     recreatePlaybackRegionReader();
@@ -28,9 +28,9 @@ PlaybackRegionView::~PlaybackRegionView()
     documentView.getARAEditorView()->removeListener (this);
 
     playbackRegion->removeListener (this);
-    playbackRegion->getAudioModification<juce::ARAAudioModification>()->removeListener (this);
-    playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>()->removeListener (this);
-    playbackRegion->getRegionSequence()->getDocument<juce::ARADocument>()->removeListener (this);
+    playbackRegion->getAudioModification()->removeListener (this);
+    playbackRegion->getAudioModification()->getAudioSource()->removeListener (this);
+    playbackRegion->getRegionSequence()->getDocument()->removeListener (this);
 
     destroyPlaybackRegionReader();
     audioThumb.removeChangeListener (this);
@@ -44,8 +44,8 @@ void PlaybackRegionView::mouseDoubleClick (const juce::MouseEvent& /*event*/)
 
     // send a content change notification for the modification and all associated playback regions
     audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
-    for (auto araPlaybackRegion : audioModification->getPlaybackRegions<juce::ARAPlaybackRegion>())
-        araPlaybackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
+    for (auto playbackRegion : audioModification->getPlaybackRegions())
+        playbackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
 }
 
 void PlaybackRegionView::updateBounds()

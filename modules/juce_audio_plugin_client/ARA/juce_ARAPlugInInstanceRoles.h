@@ -19,6 +19,12 @@ class JUCE_API  ARAPlaybackRenderer   : public ARA::PlugIn::PlaybackRenderer
 public:
     using ARA::PlugIn::PlaybackRenderer::PlaybackRenderer;
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::PlaybackRenderer::getDocumentController<DocumentController_t>(); }
+    template <typename PlaybackRegion_t = ARAPlaybackRegion>
+    std::vector<PlaybackRegion_t*> const& getPlaybackRegions() const noexcept { return ARA::PlugIn::PlaybackRenderer::getPlaybackRegions<PlaybackRegion_t>(); }
+
 // TODO JUCE_ARA Should we keep this here for subclasses? There is also didBindToARA(), which
 //               can provide this if needed. We could get rid of both renderer subclasses otherwise,
 //               in fact we could even go further and hide the instance roles entirely behind
@@ -52,6 +58,14 @@ class JUCE_API  ARAEditorRenderer     : public ARA::PlugIn::EditorRenderer
 public:
     using ARA::PlugIn::EditorRenderer::EditorRenderer;
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::EditorRenderer::getDocumentController<DocumentController_t>(); }
+    template <typename PlaybackRegion_t = ARAPlaybackRegion>
+    std::vector<PlaybackRegion_t*> const& getPlaybackRegions() const noexcept { return ARA::PlugIn::EditorRenderer::getPlaybackRegions<PlaybackRegion_t>(); }
+    template <typename RegionSequence_t = ARARegionSequence>
+    std::vector<RegionSequence_t*> const& getRegionSequences() const noexcept { return ARA::PlugIn::EditorRenderer::getRegionSequences<RegionSequence_t>(); }
+    
     void setAudioProcessor (AudioProcessor* processor) noexcept { audioProcessor = processor; }
     AudioProcessor* getAudioProcessor() const noexcept { return audioProcessor; }
 
@@ -74,6 +88,12 @@ class JUCE_API  ARAEditorView     : public ARA::PlugIn::EditorView
 {
 public:
     using ARA::PlugIn::EditorView::EditorView;
+
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::EditorView::getDocumentController<DocumentController_t>(); }
+    template <typename RegionSequence_t = ARARegionSequence>
+    std::vector<RegionSequence_t*> const& getHiddenRegionSequences() const noexcept { return ARA::PlugIn::EditorView::getHiddenRegionSequences<RegionSequence_t>(); }
 
     // these must be called by subclass implementations to properly to forward listener notifications
     void doNotifySelection (const ARA::PlugIn::ViewSelection* currentSelection) noexcept override;
