@@ -713,7 +713,10 @@ public:
                             const ScopedLock sl (juceFilter->getCallbackLock());
 
                             juceFilter->setNonRealtime (shouldBeRealtime);
-                            juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
+                            // TODO JUCE_ARA added test if prepared since otherwise this may lead to
+                            //               premature preparation (similar issues in VST3_Wrapper)
+                            if (prepared)
+                                juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
                         }
                     }
 
