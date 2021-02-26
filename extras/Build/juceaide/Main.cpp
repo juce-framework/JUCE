@@ -495,7 +495,7 @@ int main (int argc, char** argv)
         std::transform (argv, argv + argc, std::back_inserter (arguments), getString);
 
         juce::ArgumentList argumentList { arguments.front(),
-                                          juce::StringArray (arguments.data() + 1, arguments.size() - 1) };
+                                          juce::StringArray (arguments.data() + 1, (int) arguments.size() - 1) };
 
         using Fn = typename std::add_lvalue_reference<decltype (writeBinaryData)>::type;
 

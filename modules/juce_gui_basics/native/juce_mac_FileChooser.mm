@@ -377,10 +377,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Native)
 };
 
-FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                                     FilePreviewComponent* preview)
+std::unique_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+                                                                     FilePreviewComponent* preview)
 {
-    return new FileChooser::Native (owner, flags, preview);
+    return std::make_unique<FileChooser::Native> (owner, flags, preview);
 }
 
 bool FileChooser::isPlatformDialogAvailable()

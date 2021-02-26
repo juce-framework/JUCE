@@ -379,10 +379,10 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                                     FilePreviewComponent*)
+std::unique_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+                                                                     FilePreviewComponent*)
 {
-    return new FileChooser::Native (owner, flags);
+    return std::make_unique<FileChooser::Native> (owner, flags);
 }
 
 #if JUCE_DEPRECATION_IGNORED
