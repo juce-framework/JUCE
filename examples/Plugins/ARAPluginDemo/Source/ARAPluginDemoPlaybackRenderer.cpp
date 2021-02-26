@@ -2,11 +2,12 @@
 #include "ARAPluginDemoAudioModification.h"
 
 //==============================================================================
-void PluginDemoPlaybackRenderer::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans)
+void PluginDemoPlaybackRenderer::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans, bool alwaysNonRealtime)
 {
     sampleRate = rate;
     maximumSamplesPerBlock = maxSamplesPerBlock;
     numChannels = numChans;
+    useBufferedAudioSourceReader = ! alwaysNonRealtime;
 
     audioSourceReaders.clear();
 

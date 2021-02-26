@@ -137,19 +137,15 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
 
 //==============================================================================
 
-ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRenderer> playbackRenderer,
-                                                  ARAPlaybackRegion* playbackRegion)
-    : ARAPlaybackRegionReader (std::move (playbackRenderer),
-                               playbackRegion->getAudioModification()->getAudioSource()->getSampleRate(),
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (ARAPlaybackRegion* playbackRegion)
+    : ARAPlaybackRegionReader (playbackRegion->getAudioModification()->getAudioSource()->getSampleRate(),
                                playbackRegion->getAudioModification()->getAudioSource()->getChannelCount(),
                                { playbackRegion })
 {}
 
-ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRenderer> renderer,
-                                                  double rate, int numChans,
+ARAPlaybackRegionReader::ARAPlaybackRegionReader (double rate, int numChans,
                                                   std::vector<ARAPlaybackRegion*> const& playbackRegions)
-    : AudioFormatReader (nullptr, "ARAPlaybackRegionReader"),
-      playbackRenderer (std::move (renderer))
+    : AudioFormatReader (nullptr, "ARAPlaybackRegionReader")
 {
     // we're only providing the minimal set of meaningful values, since the ARA renderer
     // should only look at the time position and the playing state, and read any related
@@ -162,19 +158,16 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRen
     bitsPerSample = 32;
     usesFloatingPointData = true;
 
-    if (playbackRegions.empty())
-    {
-        startInSamples = 0;
-        lengthInSamples = 0;
-    }
-    else
+    ARADocumentController* documentController = (! playbackRegions.empty()) ? playbackRegions.front()->getDocumentController() : nullptr;
+    playbackRenderer.reset (documentController ? static_cast<ARAPlaybackRenderer*> (documentController->doCreatePlaybackRenderer()) : nullptr);
+    if (playbackRenderer)
     {
         double regionsStartTime = std::numeric_limits<double>::max();
         double regionsEndTime = std::numeric_limits<double>::lowest();
 
         for (const auto& playbackRegion : playbackRegions)
         {
-            jassert (playbackRegion->getDocumentController() == playbackRenderer->getDocumentController());
+            jassert (playbackRegion->getDocumentController() == documentController);
             auto playbackRegionTimeRange = playbackRegion->getTimeRange (true);
             regionsStartTime = jmin (regionsStartTime, playbackRegionTimeRange.getStart());
             regionsEndTime = jmax (regionsEndTime, playbackRegionTimeRange.getEnd());
@@ -185,9 +178,14 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRen
 
         startInSamples = (int64) (regionsStartTime * sampleRate + 0.5);
         lengthInSamples = (int64) ((regionsEndTime - regionsStartTime) * sampleRate + 0.5);
-    }
 
-    playbackRenderer->prepareToPlay (rate, maximumBlockSize, numChans);
+        playbackRenderer->prepareToPlay (rate, maximumBlockSize, numChans, true);
+    }
+    else
+    {
+        startInSamples = 0;
+        lengthInSamples = 0;
+    }
 }
 
 ARAPlaybackRegionReader::~ARAPlaybackRegionReader()

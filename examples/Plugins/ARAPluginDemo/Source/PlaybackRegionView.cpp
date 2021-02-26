@@ -201,7 +201,7 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
     destroyPlaybackRegionReader();
 
     // Create a playback region reader for our region for our audio thumb
-    playbackRegionReader = new juce::ARAPlaybackRegionReader (std::make_unique<PluginDemoPlaybackRenderer> (playbackRegion->getDocumentController(), false), playbackRegion);
+    playbackRegionReader = new juce::ARAPlaybackRegionReader (playbackRegion);
     audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegionReader));
 
     // TODO JUCE_ARA see juce_AudioThumbnail.cpp, line 122: AudioThumbnail handles zero-length sources

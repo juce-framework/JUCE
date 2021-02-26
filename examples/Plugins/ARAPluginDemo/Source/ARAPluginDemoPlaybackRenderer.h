@@ -8,11 +8,10 @@ class PluginDemoPlaybackRenderer : public juce::ARAPlaybackRenderer
 {
 public:
     //==============================================================================
-    PluginDemoPlaybackRenderer(juce::ARADocumentController* documentController, bool useBuffering = true)
-        : juce::ARAPlaybackRenderer(documentController), useBufferedAudioSourceReader (useBuffering) {}
+    using juce::ARAPlaybackRenderer::ARAPlaybackRenderer;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels) override;
+    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels, bool alwaysNonRealtime) override;
     void releaseResources() override;
 
     //==============================================================================
@@ -44,7 +43,7 @@ private:
     // temp buffers to use for summing signals if rendering multiple regions
     std::unique_ptr<juce::AudioBuffer<float>> tempBuffer;
 
-    const bool useBufferedAudioSourceReader;
+    bool useBufferedAudioSourceReader { true };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PluginDemoPlaybackRenderer)
 };
