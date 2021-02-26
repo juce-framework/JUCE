@@ -24,7 +24,7 @@ public:
         @param alwaysNonRealtime        True if this renderer is never used in realtime (e.g. if providing data for views only).
     */
     // TODO JUCE_ARA if adding 64 bit support, we need to add bool doublePrecisionProcessing here.
-    virtual void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels, bool alwaysNonRealtime = false) {}
+    virtual void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels, bool alwaysNonRealtime = false) { ignoreUnused (sampleRate, maximumSamplesPerBlock, numChannels, alwaysNonRealtime); }
 
     /** Frees render ressources allocated in prepareToPlay(). */
     virtual void releaseResources() {}
@@ -109,7 +109,7 @@ public:
     // Per default, editor renderers will just let the signal pass through unaltered.
     // If you're overriding this to implement actual audio preview, remember to test
     // isNonRealtime of the process context - typically preview is limited to realtime!
-    bool processBlock (AudioBuffer<float>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override { return true; }
+    bool processBlock (AudioBuffer<float>& /*buffer*/, bool /*isNonRealtime*/, const AudioPlayHead::CurrentPositionInfo& /*positionInfo*/) noexcept override { return true; }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)

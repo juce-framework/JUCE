@@ -44,8 +44,8 @@ void PlaybackRegionView::mouseDoubleClick (const juce::MouseEvent& /*event*/)
 
     // send a content change notification for the modification and all associated playback regions
     audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
-    for (auto playbackRegion : audioModification->getPlaybackRegions())
-        playbackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
+    for (auto region : audioModification->getPlaybackRegions())
+        region->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
 }
 
 void PlaybackRegionView::updateBounds()
