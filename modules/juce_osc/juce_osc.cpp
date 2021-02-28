@@ -42,3 +42,5 @@
 #include "osc/juce_OSCBundle.cpp"
 #include "osc/juce_OSCReceiver.cpp"
 #include "osc/juce_OSCSender.cpp"
+#include "osc/juce_OSCInputStream.cpp"
+#include "osc/juce_OSCOutputStream.cpp"
