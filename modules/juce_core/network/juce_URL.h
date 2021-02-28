@@ -298,6 +298,12 @@ public:
     */
     using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
 
+    /** Set the connection timeout when using the functions that internally use the createInputStream function without providing this parameter in their interface, like readEntireTextStream() */
+    void setConnectionTimeOutMs (int timeOutMs)
+    {
+        connectionTimeOutMs = timeOutMs;
+    }
+    
     /** Attempts to open a stream that can read from this URL.
 
         Note that this method will block until the first byte of data has been received or an
@@ -573,6 +579,7 @@ private:
     void addParameter (const String&, const String&);
     void createHeadersAndPostData (String&, MemoryBlock&) const;
     URL withUpload (Upload*) const;
+    int connectionTimeOutMs = 0;
 
     JUCE_LEAK_DETECTOR (URL)
 };
