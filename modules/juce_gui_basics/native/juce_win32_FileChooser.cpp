@@ -758,12 +758,16 @@ public:
 
     void runModally() override
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         enterModalState (true);
         nativeFileChooser->open (false);
         exitModalState (nativeFileChooser->results.size() > 0 ? 1 : 0);
         nativeFileChooser->cancel();
 
         owner.finished (nativeFileChooser->results);
+       #else
+        jassertfalse;
+       #endif
     }
 
     bool canModalEventBeSentToComponent (const Component* targetComponent) override

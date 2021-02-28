@@ -412,14 +412,26 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
         DEPENDS "${defs_file}"
         VERBATIM)
 
+    execute_process(COMMAND xcode-select -p
+        OUTPUT_VARIABLE xcode_developer_path
+        RESULT_VARIABLE result_variable)
+
+    if(result_variable)
+        message(FATAL_ERROR
+            "Failed to locate an active developer directory. "
+            "Run 'xcode-select -s <path to Xcode>' before reconfiguring.")
+    endif()
+
+    string(STRIP "${xcode_developer_path}" xcode_developer_path)
+
     add_custom_command(OUTPUT "${au_rez_output}"
         COMMAND "${JUCE_XCRUN}" Rez
             -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64"
             -I "${secret_au_resource_dir}"
             -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
-            -I "/Applications/Xcode.app/Contents/Developer/Extras/CoreAudio/AudioUnits/AUPublic/AUBase"
-            -I "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
-            -isysroot "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+            -I "${xcode_developer_path}/Extras/CoreAudio/AudioUnits/AUPublic/AUBase"
+            -I "${xcode_developer_path}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers"
+            -isysroot "${xcode_developer_path}/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
             "${au_rez_sources}"
             -useDF
             -o "${au_rez_output}"
@@ -862,6 +874,11 @@ function(juce_add_binary_data target)
     target_include_directories(${target} INTERFACE ${juce_binary_data_folder})
     target_compile_features(${target} PRIVATE cxx_std_11)
 
+    # This fixes an issue where Xcode is unable to find binary data during archive.
+    if(CMAKE_GENERATOR STREQUAL "Xcode")
+        set_target_properties(${target} PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "./")
+    endif()
+
     if(JUCE_ARG_HEADER_NAME STREQUAL "BinaryData.h")
         target_compile_definitions(${target} INTERFACE JUCE_TARGET_HAS_BINARY_DATA=1)
     endif()
@@ -1137,6 +1154,26 @@ function(_juce_configure_bundle source_target dest_target)
         set_target_properties(${dest_target} PROPERTIES
             XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER
                 $<TARGET_PROPERTY:${source_target},JUCE_BUNDLE_ID>)
+    endif()
+
+    if(CMAKE_GENERATOR STREQUAL "Xcode")
+        get_target_property(product_name ${source_target} JUCE_PRODUCT_NAME)
+
+        set(install_path "$(LOCAL_APPS_DIR)")
+
+        if(juce_kind_string STREQUAL "AUv3 AppExtension")
+            set(install_path "${install_path}/${product_name}.app")
+
+            if(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+                set(install_path "${install_path}/PlugIns")
+            else()
+                set(install_path "${install_path}/Contents/PlugIns")
+            endif()
+        endif()
+
+        set_target_properties(${dest_target} PROPERTIES
+            XCODE_ATTRIBUTE_INSTALL_PATH "${install_path}"
+            XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
     endif()
 endfunction()
 

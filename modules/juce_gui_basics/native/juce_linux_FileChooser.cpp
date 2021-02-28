@@ -66,6 +66,7 @@ public:
 
     void runModally() override
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         child.start (args, ChildProcess::wantStdOut);
 
         while (child.isRunning())
@@ -73,6 +74,9 @@ public:
                 break;
 
         finish (false);
+       #else
+        jassertfalse;
+       #endif
     }
 
     void launch() override

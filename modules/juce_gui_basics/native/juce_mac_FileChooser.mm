@@ -183,6 +183,7 @@ public:
 
     void runModally() override
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         ensurePanelSafe();
 
         std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
@@ -193,6 +194,9 @@ public:
         jassert (panel != nil);
         auto result = [panel runModal];
         finished (result);
+       #else
+        jassertfalse;
+       #endif
     }
 
     bool canModalEventBeSentToComponent (const Component* targetComponent) override
