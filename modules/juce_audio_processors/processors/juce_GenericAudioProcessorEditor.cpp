@@ -324,13 +324,13 @@ public:
         else
             slider.setRange (0.0, 1.0);
 
+        slider.valueFromTextFunction =
+            [&param] (const String& s) { return param.getValueForText (s); };
+        slider.textFromValueFunction =
+            [=, &param] (double x) { return param.getText (x, slider.getNumDecimalPlacesToDisplay()); };
+
         slider.setScrollWheelEnabled (false);
         addAndMakeVisible (slider);
-
-        valueLabel.setColour (Label::outlineColourId, slider.findColour (Slider::textBoxOutlineColourId));
-        valueLabel.setBorderSize ({ 1, 1, 1, 1 });
-        valueLabel.setJustificationType (Justification::centred);
-        addAndMakeVisible (valueLabel);
 
         // Set the initial value.
         handleNewParameterValue();
@@ -346,24 +346,16 @@ public:
     {
         auto area = getLocalBounds().reduced (0, 10);
 
-        valueLabel.setBounds (area.removeFromRight (80));
-
         area.removeFromLeft (6);
         slider.setBounds (area);
     }
 
 private:
-    void updateTextDisplay()
-    {
-        valueLabel.setText (getParameter().getCurrentValueAsText(), dontSendNotification);
-    }
-
     void handleNewParameterValue() override
     {
         if (! isDragging)
         {
             slider.setValue (getParameter().getValue(), dontSendNotification);
-            updateTextDisplay();
         }
     }
 
@@ -377,7 +369,6 @@ private:
                 getParameter().beginChangeGesture();
 
             getParameter().setValueNotifyingHost ((float) slider.getValue());
-            updateTextDisplay();
 
             if (! isDragging)
                 getParameter().endChangeGesture();
@@ -396,8 +387,7 @@ private:
         getParameter().endChangeGesture();
     }
 
-    Slider slider { Slider::LinearHorizontal, Slider::TextEntryBoxPosition::NoTextBox };
-    Label valueLabel;
+    Slider slider { Slider::LinearHorizontal, Slider::TextEntryBoxPosition::TextBoxRight };
     bool isDragging = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderParameterComponent)
