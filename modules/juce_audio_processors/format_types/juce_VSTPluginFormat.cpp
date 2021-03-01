@@ -83,9 +83,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 //==============================================================================
 namespace juce
 {
-#if JUCE_WINDOWS
- extern void setThreadDPIAwarenessForWindow (HWND);
-#endif
 
 //==============================================================================
 namespace
@@ -2865,7 +2862,7 @@ public:
            #if JUCE_WINDOWS
             if (pluginHWND != 0)
             {
-                setThreadDPIAwarenessForWindow (pluginHWND);
+                ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
 
                 MoveWindow (pluginHWND, pos.getX(), pos.getY(),
                             roundToInt (getWidth()  * nativeScaleFactor),
@@ -3128,7 +3125,7 @@ private:
                 // very dodgy logic to decide which size is right.
                 if (std::abs (rw - w) > 350 || std::abs (rh - h) > 350)
                 {
-                    setThreadDPIAwarenessForWindow (pluginHWND);
+                    ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
 
                     SetWindowPos (pluginHWND, 0,
                                   0, 0, roundToInt (rw * nativeScaleFactor), roundToInt (rh * nativeScaleFactor),

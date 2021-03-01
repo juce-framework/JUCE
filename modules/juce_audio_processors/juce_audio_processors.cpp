@@ -35,6 +35,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
+#define JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER 1
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
