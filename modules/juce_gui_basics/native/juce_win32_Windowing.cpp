@@ -27,7 +27,7 @@
  #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
 #endif
 
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE && JUCE_MODULE_AVAILABLE_juce_gui_extra
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
  #include <juce_gui_extra/embedding/juce_ScopedDPIAwarenessDisabler.h>
 #endif
 
@@ -470,7 +470,7 @@ static double getGlobalDPI()
 }
 
 //==============================================================================
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE && JUCE_MODULE_AVAILABLE_juce_gui_extra
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
  ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
  {
      if (! isPerMonitorDPIAwareThread())

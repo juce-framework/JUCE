@@ -277,9 +277,9 @@ PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& 
         // "Plugins" menu
         PopupMenu pluginsMenu;
         addPluginsToMenu (pluginsMenu);
-        menu.addSubMenu ("Create plugin", pluginsMenu);
+        menu.addSubMenu ("Create Plug-in", pluginsMenu);
         menu.addSeparator();
-        menu.addItem (250, "Delete all plugins");
+        menu.addItem (250, "Delete All Plug-ins");
     }
     else if (topLevelMenuIndex == 2)
     {
@@ -288,16 +288,19 @@ PopupMenu MainHostWindow::getMenuForIndex (int topLevelMenuIndex, const String& 
         menu.addCommandItem (&getCommandManager(), CommandIDs::showPluginListEditor);
 
         PopupMenu sortTypeMenu;
-        sortTypeMenu.addItem (200, "List plugins in default order",      true, pluginSortMethod == KnownPluginList::defaultOrder);
-        sortTypeMenu.addItem (201, "List plugins in alphabetical order", true, pluginSortMethod == KnownPluginList::sortAlphabetically);
-        sortTypeMenu.addItem (202, "List plugins by category",           true, pluginSortMethod == KnownPluginList::sortByCategory);
-        sortTypeMenu.addItem (203, "List plugins by manufacturer",       true, pluginSortMethod == KnownPluginList::sortByManufacturer);
-        sortTypeMenu.addItem (204, "List plugins based on the directory structure", true, pluginSortMethod == KnownPluginList::sortByFileSystemLocation);
-        menu.addSubMenu ("Plugin menu type", sortTypeMenu);
+        sortTypeMenu.addItem (200, "List Plug-ins in Default Order",      true, pluginSortMethod == KnownPluginList::defaultOrder);
+        sortTypeMenu.addItem (201, "List Plug-ins in Alphabetical Order", true, pluginSortMethod == KnownPluginList::sortAlphabetically);
+        sortTypeMenu.addItem (202, "List Plug-ins by Category",           true, pluginSortMethod == KnownPluginList::sortByCategory);
+        sortTypeMenu.addItem (203, "List Plug-ins by Manufacturer",       true, pluginSortMethod == KnownPluginList::sortByManufacturer);
+        sortTypeMenu.addItem (204, "List Plug-ins Based on the Directory Structure", true, pluginSortMethod == KnownPluginList::sortByFileSystemLocation);
+        menu.addSubMenu ("Plug-in Menu Type", sortTypeMenu);
 
         menu.addSeparator();
         menu.addCommandItem (&getCommandManager(), CommandIDs::showAudioSettings);
         menu.addCommandItem (&getCommandManager(), CommandIDs::toggleDoublePrecision);
+
+        if (autoScaleOptionAvailable)
+            menu.addCommandItem (&getCommandManager(), CommandIDs::autoScalePluginWindows);
 
         menu.addSeparator();
         menu.addCommandItem (&getCommandManager(), CommandIDs::aboutBox);
@@ -414,7 +417,8 @@ void MainHostWindow::getAllCommands (Array<CommandID>& commands)
                               CommandIDs::showAudioSettings,
                               CommandIDs::toggleDoublePrecision,
                               CommandIDs::aboutBox,
-                              CommandIDs::allWindowsForward
+                              CommandIDs::allWindowsForward,
+                              CommandIDs::autoScalePluginWindows
                             };
 
     commands.addArray (ids, numElementsInArray (ids));
@@ -451,12 +455,12 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
    #endif
 
     case CommandIDs::showPluginListEditor:
-        result.setInfo ("Edit the list of available plug-Ins...", String(), category, 0);
+        result.setInfo ("Edit the List of Available Plug-ins...", {}, category, 0);
         result.addDefaultKeypress ('p', ModifierKeys::commandModifier);
         break;
 
     case CommandIDs::showAudioSettings:
-        result.setInfo ("Change the audio device settings", String(), category, 0);
+        result.setInfo ("Change the Audio Device Settings", {}, category, 0);
         result.addDefaultKeypress ('a', ModifierKeys::commandModifier);
         break;
 
@@ -465,12 +469,16 @@ void MainHostWindow::getCommandInfo (const CommandID commandID, ApplicationComma
         break;
 
     case CommandIDs::aboutBox:
-        result.setInfo ("About...", String(), category, 0);
+        result.setInfo ("About...", {}, category, 0);
         break;
 
     case CommandIDs::allWindowsForward:
         result.setInfo ("All Windows Forward", "Bring all plug-in windows forward", category, 0);
         result.addDefaultKeypress ('w', ModifierKeys::commandModifier);
+        break;
+
+    case CommandIDs::autoScalePluginWindows:
+        updateAutoScaleMenuItem (result);
         break;
 
     default:
@@ -518,17 +526,27 @@ bool MainHostWindow::perform (const InvocationInfo& info)
     case CommandIDs::toggleDoublePrecision:
         if (auto* props = getAppProperties().getUserSettings())
         {
-            bool newIsDoublePrecision = ! isDoublePrecisionProcessing();
+            auto newIsDoublePrecision = ! isDoublePrecisionProcessingEnabled();
             props->setValue ("doublePrecisionProcessing", var (newIsDoublePrecision));
 
-            {
-                ApplicationCommandInfo cmdInfo (info.commandID);
-                updatePrecisionMenuItem (cmdInfo);
-                menuItemsChanged();
-            }
+            ApplicationCommandInfo cmdInfo (info.commandID);
+            updatePrecisionMenuItem (cmdInfo);
+            menuItemsChanged();
 
             if (graphHolder != nullptr)
                 graphHolder->setDoublePrecision (newIsDoublePrecision);
+        }
+        break;
+
+    case CommandIDs::autoScalePluginWindows:
+        if (auto* props = getAppProperties().getUserSettings())
+        {
+            auto newAutoScale = ! isAutoScalePluginWindowsEnabled();
+            props->setValue ("autoScalePluginWindows", var (newAutoScale));
+
+            ApplicationCommandInfo cmdInfo (info.commandID);
+            updateAutoScaleMenuItem (cmdInfo);
+            menuItemsChanged();
         }
         break;
 
@@ -633,7 +651,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
     }
 }
 
-bool MainHostWindow::isDoublePrecisionProcessing()
+bool MainHostWindow::isDoublePrecisionProcessingEnabled()
 {
     if (auto* props = getAppProperties().getUserSettings())
         return props->getBoolValue ("doublePrecisionProcessing", false);
@@ -641,8 +659,22 @@ bool MainHostWindow::isDoublePrecisionProcessing()
     return false;
 }
 
+bool MainHostWindow::isAutoScalePluginWindowsEnabled()
+{
+    if (auto* props = getAppProperties().getUserSettings())
+        return props->getBoolValue ("autoScalePluginWindows", false);
+
+    return false;
+}
+
 void MainHostWindow::updatePrecisionMenuItem (ApplicationCommandInfo& info)
 {
-    info.setInfo ("Double floating point precision rendering", String(), "General", 0);
-    info.setTicked (isDoublePrecisionProcessing());
+    info.setInfo ("Double Floating-Point Precision Rendering", {}, "General", 0);
+    info.setTicked (isDoublePrecisionProcessingEnabled());
+}
+
+void MainHostWindow::updateAutoScaleMenuItem (ApplicationCommandInfo& info)
+{
+    info.setInfo ("Auto-Scale Plug-in Windows", {}, "General", 0);
+    info.setTicked (isAutoScalePluginWindowsEnabled());
 }

@@ -188,3 +188,9 @@
   #include "native/juce_android_WebBrowserComponent.cpp"
  #endif
 #endif
+
+//==============================================================================
+#if ! JUCE_WINDOWS
+ juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }
+ juce::ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler() {}
+#endif
