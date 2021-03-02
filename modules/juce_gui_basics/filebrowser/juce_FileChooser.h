@@ -325,12 +325,11 @@ private:
         virtual void runModally() = 0;
     };
 
-    std::unique_ptr<Pimpl> pimpl;
+    std::shared_ptr<Pimpl> pimpl;
 
     //==============================================================================
-    Pimpl* createPimpl (int, FilePreviewComponent*);
-    static Pimpl* showPlatformDialog (FileChooser&, int,
-                                      FilePreviewComponent*);
+    std::unique_ptr<Pimpl> createPimpl (int, FilePreviewComponent*);
+    static std::unique_ptr<Pimpl> showPlatformDialog (FileChooser&, int, FilePreviewComponent*);
 
     class NonNative;
     friend class NonNative;
