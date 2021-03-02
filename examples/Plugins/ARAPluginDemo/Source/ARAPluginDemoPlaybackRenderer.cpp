@@ -2,11 +2,12 @@
 #include "ARAPluginDemoAudioModification.h"
 
 //==============================================================================
-void PluginDemoPlaybackRenderer::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans)
+void PluginDemoPlaybackRenderer::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans, bool alwaysNonRealtime)
 {
     sampleRate = rate;
     maximumSamplesPerBlock = maxSamplesPerBlock;
     numChannels = numChans;
+    useBufferedAudioSourceReader = ! alwaysNonRealtime;
 
     audioSourceReaders.clear();
 
@@ -45,9 +46,8 @@ void PluginDemoPlaybackRenderer::releaseResources()
 bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer, bool isNonRealtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept
 {
     const auto numSamples = buffer.getNumSamples();
-    const auto numChannels = buffer.getNumChannels();
     jassert (numSamples <= maximumSamplesPerBlock);
-    jassert (numChannels == numChannels);
+    jassert (numChannels == buffer.getNumChannels());
     jassert (isNonRealtime || useBufferedAudioSourceReader);
     const auto timeInSamples = positionInfo.timeInSamples;
     const auto isPlaying = positionInfo.isPlaying;

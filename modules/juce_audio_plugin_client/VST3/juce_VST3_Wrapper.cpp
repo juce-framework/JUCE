@@ -1986,7 +1986,7 @@ public:
             host.loadFrom (hostContext);
 
         processContext.sampleRate = processSetup.sampleRate;
-        preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock);
+        preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock, false);
 
         return kResultTrue;
     }
@@ -2067,7 +2067,7 @@ public:
             allocateChannelListAndBuffers (channelListFloat,  emptyBufferFloat);
             allocateChannelListAndBuffers (channelListDouble, emptyBufferDouble);
 
-            preparePlugin (sampleRate, bufferSize);
+            preparePlugin (sampleRate, bufferSize, true);
         }
 
         return kResultOk;
@@ -2746,7 +2746,7 @@ public:
                                                         : AudioProcessor::singlePrecision);
         getPluginInstance().setNonRealtime (newSetup.processMode == Vst::kOffline);
 
-        preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock);
+        preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock, false);
 
         return kResultTrue;
     }
@@ -3121,12 +3121,20 @@ private:
         return buffer.getWritePointer (channel);
     }
 
-    void preparePlugin (double sampleRate, int bufferSize)
+    // TODO JUCE_ARA preparePlugin() is called several times, not just from setActive() -
+    //               Calling setRateAndBufferSizeDetails() is ok at any of these times,
+    //               but actually calling prepareToPlay() shall only be done from setActive(),
+    //               otherwise it is not balanced properly and moreover some ARA configuration
+    //               will change while the plug-in already is prepared to play...!
+    //               As a temporary workaround, we've added a bool argument to track that.
+    //               Note that the AU_Wrapper has similar issues, albeit in less likely edge-cases...
+    void preparePlugin (double sampleRate, int bufferSize, bool callPrepareToPlay)
     {
         auto& p = getPluginInstance();
 
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
-        p.prepareToPlay (sampleRate, bufferSize);
+        if (callPrepareToPlay)
+            p.prepareToPlay (sampleRate, bufferSize);
 
         midiBuffer.ensureSize (2048);
         midiBuffer.clear();

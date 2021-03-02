@@ -21,12 +21,10 @@ public:
         @param sampleRate               The sample rate that will be used for the data that is sent to the renderer.
         @param maximumSamplesPerBlock   The maximum number of samples that will be in the blocks sent to process() method.
         @param numChannels              The number of channels that the process() method will be expected to handle.
+        @param alwaysNonRealtime        True if this renderer is never used in realtime (e.g. if providing data for views only).
     */
-    // ARARenderer draft note: if adding 64 bit support, we need to add bool doublePrecisionProcessing here.
-    // ARARenderer draft note: the ARAPluginDemo has an extra parameter that we can either add here or keep there:
-    //                         useBufferedAudioSourceReader, which guarantees isNonRealtime is always true.
-    // ARARenderer draft note: what about noexcept - in general for JUCE_ARA, where do we need to insert try/catch guards?
-    virtual void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels) {}
+    // TODO JUCE_ARA if adding 64 bit support, we need to add bool doublePrecisionProcessing here.
+    virtual void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels, bool alwaysNonRealtime = false) { ignoreUnused (sampleRate, maximumSamplesPerBlock, numChannels, alwaysNonRealtime); }
 
     /** Frees render ressources allocated in prepareToPlay(). */
     virtual void releaseResources() {}
@@ -48,10 +46,9 @@ public:
     //               which we do not need in ARA, but this is not yet supported in JUCE...
     virtual bool processBlock (AudioBuffer<float>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept = 0;
     
-    // ARARenderer draft note: should we support 64 bit precision? If so, it would need to become
-    //             an additional parameter of prepareToPlay(), and we would either require clients
-    //             to do both or offer a default implementation of the double case that falls back to
-    //             float (this might need to allocate a buffer for conversion during prepareToPlay...)
+    // TODO JUCE_ARA: should we support 64 bit precision? If so, we should require clients to do both
+    //                variants or offer a default implementation of for double that falls back to float
+    //                (this might need to allocate a buffer for conversion during prepareToPlay...)?
 //  virtual bool processBlock (AudioBuffer<double>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo) = 0;
 };
 
@@ -112,7 +109,7 @@ public:
     // Per default, editor renderers will just let the signal pass through unaltered.
     // If you're overriding this to implement actual audio preview, remember to test
     // isNonRealtime of the process context - typically preview is limited to realtime!
-    bool processBlock (AudioBuffer<float>& buffer, bool isNonRealtime, const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override { return true; }
+    bool processBlock (AudioBuffer<float>& /*buffer*/, bool /*isNonRealtime*/, const AudioPlayHead::CurrentPositionInfo& /*positionInfo*/) noexcept override { return true; }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)

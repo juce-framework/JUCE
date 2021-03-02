@@ -106,31 +106,20 @@ class JUCE_API  ARAPlaybackRegionReader   : public AudioFormatReader,
                                             private ARAPlaybackRegion::Listener
 {
 public:
-    // ARARenderer draft note: we could just let the playback region's document controller
-    //             create the playback renderer, but we then cannot customize it...
-    //             (see PluginDemoPlaybackRenderer::useBufferedAudioSourceReader)
     /** Create an ARAPlaybackRegionReader instance to read the given \p playbackRegion,
         using the sample rate and channel count of the underlying ARAAudioSource.
-        @param playbackRenderer The playback renderer which shall be used for rendering the \p playbackRegions,
-                                referencing the same ARADocumentcontroller.
-                                The reader takes ownership  of it until it is invalidated.
         @param playbackRegions The vector of playback regions that shall be read - must not be empty!
                                All regions must be part of the same ARADocument.
     */
-    ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRenderer> playbackRenderer,
-                             ARAPlaybackRegion* playbackRegion);
+    ARAPlaybackRegionReader (ARAPlaybackRegion* playbackRegion);
 
     /** Create an ARAPlaybackRegionReader instance to read the given \p playbackRegions
-        @param playbackRenderer The playback renderer which shall be used for rendering the \p playbackRegions,
-                                referencing the same ARADocumentcontroller.
-                                The reader takes ownership  of it until it is invalidated.
         @param sampleRate The sample rate that should be used for reading.
         @param numChannels The channel count that should be used for reading.
         @param playbackRegions The vector of playback regions that shall be read - must not be empty!
                                All regions must be part of the same ARADocument.
     */
-    ARAPlaybackRegionReader (std::unique_ptr<ARAPlaybackRenderer> playbackRenderer,
-                             double sampleRate, int numChannels,
+    ARAPlaybackRegionReader (double sampleRate, int numChannels,
                              std::vector<ARAPlaybackRegion*> const& playbackRegions);
 
     ~ARAPlaybackRegionReader() override;
