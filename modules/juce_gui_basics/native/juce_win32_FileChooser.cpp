@@ -82,6 +82,8 @@ public:
         // the thread should not be running
         nativeDialogRef.set (nullptr);
 
+        weakThis = shared_from_this();
+
         if (async)
         {
             jassert (! isThreadRunning());
@@ -140,6 +142,7 @@ private:
 
     //==============================================================================
     const Component::SafePointer<Component> owner;
+    std::weak_ptr<Win32NativeFileChooser> weakThis;
     String title, filtersString;
     std::unique_ptr<CustomComponentHolder> customComponent;
     String initialPath, returnedString;
@@ -481,11 +484,11 @@ private:
 
         auto resultsCopy = openDialog (true);
         auto safeOwner = owner;
-        std::weak_ptr<Win32NativeFileChooser> weakThis = shared_from_this();
+        auto weakThisCopy = weakThis;
 
-        MessageManager::callAsync ([resultsCopy, safeOwner, weakThis]
+        MessageManager::callAsync ([resultsCopy, safeOwner, weakThisCopy]
         {
-            if (auto locked = weakThis.lock())
+            if (auto locked = weakThisCopy.lock())
                 locked->results = resultsCopy;
 
             if (safeOwner != nullptr)
@@ -812,10 +815,10 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-std::unique_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags,
                                                                      FilePreviewComponent* preview)
 {
-    return std::make_unique<FileChooser::Native> (owner, flags, preview);
+    return std::make_shared<FileChooser::Native> (owner, flags, preview);
 }
 
 } // namespace juce

@@ -328,8 +328,8 @@ private:
     std::shared_ptr<Pimpl> pimpl;
 
     //==============================================================================
-    std::unique_ptr<Pimpl> createPimpl (int, FilePreviewComponent*);
-    static std::unique_ptr<Pimpl> showPlatformDialog (FileChooser&, int, FilePreviewComponent*);
+    std::shared_ptr<Pimpl> createPimpl (int, FilePreviewComponent*);
+    static std::shared_ptr<Pimpl> showPlatformDialog (FileChooser&, int, FilePreviewComponent*);
 
     class NonNative;
     friend class NonNative;
