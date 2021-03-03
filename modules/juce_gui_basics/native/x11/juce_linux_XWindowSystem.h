@@ -109,7 +109,7 @@ public:
 
     BorderSize<int> getBorderSize   (::Window) const;
     Rectangle<int>  getWindowBounds (::Window, ::Window parentWindow);
-    Point<int> getParentScreenPosition() const;
+    Point<int> getPhysicalParentScreenPosition() const;
 
     bool contains (::Window, Point<int> localPos) const;
 

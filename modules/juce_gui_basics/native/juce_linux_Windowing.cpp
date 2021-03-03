@@ -85,8 +85,8 @@ public:
 
         updateScaleFactorFromNewBounds (bounds, false);
 
-        auto physicalBounds = (parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (bounds)
-                               : bounds * currentScaleFactor);
+        auto physicalBounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (bounds)
+                                                : bounds * currentScaleFactor;
 
         WeakReference<Component> deletionChecker (&component);
 
@@ -103,13 +103,16 @@ public:
 
     Point<int> getScreenPosition (bool physical) const
     {
-        auto parentPosition = XWindowSystem::getInstance()->getParentScreenPosition();
+        auto physicalParentPosition = XWindowSystem::getInstance()->getPhysicalParentScreenPosition();
+        auto parentPosition = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalParentPosition)
+                                                : physicalParentPosition / currentScaleFactor;
 
-        auto screenBounds = (parentWindow == 0 ? bounds
-                                               : bounds.translated (parentPosition.x, parentPosition.y));
+        auto screenBounds = parentWindow == 0 ? bounds
+                                              : bounds.translated (parentPosition.x, parentPosition.y);
 
         if (physical)
-            return Desktop::getInstance().getDisplays().logicalToPhysical (screenBounds.getTopLeft());
+            return parentWindow == 0 ? Desktop::getInstance().getDisplays().logicalToPhysical (screenBounds.getTopLeft())
+                                     : screenBounds.getTopLeft() * currentScaleFactor;
 
         return screenBounds.getTopLeft();
     }
@@ -314,8 +317,8 @@ public:
 
             updateScaleFactorFromNewBounds (physicalBounds, true);
 
-            bounds = (parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
-                                        : physicalBounds / currentScaleFactor);
+            bounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
+                                       : physicalBounds / currentScaleFactor;
         }
     }
 
@@ -433,9 +436,6 @@ private:
     //==============================================================================
     void updateScaleFactorFromNewBounds (const Rectangle<int>& newBounds, bool isPhysical)
     {
-        if (! JUCEApplicationBase::isStandaloneApp())
-            return;
-
         Point<int> translation = (parentWindow != 0 ? getScreenPosition (isPhysical) : Point<int>());
         const auto& desktop = Desktop::getInstance();
 

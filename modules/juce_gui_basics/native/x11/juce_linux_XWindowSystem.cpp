@@ -1799,14 +1799,14 @@ Rectangle<int> XWindowSystem::getWindowBounds (::Window windowH, ::Window parent
         }
         else
         {
-            parentScreenPosition = Desktop::getInstance().getDisplays().physicalToLogical (Point<int> (rootX, rootY));
+            parentScreenPosition = Point<int> (rootX, rootY);
         }
     }
 
     return { wx, wy, (int) ww, (int) wh };
 }
 
-Point<int> XWindowSystem::getParentScreenPosition() const
+Point<int> XWindowSystem::getPhysicalParentScreenPosition() const
 {
     return parentScreenPosition;
 }
@@ -2424,7 +2424,7 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                                                   + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
 
                                         auto scale = DisplayHelpers::getDisplayScale (output->name, d.dpi);
-                                        scale = (scale <= 0.1 ? 1.0 : scale);
+                                        scale = (scale <= 0.1 || ! JUCEApplicationBase::isStandaloneApp()) ? 1.0 : scale;
 
                                         d.scale = masterScale * scale;
 
