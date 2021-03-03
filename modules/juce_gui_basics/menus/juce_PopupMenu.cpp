@@ -257,7 +257,12 @@ struct MenuWindow  : public Component
             auto& item = menu.items.getReference (i);
 
             if (i + 1 < menu.items.size() || ! item.isSeparator)
-                items.add (new ItemComponent (item, options, *this));
+            {
+                auto* child = items.add (new ItemComponent (item, options, *this));
+
+                if (item.itemID == options.getHighlightedItem())
+                    setCurrentlyHighlightedChild (child);
+            }
         }
 
         auto targetArea = options.getTargetScreenArea() / scaleFactor;
@@ -1243,7 +1248,7 @@ private:
     {
         if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
         {
-            const bool isMouseOver = window.reallyContains (localMousePos, true);
+            const auto isMouseOver = window.reallyContains (localMousePos, true);
 
             if (isMouseOver)
                 window.hasBeenOver = true;
@@ -1283,7 +1288,12 @@ private:
                         window.activeSubMenu->hide (nullptr, true);
 
                     if (! isMouseOver)
+                    {
+                        if (! window.hasBeenOver)
+                            return;
+
                         itemUnderMouse = nullptr;
+                    }
 
                     window.setCurrentlyHighlightedChild (itemUnderMouse);
                 }
@@ -1818,6 +1828,13 @@ PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemTo
 {
     Options o (*this);
     o.visibleItemID = idOfItemToBeVisible;
+    return o;
+}
+
+PopupMenu::Options PopupMenu::Options::withItemToHighlight (int idOfItemToHighlight) const
+{
+    Options o (*this);
+    o.highlightedItemID = idOfItemToHighlight;
     return o;
 }
 

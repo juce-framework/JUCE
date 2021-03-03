@@ -468,6 +468,7 @@ public:
         Options withMaximumNumColumns (int maxNumColumns) const;
         Options withStandardItemHeight (int standardHeight) const;
         Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+        Options withItemToHighlight (int idOfItemToHighlight) const;
         Options withParentComponent (Component* parentComponent) const;
         Options withPreferredPopupDirection (PopupDirection direction) const;
 
@@ -481,6 +482,7 @@ public:
         int getMinimumNumColumns() const noexcept                    { return minColumns; }
         int getStandardItemHeight() const noexcept                   { return standardHeight; }
         int getItemThatMustBeVisible() const noexcept                { return visibleItemID; }
+        int getHighlightedItem() const noexcept                      { return highlightedItemID; }
         PopupDirection getPreferredPopupDirection() const noexcept   { return preferredPopupDirection; }
 
     private:
@@ -489,7 +491,8 @@ public:
         Component* targetComponent = nullptr;
         Component* parentComponent = nullptr;
         WeakReference<Component> componentToWatchForDeletion;
-        int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0;
+        int visibleItemID = 0, highlightedItemID = 0, minWidth = 0,
+            minColumns = 1, maxColumns = 0, standardHeight = 0;
         bool isWatchingForDeletion = false;
         PopupDirection preferredPopupDirection = PopupDirection::downwards;
     };
