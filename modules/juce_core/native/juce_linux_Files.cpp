@@ -203,7 +203,7 @@ bool Process::openDocument (const String& fileName, const String& parameters)
         for (auto browserName : { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla",
                                   "google-chrome", "chromium-browser", "opera", "konqueror" })
         {
-            cmdLines.add (String (browserName) + " " + cmdString.trim());
+            cmdLines.add (String (browserName) + " " + cmdString.trim().quoted());
         }
 
         cmdString = cmdLines.joinIntoString (" || ");
