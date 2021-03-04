@@ -36,7 +36,7 @@ bool MidiRPNDetector::parseControllerMessage (int midiChannel,
                                               int controllerValue,
                                               MidiRPNMessage& result) noexcept
 {
-    jassert (midiChannel >= 1 && midiChannel <= 16);
+    jassert (midiChannel > 0 && midiChannel <= 16);
     jassert (controllerNumber >= 0 && controllerNumber < 128);
     jassert (controllerValue >= 0 && controllerValue < 128);
 
