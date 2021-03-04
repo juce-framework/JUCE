@@ -1303,6 +1303,8 @@ private:
                         cubase10Workaround->triggerAsyncUpdate();
                     }
                     else
+                   #elif JUCE_LINUX
+                    if (!getHostType().isArdour())
                    #endif
                     {
                         if (auto* peer = component->getPeer())
