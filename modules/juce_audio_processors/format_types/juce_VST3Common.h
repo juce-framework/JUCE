@@ -286,6 +286,7 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
     else if (channels == AudioChannelSet::quadraphonic())        return k40Music;
     else if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
     else if (channels == AudioChannelSet::create7point1point2()) return k71_2;
+	else if (channels == AudioChannelSet::create7point1point4()) return k71_4;
     else if (channels == AudioChannelSet::ambisonic (0))         return (1ull << 20);
     else if (channels == AudioChannelSet::ambisonic (1))         return (1ull << 20) | (1ull << 21) | (1ull << 22) | (1ull << 23);
    #if VST_VERSION >= 0x030608
@@ -326,6 +327,7 @@ static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
     else if (arr == kAmbi1stOrderACN)                                return AudioChannelSet::ambisonic();
     else if (arr == k40Music)                                        return AudioChannelSet::quadraphonic();
     else if (arr == k71_2)                                           return AudioChannelSet::create7point1point2();
+	else if (arr == k71_4)                                           return AudioChannelSet::create7point1point4();
     else if (arr == (k71_2 & ~(Steinberg::Vst::kSpeakerLfe)))        return AudioChannelSet::create7point0point2();
     else if (arr == (1 << 20))                                       return AudioChannelSet::ambisonic (0);
     else if (arr == ((1 << 20) | (1 << 21) | (1 << 22) | (1 << 23))) return AudioChannelSet::ambisonic (1);
