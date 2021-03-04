@@ -69,7 +69,7 @@ public:
         }
     }
 
-    ~Win32NativeFileChooser()
+    ~Win32NativeFileChooser() override
     {
         signalThreadShouldExit();
         waitForThreadToExit (-1);
@@ -105,7 +105,7 @@ public:
         shouldCancel = true;
 
         if (auto hwnd = nativeDialogRef.get())
-            EndDialog (hwnd, 0);
+            PostMessage (hwnd, WM_CLOSE, 0, 0);
     }
 
     Component* getCustomComponent()    { return customComponent.get(); }
@@ -236,24 +236,23 @@ private:
 
                 ScopedLock lock (owner.deletingDialog);
 
-                if (hwnd != nullptr)
+                if (owner.shouldCancel)
+                    d->Close (S_FALSE);
+                else if (hwnd != nullptr)
                     owner.nativeDialogRef = hwnd;
 
-                return owner.shouldCancel ? S_FALSE : S_OK;
+                return S_OK;
             }
 
-            JUCE_COMRESULT OnFolderChanging (IFileDialog*, IShellItem*) override                                { return S_OK; }
-            JUCE_COMRESULT OnFileOk (IFileDialog*) override                                                     { return S_OK; }
-            JUCE_COMRESULT OnFolderChange (IFileDialog*) override                                               { return S_OK; }
-            JUCE_COMRESULT OnSelectionChange (IFileDialog*) override                                            { return S_OK; }
-            JUCE_COMRESULT OnShareViolation (IFileDialog*, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) override  { return S_OK; }
-            JUCE_COMRESULT OnOverwrite (IFileDialog*, IShellItem*, FDE_OVERWRITE_RESPONSE*) override            { return S_OK; }
+            JUCE_COMRESULT OnFolderChanging (IFileDialog*, IShellItem*) override                                { return E_NOTIMPL; }
+            JUCE_COMRESULT OnFileOk (IFileDialog*) override                                                     { return E_NOTIMPL; }
+            JUCE_COMRESULT OnFolderChange (IFileDialog*) override                                               { return E_NOTIMPL; }
+            JUCE_COMRESULT OnSelectionChange (IFileDialog*) override                                            { return E_NOTIMPL; }
+            JUCE_COMRESULT OnShareViolation (IFileDialog*, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) override  { return E_NOTIMPL; }
+            JUCE_COMRESULT OnOverwrite (IFileDialog*, IShellItem*, FDE_OVERWRITE_RESPONSE*) override            { return E_NOTIMPL; }
 
             Win32NativeFileChooser& owner;
         };
-
-        DWORD cookie = 0;
-        dialog.Advise (new Events { *this }, &cookie);
 
         {
             ScopedLock lock (deletingDialog);
@@ -262,7 +261,20 @@ private:
                 return false;
         }
 
-        const auto result = dialog.Show (async ? nullptr : static_cast<HWND> (owner->getWindowHandle())) == S_OK;
+        const auto result = [&]
+        {
+            struct ScopedAdvise
+            {
+                ScopedAdvise (IFileDialog& d, Events& events) : dialog (d) { dialog.Advise (&events, &cookie); }
+                ~ScopedAdvise() { dialog.Unadvise (cookie); }
+                IFileDialog& dialog;
+                DWORD cookie = 0;
+            };
+
+            Events events { *this };
+            ScopedAdvise scope { dialog, events };
+            return dialog.Show (async ? nullptr : static_cast<HWND> (owner->getWindowHandle())) == S_OK;
+        }();
 
         ScopedLock lock (deletingDialog);
         nativeDialogRef = nullptr;
@@ -479,8 +491,14 @@ private:
 
     void run() override
     {
-        // IUnknown_GetWindow will only succeed when instantiated in a single-thread apartment
-        CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED);
+        struct ScopedCoInitialize
+        {
+            // IUnknown_GetWindow will only succeed when instantiated in a single-thread apartment
+            ScopedCoInitialize() { CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE); }
+            ~ScopedCoInitialize() { CoUninitialize(); }
+        };
+
+        ScopedCoInitialize scope;
 
         auto resultsCopy = openDialog (true);
         auto safeOwner = owner;
