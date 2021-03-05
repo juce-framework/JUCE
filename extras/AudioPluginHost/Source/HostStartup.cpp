@@ -223,12 +223,18 @@ void setAutoScaleValueForPlugin (const String& identifier, AutoScale s)
     getAppProperties().getUserSettings()->setValue ("autoScalePlugins", plugins.joinIntoString ("\n"));
 }
 
-bool shouldAutoScalePlugin (const String& identifier)
+static bool isAutoScaleAvailableForPlugin (const PluginDescription& description)
 {
-    if (! autoScaleOptionAvailable)
+    return autoScaleOptionAvailable
+          && description.pluginFormatName.containsIgnoreCase ("VST");
+}
+
+bool shouldAutoScalePlugin (const PluginDescription& description)
+{
+    if (! isAutoScaleAvailableForPlugin (description))
         return false;
 
-    const auto scaleValue = getAutoScaleValueForPlugin (identifier);
+    const auto scaleValue = getAutoScaleValueForPlugin (description.fileOrIdentifier);
 
     return (scaleValue == AutoScale::scaled
               || (scaleValue == AutoScale::useDefault
@@ -243,7 +249,7 @@ void addPluginAutoScaleOptionsSubMenu (AudioPluginInstance* pluginInstance,
 
     auto description = pluginInstance->getPluginDescription();
 
-    if (! description.pluginFormatName.contains ("VST"))
+    if (! isAutoScaleAvailableForPlugin (description))
         return;
 
     auto identifier = description.fileOrIdentifier;

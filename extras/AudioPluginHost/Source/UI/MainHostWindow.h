@@ -68,7 +68,7 @@ constexpr bool autoScaleOptionAvailable =
 
 AutoScale getAutoScaleValueForPlugin (const String&);
 void setAutoScaleValueForPlugin (const String&, AutoScale);
-bool shouldAutoScalePlugin (const String&);
+bool shouldAutoScalePlugin (const PluginDescription&);
 void addPluginAutoScaleOptionsSubMenu (AudioPluginInstance*, PopupMenu&);
 
 //==============================================================================

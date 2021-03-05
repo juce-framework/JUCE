@@ -29,10 +29,10 @@
 #include "InternalPlugins.h"
 #include "../UI/GraphEditorPanel.h"
 
-static std::unique_ptr<ScopedDPIAwarenessDisabler> makeDPIAwarenessDisablerForPlugin (StringRef identifier)
+static std::unique_ptr<ScopedDPIAwarenessDisabler> makeDPIAwarenessDisablerForPlugin (const PluginDescription& desc)
 {
-    return shouldAutoScalePlugin (identifier) ? std::make_unique<ScopedDPIAwarenessDisabler>()
-                                              : nullptr;
+    return shouldAutoScalePlugin (desc) ? std::make_unique<ScopedDPIAwarenessDisabler>()
+                                        : nullptr;
 }
 
 //==============================================================================
@@ -81,7 +81,7 @@ AudioProcessorGraph::Node::Ptr PluginGraph::getNodeForName (const String& name) 
 
 void PluginGraph::addPlugin (const PluginDescription& desc, Point<double> pos)
 {
-    std::shared_ptr<ScopedDPIAwarenessDisabler> dpiDisabler = makeDPIAwarenessDisablerForPlugin (desc.fileOrIdentifier);
+    std::shared_ptr<ScopedDPIAwarenessDisabler> dpiDisabler = makeDPIAwarenessDisablerForPlugin (desc);
 
     formatManager.createPluginInstanceAsync (desc,
                                              graph.getSampleRate(),
@@ -164,7 +164,7 @@ PluginWindow* PluginGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
                 return nullptr;
             }
 
-            auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (description.fileOrIdentifier);
+            auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (description);
             return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
         }
     }
@@ -383,7 +383,7 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
     {
         String errorMessage;
 
-        auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (pd.fileOrIdentifier);
+        auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (pd);
         return formatManager.createPluginInstance (pd, graph.getSampleRate(),
                                                    graph.getBlockSize(), errorMessage);
     };
