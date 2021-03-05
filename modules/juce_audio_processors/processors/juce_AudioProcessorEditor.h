@@ -54,12 +54,12 @@ public:
     /** Destructor. */
     ~AudioProcessorEditor() override;
 
-
     //==============================================================================
     /** The AudioProcessor that this editor represents. */
     AudioProcessor& processor;
 
     /** Returns a pointer to the processor that this editor represents.
+
         This method is here to support legacy code, but it's easier to just use the
         AudioProcessorEditor::processor member variable directly to get this object.
     */
@@ -76,6 +76,7 @@ public:
 
     /** Some types of plugin can call this to suggest that the control for a particular
         parameter should be highlighted.
+
         Currently only AAX plugins will call this, and implementing it is optional.
     */
     virtual void setControlHighlight (ParameterControlHighlightInfo);
@@ -117,35 +118,44 @@ public:
     virtual void setScaleFactor (float newScale);
 
     //==============================================================================
-    /** Marks the host's editor window as resizable
+    /** Sets whether the editor is resizable by the host and/or user.
 
-        @param allowHostToResize   whether the editor's parent window can be resized
-                                   by the user or the host. Even if this is false, you
-                                   can still resize your window yourself by calling
-                                   setBounds (for example, when a user clicks on a button
-                                   in your editor to drop out a panel) which will bypass any
-                                   resizable/constraints checks. If you are using
-                                   your own corner resizer than this will also bypass
-                                   any checks.
-        @param useBottomRightCornerResizer
+        @param allowHostToResize            whether the editor's parent window can be resized
+                                            by the host. Even if this is false, you can still
+                                            resize your window yourself by calling setBounds
+                                            (for example, when a user clicks on a button in
+                                            your editor to drop out a panel) which will bypass
+                                            any resizable/constraints checks.
+        @param useBottomRightCornerResizer  if this is true, a ResizableCornerComponent will be
+                                            added to the editor's bottom-right to allow the user
+                                            to resize the editor regardless of the value of
+                                            `allowHostToResize`.
+
         @see setResizeLimits, isResizable
     */
     void setResizable (bool allowHostToResize, bool useBottomRightCornerResizer);
 
-    /** Returns true if the host is allowed to resize editor's parent window
+    /** Returns true if the host is allowed to resize the editor's parent window.
 
         @see setResizable
     */
-    bool isResizable() const noexcept      { return resizable; }
+    bool isResizable() const noexcept      { return resizableByHost; }
 
     /** This sets the maximum and minimum sizes for the window.
 
         If the window's current size is outside these limits, it will be resized to
         make sure it's within them.
 
+        If you pass in a different minimum and maximum size, this will mark the editor
+        as resizable by the host.
+
         A direct call to setBounds() will bypass any constraint checks, but when the
         window is dragged by the user or resized by other indirect means, the constrainer
         will limit the numbers involved.
+
+        Note that if you have set a custom constrainer for this editor then this will have
+        no effect, and if you have removed the constrainer with `setConstrainer (nullptr);`
+        then this will re-add the default constrainer with the new limits.
 
         @see setResizable
     */
@@ -154,8 +164,8 @@ public:
                           int newMaximumWidth,
                           int newMaximumHeight) noexcept;
 
-
     /** Returns the bounds constrainer object that this window is using.
+
         You can access this to change its properties.
     */
     ComponentBoundsConstrainer* getConstrainer() noexcept           { return constrainer; }
@@ -176,11 +186,14 @@ public:
      */
     void setBoundsConstrained (Rectangle<int> newBounds);
 
+    /** The ResizableCornerComponent which is currently being used by this editor,
+        or nullptr if it does not have one.
+    */
     std::unique_ptr<ResizableCornerComponent> resizableCorner;
 
 private:
     //==============================================================================
-    struct AudioProcessorEditorListener : ComponentListener
+    struct AudioProcessorEditorListener : public ComponentListener
     {
         AudioProcessorEditorListener (AudioProcessorEditor& e) : ed (e) {}
 
@@ -198,14 +211,13 @@ private:
     void initialise();
     void editorResized (bool wasResized);
     void updatePeer();
-    void attachConstrainer (ComponentBoundsConstrainer*);
     void attachResizableCornerComponent();
 
     //==============================================================================
     std::unique_ptr<AudioProcessorEditorListener> resizeListener;
-    bool resizable;
+    bool resizableByHost = false;
     ComponentBoundsConstrainer defaultConstrainer;
-    ComponentBoundsConstrainer* constrainer = {};
+    ComponentBoundsConstrainer* constrainer = nullptr;
     Component::SafePointer<Component> splashScreen;
     AffineTransform hostScaleTransform;
 
