@@ -1169,11 +1169,6 @@ public:
             {
                 auto editorBounds = getSizeToContainChild();
 
-               #if JUCE_MAC
-                if (wrapper.useNSView)
-                    setTopLeftPosition (0, getHeight() - editorBounds.getHeight());
-               #endif
-
                 resizeHostWindow (editorBounds.getWidth(), editorBounds.getHeight());
 
                 {
