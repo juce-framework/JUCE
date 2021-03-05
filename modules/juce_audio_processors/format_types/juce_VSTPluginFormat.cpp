@@ -3110,7 +3110,12 @@ private:
         JUCE_END_IGNORE_WARNINGS_MSVC
 
         RECT r;
-        GetWindowRect (pluginHWND, &r);
+
+        {
+            ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
+            GetWindowRect (pluginHWND, &r);
+        }
+
         auto w = (int) (r.right - r.left);
         auto h = (int) (r.bottom - r.top);
 
