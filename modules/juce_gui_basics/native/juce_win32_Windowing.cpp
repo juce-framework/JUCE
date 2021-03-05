@@ -435,8 +435,7 @@ static bool isPerMonitorDPIAwareProcess()
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
     return false;
-   #endif
-
+   #else
     static bool dpiAware = []() -> bool
     {
         setDPIAwareness();
@@ -451,15 +450,15 @@ static bool isPerMonitorDPIAwareProcess()
     }();
 
     return dpiAware;
+   #endif
 }
 
 static bool isPerMonitorDPIAwareWindow (HWND nativeWindow)
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
-    ignoreUnused (h);
+    ignoreUnused (nativeWindow);
     return false;
-   #endif
-
+   #else
     setDPIAwareness();
 
     if (getWindowDPIAwarenessContext != nullptr
@@ -470,14 +469,14 @@ static bool isPerMonitorDPIAwareWindow (HWND nativeWindow)
     }
 
     return isPerMonitorDPIAwareProcess();
+   #endif
 }
 
 static bool isPerMonitorDPIAwareThread()
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
     return false;
-   #endif
-
+   #else
     setDPIAwareness();
 
     if (getThreadDPIAwarenessContext != nullptr
@@ -488,6 +487,7 @@ static bool isPerMonitorDPIAwareThread()
     }
 
     return isPerMonitorDPIAwareProcess();
+   #endif
 }
 
 static double getGlobalDPI()
@@ -1949,8 +1949,7 @@ public:
     {
        #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
         return 1.0;
-       #endif
-
+       #else
         if (! isPerMonitorDPIAwareWindow (hwnd))
             return 1.0;
 
@@ -1964,6 +1963,7 @@ public:
         }
 
         return scaleFactor;
+       #endif
     }
 
 private:
