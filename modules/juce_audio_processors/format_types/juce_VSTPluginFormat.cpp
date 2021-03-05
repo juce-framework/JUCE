@@ -2851,38 +2851,30 @@ public:
         if (recursiveResize)
             return;
 
-        auto* topComp = getTopLevelComponent();
-
-        if (topComp->getPeer() != nullptr)
+        if (auto* peer = getTopLevelComponent()->getPeer())
         {
-            auto pos = (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
+            const ScopedValueSetter<bool> recursiveResizeSetter (recursiveResize, true);
 
-            recursiveResize = true;
+            auto pos = (peer->getAreaCoveredBy (*this).toFloat() * nativeScaleFactor).toNearestInt();
 
            #if JUCE_WINDOWS
             if (pluginHWND != 0)
             {
                 ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
-
-                MoveWindow (pluginHWND, pos.getX(), pos.getY(),
-                            roundToInt (getWidth()  * nativeScaleFactor),
-                            roundToInt (getHeight() * nativeScaleFactor),
-                            TRUE);
+                MoveWindow (pluginHWND, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), TRUE);
             }
            #elif JUCE_LINUX
             if (pluginWindow != 0)
             {
                 X11Symbols::getInstance()->xMoveResizeWindow (display, pluginWindow,
                                                               pos.getX(), pos.getY(),
-                                                              static_cast<unsigned int> (roundToInt ((float) getWidth()  * nativeScaleFactor)),
-                                                              static_cast<unsigned int> (roundToInt ((float) getHeight() * nativeScaleFactor)));
+                                                              (unsigned int) pos.getWidth(),
+                                                              (unsigned int) pos.getHeight());
 
                 X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
                 X11Symbols::getInstance()->xFlush (display);
             }
            #endif
-
-            recursiveResize = false;
         }
     }
 
