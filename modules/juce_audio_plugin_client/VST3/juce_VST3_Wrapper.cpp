@@ -927,11 +927,13 @@ public:
     {
         if (auto* pluginInstance = getPluginInstance())
         {
-            if (pluginInstance->hasEditor() && name != nullptr
-                 && strcmp (name, Vst::ViewType::kEditor) == 0)
-            {
+            const auto mayCreateEditor = pluginInstance->hasEditor()
+                                      && name != nullptr
+                                      && std::strcmp (name, Vst::ViewType::kEditor) == 0
+                                      && pluginInstance->getActiveEditor() == nullptr;
+
+            if (mayCreateEditor)
                 return new JuceVST3Editor (*this, *pluginInstance);
-            }
         }
 
         return nullptr;
