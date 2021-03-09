@@ -1751,10 +1751,16 @@ PopupMenu::Options::Options()
     targetArea.setPosition (Desktop::getMousePosition());
 }
 
+template <typename Member, typename Item>
+static PopupMenu::Options with (PopupMenu::Options options, Member&& member, Item&& item)
+{
+    options.*member = std::forward<Item> (item);
+    return options;
+}
+
 PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
 {
-    Options o (*this);
-    o.targetComponent = comp;
+    auto o = with (*this, &Options::targetComponent, comp);
 
     if (comp != nullptr)
         o.targetArea = comp->getScreenBounds();
@@ -1769,66 +1775,49 @@ PopupMenu::Options PopupMenu::Options::withTargetComponent (Component& comp) con
 
 PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area) const
 {
-    Options o (*this);
-    o.targetArea = area;
-    return o;
+    return with (*this, &Options::targetArea, area);
 }
 
 PopupMenu::Options PopupMenu::Options::withDeletionCheck (Component& comp) const
 {
-    Options o (*this);
-    o.componentToWatchForDeletion = &comp;
-    o.isWatchingForDeletion = true;
-    return o;
+    return with (with (*this, &Options::isWatchingForDeletion, true),
+                 &Options::componentToWatchForDeletion,
+                 &comp);
 }
 
 PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const
 {
-    Options o (*this);
-    o.minWidth = w;
-    return o;
+    return with (*this, &Options::minWidth, w);
 }
 
 PopupMenu::Options PopupMenu::Options::withMinimumNumColumns (int cols) const
 {
-    Options o (*this);
-    o.minColumns = cols;
-    return o;
+    return with (*this, &Options::minColumns, cols);
 }
 
 PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const
 {
-    Options o (*this);
-    o.maxColumns = cols;
-    return o;
+    return with (*this, &Options::maxColumns, cols);
 }
 
 PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const
 {
-    Options o (*this);
-    o.standardHeight = height;
-    return o;
+    return with (*this, &Options::standardHeight, height);
 }
 
 PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const
 {
-    Options o (*this);
-    o.visibleItemID = idOfItemToBeVisible;
-    return o;
+    return with (*this, &Options::visibleItemID, idOfItemToBeVisible);
 }
 
 PopupMenu::Options PopupMenu::Options::withParentComponent (Component* parent) const
 {
-    Options o (*this);
-    o.parentComponent = parent;
-    return o;
+    return with (*this, &Options::parentComponent, parent);
 }
 
 PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirection direction) const
 {
-    Options o (*this);
-    o.preferredPopupDirection = direction;
-    return o;
+    return with (*this, &Options::preferredPopupDirection, direction);
 }
 
 Component* PopupMenu::createWindow (const Options& options,
