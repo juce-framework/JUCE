@@ -252,12 +252,19 @@ struct MenuWindow  : public Component
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
+        const auto initialSelectedId = options.getInitiallySelectedItemId();
+
         for (int i = 0; i < menu.items.size(); ++i)
         {
             auto& item = menu.items.getReference (i);
 
             if (i + 1 < menu.items.size() || ! item.isSeparator)
-                items.add (new ItemComponent (item, options, *this));
+            {
+                auto* child = items.add (new ItemComponent (item, options, *this));
+
+                if (initialSelectedId != 0 && item.itemID == initialSelectedId)
+                    setCurrentlyHighlightedChild (child);
+            }
         }
 
         auto targetArea = options.getTargetScreenArea() / scaleFactor;
@@ -1239,7 +1246,7 @@ private:
     {
         if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
         {
-            const bool isMouseOver = window.reallyContains (localMousePos, true);
+            const auto isMouseOver = window.reallyContains (localMousePos, true);
 
             if (isMouseOver)
                 window.hasBeenOver = true;
@@ -1279,7 +1286,12 @@ private:
                         window.activeSubMenu->hide (nullptr, true);
 
                     if (! isMouseOver)
+                    {
+                        if (! window.hasBeenOver)
+                            return;
+
                         itemUnderMouse = nullptr;
+                    }
 
                     window.setCurrentlyHighlightedChild (itemUnderMouse);
                 }
@@ -1818,6 +1830,11 @@ PopupMenu::Options PopupMenu::Options::withParentComponent (Component* parent) c
 PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirection direction) const
 {
     return with (*this, &Options::preferredPopupDirection, direction);
+}
+
+PopupMenu::Options PopupMenu::Options::withInitiallySelectedItem (int idOfItemToBeSelected) const
+{
+    return with (*this, &Options::initiallySelectedItemId, idOfItemToBeSelected);
 }
 
 Component* PopupMenu::createWindow (const Options& options,
