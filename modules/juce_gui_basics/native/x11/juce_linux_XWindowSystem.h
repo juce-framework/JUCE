@@ -164,6 +164,8 @@ public:
     ::Display* getDisplay()                    { return display; }
     XWindowSystemUtilities::Atoms& getAtoms()  { return atoms; }
 
+    bool isX11Available() const noexcept       { return xIsAvailable; }
+
     //==============================================================================
     void handleWindowMessage (LinuxComponentPeer*, XEvent&) const;
     bool isParentWindowOf (::Window, ::Window possibleChild) const;

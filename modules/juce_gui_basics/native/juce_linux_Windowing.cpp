@@ -41,6 +41,9 @@ public:
         // it's dangerous to create a window on a thread other than the message thread.
         JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
+        if (! XWindowSystem::getInstance()->isX11Available())
+            return;
+
         if (isAlwaysOnTop)
             ++numAlwaysOnTopPeers;
 
@@ -262,12 +265,14 @@ public:
     //==============================================================================
     void repaint (const Rectangle<int>& area) override
     {
-        repainter->repaint (area.getIntersection (bounds.withZeroOrigin()));
+        if (repainter != nullptr)
+            repainter->repaint (area.getIntersection (bounds.withZeroOrigin()));
     }
 
     void performAnyPendingRepaintsNow() override
     {
-        repainter->performAnyPendingRepaintsNow();
+        if (repainter != nullptr)
+            repainter->performAnyPendingRepaintsNow();
     }
 
     void setIcon (const Image& newIcon) override

@@ -1983,7 +1983,7 @@ bool XWindowSystem::canUseARGBImages() const
                                                                          X11Symbols::getInstance()->xDefaultVisual (display, X11Symbols::getInstance()->xDefaultScreen (display)),
                                                                          24, ZPixmap, nullptr, &segmentinfo, 64, 64);
 
-            canUseARGB = (testImage->bits_per_pixel == 32);
+            canUseARGB = testImage != nullptr && testImage->bits_per_pixel == 32;
             X11Symbols::getInstance()->xDestroyImage (testImage);
         }
         else
@@ -3013,7 +3013,7 @@ bool XWindowSystem::initialiseXDisplay()
     if (! displayVisuals->isValid())
     {
         Logger::outputDebugString ("ERROR: System doesn't support 32, 24 or 16 bit RGB display.\n");
-        Process::terminate();
+        return false;
     }
 
     // Setup input event handler
