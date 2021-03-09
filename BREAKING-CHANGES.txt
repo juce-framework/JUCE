@@ -6,6 +6,35 @@ Develop
 
 Change
 ------
+The implementations of `getValue` and `setValue` in `AUInstanceParameter` now
+properly take the ranges of discrete parameters into account.
+
+Possible Issues
+---------------
+
+This issue affects JUCE Audio Unit hosts. Automation data previously saved for
+a discrete parameter with a non-zero minimum value may not set the parameter to
+the same values as previous JUCE versions. Note that previously, `getValue` on
+a hosted discrete parameter may have returned out-of-range values, and
+`setValue` may have only mapped to a portion of the parameter range. As a
+result, automation recorded for affected parameters was likely already behaving
+unexpectedly.
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+The old behaviour was incorrect, and was causing issues in plugin validators
+and other hosts. Hosts expect `getValue` to return a normalised parameter
+value. If this function returns an out-of-range value (including Inf and NaN)
+this is likely to break assumptions made by the host, leading to crashes,
+corrupted project data, or other defects.
+
+
+Change
+------
 AudioProcessorListener::audioProcessorChanged gained a new parameter describing
 the nature of any change.
 
