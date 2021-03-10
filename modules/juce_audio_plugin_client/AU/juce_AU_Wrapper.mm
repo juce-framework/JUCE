@@ -682,7 +682,7 @@ public:
                         return kAudioUnitErr_InvalidPropertyValue;
 
                     const auto* identifier = static_cast<const AUHostVersionIdentifier*> (inData);
-                    PluginHostType::getHostIdReportedByWrapper() = String::fromCFString (identifier->hostName);
+                    PluginHostType::hostIdReportedByWrapper = String::fromCFString (identifier->hostName);
 
                     return noErr;
                 }

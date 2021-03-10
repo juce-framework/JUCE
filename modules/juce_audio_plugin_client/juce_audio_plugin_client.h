@@ -126,6 +126,5 @@
  #define JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE (JUCE_IOS || JUCE_ANDROID)
 #endif
 
-#include "utility/juce_PluginHostType.h"
 #include "utility/juce_CreatePluginFilter.h"
 #include "VST/juce_VSTCallbackHandler.h"

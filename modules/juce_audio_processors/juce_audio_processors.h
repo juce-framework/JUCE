@@ -142,3 +142,4 @@
 #include "utilities/juce_AudioParameterChoice.h"
 #include "utilities/juce_ParameterAttachments.h"
 #include "utilities/juce_AudioProcessorValueTreeState.h"
+#include "utilities/juce_PluginHostType.h"
