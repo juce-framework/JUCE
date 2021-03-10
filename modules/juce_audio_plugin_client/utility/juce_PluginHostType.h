@@ -297,11 +297,16 @@ public:
 
     //==============================================================================
 
-   #ifndef DOXYGEN
+  #ifndef DOXYGEN
     // @internal
     static AudioProcessor::WrapperType jucePlugInClientCurrentWrapperType;
     static std::function<bool (AudioProcessor&)> jucePlugInIsRunningInAudioSuiteFn;
-   #endif
+    static String& getHostIdReportedByWrapper()
+    {
+        static String hostId;
+        return hostId;
+    }
+  #endif
 
 private:
     static HostType getHostType()
@@ -356,6 +361,11 @@ private:
         if (hostFilename.containsIgnoreCase   ("pluginval"))                return pluginval;
         if (hostFilename.containsIgnoreCase   ("AudioPluginHost"))          return JUCEPluginHost;
         if (hostFilename.containsIgnoreCase   ("Vienna Ensemble Pro"))      return ViennaEnsemblePro;
+
+       #if defined (JucePlugin_Build_AU)
+        if (getHostIdReportedByWrapper() == "com.apple.logic.pro")          return AppleLogic;
+        if (getHostIdReportedByWrapper() == "com.apple.garageband")         return AppleGarageBand;
+       #endif
 
        #elif JUCE_WINDOWS
         if (hostFilename.containsIgnoreCase   ("Live 6"))                return AbletonLive6;

@@ -675,6 +675,19 @@ public:
                     return noErr;
                 }
 
+               #if defined (MAC_OS_X_VERSION_10_12)
+                case kAudioUnitProperty_AUHostIdentifier:
+                {
+                    if (inDataSize < sizeof (AUHostVersionIdentifier))
+                        return kAudioUnitErr_InvalidPropertyValue;
+
+                    const auto* identifier = static_cast<const AUHostVersionIdentifier*> (inData);
+                    PluginHostType::getHostIdReportedByWrapper() = String::fromCFString (identifier->hostName);
+
+                    return noErr;
+                }
+               #endif
+
                 default: break;
             }
         }
