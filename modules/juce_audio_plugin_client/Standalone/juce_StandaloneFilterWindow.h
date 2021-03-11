@@ -612,6 +612,10 @@ public:
         {
             centreWithSize (getWidth(), getHeight());
         }
+
+        if (auto* processor = getAudioProcessor())
+            if (auto* editor = processor->getActiveEditor())
+                setResizable (editor->isResizable(), false);
        #endif
     }
 
