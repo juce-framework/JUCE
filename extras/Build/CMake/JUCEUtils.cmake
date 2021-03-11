@@ -1626,9 +1626,9 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_VSTNumMidiInputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_INS>
         JucePlugin_VSTNumMidiOutputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_OUTS>
         JucePlugin_Enable_ARA=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_IS_ARA_EFFECT>>
-        JucePlugin_ARAFactoryID=$<TARGET_PROPERTY:${target},JUCE_ARA_FACTORY_ID>
-        JucePlugin_ARADocumentArchiveID=$<TARGET_PROPERTY:${target},JUCE_ARA_DOCUMENT_ARCHIVE_ID>
-        JucePlugin_ARACompatibleArchiveIDs=$<TARGET_PROPERTY:${target},JUCE_ARA_COMPATIBLE_ARCHIVE_IDS>
+        JucePlugin_ARAFactoryID="$<TARGET_PROPERTY:${target},JUCE_ARA_FACTORY_ID>"
+        JucePlugin_ARADocumentArchiveID="$<TARGET_PROPERTY:${target},JUCE_ARA_DOCUMENT_ARCHIVE_ID>"
+        JucePlugin_ARACompatibleArchiveIDs="$<TARGET_PROPERTY:${target},JUCE_ARA_COMPATIBLE_ARCHIVE_IDS>"
         JucePlugin_ARAContentTypes=$<TARGET_PROPERTY:${target},JUCE_ARA_ANALYSIS_TYPES>
         JucePlugin_ARATransformationFlags=$<TARGET_PROPERTY:${target},JUCE_ARA_TRANSFORMATION_FLAGS>)
 
