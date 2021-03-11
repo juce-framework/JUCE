@@ -6,12 +6,34 @@ Develop
 
 Change
 ------
+Calling AudioProcessorEditor::setResizeLimits() will no longer implicitly add a
+ResizableCornerComponent to the editor if it has not already been set as
+resizable.
+
+Possible Issues
+---------------
+Code which previously relied on calling this method to set up the corner
+resizer will no longer work.
+
+Workaround
+----------
+Explicitly call AudioProcessorEditor::setResizable() with the second argument
+set to true to enable the corner resizer.
+
+Rationale
+---------
+The previous behaviour was undocumented and potentially confusing. There is now
+a single method to control the behaviour of the editor's corner resizer to
+avoid any ambiguity.
+
+
+Change
+------
 The implementations of `getValue` and `setValue` in `AUInstanceParameter` now
 properly take the ranges of discrete parameters into account.
 
 Possible Issues
 ---------------
-
 This issue affects JUCE Audio Unit hosts. Automation data previously saved for
 a discrete parameter with a non-zero minimum value may not set the parameter to
 the same values as previous JUCE versions. Note that previously, `getValue` on
