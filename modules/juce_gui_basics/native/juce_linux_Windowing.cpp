@@ -83,8 +83,13 @@ public:
     //==============================================================================
     void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
     {
-        bounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
-                                     jmax (1, newBounds.getHeight()));
+        const auto correctedNewBounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
+                                                            jmax (1, newBounds.getHeight()));
+
+        if (bounds == correctedNewBounds && fullScreen == isNowFullScreen)
+            return;
+
+        bounds = correctedNewBounds;
 
         updateScaleFactorFromNewBounds (bounds, false);
 
