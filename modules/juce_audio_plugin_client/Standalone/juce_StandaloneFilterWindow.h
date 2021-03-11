@@ -113,7 +113,7 @@ public:
            startTimer (500);
     }
 
-    virtual ~StandalonePluginHolder() override
+    ~StandalonePluginHolder() override
     {
         stopTimer();
 
