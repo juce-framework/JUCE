@@ -26,7 +26,7 @@
 #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
  bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
  void JUCE_CALLTYPE juce_switchToHostApplication();
- Image JUCE_CALLTYPE juce_getIAAHostIcon (int);
+ juce::Image JUCE_CALLTYPE juce_getIAAHostIcon (int);
 #endif
 
 namespace juce
