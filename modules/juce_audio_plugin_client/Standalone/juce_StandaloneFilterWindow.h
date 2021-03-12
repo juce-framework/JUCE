@@ -755,9 +755,9 @@ private:
                 notification.setBounds (r.removeFromTop (NotificationArea::height));
 
             if (editor != nullptr)
-                editor->setBounds (editor->getLocalArea (this, r.toFloat())
-                                          .withPosition (r.getTopLeft().toFloat().transformedBy (editor->getTransform().inverted()))
-                                     .toNearestInt());
+                editor->setBoundsConstrained (editor->getLocalArea (this, r.toFloat())
+                                                     .withPosition (r.getTopLeft().toFloat().transformedBy (editor->getTransform().inverted()))
+                                                .toNearestInt());
         }
 
     private:
