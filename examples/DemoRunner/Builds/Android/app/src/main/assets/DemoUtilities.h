@@ -59,7 +59,7 @@ inline File getExamplesDirectory() noexcept
 
     return mo.toString();
    #elif defined PIP_JUCE_EXAMPLES_DIRECTORY_STRING
-    return File { PIP_JUCE_EXAMPLES_DIRECTORY_STRING };
+    return File { CharPointer_UTF8 { PIP_JUCE_EXAMPLES_DIRECTORY_STRING } };
    #else
     auto currentFile = File::getSpecialLocation (File::SpecialLocationType::currentApplicationFile);
     auto exampleDir = currentFile.getParentDirectory().getChildFile ("examples");

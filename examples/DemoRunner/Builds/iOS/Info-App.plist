@@ -41,6 +41,8 @@
     <true/>
     <key>UISupportsDocumentBrowser</key>
     <true/>
+    <key>UIRequiresFullScreen</key>
+    <false/>
     <key>UISupportedInterfaceOrientations</key>
     <array>
       <string>UIInterfaceOrientationLandscapeLeft</string>
