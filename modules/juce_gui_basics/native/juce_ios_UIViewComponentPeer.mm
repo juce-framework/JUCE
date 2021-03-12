@@ -271,7 +271,12 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 static bool isKioskModeView (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
-    jassert (juceView != nil && juceView->owner != nullptr);
+
+    if (juceView == nil || juceView->owner == nullptr)
+    {
+        jassertfalse;
+        return false;
+    }
 
     return Desktop::getInstance().getKioskModeComponent() == &(juceView->owner->getComponent());
 }
@@ -565,6 +570,12 @@ UIViewComponentPeer::~UIViewComponentPeer()
     if (! isSharedWindow)
     {
         [((JuceUIWindow*) window) setOwner: nil];
+
+      #if defined (__IPHONE_13_0)
+        if (@available (iOS 13.0, *))
+            window.windowScene = nil;
+      #endif
+
         [window release];
     }
 }
