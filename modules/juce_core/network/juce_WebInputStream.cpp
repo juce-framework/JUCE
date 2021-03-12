@@ -24,13 +24,12 @@ namespace juce
 {
 
 WebInputStream::WebInputStream (const URL& url, const bool usePost)
-    : pimpl (new Pimpl (*this, url, usePost)), hasCalledConnect (false)
+    : pimpl (std::make_unique<Pimpl> (*this, url, usePost))
 {
 }
 
 WebInputStream::~WebInputStream()
 {
-    delete pimpl;
 }
 
 WebInputStream& WebInputStream::withExtraHeaders (const String& extra)         { pimpl->withExtraHeaders (extra);       return *this; }
@@ -60,28 +59,41 @@ bool WebInputStream::connect (Listener* listener)
 StringPairArray WebInputStream::parseHttpHeaders (const String& headerData)
 {
     StringPairArray headerPairs;
-    StringArray headerLines = StringArray::fromLines (headerData);
+    auto headerLines = StringArray::fromLines (headerData);
 
     // ignore the first line as this is the status line
     for (int i = 1; i < headerLines.size(); ++i)
     {
-        const String& headersEntry = headerLines[i];
+        const auto& headersEntry = headerLines[i];
 
         if (headersEntry.isNotEmpty())
         {
-            const String key   (headersEntry.upToFirstOccurrenceOf (": ", false, false));
-            const String value (headersEntry.fromFirstOccurrenceOf (": ", false, false));
-            const String previousValue (headerPairs [key]);
-            headerPairs.set (key, previousValue.isEmpty() ? value : (previousValue + "," + value));
+            const auto key = headersEntry.upToFirstOccurrenceOf (": ", false, false);
+
+            auto value = [&headersEntry, &headerPairs, &key]
+            {
+                const auto currentValue = headersEntry.fromFirstOccurrenceOf (": ", false, false);
+                const auto previousValue = headerPairs [key];
+
+                if (previousValue.isNotEmpty())
+                    return previousValue + "," + currentValue;
+
+                return currentValue;
+            }();
+
+            headerPairs.set (key, value);
         }
     }
 
     return headerPairs;
 }
 
-void WebInputStream::createHeadersAndPostData (const URL& aURL, String& headers, MemoryBlock& data)
+void WebInputStream::createHeadersAndPostData (const URL& aURL,
+                                               String& headers,
+                                               MemoryBlock& data,
+                                               bool addParametersToBody)
 {
-    aURL.createHeadersAndPostData (headers, data);
+    aURL.createHeadersAndPostData (headers, data, addParametersToBody);
 }
 
 } // namespace juce

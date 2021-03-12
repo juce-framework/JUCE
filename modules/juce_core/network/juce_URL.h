@@ -258,37 +258,32 @@ public:
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
-        If you're setting the POST data, be careful not to have any parameters set
-        as well, otherwise it'll all get thrown in together, and might not have the
-        desired effect.
-
         If the URL already contains some POST data, this will replace it, rather
         than being appended to it.
 
-        This data will only be used if you specify a post operation when you call
-        createInputStream().
+        If no HTTP command is set when calling createInputStream() to read from
+        this URL and some data has been set, it will do a POST request.
     */
     URL withPOSTData (const String& postData) const;
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
-        If you're setting the POST data, be careful not to have any parameters set
-        as well, otherwise it'll all get thrown in together, and might not have the
-        desired effect.
-
         If the URL already contains some POST data, this will replace it, rather
         than being appended to it.
 
-        This data will only be used if you specify a post operation when you call
-        createInputStream().
+        If no HTTP command is set when calling createInputStream() to read from
+        this URL and some data has been set, it will do a POST request.
     */
     URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
     String getPostData() const                                      { return postData.toString(); }
 
-    /** Returns the data that was set using withPOSTData() as MemoryBlock. */
+    /** Returns the data that was set using withPOSTData() as a MemoryBlock. */
     const MemoryBlock& getPostDataAsMemoryBlock() const noexcept    { return postData; }
+
+    /** Returns true if this URL has POST data set using withPOSTData(). */
+    bool hasPOSTData() const noexcept                               { return postData.getSize() > 0; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
@@ -308,13 +303,103 @@ public:
     */
     static bool isProbablyAnEmailAddress (const String& possibleEmailAddress);
 
-    //==============================================================================
-    /** This callback function can be used by the createInputStream() method.
+    enum class ParameterHandling
+    {
+        inAddress,
+        inPostData
+    };
 
-        It allows your app to receive progress updates during a lengthy POST operation. If you
-        want to continue the operation, this should return true, or false to abort.
+    //==============================================================================
+    /** Class used to create a set of options to pass to the createInputStream() method.
+
+        You can chain together a series of calls to this class's methods to create
+        a set of whatever options you want to specify, e.g.
+        @code
+        if (auto inputStream = URL ("http://www.xyz.com/foobar")
+                                 .createInputStream (URL::InputStreamOptions (false).withConnectionTimeoutMs (1000)
+                                                                                    .withNumRedirectsToFollow (0)))
+        {
+            ...
+        }
+        @endcode
     */
-    using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
+    class JUCE_API  InputStreamOptions
+    {
+    public:
+        /** Constructor.
+
+            If parameterHandling is ParameterHandling::inPostData and the URL contains some
+            POST data to send set via one of its withPOSTData() methods, the URL parameters
+            will be transferred via the request body data. Otherwise the parameters will
+            be added to the URL address.
+        */
+        explicit InputStreamOptions (ParameterHandling parameterHandling);
+
+        //==============================================================================
+        /** A callback function to keep track of the operation's progress.
+
+            This can be useful for lengthy POST operations, so that you can provide user feedback.
+        */
+        InputStreamOptions withProgressCallback (std::function<bool (int bytesSent, int totalBytes)> progressCallback) const;
+
+        /** A string that will be appended onto the headers that are used for the request.
+
+            It must be a valid set of HTML header directives, separated by newlines.
+        */
+        InputStreamOptions withExtraHeaders (const String& extraHeaders) const;
+
+        /** Specifies a timeout for the request in milliseconds.
+
+            If 0, this will use whatever default setting the OS chooses. If a negative
+            number, it will be infinite.
+        */
+        InputStreamOptions withConnectionTimeoutMs (int connectionTimeoutMs) const;
+
+        /** If this is non-null, all the (key, value) pairs received as headers
+            in the response will be stored in this array.
+        */
+        InputStreamOptions withResponseHeaders (StringPairArray* responseHeaders) const;
+
+        /** If this is non-null, it will get set to the http status code, if one
+            is known, or 0 if a code isn't available.
+        */
+        InputStreamOptions withStatusCode (int* statusCode) const;
+
+        /** Specifies the number of redirects that will be followed before returning a response.
+
+            N.B. This will be ignored on Android which follows up to 5 redirects.
+        */
+        InputStreamOptions withNumRedirectsToFollow (int numRedirectsToFollow) const;
+
+        /** Specifies which HTTP request to use.
+
+            If this is not set, then this will be determined by the value of `doPostLikeRequest`
+            or the presence of POST data set via URL::withPOSTData().
+        */
+        InputStreamOptions withHttpRequestCmd (const String& httpRequestCmd) const;
+
+        //==============================================================================
+        ParameterHandling getParameterHandling() const noexcept             { return parameterHandling; }
+        std::function<bool (int, int)> getProgressCallback() const noexcept { return progressCallback; }
+        String getExtraHeaders() const noexcept                             { return extraHeaders; }
+        int getConnectionTimeoutMs() const noexcept                         { return connectionTimeOutMs; }
+        StringPairArray* getResponseHeaders() const noexcept                { return responseHeaders; }
+        int* getStatusCode() const noexcept                                 { return statusCode; }
+        int getNumRedirectsToFollow() const noexcept                        { return numRedirectsToFollow; }
+        String getHttpRequestCmd() const noexcept                           { return httpRequestCmd; }
+
+    private:
+        //==============================================================================
+        const ParameterHandling parameterHandling;
+
+        std::function<bool (int, int)> progressCallback = nullptr;
+        String extraHeaders;
+        int connectionTimeOutMs = 0;
+        StringPairArray* responseHeaders = nullptr;
+        int* statusCode = nullptr;
+        int numRedirectsToFollow = 5;
+        String httpRequestCmd;
+    };
 
     /** Attempts to open a stream that can read from this URL.
 
@@ -330,43 +415,11 @@ public:
 
         If the URL represents a local file, then this method simply returns a FileInputStream.
 
-        @param doPostLikeRequest        if true, the parameters added to this class will be transferred
-                                        via the HTTP headers which is typical for POST requests. Otherwise
-                                        the parameters will be added to the URL address. Additionally,
-                                        if the parameter httpRequestCmd is not specified (or empty) then this
-                                        parameter will determine which HTTP request command will be used
-                                        (POST or GET).
-        @param progressCallback         if this is not a nullptr, it lets you supply a callback function
-                                        to keep track of the operation's progress. This can be useful
-                                        for lengthy POST operations, so that you can provide user feedback.
-        @param progressCallbackContext  if a callback is specified, this value will be passed to
-                                        the function
-        @param extraHeaders             if not empty, this string is appended onto the headers that
-                                        are used for the request. It must therefore be a valid set of HTML
-                                        header directives, separated by newlines.
-        @param connectionTimeOutMs      if 0, this will use whatever default setting the OS chooses. If
-                                        a negative number, it will be infinite. Otherwise it specifies a
-                                        time in milliseconds.
-        @param responseHeaders          if this is non-null, all the (key, value) pairs received as headers
-                                        in the response will be stored in this array
-        @param statusCode               if this is non-null, it will get set to the http status code, if one
-                                        is known, or 0 if a code isn't available
-        @param numRedirectsToFollow     specifies the number of redirects that will be followed before
-                                        returning a response (ignored for Android which follows up to 5 redirects)
-        @param httpRequestCmd           Specify which HTTP Request to use. If this is empty, then doPostRequest
-                                        will determine the HTTP request.
+        @param options           a set of options that will be used when opening the stream.
 
-        @returns  a valid input stream, or nullptr if there was an error trying to open it.
-     */
-    std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
-                                                    OpenStreamProgressCallback* progressCallback = nullptr,
-                                                    void* progressCallbackContext = nullptr,
-                                                    String extraHeaders = {},
-                                                    int connectionTimeOutMs = 0,
-                                                    StringPairArray* responseHeaders = nullptr,
-                                                    int* statusCode = nullptr,
-                                                    int numRedirectsToFollow = 5,
-                                                    String httpRequestCmd = {}) const;
+        @returns                 a valid input stream, or nullptr if there was an error trying to open it.
+    */
+    std::unique_ptr<InputStream> createInputStream (const InputStreamOptions& options) const;
 
     /** Attempts to open an output stream to a URL for writing
 
@@ -558,6 +611,25 @@ public:
     */
     static URL createWithoutParsing (const String& url);
 
+    //==============================================================================
+    using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
+
+    /** This method has been deprecated.
+
+        New code should use the method which takes an InputStreamOptions argument instead.
+
+        @see InputStreamOptions
+    */
+    std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
+                                                    OpenStreamProgressCallback* progressCallback = nullptr,
+                                                    void* progressCallbackContext = nullptr,
+                                                    String extraHeaders = {},
+                                                    int connectionTimeOutMs = 0,
+                                                    StringPairArray* responseHeaders = nullptr,
+                                                    int* statusCode = nullptr,
+                                                    int numRedirectsToFollow = 5,
+                                                    String httpRequestCmd = {}) const;
+
 private:
     //==============================================================================
    #if JUCE_IOS
@@ -594,9 +666,10 @@ private:
     URL (const String&, int);
     void init();
     void addParameter (const String&, const String&);
-    void createHeadersAndPostData (String&, MemoryBlock&) const;
+    void createHeadersAndPostData (String&, MemoryBlock&, bool) const;
     URL withUpload (Upload*) const;
 
+    static ParameterHandling toHandling (bool);
     static File fileFromFileSchemeURL (const URL&);
     String getDomainInternal (bool) const;
 

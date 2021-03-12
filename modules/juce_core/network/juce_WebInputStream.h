@@ -220,14 +220,14 @@ class JUCE_API WebInputStream  : public InputStream
     bool setPosition (int64 wantedPos) override;
 
  private:
-    static void createHeadersAndPostData (const URL&, String&, MemoryBlock&);
-    static StringPairArray parseHttpHeaders (const String& headerData);
+    static void createHeadersAndPostData (const URL&, String&, MemoryBlock&, bool);
+    static StringPairArray parseHttpHeaders (const String&);
 
     class Pimpl;
     friend class Pimpl;
 
-    Pimpl* const pimpl;
-    bool hasCalledConnect;
+    std::unique_ptr<Pimpl> pimpl;
+    bool hasCalledConnect = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };

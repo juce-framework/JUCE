@@ -943,9 +943,11 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool shouldBePost)
-      : owner (pimplOwner), url (urlToUse), isPost (shouldBePost),
-        httpRequestCmd (shouldBePost ? "POST" : "GET")
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool isPOSTLike)
+      : owner (pimplOwner),
+        url (urlToUse),
+        addParametersToRequestBody (isPOSTLike),
+        httpRequestCmd (isPOSTLike || url.hasPOSTData() ? "POST" : "GET")
     {
     }
 
@@ -1089,7 +1091,7 @@ private:
     MemoryBlock postData;
     int64 position = 0;
     bool finished = false;
-    const bool isPost;
+    const bool addParametersToRequestBody;
     int timeOutMs = 0;
     int numRedirectsToFollow = 5;
     String httpRequestCmd;
@@ -1101,7 +1103,7 @@ private:
     {
         jassert (connection == nullptr);
 
-        if (NSURL* nsURL = [NSURL URLWithString: juceStringToNS (url.toString (! isPost))])
+        if (NSURL* nsURL = [NSURL URLWithString: juceStringToNS (url.toString (! addParametersToRequestBody))])
         {
             if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: nsURL
                                                                    cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
@@ -1111,9 +1113,9 @@ private:
                 {
                     [req setHTTPMethod: httpMethod];
 
-                    if (isPost)
+                    if (url.hasPOSTData())
                     {
-                        WebInputStream::createHeadersAndPostData (url, headers, postData);
+                        WebInputStream::createHeadersAndPostData (url, headers, postData, addParametersToRequestBody);
 
                         if (postData.getSize() > 0)
                             [req setHTTPBody: [NSData dataWithBytes: postData.getData()
