@@ -146,10 +146,20 @@ void AudioProcessorEditor::attachResizableCornerComponent()
 
 void AudioProcessorEditor::setBoundsConstrained (Rectangle<int> newBounds)
 {
-    if (constrainer != nullptr)
-        constrainer->setBoundsForComponent (this, newBounds, false, false, false, false);
-    else
+    if (constrainer == nullptr)
+    {
         setBounds (newBounds);
+        return;
+    }
+
+    auto currentBounds = getBounds();
+
+    constrainer->setBoundsForComponent (this,
+                                        newBounds,
+                                        newBounds.getY() != currentBounds.getY() && newBounds.getBottom() == currentBounds.getBottom(),
+                                        newBounds.getX() != currentBounds.getX() && newBounds.getRight()  == currentBounds.getRight(),
+                                        newBounds.getY() == currentBounds.getY() && newBounds.getBottom() != currentBounds.getBottom(),
+                                        newBounds.getX() == currentBounds.getX() && newBounds.getRight()  != currentBounds.getRight());
 }
 
 void AudioProcessorEditor::editorResized (bool wasResized)
