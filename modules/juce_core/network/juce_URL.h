@@ -282,9 +282,6 @@ public:
     /** Returns the data that was set using withPOSTData() as a MemoryBlock. */
     const MemoryBlock& getPostDataAsMemoryBlock() const noexcept    { return postData; }
 
-    /** Returns true if this URL has POST data set using withPOSTData(). */
-    bool hasPOSTData() const noexcept                               { return postData.getSize() > 0; }
-
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
 
@@ -303,21 +300,22 @@ public:
     */
     static bool isProbablyAnEmailAddress (const String& possibleEmailAddress);
 
+    //==============================================================================
     enum class ParameterHandling
     {
         inAddress,
         inPostData
     };
 
-    //==============================================================================
     /** Class used to create a set of options to pass to the createInputStream() method.
 
         You can chain together a series of calls to this class's methods to create
         a set of whatever options you want to specify, e.g.
         @code
         if (auto inputStream = URL ("http://www.xyz.com/foobar")
-                                 .createInputStream (URL::InputStreamOptions (false).withConnectionTimeoutMs (1000)
-                                                                                    .withNumRedirectsToFollow (0)))
+                                 .createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
+                                                           .withConnectionTimeoutMs (1000)
+                                                           .withNumRedirectsToFollow (0)))
         {
             ...
         }
@@ -328,10 +326,9 @@ public:
     public:
         /** Constructor.
 
-            If parameterHandling is ParameterHandling::inPostData and the URL contains some
-            POST data to send set via one of its withPOSTData() methods, the URL parameters
-            will be transferred via the request body data. Otherwise the parameters will
-            be added to the URL address.
+            If parameterHandling is ParameterHandling::inPostData, any URL parameters
+            that have been set will be transferred via the request body data. Otherwise
+            the parameters will be added to the URL address.
         */
         explicit InputStreamOptions (ParameterHandling parameterHandling);
 
@@ -371,10 +368,12 @@ public:
         */
         InputStreamOptions withNumRedirectsToFollow (int numRedirectsToFollow) const;
 
-        /** Specifies which HTTP request to use.
+        /** Specifies which HTTP request command to use.
 
-            If this is not set, then this will be determined by the value of `doPostLikeRequest`
-            or the presence of POST data set via URL::withPOSTData().
+            If this is not set, then the command will be POST if parameterHandling is
+            set to ParameterHandling::inPostData or if any POST data has been specified
+            via withPOSTData(), withFileToUpload(), or withDataToUpload(). Otherwise it
+            will be GET.
         */
         InputStreamOptions withHttpRequestCmd (const String& httpRequestCmd) const;
 
@@ -666,6 +665,7 @@ private:
     URL (const String&, int);
     void init();
     void addParameter (const String&, const String&);
+    bool hasBodyDataToSend() const;
     void createHeadersAndPostData (String&, MemoryBlock&, bool) const;
     URL withUpload (Upload*) const;
 

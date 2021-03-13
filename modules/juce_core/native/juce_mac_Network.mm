@@ -943,11 +943,12 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool isPOSTLike)
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToUse, bool addParametersToBody)
       : owner (pimplOwner),
         url (urlToUse),
-        addParametersToRequestBody (isPOSTLike),
-        httpRequestCmd (isPOSTLike || url.hasPOSTData() ? "POST" : "GET")
+        addParametersToRequestBody (addParametersToBody),
+        hasBodyDataToSend (addParametersToRequestBody || url.hasBodyDataToSend()),
+        httpRequestCmd (hasBodyDataToSend ? "POST" : "GET")
     {
     }
 
@@ -1091,7 +1092,7 @@ private:
     MemoryBlock postData;
     int64 position = 0;
     bool finished = false;
-    const bool addParametersToRequestBody;
+    const bool addParametersToRequestBody, hasBodyDataToSend;
     int timeOutMs = 0;
     int numRedirectsToFollow = 5;
     String httpRequestCmd;
@@ -1113,9 +1114,12 @@ private:
                 {
                     [req setHTTPMethod: httpMethod];
 
-                    if (url.hasPOSTData())
+                    if (hasBodyDataToSend)
                     {
-                        WebInputStream::createHeadersAndPostData (url, headers, postData, addParametersToRequestBody);
+                        WebInputStream::createHeadersAndPostData (url,
+                                                                  headers,
+                                                                  postData,
+                                                                  addParametersToRequestBody);
 
                         if (postData.getSize() > 0)
                             [req setHTTPBody: [NSData dataWithBytes: postData.getData()

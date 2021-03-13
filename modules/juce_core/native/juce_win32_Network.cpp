@@ -35,11 +35,12 @@ namespace juce
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool isPOSTLike)
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool addParametersToBody)
         : owner (pimplOwner),
           url (urlToCopy),
-          addParametersToRequestBody (isPOSTLike),
-          httpRequestCmd (isPOSTLike || url.hasPOSTData() ? "POST" : "GET")
+          addParametersToRequestBody (addParametersToBody),
+          hasBodyDataToSend (addParametersToRequestBody || url.hasBodyDataToSend()),
+          httpRequestCmd (hasBodyDataToSend ? "POST" : "GET")
     {
     }
 
@@ -240,7 +241,7 @@ private:
     MemoryBlock postData;
     int64 position = 0;
     bool finished = false;
-    const bool addParametersToRequestBody;
+    const bool addParametersToRequestBody, hasBodyDataToSend;
     int timeOutMs = 0;
     String httpRequestCmd;
     int numRedirectsToFollow = 5;
@@ -291,8 +292,11 @@ private:
             uc.lpszPassword = password;
             uc.dwPasswordLength = passwordNumChars;
 
-            if (url.hasPOSTData())
-                WebInputStream::createHeadersAndPostData (url, headers, postData, addParametersToRequestBody);
+            if (hasBodyDataToSend)
+                WebInputStream::createHeadersAndPostData (url,
+                                                          headers,
+                                                          postData,
+                                                          addParametersToRequestBody);
 
             if (InternetCrackUrl (address.toWideCharPointer(), 0, 0, &uc))
                 openConnection (uc, sessionHandle, address, listener);

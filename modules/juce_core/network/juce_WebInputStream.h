@@ -36,10 +36,12 @@ class JUCE_API WebInputStream  : public InputStream
 
         @param url      The URL that should be retrieved. This parameter may also contain
                         POST data and/or parameters.
-        @param usePost  Specifies whether a GET or a POST command should be used. This
-                        parameter will also influence the way parameters are encoded.
+        @param addParametersToRequestBody  Specifies whether any URL parameters that have
+                        been set will be transferred via the request body data or added
+                        to the URL address. This will also determine whether a POST or GET
+                        command will be used if a custom command is not set.
     */
-    WebInputStream (const URL& url, bool usePost);
+    WebInputStream (const URL& url, bool addParametersToRequestBody);
 
     /** Destructor. */
     ~WebInputStream() override;

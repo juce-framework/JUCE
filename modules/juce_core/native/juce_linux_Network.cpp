@@ -70,11 +70,12 @@ bool JUCE_CALLTYPE Process::openEmailWithAttachments (const String& /* targetEma
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool isPOSTLike)
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool addParametersToBody)
         : owner (pimplOwner),
           url (urlToCopy),
-          addParametersToRequestBody (isPOSTLike),
-          httpRequestCmd (isPOSTLike || url.hasPOSTData() ? "POST" : "GET")
+          addParametersToRequestBody (addParametersToBody),
+          hasBodyDataToSend (addParametersToRequestBody || url.hasBodyDataToSend()),
+          httpRequestCmd (hasBodyDataToSend ? "POST" : "GET")
     {
     }
 
@@ -259,7 +260,7 @@ private:
     MemoryBlock postData;
     int64 contentLength = -1, position = 0;
     bool finished = false;
-    const bool addParametersToRequestBody;
+    const bool addParametersToRequestBody, hasBodyDataToSend;
     int timeOutMs = 0;
     int numRedirectsToFollow = 5;
     String httpRequestCmd;
@@ -288,8 +289,11 @@ private:
     {
         closeSocket (false);
 
-        if (url.hasPOSTData())
-            WebInputStream::createHeadersAndPostData (url, headers, postData, addParametersToRequestBody);
+        if (hasBodyDataToSend)
+            WebInputStream::createHeadersAndPostData (url,
+                                                      headers,
+                                                      postData,
+                                                      addParametersToRequestBody);
 
         auto timeOutTime = Time::getMillisecondCounter();
 

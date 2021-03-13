@@ -452,6 +452,11 @@ URL URL::getChildURL (const String& subPath) const
     return u;
 }
 
+bool URL::hasBodyDataToSend() const
+{
+    return filesToUpload.size() > 0 || postData.getSize() > 0;
+}
+
 void URL::createHeadersAndPostData (String& headers,
                                     MemoryBlock& postDataToWrite,
                                     bool addParametersToBody) const
@@ -499,9 +504,9 @@ void URL::createHeadersAndPostData (String& headers,
     else
     {
         if (addParametersToBody)
-            data << URLHelpers::getMangledParameters (*this) << postData;
-        else
-            data << postData;
+            data << URLHelpers::getMangledParameters (*this);
+
+        data << postData;
 
         // if the user-supplied headers didn't contain a content-type, add one now..
         if (! headers.containsIgnoreCase ("Content-Type"))
@@ -886,7 +891,7 @@ URL URL::withUpload (Upload* const f) const
     auto u = *this;
 
     for (int i = u.filesToUpload.size(); --i >= 0;)
-        if (u.filesToUpload.getObjectPointerUnchecked(i)->parameterName == f->parameterName)
+        if (u.filesToUpload.getObjectPointerUnchecked (i)->parameterName == f->parameterName)
             u.filesToUpload.remove (i);
 
     u.filesToUpload.add (f);

@@ -324,11 +324,12 @@ class WebInputStream::Pimpl
 public:
     enum { contentStreamCacheSize = 1024 };
 
-    Pimpl (WebInputStream&, const URL& urlToCopy, bool isPOSTLike)
+    Pimpl (WebInputStream&, const URL& urlToCopy, bool addParametersToBody)
         : url (urlToCopy),
           isContentURL (urlToCopy.getScheme() == "content"),
-          addParametersToRequestBody (isPOSTLike),
-          httpRequest (isPOSTLike || url.hasPOSTData() ? "POST" : "GET")
+          addParametersToRequestBody (addParametersToBody),
+          hasBodyDataToSend (addParametersToRequestBody || url.hasBodyDataToSend()),
+          httpRequest (hasBodyDataToSend ? "POST" : "GET")
     {
     }
 
@@ -380,8 +381,12 @@ public:
                 address = "http://" + address;
 
             MemoryBlock postData;
-            if (url.hasPOSTData())
-                WebInputStream::createHeadersAndPostData (url, headers, postData, addParametersToRequestBody);
+
+            if (hasBodyDataToSend)
+                WebInputStream::createHeadersAndPostData (url,
+                                                          headers,
+                                                          postData,
+                                                          addParametersToRequestBody);
 
             jbyteArray postDataArray = nullptr;
 
@@ -536,7 +541,7 @@ public:
 
 private:
     const URL url;
-    const bool isContentURL, addParametersToRequestBody;
+    const bool isContentURL, addParametersToRequestBody, hasBodyDataToSend;
     bool eofStreamReached = false;
     int numRedirectsToFollow = 5, timeOutMs = 0;
     String httpRequest, headers;

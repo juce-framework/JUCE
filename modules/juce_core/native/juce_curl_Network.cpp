@@ -110,12 +110,12 @@ private:
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& ownerStream, const URL& urlToCopy, bool isPOSTLike)
+    Pimpl (WebInputStream& ownerStream, const URL& urlToCopy, bool addParametersToBody)
         : owner (ownerStream),
           url (urlToCopy),
-          addParametersToRequestBody (isPOSTLike),
-          hasPOSTData (url.hasPOSTData()),
-          httpRequest (isPOSTLike || url.hasPOSTData() ? "POST" : "GET")
+          addParametersToRequestBody (addParametersToBody),
+          hasBodyDataToSend (url.hasBodyDataToSend() || addParametersToRequestBody),
+          httpRequest (hasBodyDataToSend ? "POST" : "GET")
     {
         jassert (symbols); // Unable to load libcurl!
 
@@ -231,8 +231,11 @@ public:
         if (! requestHeaders.endsWithChar ('\n'))
             requestHeaders << "\r\n";
 
-        if (hasPOSTData)
-            WebInputStream::createHeadersAndPostData (url, requestHeaders, headersAndPostData, addParametersToRequestBody);
+        if (hasBodyDataToSend)
+            WebInputStream::createHeadersAndPostData (url,
+                                                      requestHeaders,
+                                                      headersAndPostData,
+                                                      addParametersToRequestBody);
 
         if (! requestHeaders.endsWithChar ('\n'))
             requestHeaders << "\r\n";
@@ -247,7 +250,7 @@ public:
             && symbols->curl_easy_setopt (curl, CURLOPT_USERAGENT, userAgent.toRawUTF8()) == CURLE_OK
             && symbols->curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, (maxRedirects > 0 ? 1 : 0)) == CURLE_OK)
         {
-            if (hasPOSTData)
+            if (hasBodyDataToSend)
             {
                 if (symbols->curl_easy_setopt (curl, CURLOPT_READDATA, this) != CURLE_OK
                     || symbols->curl_easy_setopt (curl, CURLOPT_READFUNCTION, StaticCurlRead) != CURLE_OK)
@@ -259,7 +262,7 @@ public:
             }
 
             // handle special http request commands
-            const auto hasSpecialRequestCmd = hasPOSTData ? (httpRequest != "POST") : (httpRequest != "GET");
+            const auto hasSpecialRequestCmd = hasBodyDataToSend ? (httpRequest != "POST") : (httpRequest != "GET");
 
             if (hasSpecialRequestCmd)
                 if (symbols->curl_easy_setopt (curl, CURLOPT_CUSTOMREQUEST, httpRequest.toRawUTF8()) != CURLE_OK)
@@ -326,7 +329,7 @@ public:
 
         listener = webInputListener;
 
-        if (hasPOSTData)
+        if (hasBodyDataToSend)
             postBuffer = &headersAndPostData;
 
         size_t lastPos = static_cast<size_t> (-1);
@@ -345,7 +348,7 @@ public:
             singleStep();
 
             // call callbacks if this is a post request
-            if (hasPOSTData && listener != nullptr && lastPos != postPosition)
+            if (hasBodyDataToSend && listener != nullptr && lastPos != postPosition)
             {
                 lastPos = postPosition;
 
@@ -616,7 +619,7 @@ public:
     // Options
     int timeOutMs = 0;
     int maxRedirects = 5;
-    const bool addParametersToRequestBody, hasPOSTData;
+    const bool addParametersToRequestBody, hasBodyDataToSend;
     String httpRequest;
 
     //==============================================================================
