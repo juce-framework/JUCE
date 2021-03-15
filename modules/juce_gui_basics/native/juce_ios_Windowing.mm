@@ -680,7 +680,7 @@ static BorderSize<int> getSafeAreaInsets (float masterScale)
    #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0
     UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
 
-    auto getInset = [&] (float original) { return roundToInt (original / masterScale); };
+    auto getInset = [&] (CGFloat original) { return roundToInt (original / masterScale); };
 
     return { getInset (safeInsets.top),    getInset (safeInsets.left),
              getInset (safeInsets.bottom), getInset (safeInsets.right) };
