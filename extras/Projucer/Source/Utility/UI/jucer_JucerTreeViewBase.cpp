@@ -61,14 +61,10 @@ void TreePanelBase::saveOpenness()
 }
 
 //==============================================================================
-JucerTreeViewBase::JucerTreeViewBase()  : textX (0)
+JucerTreeViewBase::JucerTreeViewBase()
 {
     setLinesDrawnForSubItems (false);
     setDrawsInLeftMargin (true);
-}
-
-JucerTreeViewBase::~JucerTreeViewBase()
-{
 }
 
 void JucerTreeViewBase::refreshSubItems()
