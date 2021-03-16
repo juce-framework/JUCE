@@ -828,8 +828,8 @@ private:
                     const auto extraWindowWidth = borders.getLeftAndRight();
                     const auto extraWindowHeight = extraHeight + borders.getTopAndBottom();
 
-                    owner.setResizeLimits (editorConstrainer->getMinimumWidth()  + extraWindowWidth,
-                                           editorConstrainer->getMinimumHeight() + extraWindowHeight,
+                    owner.setResizeLimits (jmax (10, editorConstrainer->getMinimumWidth()  + extraWindowWidth),
+                                           jmax (10, editorConstrainer->getMinimumHeight() + extraWindowHeight),
                                            editorConstrainer->getMaximumWidth()  + extraWindowWidth,
                                            editorConstrainer->getMaximumHeight() + extraWindowHeight);
                 }
