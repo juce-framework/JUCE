@@ -78,6 +78,67 @@ static int warnOnFailureIfImplemented (int result) noexcept
  #define warnOnFailureIfImplemented(x) x
 #endif
 
+static std::vector<Vst::ParamID> getAllParamIDs (Vst::IEditController& controller)
+{
+    std::vector<Vst::ParamID> result;
+
+    auto count = controller.getParameterCount();
+
+    for (decltype (count) i = 0; i < count; ++i)
+    {
+        Vst::ParameterInfo info{};
+        controller.getParameterInfo (i, info);
+        result.push_back (info.id);
+    }
+
+    return result;
+}
+
+//==============================================================================
+/*  Allows parameter updates to be queued up without blocking,
+    and automatically dispatches these updates on the main thread.
+*/
+class EditControllerParameterDispatcher  : private Timer
+{
+public:
+    ~EditControllerParameterDispatcher() override { stopTimer(); }
+
+    void push (size_t index, float value)
+    {
+        if (controller == nullptr)
+            return;
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            controller->setParamNormalized (cache.getParamID (index), value);
+        else
+            cache.set (index, value);
+    }
+
+    void start (Vst::IEditController& controllerIn)
+    {
+        controller = &controllerIn;
+        cache = CachedParamValues { getAllParamIDs (controllerIn) };
+        startTimerHz (60);
+    }
+
+    void flush()
+    {
+        cache.ifSet ([this] (size_t index, float value)
+        {
+            controller->setParamNormalized (cache.getParamID (index), value);
+        });
+    }
+
+private:
+    void timerCallback() override
+    {
+        flush();
+    }
+
+    CachedParamValues cache;
+    Vst::IEditController* controller = nullptr;
+};
+
 //==============================================================================
 std::array<uint32, 4> getNormalisedTUID (const TUID& tuid) noexcept
 {
@@ -506,17 +567,6 @@ private:
     Atomic<int> refCount;
     String appName;
 
-    using ParamMapType = std::map<Vst::ParamID, int>;
-    ParamMapType paramToIndexMap;
-
-    int getIndexOfParamID (Vst::ParamID paramID);
-
-    int getMappedParamID (Vst::ParamID paramID)
-    {
-        auto it = paramToIndexMap.find (paramID);
-        return it != paramToIndexMap.end() ? it->second : -1;
-    }
-
     //==============================================================================
     struct Message  : public Vst::IMessage
     {
@@ -646,7 +696,7 @@ private:
     struct AttributeList  : public Vst::IAttributeList
     {
         AttributeList (VST3HostContext* o)  : owner (o) {}
-        virtual ~AttributeList() {}
+        virtual ~AttributeList() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -1713,12 +1763,10 @@ struct VST3ComponentHolder
         if (isComponentInitialised)
             return true;
 
-       #if JUCE_WINDOWS
-        // On Windows it's highly advisable to create your plugins using the message thread,
-        // because many plugins need a chance to create HWNDs that will get their messages
-        // delivered by the main message thread, and that's not possible from a background thread.
+        // It's highly advisable to create your plugins using the message thread.
+        // The VST3 spec requires that many of the functions called during
+        // initialisation are only called from the message thread.
         JUCE_ASSERT_MESSAGE_THREAD
-       #endif
 
         factory = VSTComSmartPtr<IPluginFactory> (module->getPluginFactory());
 
@@ -1780,6 +1828,182 @@ struct VST3ComponentHolder
 };
 
 //==============================================================================
+/*  A queue which can store up to one element.
+
+    This is more memory-efficient than storing large vectors of
+    parameter changes that we'll just throw away.
+*/
+class ParamValueQueue : public Vst::IParamValueQueue
+{
+public:
+    ParamValueQueue (Vst::ParamID idIn, size_t parameterIndexIn)
+        : paramId (idIn), parameterIndex (parameterIndexIn) {}
+
+    virtual ~ParamValueQueue() = default;
+
+    JUCE_DECLARE_VST3_COM_REF_METHODS
+    JUCE_DECLARE_VST3_COM_QUERY_METHODS
+
+    Vst::ParamID PLUGIN_API getParameterId() override { return paramId; }
+
+    size_t getParameterIndex() const noexcept { return parameterIndex; }
+
+    Steinberg::int32 PLUGIN_API getPointCount() override { return size; }
+
+    tresult PLUGIN_API getPoint (Steinberg::int32 index,
+                                 Steinberg::int32& sampleOffset,
+                                 Vst::ParamValue& value) override
+    {
+        if (! isPositiveAndBelow (index, size))
+            return kResultFalse;
+
+        sampleOffset = 0;
+        value = cachedValue;
+
+        return kResultTrue;
+    }
+
+    tresult PLUGIN_API addPoint (Steinberg::int32,
+                                 Vst::ParamValue value,
+                                 Steinberg::int32& index) override
+    {
+        index = size++;
+        set ((float) value);
+
+        return kResultTrue;
+    }
+
+    void set (float valueIn)
+    {
+        cachedValue = valueIn;
+        size = 1;
+    }
+
+    void clear() { size = 0; }
+
+    float get() const noexcept
+    {
+        jassert (size > 0);
+        return cachedValue;
+    }
+
+private:
+    const Vst::ParamID paramId;
+    const size_t parameterIndex;
+    float cachedValue;
+    Steinberg::int32 size = 0;
+    Atomic<int> refCount;
+};
+
+//==============================================================================
+/*  An implementation of IParameterChanges with some important characteristics:
+    - Lookup by index is O(1)
+    - Lookup by paramID is also O(1)
+    - addParameterData never allocates, as long you pass a paramID already passed to initialise
+*/
+class ParameterChanges : public Vst::IParameterChanges
+{
+    static constexpr Steinberg::int32 notInVector = -1;
+
+    struct Entry
+    {
+        explicit Entry (std::unique_ptr<ParamValueQueue> queue) : ptr (queue.release()) {}
+
+        VSTComSmartPtr<ParamValueQueue> ptr;
+        Steinberg::int32 index = notInVector;
+    };
+
+    using Map = std::unordered_map<Vst::ParamID, Entry>;
+    using Queues = std::vector<Entry*>;
+
+public:
+    virtual ~ParameterChanges() = default;
+
+    JUCE_DECLARE_VST3_COM_REF_METHODS
+    JUCE_DECLARE_VST3_COM_QUERY_METHODS
+
+    Steinberg::int32 PLUGIN_API getParameterCount() override
+    {
+        return (Steinberg::int32) queues.size();
+    }
+
+    ParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override
+    {
+        if (isPositiveAndBelow (index, queues.size()))
+        {
+            auto& entry = queues[(size_t) index];
+            // If this fails, our container has become internally inconsistent
+            jassert (entry->index == index);
+            return entry->ptr.get();
+        }
+
+        return nullptr;
+    }
+
+    ParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id,
+                                                  Steinberg::int32& index) override
+    {
+        const auto it = map.find (id);
+
+        if (it == map.end())
+            return nullptr;
+
+        auto& result = it->second;
+
+        if (result.index == notInVector)
+        {
+            result.index = (Steinberg::int32) queues.size();
+            queues.push_back (&result);
+        }
+
+        index = result.index;
+        return result.ptr.get();
+    }
+
+    void set (Vst::ParamID id, float value)
+    {
+        Steinberg::int32 indexOut = notInVector;
+
+        if (auto* queue = addParameterData (id, indexOut))
+            queue->set (value);
+    }
+
+    void clear()
+    {
+        for (auto* item : queues)
+            item->index = notInVector;
+
+        queues.clear();
+    }
+
+    void initialise (const std::vector<Vst::ParamID>& idsIn)
+    {
+        size_t index = 0;
+
+        for (const auto& id : idsIn)
+            map.emplace (id, Entry { std::make_unique<ParamValueQueue> (id, index++) });
+
+        queues.reserve (map.size());
+        queues.clear();
+    }
+
+    template <typename Callback>
+    void forEach (Callback&& callback) const
+    {
+        for (const auto* item : queues)
+        {
+            auto* ptr = item->ptr.get();
+            callback (ptr->getParameterIndex(), ptr->get());
+        }
+    }
+
+private:
+    Map map;
+    Queues queues;
+    Atomic<int> refCount;
+};
+
+//==============================================================================
 class VST3PluginInstance : public AudioPluginInstance
 {
 public:
@@ -1799,32 +2023,32 @@ public:
 
         float getValue() const override
         {
-            if (pluginInstance.editController != nullptr)
-            {
-                const ScopedLock sl (pluginInstance.lock);
-
-                return (float) pluginInstance.editController->getParamNormalized (paramID);
-            }
-
-            return 0.0f;
+            return pluginInstance.cachedParamValues.get ((size_t) vstParamIndex);
         }
 
+        /*  The 'normal' setValue call, which will update both the processor and editor.
+        */
         void setValue (float newValue) override
         {
-            if (pluginInstance.editController != nullptr)
-            {
-                const ScopedLock sl (pluginInstance.lock);
+            pluginInstance.cachedParamValues.set ((size_t) vstParamIndex, newValue);
+            pluginInstance.parameterDispatcher.push ((size_t) vstParamIndex, newValue);
+        }
 
-                pluginInstance.editController->setParamNormalized (paramID, (double) newValue);
-
-                Steinberg::int32 index;
-                pluginInstance.inputParameterChanges->addParameterData (paramID, index)
-                                                    ->addPoint (0, newValue, index);
-            }
+        /*  If the editor set the value, there's no need to notify it that the parameter
+            value changed. Instead, we set the cachedValue (which will be read by the
+            processor during the next processBlock) and notify listeners that the parameter
+            has changed.
+        */
+        void setValueFromEditor (float newValue)
+        {
+            pluginInstance.cachedParamValues.set ((size_t) vstParamIndex, newValue);
+            sendValueChangedMessageToListeners (newValue);
         }
 
         String getText (float value, int maximumLength) const override
         {
+            MessageManagerLock lock;
+
             if (pluginInstance.editController != nullptr)
             {
                 Vst::String128 result;
@@ -1838,6 +2062,8 @@ public:
 
         float getValueForText (const String& text) const override
         {
+            MessageManagerLock lock;
+
             if (pluginInstance.editController != nullptr)
             {
                 Vst::ParamValue result;
@@ -1847,11 +2073,6 @@ public:
             }
 
             return Parameter::getValueForText (text);
-        }
-
-        Vst::ParameterInfo getParameterInfo() const
-        {
-            return pluginInstance.getParameterInfoForIndex (vstParamIndex);
         }
 
         float getDefaultValue() const override
@@ -1876,14 +2097,12 @@ public:
 
         bool isDiscrete() const override
         {
-            return getNumSteps() != AudioProcessor::getDefaultNumParameterSteps();
+            return discrete;
         }
 
         int getNumSteps() const override
         {
-            auto stepCount = getParameterInfo().stepCount;
-            return stepCount == 0 ? AudioProcessor::getDefaultNumParameterSteps()
-                                  : stepCount + 1;
+            return numSteps;
         }
 
         StringArray getAllValueStrings() const override
@@ -1891,18 +2110,31 @@ public:
             return {};
         }
 
+        Steinberg::Vst::ParamID getParamID() const noexcept { return paramID; }
+
+    private:
+        Vst::ParameterInfo getParameterInfo() const
+        {
+            return pluginInstance.getParameterInfoForIndex (vstParamIndex);
+        }
+
         VST3PluginInstance& pluginInstance;
         const int vstParamIndex;
         const Steinberg::Vst::ParamID paramID;
         const bool automatable;
+        const bool discrete = getNumSteps() != AudioProcessor::getDefaultNumParameterSteps();
+        const int numSteps = [&]
+        {
+            auto stepCount = getParameterInfo().stepCount;
+            return stepCount == 0 ? AudioProcessor::getDefaultNumParameterSteps()
+                                  : stepCount + 1;
+        }();
     };
 
     //==============================================================================
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
           holder (componentHolder),
-          inputParameterChanges  (new ParamValueQueueList()),
-          outputParameterChanges (new ParamValueQueueList()),
           midiInputs (new MidiEventList()),
           midiOutputs (new MidiEventList())
     {
@@ -1974,12 +2206,10 @@ public:
     //==============================================================================
     bool initialise()
     {
-       #if JUCE_WINDOWS
-        // On Windows it's highly advisable to create your plugins using the message thread,
-        // because many plugins need a chance to create HWNDs that will get their messages
-        // delivered by the main message thread, and that's not possible from a background thread.
+        // It's highly advisable to create your plugins using the message thread.
+        // The VST3 spec requires that many of the functions called during
+        // initialisation are only called from the message thread.
         JUCE_ASSERT_MESSAGE_THREAD
-       #endif
 
         if (! holder->initialise())
             return false;
@@ -2009,6 +2239,8 @@ public:
         // configured, so we need to jump though all these hoops again
         if (getParameters().isEmpty() && editController->getParameterCount() > 0)
             configureParameters();
+
+        parameterDispatcher.start (*editController);
 
         return true;
     }
@@ -2054,6 +2286,11 @@ public:
 
     void prepareToPlay (double newSampleRate, int estimatedSamplesPerBlock) override
     {
+        // The VST3 spec requires that IComponent::setupProcessing() is called on the message
+        // thread. If you call it from a different thread, some plugins may break.
+        JUCE_ASSERT_MESSAGE_THREAD
+        MessageManagerLock lock;
+
         // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
         if (isActive
               && getSampleRate() == newSampleRate
@@ -2071,7 +2308,6 @@ public:
         warnOnFailure (processor->setupProcessing (setup));
 
         holder->initialise();
-        editController->setComponentHandler (holder->host);
 
         Array<Vst::SpeakerArrangement> inputArrangements, outputArrangements;
         processorLayoutsToArrangements (inputArrangements, outputArrangements);
@@ -2131,6 +2367,13 @@ public:
     bool supportsDoublePrecisionProcessing() const override
     {
         return (processor->canProcessSampleSize (Vst::kSample64) == kResultTrue);
+    }
+
+    //==============================================================================
+    VST3Parameter* getParameterForID (Vst::ParamID paramID)
+    {
+        const auto index = getIndexOfParamID (paramID);
+        return index < 0 ? nullptr : static_cast<VST3Parameter*> (getParameters()[index]);
     }
 
     //==============================================================================
@@ -2210,30 +2453,23 @@ public:
         associateWith (data, buffer);
         associateWith (data, midiMessages);
 
+        inputParameterChanges ->clear();
+        outputParameterChanges->clear();
+
+        cachedParamValues.ifSet ([&] (size_t index, float value)
+        {
+            inputParameterChanges->set (cachedParamValues.getParamID (index), value);
+        });
+
         processor->process (data);
 
-        for (auto* q : outputParameterChanges->queues)
+        outputParameterChanges->forEach ([&] (size_t index, float value)
         {
-            if (editController != nullptr)
-            {
-                auto numPoints = q->getPointCount();
-
-                if (numPoints > 0)
-                {
-                    Steinberg::int32 sampleOffset;
-                    Steinberg::Vst::ParamValue value;
-                    q->getPoint (numPoints - 1, sampleOffset, value);
-                    editController->setParamNormalized (q->getParameterId(), value);
-                }
-            }
-
-            q->clear();
-        }
+            parameterDispatcher.push (index, value);
+        });
 
         midiMessages.clear();
         MidiEventList::toMidiBuffer (midiMessages, *midiOutputs);
-
-        inputParameterChanges->clearAllQueues();
     }
 
     //==============================================================================
@@ -2476,7 +2712,8 @@ public:
     int getCurrentProgram() override
     {
         if (programNames.size() > 0 && editController != nullptr)
-            return jmax (0, roundToInt (editController->getParamNormalized (programParameterID) * (programNames.size() - 1)));
+            if (auto* param = getParameterForID (programParameterID))
+                return jmax (0, roundToInt (param->getValue() * (float) (programNames.size() - 1)));
 
         return 0;
     }
@@ -2487,9 +2724,8 @@ public:
         {
             auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (jmax (1, programNames.size() - 1));
 
-            editController->setParamNormalized (programParameterID, value);
-            Steinberg::int32 index;
-            inputParameterChanges->addParameterData (programParameterID, index)->addPoint (0, value, index);
+            if (auto* param = getParameterForID (programParameterID))
+                param->setValue ((float) value);
         }
     }
 
@@ -2509,6 +2745,16 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
     {
+        // The VST3 plugin format requires that get/set state calls are made
+        // from the message thread.
+        // We'll lock the message manager here as a safety precaution, but some
+        // plugins may still misbehave!
+
+        JUCE_ASSERT_MESSAGE_THREAD
+        MessageManagerLock lock;
+
+        parameterDispatcher.flush();
+
         XmlElement state ("VST3PluginState");
 
         appendStateFrom (state, holder->component, "IComponent");
@@ -2519,6 +2765,16 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
+        // The VST3 plugin format requires that get/set state calls are made
+        // from the message thread.
+        // We'll lock the message manager here as a safety precaution, but some
+        // plugins may still misbehave!
+
+        JUCE_ASSERT_MESSAGE_THREAD
+        MessageManagerLock lock;
+
+        parameterDispatcher.flush();
+
         if (auto head = AudioProcessor::getXmlFromBinary (data, sizeInBytes))
         {
             auto componentStream (createMemoryStreamForState (*head, "IComponent"));
@@ -2532,7 +2788,7 @@ public:
                 {
                     int64 result;
                     componentStream->seek (0, IBStream::kIBSeekSet, &result);
-                    editController->setComponentState (componentStream);
+                    setComponentStateAndResetParameters (*componentStream);
                 }
 
                 auto controllerStream (createMemoryStreamForState (*head, "IEditController"));
@@ -2540,6 +2796,19 @@ public:
                 if (controllerStream != nullptr)
                     editController->setState (controllerStream);
             }
+        }
+    }
+
+    void setComponentStateAndResetParameters (Steinberg::MemoryStream& stream)
+    {
+        jassert (editController != nullptr);
+
+        warnOnFailureIfImplemented (editController->setComponentState (&stream));
+
+        for (auto* parameter : getParameters())
+        {
+            auto* vst3Param = static_cast<VST3Parameter*> (parameter);
+            vst3Param->setValueFromEditor ((float) editController->getParamNormalized (vst3Param->getParamID()));
         }
     }
 
@@ -2573,132 +2842,6 @@ public:
         ignoreUnused (data, sizeInBytes);
     }
 
-    //==============================================================================
-    // NB: this class and its subclasses must be public to avoid problems in
-    // DLL builds under MSVC.
-    struct ParamValueQueueList  : public Vst::IParameterChanges
-    {
-        ParamValueQueueList() {}
-        virtual ~ParamValueQueueList() {}
-
-        JUCE_DECLARE_VST3_COM_REF_METHODS
-        JUCE_DECLARE_VST3_COM_QUERY_METHODS
-
-        Steinberg::int32 PLUGIN_API getParameterCount() override
-        {
-            const ScopedLock sl (queuesLock);
-            return numQueuesUsed;
-        }
-
-        Vst::IParamValueQueue* PLUGIN_API getParameterData (Steinberg::int32 index) override
-        {
-            const ScopedLock sl (queuesLock);
-            return isPositiveAndBelow (static_cast<int> (index), numQueuesUsed) ? queues[(int) index] : nullptr;
-        }
-
-        Vst::IParamValueQueue* PLUGIN_API addParameterData (const Vst::ParamID& id, Steinberg::int32& index) override
-        {
-            const ScopedLock sl (queuesLock);
-
-            for (int i = numQueuesUsed; --i >= 0;)
-            {
-                if (auto* q = queues.getUnchecked (i))
-                {
-                    if (q->getParameterId() == id)
-                    {
-                        index = (Steinberg::int32) i;
-                        return q;
-                    }
-                }
-            }
-
-            index = numQueuesUsed++;
-            auto* valueQueue = (index < queues.size() ? queues[index]
-                                                      : queues.add (new ParamValueQueue()));
-
-            valueQueue->clear();
-            valueQueue->setParamID (id);
-
-            return valueQueue;
-        }
-
-        void clearAllQueues() noexcept
-        {
-            const ScopedLock sl (queuesLock);
-            numQueuesUsed = 0;
-        }
-
-        struct ParamValueQueue  : public Vst::IParamValueQueue
-        {
-            ParamValueQueue()
-            {
-                points.ensureStorageAllocated (1024);
-            }
-
-            virtual ~ParamValueQueue() {}
-
-            void setParamID (Vst::ParamID pID) noexcept    { paramID = pID; }
-
-            JUCE_DECLARE_VST3_COM_REF_METHODS
-            JUCE_DECLARE_VST3_COM_QUERY_METHODS
-
-            Steinberg::Vst::ParamID PLUGIN_API getParameterId() override    { return paramID; }
-            Steinberg::int32 PLUGIN_API getPointCount() override            { return (Steinberg::int32) points.size(); }
-
-            Steinberg::tresult PLUGIN_API getPoint (Steinberg::int32 index,
-                                                    Steinberg::int32& sampleOffset,
-                                                    Steinberg::Vst::ParamValue& value) override
-            {
-                const ScopedLock sl (points.getLock());
-
-                if (isPositiveAndBelow ((int) index, points.size()))
-                {
-                    auto e = points.getUnchecked ((int) index);
-                    sampleOffset = e.sampleOffset;
-                    value = e.value;
-
-                    return kResultTrue;
-                }
-
-                sampleOffset = -1;
-                value = 0.0;
-
-                return kResultFalse;
-            }
-
-            Steinberg::tresult PLUGIN_API addPoint (Steinberg::int32 sampleOffset,
-                                                    Steinberg::Vst::ParamValue value,
-                                                    Steinberg::int32& index) override
-            {
-                index = (Steinberg::int32) points.size();
-                points.add ({ sampleOffset, value });
-                return kResultTrue;
-            }
-
-            void clear() noexcept  { points.clearQuick(); }
-
-        private:
-            struct ParamPoint
-            {
-                Steinberg::int32 sampleOffset;
-                Steinberg::Vst::ParamValue value;
-            };
-
-            Atomic<int> refCount;
-            Vst::ParamID paramID = static_cast<Vst::ParamID> (-1);
-            Array<ParamPoint, CriticalSection> points;
-
-            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueue)
-        };
-
-        Atomic<int> refCount;
-
-        OwnedArray<ParamValueQueue> queues;
-        int numQueuesUsed = 0;
-        CriticalSection queuesLock;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParamValueQueueList)
-    };
 
 private:
     //==============================================================================
@@ -2740,6 +2883,40 @@ private:
     StringArray programNames;
     Vst::ParamID programParameterID = (Vst::ParamID) -1;
 
+    std::map<Vst::ParamID, int> paramToIndexMap;
+
+    int getMappedParamID (Vst::ParamID paramID) const
+    {
+        auto it = paramToIndexMap.find (paramID);
+        return it != paramToIndexMap.end() ? it->second : -1;
+    }
+
+    int getIndexOfParamID (Vst::ParamID paramID)
+    {
+        if (editController == nullptr)
+            return -1;
+
+        auto result = getMappedParamID (paramID);
+
+        if (result < 0)
+        {
+            auto numParams = editController->getParameterCount();
+
+            for (int i = 0; i < numParams; ++i)
+            {
+                Vst::ParameterInfo paramInfo;
+                editController->getParameterInfo (i, paramInfo);
+                paramToIndexMap[paramInfo.id] = i;
+            }
+
+            result = getMappedParamID (paramID);
+        }
+
+        return result;
+    }
+
+    EditControllerParameterDispatcher parameterDispatcher;
+
     //==============================================================================
     template <typename Type>
     static void appendStateFrom (XmlElement& head, VSTComSmartPtr<Type>& object, const String& identifier)
@@ -2774,12 +2951,13 @@ private:
         return nullptr;
     }
 
-    VSTComSmartPtr<ParamValueQueueList> inputParameterChanges, outputParameterChanges;
+    CachedParamValues cachedParamValues;
+    VSTComSmartPtr<ParameterChanges> inputParameterChanges  { new ParameterChanges };
+    VSTComSmartPtr<ParameterChanges> outputParameterChanges { new ParameterChanges };
     VSTComSmartPtr<MidiEventList> midiInputs, midiOutputs;
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
     bool isControllerInitialised = false, isActive = false, lastProcessBlockCallWasBypass = false;
     VST3Parameter* bypassParam = nullptr;
-    CriticalSection lock;
 
     //==============================================================================
     /** Some plugins need to be "connected" to intercommunicate between their implemented classes */
@@ -2815,6 +2993,13 @@ private:
                 unitInfo->getUnitInfo (i, ui);
                 infoMap[ui.id] = std::move (ui);
             }
+        }
+
+        {
+            auto allIds = getAllParamIDs (*editController);
+            inputParameterChanges ->initialise (allIds);
+            outputParameterChanges->initialise (allIds);
+            cachedParamValues = CachedParamValues { std::move (allIds) };
         }
 
         for (int i = 0; i < editController->getParameterCount(); ++i)
@@ -2865,7 +3050,7 @@ private:
 
         if (holder->component->getState (&stream) == kResultTrue)
             if (stream.seek (0, Steinberg::IBStream::kIBSeekSet, nullptr) == kResultTrue)
-                warnOnFailureIfImplemented (editController->setComponentState (&stream));
+                setComponentStateAndResetParameters (stream);
     }
 
     void grabInformationObjects()
@@ -2986,6 +3171,8 @@ private:
     /** @note An IPlugView, when first created, should start with a ref-count of 1! */
     IPlugView* tryCreatingView() const
     {
+        JUCE_ASSERT_MESSAGE_THREAD
+
         IPlugView* v = editController->createView (Vst::ViewType::kEditor);
 
         if (v == nullptr) v = editController->createView (nullptr);
@@ -3141,42 +3328,31 @@ tresult VST3HostContext::beginEdit (Vst::ParamID paramID)
 {
     if (plugin != nullptr)
     {
-        auto index = getIndexOfParamID (paramID);
-
-        if (index < 0)
-            return kResultFalse;
-
-        if (auto* param = plugin->getParameters()[index])
+        if (auto* param = plugin->getParameterForID (paramID))
+        {
             param->beginChangeGesture();
-        else
-            jassertfalse; // Invalid parameter index!
+            return kResultTrue;
+        }
+
+        jassertfalse; // Invalid parameter index!
+        return kResultFalse;
     }
 
     return kResultTrue;
 }
 
-tresult VST3HostContext::performEdit (Vst::ParamID paramID, Vst::ParamValue valueNormalized)
+tresult VST3HostContext::performEdit (Vst::ParamID paramID, Vst::ParamValue valueNormalised)
 {
     if (plugin != nullptr)
     {
-        auto index = getIndexOfParamID (paramID);
-
-        if (index < 0)
-            return kResultFalse;
-
-        if (auto* param = plugin->getParameters()[index])
-            param->sendValueChangedMessageToListeners ((float) valueNormalized);
+        if (auto* param = plugin->getParameterForID (paramID))
+            param->setValueFromEditor ((float) valueNormalised);
         else
             jassertfalse; // Invalid parameter index!
 
-        {
-            Steinberg::int32 eventIndex;
-            plugin->inputParameterChanges->addParameterData (paramID, eventIndex)->addPoint (0, valueNormalized, eventIndex);
-        }
-
         // did the plug-in already update the parameter internally
-        if (plugin->editController->getParamNormalized (paramID) != (float) valueNormalized)
-            return plugin->editController->setParamNormalized (paramID, valueNormalized);
+        if (plugin->editController->getParamNormalized (paramID) != (float) valueNormalised)
+            return plugin->editController->setParamNormalized (paramID, valueNormalised);
     }
 
     return kResultTrue;
@@ -3186,15 +3362,14 @@ tresult VST3HostContext::endEdit (Vst::ParamID paramID)
 {
     if (plugin != nullptr)
     {
-        auto index = getIndexOfParamID (paramID);
-
-        if (index < 0)
-            return kResultFalse;
-
-        if (auto* param = plugin->getParameters()[index])
+        if (auto* param = plugin->getParameterForID (paramID))
+        {
             param->endChangeGesture();
-        else
-            jassertfalse; // Invalid parameter index!
+            return kResultTrue;
+        }
+
+        jassertfalse; // Invalid parameter index!
+        return kResultFalse;
     }
 
     return kResultTrue;
@@ -3311,30 +3486,6 @@ tresult VST3HostContext::notifyProgramListChange (Vst::ProgramListID, Steinberg:
 }
 
 //==============================================================================
-int VST3HostContext::getIndexOfParamID (Vst::ParamID paramID)
-{
-    if (plugin == nullptr || plugin->editController == nullptr)
-        return -1;
-
-    auto result = getMappedParamID (paramID);
-
-    if (result < 0)
-    {
-        auto numParams = plugin->editController->getParameterCount();
-
-        for (int i = 0; i < numParams; ++i)
-        {
-            Vst::ParameterInfo paramInfo;
-            plugin->editController->getParameterInfo (i, paramInfo);
-            paramToIndexMap[paramInfo.id] = i;
-        }
-
-        result = getMappedParamID (paramID);
-    }
-
-    return result;
-}
-
 //==============================================================================
 VST3PluginFormat::VST3PluginFormat() {}
 VST3PluginFormat::~VST3PluginFormat() {}
