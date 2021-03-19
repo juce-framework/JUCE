@@ -283,7 +283,7 @@ private:
 
     struct PathGeometrySink  : public ComBaseClassHelper<IDWriteGeometrySink>
     {
-        PathGeometrySink() : ComBaseClassHelper<IDWriteGeometrySink> (0) {}
+        PathGeometrySink() : ComBaseClassHelper (0) {}
 
         void STDMETHODCALLTYPE AddBeziers (const D2D1_BEZIER_SEGMENT* beziers, UINT beziersCount) noexcept override
         {
