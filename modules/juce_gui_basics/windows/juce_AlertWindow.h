@@ -460,6 +460,8 @@ protected:
     void userTriedToCloseWindow() override;
     /** @internal */
     int getDesktopWindowStyleFlags() const override;
+    /** @internal */
+    float getDesktopScaleFactor() const override { return desktopScale; }
 
 private:
     //==============================================================================
@@ -479,6 +481,7 @@ private:
     StringArray textboxNames, comboBoxNames;
     Component* const associatedComponent;
     bool escapeKeyCancels = true;
+    float desktopScale = 1.0f;
 
     void exitAlert (Button* button);
     void updateLayout (bool onlyIncreaseSize);
