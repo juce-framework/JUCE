@@ -27,18 +27,18 @@ bool ARAPluginDemoDocumentController::doRestoreObjectsFromStream (juce::ARAInput
 
         // read audio modification persistent ID and analysis result from archive
         const juce::String persistentID = input.readString();
-        const bool reverse = input.readBool();
+        const bool dimmed = input.readBool();
 
         // find audio modification to restore the state to (drop state if not to be loaded)
         auto audioModification = filter->getAudioModificationToRestoreStateWithID<ARAPluginDemoAudioModification> (persistentID.getCharPointer());
         if (! audioModification)
             continue;
 
-        bool reverseStateChanged = (reverse != audioModification->getReversePlayback());
-        audioModification->setReversePlayback (reverse);
+        bool dimChanged = (dimmed != audioModification->isDimmed());
+        audioModification->setDimmed (dimmed);
 
-        // if the reverse state changed, send a sample content change notification without notifying the host
-        if (reverseStateChanged)
+        // if the dim state changed, send a sample content change notification without notifying the host
+        if (dimChanged)
         {
             audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), false);
             for (auto playbackRegion : audioModification->getPlaybackRegions())
@@ -60,12 +60,12 @@ bool ARAPluginDemoDocumentController::doStoreObjectsToStream (juce::ARAOutputStr
     const size_t numAudioModifications = audioModificationsToPersist.size();
     bool success = output.writeInt64 ((juce::int64)numAudioModifications);
 
-    // for each audio modification to persist, persist its ID followed by whether or not it's reversed
+    // for each audio modification to persist, persist its ID followed by whether or not it's dimmed
     for (size_t i = 0; i < numAudioModifications; ++i)
     {
-        // write persistent ID and reverse state
+        // write persistent ID and dim state
         success = success && output.writeString (audioModificationsToPersist[i]->getPersistentID());
-        success = success && output.writeBool (audioModificationsToPersist[i]->getReversePlayback());
+        success = success && output.writeBool (audioModificationsToPersist[i]->isDimmed());
 
         const float progressVal = static_cast<float> (i) / static_cast<float> (numAudioModifications);
         getHostArchivingController()->notifyDocumentArchivingProgress (progressVal);

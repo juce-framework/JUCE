@@ -39,7 +39,7 @@ void RegionSequenceHeaderView::paint (juce::Graphics& g)
     g.drawRect (rect);
     rect.reduce (1, 1);
 
-    const juce::Colour trackColour = juce::convertOptionalARAColour (regionSequence->getColor());
+    const juce::Colour trackColour = juce::convertOptionalARAColour (regionSequence->getColor(), juce::Colours::black);
     g.setColour (trackColour);
     g.fillRect (rect);
 
