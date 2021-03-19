@@ -732,8 +732,7 @@ public:
     Steinberg::TBool PLUGIN_API isViewEmbeddingSupported() override
     {
         if (auto* pluginInstance = getPluginInstance())
-            if (auto* araExtension = dynamic_cast<AudioProcessorARAExtension*> (pluginInstance))
-                return (Steinberg::TBool) araExtension->isEditorView();
+            return (Steinberg::TBool) dynamic_cast<AudioProcessorARAExtension*> (pluginInstance)->isEditorView();
         return (Steinberg::TBool) false;
     }
 
@@ -1018,6 +1017,9 @@ public:
             }
 
             auto latencySamples = pluginInstance->getLatencySamples();
+           #if JucePlugin_Enable_ARA
+            jassert (latencySamples == 0 || ! dynamic_cast<AudioProcessorARAExtension*> (pluginInstance)->isBoundToARA());
+           #endif
 
             if (latencySamples != lastLatencySamples)
             {
