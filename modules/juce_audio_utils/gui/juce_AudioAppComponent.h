@@ -82,8 +82,8 @@ public:
                                         is needed by sources such as tone generators.
         @see releaseResources, getNextAudioBlock
     */
-    virtual void prepareToPlay (int samplesPerBlockExpected,
-                                double sampleRate) override = 0;
+    void prepareToPlay (int samplesPerBlockExpected,
+                        double sampleRate) override = 0;
 
     /** Allows the source to release anything it no longer needs after playback has stopped.
 
@@ -97,7 +97,7 @@ public:
 
         @see prepareToPlay, getNextAudioBlock
     */
-    virtual void releaseResources() override = 0;
+    void releaseResources() override = 0;
 
     /** Called repeatedly to fetch subsequent blocks of audio data.
 
@@ -111,7 +111,7 @@ public:
 
         @see AudioSourceChannelInfo, prepareToPlay, releaseResources
     */
-    virtual void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override = 0;
+    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override = 0;
 
     /** Shuts down the audio device and clears the audio source.
 
