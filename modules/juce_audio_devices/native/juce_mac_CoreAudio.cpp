@@ -947,9 +947,32 @@ public:
             jassert (inputDeviceId != 0);
             device = new CoreAudioInternal (*this, inputDeviceId, true, outputDeviceId != 0);
         }
-        else
+        else if (inputDeviceId == 0)
         {
             device = new CoreAudioInternal (*this, outputDeviceId, false, true);
+        }
+        else
+        {
+            NSDictionary* description = @{
+                @(kAudioAggregateDeviceUIDKey) : @"com.juce.aggregate",
+                @(kAudioAggregateDeviceIsPrivateKey) : @(1),
+                @(kAudioAggregateDeviceSubDeviceListKey): @[
+                    @{
+                        @(kAudioSubDeviceUIDKey) : getDeviceUID (inputDeviceId),
+                        @(kAudioSubDeviceDriftCompensationKey) : @(1),
+                        @(kAudioSubDeviceDriftCompensationQualityKey) : @(kAudioSubDeviceDriftCompensationMaxQuality),
+                    },
+                    @{
+                        @(kAudioSubDeviceUIDKey) : getDeviceUID (outputDeviceId),
+                        @(kAudioSubDeviceDriftCompensationKey) : @(1),
+                        @(kAudioSubDeviceDriftCompensationQualityKey) : @(kAudioSubDeviceDriftCompensationMaxQuality),
+                    },
+                ],
+            };
+            // Guaranteed available earlier in CoreAudioIODeviceType::createDevice()
+            OSStatus status = AudioHardwareCreateAggregateDevice ((CFDictionaryRef)description, &aggregateDeviceID);
+            if (status == noErr)
+                device = new CoreAudioInternal (*this, aggregateDeviceID, true, true);
         }
 
         jassert (device != nullptr);
@@ -973,6 +996,9 @@ public:
         pa.mElement = kAudioObjectPropertyElementWildcard;
 
         AudioObjectRemovePropertyListener (kAudioObjectSystemObject, &pa, hardwareListenerProc, internal.get());
+
+        if (aggregateDeviceID != 0)
+            AudioHardwareDestroyAggregateDevice (aggregateDeviceID);
     }
 
     StringArray getOutputChannelNames() override        { return internal->outChanNames; }
@@ -1145,6 +1171,7 @@ public:
     int inputIndex, outputIndex;
 
 private:
+    AudioDeviceID aggregateDeviceID = 0;
     std::unique_ptr<CoreAudioInternal> internal;
     bool isOpen_ = false, isStarted = false, restartDevice = true;
     String lastError;
@@ -1181,6 +1208,15 @@ private:
         }
 
         return noErr;
+    }
+
+    static NSString* getDeviceUID (AudioDeviceID deviceID)
+    {
+        CFStringRef uid = NULL;
+        UInt32 uidSize = sizeof (uid);
+        AudioObjectPropertyAddress pa {kAudioDevicePropertyDeviceUID, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster};
+        AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &uidSize, &uid);
+        return [(NSString*)uid autorelease];
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioIODevice)
@@ -2152,7 +2188,13 @@ public:
         auto combinedName = outputDeviceName.isEmpty() ? inputDeviceName
                                                        : outputDeviceName;
 
-        if (inputDeviceID == outputDeviceID)
+        // Newer Apple platforms can create aggregate audio devices
+        bool canCreateAppleAggregateDevice = [] {
+            if (@available(macOS 10.9, iOS 7, *))
+                return true;
+            return false;
+        }();
+        if (inputDeviceID == outputDeviceID || canCreateAppleAggregateDevice)
             return new CoreAudioIODevice (this, combinedName, inputDeviceID, inputIndex, outputDeviceID, outputIndex);
 
         std::unique_ptr<CoreAudioIODevice> in, out;
