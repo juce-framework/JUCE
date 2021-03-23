@@ -264,6 +264,23 @@ private:
 #endif
 
 //==============================================================================
+class ScopedThreadLocalBooleanSetter
+{
+public:
+    explicit ScopedThreadLocalBooleanSetter (ThreadLocalValue<bool>& ref)
+        : toSet (ref)
+    {
+        jassert (! toSet.get());
+        toSet = true;
+    }
+
+    ~ScopedThreadLocalBooleanSetter() noexcept { toSet = false; }
+
+private:
+    ThreadLocalValue<bool>& toSet;
+};
+
+//==============================================================================
 class JuceAudioProcessor   : public Vst::IUnitInfo
 {
 public:
@@ -672,8 +689,6 @@ public:
             valueNormalized = info.defaultNormalizedValue;
         }
 
-        virtual ~Param() override = default;
-
         bool updateParameterInfo()
         {
             auto updateParamIfChanged = [] (Vst::String128& paramToUpdate, const String& newValue)
@@ -709,7 +724,7 @@ public:
 
                     param.setValue (value);
 
-                    inParameterChangedCallback = true;
+                    ScopedThreadLocalBooleanSetter scope { inParameterChangedCallback };
                     param.sendValueChangedMessageToListeners (value);
                 }
 
@@ -871,6 +886,9 @@ public:
     //==============================================================================
     tresult PLUGIN_API setComponentState (IBStream* stream) override
     {
+        // As an IEditController member, the host should only call this from the message thread.
+        JUCE_ASSERT_MESSAGE_THREAD
+
         if (auto* pluginInstance = getPluginInstance())
         {
             for (auto vstParamId : audioProcessor->vstParamIDs)
@@ -1109,10 +1127,7 @@ public:
     void paramChanged (Vst::ParamID vstParamId, double newValue)
     {
         if (inParameterChangedCallback.get())
-        {
-            inParameterChangedCallback = false;
             return;
-        }
 
         // NB: Cubase has problems if performEdit is called without setParamNormalized
         EditController::setParamNormalized (vstParamId, newValue);
@@ -1168,8 +1183,8 @@ public:
             }
         }
 
-        if (flags != 0 && componentHandler != nullptr && ! inSetupProcessing)
-            componentHandler->restartComponent (flags);
+        if (! inSetupProcessing)
+            componentRestarter.restart (flags);
     }
 
     //==============================================================================
@@ -1185,6 +1200,42 @@ private:
     friend class JuceVST3Component;
     friend struct Param;
 
+    class ComponentRestarter : private AsyncUpdater
+    {
+    public:
+        explicit ComponentRestarter (JuceVST3EditController& controllerIn)
+            : controller (controllerIn) {}
+
+        ~ComponentRestarter() noexcept override
+        {
+            cancelPendingUpdate();
+        }
+
+        void restart (int32 newFlags)
+        {
+            if (newFlags == 0)
+                return;
+
+            flags = newFlags;
+
+            if (Thread::getCurrentThreadId() == messageThreadId)
+                handleAsyncUpdate();
+            else
+                triggerAsyncUpdate();
+        }
+
+    private:
+        void handleAsyncUpdate() override
+        {
+            if (auto* handler = controller.componentHandler)
+                handler->restartComponent (flags);
+        }
+
+        const Thread::ThreadID messageThreadId = MessageManager::getInstance()->getCurrentMessageThread();
+        JuceVST3EditController& controller;
+        int32 flags = 0;
+    };
+
     //==============================================================================
     VSTComSmartPtr<JuceAudioProcessor> audioProcessor;
 
@@ -1192,6 +1243,8 @@ private:
     {
         int channel = -1, ctrlNumber = -1;
     };
+
+    ComponentRestarter componentRestarter { *this };
 
     enum { numMIDIChannels = 16 };
     Vst::ParamID parameterToMidiControllerOffset;
@@ -2098,7 +2151,7 @@ public:
             auto floatValue = (shouldBeBypassed ? 1.0f : 0.0f);
             bypassParam->setValue (floatValue);
 
-            inParameterChangedCallback = true;
+            ScopedThreadLocalBooleanSetter scope { inParameterChangedCallback };
             bypassParam->sendValueChangedMessageToListeners (floatValue);
         }
     }
@@ -2804,7 +2857,7 @@ public:
                         {
                             param->setValue (floatValue);
 
-                            inParameterChangedCallback = true;
+                            ScopedThreadLocalBooleanSetter scope { inParameterChangedCallback };
                             param->sendValueChangedMessageToListeners (floatValue);
                         }
                     }
