@@ -81,10 +81,17 @@ static int warnOnFailureIfImplemented (int result) noexcept
 //==============================================================================
 static int getHashForTUID (const TUID& tuid) noexcept
 {
+   #if JUCE_VST3_HOST_CROSS_PLATFORM_UID
+    const FUID fuid { tuid };
+    const uint32 inputArray[] { fuid.getLong1(), fuid.getLong2(), fuid.getLong3(), fuid.getLong4() };
+   #else
+    const auto& inputArray = tuid;
+   #endif
+
     uint32 value = 0;
 
-    for (int i = 0; i < numElementsInArray (tuid); ++i)
-        value = (value * 31) + (uint32) tuid[i];
+    for (const auto& item : inputArray)
+        value = (value * 31) + (uint32) item;
 
     return (int) value;
 }
