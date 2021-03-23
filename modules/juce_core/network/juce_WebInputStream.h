@@ -103,7 +103,7 @@ class JUCE_API WebInputStream  : public InputStream
 
             @param request    the original request
             @param bytesSent  the number of bytes sent so far
-            @param totalByes  the total number of bytes to send
+            @param totalBytes  the total number of bytes to send
 
             @returns true to continue or false to cancel the upload
         */
