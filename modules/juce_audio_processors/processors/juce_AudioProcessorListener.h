@@ -69,6 +69,13 @@ public:
         ChangeDetails withParameterInfoChanged (bool b) const noexcept { return with (&ChangeDetails::parameterInfoChanged, b); }
         ChangeDetails withProgramChanged       (bool b) const noexcept { return with (&ChangeDetails::programChanged,       b); }
 
+        static ChangeDetails getAllChanged()
+        {
+            return ChangeDetails{}.withLatencyChanged (true)
+                                  .withParameterInfoChanged (true)
+                                  .withProgramChanged (true);
+        }
+
     private:
         template <typename Member, typename Value>
         ChangeDetails with (Member&& member, Value&& value) const noexcept
