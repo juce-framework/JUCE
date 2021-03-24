@@ -3376,7 +3376,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (JucePluginFactory)
 };
 
-} // juce namespace
+} // namespace juce
 
 //==============================================================================
 #ifndef JucePlugin_Vst3ComponentFlags

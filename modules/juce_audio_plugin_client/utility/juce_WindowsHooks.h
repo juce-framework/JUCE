@@ -105,6 +105,6 @@ namespace
     };
 }
 
-} // juce namespace
+} // namespace juce
 
 #endif
