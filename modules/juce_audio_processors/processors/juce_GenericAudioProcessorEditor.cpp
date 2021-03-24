@@ -324,6 +324,8 @@ public:
         else
             slider.setRange (0.0, 1.0);
 
+        slider.setDoubleClickReturnValue (true, param.getDefaultValue());
+
         slider.setScrollWheelEnabled (false);
         addAndMakeVisible (slider);
 
