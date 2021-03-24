@@ -1,7 +1,7 @@
 #if defined(__arm__) || defined(__TARGET_ARCH_ARM) || defined(_M_ARM) || defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)
 
   #if defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)
-    #error JUCE_ARCH arm64
+    #error JUCE_ARCH aarch64
   #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 8) || defined(__ARMv8__) || defined(__ARMv8_A__)
     #error JUCE_ARCH armv8l
   #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 7) || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__) || defined(_ARM_ARCH_7) || defined(__CORE_CORTEXA__)

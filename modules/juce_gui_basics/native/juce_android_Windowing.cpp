@@ -186,7 +186,6 @@ static const uint8 javaComponentPeerView[] =
 
 //==============================================================================
 #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
- // Returns true if the intent was handled.
  extern bool juce_handleNotificationIntent (void*);
  extern void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
  extern void juce_firebaseRemoteNotificationReceived (void*);
@@ -197,21 +196,19 @@ static const uint8 javaComponentPeerView[] =
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (create,                      "<init>",                      "(II)V")
+ METHOD (create, "<init>", "(II)V")
 
 DECLARE_JNI_CLASS (AndroidLayoutParams, "android/view/ViewGroup$LayoutParams")
 #undef JNI_CLASS_MEMBERS
 
-//==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (addView,       "addView",             "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V") \
- METHOD (removeView, "removeView", "(Landroid/view/View;)V") \
- METHOD (updateViewLayout, "updateViewLayout", "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V")
+ METHOD (addView,          "addView",             "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V") \
+ METHOD (removeView,       "removeView",          "(Landroid/view/View;)V") \
+ METHOD (updateViewLayout, "updateViewLayout",    "(Landroid/view/View;Landroid/view/ViewGroup$LayoutParams;)V")
 
 DECLARE_JNI_CLASS (AndroidViewManager, "android/view/ViewManager")
 #undef JNI_CLASS_MEMBERS
 
-//==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (create,           "<init>",             "(IIIIIII)V") \
  FIELD  (gravity,          "gravity",            "I") \
@@ -220,7 +217,6 @@ DECLARE_JNI_CLASS (AndroidViewManager, "android/view/ViewManager")
 DECLARE_JNI_CLASS (AndroidWindowManagerLayoutParams, "android/view/WindowManager$LayoutParams")
 #undef JNI_CLASS_MEMBERS
 
-//==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (getDecorView, "getDecorView",       "()Landroid/view/View;") \
  METHOD (setFlags,     "setFlags",           "(II)V") \
@@ -229,6 +225,22 @@ DECLARE_JNI_CLASS (AndroidWindowManagerLayoutParams, "android/view/WindowManager
 DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getDisplayCutout,     "getDisplayCutout", "()Landroid/view/DisplayCutout;")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindowInsets, "android/view/WindowInsets", 28)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getSafeInsetBottom, "getSafeInsetBottom", "()I") \
+ METHOD (getSafeInsetLeft,   "getSafeInsetLeft",   "()I") \
+ METHOD (getSafeInsetRight,  "getSafeInsetRight",  "()I") \
+ METHOD (getSafeInsetTop,    "getSafeInsetTop",    "()I")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidDisplayCutout, "android/view/DisplayCutout", 28)
+#undef JNI_CLASS_MEMBERS
+
+//==============================================================================
 namespace
 {
     enum
@@ -244,8 +256,31 @@ namespace
     };
 
     constexpr int fullScreenFlags = SYSTEM_UI_FLAG_HIDE_NAVIGATION | SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-
     constexpr int FLAG_NOT_FOCUSABLE = 0x8;
+}
+
+//==============================================================================
+static bool supportsDisplayCutout()
+{
+    return getAndroidSDKVersion() >= 28;
+}
+
+static BorderSize<int> androidDisplayCutoutToBorderSize (LocalRef<jobject> displayCutout, double displayScale)
+{
+    if (displayCutout.get() == nullptr)
+        return {};
+
+    auto* env = getEnv();
+
+    auto getInset = [&] (jmethodID methodID)
+    {
+        return roundToInt (env->CallIntMethod (displayCutout.get(), methodID) / displayScale);
+    };
+
+    return { getInset (AndroidDisplayCutout.getSafeInsetTop),
+             getInset (AndroidDisplayCutout.getSafeInsetLeft),
+             getInset (AndroidDisplayCutout.getSafeInsetBottom),
+             getInset (AndroidDisplayCutout.getSafeInsetRight) };
 }
 
 //==============================================================================
@@ -254,11 +289,7 @@ class AndroidComponentPeer  : public ComponentPeer,
 {
 public:
     AndroidComponentPeer (Component& comp, int windowStyleFlags, void* nativeViewHandle)
-        : ComponentPeer (comp, windowStyleFlags),
-          fullScreen (false),
-          navBarsHidden (false),
-          sizeAllocated (0),
-          scale ((float) Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale)
+        : ComponentPeer (comp, windowStyleFlags)
     {
         auto* env = getEnv();
 
@@ -274,7 +305,7 @@ public:
 
             // we don't know if the user is holding on to a local ref to this, so
             // explicitly create a new one
-            auto nativeView = LocalRef<jobject>(env->NewLocalRef(static_cast<jobject> (nativeViewHandle)));
+            auto nativeView = LocalRef<jobject> (env->NewLocalRef (static_cast<jobject> (nativeViewHandle)));
 
             if (env->IsInstanceOf (nativeView.get(), AndroidActivity))
             {
@@ -301,10 +332,9 @@ public:
             viewGroupIsWindow = true;
 
             LocalRef<jobject> viewLayoutParams (env->NewObject (AndroidLayoutParams, AndroidLayoutParams.create, -2, -2));
-
             env->CallVoidMethod (view.get(), AndroidView.setLayoutParams, viewLayoutParams.get());
 
-            Rectangle<int> physicalBounds = comp.getBoundsInParent() * scale;
+            auto physicalBounds = (comp.getBoundsInParent().toFloat() * scale).toNearestInt();
 
             view.callVoidMethod (AndroidView.layout,
                                  physicalBounds.getX(), physicalBounds.getY(), physicalBounds.getRight(), physicalBounds.getBottom());
@@ -314,8 +344,21 @@ public:
                                                                   physicalBounds.getX(), physicalBounds.getY(),
                                                                   TYPE_APPLICATION, FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_NO_LIMITS | FLAG_NOT_FOCUSABLE,
                                                                   component.isOpaque() ? PIXEL_FORMAT_OPAQUE : PIXEL_FORMAT_TRANSPARENT));
+
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.gravity, GRAVITY_LEFT | GRAVITY_TOP);
             env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.windowAnimations, 0x01030000 /* android.R.style.Animation */);
+
+            if (supportsDisplayCutout())
+            {
+                jfieldID layoutInDisplayCutoutModeFieldId = env->GetFieldID (AndroidWindowManagerLayoutParams,
+                                                                             "layoutInDisplayCutoutMode",
+                                                                             "I");
+
+                if (layoutInDisplayCutoutModeFieldId != nullptr)
+                    env->SetIntField (windowLayoutParams.get(),
+                                      layoutInDisplayCutoutModeFieldId,
+                                      LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
+            }
 
             if (Desktop::getInstance().getKioskModeComponent() != nullptr)
                 setNavBarsHidden (true);
@@ -329,46 +372,41 @@ public:
             env->CallVoidMethod (viewGroup.get(), AndroidViewManager.addView, view.get(), windowLayoutParams.get());
         }
 
+        if (supportsDisplayCutout())
+        {
+            jmethodID setOnApplyWindowInsetsListenerMethodId = env->GetMethodID (AndroidView,
+                                                                                 "setOnApplyWindowInsetsListener",
+                                                                                 "(Landroid/view/View$OnApplyWindowInsetsListener;)V");
+
+            if (setOnApplyWindowInsetsListenerMethodId != nullptr)
+                env->CallVoidMethod (view.get(), setOnApplyWindowInsetsListenerMethodId,
+                                     CreateJavaInterface (new ViewWindowInsetsListener,
+                                                          "android/view/View$OnApplyWindowInsetsListener").get());
+        }
+
         if (isFocused())
             handleFocusGain();
     }
 
     ~AndroidComponentPeer() override
     {
+        stopTimer();
+
         auto* env = getEnv();
 
         env->CallVoidMethod (view, ComponentPeerView.clear);
         frontWindow = nullptr;
 
-        if (MessageManager::getInstance()->isThisTheMessageThread())
+        GlobalRef localView (view);
+        GlobalRef localViewGroup (viewGroup);
+
+        callOnMessageThread ([env, localView, localViewGroup]
         {
-            if (env->IsInstanceOf (viewGroup.get(), AndroidActivity))
-                env->CallVoidMethod (viewGroup.get(), AndroidActivity.setContentView, nullptr);
+            if (env->IsInstanceOf (localViewGroup.get(), AndroidActivity))
+                env->CallVoidMethod (localViewGroup.get(), AndroidActivity.setContentView, nullptr);
             else
-                env->CallVoidMethod (viewGroup.get(), AndroidViewManager.removeView, view.get());
-        }
-        else
-        {
-            struct ViewDeleter  : public CallbackMessage
-            {
-                ViewDeleter (const GlobalRef& view_, const GlobalRef& viewGroup_) : view (view_), group (viewGroup_) {}
-
-                void messageCallback() override
-                {
-                    auto* callbackEnv = getEnv();
-
-                    if (callbackEnv->IsInstanceOf (group.get(), AndroidActivity))
-                        callbackEnv->CallVoidMethod (group.get(), AndroidActivity.setContentView, nullptr);
-                    else
-                        callbackEnv->CallVoidMethod (group.get(), AndroidViewManager.removeView, view.get());
-                }
-
-            private:
-                GlobalRef view, group;
-            };
-
-            (new ViewDeleter (view, viewGroup))->post();
-        }
+                env->CallVoidMethod (localViewGroup.get(), AndroidViewManager.removeView, localView.get());
+        });
     }
 
     void* getNativeHandle() const override
@@ -378,29 +416,12 @@ public:
 
     void setVisible (bool shouldBeVisible) override
     {
-        if (MessageManager::getInstance()->isThisTheMessageThread())
+        GlobalRef localView (view);
+
+        callOnMessageThread ([localView, shouldBeVisible]
         {
-            view.callVoidMethod (ComponentPeerView.setVisible, shouldBeVisible);
-        }
-        else
-        {
-            struct VisibilityChanger  : public CallbackMessage
-            {
-                VisibilityChanger (const GlobalRef& view_, bool shouldBeVisible_)
-                    : view (view_), shouldBeVisible (shouldBeVisible_)
-                {}
-
-                void messageCallback() override
-                {
-                    view.callVoidMethod (ComponentPeerView.setVisible, shouldBeVisible);
-                }
-
-                GlobalRef view;
-                bool shouldBeVisible;
-            };
-
-            (new VisibilityChanger (view, shouldBeVisible))->post();
-        }
+            localView.callVoidMethod (ComponentPeerView.setVisible, shouldBeVisible);
+        });
     }
 
     void setTitle (const String& title) override
@@ -410,60 +431,48 @@ public:
 
     void setBounds (const Rectangle<int>& userRect, bool isNowFullScreen) override
     {
-        Rectangle<int> r = (userRect.toFloat() * scale).toNearestInt();
+        auto bounds = (userRect.toFloat() * scale).toNearestInt();
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
         {
-            auto* env = getEnv();
-
             fullScreen = isNowFullScreen;
 
-            {
-                view.callVoidMethod (AndroidView.layout,
-                                     r.getX(), r.getY(), r.getRight(), r.getBottom());
+            view.callVoidMethod (AndroidView.layout,
+                                 bounds.getX(), bounds.getY(), bounds.getRight(), bounds.getBottom());
 
-                if (viewGroup != nullptr && viewGroupIsWindow)
-                {
-                    LocalRef<jobject> windowLayoutParams (env->NewObject (AndroidWindowManagerLayoutParams, AndroidWindowManagerLayoutParams.create,
-                                                                          r.getWidth(), r.getHeight(),
-                                                                          r.getX(), r.getY(),
-                                                                          TYPE_APPLICATION, FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_NO_LIMITS,
-                                                                          component.isOpaque() ? PIXEL_FORMAT_OPAQUE : PIXEL_FORMAT_TRANSPARENT));
-                    env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.gravity, 0x3 /* LEFT */ | 0x30 /* TOP */);
-                    env->CallVoidMethod (viewGroup.get(), AndroidViewManager.updateViewLayout, view.get(), windowLayoutParams.get());
-                }
+            if (viewGroup != nullptr && viewGroupIsWindow)
+            {
+                auto* env = getEnv();
+
+                LocalRef<jobject> windowLayoutParams (env->NewObject (AndroidWindowManagerLayoutParams, AndroidWindowManagerLayoutParams.create,
+                                                                      bounds.getWidth(), bounds.getHeight(), bounds.getX(), bounds.getY(),
+                                                                      TYPE_APPLICATION, FLAG_NOT_TOUCH_MODAL | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_NO_LIMITS,
+                                                                      component.isOpaque() ? PIXEL_FORMAT_OPAQUE : PIXEL_FORMAT_TRANSPARENT));
+
+                env->SetIntField (windowLayoutParams.get(), AndroidWindowManagerLayoutParams.gravity, GRAVITY_LEFT | GRAVITY_TOP);
+                env->CallVoidMethod (viewGroup.get(), AndroidViewManager.updateViewLayout, view.get(), windowLayoutParams.get());
             }
         }
         else
         {
-            class ViewMover  : public CallbackMessage
+            GlobalRef localView (view);
+
+            MessageManager::callAsync ([localView, bounds]
             {
-            public:
-                ViewMover (const GlobalRef& v, Rectangle<int> boundsToUse)  : view (v), bounds (boundsToUse) {}
-
-                void messageCallback() override
-                {
-                    view.callVoidMethod (AndroidView.layout,
-                                         bounds.getX(), bounds.getY(), bounds.getRight(), bounds.getBottom());
-                }
-
-            private:
-                GlobalRef view;
-                Rectangle<int> bounds;
-            };
-
-            (new ViewMover (view, r))->post();
+                localView.callVoidMethod (AndroidView.layout,
+                                          bounds.getX(), bounds.getY(), bounds.getRight(), bounds.getBottom());
+            });
         }
     }
 
     Rectangle<int> getBounds() const override
     {
-        Rectangle<int> r (view.callIntMethod (AndroidView.getLeft),
-                          view.callIntMethod (AndroidView.getTop),
-                          view.callIntMethod (AndroidView.getWidth),
-                          view.callIntMethod (AndroidView.getHeight));
+        Rectangle<int> bounds (view.callIntMethod (AndroidView.getLeft),
+                               view.callIntMethod (AndroidView.getTop),
+                               view.callIntMethod (AndroidView.getWidth),
+                               view.callIntMethod (AndroidView.getHeight));
 
-        return r / scale;
+        return (bounds.toFloat() / scale).toNearestInt();
     }
 
     void handleScreenSizeChange() override
@@ -512,49 +521,32 @@ public:
         return false;
     }
 
-    bool shouldNavBarsBeHidden (bool shouldBeFullScreen) const
-    {
-        if (shouldBeFullScreen)
-            if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
-                if (kiosk->getPeer() == this)
-                    return true;
-
-        return false;
-    }
-
-    void setNavBarsHidden (bool hidden)
-    {
-        view.callVoidMethod (ComponentPeerView.setSystemUiVisibilityCompat,
-                             hidden ? (jint) (fullScreenFlags)
-                                    : (jint) (SYSTEM_UI_FLAG_VISIBLE));
-
-        navBarsHidden = hidden;
-    }
-
     void setFullScreen (bool shouldBeFullScreen) override
     {
-        // updating the nav bar visibility is a bit odd on Android - need to wait for
         if (shouldNavBarsBeHidden (shouldBeFullScreen))
         {
-            if (! isTimerRunning())
-            {
-                startTimer (500);
-            }
+            if (isTimerRunning())
+                return;
+
+            startTimer (500);
         }
         else
         {
             setNavBarsHidden (false);
         }
 
-        Rectangle<int> r (shouldBeFullScreen ? Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea
-                                             : lastNonFullscreenBounds);
+        auto newBounds = [&]
+        {
+            if (navBarsHidden || shouldBeFullScreen)
+                if (auto* display = Desktop::getInstance().getDisplays().getPrimaryDisplay())
+                    return navBarsHidden ? display->totalArea
+                                         : display->userArea;
 
-        if ((! shouldBeFullScreen) && r.isEmpty())
-            r = getBounds();
+            return lastNonFullscreenBounds.isEmpty() ? getBounds() : lastNonFullscreenBounds;
+        }();
 
-        // (can't call the component's setBounds method because that'll reset our fullscreen flag)
-        if (! r.isEmpty())
-            setBounds (r, shouldBeFullScreen);
+        if (! newBounds.isEmpty())
+            setBounds (newBounds, shouldBeFullScreen);
 
         component.repaint();
     }
@@ -562,13 +554,6 @@ public:
     bool isFullScreen() const override
     {
         return fullScreen;
-    }
-
-    void timerCallback() override
-    {
-        setNavBarsHidden (shouldNavBarsBeHidden (fullScreen));
-        setFullScreen (fullScreen);
-        stopTimer();
     }
 
     void setIcon (const Image& /*newIcon*/) override
@@ -581,14 +566,14 @@ public:
         return isPositiveAndBelow (localPos.x, component.getWidth())
             && isPositiveAndBelow (localPos.y, component.getHeight())
             && ((! trueIfInAChildWindow) || view.callBooleanMethod (ComponentPeerView.containsPoint,
-                                                                    localPos.x * scale,
-                                                                    localPos.y * scale));
+                                                                    (float) localPos.x * scale,
+                                                                    (float) localPos.y * scale));
     }
 
     BorderSize<int> getFrameSize() const override
     {
         // TODO
-        return BorderSize<int>();
+        return {};
     }
 
     bool setAlwaysOnTop (bool /*alwaysOnTop*/) override
@@ -603,7 +588,6 @@ public:
         if (frontWindow != this)
         {
             view.callVoidMethod (AndroidView.bringToFront);
-
             frontWindow = this;
         }
 
@@ -622,11 +606,17 @@ public:
     void handleMouseDownCallback (int index, Point<float> sysPos, int64 time)
     {
         lastMousePos = sysPos / scale;
-        Point<float> pos = globalToLocal (lastMousePos);
+        auto pos = globalToLocal (lastMousePos);
 
         // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, ModifierKeys::currentModifiers.withoutMouseButtons(),
-                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, index);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch,
+                          pos,
+                          ModifierKeys::currentModifiers.withoutMouseButtons(),
+                          MouseInputSource::invalidPressure,
+                          MouseInputSource::invalidOrientation,
+                          time,
+                          {},
+                          index);
 
         if (isValidPeer (this))
             handleMouseDragCallback (index, sysPos, time);
@@ -635,19 +625,27 @@ public:
     void handleMouseDragCallback (int index, Point<float> sysPos, int64 time)
     {
         lastMousePos = sysPos / scale;
-        Point<float> pos = globalToLocal (lastMousePos);
+        auto pos = globalToLocal (lastMousePos);
 
         jassert (index < 64);
         touchesDown = (touchesDown | (1 << (index & 63)));
+
         ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier);
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier),
-                          MouseInputSource::invalidPressure, MouseInputSource::invalidOrientation, time, {}, index);
+
+        handleMouseEvent (MouseInputSource::InputSourceType::touch,
+                          pos,
+                          ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier),
+                          MouseInputSource::invalidPressure,
+                          MouseInputSource::invalidOrientation,
+                          time,
+                          {},
+                          index);
     }
 
     void handleMouseUpCallback (int index, Point<float> sysPos, int64 time)
     {
         lastMousePos = sysPos / scale;
-        Point<float> pos = globalToLocal (lastMousePos);
+        auto pos = globalToLocal (lastMousePos);
 
         jassert (index < 64);
         touchesDown = (touchesDown & ~(1 << (index & 63)));
@@ -655,8 +653,14 @@ public:
         if (touchesDown == 0)
             ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
 
-        handleMouseEvent (MouseInputSource::InputSourceType::touch, pos, ModifierKeys::currentModifiers.withoutMouseButtons(), MouseInputSource::invalidPressure,
-                          MouseInputSource::invalidOrientation, time, {}, index);
+        handleMouseEvent (MouseInputSource::InputSourceType::touch,
+                          pos,
+                          ModifierKeys::currentModifiers.withoutMouseButtons(),
+                          MouseInputSource::invalidPressure,
+                          MouseInputSource::invalidOrientation,
+                          time,
+                          {},
+                          index);
     }
 
     void handleKeyDownCallback (int k, int kc)
@@ -675,9 +679,8 @@ public:
         if (auto* app = JUCEApplicationBase::getInstance())
             handled = app->backButtonPressed();
 
-        if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
-            if (kiosk->getPeer() == this)
-                setNavBarsHidden (navBarsHidden);
+        if (isKioskModeComponent())
+            setNavBarsHidden (navBarsHidden);
 
         if (! handled)
         {
@@ -692,7 +695,6 @@ public:
                     env->CallVoidMethod (activity.get(), finishMethod);
             }
         }
-
     }
 
     void handleKeyboardHiddenCallback()
@@ -704,9 +706,8 @@ public:
 
     void handleAppResumedCallback()
     {
-        if (Component* kiosk = Desktop::getInstance().getKioskModeComponent())
-            if (kiosk->getPeer() == this)
-                setNavBarsHidden (navBarsHidden);
+        if (isKioskModeComponent())
+            setNavBarsHidden (navBarsHidden);
     }
 
     //==============================================================================
@@ -761,15 +762,9 @@ public:
     {
         view.callVoidMethod (ComponentPeerView.showKeyboard, javaString ("").get());
 
-        // updating the nav bar visibility is a bit odd on Android - need to wait for
         if (! isTimerRunning())
-            hideNavBarDelayed();
+            startTimer (500);
      }
-
-    void hideNavBarDelayed()
-    {
-        startTimer (500);
-    }
 
     //==============================================================================
     void handlePaintCallback (jobject canvas, jobject paint)
@@ -777,24 +772,24 @@ public:
         auto* env = getEnv();
 
         jobject rect = env->CallObjectMethod (canvas, AndroidCanvas.getClipBounds);
-        const int left   = env->GetIntField (rect, AndroidRect.left);
-        const int top    = env->GetIntField (rect, AndroidRect.top);
-        const int right  = env->GetIntField (rect, AndroidRect.right);
-        const int bottom = env->GetIntField (rect, AndroidRect.bottom);
+        auto left   = env->GetIntField (rect, AndroidRect.left);
+        auto top    = env->GetIntField (rect, AndroidRect.top);
+        auto right  = env->GetIntField (rect, AndroidRect.right);
+        auto bottom = env->GetIntField (rect, AndroidRect.bottom);
         env->DeleteLocalRef (rect);
 
-        const Rectangle<int> clip (left, top, right - left, bottom - top);
+        auto clip = Rectangle<int>::leftTopRightBottom (left, top, right, bottom);
 
-        const int sizeNeeded = clip.getWidth() * clip.getHeight();
+        if (clip.isEmpty())
+            return;
+
+        auto sizeNeeded = clip.getWidth() * clip.getHeight();
+
         if (sizeAllocated < sizeNeeded)
         {
             buffer.clear();
             sizeAllocated = sizeNeeded;
             buffer = GlobalRef (LocalRef<jobject> ((jobject) env->NewIntArray (sizeNeeded)));
-        }
-        else if (sizeNeeded == 0)
-        {
-            return;
         }
 
         if (jint* dest = env->GetIntArrayElements ((jintArray) buffer.get(), nullptr))
@@ -821,32 +816,15 @@ public:
 
     void repaint (const Rectangle<int>& userArea) override
     {
-        Rectangle<int> area = userArea * scale;
+        auto area = (userArea.toFloat() * scale).toNearestInt();
 
-        if (MessageManager::getInstance()->isThisTheMessageThread())
+        GlobalRef localView (view);
+
+        callOnMessageThread ([area, localView]
         {
-            view.callVoidMethod (AndroidView.invalidate, area.getX(), area.getY(), area.getRight(), area.getBottom());
-        }
-        else
-        {
-            struct ViewRepainter  : public CallbackMessage
-            {
-                ViewRepainter (const GlobalRef& view_, const Rectangle<int>& area_)
-                    : view (view_), area (area_) {}
-
-                void messageCallback() override
-                {
-                    view.callVoidMethod (AndroidView.invalidate, area.getX(), area.getY(),
-                                         area.getRight(), area.getBottom());
-                }
-
-            private:
-                GlobalRef view;
-                const Rectangle<int> area;
-            };
-
-            (new ViewRepainter (view, area))->post();
-        }
+            localView.callVoidMethod (AndroidView.invalidate,
+                                      area.getX(), area.getY(), area.getRight(), area.getBottom());
+        });
     }
 
     void performAnyPendingRepaintsNow() override
@@ -869,7 +847,7 @@ public:
     static int64 touchesDown;
 
     //==============================================================================
-    struct StartupActivityCallbackListener : ActivityLifecycleCallbacks
+    struct StartupActivityCallbackListener  : public ActivityLifecycleCallbacks
     {
         void onActivityStarted (jobject /*activity*/) override
         {
@@ -878,28 +856,18 @@ public:
 
             if (appContext.get() != nullptr)
             {
-
                 env->CallVoidMethod (appContext.get(),
                                      AndroidApplication.unregisterActivityLifecycleCallbacks,
                                      activityCallbackListener.get());
                 clear();
                 activityCallbackListener.clear();
 
-                const_cast<Displays &> (Desktop::getInstance().getDisplays()).refresh();
+                forceDisplayUpdate();
             }
         }
     };
 
 private:
-    //==============================================================================
-    GlobalRef view, viewGroup;
-    bool viewGroupIsWindow = false;
-    GlobalRef buffer;
-    bool fullScreen;
-    bool navBarsHidden;
-    int sizeAllocated;
-    float scale;
-
     //==============================================================================
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
      METHOD   (create,                      "<init>",                      "(Landroid/content/Context;ZJ)V") \
@@ -940,16 +908,59 @@ private:
     static void JNICALL handleAppResumedJni     (JNIEnv*, jobject /*view*/, jlong host)                                          { if (auto* myself = reinterpret_cast<AndroidComponentPeer*> (host)) myself->handleAppResumedCallback(); }
 
     //==============================================================================
-    friend class Displays;
-    static AndroidComponentPeer* frontWindow;
-    static GlobalRef activityCallbackListener;
+    struct ViewWindowInsetsListener  : public juce::AndroidInterfaceImplementer
+    {
+        jobject onApplyWindowInsets (LocalRef<jobject> v, LocalRef<jobject> insets)
+        {
+            auto* env = getEnv();
+
+            LocalRef<jobject> displayCutout (env->CallObjectMethod (insets.get(), AndroidWindowInsets.getDisplayCutout));
+
+            if (displayCutout != nullptr)
+            {
+                const auto& mainDisplay = *Desktop::getInstance().getDisplays().getPrimaryDisplay();
+                auto newSafeAreaInsets = androidDisplayCutoutToBorderSize (displayCutout, mainDisplay.scale);
+
+                if (newSafeAreaInsets != mainDisplay.safeAreaInsets)
+                    forceDisplayUpdate();
+
+                auto* fieldId = env->GetStaticFieldID (AndroidWindowInsets, "CONSUMED", "Landroid/view/WindowInsets");
+                jassert (fieldId != nullptr);
+
+                return env->GetStaticObjectField (AndroidWindowInsets, fieldId);
+            }
+
+            jmethodID onApplyWindowInsetsMethodId = env->GetMethodID (AndroidView,
+                                                                      "onApplyWindowInsets",
+                                                                      "(Landroid/view/WindowInsets;)Landroid/view/WindowInsets;");
+
+            jassert (onApplyWindowInsetsMethodId != nullptr);
+
+            return env->CallObjectMethod (v.get(), onApplyWindowInsetsMethodId, insets.get());
+        }
+
+    private:
+        jobject invoke (jobject proxy, jobject method, jobjectArray args) override
+        {
+            auto* env = getEnv();
+            auto methodName = juce::juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
+
+            if (methodName == "onApplyWindowInsets")
+            {
+                jassert (env->GetArrayLength (args) == 2);
+
+                LocalRef<jobject> windowView (env->GetObjectArrayElement (args, 0));
+                LocalRef<jobject> insets     (env->GetObjectArrayElement (args, 1));
+
+                return onApplyWindowInsets (std::move (windowView), std::move (insets));
+            }
+
+            // invoke base class
+            return AndroidInterfaceImplementer::invoke (proxy, method, args);
+        }
+    };
 
     //==============================================================================
-    static constexpr int GRAVITY_LEFT = 0x3, GRAVITY_TOP = 0x30;
-    static constexpr int TYPE_APPLICATION = 0x2;
-    static constexpr int FLAG_NOT_TOUCH_MODAL = 0x20, FLAG_LAYOUT_IN_SCREEN = 0x100, FLAG_LAYOUT_NO_LIMITS = 0x200;
-    static constexpr int PIXEL_FORMAT_OPAQUE = -1, PIXEL_FORMAT_TRANSPARENT = -2;
-
     struct PreallocatedImage  : public ImagePixelData
     {
         PreallocatedImage (int width_, int height_, jint* data_, bool hasAlpha_)
@@ -1008,6 +1019,64 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreallocatedImage)
     };
 
+    //==============================================================================
+    void timerCallback() override
+    {
+        setNavBarsHidden (shouldNavBarsBeHidden (fullScreen));
+        setFullScreen (fullScreen);
+        stopTimer();
+    }
+
+    bool isKioskModeComponent() const
+    {
+        if (auto* kiosk = Desktop::getInstance().getKioskModeComponent())
+            return kiosk->getPeer() == this;
+
+        return false;
+    }
+
+    bool shouldNavBarsBeHidden (bool shouldBeFullScreen) const
+    {
+        return (shouldBeFullScreen && isKioskModeComponent());
+    }
+
+    void setNavBarsHidden (bool hidden)
+    {
+        if (navBarsHidden != hidden)
+        {
+            navBarsHidden = hidden;
+
+            view.callVoidMethod (ComponentPeerView.setSystemUiVisibilityCompat,
+                                 (navBarsHidden ? (jint) (fullScreenFlags) : (jint) (SYSTEM_UI_FLAG_VISIBLE)));
+        }
+    }
+
+    template <typename Callback>
+    static void callOnMessageThread (Callback&& callback)
+    {
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            callback();
+        else
+            MessageManager::callAsync (std::forward<Callback> (callback));
+    }
+
+    //==============================================================================
+    friend class Displays;
+    static AndroidComponentPeer* frontWindow;
+    static GlobalRef activityCallbackListener;
+
+    static constexpr int GRAVITY_LEFT = 0x3, GRAVITY_TOP = 0x30;
+    static constexpr int TYPE_APPLICATION = 0x2;
+    static constexpr int FLAG_NOT_TOUCH_MODAL = 0x20, FLAG_LAYOUT_IN_SCREEN = 0x100, FLAG_LAYOUT_NO_LIMITS = 0x200;
+    static constexpr int PIXEL_FORMAT_OPAQUE = -1, PIXEL_FORMAT_TRANSPARENT = -2;
+    static constexpr int LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS = 0x3;
+
+    GlobalRef view, viewGroup, buffer;
+    bool viewGroupIsWindow = false, fullScreen = false, navBarsHidden = false;
+    int sizeAllocated = 0;
+    float scale = (float) Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AndroidComponentPeer)
 };
 
@@ -1416,9 +1485,13 @@ private:
 };
 
 //==============================================================================
-class MainActivityWindowLayoutListener   : public LayoutChangeListener
+struct MainActivityWindowLayoutListener   : public LayoutChangeListener
 {
-public:
+    MainActivityWindowLayoutListener (std::function<void()>&& updateDisplaysCb)
+        : forceDisplayUpdate (std::move (updateDisplaysCb))
+    {
+    }
+
     void onLayoutChange (LocalRef<jobject> /*view*/, int left, int top, int right, int bottom,
                          int oldLeft, int oldTop, int oldRight, int oldBottom) override
     {
@@ -1427,15 +1500,15 @@ public:
 
         if (newBounds != oldBounds)
         {
-            auto& displays = Desktop::getInstance().getDisplays();
-            auto& mainDisplay = *displays.getPrimaryDisplay();
-
-            Rectangle<int> userArea = newBounds / mainDisplay.scale;
+            const auto& mainDisplay = *Desktop::getInstance().getDisplays().getPrimaryDisplay();
+            auto userArea = (newBounds.toFloat() / mainDisplay.scale).toNearestInt();
 
             if (userArea != mainDisplay.userArea)
-                const_cast<Displays&> (displays).refresh();
+                forceDisplayUpdate();
         }
     }
+
+    std::function<void()> forceDisplayUpdate;
 };
 
 //==============================================================================
@@ -1492,6 +1565,26 @@ void Displays::findDisplays (float masterScale)
             if (! activityArea.isEmpty())
                 d.userArea = activityArea / d.scale;
 
+            if (supportsDisplayCutout())
+            {
+                jmethodID getRootWindowInsetsMethodId = env->GetMethodID (AndroidView,
+                                                                          "getRootWindowInsets",
+                                                                          "()Landroid/view/WindowInsets;");
+
+                if (getRootWindowInsetsMethodId != nullptr)
+                {
+                    LocalRef<jobject> insets (env->CallObjectMethod (contentView.get(), getRootWindowInsetsMethodId));
+
+                    if (insets != nullptr)
+                    {
+                        LocalRef<jobject> displayCutout (env->CallObjectMethod (insets.get(), AndroidWindowInsets.getDisplayCutout));
+
+                        if (displayCutout.get() != nullptr)
+                            d.safeAreaInsets = androidDisplayCutoutToBorderSize (displayCutout, d.scale);
+                    }
+                }
+            }
+
             static bool hasAddedMainActivityListener = false;
 
             if (! hasAddedMainActivityListener)
@@ -1499,7 +1592,7 @@ void Displays::findDisplays (float masterScale)
                 hasAddedMainActivityListener = true;
 
                 env->CallVoidMethod (contentView.get(), AndroidView.addOnLayoutChangeListener,
-                                     CreateJavaInterface (new MainActivityWindowLayoutListener,
+                                     CreateJavaInterface (new MainActivityWindowLayoutListener ([this] { refresh(); }),
                                                           "android/view/View$OnLayoutChangeListener").get());
             }
         }
@@ -1668,24 +1761,22 @@ const int KeyPress::fastForwardKey  = extendedKeyModifier + 47;
 const int KeyPress::rewindKey       = extendedKeyModifier + 48;
 
 //==============================================================================
-struct JuceActivityNewIntentListener
-{
-    #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-     CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V")
+#ifdef JUCE_PUSH_NOTIFICATIONS_ACTIVITY
+ struct JuceActivityNewIntentListener
+ {
+     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+      CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V")
 
-     DECLARE_JNI_CLASS (JavaActivity, JUCE_PUSH_NOTIFICATIONS_ACTIVITY)
-    #undef JNI_CLASS_MEMBERS
+      DECLARE_JNI_CLASS (JavaActivity, JUCE_PUSH_NOTIFICATIONS_ACTIVITY)
+     #undef JNI_CLASS_MEMBERS
 
-    static void JNICALL appNewIntent (JNIEnv*, jobject /*activity*/, jobject intentData)
-    {
-       #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
-        juce_handleNotificationIntent (static_cast<void*> (intentData));
-       #else
-        juce::ignoreUnused (intentData);
-       #endif
-    }
-};
+     static void JNICALL appNewIntent (JNIEnv*, jobject /*activity*/, jobject intentData)
+     {
+         juce_handleNotificationIntent (static_cast<void*> (intentData));
+     }
+ };
 
-JuceActivityNewIntentListener::JavaActivity_Class JuceActivityNewIntentListener::JavaActivity;
+ JuceActivityNewIntentListener::JavaActivity_Class JuceActivityNewIntentListener::JavaActivity;
+#endif
 
 } // namespace juce

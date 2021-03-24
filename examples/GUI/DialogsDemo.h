@@ -248,6 +248,11 @@ private:
         else if (type == extraComponentsAlertWindow)
         {
            #if JUCE_MODAL_LOOPS_PERMITTED
+            // Modal loops are extremely dangerous. Do not copy the code below unless you are absolutely
+            // certain you are aware of all the many complicated things that can go catastrophically
+            // wrong. Read the documentation for Component::runModalLoop. If you find you are using code
+            // similar to this you should refactor things to remove it.
+
             AlertWindow w ("AlertWindow demo..",
                            "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
                            AlertWindow::QuestionIcon);

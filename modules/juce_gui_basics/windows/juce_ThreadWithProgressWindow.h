@@ -113,7 +113,7 @@ public:
     ~ThreadWithProgressWindow() override;
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Starts the thread and waits for it to finish.
 
         This will start the thread, make the dialog box appear, and wait until either

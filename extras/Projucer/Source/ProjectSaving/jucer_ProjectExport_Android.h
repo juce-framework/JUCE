@@ -922,14 +922,13 @@ private:
                 addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
         }
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics")
-            && (getActivityClassString() == getDefaultActivityClass() || isContentSharingEnabled()))
+        if (isUsingDefaultActivityClass() || isContentSharingEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
         if (areRemoteNotificationsEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_extra");
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_product_unlocking") && isInAppBillingEnabled())
+        if (isInAppBillingEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_product_unlocking");
 
         MemoryOutputStream mo;
@@ -1223,6 +1222,7 @@ private:
         }
     }
 
+    //==============================================================================
     String getActivityClassString() const
     {
         auto customActivityClass = androidCustomActivityClass.get().toString();
@@ -1234,17 +1234,33 @@ private:
     }
 
     String getApplicationClassString() const    { return androidCustomApplicationClass.get(); }
+    String getJNIActivityClassName() const      { return getActivityClassString().replaceCharacter ('.', '/'); }
 
-    bool arePushNotificationsEnabled() const    { return androidPushNotifications.get(); }
-    bool areRemoteNotificationsEnabled() const  { return arePushNotificationsEnabled() && androidEnableRemoteNotifications.get(); }
+    bool isUsingDefaultActivityClass() const    { return getActivityClassString() == getDefaultActivityClass(); }
 
-    bool isInAppBillingEnabled() const          { return androidInAppBillingPermission.get(); }
-
-    bool isContentSharingEnabled() const        { return androidEnableContentSharing.get(); }
-
-    String getJNIActivityClassName() const
+    //==============================================================================
+    bool arePushNotificationsEnabled() const
     {
-        return getActivityClassString().replaceCharacter ('.', '/');
+        return project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
+              && androidPushNotifications.get();
+    }
+
+    bool areRemoteNotificationsEnabled() const
+    {
+        return arePushNotificationsEnabled()
+              && androidEnableRemoteNotifications.get();
+    }
+
+    bool isInAppBillingEnabled() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_product_unlocking")
+              && androidInAppBillingPermission.get();
+    }
+
+    bool isContentSharingEnabled() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_gui_basics")
+              && androidEnableContentSharing.get();
     }
 
     //==============================================================================
@@ -1633,7 +1649,7 @@ private:
     {
         auto permissions = getPermissionsRequired();
 
-        forEachXmlChildElementWithTagName (manifest, child, "uses-permission")
+        for (auto* child : manifest.getChildWithTagNameIterator ("uses-permission"))
         {
             permissions.removeString (child->getStringAttribute ("android:name"), false);
         }
@@ -1648,7 +1664,7 @@ private:
         {
             XmlElement* glVersion = nullptr;
 
-            forEachXmlChildElementWithTagName (manifest, child, "uses-feature")
+            for (auto* child : manifest.getChildWithTagNameIterator ("uses-feature"))
             {
                 if (child->getStringAttribute ("android:glEsVersion").isNotEmpty())
                 {

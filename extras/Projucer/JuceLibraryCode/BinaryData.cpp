@@ -7488,7 +7488,7 @@ static const unsigned char temp_binary_data_61[] =
 "#if defined(__arm__) || defined(__TARGET_ARCH_ARM) || defined(_M_ARM) || defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
 "\r\n"
 "  #if defined(_M_ARM64) || defined(__aarch64__) || defined(__ARM64__)\r\n"
-"    #error JUCE_ARCH arm64\r\n"
+"    #error JUCE_ARCH aarch64\r\n"
 "  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 8) || defined(__ARMv8__) || defined(__ARMv8_A__)\r\n"
 "    #error JUCE_ARCH armv8l\r\n"
 "  #elif (defined(__TARGET_ARCH_ARM) && __TARGET_ARCH_ARM == 7) || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7R__) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7S__) || defined(_ARM_ARCH_7) || defined(__CORE_CORTEX"
@@ -7619,7 +7619,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
-        case 0x7c03d519:  numBytes = 2127; return juce_runtime_arch_detection_cpp;
+        case 0x7c03d519:  numBytes = 2129; return juce_runtime_arch_detection_cpp;
         default: break;
     }
 

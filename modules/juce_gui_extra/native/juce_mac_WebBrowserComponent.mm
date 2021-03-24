@@ -45,9 +45,9 @@ static NSMutableURLRequest* getRequestForURL (const String& url, const StringArr
     NSString* urlString = juceStringToNS (url);
 
     #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
     #else
-     urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+     urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
     #endif
 
      if (NSURL* nsURL = [NSURL URLWithString: urlString])
@@ -312,12 +312,24 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
+        auto trimmed = url.trimStart();
 
-        if (url.trimStart().startsWithIgnoreCase ("javascript:"))
+        if (trimmed.startsWithIgnoreCase ("javascript:"))
         {
             [webView evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
                      completionHandler: nil];
+
+            return;
+        }
+
+        stop();
+
+        if (trimmed.startsWithIgnoreCase ("file:"))
+        {
+            auto file = URL (url).getLocalFile();
+
+            if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
+                [webView loadFileURL: nsUrl allowingReadAccessToURL: nsUrl];
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
@@ -531,14 +543,32 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
-
         if (url.trimStart().startsWithIgnoreCase ("javascript:"))
         {
-            [webView stringByEvaluatingJavaScriptFromString:
-                juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            [webView stringByEvaluatingJavaScriptFromString: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            return;
         }
-        else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
+
+        stop();
+
+        auto getRequest = [&]() -> NSMutableURLRequest*
+        {
+            if (url.trimStart().startsWithIgnoreCase ("file:"))
+            {
+                auto file = URL (url).getLocalFile();
+
+                if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
+                    return [NSMutableURLRequest requestWithURL: nsUrl
+                                                   cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                               timeoutInterval: 30.0];
+
+                return nullptr;
+            }
+
+            return getRequestForURL (url, headers, postData);
+        };
+
+        if (NSMutableURLRequest* request = getRequest())
         {
            #if JUCE_MAC
             [[webView mainFrame] loadRequest: request];

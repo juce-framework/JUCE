@@ -39,10 +39,7 @@
 #define JUCE_EVENTS_INCLUDE_WIN32_MESSAGE_WINDOW 1
 #define JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
-
-#if JUCE_USE_WIN_WEBVIEW2
- #define JUCE_EVENTS_INCLUDE_WINRT_WRAPPER 1
-#endif
+#define JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER 1
 
 #ifndef JUCE_PUSH_NOTIFICATIONS
  #define JUCE_PUSH_NOTIFICATIONS 0
@@ -97,18 +94,16 @@
    #include <windows.foundation.h>
    #include <windows.foundation.collections.h>
 
-   #pragma warning (push)
-   #pragma warning (disable: 4265)
+   JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4265)
    #include <wrl.h>
    #include <wrl/wrappers/corewrappers.h>
-   #pragma warning (pop)
+   JUCE_END_IGNORE_WARNINGS_MSVC
 
    #include "WebView2.h"
 
-   #pragma warning (push)
-   #pragma warning (disable: 4458)
+   JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4458)
    #include "WebView2EnvironmentOptions.h"
-   #pragma warning (pop)
+   JUCE_END_IGNORE_WARNINGS_MSVC
   #endif
 
  #endif
@@ -193,4 +188,10 @@
  #if JUCE_WEB_BROWSER
   #include "native/juce_android_WebBrowserComponent.cpp"
  #endif
+#endif
+
+//==============================================================================
+#if ! JUCE_WINDOWS
+ juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }
+ juce::ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler() {}
 #endif

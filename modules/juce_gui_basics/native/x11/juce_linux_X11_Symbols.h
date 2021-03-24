@@ -29,10 +29,10 @@ namespace juce
 //==============================================================================
 namespace ReturnHelpers
 {
-    template<typename Type>
+    template <typename Type>
     Type returnDefaultConstructedAnyType()               { return {}; }
 
-    template<>
+    template <>
     inline void returnDefaultConstructedAnyType<void>()  {}
 }
 

@@ -378,7 +378,7 @@ void KnownPluginList::recreateFromXml (const XmlElement& xml)
 
     if (xml.hasTagName ("KNOWNPLUGINS"))
     {
-        forEachXmlChildElement (xml, e)
+        for (auto* e : xml.getChildIterator())
         {
             PluginDescription info;
 

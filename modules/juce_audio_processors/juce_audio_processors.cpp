@@ -35,6 +35,7 @@
 #define JUCE_CORE_INCLUDE_NATIVE_HEADERS 1
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 #define JUCE_GUI_BASICS_INCLUDE_XHEADERS 1
+#define JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER 1
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
@@ -81,7 +82,97 @@ static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
 
 #endif
 
-#if JUCE_MAC || JUCE_IOS
+#if JUCE_WINDOWS
+
+//==============================================================================
+class HWNDComponentWithParent  : public HWNDComponent,
+                                 private Timer
+{
+public:
+    HWNDComponentWithParent()
+    {
+        String className ("JUCE_");
+        className << String::toHexString (Time::getHighResolutionTicks());
+
+        HMODULE moduleHandle = (HMODULE) Process::getCurrentModuleInstanceHandle();
+
+        WNDCLASSEX wc = {};
+        wc.cbSize         = sizeof (wc);
+        wc.lpfnWndProc    = (WNDPROC) wndProc;
+        wc.cbWndExtra     = 4;
+        wc.hInstance      = moduleHandle;
+        wc.lpszClassName  = className.toWideCharPointer();
+
+        atom = RegisterClassEx (&wc);
+        jassert (atom != 0);
+
+        hwnd = CreateWindow (getClassNameFromAtom(), L"HWNDComponentWithParent",
+                             0, 0, 0, 0, 0,
+                             nullptr, nullptr, moduleHandle, nullptr);
+
+        jassert (hwnd != nullptr);
+
+        setHWND (hwnd);
+        startTimer (30);
+    }
+
+    ~HWNDComponentWithParent() override
+    {
+        if (IsWindow (hwnd))
+            DestroyWindow (hwnd);
+
+        UnregisterClass (getClassNameFromAtom(), nullptr);
+    }
+
+private:
+    //==============================================================================
+    static LRESULT CALLBACK wndProc (HWND h, const UINT message, const WPARAM wParam, const LPARAM lParam)
+    {
+        if (message == WM_SHOWWINDOW && wParam == TRUE)
+            return 0;
+
+        return DefWindowProc (h, message, wParam, lParam);
+    }
+
+    void timerCallback() override
+    {
+        if (HWND child = getChildHWND())
+        {
+            stopTimer();
+
+            ShowWindow (child, SW_HIDE);
+            SetParent (child, NULL);
+
+            auto windowFlags = GetWindowLongPtr (child, -16);
+
+            windowFlags &= ~WS_CHILD;
+            windowFlags |= WS_POPUP;
+
+            SetWindowLongPtr (child, -16, windowFlags);
+
+            setHWND (child);
+        }
+    }
+
+    LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) (pointer_sized_uint) atom; }
+
+    HWND getChildHWND() const
+    {
+        if (HWND parent = (HWND) getHWND())
+            return GetWindow (parent, GW_CHILD);
+
+        return nullptr;
+    }
+
+    //==============================================================================
+    ATOM atom;
+    HWND hwnd;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentWithParent)
+};
+
+#elif JUCE_MAC || JUCE_IOS
 
 #if JUCE_IOS
  #define JUCE_IOS_MAC_VIEW  UIView
@@ -130,6 +221,7 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
         }
     }
 };
+
 #endif
 
 } // namespace juce
@@ -159,3 +251,4 @@ struct AutoResizingNSViewComponentWithParent  : public AutoResizingNSViewCompone
 #include "utilities/juce_AudioParameterChoice.cpp"
 #include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
+#include "utilities/juce_PluginHostType.cpp"

@@ -252,12 +252,19 @@ struct MenuWindow  : public Component
         setOpaque (lf.findColour (PopupMenu::backgroundColourId).isOpaque()
                      || ! Desktop::canUseSemiTransparentWindows());
 
+        const auto initialSelectedId = options.getInitiallySelectedItemId();
+
         for (int i = 0; i < menu.items.size(); ++i)
         {
             auto& item = menu.items.getReference (i);
 
             if (i + 1 < menu.items.size() || ! item.isSeparator)
-                items.add (new ItemComponent (item, options, *this));
+            {
+                auto* child = items.add (new ItemComponent (item, options, *this));
+
+                if (initialSelectedId != 0 && item.itemID == initialSelectedId)
+                    setCurrentlyHighlightedChild (child);
+            }
         }
 
         auto targetArea = options.getTargetScreenArea() / scaleFactor;
@@ -410,7 +417,7 @@ struct MenuWindow  : public Component
             }
             else
             {
-                hide (nullptr, false);
+                hide (nullptr, true);
             }
         }
     }
@@ -621,26 +628,22 @@ struct MenuWindow  : public Component
 
     bool doesAnyJuceCompHaveFocus()
     {
-        bool anyFocused = Process::isForegroundProcess();
+        if (! Process::isForegroundProcess())
+            return false;
 
-        if (anyFocused && Component::getCurrentlyFocusedComponent() == nullptr)
+        if (Component::getCurrentlyFocusedComponent() != nullptr)
+            return true;
+
+        for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
         {
-            // because no component at all may have focus, our test here will
-            // only be triggered when something has focus and then loses it.
-            anyFocused = ! hasAnyJuceCompHadFocus;
-
-            for (int i = ComponentPeer::getNumPeers(); --i >= 0;)
+            if (ComponentPeer::getPeer (i)->isFocused())
             {
-                if (ComponentPeer::getPeer (i)->isFocused())
-                {
-                    anyFocused = true;
-                    hasAnyJuceCompHadFocus = true;
-                    break;
-                }
+                hasAnyJuceCompHadFocus = true;
+                return true;
             }
         }
 
-        return anyFocused;
+        return ! hasAnyJuceCompHadFocus;
     }
 
     //==============================================================================
@@ -1243,7 +1246,7 @@ private:
     {
         if (globalMousePos != lastMousePos || timeNow > lastMouseMoveTime + 350)
         {
-            const bool isMouseOver = window.reallyContains (localMousePos, true);
+            const auto isMouseOver = window.reallyContains (localMousePos, true);
 
             if (isMouseOver)
                 window.hasBeenOver = true;
@@ -1283,7 +1286,12 @@ private:
                         window.activeSubMenu->hide (nullptr, true);
 
                     if (! isMouseOver)
+                    {
+                        if (! window.hasBeenOver)
+                            return;
+
                         itemUnderMouse = nullptr;
+                    }
 
                     window.setCurrentlyHighlightedChild (itemUnderMouse);
                 }
@@ -1755,10 +1763,16 @@ PopupMenu::Options::Options()
     targetArea.setPosition (Desktop::getMousePosition());
 }
 
+template <typename Member, typename Item>
+static PopupMenu::Options with (PopupMenu::Options options, Member&& member, Item&& item)
+{
+    options.*member = std::forward<Item> (item);
+    return options;
+}
+
 PopupMenu::Options PopupMenu::Options::withTargetComponent (Component* comp) const
 {
-    Options o (*this);
-    o.targetComponent = comp;
+    auto o = with (*this, &Options::targetComponent, comp);
 
     if (comp != nullptr)
         o.targetArea = comp->getScreenBounds();
@@ -1773,66 +1787,54 @@ PopupMenu::Options PopupMenu::Options::withTargetComponent (Component& comp) con
 
 PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area) const
 {
-    Options o (*this);
-    o.targetArea = area;
-    return o;
+    return with (*this, &Options::targetArea, area);
 }
 
 PopupMenu::Options PopupMenu::Options::withDeletionCheck (Component& comp) const
 {
-    Options o (*this);
-    o.componentToWatchForDeletion = &comp;
-    o.isWatchingForDeletion = true;
-    return o;
+    return with (with (*this, &Options::isWatchingForDeletion, true),
+                 &Options::componentToWatchForDeletion,
+                 &comp);
 }
 
 PopupMenu::Options PopupMenu::Options::withMinimumWidth (int w) const
 {
-    Options o (*this);
-    o.minWidth = w;
-    return o;
+    return with (*this, &Options::minWidth, w);
 }
 
 PopupMenu::Options PopupMenu::Options::withMinimumNumColumns (int cols) const
 {
-    Options o (*this);
-    o.minColumns = cols;
-    return o;
+    return with (*this, &Options::minColumns, cols);
 }
 
 PopupMenu::Options PopupMenu::Options::withMaximumNumColumns (int cols) const
 {
-    Options o (*this);
-    o.maxColumns = cols;
-    return o;
+    return with (*this, &Options::maxColumns, cols);
 }
 
 PopupMenu::Options PopupMenu::Options::withStandardItemHeight (int height) const
 {
-    Options o (*this);
-    o.standardHeight = height;
-    return o;
+    return with (*this, &Options::standardHeight, height);
 }
 
 PopupMenu::Options PopupMenu::Options::withItemThatMustBeVisible (int idOfItemToBeVisible) const
 {
-    Options o (*this);
-    o.visibleItemID = idOfItemToBeVisible;
-    return o;
+    return with (*this, &Options::visibleItemID, idOfItemToBeVisible);
 }
 
 PopupMenu::Options PopupMenu::Options::withParentComponent (Component* parent) const
 {
-    Options o (*this);
-    o.parentComponent = parent;
-    return o;
+    return with (*this, &Options::parentComponent, parent);
 }
 
 PopupMenu::Options PopupMenu::Options::withPreferredPopupDirection (PopupDirection direction) const
 {
-    Options o (*this);
-    o.preferredPopupDirection = direction;
-    return o;
+    return with (*this, &Options::preferredPopupDirection, direction);
+}
+
+PopupMenu::Options PopupMenu::Options::withInitiallySelectedItem (int idOfItemToBeSelected) const
+{
+    return with (*this, &Options::initiallySelectedItemId, idOfItemToBeSelected);
 }
 
 Component* PopupMenu::createWindow (const Options& options,
@@ -1849,12 +1851,7 @@ Component* PopupMenu::createWindow (const Options& options,
 // This invokes any command manager commands and deletes the menu window when it is dismissed
 struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
 {
-    PopupMenuCompletionCallback()
-        : prevFocused (Component::getCurrentlyFocusedComponent()),
-          prevTopLevel (prevFocused != nullptr ? prevFocused->getTopLevelComponent() : nullptr)
-    {
-        PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
-    }
+    PopupMenuCompletionCallback() = default;
 
     void modalStateFinished (int result) override
     {
@@ -1869,19 +1866,41 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         // (this would be the place to fade out the component, if that's what's required)
         component.reset();
 
-        if (! PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
-        {
-            if (prevTopLevel != nullptr)
-                prevTopLevel->toFront (true);
+        if (PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
+            return;
 
-            if (prevFocused != nullptr && prevFocused->isShowing())
-                prevFocused->grabKeyboardFocus();
+        auto* focusComponent = getComponentToPassFocusTo();
+
+        const auto focusedIsNotMinimised = [focusComponent]
+        {
+            if (focusComponent != nullptr)
+                if (auto* peer = focusComponent->getPeer())
+                    return ! peer->isMinimised();
+
+            return false;
+        }();
+
+        if (focusedIsNotMinimised)
+        {
+            if (auto* topLevel = focusComponent->getTopLevelComponent())
+                topLevel->toFront (true);
+
+            if (focusComponent->isShowing() && ! focusComponent->hasKeyboardFocus (true))
+                focusComponent->grabKeyboardFocus();
         }
+    }
+
+    Component* getComponentToPassFocusTo() const
+    {
+        if (auto* current = Component::getCurrentlyFocusedComponent())
+            return current;
+
+        return prevFocused.get();
     }
 
     ApplicationCommandManager* managerOfChosenCommand = nullptr;
     std::unique_ptr<Component> component;
-    WeakReference<Component> prevFocused, prevTopLevel;
+    WeakReference<Component> prevFocused { Component::getCurrentlyFocusedComponent() };
 
     JUCE_DECLARE_NON_COPYABLE (PopupMenuCompletionCallback)
 };
@@ -1896,6 +1915,8 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
     if (auto* window = createWindow (options, &(callback->managerOfChosenCommand)))
     {
         callback->component.reset (window);
+
+        PopupMenuSettings::menuWasHiddenBecauseOfAppChange = false;
 
         window->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
         window->enterModalState (false, userCallbackDeleter.release());

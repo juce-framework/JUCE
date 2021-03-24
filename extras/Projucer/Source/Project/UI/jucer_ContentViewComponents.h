@@ -233,7 +233,8 @@ private:
 };
 
 //==============================================================================
-class PropertyGroupComponent  : public Component
+class PropertyGroupComponent  : public Component,
+                                private TextPropertyComponent::Listener
 {
 public:
     PropertyGroupComponent (String name, Icon icon, String desc = {})
@@ -266,15 +267,12 @@ public:
             }
 
             if (auto* multiChoice = dynamic_cast<MultiChoicePropertyComponent*> (prop))
-            {
-                multiChoice->onHeightChange = [this]
-                {
-                    updateSize (getX(), getY(), getWidth());
+                multiChoice->onHeightChange = [this] { updateSize(); };
 
-                    if (auto* parent = getParentComponent())
-                        parent->parentSizeChanged();
-                };
-            }
+            if (auto* text = dynamic_cast<TextPropertyComponent*> (prop))
+                if (text->isTextEditorMultiLine())
+                    text->addListener (this);
+
         }
     }
 
@@ -334,11 +332,30 @@ public:
     OwnedArray<PropertyComponent> properties;
 
 private:
-    OwnedArray<InfoButton> infoButtons;
-    ContentViewHeader header;
-    AttributedString description;
-    TextLayout descriptionLayout;
-    int headerSize = 40;
+    //==============================================================================
+    void textPropertyComponentChanged (TextPropertyComponent* comp) override
+    {
+        auto fontHeight = [comp]
+        {
+            Label tmpLabel;
+            return comp->getLookAndFeel().getLabelFont (tmpLabel).getHeight();
+        }();
+
+        auto lines = StringArray::fromLines (comp->getText());
+
+        comp->setPreferredHeight (jmax (100, 10 + roundToInt (fontHeight * (float) lines.size())));
+
+        updateSize();
+    }
+
+    //==============================================================================
+    void updateSize()
+    {
+        updateSize (getX(), getY(), getWidth());
+
+        if (auto* parent = getParentComponent())
+            parent->parentSizeChanged();
+    }
 
     //==============================================================================
     bool shouldResizePropertyComponent (PropertyComponent* p)
@@ -374,6 +391,12 @@ private:
 
         return static_cast<int> (nameWidth / (float) availableTextWidth);
     }
+
+    OwnedArray<InfoButton> infoButtons;
+    ContentViewHeader header;
+    AttributedString description;
+    TextLayout descriptionLayout;
+    int headerSize = 40;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroupComponent)

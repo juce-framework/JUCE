@@ -309,9 +309,9 @@ private:
     static ErrorMessageAndType runTask (std::unique_ptr<AccountEnquiryBase> accountEnquiryTask, LicenseState& state)
     {
         const ErrorMessageAndType cancelledError ("Cancelled.", ErrorType::cancelled);
-        const String endpointURL = "https://api.juce.com/api/v1";
+        const String endpointURL ("https://api.juce.com/api/v1");
 
-        auto url = URL (endpointURL + accountEnquiryTask->getEndpointURLSuffix());
+        URL url (endpointURL + accountEnquiryTask->getEndpointURLSuffix());
 
         auto isPOST = accountEnquiryTask->isPOSTLikeRequest();
 
@@ -322,9 +322,11 @@ private:
             return cancelledError;
 
         int statusCode = 0;
-        auto urlStream = url.createInputStream (isPOST, nullptr, nullptr,
-                                                accountEnquiryTask->getExtraHeaders(),
-                                                5000, nullptr, &statusCode);
+        auto urlStream = url.createInputStream (URL::InputStreamOptions (isPOST ? URL::ParameterHandling::inPostData
+                                                                                : URL::ParameterHandling::inAddress)
+                                                  .withExtraHeaders (accountEnquiryTask->getExtraHeaders())
+                                                  .withConnectionTimeoutMs (5000)
+                                                  .withStatusCode (&statusCode));
 
         if (urlStream == nullptr)
             return { "Failed to connect to the web server.", ErrorType::connectionError };
@@ -339,7 +341,7 @@ private:
 
         for (;;)
         {
-            char buffer [8192];
+            char buffer [8192] = "";
             auto num = urlStream->read (buffer, sizeof (buffer));
 
             if (ThreadPoolJob::getCurrentThreadPoolJob()->shouldExit())

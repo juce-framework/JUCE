@@ -38,20 +38,30 @@ private:
     Displays (Desktop&);
 
 public:
+    //==============================================================================
     /** Represents a connected display device. */
-    struct Display
+    struct JUCE_API  Display
     {
         /** This will be true if this is the user's main display device. */
         bool isMain;
 
         /** The total area of this display in logical pixels including any OS-dependent objects
-            like the taskbar, menu bar, etc. */
+            like the taskbar, menu bar, etc.
+        */
         Rectangle<int> totalArea;
 
         /** The total area of this display in logical pixels which isn't covered by OS-dependent
             objects like the taskbar, menu bar, etc.
         */
         Rectangle<int> userArea;
+
+        /** Represents the area of this display in logical pixels that is not functional for
+            displaying content.
+
+            On mobile devices this may be the area covered by display cutouts and notches, where
+            you still want to draw a background but should not position important content.
+        */
+        BorderSize<int> safeAreaInsets;
 
         /** The top-left of this display in physical coordinates. */
         Point<int> topLeftPhysical;
@@ -74,27 +84,56 @@ public:
         double dpi;
     };
 
-    /** Converts a Rectangle from physical to logical pixels.
+    //==============================================================================
+    /** Converts an integer Rectangle from physical to logical pixels.
 
         If useScaleFactorOfDisplay is not null then its scale factor will be used for the conversion
         regardless of the display that the Rectangle to be converted is on.
     */
-    Rectangle<int> physicalToLogical (Rectangle<int> physicalRect, const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
+    Rectangle<int> physicalToLogical (Rectangle<int> physicalRect,
+                                      const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
 
-    /** Converts a Rectangle from logical to physical pixels.
+    /** Converts a floating-point Rectangle from physical to logical pixels.
 
         If useScaleFactorOfDisplay is not null then its scale factor will be used for the conversion
         regardless of the display that the Rectangle to be converted is on.
     */
-    Rectangle<int> logicalToPhysical (Rectangle<int> logicalRect, const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
+    Rectangle<float> physicalToLogical (Rectangle<float> physicalRect,
+                                        const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
 
-    /** Converts a Point from physical to logical pixels. */
-    template <typename ValueType>
-    Point<ValueType> physicalToLogical (Point<ValueType> physicalPoint, const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
+    /** Converts an integer Rectangle from logical to physical pixels.
 
-    /** Converts a Point from logical to physical pixels. */
+        If useScaleFactorOfDisplay is not null then its scale factor will be used for the conversion
+        regardless of the display that the Rectangle to be converted is on.
+    */
+    Rectangle<int> logicalToPhysical (Rectangle<int> logicalRect,
+                                      const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
+
+    /** Converts a floating-point Rectangle from logical to physical pixels.
+
+        If useScaleFactorOfDisplay is not null then its scale factor will be used for the conversion
+        regardless of the display that the Rectangle to be converted is on.
+    */
+    Rectangle<float> logicalToPhysical (Rectangle<float> logicalRect,
+                                        const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
+
+    /** Converts a Point from physical to logical pixels.
+
+        If useScaleFactorOfDisplay is not null then its scale factor will be used for the conversion
+        regardless of the display that the Point to be converted is on.
+    */
     template <typename ValueType>
-    Point<ValueType> logicalToPhysical (Point<ValueType> logicalPoint, const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
+    Point<ValueType> physicalToLogical (Point<ValueType> physicalPoint,
+                                        const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
+
+    /** Converts a Point from logical to physical pixels.
+
+        If useScaleFactorOfDisplay is not null then its scale factor will be used for the conversion
+        regardless of the display that the Point to be converted is on.
+    */
+    template <typename ValueType>
+    Point<ValueType> logicalToPhysical (Point<ValueType> logicalPoint,
+                                        const Display* useScaleFactorOfDisplay = nullptr) const noexcept;
 
     /** Returns the Display object representing the display containing a given Rectangle (either
         in logical or physical pixels), or nullptr if there are no connected displays.

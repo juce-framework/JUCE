@@ -699,7 +699,7 @@ struct Expression::Helpers
 
         bool readOperator (const char* ops, char* const opType = nullptr) noexcept
         {
-            text = text.findEndOfWhitespace();
+            text.incrementToEndOfWhitespace();
 
             while (*ops != 0)
             {
@@ -719,7 +719,7 @@ struct Expression::Helpers
 
         bool readIdentifier (String& identifier) noexcept
         {
-            text = text.findEndOfWhitespace();
+            text.incrementToEndOfWhitespace();
             auto t = text;
             int numChars = 0;
 
@@ -747,21 +747,21 @@ struct Expression::Helpers
 
         Term* readNumber() noexcept
         {
-            text = text.findEndOfWhitespace();
+            text.incrementToEndOfWhitespace();
             auto t = text;
             bool isResolutionTarget = (*t == '@');
 
             if (isResolutionTarget)
             {
                 ++t;
-                t = t.findEndOfWhitespace();
+                t.incrementToEndOfWhitespace();
                 text = t;
             }
 
             if (*t == '-')
             {
                 ++t;
-                t = t.findEndOfWhitespace();
+                t.incrementToEndOfWhitespace();
             }
 
             if (isDecimalDigit (*t) || (*t == '.' && isDecimalDigit (t[1])))

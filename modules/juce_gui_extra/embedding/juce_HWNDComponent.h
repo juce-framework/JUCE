@@ -71,6 +71,9 @@ public:
     /** Resizes this component to fit the HWND that it contains. */
     void resizeToFit();
 
+    /** @internal */
+    void paint (Graphics&) override;
+
 private:
     class Pimpl;
     std::unique_ptr<Pimpl> pimpl;

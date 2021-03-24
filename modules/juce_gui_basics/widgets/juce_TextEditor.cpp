@@ -278,8 +278,8 @@ struct TextEditor::Iterator
     Iterator (const TextEditor& ed)
       : sections (ed.sections),
         justification (ed.justification),
-        bottomRight (ed.getMaximumWidth(), ed.getMaximumHeight()),
-        wordWrapWidth (ed.getWordWrapWidth()),
+        bottomRight ((float) ed.getMaximumTextWidth(), (float) ed.getMaximumTextHeight()),
+        wordWrapWidth ((float) ed.getWordWrapWidth()),
         passwordCharacter (ed.passwordCharacter),
         lineSpacing (ed.lineSpacing),
         underlineWhitespace (ed.underlineWhitespace)
@@ -669,6 +669,18 @@ struct TextEditor::Iterator
         return bottom * 0.5f;
     }
 
+    int getTotalTextHeight()
+    {
+        while (next()) {}
+
+        auto height = lineY + lineHeight + getYOffset();
+
+        if (atom != nullptr && atom->isNewLine())
+            height += lineHeight;
+
+        return roundToInt (height);
+    }
+
     //==============================================================================
     int indexInText = 0;
     float lineY = 0, lineHeight = 0, maxDescent = 0;
@@ -866,7 +878,7 @@ struct TextEditor::TextEditorViewport  : public Viewport
 
 private:
     TextEditor& owner;
-    float lastWordWrapWidth = 0;
+    int lastWordWrapWidth = 0;
     bool reentrant = false;
 
     JUCE_DECLARE_NON_COPYABLE (TextEditorViewport)
@@ -1328,7 +1340,10 @@ void TextEditor::moveCaret (int newCaretPos)
     if (newCaretPos != getCaretPosition())
     {
         caretPosition = newCaretPos;
-        textHolder->restartTimer();
+
+        if (hasKeyboardFocus (false))
+            textHolder->restartTimer();
+
         scrollToMakeSureCursorIsVisible();
         updateCaretPosition();
     }
@@ -1401,63 +1416,34 @@ Rectangle<float> TextEditor::getCaretRectangleFloat() const
 // Extra space for the cursor at the right-hand-edge
 constexpr int rightEdgeSpace = 2;
 
-float TextEditor::getWordWrapWidth() const
+int TextEditor::getWordWrapWidth() const
 {
-    return wordWrap ? getMaximumWidth()
-                    : std::numeric_limits<float>::max();
+    return wordWrap ? getMaximumTextWidth()
+                    : std::numeric_limits<int>::max();
 }
 
-float TextEditor::getMaximumWidth() const
+int TextEditor::getMaximumTextWidth() const
 {
-    return (float) (viewport->getMaximumVisibleWidth() - (leftIndent + rightEdgeSpace + 1));
+    return viewport->getMaximumVisibleWidth() - leftIndent + rightEdgeSpace;
 }
 
-float TextEditor::getMaximumHeight() const
+int TextEditor::getMaximumTextHeight() const
 {
-    return (float) (viewport->getMaximumVisibleHeight() - topIndent);
+    return viewport->getMaximumVisibleHeight() - topIndent;
 }
 
 void TextEditor::checkLayout()
 {
     if (getWordWrapWidth() > 0)
     {
-        auto maxWidth = getMaximumWidth();
-        Iterator i (*this);
+        auto textBottom = Iterator (*this).getTotalTextHeight() + topIndent;
+        auto textRight = getMaximumTextWidth() + leftIndent + rightEdgeSpace;
 
-        while (i.next())
-            maxWidth = jmax (maxWidth, i.atomRight);
-
-        auto textRight = roundToInt (maxWidth);
-        auto textBottom = roundToInt (i.lineY + i.lineHeight + i.getYOffset());
-
-        if (i.atom != nullptr && i.atom->isNewLine())
-            textBottom += (int) i.lineHeight;
-
-        updateTextHolderSize (textRight, textBottom);
-        updateScrollbarVisibility (textRight, textBottom);
-    }
-}
-
-void TextEditor::updateTextHolderSize (int textRight, int textBottom)
-{
-    auto w = leftIndent + jmax (roundToInt (getMaximumWidth()), textRight);
-    auto h = topIndent + textBottom;
-
-    textHolder->setSize (w + rightEdgeSpace, h + 1);
-}
-
-void TextEditor::updateScrollbarVisibility (int textRight, int textBottom)
-{
-    if (scrollbarVisible && multiline)
-    {
-        auto horizontalVisible = (leftIndent + textRight) > (viewport->getMaximumVisibleWidth() - viewport->getScrollBarThickness());
-        auto verticalVisible = (topIndent + textBottom) > (viewport->getMaximumVisibleHeight() + 1);
-
-        viewport->setScrollBarsShown (verticalVisible, horizontalVisible);
-    }
-    else
-    {
-        viewport->setScrollBarsShown (false, false);
+        textHolder->setSize (textRight, textBottom);
+        viewport->setScrollBarsShown (scrollbarVisible
+                                        && multiline
+                                        && (textBottom > viewport->getMaximumVisibleHeight()),
+                                      false);
     }
 }
 

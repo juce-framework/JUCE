@@ -219,11 +219,11 @@ private:
 
 FileChooser::Native* FileChooser::Native::currentFileChooser = nullptr;
 
-FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                                     FilePreviewComponent*)
+std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+                                                                     FilePreviewComponent*)
 {
     if (FileChooser::Native::currentFileChooser == nullptr)
-        return new FileChooser::Native (owner, flags);
+        return std::make_shared<FileChooser::Native> (owner, flags);
 
     // there can only be one file chooser on Android at a once
     jassertfalse;

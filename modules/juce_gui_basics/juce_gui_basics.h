@@ -35,7 +35,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            6.0.6
+  version:            6.0.8
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -340,6 +340,10 @@ namespace juce
   #include "native/x11/juce_linux_XWindowSystem.h"
   #include "native/x11/juce_linux_X11_Symbols.h"
  #endif
+#endif
+
+#if JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER && JUCE_WINDOWS
+ #include "native/juce_win32_ScopedThreadDPIAwarenessSetter.h"
 #endif
 
 #include "layout/juce_FlexItem.h"

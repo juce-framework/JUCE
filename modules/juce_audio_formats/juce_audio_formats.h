@@ -35,7 +35,7 @@
 
   ID:                 juce_audio_formats
   vendor:             juce
-  version:            6.0.6
+  version:            6.0.8
   name:               JUCE audio file format codecs
   description:        Classes for reading and writing various audio file formats.
   website:            http://www.juce.com/juce
@@ -104,7 +104,7 @@
  #define JUCE_USE_WINDOWS_MEDIA_FORMAT 1
 #endif
 
-#if ! JUCE_MSVC
+#if ! JUCE_WINDOWS
  #undef JUCE_USE_WINDOWS_MEDIA_FORMAT
  #define JUCE_USE_WINDOWS_MEDIA_FORMAT 0
 #endif

@@ -192,7 +192,7 @@ bool PaintElementGroup::loadFromXml (const XmlElement& xml)
 {
     if (xml.hasTagName (getTagName()))
     {
-        forEachXmlChildElement (xml, e)
+        for (auto* e : xml.getChildIterator())
             if (PaintElement* const pe = ObjectTypes::createElementForXml (e, owner))
                 subElements.add (pe);
 

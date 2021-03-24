@@ -119,7 +119,7 @@ public:
     */
     bool cancelAllModalComponents();
 
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Runs the event loop until the currently topmost modal component is dismissed, and
         returns the exit code for that component.
     */

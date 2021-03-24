@@ -470,6 +470,7 @@ public:
         Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
         Options withParentComponent (Component* parentComponent) const;
         Options withPreferredPopupDirection (PopupDirection direction) const;
+        Options withInitiallySelectedItem (int idOfItemToBeSelected) const;
 
         //==============================================================================
         Component* getParentComponent() const noexcept               { return parentComponent; }
@@ -482,6 +483,7 @@ public:
         int getStandardItemHeight() const noexcept                   { return standardHeight; }
         int getItemThatMustBeVisible() const noexcept                { return visibleItemID; }
         PopupDirection getPreferredPopupDirection() const noexcept   { return preferredPopupDirection; }
+        int getInitiallySelectedItemId() const noexcept              { return initiallySelectedItemId; }
 
     private:
         //==============================================================================
@@ -489,13 +491,13 @@ public:
         Component* targetComponent = nullptr;
         Component* parentComponent = nullptr;
         WeakReference<Component> componentToWatchForDeletion;
-        int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0;
+        int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0, initiallySelectedItemId = 0;
         bool isWatchingForDeletion = false;
         PopupDirection preferredPopupDirection = PopupDirection::downwards;
     };
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Displays the menu and waits for the user to pick something.
 
         This will display the menu modally, and return the ID of the item that the

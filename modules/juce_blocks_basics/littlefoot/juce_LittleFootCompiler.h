@@ -272,7 +272,7 @@ private:
         {
             for (;;)
             {
-                p = p.findEndOfWhitespace();
+                p.incrementToEndOfWhitespace();
 
                 if (*p == '/')
                 {
@@ -1067,7 +1067,7 @@ private:
         bool matchesAnyType() const noexcept         { return matchesAny (Token::int_, Token::float_, Token::bool_); }
         bool matchesAnyTypeOrVoid() const noexcept   { return matchesAnyType() || currentType == Token::void_; }
         ExpPtr matchCloseParen (ExpPtr e)            { match (Token::closeParen); return e; }
-        template<typename ExpType> ExpType matchEndOfStatement (ExpType e)  { match (Token::semicolon); return e; }
+        template <typename ExpType> ExpType matchEndOfStatement (ExpType e)  { match (Token::semicolon); return e; }
     };
 
     //==============================================================================

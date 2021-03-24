@@ -71,6 +71,23 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleDeviceManagerInputLevelMeter)
 };
 
+static void drawTextLayout (Graphics& g, Component& owner, StringRef text, const Rectangle<int>& textBounds, bool enabled)
+{
+    const auto textColour = owner.findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f);
+
+    AttributedString attributedString { text };
+    attributedString.setColour (textColour);
+    attributedString.setFont ((float) textBounds.getHeight() * 0.6f);
+    attributedString.setJustification (Justification::centredLeft);
+    attributedString.setWordWrap (AttributedString::WordWrap::none);
+
+    TextLayout textLayout;
+    textLayout.createLayout (attributedString,
+                             (float) textBounds.getWidth(),
+                             (float) textBounds.getHeight());
+    textLayout.draw (g, textBounds.toFloat());
+}
+
 
 //==============================================================================
 class AudioDeviceSelectorComponent::MidiInputSelectorComponentListBox  : public ListBox,
@@ -114,9 +131,7 @@ public:
             getLookAndFeel().drawTickBox (g, *this, (float) x - tickW, ((float) height - tickW) * 0.5f, tickW, tickW,
                                           enabled, true, true, false);
 
-            g.setFont ((float) height * 0.6f);
-            g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-            g.drawText (item.name, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
+            drawTextLayout (g, *this, item.name, { x + 5, 0, width - x - 5, height }, enabled);
         }
     }
 
@@ -805,9 +820,7 @@ public:
                 getLookAndFeel().drawTickBox (g, *this, (float) x - tickW, ((float) height - tickW) * 0.5f, tickW, tickW,
                                               enabled, true, true, false);
 
-                g.setFont ((float) height * 0.6f);
-                g.setColour (findColour (ListBox::textColourId, true).withMultipliedAlpha (enabled ? 1.0f : 0.6f));
-                g.drawText (item, x + 5, 0, width - x - 5, height, Justification::centredLeft, true);
+                drawTextLayout (g, *this, item, { x + 5, 0, width - x - 5, height }, enabled);
             }
         }
 

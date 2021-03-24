@@ -30,7 +30,7 @@ namespace CDReaderHelpers
 {
     inline const XmlElement* getElementForKey (const XmlElement& xml, const String& key)
     {
-        forEachXmlChildElementWithTagName (xml, child, "key")
+        for (auto* child : xml.getChildWithTagNameIterator ("key"))
             if (child->getAllSubText().trim() == key)
                 return child->getNextElement();
 
@@ -71,7 +71,7 @@ namespace CDReaderHelpers
         if (trackArray == nullptr)
             return "Couldn't find Track Array";
 
-        forEachXmlChildElement (*trackArray, track)
+        for (auto* track : trackArray->getChildIterator())
         {
             const int trackValue = getIntValueForKey (*track, "Start Block");
             if (trackValue < 0)

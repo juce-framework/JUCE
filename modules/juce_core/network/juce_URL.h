@@ -30,7 +30,7 @@ class WebInputStream;
     Represents a URL and has a bunch of useful functions to manipulate it.
 
     This class can be used to launch URLs in browsers, and also to create
-    InputStreams that can read from remote http or ftp sources.
+    InputStreams that can read from remote HTTP or FTP sources.
 
     @tags{Core}
 */
@@ -42,24 +42,21 @@ public:
     URL();
 
     /** Creates a URL from a string.
+
         This will parse any embedded parameters after a '?' character and store them
         in the list (see getParameterNames etc). If you don't want this to happen, you
         can use createWithoutParsing().
     */
     URL (const String& url);
 
-    URL (const URL&) = default;
-    URL& operator= (const URL&) = default;
-    URL (URL&&) = default;
-    URL& operator= (URL&&) = default;
-
     /** Creates URL referring to a local file on your disk using the file:// scheme. */
-    explicit URL (File);
+    explicit URL (File localFile);
 
     /** Destructor. */
     ~URL() = default;
 
     /** Compares two URLs.
+
         All aspects of the URLs must be identical for them to match, including any parameters,
         upload files, etc.
     */
@@ -69,9 +66,11 @@ public:
     //==============================================================================
     /** Returns a string version of the URL.
 
-        If includeGetParameters is true and any parameters have been set with the
-        withParameter() method, then the string will have these appended on the
-        end and url-encoded.
+        @param includeGetParameters  if this is true and any parameters have been set
+                                     with the withParameter() method, then the string
+                                     will have these appended on the end and URL-encoded.
+
+        @see getQueryString
     */
     String toString (bool includeGetParameters) const;
 
@@ -82,26 +81,31 @@ public:
     bool isWellFormed() const;
 
     /** Returns just the domain part of the URL.
-        E.g. for "http://www.xyz.com/foobar", this will return "www.xyz.com".
+
+        e.g. for "http://www.xyz.com/foobar", this will return "www.xyz.com".
     */
     String getDomain() const;
 
     /** Returns the path part of the URL.
-        E.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
 
-        If includeGetParameters is true and any parameters have been set with the
-        withParameter() method, then the string will have these appended on the
-        end and url-encoded.
+        e.g. for "http://www.xyz.com/foo/bar?x=1", this will return "foo/bar".
+
+        @param includeGetParameters  if this is true and any parameters have been set
+                                     with the withParameter() method, then the string
+                                     will have these appended on the end and URL-encoded.
+
+        @see getQueryString
     */
     String getSubPath (bool includeGetParameters = false) const;
 
-    /** If any parameters are set, returns these URL encoded, including the "?"
-     *  prefix.
+    /** If any parameters are set, returns these URL-encoded, including the "?"
+        prefix.
     */
     String getQueryString() const;
 
     /** Returns the scheme of the URL.
-        E.g. for "http://www.xyz.com/foobar", this will return "http". (It won't
+
+        e.g. for "http://www.xyz.com/foobar", this will return "http" (it won't
         include the colon).
     */
     String getScheme() const;
@@ -110,19 +114,20 @@ public:
     bool isLocalFile() const;
 
     /** Returns the file path of the local file to which this URL refers to.
+
         If the URL does not represent a local file URL (i.e. the URL's scheme is not 'file')
         then this method will assert.
 
-        This method also supports converting Android's content:// URLs to
-        local file paths.
+        This method also supports converting Android's content:// URLs to local file paths.
 
         @see isLocalFile
     */
     File getLocalFile() const;
 
-    /** Returns the file name. For all but Android's content:// scheme, it will
-        simply return the last segment of the URL.
-        E.g. for "http://www.xyz.com/foo/bar.txt", this will return "bar.txt".
+    /** Returns the file name.
+
+        For all but Android's content:// scheme, it will simply return the last segment of
+        the URL, e.g. for "http://www.xyz.com/foo/bar.txt", this will return "bar.txt".
 
         For Android's content:// scheme, it will attempt to resolve the filename
         located under the URL.
@@ -130,36 +135,44 @@ public:
     String getFileName() const;
 
     /** Attempts to read a port number from the URL.
+
         @returns the port number, or 0 if none is explicitly specified.
     */
     int getPort() const;
 
     /** Returns a new version of this URL with a different domain and path.
-        E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
+
+        e.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
         "abc.com/zzz", it'll return "http://abc.com/zzz?x=1".
+
         @see withNewSubPath
     */
     URL withNewDomainAndPath (const String& newFullPath) const;
 
     /** Returns a new version of this URL with a different sub-path.
-        E.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
+
+        e.g. if the URL is "http://www.xyz.com/foo?x=1" and you call this with
         "bar", it'll return "http://www.xyz.com/bar?x=1".
+
         @see withNewDomainAndPath
     */
     URL withNewSubPath (const String& newPath) const;
 
     /** Attempts to return a URL which is the parent folder containing this URL.
+
         If there isn't a parent, this method will just return a copy of this URL.
     */
     URL getParentURL() const;
 
     /** Returns a new URL that refers to a sub-path relative to this one.
-        E.g. if the URL is "http://www.xyz.com/foo" and you call this with
-        "bar", it'll return "http://www.xyz.com/foo/bar". Note that there's no way for
-        this method to know whether the original URL is a file or directory, so it's
-        up to you to make sure it's a directory. It also won't attempt to be smart about
-        the content of the childPath string, so if this string is an absolute URL, it'll
-        still just get bolted onto the end of the path.
+
+        e.g. if the URL is "http://www.xyz.com/foo" and you call this with "bar",
+        it'll return "http://www.xyz.com/foo/bar".
+
+        Note that there's no way for this method to know whether the original URL is
+        a file or directory, so it's up to you to make sure it's a directory. It also
+        won't attempt to be smart about the content of the childPath string, so if this
+        string is an absolute URL, it'll still just get bolted onto the end of the path.
 
         @see File::getChildFile
     */
@@ -168,9 +181,10 @@ public:
     //==============================================================================
     /** Returns a copy of this URL, with a GET or POST parameter added to the end.
 
-        Any control characters in the value will be encoded.
+        Any control characters in the value will be URL-encoded.
+
         e.g. calling "withParameter ("amount", "some fish") for the url "www.fish.com"
-        would produce a new url whose toString(true) method would return
+        would produce a new url whose `toString (true)` method would return
         "www.fish.com?amount=some+fish".
 
         @see getParameterNames, getParameterValues
@@ -179,7 +193,9 @@ public:
                        const String& parameterValue) const;
 
     /** Returns a copy of this URL, with a set of GET or POST parameters added.
+
         This is a convenience method, equivalent to calling withParameter for each value.
+
         @see withParameter
     */
     URL withParameters (const StringPairArray& parametersToAdd) const;
@@ -203,6 +219,7 @@ public:
 
         When performing a POST where one of your parameters is a binary file, this
         lets you specify the file content.
+
         Note that the filename parameter should not be a full path, it's just the
         last part of the filename.
 
@@ -215,7 +232,7 @@ public:
 
     /** Returns an array of the names of all the URL's parameters.
 
-        E.g. for the url "www.fish.com?type=haddock&amount=some+fish", this array would
+        e.g. for the url "www.fish.com?type=haddock&amount=some+fish", this array would
         contain two items: "type" and "amount".
 
         You can call getParameterValues() to get the corresponding value of each
@@ -227,7 +244,7 @@ public:
 
     /** Returns an array of the values of all the URL's parameters.
 
-        E.g. for the url "www.fish.com?type=haddock&amount=some+fish", this array would
+        e.g. for the url "www.fish.com?type=haddock&amount=some+fish", this array would
         contain two items: "haddock" and "some fish".
 
         The values returned will have been cleaned up to remove any escape characters.
@@ -241,41 +258,34 @@ public:
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
-        If you're setting the POST data, be careful not to have any parameters set
-        as well, otherwise it'll all get thrown in together, and might not have the
-        desired effect.
-
         If the URL already contains some POST data, this will replace it, rather
         than being appended to it.
 
-        This data will only be used if you specify a post operation when you call
-        createInputStream().
+        If no HTTP command is set when calling createInputStream() to read from
+        this URL and some data has been set, it will do a POST request.
     */
     URL withPOSTData (const String& postData) const;
 
     /** Returns a copy of this URL, with a block of data to send as the POST data.
 
-        If you're setting the POST data, be careful not to have any parameters set
-        as well, otherwise it'll all get thrown in together, and might not have the
-        desired effect.
-
         If the URL already contains some POST data, this will replace it, rather
         than being appended to it.
 
-        This data will only be used if you specify a post operation when you call
-        createInputStream().
+        If no HTTP command is set when calling createInputStream() to read from
+        this URL and some data has been set, it will do a POST request.
     */
     URL withPOSTData (const MemoryBlock& postData) const;
 
     /** Returns the data that was set using withPOSTData(). */
     String getPostData() const                                      { return postData.toString(); }
 
-    /** Returns the data that was set using withPOSTData() as MemoryBlock. */
+    /** Returns the data that was set using withPOSTData() as a MemoryBlock. */
     const MemoryBlock& getPostDataAsMemoryBlock() const noexcept    { return postData; }
 
     //==============================================================================
     /** Tries to launch the system's default browser to open the URL.
-        Returns true if this seems to have worked.
+
+        @returns  true if this seems to have worked.
     */
     bool launchInDefaultBrowser() const;
 
@@ -291,12 +301,104 @@ public:
     static bool isProbablyAnEmailAddress (const String& possibleEmailAddress);
 
     //==============================================================================
-    /** This callback function can be used by the createInputStream() method.
+    enum class ParameterHandling
+    {
+        inAddress,
+        inPostData
+    };
 
-        It allows your app to receive progress updates during a lengthy POST operation. If you
-        want to continue the operation, this should return true, or false to abort.
+    /** Class used to create a set of options to pass to the createInputStream() method.
+
+        You can chain together a series of calls to this class's methods to create
+        a set of whatever options you want to specify, e.g.
+        @code
+        if (auto inputStream = URL ("http://www.xyz.com/foobar")
+                                 .createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
+                                                           .withConnectionTimeoutMs (1000)
+                                                           .withNumRedirectsToFollow (0)))
+        {
+            ...
+        }
+        @endcode
     */
-    using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
+    class JUCE_API  InputStreamOptions
+    {
+    public:
+        /** Constructor.
+
+            If parameterHandling is ParameterHandling::inPostData, any URL parameters
+            that have been set will be transferred via the request body data. Otherwise
+            the parameters will be added to the URL address.
+        */
+        explicit InputStreamOptions (ParameterHandling parameterHandling);
+
+        //==============================================================================
+        /** A callback function to keep track of the operation's progress.
+
+            This can be useful for lengthy POST operations, so that you can provide user feedback.
+        */
+        InputStreamOptions withProgressCallback (std::function<bool (int bytesSent, int totalBytes)> progressCallback) const;
+
+        /** A string that will be appended onto the headers that are used for the request.
+
+            It must be a valid set of HTML header directives, separated by newlines.
+        */
+        InputStreamOptions withExtraHeaders (const String& extraHeaders) const;
+
+        /** Specifies a timeout for the request in milliseconds.
+
+            If 0, this will use whatever default setting the OS chooses. If a negative
+            number, it will be infinite.
+        */
+        InputStreamOptions withConnectionTimeoutMs (int connectionTimeoutMs) const;
+
+        /** If this is non-null, all the (key, value) pairs received as headers
+            in the response will be stored in this array.
+        */
+        InputStreamOptions withResponseHeaders (StringPairArray* responseHeaders) const;
+
+        /** If this is non-null, it will get set to the http status code, if one
+            is known, or 0 if a code isn't available.
+        */
+        InputStreamOptions withStatusCode (int* statusCode) const;
+
+        /** Specifies the number of redirects that will be followed before returning a response.
+
+            N.B. This will be ignored on Android which follows up to 5 redirects.
+        */
+        InputStreamOptions withNumRedirectsToFollow (int numRedirectsToFollow) const;
+
+        /** Specifies which HTTP request command to use.
+
+            If this is not set, then the command will be POST if parameterHandling is
+            set to ParameterHandling::inPostData or if any POST data has been specified
+            via withPOSTData(), withFileToUpload(), or withDataToUpload(). Otherwise it
+            will be GET.
+        */
+        InputStreamOptions withHttpRequestCmd (const String& httpRequestCmd) const;
+
+        //==============================================================================
+        ParameterHandling getParameterHandling() const noexcept             { return parameterHandling; }
+        std::function<bool (int, int)> getProgressCallback() const noexcept { return progressCallback; }
+        String getExtraHeaders() const noexcept                             { return extraHeaders; }
+        int getConnectionTimeoutMs() const noexcept                         { return connectionTimeOutMs; }
+        StringPairArray* getResponseHeaders() const noexcept                { return responseHeaders; }
+        int* getStatusCode() const noexcept                                 { return statusCode; }
+        int getNumRedirectsToFollow() const noexcept                        { return numRedirectsToFollow; }
+        String getHttpRequestCmd() const noexcept                           { return httpRequestCmd; }
+
+    private:
+        //==============================================================================
+        const ParameterHandling parameterHandling;
+
+        std::function<bool (int, int)> progressCallback = nullptr;
+        String extraHeaders;
+        int connectionTimeOutMs = 0;
+        StringPairArray* responseHeaders = nullptr;
+        int* statusCode = nullptr;
+        int numRedirectsToFollow = 5;
+        String httpRequestCmd;
+    };
 
     /** Attempts to open a stream that can read from this URL.
 
@@ -312,42 +414,11 @@ public:
 
         If the URL represents a local file, then this method simply returns a FileInputStream.
 
-        @param doPostLikeRequest if true, the parameters added to this class will be transferred
-                                 via the HTTP headers which is typical for POST requests. Otherwise
-                                 the parameters will be added to the URL address. Additionally,
-                                 if the parameter httpRequestCmd is not specified (or empty) then this
-                                 parameter will determine which HTTP request command will be used
-                                 (POST or GET).
-        @param progressCallback  if this is not a nullptr, it lets you supply a callback function
-                                 to keep track of the operation's progress. This can be useful
-                                 for lengthy POST operations, so that you can provide user feedback.
-        @param progressCallbackContext  if a callback is specified, this value will be passed to
-                                 the function
-        @param extraHeaders      if not empty, this string is appended onto the headers that
-                                 are used for the request. It must therefore be a valid set of HTML
-                                 header directives, separated by newlines.
-        @param connectionTimeOutMs  if 0, this will use whatever default setting the OS chooses. If
-                                 a negative number, it will be infinite. Otherwise it specifies a
-                                 time in milliseconds.
-        @param responseHeaders   if this is non-null, all the (key, value) pairs received as headers
-                                 in the response will be stored in this array
-        @param statusCode        if this is non-null, it will get set to the http status code, if one
-                                 is known, or 0 if a code isn't available
-        @param numRedirectsToFollow specifies the number of redirects that will be followed before
-                                 returning a response (ignored for Android which follows up to 5 redirects)
-        @param httpRequestCmd    Specify which HTTP Request to use. If this is empty, then doPostRequest
-                                 will determine the HTTP request.
-        @returns    a valid input stream, or nullptr if there was an error trying to open it.
-     */
-    std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
-                                                    OpenStreamProgressCallback* progressCallback = nullptr,
-                                                    void* progressCallbackContext = nullptr,
-                                                    String extraHeaders = {},
-                                                    int connectionTimeOutMs = 0,
-                                                    StringPairArray* responseHeaders = nullptr,
-                                                    int* statusCode = nullptr,
-                                                    int numRedirectsToFollow = 5,
-                                                    String httpRequestCmd = {}) const;
+        @param options           a set of options that will be used when opening the stream.
+
+        @returns                 a valid input stream, or nullptr if there was an error trying to open it.
+    */
+    std::unique_ptr<InputStream> createInputStream (const InputStreamOptions& options) const;
 
     /** Attempts to open an output stream to a URL for writing
 
@@ -358,32 +429,38 @@ public:
 
     //==============================================================================
     /** Represents a download task.
-        Returned by downloadToFile to allow querying and controlling the download task.
+
+        Returned by downloadToFile() to allow querying and controlling the download task.
     */
     class JUCE_API  DownloadTask
     {
     public:
-        /** Used to receive callbacks for download progress */
+        /** Used to receive callbacks for download progress. */
         struct JUCE_API  Listener
         {
             virtual ~Listener();
 
             /** Called when the download has finished. Be aware that this callback may
-                come on an arbitrary thread. */
+                come on an arbitrary thread.
+            */
             virtual void finished (URL::DownloadTask* task, bool success) = 0;
 
             /** Called periodically by the OS to indicate download progress.
+
                 Beware that this callback may come on an arbitrary thread.
             */
             virtual void progress (URL::DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
         };
 
         /** Releases the resources of the download task, unregisters the listener
-            and cancels the download if necessary. */
+            and cancels the download if necessary.
+        */
         virtual ~DownloadTask();
 
-        /** Returns the total length of the download task. This may return -1 if the length
-            was not returned by the server. */
+        /** Returns the total length of the download task.
+
+            This may return -1 if the length was not returned by the server.
+        */
         int64 getTotalLength() const                      { return contentLength; }
 
         /** Returns the number of bytes that have been downloaded so far. */
@@ -393,7 +470,9 @@ public:
         bool isFinished() const                           { return finished; }
 
         /** Returns the status code of the server's response.
+
             This will only be valid after the download has finished.
+
             @see isFinished
         */
         int statusCode() const                            { return httpCode; }
@@ -449,9 +528,10 @@ public:
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.
 
-        @param destData         the memory block to append the new data to
-        @param usePostCommand   whether to use a POST command to get the data (uses
-                                a GET command if this is false)
+        @param destData        the memory block to append the new data to.
+        @param usePostCommand  whether to use a POST command to get the data (uses
+                               a GET command if this is false).
+
         @see readEntireTextStream, readEntireXmlStream
     */
     bool readEntireBinaryStream (MemoryBlock& destData,
@@ -467,8 +547,9 @@ public:
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.
 
-        @param usePostCommand   whether to use a POST command to get the data (uses
-                                a GET command if this is false)
+        @param usePostCommand  whether to use a POST command to get the data (uses
+                               a GET command if this is false).
+
         @see readEntireBinaryStream, readEntireXmlStream
     */
     String readEntireTextStream (bool usePostCommand = false) const;
@@ -481,8 +562,8 @@ public:
         Note that on some platforms (Android, for example) it's not permitted to do any network
         action from the message thread, so you must only call it from a background thread.
 
-        @param usePostCommand   whether to use a POST command to get the data (uses
-                                a GET command if this is false)
+        @param usePostCommand  whether to use a POST command to get the data (uses
+                               a GET command if this is false).
 
         @see readEntireBinaryStream, readEntireTextStream
     */
@@ -496,14 +577,14 @@ public:
 
         This is the opposite of removeEscapeChars().
 
-        @param stringToAddEscapeCharsTo The string to escape.
-        @param isParameter              If true then the string is going to be
-                                        used as a parameter, so it also encodes
-                                        '$' and ',' (which would otherwise be
-                                        legal in a URL.
-        @param roundBracketsAreLegal    Technically round brackets are ok in URLs,
-                                        however, some servers (like AWS) also want
-                                        round brackets to be escaped.
+        @param stringToAddEscapeCharsTo  the string to escape.
+        @param isParameter               if true then the string is going to be
+                                         used as a parameter, so it also encodes
+                                         '$' and ',' (which would otherwise be
+                                         legal in a URL.
+        @param roundBracketsAreLegal     technically round brackets are ok in URLs,
+                                         however, some servers (like AWS) also want
+                                         round brackets to be escaped.
 
         @see removeEscapeChars
     */
@@ -523,35 +604,34 @@ public:
     static String removeEscapeChars (const String& stringToRemoveEscapeCharsFrom);
 
     /** Returns a URL without attempting to remove any embedded parameters from the string.
+
         This may be necessary if you need to create a request that involves both POST
         parameters and parameters which are embedded in the URL address itself.
     */
     static URL createWithoutParsing (const String& url);
 
+    //==============================================================================
+    using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
+
+    /** This method has been deprecated.
+
+        New code should use the method which takes an InputStreamOptions argument instead.
+
+        @see InputStreamOptions
+    */
+    std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
+                                                    OpenStreamProgressCallback* progressCallback = nullptr,
+                                                    void* progressCallbackContext = nullptr,
+                                                    String extraHeaders = {},
+                                                    int connectionTimeOutMs = 0,
+                                                    StringPairArray* responseHeaders = nullptr,
+                                                    int* statusCode = nullptr,
+                                                    int numRedirectsToFollow = 5,
+                                                    String httpRequestCmd = {}) const;
+
 private:
     //==============================================================================
-    friend class WebInputStream;
-
-    String url;
-    MemoryBlock postData;
-    StringArray parameterNames, parameterValues;
-
-    static File fileFromFileSchemeURL (const URL&);
-    String getDomainInternal (bool) const;
-
-    struct Upload  : public ReferenceCountedObject
-    {
-        Upload (const String&, const String&, const String&, const File&, MemoryBlock*);
-        String parameterName, filename, mimeType;
-        File file;
-        std::unique_ptr<MemoryBlock> data;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Upload)
-    };
-
-    ReferenceCountedArray<Upload> filesToUpload;
-
-  #if JUCE_IOS
+   #if JUCE_IOS
     struct Bookmark : public ReferenceCountedObject
     {
         using Ptr = ReferenceCountedObjectPtr<Bookmark>;
@@ -566,14 +646,41 @@ private:
 
     friend void setURLBookmark (URL&, void*);
     friend void* getURLBookmark (URL&);
-  #endif
+   #endif
+
+    //==============================================================================
+    struct Upload  : public ReferenceCountedObject
+    {
+        Upload (const String&, const String&, const String&, const File&, MemoryBlock*);
+        String parameterName, filename, mimeType;
+        File file;
+        std::unique_ptr<MemoryBlock> data;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Upload)
+    };
+
+    //==============================================================================
+    friend class WebInputStream;
 
     URL (const String&, int);
     void init();
     void addParameter (const String&, const String&);
-    void createHeadersAndPostData (String&, MemoryBlock&) const;
+    bool hasBodyDataToSend() const;
+    void createHeadersAndPostData (String&, MemoryBlock&, bool) const;
     URL withUpload (Upload*) const;
 
+    static ParameterHandling toHandling (bool);
+    static File fileFromFileSchemeURL (const URL&);
+    String getDomainInternal (bool) const;
+
+    //==============================================================================
+    String url;
+    MemoryBlock postData;
+    StringArray parameterNames, parameterValues;
+
+    ReferenceCountedArray<Upload> filesToUpload;
+
+    //==============================================================================
     JUCE_LEAK_DETECTOR (URL)
 };
 

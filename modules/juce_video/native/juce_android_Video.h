@@ -544,7 +544,7 @@ private:
 
         double getSpeed() const              { return controller.getPlaySpeed(); }
         Rectangle<int> getNativeSize() const { return player.getVideoNativeSize(); }
-        double getDuration() const           { return player.getVideoDuration() / 1000.0; }
+        double getDuration() const           { return (double) player.getVideoDuration() / 1000.0; }
 
         void setVolume (float newVolume)
         {
@@ -578,7 +578,7 @@ private:
             auto* env = getEnv();
 
             auto pos = env->CallLongMethod (storedPlaybackState, AndroidPlaybackState.getPosition);
-            setPosition (pos / 1000.0);
+            setPosition ((double) pos / 1000.0);
 
             setSpeed (playSpeedMult);
 
@@ -680,7 +680,7 @@ private:
                 auto playbackState = LocalRef<jobject> (env->CallObjectMethod (nativeController, AndroidMediaController.getPlaybackState));
 
                 if (playbackState != nullptr)
-                    return env->CallLongMethod (playbackState, AndroidPlaybackState.getPosition) / 1000.0;
+                    return (double) env->CallLongMethod (playbackState, AndroidPlaybackState.getPosition) / 1000.0;
 
                 return 0.0;
             }
@@ -705,7 +705,7 @@ private:
 
                 auto maxVolume = env->CallIntMethod (playbackInfo, AndroidMediaControllerPlaybackInfo.getMaxVolume);
 
-                auto targetVolume = jmin (jint (maxVolume * newVolume), maxVolume);
+                auto targetVolume = jmin (jint ((float) maxVolume * newVolume), maxVolume);
 
                 static constexpr jint flagShowUI = 1;
                 env->CallVoidMethod (nativeController, AndroidMediaController.setVolumeTo, targetVolume, flagShowUI);
@@ -720,7 +720,7 @@ private:
                 auto maxVolume = (int) (env->CallIntMethod (playbackInfo, AndroidMediaControllerPlaybackInfo.getMaxVolume));
                 auto curVolume = (int) (env->CallIntMethod (playbackInfo, AndroidMediaControllerPlaybackInfo.getCurrentVolume));
 
-                return static_cast<float> (curVolume) / maxVolume;
+                return static_cast<float> (curVolume) / (float) maxVolume;
             }
 
         private:

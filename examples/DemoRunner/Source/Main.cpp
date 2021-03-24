@@ -129,7 +129,11 @@ private:
 
            #if JUCE_IOS || JUCE_ANDROID
             setFullScreen (true);
-            Desktop::getInstance().setOrientationsEnabled (Desktop::rotatedClockwise | Desktop::rotatedAntiClockwise);
+
+            auto& desktop = Desktop::getInstance();
+
+            desktop.setOrientationsEnabled (Desktop::allOrientations);
+            desktop.setKioskModeComponent (this);
            #else
             setBounds ((int) (0.1f * (float) getParentWidth()),
                        (int) (0.1f * (float) getParentHeight()),

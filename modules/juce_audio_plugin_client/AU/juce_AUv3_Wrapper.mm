@@ -73,6 +73,8 @@
 
 #define JUCE_AUDIOUNIT_OBJC_NAME(x) JUCE_JOIN_MACRO (x, AUv3)
 
+#include <future>
+
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnullability-completeness")
 
 using namespace juce;
@@ -912,7 +914,7 @@ public:
    #endif
 
     //==============================================================================
-    void audioProcessorChanged (AudioProcessor* processor) override
+    void audioProcessorChanged (AudioProcessor* processor, const ChangeDetails&) override
     {
         ignoreUnused (processor);
 
@@ -1750,7 +1752,7 @@ public:
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
-        if (processorHolder != nullptr)
+        if (processorHolder.get() != nullptr)
             JuceAudioUnitv3::removeEditor (getAudioProcessor());
     }
 
@@ -1795,22 +1797,25 @@ public:
 
     void viewDidLayoutSubviews()
     {
-        if (processorHolder != nullptr && [myself view] != nullptr)
+        if (auto holder = processorHolder.get())
         {
-            if (AudioProcessorEditor* editor = getAudioProcessor().getActiveEditor())
+            if ([myself view] != nullptr)
             {
-                if (processorHolder->viewConfiguration != nullptr)
-                    editor->hostMIDIControllerIsAvailable (processorHolder->viewConfiguration->hostHasMIDIController);
-
-                editor->setBounds (convertToRectInt ([[myself view] bounds]));
-
-                if (JUCE_IOS_MAC_VIEW* peerView = [[[myself view] subviews] objectAtIndex: 0])
+                if (AudioProcessorEditor* editor = getAudioProcessor().getActiveEditor())
                 {
-                   #if JUCE_IOS
-                    [peerView setNeedsDisplay];
-                   #else
-                    [peerView setNeedsDisplay: YES];
-                   #endif
+                    if (holder->viewConfiguration != nullptr)
+                        editor->hostMIDIControllerIsAvailable (holder->viewConfiguration->hostHasMIDIController);
+
+                    editor->setBounds (convertToRectInt ([[myself view] bounds]));
+
+                    if (JUCE_IOS_MAC_VIEW* peerView = [[[myself view] subviews] objectAtIndex: 0])
+                    {
+                       #if JUCE_IOS
+                        [peerView setNeedsDisplay];
+                       #else
+                        [peerView setNeedsDisplay: YES];
+                       #endif
+                    }
                 }
             }
         }
@@ -1818,21 +1823,21 @@ public:
 
     void didReceiveMemoryWarning()
     {
-        if (processorHolder != nullptr)
-            if (auto* processor = processorHolder->get())
+        if (auto ptr = processorHolder.get())
+            if (auto* processor = ptr->get())
                 processor->memoryWarningReceived();
     }
 
     void viewDidAppear (bool)
     {
-        if (processorHolder != nullptr)
+        if (processorHolder.get() != nullptr)
             if (AudioProcessorEditor* editor = getAudioProcessor().getActiveEditor())
                 editor->setVisible (true);
     }
 
     void viewDidDisappear (bool)
     {
-        if (processorHolder != nullptr)
+        if (processorHolder.get() != nullptr)
             if (AudioProcessorEditor* editor = getAudioProcessor().getActiveEditor())
                 editor->setVisible (false);
     }
@@ -1846,65 +1851,72 @@ public:
     //==============================================================================
     AUAudioUnit* createAudioUnit (const AudioComponentDescription& descr, NSError** error)
     {
-        AUAudioUnit* retval = nil;
-
-        if (! MessageManager::getInstance()->isThisTheMessageThread())
+        const auto holder = [&]
         {
-            WaitableEvent creationEvent;
+            if (auto initialisedHolder = processorHolder.get())
+                return initialisedHolder;
 
-            // AUv3 headers say that we may block this thread and that the message thread is guaranteed
-            // to be unblocked
-            struct AUCreator  : public CallbackMessage
-            {
-                JuceAUViewController& owner;
-                AudioComponentDescription pDescr;
-                NSError** pError;
-                AUAudioUnit*& outAU;
-                WaitableEvent& e;
+            waitForExecutionOnMainThread ([this] { [myself view]; });
+            return processorHolder.get();
+        }();
 
-                AUCreator (JuceAUViewController& parent, const AudioComponentDescription& paramDescr, NSError** paramError,
-                           AUAudioUnit*& outputAU, WaitableEvent& event)
-                    : owner (parent), pDescr (paramDescr), pError (paramError), outAU (outputAU), e (event)
-                {}
+        if (holder == nullptr)
+            return nullptr;
 
-                void messageCallback() override
-                {
-                    outAU = owner.createAudioUnitOnMessageThread (pDescr, pError);
-                    e.signal();
-                }
-            };
-
-            (new AUCreator (*this, descr, error, retval, creationEvent))->post();
-            creationEvent.wait (-1);
-        }
-        else
-        {
-            retval = createAudioUnitOnMessageThread (descr, error);
-        }
-
-        return [retval autorelease];
+        return (new JuceAudioUnitv3 (holder, descr, 0, error))->getAudioUnit();
     }
 
 private:
+    template <typename Callback>
+    static void waitForExecutionOnMainThread (Callback&& callback)
+    {
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+        {
+            callback();
+            return;
+        }
+
+        std::promise<void> promise;
+
+        MessageManager::callAsync ([&]
+        {
+            callback();
+            promise.set_value();
+        });
+
+        promise.get_future().get();
+    }
+
+    // There's a chance that createAudioUnit will be called from a background
+    // thread while the processorHolder is being updated on the main thread.
+    class LockedProcessorHolder
+    {
+    public:
+        AudioProcessorHolder::Ptr get() const
+        {
+            const ScopedLock lock (mutex);
+            return holder;
+        }
+
+        LockedProcessorHolder& operator= (const AudioProcessorHolder::Ptr& other)
+        {
+            const ScopedLock lock (mutex);
+            holder = other;
+            return *this;
+        }
+
+    private:
+        mutable CriticalSection mutex;
+        AudioProcessorHolder::Ptr holder;
+    };
+
     //==============================================================================
     AUViewController<AUAudioUnitFactory>* myself;
-    AudioProcessorHolder::Ptr processorHolder = nullptr;
+    LockedProcessorHolder processorHolder;
     Rectangle<int> preferredSize { 1, 1 };
 
     //==============================================================================
-    AUAudioUnit* createAudioUnitOnMessageThread (const AudioComponentDescription& descr, NSError** error)
-    {
-        JUCE_ASSERT_MESSAGE_THREAD
-
-        [myself view];  // this will call [view load] and ensure that the AudioProcessor has been instantiated
-
-        if (processorHolder == nullptr)
-            return nullptr;
-
-        return (new JuceAudioUnitv3 (processorHolder, descr, 0, error))->getAudioUnit();
-    }
-
-    AudioProcessor& getAudioProcessor() const noexcept       { return **processorHolder; }
+    AudioProcessor& getAudioProcessor() const noexcept       { return **processorHolder.get(); }
 };
 
 //==============================================================================
@@ -1921,7 +1933,11 @@ private:
 - (void) loadView                { cpp->loadView(); }
 - (AUAudioUnit *) createAudioUnitWithComponentDescription: (AudioComponentDescription) desc error: (NSError **) error { return cpp->createAudioUnit (desc, error); }
 - (CGSize) preferredContentSize  { return cpp->getPreferredContentSize(); }
+
+// NSViewController and UIViewController have slightly different names for this function
 - (void) viewDidLayoutSubviews   { cpp->viewDidLayoutSubviews(); }
+- (void) viewDidLayout           { cpp->viewDidLayoutSubviews(); }
+
 - (void) didReceiveMemoryWarning { cpp->didReceiveMemoryWarning(); }
 #if JUCE_IOS
 - (void) viewDidAppear: (BOOL) animated { cpp->viewDidAppear (animated); [super viewDidAppear:animated]; }

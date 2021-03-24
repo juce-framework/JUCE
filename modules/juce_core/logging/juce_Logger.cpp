@@ -49,7 +49,7 @@ void Logger::writeToLog (const String& message)
 void JUCE_API JUCE_CALLTYPE logAssertion (const char* const filename, const int lineNum) noexcept
 {
     String m ("JUCE Assertion failure in ");
-    m << File::createFileWithoutCheckingPath (filename).getFileName() << ':' << lineNum;
+    m << File::createFileWithoutCheckingPath (CharPointer_UTF8 (filename)).getFileName() << ':' << lineNum;
 
    #if JUCE_LOG_ASSERTIONS
     Logger::writeToLog (m);

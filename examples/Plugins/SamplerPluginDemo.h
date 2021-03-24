@@ -42,6 +42,8 @@
 
  useLocalCopy:     1
 
+ pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn
+
  END_JUCE_PIP_METADATA
 
 *******************************************************************************/
@@ -2344,7 +2346,7 @@ public:
             std::vector<std::unique_ptr<MPESamplerVoice>> newVoices;
         };
 
-        numberOfVoices = std::min (maxVoices, numberOfVoices);
+        numberOfVoices = std::min ((int) maxVoices, numberOfVoices);
         auto loadedSamplerSound = samplerSound;
         std::vector<std::unique_ptr<MPESamplerVoice>> newSamplerVoices;
         newSamplerVoices.reserve ((size_t) numberOfVoices);
@@ -2595,12 +2597,10 @@ private:
     // with the real state of the processor.
     SpinLock commandQueueMutex;
 
-    static constexpr auto maxVoices { 20 };
+    enum { maxVoices = 20 };
 
     // This is used for visualising the current playback position of each voice.
     std::array<std::atomic<float>, maxVoices> playbackPositions;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SamplerAudioProcessor)
 };
-
-const int SamplerAudioProcessor::maxVoices;

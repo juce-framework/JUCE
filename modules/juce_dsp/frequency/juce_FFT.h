@@ -50,6 +50,12 @@ public:
     */
     FFT (int order);
 
+    /** Move constructor. */
+    FFT (FFT&&) noexcept;
+
+    /** Move assignment operator. */
+    FFT& operator= (FFT&&) noexcept;
+
     /** Destructor. */
     ~FFT();
 

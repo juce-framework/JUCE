@@ -402,6 +402,7 @@ private:
 
             // set resize limits for this plug-in
             setResizeLimits (400, 200, 1024, 700);
+            setResizable (true, owner.wrapperType != wrapperType_AudioUnitv3);
 
             lastUIWidth .referTo (owner.state.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
             lastUIHeight.referTo (owner.state.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));

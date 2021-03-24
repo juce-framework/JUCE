@@ -339,7 +339,7 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
     midiDeviceInfosFromXml.clear();
     enabledMidiInputs.clear();
 
-    forEachXmlChildElementWithTagName (xml, c, "MIDIINPUT")
+    for (auto* c : xml.getChildWithTagNameIterator ("MIDIINPUT"))
         midiDeviceInfosFromXml.add ({ c->getStringAttribute ("name"), c->getStringAttribute ("identifier") });
 
     auto isIdentifierAvailable = [] (const Array<MidiDeviceInfo>& available, const String& identifier)
@@ -1146,12 +1146,19 @@ void AudioDeviceManager::addMidiInputCallback (const String& name, MidiInputCall
 
 void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* callbackToRemove)
 {
-    for (auto& device : MidiInput::getAvailableDevices())
+    if (name.isEmpty())
     {
-        if (device.name == name)
+        removeMidiInputDeviceCallback ({}, callbackToRemove);
+    }
+    else
+    {
+        for (auto& device : MidiInput::getAvailableDevices())
         {
-            removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
-            return;
+            if (device.name == name)
+            {
+                removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
+                return;
+            }
         }
     }
 }

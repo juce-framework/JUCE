@@ -74,7 +74,7 @@ bool ComponentDocument::loadFromXml (const XmlElement& xml)
     {
         components->clearComponents();
 
-        forEachXmlChildElement (xml, e)
+        for (auto* e : xml.getChildIterator())
         {
             if (e->hasTagName (PaintRoutine::xmlTagName))
                 backgroundGraphics->loadFromXml (*e);

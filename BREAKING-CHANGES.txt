@@ -1,6 +1,106 @@
 JUCE breaking changes
 =====================
 
+Version 6.0.8
+=============
+
+Change
+------
+Calling AudioProcessorEditor::setResizeLimits() will no longer implicitly add a
+ResizableCornerComponent to the editor if it has not already been set as
+resizable.
+
+Possible Issues
+---------------
+Code which previously relied on calling this method to set up the corner
+resizer will no longer work.
+
+Workaround
+----------
+Explicitly call AudioProcessorEditor::setResizable() with the second argument
+set to true to enable the corner resizer.
+
+Rationale
+---------
+The previous behaviour was undocumented and potentially confusing. There is now
+a single method to control the behaviour of the editor's corner resizer to
+avoid any ambiguity.
+
+
+Change
+------
+The implementations of `getValue` and `setValue` in `AUInstanceParameter` now
+properly take the ranges of discrete parameters into account.
+
+Possible Issues
+---------------
+This issue affects JUCE Audio Unit hosts. Automation data previously saved for
+a discrete parameter with a non-zero minimum value may not set the parameter to
+the same values as previous JUCE versions. Note that previously, `getValue` on
+a hosted discrete parameter may have returned out-of-range values, and
+`setValue` may have only mapped to a portion of the parameter range. As a
+result, automation recorded for affected parameters was likely already behaving
+unexpectedly.
+
+Workaround
+----------
+There is no workaround.
+
+Rationale
+---------
+The old behaviour was incorrect, and was causing issues in plugin validators
+and other hosts. Hosts expect `getValue` to return a normalised parameter
+value. If this function returns an out-of-range value (including Inf and NaN)
+this is likely to break assumptions made by the host, leading to crashes,
+corrupted project data, or other defects.
+
+
+Change
+------
+AudioProcessorListener::audioProcessorChanged gained a new parameter describing
+the nature of any change.
+
+Possible Issues
+---------------
+Code using the old function signature will not build until updated to use
+the new signature.
+
+Workaround
+----------
+Listeners should add the new parameter to any overrides of
+audioProcessorChanged.
+
+Rationale
+---------
+The new function signature means that wrappers can be smarter about the
+requests that they make to hosts whenever some aspect of the processor changes.
+In particular, plugin wrappers can now distinguish between changes to latency,
+parameter attributes, and the current program. This means that hosts will no
+longer assume parameters have changed when `setLatencySamples` is called.
+
+
+Change
+------
+CharacterFunctions::readDoubleValue now returns values consistent with other
+C++ number parsing libraries. Parsing values smaller than the minimum number
+respresentable in a double will return (+/-)0.0 and parsing values larger than
+the maximum number respresentable in a double will return (+/-)inf.
+
+Possible Issues
+---------------
+Code reading very large or very small numbers may receive values of 0.0 and inf
+rather than nan.
+
+Workaround
+----------
+Where you may be using std::isnan to check the validity of the result you can
+instead use std::isfinite.
+
+Rationale
+---------
+The new behaviour is consistent with other string parsing libraries.
+
+
 Version 6.0.6
 =============
 

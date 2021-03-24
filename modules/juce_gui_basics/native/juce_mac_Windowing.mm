@@ -441,26 +441,30 @@ struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
 {
     DisplaySettingsChangeCallback()
     {
-        CGDisplayRegisterReconfigurationCallback (displayReconfigurationCallBack, nullptr);
+        CGDisplayRegisterReconfigurationCallback (displayReconfigurationCallback, nullptr);
     }
 
     ~DisplaySettingsChangeCallback()
     {
-        CGDisplayRemoveReconfigurationCallback (displayReconfigurationCallBack, nullptr);
+        CGDisplayRemoveReconfigurationCallback (displayReconfigurationCallback, nullptr);
         clearSingletonInstance();
     }
 
-    static void displayReconfigurationCallBack (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void*)
+    static void displayReconfigurationCallback (CGDirectDisplayID, CGDisplayChangeSummaryFlags, void*)
     {
-        const_cast<Displays&> (Desktop::getInstance().getDisplays()).refresh();
+        if (forceDisplayUpdate != nullptr)
+            forceDisplayUpdate();
     }
 
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (DisplaySettingsChangeCallback)
+    static std::function<void()> forceDisplayUpdate;
 
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (DisplaySettingsChangeCallback)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DisplaySettingsChangeCallback)
 };
 
 JUCE_IMPLEMENT_SINGLETON (DisplaySettingsChangeCallback)
+
+std::function<void()> DisplaySettingsChangeCallback::forceDisplayUpdate = nullptr;
 
 static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
 {
@@ -494,7 +498,10 @@ void Displays::findDisplays (const float masterScale)
 {
     JUCE_AUTORELEASEPOOL
     {
-        DisplaySettingsChangeCallback::getInstance();
+        auto& settingsChangeCallback = *DisplaySettingsChangeCallback::getInstance();
+
+        if (settingsChangeCallback.forceDisplayUpdate == nullptr)
+            settingsChangeCallback.forceDisplayUpdate = [this] { refresh(); };
 
         CGFloat mainScreenBottom = 0;
 

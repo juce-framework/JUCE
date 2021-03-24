@@ -47,7 +47,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshorten-64-to-32",
                                      "-Wzero-as-null-pointer-constant",
                                      "-Wnullable-to-nonnull-conversion",
                                      "-Wgnu-zero-variadic-macro-arguments",
-                                     "-Wformat-pedantic")
+                                     "-Wformat-pedantic",
+                                     "-Wdeprecated-anon-enum-enum-conversion")
 
 #include "../utility/juce_IncludeSystemHeaders.h"
 
@@ -354,7 +355,7 @@ public:
                     }
                 }
 
-                err = (busNr == (requestedNumBus - 1) ? noErr : kAudioUnitErr_FormatNotSupported);
+                err = (busNr == (requestedNumBus - 1) ? (OSStatus) noErr : (OSStatus) kAudioUnitErr_FormatNotSupported);
             }
 
             // was there an error?
@@ -673,6 +674,19 @@ public:
 
                     return noErr;
                 }
+
+               #if defined (MAC_OS_X_VERSION_10_12)
+                case kAudioUnitProperty_AUHostIdentifier:
+                {
+                    if (inDataSize < sizeof (AUHostVersionIdentifier))
+                        return kAudioUnitErr_InvalidPropertyValue;
+
+                    const auto* identifier = static_cast<const AUHostVersionIdentifier*> (inData);
+                    PluginHostType::hostIdReportedByWrapper = String::fromCFString (identifier->hostName);
+
+                    return noErr;
+                }
+               #endif
 
                 default: break;
             }
@@ -1165,16 +1179,24 @@ public:
         sendAUEvent (kAudioUnitEvent_EndParameterChangeGesture, index);
     }
 
-    void audioProcessorChanged (AudioProcessor*) override
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails& details) override
     {
-        PropertyChanged (kAudioUnitProperty_Latency,       kAudioUnitScope_Global, 0);
-        PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
-        PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
-        PropertyChanged (kAudioUnitProperty_ClassInfo,     kAudioUnitScope_Global, 0);
+        if (details.latencyChanged)
+            PropertyChanged (kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
 
-        refreshCurrentPreset();
+        if (details.parameterInfoChanged)
+        {
+            PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
+            PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
+        }
 
-        PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
+        PropertyChanged (kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, 0);
+
+        if (details.programChanged)
+        {
+            refreshCurrentPreset();
+            PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
+        }
     }
 
     //==============================================================================
@@ -1746,6 +1768,9 @@ private:
     Array<const AudioProcessorParameterGroup*> parameterGroups;
 
     //==============================================================================
+    // According to the docs, this is the maximum size of a MIDIPacketList.
+    static constexpr UInt32 packetListBytes = 65536;
+
     AudioUnitEvent auEvent;
     mutable Array<AUPreset> presetsArray;
     CriticalSection incomingMidiLock;
@@ -1753,6 +1778,7 @@ private:
     AudioTimeStamp lastTimeStamp;
     int totalInChannels, totalOutChannels;
     HeapBlock<bool> pulledSucceeded;
+    HeapBlock<MIDIPacketList> packetList { packetListBytes, 1 };
 
     ThreadLocalValue<bool> inParameterChangedCallback;
 
@@ -1849,37 +1875,55 @@ private:
 
     void pushMidiOutput (UInt32 nFrames) noexcept
     {
-        UInt32 numPackets = 0;
-        size_t dataSize = 0;
+        MIDIPacket* end = nullptr;
+
+        const auto init = [&]
+        {
+            end = MIDIPacketListInit (packetList);
+        };
+
+        const auto send = [&]
+        {
+            midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
+        };
+
+        const auto add = [&] (const MidiMessageMetadata& metadata)
+        {
+            end = MIDIPacketListAdd (packetList,
+                                     packetListBytes,
+                                     end,
+                                     static_cast<MIDITimeStamp> (metadata.samplePosition),
+                                     static_cast<ByteCount> (metadata.numBytes),
+                                     metadata.data);
+        };
+
+        init();
 
         for (const auto metadata : midiEvents)
         {
             jassert (isPositiveAndBelow (metadata.samplePosition, nFrames));
             ignoreUnused (nFrames);
 
-            dataSize += (size_t) metadata.numBytes;
-            ++numPackets;
+            add (metadata);
+
+            if (end == nullptr)
+            {
+                send();
+                init();
+                add (metadata);
+
+                if (end == nullptr)
+                {
+                    // If this is hit, the size of this midi packet exceeds the maximum size of
+                    // a MIDIPacketList. Large SysEx messages should be broken up into smaller
+                    // chunks.
+                    jassertfalse;
+                    init();
+                }
+            }
         }
 
-        MIDIPacket* p;
-        const size_t packetMembersSize     = sizeof (MIDIPacket)     - sizeof (p->data); // NB: GCC chokes on "sizeof (MidiMessage::data)"
-        const size_t packetListMembersSize = sizeof (MIDIPacketList) - sizeof (p->data);
-
-        HeapBlock<MIDIPacketList> packetList;
-        packetList.malloc (packetListMembersSize + packetMembersSize * numPackets + dataSize, 1);
-        packetList->numPackets = numPackets;
-
-        p = packetList->packet;
-
-        for (const auto metadata : midiEvents)
-        {
-            p->timeStamp = (MIDITimeStamp) metadata.samplePosition;
-            p->length = (UInt16) metadata.numBytes;
-            memcpy (p->data, metadata.data, (size_t) metadata.numBytes);
-            p = MIDIPacketNext (p);
-        }
-
-        midiCallback.midiOutputCallback (midiCallback.userData, &lastTimeStamp, 0, packetList);
+        send();
     }
 
     void GetAudioBufferList (bool isInput, int busIdx, AudioBufferList*& bufferList, bool& interleaved, int& numChannels)
@@ -1902,7 +1946,7 @@ private:
 
         return (scope != kAudioUnitScope_Input
              && scope != kAudioUnitScope_Output)
-              ? kAudioUnitErr_InvalidScope : noErr;
+              ? (OSStatus) kAudioUnitErr_InvalidScope : (OSStatus) noErr;
     }
 
     OSStatus elementToBusIdx (AudioUnitScope scope, AudioUnitElement element, bool& isInput, int& busIdx) noexcept
@@ -2042,10 +2086,12 @@ private:
         addSupportedLayoutTags();
 
         for (int i = 0; i < enabledInputs; ++i)
-            if ((err = syncAudioUnitWithChannelSet (true,  i, juceFilter->getChannelLayoutOfBus (true,  i))) != noErr) return err;
+            if ((err = syncAudioUnitWithChannelSet (true,  i, juceFilter->getChannelLayoutOfBus (true,  i))) != noErr)
+                return err;
 
         for (int i = 0; i < enabledOutputs; ++i)
-            if ((err = syncAudioUnitWithChannelSet (false, i, juceFilter->getChannelLayoutOfBus (false, i))) != noErr) return err;
+            if ((err = syncAudioUnitWithChannelSet (false, i, juceFilter->getChannelLayoutOfBus (false, i))) != noErr)
+                return err;
 
         return noErr;
     }
@@ -2168,7 +2214,7 @@ private:
            #endif
 
             // add discrete layout tags
-            int n = bus->getMaxSupportedChannels(maxChannelsToProbeFor());
+            int n = bus->getMaxSupportedChannels (maxChannelsToProbeFor());
 
             for (int ch = 0; ch < n; ++ch)
             {

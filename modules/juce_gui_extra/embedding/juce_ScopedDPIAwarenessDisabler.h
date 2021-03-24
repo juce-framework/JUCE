@@ -26,8 +26,6 @@
 namespace juce
 {
 
-#if (JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE) || DOXYGEN
-
 //==============================================================================
 /**
     A Windows-specific class that temporarily sets the DPI awareness context of
@@ -52,6 +50,5 @@ public:
 private:
     void* previousContext = nullptr;
 };
-#endif
 
 } // namespace juce

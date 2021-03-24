@@ -1942,7 +1942,7 @@ public:
     virtual void handleCommandMessage (int commandId);
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** Runs a component modally, waiting until the loop terminates.
 
         This method first makes the component visible, brings it to the front and
@@ -2179,10 +2179,7 @@ public:
         operator ComponentType*() const noexcept              { return getComponent(); }
 
         /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        ComponentType* operator->() noexcept                  { return getComponent(); }
-
-        /** Returns the component that this pointer refers to, or null if the component no longer exists. */
-        const ComponentType* operator->() const noexcept      { return getComponent(); }
+        ComponentType* operator->() const noexcept            { return getComponent(); }
 
         /** If the component is valid, this deletes it and sets this pointer to null. */
         void deleteAndZero()                                  { delete getComponent(); }

@@ -85,7 +85,7 @@ namespace XWindowSystemUtilities
 
         static constexpr unsigned long DndVersion = 3;
 
-        Atom protocols, protocolList[3], changeState, state, userTime, activeWin, pid, windowType, windowState,
+        Atom protocols, protocolList[3], changeState, state, userTime, activeWin, pid, windowType, windowState, windowStateHidden,
              XdndAware, XdndEnter, XdndLeave, XdndPosition, XdndStatus, XdndDrop, XdndFinished, XdndSelection,
              XdndTypeList, XdndActionList, XdndActionDescription, XdndActionCopy, XdndActionPrivate,
              XembedMsgType, XembedInfo, allowedActions[5], allowedMimeTypes[4], utf8String, clipboard, targets;
@@ -93,69 +93,70 @@ namespace XWindowSystemUtilities
 }
 
 //==============================================================================
-template<typename WindowHandle>
 class LinuxComponentPeer;
 
 class XWindowSystem  : public DeletedAtShutdown
 {
 public:
     //==============================================================================
-    ::Window createWindow (::Window parentWindow, LinuxComponentPeer<::Window>* peer) const;
-    void destroyWindow    (::Window windowH);
+    ::Window createWindow (::Window parentWindow, LinuxComponentPeer*) const;
+    void destroyWindow    (::Window);
 
-    void setTitle (::Window windowH, const String& title) const;
-    void setIcon (::Window windowH, const Image& newIcon) const;
-    void setVisible (::Window windowH, bool shouldBeVisible) const;
-    void setBounds (::Window windowH, Rectangle<int> newBounds, bool fullScreen) const;
+    void setTitle (::Window, const String&) const;
+    void setIcon (::Window , const Image&) const;
+    void setVisible (::Window, bool shouldBeVisible) const;
+    void setBounds (::Window, Rectangle<int>, bool fullScreen) const;
 
-    BorderSize<int> getBorderSize   (::Window windowH) const;
-    Rectangle<int>  getWindowBounds (::Window windowH, ::Window parentWindow);
-    Point<int> getParentScreenPosition() const;
+    BorderSize<int> getBorderSize   (::Window) const;
+    Rectangle<int>  getWindowBounds (::Window, ::Window parentWindow);
+    Point<int> getPhysicalParentScreenPosition() const;
 
-    bool contains (::Window windowH, Point<int> localPos) const;
+    bool contains (::Window, Point<int> localPos) const;
 
-    void setMinimised (::Window windowH, bool shouldBeMinimised) const;
-    bool isMinimised  (::Window windowH) const;
+    void setMinimised (::Window, bool shouldBeMinimised) const;
+    bool isMinimised  (::Window) const;
 
-    void toFront  (::Window windowH, bool makeActive) const;
-    void toBehind (::Window windowH, ::Window otherWindow) const;
+    void setMaximised (::Window, bool shouldBeMinimised) const;
 
-    bool isFocused (::Window windowH) const;
-    bool grabFocus (::Window windowH) const;
+    void toFront  (::Window, bool makeActive) const;
+    void toBehind (::Window, ::Window otherWindow) const;
+
+    bool isFocused (::Window) const;
+    bool grabFocus (::Window) const;
 
     bool canUseSemiTransparentWindows() const;
     bool canUseARGBImages() const;
 
-    int getNumPaintsPendingForWindow (::Window windowH);
-    void processPendingPaintsForWindow (::Window windowH);
-    void addPendingPaintForWindow (::Window windowH);
-    void removePendingPaintForWindow (::Window windowH);
+    int getNumPaintsPendingForWindow (::Window);
+    void processPendingPaintsForWindow (::Window);
+    void addPendingPaintForWindow (::Window);
+    void removePendingPaintForWindow (::Window);
 
     Image createImage (bool isSemiTransparentWindow, int width, int height, bool argb) const;
-    void blitToWindow (::Window windowH, Image image, Rectangle<int> destinationRect, Rectangle<int> totalRect) const;
+    void blitToWindow (::Window, Image, Rectangle<int> destinationRect, Rectangle<int> totalRect) const;
 
     void setScreenSaverEnabled (bool enabled) const;
 
     Point<float> getCurrentMousePosition() const;
     void setMousePosition (Point<float> pos) const;
 
-    void* createCustomMouseCursorInfo (const Image& image, Point<int> hotspot) const;
+    void* createCustomMouseCursorInfo (const Image&, Point<int> hotspot) const;
     void deleteMouseCursor (void* cursorHandle) const;
-    void* createStandardMouseCursor (MouseCursor::StandardCursorType type) const;
-    void showCursor (::Window windowH, void* cursorHandle) const;
+    void* createStandardMouseCursor (MouseCursor::StandardCursorType) const;
+    void showCursor (::Window, void* cursorHandle) const;
 
     bool isKeyCurrentlyDown (int keyCode) const;
     ModifierKeys getNativeRealtimeModifiers() const;
 
     Array<Displays::Display> findDisplays (float masterScale) const;
 
-    ::Window createKeyProxy (::Window windowH) const;
-    void deleteKeyProxy (::Window keyProxy) const;
+    ::Window createKeyProxy (::Window) const;
+    void deleteKeyProxy (::Window) const;
 
-    bool externalDragFileInit (LinuxComponentPeer<::Window>* peer, const StringArray& files, bool canMove, std::function<void()>&& callback) const;
-    bool externalDragTextInit (LinuxComponentPeer<::Window>* peer, const String& text, std::function<void()>&& callback) const;
+    bool externalDragFileInit (LinuxComponentPeer*, const StringArray& files, bool canMove, std::function<void()>&& callback) const;
+    bool externalDragTextInit (LinuxComponentPeer*, const String& text, std::function<void()>&& callback) const;
 
-    void copyTextToClipboard (const String& clipText);
+    void copyTextToClipboard (const String&);
     String getTextFromClipboard() const;
 
     String getLocalClipboardContent() const    { return localClipboardContent; }
@@ -163,8 +164,11 @@ public:
     ::Display* getDisplay()                    { return display; }
     XWindowSystemUtilities::Atoms& getAtoms()  { return atoms; }
 
+    bool isX11Available() const noexcept       { return xIsAvailable; }
+
     //==============================================================================
-    void handleWindowMessage (LinuxComponentPeer<::Window>* peer, XEvent& event) const;
+    void handleWindowMessage (LinuxComponentPeer*, XEvent&) const;
+    bool isParentWindowOf (::Window, ::Window possibleChild) const;
 
     //==============================================================================
     JUCE_DECLARE_SINGLETON (XWindowSystem, false)
@@ -182,9 +186,9 @@ private:
 
     struct DisplayVisuals
     {
-        explicit DisplayVisuals (::Display* d);
+        explicit DisplayVisuals (::Display*);
 
-        VisualAndDepth getBestVisualForWindow (bool isSemiTransparent) const;
+        VisualAndDepth getBestVisualForWindow (bool) const;
         bool isValid() const noexcept;
 
         Visual* visual16Bit = nullptr;
@@ -196,42 +200,47 @@ private:
     void destroyXDisplay();
 
     //==============================================================================
-    ::Window getFocusWindow (::Window windowH) const;
+    ::Window getFocusWindow (::Window) const;
 
-    bool isParentWindowOf (::Window windowH, ::Window possibleChild) const;
-    bool isFrontWindow (::Window windowH) const;
+    bool isFrontWindow (::Window) const;
 
     //==============================================================================
-    void xchangeProperty (::Window windowH, Atom property, Atom type, int format, const void* data, int numElements) const;
+    void xchangeProperty (::Window, Atom, Atom, int, const void*, int) const;
 
-    void removeWindowDecorations (::Window windowH) const;
-    void addWindowButtons        (::Window windowH, int styleFlags) const;
-    void setWindowType           (::Window windowH, int styleFlags) const;
+    void removeWindowDecorations (::Window) const;
+    void addWindowButtons        (::Window, int) const;
+    void setWindowType           (::Window, int) const;
 
     void initialisePointerMap();
-    void deleteIconPixmaps (::Window windowH) const;
+    void deleteIconPixmaps (::Window) const;
     void updateModifierMappings() const;
 
-    long getUserTime (::Window windowH) const;
+    long getUserTime (::Window) const;
 
     //==============================================================================
-    void handleKeyPressEvent        (LinuxComponentPeer<::Window>*, XKeyEvent&) const;
-    void handleKeyReleaseEvent      (LinuxComponentPeer<::Window>*, const XKeyEvent&) const;
-    void handleWheelEvent           (LinuxComponentPeer<::Window>*, const XButtonPressedEvent&, float) const;
-    void handleButtonPressEvent     (LinuxComponentPeer<::Window>*, const XButtonPressedEvent&, int) const;
-    void handleButtonPressEvent     (LinuxComponentPeer<::Window>*, const XButtonPressedEvent&) const;
-    void handleButtonReleaseEvent   (LinuxComponentPeer<::Window>*, const XButtonReleasedEvent&) const;
-    void handleMotionNotifyEvent    (LinuxComponentPeer<::Window>*, const XPointerMovedEvent&) const;
-    void handleEnterNotifyEvent     (LinuxComponentPeer<::Window>*, const XEnterWindowEvent&) const;
-    void handleLeaveNotifyEvent     (LinuxComponentPeer<::Window>*, const XLeaveWindowEvent&) const;
-    void handleFocusInEvent         (LinuxComponentPeer<::Window>*) const;
-    void handleFocusOutEvent        (LinuxComponentPeer<::Window>*) const;
-    void handleExposeEvent          (LinuxComponentPeer<::Window>*, XExposeEvent&) const;
-    void handleConfigureNotifyEvent (LinuxComponentPeer<::Window>*, XConfigureEvent&) const;
-    void handleGravityNotify        (LinuxComponentPeer<::Window>*) const;
+    void handleKeyPressEvent        (LinuxComponentPeer*, XKeyEvent&) const;
+    void handleKeyReleaseEvent      (LinuxComponentPeer*, const XKeyEvent&) const;
+    void handleWheelEvent           (LinuxComponentPeer*, const XButtonPressedEvent&, float) const;
+    void handleButtonPressEvent     (LinuxComponentPeer*, const XButtonPressedEvent&, int) const;
+    void handleButtonPressEvent     (LinuxComponentPeer*, const XButtonPressedEvent&) const;
+    void handleButtonReleaseEvent   (LinuxComponentPeer*, const XButtonReleasedEvent&) const;
+    void handleMotionNotifyEvent    (LinuxComponentPeer*, const XPointerMovedEvent&) const;
+    void handleEnterNotifyEvent     (LinuxComponentPeer*, const XEnterWindowEvent&) const;
+    void handleLeaveNotifyEvent     (LinuxComponentPeer*, const XLeaveWindowEvent&) const;
+    void handleFocusInEvent         (LinuxComponentPeer*) const;
+    void handleFocusOutEvent        (LinuxComponentPeer*) const;
+    void handleExposeEvent          (LinuxComponentPeer*, XExposeEvent&) const;
+    void handleConfigureNotifyEvent (LinuxComponentPeer*, XConfigureEvent&) const;
+    void handleGravityNotify        (LinuxComponentPeer*) const;
+    void propertyNotifyEvent        (LinuxComponentPeer*, const XPropertyEvent&) const;
     void handleMappingNotify        (XMappingEvent&) const;
-    void handleClientMessageEvent   (LinuxComponentPeer<::Window>*, XClientMessageEvent&, XEvent&) const;
-    void handleXEmbedMessage        (LinuxComponentPeer<::Window>*, XClientMessageEvent&) const;
+    void handleClientMessageEvent   (LinuxComponentPeer*, XClientMessageEvent&, XEvent&) const;
+    void handleXEmbedMessage        (LinuxComponentPeer*, XClientMessageEvent&) const;
+
+    void dismissBlockingModals      (LinuxComponentPeer*) const;
+    void dismissBlockingModals      (LinuxComponentPeer*, const XConfigureEvent&) const;
+
+    static void windowMessageReceive (XEvent&);
 
     //==============================================================================
     bool xIsAvailable = false;

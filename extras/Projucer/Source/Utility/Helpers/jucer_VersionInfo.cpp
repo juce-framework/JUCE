@@ -48,9 +48,12 @@ std::unique_ptr<InputStream> VersionInfo::createInputStreamForAsset (const Asset
     URL downloadUrl (asset.url);
     StringPairArray responseHeaders;
 
-    return std::unique_ptr<InputStream> (downloadUrl.createInputStream (false, nullptr, nullptr,
-                                                                        "Accept: application/octet-stream",
-                                                                        5000, &responseHeaders, &statusCode, 1));
+    return std::unique_ptr<InputStream> (downloadUrl.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
+                                                                          .withExtraHeaders ("Accept: application/octet-stream")
+                                                                          .withConnectionTimeoutMs (5000)
+                                                                          .withResponseHeaders (&responseHeaders)
+                                                                          .withStatusCode (&statusCode)
+                                                                          .withNumRedirectsToFollow (1)));
 }
 
 bool VersionInfo::isNewerVersionThanCurrent()
@@ -60,7 +63,7 @@ bool VersionInfo::isNewerVersionThanCurrent()
     auto currentTokens = StringArray::fromTokens (ProjectInfo::versionString, ".", {});
     auto thisTokens    = StringArray::fromTokens (versionString, ".", {});
 
-    jassert (thisTokens.size() == 3 && thisTokens.size() == 3);
+    jassert (thisTokens.size() == 3);
 
     if (currentTokens[0].getIntValue() == thisTokens[0].getIntValue())
     {
@@ -76,7 +79,9 @@ bool VersionInfo::isNewerVersionThanCurrent()
 std::unique_ptr<VersionInfo> VersionInfo::fetch (const String& endpoint)
 {
     URL latestVersionURL ("https://api.github.com/repos/juce-framework/JUCE/releases/" + endpoint);
-    std::unique_ptr<InputStream> inStream (latestVersionURL.createInputStream (false, nullptr, nullptr, {}, 5000));
+
+    std::unique_ptr<InputStream> inStream (latestVersionURL.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
+                                                                                 .withConnectionTimeoutMs (5000)));
 
     if (inStream == nullptr)
         return nullptr;

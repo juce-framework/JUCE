@@ -32,7 +32,7 @@ enum class PannerRule
 {
     linear,          // regular 6 dB or linear panning rule, allows the panned sound to be
                      // perceived as having a constant level when summed to mono
-    balanced,        // both left and right are 1 when pan value is 0.5, with left decreasing
+    balanced,        // both left and right are 1 when pan value is 0, with left decreasing
                      // to 0 above this value and right decreasing to 0 below it
     sin3dB,          // alternate version of the regular 3 dB panning rule with a sine curve
     sin4p5dB,        // alternate version of the regular 4.5 dB panning rule with a sine curve

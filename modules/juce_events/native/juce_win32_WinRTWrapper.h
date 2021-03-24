@@ -26,78 +26,21 @@ namespace juce
 class WinRTWrapper :   public DeletedAtShutdown
 {
 public:
-    class ScopedHString
-    {
-    public:
-        ScopedHString (String);
-
-        ~ScopedHString();
-
-        HSTRING get() const noexcept          { return hstr; }
-
-    private:
-        HSTRING hstr = nullptr;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedHString)
-    };
-
-    template <class ComClass>
-    class ComPtr
-    {
-    public:
-        ComPtr() noexcept {}
-        ComPtr (ComClass* obj) : p (obj) { if (p) p->AddRef(); }
-        ComPtr (const ComPtr& other) : p (other.p) { if (p) p->AddRef(); }
-        ~ComPtr() { release(); }
-
-        operator ComClass*()   const noexcept { return p; }
-        ComClass* get()        const noexcept { return p; }
-        ComClass& operator*()  const noexcept { return *p; }
-        ComClass* operator->() const noexcept { return p; }
-
-        ComPtr& operator= (ComClass* const newP)
-        {
-            if (newP != nullptr)
-                newP->AddRef();
-
-            release();
-            p = newP;
-            return *this;
-        }
-
-        ComPtr& operator= (const ComPtr& newP) { return operator= (newP.p); }
-
-        ComClass** resetAndGetPointerAddress()
-        {
-            release();
-            p = nullptr;
-            return &p;
-        }
-
-    private:
-        ComClass* p = nullptr;
-
-        void release() { if (p != nullptr) p->Release(); }
-
-        ComClass** operator&() noexcept; // private to avoid it being used accidentally
-    };
+    //==============================================================================
+    ~WinRTWrapper();
+    bool isInitialised() const noexcept  { return initialised; }
 
     JUCE_DECLARE_SINGLETON (WinRTWrapper, true)
 
-    ~WinRTWrapper();
-
-    String hStringToString (HSTRING);
-
-    bool isInitialised() const noexcept       { return initialised; }
-
+    //==============================================================================
     template <class ComClass>
-    ComPtr<ComClass> activateInstance (const wchar_t* runtimeClassID, REFCLSID classUUID)
+    ComSmartPtr<ComClass> activateInstance (const wchar_t* runtimeClassID, REFCLSID classUUID)
     {
-        ComPtr<ComClass> result;
+        ComSmartPtr<ComClass> result;
 
         if (isInitialised())
         {
-            ComPtr<IInspectable> inspectable;
+            ComSmartPtr<IInspectable> inspectable;
             ScopedHString runtimeClass (runtimeClassID);
             auto hr = roActivateInstance (runtimeClass.get(), inspectable.resetAndGetPointerAddress());
 
@@ -109,9 +52,9 @@ public:
     }
 
     template <class ComClass>
-    ComPtr<ComClass> getWRLFactory (const wchar_t* runtimeClassID)
+    ComSmartPtr<ComClass> getWRLFactory (const wchar_t* runtimeClassID)
     {
-        ComPtr<ComClass> comPtr;
+        ComSmartPtr<ComClass> comPtr;
 
         if (isInitialised())
         {
@@ -124,9 +67,27 @@ public:
         return comPtr;
     }
 
+    //==============================================================================
+    class ScopedHString
+    {
+    public:
+        ScopedHString (String);
+        ~ScopedHString();
+
+        HSTRING get() const noexcept          { return hstr; }
+
+    private:
+        HSTRING hstr = nullptr;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedHString)
+    };
+
+    String hStringToString (HSTRING);
+
 private:
     WinRTWrapper();
 
+    //==============================================================================
     HMODULE winRTHandle = nullptr;
     bool initialised = false;
 
@@ -143,6 +104,9 @@ private:
     WindowsGetStringRawBufferFuncPtr getHStringRawBuffer = nullptr;
     RoActivateInstanceFuncPtr roActivateInstance = nullptr;
     RoGetActivationFactoryFuncPtr roGetActivationFactory = nullptr;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WinRTWrapper)
 };
 
 } // namespace juce

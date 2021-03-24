@@ -30,7 +30,7 @@ namespace RelativeRectangleHelpers
 {
     inline void skipComma (String::CharPointerType& s)
     {
-        s = s.findEndOfWhitespace();
+        s.incrementToEndOfWhitespace();
 
         if (*s == ',')
             ++s;

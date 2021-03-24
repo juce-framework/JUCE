@@ -612,7 +612,7 @@ Typeface::Ptr Typeface::createSystemTypefaceFor (const Font& font)
     {
         std::unique_ptr<WindowsDirectWriteTypeface> wtf (new WindowsDirectWriteTypeface (font, factories->systemFonts));
 
-        if (wtf->loadedOk())
+        if (wtf->loadedOk() && wtf->isFontFound())
             return wtf.release();
     }
    #endif

@@ -950,7 +950,11 @@ FFT::FFT (int order)
 {
 }
 
-FFT::~FFT() {}
+FFT::FFT (FFT&&) noexcept = default;
+
+FFT& FFT::operator= (FFT&&) noexcept = default;
+
+FFT::~FFT() = default;
 
 void FFT::perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept
 {

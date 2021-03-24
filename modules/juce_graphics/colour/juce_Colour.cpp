@@ -84,7 +84,7 @@ namespace ColourHelpers
                 if (lightness > 0.0f)
                     hue = getHue (col);
 
-                saturation = (float) (hi - lo) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
+                saturation = ((float) (hi - lo) / 255.0f) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
             }
         }
 
@@ -691,6 +691,8 @@ public:
             testColour (red.withMultipliedSaturationHSL (0.0f), 128, 128, 128);
             testColour (red.withMultipliedBrightness (0.5f), 128, 0, 0);
             testColour (red.withMultipliedLightness (2.0f), 255, 255, 255);
+            testColour (red.withMultipliedLightness (1.0f), 255, 0, 0);
+            testColour (red.withLightness (red.getLightness()), 255, 0, 0);
         }
     }
 };

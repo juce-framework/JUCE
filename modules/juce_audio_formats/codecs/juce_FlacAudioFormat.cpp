@@ -250,7 +250,7 @@ public:
                     samplesInReservoir = 0;
                 }
                 else if (startSampleInFile < reservoirStart
-                          || startSampleInFile > reservoirStart + jmax (samplesInReservoir, 511))
+                          || startSampleInFile > reservoirStart + jmax (samplesInReservoir, (int64) 511))
                 {
                     // had some problems with flac crashing if the read pos is aligned more
                     // accurately than this. Probably fixed in newer versions of the library, though.
@@ -367,7 +367,7 @@ public:
 private:
     FlacNamespace::FLAC__StreamDecoder* decoder;
     AudioBuffer<float> reservoir;
-    int reservoirStart = 0, samplesInReservoir = 0;
+    int64 reservoirStart = 0, samplesInReservoir = 0;
     bool ok = false, scanningForLength = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacReader)

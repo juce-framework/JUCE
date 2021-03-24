@@ -137,18 +137,18 @@ namespace LiveConstantEditor
     Component* createBoolSlider (LivePropertyEditorBase&);
 
     template <typename Type> struct CustomEditor    { static Component* create (LivePropertyEditorBase&)   { return nullptr; } };
-    template<> struct CustomEditor<char>            { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<unsigned char>   { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<int>             { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<unsigned int>    { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<short>           { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<unsigned short>  { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<int64>           { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<uint64>          { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
-    template<> struct CustomEditor<float>           { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
-    template<> struct CustomEditor<double>          { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
-    template<> struct CustomEditor<Colour>          { static Component* create (LivePropertyEditorBase& e) { return createColourEditor (e); } };
-    template<> struct CustomEditor<bool>            { static Component* create (LivePropertyEditorBase& e) { return createBoolSlider (e); } };
+    template <> struct CustomEditor<char>           { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<unsigned char>  { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<int>            { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<unsigned int>   { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<short>          { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<unsigned short> { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<int64>          { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<uint64>         { static Component* create (LivePropertyEditorBase& e) { return createIntegerSlider (e); } };
+    template <> struct CustomEditor<float>          { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
+    template <> struct CustomEditor<double>         { static Component* create (LivePropertyEditorBase& e) { return createFloatSlider (e); } };
+    template <> struct CustomEditor<Colour>         { static Component* create (LivePropertyEditorBase& e) { return createColourEditor (e); } };
+    template <> struct CustomEditor<bool>           { static Component* create (LivePropertyEditorBase& e) { return createBoolSlider (e); } };
 
     template <typename Type>
     struct LivePropertyEditor  : public LivePropertyEditorBase

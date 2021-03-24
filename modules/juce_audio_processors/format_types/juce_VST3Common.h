@@ -68,12 +68,14 @@ static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexc
 #endif
 
 //==============================================================================
-inline juce::String toString (const Steinberg::char8* string) noexcept      { return juce::String (string); }
-inline juce::String toString (const Steinberg::char16* string) noexcept     { return juce::String (juce::CharPointer_UTF16 ((juce::CharPointer_UTF16::CharType*) string)); }
+inline juce::String toString (const Steinberg::char8* string) noexcept       { return juce::String (juce::CharPointer_UTF8  ((juce::CharPointer_UTF8::CharType*)  string)); }
+inline juce::String toString (const Steinberg::char16* string) noexcept      { return juce::String (juce::CharPointer_UTF16 ((juce::CharPointer_UTF16::CharType*) string)); }
 
 // NB: The casts are handled by a Steinberg::UString operator
-inline juce::String toString (const Steinberg::UString128& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
-inline juce::String toString (const Steinberg::UString256& string) noexcept { return toString (static_cast<const Steinberg::char16*> (string)); }
+inline juce::String toString (const Steinberg::UString128& string) noexcept  { return toString (static_cast<const Steinberg::char16*> (string)); }
+inline juce::String toString (const Steinberg::UString256& string) noexcept  { return toString (static_cast<const Steinberg::char16*> (string)); }
+
+inline Steinberg::Vst::TChar* toString (const juce::String& source) noexcept { return reinterpret_cast<Steinberg::Vst::TChar*> (source.toUTF16().getAddress()); }
 
 inline void toString128 (Steinberg::Vst::String128 result, const char* source)
 {
@@ -82,12 +84,7 @@ inline void toString128 (Steinberg::Vst::String128 result, const char* source)
 
 inline void toString128 (Steinberg::Vst::String128 result, const juce::String& source)
 {
-    Steinberg::UString (result, 128).fromAscii (source.toUTF8());
-}
-
-inline Steinberg::Vst::TChar* toString (const juce::String& source) noexcept
-{
-    return reinterpret_cast<Steinberg::Vst::TChar*> (source.toUTF16().getAddress());
+    Steinberg::UString (result, 128).assign (toString (source));
 }
 
 #if JUCE_WINDOWS
@@ -269,31 +266,33 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    if      (channels == AudioChannelSet::disabled())            return kEmpty;
-    else if (channels == AudioChannelSet::mono())                return kMono;
-    else if (channels == AudioChannelSet::stereo())              return kStereo;
-    else if (channels == AudioChannelSet::createLCR())           return k30Cine;
-    else if (channels == AudioChannelSet::createLRS())           return k30Music;
-    else if (channels == AudioChannelSet::createLCRS())          return k40Cine;
-    else if (channels == AudioChannelSet::create5point0())       return k50;
-    else if (channels == AudioChannelSet::create5point1())       return k51;
-    else if (channels == AudioChannelSet::create6point0())       return k60Cine;
-    else if (channels == AudioChannelSet::create6point1())       return k61Cine;
-    else if (channels == AudioChannelSet::create6point0Music())  return k60Music;
-    else if (channels == AudioChannelSet::create6point1Music())  return k61Music;
-    else if (channels == AudioChannelSet::create7point0())       return k70Music;
-    else if (channels == AudioChannelSet::create7point0SDDS())   return k70Cine;
-    else if (channels == AudioChannelSet::create7point1())       return k71CineSideFill;
-    else if (channels == AudioChannelSet::create7point1SDDS())   return k71Cine;
-    else if (channels == AudioChannelSet::ambisonic())           return kAmbi1stOrderACN;
-    else if (channels == AudioChannelSet::quadraphonic())        return k40Music;
-    else if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
-    else if (channels == AudioChannelSet::create7point1point2()) return k71_2;
-    else if (channels == AudioChannelSet::ambisonic (0))         return (1ull << 20);
-    else if (channels == AudioChannelSet::ambisonic (1))         return (1ull << 20) | (1ull << 21) | (1ull << 22) | (1ull << 23);
+    if (channels == AudioChannelSet::disabled())            return kEmpty;
+    if (channels == AudioChannelSet::mono())                return kMono;
+    if (channels == AudioChannelSet::stereo())              return kStereo;
+    if (channels == AudioChannelSet::createLCR())           return k30Cine;
+    if (channels == AudioChannelSet::createLRS())           return k30Music;
+    if (channels == AudioChannelSet::createLCRS())          return k40Cine;
+    if (channels == AudioChannelSet::create5point0())       return k50;
+    if (channels == AudioChannelSet::create5point1())       return k51;
+    if (channels == AudioChannelSet::create6point0())       return k60Cine;
+    if (channels == AudioChannelSet::create6point1())       return k61Cine;
+    if (channels == AudioChannelSet::create6point0Music())  return k60Music;
+    if (channels == AudioChannelSet::create6point1Music())  return k61Music;
+    if (channels == AudioChannelSet::create7point0())       return k70Music;
+    if (channels == AudioChannelSet::create7point0SDDS())   return k70Cine;
+    if (channels == AudioChannelSet::create7point1())       return k71CineSideFill;
+    if (channels == AudioChannelSet::create7point1SDDS())   return k71Cine;
+    if (channels == AudioChannelSet::ambisonic())           return kAmbi1stOrderACN;
+    if (channels == AudioChannelSet::quadraphonic())        return k40Music;
+    if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
+    if (channels == AudioChannelSet::create7point1point2()) return k71_2;
+    if (channels == AudioChannelSet::create7point0point4()) return k71_4 & ~(Steinberg::Vst::kSpeakerLfe);
+    if (channels == AudioChannelSet::create7point1point4()) return k71_4;
+    if (channels == AudioChannelSet::ambisonic (0))         return (1ull << 20);
+    if (channels == AudioChannelSet::ambisonic (1))         return (1ull << 20) | (1ull << 21) | (1ull << 22) | (1ull << 23);
    #if VST_VERSION >= 0x030608
-    else if (channels == AudioChannelSet::ambisonic (2))         return kAmbi2cdOrderACN;
-    else if (channels == AudioChannelSet::ambisonic (3))         return kAmbi3rdOrderACN;
+    if (channels == AudioChannelSet::ambisonic (2))         return kAmbi2cdOrderACN;
+    if (channels == AudioChannelSet::ambisonic (3))         return kAmbi3rdOrderACN;
    #endif
 
     Steinberg::Vst::SpeakerArrangement result = 0;
@@ -310,32 +309,36 @@ static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    if      (arr == kEmpty)                                          return AudioChannelSet::disabled();
-    else if (arr == kMono)                                           return AudioChannelSet::mono();
-    else if (arr == kStereo)                                         return AudioChannelSet::stereo();
-    else if (arr == k30Cine)                                         return AudioChannelSet::createLCR();
-    else if (arr == k30Music)                                        return AudioChannelSet::createLRS();
-    else if (arr == k40Cine)                                         return AudioChannelSet::createLCRS();
-    else if (arr == k50)                                             return AudioChannelSet::create5point0();
-    else if (arr == k51)                                             return AudioChannelSet::create5point1();
-    else if (arr == k60Cine)                                         return AudioChannelSet::create6point0();
-    else if (arr == k61Cine)                                         return AudioChannelSet::create6point1();
-    else if (arr == k60Music)                                        return AudioChannelSet::create6point0Music();
-    else if (arr == k61Music)                                        return AudioChannelSet::create6point1Music();
-    else if (arr == k70Music)                                        return AudioChannelSet::create7point0();
-    else if (arr == k70Cine)                                         return AudioChannelSet::create7point0SDDS();
-    else if (arr == k71CineSideFill)                                 return AudioChannelSet::create7point1();
-    else if (arr == k71Cine)                                         return AudioChannelSet::create7point1SDDS();
-    else if (arr == kAmbi1stOrderACN)                                return AudioChannelSet::ambisonic();
-    else if (arr == k40Music)                                        return AudioChannelSet::quadraphonic();
-    else if (arr == k71_2)                                           return AudioChannelSet::create7point1point2();
-    else if (arr == (k71_2 & ~(Steinberg::Vst::kSpeakerLfe)))        return AudioChannelSet::create7point0point2();
-    else if (arr == (1 << 20))                                       return AudioChannelSet::ambisonic (0);
-    else if (arr == ((1 << 20) | (1 << 21) | (1 << 22) | (1 << 23))) return AudioChannelSet::ambisonic (1);
-   #if VST_VERSION >= 0x030608
-    else if (arr == kAmbi2cdOrderACN)                                return AudioChannelSet::ambisonic (2);
-    else if (arr == kAmbi3rdOrderACN)                                return AudioChannelSet::ambisonic (3);
-   #endif
+    switch (arr)
+    {
+        case kEmpty:                                          return AudioChannelSet::disabled();
+        case kMono:                                           return AudioChannelSet::mono();
+        case kStereo:                                         return AudioChannelSet::stereo();
+        case k30Cine:                                         return AudioChannelSet::createLCR();
+        case k30Music:                                        return AudioChannelSet::createLRS();
+        case k40Cine:                                         return AudioChannelSet::createLCRS();
+        case k50:                                             return AudioChannelSet::create5point0();
+        case k51:                                             return AudioChannelSet::create5point1();
+        case k60Cine:                                         return AudioChannelSet::create6point0();
+        case k61Cine:                                         return AudioChannelSet::create6point1();
+        case k60Music:                                        return AudioChannelSet::create6point0Music();
+        case k61Music:                                        return AudioChannelSet::create6point1Music();
+        case k70Music:                                        return AudioChannelSet::create7point0();
+        case k70Cine:                                         return AudioChannelSet::create7point0SDDS();
+        case k71CineSideFill:                                 return AudioChannelSet::create7point1();
+        case k71Cine:                                         return AudioChannelSet::create7point1SDDS();
+        case k40Music:                                        return AudioChannelSet::quadraphonic();
+        case k71_2:                                           return AudioChannelSet::create7point1point2();
+        case k71_2 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point2();
+        case k71_4:                                           return AudioChannelSet::create7point1point4();
+        case k71_4 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point4();
+        case (1 << 20):                                       return AudioChannelSet::ambisonic (0);
+        case kAmbi1stOrderACN:                                return AudioChannelSet::ambisonic (1);
+       #if VST_VERSION >= 0x030608
+        case kAmbi2cdOrderACN:                                return AudioChannelSet::ambisonic (2);
+        case kAmbi3rdOrderACN:                                return AudioChannelSet::ambisonic (3);
+       #endif
+    }
 
     AudioChannelSet result;
 
@@ -355,24 +358,24 @@ static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
 
 //==============================================================================
 template <class ObjectType>
-class ComSmartPtr
+class VSTComSmartPtr
 {
 public:
-    ComSmartPtr() noexcept : source (nullptr) {}
-    ComSmartPtr (ObjectType* object, bool autoAddRef = true) noexcept  : source (object)    { if (source != nullptr && autoAddRef) source->addRef(); }
-    ComSmartPtr (const ComSmartPtr& other) noexcept : source (other.source)                 { if (source != nullptr) source->addRef(); }
-    ~ComSmartPtr()                                                                          { if (source != nullptr) source->release(); }
+    VSTComSmartPtr() noexcept : source (nullptr) {}
+    VSTComSmartPtr (ObjectType* object, bool autoAddRef = true) noexcept  : source (object)  { if (source != nullptr && autoAddRef) source->addRef(); }
+    VSTComSmartPtr (const VSTComSmartPtr& other) noexcept : source (other.source)            { if (source != nullptr) source->addRef(); }
+    ~VSTComSmartPtr()                                                                        { if (source != nullptr) source->release(); }
 
     operator ObjectType*() const noexcept    { return source; }
     ObjectType* get() const noexcept         { return source; }
     ObjectType& operator*() const noexcept   { return *source; }
     ObjectType* operator->() const noexcept  { return source; }
 
-    ComSmartPtr& operator= (const ComSmartPtr& other)       { return operator= (other.source); }
+    VSTComSmartPtr& operator= (const VSTComSmartPtr& other)       { return operator= (other.source); }
 
-    ComSmartPtr& operator= (ObjectType* const newObjectToTakePossessionOf)
+    VSTComSmartPtr& operator= (ObjectType* const newObjectToTakePossessionOf)
     {
-        ComSmartPtr p (newObjectToTakePossessionOf);
+        VSTComSmartPtr p (newObjectToTakePossessionOf);
         std::swap (p.source, source);
         return *this;
     }

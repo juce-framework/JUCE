@@ -228,24 +228,24 @@ private:
 
             const float xmargin = 3.0f;
             const float ymargin = 3.0f;
-            const float fontHeight = 0.4f * height;
-            const float deviceNameWidth = 0.6f * width;
+            const float fontHeight = 0.4f * (float) height;
+            const float deviceNameWidth = 0.6f * (float) width;
 
             g.setFont (fontHeight);
 
             g.setColour (getDeviceNameFontColour (device.connectionStatus));
             g.drawText (device.name,
-                        Rectangle<float> (xmargin, ymargin, deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
+                        Rectangle<float> (xmargin, ymargin, deviceNameWidth - (2.0f * xmargin), (float) height - (2.0f * ymargin)),
                         Justification::topLeft, true);
 
             g.setColour (getDeviceStatusFontColour (device.connectionStatus));
             g.drawText (statusString,
                         Rectangle<float> (deviceNameWidth + xmargin, ymargin,
-                                          width - deviceNameWidth - (2.0f * xmargin), height - (2.0f * ymargin)),
+                                          (float) width - deviceNameWidth - (2.0f * xmargin), (float) height - (2.0f * ymargin)),
                         Justification::topRight, true);
 
             g.setColour (Colours::grey);
-            g.drawHorizontalLine (height - 1, xmargin, width);
+            g.drawHorizontalLine (height - 1, xmargin, (float) width);
         }
     }
 

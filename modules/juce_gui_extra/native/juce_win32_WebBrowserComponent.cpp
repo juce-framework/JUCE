@@ -335,9 +335,6 @@ public:
          : ComponentMovementWatcher (&o),
            owner (o)
     {
-        if (! WinRTWrapper::getInstance()->isInitialised())
-            throw std::runtime_error ("Failed to initialise the WinRT wrapper");
-
         if (! createWebViewEnvironment (dllLocation, userDataFolder))
             throw std::runtime_error ("Failed to create the CoreWebView2Environemnt");
 
@@ -439,7 +436,7 @@ public:
 
 private:
     //==============================================================================
-    template<class ArgType>
+    template <class ArgType>
     static String getUriStringFromArgs (ArgType* args)
     {
         if (args != nullptr)
@@ -531,10 +528,10 @@ private:
                     if (urlRequest.url.isEmpty())
                         return S_OK;
 
-                    WinRTWrapper::ComPtr<ICoreWebView2WebResourceRequest> request;
+                    ComSmartPtr<ICoreWebView2WebResourceRequest> request;
                     args->get_Request (request.resetAndGetPointerAddress());
 
-                    auto uriString = getUriStringFromArgs (request.get());
+                    auto uriString = getUriStringFromArgs<ICoreWebView2WebResourceRequest> (request);
 
                     if (uriString == urlRequest.url
                         || (uriString.endsWith ("/") && uriString.upToLastOccurrenceOf ("/", false, false) == urlRequest.url))
@@ -545,14 +542,14 @@ private:
                         {
                             method = "POST";
 
-                            WinRTWrapper::ComPtr<IStream> content (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
+                            ComSmartPtr<IStream> content (SHCreateMemStream ((BYTE*) urlRequest.postData.getData(),
                                                                                       (UINT) urlRequest.postData.getSize()));
-                            request->put_Content (content.get());
+                            request->put_Content (content);
                         }
 
                         if (! urlRequest.headers.isEmpty())
                         {
-                            WinRTWrapper::ComPtr<ICoreWebView2HttpRequestHeaders> headers;
+                            ComSmartPtr<ICoreWebView2HttpRequestHeaders> headers;
                             request->get_Headers (headers.resetAndGetPointerAddress());
 
                             for (auto& header : urlRequest.headers)
@@ -675,7 +672,7 @@ private:
 
     void closeWebView()
     {
-        if (webViewController.get() != nullptr)
+        if (webViewController != nullptr)
         {
             webViewController->Close();
             webViewController = nullptr;
@@ -711,9 +708,9 @@ private:
 
     HMODULE webView2LoaderHandle = nullptr;
 
-    WinRTWrapper::ComPtr<ICoreWebView2Environment> webViewEnvironment;
-    WinRTWrapper::ComPtr<ICoreWebView2Controller> webViewController;
-    WinRTWrapper::ComPtr<ICoreWebView2> webView;
+    ComSmartPtr<ICoreWebView2Environment> webViewEnvironment;
+    ComSmartPtr<ICoreWebView2Controller> webViewController;
+    ComSmartPtr<ICoreWebView2> webView;
 
     EventRegistrationToken navigationStartingToken   { 0 },
                            newWindowRequestedToken   { 0 },

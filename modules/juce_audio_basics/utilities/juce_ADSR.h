@@ -199,7 +199,7 @@ public:
 
         @see getNextSample
     */
-    template<typename FloatType>
+    template <typename FloatType>
     void applyEnvelopeToBuffer (AudioBuffer<FloatType>& buffer, int startSample, int numSamples)
     {
         jassert (startSample + numSamples <= buffer.getNumSamples());

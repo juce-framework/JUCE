@@ -39,7 +39,8 @@ namespace juce
     @tags{GUI}
 */
 class SidePanel    : public Component,
-                     private ComponentListener
+                     private ComponentListener,
+                     private ChangeListener
 {
 public:
     //==============================================================================
@@ -145,16 +146,6 @@ public:
     String getTitleText() const noexcept               { return titleLabel.getText(); }
 
     //==============================================================================
-    void moved() override;
-    void resized() override;
-    void paint (Graphics& g) override;
-
-    void parentHierarchyChanged() override;
-
-    void mouseDrag (const MouseEvent&) override;
-    void mouseUp (const MouseEvent&) override;
-
-    //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
         SidePanel drawing functionality.
      */
@@ -191,6 +182,20 @@ public:
     /** You can assign a lambda to this callback object and it will be called when the panel is shown or hidden. */
     std::function<void (bool)> onPanelShowHide;
 
+    //==============================================================================
+    /** @internal */
+    void moved() override;
+    /** @internal */
+    void resized() override;
+    /** @internal */
+    void paint (Graphics& g) override;
+    /** @internal */
+    void parentHierarchyChanged() override;
+    /** @internal */
+    void mouseDrag (const MouseEvent&) override;
+    /** @internal */
+    void mouseUp (const MouseEvent&) override;
+
 private:
     //==============================================================================
     Component* parent = nullptr;
@@ -218,6 +223,7 @@ private:
     //==============================================================================
     void lookAndFeelChanged() override;
     void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
+    void changeListenerCallback (ChangeBroadcaster*) override;
 
     Rectangle<int> calculateBoundsInParent (Component&) const;
     void calculateAndRemoveShadowBounds (Rectangle<int>& bounds);

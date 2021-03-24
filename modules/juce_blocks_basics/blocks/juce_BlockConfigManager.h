@@ -338,7 +338,7 @@ private:
         return false;
     }
 
-    template<typename PacketBuildFn>
+    template <typename PacketBuildFn>
     void buildAndSendPacket (PacketBuildFn buildFn)
     {
         if (deviceConnection == nullptr)

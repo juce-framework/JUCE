@@ -34,9 +34,6 @@
 namespace juce
 {
 
-AudioProcessor::WrapperType PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_Undefined;
-std::function<bool (AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudioSuiteFn = nullptr;
-
 #if JucePlugin_Build_Unity
  bool juce_isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
 #endif
@@ -146,67 +143,3 @@ std::function<bool (AudioProcessor&)> PluginHostType::jucePlugInIsRunningInAudio
 #endif
 
 } // namespace juce
-
-using namespace juce;
-
-//==============================================================================
-#if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
- extern bool JUCE_CALLTYPE juce_isInterAppAudioConnected();
- extern void JUCE_CALLTYPE juce_switchToHostApplication();
- extern Image JUCE_CALLTYPE juce_getIAAHostIcon (int);
-#endif
-
-bool PluginHostType::isInterAppAudioConnected() const
-{
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
-    if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
-        return juce_isInterAppAudioConnected();
-   #endif
-
-    return false;
-}
-
-void PluginHostType::switchToHostApplication() const
-{
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
-    if (getPluginLoadedAs() == AudioProcessor::wrapperType_Standalone)
-        juce_switchToHostApplication();
-   #endif
-}
-
-bool PluginHostType::isInAAXAudioSuite (AudioProcessor& processor)
-{
-   #if JucePlugin_Build_AAX
-    if (PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_AAX
-        && jucePlugInIsRunningInAudioSuiteFn != nullptr)
-    {
-        return jucePlugInIsRunningInAudioSuiteFn (processor);
-    }
-   #endif
-
-    ignoreUnused (processor);
-    return false;
-}
-
-namespace juce {
-
-extern Image JUCE_API getIconFromApplication (const String&, const int);
-
-Image PluginHostType::getHostIcon (int size) const
-{
-    ignoreUnused (size);
-
-   #if JucePlugin_Enable_IAA && JucePlugin_Build_Standalone && JUCE_IOS && (! JUCE_USE_CUSTOM_PLUGIN_STANDALONE_APP)
-    if (isInterAppAudioConnected())
-        return juce_getIAAHostIcon (size);
-   #endif
-
-   #if JUCE_MAC
-    String bundlePath (getHostPath().upToLastOccurrenceOf (".app", true, true));
-    return getIconFromApplication (bundlePath, size);
-   #endif
-
-    return Image();
-}
-
-}

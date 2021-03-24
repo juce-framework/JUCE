@@ -277,7 +277,7 @@ protected:
     */
     virtual void setLastDocumentOpened (const File& file) = 0;
 
-   #if JUCE_MODAL_LOOPS_PERMITTED
+   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
     /** This is called by saveAsInteractive() to allow you to optionally customise the
         filename that the user is presented with in the save dialog.
         The defaultFile parameter is an initial suggestion based on what the class knows

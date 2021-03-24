@@ -82,7 +82,7 @@ public:
 
         t->clearTabs();
 
-        forEachXmlChildElement (xml, e)
+        for (auto* e : xml.getChildIterator())
         {
             addNewTab (t);
             restoreTabState (t, t->getNumTabs() - 1, *e);

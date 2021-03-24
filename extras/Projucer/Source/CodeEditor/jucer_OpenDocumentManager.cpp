@@ -381,7 +381,7 @@ static void restoreDocList (Project& project, Array <OpenDocumentManager::Docume
     {
         OpenDocumentManager& odm = ProjucerApplication::getApp().openDocumentManager;
 
-        forEachXmlChildElementWithTagName (*xml, e, "DOC")
+        for (auto* e : xml->getChildWithTagNameIterator ("DOC"))
         {
             const File file (e->getStringAttribute ("file"));
 

@@ -329,7 +329,7 @@ public:
     virtual void setDataBits (uint32 startBit, uint32 numBits, uint32 value) = 0;
 
     /** Sets a single, 32 bit or less, value on the littlefoot heap. */
-    template<typename Type>
+    template <typename Type>
     void setData (uint32 offset, Type value)
     {
         const auto numBytes = sizeof (Type);

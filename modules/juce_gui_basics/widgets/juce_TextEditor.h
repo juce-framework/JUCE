@@ -793,11 +793,9 @@ private:
     bool moveCaretWithTransaction (int newPos, bool selecting);
     void drawContent (Graphics&);
     void checkLayout();
-    void updateTextHolderSize (int, int);
-    void updateScrollbarVisibility (int, int);
-    float getWordWrapWidth() const;
-    float getMaximumWidth() const;
-    float getMaximumHeight() const;
+    int getWordWrapWidth() const;
+    int getMaximumTextWidth() const;
+    int getMaximumTextHeight() const;
     void timerCallbackInt();
     void checkFocus();
     void repaintText (Range<int>);

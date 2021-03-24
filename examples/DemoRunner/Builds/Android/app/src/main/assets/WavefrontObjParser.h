@@ -143,7 +143,7 @@ private:
 
     static float parseFloat (String::CharPointerType& t)
     {
-        t = t.findEndOfWhitespace();
+        t.incrementToEndOfWhitespace();
         return (float) CharacterFunctions::readDoubleValue (t);
     }
 
@@ -211,7 +211,7 @@ private:
         {
             TripleIndex i;
 
-            t = t.findEndOfWhitespace();
+            t.incrementToEndOfWhitespace();
             i.vertexIndex = t.getIntValue32() - 1;
             t = findEndOfFaceToken (t);
 

@@ -173,7 +173,7 @@ void ScrollBar::removeListener (Listener* listener)
 void ScrollBar::handleAsyncUpdate()
 {
     auto start = visibleRange.getStart(); // (need to use a temp variable for VC7 compatibility)
-    listeners.call ([=] (Listener& l) { l.scrollBarMoved (this, start); });
+    listeners.call ([this, start] (Listener& l) { l.scrollBarMoved (this, start); });
 }
 
 //==============================================================================

@@ -25,19 +25,19 @@
 
 interface ISampleGrabberCB  : public IUnknown
 {
-    virtual STDMETHODIMP SampleCB (double, IMediaSample*) = 0;
-    virtual STDMETHODIMP BufferCB (double, BYTE*, long) = 0;
+    JUCE_COMCALL SampleCB (double, IMediaSample*) = 0;
+    JUCE_COMCALL BufferCB (double, BYTE*, long) = 0;
 };
 
 interface ISampleGrabber  : public IUnknown
 {
-    virtual HRESULT STDMETHODCALLTYPE SetOneShot (BOOL) = 0;
-    virtual HRESULT STDMETHODCALLTYPE SetMediaType (const AM_MEDIA_TYPE*) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetConnectedMediaType (AM_MEDIA_TYPE*) = 0;
-    virtual HRESULT STDMETHODCALLTYPE SetBufferSamples (BOOL) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetCurrentBuffer (long*, long*) = 0;
-    virtual HRESULT STDMETHODCALLTYPE GetCurrentSample (IMediaSample**) = 0;
-    virtual HRESULT STDMETHODCALLTYPE SetCallback (ISampleGrabberCB*, long) = 0;
+    JUCE_COMCALL SetOneShot (BOOL) = 0;
+    JUCE_COMCALL SetMediaType (const AM_MEDIA_TYPE*) = 0;
+    JUCE_COMCALL GetConnectedMediaType (AM_MEDIA_TYPE*) = 0;
+    JUCE_COMCALL SetBufferSamples (BOOL) = 0;
+    JUCE_COMCALL GetCurrentBuffer (long*, long*) = 0;
+    JUCE_COMCALL GetCurrentSample (IMediaSample**) = 0;
+    JUCE_COMCALL SetCallback (ISampleGrabberCB*, long) = 0;
 };
 
 static const IID IID_ISampleGrabberCB  = { 0x0579154A, 0x2B53, 0x4994, { 0xB0, 0xD0, 0xE7, 0x73, 0x14, 0x8E, 0xFF, 0x85 } };
@@ -532,9 +532,9 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
             return ComBaseClassHelperBase<ISampleGrabberCB>::QueryInterface (refId, result);
         }
 
-        STDMETHODIMP SampleCB (double, IMediaSample*)  { return E_FAIL; }
+        JUCE_COMRESULT SampleCB (double, IMediaSample*)  { return E_FAIL; }
 
-        STDMETHODIMP BufferCB (double time, BYTE* buffer, long bufferSize)
+        JUCE_COMRESULT BufferCB (double time, BYTE* buffer, long bufferSize)
         {
             owner.handleFrame (time, buffer, bufferSize);
             return S_OK;
