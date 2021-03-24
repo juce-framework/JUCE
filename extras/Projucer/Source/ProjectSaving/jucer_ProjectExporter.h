@@ -58,6 +58,8 @@ public:
 
     static bool canProjectBeLaunched (Project*);
 
+    virtual Identifier getExporterIdentifier() const = 0;
+
     //==============================================================================
     // capabilities of exporter
     virtual bool usesMMFiles() const = 0;

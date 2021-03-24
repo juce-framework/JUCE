@@ -57,6 +57,8 @@ public:
     static String getValueTreeTypeName()  { return "CLION"; }
     static String getTargetFolderName()   { return "CLion"; }
 
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
     static CLionProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))

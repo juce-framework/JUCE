@@ -121,6 +121,7 @@ ProjectExporter::ExporterTypeInfo ProjectExporter::getTypeInfoForExporter (const
     if (iter != typeInfos.end())
         return *iter;
 
+    jassertfalse;
     return {};
 }
 
