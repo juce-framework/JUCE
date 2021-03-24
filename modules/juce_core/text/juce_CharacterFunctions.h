@@ -146,7 +146,7 @@ public:
     template <typename CharPointerType>
     static double readDoubleValue (CharPointerType& text) noexcept
     {
-        constexpr auto inf = std::numeric_limits<double>::infinity();
+        constexpr auto infinity = std::numeric_limits<double>::infinity();
 
         bool isNegative = false;
        #if ! JUCE_MINGW
@@ -197,7 +197,7 @@ public:
                 if ((text[1] == 'n' || text[1] == 'N') && (text[2] == 'f' || text[2] == 'F'))
                 {
                     text += 3;
-                    return isNegative ? -inf : inf;
+                    return isNegative ? -infinity : infinity;
                 }
 
                 text = endOfWhitspace;
@@ -426,7 +426,7 @@ public:
             }
             else if (exponent > std::numeric_limits<double>::max_exponent10 + 1)
             {
-                return isNegative ? -inf : inf;
+                return isNegative ? -infinity : infinity;
             }
 
             writeExponentDigits (exponent, writePtr);
