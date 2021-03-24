@@ -686,16 +686,20 @@ void UIViewComponentPeer::updateScreenBounds()
     }
     else if (! isSharedWindow)
     {
-        // this will re-centre the window, but leave its size unchanged
-        auto centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
-        auto centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
-
         auto newDesktop = desktop.getDisplays().getPrimaryDisplay()->userArea;
 
-        auto x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
-        auto y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+        if (newDesktop != oldDesktop)
+        {
+            // this will re-centre the window, but leave its size unchanged
 
-        component.setBounds (oldArea.withPosition (x, y));
+            auto centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
+            auto centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
+
+            auto x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
+            auto y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+
+            component.setBounds (oldArea.withPosition (x, y));
+        }
     }
 
     [view setNeedsDisplay];
