@@ -1155,8 +1155,6 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
        #if JUCE_MAC
         embeddedComponent.setView (nullptr);
-       #elif JUCE_WINDOWS
-        embeddedComponent.setHWND (nullptr);
        #endif
 
         view = nullptr;
@@ -1328,14 +1326,23 @@ struct VST3PluginWindow : public AudioProcessorEditor,
                          roundToInt ((float) rect.getHeight() / nativeScaleFactor));
             }
 
+           #if JUCE_WINDOWS
+            setPluginWindowPos (rect);
+           #else
             embeddedComponent.setBounds (getLocalBounds());
+           #endif
 
             view->onSize (&rect);
         }
         else
         {
             warnOnFailure (view->getSize (&rect));
+
+           #if JUCE_WINDOWS
+            setPluginWindowPos (rect);
+           #else
             resizeWithRect (embeddedComponent, rect, nativeScaleFactor);
+           #endif
         }
 
         // Some plugins don't update their cursor correctly when mousing out the window
@@ -1402,16 +1409,21 @@ private:
     {
         if (pluginHandle == HandleFormat{})
         {
-            embeddedComponent.setBounds (getLocalBounds());
-            addAndMakeVisible (embeddedComponent);
-
-           #if JUCE_MAC
-            pluginHandle = (HandleFormat) embeddedComponent.getView();
-           #elif JUCE_WINDOWS
-            pluginHandle = (HandleFormat) embeddedComponent.getHWND();
-           #elif JUCE_LINUX
-            pluginHandle = (HandleFormat) embeddedComponent.getHostWindowID();
-           #endif
+            #if JUCE_WINDOWS
+             if (auto* topComp = getTopLevelComponent())
+             {
+                 peer.reset (embeddedComponent.createNewPeer (0, topComp->getWindowHandle()));
+                 pluginHandle = (HandleFormat) peer->getNativeHandle();
+             }
+            #else
+             embeddedComponent.setBounds (getLocalBounds());
+             addAndMakeVisible (embeddedComponent);
+             #if JUCE_MAC
+              pluginHandle = (HandleFormat) embeddedComponent.getView();
+             #elif JUCE_LINUX
+              pluginHandle = (HandleFormat) embeddedComponent.getHostWindowID();
+             #endif
+            #endif
 
             if (pluginHandle == HandleFormat{})
             {
@@ -1441,7 +1453,32 @@ private:
     VSTComSmartPtr<IPlugView> view;
 
    #if JUCE_WINDOWS
-    HWNDComponentWithParent embeddedComponent;
+    struct ChildComponent  : public Component
+    {
+        ChildComponent() {}
+        void paint (Graphics& g) override  { g.fillAll (Colours::cornflowerblue); }
+        using Component::createNewPeer;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildComponent)
+    };
+
+    void setPluginWindowPos (ViewRect rect)
+    {
+        if (auto* topComp = getTopLevelComponent())
+        {
+            auto pos = (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
+
+            ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
+
+            SetWindowPos (pluginHandle, 0,
+                          pos.x, pos.y,
+                          rect.getWidth(), rect.getHeight(),
+                          isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
+        }
+    }
+
+    ChildComponent embeddedComponent;
+    std::unique_ptr<ComponentPeer> peer;
     using HandleFormat = HWND;
    #elif JUCE_MAC
     AutoResizingNSViewComponentWithParent embeddedComponent;
