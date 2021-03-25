@@ -324,9 +324,23 @@ namespace CoreTextTypeLayout
         return range.getLength();
     }
 
-    static void drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
+    static bool areAllFontsDefaultWidth (const AttributedString& text)
+    {
+        auto numCharacterAttributes = text.getNumAttributes();
+
+        for (int i = 0; i < numCharacterAttributes; ++i)
+            if (text.getAttribute (i).font.getHorizontalScale() != 1.0f)
+                return false;
+
+        return true;
+    }
+
+    static bool drawToCGContext (const AttributedString& text, const Rectangle<float>& area,
                                  const CGContextRef& context, float flipHeight)
     {
+        if (! areAllFontsDefaultWidth (text))
+            return false;
+
         auto framesetter = createCTFramesetter (text);
 
         // Ugly hack to fix a bug in OS X Sierra where the CTFrame needs to be slightly
@@ -377,6 +391,8 @@ namespace CoreTextTypeLayout
 
         CGContextRestoreGState (context);
         CGContextSetTextMatrix (context, textMatrix);
+
+        return true;
     }
 
     static void createLayout (TextLayout& glyphLayout, const AttributedString& text)
@@ -817,7 +833,7 @@ static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 
     for (int i = 0; i < numCharacterAttributes; ++i)
     {
-        if (auto tf = dynamic_cast<OSXTypeface*> (text.getAttribute(i).font.getTypeface()))
+        if (auto tf = dynamic_cast<OSXTypeface*> (text.getAttribute (i).font.getTypeface()))
             if (tf->canBeUsedForLayout)
                 continue;
 
@@ -829,7 +845,7 @@ static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 
 bool TextLayout::createNativeLayout (const AttributedString& text)
 {
-    if (canAllTypefacesBeUsedInLayout (text))
+    if (canAllTypefacesBeUsedInLayout (text) && CoreTextTypeLayout::areAllFontsDefaultWidth (text))
     {
         CoreTextTypeLayout::createLayout (*this, text);
         return true;

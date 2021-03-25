@@ -676,8 +676,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 
 bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Rectangle<float>& area)
 {
-    CoreTextTypeLayout::drawToCGContext (text, area, context.get(), (float) flipHeight);
-    return true;
+    return CoreTextTypeLayout::drawToCGContext (text, area, context.get(), (float) flipHeight);
 }
 
 CoreGraphicsContext::SavedState::SavedState()
