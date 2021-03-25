@@ -304,11 +304,8 @@ private:
 
     static String cmTimeToString (CMTime time)
     {
-        CFStringRef timeDesc = CMTimeCopyDescription (nullptr, time);
-        String result = String::fromCFString (timeDesc);
-
-        CFRelease (timeDesc);
-        return result;
+        CFUniquePtr<CFStringRef> timeDesc (CMTimeCopyDescription (nullptr, time));
+        return String::fromCFString (timeDesc.get());
     }
 
     static String frameRateRangeToString (AVFrameRateRange* range)

@@ -23,17 +23,17 @@
   ==============================================================================
 */
 
+#if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+
 #include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_TargetPlatform.h>
 
-//==============================================================================
-#if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+#if JUCE_MAC
+ #include <CoreFoundation/CoreFoundation.h>
+ #include <juce_core/native/juce_osx_ObjCHelpers.h>
+#endif
 
 #if JUCE_PLUGINHOST_VST3
- #if JUCE_MAC
-  #include <CoreFoundation/CoreFoundation.h>
- #endif
-
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
@@ -3131,9 +3131,8 @@ bool shutdownModule()
              globalBundleInstance = ref;
              moduleHandle = ref;
 
-             CFURLRef tempURL = CFBundleCopyBundleURL (ref);
-             CFURLGetFileSystemRepresentation (tempURL, true, (UInt8*) modulePath, MaxPathLength);
-             CFRelease (tempURL);
+             CFUniquePtr<CFURLRef> tempURL (CFBundleCopyBundleURL (ref));
+             CFURLGetFileSystemRepresentation (tempURL.get(), true, (UInt8*) modulePath, MaxPathLength);
          }
      }
 

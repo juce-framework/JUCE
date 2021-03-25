@@ -230,10 +230,48 @@ static ReturnType ObjCMsgSendSuper (id self, SEL sel, Params... params)
 //==============================================================================
 struct NSObjectDeleter
 {
-    void operator()(NSObject* object) const
+    void operator() (NSObject* object) const noexcept
     {
-        [object release];
+        if (object != nullptr)
+            [object release];
     }
+};
+
+template <typename NSType>
+using NSUniquePtr = std::unique_ptr<NSType, NSObjectDeleter>;
+
+template <typename CFType>
+struct CFObjectDeleter
+{
+    void operator() (CFType object) const noexcept
+    {
+        if (object != nullptr)
+            CFRelease (object);
+    }
+};
+
+template <typename CFType>
+using CFUniquePtr = std::unique_ptr<typename std::remove_pointer<CFType>::type, CFObjectDeleter<CFType>>;
+
+template <typename CFType>
+struct CFObjectHolder
+{
+    CFObjectHolder() = default;
+
+    CFObjectHolder (const CFObjectHolder&) = delete;
+    CFObjectHolder (CFObjectHolder&&) = delete;
+
+    CFObjectHolder& operator= (const CFObjectHolder&) = delete;
+    CFObjectHolder& operator= (CFObjectHolder&&) = delete;
+
+    ~CFObjectHolder() noexcept
+    {
+        if (object != nullptr)
+            CFRelease (object);
+    }
+
+    // Public to facilitate passing the pointer address to functions
+    CFType object = nullptr;
 };
 
 //==============================================================================
@@ -416,20 +454,5 @@ public:
 private:
     BlockType block;
 };
-
-struct ScopedCFString
-{
-    ScopedCFString() = default;
-    ScopedCFString (String s) : cfString (s.toCFString())  {}
-
-    ~ScopedCFString() noexcept
-    {
-        if (cfString != nullptr)
-            CFRelease (cfString);
-    }
-
-    CFStringRef cfString = {};
-};
-
 
 } // namespace juce

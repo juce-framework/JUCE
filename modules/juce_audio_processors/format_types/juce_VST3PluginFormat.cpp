@@ -836,9 +836,6 @@ struct DLLHandle
 
            #if JUCE_WINDOWS || JUCE_LINUX
             library.close();
-           #elif JUCE_MAC
-            CFRelease (bundleRef);
-            bundleRef = nullptr;
            #endif
         }
     }
@@ -868,8 +865,8 @@ struct DLLHandle
         if (bundleRef == nullptr)
             return nullptr;
 
-        ScopedCFString name (functionName);
-        return CFBundleGetFunctionPointerForName (bundleRef, name.cfString);
+        CFUniquePtr<CFStringRef> name (String (functionName).toCFString());
+        return CFBundleGetFunctionPointerForName (bundleRef.get(), name.get());
        #endif
     }
 
@@ -927,45 +924,32 @@ private:
         return false;
     }
    #elif JUCE_MAC
-    CFBundleRef bundleRef;
+    CFUniquePtr<CFBundleRef> bundleRef;
 
     bool open()
     {
         auto* utf8 = dllFile.getFullPathName().toRawUTF8();
 
-        if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (nullptr,
-                                                                    (const UInt8*) utf8,
-                                                                    (CFIndex) std::strlen (utf8),
-                                                                    dllFile.isDirectory()))
+        if (auto url = CFUniquePtr<CFURLRef> (CFURLCreateFromFileSystemRepresentation (nullptr,
+                                                                                       (const UInt8*) utf8,
+                                                                                       (CFIndex) std::strlen (utf8),
+                                                                                       dllFile.isDirectory())))
         {
-            bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
-            CFRelease (url);
+            bundleRef.reset (CFBundleCreate (kCFAllocatorDefault, url.get()));
 
             if (bundleRef != nullptr)
             {
-                CFErrorRef error = nullptr;
+                CFObjectHolder<CFErrorRef> error;
 
-                if (CFBundleLoadExecutableAndReturnError (bundleRef, &error))
-                {
+                if (CFBundleLoadExecutableAndReturnError (bundleRef.get(), &error.object))
                     if (auto* proc = (EntryProc) getFunction (entryFnName))
-                    {
-                        if (proc (bundleRef))
+                        if (proc (bundleRef.get()))
                             return true;
-                    }
-                }
 
-                if (error != nullptr)
-                {
-                    if (CFStringRef failureMessage = CFErrorCopyFailureReason (error))
-                    {
-                        DBG (String::fromCFString (failureMessage));
-                        CFRelease (failureMessage);
-                    }
+                if (error.object != nullptr)
+                    if (auto failureMessage = CFUniquePtr<CFStringRef> (CFErrorCopyFailureReason (error.object)))
+                        DBG (String::fromCFString (failureMessage.get()));
 
-                    CFRelease (error);
-                }
-
-                CFRelease (bundleRef);
                 bundleRef = nullptr;
             }
         }

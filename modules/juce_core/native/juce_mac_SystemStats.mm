@@ -292,9 +292,8 @@ String SystemStats::getComputerName()
 
 static String getLocaleValue (CFStringRef key)
 {
-    CFLocaleRef cfLocale = CFLocaleCopyCurrent();
-    const String result (String::fromCFString ((CFStringRef) CFLocaleGetValue (cfLocale, key)));
-    CFRelease (cfLocale);
+    CFUniquePtr<CFLocaleRef> cfLocale (CFLocaleCopyCurrent());
+    const String result (String::fromCFString ((CFStringRef) CFLocaleGetValue (cfLocale.get(), key)));
     return result;
 }
 
@@ -303,9 +302,8 @@ String SystemStats::getUserRegion()     { return getLocaleValue (kCFLocaleCountr
 
 String SystemStats::getDisplayLanguage()
 {
-    CFArrayRef cfPrefLangs = CFLocaleCopyPreferredLanguages();
-    const String result (String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (cfPrefLangs, 0)));
-    CFRelease (cfPrefLangs);
+    CFUniquePtr<CFArrayRef> cfPrefLangs (CFLocaleCopyPreferredLanguages());
+    const String result (String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (cfPrefLangs.get(), 0)));
     return result;
 }
 
