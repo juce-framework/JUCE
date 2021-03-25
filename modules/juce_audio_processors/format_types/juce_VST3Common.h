@@ -91,7 +91,7 @@ inline void toString128 (Steinberg::Vst::String128 result, const juce::String& s
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeHWND;
 #elif JUCE_MAC
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeNSView;
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeX11EmbedWindowID;
 #endif
 

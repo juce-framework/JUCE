@@ -111,7 +111,7 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 {
     if (logger == nullptr)
     {
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         String folder = "~/.config/Projucer/Logs";
        #else
         String folder = "com.juce.projucer";
@@ -717,7 +717,7 @@ static String getPlatformSpecificFileExtension()
     return ".app";
    #elif JUCE_WINDOWS
     return ".exe";
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     return {};
    #else
     jassertfalse;
@@ -738,7 +738,7 @@ static File getPlatformSpecificProjectFolder()
     return buildsFolder.getChildFile ("MacOSX");
    #elif JUCE_WINDOWS
     return buildsFolder.getChildFile ("VisualStudio2017");
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     return buildsFolder.getChildFile ("LinuxMakefile");
    #else
     jassertfalse;
@@ -775,7 +775,7 @@ static File tryToFindDemoRunnerExecutableInBuilds()
 
     if (demoRunnerExecutable.existsAsFile())
         return demoRunnerExecutable;
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     projectFolder = projectFolder.getChildFile ("LinuxMakefile").getChildFile ("build");
     auto demoRunnerExecutable = projectFolder.getChildFile ("DemoRunner");
 
@@ -854,7 +854,7 @@ File ProjucerApplication::tryToFindDemoRunnerProject()
     auto demoRunnerProjectFile = projectFolder.getChildFile ("DemoRunner.xcodeproj");
    #elif JUCE_WINDOWS
     auto demoRunnerProjectFile = projectFolder.getChildFile ("DemoRunner.sln");
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     auto demoRunnerProjectFile = projectFolder.getChildFile ("Makefile");
    #endif
 
@@ -885,7 +885,7 @@ void ProjucerApplication::launchDemoRunner()
 
         demoRunnerAlert.reset (lf.createAlertWindow ("Open Project",
                                                      "Couldn't find a compiled version of the Demo Runner."
-                                                    #if JUCE_LINUX
+                                                    #if JUCE_LINUX || JUCE_BSD
                                                      " Do you want to build it now?", "Build project", "Cancel",
                                                     #else
                                                      " Do you want to open the project?", "Open project", "Cancel",
@@ -900,7 +900,7 @@ void ProjucerApplication::launchDemoRunner()
 
                                                     if (retVal == 1)
                                                     {
-                                                       #if JUCE_LINUX
+                                                       #if JUCE_LINUX || JUCE_BSD
                                                         String command ("make -C " + demoRunnerFile.getParentDirectory().getFullPathName() + " CONFIG=Release -j3");
 
                                                         if (! makeProcess.start (command))
@@ -998,7 +998,7 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         break;
 
     case CommandIDs::launchDemoRunner:
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         if (makeProcess.isRunning())
         {
             result.setInfo ("Building Demo Runner...", "The Demo Runner project is currently building", CommandCategories::general, 0);
@@ -1426,7 +1426,7 @@ PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const St
     options.applicationName     = filename;
     options.filenameSuffix      = "settings";
     options.osxLibrarySubFolder = "Application Support";
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     options.folderName          = "~/.config/Projucer";
    #else
     options.folderName          = "Projucer";

@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+#if defined(__FreeBSD__)
+extern char **environ;
+#endif
+
 namespace juce
 {
 

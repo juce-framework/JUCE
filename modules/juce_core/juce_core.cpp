@@ -64,7 +64,7 @@
  #endif
 
 #else
- #if JUCE_LINUX || JUCE_ANDROID
+ #if JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
   #include <sys/types.h>
   #include <sys/socket.h>
   #include <sys/errno.h>
@@ -82,7 +82,7 @@
   #include <sys/stat.h>
  #endif
 
- #if JUCE_LINUX
+ #if JUCE_LINUX || JUCE_BSD
   #include <stdio.h>
   #include <langinfo.h>
   #include <ifaddrs.h>
@@ -218,7 +218,7 @@
  #include "native/juce_win32_Threads.cpp"
 
 //==============================================================================
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include "native/juce_linux_CommonFile.cpp"
  #include "native/juce_linux_Files.cpp"
  #include "native/juce_linux_Network.cpp"

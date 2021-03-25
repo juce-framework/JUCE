@@ -1369,7 +1369,7 @@ void ProjectContentComponent::handleMissingSystemHeaders()
    #elif JUCE_WINDOWS
     String tabMessage ("Compiler not available due to missing system headers\nPlease install a recent version of Visual Studio and the Windows Desktop SDK");
     String alertWindowMessage ("Missing system headers\nPlease install a recent version of Visual Studio and the Windows Desktop SDK");
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     String tabMessage ("Compiler not available due to missing system headers\nPlease do a sudo apt-get install ...");
     String alertWindowMessage ("Missing system headers\nPlease do sudo apt-get install ...");
    #endif

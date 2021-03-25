@@ -82,6 +82,8 @@ void LatestVersionCheckerAndUpdater::run()
         return "windows";
        #elif JUCE_LINUX
         return "linux";
+       #elif JUCE_BSD
+        return "bsd";
        #else
         jassertfalse;
         return "Unknown";
@@ -444,7 +446,7 @@ private:
         if (threadShouldExit())
             return Result::fail ("Cancelled");
 
-       #if JUCE_LINUX || JUCE_MAC
+       #if JUCE_LINUX || JUCE_BSD || JUCE_MAC
         r = setFilePermissions (unzipTarget.folder, zip);
 
         if (r.failed())
@@ -502,10 +504,10 @@ private:
 
 static void restartProcess (const File& targetFolder)
 {
-   #if JUCE_MAC || JUCE_LINUX
+   #if JUCE_MAC || JUCE_LINUX || JUCE_BSD
     #if JUCE_MAC
      auto newProcess = targetFolder.getChildFile ("Projucer.app").getChildFile ("Contents").getChildFile ("MacOS").getChildFile ("Projucer");
-    #elif JUCE_LINUX
+    #elif JUCE_LINUX || JUCE_BSD
      auto newProcess = targetFolder.getChildFile ("Projucer");
     #endif
 

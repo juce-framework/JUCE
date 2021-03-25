@@ -39,6 +39,7 @@ struct TargetOS
         windows = 0,
         osx,
         linux,
+        bsd,
         unknown
     };
 
@@ -50,6 +51,8 @@ struct TargetOS
         return osx;
        #elif JUCE_LINUX
         return linux;
+       #elif JUCE_BSD
+        return bsd;
        #else
         return unknown;
        #endif

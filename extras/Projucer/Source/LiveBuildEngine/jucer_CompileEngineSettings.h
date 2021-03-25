@@ -97,6 +97,8 @@ private:
         return "WINDOWS";
        #elif JUCE_LINUX
         return "LINUX";
+       #elif JUCE_BSD
+        return "BSD";
        #else
         // unknown platform?!
         jassertfalse;

@@ -162,7 +162,7 @@ namespace ump = universal_midi_packets;
  #endif
 
 //==============================================================================
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #if JUCE_ALSA
   /* Got an include error here? If so, you've either not got ALSA installed, or you've
      not got your paths set up correctly to find its header files.

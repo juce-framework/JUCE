@@ -701,16 +701,17 @@ namespace
         if      (os == "osx")        targetOS = TargetOS::osx;
         else if (os == "windows")    targetOS = TargetOS::windows;
         else if (os == "linux")      targetOS = TargetOS::linux;
+        else if (os == "bsd")        targetOS = TargetOS::bsd;
 
         if (targetOS == TargetOS::unknown)
-            ConsoleApplication::fail ("You need to specify a valid OS! Use osx, windows or linux");
+            ConsoleApplication::fail ("You need to specify a valid OS! Use osx, windows, linux or bsd");
 
         return targetOS == TargetOS::getThisOS();
     }
 
     static bool isValidPathIdentifier (const String& id, const String& os)
     {
-        return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
+        return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux" && os != "bsd") || (id == "rtasPath" && os != "linux" && os != "bsd")
             || id == "androidSDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
     }
 

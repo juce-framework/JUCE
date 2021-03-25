@@ -141,6 +141,16 @@ private:
         return "Windows";
        #elif JUCE_LINUX
         return "Linux";
+       #elif JUCE_BSD
+#if defined(__FreeBSD__)
+        return "FreeBSD";
+#elif defined(__OpenBSD__)
+        return "OpenBSD";
+#elif defined(__NetBSD__)
+        return "NetBSD";
+#else
+        #error Unknown BSD
+#endif
        #endif
     }
 

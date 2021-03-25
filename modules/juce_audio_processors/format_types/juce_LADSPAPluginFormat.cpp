@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_LADSPA && JUCE_LINUX
+#if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
 
 #include <ladspa.h>
 

@@ -220,7 +220,7 @@ private:
     std::unique_ptr<AlertWindow> demoRunnerAlert;
     bool hasScannedForDemoRunnerExecutable = false, hasScannedForDemoRunnerProject = false;
     File lastJUCEPath, lastDemoRunnerExectuableFile, lastDemoRunnerProjectFile;
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     ChildProcess makeProcess;
    #endif
 

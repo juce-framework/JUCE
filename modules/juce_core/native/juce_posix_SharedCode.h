@@ -59,7 +59,7 @@ void JUCE_CALLTYPE Process::terminate()
 }
 
 
-#if JUCE_MAC || JUCE_LINUX
+#if JUCE_MAC || JUCE_LINUX || JUCE_BSD
 bool Process::setMaxNumberOfFileHandles (int newMaxNumber) noexcept
 {
     rlimit lim;
@@ -162,6 +162,9 @@ namespace
    #if JUCE_LINUX || (JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T) // (this iOS stuff is to avoid a simulator bug)
     using juce_statStruct = struct stat64;
     #define JUCE_STAT  stat64
+   #elif JUCE_BSD
+    using juce_statStruct = struct stat;
+    #define JUCE_STAT  stat
    #else
     using juce_statStruct = struct stat;
     #define JUCE_STAT  stat
@@ -260,7 +263,7 @@ uint64 File::getFileIdentifier() const
 
 static bool hasEffectiveRootFilePermissions()
 {
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     return geteuid() == 0;
    #else
     return false;
@@ -940,9 +943,9 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
     {
         [[NSThread currentThread] setName: juceStringToNS (name)];
     }
-   #elif JUCE_LINUX || JUCE_ANDROID
+   #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
     #if ((JUCE_LINUX && (__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2012) \
-          || JUCE_ANDROID && __ANDROID_API__ >= 9)
+          || JUCE_ANDROID && __ANDROID_API__ >= 9) || JUCE_BSD
      pthread_setname_np (pthread_self(), name.toRawUTF8());
     #else
      prctl (PR_SET_NAME, name.toRawUTF8(), 0, 0, 0);
@@ -1000,7 +1003,7 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (uint32 affinityMask)
         if ((affinityMask & (uint32) (1 << i)) != 0)
             CPU_SET ((size_t) i, &affinity);
 
-   #if (! JUCE_ANDROID) && ((! JUCE_LINUX) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
+   #if (! JUCE_ANDROID) && ((! (JUCE_LINUX || JUCE_BSD)) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
     pthread_setaffinity_np (pthread_self(), sizeof (cpu_set_t), &affinity);
    #elif JUCE_ANDROID
     sched_setaffinity (gettid(), sizeof (cpu_set_t), &affinity);
@@ -1045,7 +1048,7 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 }
 
 //==============================================================================
-#if JUCE_LINUX || JUCE_ANDROID
+#if JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
 static String readPosixConfigFileValue (const char* file, const char* key)
 {
     StringArray lines;

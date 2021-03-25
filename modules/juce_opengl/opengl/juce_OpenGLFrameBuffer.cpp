@@ -39,7 +39,7 @@ public:
         // context. You'll need to create this object in one of the OpenGLContext's callbacks.
         jassert (OpenGLHelpers::isContextActive());
 
-       #if JUCE_WINDOWS || JUCE_LINUX
+       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         if (context.extensions.glGenFramebuffers == nullptr)
             return;
        #endif

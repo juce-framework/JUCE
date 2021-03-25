@@ -27,7 +27,7 @@
 #include <juce_core/system/juce_TargetPlatform.h>
 
 //==============================================================================
-#if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+#if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
 
 #if JUCE_PLUGINHOST_VST3
  #if JUCE_MAC
@@ -74,7 +74,7 @@
  #endif
 #endif
 
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
  #include <unordered_map>
 
  std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
@@ -1163,7 +1163,7 @@ private:
     //==============================================================================
     class JuceVST3Editor  : public Vst::EditorView,
                             public Steinberg::IPlugViewContentScaleSupport,
-                           #if JUCE_LINUX
+                           #if JUCE_LINUX || JUCE_BSD
                             public Steinberg::Linux::IEventHandler,
                            #endif
                             private Timer
@@ -1193,7 +1193,7 @@ private:
         REFCOUNT_METHODS (Vst::EditorView)
 
         //==============================================================================
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
         {
             if (plugFrame != nullptr)
@@ -1215,7 +1215,7 @@ private:
                 if (strcmp (type, kPlatformTypeHWND) == 0)
                #elif JUCE_MAC
                 if (strcmp (type, kPlatformTypeNSView) == 0 || strcmp (type, kPlatformTypeHIView) == 0)
-               #elif JUCE_LINUX
+               #elif JUCE_LINUX || JUCE_BSD
                 if (strcmp (type, kPlatformTypeX11EmbedWindowID) == 0)
                #endif
                     return kResultTrue;
@@ -1233,7 +1233,7 @@ private:
 
             createContentWrapperComponentIfNeeded();
 
-           #if JUCE_WINDOWS || JUCE_LINUX
+           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             component->setOpaque (true);
             component->addToDesktop (0, (void*) systemWindow);
             component->setVisible (true);
@@ -1243,7 +1243,7 @@ private:
              component->startTimer (500);
             #endif
 
-            #if JUCE_LINUX
+            #if JUCE_LINUX || JUCE_BSD
              if (auto* runLoop = getHostRunLoop())
              {
                  for (auto& cb : getFdReadCallbacks())
@@ -1275,7 +1275,7 @@ private:
             {
                #if JUCE_WINDOWS
                 component->removeFromDesktop();
-               #elif JUCE_LINUX
+               #elif JUCE_LINUX || JUCE_BSD
                 fdCallbackMap.clear();
 
                 if (auto* runLoop = getHostRunLoop())
@@ -1569,7 +1569,7 @@ private:
                 {
                     resizeHostWindow();
 
-                   #if JUCE_LINUX
+                   #if JUCE_LINUX || JUCE_BSD
                     if (getHostType().isBitwigStudio())
                         repaint();
                    #endif
@@ -1721,7 +1721,7 @@ private:
 
         #if JUCE_WINDOWS
          WindowsHooks hooks;
-        #elif JUCE_LINUX
+        #elif JUCE_LINUX || JUCE_BSD
          std::unordered_map<int, std::function<void (int)>> fdCallbackMap;
 
          ::Display* display = XWindowSystem::getInstance()->getDisplay();
@@ -3080,7 +3080,7 @@ bool shutdownModule()
 #if JUCE_WINDOWS
  extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
  extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  void* moduleHandle = nullptr;
  int moduleEntryCounter = 0;
 

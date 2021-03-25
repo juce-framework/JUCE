@@ -48,14 +48,14 @@
  #endif
 #endif
 
-#if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && JUCE_LINUX
+#if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
  #include <sys/utsname.h>
  #undef KeyPress
 #endif
 
-#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX
+#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX && ! JUCE_BSD
  #undef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
 #endif
@@ -68,7 +68,7 @@
 namespace juce
 {
 
-#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX)
+#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD))
 
 static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                  const PluginDescription& desc)

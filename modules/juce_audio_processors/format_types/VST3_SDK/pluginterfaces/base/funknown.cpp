@@ -35,7 +35,7 @@
 
 #endif
 
-#if SMTG_OS_LINUX
+#if SMTG_OS_LINUX && !JUCE_BSD
 #include <ext/atomicity.h>
 #endif
 
@@ -71,7 +71,7 @@ int32 PLUGIN_API atomicAdd (int32& var, int32 d)
 	return InterlockedExchangeAdd (&var, d) + d;
 #elif SMTG_OS_MACOS
 	return OSAtomicAdd32Barrier (d, (int32_t*)&var);
-#elif SMTG_OS_LINUX
+#elif SMTG_OS_LINUX && !JUCE_BSD
 	__gnu_cxx::__atomic_add (&var, d);
 	return var;
 #else

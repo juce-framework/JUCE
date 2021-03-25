@@ -188,7 +188,7 @@ namespace
 }
 
 //==============================================================================
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
 
 struct SharedMessageThread  : public Thread
 {
@@ -364,7 +364,7 @@ public:
         JUCE_AUTORELEASEPOOL
         {
             {
-               #if JUCE_LINUX
+               #if JUCE_LINUX || JUCE_BSD
                 MessageManagerLock mmLock;
                #endif
                 stopTimer();
@@ -385,7 +385,7 @@ public:
 
             if (activePlugins.size() == 0)
             {
-               #if JUCE_LINUX
+               #if JUCE_LINUX || JUCE_BSD
                 SharedMessageThread::deleteInstance();
                #endif
                 shutdownJuce_GUI();
@@ -1066,11 +1066,11 @@ public:
         {
             setVisible (false);
 
-           #if JUCE_WINDOWS || JUCE_LINUX
+           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             addToDesktop (0, args.ptr);
             hostWindow = (HostWindowType) args.ptr;
 
-            #if JUCE_LINUX
+            #if JUCE_LINUX || JUCE_BSD
              X11Symbols::getInstance()->xReparentWindow (display,
                                                          (Window) getWindowHandle(),
                                                          (HostWindowType) hostWindow,
@@ -1174,7 +1174,7 @@ public:
                 {
                     const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
 
-                   #if JUCE_LINUX // setSize() on linux causes renoise and energyxt to fail.
+                   #if JUCE_LINUX || JUCE_BSD // setSize() on linux causes renoise and energyxt to fail.
                     auto rect = convertToHostBounds ({ 0, 0, (int16) editorBounds.getHeight(), (int16) editorBounds.getWidth() });
 
                     X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
@@ -1219,7 +1219,7 @@ public:
 
                #if JUCE_MAC
                 setNativeHostWindowSizeVST (hostWindow, this, newWidth, newHeight, wrapper.useNSView);
-               #elif JUCE_LINUX
+               #elif JUCE_LINUX || JUCE_BSD
                 // (Currently, all linux hosts support sizeWindow, so this should never need to happen)
                 setSize (newWidth, newHeight);
                #else
@@ -1355,7 +1355,7 @@ public:
         float editorScaleFactor = 1.0f;
         juce::Rectangle<int> lastBounds;
 
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         using HostWindowType = ::Window;
         ::Display* display = XWindowSystem::getInstance()->getDisplay();
        #elif JUCE_WINDOWS
@@ -2142,7 +2142,7 @@ namespace
             {
                 if (audioMaster (nullptr, Vst2::audioMasterVersion, 0, 0, nullptr, 0) != 0)
                 {
-                   #if JUCE_LINUX
+                   #if JUCE_LINUX || JUCE_BSD
                     MessageManagerLock mmLock;
                    #endif
 
@@ -2197,7 +2197,7 @@ namespace
 
 //==============================================================================
 // Linux startup code..
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
 
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster);
     JUCE_EXPORTED_FUNCTION Vst2::AEffect* VSTPluginMain (Vst2::audioMasterCallback audioMaster)

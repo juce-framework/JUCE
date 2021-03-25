@@ -25,6 +25,7 @@ namespace juce
 
 void MACAddress::findAllAddresses (Array<MACAddress>& result)
 {
+#if !defined(__FreeBSD__) // TODO implement
     auto s = socket (AF_INET, SOCK_DGRAM, 0);
 
     if (s != -1)
@@ -53,6 +54,7 @@ void MACAddress::findAllAddresses (Array<MACAddress>& result)
 
         ::close (s);
     }
+#endif
 }
 
 

@@ -183,7 +183,7 @@ StringArray JUCE_CALLTYPE JUCEApplicationBase::getCommandLineParameterArray()
  extern void initialiseNSApplication();
 #endif
 
-#if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+#if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
  extern int juce_gtkWebkitMain (int argc, const char* argv[]);
 #endif
 
@@ -228,7 +228,7 @@ int JUCEApplicationBase::main (int argc, const char* argv[])
         initialiseNSApplication();
        #endif
 
-       #if JUCE_LINUX && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
+       #if (JUCE_LINUX || JUCE_BSD) && JUCE_MODULE_AVAILABLE_juce_gui_extra && (! defined(JUCE_WEB_BROWSER) || JUCE_WEB_BROWSER)
         if (argc >= 2 && String (argv[1]) == "--juce-gtkwebkitfork-child")
             return juce_gtkWebkitMain (argc, argv);
        #endif

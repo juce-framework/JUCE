@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+#if defined(__FreeBSD__)
+#include <sys/sysinfo.h>
+#endif
+
 #if JUCE_BELA
 extern "C" int cobalt_thread_mode();
 #endif
@@ -139,8 +143,13 @@ static String getLocaleValue (nl_item key)
     return result;
 }
 
+#if JUCE_BSD
+String SystemStats::getUserLanguage()     { return String(); }
+String SystemStats::getUserRegion()       { return String(); }
+#else
 String SystemStats::getUserLanguage()     { return getLocaleValue (_NL_IDENTIFICATION_LANGUAGE); }
 String SystemStats::getUserRegion()       { return getLocaleValue (_NL_IDENTIFICATION_TERRITORY); }
+#endif
 String SystemStats::getDisplayLanguage()  { return getUserLanguage() + "-" + getUserRegion(); }
 
 //==============================================================================

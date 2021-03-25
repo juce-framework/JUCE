@@ -137,7 +137,7 @@ function(_juce_find_linux_target_architecture result)
     set("${result}" "${match_result}" PARENT_SCOPE)
 endfunction()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES ".*BSD")
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
     _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
 
@@ -177,7 +177,7 @@ function(_juce_set_default_properties)
 
         set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "${prefix}/VST3")
         set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "${prefix}/Avid/Audio/Plug-Ins")
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES ".*BSD")
         set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR  "$ENV{HOME}/.vst")
         set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "$ENV{HOME}/.vst3")
     endif()
@@ -575,7 +575,7 @@ function(juce_add_module module_path)
 
     target_compile_definitions(${module_name} INTERFACE JUCE_MODULE_AVAILABLE_${module_name}=1)
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES ".*BSD")
         target_compile_definitions(${module_name} INTERFACE LINUX=1)
     endif()
 
@@ -613,7 +613,7 @@ function(juce_add_module module_path)
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" iOSLibs)
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES ".*BSD")
         _juce_get_metadata("${metadata_dict}" linuxPackages module_linuxpackages)
 
         if(module_linuxpackages)
@@ -681,7 +681,7 @@ endfunction()
 # know they need it. Otherwise, we won't link anything.
 # See the NEEDS_CURL, NEEDS_WEB_BROWSER, and NEEDS_STORE_KIT options in the CMake/readme.md.
 function(_juce_link_optional_libraries target)
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES ".*BSD")
         get_target_property(needs_curl ${target} JUCE_NEEDS_CURL)
 
         if(needs_curl)
@@ -1330,7 +1330,7 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
 
         set(output_path "${products_folder}/${product_name}.vst3")
 
-        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME MATCHES ".*BSD")
             set_target_properties(${target_name} PROPERTIES
                 SUFFIX .so
                 LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_LINUX_TARGET_ARCHITECTURE}-linux")
