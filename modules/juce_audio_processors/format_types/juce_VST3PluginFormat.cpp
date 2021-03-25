@@ -452,12 +452,13 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
         if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iid, Vst::IMessage::iid))
         {
             VSTComSmartPtr<Message> m (new Message (attributeList));
-            messageQueue.add (m);
+            messageMap.add (m);
             m->addRef();
             *obj = m;
             return kResultOk;
         }
-        else if (doUIDsMatch (cid, Vst::IAttributeList::iid) && doUIDsMatch (iid, Vst::IAttributeList::iid))
+
+        if (doUIDsMatch (cid, Vst::IAttributeList::iid) && doUIDsMatch (iid, Vst::IAttributeList::iid))
         {
             VSTComSmartPtr<AttributeList> l (new AttributeList (this));
             l->addRef();
@@ -519,7 +520,7 @@ private:
     //==============================================================================
     struct Message  : public Vst::IMessage
     {
-        Message (Vst::IAttributeList* list)
+        explicit Message (Vst::IAttributeList* list)
            : attributeList (list)
         {
         }
@@ -534,7 +535,7 @@ private:
         {
         }
 
-        virtual ~Message() {}
+        virtual ~Message() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
         JUCE_DECLARE_VST3_COM_QUERY_METHODS
@@ -553,7 +554,93 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Message)
     };
 
-    Array<VSTComSmartPtr<Message>, CriticalSection> messageQueue;
+    class MessageMap
+    {
+    public:
+        tresult getBinary (const char* id, const void*& data, Steinberg::uint32& size)
+        {
+            jassert (id != nullptr);
+
+            const ScopedLock lock (mutex);
+
+            const auto it = storage.find (id);
+
+            if (it != storage.cend())
+            {
+                if (auto* binaryData = it->second->value.getBinaryData())
+                {
+                    data = binaryData->getData();
+                    size = (Steinberg::uint32) binaryData->getSize();
+                    return kResultTrue;
+                }
+            }
+
+            return kResultFalse;
+        }
+
+        template <typename Type>
+        void addMessageToQueue (const char* id, Vst::IAttributeList* list, const Type& value)
+        {
+            jassert (id != nullptr);
+
+            const ScopedLock lock (mutex);
+
+            const auto it = storage.find (id);
+
+            if (it != storage.cend())
+                it->second->value = value;
+            else
+                storage.emplace (id, new Message (list, id, value));
+        }
+
+        template <typename Type>
+        bool findMessageOnQueueWithID (const char* id, Type& value)
+        {
+            jassert (id != nullptr);
+
+            const ScopedLock lock (mutex);
+
+            const auto it = storage.find (id);
+
+            if (it == storage.cend())
+                return false;
+
+            value = it->second->value;
+            return true;
+        }
+
+        void add (VSTComSmartPtr<Message> message)
+        {
+            const ScopedLock lock (mutex);
+
+            const auto* id = message->getMessageID();
+            storage.erase (id);
+            storage.emplace (id, std::move (message));
+        }
+
+    private:
+        struct Comparator
+        {
+            bool operator() (const char* a, const char* b) const noexcept
+            {
+                return std::strcmp (a, b) < 0;
+            }
+        };
+
+        // Steinberg's docs say:
+        // >  Please note that messages from the processor to the controller must not be sent during
+        //    the process call, as this would not be fast enough and would break the real time
+        //    processing. Such tasks should be handled in a separate timer thread.
+
+        // Using a lock here is fine (plugins should be aware that sending messages is not
+        // realtime-safe), and protects the data structure in case the processor sends messages from
+        // a background thread rather than from the message thread.
+
+        std::map<const char*, VSTComSmartPtr<Message>, Comparator> storage;
+        CriticalSection mutex;
+    };
+
+    MessageMap messageMap;
 
     //==============================================================================
     struct AttributeList  : public Vst::IAttributeList
@@ -632,22 +719,7 @@ private:
 
         tresult PLUGIN_API getBinary (AttrID id, const void*& data, Steinberg::uint32& size) override
         {
-            jassert (id != nullptr);
-
-            for (auto&& m : owner->messageQueue)
-            {
-                if (std::strcmp (m->getMessageID(), id) == 0)
-                {
-                    if (auto* binaryData = m->value.getBinaryData())
-                    {
-                        data = binaryData->getData();
-                        size = (Steinberg::uint32) binaryData->getSize();
-                        return kResultTrue;
-                    }
-                }
-            }
-
-            return kResultFalse;
+            return owner->messageMap.getBinary (id, data, size);
         }
 
     private:
@@ -658,35 +730,13 @@ private:
         template <typename Type>
         void addMessageToQueue (AttrID id, const Type& value)
         {
-            jassert (id != nullptr);
-
-            for (auto&& m : owner->messageQueue)
-            {
-                if (std::strcmp (m->getMessageID(), id) == 0)
-                {
-                    m->value = value;
-                    return;
-                }
-            }
-
-            owner->messageQueue.add (VSTComSmartPtr<Message> (new Message (this, id, value)));
+            owner->messageMap.addMessageToQueue (id, this, value);
         }
 
         template <typename Type>
         bool findMessageOnQueueWithID (AttrID id, Type& value)
         {
-            jassert (id != nullptr);
-
-            for (auto&& m : owner->messageQueue)
-            {
-                if (std::strcmp (m->getMessageID(), id) == 0)
-                {
-                    value = m->value;
-                    return true;
-                }
-            }
-
-            return false;
+            return owner->messageMap.findMessageOnQueueWithID (id, value);
         }
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttributeList)
