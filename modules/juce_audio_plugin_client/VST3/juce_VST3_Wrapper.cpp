@@ -305,7 +305,7 @@ private:
        #endif
 
         juceParameters.update (*audioProcessor, forceLegacyParamIDs);
-        auto additionalLegacyParameterIDIndex = juceParameters.getNumParameters();
+        auto numParameters = juceParameters.getNumParameters();
 
         bool vst3WrapperProvidedBypassParam = false;
         auto* bypassParameter = audioProcessor->getBypassParameter();
@@ -336,8 +336,7 @@ private:
             {
                 // we need to remain backward compatible with the old bypass id
                 if (vst3WrapperProvidedBypassParam)
-                    vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass
-                                                                                                                  : additionalLegacyParameterIDIndex++);
+                    vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass : numParameters);
 
                 bypassParamID = vstParamID;
             }
@@ -356,8 +355,7 @@ private:
 
             juceParameters.params.add (ownedProgramParameter.get());
 
-            programParamID = static_cast<Vst::ParamID> (forceLegacyParamIDs ? additionalLegacyParameterIDIndex++
-                                                                            : paramPreset);
+            programParamID = static_cast<Vst::ParamID> (forceLegacyParamIDs ? i++ : paramPreset);
 
             vstParamIDs.add (programParamID);
             paramMap.set (static_cast<int32> (programParamID), ownedProgramParameter.get());
