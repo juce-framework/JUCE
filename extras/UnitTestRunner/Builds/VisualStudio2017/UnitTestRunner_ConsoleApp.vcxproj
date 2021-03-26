@@ -2769,8 +2769,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_WindowsRegistry.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_android_JNIHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_CFHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_osx_ObjCHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ObjCHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_posix_IPAddress.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_posix_SharedCode.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_win32_ComSmartPtr.h"/>

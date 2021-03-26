@@ -3669,10 +3669,13 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_CFHelpers.h">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_osx_ObjCHelpers.h">
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ObjCHelpers.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_posix_IPAddress.h">
