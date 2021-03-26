@@ -23,17 +23,16 @@
   ==============================================================================
 */
 
+#include <juce_core/system/juce_TargetPlatform.h>
+#include <juce_core/system/juce_CompilerWarnings.h>
+
+//==============================================================================
 #if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
 
-#include <juce_core/system/juce_CompilerWarnings.h>
-#include <juce_core/system/juce_TargetPlatform.h>
-
-#if JUCE_MAC
- #include <CoreFoundation/CoreFoundation.h>
- #include <juce_core/native/juce_osx_ObjCHelpers.h>
-#endif
-
 #if JUCE_PLUGINHOST_VST3
+ #if JUCE_MAC
+  #include <CoreFoundation/CoreFoundation.h>
+ #endif
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
@@ -78,6 +77,10 @@
  #include <unordered_map>
 
  std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
+#endif
+
+#if JUCE_MAC
+ #include <juce_core/native/juce_mac_CFHelpers.h>
 #endif
 
 namespace juce

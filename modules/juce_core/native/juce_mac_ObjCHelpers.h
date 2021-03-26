@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+#include "juce_mac_CFHelpers.h"
+
 /* This file contains a few helper functions that are used internally but which
    need to be kept away from the public headers because they use obj-C symbols.
 */
@@ -239,40 +241,6 @@ struct NSObjectDeleter
 
 template <typename NSType>
 using NSUniquePtr = std::unique_ptr<NSType, NSObjectDeleter>;
-
-template <typename CFType>
-struct CFObjectDeleter
-{
-    void operator() (CFType object) const noexcept
-    {
-        if (object != nullptr)
-            CFRelease (object);
-    }
-};
-
-template <typename CFType>
-using CFUniquePtr = std::unique_ptr<typename std::remove_pointer<CFType>::type, CFObjectDeleter<CFType>>;
-
-template <typename CFType>
-struct CFObjectHolder
-{
-    CFObjectHolder() = default;
-
-    CFObjectHolder (const CFObjectHolder&) = delete;
-    CFObjectHolder (CFObjectHolder&&) = delete;
-
-    CFObjectHolder& operator= (const CFObjectHolder&) = delete;
-    CFObjectHolder& operator= (CFObjectHolder&&) = delete;
-
-    ~CFObjectHolder() noexcept
-    {
-        if (object != nullptr)
-            CFRelease (object);
-    }
-
-    // Public to facilitate passing the pointer address to functions
-    CFType object = nullptr;
-};
 
 //==============================================================================
 template <typename SuperclassType>
