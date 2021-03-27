@@ -82,13 +82,6 @@ set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
 
 # ==================================================================================================
 
-function(_juce_add_interface_library target)
-    add_library(${target} INTERFACE)
-    target_sources(${target} INTERFACE ${ARGN})
-endfunction()
-
-# ==================================================================================================
-
 function(_juce_create_pkgconfig_target name)
     if(TARGET juce::pkgconfig_${name})
         return()
@@ -457,7 +450,9 @@ function(_juce_add_plugin_wrapper_target format path out_path)
     list(FILTER out_var EXCLUDE REGEX "/juce_audio_plugin_client_utils.cpp$")
     set(target_name juce_audio_plugin_client_${format})
 
-    _juce_add_interface_library("${target_name}" ${out_var})
+    add_library("${target_name}" INTERFACE)
+    target_sources("${target_name}" INTERFACE ${out_var})
+
     _juce_add_plugin_definitions("${target_name}" INTERFACE ${format})
     _juce_add_standard_defs("${target_name}")
 
@@ -535,7 +530,8 @@ function(juce_add_module module_path)
         list(APPEND all_module_sources ${globbed_sources})
     endif()
 
-    _juce_add_interface_library(${module_name} ${all_module_sources})
+    add_library(${module_name} INTERFACE)
+    target_sources(${module_name} INTERFACE ${all_module_sources})
 
     set_property(GLOBAL APPEND PROPERTY _juce_module_names ${module_name})
 
