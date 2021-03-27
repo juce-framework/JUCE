@@ -180,8 +180,8 @@ _juce_set_default_properties()
 
 # ==================================================================================================
 
-function(_juce_add_standard_defs juce_target)
-    target_compile_definitions(${juce_target} INTERFACE
+function(_juce_add_standard_defs juce_target visibility)
+    target_compile_definitions(${juce_target} ${visibility}
         JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
         $<IF:$<CONFIG:DEBUG>,DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
         $<$<PLATFORM_ID:Android>:JUCE_ANDROID=1>)
@@ -454,7 +454,7 @@ function(_juce_add_plugin_wrapper_target format path out_path)
     target_sources("${target_name}" INTERFACE ${out_var})
 
     _juce_add_plugin_definitions("${target_name}" INTERFACE ${format})
-    _juce_add_standard_defs("${target_name}")
+    _juce_add_standard_defs("${target_name}" INTERFACE)
 
     target_compile_features("${target_name}" INTERFACE cxx_std_11)
     add_library("juce::${target_name}" ALIAS "${target_name}")
@@ -490,6 +490,16 @@ function(juce_add_module module_path)
 
     get_filename_component(module_name ${module_path} NAME)
     get_filename_component(module_parent_path ${module_path} DIRECTORY)
+
+    if(JUCE_BUILD_LIBRARIES AND NOT ${module_name} STREQUAL "juce_audio_plugin_client")
+        set(library_type)
+        set(library_public PUBLIC)
+        set(library_private PRIVATE)
+    else()
+        set(library_type INTERFACE)
+        set(library_public INTERFACE)
+        set(library_private INTERFACE)
+    endif()
 
     set(module_header_name "${module_name}.h")
 
@@ -530,8 +540,8 @@ function(juce_add_module module_path)
         list(APPEND all_module_sources ${globbed_sources})
     endif()
 
-    add_library(${module_name} INTERFACE)
-    target_sources(${module_name} INTERFACE ${all_module_sources})
+    add_library(${module_name} ${library_type})
+    target_sources(${module_name} ${library_private} ${all_module_sources})
 
     set_property(GLOBAL APPEND PROPERTY _juce_module_names ${module_name})
 
@@ -541,18 +551,18 @@ function(juce_add_module module_path)
         INTERFACE_JUCE_MODULE_PATH      "${base_path}")
 
     if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
-        target_sources(${module_name} INTERFACE ${headers})
+        target_sources(${module_name} ${library_public} ${headers})
     endif()
 
     if(${module_name} STREQUAL "juce_core")
-        _juce_add_standard_defs(${module_name})
+        _juce_add_standard_defs(${module_name} ${library_public})
 
-        target_link_libraries(juce_core INTERFACE juce::juce_atomic_wrapper)
+        target_link_libraries(juce_core ${library_public} juce::juce_atomic_wrapper)
 
         if(CMAKE_SYSTEM_NAME STREQUAL "Android")
-            target_sources(juce_core INTERFACE "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
-            target_include_directories(juce_core INTERFACE "${ANDROID_NDK}/sources/android/cpufeatures")
-            target_link_libraries(juce_core INTERFACE android log)
+            target_sources(juce_core ${library_public} "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
+            target_include_directories(juce_core ${library_public} "${ANDROID_NDK}/sources/android/cpufeatures")
+            target_link_libraries(juce_core ${library_public} android log)
         endif()
     endif()
 
@@ -567,12 +577,12 @@ function(juce_add_module module_path)
         endif()
     endif()
 
-    target_include_directories(${module_name} INTERFACE ${base_path})
+    target_include_directories(${module_name} ${library_public} ${base_path})
 
-    target_compile_definitions(${module_name} INTERFACE JUCE_MODULE_AVAILABLE_${module_name}=1)
+    target_compile_definitions(${module_name} ${library_public} JUCE_MODULE_AVAILABLE_${module_name}=1)
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-        target_compile_definitions(${module_name} INTERFACE LINUX=1)
+        target_compile_definitions(${module_name} ${library_public} LINUX=1)
     endif()
 
     _juce_extract_metadata_block(JUCE_MODULE_DECLARATION "${module_path}/${module_header_name}" metadata_dict)
@@ -580,9 +590,9 @@ function(juce_add_module module_path)
     _juce_get_metadata("${metadata_dict}" minimumCppStandard module_cpp_standard)
 
     if(module_cpp_standard)
-        target_compile_features(${module_name} INTERFACE cxx_std_${module_cpp_standard})
+        target_compile_features(${module_name} ${library_public} cxx_std_${module_cpp_standard})
     else()
-        target_compile_features(${module_name} INTERFACE cxx_std_11)
+        target_compile_features(${module_name} ${library_public} cxx_std_11)
     endif()
 
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
@@ -593,7 +603,7 @@ function(juce_add_module module_path)
                 continue()
             endif()
 
-            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
+            _juce_link_frameworks("${module_name}" ${library_public} "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" OSXLibs)
@@ -605,7 +615,7 @@ function(juce_add_module module_path)
                 continue()
             endif()
 
-            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
+            _juce_link_frameworks("${module_name}" ${library_public} "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" iOSLibs)
@@ -614,20 +624,20 @@ function(juce_add_module module_path)
 
         if(module_linuxpackages)
             _juce_create_pkgconfig_target(${module_name}_LINUX_DEPS ${module_linuxpackages})
-            target_link_libraries(${module_name} INTERFACE juce::pkgconfig_${module_name}_LINUX_DEPS)
+            target_link_libraries(${module_name} ${library_public} juce::pkgconfig_${module_name}_LINUX_DEPS)
         endif()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
             if(module_name STREQUAL "juce_gui_basics")
-                target_compile_options(${module_name} INTERFACE /bigobj)
+                target_compile_options(${module_name} ${library_public} /bigobj)
             endif()
 
             _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" windowsLibs)
         elseif(MSYS OR MINGW)
             if(module_name STREQUAL "juce_gui_basics")
-                target_compile_options(${module_name} INTERFACE "-Wa,-mbig-obj")
+                target_compile_options(${module_name} ${library_public} "-Wa,-mbig-obj")
             endif()
 
             _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" mingwLibs)
@@ -635,14 +645,14 @@ function(juce_add_module module_path)
     endif()
 
     _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)
-    target_link_libraries(${module_name} INTERFACE ${module_dependencies})
+    target_link_libraries(${module_name} ${library_public} ${module_dependencies})
 
     _juce_get_metadata("${metadata_dict}" searchpaths module_searchpaths)
 
     if(NOT module_searchpaths STREQUAL "")
         foreach(module_searchpath IN LISTS module_searchpaths)
             target_include_directories(${module_name}
-                INTERFACE "${module_path}/${module_searchpath}")
+                ${library_public} "${module_path}/${module_searchpath}")
         endforeach()
     endif()
 
@@ -1565,7 +1575,7 @@ function(_juce_configure_plugin_targets target)
         message(FATAL_ERROR "Use juce_set_aax_sdk_path to set up the AAX sdk before adding AAX targets")
     endif()
 
-    _juce_add_standard_defs(${target})
+    _juce_add_standard_defs(${target} INTERFACE)
     _juce_add_plugin_definitions(${target} PRIVATE ${active_formats})
 
     # The plugin wrappers need to know what other modules are available, especially

@@ -89,6 +89,15 @@ if(JUCE_BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
+# Normally JUCE creates modules as INTERFACE targets.
+# By turning this option on modules will instead be built as libraries.
+# CMake will create static or shared libs depending on BUILD_SHARED_LIBS.
+
+option(JUCE_BUILD_LIBRARIES
+    "Enable to build libraries (static or shared) of modules instead of source interface targets"
+    OFF
+)
+
 # ==================================================================================================
 # Install configuration
 
