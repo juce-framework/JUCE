@@ -657,7 +657,12 @@ function(juce_add_module module_path)
     endif()
 
     if(JUCE_ARG_INSTALL_PATH)
-        install(DIRECTORY "${module_path}" DESTINATION "${JUCE_ARG_INSTALL_PATH}")
+        if(JUCE_BUILD_LIBRARIES)
+            install(TARGETS ${module_name})
+            install(DIRECTORY "${module_path}" DESTINATION include FILES_MATCHING PATTERN "*.h*")
+        else()
+            install(DIRECTORY "${module_path}" DESTINATION "${JUCE_ARG_INSTALL_PATH}")
+        endif()
     endif()
 
     if(JUCE_ARG_ALIAS_NAMESPACE)
