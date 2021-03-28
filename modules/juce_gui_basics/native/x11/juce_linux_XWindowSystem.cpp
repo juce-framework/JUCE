@@ -628,13 +628,13 @@ namespace Visuals
                         {
                             for (int i = 0; i < numVisuals; ++i)
                             {
-                                auto pictVisualFormat = X11Symbols::getInstance()->xRenderFindVisualFormat (display, xvinfos[i].visual);
+                                auto pictVisualFormat = X11Symbols::getInstance()->xRenderFindVisualFormat (display, xvinfos.get()[i].visual);
 
                                 if (pictVisualFormat != nullptr
                                      && pictVisualFormat->type == PictTypeDirect
                                      && pictVisualFormat->direct.alphaMask)
                                 {
-                                    visual = xvinfos[i].visual;
+                                    visual = xvinfos.get()[i].visual;
                                     matchedDepth = 32;
                                     break;
                                 }
