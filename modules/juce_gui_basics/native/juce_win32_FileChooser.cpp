@@ -26,6 +26,9 @@
 namespace juce
 {
 
+// Implemented in juce_win32_Messageing.cpp
+bool windowsDispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
+
 class Win32NativeFileChooser  : public std::enable_shared_from_this<Win32NativeFileChooser>,
                                 private Thread
 {
@@ -72,7 +75,12 @@ public:
     ~Win32NativeFileChooser() override
     {
         signalThreadShouldExit();
-        waitForThreadToExit (-1);
+
+        while (isThreadRunning())
+        {
+            if (! windowsDispatchNextMessageOnSystemQueue (true))
+                Thread::sleep (1);
+        }
     }
 
     void open (bool async)
@@ -229,7 +237,15 @@ private:
         {
             explicit Events (Win32NativeFileChooser& o) : owner (o) {}
 
-            JUCE_COMRESULT OnTypeChange (IFileDialog* d) override
+            JUCE_COMRESULT OnTypeChange (IFileDialog* d) override                                                 { return updateHwnd (d); }
+            JUCE_COMRESULT OnFolderChanging (IFileDialog* d, IShellItem*) override                                { return updateHwnd (d); }
+            JUCE_COMRESULT OnFileOk (IFileDialog* d) override                                                     { return updateHwnd (d); }
+            JUCE_COMRESULT OnFolderChange (IFileDialog* d) override                                               { return updateHwnd (d); }
+            JUCE_COMRESULT OnSelectionChange (IFileDialog* d) override                                            { return updateHwnd (d); }
+            JUCE_COMRESULT OnShareViolation (IFileDialog* d, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) override  { return updateHwnd (d); }
+            JUCE_COMRESULT OnOverwrite (IFileDialog* d, IShellItem*, FDE_OVERWRITE_RESPONSE*) override            { return updateHwnd (d); }
+
+            JUCE_COMRESULT updateHwnd (IFileDialog* d)
             {
                 HWND hwnd = nullptr;
                 IUnknown_GetWindow (d, &hwnd);
@@ -243,13 +259,6 @@ private:
 
                 return S_OK;
             }
-
-            JUCE_COMRESULT OnFolderChanging (IFileDialog*, IShellItem*) override                                { return E_NOTIMPL; }
-            JUCE_COMRESULT OnFileOk (IFileDialog*) override                                                     { return E_NOTIMPL; }
-            JUCE_COMRESULT OnFolderChange (IFileDialog*) override                                               { return E_NOTIMPL; }
-            JUCE_COMRESULT OnSelectionChange (IFileDialog*) override                                            { return E_NOTIMPL; }
-            JUCE_COMRESULT OnShareViolation (IFileDialog*, IShellItem*, FDE_SHAREVIOLATION_RESPONSE*) override  { return E_NOTIMPL; }
-            JUCE_COMRESULT OnOverwrite (IFileDialog*, IShellItem*, FDE_OVERWRITE_RESPONSE*) override            { return E_NOTIMPL; }
 
             Win32NativeFileChooser& owner;
         };
@@ -491,16 +500,20 @@ private:
 
     void run() override
     {
-        struct ScopedCoInitialize
+        auto resultsCopy = [&]
         {
-            // IUnknown_GetWindow will only succeed when instantiated in a single-thread apartment
-            ScopedCoInitialize() { CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE); }
-            ~ScopedCoInitialize() { CoUninitialize(); }
-        };
+            struct ScopedCoInitialize
+            {
+                // IUnknown_GetWindow will only succeed when instantiated in a single-thread apartment
+                ScopedCoInitialize() { CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE); }
+                ~ScopedCoInitialize() { CoUninitialize(); }
+            };
 
-        ScopedCoInitialize scope;
+            ScopedCoInitialize scope;
 
-        auto resultsCopy = openDialog (true);
+            return openDialog (true);
+        }();
+
         auto safeOwner = owner;
         auto weakThisCopy = weakThis;
 
