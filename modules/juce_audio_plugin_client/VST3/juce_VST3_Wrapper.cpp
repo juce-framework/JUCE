@@ -262,7 +262,7 @@ public:
     //==============================================================================
     static const FUID iid;
     Array<Vst::ParamID> vstParamIDs;
-    Vst::ParamID bypassParamID = 0, programParamID = 0;
+    Vst::ParamID bypassParamID = 0, programParamID = static_cast<Vst::ParamID> (paramPreset);
     bool bypassIsRegularParameter = false;
 
 private:
@@ -355,7 +355,8 @@ private:
 
             juceParameters.params.add (ownedProgramParameter.get());
 
-            programParamID = static_cast<Vst::ParamID> (forceLegacyParamIDs ? i++ : paramPreset);
+            if (forceLegacyParamIDs)
+                programParamID = static_cast<Vst::ParamID> (i++);
 
             vstParamIDs.add (programParamID);
             paramMap.set (static_cast<int32> (programParamID), ownedProgramParameter.get());
