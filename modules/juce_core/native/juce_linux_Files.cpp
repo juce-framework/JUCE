@@ -36,7 +36,7 @@ bool File::isOnCDRomDrive() const
     struct statfs buf;
 
     return statfs (getFullPathName().toUTF8(), &buf) == 0
-             && buf.f_type == (short) U_ISOFS_SUPER_MAGIC;
+             && buf.f_type == (unsigned int) U_ISOFS_SUPER_MAGIC;
 }
 
 bool File::isOnHardDisk() const
