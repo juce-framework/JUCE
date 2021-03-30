@@ -63,7 +63,6 @@ static void doBasicProjectSetup (Project& project, const NewProjectTemplates::Pr
     project.getMainGroup().addNewSubGroup ("Source", 0);
 
     project.getConfigFlag ("JUCE_STRICT_REFCOUNTEDPOINTER") = true;
-    project.getConfigFlag ("JUCE_VST3_HOST_CROSS_PLATFORM_UID") = true;
     project.getProjectValue (Ids::useAppConfig) = false;
     project.getProjectValue (Ids::addUsingNamespaceToJuceHeader) = false;
 

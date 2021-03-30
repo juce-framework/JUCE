@@ -79,18 +79,18 @@ static int warnOnFailureIfImplemented (int result) noexcept
 #endif
 
 //==============================================================================
-static int getHashForTUID (const TUID& tuid) noexcept
+std::array<uint32, 4> getNormalisedTUID (const TUID& tuid) noexcept
 {
-   #if JUCE_VST3_HOST_CROSS_PLATFORM_UID
     const FUID fuid { tuid };
-    const uint32 inputArray[] { fuid.getLong1(), fuid.getLong2(), fuid.getLong3(), fuid.getLong4() };
-   #else
-    const auto& inputArray = tuid;
-   #endif
+    return { { fuid.getLong1(), fuid.getLong2(), fuid.getLong3(), fuid.getLong4() } };
+}
 
+template <typename Range>
+static int getHashForRange (Range&& range) noexcept
+{
     uint32 value = 0;
 
-    for (const auto& item : inputArray)
+    for (const auto& item : range)
         value = (value * 31) + (uint32) item;
 
     return (int) value;
@@ -120,7 +120,9 @@ static void createPluginDescription (PluginDescription& description,
     description.pluginFormatName    = "VST3";
     description.numInputChannels    = numInputs;
     description.numOutputChannels   = numOutputs;
-    description.uid                 = getHashForTUID (info.cid);
+
+    description.deprecatedUid       = getHashForRange (info.cid);
+    description.uniqueId            = getHashForRange (getNormalisedTUID (info.cid));
 
     if (infoW != nullptr)      fillDescriptionWith (description, *infoW);
     else if (info2 != nullptr) fillDescriptionWith (description, *info2);
@@ -780,7 +782,7 @@ struct DescriptionFactory
                 }
             }
 
-            if (desc.uid != 0)
+            if (desc.uniqueId != 0)
                 result = performOnDescription (desc);
 
             if (result.failed())
@@ -1105,7 +1107,8 @@ private:
                     continue;
 
                 if (toString (info.name).trim() == description.name
-                    && getHashForTUID (info.cid) == description.uid)
+                    && (getHashForRange (getNormalisedTUID (info.cid)) == description.uniqueId
+                        || getHashForRange (info.cid) == description.deprecatedUid))
                 {
                     name = description.name;
                     return true;

@@ -2274,8 +2274,7 @@ function(juce_add_pip header)
     target_compile_definitions(${JUCE_PIP_NAME}
         PRIVATE ${pip_moduleflags}
         PUBLIC
-            JUCE_VST3_CAN_REPLACE_VST2=0
-            JUCE_VST3_HOST_CROSS_PLATFORM_UID=1)
+            JUCE_VST3_CAN_REPLACE_VST2=0)
 
     _juce_get_pip_targets(${JUCE_PIP_NAME} pip_targets)
 

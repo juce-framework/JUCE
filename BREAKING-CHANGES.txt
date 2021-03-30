@@ -1,6 +1,34 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+PluginDescription::uid has been deprecated and replaced with a new 'uniqueId'
+data member.
+
+Possible Issues
+---------------
+Code using the old data member will need to be updated in order to compile.
+
+Workaround
+----------
+Code that used to use 'uid' to identify plugins should switch to using
+'uniqueId', with some caveats - see "Rationale" for details.
+
+Rationale
+---------
+The 'uniqueId' member has the benefit of being consistent for
+a given VST3 across Windows, macOS, and Linux. However, the value of the
+uniqueId may differ from the value of the old uid on some platforms. The value
+of the old 'uid' member can now be found in the 'deprecatedUid' member, which
+should allow clients to implement logic such as checking a saved uid against
+the new uniqueId, and falling back to the deprecatedUid. This should allow
+hosts to gracefully upgrade from the old uid values to the new values.
+
+
 Version 6.0.8
 =============
 

@@ -113,17 +113,18 @@ private:
 
         PluginDescription descr;
 
-        descr.name              = identifier;
-        descr.descriptiveName   = identifier;
-        descr.pluginFormatName  = InternalPluginFormat::getIdentifier();
-        descr.category          = (registerAsGenerator ? (acceptsMidi ? "Synth" : "Generator") : "Effect");
-        descr.manufacturerName  = "JUCE";
-        descr.version           = ProjectInfo::versionString;
-        descr.fileOrIdentifier  = identifier;
-        descr.uid               = identifier.hashCode();
-        descr.isInstrument      = (acceptsMidi && registerAsGenerator);
-        descr.numInputChannels  = ins;
-        descr.numOutputChannels = outs;
+        descr.name                 = identifier;
+        descr.descriptiveName      = identifier;
+        descr.pluginFormatName     = InternalPluginFormat::getIdentifier();
+        descr.category             = (registerAsGenerator ? (acceptsMidi ? "Synth" : "Generator") : "Effect");
+        descr.manufacturerName     = "JUCE";
+        descr.version              = ProjectInfo::versionString;
+        descr.fileOrIdentifier     = identifier;
+        descr.isInstrument         = (acceptsMidi && registerAsGenerator);
+        descr.numInputChannels     = ins;
+        descr.numOutputChannels    = outs;
+
+        descr.uniqueId = descr.deprecatedUid = identifier.hashCode();
 
         return descr;
     }
