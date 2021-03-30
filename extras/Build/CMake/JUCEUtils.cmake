@@ -564,8 +564,13 @@ function(juce_add_module module_path)
 
     if(${module_name} STREQUAL "juce_audio_processors")
         add_library(juce_vst3_headers INTERFACE)
+
+        target_compile_definitions(juce_vst3_headers INTERFACE "$<$<TARGET_EXISTS:juce_vst3_sdk>:JUCE_CUSTOM_VST3_SDK=1>")
+
         target_include_directories(juce_vst3_headers INTERFACE
-            "${base_path}/juce_audio_processors/format_types/VST3_SDK")
+            "$<$<TARGET_EXISTS:juce_vst3_sdk>:$<TARGET_PROPERTY:juce_vst3_sdk,INTERFACE_INCLUDE_DIRECTORIES>>"
+            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors/format_types/VST3_SDK>")
+
         target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
 
         if(JUCE_ARG_ALIAS_NAMESPACE)
@@ -2348,6 +2353,22 @@ function(juce_set_vst2_sdk_path path)
     target_include_directories(juce_vst2_sdk INTERFACE
         $<TARGET_PROPERTY:juce::juce_vst3_headers,INTERFACE_INCLUDE_DIRECTORIES>
         "${path}")
+endfunction()
+
+function(juce_set_vst3_sdk_path path)
+    if(TARGET juce_vst3_sdk)
+        message(FATAL_ERROR "juce_set_vst3_sdk_path should only be called once")
+    endif()
+
+    _juce_make_absolute(path)
+
+    if(NOT EXISTS "${path}")
+        message(FATAL_ERROR "Could not find VST3 SDK at the specified path: ${path}")
+    endif()
+
+    add_library(juce_vst3_sdk INTERFACE IMPORTED GLOBAL)
+
+    target_include_directories(juce_vst3_sdk INTERFACE "${path}")
 endfunction()
 
 # ==================================================================================================

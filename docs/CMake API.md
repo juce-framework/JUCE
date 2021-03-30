@@ -611,10 +611,11 @@ target!).
 
     juce_set_aax_sdk_path(<absolute path>)
     juce_set_vst2_sdk_path(<absolute path>)
+    juce_set_vst3_sdk_path(<absolute path>)
 
-Call these functions from your CMakeLists to set up your local AAX and/or VST2 SDKs. These functions
-should be called *before* adding any targets that may depend on the AAX/VST2 SDKs (plugin
-hosts, VST2/AAX plugins etc.).
+Call these functions from your CMakeLists to set up your local AAX, VST2, and VST3 SDKs. These
+functions should be called *before* adding any targets that may depend on the AAX/VST2/VST3 SDKs
+(plugin hosts, AAX/VST2/VST3 plugins etc.).
 
 #### `juce_add_module`
 
