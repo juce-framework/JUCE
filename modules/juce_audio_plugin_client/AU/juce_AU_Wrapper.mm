@@ -719,12 +719,9 @@ public:
 
             if (state.getSize() > 0)
             {
-                CFDataRef ourState = CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), (CFIndex) state.getSize());
-
-                CFStringRef key = CFStringCreateWithCString (kCFAllocatorDefault, JUCE_STATE_DICTIONARY_KEY, kCFStringEncodingUTF8);
-                CFDictionarySetValue (dict, key, ourState);
-                CFRelease (key);
-                CFRelease (ourState);
+                CFUniquePtr<CFDataRef> ourState (CFDataCreate (kCFAllocatorDefault, (const UInt8*) state.getData(), (CFIndex) state.getSize()));
+                CFUniquePtr<CFStringRef> key (CFStringCreateWithCString (kCFAllocatorDefault, JUCE_STATE_DICTIONARY_KEY, kCFStringEncodingUTF8));
+                CFDictionarySetValue (dict, key.get(), ourState.get());
             }
         }
 
@@ -735,10 +732,9 @@ public:
     {
         {
             // Remove the data entry from the state to prevent the superclass loading the parameters
-            CFMutableDictionaryRef copyWithoutData = CFDictionaryCreateMutableCopy (nullptr, 0, (CFDictionaryRef) inData);
-            CFDictionaryRemoveValue (copyWithoutData, CFSTR (kAUPresetDataKey));
-            ComponentResult err = MusicDeviceBase::RestoreState (copyWithoutData);
-            CFRelease (copyWithoutData);
+            CFUniquePtr<CFMutableDictionaryRef> copyWithoutData (CFDictionaryCreateMutableCopy (nullptr, 0, (CFDictionaryRef) inData));
+            CFDictionaryRemoveValue (copyWithoutData.get(), CFSTR (kAUPresetDataKey));
+            ComponentResult err = MusicDeviceBase::RestoreState (copyWithoutData.get());
 
             if (err != noErr)
                 return err;
@@ -749,10 +745,9 @@ public:
             CFDictionaryRef dict = (CFDictionaryRef) inData;
             CFDataRef data = nullptr;
 
-            CFStringRef key = CFStringCreateWithCString (kCFAllocatorDefault, JUCE_STATE_DICTIONARY_KEY, kCFStringEncodingUTF8);
+            CFUniquePtr<CFStringRef> key (CFStringCreateWithCString (kCFAllocatorDefault, JUCE_STATE_DICTIONARY_KEY, kCFStringEncodingUTF8));
 
-            bool valuePresent = CFDictionaryGetValueIfPresent (dict, key, (const void**) &data);
-            CFRelease (key);
+            bool valuePresent = CFDictionaryGetValueIfPresent (dict, key.get(), (const void**) &data);
 
             if (valuePresent)
             {

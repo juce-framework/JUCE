@@ -61,14 +61,16 @@ void LibraryModule::addSearchPathsToExporter (ProjectExporter& exporter) const
 
     exporter.addToExtraSearchPaths (moduleRelativePath.getParentDirectory());
 
-    String libDirPlatform;
+    const auto libDirPlatform = [&]() -> String
+    {
+        if (exporter.isLinux())
+            return "Linux";
 
-    if (exporter.isLinux())
-        libDirPlatform = "Linux";
-    else if (exporter.isCodeBlocks() && exporter.isWindows())
-        libDirPlatform = "MinGW";
-    else
-        libDirPlatform = exporter.getTargetFolder().getFileName();
+        if (exporter.isCodeBlocks() && exporter.isWindows())
+            return "MinGW";
+
+        return exporter.getTypeInfoForExporter (exporter.getExporterIdentifier()).targetFolder;
+    }();
 
     auto libSubdirPath = moduleRelativePath.toUnixStyle() + "/libs/" + libDirPlatform;
     auto moduleLibDir = File (exporter.getProject().getProjectFolder().getFullPathName() + "/" + libSubdirPath);

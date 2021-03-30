@@ -143,15 +143,15 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode)
 {
     Array<int> cookies;
 
-    CFArrayRef elements;
+    CFObjectHolder<CFArrayRef> elements;
     auto device122 = (IOHIDDeviceInterface122**) device;
 
-    if ((*device122)->copyMatchingElements (device122, nullptr, &elements) != kIOReturnSuccess)
+    if ((*device122)->copyMatchingElements (device122, nullptr, &elements.object) != kIOReturnSuccess)
         return false;
 
-    for (int i = 0; i < CFArrayGetCount (elements); ++i)
+    for (int i = 0; i < CFArrayGetCount (elements.object); ++i)
     {
-        auto element = (CFDictionaryRef) CFArrayGetValueAtIndex (elements, i);
+        auto element = (CFDictionaryRef) CFArrayGetValueAtIndex (elements.object, i);
 
         // get the cookie
         CFTypeRef object = CFDictionaryGetValue (element, CFSTR (kIOHIDElementCookieKey));
@@ -165,8 +165,6 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode)
 
         cookies.add ((int) number);
     }
-
-    CFRelease (elements);
 
     if ((*(IOHIDDeviceInterface**) device)
             ->open ((IOHIDDeviceInterface**) device,

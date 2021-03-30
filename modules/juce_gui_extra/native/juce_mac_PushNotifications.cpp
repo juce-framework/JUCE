@@ -298,7 +298,7 @@ struct PushNotificationsDelegate
     virtual bool shouldPresentNotification (NSUserNotification* notification) = 0;
 
 protected:
-    std::unique_ptr<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>, NSObjectDeleter> delegate;
+    NSUniquePtr<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>> delegate;
 
 private:
     struct Class    : public ObjCClass<NSObject<NSApplicationDelegate, NSUserNotificationCenterDelegate>>

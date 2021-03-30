@@ -76,6 +76,8 @@ public:
     static String getValueTreeTypeName()  { return "ANDROIDSTUDIO"; }
     static String getTargetFolderName()   { return "Android"; }
 
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
     static const char* getDefaultActivityClass()     { return "com.rmsl.juce.JuceActivity"; }
     static const char* getDefaultApplicationClass()  { return "com.rmsl.juce.JuceApp"; }
 

@@ -271,7 +271,12 @@ static void sendScreenBoundsUpdate (JuceUIViewController* c)
 static bool isKioskModeView (JuceUIViewController* c)
 {
     JuceUIView* juceView = (JuceUIView*) [c view];
-    jassert (juceView != nil && juceView->owner != nullptr);
+
+    if (juceView == nil || juceView->owner == nullptr)
+    {
+        jassertfalse;
+        return false;
+    }
 
     return Desktop::getInstance().getKioskModeComponent() == &(juceView->owner->getComponent());
 }
@@ -565,6 +570,12 @@ UIViewComponentPeer::~UIViewComponentPeer()
     if (! isSharedWindow)
     {
         [((JuceUIWindow*) window) setOwner: nil];
+
+      #if defined (__IPHONE_13_0)
+        if (@available (iOS 13.0, *))
+            window.windowScene = nil;
+      #endif
+
         [window release];
     }
 }
@@ -675,16 +686,20 @@ void UIViewComponentPeer::updateScreenBounds()
     }
     else if (! isSharedWindow)
     {
-        // this will re-centre the window, but leave its size unchanged
-        auto centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
-        auto centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
-
         auto newDesktop = desktop.getDisplays().getPrimaryDisplay()->userArea;
 
-        auto x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
-        auto y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+        if (newDesktop != oldDesktop)
+        {
+            // this will re-centre the window, but leave its size unchanged
 
-        component.setBounds (oldArea.withPosition (x, y));
+            auto centreRelX = oldArea.getCentreX() / (float) oldDesktop.getWidth();
+            auto centreRelY = oldArea.getCentreY() / (float) oldDesktop.getHeight();
+
+            auto x = ((int) (newDesktop.getWidth()  * centreRelX)) - (oldArea.getWidth()  / 2);
+            auto y = ((int) (newDesktop.getHeight() * centreRelY)) - (oldArea.getHeight() / 2);
+
+            component.setBounds (oldArea.withPosition (x, y));
+        }
     }
 
     [view setNeedsDisplay];

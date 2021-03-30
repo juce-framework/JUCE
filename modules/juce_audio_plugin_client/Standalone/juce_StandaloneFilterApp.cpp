@@ -58,7 +58,7 @@ public:
         options.applicationName     = getApplicationName();
         options.filenameSuffix      = ".settings";
         options.osxLibrarySubFolder = "Application Support";
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         options.folderName          = "~/.config";
        #else
         options.folderName          = "";

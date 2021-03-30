@@ -81,10 +81,17 @@ static int warnOnFailureIfImplemented (int result) noexcept
 //==============================================================================
 static int getHashForTUID (const TUID& tuid) noexcept
 {
+   #if JUCE_VST3_HOST_CROSS_PLATFORM_UID
+    const FUID fuid { tuid };
+    const uint32 inputArray[] { fuid.getLong1(), fuid.getLong2(), fuid.getLong3(), fuid.getLong4() };
+   #else
+    const auto& inputArray = tuid;
+   #endif
+
     uint32 value = 0;
 
-    for (int i = 0; i < numElementsInArray (tuid); ++i)
-        value = (value * 31) + (uint32) tuid[i];
+    for (const auto& item : inputArray)
+        value = (value * 31) + (uint32) item;
 
     return (int) value;
 }
@@ -836,9 +843,6 @@ struct DLLHandle
 
            #if JUCE_WINDOWS || JUCE_LINUX
             library.close();
-           #elif JUCE_MAC
-            CFRelease (bundleRef);
-            bundleRef = nullptr;
            #endif
         }
     }
@@ -868,8 +872,8 @@ struct DLLHandle
         if (bundleRef == nullptr)
             return nullptr;
 
-        ScopedCFString name (functionName);
-        return CFBundleGetFunctionPointerForName (bundleRef, name.cfString);
+        CFUniquePtr<CFStringRef> name (String (functionName).toCFString());
+        return CFBundleGetFunctionPointerForName (bundleRef.get(), name.get());
        #endif
     }
 
@@ -927,45 +931,32 @@ private:
         return false;
     }
    #elif JUCE_MAC
-    CFBundleRef bundleRef;
+    CFUniquePtr<CFBundleRef> bundleRef;
 
     bool open()
     {
         auto* utf8 = dllFile.getFullPathName().toRawUTF8();
 
-        if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (nullptr,
-                                                                    (const UInt8*) utf8,
-                                                                    (CFIndex) std::strlen (utf8),
-                                                                    dllFile.isDirectory()))
+        if (auto url = CFUniquePtr<CFURLRef> (CFURLCreateFromFileSystemRepresentation (nullptr,
+                                                                                       (const UInt8*) utf8,
+                                                                                       (CFIndex) std::strlen (utf8),
+                                                                                       dllFile.isDirectory())))
         {
-            bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
-            CFRelease (url);
+            bundleRef.reset (CFBundleCreate (kCFAllocatorDefault, url.get()));
 
             if (bundleRef != nullptr)
             {
-                CFErrorRef error = nullptr;
+                CFObjectHolder<CFErrorRef> error;
 
-                if (CFBundleLoadExecutableAndReturnError (bundleRef, &error))
-                {
+                if (CFBundleLoadExecutableAndReturnError (bundleRef.get(), &error.object))
                     if (auto* proc = (EntryProc) getFunction (entryFnName))
-                    {
-                        if (proc (bundleRef))
+                        if (proc (bundleRef.get()))
                             return true;
-                    }
-                }
 
-                if (error != nullptr)
-                {
-                    if (CFStringRef failureMessage = CFErrorCopyFailureReason (error))
-                    {
-                        DBG (String::fromCFString (failureMessage));
-                        CFRelease (failureMessage);
-                    }
+                if (error.object != nullptr)
+                    if (auto failureMessage = CFUniquePtr<CFStringRef> (CFErrorCopyFailureReason (error.object)))
+                        DBG (String::fromCFString (failureMessage.get()));
 
-                    CFRelease (error);
-                }
-
-                CFRelease (bundleRef);
                 bundleRef = nullptr;
             }
         }
@@ -1171,8 +1162,6 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
        #if JUCE_MAC
         embeddedComponent.setView (nullptr);
-       #elif JUCE_WINDOWS
-        embeddedComponent.setHWND (nullptr);
        #endif
 
         view = nullptr;
@@ -1344,14 +1333,23 @@ struct VST3PluginWindow : public AudioProcessorEditor,
                          roundToInt ((float) rect.getHeight() / nativeScaleFactor));
             }
 
+           #if JUCE_WINDOWS
+            setPluginWindowPos (rect);
+           #else
             embeddedComponent.setBounds (getLocalBounds());
+           #endif
 
             view->onSize (&rect);
         }
         else
         {
             warnOnFailure (view->getSize (&rect));
+
+           #if JUCE_WINDOWS
+            setPluginWindowPos (rect);
+           #else
             resizeWithRect (embeddedComponent, rect, nativeScaleFactor);
+           #endif
         }
 
         // Some plugins don't update their cursor correctly when mousing out the window
@@ -1418,16 +1416,21 @@ private:
     {
         if (pluginHandle == HandleFormat{})
         {
-            embeddedComponent.setBounds (getLocalBounds());
-            addAndMakeVisible (embeddedComponent);
-
-           #if JUCE_MAC
-            pluginHandle = (HandleFormat) embeddedComponent.getView();
-           #elif JUCE_WINDOWS
-            pluginHandle = (HandleFormat) embeddedComponent.getHWND();
-           #elif JUCE_LINUX
-            pluginHandle = (HandleFormat) embeddedComponent.getHostWindowID();
-           #endif
+            #if JUCE_WINDOWS
+             if (auto* topComp = getTopLevelComponent())
+             {
+                 peer.reset (embeddedComponent.createNewPeer (0, topComp->getWindowHandle()));
+                 pluginHandle = (HandleFormat) peer->getNativeHandle();
+             }
+            #else
+             embeddedComponent.setBounds (getLocalBounds());
+             addAndMakeVisible (embeddedComponent);
+             #if JUCE_MAC
+              pluginHandle = (HandleFormat) embeddedComponent.getView();
+             #elif JUCE_LINUX
+              pluginHandle = (HandleFormat) embeddedComponent.getHostWindowID();
+             #endif
+            #endif
 
             if (pluginHandle == HandleFormat{})
             {
@@ -1457,7 +1460,32 @@ private:
     VSTComSmartPtr<IPlugView> view;
 
    #if JUCE_WINDOWS
-    HWNDComponentWithParent embeddedComponent;
+    struct ChildComponent  : public Component
+    {
+        ChildComponent() {}
+        void paint (Graphics& g) override  { g.fillAll (Colours::cornflowerblue); }
+        using Component::createNewPeer;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildComponent)
+    };
+
+    void setPluginWindowPos (ViewRect rect)
+    {
+        if (auto* topComp = getTopLevelComponent())
+        {
+            auto pos = (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
+
+            ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
+
+            SetWindowPos (pluginHandle, 0,
+                          pos.x, pos.y,
+                          rect.getWidth(), rect.getHeight(),
+                          isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
+        }
+    }
+
+    ChildComponent embeddedComponent;
+    std::unique_ptr<ComponentPeer> peer;
     using HandleFormat = HWND;
    #elif JUCE_MAC
     AutoResizingNSViewComponentWithParent embeddedComponent;

@@ -23,8 +23,8 @@
   ==============================================================================
 */
 
-#include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_TargetPlatform.h>
+#include <juce_core/system/juce_CompilerWarnings.h>
 
 //==============================================================================
 #if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
@@ -33,7 +33,6 @@
  #if JUCE_MAC
   #include <CoreFoundation/CoreFoundation.h>
  #endif
-
  #undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
  #define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
 #endif
@@ -78,6 +77,10 @@
  #include <unordered_map>
 
  std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
+#endif
+
+#if JUCE_MAC
+ #include <juce_core/native/juce_mac_CFHelpers.h>
 #endif
 
 namespace juce
@@ -259,7 +262,7 @@ public:
     //==============================================================================
     static const FUID iid;
     Array<Vst::ParamID> vstParamIDs;
-    Vst::ParamID bypassParamID = 0, programParamID = 0;
+    Vst::ParamID bypassParamID = 0, programParamID = static_cast<Vst::ParamID> (paramPreset);
     bool bypassIsRegularParameter = false;
 
 private:
@@ -302,7 +305,7 @@ private:
        #endif
 
         juceParameters.update (*audioProcessor, forceLegacyParamIDs);
-        auto additionalLegacyParameterIDIndex = juceParameters.getNumParameters();
+        auto numParameters = juceParameters.getNumParameters();
 
         bool vst3WrapperProvidedBypassParam = false;
         auto* bypassParameter = audioProcessor->getBypassParameter();
@@ -333,8 +336,7 @@ private:
             {
                 // we need to remain backward compatible with the old bypass id
                 if (vst3WrapperProvidedBypassParam)
-                    vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass
-                                                                                                                  : additionalLegacyParameterIDIndex++);
+                    vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass : numParameters);
 
                 bypassParamID = vstParamID;
             }
@@ -353,8 +355,8 @@ private:
 
             juceParameters.params.add (ownedProgramParameter.get());
 
-            programParamID = static_cast<Vst::ParamID> (forceLegacyParamIDs ? additionalLegacyParameterIDIndex++
-                                                                            : paramPreset);
+            if (forceLegacyParamIDs)
+                programParamID = static_cast<Vst::ParamID> (i++);
 
             vstParamIDs.add (programParamID);
             paramMap.set (static_cast<int32> (programParamID), ownedProgramParameter.get());
@@ -3131,9 +3133,8 @@ bool shutdownModule()
              globalBundleInstance = ref;
              moduleHandle = ref;
 
-             CFURLRef tempURL = CFBundleCopyBundleURL (ref);
-             CFURLGetFileSystemRepresentation (tempURL, true, (UInt8*) modulePath, MaxPathLength);
-             CFRelease (tempURL);
+             CFUniquePtr<CFURLRef> tempURL (CFBundleCopyBundleURL (ref));
+             CFURLGetFileSystemRepresentation (tempURL.get(), true, (UInt8*) modulePath, MaxPathLength);
          }
      }
 
@@ -3376,7 +3377,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE (JucePluginFactory)
 };
 
-} // juce namespace
+} // namespace juce
 
 //==============================================================================
 #ifndef JucePlugin_Vst3ComponentFlags

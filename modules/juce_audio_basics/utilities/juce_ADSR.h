@@ -33,14 +33,13 @@ namespace juce
 
     @tags{Audio}
 */
-class ADSR
+class JUCE_API  ADSR
 {
 public:
     //==============================================================================
     ADSR()
     {
-        setSampleRate (44100.0);
-        setParameters ({});
+        recalculateRates();
     }
 
     //==============================================================================
@@ -49,19 +48,22 @@ public:
 
         @tags{Audio}
     */
-    struct Parameters
+    struct JUCE_API  Parameters
     {
-        /** Attack time in seconds. */
-        float attack  = 0.1f;
+        Parameters() = default;
 
-        /** Decay time in seconds. */
-        float decay   = 0.1f;
+        Parameters (float attackTimeSeconds,
+                    float decayTimeSeconds,
+                    float sustainLevel,
+                    float releaseTimeSeconds)
+            : attack (attackTimeSeconds),
+              decay (decayTimeSeconds),
+              sustain (sustainLevel),
+              release (releaseTimeSeconds)
+        {
+        }
 
-        /** Sustain level. */
-        float sustain = 1.0f;
-
-        /** Release time in seconds. */
-        float release = 0.1f;
+        float attack = 0.1f, decay = 0.1f, sustain = 1.0f, release = 0.1f;
     };
 
     /** Sets the parameters that will be used by an ADSR object.
@@ -73,70 +75,68 @@ public:
     */
     void setParameters (const Parameters& newParameters)
     {
-        currentParameters = newParameters;
+        // need to call setSampleRate() first!
+        jassert (sampleRate > 0.0);
 
-        sustainLevel = newParameters.sustain;
-        calculateRates (newParameters);
-
-        if (currentState != State::idle)
-            checkCurrentState();
+        parameters = newParameters;
+        recalculateRates();
     }
 
     /** Returns the parameters currently being used by an ADSR object.
 
         @see setParameters
     */
-    const Parameters& getParameters() const    { return currentParameters; }
+    const Parameters& getParameters() const noexcept  { return parameters; }
 
     /** Returns true if the envelope is in its attack, decay, sustain or release stage. */
-    bool isActive() const noexcept             { return currentState != State::idle; }
+    bool isActive() const noexcept                    { return state != State::idle; }
 
     //==============================================================================
     /** Sets the sample rate that will be used for the envelope.
 
         This must be called before the getNextSample() or setParameters() methods.
     */
-    void setSampleRate (double sampleRate)
+    void setSampleRate (double newSampleRate) noexcept
     {
-        jassert (sampleRate > 0.0);
-        sr = sampleRate;
+        jassert (newSampleRate > 0.0);
+        sampleRate = newSampleRate;
     }
 
     //==============================================================================
     /** Resets the envelope to an idle state. */
-    void reset()
+    void reset() noexcept
     {
         envelopeVal = 0.0f;
-        currentState = State::idle;
+        state = State::idle;
     }
 
     /** Starts the attack phase of the envelope. */
-    void noteOn()
+    void noteOn() noexcept
     {
         if (attackRate > 0.0f)
         {
-            currentState = State::attack;
+            state = State::attack;
         }
         else if (decayRate > 0.0f)
         {
             envelopeVal = 1.0f;
-            currentState = State::decay;
+            state = State::decay;
         }
         else
         {
-            currentState = State::sustain;
+            state = State::sustain;
         }
     }
 
     /** Starts the release phase of the envelope. */
-    void noteOff()
+    void noteOff() noexcept
     {
-        if (currentState != State::idle)
+        if (state != State::idle)
         {
-            if (currentParameters.release > 0.0f)
+            if (parameters.release > 0.0f)
             {
-                releaseRate = static_cast<float> (envelopeVal / (currentParameters.release * sr));
-                currentState = State::release;
+                releaseRate = (float) (envelopeVal / (parameters.release * sampleRate));
+                state = State::release;
             }
             else
             {
@@ -150,45 +150,41 @@ public:
 
         @see applyEnvelopeToBuffer
     */
-    float getNextSample()
+    float getNextSample() noexcept
     {
-        if (currentState == State::idle)
+        if (state == State::idle)
             return 0.0f;
 
-        if (currentState == State::attack)
+        if (state == State::attack)
         {
             envelopeVal += attackRate;
 
             if (envelopeVal >= 1.0f)
             {
                 envelopeVal = 1.0f;
-
-                if (decayRate > 0.0f)
-                    currentState = State::decay;
-                else
-                    currentState = State::sustain;
+                goToNextState();
             }
         }
-        else if (currentState == State::decay)
+        else if (state == State::decay)
         {
             envelopeVal -= decayRate;
 
-            if (envelopeVal <= sustainLevel)
+            if (envelopeVal <= parameters.sustain)
             {
-                envelopeVal = sustainLevel;
-                currentState = State::sustain;
+                envelopeVal = parameters.sustain;
+                goToNextState();
             }
         }
-        else if (currentState == State::sustain)
+        else if (state == State::sustain)
         {
-            envelopeVal = sustainLevel;
+            envelopeVal = parameters.sustain;
         }
-        else if (currentState == State::release)
+        else if (state == State::release)
         {
             envelopeVal -= releaseRate;
 
             if (envelopeVal <= 0.0f)
-                reset();
+                goToNextState();
         }
 
         return envelopeVal;
@@ -203,6 +199,18 @@ public:
     void applyEnvelopeToBuffer (AudioBuffer<FloatType>& buffer, int startSample, int numSamples)
     {
         jassert (startSample + numSamples <= buffer.getNumSamples());
+
+        if (state == State::idle)
+        {
+            buffer.clear (startSample, numSamples);
+            return;
+        }
+
+        if (state == State::sustain)
+        {
+            buffer.applyGain (startSample, numSamples, parameters.sustain);
+            return;
+        }
 
         auto numChannels = buffer.getNumChannels();
 
@@ -219,30 +227,43 @@ public:
 
 private:
     //==============================================================================
-    void calculateRates (const Parameters& parameters)
+    void recalculateRates() noexcept
     {
-        // need to call setSampleRate() first!
-        jassert (sr > 0.0);
+        auto getRate = [] (float distance, float timeInSeconds, double sr)
+        {
+            return timeInSeconds > 0.0f ? (float) (distance / (timeInSeconds * sr)) : -1.0f;
+        };
 
-        attackRate  = (parameters.attack  > 0.0f ? static_cast<float> (1.0f                  / (parameters.attack * sr))  : -1.0f);
-        decayRate   = (parameters.decay   > 0.0f ? static_cast<float> ((1.0f - sustainLevel) / (parameters.decay * sr))   : -1.0f);
+        attackRate  = getRate (1.0f, parameters.attack, sampleRate);
+        decayRate   = getRate (1.0f - parameters.sustain, parameters.decay, sampleRate);
+        releaseRate = getRate (parameters.sustain, parameters.release, sampleRate);
+
+        if ((state == State::attack && attackRate <= 0.0f)
+            || (state == State::decay && (decayRate <= 0.0f || envelopeVal <= parameters.sustain))
+            || (state == State::release && releaseRate <= 0.0f))
+        {
+            goToNextState();
+        }
     }
 
-    void checkCurrentState()
+    void goToNextState() noexcept
     {
-        if      (currentState == State::attack  && attackRate <= 0.0f)   currentState = decayRate > 0.0f ? State::decay : State::sustain;
-        else if (currentState == State::decay   && decayRate <= 0.0f)    currentState = State::sustain;
-        else if (currentState == State::release && releaseRate <= 0.0f)  reset();
+        if (state == State::attack)
+            state = (decayRate > 0.0f ? State::decay : State::sustain);
+        else if (state == State::decay)
+            state = State::sustain;
+        else if (state == State::release)
+            reset();
     }
 
     //==============================================================================
     enum class State { idle, attack, decay, sustain, release };
 
-    State currentState = State::idle;
-    Parameters currentParameters;
+    State state = State::idle;
+    Parameters parameters;
 
-    double sr = 0.0;
-    float envelopeVal = 0.0f, sustainLevel = 0.0f, attackRate = 0.0f, decayRate = 0.0f, releaseRate = 0.0f;
+    double sampleRate = 44100.0;
+    float envelopeVal = 0.0f, attackRate = 0.0f, decayRate = 0.0f, releaseRate = 0.0f;
 };
 
 } // namespace juce

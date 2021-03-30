@@ -88,13 +88,13 @@ void AudioIODeviceType::callDeviceChangeListeners()
  AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ASIO()         { return nullptr; }
 #endif
 
-#if JUCE_LINUX && JUCE_ALSA
+#if (JUCE_LINUX || JUCE_BSD) && JUCE_ALSA
  AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()         { return createAudioIODeviceType_ALSA_PCMDevices(); }
 #else
  AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_ALSA()         { return nullptr; }
 #endif
 
-#if JUCE_LINUX && JUCE_JACK
+#if (JUCE_LINUX || JUCE_BSD) && JUCE_JACK
  AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()         { return new JackAudioIODeviceType(); }
 #else
  AudioIODeviceType* AudioIODeviceType::createAudioIODeviceType_JACK()         { return nullptr; }

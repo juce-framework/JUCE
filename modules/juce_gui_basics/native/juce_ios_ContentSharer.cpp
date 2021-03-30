@@ -191,8 +191,8 @@ private:
 
     ContentSharer& owner;
     UIViewComponentPeer* peer = nullptr;
-    std::unique_ptr<UIActivityViewController, NSObjectDeleter> controller;
-    std::unique_ptr<NSObject<UIPopoverPresentationControllerDelegate>, NSObjectDeleter> popoverDelegate;
+    NSUniquePtr<UIActivityViewController> controller;
+    NSUniquePtr<NSObject<UIPopoverPresentationControllerDelegate>> popoverDelegate;
 
     bool succeeded = false;
     String errorDescription;

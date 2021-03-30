@@ -31,7 +31,7 @@ function(_juce_add_pips)
         CONFIGURE_DEPENDS LIST_DIRECTORIES false
         "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
         list(REMOVE_ITEM headers
             "${CMAKE_CURRENT_SOURCE_DIR}/CameraDemo.h"
             "${CMAKE_CURRENT_SOURCE_DIR}/PushNotificationsDemo.h"

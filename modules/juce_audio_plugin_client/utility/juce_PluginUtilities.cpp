@@ -42,7 +42,7 @@ namespace juce
  #define JUCE_VST3_CAN_REPLACE_VST2 1
 #endif
 
-#if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+#if JucePlugin_Build_VST3 && JUCE_VST3_CAN_REPLACE_VST2 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
  #define VST3_REPLACEMENT_AVAILABLE 1
 
  // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.

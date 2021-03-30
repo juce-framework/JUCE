@@ -154,7 +154,7 @@
 #endif
 
 //==============================================================================
-#if JUCE_LINUX || JUCE_ANDROID
+#if JUCE_LINUX || JUCE_ANDROID || JUCE_BSD
 
   #ifdef _DEBUG
     #define JUCE_DEBUG 1

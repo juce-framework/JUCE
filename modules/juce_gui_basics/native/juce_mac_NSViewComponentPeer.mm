@@ -808,7 +808,7 @@ public:
     {
         // (need to retain this in case a modal loop runs in handleKeyEvent and
         // our event object gets lost)
-        const std::unique_ptr<NSEvent, NSObjectDeleter> r ([ev retain]);
+        const NSUniquePtr<NSEvent> r ([ev retain]);
 
         updateKeysDown (ev, true);
         bool used = handleKeyEvent (ev, true);
@@ -838,7 +838,7 @@ public:
     void redirectModKeyChange (NSEvent* ev)
     {
         // (need to retain this in case a modal loop runs and our event object gets lost)
-        const std::unique_ptr<NSEvent, NSObjectDeleter> r ([ev retain]);
+        const NSUniquePtr<NSEvent> r ([ev retain]);
 
         keysCurrentlyDown.clear();
         handleKeyUpOrDown (true);
@@ -1242,7 +1242,7 @@ public:
         String unmodified;
 
        #if JUCE_SUPPORT_CARBON
-        if (TISInputSourceRef currentKeyboard = TISCopyCurrentKeyboardInputSource())
+        if (auto currentKeyboard = CFUniquePtr<TISInputSourceRef> (TISCopyCurrentKeyboardInputSource()))
         {
             if (auto layoutData = (CFDataRef) TISGetInputSourceProperty (currentKeyboard,
                                                                          kTISPropertyUnicodeKeyLayoutData))
@@ -1259,8 +1259,6 @@ public:
                         unmodified = String (CharPointer_UTF16 (reinterpret_cast<CharPointer_UTF16::CharType*> (buffer)), 4);
                 }
             }
-
-            CFRelease (currentKeyboard);
         }
 
         // did the above layout conversion fail

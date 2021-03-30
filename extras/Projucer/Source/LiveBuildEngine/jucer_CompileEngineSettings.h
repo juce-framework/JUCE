@@ -95,7 +95,7 @@ private:
         return "OSX";
        #elif JUCE_WINDOWS
         return "WINDOWS";
-       #elif JUCE_LINUX
+       #elif JUCE_LINUX || JUCE_BSD
         return "LINUX";
        #else
         // unknown platform?!

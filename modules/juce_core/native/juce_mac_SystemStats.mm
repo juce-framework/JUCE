@@ -44,63 +44,31 @@ void Logger::outputDebugString (const String& text)
 }
 
 //==============================================================================
-namespace SystemStatsHelpers
-{
-   #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
-    static void doCPUID (uint32& a, uint32& b, uint32& c, uint32& d, uint32 type)
-    {
-        uint32 la = a, lb = b, lc = c, ld = d;
-
-       #if JUCE_32BIT && defined (__pic__)
-        asm ("mov %%ebx, %%edi\n"
-             "cpuid\n"
-             "xchg %%edi, %%ebx\n"
-               : "=a" (la), "=D" (lb), "=c" (lc), "=d" (ld)
-               : "a" (type), "c" (0));
-       #else
-        asm ("cpuid\n"
-               : "=a" (la), "=b" (lb), "=c" (lc), "=d" (ld)
-               : "a" (type), "c" (0));
-       #endif
-
-        a = la; b = lb; c = lc; d = ld;
-    }
-   #endif
-}
-
-//==============================================================================
 void CPUInformation::initialise() noexcept
 {
    #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
-    uint32 a = 0, b = 0, d = 0, c = 0;
-    SystemStatsHelpers::doCPUID (a, b, c, d, 1);
-
-    hasMMX   = (d & (1u << 23)) != 0;
-    hasSSE   = (d & (1u << 25)) != 0;
-    hasSSE2  = (d & (1u << 26)) != 0;
-    has3DNow = (b & (1u << 31)) != 0;
-    hasSSE3  = (c & (1u <<  0)) != 0;
-    hasSSSE3 = (c & (1u <<  9)) != 0;
-    hasFMA3  = (c & (1u << 12)) != 0;
-    hasSSE41 = (c & (1u << 19)) != 0;
-    hasSSE42 = (c & (1u << 20)) != 0;
-    hasAVX   = (c & (1u << 28)) != 0;
-
-    SystemStatsHelpers::doCPUID (a, b, c, d, 0x80000001);
-    hasFMA4  = (c & (1u << 16)) != 0;
-
-    SystemStatsHelpers::doCPUID (a, b, c, d, 7);
-    hasAVX2            = (b & (1u <<  5)) != 0;
-    hasAVX512F         = (b & (1u << 16)) != 0;
-    hasAVX512DQ        = (b & (1u << 17)) != 0;
-    hasAVX512IFMA      = (b & (1u << 21)) != 0;
-    hasAVX512PF        = (b & (1u << 26)) != 0;
-    hasAVX512ER        = (b & (1u << 27)) != 0;
-    hasAVX512CD        = (b & (1u << 28)) != 0;
-    hasAVX512BW        = (b & (1u << 30)) != 0;
-    hasAVX512VL        = (b & (1u << 31)) != 0;
-    hasAVX512VBMI      = (c & (1u <<  1)) != 0;
-    hasAVX512VPOPCNTDQ = (c & (1u << 14)) != 0;
+    SystemStatsHelpers::getCPUInfo (hasMMX,
+                                    hasSSE,
+                                    hasSSE2,
+                                    has3DNow,
+                                    hasSSE3,
+                                    hasSSSE3,
+                                    hasFMA3,
+                                    hasSSE41,
+                                    hasSSE42,
+                                    hasAVX,
+                                    hasFMA4,
+                                    hasAVX2,
+                                    hasAVX512F,
+                                    hasAVX512DQ,
+                                    hasAVX512IFMA,
+                                    hasAVX512PF,
+                                    hasAVX512ER,
+                                    hasAVX512CD,
+                                    hasAVX512BW,
+                                    hasAVX512VL,
+                                    hasAVX512VBMI,
+                                    hasAVX512VPOPCNTDQ);
    #endif
 
     numLogicalCPUs = (int) [[NSProcessInfo processInfo] activeProcessorCount];
@@ -292,9 +260,8 @@ String SystemStats::getComputerName()
 
 static String getLocaleValue (CFStringRef key)
 {
-    CFLocaleRef cfLocale = CFLocaleCopyCurrent();
-    const String result (String::fromCFString ((CFStringRef) CFLocaleGetValue (cfLocale, key)));
-    CFRelease (cfLocale);
+    CFUniquePtr<CFLocaleRef> cfLocale (CFLocaleCopyCurrent());
+    const String result (String::fromCFString ((CFStringRef) CFLocaleGetValue (cfLocale.get(), key)));
     return result;
 }
 
@@ -303,9 +270,8 @@ String SystemStats::getUserRegion()     { return getLocaleValue (kCFLocaleCountr
 
 String SystemStats::getDisplayLanguage()
 {
-    CFArrayRef cfPrefLangs = CFLocaleCopyPreferredLanguages();
-    const String result (String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (cfPrefLangs, 0)));
-    CFRelease (cfPrefLangs);
+    CFUniquePtr<CFArrayRef> cfPrefLangs (CFLocaleCopyPreferredLanguages());
+    const String result (String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (cfPrefLangs.get(), 0)));
     return result;
 }
 

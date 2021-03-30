@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if JUCE_WINDOWS || JUCE_LINUX || JUCE_MAC
+#if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_MAC
 
 SystemTrayIconComponent::SystemTrayIconComponent()
 {

@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if ! (JUCE_LINUX || JUCE_PROJUCER_LIVE_BUILD)
+#if ! (JUCE_LINUX || JUCE_BSD || JUCE_PROJUCER_LIVE_BUILD)
 
 #if JUCE_MAC || JUCE_IOS
  #include "../native/juce_mac_Video.h"

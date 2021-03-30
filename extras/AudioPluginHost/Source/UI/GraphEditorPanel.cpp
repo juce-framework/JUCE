@@ -1205,7 +1205,16 @@ GraphDocumentComponent::~GraphDocumentComponent()
 
 void GraphDocumentComponent::resized()
 {
-    auto r = getLocalBounds();
+    auto r = [this]
+    {
+        auto bounds = getLocalBounds();
+
+        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (getScreenBounds()))
+            return display->safeAreaInsets.subtractedFrom (bounds);
+
+        return bounds;
+    }();
+
     const int titleBarHeight = 40;
     const int keysHeight = 60;
     const int statusHeight = 20;

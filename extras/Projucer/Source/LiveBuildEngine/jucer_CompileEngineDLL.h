@@ -96,7 +96,7 @@ struct CompileEngineDLL  : private DeletedAtShutdown
     {
        #if JUCE_MAC
         return "JUCECompileEngine.dylib";
-       #elif JUCE_LINUX
+       #elif JUCE_LINUX || JUCE_BSD
         return "JUCECompileEngine.so";
        #elif JUCE_WINDOWS
         return "JUCECompileEngine.dll";

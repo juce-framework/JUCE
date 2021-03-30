@@ -111,7 +111,7 @@ bool ProjucerApplication::initialiseLogger (const char* filePrefix)
 {
     if (logger == nullptr)
     {
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         String folder = "~/.config/Projucer/Logs";
        #else
         String folder = "com.juce.projucer";
@@ -717,7 +717,7 @@ static String getPlatformSpecificFileExtension()
     return ".app";
    #elif JUCE_WINDOWS
     return ".exe";
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     return {};
    #else
     jassertfalse;
@@ -738,7 +738,7 @@ static File getPlatformSpecificProjectFolder()
     return buildsFolder.getChildFile ("MacOSX");
    #elif JUCE_WINDOWS
     return buildsFolder.getChildFile ("VisualStudio2017");
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     return buildsFolder.getChildFile ("LinuxMakefile");
    #else
     jassertfalse;
@@ -775,8 +775,8 @@ static File tryToFindDemoRunnerExecutableInBuilds()
 
     if (demoRunnerExecutable.existsAsFile())
         return demoRunnerExecutable;
-   #elif JUCE_LINUX
-    projectFolder = projectFolder.getChildFile ("LinuxMakefile").getChildFile ("build");
+   #elif JUCE_LINUX || JUCE_BSD
+    projectFolder = projectFolder.getChildFile ("build");
     auto demoRunnerExecutable = projectFolder.getChildFile ("DemoRunner");
 
     if (demoRunnerExecutable.existsAsFile())
@@ -854,7 +854,7 @@ File ProjucerApplication::tryToFindDemoRunnerProject()
     auto demoRunnerProjectFile = projectFolder.getChildFile ("DemoRunner.xcodeproj");
    #elif JUCE_WINDOWS
     auto demoRunnerProjectFile = projectFolder.getChildFile ("DemoRunner.sln");
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     auto demoRunnerProjectFile = projectFolder.getChildFile ("Makefile");
    #endif
 
@@ -883,33 +883,33 @@ void ProjucerApplication::launchDemoRunner()
     {
         auto& lf = Desktop::getInstance().getDefaultLookAndFeel();
 
+       #if JUCE_LINUX || JUCE_BSD
         demoRunnerAlert.reset (lf.createAlertWindow ("Open Project",
                                                      "Couldn't find a compiled version of the Demo Runner."
-                                                    #if JUCE_LINUX
-                                                     " Do you want to build it now?", "Build project", "Cancel",
-                                                    #else
-                                                     " Do you want to open the project?", "Open project", "Cancel",
-                                                    #endif
-                                                     {},
+                                                     " Please compile the Demo Runner project in the JUCE examples directory.",
+                                                     "OK", {}, {},
+                                                     AlertWindow::WarningIcon, 1,
+                                                     mainWindowList.getFrontmostWindow (false)));
+        demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this] (int)
+                                                {
+                                                    demoRunnerAlert.reset (nullptr);
+                                                }), false);
+
+       #else
+        demoRunnerAlert.reset (lf.createAlertWindow ("Open Project",
+                                                     "Couldn't find a compiled version of the Demo Runner."
+                                                     " Do you want to open the project?",
+                                                     "Open project", "Cancel", {},
                                                      AlertWindow::QuestionIcon, 2,
                                                      mainWindowList.getFrontmostWindow (false)));
-
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this, demoRunnerFile] (int retVal)
                                                 {
                                                     demoRunnerAlert.reset (nullptr);
 
                                                     if (retVal == 1)
-                                                    {
-                                                       #if JUCE_LINUX
-                                                        String command ("make -C " + demoRunnerFile.getParentDirectory().getFullPathName() + " CONFIG=Release -j3");
-
-                                                        if (! makeProcess.start (command))
-                                                            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", "Error building Demo Runner.");
-                                                       #else
                                                         demoRunnerFile.startAsProcess();
-                                                       #endif
-                                                    }
                                                 }), false);
+       #endif
     }
 }
 
@@ -998,18 +998,8 @@ void ProjucerApplication::getCommandInfo (CommandID commandID, ApplicationComman
         break;
 
     case CommandIDs::launchDemoRunner:
-       #if JUCE_LINUX
-        if (makeProcess.isRunning())
-        {
-            result.setInfo ("Building Demo Runner...", "The Demo Runner project is currently building", CommandCategories::general, 0);
-            result.setActive (false);
-        }
-        else
-       #endif
-        {
-            result.setInfo ("Launch Demo Runner", "Launches the JUCE demo runner application, or the project if it can't be found", CommandCategories::general, 0);
-            result.setActive (tryToFindDemoRunnerExecutable() != File() || tryToFindDemoRunnerProject() != File());
-        }
+        result.setInfo ("Launch Demo Runner", "Launches the JUCE demo runner application, or the project if it can't be found", CommandCategories::general, 0);
+        result.setActive (tryToFindDemoRunnerExecutable() != File() || tryToFindDemoRunnerProject() != File());
         break;
 
     case CommandIDs::open:
@@ -1426,7 +1416,7 @@ PropertiesFile::Options ProjucerApplication::getPropertyFileOptionsFor (const St
     options.applicationName     = filename;
     options.filenameSuffix      = "settings";
     options.osxLibrarySubFolder = "Application Support";
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     options.folderName          = "~/.config/Projucer";
    #else
     options.folderName          = "Projucer";

@@ -379,6 +379,8 @@ public:
     static String getValueTreeTypeName()  { return "LINUX_MAKE"; }
     static String getTargetFolderName()   { return "LinuxMakefile"; }
 
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
     static MakefileProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {
         if (settingsToUse.hasType (getValueTreeTypeName()))

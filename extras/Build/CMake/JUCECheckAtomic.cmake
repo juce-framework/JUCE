@@ -25,7 +25,7 @@ function(_juce_create_atomic_target target_name)
     add_library("${target_name}" INTERFACE)
     add_library("juce::${target_name}" ALIAS "${target_name}")
 
-    if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+    if(NOT ((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD")))
         return()
     endif()
 

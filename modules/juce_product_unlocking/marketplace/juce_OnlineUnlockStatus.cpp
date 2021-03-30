@@ -280,6 +280,8 @@ char OnlineUnlockStatus::MachineIDUtilities::getPlatformPrefix()
     return 'W';
    #elif JUCE_LINUX
     return 'L';
+   #elif JUCE_BSD
+    return 'B';
    #elif JUCE_IOS
     return 'I';
    #elif JUCE_ANDROID
