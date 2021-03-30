@@ -29,8 +29,7 @@ namespace juce
 // Implemented in juce_win32_Messageing.cpp
 bool windowsDispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
-class Win32NativeFileChooser  : public std::enable_shared_from_this<Win32NativeFileChooser>,
-                                private Thread
+class Win32NativeFileChooser  : private Thread
 {
 public:
     enum { charsAvailableForResult = 32768 };
@@ -90,8 +89,6 @@ public:
         // the thread should not be running
         nativeDialogRef.set (nullptr);
 
-        weakThis = shared_from_this();
-
         if (async)
         {
             jassert (! isThreadRunning());
@@ -150,7 +147,6 @@ private:
 
     //==============================================================================
     const Component::SafePointer<Component> owner;
-    std::weak_ptr<Win32NativeFileChooser> weakThis;
     String title, filtersString;
     std::unique_ptr<CustomComponentHolder> customComponent;
     String initialPath, returnedString;
@@ -500,7 +496,7 @@ private:
 
     void run() override
     {
-        auto resultsCopy = [&]
+        results = [&]
         {
             struct ScopedCoInitialize
             {
@@ -515,15 +511,12 @@ private:
         }();
 
         auto safeOwner = owner;
-        auto weakThisCopy = weakThis;
+        auto resultCode = results.size() > 0 ? 1 : 0;
 
-        MessageManager::callAsync ([resultsCopy, safeOwner, weakThisCopy]
+        MessageManager::callAsync ([resultCode, safeOwner]
         {
-            if (auto locked = weakThisCopy.lock())
-                locked->results = resultsCopy;
-
             if (safeOwner != nullptr)
-                safeOwner->exitModalState (resultsCopy.size() > 0 ? 1 : 0);
+                safeOwner->exitModalState (resultCode);
         });
     }
 
@@ -773,7 +766,7 @@ class FileChooser::Native     : public std::enable_shared_from_this<Native>,
 public:
     Native (FileChooser& fileChooser, int flags, FilePreviewComponent* previewComp)
         : owner (fileChooser),
-          nativeFileChooser (std::make_shared<Win32NativeFileChooser> (this, flags, previewComp, fileChooser.startingFile,
+          nativeFileChooser (std::make_unique<Win32NativeFileChooser> (this, flags, previewComp, fileChooser.startingFile,
                                                                        fileChooser.title, fileChooser.filters))
     {
         auto mainMon = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
