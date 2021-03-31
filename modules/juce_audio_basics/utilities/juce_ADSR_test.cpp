@@ -82,7 +82,7 @@ struct ADSRTests  : public UnitTest
             for (int numTests = 0; numTests < 100; ++numTests)
             {
                 const auto sustainLevel = random.nextFloat();
-                const auto sustainLength = random.nextFloat();
+                const auto sustainLength = jmax (0.1f, random.nextFloat());
 
                 adsr.setParameters ({ parameters.attack, parameters.decay, sustainLevel, parameters.release });
 
