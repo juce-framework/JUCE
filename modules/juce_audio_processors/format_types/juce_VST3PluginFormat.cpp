@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
 
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
@@ -841,7 +841,7 @@ struct DLLHandle
             if (auto* exitFn = (ExitModuleFn) getFunction (exitFnName))
                 exitFn();
 
-           #if JUCE_WINDOWS || JUCE_LINUX
+           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             library.close();
            #endif
         }
@@ -866,7 +866,7 @@ struct DLLHandle
 
     void* getFunction (const char* functionName)
     {
-       #if JUCE_WINDOWS || JUCE_LINUX
+       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         return library.getFunction (functionName);
        #elif JUCE_MAC
         if (bundleRef == nullptr)
@@ -890,7 +890,7 @@ private:
     static constexpr const char* exitFnName  = "ExitDll";
 
     using EntryProc = bool (PLUGIN_API*) ();
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     static constexpr const char* entryFnName = "ModuleEntry";
     static constexpr const char* exitFnName  = "ModuleExit";
 
@@ -903,7 +903,7 @@ private:
    #endif
 
     //==============================================================================
-   #if JUCE_WINDOWS || JUCE_LINUX
+   #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
     DynamicLibrary library;
 
     bool open()
@@ -978,7 +978,7 @@ struct DLLHandleCache  : public DeletedAtShutdown
 
     DLLHandle& findOrCreateHandle (const String& modulePath)
     {
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         File file (getDLLFileFromBundle (modulePath));
        #else
         File file (modulePath);
@@ -998,7 +998,7 @@ struct DLLHandleCache  : public DeletedAtShutdown
     }
 
 private:
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     File getDLLFileFromBundle (const String& bundlePath) const
     {
         auto machineName = []() -> String
@@ -1151,7 +1151,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         removeScaleFactorListener();
 
-        #if JUCE_LINUX
+        #if JUCE_LINUX || JUCE_BSD
          embeddedComponent.removeClient();
         #endif
 
@@ -1167,7 +1167,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
         view = nullptr;
     }
 
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     struct RunLoop  final  : public Steinberg::Linux::IRunLoop
     {
         ~RunLoop()
@@ -1427,7 +1427,7 @@ private:
              addAndMakeVisible (embeddedComponent);
              #if JUCE_MAC
               pluginHandle = (HandleFormat) embeddedComponent.getView();
-             #elif JUCE_LINUX
+             #elif JUCE_LINUX || JUCE_BSD
               pluginHandle = (HandleFormat) embeddedComponent.getHostWindowID();
              #endif
             #endif
@@ -1490,7 +1490,7 @@ private:
    #elif JUCE_MAC
     AutoResizingNSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     XEmbedComponent embeddedComponent { true, false };
     using HandleFormat = Window;
    #else
@@ -3338,7 +3338,7 @@ bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdent
     auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
 
     return f.hasFileExtension (".vst3")
-          #if JUCE_MAC || JUCE_LINUX
+          #if JUCE_MAC || JUCE_LINUX || JUCE_BSD
            && f.exists();
           #else
            && f.existsAsFile();

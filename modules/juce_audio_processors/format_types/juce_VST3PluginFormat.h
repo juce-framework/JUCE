@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)) || DOXYGEN
+#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)) || DOXYGEN
 
 /**
     Implements a plugin format for VST3s.
