@@ -1032,6 +1032,124 @@ private:
 JUCE_IMPLEMENT_SINGLETON (DLLHandleCache)
 
 //==============================================================================
+#if JUCE_LINUX || JUCE_BSD
+
+class RunLoop  final  : public Steinberg::Linux::IRunLoop
+{
+public:
+    RunLoop() = default;
+
+    ~RunLoop()
+    {
+        for (const auto& h : eventHandlerMap)
+            LinuxEventLoop::unregisterFdCallback (h.first);
+    }
+
+    //==============================================================================
+    tresult PLUGIN_API registerEventHandler (Linux::IEventHandler* handler,
+                                             Linux::FileDescriptor fd) override
+    {
+        if (handler == nullptr)
+            return kInvalidArgument;
+
+        auto& handlers = eventHandlerMap[fd];
+
+        if (handlers.empty())
+        {
+            LinuxEventLoop::registerFdCallback (fd, [this] (int descriptor)
+            {
+                for (auto* h : eventHandlerMap[descriptor])
+                    h->onFDIsSet (descriptor);
+
+                return true;
+            });
+        }
+
+        handlers.push_back (handler);
+
+        return kResultTrue;
+    }
+
+    tresult PLUGIN_API unregisterEventHandler (Linux::IEventHandler* handler) override
+    {
+        if (handler == nullptr)
+            return kInvalidArgument;
+
+        for (auto iter = eventHandlerMap.begin(), end = eventHandlerMap.end(); iter != end;)
+        {
+            auto& handlers = iter->second;
+
+            auto handlersIter = std::find (std::begin (handlers), std::end (handlers), handler);
+
+            if (handlersIter != std::end (handlers))
+            {
+                handlers.erase (handlersIter);
+
+                if (handlers.empty())
+                {
+                    LinuxEventLoop::unregisterFdCallback (iter->first);
+                    iter = eventHandlerMap.erase (iter);
+                    continue;
+                }
+            }
+
+            ++iter;
+        }
+
+        return kResultTrue;
+    }
+
+    //==============================================================================
+    tresult PLUGIN_API registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds) override
+    {
+        if (handler == nullptr || milliseconds <= 0)
+            return kInvalidArgument;
+
+        timerCallers.emplace_back (handler, (int) milliseconds);
+        return kResultTrue;
+    }
+
+    tresult PLUGIN_API unregisterTimer (Linux::ITimerHandler* handler) override
+    {
+        auto iter = std::find (timerCallers.begin(), timerCallers.end(), handler);
+
+        if (iter == timerCallers.end())
+            return kInvalidArgument;
+
+        timerCallers.erase (iter);
+        return kResultTrue;
+    }
+
+    //==============================================================================
+    uint32 PLUGIN_API addRef() override                                { return 1000; }
+    uint32 PLUGIN_API release() override                               { return 1000; }
+    tresult PLUGIN_API queryInterface (const TUID, void**) override    { return kNoInterface; }
+
+private:
+    //==============================================================================
+    struct TimerCaller  : private Timer
+    {
+        TimerCaller (Linux::ITimerHandler* h, int interval)  : handler (h)  { startTimer (interval); }
+        ~TimerCaller() override { stopTimer(); }
+
+        void timerCallback() override  { handler->onTimer(); }
+
+        bool operator== (Linux::ITimerHandler* other) const noexcept { return handler == other; }
+
+        Linux::ITimerHandler* handler = nullptr;
+    };
+
+    std::unordered_map<Linux::FileDescriptor, std::vector<Linux::IEventHandler*>> eventHandlerMap;
+    std::list<TimerCaller> timerCallers;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_MOVEABLE (RunLoop)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RunLoop)
+};
+
+#endif
+
+//==============================================================================
 struct VST3ModuleHandle  : public ReferenceCountedObject
 {
     explicit VST3ModuleHandle (const File& pluginFile, const PluginDescription& pluginDesc)
@@ -1171,104 +1289,11 @@ struct VST3PluginWindow : public AudioProcessorEditor,
     }
 
    #if JUCE_LINUX || JUCE_BSD
-    struct RunLoop  final  : public Steinberg::Linux::IRunLoop
-    {
-        ~RunLoop()
-        {
-            for (const auto& h : eventHandlers)
-                LinuxEventLoop::unregisterFdCallback (h.first);
-        }
-
-        tresult PLUGIN_API registerEventHandler (Linux::IEventHandler* handler,
-                                                 Linux::FileDescriptor fd) override
-        {
-            if (handler == nullptr || eventHandlers.find (fd) != eventHandlers.end())
-                return kInvalidArgument;
-
-            LinuxEventLoop::registerFdCallback (fd, [handler] (int descriptor)
-            {
-                handler->onFDIsSet (descriptor);
-                return true;
-            });
-
-            eventHandlers.emplace (fd, handler);
-            return kResultTrue;
-        }
-
-        tresult PLUGIN_API unregisterEventHandler (Linux::IEventHandler* handler) override
-        {
-            if (handler == nullptr)
-                return kInvalidArgument;
-
-            for (auto it = eventHandlers.begin(), end = eventHandlers.end(); it != end; ++it)
-            {
-                if (it->second == handler)
-                {
-                    LinuxEventLoop::unregisterFdCallback (it->first);
-                    eventHandlers.erase (it);
-                    return kResultTrue;
-                }
-            }
-
-            return kResultFalse;
-        }
-
-        tresult PLUGIN_API registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds) override
-        {
-            if (handler == nullptr || milliseconds == 0)
-                return kInvalidArgument;
-
-            timerHandlers.push_back (std::make_unique<TimerCaller> (handler, (int) milliseconds));
-            return kResultTrue;
-        }
-
-        tresult PLUGIN_API unregisterTimer (Linux::ITimerHandler* handler) override
-        {
-            if (handler == nullptr)
-                return kInvalidArgument;
-
-            for (auto it = timerHandlers.begin(), end = timerHandlers.end(); it != end; ++it)
-            {
-                if (it->get()->handler == handler)
-                {
-                    timerHandlers.erase (it);
-                    return kResultTrue;
-                }
-            }
-
-            return kNotImplemented;
-        }
-
-        uint32 PLUGIN_API addRef() override                                { return 1000; }
-        uint32 PLUGIN_API release() override                               { return 1000; }
-        tresult PLUGIN_API queryInterface (const TUID, void**) override    { return kNoInterface; }
-
-        std::unordered_map<Linux::FileDescriptor, Linux::IEventHandler*> eventHandlers;
-
-        struct TimerCaller : public Timer
-        {
-            TimerCaller (Linux::ITimerHandler* h, int interval) : handler (h)
-            {
-                startTimer (interval);
-            }
-
-            void timerCallback() override
-            {
-                handler->onTimer();
-            }
-
-            Linux::ITimerHandler* handler;
-        };
-        std::vector<std::unique_ptr<TimerCaller>> timerHandlers;
-    };
-
-    RunLoop runLoop;
-
     Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID iid, void** obj) override
     {
         if (doUIDsMatch (iid, Steinberg::Linux::IRunLoop::iid))
         {
-            *obj = &runLoop;
+            *obj = &runLoop.get();
             return kResultTrue;
         }
 
@@ -1494,6 +1519,7 @@ private:
     AutoResizingNSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
    #elif JUCE_LINUX || JUCE_BSD
+    SharedResourcePointer<RunLoop> runLoop;
     XEmbedComponent embeddedComponent { true, false };
     using HandleFormat = Window;
    #else
@@ -2626,6 +2652,10 @@ public:
 
 private:
     //==============================================================================
+   #if JUCE_LINUX || JUCE_BSD
+    SharedResourcePointer<RunLoop> runLoop;
+   #endif
+
     std::unique_ptr<VST3ComponentHolder> holder;
 
     friend VST3HostContext;
