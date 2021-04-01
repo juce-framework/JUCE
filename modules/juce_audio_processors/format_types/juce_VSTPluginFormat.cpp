@@ -3634,7 +3634,7 @@ FileSearchPath VSTPluginFormat::getDefaultLocationsToSearch()
     CFUniquePtr<CFURLRef> relativePluginDir (CFBundleCopyBuiltInPlugInsURL (CFBundleGetMainBundle()));
     CFUniquePtr<CFURLRef> pluginDir (CFURLCopyAbsoluteURL (relativePluginDir.get()));
 
-    CFStringRef path = CFURLCopyFileSystemPath (pluginDir.get(), kCFURLPOSIXPathStyle);
+    CFUniquePtr<CFStringRef> path (CFURLCopyFileSystemPath (pluginDir.get(), kCFURLPOSIXPathStyle));
     FileSearchPath retval (String (CFStringGetCStringPtr (path.get(), kCFStringEncodingUTF8)));
     return retval;
    #endif
