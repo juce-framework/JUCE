@@ -105,6 +105,7 @@ using namespace juce;
 
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
+#include "../utility/juce_LinuxMessageThread.h"
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_VSTCommon.h>
@@ -186,47 +187,6 @@ namespace
 
     static bool messageThreadIsDefinitelyCorrect = false;
 }
-
-//==============================================================================
-#elif JUCE_LINUX || JUCE_BSD
-
-struct SharedMessageThread  : public Thread
-{
-    SharedMessageThread()  : Thread ("VstMessageThread")
-    {
-        startThread (7);
-
-        while (! initialised)
-            sleep (1);
-    }
-
-    ~SharedMessageThread() override
-    {
-        signalThreadShouldExit();
-        JUCEApplicationBase::quit();
-        waitForThreadToExit (5000);
-        clearSingletonInstance();
-    }
-
-    void run() override
-    {
-        initialiseJuce_GUI();
-        initialised = true;
-
-        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
-
-        XWindowSystem::getInstance();
-
-        while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
-        {}
-    }
-
-    JUCE_DECLARE_SINGLETON (SharedMessageThread, false)
-
-    bool initialised = false;
-};
-
-JUCE_IMPLEMENT_SINGLETON (SharedMessageThread)
 
 #endif
 
