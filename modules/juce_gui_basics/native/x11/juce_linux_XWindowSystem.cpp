@@ -1328,9 +1328,11 @@ namespace ClipboardHelpers
         int propertyFormat = 0;
         size_t numDataItems = 0;
 
-        if (evt.selection == XA_PRIMARY || evt.selection == XWindowSystem::getInstance()->getAtoms().clipboard)
+        const auto& atoms = XWindowSystem::getInstance()->getAtoms();
+
+        if (evt.selection == XA_PRIMARY || evt.selection == atoms.clipboard)
         {
-            if (evt.target == XA_STRING || evt.target == XWindowSystem::getInstance()->getAtoms().utf8String)
+            if (evt.target == XA_STRING || evt.target == atoms.utf8String)
             {
                 auto localContent = XWindowSystem::getInstance()->getLocalClipboardContent();
 
@@ -1340,15 +1342,17 @@ namespace ClipboardHelpers
                 localContent.copyToUTF8 (data, numDataItems);
                 propertyFormat = 8; // bits/item
             }
-            else if (evt.target == XWindowSystem::getInstance()->getAtoms().targets)
+            else if (evt.target == atoms.targets)
             {
                 // another application wants to know what we are able to send
                 numDataItems = 2;
                 propertyFormat = 32; // atoms are 32-bit
                 data.calloc (numDataItems * 4);
-                Atom* atoms = unalignedPointerCast<Atom*> (data.getData());
-                atoms[0] = XWindowSystem::getInstance()->getAtoms().utf8String;
-                atoms[1] = XA_STRING;
+
+                auto* dataAtoms = unalignedPointerCast<Atom*> (data.getData());
+
+                dataAtoms[0] = atoms.utf8String;
+                dataAtoms[1] = XA_STRING;
 
                 evt.target = XA_ATOM;
             }
@@ -2588,14 +2592,12 @@ void XWindowSystem::copyTextToClipboard (const String& clipText)
 {
     localClipboardContent = clipText;
 
-    X11Symbols::getInstance()->xSetSelectionOwner (display, XA_PRIMARY,       juce_messageWindowHandle, CurrentTime);
+    X11Symbols::getInstance()->xSetSelectionOwner (display, XA_PRIMARY,      juce_messageWindowHandle, CurrentTime);
     X11Symbols::getInstance()->xSetSelectionOwner (display, atoms.clipboard, juce_messageWindowHandle, CurrentTime);
 }
 
 String XWindowSystem::getTextFromClipboard() const
 {
-    String content;
-
     /* 1) try to read from the "CLIPBOARD" selection first (the "high
        level" clipboard that is supposed to be filled by ctrl-C
        etc). When a clipboard manager is running, the content of this
@@ -2605,22 +2607,29 @@ String XWindowSystem::getTextFromClipboard() const
        2) and then try to read from "PRIMARY" selection (the "legacy" selection
        filled by good old x11 apps such as xterm)
     */
-    auto selection = XA_PRIMARY;
-    Window selectionOwner = None;
 
-    if ((selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection)) == None)
+    auto getContentForSelection = [this] (Atom selectionAtom) -> String
     {
-        selection = atoms.clipboard;
-        selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection);
-    }
+        auto selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selectionAtom);
 
-    if (selectionOwner != None)
-    {
+        if (selectionOwner == None)
+            return {};
+
         if (selectionOwner == juce_messageWindowHandle)
-            content = localClipboardContent;
-        else if (! ClipboardHelpers::requestSelectionContent (display, content, selection, atoms.utf8String))
-            ClipboardHelpers::requestSelectionContent (display, content, selection, XA_STRING);
-    }
+            return localClipboardContent;
+
+        String content;
+
+        if (! ClipboardHelpers::requestSelectionContent (display, content, selectionAtom, atoms.utf8String))
+            ClipboardHelpers::requestSelectionContent (display, content, selectionAtom, XA_STRING);
+
+        return content;
+    };
+
+    auto content = getContentForSelection (atoms.clipboard);
+
+    if (content.isEmpty())
+        content = getContentForSelection (XA_PRIMARY);
 
     return content;
 }
