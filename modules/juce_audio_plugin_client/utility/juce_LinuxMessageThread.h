@@ -25,46 +25,69 @@
 
 #if JUCE_LINUX || JUCE_BSD
 
+#include <thread>
+
 namespace juce
 {
 
-struct SharedMessageThread  : public Thread
+class MessageThread
 {
-    SharedMessageThread()  : Thread ("VstMessageThread")
+public:
+    MessageThread()
     {
-        startThread (7);
-
-        while (! initialised)
-            sleep (1);
+        startThread();
     }
 
-    ~SharedMessageThread() override
+    ~MessageThread()
     {
-        signalThreadShouldExit();
-        JUCEApplicationBase::quit();
-        waitForThreadToExit (5000);
-        clearSingletonInstance();
+        MessageManager::getInstance()->stopDispatchLoop();
+        stopThread();
     }
 
-    void run() override
+    void startThread()
     {
-        initialiseJuce_GUI();
-        initialised = true;
+        shouldExit = false;
 
-        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+        thread = std::thread { [this]
+        {
+            Thread::setCurrentThreadPriority (7);
+            Thread::setCurrentThreadName ("JUCE Plugin Message Thread");
 
-        XWindowSystem::getInstance();
+            MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+            XWindowSystem::getInstance();
 
-        while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
-        {}
+            threadInitialised.signal();
+
+            for (;;)
+            {
+                if (shouldExit
+                    || ! MessageManager::getInstance()->runDispatchLoopUntil (250))
+                {
+                    break;
+                }
+            }
+        } };
+
+        threadInitialised.wait();
     }
 
-    JUCE_DECLARE_SINGLETON (SharedMessageThread, false)
+    void stopThread()
+    {
+        shouldExit = true;
+        thread.join();
+    }
 
-    bool initialised = false;
+    bool isThreadRunning() const noexcept  { return thread.joinable(); }
+
+private:
+    WaitableEvent threadInitialised;
+    std::thread thread;
+
+    std::atomic<bool> shouldExit { false };
+
+    JUCE_DECLARE_NON_MOVEABLE (MessageThread)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageThread)
 };
-
-JUCE_IMPLEMENT_SINGLETON (SharedMessageThread)
 
 } // namespace juce
 

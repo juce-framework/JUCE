@@ -185,12 +185,11 @@ namespace
         return w;
     }
 
+    static int numActivePlugins = 0;
     static bool messageThreadIsDefinitelyCorrect = false;
 }
 
 #endif
-
-static Array<void*> activePlugins;
 
 //==============================================================================
 // Ableton Live host specific commands
@@ -316,44 +315,35 @@ public:
             vstEffect.flags |= Vst2::effFlagsNoSoundInStop;
        #endif
 
-        activePlugins.add (this);
+       #if JUCE_WINDOWS
+        ++numActivePlugins;
+       #endif
     }
 
     ~JuceVSTWrapper() override
     {
         JUCE_AUTORELEASEPOOL
         {
-            {
-               #if JUCE_LINUX || JUCE_BSD
-                MessageManagerLock mmLock;
-               #endif
-                stopTimer();
-                deleteEditor (false);
+           #if JUCE_LINUX || JUCE_BSD
+            MessageManagerLock mmLock;
+           #endif
 
-                hasShutdown = true;
+            stopTimer();
+            deleteEditor (false);
 
-                delete processor;
-                processor = nullptr;
+            hasShutdown = true;
 
-                jassert (editorComp == nullptr);
+            delete processor;
+            processor = nullptr;
 
-                deleteTempChannels();
+            jassert (editorComp == nullptr);
 
-                jassert (activePlugins.contains (this));
-                activePlugins.removeFirstMatchingValue (this);
-            }
+            deleteTempChannels();
 
-            if (activePlugins.size() == 0)
-            {
-               #if JUCE_LINUX || JUCE_BSD
-                SharedMessageThread::deleteInstance();
-               #endif
-                shutdownJuce_GUI();
-
-               #if JUCE_WINDOWS
+           #if JUCE_WINDOWS
+            if (--numActivePlugins == 0)
                 messageThreadIsDefinitelyCorrect = false;
-               #endif
-            }
+           #endif
         }
     }
 
@@ -393,8 +383,6 @@ public:
        #if JUCE_DEBUG && ! (JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect)
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
        #endif
-
-        jassert (activePlugins.contains (this));
 
         {
             const int numIn  = processor->getTotalNumInputChannels();
@@ -2044,6 +2032,12 @@ private:
     }
 
     //==============================================================================
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+
+   #if JUCE_LINUX || JUCE_BSD
+    SharedResourcePointer<MessageThread> messageThread;
+   #endif
+
     Vst2::audioMasterCallback hostCallback;
     AudioProcessor* processor = {};
     double sampleRate = 44100.0;
@@ -2096,7 +2090,11 @@ namespace
     {
         JUCE_AUTORELEASEPOOL
         {
-            initialiseJuce_GUI();
+            ScopedJuceInitialiser_GUI libraryInitialiser;
+
+           #if JUCE_LINUX || JUCE_BSD
+            SharedResourcePointer<MessageThread> messageThread;
+           #endif
 
             try
             {
@@ -2164,7 +2162,6 @@ namespace
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
-        SharedMessageThread::getInstance();
         return pluginEntryPoint (audioMaster);
     }
 
