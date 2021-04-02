@@ -2605,12 +2605,12 @@ String XWindowSystem::getTextFromClipboard() const
        2) and then try to read from "PRIMARY" selection (the "legacy" selection
        filled by good old x11 apps such as xterm)
     */
-    auto selection = XA_PRIMARY;
+    auto selection = atoms.clipboard;
     Window selectionOwner = None;
 
     if ((selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection)) == None)
     {
-        selection = atoms.clipboard;
+        selection = XA_PRIMARY;
         selectionOwner = X11Symbols::getInstance()->xGetSelectionOwner (display, selection);
     }
 
