@@ -35,17 +35,20 @@ class MessageThread
 public:
     MessageThread()
     {
-        startThread();
+        start();
     }
 
     ~MessageThread()
     {
         MessageManager::getInstance()->stopDispatchLoop();
-        stopThread();
+        stop();
     }
 
-    void startThread()
+    void start()
     {
+        if (isRunning())
+            stop();
+
         shouldExit = false;
 
         thread = std::thread { [this]
@@ -71,13 +74,16 @@ public:
         threadInitialised.wait();
     }
 
-    void stopThread()
+    void stop()
     {
+        if (! isRunning())
+            return;
+
         shouldExit = true;
         thread.join();
     }
 
-    bool isThreadRunning() const noexcept  { return thread.joinable(); }
+    bool isRunning() const noexcept  { return thread.joinable(); }
 
 private:
     WaitableEvent threadInitialised;
