@@ -2767,7 +2767,7 @@ private:
                     if (val.isEmpty() || (val.containsAnyOf (" \t;<>()=,&+-@~\r\n\\#%^`*")
                                             && ! (val.trimStart().startsWithChar ('(')
                                                     || val.trimStart().startsWithChar ('{'))))
-                        val = val.quoted();
+                        val = "\"" + val + "\"";
 
                     auto content = propertyName.toString() + " = " + val + ";";
 
