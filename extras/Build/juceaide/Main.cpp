@@ -69,18 +69,26 @@ namespace ProjectInfo
 
 int writeBinaryData (juce::ArgumentList&& args)
 {
-    args.checkMinNumArguments (3);
+    args.checkMinNumArguments (4);
     const auto namespaceName = args.arguments.removeAndReturn (0);
     const auto headerName    = args.arguments.removeAndReturn (0);
     const auto outFolder     = args.arguments.removeAndReturn (0).resolveAsExistingFolder();
+    const auto inputFileList = args.arguments.removeAndReturn (0).resolveAsExistingFile();
 
     juce::build_tools::ResourceFile resourceFile;
 
     resourceFile.setClassName (namespaceName.text);
     const auto lineEndings = args.removeOptionIfFound ("--windows") ? "\r\n" : "\n";
 
-    for (const auto& arg : args.arguments)
-        resourceFile.addFile (arg.resolveAsExistingFile());
+    const auto allLines = [&]
+    {
+        auto lines = juce::StringArray::fromLines (inputFileList.loadFileAsString());
+        lines.removeEmptyStrings();
+        return lines;
+    }();
+
+    for (const auto& arg : allLines)
+        resourceFile.addFile (juce::File (arg));
 
     const auto result = resourceFile.write (0,
                                             lineEndings,
