@@ -75,7 +75,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
 
             for (int j = 0; j < numDestChannels; ++j)
             {
-                if (auto dest = (float*) destSamples[j])
+                if (auto* dest = (float*) destSamples[j])
                 {
                     dest += startOffsetInDestBuffer;
 
@@ -95,7 +95,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
             if (timeoutMs >= 0 && Time::getMillisecondCounter() >= startTime + (uint32) timeoutMs)
             {
                 for (int j = 0; j < numDestChannels; ++j)
-                    if (auto dest = (float*) destSamples[j])
+                    if (auto* dest = (float*) destSamples[j])
                         FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
 
                 break;
@@ -135,14 +135,13 @@ int BufferingAudioReader::useTimeSlice()
 bool BufferingAudioReader::readNextBufferChunk()
 {
     auto pos = nextReadPosition.load();
-    auto startPos = ((pos - 1024) / samplesPerBlock) * samplesPerBlock;
-    auto endPos = startPos + numBlocks * samplesPerBlock;
+    auto endPos = pos + numBlocks * samplesPerBlock;
 
     OwnedArray<BufferedBlock> newBlocks;
 
     for (int i = blocks.size(); --i >= 0;)
-        if (blocks.getUnchecked(i)->range.intersects (Range<int64> (startPos, endPos)))
-            newBlocks.add (blocks.getUnchecked(i));
+        if (blocks.getUnchecked (i)->range.intersects (Range<int64> (pos, endPos)))
+            newBlocks.add (blocks.getUnchecked (i));
 
     if (newBlocks.size() == numBlocks)
     {
@@ -150,7 +149,7 @@ bool BufferingAudioReader::readNextBufferChunk()
         return false;
     }
 
-    for (auto p = startPos; p < endPos; p += samplesPerBlock)
+    for (auto p = pos; p < endPos; p += samplesPerBlock)
     {
         if (getBlockContaining (p) == nullptr)
         {
@@ -165,7 +164,7 @@ bool BufferingAudioReader::readNextBufferChunk()
     }
 
     for (int i = blocks.size(); --i >= 0;)
-        newBlocks.removeObject (blocks.getUnchecked(i), false);
+        newBlocks.removeObject (blocks.getUnchecked (i), false);
 
     return true;
 }
