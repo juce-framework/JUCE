@@ -40,9 +40,6 @@ BufferingAudioReader::BufferingAudioReader (AudioFormatReader* sourceReader,
     bitsPerSample         = 32;
     usesFloatingPointData = true;
 
-    for (int i = 3; --i >= 0;)
-        readNextBufferChunk();
-
     timeSliceThread.addTimeSliceClient (this);
 }
 
