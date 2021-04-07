@@ -681,6 +681,16 @@ struct TextEditor::Iterator
         return roundToInt (height);
     }
 
+    int getTextRight()
+    {
+        float maxWidth = 0.0f;
+
+        while (next())
+            maxWidth = jmax (maxWidth, atomRight);
+
+        return roundToInt (maxWidth);
+    }
+
     //==============================================================================
     int indexInText = 0;
     float lineY = 0, lineHeight = 0, maxDescent = 0;
@@ -1437,7 +1447,8 @@ void TextEditor::checkLayout()
     if (getWordWrapWidth() > 0)
     {
         auto textBottom = Iterator (*this).getTotalTextHeight() + topIndent;
-        auto textRight = getMaximumTextWidth() + leftIndent + rightEdgeSpace;
+        auto textRight = jmax (getMaximumTextWidth() + leftIndent + rightEdgeSpace,
+                               Iterator (*this).getTextRight());
 
         textHolder->setSize (textRight, textBottom);
         viewport->setScrollBarsShown (scrollbarVisible
