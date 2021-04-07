@@ -953,8 +953,11 @@ public:
         }
         else
         {
+            // This used to be just "com.juce.aggregate", but macOS doesn't allow two different instances of an app with
+            // the same bundle ID to create the same aggregate device UID, even when it's private.
+            CFStringRef aggregateDeviceUid = Uuid().toString().toCFString();
             NSDictionary* description = @{
-                @(kAudioAggregateDeviceUIDKey) : @"com.juce.aggregate",
+                @(kAudioAggregateDeviceUIDKey) : (NSString*) aggregateDeviceUid,
                 @(kAudioAggregateDeviceIsPrivateKey) : @(1),
                 @(kAudioAggregateDeviceSubDeviceListKey): @[
                     @{
@@ -969,6 +972,8 @@ public:
                     },
                 ],
             };
+            CFRelease (aggregateDeviceUid);
+
             // Guaranteed available earlier in CoreAudioIODeviceType::createDevice()
             OSStatus status = AudioHardwareCreateAggregateDevice ((CFDictionaryRef)description, &aggregateDeviceID);
             if (status == noErr)
