@@ -166,4 +166,174 @@ bool BufferingAudioReader::readNextBufferChunk()
     return true;
 }
 
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+static bool operator== (const AudioBuffer<float>& a, const AudioBuffer<float>& b)
+{
+    if (a.getNumChannels() != b.getNumChannels() || a.getNumSamples() != b.getNumSamples())
+        return false;
+
+    for (int channel = 0; channel < a.getNumChannels(); ++channel)
+    {
+        auto* aPtr = a.getReadPointer (channel);
+        auto* bPtr = b.getReadPointer (channel);
+
+        if (std::vector<float> (aPtr, aPtr + a.getNumSamples())
+            != std::vector<float> (bPtr, bPtr + b.getNumSamples()))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+static bool isSilent (const AudioBuffer<float>& b)
+{
+    for (int channel = 0; channel < b.getNumChannels(); ++channel)
+        if (b.findMinMax (channel, 0, b.getNumSamples()) != Range<float>{})
+            return false;
+
+    return true;
+}
+
+struct TestAudioFormatReader  : public AudioFormatReader
+{
+    explicit TestAudioFormatReader (AudioBuffer<float>& b)
+        : AudioFormatReader (nullptr, {}),
+          buffer (b)
+    {
+        sampleRate            = 44100.0f;
+        bitsPerSample         = 32;
+        usesFloatingPointData = true;
+        lengthInSamples       = buffer.getNumSamples();
+        numChannels           = (unsigned int) buffer.getNumChannels();
+    }
+
+    bool readSamples (int** destChannels, int numDestChannels, int startOffsetInDestBuffer,
+                      int64 startSampleInFile, int numSamples) override
+    {
+        clearSamplesBeyondAvailableLength (destChannels, numDestChannels, startOffsetInDestBuffer,
+                                           startSampleInFile, numSamples, lengthInSamples);
+
+        for (int j = 0; j < numDestChannels; ++j)
+        {
+            static_assert (sizeof (int) == sizeof (float),
+                           "Int and float size must match in order for pointer arithmetic to work correctly");
+
+            if (auto* dest = reinterpret_cast<float*> (destChannels[j]))
+            {
+                dest += startOffsetInDestBuffer;
+
+                if (j < (int) numChannels)
+                    FloatVectorOperations::copy (dest, buffer.getReadPointer (j, (int) startSampleInFile), numSamples);
+                else
+                    FloatVectorOperations::clear (dest, numSamples);
+            }
+        }
+
+        return true;
+    }
+
+    const AudioBuffer<float>& buffer;
+};
+
+class BufferingAudioReaderTests  : public UnitTest
+{
+public:
+    BufferingAudioReaderTests()  : UnitTest ("BufferingAudioReader", UnitTestCategories::audio)  {}
+
+    void runTest() override
+    {
+        TimeSliceThread timeSlice ("TestBackgroundThread");
+        timeSlice.startThread (5);
+
+        beginTest ("Timeout");
+        {
+            struct BlockingReader  : public AudioFormatReader
+            {
+                BlockingReader()
+                    : AudioFormatReader (nullptr, {})
+                {
+                    sampleRate            = 44100.0f;
+                    bitsPerSample         = 32;
+                    usesFloatingPointData = true;
+                    lengthInSamples       = 1024;
+                    numChannels           = 2;
+                }
+
+                bool readSamples (int**, int, int, int64, int) override
+                {
+                    Thread::sleep (100);
+                    return true;
+                }
+            };
+
+            BufferingAudioReader bufferingReader (new BlockingReader(), timeSlice, 64);
+            bufferingReader.setReadTimeout (10);
+
+            AudioBuffer<float> readBuffer { 2, 1024 };
+            read (bufferingReader, readBuffer);
+
+            expect (isSilent (readBuffer));
+        }
+
+        beginTest ("Read samples");
+        {
+            for (auto i = 4; i < 18; ++i)
+            {
+                const auto backgroundBufferSize = 1 << i;
+                auto buffer = generateTestBuffer (backgroundBufferSize);
+
+                BufferingAudioReader bufferingReader (new TestAudioFormatReader (buffer), timeSlice, backgroundBufferSize);
+                bufferingReader.setReadTimeout (-1);
+
+                AudioBuffer<float> readBuffer { buffer.getNumChannels(), buffer.getNumSamples() };
+                read (bufferingReader, readBuffer);
+
+                expect (buffer == readBuffer);
+            }
+        }
+    }
+
+private:
+    AudioBuffer<float> generateTestBuffer (int bufferSize) const
+    {
+        auto random = getRandom();
+
+        AudioBuffer<float> buffer { 2, random.nextInt ({ bufferSize, bufferSize * 10 }) };
+
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+                buffer.setSample (channel, sample, random.nextFloat());
+
+        return buffer;
+    }
+
+    void read (BufferingAudioReader& reader, AudioBuffer<float>& readBuffer)
+    {
+        constexpr int blockSize = 1024;
+
+        const auto numSamples = readBuffer.getNumSamples();
+        int readPos = 0;
+
+        for (;;)
+        {
+            reader.read (&readBuffer, readPos, jmin (blockSize, numSamples - readPos), readPos, true, true);
+
+            readPos += blockSize;
+
+            if (readPos >= numSamples)
+                break;
+        }
+    }
+};
+
+static BufferingAudioReaderTests bufferingAudioReaderTests;
+
+#endif
+
 } // namespace juce
