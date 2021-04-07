@@ -23,10 +23,14 @@
   ==============================================================================
 */
 
+#if JUCE_MINGW
+LWSTDAPI IUnknown_GetWindow (IUnknown* punk, HWND* phwnd);
+#endif
+
 namespace juce
 {
 
-// Implemented in juce_win32_Messageing.cpp
+// Implemented in juce_win32_Messaging.cpp
 bool windowsDispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
 class Win32NativeFileChooser  : private Thread
@@ -485,11 +489,13 @@ private:
 
         const Remover remover (*this);
 
+       #if ! JUCE_MINGW
         if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista
             && customComponent == nullptr)
         {
             return openDialogVistaAndUp (async);
         }
+       #endif
 
         return openDialogPreVista (async);
     }
