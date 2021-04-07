@@ -247,9 +247,9 @@ private:
 
 public:
     //==============================================================================
-    JuceVSTWrapper (Vst2::audioMasterCallback cb, AudioProcessor* af)
+    JuceVSTWrapper (Vst2::audioMasterCallback cb, std::unique_ptr<AudioProcessor> af)
        : hostCallback (cb),
-         processor (af)
+         processor (std::move (af))
     {
         inParameterChangedCallback = false;
 
@@ -283,7 +283,7 @@ public:
         vstEffect.process = nullptr;
         vstEffect.setParameter = (Vst2::AEffectSetParameterProc) setParameterCB;
         vstEffect.getParameter = (Vst2::AEffectGetParameterProc) getParameterCB;
-        vstEffect.numPrograms = jmax (1, af->getNumPrograms());
+        vstEffect.numPrograms = jmax (1, processor->getNumPrograms());
         vstEffect.numParams = juceParameters.getNumParameters();
         vstEffect.numInputs = maxNumInChannels;
         vstEffect.numOutputs = maxNumOutChannels;
@@ -333,7 +333,6 @@ public:
 
             hasShutdown = true;
 
-            delete processor;
             processor = nullptr;
 
             jassert (editorComp == nullptr);
@@ -1822,7 +1821,7 @@ private:
         if (args.index == Vst2::effGetParamDisplay)
             return handleCockosGetParameterText (args.value, args.ptr, args.opt);
 
-        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor.get()))
             return callbackHandler->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
 
         return 0;
@@ -1882,7 +1881,7 @@ private:
         if (matches ("hasCockosExtensions"))
             return (int32) 0xbeef0000;
 
-        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor.get()))
             return callbackHandler->handleVstPluginCanDo (args.index, args.value, args.ptr, args.opt);
 
         return 0;
@@ -2039,7 +2038,7 @@ private:
    #endif
 
     Vst2::audioMasterCallback hostCallback;
-    AudioProcessor* processor = {};
+    std::unique_ptr<AudioProcessor> processor;
     double sampleRate = 44100.0;
     int32 blockSize = 1024;
     Vst2::AEffect vstEffect;
@@ -2104,11 +2103,12 @@ namespace
                     MessageManagerLock mmLock;
                    #endif
 
-                    auto* processor = createPluginFilterOfType (AudioProcessor::wrapperType_VST);
-                    auto* wrapper = new JuceVSTWrapper (audioMaster, processor);
+                    std::unique_ptr<AudioProcessor> processor { createPluginFilterOfType (AudioProcessor::wrapperType_VST) };
+                    auto* processorPtr = processor.get();
+                    auto* wrapper = new JuceVSTWrapper (audioMaster, std::move (processor));
                     auto* aEffect = wrapper->getAEffect();
 
-                    if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+                    if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processorPtr))
                     {
                         callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect] (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
                         {
