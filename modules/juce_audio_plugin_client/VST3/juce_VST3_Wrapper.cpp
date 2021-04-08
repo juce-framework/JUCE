@@ -1332,10 +1332,6 @@ private:
             owner (&ec),
             pluginInstance (p)
         {
-           #if JUCE_LINUX || JUCE_BSD
-            const MessageManagerLock mmLock;
-           #endif
-
             createContentWrapperComponentIfNeeded();
 
            #if JUCE_MAC
@@ -1345,15 +1341,6 @@ private:
             if (! approximatelyEqual (editorScaleFactor, ec.lastScaleFactorReceived))
                 setContentScaleFactor (ec.lastScaleFactorReceived);
            #endif
-        }
-
-        ~JuceVST3Editor() override
-        {
-           #if JUCE_LINUX || JUCE_BSD
-            const MessageManagerLock mmLock;
-           #endif
-
-            component = nullptr;
         }
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
@@ -1831,6 +1818,10 @@ private:
         {
             if (component == nullptr)
             {
+               #if JUCE_LINUX || JUCE_BSD
+                const MessageManagerLock mmLock;
+               #endif
+
                 component.reset (new ContentWrapperComponent (*this));
                 component->createEditor (pluginInstance);
             }
@@ -1847,7 +1838,22 @@ private:
         VSTComSmartPtr<JuceVST3EditController> owner;
         AudioProcessor& pluginInstance;
 
+       #if JUCE_LINUX || JUCE_BSD
+        struct MessageManagerLockedDeleter
+        {
+            template <typename ObjectType>
+            void operator() (ObjectType* object) const noexcept
+            {
+                const MessageManagerLock mmLock;
+                delete object;
+            }
+        };
+
+        std::unique_ptr<ContentWrapperComponent, MessageManagerLockedDeleter> component;
+       #else
         std::unique_ptr<ContentWrapperComponent> component;
+       #endif
+
         friend struct ContentWrapperComponent;
 
        #if JUCE_MAC
@@ -1928,7 +1934,7 @@ public:
         // and not AudioChannelSet::discreteChannels (2) etc.
         jassert (checkBusFormatsAreNotDiscrete());
 
-        comPluginInstance = new JuceAudioProcessor (pluginInstance);
+        comPluginInstance = VSTComSmartPtr<JuceAudioProcessor> { new JuceAudioProcessor (pluginInstance) };
 
         zerostruct (processContext);
 
@@ -1942,20 +1948,12 @@ public:
 
     ~JuceVST3Component() override
     {
-       #if JUCE_LINUX || JUCE_BSD
-        const MessageManagerLock mmLock;
-       #endif
-
         if (juceVST3EditController != nullptr)
             juceVST3EditController->vst3IsPlaying = false;
 
         if (pluginInstance != nullptr)
             if (pluginInstance->getPlayHead() == this)
                 pluginInstance->setPlayHead (nullptr);
-
-        juceVST3EditController = nullptr;
-        comPluginInstance = nullptr;
-        host = nullptr;
     }
 
     //==============================================================================
@@ -2019,7 +2017,7 @@ public:
         if (juceVST3EditController != nullptr)
             juceVST3EditController->vst3IsPlaying = false;
 
-        juceVST3EditController = nullptr;
+        juceVST3EditController = {};
         return kResultTrue;
     }
 
@@ -2031,7 +2029,7 @@ public:
 
             if (message->getAttributes()->getInt ("JuceVST3EditController", value) == kResultTrue)
             {
-                juceVST3EditController = (JuceVST3EditController*) (pointer_sized_int) value;
+                juceVST3EditController = VSTComSmartPtr<JuceVST3EditController> { (JuceVST3EditController*) (pointer_sized_int) value };
 
                 if (juceVST3EditController != nullptr)
                     juceVST3EditController->setAudioProcessor (comPluginInstance);
@@ -3142,18 +3140,45 @@ private:
    #endif
 
     std::atomic<int> refCount { 1 };
+    AudioProcessor* pluginInstance = nullptr;
 
-    AudioProcessor* pluginInstance;
+   #if JUCE_LINUX || JUCE_BSD
+    template <class T>
+    struct LockedVSTComSmartPtr
+    {
+        LockedVSTComSmartPtr() = default;
+        LockedVSTComSmartPtr (const VSTComSmartPtr<T>& ptrIn)  : ptr (ptrIn)  {}
+
+        ~LockedVSTComSmartPtr()
+        {
+            const MessageManagerLock mmLock;
+            ptr = {};
+        }
+
+        T* operator->()               { return ptr.operator->(); }
+        operator T*() const noexcept  { return ptr.get(); }
+
+        template <typename... Args>
+        bool loadFrom (Args&&... args)  { return ptr.loadFrom (std::forward<Args> (args)...); }
+
+    private:
+        VSTComSmartPtr<T> ptr;
+    };
+
+    LockedVSTComSmartPtr<Vst::IHostApplication> host;
+    LockedVSTComSmartPtr<JuceAudioProcessor> comPluginInstance;
+    LockedVSTComSmartPtr<JuceVST3EditController> juceVST3EditController;
+   #else
     VSTComSmartPtr<Vst::IHostApplication> host;
     VSTComSmartPtr<JuceAudioProcessor> comPluginInstance;
     VSTComSmartPtr<JuceVST3EditController> juceVST3EditController;
+   #endif
 
     /**
         Since VST3 does not provide a way of knowing the buffer size and sample rate at any point,
         this object needs to be copied on every call to process() to be up-to-date...
     */
     Vst::ProcessContext processContext;
-
     Vst::ProcessSetup processSetup;
 
     MidiBuffer midiBuffer;
