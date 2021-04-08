@@ -40,7 +40,7 @@ namespace juce
     if (myElement->hasTagName ("ANIMALS"))
     {
         // now we'll iterate its sub-elements looking for 'giraffe' elements..
-        forEachXmlChildElement (*myElement, e)
+        for (auto* e : myElement->getChildIterator())
         {
             if (e->hasTagName ("GIRAFFE"))
             {
@@ -345,7 +345,8 @@ public:
 
     /** Returns the first of this element's sub-elements.
         see getNextElement() for an example of how to iterate the sub-elements.
-        @see forEachXmlChildElement
+
+        @see getChildIterator
     */
     XmlElement* getFirstChildElement() const noexcept       { return firstChildElement; }
 
@@ -368,12 +369,12 @@ public:
         out.
 
         Also, it's much easier and neater to use this method indirectly via the
-        forEachXmlChildElement macro.
+        getChildIterator() method.
 
         @returns    the sibling element that follows this one, or a nullptr if
                     this is the last element in its parent
 
-        @see getNextElement, isTextElement, forEachXmlChildElement
+        @see getNextElement, isTextElement, getChildIterator
     */
     inline XmlElement* getNextElement() const noexcept          { return nextListItem; }
 
@@ -383,7 +384,7 @@ public:
         This is like getNextElement(), but will scan through the list until it
         finds an element with the given tag name.
 
-        @see getNextElement, forEachXmlChildElementWithTagName
+        @see getNextElement, getChildIterator
     */
     XmlElement* getNextElementWithTagName (StringRef requiredTagName) const;
 
