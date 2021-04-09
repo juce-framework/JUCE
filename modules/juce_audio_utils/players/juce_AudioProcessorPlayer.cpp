@@ -135,6 +135,9 @@ AudioProcessorPlayer::~AudioProcessorPlayer()
 //==============================================================================
 AudioProcessorPlayer::NumChannels AudioProcessorPlayer::findMostSuitableLayout (const AudioProcessor& proc) const
 {
+    if (proc.isMidiEffect())
+        return {};
+
     std::vector<NumChannels> layouts { deviceChannels };
 
     if (deviceChannels.ins == 0 || deviceChannels.ins == 1)
@@ -173,10 +176,13 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
         defaultProcessorChannels = NumChannels { processorToPlay->getBusesLayout() };
         actualProcessorChannels  = findMostSuitableLayout (*processorToPlay);
 
-        processorToPlay->setPlayConfigDetails (actualProcessorChannels.ins,
-                                               actualProcessorChannels.outs,
-                                               sampleRate,
-                                               blockSize);
+        if (processorToPlay->isMidiEffect())
+            processorToPlay->setRateAndBufferSizeDetails (sampleRate, blockSize);
+        else
+            processorToPlay->setPlayConfigDetails (actualProcessorChannels.ins,
+                                                   actualProcessorChannels.outs,
+                                                   sampleRate,
+                                                   blockSize);
 
         auto supportsDouble = processorToPlay->supportsDoublePrecisionProcessing() && isDoublePrecision;
 
@@ -256,7 +262,7 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
     {
         // The processor should be prepared to deal with the same number of output channels
         // as our output device.
-        jassert (numOutputChannels == actualProcessorChannels.outs);
+        jassert (processor->isMidiEffect() || numOutputChannels == actualProcessorChannels.outs);
 
         const ScopedLock sl2 (processor->getCallbackLock());
 
