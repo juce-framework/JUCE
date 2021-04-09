@@ -1097,8 +1097,9 @@ public:
 
         beginTest ("Writing");
 
+        auto random = getRandom();
         const auto tempFolderName = "JUCE UnitTests Temp Folder "
-                                  + String::toHexString (Random::getSystemRandom().nextInt())
+                                  + String::toHexString (random.nextInt())
                                   + ".folder";
         File demoFolder (temp.getChildFile (tempFolderName));
         expect (demoFolder.deleteRecursively());
