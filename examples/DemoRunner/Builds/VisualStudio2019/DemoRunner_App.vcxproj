@@ -804,6 +804,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_ParameterAttachments.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_PluginHostType.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_RangedAudioParameter.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1189,6 +1192,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_posix_NamedPipe.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_wasm_SystemStats.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Files.cpp">
@@ -2812,6 +2818,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameterWithID.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorValueTreeState.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_ParameterAttachments.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_PluginHostType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_RangedAudioParameter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDBurner.h"/>
@@ -3288,6 +3295,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_X11_Symbols.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_XWindowSystem.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_win32_ScopedThreadDPIAwarenessSetter.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\positioning\juce_MarkerList.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\positioning\juce_RelativeCoordinate.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\positioning\juce_RelativeCoordinatePositioner.h"/>

@@ -139,7 +139,7 @@
  #define _UNICODE 1
  #define UNICODE 1
  #ifndef _WIN32_IE
-  #define _WIN32_IE 0x0500
+  #define _WIN32_IE 0x0501
  #endif
 
  #include <windows.h>

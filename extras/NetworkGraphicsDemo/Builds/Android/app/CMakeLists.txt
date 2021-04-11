@@ -596,6 +596,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.h"
+    "../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.cpp"
+    "../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.h"
     "../../../../../modules/juce_audio_processors/juce_audio_processors.cpp"
@@ -751,6 +753,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/native/juce_posix_IPAddress.h"
     "../../../../../modules/juce_core/native/juce_posix_NamedPipe.cpp"
     "../../../../../modules/juce_core/native/juce_posix_SharedCode.h"
+    "../../../../../modules/juce_core/native/juce_wasm_SystemStats.cpp"
     "../../../../../modules/juce_core/native/juce_win32_ComSmartPtr.h"
     "../../../../../modules/juce_core/native/juce_win32_Files.cpp"
     "../../../../../modules/juce_core/native/juce_win32_Network.cpp"
@@ -1335,6 +1338,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/native/juce_MultiTouchMapper.h"
     "../../../../../modules/juce_gui_basics/native/juce_win32_DragAndDrop.cpp"
     "../../../../../modules/juce_gui_basics/native/juce_win32_FileChooser.cpp"
+    "../../../../../modules/juce_gui_basics/native/juce_win32_ScopedThreadDPIAwarenessSetter.h"
     "../../../../../modules/juce_gui_basics/native/juce_win32_Windowing.cpp"
     "../../../../../modules/juce_gui_basics/positioning/juce_MarkerList.cpp"
     "../../../../../modules/juce_gui_basics/positioning/juce_MarkerList.h"
@@ -2110,6 +2114,8 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/utilit
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/juce_audio_processors.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2265,6 +2271,7 @@ set_source_files_properties("../../../../../modules/juce_core/native/juce_osx_Ob
 set_source_files_properties("../../../../../modules/juce_core/native/juce_posix_IPAddress.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_posix_NamedPipe.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_posix_SharedCode.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/native/juce_wasm_SystemStats.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_win32_ComSmartPtr.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_win32_Files.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_win32_Network.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2849,6 +2856,7 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_MultiTouchMapper.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_win32_DragAndDrop.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_win32_FileChooser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_win32_ScopedThreadDPIAwarenessSetter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_win32_Windowing.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/positioning/juce_MarkerList.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/positioning/juce_MarkerList.h" PROPERTIES HEADER_FILE_ONLY TRUE)

@@ -1435,7 +1435,7 @@ public:
             for (auto& path : mtlHeaderPaths)
                 path = path.unquoted();
 
-            s.set ("MTL_HEADER_SEARCH_PATHS", mtlHeaderPaths.joinIntoString (" ").quoted());
+            s.set ("MTL_HEADER_SEARCH_PATHS", "\"" + mtlHeaderPaths.joinIntoString (" ") + "\"");
 
             headerPaths.add ("\"$(inherited)\"");
             s.set ("HEADER_SEARCH_PATHS", indentParenthesisedList (headerPaths, 1));

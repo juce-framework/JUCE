@@ -232,6 +232,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_posix_NamedPipe.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_wasm_SystemStats.cpp">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_win32_Files.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
