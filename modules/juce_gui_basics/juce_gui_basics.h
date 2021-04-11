@@ -342,6 +342,10 @@ namespace juce
  #endif
 #endif
 
+#if JUCE_GUI_BASICS_INCLUDE_SCOPED_THREAD_DPI_AWARENESS_SETTER && JUCE_WINDOWS
+ #include "native/juce_win32_ScopedThreadDPIAwarenessSetter.h"
+#endif
+
 #include "layout/juce_FlexItem.h"
 #include "layout/juce_FlexBox.h"
 

@@ -1799,14 +1799,14 @@ Rectangle<int> XWindowSystem::getWindowBounds (::Window windowH, ::Window parent
         }
         else
         {
-            parentScreenPosition = Desktop::getInstance().getDisplays().physicalToLogical (Point<int> (rootX, rootY));
+            parentScreenPosition = Point<int> (rootX, rootY);
         }
     }
 
     return { wx, wy, (int) ww, (int) wh };
 }
 
-Point<int> XWindowSystem::getParentScreenPosition() const
+Point<int> XWindowSystem::getPhysicalParentScreenPosition() const
 {
     return parentScreenPosition;
 }
@@ -1983,7 +1983,7 @@ bool XWindowSystem::canUseARGBImages() const
                                                                          X11Symbols::getInstance()->xDefaultVisual (display, X11Symbols::getInstance()->xDefaultScreen (display)),
                                                                          24, ZPixmap, nullptr, &segmentinfo, 64, 64);
 
-            canUseARGB = (testImage->bits_per_pixel == 32);
+            canUseARGB = testImage != nullptr && testImage->bits_per_pixel == 32;
             X11Symbols::getInstance()->xDestroyImage (testImage);
         }
         else
@@ -2424,7 +2424,7 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
                                                   + ((static_cast<double> (crtc->height) * 25.4 * 0.5) / static_cast<double> (output->mm_height));
 
                                         auto scale = DisplayHelpers::getDisplayScale (output->name, d.dpi);
-                                        scale = (scale <= 0.1 ? 1.0 : scale);
+                                        scale = (scale <= 0.1 || ! JUCEApplicationBase::isStandaloneApp()) ? 1.0 : scale;
 
                                         d.scale = masterScale * scale;
 
@@ -3013,7 +3013,7 @@ bool XWindowSystem::initialiseXDisplay()
     if (! displayVisuals->isValid())
     {
         Logger::outputDebugString ("ERROR: System doesn't support 32, 24 or 16 bit RGB display.\n");
-        Process::terminate();
+        return false;
     }
 
     // Setup input event handler

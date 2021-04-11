@@ -256,9 +256,9 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-std::unique_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags, FilePreviewComponent*)
+std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags, FilePreviewComponent*)
 {
-    return std::make_unique<Native> (owner, flags);
+    return std::make_shared<Native> (owner, flags);
 }
 
 } // namespace juce

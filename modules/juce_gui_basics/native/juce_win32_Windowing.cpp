@@ -27,7 +27,7 @@
  #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
 #endif
 
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE && JUCE_MODULE_AVAILABLE_juce_gui_extra
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
  #include <juce_gui_extra/embedding/juce_ScopedDPIAwarenessDisabler.h>
 #endif
 
@@ -62,6 +62,31 @@ extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 static bool shouldDeactivateTitleBar = true;
 
 void* getUser32Function (const char*);
+
+#if JUCE_DEBUG
+ int numActiveScopedDpiAwarenessDisablers = 0;
+ bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
+ extern HWND juce_messageWindowHandle;
+#endif
+
+struct ScopedDeviceContext
+{
+    explicit ScopedDeviceContext (HWND h)
+        : hwnd (h), dc (GetDC (hwnd))
+    {
+    }
+
+    ~ScopedDeviceContext()
+    {
+        ReleaseDC (hwnd, dc);
+    }
+
+    HWND hwnd;
+    HDC dc;
+
+    JUCE_DECLARE_NON_COPYABLE (ScopedDeviceContext)
+    JUCE_DECLARE_NON_MOVEABLE (ScopedDeviceContext)
+};
 
 //==============================================================================
 #ifndef WM_TOUCH
@@ -408,7 +433,9 @@ static void setDPIAwareness()
 
 static bool isPerMonitorDPIAwareProcess()
 {
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+   #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
+    return false;
+   #else
     static bool dpiAware = []() -> bool
     {
         setDPIAwareness();
@@ -423,39 +450,43 @@ static bool isPerMonitorDPIAwareProcess()
     }();
 
     return dpiAware;
-   #else
-    return false;
    #endif
 }
 
-static bool isPerMonitorDPIAwareWindow (HWND h)
+static bool isPerMonitorDPIAwareWindow (HWND nativeWindow)
 {
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    jassert (h != nullptr);
-
+   #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
+    ignoreUnused (nativeWindow);
+    return false;
+   #else
     setDPIAwareness();
 
-    if (getWindowDPIAwarenessContext != nullptr && getAwarenessFromDPIAwarenessContext != nullptr)
-        return getAwarenessFromDPIAwarenessContext (getWindowDPIAwarenessContext (h)) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+    if (getWindowDPIAwarenessContext != nullptr
+        && getAwarenessFromDPIAwarenessContext != nullptr)
+    {
+        return (getAwarenessFromDPIAwarenessContext (getWindowDPIAwarenessContext (nativeWindow))
+                  == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+    }
 
     return isPerMonitorDPIAwareProcess();
-   #else
-    ignoreUnused (h);
-    return false;
    #endif
 }
 
 static bool isPerMonitorDPIAwareThread()
 {
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+   #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
+    return false;
+   #else
     setDPIAwareness();
 
-    if (getThreadDPIAwarenessContext != nullptr && getAwarenessFromDPIAwarenessContext != nullptr)
-        return getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
+    if (getThreadDPIAwarenessContext != nullptr
+        && getAwarenessFromDPIAwarenessContext != nullptr)
+    {
+        return (getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext())
+                  == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+    }
 
     return isPerMonitorDPIAwareProcess();
-   #else
-    return false;
    #endif
 }
 
@@ -463,27 +494,114 @@ static double getGlobalDPI()
 {
     setDPIAwareness();
 
-    HDC dc = GetDC (nullptr);
-    auto dpi = (GetDeviceCaps (dc, LOGPIXELSX) + GetDeviceCaps (dc, LOGPIXELSY)) / 2.0;
-    ReleaseDC (nullptr, dc);
-    return dpi;
+    ScopedDeviceContext deviceContext { nullptr };
+    return (GetDeviceCaps (deviceContext.dc, LOGPIXELSX) + GetDeviceCaps (deviceContext.dc, LOGPIXELSY)) / 2.0;
 }
 
 //==============================================================================
-#if JUCE_WIN_PER_MONITOR_DPI_AWARE && JUCE_MODULE_AVAILABLE_juce_gui_extra
+class ScopedThreadDPIAwarenessSetter::NativeImpl
+{
+public:
+    explicit NativeImpl (HWND nativeWindow)
+    {
+        ignoreUnused (nativeWindow);
+
+       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        if (auto* functionSingleton = FunctionSingleton::getInstance())
+        {
+            if (! functionSingleton->isLoaded())
+                return;
+
+            auto dpiAwareWindow = (functionSingleton->getAwarenessFromContext (functionSingleton->getWindowAwareness (nativeWindow))
+                                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+
+            auto dpiAwareThread = (functionSingleton->getAwarenessFromContext (functionSingleton->getThreadAwareness())
+                                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
+
+            if (dpiAwareWindow && ! dpiAwareThread)
+                oldContext = functionSingleton->setThreadAwareness (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+            else if (! dpiAwareWindow && dpiAwareThread)
+                oldContext = functionSingleton->setThreadAwareness (DPI_AWARENESS_CONTEXT_UNAWARE);
+        }
+       #endif
+    }
+
+    ~NativeImpl()
+    {
+        if (oldContext != nullptr)
+            if (auto* functionSingleton = FunctionSingleton::getInstance())
+                functionSingleton->setThreadAwareness (oldContext);
+    }
+
+private:
+    struct FunctionSingleton  : public DeletedAtShutdown
+    {
+        FunctionSingleton() = default;
+        ~FunctionSingleton() override { clearSingletonInstance(); }
+
+        SetThreadDPIAwarenessContextFunc setThreadAwareness             = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+        GetWindowDPIAwarenessContextFunc getWindowAwareness             = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
+        GetThreadDPIAwarenessContextFunc getThreadAwareness             = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+        GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+
+        bool isLoaded() const noexcept
+        {
+            return setThreadAwareness != nullptr
+                && getWindowAwareness != nullptr
+                && getThreadAwareness != nullptr
+                && getAwarenessFromContext != nullptr;
+        }
+
+        JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (FunctionSingleton)
+
+        JUCE_DECLARE_NON_COPYABLE (FunctionSingleton)
+        JUCE_DECLARE_NON_MOVEABLE (FunctionSingleton)
+    };
+
+    DPI_AWARENESS_CONTEXT oldContext = nullptr;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeImpl)
+    JUCE_DECLARE_NON_MOVEABLE (NativeImpl)
+};
+
+
+JUCE_IMPLEMENT_SINGLETON (ScopedThreadDPIAwarenessSetter::NativeImpl::FunctionSingleton)
+
+ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWindow)
+{
+    pimpl = std::make_unique<NativeImpl> ((HWND) nativeWindow);
+}
+
+ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter()
+{
+}
+
+#if JUCE_MODULE_AVAILABLE_juce_gui_extra
  ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
  {
      if (! isPerMonitorDPIAwareThread())
          return;
 
      if (setThreadDPIAwarenessContext != nullptr)
+     {
          previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+
+        #if JUCE_DEBUG
+         ++numActiveScopedDpiAwarenessDisablers;
+        #endif
+     }
  }
 
  ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
  {
      if (previousContext != nullptr)
+     {
          setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
+
+        #if JUCE_DEBUG
+         --numActiveScopedDpiAwarenessDisablers;
+        #endif
+     }
  }
 #endif
 
@@ -527,6 +645,14 @@ static Point<int> convertPhysicalScreenPointToLogical (Point<int> p, HWND h) noe
     return p;
 }
 
+static Point<int> convertLogicalScreenPointToPhysical (Point<int> p, HWND h) noexcept
+{
+    if (isPerMonitorDPIAwareWindow (h))
+        return Desktop::getInstance().getDisplays().logicalToPhysical (p, getCurrentDisplayFromScaleFactor (h));
+
+    return p;
+}
+
 JUCE_API double getScaleFactorForWindow (HWND h)
 {
     // NB. Using a local function here because we need to call this method from the plug-in wrappers
@@ -549,50 +675,11 @@ JUCE_API double getScaleFactorForWindow (HWND h)
     return 1.0;
  }
 
-JUCE_API void setThreadDPIAwarenessForWindow (HWND nativeWindow)
-{
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    // NB. Using local functions here because we need to call this method from the plug-in wrappers
-    // which don't load the DPI-awareness functions on startup
-    static SetThreadDPIAwarenessContextFunc        localSetThreadDPIAwarenessContext        = nullptr;
-    static GetWindowDPIAwarenessContextFunc        localGetWindowDPIAwarenessContext        = nullptr;
-    static GetThreadDPIAwarenessContextFunc        localGetThreadDPIAwarenessContext        = nullptr;
-    static GetAwarenessFromDpiAwarenessContextFunc localGetAwarenessFromDPIAwarenessContext = nullptr;
-
-    static bool hasChecked = false;
-    static bool loadedOK = false;
-
-    if (! hasChecked)
-    {
-        hasChecked = true;
-
-        localSetThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-        localGetWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-        localGetThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-        localGetAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-
-        loadedOK = (localSetThreadDPIAwarenessContext != nullptr && localGetWindowDPIAwarenessContext != nullptr
-                   && localGetThreadDPIAwarenessContext != nullptr && localGetAwarenessFromDPIAwarenessContext != nullptr);
-    }
-
-    if (loadedOK)
-    {
-        auto dpiAwareWindow = localGetAwarenessFromDPIAwarenessContext (localGetWindowDPIAwarenessContext (nativeWindow)) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
-        auto dpiAwareThread = localGetAwarenessFromDPIAwarenessContext (localGetThreadDPIAwarenessContext()) == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware;
-
-        if (dpiAwareWindow && ! dpiAwareThread)
-            localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-        else if (! dpiAwareWindow && dpiAwareThread)
-            localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
-    }
-   #else
-    ignoreUnused (nativeWindow);
-   #endif
-}
-
 //==============================================================================
 static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags, bool adjustTopLeft = false)
 {
+    ScopedThreadDPIAwarenessSetter setter { hwnd };
+
     if (isPerMonitorDPIAwareWindow (hwnd))
     {
         if (adjustTopLeft)
@@ -607,9 +694,7 @@ static void setWindowPos (HWND hwnd, Rectangle<int> bounds, UINT flags, bool adj
 
 static RECT getWindowScreenRect (HWND hwnd)
 {
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    setThreadDPIAwarenessForWindow (hwnd);
-   #endif
+    ScopedThreadDPIAwarenessSetter setter { hwnd };
 
     RECT rect;
     GetWindowRect (hwnd, &rect);
@@ -621,7 +706,10 @@ static RECT getWindowClientRect (HWND hwnd)
     auto rect = getWindowScreenRect (hwnd);
 
     if (auto parentH = GetParent (hwnd))
+    {
+        ScopedThreadDPIAwarenessSetter setter { hwnd };
         MapWindowPoints (HWND_DESKTOP, parentH, (LPPOINT) &rect, 2);
+    }
 
     return rect;
 }
@@ -634,14 +722,8 @@ static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 //==============================================================================
 double Desktop::getDefaultMasterScale()
 {
-    if (! JUCEApplicationBase::isStandaloneApp()
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        || isPerMonitorDPIAwareProcess()
-       #endif
-        )
-    {
+    if (! JUCEApplicationBase::isStandaloneApp() || isPerMonitorDPIAwareProcess())
         return 1.0;
-    }
 
     return getGlobalDPI() / USER_DEFAULT_SCREEN_DPI;
 }
@@ -782,9 +864,10 @@ public:
             bitmapInfo.bV4V4Compression  = BI_RGB;
         }
 
-        HDC dc = GetDC (nullptr);
-        hdc = CreateCompatibleDC (dc);
-        ReleaseDC (nullptr, dc);
+        {
+            ScopedDeviceContext deviceContext { nullptr };
+            hdc = CreateCompatibleDC (deviceContext.dc);
+        }
 
         SetMapMode (hdc, MM_TEXT);
 
@@ -877,10 +960,8 @@ public:
 private:
     static bool isGraphicsCard32Bit()
     {
-        auto dc = GetDC (nullptr);
-        auto bitsPerPixel = GetDeviceCaps (dc, BITSPIXEL);
-        ReleaseDC (nullptr, dc);
-        return bitsPerPixel > 24;
+        ScopedDeviceContext deviceContext { nullptr };
+        return GetDeviceCaps (deviceContext.dc, BITSPIXEL) > 24;
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsBitmapImage)
@@ -893,13 +974,13 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
     auto hwnd = (HWND) nativeWindowHandle;
 
     auto r = convertPhysicalScreenRectangleToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)), hwnd);
-    const int w = r.getWidth();
-    const int h = r.getHeight();
+    const auto w = r.getWidth();
+    const auto h = r.getHeight();
 
     auto nativeBitmap = new WindowsBitmapImage (Image::RGB, w, h, true);
     Image bitmap (nativeBitmap);
 
-    HDC dc = GetDC (hwnd);
+    ScopedDeviceContext deviceContext { hwnd };
 
     if (isPerMonitorDPIAwareProcess())
     {
@@ -908,17 +989,15 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
         SetBrushOrgEx (nativeBitmap->hdc, 0, 0, NULL);
 
         StretchBlt (nativeBitmap->hdc, 0, 0, w, h,
-                    dc, 0, 0, roundToInt (w * scale), roundToInt (h * scale),
+                    deviceContext.dc, 0, 0, roundToInt (w * scale), roundToInt (h * scale),
                     SRCCOPY);
 
         SetStretchBltMode (nativeBitmap->hdc, prevStretchMode);
     }
     else
     {
-        BitBlt (nativeBitmap->hdc, 0, 0, w, h, dc, 0, 0, SRCCOPY);
+        BitBlt (nativeBitmap->hdc, 0, 0, w, h, deviceContext.dc, 0, 0, SRCCOPY);
     }
-
-    ReleaseDC (hwnd, dc);
 
     return SoftwareImageType().convert (bitmap);
 }
@@ -960,79 +1039,75 @@ namespace IconConverters
                && bm.bmWidth > 0 && bm.bmHeight > 0))
             return {};
 
-        if (auto* tempDC = ::GetDC (nullptr))
+        ScopedDeviceContext deviceContext { nullptr };
+
+        if (auto* dc = ::CreateCompatibleDC (deviceContext.dc))
         {
-            if (auto* dc = ::CreateCompatibleDC (tempDC))
+            BITMAPV5HEADER header = {};
+            header.bV5Size = sizeof (BITMAPV5HEADER);
+            header.bV5Width = bm.bmWidth;
+            header.bV5Height = -bm.bmHeight;
+            header.bV5Planes = 1;
+            header.bV5Compression = BI_RGB;
+            header.bV5BitCount = 32;
+            header.bV5RedMask = 0x00FF0000;
+            header.bV5GreenMask = 0x0000FF00;
+            header.bV5BlueMask = 0x000000FF;
+            header.bV5AlphaMask = 0xFF000000;
+            header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
+            header.bV5Intent = LCS_GM_IMAGES;
+
+            uint32* bitmapImageData = nullptr;
+
+            if (auto* dib = ::CreateDIBSection (deviceContext.dc, (BITMAPINFO*) &header, DIB_RGB_COLORS,
+                                                (void**) &bitmapImageData, nullptr, 0))
             {
-                BITMAPV5HEADER header = {};
-                header.bV5Size = sizeof (BITMAPV5HEADER);
-                header.bV5Width = bm.bmWidth;
-                header.bV5Height = -bm.bmHeight;
-                header.bV5Planes = 1;
-                header.bV5Compression = BI_RGB;
-                header.bV5BitCount = 32;
-                header.bV5RedMask = 0x00FF0000;
-                header.bV5GreenMask = 0x0000FF00;
-                header.bV5BlueMask = 0x000000FF;
-                header.bV5AlphaMask = 0xFF000000;
-                header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
-                header.bV5Intent = LCS_GM_IMAGES;
+                auto oldObject = ::SelectObject (dc, dib);
 
-                uint32* bitmapImageData = nullptr;
+                auto numPixels = bm.bmWidth * bm.bmHeight;
+                auto numColourComponents = (size_t) numPixels * 4;
 
-                if (auto* dib = ::CreateDIBSection (tempDC, (BITMAPINFO*) &header, DIB_RGB_COLORS,
-                                                    (void**) &bitmapImageData, nullptr, 0))
+                // Windows icon data comes as two layers, an XOR mask which contains the bulk
+                // of the image data and an AND mask which provides the transparency. Annoyingly
+                // the XOR mask can also contain an alpha channel, in which case the transparency
+                // mask should not be applied, but there's no way to find out a priori if the XOR
+                // mask contains an alpha channel.
+
+                HeapBlock<bool> opacityMask (numPixels);
+                memset (bitmapImageData, 0, numColourComponents);
+                ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_MASK);
+
+                for (int i = 0; i < numPixels; ++i)
+                    opacityMask[i] = (bitmapImageData[i] == 0);
+
+                Image result = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
+                Image::BitmapData imageData (result, Image::BitmapData::readWrite);
+
+                memset (bitmapImageData, 0, numColourComponents);
+                ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_NORMAL);
+                memcpy (imageData.data, bitmapImageData, numColourComponents);
+
+                auto imageHasAlphaChannel = [&imageData, numPixels]()
                 {
-                    auto oldObject = ::SelectObject (dc, dib);
-
-                    auto numPixels = bm.bmWidth * bm.bmHeight;
-                    auto numColourComponents = (size_t) numPixels * 4;
-
-                    // Windows icon data comes as two layers, an XOR mask which contains the bulk
-                    // of the image data and an AND mask which provides the transparency. Annoyingly
-                    // the XOR mask can also contain an alpha channel, in which case the transparency
-                    // mask should not be applied, but there's no way to find out a priori if the XOR
-                    // mask contains an alpha channel.
-
-                    HeapBlock<bool> opacityMask (numPixels);
-                    memset (bitmapImageData, 0, numColourComponents);
-                    ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_MASK);
-
                     for (int i = 0; i < numPixels; ++i)
-                        opacityMask[i] = (bitmapImageData[i] == 0);
+                        if (imageData.data[i * 4] != 0)
+                            return true;
 
-                    Image result = Image (Image::ARGB, bm.bmWidth, bm.bmHeight, true);
-                    Image::BitmapData imageData (result, Image::BitmapData::readWrite);
+                    return false;
+                };
 
-                    memset (bitmapImageData, 0, numColourComponents);
-                    ::DrawIconEx (dc, 0, 0, icon, bm.bmWidth, bm.bmHeight, 0, nullptr, DI_NORMAL);
-                    memcpy (imageData.data, bitmapImageData, numColourComponents);
+                if (! imageHasAlphaChannel())
+                    for (int i = 0; i < numPixels; ++i)
+                        imageData.data[i * 4] = opacityMask[i] ? 0xff : 0x00;
 
-                    auto imageHasAlphaChannel = [&imageData, numPixels]()
-                    {
-                        for (int i = 0; i < numPixels; ++i)
-                            if (imageData.data[i * 4] != 0)
-                                return true;
-
-                        return false;
-                    };
-
-                    if (! imageHasAlphaChannel())
-                        for (int i = 0; i < numPixels; ++i)
-                            imageData.data[i * 4] = opacityMask[i] ? 0xff : 0x00;
-
-                    ::SelectObject (dc, oldObject);
-                    ::DeleteObject(dib);
-                    ::DeleteDC (dc);
-                    ::ReleaseDC (nullptr, tempDC);
-
-                    return result;
-                }
-
+                ::SelectObject (dc, oldObject);
+                ::DeleteObject (dib);
                 ::DeleteDC (dc);
+
+                return result;
             }
 
-            ::ReleaseDC (nullptr, tempDC);
+            ::DeleteDC (dc);
         }
 
         return {};
@@ -1433,10 +1508,8 @@ public:
 
             auto localBounds = rectangleFromRECT (getWindowClientRect (hwnd));
 
-           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareWindow (hwnd))
                 return (localBounds.toDouble() / getPlatformScaleFactor()).toNearestInt();
-           #endif
 
             return localBounds;
         }();
@@ -1554,16 +1627,10 @@ public:
         if (! r.withZeroOrigin().contains (localPos))
             return false;
 
-        auto globalPos = localPos + getScreenPosition();
+        auto w = WindowFromPoint (POINTFromPoint (convertLogicalScreenPointToPhysical (localPos + getScreenPosition(),
+                                                                                       hwnd)));
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (isPerMonitorDPIAwareThread() || isPerMonitorDPIAwareWindow (hwnd))
-            globalPos = Desktop::getInstance().getDisplays().logicalToPhysical (globalPos);
-       #endif
-
-        auto w = WindowFromPoint (POINTFromPoint (globalPos));
-
-        return  w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
+        return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
     BorderSize<int> getFrameSize() const override
@@ -1663,18 +1730,7 @@ public:
 
     void repaint (const Rectangle<int>& area) override
     {
-        auto scale = getPlatformScaleFactor();
-
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        // if the calling thread is DPI-aware but we are invalidating a non-DPI aware window RECT, we actually have to
-        // divide the bounds by the scale factor as it will get multiplied for the virtualised paint callback...
-        if (isPerMonitorDPIAwareThread() && ! isPerMonitorDPIAwareWindow (hwnd))
-            scale = 1.0 / Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
-       #endif
-
-        auto scaled = area.toDouble() * scale;
-        auto r = RECTFromRectangle (scaled.getSmallestIntegerContainer());
-
+        auto r = RECTFromRectangle ((area.toDouble() * getPlatformScaleFactor()).getSmallestIntegerContainer());
         InvalidateRect (hwnd, &r, FALSE);
     }
 
@@ -1795,19 +1851,8 @@ public:
     private:
         Point<float> getMousePos (POINTL mousePos) const
         {
-            auto screenPos = pointFromPOINT ({ mousePos.x, mousePos.y }).toFloat();
-
-           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-            auto h = (HWND) peer.getNativeHandle();
-
-            if (isPerMonitorDPIAwareWindow (h))
-                screenPos = convertPhysicalScreenPointToLogical (screenPos.roundToInt(), h).toFloat();
-           #else
-            if (JUCEApplication::isStandaloneApp())
-                screenPos /= static_cast<float> (getGlobalDPI() / USER_DEFAULT_SCREEN_DPI);
-           #endif
-
-            return peer.getComponent().getLocalPoint (nullptr, screenPos);
+            return peer.getComponent().getLocalPoint (nullptr, convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }),
+                                                                                                    (HWND) peer.getNativeHandle()).toFloat());
         }
 
         struct DroppedData
@@ -1902,7 +1947,9 @@ public:
 
     double getPlatformScaleFactor() const noexcept override
     {
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+       #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
+        return 1.0;
+       #else
         if (! isPerMonitorDPIAwareWindow (hwnd))
             return 1.0;
 
@@ -1916,8 +1963,6 @@ public:
         }
 
         return scaleFactor;
-       #else
-        return 1.0;
        #endif
     }
 
@@ -2153,6 +2198,14 @@ private:
                                L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
                                (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
 
+       #if JUCE_DEBUG
+        // The DPI-awareness context of this window and JUCE's hidden message window are different.
+        // You normally want these to match otherwise timer events and async messages will happen
+        // in a different context to normal HWND messages which can cause issues with UI scaling.
+        jassert (isPerMonitorDPIAwareWindow (hwnd) == isPerMonitorDPIAwareWindow (juce_messageWindowHandle)
+                   || isInScopedDPIAwarenessDisabler());
+       #endif
+
         if (hwnd != nullptr)
         {
             SetWindowLongPtr (hwnd, 0, 0);
@@ -2179,19 +2232,8 @@ private:
 
             setDPIAwareness();
 
-           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (isPerMonitorDPIAwareThread())
-            {
-                auto bounds = component.getBounds();
-
-                if (bounds.isEmpty())
-                    scaleFactor = Desktop::getInstance().getDisplays().getPrimaryDisplay()->scale;
-                else
-                    scaleFactor = Desktop::getInstance().getDisplays().getDisplayForRect (bounds)->scale;
-
-                scaleFactor /= Desktop::getInstance().getGlobalScaleFactor();
-            }
-           #endif
+                scaleFactor = getScaleFactorForWindow (hwnd);
 
             setMessageFilter();
             updateBorderSize();
@@ -3508,20 +3550,18 @@ private:
 
     Point<float> getPointFromLocalLParam (LPARAM lParam) noexcept
     {
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+        auto p = pointFromPOINT (getPOINTFromLParam (lParam));
+
         if (isPerMonitorDPIAwareWindow (hwnd))
         {
             // LPARAM is relative to this window's top-left but may be on a different monitor so we need to calculate the
             // physical screen position and then convert this to local logical coordinates
-            auto localPos = getPOINTFromLParam (lParam);
             auto r = getWindowScreenRect (hwnd);
-
-            return globalToLocal (Desktop::getInstance().getDisplays().physicalToLogical (pointFromPOINT ({ r.left + localPos.x + roundToInt (windowBorder.getLeft() * scaleFactor),
-                                                                                                            r.top  + localPos.y + roundToInt (windowBorder.getTop()  * scaleFactor) })).toFloat());
+            return globalToLocal (Desktop::getInstance().getDisplays().physicalToLogical (pointFromPOINT ({ r.left + p.x + roundToInt (windowBorder.getLeft() * scaleFactor),
+                                                                                                            r.top  + p.y + roundToInt (windowBorder.getTop()  * scaleFactor) })).toFloat());
         }
-       #endif
 
-        return { static_cast<float> (GET_X_LPARAM (lParam)), static_cast<float> (GET_Y_LPARAM (lParam)) };
+        return p.toFloat();
     }
 
     Point<float> getCurrentMousePos() noexcept
@@ -4433,10 +4473,8 @@ Point<float> MouseInputSource::getCurrentRawMousePosition()
 
     auto p = pointFromPOINT (mousePos);
 
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     if (isPerMonitorDPIAwareThread())
         p = Desktop::getInstance().getDisplays().physicalToLogical (p);
-   #endif
 
     return p.toFloat();
 }

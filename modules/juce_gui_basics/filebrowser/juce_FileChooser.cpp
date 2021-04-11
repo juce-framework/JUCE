@@ -184,7 +184,7 @@ void FileChooser::launchAsync (int flags, std::function<void (const FileChooser&
 }
 
 
-std::unique_ptr<FileChooser::Pimpl> FileChooser::createPimpl (int flags, FilePreviewComponent* previewComp)
+std::shared_ptr<FileChooser::Pimpl> FileChooser::createPimpl (int flags, FilePreviewComponent* previewComp)
 {
     results.clear();
 

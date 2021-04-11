@@ -495,17 +495,11 @@ public:
 
         float normaliseParamValue (float scaledValue) const noexcept
         {
-            if (discrete)
-                return scaledValue / (getNumSteps() - 1);
-
             return (scaledValue - minValue) / range;
         }
 
         float scaleParamValue (float normalisedValue) const noexcept
         {
-            if (discrete)
-                return normalisedValue * (getNumSteps() - 1);
-
             return minValue + (range * normalisedValue);
         }
 
@@ -1467,7 +1461,7 @@ public:
                                                                    info.defaultValue,
                                                                    (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0,
                                                                    isDiscrete,
-                                                                   isDiscrete ? (int) (info.maxValue + 1.0f) : AudioProcessor::getDefaultNumParameterSteps(),
+                                                                   isDiscrete ? (int) (info.maxValue - info.minValue + 1.0f) : AudioProcessor::getDefaultNumParameterSteps(),
                                                                    isBoolean,
                                                                    label,
                                                                    (info.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
