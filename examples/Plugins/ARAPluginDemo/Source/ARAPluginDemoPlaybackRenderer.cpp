@@ -99,13 +99,10 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
                 bufferingReader->setReadTimeout (isNonRealtime ? 100 : 0);
             }
 
-            // Calculate buffer offsets and handle reverse playback setting.
+            // Calculate buffer offsets.
             const int numSamplesToRead = (int) renderRange.getLength();
             const int startInBuffer = (int) (renderRange.getStart() - blockRange.getStart());
             auto startInSource = renderRange.getStart() + modificationSampleOffset;
-            const bool playReversed = playbackRegion->getAudioModification<ARAPluginDemoAudioModification>()->getReversePlayback();
-            if (playReversed)
-                startInSource = audioSource->getSampleCount() - startInSource - numSamplesToRead;
 
             // Read samples:
             // first region can write directly into output, later regions need to use local buffer.
@@ -116,8 +113,9 @@ bool PluginDemoPlaybackRenderer::processBlock (juce::AudioBuffer<float>& buffer,
                 continue;
             }
 
-            if (playReversed)
-                readBuffer.reverse (startInBuffer, numSamplesToRead);
+            // Apply dim if enabled
+            if (playbackRegion->getAudioModification<ARAPluginDemoAudioModification>()->isDimmed())
+                readBuffer.applyGain (startInBuffer, numSamplesToRead, 0.25f);  // dim by about 12 dB
 
             if (didRenderAnyRegion)
             {

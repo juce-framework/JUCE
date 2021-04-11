@@ -38,9 +38,9 @@ PlaybackRegionView::~PlaybackRegionView()
 
 void PlaybackRegionView::mouseDoubleClick (const juce::MouseEvent& /*event*/)
 {
-    // set the reverse flag on our region's audio modification when double clicked
+    // set the dim flag on our region's audio modification when double clicked
     auto audioModification = playbackRegion->getAudioModification<ARAPluginDemoAudioModification>();
-    audioModification->setReversePlayback (! audioModification->getReversePlayback());
+    audioModification->setDimmed (! audioModification->isDimmed());
 
     // send a content change notification for the modification and all associated playback regions
     audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
@@ -70,7 +70,7 @@ void PlaybackRegionView::paint (juce::Graphics& g)
         rect.reduce (1, 1);
     }
 
-    const juce::Colour regionColour = juce::convertOptionalARAColour (playbackRegion->getEffectiveColor());
+    const juce::Colour regionColour = juce::convertOptionalARAColour (playbackRegion->getEffectiveColor(), juce::Colours::black);
     g.setColour (regionColour);
     g.fillRect (rect);
 
@@ -88,7 +88,7 @@ void PlaybackRegionView::paint (juce::Graphics& g)
 
             auto drawBounds = getBounds() - getPosition();
             drawBounds.setHorizontalRange (clipBounds.getHorizontalRange());
-            g.setColour (regionColour.contrasting (0.7f));
+            g.setColour (regionColour.contrasting (audioModification->isDimmed() ? 0.55f : 0.7f));
             audioThumb.drawChannels (g, drawBounds, startTime - regionTimeRange.getStart(), endTime - regionTimeRange.getStart(), 1.0f);
         }
     }
@@ -103,7 +103,8 @@ void PlaybackRegionView::paint (juce::Graphics& g)
     g.setFont (juce::Font (12.0f));
     g.drawText (juce::convertOptionalARAString (playbackRegion->getEffectiveName()), rect, juce::Justification::topLeft);
 
-    g.drawText ((audioModification->getReversePlayback() ? "<==" : "==>"), rect, juce::Justification::bottomLeft);
+    if (audioModification->isDimmed())
+        g.drawText ("DIMMED", rect, juce::Justification::bottomLeft);
 }
 
 //==============================================================================

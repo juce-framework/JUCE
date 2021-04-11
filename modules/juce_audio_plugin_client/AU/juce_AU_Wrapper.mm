@@ -1112,6 +1112,9 @@ public:
     {
         const double rate = getSampleRate();
         jassert (rate > 0);
+       #if JucePlugin_Enable_ARA
+        jassert (juceFilter->getLatencySamples() == 0 || ! dynamic_cast<AudioProcessorARAExtension*> (juceFilter.get())->isBoundToARA());
+       #endif
         return rate > 0 ? juceFilter->getLatencySamples() / rate : 0;
     }
 
