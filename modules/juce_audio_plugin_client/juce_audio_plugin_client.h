@@ -130,6 +130,5 @@
  #include "ARA/juce_ARA_Wrapper.h"
 #endif
 
-#include "utility/juce_PluginHostType.h"
 #include "utility/juce_CreatePluginFilter.h"
 #include "VST/juce_VSTCallbackHandler.h"
