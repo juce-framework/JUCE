@@ -466,6 +466,24 @@ private:
             deviceSelector.setBounds (r);
         }
 
+        void childBoundsChanged (Component* childComp) override
+        {
+            if (childComp != &deviceSelector)
+                return;
+
+            const auto extraHeight = [&]
+            {
+                if (! owner.getProcessorHasPotentialFeedbackLoop())
+                    return 0;
+
+                const auto itemHeight = deviceSelector.getItemHeight();
+                const auto separatorHeight = (itemHeight >> 1);
+                return itemHeight + separatorHeight;
+            }();
+
+            setSize (getWidth(), deviceSelector.getHeight() + extraHeight);
+        }
+
     private:
         //==============================================================================
         StandalonePluginHolder& owner;
