@@ -35,7 +35,7 @@
 
   ID:                 juce_opengl
   vendor:             juce
-  version:            6.0.7
+  version:            6.0.8
   name:               JUCE OpenGL classes
   description:        Classes for rendering OpenGL in a JUCE window.
   website:            http://www.juce.com/juce
@@ -88,7 +88,7 @@
   #undef APIENTRY
   #undef CLEAR_TEMP_APIENTRY
  #endif
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include <GL/gl.h>
  #undef KeyPress
 #elif JUCE_IOS

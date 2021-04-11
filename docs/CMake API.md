@@ -192,6 +192,9 @@ might slow down configuration a bit. If you enable this, you should probably als
 `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists as this is required for
 source grouping to work.
 
+The modules will be placed in a group named "JUCE Modules" within the group for each target,
+alongside the "Source Files" and "Header Files" groups.
+
 #### `JUCE_COPY_PLUGIN_AFTER_BUILD`
 
 Controls whether plugin targets should be installed to the system after building. Note that the
@@ -589,14 +592,33 @@ disabled by setting the compile definitions `DONT_SET_USING_JUCE_NAMESPACE` and
 JuceHeader.h is optional. Instead, module headers can be included directly in source files that
 require them.
 
+#### `juce_enable_copy_plugin_step`
+
+    juce_enable_copy_plugin_step(<target>)
+
+As an alternative to the JUCE_COPY_PLUGIN_AFTER_BUILD property, you may call this function to
+manually enable post-build copy on a plugin. The argument to this function should be a target
+previously created with `juce_add_plugin`.
+
+JUCE_COPY_PLUGIN_AFTER_BUILD will cause plugins to be installed immediately after building. This is
+not always appropriate, if extra build steps (such as signing or modifying the plugin bundle) must
+be executed before the install. In such cases, you should leave JUCE_COPY_PLUGIN_AFTER_BUILD
+disabled, use `add_custom_command(TARGET POST_BUILD)` to add your own post-build steps, and then
+finally call `juce_enable_copy_plugin_step`.
+
+If your custom build steps need to use the location of the plugin artefact, you can extract this
+by querying the property `JUCE_PLUGIN_ARTEFACT_FILE` on a plugin target (*not* the shared code
+target!).
+
 #### `juce_set_<kind>_sdk_path`
 
     juce_set_aax_sdk_path(<absolute path>)
     juce_set_vst2_sdk_path(<absolute path>)
+    juce_set_vst3_sdk_path(<absolute path>)
 
-Call these functions from your CMakeLists to set up your local AAX and/or VST2 SDKs. These functions
-should be called *before* adding any targets that may depend on the AAX/VST2 SDKs (plugin
-hosts, VST2/AAX plugins etc.).
+Call these functions from your CMakeLists to set up your local AAX, VST2, and VST3 SDKs. These
+functions should be called *before* adding any targets that may depend on the AAX/VST2/VST3 SDKs
+(plugin hosts, AAX/VST2/VST3 plugins etc.).
 
 #### `juce_add_module`
 

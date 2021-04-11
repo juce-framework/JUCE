@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
+#if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
 
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
@@ -92,12 +92,19 @@ static int warnOnFailureIfImplemented (int result) noexcept
 #endif
 
 //==============================================================================
-static int getHashForTUID (const TUID& tuid) noexcept
+std::array<uint32, 4> getNormalisedTUID (const TUID& tuid) noexcept
+{
+    const FUID fuid { tuid };
+    return { { fuid.getLong1(), fuid.getLong2(), fuid.getLong3(), fuid.getLong4() } };
+}
+
+template <typename Range>
+static int getHashForRange (Range&& range) noexcept
 {
     uint32 value = 0;
 
-    for (int i = 0; i < numElementsInArray (tuid); ++i)
-        value = (value * 31) + (uint32) tuid[i];
+    for (const auto& item : range)
+        value = (value * 31) + (uint32) item;
 
     return (int) value;
 }
@@ -127,7 +134,9 @@ static void createPluginDescription (PluginDescription& description,
     description.pluginFormatName    = "VST3";
     description.numInputChannels    = numInputs;
     description.numOutputChannels   = numOutputs;
-    description.uid                 = getHashForTUID (info.cid);
+
+    description.deprecatedUid       = getHashForRange (info.cid);
+    description.uniqueId            = getHashForRange (getNormalisedTUID (info.cid));
 
     if (infoW != nullptr)      fillDescriptionWith (description, *infoW);
     else if (info2 != nullptr) fillDescriptionWith (description, *info2);
@@ -824,7 +833,7 @@ struct DescriptionFactory
                 }
             }
 
-            if (desc.uid != 0)
+            if (desc.uniqueId != 0)
                 result = performOnDescription (desc);
 
             if (result.failed())
@@ -885,11 +894,8 @@ struct DLLHandle
             if (auto* exitFn = (ExitModuleFn) getFunction (exitFnName))
                 exitFn();
 
-           #if JUCE_WINDOWS || JUCE_LINUX
+           #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
             library.close();
-           #elif JUCE_MAC
-            CFRelease (bundleRef);
-            bundleRef = nullptr;
            #endif
         }
     }
@@ -913,14 +919,14 @@ struct DLLHandle
 
     void* getFunction (const char* functionName)
     {
-       #if JUCE_WINDOWS || JUCE_LINUX
+       #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
         return library.getFunction (functionName);
        #elif JUCE_MAC
         if (bundleRef == nullptr)
             return nullptr;
 
-        ScopedCFString name (functionName);
-        return CFBundleGetFunctionPointerForName (bundleRef, name.cfString);
+        CFUniquePtr<CFStringRef> name (String (functionName).toCFString());
+        return CFBundleGetFunctionPointerForName (bundleRef.get(), name.get());
        #endif
     }
 
@@ -937,7 +943,7 @@ private:
     static constexpr const char* exitFnName  = "ExitDll";
 
     using EntryProc = bool (PLUGIN_API*) ();
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     static constexpr const char* entryFnName = "ModuleEntry";
     static constexpr const char* exitFnName  = "ModuleExit";
 
@@ -950,7 +956,7 @@ private:
    #endif
 
     //==============================================================================
-   #if JUCE_WINDOWS || JUCE_LINUX
+   #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
     DynamicLibrary library;
 
     bool open()
@@ -978,45 +984,32 @@ private:
         return false;
     }
    #elif JUCE_MAC
-    CFBundleRef bundleRef;
+    CFUniquePtr<CFBundleRef> bundleRef;
 
     bool open()
     {
         auto* utf8 = dllFile.getFullPathName().toRawUTF8();
 
-        if (CFURLRef url = CFURLCreateFromFileSystemRepresentation (nullptr,
-                                                                    (const UInt8*) utf8,
-                                                                    (CFIndex) std::strlen (utf8),
-                                                                    dllFile.isDirectory()))
+        if (auto url = CFUniquePtr<CFURLRef> (CFURLCreateFromFileSystemRepresentation (nullptr,
+                                                                                       (const UInt8*) utf8,
+                                                                                       (CFIndex) std::strlen (utf8),
+                                                                                       dllFile.isDirectory())))
         {
-            bundleRef = CFBundleCreate (kCFAllocatorDefault, url);
-            CFRelease (url);
+            bundleRef.reset (CFBundleCreate (kCFAllocatorDefault, url.get()));
 
             if (bundleRef != nullptr)
             {
-                CFErrorRef error = nullptr;
+                CFObjectHolder<CFErrorRef> error;
 
-                if (CFBundleLoadExecutableAndReturnError (bundleRef, &error))
-                {
+                if (CFBundleLoadExecutableAndReturnError (bundleRef.get(), &error.object))
                     if (auto* proc = (EntryProc) getFunction (entryFnName))
-                    {
-                        if (proc (bundleRef))
+                        if (proc (bundleRef.get()))
                             return true;
-                    }
-                }
 
-                if (error != nullptr)
-                {
-                    if (CFStringRef failureMessage = CFErrorCopyFailureReason (error))
-                    {
-                        DBG (String::fromCFString (failureMessage));
-                        CFRelease (failureMessage);
-                    }
+                if (error.object != nullptr)
+                    if (auto failureMessage = CFUniquePtr<CFStringRef> (CFErrorCopyFailureReason (error.object)))
+                        DBG (String::fromCFString (failureMessage.get()));
 
-                    CFRelease (error);
-                }
-
-                CFRelease (bundleRef);
                 bundleRef = nullptr;
             }
         }
@@ -1038,7 +1031,7 @@ struct DLLHandleCache  : public DeletedAtShutdown
 
     DLLHandle& findOrCreateHandle (const String& modulePath)
     {
-       #if JUCE_LINUX
+       #if JUCE_LINUX || JUCE_BSD
         File file (getDLLFileFromBundle (modulePath));
        #else
         File file (modulePath);
@@ -1058,7 +1051,7 @@ struct DLLHandleCache  : public DeletedAtShutdown
     }
 
 private:
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     File getDLLFileFromBundle (const String& bundlePath) const
     {
         auto machineName = []() -> String
@@ -1088,6 +1081,124 @@ private:
 
 
 JUCE_IMPLEMENT_SINGLETON (DLLHandleCache)
+
+//==============================================================================
+#if JUCE_LINUX || JUCE_BSD
+
+class RunLoop  final  : public Steinberg::Linux::IRunLoop
+{
+public:
+    RunLoop() = default;
+
+    ~RunLoop()
+    {
+        for (const auto& h : eventHandlerMap)
+            LinuxEventLoop::unregisterFdCallback (h.first);
+    }
+
+    //==============================================================================
+    tresult PLUGIN_API registerEventHandler (Linux::IEventHandler* handler,
+                                             Linux::FileDescriptor fd) override
+    {
+        if (handler == nullptr)
+            return kInvalidArgument;
+
+        auto& handlers = eventHandlerMap[fd];
+
+        if (handlers.empty())
+        {
+            LinuxEventLoop::registerFdCallback (fd, [this] (int descriptor)
+            {
+                for (auto* h : eventHandlerMap[descriptor])
+                    h->onFDIsSet (descriptor);
+
+                return true;
+            });
+        }
+
+        handlers.push_back (handler);
+
+        return kResultTrue;
+    }
+
+    tresult PLUGIN_API unregisterEventHandler (Linux::IEventHandler* handler) override
+    {
+        if (handler == nullptr)
+            return kInvalidArgument;
+
+        for (auto iter = eventHandlerMap.begin(), end = eventHandlerMap.end(); iter != end;)
+        {
+            auto& handlers = iter->second;
+
+            auto handlersIter = std::find (std::begin (handlers), std::end (handlers), handler);
+
+            if (handlersIter != std::end (handlers))
+            {
+                handlers.erase (handlersIter);
+
+                if (handlers.empty())
+                {
+                    LinuxEventLoop::unregisterFdCallback (iter->first);
+                    iter = eventHandlerMap.erase (iter);
+                    continue;
+                }
+            }
+
+            ++iter;
+        }
+
+        return kResultTrue;
+    }
+
+    //==============================================================================
+    tresult PLUGIN_API registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds) override
+    {
+        if (handler == nullptr || milliseconds <= 0)
+            return kInvalidArgument;
+
+        timerCallers.emplace_back (handler, (int) milliseconds);
+        return kResultTrue;
+    }
+
+    tresult PLUGIN_API unregisterTimer (Linux::ITimerHandler* handler) override
+    {
+        auto iter = std::find (timerCallers.begin(), timerCallers.end(), handler);
+
+        if (iter == timerCallers.end())
+            return kInvalidArgument;
+
+        timerCallers.erase (iter);
+        return kResultTrue;
+    }
+
+    //==============================================================================
+    uint32 PLUGIN_API addRef() override                                { return 1000; }
+    uint32 PLUGIN_API release() override                               { return 1000; }
+    tresult PLUGIN_API queryInterface (const TUID, void**) override    { return kNoInterface; }
+
+private:
+    //==============================================================================
+    struct TimerCaller  : private Timer
+    {
+        TimerCaller (Linux::ITimerHandler* h, int interval)  : handler (h)  { startTimer (interval); }
+        ~TimerCaller() override { stopTimer(); }
+
+        void timerCallback() override  { handler->onTimer(); }
+
+        bool operator== (Linux::ITimerHandler* other) const noexcept { return handler == other; }
+
+        Linux::ITimerHandler* handler = nullptr;
+    };
+
+    std::unordered_map<Linux::FileDescriptor, std::vector<Linux::IEventHandler*>> eventHandlerMap;
+    std::list<TimerCaller> timerCallers;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_MOVEABLE (RunLoop)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RunLoop)
+};
+
+#endif
 
 //==============================================================================
 struct VST3ModuleHandle  : public ReferenceCountedObject
@@ -1165,7 +1276,8 @@ private:
                     continue;
 
                 if (toString (info.name).trim() == description.name
-                    && getHashForTUID (info.cid) == description.uid)
+                    && (getHashForRange (getNormalisedTUID (info.cid)) == description.uniqueId
+                        || getHashForRange (info.cid) == description.deprecatedUid))
                 {
                     name = description.name;
                     return true;
@@ -1211,7 +1323,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         removeScaleFactorListener();
 
-        #if JUCE_LINUX
+        #if JUCE_LINUX || JUCE_BSD
          embeddedComponent.removeClient();
         #endif
 
@@ -1222,112 +1334,17 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
        #if JUCE_MAC
         embeddedComponent.setView (nullptr);
-       #elif JUCE_WINDOWS
-        embeddedComponent.setHWND (nullptr);
        #endif
 
         view = nullptr;
     }
 
-   #if JUCE_LINUX
-    struct RunLoop  final  : public Steinberg::Linux::IRunLoop
-    {
-        ~RunLoop()
-        {
-            for (const auto& h : eventHandlers)
-                LinuxEventLoop::unregisterFdCallback (h.first);
-        }
-
-        tresult PLUGIN_API registerEventHandler (Linux::IEventHandler* handler,
-                                                 Linux::FileDescriptor fd) override
-        {
-            if (handler == nullptr || eventHandlers.find (fd) != eventHandlers.end())
-                return kInvalidArgument;
-
-            LinuxEventLoop::registerFdCallback (fd, [handler] (int descriptor)
-            {
-                handler->onFDIsSet (descriptor);
-                return true;
-            });
-
-            eventHandlers.emplace (fd, handler);
-            return kResultTrue;
-        }
-
-        tresult PLUGIN_API unregisterEventHandler (Linux::IEventHandler* handler) override
-        {
-            if (handler == nullptr)
-                return kInvalidArgument;
-
-            for (auto it = eventHandlers.begin(), end = eventHandlers.end(); it != end; ++it)
-            {
-                if (it->second == handler)
-                {
-                    LinuxEventLoop::unregisterFdCallback (it->first);
-                    eventHandlers.erase (it);
-                    return kResultTrue;
-                }
-            }
-
-            return kResultFalse;
-        }
-
-        tresult PLUGIN_API registerTimer (Linux::ITimerHandler* handler, Linux::TimerInterval milliseconds) override
-        {
-            if (handler == nullptr || milliseconds == 0)
-                return kInvalidArgument;
-
-            timerHandlers.push_back (std::make_unique<TimerCaller> (handler, (int) milliseconds));
-            return kResultTrue;
-        }
-
-        tresult PLUGIN_API unregisterTimer (Linux::ITimerHandler* handler) override
-        {
-            if (handler == nullptr)
-                return kInvalidArgument;
-
-            for (auto it = timerHandlers.begin(), end = timerHandlers.end(); it != end; ++it)
-            {
-                if (it->get()->handler == handler)
-                {
-                    timerHandlers.erase (it);
-                    return kResultTrue;
-                }
-            }
-
-            return kNotImplemented;
-        }
-
-        uint32 PLUGIN_API addRef() override                                { return 1000; }
-        uint32 PLUGIN_API release() override                               { return 1000; }
-        tresult PLUGIN_API queryInterface (const TUID, void**) override    { return kNoInterface; }
-
-        std::unordered_map<Linux::FileDescriptor, Linux::IEventHandler*> eventHandlers;
-
-        struct TimerCaller : public Timer
-        {
-            TimerCaller (Linux::ITimerHandler* h, int interval) : handler (h)
-            {
-                startTimer (interval);
-            }
-
-            void timerCallback() override
-            {
-                handler->onTimer();
-            }
-
-            Linux::ITimerHandler* handler;
-        };
-        std::vector<std::unique_ptr<TimerCaller>> timerHandlers;
-    };
-
-    RunLoop runLoop;
-
+   #if JUCE_LINUX || JUCE_BSD
     Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID iid, void** obj) override
     {
         if (doUIDsMatch (iid, Steinberg::Linux::IRunLoop::iid))
         {
-            *obj = &runLoop;
+            *obj = &runLoop.get();
             return kResultTrue;
         }
 
@@ -1395,14 +1412,23 @@ struct VST3PluginWindow : public AudioProcessorEditor,
                          roundToInt ((float) rect.getHeight() / nativeScaleFactor));
             }
 
+           #if JUCE_WINDOWS
+            setPluginWindowPos (rect);
+           #else
             embeddedComponent.setBounds (getLocalBounds());
+           #endif
 
             view->onSize (&rect);
         }
         else
         {
             warnOnFailure (view->getSize (&rect));
+
+           #if JUCE_WINDOWS
+            setPluginWindowPos (rect);
+           #else
             resizeWithRect (embeddedComponent, rect, nativeScaleFactor);
+           #endif
         }
 
         // Some plugins don't update their cursor correctly when mousing out the window
@@ -1469,16 +1495,21 @@ private:
     {
         if (pluginHandle == HandleFormat{})
         {
-            embeddedComponent.setBounds (getLocalBounds());
-            addAndMakeVisible (embeddedComponent);
-
-           #if JUCE_MAC
-            pluginHandle = (HandleFormat) embeddedComponent.getView();
-           #elif JUCE_WINDOWS
-            pluginHandle = (HandleFormat) embeddedComponent.getHWND();
-           #elif JUCE_LINUX
-            pluginHandle = (HandleFormat) embeddedComponent.getHostWindowID();
-           #endif
+            #if JUCE_WINDOWS
+             if (auto* topComp = getTopLevelComponent())
+             {
+                 peer.reset (embeddedComponent.createNewPeer (0, topComp->getWindowHandle()));
+                 pluginHandle = (HandleFormat) peer->getNativeHandle();
+             }
+            #else
+             embeddedComponent.setBounds (getLocalBounds());
+             addAndMakeVisible (embeddedComponent);
+             #if JUCE_MAC
+              pluginHandle = (HandleFormat) embeddedComponent.getView();
+             #elif JUCE_LINUX || JUCE_BSD
+              pluginHandle = (HandleFormat) embeddedComponent.getHostWindowID();
+             #endif
+            #endif
 
             if (pluginHandle == HandleFormat{})
             {
@@ -1508,12 +1539,38 @@ private:
     VSTComSmartPtr<IPlugView> view;
 
    #if JUCE_WINDOWS
-    HWNDComponentWithParent embeddedComponent;
+    struct ChildComponent  : public Component
+    {
+        ChildComponent() {}
+        void paint (Graphics& g) override  { g.fillAll (Colours::cornflowerblue); }
+        using Component::createNewPeer;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildComponent)
+    };
+
+    void setPluginWindowPos (ViewRect rect)
+    {
+        if (auto* topComp = getTopLevelComponent())
+        {
+            auto pos = (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
+
+            ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
+
+            SetWindowPos (pluginHandle, 0,
+                          pos.x, pos.y,
+                          rect.getWidth(), rect.getHeight(),
+                          isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
+        }
+    }
+
+    ChildComponent embeddedComponent;
+    std::unique_ptr<ComponentPeer> peer;
     using HandleFormat = HWND;
    #elif JUCE_MAC
     AutoResizingNSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
+    SharedResourcePointer<RunLoop> runLoop;
     XEmbedComponent embeddedComponent { true, false };
     using HandleFormat = Window;
    #else
@@ -2654,6 +2711,10 @@ public:
 
 private:
     //==============================================================================
+   #if JUCE_LINUX || JUCE_BSD
+    SharedResourcePointer<RunLoop> runLoop;
+   #endif
+
     std::unique_ptr<VST3ComponentHolder> holder;
 
     friend VST3HostContext;
@@ -3369,7 +3430,7 @@ bool VST3PluginFormat::fileMightContainThisPluginType (const String& fileOrIdent
     auto f = File::createFileWithoutCheckingPath (fileOrIdentifier);
 
     return f.hasFileExtension (".vst3")
-          #if JUCE_MAC || JUCE_LINUX
+          #if JUCE_MAC || JUCE_LINUX || JUCE_BSD
            && f.exists();
           #else
            && f.existsAsFile();

@@ -35,7 +35,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            6.0.7
+  version:            6.0.8
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -294,7 +294,7 @@ namespace juce
 #include "lookandfeel/juce_LookAndFeel_V4.h"
 #include "mouse/juce_LassoComponent.h"
 
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
  #if JUCE_GUI_BASICS_INCLUDE_XHEADERS
   // If you're missing these headers, you need to install the libx11-dev package
   #include <X11/Xlib.h>

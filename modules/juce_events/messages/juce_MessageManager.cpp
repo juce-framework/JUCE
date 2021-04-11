@@ -231,9 +231,11 @@ void MessageManager::setCurrentThreadAsMessageThread()
     {
         messageThreadId = thisThread;
 
+       #if JUCE_WINDOWS
         // This is needed on windows to make sure the message window is created by this thread
         doPlatformSpecificShutdown();
         doPlatformSpecificInitialisation();
+       #endif
     }
 }
 

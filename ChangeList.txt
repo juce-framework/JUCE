@@ -3,6 +3,20 @@
 This file just lists the more notable headline features. For more detailed info
 about minor changes and bugfixes, please see the git log!
 
+Version 6.0.8
+  - Fixed a macOS graphics invalidation region issue
+  - Improved the handling of modal dialog dismissal
+  - Fixed audio glitching in CoreAudio before microphone permission is granted
+  - Improved AUv3 resizing and initialisation
+  - Fixed some string to double conversions
+  - Improved iOS split view behaviour
+  - Added Display::safeAreaInserts
+  - Improved assertion behaviour on macOS ARM
+  - Multiple resizing and display scaling fixes
+  - Added more information to audioProcessorChanged callbacks
+  - Fixed some DSP convolution issues
+  - Added host detection on macOS ARM
+
 Version 6.0.7
   - Fixed a macOS drawing issue
   - Updated the DemoRunner bundle ID

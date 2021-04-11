@@ -146,6 +146,7 @@ public:
          activeWindowList (windowList),
          node (n), type (t)
     {
+        setResizable (true, false);
         setSize (400, 300);
 
         if (auto* ui = createProcessorEditor (*node->getProcessor(), type))
@@ -194,6 +195,16 @@ public:
     const AudioProcessorGraph::Node::Ptr node;
     const Type type;
 
+    BorderSize<int> getBorderThickness() override
+    {
+       #if JUCE_IOS || JUCE_ANDROID
+        const int border = 10;
+        return { border, border, border, border };
+       #else
+        return DocumentWindow::getBorderThickness();
+       #endif
+    }
+
 private:
     float getDesktopScaleFactor() const override     { return 1.0f; }
 
@@ -202,8 +213,9 @@ private:
     {
         if (type == PluginWindow::Type::normal)
         {
-            if (auto* ui = processor.createEditorIfNeeded())
-                return ui;
+            if (processor.hasEditor())
+                if (auto* ui = processor.createEditorIfNeeded())
+                    return ui;
 
             type = PluginWindow::Type::generic;
         }

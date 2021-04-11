@@ -220,9 +220,6 @@ private:
     std::unique_ptr<AlertWindow> demoRunnerAlert;
     bool hasScannedForDemoRunnerExecutable = false, hasScannedForDemoRunnerProject = false;
     File lastJUCEPath, lastDemoRunnerExectuableFile, lastDemoRunnerProjectFile;
-   #if JUCE_LINUX
-    ChildProcess makeProcess;
-   #endif
 
     int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0;
 

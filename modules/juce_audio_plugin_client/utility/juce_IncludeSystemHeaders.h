@@ -36,7 +36,7 @@
  #ifdef __INTEL_COMPILER
   #pragma warning (disable : 1899)
  #endif
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include <float.h>
  #include <sys/time.h>
  #include <arpa/inet.h>

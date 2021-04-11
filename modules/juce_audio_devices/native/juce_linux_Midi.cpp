@@ -51,13 +51,13 @@ public:
         jassert (instance != nullptr);
         instance = nullptr;
 
-        if (handle != nullptr)
-            snd_seq_close (handle);
-
         jassert (activeCallbacks.get() == 0);
 
         if (inputThread)
             inputThread->stopThread (3000);
+
+        if (handle != nullptr)
+            snd_seq_close (handle);
     }
 
     static String getAlsaMidiName()

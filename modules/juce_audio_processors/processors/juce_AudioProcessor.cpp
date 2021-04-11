@@ -40,9 +40,8 @@ AudioProcessor::AudioProcessor()
 }
 
 AudioProcessor::AudioProcessor (const BusesProperties& ioConfig)
+    : wrapperType (wrapperTypeBeingCreated.get())
 {
-    wrapperType = wrapperTypeBeingCreated.get();
-
     for (auto& layout : ioConfig.inputLayouts)   createBus (true,  layout);
     for (auto& layout : ioConfig.outputLayouts)  createBus (false, layout);
 

@@ -29,7 +29,8 @@ namespace juce
 static std::unique_ptr<XmlElement> findFontsConfFile()
 {
     static const char* pathsToSearch[] = { "/etc/fonts/fonts.conf",
-                                           "/usr/share/fonts/fonts.conf" };
+                                           "/usr/share/fonts/fonts.conf",
+                                           "/usr/local/etc/fonts/fonts.conf" };
 
     for (auto* path : pathsToSearch)
         if (auto xml = parseXML (File (path)))

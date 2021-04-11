@@ -91,7 +91,7 @@ inline void toString128 (Steinberg::Vst::String128 result, const juce::String& s
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeHWND;
 #elif JUCE_MAC
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeNSView;
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  static const Steinberg::FIDString defaultVST3WindowType = Steinberg::kPlatformTypeX11EmbedWindowID;
 #endif
 
@@ -919,6 +919,101 @@ template <> struct VST3FloatAndDoubleBusMapCompositeHelper<float>
 template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
 {
     static VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
+};
+
+//==============================================================================
+class FloatCache
+{
+    using FlagType = uint32_t;
+
+public:
+    FloatCache() = default;
+
+    explicit FloatCache (size_t sizeIn)
+        : values (sizeIn),
+          flags (divCeil (sizeIn, numFlagBits))
+    {
+        std::fill (values.begin(), values.end(), 0.0f);
+        std::fill (flags.begin(), flags.end(), 0);
+    }
+
+    size_t size() const noexcept { return values.size(); }
+
+    void set (size_t index, float value)
+    {
+        jassert (index < size());
+        values[index].store (value, std::memory_order_relaxed);
+        flags[index / numFlagBits].fetch_or ((FlagType) 1 << (index % numFlagBits),
+                                             std::memory_order_acq_rel);
+    }
+
+    float get (size_t index) const noexcept
+    {
+        jassert (index < size());
+        return values[index].load (std::memory_order_relaxed);
+    }
+
+    /*  Calls the supplied callback for any entries which have been modified
+        since the last call to this function.
+    */
+    template <typename Callback>
+    void ifSet (Callback&& callback)
+    {
+        for (size_t flagIndex = 0; flagIndex < flags.size(); ++flagIndex)
+        {
+            const auto prevFlags = flags[flagIndex].exchange (0, std::memory_order_acq_rel);
+
+            for (size_t bit = 0; bit < numFlagBits; ++bit)
+            {
+                if (prevFlags & ((FlagType) 1 << bit))
+                {
+                    const auto itemIndex = (flagIndex * numFlagBits) + bit;
+                    callback (itemIndex, values[itemIndex].load (std::memory_order_relaxed));
+                }
+            }
+        }
+    }
+
+private:
+    static constexpr size_t numFlagBits = 8 * sizeof (FlagType);
+
+    static constexpr size_t divCeil (size_t a, size_t b)
+    {
+        return (a / b) + ((a % b) != 0);
+    }
+
+    std::vector<std::atomic<float>> values;
+    std::vector<std::atomic<FlagType>> flags;
+};
+
+/*  Provides very quick polling of all parameter states.
+
+    We must iterate all parameters on each processBlock call to check whether any
+    parameter value has changed. This class attempts to make this polling process
+    as quick as possible.
+*/
+class CachedParamValues
+{
+public:
+    CachedParamValues() = default;
+
+    explicit CachedParamValues (std::vector<Steinberg::Vst::ParamID> paramIdsIn)
+        : paramIds (std::move (paramIdsIn)), floatCache (paramIds.size()) {}
+
+    size_t size() const noexcept { return floatCache.size(); }
+
+    Steinberg::Vst::ParamID getParamID (size_t index) const noexcept { return paramIds[index]; }
+
+    void set (size_t index, float value) { floatCache.set (index, value); }
+
+    float get (size_t index) const noexcept { return floatCache.get (index); }
+
+    template <typename Callback>
+    void ifSet (Callback&& callback) { floatCache.ifSet (std::forward<Callback> (callback)); }
+
+private:
+    std::vector<Steinberg::Vst::ParamID> paramIds;
+    FloatCache floatCache;
 };
 
 } // namespace juce

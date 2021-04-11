@@ -38,7 +38,7 @@ class PluginGraph   : public FileBasedDocument,
 {
 public:
     //==============================================================================
-    PluginGraph (AudioPluginFormatManager&);
+    PluginGraph (AudioPluginFormatManager&, KnownPluginList&);
     ~PluginGraph() override;
 
     //==============================================================================
@@ -85,6 +85,7 @@ public:
 private:
     //==============================================================================
     AudioPluginFormatManager& formatManager;
+    KnownPluginList& knownPlugins;
     OwnedArray<PluginWindow> activePluginWindows;
 
     NodeID lastUID;

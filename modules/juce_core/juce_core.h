@@ -32,7 +32,7 @@
 
   ID:                 juce_core
   vendor:             juce
-  version:            6.0.7
+  version:            6.0.8
   name:               JUCE core classes
   description:        The essential set of basic JUCE classes, as required by all the other JUCE modules. Includes text, container, memory, threading and i/o functionality.
   website:            http://www.juce.com/juce
@@ -340,7 +340,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_AllocationHooks.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
- #include "native/juce_osx_ObjCHelpers.h"
+ #include "native/juce_mac_ObjCHelpers.h"
 #endif
 
 #if JUCE_CORE_INCLUDE_COM_SMART_PTR && JUCE_WINDOWS

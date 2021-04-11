@@ -44,9 +44,12 @@ class JUCE_API  PluginDescription
 public:
     //==============================================================================
     PluginDescription() = default;
-    PluginDescription (const PluginDescription& other) = default;
 
-    PluginDescription& operator= (const PluginDescription& other) = default;
+    PluginDescription (const PluginDescription&) = default;
+    PluginDescription (PluginDescription&&) = default;
+
+    PluginDescription& operator= (const PluginDescription&) = default;
+    PluginDescription& operator= (PluginDescription&&) = default;
 
     //==============================================================================
     /** The name of the plug-in. */
@@ -88,14 +91,31 @@ public:
     */
     Time lastInfoUpdateTime;
 
-    /** A unique ID for the plug-in.
+    /** Deprecated: New projects should use uniqueId instead.
+
+        A unique ID for the plug-in.
 
         Note that this might not be unique between formats, e.g. a VST and some
         other format might actually have the same id.
 
         @see createIdentifierString
     */
-    int uid = 0;
+    int deprecatedUid = 0;
+
+    /** A unique ID for the plug-in.
+
+        Note that this might not be unique between formats, e.g. a VST and some
+        other format might actually have the same id.
+
+        The uniqueId field replaces the deprecatedUid field, and fixes an issue
+        where VST3 plugins with matching FUIDs would generate different uid
+        values depending on the platform. The deprecatedUid field is kept for
+        backwards compatibility, allowing existing hosts to migrate from the
+        old uid to the new uniqueId.
+
+        @see createIdentifierString
+    */
+    int uniqueId = 0;
 
     /** True if the plug-in identifies itself as a synthesiser. */
     bool isInstrument = false;

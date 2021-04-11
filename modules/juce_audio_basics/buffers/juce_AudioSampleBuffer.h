@@ -751,7 +751,10 @@ public:
                   int numSamples,
                   Type gainToApplyToSource = Type (1)) noexcept
     {
-        jassert (&source != this || sourceChannel != destChannel);
+        jassert (&source != this
+                 || sourceChannel != destChannel
+                 || sourceStartSample + numSamples <= destStartSample
+                 || destStartSample + numSamples <= sourceStartSample);
         jassert (isPositiveAndBelow (destChannel, numChannels));
         jassert (destStartSample >= 0 && numSamples >= 0 && destStartSample + numSamples <= size);
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));
@@ -887,7 +890,10 @@ public:
                    int sourceStartSample,
                    int numSamples) noexcept
     {
-        jassert (&source != this || sourceChannel != destChannel);
+        jassert (&source != this
+                 || sourceChannel != destChannel
+                 || sourceStartSample + numSamples <= destStartSample
+                 || destStartSample + numSamples <= sourceStartSample);
         jassert (isPositiveAndBelow (destChannel, numChannels));
         jassert (destStartSample >= 0 && destStartSample + numSamples <= size);
         jassert (isPositiveAndBelow (sourceChannel, source.numChannels));

@@ -78,6 +78,8 @@ public:
         doublePrecision
     };
 
+    using ChangeDetails = AudioProcessorListener::ChangeDetails;
+
     //==============================================================================
     /** Destructor. */
     virtual ~AudioProcessor();
@@ -1066,7 +1068,7 @@ public:
         It sends a hint to the host that something like the program, number of parameters,
         etc, has changed, and that it should update itself.
     */
-    void updateHostDisplay (const AudioProcessorListener::ChangeDetails& details = {});
+    void updateHostDisplay (const ChangeDetails& details = ChangeDetails::getAllChanged());
 
     //==============================================================================
     /** Adds a parameter to the AudioProcessor.
@@ -1292,7 +1294,7 @@ public:
     /** When loaded by a plugin wrapper, this flag will be set to indicate the type
         of plugin within which the processor is running.
     */
-    WrapperType wrapperType;
+    const WrapperType wrapperType;
 
     /** Returns a textual description of a WrapperType value */
     static const char* getWrapperTypeDescription (AudioProcessor::WrapperType) noexcept;

@@ -118,9 +118,10 @@ public:
 
         if (mustOutliveSource)
         {
-            CFDataRef data = CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) ((size_t) srcData.lineStride * (size_t) srcData.height));
-            provider = detail::DataProviderPtr { CGDataProviderCreateWithCFData (data) };
-            CFRelease (data);
+            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr,
+                                                       (const UInt8*) srcData.data,
+                                                       (CFIndex) ((size_t) srcData.lineStride * (size_t) srcData.height)));
+            provider = detail::DataProviderPtr { CGDataProviderCreateWithCFData (data.get()) };
         }
         else
         {
@@ -675,8 +676,7 @@ void CoreGraphicsContext::drawGlyph (int glyphNumber, const AffineTransform& tra
 
 bool CoreGraphicsContext::drawTextLayout (const AttributedString& text, const Rectangle<float>& area)
 {
-    CoreTextTypeLayout::drawToCGContext (text, area, context.get(), (float) flipHeight);
-    return true;
+    return CoreTextTypeLayout::drawToCGContext (text, area, context.get(), (float) flipHeight);
 }
 
 CoreGraphicsContext::SavedState::SavedState()
@@ -845,12 +845,11 @@ Image juce_loadWithCoreImage (InputStream& input)
                                                                                 memBlockHolder->block.getData(),
                                                                                 memBlockHolder->block.getSize(),
                                                                                 [] (void * __nullable info, const void*, size_t) { delete (MemoryBlockHolder::Ptr*) info; }) };
-        auto imageSource = CGImageSourceCreateWithDataProvider (provider.get(), nullptr);
 
-        if (imageSource != nullptr)
+        if (auto imageSource = CFUniquePtr<CGImageSourceRef> (CGImageSourceCreateWithDataProvider (provider.get(), nullptr)))
         {
-            auto loadedImage = CGImageSourceCreateImageAtIndex (imageSource, 0, nullptr);
-            CFRelease (imageSource);
+            CFUniquePtr<CGImageRef> loadedImagePtr (CGImageSourceCreateImageAtIndex (imageSource.get(), 0, nullptr));
+            auto* loadedImage = loadedImagePtr.get();
       #endif
 
             if (loadedImage != nullptr)
@@ -870,10 +869,6 @@ Image juce_loadWithCoreImage (InputStream& input)
 
                 CGContextDrawImage (cgImage->context.get(), convertToCGRect (image.getBounds()), loadedImage);
                 CGContextFlush (cgImage->context.get());
-
-               #if ! JUCE_IOS
-                CFRelease (loadedImage);
-               #endif
 
                 // Because it's impossible to create a truly 24-bit CG image, this flag allows a user
                 // to find out whether the file they just loaded the image from had an alpha channel or not.

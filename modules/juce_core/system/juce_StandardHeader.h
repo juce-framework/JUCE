@@ -29,7 +29,7 @@
 */
 #define JUCE_MAJOR_VERSION      6
 #define JUCE_MINOR_VERSION      0
-#define JUCE_BUILDNUMBER        7
+#define JUCE_BUILDNUMBER        8
 
 /** Current JUCE version number.
 
@@ -83,7 +83,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4514 4245 4100)
  #include <signal.h>
 #endif
 
-#if JUCE_LINUX
+#if JUCE_LINUX || JUCE_BSD
  #include <cstring>
  #include <signal.h>
 

@@ -28,7 +28,7 @@ namespace juce
 
 static juce_wchar getDefaultPasswordChar() noexcept
 {
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     return 0x2022;
    #else
     return 0x25cf;
@@ -42,7 +42,8 @@ AlertWindow::AlertWindow (const String& title,
                           Component* comp)
    : TopLevelWindow (title, true),
      alertIconType (iconType),
-     associatedComponent (comp)
+     associatedComponent (comp),
+     desktopScale (comp != nullptr ? Component::getApproximateScaleFactorForComponent (comp) : 1.0f)
 {
     setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 
@@ -583,8 +584,8 @@ private:
         auto& lf = associatedComponent != nullptr ? associatedComponent->getLookAndFeel()
                                                   : LookAndFeel::getDefaultLookAndFeel();
 
-        std::unique_ptr<Component> alertBox (lf.createAlertWindow (title, message, button1, button2, button3,
-                                                                   iconType, numButtons, associatedComponent));
+        std::unique_ptr<AlertWindow> alertBox (lf.createAlertWindow (title, message, button1, button2, button3,
+                                                                     iconType, numButtons, associatedComponent));
 
         jassert (alertBox != nullptr); // you have to return one of these!
 

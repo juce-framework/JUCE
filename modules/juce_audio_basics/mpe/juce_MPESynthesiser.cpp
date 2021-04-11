@@ -129,7 +129,7 @@ void MPESynthesiser::noteReleased (MPENote finishedNote)
     {
         auto* voice = voices.getUnchecked (i);
 
-        if (voice->isCurrentlyPlayingNote(finishedNote))
+        if (voice->isCurrentlyPlayingNote (finishedNote))
             stopVoice (voice, finishedNote, true);
     }
 }
@@ -305,7 +305,12 @@ void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
         // first turn off all voices (it's more efficient to do this immediately
         // rather than to go through the MPEInstrument for this).
         for (auto* voice : voices)
+        {
+            voice->currentlyPlayingNote.noteOffVelocity = MPEValue::from7BitInt (64); // some reasonable number
+            voice->currentlyPlayingNote.keyState = MPENote::off;
+
             voice->noteStopped (allowTailOff);
+        }
     }
 
     // finally make sure the MPE Instrument also doesn't have any notes anymore.

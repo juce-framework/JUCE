@@ -48,14 +48,14 @@
  #endif
 #endif
 
-#if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && JUCE_LINUX
+#if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>
  #include <sys/utsname.h>
  #undef KeyPress
 #endif
 
-#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX
+#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX && ! JUCE_BSD
  #undef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
 #endif
@@ -68,7 +68,7 @@
 namespace juce
 {
 
-#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX)
+#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD))
 
 static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                  const PluginDescription& desc)
@@ -82,97 +82,7 @@ static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
 
 #endif
 
-#if JUCE_WINDOWS
-
-//==============================================================================
-class HWNDComponentWithParent  : public HWNDComponent,
-                                 private Timer
-{
-public:
-    HWNDComponentWithParent()
-    {
-        String className ("JUCE_");
-        className << String::toHexString (Time::getHighResolutionTicks());
-
-        HMODULE moduleHandle = (HMODULE) Process::getCurrentModuleInstanceHandle();
-
-        WNDCLASSEX wc = {};
-        wc.cbSize         = sizeof (wc);
-        wc.lpfnWndProc    = (WNDPROC) wndProc;
-        wc.cbWndExtra     = 4;
-        wc.hInstance      = moduleHandle;
-        wc.lpszClassName  = className.toWideCharPointer();
-
-        atom = RegisterClassEx (&wc);
-        jassert (atom != 0);
-
-        hwnd = CreateWindow (getClassNameFromAtom(), L"HWNDComponentWithParent",
-                             0, 0, 0, 0, 0,
-                             nullptr, nullptr, moduleHandle, nullptr);
-
-        jassert (hwnd != nullptr);
-
-        setHWND (hwnd);
-        startTimer (30);
-    }
-
-    ~HWNDComponentWithParent() override
-    {
-        if (IsWindow (hwnd))
-            DestroyWindow (hwnd);
-
-        UnregisterClass (getClassNameFromAtom(), nullptr);
-    }
-
-private:
-    //==============================================================================
-    static LRESULT CALLBACK wndProc (HWND h, const UINT message, const WPARAM wParam, const LPARAM lParam)
-    {
-        if (message == WM_SHOWWINDOW && wParam == TRUE)
-            return 0;
-
-        return DefWindowProc (h, message, wParam, lParam);
-    }
-
-    void timerCallback() override
-    {
-        if (HWND child = getChildHWND())
-        {
-            stopTimer();
-
-            ShowWindow (child, SW_HIDE);
-            SetParent (child, NULL);
-
-            auto windowFlags = GetWindowLongPtr (child, -16);
-
-            windowFlags &= ~WS_CHILD;
-            windowFlags |= WS_POPUP;
-
-            SetWindowLongPtr (child, -16, windowFlags);
-
-            setHWND (child);
-        }
-    }
-
-    LPCTSTR getClassNameFromAtom() noexcept  { return (LPCTSTR) (pointer_sized_uint) atom; }
-
-    HWND getChildHWND() const
-    {
-        if (HWND parent = (HWND) getHWND())
-            return GetWindow (parent, GW_CHILD);
-
-        return nullptr;
-    }
-
-    //==============================================================================
-    ATOM atom;
-    HWND hwnd;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentWithParent)
-};
-
-#elif JUCE_MAC || JUCE_IOS
+#if JUCE_MAC || JUCE_IOS
 
 #if JUCE_IOS
  #define JUCE_IOS_MAC_VIEW  UIView

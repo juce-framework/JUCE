@@ -162,7 +162,7 @@ namespace ump = universal_midi_packets;
  #endif
 
 //==============================================================================
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #if JUCE_ALSA
   /* Got an include error here? If so, you've either not got ALSA installed, or you've
      not got your paths set up correctly to find its header files.
@@ -189,7 +189,7 @@ namespace ump = universal_midi_packets;
   #include "native/juce_linux_JackAudio.cpp"
  #endif
 
- #if JUCE_BELA
+ #if (JUCE_LINUX && JUCE_BELA)
   /* Got an include error here? If so, you've either not got the bela headers
      installed, or you've not got your paths set up correctly to find its header
      files.

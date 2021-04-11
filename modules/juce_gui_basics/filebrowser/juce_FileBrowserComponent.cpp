@@ -441,7 +441,7 @@ void FileBrowserComponent::browserRootChanged (const File&) {}
 
 bool FileBrowserComponent::keyPressed (const KeyPress& key)
 {
-   #if JUCE_LINUX || JUCE_WINDOWS
+   #if JUCE_LINUX || JUCE_BSD || JUCE_WINDOWS
     if (key.getModifiers().isCommandDown()
          && (key.getKeyCode() == 'H' || key.getKeyCode() == 'h'))
     {

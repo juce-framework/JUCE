@@ -141,6 +141,8 @@ private:
         return "Windows";
        #elif JUCE_LINUX
         return "Linux";
+       #elif JUCE_BSD
+        return "BSD";
        #endif
     }
 

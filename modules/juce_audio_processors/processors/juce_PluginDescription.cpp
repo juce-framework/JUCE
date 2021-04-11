@@ -28,14 +28,18 @@ namespace juce
 
 bool PluginDescription::isDuplicateOf (const PluginDescription& other) const noexcept
 {
-    return fileOrIdentifier == other.fileOrIdentifier
-            && uid == other.uid;
+    const auto tie = [] (const PluginDescription& d)
+    {
+        return std::tie (d.fileOrIdentifier, d.deprecatedUid, d.uniqueId);
+    };
+
+    return tie (*this) == tie (other);
 }
 
 static String getPluginDescSuffix (const PluginDescription& d)
 {
     return "-" + String::toHexString (d.fileOrIdentifier.hashCode())
-         + "-" + String::toHexString (d.uid);
+         + "-" + String::toHexString (d.uniqueId);
 }
 
 bool PluginDescription::matchesIdentifierString (const String& identifierString) const
@@ -62,13 +66,15 @@ std::unique_ptr<XmlElement> PluginDescription::createXml() const
     e->setAttribute ("manufacturer", manufacturerName);
     e->setAttribute ("version", version);
     e->setAttribute ("file", fileOrIdentifier);
-    e->setAttribute ("uid", String::toHexString (uid));
+    e->setAttribute ("uniqueId", String::toHexString (uniqueId));
     e->setAttribute ("isInstrument", isInstrument);
     e->setAttribute ("fileTime", String::toHexString (lastFileModTime.toMilliseconds()));
     e->setAttribute ("infoUpdateTime", String::toHexString (lastInfoUpdateTime.toMilliseconds()));
     e->setAttribute ("numInputs", numInputChannels);
     e->setAttribute ("numOutputs", numOutputChannels);
     e->setAttribute ("isShell", hasSharedContainer);
+
+    e->setAttribute ("uid", String::toHexString (deprecatedUid));
 
     return e;
 }
@@ -84,13 +90,15 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
         manufacturerName    = xml.getStringAttribute ("manufacturer");
         version             = xml.getStringAttribute ("version");
         fileOrIdentifier    = xml.getStringAttribute ("file");
-        uid                 = xml.getStringAttribute ("uid").getHexValue32();
         isInstrument        = xml.getBoolAttribute ("isInstrument", false);
         lastFileModTime     = Time (xml.getStringAttribute ("fileTime").getHexValue64());
         lastInfoUpdateTime  = Time (xml.getStringAttribute ("infoUpdateTime").getHexValue64());
         numInputChannels    = xml.getIntAttribute ("numInputs");
         numOutputChannels   = xml.getIntAttribute ("numOutputs");
         hasSharedContainer  = xml.getBoolAttribute ("isShell", false);
+
+        deprecatedUid       = xml.getStringAttribute ("uid").getHexValue32();
+        uniqueId            = xml.getStringAttribute ("uniqueId", "0").getHexValue32();
 
         return true;
     }

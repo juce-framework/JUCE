@@ -49,7 +49,7 @@
  #import <IOKit/hid/IOHIDKeys.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
 
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include <unistd.h>
 #endif
 
@@ -85,7 +85,7 @@
   #include "native/juce_win32_WinRTWrapper.cpp"
  #endif
 
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #include "native/juce_linux_Messaging.cpp"
 
 #elif JUCE_ANDROID
