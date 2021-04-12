@@ -1971,8 +1971,8 @@ private:
     //==============================================================================
     static String expandPath (const String& path)
     {
-        if (! File::isAbsolutePath (path))  return "$(SRCROOT)/" + path;
-        if (path.startsWithChar ('~'))      return "$(HOME)" + path.substring (1);
+        if (! build_tools::isAbsolutePath (path))  return "$(SRCROOT)/" + path;
+        if (path.startsWithChar ('~'))             return "$(HOME)" + path.substring (1);
 
         return path;
     }
@@ -2812,7 +2812,7 @@ private:
     String addFileOrFolderReference (const String& pathString, String sourceTree, String fileType) const
     {
         auto fileRefID = createFileRefID (pathString);
-        auto filename = File::createFileWithoutCheckingPath (pathString).getFileName();
+        auto filename = build_tools::RelativePath (pathString, build_tools::RelativePath::unknown).getFileName();
 
         ValueTree v (fileRefID + " /* " + filename + " */");
         v.setProperty ("isa", "PBXFileReference", nullptr);
@@ -2947,7 +2947,7 @@ private:
     String addBuildFile (const FileOptions& opts) const
     {
         auto fileID = createID (opts.path + "buildref");
-        auto filename = File::createFileWithoutCheckingPath (opts.path).getFileName();
+        auto filename = build_tools::RelativePath (opts.path, build_tools::RelativePath::unknown).getFileName();
 
         if (opts.compile)
         {
@@ -3084,7 +3084,7 @@ private:
         auto path = frameworkName;
         auto isRelativePath = path.startsWith ("../");
 
-        if (! File::isAbsolutePath (path) && ! isRelativePath)
+        if (! build_tools::isAbsolutePath (path) && ! isRelativePath)
             path = "System/Library/Frameworks/" + path;
 
         if (! path.endsWithIgnoreCase (".framework"))
@@ -3092,7 +3092,7 @@ private:
 
         auto fileRefID = createFileRefID (path);
 
-        addFileReference (((File::isAbsolutePath (frameworkName) || isRelativePath) ? "" : "${SDKROOT}/") + path);
+        addFileReference (((build_tools::isAbsolutePath (frameworkName) || isRelativePath) ? "" : "${SDKROOT}/") + path);
         frameworkFileIDs.add (fileRefID);
 
         return addBuildFile (FileOptions().withPath (path)
@@ -3118,7 +3118,7 @@ private:
     String addEmbeddedFramework (const String& path) const
     {
         auto fileRefID = createFileRefID (path);
-        auto filename = File::createFileWithoutCheckingPath (path).getFileName();
+        auto filename = build_tools::RelativePath (path, build_tools::RelativePath::unknown).getFileName();
 
         auto fileType = getFileType (path);
         addFileOrFolderReference (path, "<group>", fileType);
