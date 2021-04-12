@@ -290,6 +290,30 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_should_build_module_source filename output_var)
+    get_filename_component(trimmed_name "${filename}" NAME_WE)
+
+    set(result TRUE)
+
+    set(pairs
+        "OSX\;Darwin"
+        "Windows\;Windows"
+        "Linux\;Linux"
+        "Android\;Android"
+        "iOS\;iOS")
+
+    foreach(pair IN LISTS pairs)
+        list(GET pair 0 suffix)
+        list(GET pair 1 system_name)
+
+        if((trimmed_name MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME STREQUAL "${system_name}"))
+            set(result FALSE)
+        endif()
+    endforeach()
+
+    set("${output_var}" "${result}" PARENT_SCOPE)
+endfunction()
+
 function(_juce_module_sources module_path output_path built_sources other_sources)
     get_filename_component(module_parent_path ${module_path} DIRECTORY)
     get_filename_component(module_glob ${module_path} NAME)
@@ -318,15 +342,25 @@ function(_juce_module_sources module_path output_path built_sources other_source
 
     set(headers ${all_module_files})
 
-    if(NOT module_cpp STREQUAL "")
-        list(REMOVE_ITEM headers ${module_cpp})
+    set(module_files_to_build)
+
+    foreach(filename IN LISTS module_cpp)
+        _juce_should_build_module_source("${filename}" should_build_file)
+
+        if(should_build_file)
+            list(APPEND module_files_to_build "${filename}")
+        endif()
+    endforeach()
+
+    if(NOT module_files_to_build STREQUAL "")
+        list(REMOVE_ITEM headers ${module_files_to_build})
     endif()
 
-    foreach(source_list IN ITEMS module_cpp headers)
+    foreach(source_list IN ITEMS module_files_to_build headers)
         list(TRANSFORM ${source_list} PREPEND "${output_path}/")
     endforeach()
 
-    set(${built_sources} ${module_cpp} PARENT_SCOPE)
+    set(${built_sources} ${module_files_to_build} PARENT_SCOPE)
     set(${other_sources} ${headers} PARENT_SCOPE)
 endfunction()
 
@@ -865,6 +899,7 @@ function(juce_add_binary_data target)
     set(newline_delimited_input)
 
     foreach(name IN LISTS JUCE_ARG_SOURCES)
+        _juce_make_absolute_and_check(name)
         set(newline_delimited_input "${newline_delimited_input}${name}\n")
     endforeach()
 
