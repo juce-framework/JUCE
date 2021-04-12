@@ -113,7 +113,7 @@ namespace IIR
             else
                 processInternal<ProcessContext, false> (context);
 
-           #if JUCE_SNAP_TO_ZERO
+           #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
             snapToZero();
            #endif
         }
