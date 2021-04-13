@@ -288,7 +288,7 @@ void MessageManager::broadcastMessage (const String&)
 }
 
 // this function expects that it will NEVER be called simultaneously for two concurrent threads
-bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 {
     for (;;)
     {
