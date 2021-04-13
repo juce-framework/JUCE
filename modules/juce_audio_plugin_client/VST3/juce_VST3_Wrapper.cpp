@@ -909,8 +909,23 @@ public:
     //==============================================================================
     tresult PLUGIN_API setComponentState (IBStream* stream) override
     {
+        if (! MessageManager::existsAndIsCurrentThread())
+       #if JUCE_LINUX || JUCE_BSD
+        {
+            WaitableEvent finishedEvent;
+
+            MessageManager::callAsync ([&]
+            {
+                setComponentState (stream);
+                finishedEvent.signal();
+            });
+
+            finishedEvent.wait();
+        }
+       #else
         // As an IEditController member, the host should only call this from the message thread.
-        JUCE_ASSERT_MESSAGE_THREAD
+        jassertfalse;
+       #endif
 
         if (auto* pluginInstance = getPluginInstance())
         {
