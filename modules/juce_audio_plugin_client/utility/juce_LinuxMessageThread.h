@@ -30,6 +30,9 @@
 namespace juce
 {
 
+// Implemented in juce_linux_Messaging.cpp
+bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
+
 class MessageThread
 {
 public:
@@ -63,11 +66,11 @@ public:
 
             for (;;)
             {
-                if (shouldExit
-                    || ! MessageManager::getInstance()->runDispatchLoopUntil (250))
-                {
+                if (! dispatchNextMessageOnSystemQueue (true))
+                    Thread::sleep (1);
+
+                if (shouldExit)
                     break;
-                }
             }
         } };
 
