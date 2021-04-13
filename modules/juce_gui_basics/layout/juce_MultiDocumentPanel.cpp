@@ -220,6 +220,13 @@ bool MultiDocumentPanel::addDocument (Component* const component,
 bool MultiDocumentPanel::closeDocument (Component* component,
                                         const bool checkItsOkToCloseFirst)
 {
+    // Intellisense warns about component being uninitialised.
+    // I'm not sure how a function argument could be uninitialised.
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6001)
+
+    if (component == nullptr)
+        return true;
+
     if (components.contains (component))
     {
         if (checkItsOkToCloseFirst && ! tryToCloseDocument (component))
@@ -304,6 +311,8 @@ bool MultiDocumentPanel::closeDocument (Component* component,
     }
 
     return true;
+
+    JUCE_END_IGNORE_WARNINGS_MSVC
 }
 
 int MultiDocumentPanel::getNumDocuments() const noexcept

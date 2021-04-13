@@ -534,17 +534,19 @@ private:
     {
         for (auto i = concertinaPanel.getNumPanels() - 1; i >= 0; --i)
         {
-            auto* p = concertinaPanel.getPanel (i);
-
-            if (! (p->isParentOf (e.eventComponent)))
+            if (auto* p = concertinaPanel.getPanel (i))
             {
-                auto* base = dynamic_cast<TreePanelBase*> (p);
+                if (! (p->isParentOf (e.eventComponent)))
+                {
+                    auto* base = dynamic_cast<TreePanelBase*> (p);
 
-                if (base == nullptr)
-                    base = dynamic_cast<ConcertinaTreeComponent*> (p)->getTree();
+                    if (base == nullptr)
+                        if (auto* concertina = dynamic_cast<ConcertinaTreeComponent*> (p))
+                            base = concertina->getTree();
 
-                if (base != nullptr)
-                    base->tree.clearSelectedItems();
+                    if (base != nullptr)
+                        base->tree.clearSelectedItems();
+                }
             }
         }
     }

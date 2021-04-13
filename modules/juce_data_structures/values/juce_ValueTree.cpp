@@ -949,19 +949,16 @@ void ValueTree::moveChild (int currentIndex, int newIndex, UndoManager* undoMana
 //==============================================================================
 void ValueTree::createListOfChildren (OwnedArray<ValueTree>& list) const
 {
-    jassert (object != nullptr);
-
-    for (auto* o : object->children)
-    {
-        jassert (o != nullptr);
-        list.add (new ValueTree (*o));
-    }
+    if (object != nullptr)
+        for (auto* o : object->children)
+            if (o != nullptr)
+                list.add (new ValueTree (*o));
 }
 
 void ValueTree::reorderChildren (const OwnedArray<ValueTree>& newOrder, UndoManager* undoManager)
 {
-    jassert (object != nullptr);
-    object->reorderChildren (newOrder, undoManager);
+    if (object != nullptr)
+        object->reorderChildren (newOrder, undoManager);
 }
 
 //==============================================================================

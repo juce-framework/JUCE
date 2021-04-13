@@ -108,7 +108,7 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
 
         for (auto* w : activeTooltipWindows)
         {
-            if (w != this && w->tipShowing == tipShowing && w->getParentComponent() == parent)
+            if (w != nullptr && w != this && w->tipShowing == tipShowing && w->getParentComponent() == parent)
             {
                 // Looks like you have more than one TooltipWindow showing the same tip..
                 // Be careful not to create more than one instance of this class with the

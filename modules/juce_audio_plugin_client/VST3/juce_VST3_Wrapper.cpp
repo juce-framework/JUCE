@@ -527,7 +527,11 @@ private:
             {
                 // we need to remain backward compatible with the old bypass id
                 if (vst3WrapperProvidedBypassParam)
+                {
+                    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6240)
                     vstParamID = static_cast<Vst::ParamID> ((isUsingManagedParameters() && ! forceLegacyParamIDs) ? paramBypass : numParameters);
+                    JUCE_END_IGNORE_WARNINGS_MSVC
+                }
 
                 bypassParamID = vstParamID;
             }
@@ -3683,18 +3687,15 @@ using namespace juce;
 
 //==============================================================================
 // The VST3 plugin entry point.
-JUCE_EXPORTED_FUNCTION IPluginFactory* PLUGIN_API GetPluginFactory()
+extern "C" SMTG_EXPORT_SYMBOL IPluginFactory* PLUGIN_API GetPluginFactory()
 {
     PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST3;
 
-   #if JUCE_MSVC || (JUCE_WINDOWS && JUCE_CLANG)
+   #if (JUCE_MSVC || (JUCE_WINDOWS && JUCE_CLANG)) && JUCE_32BIT
     // Cunning trick to force this function to be exported. Life's too short to
     // faff around creating .def files for this kind of thing.
-    #if JUCE_32BIT
-     #pragma comment(linker, "/EXPORT:GetPluginFactory=_GetPluginFactory@0")
-    #else
-     #pragma comment(linker, "/EXPORT:GetPluginFactory=GetPluginFactory")
-    #endif
+    // Unnecessary for 64-bit builds because those don't use decorated function names.
+    #pragma comment(linker, "/EXPORT:GetPluginFactory=_GetPluginFactory@0")
    #endif
 
     if (globalFactory == nullptr)

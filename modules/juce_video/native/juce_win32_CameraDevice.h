@@ -139,9 +139,12 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
         AM_MEDIA_TYPE mt = {};
         hr = sampleGrabber->GetConnectedMediaType (&mt);
-        VIDEOINFOHEADER* pVih = (VIDEOINFOHEADER*) (mt.pbFormat);
-        width = pVih->bmiHeader.biWidth;
-        height = pVih->bmiHeader.biHeight;
+
+        if (auto* pVih = (VIDEOINFOHEADER*) (mt.pbFormat))
+        {
+            width = pVih->bmiHeader.biWidth;
+            height = pVih->bmiHeader.biHeight;
+        }
 
         ComSmartPtr<IBaseFilter> nullFilter;
         hr = nullFilter.CoCreateInstance (CLSID_NullRenderer);
@@ -465,6 +468,13 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         int index = 0;
         ComSmartPtr<ICreateDevEnum> pDevEnum;
 
+        struct Deleter
+        {
+            void operator() (IUnknown* ptr) const noexcept { ptr->Release(); }
+        };
+
+        using ContextPtr = std::unique_ptr<IBindCtx, Deleter>;
+
         if (SUCCEEDED (pDevEnum.CoCreateInstance (CLSID_SystemDeviceEnum)))
         {
             ComSmartPtr<IEnumMoniker> enumerator;
@@ -477,13 +487,20 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
                 while (enumerator->Next (1, moniker.resetAndGetPointerAddress(), &fetched) == S_OK)
                 {
+                    auto context = []
+                    {
+                        IBindCtx* ptr = nullptr;
+                        ignoreUnused (CreateBindCtx (0, &ptr));
+                        return ContextPtr (ptr);
+                    }();
+
                     ComSmartPtr<IBaseFilter> captureFilter;
-                    hr = moniker->BindToObject (0, 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
+                    hr = moniker->BindToObject (context.get(), 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
 
                     if (SUCCEEDED (hr))
                     {
                         ComSmartPtr<IPropertyBag> propertyBag;
-                        hr = moniker->BindToStorage (0, 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
+                        hr = moniker->BindToStorage (context.get(), 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
 
                         if (SUCCEEDED (hr))
                         {
@@ -719,7 +736,7 @@ private:
             return false;
 
         ComSmartPtr<IMoniker> moniker;
-        WCHAR buffer[128];
+        WCHAR buffer[128]{};
         HRESULT hr = CreateItemMoniker (_T("!"), buffer, moniker.resetAndGetPointerAddress());
         if (FAILED (hr))
             return false;

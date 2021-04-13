@@ -179,10 +179,12 @@ public:
     */
     void insertNext (ObjectType* const newItem)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
         jassert (newItem != nullptr);
         jassert (newItem->nextListItem == nullptr);
         newItem->nextListItem = item;
         item = newItem;
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     /** Inserts an item at a numeric index in the list.
@@ -208,6 +210,7 @@ public:
     */
     ObjectType* replaceNext (ObjectType* const newItem) noexcept
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011 28182)
         jassert (newItem != nullptr);
         jassert (newItem->nextListItem == nullptr);
 
@@ -216,6 +219,7 @@ public:
         item->nextListItem = oldItem->nextListItem.item;
         oldItem->nextListItem.item = nullptr;
         return oldItem;
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     /** Adds an item to the end of the list.
@@ -308,10 +312,13 @@ public:
     */
     void copyToArray (ObjectType** destArray) const noexcept
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
         jassert (destArray != nullptr);
 
         for (auto* i = item; i != nullptr; i = i->nextListItem)
             *destArray++ = i;
+
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     /** Swaps this pointer with another one */

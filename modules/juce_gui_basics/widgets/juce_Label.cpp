@@ -150,7 +150,7 @@ void Label::attachToComponent (Component* owner, bool onLeft)
 
     if (ownerComponent != nullptr)
     {
-        setVisible (owner->isVisible());
+        setVisible (ownerComponent->isVisible());
         ownerComponent->addComponentListener (this);
         componentParentHierarchyChanged (*ownerComponent);
         componentMovedOrResized (*ownerComponent, true, true);

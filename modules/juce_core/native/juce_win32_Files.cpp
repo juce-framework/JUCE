@@ -717,7 +717,7 @@ static String readWindowsLnkFile (File lnkFile, bool wantsAbsolutePath)
              && SUCCEEDED (persistFile->Load (lnkFile.getFullPathName().toWideCharPointer(), STGM_READ))
              && (! wantsAbsolutePath || SUCCEEDED (shellLink->Resolve (nullptr, SLR_ANY_MATCH | SLR_NO_UI))))
         {
-            WIN32_FIND_DATA winFindData;
+            WIN32_FIND_DATA winFindData = {};
             WCHAR resolvedPath[MAX_PATH];
 
             DWORD flags = SLGP_UNCPRIORITY;
@@ -861,7 +861,7 @@ bool File::createShortcut (const String& description, const File& linkFileToCrea
     ComSmartPtr<IShellLink> shellLink;
     ComSmartPtr<IPersistFile> persistFile;
 
-    CoInitialize (nullptr);
+    ignoreUnused (CoInitialize (nullptr));
 
     return SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
         && SUCCEEDED (shellLink->SetPath (getFullPathName().toWideCharPointer()))

@@ -348,7 +348,9 @@ void Displays::updateToLogical()
             }
         }
 
-        retVal->isRoot = true;
+        if (retVal != nullptr)
+            retVal->isRoot = true;
+
         return retVal;
     }();
 

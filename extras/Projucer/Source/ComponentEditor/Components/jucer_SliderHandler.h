@@ -544,15 +544,15 @@ private:
 
         String getText() const override
         {
-            Slider* s = dynamic_cast<Slider*> (component);
-            jassert (s != nullptr);
-
-            switch (rangeParam)
+            if (auto* s = dynamic_cast<Slider*> (component))
             {
-                case 0:     return String (s->getMinimum());
-                case 1:     return String (s->getMaximum());
-                case 2:     return String (s->getInterval());
-                default:    jassertfalse; break;
+                switch (rangeParam)
+                {
+                    case 0:     return String (s->getMinimum());
+                    case 1:     return String (s->getMaximum());
+                    case 2:     return String (s->getInterval());
+                    default:    jassertfalse; break;
+                }
             }
 
             return {};
@@ -613,10 +613,10 @@ private:
 
         String getText() const override
         {
-            auto s = dynamic_cast<Slider*> (component);
-            jassert (s != nullptr);
+            if (auto* s = dynamic_cast<Slider*> (component))
+                return String (s->getSkewFactor());
 
-            return String (s->getSkewFactor());
+            return {};
         }
 
         struct SliderSkewChangeAction  : public ComponentUndoableAction<Slider>

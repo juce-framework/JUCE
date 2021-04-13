@@ -77,10 +77,10 @@ bool OpenGLShaderProgram::addShader (const String& code, GLenum type)
 
     if (status == (GLint) GL_FALSE)
     {
-        GLchar infoLog [16384];
+        std::vector<GLchar> infoLog (16384);
         GLsizei infoLogLength = 0;
-        context.extensions.glGetShaderInfoLog (shaderID, sizeof (infoLog), &infoLogLength, infoLog);
-        errorLog = String (infoLog, (size_t) infoLogLength);
+        context.extensions.glGetShaderInfoLog (shaderID, (GLsizei) infoLog.size(), &infoLogLength, infoLog.data());
+        errorLog = String (infoLog.data(), (size_t) infoLogLength);
 
        #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained compile errors!
@@ -115,10 +115,10 @@ bool OpenGLShaderProgram::link() noexcept
 
     if (status == (GLint) GL_FALSE)
     {
-        GLchar infoLog [16384];
+        std::vector<GLchar> infoLog (16384);
         GLsizei infoLogLength = 0;
-        context.extensions.glGetProgramInfoLog (progID, sizeof (infoLog), &infoLogLength, infoLog);
-        errorLog = String (infoLog, (size_t) infoLogLength);
+        context.extensions.glGetProgramInfoLog (progID, (GLsizei) infoLog.size(), &infoLogLength, infoLog.data());
+        errorLog = String (infoLog.data(), (size_t) infoLogLength);
 
        #if JUCE_DEBUG && ! JUCE_DONT_ASSERT_ON_GLSL_COMPILE_ERROR
         // Your GLSL code contained link errors!

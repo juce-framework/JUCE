@@ -1747,6 +1747,9 @@ Button* LookAndFeel_V2::createFilenameComponentBrowseButton (const String& text)
 void LookAndFeel_V2::layoutFilenameComponent (FilenameComponent& filenameComp,
                                               ComboBox* filenameBox, Button* browseButton)
 {
+    if (browseButton == nullptr || filenameBox == nullptr)
+        return;
+
     browseButton->setSize (80, filenameComp.getHeight());
 
     if (auto* tb = dynamic_cast<TextButton*> (browseButton))

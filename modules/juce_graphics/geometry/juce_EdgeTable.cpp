@@ -26,6 +26,8 @@
 namespace juce
 {
 
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6255 6263 6386)
+
 const int juce_edgeTableDefaultEdgesPerLine = 32;
 
 //==============================================================================
@@ -837,5 +839,7 @@ bool EdgeTable::isEmpty() noexcept
 
     return bounds.getHeight() == 0;
 }
+
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 } // namespace juce

@@ -116,7 +116,10 @@ struct TextDiffHelpers
 
         if (scratchSpace < 4096)
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6255)
             auto* scratch = (int*) alloca (scratchSpace);
+            JUCE_END_IGNORE_WARNINGS_MSVC
+
             return findLongestCommonSubstring (a, lenA, indexInA, b, lenB, indexInB, scratchSpace, scratch);
         }
 

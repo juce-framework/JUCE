@@ -157,16 +157,16 @@ bool AudioFormatWriter::writeFromFloatArrays (const float* const* channels, int 
     if (isFloatingPoint())
         return write ((const int**) channels, numSamples);
 
-    int* chans[256];
-    int scratch[4096];
+    std::vector<int*> chans (256);
+    std::vector<int> scratch (4096);
 
-    jassert (numSourceChannels < numElementsInArray (chans));
-    const int maxSamples = (int) (numElementsInArray (scratch) / numSourceChannels);
+    jassert (numSourceChannels < (int) chans.size());
+    const int maxSamples = (int) scratch.size() / numSourceChannels;
 
     for (int i = 0; i < numSourceChannels; ++i)
-        chans[i] = scratch + (i * maxSamples);
+        chans[(size_t) i] = scratch.data() + (i * maxSamples);
 
-    chans[numSourceChannels] = nullptr;
+    chans[(size_t) numSourceChannels] = nullptr;
     int startSample = 0;
 
     while (numSamples > 0)
@@ -174,9 +174,9 @@ bool AudioFormatWriter::writeFromFloatArrays (const float* const* channels, int 
         auto numToDo = jmin (numSamples, maxSamples);
 
         for (int i = 0; i < numSourceChannels; ++i)
-            convertFloatsToInts (chans[i], channels[i] + startSample, numToDo);
+            convertFloatsToInts (chans[(size_t) i], channels[(size_t) i] + startSample, numToDo);
 
-        if (! write ((const int**) chans, numToDo))
+        if (! write ((const int**) chans.data(), numToDo))
             return false;
 
         startSample += numToDo;

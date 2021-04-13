@@ -177,7 +177,14 @@ public:
 
     int read (void* buffer, int bytesToRead)
     {
-        jassert (buffer != nullptr && bytesToRead >= 0);
+        jassert (bytesToRead >= 0);
+
+        if (buffer == nullptr)
+        {
+            jassertfalse;
+            return 0;
+        }
+
         DWORD bytesRead = 0;
 
         if (! (finished || isError()))

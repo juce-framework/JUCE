@@ -353,7 +353,7 @@ static void checkForPointerAPI()
 //==============================================================================
 using SetProcessDPIAwareFunc                   = BOOL                  (WINAPI*) ();
 using SetProcessDPIAwarenessContextFunc        = BOOL                  (WINAPI*) (DPI_AWARENESS_CONTEXT);
-using SetProcessDPIAwarenessFunc               = BOOL                  (WINAPI*) (DPI_Awareness);
+using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (DPI_Awareness);
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using GetDPIForWindowFunc                      = UINT                  (WINAPI*) (HWND);
 using GetDPIForMonitorFunc                     = HRESULT               (WINAPI*) (HMONITOR, Monitor_DPI_Type, UINT*, UINT*);
@@ -406,7 +406,7 @@ static void setDPIAwareness()
         setProcessDPIAwarenessContext       = (SetProcessDPIAwarenessContextFunc) getUser32Function ("SetProcessDpiAwarenessContext");
 
         if (setProcessDPIAwarenessContext != nullptr
-            && SUCCEEDED (setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
+            && setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
             return;
 
         enableNonClientDPIScaling = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
@@ -874,7 +874,8 @@ public:
         hBitmap = CreateDIBSection (hdc, (BITMAPINFO*) &(bitmapInfo), DIB_RGB_COLORS,
                                     (void**) &bitmapData, nullptr, 0);
 
-        previousBitmap = SelectObject (hdc, hBitmap);
+        if (hBitmap != nullptr)
+            previousBitmap = SelectObject (hdc, hBitmap);
 
         if (format == Image::ARGB && clearImage)
             zeromem (bitmapData, (size_t) std::abs (h * lineStride));
@@ -1030,7 +1031,7 @@ namespace IconConverters
 
         ScopedICONINFO info;
 
-        if (! SUCCEEDED (::GetIconInfo (icon, &info)))
+        if (! ::GetIconInfo (icon, &info))
             return {};
 
         BITMAP bm;
@@ -1878,7 +1879,7 @@ public:
             {
                 FORMATETC format = { type, nullptr, DVASPECT_CONTENT, -1, TYMED_HGLOBAL };
 
-                if (SUCCEEDED (error = dataObject->GetData (&format, &medium)))
+                if (SUCCEEDED (error = dataObject->GetData (&format, &medium)) && medium.hGlobal != nullptr)
                 {
                     dataSize = GlobalSize (medium.hGlobal);
                     data = GlobalLock (medium.hGlobal);
@@ -1887,7 +1888,7 @@ public:
 
             ~DroppedData()
             {
-                if (data != nullptr)
+                if (data != nullptr && medium.hGlobal != nullptr)
                     GlobalUnlock (medium.hGlobal);
             }
 
@@ -3153,7 +3154,7 @@ private:
                         const UINT keyChar  = MapVirtualKey ((UINT) key, 2);
                         const UINT scanCode = MapVirtualKey ((UINT) key, 0);
                         BYTE keyState[256];
-                        GetKeyboardState (keyState);
+                        ignoreUnused (GetKeyboardState (keyState));
 
                         WCHAR text[16] = { 0 };
                         if (ToUnicode ((UINT) key, scanCode, keyState, text, 8, 0) != 1)
@@ -4351,7 +4352,7 @@ static BOOL CALLBACK enumAlwaysOnTopWindows (HWND hwnd, LPARAM lParam)
 
         if (processID == GetCurrentProcessId())
         {
-            WINDOWINFO info;
+            WINDOWINFO info{};
 
             if (GetWindowInfo (hwnd, &info)
                  && (info.dwExStyle & WS_EX_TOPMOST) != 0)
@@ -4642,7 +4643,7 @@ void Desktop::setKioskComponent (Component* kioskModeComp, bool enableOrDisable,
     if (auto* tlw = dynamic_cast<TopLevelWindow*> (kioskModeComp))
         tlw->setUsingNativeTitleBar (! enableOrDisable);
 
-    if (enableOrDisable)
+    if (kioskModeComp != nullptr && enableOrDisable)
         kioskModeComp->setBounds (getDisplays().getDisplayForRect (kioskModeComp->getScreenBounds())->totalArea);
 }
 

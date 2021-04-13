@@ -108,9 +108,12 @@ struct CachedImageList  : public ReferenceCountedObject,
 
         TextureInfo getTextureInfo()
         {
+            if (pixelData == nullptr)
+                return {};
+
             TextureInfo t;
 
-            if (textureNeedsReloading && pixelData != nullptr)
+            if (textureNeedsReloading)
             {
                 textureNeedsReloading = false;
                 texture.loadImage (Image (*pixelData));
@@ -1049,7 +1052,11 @@ struct StateHelpers
 
         void bindTexture (GLuint textureID) noexcept
         {
-            jassert (currentActiveTexture >= 0);
+            if (currentActiveTexture < 0 || numTextures <= currentActiveTexture)
+            {
+                jassertfalse;
+                return;
+            }
 
             if (currentTextureID[currentActiveTexture] != textureID)
             {
@@ -1068,7 +1075,8 @@ struct StateHelpers
         }
 
     private:
-        GLuint currentTextureID[3];
+        static constexpr auto numTextures = 3;
+        GLuint currentTextureID[numTextures];
         int texturesEnabled = 0, currentActiveTexture = -1;
         const OpenGLContext& context;
 

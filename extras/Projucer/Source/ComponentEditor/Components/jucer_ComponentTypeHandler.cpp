@@ -612,7 +612,7 @@ void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* c
     s << "addAndMakeVisible (" << memberVariableName << ".get());\n";
 
 
-    if (SettableTooltipClient* ttc = dynamic_cast<SettableTooltipClient*> (component))
+    if (auto* ttc = dynamic_cast<SettableTooltipClient*> (component))
     {
         if (ttc->getTooltip().isNotEmpty())
         {
@@ -622,7 +622,7 @@ void ComponentTypeHandler::fillInCreationCode (GeneratedCode& code, Component* c
         }
     }
 
-    if (component->getExplicitFocusOrder() > 0)
+    if (component != nullptr && component->getExplicitFocusOrder() > 0)
         s << memberVariableName << "->setExplicitFocusOrder ("
           << component->getExplicitFocusOrder()
           << ");\n";

@@ -382,7 +382,9 @@ struct Component::ComponentHelpers
         if (directParent == parent)
             return convertFromParentSpace (target, coordInParent);
 
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
         return convertFromParentSpace (target, convertFromDistantParentSpace (parent, *directParent, coordInParent));
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     template <typename PointOrRect>
@@ -393,8 +395,12 @@ struct Component::ComponentHelpers
             if (source == target)
                 return p;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
+
             if (source->isParentOf (target))
                 return convertFromDistantParentSpace (source, *target, p);
+
+            JUCE_END_IGNORE_WARNINGS_MSVC
 
             p = convertToParentSpace (*source, p);
             source = source->getParentComponent();
@@ -3014,7 +3020,7 @@ bool Component::isMouseOver (bool includeChildren) const
     {
         auto* c = ms.getComponentUnderMouse();
 
-        if (c == this || (includeChildren && isParentOf (c)))
+        if (c != nullptr && (c == this || (includeChildren && isParentOf (c))))
             if (ms.isDragging() || ! (ms.isTouch() || ms.isPen()))
                 if (c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition()).roundToInt(), false))
                     return true;

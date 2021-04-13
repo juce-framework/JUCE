@@ -394,7 +394,7 @@ private:
     {
         DirectShowContext (Pimpl& c)  : component (c)
         {
-            CoInitialize (0);
+            ignoreUnused (CoInitialize (0));
         }
 
         ~DirectShowContext()

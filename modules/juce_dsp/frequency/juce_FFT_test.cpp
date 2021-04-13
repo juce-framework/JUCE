@@ -148,7 +148,7 @@ struct FFTUnitTest  : public UnitTest
                 HeapBlock<Complex<float>> frequency (n);
 
                 fillRandom (random, inout.getData(), n);
-                zeromem (reference.getData(), sizeof (float) * (n << 1));
+                zeromem (reference.getData(), sizeof (float) * ((size_t) n << 1));
                 performReferenceFourier (inout.getData(), frequency.getData(), n, false);
 
                 for (size_t i = 0; i < n; ++i)

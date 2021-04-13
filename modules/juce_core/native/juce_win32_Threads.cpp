@@ -28,8 +28,12 @@ HWND juce_messageWindowHandle = nullptr;  // (this is used by other parts of the
 void* getUser32Function (const char* functionName)
 {
     HMODULE module = GetModuleHandleA ("user32.dll");
-    jassert (module != nullptr);
-    return (void*) GetProcAddress (module, functionName);
+
+    if (module != nullptr)
+        return (void*) GetProcAddress (module, functionName);
+
+    jassertfalse;
+    return nullptr;
 }
 
 //==============================================================================
@@ -85,7 +89,10 @@ void Thread::killThread()
        #if JUCE_DEBUG
         OutputDebugStringA ("** Warning - Forced thread termination **\n");
        #endif
+
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6258)
         TerminateThread (threadHandle.get(), 0);
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 }
 
@@ -109,8 +116,11 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
     {
         RaiseException (0x406d1388 /*MS_VC_EXCEPTION*/, 0, sizeof (info) / sizeof (ULONG_PTR), (ULONG_PTR*) &info);
     }
-    __except (EXCEPTION_CONTINUE_EXECUTION)
-    {}
+    __except (GetExceptionCode() == EXCEPTION_NONCONTINUABLE_EXCEPTION ? EXCEPTION_EXECUTE_HANDLER
+                                                                       : EXCEPTION_CONTINUE_EXECUTION)
+    {
+        OutputDebugStringA ("** Warning - Encountered noncontinuable exception **\n");
+    }
    #else
     ignoreUnused (name);
    #endif
@@ -404,9 +414,11 @@ public:
             startupInfo.hStdError  = (streamFlags & wantStdErr) != 0 ? writePipe : nullptr;
             startupInfo.dwFlags = STARTF_USESTDHANDLES;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6335)
             ok = CreateProcess (nullptr, const_cast<LPWSTR> (command.toWideCharPointer()),
                                 nullptr, nullptr, TRUE, CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT,
                                 nullptr, nullptr, &startupInfo, &processInfo) != FALSE;
+            JUCE_END_IGNORE_WARNINGS_MSVC
         }
     }
 
