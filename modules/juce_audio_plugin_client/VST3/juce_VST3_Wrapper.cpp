@@ -912,15 +912,17 @@ public:
         if (! MessageManager::existsAndIsCurrentThread())
        #if JUCE_LINUX || JUCE_BSD
         {
+            tresult result = kResultOk;
             WaitableEvent finishedEvent;
 
             MessageManager::callAsync ([&]
             {
-                setComponentState (stream);
+                result = setComponentState (stream);
                 finishedEvent.signal();
             });
 
             finishedEvent.wait();
+            return result;
         }
        #else
         // As an IEditController member, the host should only call this from the message thread.
