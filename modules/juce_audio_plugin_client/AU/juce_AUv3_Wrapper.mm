@@ -782,7 +782,7 @@ public:
         for (int dir = 0; dir < 2; ++dir)
         {
             const bool isInput = (dir == 0);
-            const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
+            const int n = AudioUnitHelpers::getBusCount (processor, isInput);
             Array<AudioChannelSet>& channelSets = (isInput ? layouts.inputBuses : layouts.outputBuses);
 
             AUAudioUnitBusArray* auBuses = (isInput ? [getAudioUnit() inputBusses] : [getAudioUnit() outputBusses]);
@@ -839,7 +839,7 @@ public:
 
         audioBuffer.prepare (totalInChannels, totalOutChannels, static_cast<int> (maxFrames));
 
-        double sampleRate = (jmax (AudioUnitHelpers::getBusCount (&processor, true), AudioUnitHelpers::getBusCount (&processor, false)) > 0 ?
+        double sampleRate = (jmax (AudioUnitHelpers::getBusCount (processor, true), AudioUnitHelpers::getBusCount (processor, false)) > 0 ?
                              [[[([inputBusses.get() count] > 0 ? inputBusses.get() : outputBusses.get()) objectAtIndexedSubscript: 0] format] sampleRate] : 44100.0);
 
         processor.setRateAndBufferSizeDetails (sampleRate, static_cast<int> (maxFrames));
@@ -1125,7 +1125,7 @@ private:
     {
         std::unique_ptr<NSMutableArray<AUAudioUnitBus*>, NSObjectDeleter> array ([[NSMutableArray<AUAudioUnitBus*> alloc] init]);
         AudioProcessor& processor = getAudioProcessor();
-        const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
+        const int n = AudioUnitHelpers::getBusCount (processor, isInput);
 
         for (int i = 0; i < n; ++i)
         {
@@ -1383,7 +1383,7 @@ private:
         OwnedArray<BusBuffer>& busBuffers = isInput ? inBusBuffers : outBusBuffers;
         busBuffers.clear();
 
-        const int n = AudioUnitHelpers::getBusCount (&getAudioProcessor(), isInput);
+        const int n = AudioUnitHelpers::getBusCount (getAudioProcessor(), isInput);
         const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
         for (int busIdx = 0; busIdx < n; ++busIdx)
