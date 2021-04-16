@@ -340,7 +340,10 @@ namespace build_tools
         auto* tagsArray = componentDict->createNewChildElement ("array");
 
         tagsArray->createNewChildElement ("string")
-            ->addTextElement (isPluginSynth ? "Synth" : "Effects");
+                 ->addTextElement (isPluginSynth ? "Synth" : "Effects");
+
+        if (auMainType.removeCharacters ("'") == "aumi")
+            tagsArray->createNewChildElement ("string")->addTextElement ("MIDI");
 
         return { plistKey, plistEntry };
     }
