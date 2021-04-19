@@ -865,7 +865,7 @@ public:
            #ifdef JucePlugin_PreferredChannelConfigurations
             short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
 
-            if (! AudioUnitHelpers::isLayoutSupported (*juceFilter, isInput, busNr, newChannelNum, configs))
+            if (! AudioUnitHelpers::isLayoutSupported (*juceFilter, info.isInput, info.busNr, newChannelNum, configs))
                 return kAudioUnitErr_FormatNotSupported;
            #else
             if (! juceFilter->getBus (info.isInput, info.busNr)->isLayoutSupported (newChannelSet))
@@ -1244,7 +1244,7 @@ public:
             short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
 
             ignoreUnused (bus);
-            return AudioUnitHelpers::isLayoutSupported (*juceFilter, isInput, busNr, newNumChannels, configs);
+            return AudioUnitHelpers::isLayoutSupported (*juceFilter, info.isInput, info.busNr, newNumChannels, configs);
            #else
             return bus->isNumberOfChannelsSupported (newNumChannels);
            #endif
@@ -1269,7 +1269,7 @@ public:
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
 
-        if (! AudioUnitHelpers::isLayoutSupported (*juceFilter, isInput, busNr, newNumChannels, configs))
+        if (! AudioUnitHelpers::isLayoutSupported (*juceFilter, info.isInput, info.busNr, newNumChannels, configs))
             return kAudioUnitErr_FormatNotSupported;
        #endif
 

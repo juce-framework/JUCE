@@ -512,7 +512,7 @@ struct AudioUnitHelpers
             const bool isInput = (dir == 0);
 
             const int actualBuses = juceFilter->getBusCount (isInput);
-            const int auNumBuses  = getBusCount (juceFilter, isInput);
+            const int auNumBuses  = getBusCount (*juceFilter, isInput);
             Array<AudioChannelSet>& buses = (isInput ? copy.inputBuses : copy.outputBuses);
 
             for (int i = auNumBuses; i < actualBuses; ++i)
@@ -535,7 +535,7 @@ struct AudioUnitHelpers
             const bool isInput = (dir == 0);
 
             const int actualBuses = juceFilter->getBusCount (isInput);
-            const int auNumBuses  = getBusCount (juceFilter, isInput);
+            const int auNumBuses  = getBusCount (*juceFilter, isInput);
             auto& buses = (isInput ? layout.inputBuses : layout.outputBuses);
 
             for (int i = auNumBuses; i < actualBuses; ++i)
