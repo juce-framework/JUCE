@@ -511,6 +511,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\synthesisers\juce_Synthesiser.cpp">
       <Filter>JUCE Modules\juce_audio_basics\synthesisers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_ADSR_test.cpp">
+      <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\utilities\juce_IIRFilter.cpp">
       <Filter>JUCE Modules\juce_audio_basics\utilities</Filter>
     </ClCompile>
@@ -3669,6 +3672,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_intel_SharedCode.h">
+      <Filter>JUCE Modules\juce_core\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_CFHelpers.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
@@ -4741,6 +4747,9 @@
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\public.sdk\README.md">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK\public.sdk</Filter>
+    </None>
+    <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\JUCE_README.txt">
+      <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\LICENSE.txt">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK</Filter>

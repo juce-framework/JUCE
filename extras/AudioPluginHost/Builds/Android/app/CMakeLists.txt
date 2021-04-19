@@ -115,6 +115,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp"
     "../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_ADSR.h"
+    "../../../../../modules/juce_audio_basics/utilities/juce_ADSR_test.cpp"
     "../../../../../modules/juce_audio_basics/utilities/juce_Decibels.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_GenericInterpolator.h"
     "../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.cpp"
@@ -557,6 +558,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/LICENSE.txt"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/README.md"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/JUCE_README.txt"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/README.md"
     "../../../../../modules/juce_audio_processors/format_types/juce_AU_Shared.h"
@@ -751,6 +753,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/native/juce_android_Threads.cpp"
     "../../../../../modules/juce_core/native/juce_BasicNativeHeaders.h"
     "../../../../../modules/juce_core/native/juce_curl_Network.cpp"
+    "../../../../../modules/juce_core/native/juce_intel_SharedCode.h"
     "../../../../../modules/juce_core/native/juce_linux_CommonFile.cpp"
     "../../../../../modules/juce_core/native/juce_linux_Files.cpp"
     "../../../../../modules/juce_core/native/juce_linux_Network.cpp"
@@ -1702,6 +1705,7 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/sources/ju
 set_source_files_properties("../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/synthesisers/juce_Synthesiser.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_ADSR.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_ADSR_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_Decibels.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_GenericInterpolator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/utilities/juce_IIRFilter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2144,6 +2148,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/JUCE_README.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_AU_Shared.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2338,6 +2343,7 @@ set_source_files_properties("../../../../../modules/juce_core/native/juce_androi
 set_source_files_properties("../../../../../modules/juce_core/native/juce_android_Threads.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_BasicNativeHeaders.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_curl_Network.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_core/native/juce_intel_SharedCode.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_CommonFile.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_Files.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_Network.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

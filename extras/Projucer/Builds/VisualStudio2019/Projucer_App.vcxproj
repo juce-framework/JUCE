@@ -70,7 +70,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)\</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)\</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)\Projucer.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -112,7 +112,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)\</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)\</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)\Projucer.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -1741,6 +1741,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_WindowsRegistry.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_android_JNIHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_BasicNativeHeaders.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_intel_SharedCode.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_CFHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ObjCHelpers.h"/>
