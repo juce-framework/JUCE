@@ -821,7 +821,15 @@ private:
 
     long refreshBufferSizes()
     {
-        return asioObject->getBufferSize (&minBufferSize, &maxBufferSize, &preferredBufferSize, &bufferGranularity);
+        const auto err = asioObject->getBufferSize (&minBufferSize, &maxBufferSize, &preferredBufferSize, &bufferGranularity);
+
+        if (err == ASE_OK)
+        {
+            bufferSizes.clear();
+            addBufferSizes (minBufferSize, maxBufferSize, preferredBufferSize, bufferGranularity);
+        }
+
+        return err;
     }
 
     int readBufferSizes (int bufferSizeSamples)
@@ -1214,8 +1222,6 @@ private:
 
                     if ((err = refreshBufferSizes()) == 0)
                     {
-                        addBufferSizes (minBufferSize, maxBufferSize, preferredBufferSize, bufferGranularity);
-
                         auto currentRate = getSampleRate();
 
                         if (currentRate < 1.0 || currentRate > 192001.0)
