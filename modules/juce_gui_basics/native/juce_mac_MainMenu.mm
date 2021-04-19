@@ -537,12 +537,43 @@ private:
         }
 
     private:
+        /*  Returns true if and only if the peer handles the event. */
+        static bool tryPassingKeyEventToPeer (NSMenuItem* item)
+        {
+            auto* e = [NSApp currentEvent];
+
+            if ([e type] != NSEventTypeKeyDown && [e type] != NSEventTypeKeyUp)
+                return false;
+
+            const auto triggeredByShortcut = [[e charactersIgnoringModifiers] isEqualToString: [item keyEquivalent]]
+                                             && ([e modifierFlags] & ~(NSUInteger) 0xFFFF) == [item keyEquivalentModifierMask];
+
+            if (! triggeredByShortcut)
+                return false;
+
+            if (auto* focused = juce::Component::getCurrentlyFocusedComponent())
+            {
+                if (auto* peer = dynamic_cast<juce::NSViewComponentPeer*> (focused->getPeer()))
+                {
+                    if ([e type] == NSEventTypeKeyDown)
+                        peer->redirectKeyDown (e);
+                    else
+                        peer->redirectKeyUp (e);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         static void menuItemInvoked (id self, SEL, NSMenuItem* item)
         {
-            auto owner = getIvar<JuceMainMenuHandler*> (self, "owner");
+            if (tryPassingKeyEventToPeer (item))
+                return;
 
             if (auto* juceItem = getJuceClassFromNSObject<PopupMenu::Item> ([item representedObject]))
-                owner->invoke (*juceItem, static_cast<int> ([item tag]));
+                getIvar<JuceMainMenuHandler*> (self, "owner")->invoke (*juceItem, static_cast<int> ([item tag]));
         }
 
         static void menuNeedsUpdate (id self, SEL, NSMenu* menu)
