@@ -62,6 +62,8 @@ namespace build_tools
         String version;
         String companyCopyright;
 
+        String applicationCategory;
+
         StringPairArray allPreprocessorDefs;
         String documentExtensions;
 

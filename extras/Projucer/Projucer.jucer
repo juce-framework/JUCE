@@ -9,7 +9,8 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="Zrx1Gl"
                extraFrameworks="AudioUnit; Accelerate; AVFoundation; CoreAudio; CoreAudioKit; CoreMIDI; DiscRecording; QuartzCore; AudioToolbox; OpenGL; QTKit; QuickTime"
-               microphonePermissionNeeded="1" cameraPermissionNeeded="1" smallIcon="Zrx1Gl">
+               microphonePermissionNeeded="1" cameraPermissionNeeded="1" smallIcon="Zrx1Gl"
+               applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" cppLibType="libc++"
                        recommendedWarnings="LLVM"/>
@@ -290,8 +291,8 @@
             file="Source/BinaryData/colourscheme_dark.xml"/>
       <FILE id="bvFank" name="colourscheme_light.xml" compile="0" resource="1"
             file="Source/BinaryData/colourscheme_light.xml"/>
-      <FILE id="SDFoQY" name="juce_runtime_arch_detection.cpp" compile="0" resource="1"
-            file="../Build/CMake/juce_runtime_arch_detection.cpp"/>
+      <FILE id="SDFoQY" name="juce_runtime_arch_detection.cpp" compile="0"
+            resource="1" file="../Build/CMake/juce_runtime_arch_detection.cpp"/>
     </GROUP>
     <GROUP id="{A5AE7471-B900-FD9D-8DE7-2FB68D11AE30}" name="CodeEditor">
       <FILE id="w3ka6n" name="jucer_DocumentEditorComponent.cpp" compile="1"

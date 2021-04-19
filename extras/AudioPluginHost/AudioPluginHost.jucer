@@ -9,7 +9,7 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" rtasFolder="~/SDKs/PT_80_SDK" objCExtraSuffix="M73TRi"
                smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1"
                sendAppleEventsPermissionNeeded="1" sendAppleEventsPermissionText="This is required for some third-party plug-ins to function correctly."
-               customXcodeResourceFolders="../../examples/Assets">
+               customXcodeResourceFolders="../../examples/Assets" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" recommendedWarnings="LLVM"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"

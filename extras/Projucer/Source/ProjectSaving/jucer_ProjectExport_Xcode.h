@@ -133,6 +133,7 @@ public:
         : ProjectExporter (p, t),
           xcodeCanUseDwarf (true),
           iOS (isIOS),
+          applicationCategoryValue                     (settings, Ids::applicationCategory,                     getUndoManager(), ""),
           customPListValue                             (settings, Ids::customPList,                             getUndoManager()),
           pListPrefixHeaderValue                       (settings, Ids::pListPrefixHeader,                       getUndoManager()),
           pListPreprocessValue                         (settings, Ids::pListPreprocess,                         getUndoManager()),
@@ -209,6 +210,8 @@ public:
     }
 
     //==============================================================================
+    String getApplicationCategoryString() const             { return applicationCategoryValue.get(); }
+
     String getPListToMergeString() const                    { return customPListValue.get(); }
     String getPListPrefixHeaderString() const               { return pListPrefixHeaderValue.get(); }
     bool isPListPreprocessEnabled() const                   { return pListPreprocessValue.get(); }
@@ -415,6 +418,70 @@ public:
 
         if (isOSX())
         {
+            std::vector<std::pair<String, String>> appCategories
+            {
+                { "None",                 "" },
+                { "Business",             "business" },
+                { "Developer Tools",      "developer-tools" },
+                { "Education",            "education" },
+                { "Entertainment",        "entertainment" },
+                { "Finace",               "finance" },
+                { "Games",                "games" },
+                { "Games - Action",       "action-games" },
+                { "Games - Adventure",    "adventure-games" },
+                { "Games - Arcade",       "arcade-games" },
+                { "Games - Board",        "board-games" },
+                { "Games - Card",         "card-games" },
+                { "Games - Casino",       "casino-games" },
+                { "Games - Dice",         "dice-games" },
+                { "Games - Educational",  "educational-games" },
+                { "Games - Family",       "family-games" },
+                { "Games - Kids",         "kids-games" },
+                { "Games - Music",        "music-games" },
+                { "Games - Puzzle",       "puzzle-games" },
+                { "Games - Racing",       "racing-games" },
+                { "Games - Role Playing", "role-playing-games" },
+                { "Games - Simulation",   "simulation-games" },
+                { "Games - Sports",       "sports-games" },
+                { "Games - Strategy",     "strategy-games" },
+                { "Games - Trivia",       "trivia-games" },
+                { "Games - Word",         "word-games" },
+                { "Graphics Design",      "graphics-design" },
+                { "Healthcare & Fitness", "healthcare-fitness" },
+                { "Lifestyle",            "lifestyle" },
+                { "Medial",               "medical" },
+                { "Music",                "music" },
+                { "News",                 "news" },
+                { "Photography",          "photography" },
+                { "Productivity",         "productivity" },
+                { "Reference",            "reference" },
+                { "Social Networking",    "social-networking" },
+                { "Sports",               "sports" },
+                { "Travel",               "travel" },
+                { "Utilities",            "utilities" },
+                { "Video",                "video" },
+                { "Weather" ,             "weather" }
+            };
+
+            StringArray appCategoryKeys;
+            Array<var> appCategoryValues;
+
+            for (auto& opt : appCategories)
+            {
+                appCategoryKeys.add (opt.first);
+
+                if (opt.second.isNotEmpty())
+                    appCategoryValues.add ("public.app-category." + opt.second);
+                else
+                    appCategoryValues.add ("");
+            }
+
+            props.add (new ChoicePropertyComponent (applicationCategoryValue,
+                                                    "App Category",
+                                                    appCategoryKeys,
+                                                    appCategoryValues),
+                       "The application category.");
+
             props.add (new MultiChoicePropertyComponent (validArchsValue, "Valid Architectures", getAllArchs(), getAllArchs()),
                        "The full set of architectures which this project may target. "
                        "Each configuration will build for the intersection of this property, and the per-configuration macOS Architecture property");
@@ -1739,6 +1806,7 @@ public:
             options.type                             = type;
             options.executableName                   = "${EXECUTABLE_NAME}";
             options.bundleIdentifier                 = getBundleIdentifier();
+            options.applicationCategory              = owner.getApplicationCategoryString();
             options.plistToMerge                     = owner.getPListToMergeString();
             options.iOS                              = owner.iOS;
             options.microphonePermissionEnabled      = owner.isMicrophonePermissionEnabled();
@@ -3488,7 +3556,8 @@ private:
 
     const bool iOS;
 
-    ValueWithDefault customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
+    ValueWithDefault applicationCategoryValue,
+                     customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
                      subprojectsValue,
                      validArchsValue,
                      extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,

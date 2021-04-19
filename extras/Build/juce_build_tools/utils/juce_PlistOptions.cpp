@@ -162,6 +162,9 @@ namespace build_tools
         addPlistDictionaryKey (*dict, "NSHumanReadableCopyright",    companyCopyright);
         addPlistDictionaryKey (*dict, "NSHighResolutionCapable", true);
 
+        if (applicationCategory.isNotEmpty())
+            addPlistDictionaryKey (*dict, "LSApplicationCategoryType", applicationCategory);
+
         auto replacedDocExtensions = StringArray::fromTokens (replacePreprocessorDefs (allPreprocessorDefs,
                                                                                        documentExtensions), ",", {});
         replacedDocExtensions.trim();

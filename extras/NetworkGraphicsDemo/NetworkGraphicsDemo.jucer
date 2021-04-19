@@ -17,7 +17,7 @@
     <FILE id="Ww6bQw" name="juce_icon.png" compile="0" resource="1" file="Source/juce_icon.png"/>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="Ww6bQw">
+    <XCODE_MAC targetFolder="Builds/MacOSX" bigIcon="Ww6bQw" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" osxCompatibility="10.9 SDK" isDebug="1" targetName="JUCE Network Graphics Demo"/>
         <CONFIGURATION name="Release" osxCompatibility="10.9 SDK" isDebug="0" targetName="JUCE Network Graphics Demo"/>
