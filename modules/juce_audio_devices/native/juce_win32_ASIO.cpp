@@ -399,7 +399,7 @@ public:
 
         jassert (currentCallback == nullptr);
 
-        if (bufferSizeSamples < 8 || bufferSizeSamples > 16384)
+        if (bufferSizeSamples < 8 || bufferSizeSamples > 32768)
             shouldUsePreferredSize = true;
 
         if (asioObject == nullptr)
