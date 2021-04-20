@@ -42,7 +42,7 @@
 
  useLocalCopy:          1
 
- pluginCharacteristics: pluginWantsMidiIn, pluginProducesMidiOut
+ pluginCharacteristics: pluginWantsMidiIn, pluginProducesMidiOut, pluginIsMidiEffectPlugin
 
  END_JUCE_PIP_METADATA
 

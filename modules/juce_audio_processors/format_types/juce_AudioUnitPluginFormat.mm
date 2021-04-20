@@ -529,7 +529,6 @@ public:
                          || componentDesc.componentType == kAudioUnitType_MIDIProcessor;
 
         isMidiEffectPlugin = (componentDesc.componentType == kAudioUnitType_MIDIProcessor);
-
         AudioComponentDescription ignore;
         getComponentDescFromIdentifier (createPluginIdentifier (componentDesc), ignore, pluginName, version, manufacturer);
         updateSupportedLayouts();
@@ -887,61 +886,54 @@ public:
         {
             releaseResources();
 
-            if (isMidiEffectPlugin)
+            for (int dir = 0; dir < 2; ++dir)
             {
-                outputBufferList.add (new AUBuffer (1));
-            }
-            else
-            {
-                for (int dir = 0; dir < 2; ++dir)
+                const bool isInput = (dir == 0);
+                const AudioUnitScope scope = isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
+                const int n = getBusCount (isInput);
+
+                for (int i = 0; i < n; ++i)
                 {
-                    const bool isInput = (dir == 0);
-                    const AudioUnitScope scope = isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
-                    const int n = getBusCount (isInput);
+                    Float64 sampleRate;
+                    UInt32 sampleRateSize = sizeof (sampleRate);
+                    const Float64 sr = newSampleRate;
 
-                    for (int i = 0; i < n; ++i)
+                    AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sampleRate, &sampleRateSize);
+
+                    if (sampleRate != sr)
                     {
-                        Float64 sampleRate;
-                        UInt32 sampleRateSize = sizeof (sampleRate);
-                        const Float64 sr = newSampleRate;
-
-                        AudioUnitGetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sampleRate, &sampleRateSize);
-
-                        if (sampleRate != sr)
+                        if (isAUv3) // setting kAudioUnitProperty_SampleRate fails on AUv3s
                         {
-                            if (isAUv3) // setting kAudioUnitProperty_SampleRate fails on AUv3s
+                            AudioStreamBasicDescription stream;
+                            UInt32 dataSize = sizeof (stream);
+                            auto err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, &dataSize);
+
+                            if (err == noErr && dataSize == sizeof (stream))
                             {
-                                AudioStreamBasicDescription stream;
-                                UInt32 dataSize = sizeof (stream);
-                                auto err = AudioUnitGetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, &dataSize);
-
-                                if (err == noErr && dataSize == sizeof (stream))
-                                {
-                                    stream.mSampleRate = sr;
-                                    AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, sizeof (stream));
-                                }
+                                stream.mSampleRate = sr;
+                                AudioUnitSetProperty (audioUnit, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (i), &stream, sizeof (stream));
                             }
-                            else
-                            {
-                                AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sr, sizeof (sr));
-                            }
-                        }
-
-                        if (isInput)
-                        {
-                            AURenderCallbackStruct info;
-                            zerostruct (info); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
-
-                            info.inputProcRefCon = this;
-                            info.inputProc = renderGetInputCallback;
-
-                            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
-                                                  static_cast<UInt32> (i), &info, sizeof (info));
                         }
                         else
                         {
-                            outputBufferList.add (new AUBuffer (static_cast<size_t> (getChannelCountOfBus (false, i))));
+                            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SampleRate, scope, static_cast<UInt32> (i), &sr, sizeof (sr));
                         }
+                    }
+
+                    if (isInput)
+                    {
+                        AURenderCallbackStruct info;
+                        zerostruct (info); // (can't use "= { 0 }" on this object because it's typedef'ed as a C struct)
+
+                        info.inputProcRefCon = this;
+                        info.inputProc = renderGetInputCallback;
+
+                        AudioUnitSetProperty (audioUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input,
+                                              static_cast<UInt32> (i), &info, sizeof (info));
+                    }
+                    else
+                    {
+                        outputBufferList.add (new AUBuffer (static_cast<size_t> (getChannelCountOfBus (false, i))));
                     }
                 }
             }
@@ -1026,39 +1018,20 @@ public:
             timeStamp.mHostTime = GetCurrentHostTime (numSamples, getSampleRate(), isAUv3);
             int numOutputBuses;
 
-            if (isMidiEffectPlugin)
-            {
-                numOutputBuses = 1;
+            int chIdx = 0;
+            numOutputBuses = getBusCount (false);
 
-                if (AUBuffer* buf = outputBufferList[0])
+            for (int i = 0; i < numOutputBuses; ++i)
+            {
+                if (AUBuffer* buf = outputBufferList[i])
                 {
                     AudioBufferList& abl = *buf;
 
                     for (AudioUnitElement j = 0; j < abl.mNumberBuffers; ++j)
                     {
-                        abl.mBuffers[j].mNumberChannels = 0;
-                        abl.mBuffers[j].mDataByteSize = 0;
-                        abl.mBuffers[j].mData = nullptr;
-                    }
-                }
-            }
-            else
-            {
-                int chIdx = 0;
-                numOutputBuses = getBusCount (false);
-
-                for (int i = 0; i < numOutputBuses; ++i)
-                {
-                    if (AUBuffer* buf = outputBufferList[i])
-                    {
-                        AudioBufferList& abl = *buf;
-
-                        for (AudioUnitElement j = 0; j < abl.mNumberBuffers; ++j)
-                        {
-                            abl.mBuffers[j].mNumberChannels = 1;
-                            abl.mBuffers[j].mDataByteSize = (UInt32) ((size_t) numSamples * sizeof (float));
-                            abl.mBuffers[j].mData = buffer.getWritePointer (chIdx++);
-                        }
+                        abl.mBuffers[j].mNumberChannels = 1;
+                        abl.mBuffers[j].mDataByteSize = (UInt32) ((size_t) numSamples * sizeof (float));
+                        abl.mBuffers[j].mData = buffer.getWritePointer (chIdx++);
                     }
                 }
             }
@@ -1080,22 +1053,12 @@ public:
                 midiMessages.clear();
             }
 
-            if (isMidiEffectPlugin)
+            for (int i = 0; i < numOutputBuses; ++i)
             {
                 AudioUnitRenderActionFlags flags = 0;
 
-                if (AUBuffer* buf = outputBufferList[0])
-                    AudioUnitRender (audioUnit, &flags, &timeStamp, 0, (UInt32) numSamples, buf->bufferList.get());
-            }
-            else
-            {
-                for (int i = 0; i < numOutputBuses; ++i)
-                {
-                    AudioUnitRenderActionFlags flags = 0;
-
-                    if (AUBuffer* buf = outputBufferList[i])
-                        AudioUnitRender (audioUnit, &flags, &timeStamp, static_cast<UInt32> (i), (UInt32) numSamples, buf->bufferList.get());
-                }
+                if (AUBuffer* buf = outputBufferList[i])
+                    AudioUnitRender (audioUnit, &flags, &timeStamp, static_cast<UInt32> (i), (UInt32) numSamples, buf->bufferList.get());
             }
 
             timeStamp.mSampleTime += numSamples;
@@ -1518,6 +1481,8 @@ public:
     }
 
     void handlePartialSysexMessage (void*, const uint8*, int, double) {}
+
+    bool isMidiEffect() const override { return isMidiEffectPlugin; }
 
 private:
     //==============================================================================

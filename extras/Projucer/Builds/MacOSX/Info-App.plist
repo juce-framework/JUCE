@@ -29,6 +29,8 @@
     <string>Raw Material Software Limited</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
     <key>CFBundleDocumentTypes</key>
     <array>
       <dict>

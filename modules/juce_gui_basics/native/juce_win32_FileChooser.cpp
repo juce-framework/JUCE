@@ -31,7 +31,7 @@ namespace juce
 {
 
 // Implemented in juce_win32_Messaging.cpp
-bool windowsDispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
+bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
 class Win32NativeFileChooser  : private Thread
 {
@@ -81,7 +81,7 @@ public:
 
         while (isThreadRunning())
         {
-            if (! windowsDispatchNextMessageOnSystemQueue (true))
+            if (! dispatchNextMessageOnSystemQueue (true))
                 Thread::sleep (1);
         }
     }

@@ -61,7 +61,7 @@ struct IntegerWithBitSize
     IntegerWithBitSize (uint32 v) noexcept : value (v)
     {
         static_assert (numBits <= 32, "numBits must be <= 32");
-        jassert (v >= 0 && v <= maxValue);
+        jassert (v <= maxValue);
     }
 
     enum

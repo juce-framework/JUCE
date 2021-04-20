@@ -139,7 +139,7 @@ public:
                 outputSamples[i] = processSample ((int) channel, inputSamples[i]);
         }
 
-       #if JUCE_SNAP_TO_ZERO
+       #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
         snapToZero();
        #endif
     }

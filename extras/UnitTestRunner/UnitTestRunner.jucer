@@ -10,7 +10,7 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX">
+    <XCODE_MAC targetFolder="Builds/MacOSX" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" osxCompatibility="10.10 SDK" isDebug="1" targetName="UnitTestRunner"
                        recommendedWarnings="LLVM"/>
