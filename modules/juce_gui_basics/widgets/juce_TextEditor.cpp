@@ -1434,7 +1434,7 @@ int TextEditor::getWordWrapWidth() const
 
 int TextEditor::getMaximumTextWidth() const
 {
-    return viewport->getMaximumVisibleWidth() - leftIndent + rightEdgeSpace;
+    return viewport->getMaximumVisibleWidth() - leftIndent - rightEdgeSpace;
 }
 
 int TextEditor::getMaximumTextHeight() const
@@ -1447,8 +1447,8 @@ void TextEditor::checkLayout()
     if (getWordWrapWidth() > 0)
     {
         auto textBottom = Iterator (*this).getTotalTextHeight() + topIndent;
-        auto textRight = jmax (getMaximumTextWidth() + leftIndent + rightEdgeSpace,
-                               Iterator (*this).getTextRight());
+        auto textRight = jmax (viewport->getMaximumVisibleWidth(),
+                               Iterator (*this).getTextRight() + leftIndent + rightEdgeSpace);
 
         textHolder->setSize (textRight, textBottom);
         viewport->setScrollBarsShown (scrollbarVisible
