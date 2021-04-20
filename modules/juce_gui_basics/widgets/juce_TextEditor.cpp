@@ -957,9 +957,10 @@ bool TextEditor::undoOrRedo (const bool shouldUndo)
         if (shouldUndo ? undoManager.undo()
                        : undoManager.redo())
         {
-            scrollToMakeSureCursorIsVisible();
             repaint();
             textChanged();
+            scrollToMakeSureCursorIsVisible();
+
             return true;
         }
     }
