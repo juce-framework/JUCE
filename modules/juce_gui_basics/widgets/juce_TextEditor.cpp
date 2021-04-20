@@ -2427,6 +2427,7 @@ void TextEditor::remove (Range<int> range, UndoManager* const um, const int care
             totalNumChars = -1;
             valueTextNeedsUpdating = true;
 
+            checkLayout();
             moveCaretTo (caretPositionToMoveTo, false);
 
             repaintText ({ range.getStart(), getTotalNumChars() });
