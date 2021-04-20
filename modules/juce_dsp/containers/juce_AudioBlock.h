@@ -465,8 +465,8 @@ public:
     /** Replaces each channel of this block with the product of the src block and a smoothed value. */
     template <typename OtherSampleType, typename SmoothingType>
     AudioBlock&       replaceWithProductOf (AudioBlock<OtherSampleType> src, SmoothedValue<SampleType, SmoothingType>& value)       noexcept   { replaceWithProductOfInternal (src, value); return *this; }
-    template <typename OtherSampleType, typename SmoothingType>
-    const AudioBlock& replaceWithProductOf (AudioBlock<OtherSampleType> src, SmoothedValue<SampleType, SmoothingType>& value) const noexcept   { replaceWithProductOfInternal (src, value); return *this; }
+    template <typename OtherSampleType, typename SmoothingType, typename SmoothingSampleType>
+    const AudioBlock& replaceWithProductOf (AudioBlock<OtherSampleType> src, SmoothedValue<SmoothingSampleType, SmoothingType>& value) const noexcept   { replaceWithProductOfInternal (src, value); return *this; }
 
     //==============================================================================
     /** Multiplies each value in src by a fixed value and adds the result to this block. */
@@ -775,14 +775,14 @@ private:
         }
     }
 
-    template <typename OtherSampleType, typename SmoothingType>
-    void replaceWithProductOfInternal (AudioBlock<OtherSampleType> src, SmoothedValue<SampleType, SmoothingType>& value) const noexcept
+    template <typename OtherSampleType, typename SmoothingType, typename SmoothingSampleType>
+    void replaceWithProductOfInternal (AudioBlock<OtherSampleType> src, SmoothedValue<SmoothingSampleType, SmoothingType>& value) const noexcept
     {
         jassert (numChannels == src.numChannels);
 
         if (! value.isSmoothing())
         {
-            replaceWithProductOfInternal (src, value.getTargetValue());
+            replaceWithProductOfInternal (src, OtherSampleType(value.getTargetValue()));
         }
         else
         {
@@ -790,7 +790,7 @@ private:
 
             for (size_t i = 0; i < n; ++i)
             {
-                const auto scaler = value.getNextValue();
+                const auto scaler = OtherSampleType( value.getNextValue() );
 
                 for (size_t ch = 0; ch < numChannels; ++ch)
                     getDataPointer (ch)[i] = scaler * src.getChannelPointer (ch)[i];
