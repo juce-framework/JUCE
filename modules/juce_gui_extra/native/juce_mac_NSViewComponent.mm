@@ -125,25 +125,12 @@ public:
         [view release];
     }
 
-    void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized) override
-    {
-        ComponentMovementWatcher::componentMovedOrResized (comp, wasMoved, wasResized);
-
-        // The ComponentMovementWatcher version of this method avoids calling
-        // us when the top-level comp is resized, but for an NSView we need to know this
-        // because with inverted coordinates, we need to update the position even if the
-        // top-left pos hasn't changed
-        if (comp.isOnDesktop() && wasResized)
-            componentMovedOrResized (wasMoved, wasResized);
-    }
-
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         if (auto* peer = owner.getTopLevelComponent()->getPeer())
         {
-            auto r = makeNSRect (peer->getAreaCoveredBy (owner));
-            r.origin.y = [[view superview] frame].size.height - (r.origin.y + r.size.height);
-            [view setFrame: r];
+            const auto newArea = makeNSRect (peer->getAreaCoveredBy (owner));
+            [view setFrame: newArea];
         }
     }
 
@@ -204,8 +191,8 @@ private:
 };
 
 //==============================================================================
-NSViewComponent::NSViewComponent() {}
-NSViewComponent::~NSViewComponent() {}
+NSViewComponent::NSViewComponent() = default;
+NSViewComponent::~NSViewComponent() = default;
 
 void NSViewComponent::setView (void* view)
 {
@@ -232,8 +219,15 @@ void NSViewComponent::resizeToFitView()
 {
     if (attachment != nullptr)
     {
-        auto r = [static_cast<NSViewAttachment*> (attachment.get())->view frame];
+        auto* view = static_cast<NSViewAttachment*> (attachment.get())->view;
+        auto r = [view frame];
         setBounds (Rectangle<int> ((int) r.size.width, (int) r.size.height));
+
+        if (auto* peer = getTopLevelComponent()->getPeer())
+        {
+            const auto position = peer->getAreaCoveredBy (*this).getPosition().toFloat();
+            [view setFrameOrigin: NSMakePoint (position.x, position.y)];
+        }
     }
 }
 

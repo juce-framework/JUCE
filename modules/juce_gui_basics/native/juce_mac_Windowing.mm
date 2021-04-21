@@ -466,12 +466,6 @@ struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
 JUCE_IMPLEMENT_SINGLETON (DisplaySettingsChangeCallback)
 
 
-static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
-{
-    r.origin.y = mainScreenBottom - (r.origin.y + r.size.height);
-    return convertToRectInt (r);
-}
-
 static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenBottom, const float masterScale)
 {
     Displays::Display d;
@@ -481,8 +475,8 @@ static Displays::Display getDisplayFromScreen (NSScreen* s, CGFloat& mainScreenB
     if (d.isMain)
         mainScreenBottom = [s frame].size.height;
 
-    d.userArea  = convertDisplayRect ([s visibleFrame], mainScreenBottom) / masterScale;
-    d.totalArea = convertDisplayRect ([s frame], mainScreenBottom) / masterScale;
+    d.userArea  = convertToRectInt ([s visibleFrame]) / masterScale;
+    d.totalArea = convertToRectInt ([s frame]) / masterScale;
     d.scale = masterScale;
 
     if ([s respondsToSelector: @selector (backingScaleFactor)])
