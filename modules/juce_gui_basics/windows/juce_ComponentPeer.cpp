@@ -162,6 +162,15 @@ Component* ComponentPeer::getTargetForKeyPress()
 {
     auto* c = Component::getCurrentlyFocusedComponent();
 
+    {
+        /** a small change to allow apps like BetterTouchTool for mac to send KeyPresses to JUCE based applications while in background. There might be huge problems with this change... we will see.
+         */
+        
+        if (c == nullptr)
+            c = lastFocusedComponent;
+    }
+    
+    
     if (c == nullptr)
         c = &component;
 
