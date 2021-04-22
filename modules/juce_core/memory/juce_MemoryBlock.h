@@ -120,6 +120,9 @@ public:
     const char* end() const noexcept                                { return begin() + getSize(); }
 
     //==============================================================================
+    /** Returns true if the memory block has zero size. */
+    bool isEmpty() const noexcept                                   { return getSize() == 0; }
+
     /** Returns the block's current allocated size, in bytes. */
     size_t getSize() const noexcept                                 { return size; }
 
