@@ -234,7 +234,8 @@ public:
     */
     void setEditable (bool editOnSingleClick,
                       bool editOnDoubleClick = false,
-                      bool lossOfFocusDiscardsChanges = false);
+                      bool lossOfFocusDiscardsChanges = false,
+					  bool editOnFocusGainedByTabKey = false);
 
     /** Returns true if this option was set using setEditable(). */
     bool isEditableOnSingleClick() const noexcept                       { return editSingleClick; }
@@ -245,8 +246,11 @@ public:
     /** Returns true if this option has been set in a call to setEditable(). */
     bool doesLossOfFocusDiscardChanges() const noexcept                 { return lossOfFocusDiscardsChanges; }
 
-    /** Returns true if the user can edit this label's text. */
-    bool isEditable() const noexcept                                    { return editSingleClick || editDoubleClick; }
+	/** Returns true if this option has been set in a call to setEditable(). */
+	bool isEditableOnFocusGainedByTabKey() const noexcept				{ return editFocusGainedByTabKey; }
+
+	/** Returns true if the user can edit this label's text. */
+	bool isEditable() const noexcept                                    { return editSingleClick || editDoubleClick; }
 
     /** Makes the editor appear as if the label had been clicked by the user.
         @see textWasEdited, setEditable
@@ -352,7 +356,8 @@ private:
     float minimumHorizontalScale = 0;
     TextInputTarget::VirtualKeyboardType keyboardType = TextInputTarget::textKeyboard;
     bool editSingleClick = false;
-    bool editDoubleClick = false;
+	bool editDoubleClick = false;
+	bool editFocusGainedByTabKey = false;
     bool lossOfFocusDiscardsChanges = false;
     bool leftOfOwnerComp = false;
 

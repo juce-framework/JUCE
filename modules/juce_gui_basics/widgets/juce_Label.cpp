@@ -99,14 +99,16 @@ Font Label::getFont() const noexcept
 
 void Label::setEditable (bool editOnSingleClick,
                          bool editOnDoubleClick,
-                         bool lossOfFocusDiscards)
+                         bool lossOfFocusDiscards,
+						 bool editOnFocusGainedByTabKey)
 {
     editSingleClick = editOnSingleClick;
     editDoubleClick = editOnDoubleClick;
     lossOfFocusDiscardsChanges = lossOfFocusDiscards;
+	editFocusGainedByTabKey = editOnFocusGainedByTabKey;
 
-    setWantsKeyboardFocus (editOnSingleClick || editOnDoubleClick);
-    setFocusContainer (editOnSingleClick || editOnDoubleClick);
+    setWantsKeyboardFocus (editOnSingleClick || editOnDoubleClick || editOnFocusGainedByTabKey);
+    setFocusContainer (editOnSingleClick || editOnDoubleClick || editOnFocusGainedByTabKey);
 }
 
 void Label::setJustificationType (Justification newJustification)
@@ -362,7 +364,7 @@ void Label::resized()
 
 void Label::focusGained (FocusChangeType cause)
 {
-    if (editSingleClick
+    if ((editSingleClick || editFocusGainedByTabKey)
          && isEnabled()
          && cause == focusChangedByTabKey)
         showEditor();
@@ -433,7 +435,7 @@ void Label::textEditorTextChanged (TextEditor& ed)
     {
         jassert (&ed == editor.get());
 
-        if (! (hasKeyboardFocus (true) || isCurrentlyBlockedByAnotherModalComponent()))
+        if (! (ed.hasKeyboardFocus (true) || isCurrentlyBlockedByAnotherModalComponent()))
         {
             if (lossOfFocusDiscardsChanges)
                 textEditorEscapeKeyPressed (ed);
