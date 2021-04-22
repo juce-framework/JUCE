@@ -355,7 +355,7 @@ function(_juce_module_sources module_path output_path built_sources other_source
         endif()
     endforeach()
 
-    if(NOT module_files_to_build STREQUAL "")
+    if(NOT "${module_files_to_build}" STREQUAL "")
         list(REMOVE_ITEM headers ${module_files_to_build})
     endif()
 
