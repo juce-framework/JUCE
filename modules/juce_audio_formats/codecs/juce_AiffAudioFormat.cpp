@@ -728,9 +728,9 @@ private:
         // to be able to seek back to write the header
         jassert (couldSeekOk);
 
-        auto headerLen = (int) (54 + (markChunk.getSize() > 0 ? markChunk.getSize() + 8 : 0)
-                                   + (comtChunk.getSize() > 0 ? comtChunk.getSize() + 8 : 0)
-                                   + (instChunk.getSize() > 0 ? instChunk.getSize() + 8 : 0));
+        auto headerLen = (int) (54 + (markChunk.isEmpty() ? 0 : markChunk.getSize() + 8)
+                                   + (comtChunk.isEmpty() ? 0 : comtChunk.getSize() + 8)
+                                   + (instChunk.isEmpty() ? 0 : instChunk.getSize() + 8));
         auto audioBytes = (int) (lengthInSamples * ((bitsPerSample * numChannels) / 8));
         audioBytes += (audioBytes & 1);
 
@@ -786,21 +786,21 @@ private:
 
         output->write (sampleRateBytes, 10);
 
-        if (markChunk.getSize() > 0)
+        if (! markChunk.isEmpty())
         {
             output->writeInt (chunkName ("MARK"));
             output->writeIntBigEndian ((int) markChunk.getSize());
             *output << markChunk;
         }
 
-        if (comtChunk.getSize() > 0)
+        if (! comtChunk.isEmpty())
         {
             output->writeInt (chunkName ("COMT"));
             output->writeIntBigEndian ((int) comtChunk.getSize());
             *output << comtChunk;
         }
 
-        if (instChunk.getSize() > 0)
+        if (! instChunk.isEmpty())
         {
             output->writeInt (chunkName ("INST"));
             output->writeIntBigEndian ((int) instChunk.getSize());

@@ -681,7 +681,7 @@ void WebBrowserComponent::reloadLastURL()
 {
     if (lastURL.isNotEmpty())
     {
-        goToURL (lastURL, &lastHeaders, lastPostData.getSize() == 0 ? nullptr : &lastPostData);
+        goToURL (lastURL, &lastHeaders, lastPostData.isEmpty() ? nullptr : &lastPostData);
         lastURL.clear();
     }
 }
