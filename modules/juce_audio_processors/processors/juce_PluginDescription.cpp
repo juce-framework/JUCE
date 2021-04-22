@@ -36,20 +36,25 @@ bool PluginDescription::isDuplicateOf (const PluginDescription& other) const noe
     return tie (*this) == tie (other);
 }
 
-static String getPluginDescSuffix (const PluginDescription& d)
+static String getPluginDescSuffix (const PluginDescription& d, int uid)
 {
     return "-" + String::toHexString (d.fileOrIdentifier.hashCode())
-         + "-" + String::toHexString (d.uniqueId);
+         + "-" + String::toHexString (uid);
 }
 
 bool PluginDescription::matchesIdentifierString (const String& identifierString) const
 {
-    return identifierString.endsWithIgnoreCase (getPluginDescSuffix (*this));
+    const auto matches = [&] (int uid)
+    {
+        return identifierString.endsWithIgnoreCase (getPluginDescSuffix (*this, uid));
+    };
+
+    return matches (uniqueId) || matches (deprecatedUid);
 }
 
 String PluginDescription::createIdentifierString() const
 {
-    return pluginFormatName + "-" + name + getPluginDescSuffix (*this);
+    return pluginFormatName + "-" + name + getPluginDescSuffix (*this, uniqueId);
 }
 
 std::unique_ptr<XmlElement> PluginDescription::createXml() const
