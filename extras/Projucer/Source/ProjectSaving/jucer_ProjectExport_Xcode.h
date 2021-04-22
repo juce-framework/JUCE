@@ -2062,8 +2062,6 @@ private:
         addSubprojects();
 
         addFrameworks();
-        addCustomFrameworks();
-        addEmbeddedFrameworks();
 
         addCustomResourceFolders();
         addPlistFileReferences();
@@ -2550,6 +2548,24 @@ private:
         return s;
     }
 
+    template<typename AddFrameworkFn>
+    void addFrameworkList (const String& frameworksString, AddFrameworkFn&& addFrameworkFn) const
+    {
+        auto frameworks = StringArray::fromTokens (frameworksString, "\n\r", "\"'");
+        frameworks.trim();
+
+        for (auto& framework : frameworks)
+        {
+            auto frameworkID = addFrameworkFn (framework);
+
+            for (auto& target : targets)
+            {
+                target->frameworkIDs.add (frameworkID);
+                target->frameworkNames.add (framework);
+            }
+        }
+    }
+
     void addFrameworks() const
     {
         if (! projectType.isStaticLibrary())
@@ -2557,14 +2573,16 @@ private:
             if (isInAppPurchasesEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("StoreKit");
 
-            if (iOS && isPushNotificationsEnabled())
-                xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
-
-            if (iOS
-                && project.getEnabledModules().isModuleEnabled ("juce_video")
-                && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+            if (iOS)
             {
-                xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+                if (isPushNotificationsEnabled())
+                    xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
+
+                if (project.getEnabledModules().isModuleEnabled ("juce_video")
+                    && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+                {
+                    xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+                }
             }
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
@@ -2607,43 +2625,18 @@ private:
                 }
             }
         }
-    }
 
-    void addCustomFrameworks() const
-    {
-        StringArray customFrameworks;
-        customFrameworks.addTokens (getExtraCustomFrameworksString(), true);
-        customFrameworks.trim();
+        addFrameworkList (getExtraCustomFrameworksString(),
+                          [this] (const String& framework) { return addCustomFramework (framework); });
 
-        for (auto& framework : customFrameworks)
-        {
-            auto frameworkID = addCustomFramework (framework);
+        addFrameworkList (getEmbeddedFrameworksString(),
+                          [this] (const String& framework)
+                          {
+                              auto frameworkId = addEmbeddedFramework (framework);
+                              embeddedFrameworkIDs.add (frameworkId);
 
-            for (auto& target : targets)
-            {
-                target->frameworkIDs.add (frameworkID);
-                target->frameworkNames.add (framework);
-            }
-        }
-    }
-
-    void addEmbeddedFrameworks() const
-    {
-        StringArray frameworks;
-        frameworks.addTokens (getEmbeddedFrameworksString(), true);
-        frameworks.trim();
-
-        for (auto& framework : frameworks)
-        {
-            auto frameworkID = addEmbeddedFramework (framework);
-            embeddedFrameworkIDs.add (frameworkID);
-
-            for (auto& target : targets)
-            {
-                target->frameworkIDs.add (frameworkID);
-                target->frameworkNames.add (framework);
-            }
-        }
+                              return frameworkId;
+                          });
 
         if (! embeddedFrameworkIDs.isEmpty())
             for (auto& target : targets)
