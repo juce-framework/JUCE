@@ -173,6 +173,7 @@ PluginHostType::HostType PluginHostType::getHostType()
     if (hostPath.containsIgnoreCase       ("Live 9"))                   return AbletonLive9;
     if (hostPath.containsIgnoreCase       ("Live 10"))                  return AbletonLive10;
     if (hostFilename.containsIgnoreCase   ("Live"))                     return AbletonLiveGeneric;
+    if (hostFilename.containsIgnoreCase   ("Audition"))                 return AdobeAudition;
     if (hostFilename.containsIgnoreCase   ("Adobe Premiere"))           return AdobePremierePro;
     if (hostFilename.containsIgnoreCase   ("GarageBand"))               return AppleGarageBand;
     if (hostFilename.containsIgnoreCase   ("Logic"))                    return AppleLogic;
