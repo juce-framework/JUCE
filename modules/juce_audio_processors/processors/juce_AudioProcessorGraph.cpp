@@ -1418,12 +1418,13 @@ const String AudioProcessorGraph::AudioGraphIOProcessor::getName() const
 void AudioProcessorGraph::AudioGraphIOProcessor::fillInPluginDescription (PluginDescription& d) const
 {
     d.name = getName();
-    d.uid = d.name.hashCode();
     d.category = "I/O devices";
     d.pluginFormatName = "Internal";
     d.manufacturerName = "JUCE";
     d.version = "1.0";
     d.isInstrument = false;
+
+    d.deprecatedUid = d.uniqueId = d.name.hashCode();
 
     d.numInputChannels = getTotalNumInputChannels();
 

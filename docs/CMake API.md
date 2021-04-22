@@ -192,6 +192,9 @@ might slow down configuration a bit. If you enable this, you should probably als
 `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists as this is required for
 source grouping to work.
 
+The modules will be placed in a group named "JUCE Modules" within the group for each target,
+alongside the "Source Files" and "Header Files" groups.
+
 #### `JUCE_COPY_PLUGIN_AFTER_BUILD`
 
 Controls whether plugin targets should be installed to the system after building. Note that the
@@ -611,10 +614,11 @@ target!).
 
     juce_set_aax_sdk_path(<absolute path>)
     juce_set_vst2_sdk_path(<absolute path>)
+    juce_set_vst3_sdk_path(<absolute path>)
 
-Call these functions from your CMakeLists to set up your local AAX and/or VST2 SDKs. These functions
-should be called *before* adding any targets that may depend on the AAX/VST2 SDKs (plugin
-hosts, VST2/AAX plugins etc.).
+Call these functions from your CMakeLists to set up your local AAX, VST2, and VST3 SDKs. These
+functions should be called *before* adding any targets that may depend on the AAX/VST2/VST3 SDKs
+(plugin hosts, AAX/VST2/VST3 plugins etc.).
 
 #### `juce_add_module`
 

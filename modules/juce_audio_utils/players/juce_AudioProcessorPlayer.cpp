@@ -135,6 +135,9 @@ AudioProcessorPlayer::~AudioProcessorPlayer()
 //==============================================================================
 AudioProcessorPlayer::NumChannels AudioProcessorPlayer::findMostSuitableLayout (const AudioProcessor& proc) const
 {
+    if (proc.isMidiEffect())
+        return {};
+
     std::vector<NumChannels> layouts { deviceChannels };
 
     if (deviceChannels.ins == 0 || deviceChannels.ins == 1)
@@ -163,39 +166,40 @@ void AudioProcessorPlayer::resizeChannels()
 
 void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
 {
-    if (processor != processorToPlay)
-    {
-        if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
-        {
-            defaultProcessorChannels = NumChannels { processorToPlay->getBusesLayout() };
-            actualProcessorChannels  = findMostSuitableLayout (*processorToPlay);
+    const ScopedLock sl (lock);
 
+    if (processor == processorToPlay)
+        return;
+
+    if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
+    {
+        defaultProcessorChannels = NumChannels { processorToPlay->getBusesLayout() };
+        actualProcessorChannels  = findMostSuitableLayout (*processorToPlay);
+
+        if (processorToPlay->isMidiEffect())
+            processorToPlay->setRateAndBufferSizeDetails (sampleRate, blockSize);
+        else
             processorToPlay->setPlayConfigDetails (actualProcessorChannels.ins,
                                                    actualProcessorChannels.outs,
                                                    sampleRate,
                                                    blockSize);
 
-            auto supportsDouble = processorToPlay->supportsDoublePrecisionProcessing() && isDoublePrecision;
+        auto supportsDouble = processorToPlay->supportsDoublePrecisionProcessing() && isDoublePrecision;
 
-            processorToPlay->setProcessingPrecision (supportsDouble ? AudioProcessor::doublePrecision
-                                                                    : AudioProcessor::singlePrecision);
-            processorToPlay->prepareToPlay (sampleRate, blockSize);
-        }
-
-        AudioProcessor* oldOne = nullptr;
-
-        {
-            const ScopedLock sl (lock);
-
-            oldOne = isPrepared ? processor : nullptr;
-            processor = processorToPlay;
-            isPrepared = true;
-            resizeChannels();
-        }
-
-        if (oldOne != nullptr)
-            oldOne->releaseResources();
+        processorToPlay->setProcessingPrecision (supportsDouble ? AudioProcessor::doublePrecision
+                                                                : AudioProcessor::singlePrecision);
+        processorToPlay->prepareToPlay (sampleRate, blockSize);
     }
+
+    AudioProcessor* oldOne = nullptr;
+
+    oldOne = isPrepared ? processor : nullptr;
+    processor = processorToPlay;
+    isPrepared = true;
+    resizeChannels();
+
+    if (oldOne != nullptr)
+        oldOne->releaseResources();
 }
 
 void AudioProcessorPlayer::setDoublePrecisionProcessing (bool doublePrecision)
@@ -235,12 +239,10 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
                                                   const int numOutputChannels,
                                                   const int numSamples)
 {
+    const ScopedLock sl (lock);
+
     // These should have been prepared by audioDeviceAboutToStart()...
     jassert (sampleRate > 0 && blockSize > 0);
-
-    // The processor should be prepared to deal with the same number of output channels
-    // as our output device.
-    jassert (processor == nullptr || numOutputChannels == actualProcessorChannels.outs);
 
     incomingMidi.clear();
     messageCollector.removeNextBlockOfMessages (incomingMidi, numSamples);
@@ -256,42 +258,42 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
     const auto totalNumChannels = jmax (actualProcessorChannels.ins, actualProcessorChannels.outs);
     AudioBuffer<float> buffer (channels.data(), (int) totalNumChannels, numSamples);
 
+    if (processor != nullptr)
     {
-        const ScopedLock sl (lock);
+        // The processor should be prepared to deal with the same number of output channels
+        // as our output device.
+        jassert (processor->isMidiEffect() || numOutputChannels == actualProcessorChannels.outs);
 
-        if (processor != nullptr)
+        const ScopedLock sl2 (processor->getCallbackLock());
+
+        if (! processor->isSuspended())
         {
-            const ScopedLock sl2 (processor->getCallbackLock());
-
-            if (! processor->isSuspended())
+            if (processor->isUsingDoublePrecision())
             {
-                if (processor->isUsingDoublePrecision())
+                conversionBuffer.makeCopyOf (buffer, true);
+                processor->processBlock (conversionBuffer, incomingMidi);
+                buffer.makeCopyOf (conversionBuffer, true);
+            }
+            else
+            {
+                processor->processBlock (buffer, incomingMidi);
+            }
+
+            if (midiOutput != nullptr)
+            {
+                if (midiOutput->isBackgroundThreadRunning())
                 {
-                    conversionBuffer.makeCopyOf (buffer, true);
-                    processor->processBlock (conversionBuffer, incomingMidi);
-                    buffer.makeCopyOf (conversionBuffer, true);
+                    midiOutput->sendBlockOfMessages (incomingMidi,
+                                                     Time::getMillisecondCounterHiRes(),
+                                                     sampleRate);
                 }
                 else
                 {
-                    processor->processBlock (buffer, incomingMidi);
+                    midiOutput->sendBlockOfMessagesNow (incomingMidi);
                 }
-
-                if (midiOutput != nullptr)
-                {
-                    if (midiOutput->isBackgroundThreadRunning())
-                    {
-                        midiOutput->sendBlockOfMessages (incomingMidi,
-                                                         Time::getMillisecondCounterHiRes(),
-                                                         sampleRate);
-                    }
-                    else
-                    {
-                        midiOutput->sendBlockOfMessagesNow (incomingMidi);
-                    }
-                }
-
-                return;
             }
+
+            return;
         }
     }
 

@@ -120,10 +120,11 @@ private:
         descr.manufacturerName  = "JUCE";
         descr.version           = ProjectInfo::versionString;
         descr.fileOrIdentifier  = identifier;
-        descr.uid               = identifier.hashCode();
         descr.isInstrument      = (acceptsMidi && registerAsGenerator);
         descr.numInputChannels  = ins;
         descr.numOutputChannels = outs;
+
+        descr.uniqueId = descr.deprecatedUid = identifier.hashCode();
 
         return descr;
     }

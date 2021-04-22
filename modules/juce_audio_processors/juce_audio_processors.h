@@ -102,15 +102,6 @@
  #define JUCE_CUSTOM_VST3_SDK 0
 #endif
 
-/** Config: JUCE_VST3_HOST_CROSS_PLATFORM_UID
-    If enabled, ensures that PluginDescription::uid will produce consistent values for VST3 plugins on all platforms.
-    It is recommended to enable this flag in all new projects.
-    Projects which predate this flag should leave it disabled, in case they need to interact with uid values which they previously stored.
-*/
-#ifndef JUCE_VST3_HOST_CROSS_PLATFORM_UID
- #define JUCE_VST3_HOST_CROSS_PLATFORM_UID 0
-#endif
-
 #if ! (JUCE_PLUGINHOST_AU || JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_LADSPA)
 // #error "You need to set either the JUCE_PLUGINHOST_AU and/or JUCE_PLUGINHOST_VST and/or JUCE_PLUGINHOST_VST3 and/or JUCE_PLUGINHOST_LADSPA flags if you're using this module!"
 #endif

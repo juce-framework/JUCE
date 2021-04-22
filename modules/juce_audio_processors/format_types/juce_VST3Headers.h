@@ -156,8 +156,9 @@ namespace Steinberg
     DEF_CLASS_IID (IPlugFrame)
     DEF_CLASS_IID (IPlugViewContentScaleSupport)
 
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     DEF_CLASS_IID (Linux::IRunLoop)
+    DEF_CLASS_IID (Linux::IEventHandler)
    #endif
 }
 #endif // JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY

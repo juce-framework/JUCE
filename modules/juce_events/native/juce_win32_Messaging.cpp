@@ -260,7 +260,7 @@ JUCE_IMPLEMENT_SINGLETON (InternalMessageQueue)
 const TCHAR InternalMessageQueue::messageWindowName[] = _T("JUCEWindow");
 
 //==============================================================================
-bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 {
     if (auto* queue = InternalMessageQueue::getInstanceWithoutCreating())
         return queue->dispatchNextMessage (returnIfNoPendingMessages);

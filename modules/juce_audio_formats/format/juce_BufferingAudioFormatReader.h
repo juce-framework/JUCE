@@ -57,23 +57,16 @@ public:
 
     /** Sets a number of milliseconds that the reader can block for in its readSamples()
         method before giving up and returning silence.
-        A value of less that 0 means "wait forever".
-        The default timeout is 0.
+
+        A value of less that 0 means "wait forever". The default timeout is 0.
     */
     void setReadTimeout (int timeoutMilliseconds) noexcept;
 
+    //==============================================================================
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
 
 private:
-    std::unique_ptr<AudioFormatReader> source;
-    TimeSliceThread& thread;
-    std::atomic<int64> nextReadPosition { 0 };
-    const int numBlocks;
-    int timeoutMs = 0;
-
-    enum { samplesPerBlock = 32768 };
-
     struct BufferedBlock
     {
         BufferedBlock (AudioFormatReader& reader, int64 pos, int numSamples);
@@ -82,12 +75,20 @@ private:
         AudioBuffer<float> buffer;
     };
 
+    int useTimeSlice() override;
+    BufferedBlock* getBlockContaining (int64 pos) const noexcept;
+    bool readNextBufferChunk();
+
+    static constexpr int samplesPerBlock = 32768;
+
+    std::unique_ptr<AudioFormatReader> source;
+    TimeSliceThread& thread;
+    std::atomic<int64> nextReadPosition { 0 };
+    const int numBlocks;
+    int timeoutMs = 0;
+
     CriticalSection lock;
     OwnedArray<BufferedBlock> blocks;
-
-    BufferedBlock* getBlockContaining (int64 pos) const noexcept;
-    int useTimeSlice() override;
-    bool readNextBufferChunk();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioReader)
 };

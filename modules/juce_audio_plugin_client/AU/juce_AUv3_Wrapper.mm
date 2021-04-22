@@ -527,7 +527,7 @@ public:
         return nullptr;
     }
 
-    void setCurrentPreset(AUAudioUnitPreset* preset) override
+    void setCurrentPreset (AUAudioUnitPreset* preset) override
     {
         const int n = static_cast<int> ([factoryPresets.get() count]);
         const int idx = static_cast<int> ([preset number]);
@@ -782,7 +782,7 @@ public:
         for (int dir = 0; dir < 2; ++dir)
         {
             const bool isInput = (dir == 0);
-            const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
+            const int n = AudioUnitHelpers::getBusCountForWrapper (processor, isInput);
             Array<AudioChannelSet>& channelSets = (isInput ? layouts.inputBuses : layouts.outputBuses);
 
             AUAudioUnitBusArray* auBuses = (isInput ? [getAudioUnit() inputBusses] : [getAudioUnit() outputBusses]);
@@ -790,22 +790,24 @@ public:
 
             for (int busIdx = 0; busIdx < n; ++busIdx)
             {
-                AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx);
-                AVAudioFormat* format = [[auBuses objectAtIndexedSubscript:static_cast<NSUInteger> (busIdx)] format];
+                if (AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))
+                {
+                    AVAudioFormat* format = [[auBuses objectAtIndexedSubscript:static_cast<NSUInteger> (busIdx)] format];
 
-                AudioChannelSet newLayout;
-                const AVAudioChannelLayout* layout    = [format channelLayout];
-                const AudioChannelLayoutTag layoutTag = (layout != nullptr ? [layout layoutTag] : 0);
+                    AudioChannelSet newLayout;
+                    const AVAudioChannelLayout* layout    = [format channelLayout];
+                    const AudioChannelLayoutTag layoutTag = (layout != nullptr ? [layout layoutTag] : 0);
 
-                if (layoutTag != 0)
-                    newLayout = CoreAudioLayouts::fromCoreAudio (layoutTag);
-                else
-                    newLayout = bus->supportedLayoutWithChannels (static_cast<int> ([format channelCount]));
+                    if (layoutTag != 0)
+                        newLayout = CoreAudioLayouts::fromCoreAudio (layoutTag);
+                    else
+                        newLayout = bus->supportedLayoutWithChannels (static_cast<int> ([format channelCount]));
 
-                if (newLayout.isDisabled())
-                    return false;
+                    if (newLayout.isDisabled())
+                        return false;
 
-                channelSets.add (newLayout);
+                    channelSets.add (newLayout);
+                }
             }
         }
 
@@ -839,8 +841,14 @@ public:
 
         audioBuffer.prepare (totalInChannels, totalOutChannels, static_cast<int> (maxFrames));
 
-        double sampleRate = (jmax (AudioUnitHelpers::getBusCount (&processor, true), AudioUnitHelpers::getBusCount (&processor, false)) > 0 ?
-                             [[[([inputBusses.get() count] > 0 ? inputBusses.get() : outputBusses.get()) objectAtIndexedSubscript: 0] format] sampleRate] : 44100.0);
+        auto sampleRate = [&]
+        {
+            for (auto* buffer : { inputBusses.get(), outputBusses.get() })
+                if ([buffer count] > 0)
+                    return [[[buffer objectAtIndexedSubscript: 0] format] sampleRate];
+
+            return 44100.0;
+        }();
 
         processor.setRateAndBufferSizeDetails (sampleRate, static_cast<int> (maxFrames));
         processor.prepareToPlay (sampleRate, static_cast<int> (maxFrames));
@@ -1125,15 +1133,17 @@ private:
     {
         std::unique_ptr<NSMutableArray<AUAudioUnitBus*>, NSObjectDeleter> array ([[NSMutableArray<AUAudioUnitBus*> alloc] init]);
         AudioProcessor& processor = getAudioProcessor();
-        const int n = AudioUnitHelpers::getBusCount (&processor, isInput);
+        const auto numWrapperBuses = AudioUnitHelpers::getBusCountForWrapper (processor, isInput);
+        const auto numProcessorBuses = AudioUnitHelpers::getBusCount (processor, isInput);
 
-        for (int i = 0; i < n; ++i)
+        for (int i = 0; i < numWrapperBuses; ++i)
         {
             std::unique_ptr<AUAudioUnitBus, NSObjectDeleter> audioUnitBus;
 
             {
+                const auto channels = numProcessorBuses <= i ? 2 : processor.getChannelCountOfBus (isInput, i);
                 std::unique_ptr<AVAudioFormat, NSObjectDeleter> defaultFormat ([[AVAudioFormat alloc] initStandardFormatWithSampleRate: kDefaultSampleRate
-                                                                                                                              channels: static_cast<AVAudioChannelCount> (processor.getChannelCountOfBus (isInput, i))]);
+                                                                                                                              channels: static_cast<AVAudioChannelCount> (channels)]);
 
                 audioUnitBus.reset ([[AUAudioUnitBus alloc] initWithFormat: defaultFormat.get()
                                                                      error: nullptr]);
@@ -1383,7 +1393,7 @@ private:
         OwnedArray<BusBuffer>& busBuffers = isInput ? inBusBuffers : outBusBuffers;
         busBuffers.clear();
 
-        const int n = AudioUnitHelpers::getBusCount (&getAudioProcessor(), isInput);
+        const int n = AudioUnitHelpers::getBusCountForWrapper (getAudioProcessor(), isInput);
         const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
 
         for (int busIdx = 0; busIdx < n; ++busIdx)
@@ -1442,24 +1452,29 @@ private:
         {
             lastTimeStamp = *timestamp;
 
-            const int numInputBuses  = inBusBuffers. size();
-            const int numOutputBuses = outBusBuffers.size();
+            const auto numWrapperBusesIn    = AudioUnitHelpers::getBusCountForWrapper (processor, true);
+            const auto numWrapperBusesOut   = AudioUnitHelpers::getBusCountForWrapper (processor, false);
+            const auto numProcessorBusesIn  = AudioUnitHelpers::getBusCount (processor, true);
+            const auto numProcessorBusesOut = AudioUnitHelpers::getBusCount (processor, false);
 
             // prepare buffers
             {
-                for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
+                for (int busIdx = 0; busIdx < numWrapperBusesOut; ++busIdx)
                 {
                      BusBuffer& busBuffer = *outBusBuffers[busIdx];
                      const bool canUseDirectOutput =
                          (busIdx == outputBusNumber && outputData != nullptr && outputData->mNumberBuffers > 0);
 
                     busBuffer.prepare (frameCount, canUseDirectOutput ? outputData : nullptr);
+
+                    if (numProcessorBusesOut <= busIdx)
+                        AudioUnitHelpers::clearAudioBuffer (*busBuffer.get());
                 }
 
-                for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
+                for (int busIdx = 0; busIdx < numWrapperBusesIn; ++busIdx)
                 {
                     BusBuffer& busBuffer = *inBusBuffers[busIdx];
-                    busBuffer.prepare (frameCount, busIdx < numOutputBuses ? outBusBuffers[busIdx]->get() : nullptr);
+                    busBuffer.prepare (frameCount, busIdx < numWrapperBusesOut ? outBusBuffers[busIdx]->get() : nullptr);
                 }
 
                 audioBuffer.reset();
@@ -1467,7 +1482,7 @@ private:
 
             // pull inputs
             {
-                for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
+                for (int busIdx = 0; busIdx < numProcessorBusesIn; ++busIdx)
                 {
                     BusBuffer& busBuffer = *inBusBuffers[busIdx];
                     AudioBufferList* buffer = busBuffer.get();
@@ -1484,7 +1499,7 @@ private:
             {
                 int chIdx = 0;
 
-                for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
+                for (int busIdx = 0; busIdx < numProcessorBusesOut; ++busIdx)
                 {
                     BusBuffer& busBuffer = *outBusBuffers[busIdx];
                     AudioBufferList* buffer = busBuffer.get();
@@ -1514,7 +1529,7 @@ private:
 
             // copy input
             {
-                for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
+                for (int busIdx = 0; busIdx < numProcessorBusesIn; ++busIdx)
                     audioBuffer.push (*inBusBuffers[busIdx]->get(), mapper.get (true, busIdx));
 
                 // clear remaining channels
@@ -1537,8 +1552,9 @@ private:
             midiMessages.clear();
 
             // copy back
-            audioBuffer.pop (*outBusBuffers[(int) outputBusNumber]->get(),
-                             mapper.get (false, (int) outputBusNumber));
+            if (outputBusNumber < numProcessorBusesOut)
+                audioBuffer.pop (*outBusBuffers[(int) outputBusNumber]->get(),
+                                 mapper.get (false, (int) outputBusNumber));
         }
 
         return noErr;

@@ -61,6 +61,7 @@ void FirstOrderTPTFilter<SampleType>::prepare (const ProcessSpec& spec)
     sampleRate = spec.sampleRate;
     s1.resize (spec.numChannels);
 
+    update();
     reset();
 }
 

@@ -290,6 +290,30 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_should_build_module_source filename output_var)
+    get_filename_component(trimmed_name "${filename}" NAME_WE)
+
+    set(result TRUE)
+
+    set(pairs
+        "OSX\;Darwin"
+        "Windows\;Windows"
+        "Linux\;Linux"
+        "Android\;Android"
+        "iOS\;iOS")
+
+    foreach(pair IN LISTS pairs)
+        list(GET pair 0 suffix)
+        list(GET pair 1 system_name)
+
+        if((trimmed_name MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME STREQUAL "${system_name}"))
+            set(result FALSE)
+        endif()
+    endforeach()
+
+    set("${output_var}" "${result}" PARENT_SCOPE)
+endfunction()
+
 function(_juce_module_sources module_path output_path built_sources other_sources)
     get_filename_component(module_parent_path ${module_path} DIRECTORY)
     get_filename_component(module_glob ${module_path} NAME)
@@ -302,31 +326,44 @@ function(_juce_module_sources module_path output_path built_sources other_source
     set(base_path "${module_glob}/${module_glob}")
 
     set(module_cpp ${all_module_files})
-    list(FILTER module_cpp INCLUDE REGEX "^${base_path}[^/]*\\.cpp$")
+    list(FILTER module_cpp INCLUDE REGEX "^${base_path}[^/]*\\.(c|cc|cpp|cxx|s|asm)$")
 
     if(APPLE)
         set(module_mm ${all_module_files})
-        list(FILTER module_mm INCLUDE REGEX "^${base_path}[^/]*\\.(mm|r)$")
+        list(FILTER module_mm INCLUDE REGEX "^${base_path}[^/]*\\.mm$")
 
         if(module_mm)
             set(module_mm_replaced ${module_mm})
             list(TRANSFORM module_mm_replaced REPLACE "\\.mm$" ".cpp")
             list(REMOVE_ITEM module_cpp ${module_mm_replaced})
-            list(APPEND module_cpp ${module_mm})
         endif()
+
+        set(module_apple_files ${all_module_files})
+        list(FILTER module_apple_files INCLUDE REGEX "${base_path}[^/]*\\.(m|mm|metal|r|swift)$")
+        list(APPEND module_cpp ${module_apple_files})
     endif()
 
     set(headers ${all_module_files})
 
-    if(NOT module_cpp STREQUAL "")
-        list(REMOVE_ITEM headers ${module_cpp})
+    set(module_files_to_build)
+
+    foreach(filename IN LISTS module_cpp)
+        _juce_should_build_module_source("${filename}" should_build_file)
+
+        if(should_build_file)
+            list(APPEND module_files_to_build "${filename}")
+        endif()
+    endforeach()
+
+    if(NOT module_files_to_build STREQUAL "")
+        list(REMOVE_ITEM headers ${module_files_to_build})
     endif()
 
-    foreach(source_list IN ITEMS module_cpp headers)
+    foreach(source_list IN ITEMS module_files_to_build headers)
         list(TRANSFORM ${source_list} PREPEND "${output_path}/")
     endforeach()
 
-    set(${built_sources} ${module_cpp} PARENT_SCOPE)
+    set(${built_sources} ${module_files_to_build} PARENT_SCOPE)
     set(${other_sources} ${headers} PARENT_SCOPE)
 endfunction()
 
@@ -445,7 +482,14 @@ function(_juce_link_frameworks target visibility)
             find_library("juce_found_${framework}" "${framework}" REQUIRED)
             target_link_libraries("${target}" "${visibility}" "${juce_found_${framework}}")
         elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-            target_link_libraries("${target}" "${visibility}" "-framework ${framework}")
+            # CoreServices is only available on iOS 12+, we must link it weakly on earlier platforms
+            if((framework STREQUAL "CoreServices") AND (CMAKE_OSX_DEPLOYMENT_TARGET LESS 12.0))
+                set(framework_flags "-weak_framework ${framework}")
+            else()
+                set(framework_flags "-framework ${framework}")
+            endif()
+
+            target_link_libraries("${target}" "${visibility}" "${framework_flags}")
         endif()
     endforeach()
 endfunction()
@@ -564,8 +608,13 @@ function(juce_add_module module_path)
 
     if(${module_name} STREQUAL "juce_audio_processors")
         add_library(juce_vst3_headers INTERFACE)
+
+        target_compile_definitions(juce_vst3_headers INTERFACE "$<$<TARGET_EXISTS:juce_vst3_sdk>:JUCE_CUSTOM_VST3_SDK=1>")
+
         target_include_directories(juce_vst3_headers INTERFACE
-            "${base_path}/juce_audio_processors/format_types/VST3_SDK")
+            "$<$<TARGET_EXISTS:juce_vst3_sdk>:$<TARGET_PROPERTY:juce_vst3_sdk,INTERFACE_INCLUDE_DIRECTORIES>>"
+            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors/format_types/VST3_SDK>")
+
         target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
 
         if(JUCE_ARG_ALIAS_NAMESPACE)
@@ -857,11 +906,21 @@ function(juce_add_binary_data target)
 
     list(APPEND binary_file_names "${juce_binary_data_folder}/${JUCE_ARG_HEADER_NAME}")
 
+    set(newline_delimited_input)
+
+    foreach(name IN LISTS JUCE_ARG_SOURCES)
+        _juce_make_absolute_and_check(name)
+        set(newline_delimited_input "${newline_delimited_input}${name}\n")
+    endforeach()
+
+    set(input_file_list "${juce_binary_data_folder}/input_file_list")
+    file(WRITE "${input_file_list}" "${newline_delimited_input}")
+
     add_custom_command(OUTPUT ${binary_file_names}
         COMMAND juce::juceaide binarydata "${JUCE_ARG_NAMESPACE}" "${JUCE_ARG_HEADER_NAME}"
-            ${juce_binary_data_folder} ${JUCE_ARG_SOURCES}
+            ${juce_binary_data_folder} "${input_file_list}"
         WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
-        DEPENDS ${JUCE_ARG_SOURCES}
+        DEPENDS "${input_file_list}"
         VERBATIM)
 
     target_sources(${target} PRIVATE "${binary_file_names}")
@@ -2260,8 +2319,7 @@ function(juce_add_pip header)
     target_compile_definitions(${JUCE_PIP_NAME}
         PRIVATE ${pip_moduleflags}
         PUBLIC
-            JUCE_VST3_CAN_REPLACE_VST2=0
-            JUCE_VST3_HOST_CROSS_PLATFORM_UID=1)
+            JUCE_VST3_CAN_REPLACE_VST2=0)
 
     _juce_get_pip_targets(${JUCE_PIP_NAME} pip_targets)
 
@@ -2348,6 +2406,22 @@ function(juce_set_vst2_sdk_path path)
     target_include_directories(juce_vst2_sdk INTERFACE
         $<TARGET_PROPERTY:juce::juce_vst3_headers,INTERFACE_INCLUDE_DIRECTORIES>
         "${path}")
+endfunction()
+
+function(juce_set_vst3_sdk_path path)
+    if(TARGET juce_vst3_sdk)
+        message(FATAL_ERROR "juce_set_vst3_sdk_path should only be called once")
+    endif()
+
+    _juce_make_absolute(path)
+
+    if(NOT EXISTS "${path}")
+        message(FATAL_ERROR "Could not find VST3 SDK at the specified path: ${path}")
+    endif()
+
+    add_library(juce_vst3_sdk INTERFACE IMPORTED GLOBAL)
+
+    target_include_directories(juce_vst3_sdk INTERFACE "${path}")
 endfunction()
 
 # ==================================================================================================

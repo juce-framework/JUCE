@@ -105,6 +105,7 @@ using namespace juce;
 
 #include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
+#include "../utility/juce_LinuxMessageThread.h"
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_VSTCommon.h>
@@ -184,53 +185,11 @@ namespace
         return w;
     }
 
+    static int numActivePlugins = 0;
     static bool messageThreadIsDefinitelyCorrect = false;
 }
 
-//==============================================================================
-#elif JUCE_LINUX || JUCE_BSD
-
-struct SharedMessageThread  : public Thread
-{
-    SharedMessageThread()  : Thread ("VstMessageThread")
-    {
-        startThread (7);
-
-        while (! initialised)
-            sleep (1);
-    }
-
-    ~SharedMessageThread() override
-    {
-        signalThreadShouldExit();
-        JUCEApplicationBase::quit();
-        waitForThreadToExit (5000);
-        clearSingletonInstance();
-    }
-
-    void run() override
-    {
-        initialiseJuce_GUI();
-        initialised = true;
-
-        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
-
-        XWindowSystem::getInstance();
-
-        while ((! threadShouldExit()) && MessageManager::getInstance()->runDispatchLoopUntil (250))
-        {}
-    }
-
-    JUCE_DECLARE_SINGLETON (SharedMessageThread, false)
-
-    bool initialised = false;
-};
-
-JUCE_IMPLEMENT_SINGLETON (SharedMessageThread)
-
 #endif
-
-static Array<void*> activePlugins;
 
 //==============================================================================
 // Ableton Live host specific commands
@@ -288,9 +247,9 @@ private:
 
 public:
     //==============================================================================
-    JuceVSTWrapper (Vst2::audioMasterCallback cb, AudioProcessor* af)
+    JuceVSTWrapper (Vst2::audioMasterCallback cb, std::unique_ptr<AudioProcessor> af)
        : hostCallback (cb),
-         processor (af)
+         processor (std::move (af))
     {
         inParameterChangedCallback = false;
 
@@ -324,7 +283,7 @@ public:
         vstEffect.process = nullptr;
         vstEffect.setParameter = (Vst2::AEffectSetParameterProc) setParameterCB;
         vstEffect.getParameter = (Vst2::AEffectGetParameterProc) getParameterCB;
-        vstEffect.numPrograms = jmax (1, af->getNumPrograms());
+        vstEffect.numPrograms = jmax (1, processor->getNumPrograms());
         vstEffect.numParams = juceParameters.getNumParameters();
         vstEffect.numInputs = maxNumInChannels;
         vstEffect.numOutputs = maxNumOutChannels;
@@ -356,44 +315,34 @@ public:
             vstEffect.flags |= Vst2::effFlagsNoSoundInStop;
        #endif
 
-        activePlugins.add (this);
+       #if JUCE_WINDOWS
+        ++numActivePlugins;
+       #endif
     }
 
     ~JuceVSTWrapper() override
     {
         JUCE_AUTORELEASEPOOL
         {
-            {
-               #if JUCE_LINUX || JUCE_BSD
-                MessageManagerLock mmLock;
-               #endif
-                stopTimer();
-                deleteEditor (false);
+           #if JUCE_LINUX || JUCE_BSD
+            MessageManagerLock mmLock;
+           #endif
 
-                hasShutdown = true;
+            stopTimer();
+            deleteEditor (false);
 
-                delete processor;
-                processor = nullptr;
+            hasShutdown = true;
 
-                jassert (editorComp == nullptr);
+            processor = nullptr;
 
-                deleteTempChannels();
+            jassert (editorComp == nullptr);
 
-                jassert (activePlugins.contains (this));
-                activePlugins.removeFirstMatchingValue (this);
-            }
+            deleteTempChannels();
 
-            if (activePlugins.size() == 0)
-            {
-               #if JUCE_LINUX || JUCE_BSD
-                SharedMessageThread::deleteInstance();
-               #endif
-                shutdownJuce_GUI();
-
-               #if JUCE_WINDOWS
+           #if JUCE_WINDOWS
+            if (--numActivePlugins == 0)
                 messageThreadIsDefinitelyCorrect = false;
-               #endif
-            }
+           #endif
         }
     }
 
@@ -433,8 +382,6 @@ public:
        #if JUCE_DEBUG && ! (JucePlugin_ProducesMidiOutput || JucePlugin_IsMidiEffect)
         const int numMidiEventsComingIn = midiEvents.getNumEvents();
        #endif
-
-        jassert (activePlugins.contains (this));
 
         {
             const int numIn  = processor->getTotalNumInputChannels();
@@ -1874,7 +1821,7 @@ private:
         if (args.index == Vst2::effGetParamDisplay)
             return handleCockosGetParameterText (args.value, args.ptr, args.opt);
 
-        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor.get()))
             return callbackHandler->handleVstManufacturerSpecific (args.index, args.value, args.ptr, args.opt);
 
         return 0;
@@ -1934,7 +1881,7 @@ private:
         if (matches ("hasCockosExtensions"))
             return (int32) 0xbeef0000;
 
-        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+        if (auto callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor.get()))
             return callbackHandler->handleVstPluginCanDo (args.index, args.value, args.ptr, args.opt);
 
         return 0;
@@ -2084,8 +2031,14 @@ private:
     }
 
     //==============================================================================
+    ScopedJuceInitialiser_GUI libraryInitialiser;
+
+   #if JUCE_LINUX || JUCE_BSD
+    SharedResourcePointer<MessageThread> messageThread;
+   #endif
+
     Vst2::audioMasterCallback hostCallback;
-    AudioProcessor* processor = {};
+    std::unique_ptr<AudioProcessor> processor;
     double sampleRate = 44100.0;
     int32 blockSize = 1024;
     Vst2::AEffect vstEffect;
@@ -2136,7 +2089,11 @@ namespace
     {
         JUCE_AUTORELEASEPOOL
         {
-            initialiseJuce_GUI();
+            ScopedJuceInitialiser_GUI libraryInitialiser;
+
+           #if JUCE_LINUX || JUCE_BSD
+            SharedResourcePointer<MessageThread> messageThread;
+           #endif
 
             try
             {
@@ -2146,11 +2103,12 @@ namespace
                     MessageManagerLock mmLock;
                    #endif
 
-                    auto* processor = createPluginFilterOfType (AudioProcessor::wrapperType_VST);
-                    auto* wrapper = new JuceVSTWrapper (audioMaster, processor);
+                    std::unique_ptr<AudioProcessor> processor { createPluginFilterOfType (AudioProcessor::wrapperType_VST) };
+                    auto* processorPtr = processor.get();
+                    auto* wrapper = new JuceVSTWrapper (audioMaster, std::move (processor));
                     auto* aEffect = wrapper->getAEffect();
 
-                    if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processor))
+                    if (auto* callbackHandler = dynamic_cast<VSTCallbackHandler*> (processorPtr))
                     {
                         callbackHandler->handleVstHostCallbackAvailable ([audioMaster, aEffect] (int32 opcode, int32 index, pointer_sized_int value, void* ptr, float opt)
                         {
@@ -2204,7 +2162,6 @@ namespace
     {
         PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_VST;
 
-        SharedMessageThread::getInstance();
         return pluginEntryPoint (audioMaster);
     }
 

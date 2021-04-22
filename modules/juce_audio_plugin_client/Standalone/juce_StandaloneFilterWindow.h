@@ -128,19 +128,31 @@ public:
         processor->disableNonMainBuses();
         processor->setRateAndBufferSizeDetails (44100, 512);
 
-        int inChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numIns
-                                                          : processor->getMainBusNumInputChannels());
-
-        int outChannels = (channelConfiguration.size() > 0 ? channelConfiguration[0].numOuts
-                                                           : processor->getMainBusNumOutputChannels());
-
-        processorHasPotentialFeedbackLoop = (inChannels > 0 && outChannels > 0);
+        processorHasPotentialFeedbackLoop = (getNumInputChannels() > 0 && getNumOutputChannels() > 0);
     }
 
     virtual void deletePlugin()
     {
         stopPlaying();
         processor = nullptr;
+    }
+
+    int getNumInputChannels() const
+    {
+        if (processor == nullptr)
+            return 0;
+
+        return (channelConfiguration.size() > 0 ? channelConfiguration[0].numIns
+                                                : processor->getMainBusNumInputChannels());
+    }
+
+    int getNumOutputChannels() const
+    {
+        if (processor == nullptr)
+            return 0;
+
+        return (channelConfiguration.size() > 0 ? channelConfiguration[0].numOuts
+                                                : processor->getMainBusNumOutputChannels());
     }
 
     static String getFilePatterns (const String& fileSuffix)
@@ -305,18 +317,17 @@ public:
            #endif
         }
 
-        auto totalInChannels  = processor->getMainBusNumInputChannels();
-        auto totalOutChannels = processor->getMainBusNumOutputChannels();
+        auto inputChannels  = getNumInputChannels();
+        auto outputChannels = getNumOutputChannels();
 
-        if (channelConfiguration.size() > 0)
+        if (inputChannels == 0 && outputChannels == 0 && processor->isMidiEffect())
         {
-            auto defaultConfig = channelConfiguration.getReference (0);
-            totalInChannels  = defaultConfig.numIns;
-            totalOutChannels = defaultConfig.numOuts;
+            // add a dummy output channel for MIDI effect plug-ins so they can receive audio callbacks
+            outputChannels = 1;
         }
 
-        deviceManager.initialise (enableAudioInput ? totalInChannels : 0,
-                                  totalOutChannels,
+        deviceManager.initialise (enableAudioInput ? inputChannels : 0,
+                                  outputChannels,
                                   savedState.get(),
                                   true,
                                   preferredDefaultDeviceName,
@@ -453,6 +464,24 @@ private:
             }
 
             deviceSelector.setBounds (r);
+        }
+
+        void childBoundsChanged (Component* childComp) override
+        {
+            if (childComp != &deviceSelector)
+                return;
+
+            const auto extraHeight = [&]
+            {
+                if (! owner.getProcessorHasPotentialFeedbackLoop())
+                    return 0;
+
+                const auto itemHeight = deviceSelector.getItemHeight();
+                const auto separatorHeight = (itemHeight >> 1);
+                return itemHeight + separatorHeight;
+            }();
+
+            setSize (getWidth(), deviceSelector.getHeight() + extraHeight);
         }
 
     private:

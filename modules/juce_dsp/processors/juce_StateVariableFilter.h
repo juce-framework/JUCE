@@ -160,7 +160,7 @@ namespace StateVariableFilter
             for (size_t i = 0 ; i < n; ++i)
                 output[i] = processLoop<isBypassed, type> (input[i], state);
 
-           #if JUCE_SNAP_TO_ZERO
+           #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
             snapToZero();
            #endif
 

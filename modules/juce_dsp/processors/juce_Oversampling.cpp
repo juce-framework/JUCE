@@ -363,7 +363,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
             }
         }
 
-       #if JUCE_SNAP_TO_ZERO
+       #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
         snapToZero (true);
        #endif
     }
@@ -422,7 +422,7 @@ struct Oversampling2TimesPolyphaseIIR  : public Oversampling<SampleType>::Oversa
             delayDown.setUnchecked (static_cast<int> (channel), delay);
         }
 
-       #if JUCE_SNAP_TO_ZERO
+       #if JUCE_DSP_ENABLE_SNAP_TO_ZERO
         snapToZero (false);
        #endif
     }

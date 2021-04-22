@@ -162,6 +162,9 @@ namespace build_tools
         addPlistDictionaryKey (*dict, "NSHumanReadableCopyright",    companyCopyright);
         addPlistDictionaryKey (*dict, "NSHighResolutionCapable", true);
 
+        if (applicationCategory.isNotEmpty())
+            addPlistDictionaryKey (*dict, "LSApplicationCategoryType", applicationCategory);
+
         auto replacedDocExtensions = StringArray::fromTokens (replacePreprocessorDefs (allPreprocessorDefs,
                                                                                        documentExtensions), ",", {});
         replacedDocExtensions.trim();
@@ -340,7 +343,10 @@ namespace build_tools
         auto* tagsArray = componentDict->createNewChildElement ("array");
 
         tagsArray->createNewChildElement ("string")
-            ->addTextElement (isPluginSynth ? "Synth" : "Effects");
+                 ->addTextElement (isPluginSynth ? "Synth" : "Effects");
+
+        if (auMainType.removeCharacters ("'") == "aumi")
+            tagsArray->createNewChildElement ("string")->addTextElement ("MIDI");
 
         return { plistKey, plistEntry };
     }

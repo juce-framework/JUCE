@@ -36,12 +36,13 @@ static std::unique_ptr<ScopedDPIAwarenessDisabler> makeDPIAwarenessDisablerForPl
 }
 
 //==============================================================================
-PluginGraph::PluginGraph (AudioPluginFormatManager& fm)
+PluginGraph::PluginGraph (AudioPluginFormatManager& fm, KnownPluginList& kpl)
     : FileBasedDocument (getFilenameSuffix(),
                          getFilenameWildcard(),
                          "Load a graph",
                          "Save a graph"),
-      formatManager (fm)
+      formatManager (fm),
+      knownPlugins (kpl)
 {
     newDocument();
     graph.addListener (this);
@@ -379,16 +380,41 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
             break;
     }
 
-    auto createInstance = [this, pd]
+    auto createInstanceWithFallback = [&]() -> std::unique_ptr<AudioPluginInstance>
     {
-        String errorMessage;
+        auto createInstance = [this] (const PluginDescription& description)
+        {
+            String errorMessage;
 
-        auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (pd);
-        return formatManager.createPluginInstance (pd, graph.getSampleRate(),
-                                                   graph.getBlockSize(), errorMessage);
+            auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (description);
+
+            return formatManager.createPluginInstance (description,
+                                                       graph.getSampleRate(),
+                                                       graph.getBlockSize(),
+                                                       errorMessage);
+        };
+
+        if (auto instance = createInstance (pd))
+            return instance;
+
+        const auto allFormats = formatManager.getFormats();
+        const auto matchingFormat = std::find_if (allFormats.begin(), allFormats.end(),
+                                                  [&] (const AudioPluginFormat* f) { return f->getName() == pd.pluginFormatName; });
+
+        if (matchingFormat == allFormats.end())
+            return nullptr;
+
+        const auto plugins = knownPlugins.getTypesForFormat (**matchingFormat);
+        const auto matchingPlugin = std::find_if (plugins.begin(), plugins.end(),
+                                                  [&] (const PluginDescription& desc) { return pd.uniqueId == desc.uniqueId; });
+
+        if (matchingPlugin == plugins.end())
+            return nullptr;
+
+        return createInstance (*matchingPlugin);
     };
 
-    if (auto instance = createInstance())
+    if (auto instance = createInstanceWithFallback())
     {
         if (auto* layoutEntity = xml.getChildByName ("LAYOUT"))
         {

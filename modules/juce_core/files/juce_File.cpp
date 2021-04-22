@@ -1097,7 +1097,11 @@ public:
 
         beginTest ("Writing");
 
-        File demoFolder (temp.getChildFile ("JUCE UnitTests Temp Folder.folder"));
+        auto random = getRandom();
+        const auto tempFolderName = "JUCE UnitTests Temp Folder "
+                                  + String::toHexString (random.nextInt())
+                                  + ".folder";
+        File demoFolder (temp.getChildFile (tempFolderName));
         expect (demoFolder.deleteRecursively());
         expect (demoFolder.createDirectory());
         expect (demoFolder.isDirectory());
