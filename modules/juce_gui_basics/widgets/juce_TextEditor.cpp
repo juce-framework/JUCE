@@ -263,7 +263,7 @@ private:
 
             TextAtom atom;
             atom.atomText = String (start, numChars);
-            atom.width = font.getStringWidthFloat (atom.getText (passwordChar));
+            atom.width = (atom.isNewLine() ? 0.0f : font.getStringWidthFloat (atom.getText (passwordChar)));
             atom.numChars = (uint16) numChars;
             atoms.add (atom);
         }
