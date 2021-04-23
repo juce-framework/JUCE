@@ -303,37 +303,8 @@ struct TextEditor::Iterator
     //==============================================================================
     bool next()
     {
-        if (atom == &tempAtom)
-        {
-            auto numRemaining = tempAtom.atomText.length() - tempAtom.numChars;
-
-            if (numRemaining > 0)
-            {
-                tempAtom.atomText = tempAtom.atomText.substring (tempAtom.numChars);
-
-                if (tempAtom.numChars > 0)
-                    lineY += lineHeight * lineSpacing;
-
-                indexInText += tempAtom.numChars;
-
-                GlyphArrangement g;
-                g.addLineOfText (currentSection->font, atom->getText (passwordCharacter), 0.0f, 0.0f);
-
-                int split;
-                for (split = 0; split < g.getNumGlyphs(); ++split)
-                    if (shouldWrap (g.getGlyph (split).getRight()))
-                        break;
-
-                if (split > 0 && split <= numRemaining)
-                {
-                    tempAtom.numChars = (uint16) split;
-                    tempAtom.width = g.getGlyph (split - 1).getRight();
-                    atomX = getJustificationOffsetX (tempAtom.width);
-                    atomRight = atomX + tempAtom.width;
-                    return true;
-                }
-            }
-        }
+        if (atom == &longAtom && chunkLongAtom (true))
+            return true;
 
         if (sectionIndex >= sections.size())
         {
@@ -401,6 +372,8 @@ struct TextEditor::Iterator
             }
         }
 
+        bool isInPreviousAtom = false;
+
         if (atom != nullptr)
         {
             atomX = atomRight;
@@ -408,6 +381,8 @@ struct TextEditor::Iterator
 
             if (atom->isNewLine())
                 beginNewLine();
+            else
+                isInPreviousAtom = true;
         }
 
         atom = &(currentSection->atoms.getReference (atomIndex));
@@ -421,25 +396,17 @@ struct TextEditor::Iterator
                 // leave whitespace at the end of a line, but truncate it to avoid scrolling
                 atomRight = jmin (atomRight, wordWrapWidth);
             }
+            else if (shouldWrap (atom->width))  // atom too big to fit on a line, so break it up..
+            {
+                longAtom = *atom;
+                longAtom.numChars = 0;
+                atom = &longAtom;
+                chunkLongAtom (isInPreviousAtom);
+            }
             else
             {
-                if (shouldWrap (atom->width))  // atom too big to fit on a line, so break it up..
-                {
-                    tempAtom = *atom;
-                    tempAtom.width = 0;
-                    tempAtom.numChars = 0;
-                    atom = &tempAtom;
-
-                    if (atomX > justificationOffsetX)
-                        beginNewLine();
-
-                    return next();
-                }
-
                 beginNewLine();
-                atomX = justificationOffsetX;
                 atomRight = atomX + atom->width;
-                return true;
             }
         }
 
@@ -497,8 +464,7 @@ struct TextEditor::Iterator
             ++tempAtomIndex;
         }
 
-        justificationOffsetX = getJustificationOffsetX (lineWidth);
-        atomX = justificationOffsetX;
+        atomX = getJustificationOffsetX (lineWidth);
     }
 
     float getJustificationOffsetX (float lineWidth) const
@@ -702,13 +668,51 @@ private:
     const UniformTextSection* currentSection = nullptr;
     int sectionIndex = 0, atomIndex = 0;
     Justification justification;
-    float justificationOffsetX = 0;
     const Point<float> bottomRight;
     const float wordWrapWidth;
     const juce_wchar passwordCharacter;
     const float lineSpacing;
     const bool underlineWhitespace;
-    TextAtom tempAtom;
+    TextAtom longAtom;
+
+    bool chunkLongAtom (bool shouldStartNewLine)
+    {
+        const auto numRemaining = longAtom.atomText.length() - longAtom.numChars;
+
+        if (numRemaining <= 0)
+            return false;
+
+        longAtom.atomText = longAtom.atomText.substring (longAtom.numChars);
+        indexInText += longAtom.numChars;
+
+        GlyphArrangement g;
+        g.addLineOfText (currentSection->font, atom->getText (passwordCharacter), 0.0f, 0.0f);
+
+        int split;
+        for (split = 0; split < g.getNumGlyphs(); ++split)
+            if (shouldWrap (g.getGlyph (split).getRight()))
+                break;
+
+        split = jmax (1, split);
+
+        longAtom.numChars = (uint16) split;
+        longAtom.width = g.getGlyph (split - 1).getRight();
+
+        if (split == numRemaining)
+        {
+            beginNewLine();
+            atomRight = atomX + longAtom.width;
+            return true;
+        }
+
+        if (shouldStartNewLine)
+            lineY += lineHeight * lineSpacing;
+
+        atomX = getJustificationOffsetX (longAtom.width);
+        atomRight = atomX + longAtom.width;
+
+        return true;
+    }
 
     void moveToEndOfLastAtom()
     {
