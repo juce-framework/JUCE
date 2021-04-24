@@ -1439,12 +1439,12 @@ int TextEditor::getWordWrapWidth() const
 
 int TextEditor::getMaximumTextWidth() const
 {
-    return viewport->getMaximumVisibleWidth() - leftIndent - rightEdgeSpace;
+    return jmax (1, viewport->getMaximumVisibleWidth() - leftIndent - rightEdgeSpace);
 }
 
 int TextEditor::getMaximumTextHeight() const
 {
-    return viewport->getMaximumVisibleHeight() - topIndent;
+    return jmax (1, viewport->getMaximumVisibleHeight() - topIndent);
 }
 
 void TextEditor::checkLayout()
