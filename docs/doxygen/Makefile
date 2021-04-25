@@ -2,7 +2,7 @@ SHELL := /bin/bash
 
 SOURCE_FILES := $(shell find ../../modules -type f -name "juce_*.h" -or -name "juce_*.dox" | sed 's/ /\\ /g')
 
-.PHONEY: clean
+.PHONY: clean
 
 doc/index.html: build/juce_modules.dox Doxyfile
 	doxygen
