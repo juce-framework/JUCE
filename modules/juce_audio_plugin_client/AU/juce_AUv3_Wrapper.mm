@@ -999,7 +999,6 @@ public:
                 info.ppqPositionOfLastBarStart = outCurrentMeasureDownBeat;
                 info.bpm = bpm;
                 info.ppqPosition = ppqPosition;
-                info.ppqPositionOfLastBarStart = outCurrentMeasureDownBeat;
             }
         }
 
