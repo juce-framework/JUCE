@@ -793,6 +793,7 @@ endfunction()
 function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content EXECUTABLE_NAME                      ${target} JUCE_PRODUCT_NAME)
     _juce_append_target_property(file_content VERSION                              ${target} JUCE_VERSION)
+    _juce_append_target_property(file_content BUILD_VERSION                        ${target} JUCE_BUILD_VERSION)
     _juce_append_target_property(file_content PLIST_TO_MERGE                       ${target} JUCE_PLIST_TO_MERGE)
     _juce_append_target_property(file_content BUNDLE_ID                            ${target} JUCE_BUNDLE_ID)
     _juce_append_target_property(file_content XCODE_EXTRA_PLIST_ENTRIES            ${target} JUCE_XCODE_EXTRA_PLIST_ENTRIES)
@@ -1790,6 +1791,8 @@ function(_juce_set_fallback_properties target)
         message(FATAL_ERROR "Target ${target} must have its VERSION argument set, or must be part of a project with a PROJECT_VERSION")
     endif()
 
+    _juce_set_property_if_not_set(${target} BUILD_VERSION "${final_version}")
+
     get_target_property(custom_xcassets ${target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
     set(needs_storyboard TRUE)
@@ -1973,6 +1976,7 @@ endfunction()
 function(_juce_initialise_target target)
     set(one_value_args
         VERSION
+        BUILD_VERSION
         PRODUCT_NAME
         PLIST_TO_MERGE
         BUNDLE_ID
