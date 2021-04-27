@@ -175,6 +175,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/native/oboe/include/oboe/StabilizedCallback.h"
     "../../../../../modules/juce_audio_devices/native/oboe/include/oboe/Utilities.h"
     "../../../../../modules/juce_audio_devices/native/oboe/include/oboe/Version.h"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AAudioExtensions.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AAudioLoader.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AAudioLoader.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AudioStreamAAudio.cpp"
@@ -1965,6 +1966,7 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/native/ob
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/include/oboe/StabilizedCallback.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/include/oboe/Utilities.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/include/oboe/Version.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AAudioExtensions.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AAudioLoader.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AAudioLoader.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/aaudio/AudioStreamAAudio.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
