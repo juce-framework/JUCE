@@ -47,6 +47,12 @@ namespace
         return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
     }
 
+    template <class PointType>
+    Point<float> convertToPointFloat (PointType p) noexcept
+    {
+        return { (float) p.x, (float) p.y };
+    }
+
     template <typename PointType>
     CGPoint convertToCGPoint (PointType p) noexcept
     {
