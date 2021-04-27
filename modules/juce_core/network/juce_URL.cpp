@@ -454,7 +454,7 @@ URL URL::getChildURL (const String& subPath) const
 
 bool URL::hasBodyDataToSend() const
 {
-    return filesToUpload.size() > 0 || postData.getSize() > 0;
+    return filesToUpload.size() > 0 || ! postData.isEmpty();
 }
 
 void URL::createHeadersAndPostData (String& headers,
@@ -466,7 +466,7 @@ void URL::createHeadersAndPostData (String& headers,
     if (filesToUpload.size() > 0)
     {
         // (this doesn't currently support mixing custom post-data with uploads..)
-        jassert (postData.getSize() == 0);
+        jassert (postData.isEmpty());
 
         auto boundary = String::toHexString (Random::getSystemRandom().nextInt64());
 

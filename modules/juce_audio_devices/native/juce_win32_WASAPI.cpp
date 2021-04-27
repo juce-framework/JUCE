@@ -975,7 +975,7 @@ public:
 
     void copyBuffersFromReservoir (float** destBuffers, int numDestBuffers, int bufferSize)
     {
-        if ((numChannels <= 0 && bufferSize == 0) || reservoir.getSize() == 0)
+        if ((numChannels <= 0 && bufferSize == 0) || reservoir.isEmpty())
             return;
 
         int offset = jmax (0, bufferSize - getNumSamplesInReservoir());

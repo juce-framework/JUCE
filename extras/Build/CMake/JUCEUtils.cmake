@@ -349,7 +349,7 @@ function(_juce_module_sources module_path output_path built_sources other_source
         endif()
     endforeach()
 
-    if(NOT module_files_to_build STREQUAL "")
+    if(NOT "${module_files_to_build}" STREQUAL "")
         list(REMOVE_ITEM headers ${module_files_to_build})
     endif()
 
@@ -476,7 +476,14 @@ function(_juce_link_frameworks target visibility)
             find_library("juce_found_${framework}" "${framework}" REQUIRED)
             target_link_libraries("${target}" "${visibility}" "${juce_found_${framework}}")
         elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-            target_link_libraries("${target}" "${visibility}" "-framework ${framework}")
+            # CoreServices is only available on iOS 12+, we must link it weakly on earlier platforms
+            if((framework STREQUAL "CoreServices") AND (CMAKE_OSX_DEPLOYMENT_TARGET LESS 12.0))
+                set(framework_flags "-weak_framework ${framework}")
+            else()
+                set(framework_flags "-framework ${framework}")
+            endif()
+
+            target_link_libraries("${target}" "${visibility}" "${framework_flags}")
         endif()
     endforeach()
 endfunction()

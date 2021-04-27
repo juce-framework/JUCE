@@ -399,7 +399,7 @@ public:
 
         jassert (currentCallback == nullptr);
 
-        if (bufferSizeSamples < 8 || bufferSizeSamples > 16384)
+        if (bufferSizeSamples < 8 || bufferSizeSamples > 32768)
             shouldUsePreferredSize = true;
 
         if (asioObject == nullptr)
@@ -415,11 +415,8 @@ public:
         auto err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans);
         jassert (err == ASE_OK);
 
-        bufferSizeSamples = readBufferSizes (bufferSizeSamples);
-
         auto sampleRate = sr;
         currentSampleRate = sampleRate;
-        currentBlockSizeSamples = bufferSizeSamples;
         currentChansOut.clear();
         currentChansIn.clear();
 
@@ -441,6 +438,7 @@ public:
         buffersCreated = false;
 
         setSampleRate (sampleRate);
+        currentBlockSizeSamples = bufferSizeSamples = readBufferSizes (bufferSizeSamples);
 
         // (need to get this again in case a sample rate change affected the channel count)
         err = asioObject->getChannels (&totalNumInputChans, &totalNumOutputChans);
