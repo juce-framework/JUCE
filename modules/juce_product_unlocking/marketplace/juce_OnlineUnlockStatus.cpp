@@ -229,7 +229,7 @@ void OnlineUnlockStatus::load()
     MemoryBlock mb;
     mb.fromBase64Encoding (getState());
 
-    if (mb.getSize() > 0)
+    if (! mb.isEmpty())
         status = ValueTree::readFromGZIPData (mb.getData(), mb.getSize());
     else
         status = ValueTree (stateTagName);

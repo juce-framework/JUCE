@@ -251,9 +251,9 @@ bool JPEGImageFormat::canUnderstand (InputStream& in)
 
 Image JPEGImageFormat::decodeImage (InputStream& in)
 {
-#if JUCE_USING_COREIMAGE_LOADER
+   #if JUCE_USING_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);
-#else
+   #else
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
@@ -356,7 +356,7 @@ Image JPEGImageFormat::decodeImage (InputStream& in)
     }
 
     return image;
-#endif
+   #endif
 }
 
 bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)

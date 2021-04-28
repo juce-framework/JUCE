@@ -63,7 +63,7 @@ public:
         Note that like all other messages, this object will be deleted immediately
         after this method has been invoked.
     */
-    virtual void messageCallback() override = 0;
+    void messageCallback() override = 0;
 
 private:
     // Avoid the leak-detector because for plugins, the host can unload our DLL with undelivered

@@ -33,7 +33,7 @@ namespace DirectWriteTypeLayout
     {
     public:
         CustomDirectWriteTextRenderer (IDWriteFontCollection& fonts, const AttributedString& as)
-            : ComBaseClassHelper<IDWriteTextRenderer> (0),
+            : ComBaseClassHelper (0),
               attributedString (as),
               fontCollection (fonts)
         {

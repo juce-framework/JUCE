@@ -33,7 +33,7 @@ class JuceIStream   : public ComBaseClassHelper<IStream>
 {
 public:
     JuceIStream (InputStream& in) noexcept
-        : ComBaseClassHelper<IStream> (0), source (in)
+        : ComBaseClassHelper (0), source (in)
     {
     }
 

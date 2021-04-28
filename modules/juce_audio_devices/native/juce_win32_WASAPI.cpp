@@ -975,7 +975,7 @@ public:
 
     void copyBuffersFromReservoir (float** destBuffers, int numDestBuffers, int bufferSize)
     {
-        if ((numChannels <= 0 && bufferSize == 0) || reservoir.getSize() == 0)
+        if ((numChannels <= 0 && bufferSize == 0) || reservoir.isEmpty())
             return;
 
         int offset = jmax (0, bufferSize - getNumSamplesInReservoir());
@@ -1746,7 +1746,7 @@ private:
     {
     public:
         ChangeNotificationClient (WASAPIAudioIODeviceType* d)
-            : ComBaseClassHelper<IMMNotificationClient> (0), device (d) {}
+            : ComBaseClassHelper (0), device (d) {}
 
         JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             { return notify(); }
         JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           { return notify(); }

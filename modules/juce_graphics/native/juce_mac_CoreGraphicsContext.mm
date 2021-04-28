@@ -829,6 +829,9 @@ Image juce_loadWithCoreImage (InputStream& input)
     MemoryBlockHolder::Ptr memBlockHolder = new MemoryBlockHolder();
     input.readIntoMemoryBlock (memBlockHolder->block, -1);
 
+    if (memBlockHolder->block.isEmpty())
+        return {};
+
    #if JUCE_IOS
     JUCE_AUTORELEASEPOOL
    #endif

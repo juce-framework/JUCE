@@ -23,6 +23,7 @@
 #include "common/AudioClock.h"
 #include "common/OboeDebug.h"
 #include "oboe/Utilities.h"
+#include "AAudioExtensions.h"
 
 #ifdef __ANDROID__
 #include <sys/system_properties.h>
@@ -677,7 +678,7 @@ ResultWithValue<double> AudioStreamAAudio::calculateLatencyMillis() {
 bool AudioStreamAAudio::isMMapUsed() {
     AAudioStream *stream = mAAudioStream.load();
     if (stream != nullptr) {
-        return mLibLoader->stream_isMMapUsed(stream);
+        return AAudioExtensions::getInstance().isMMapUsed(stream);
     } else {
         return false;
     }
