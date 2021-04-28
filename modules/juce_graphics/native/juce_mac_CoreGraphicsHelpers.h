@@ -32,13 +32,19 @@ namespace
     template <class RectType>
     Rectangle<int> convertToRectInt (RectType r) noexcept
     {
-        return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
+        return { (int) r.origin.x,
+                 (int) r.origin.y,
+                 (int) r.size.width,
+                 (int) r.size.height };
     }
 
     template <class RectType>
     Rectangle<float> convertToRectFloat (RectType r) noexcept
     {
-        return Rectangle<float> (r.origin.x, r.origin.y, r.size.width, r.size.height);
+        return { (float) r.origin.x,
+                 (float) r.origin.y,
+                 (float) r.size.width,
+                 (float) r.size.height };
     }
 
     template <class RectType>

@@ -1351,10 +1351,13 @@ struct VST3PluginWindow : public AudioProcessorEditor,
                           public ComponentPeer::ScaleFactorListener,
                           public IPlugFrame
 {
-    VST3PluginWindow (AudioProcessor* owner, IPlugView* pluginView)
+    VST3PluginWindow (AudioPluginInstance* owner, IPlugView* pluginView)
       : AudioProcessorEditor (owner),
         ComponentMovementWatcher (this),
         view (pluginView, false)
+       #if JUCE_MAC
+      , embeddedComponent (*owner)
+       #endif
     {
         setSize (10, 10);
         setOpaque (true);
@@ -1616,7 +1619,7 @@ private:
     std::unique_ptr<ComponentPeer> peer;
     using HandleFormat = HWND;
    #elif JUCE_MAC
-    AutoResizingNSViewComponentWithParent embeddedComponent;
+    NSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
    #elif JUCE_LINUX || JUCE_BSD
     SharedResourcePointer<RunLoop> runLoop;
