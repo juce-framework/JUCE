@@ -908,8 +908,9 @@ public:
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
         {
-            CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, getComponent().getHeight()));
-            CoreGraphicsContext context (cg, (float) [view frame].size.height);
+            const auto height = getComponent().getHeight();
+            CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, 0, height));
+            CoreGraphicsContext context (cg, (float) height);
             handlePaint (context);
         }
         else
