@@ -34,7 +34,7 @@ class JucerTreeViewBase   : public TreeViewItem,
 {
 public:
     JucerTreeViewBase();
-    ~JucerTreeViewBase() override;
+    ~JucerTreeViewBase() override = default;
 
     int getItemWidth() const override                   { return -1; }
     int getItemHeight() const override                  { return 25; }
@@ -98,7 +98,7 @@ public:
         }
     };
 
-    int textX;
+    int textX = 0;
 
 protected:
     ProjectContentComponent* getProjectContentComponent() const;
@@ -203,21 +203,24 @@ private:
 class TreeItemComponent   : public Component
 {
 public:
-    TreeItemComponent (JucerTreeViewBase& i)  : item (i)
+    TreeItemComponent (JucerTreeViewBase& i)  : item (&i)
     {
         setInterceptsMouseClicks (false, true);
-        item.textX = iconWidth;
+        item->textX = iconWidth;
     }
 
     void paint (Graphics& g) override
     {
+        if (item == nullptr)
+            return;
+
         auto bounds = getLocalBounds().toFloat();
         auto iconBounds = bounds.removeFromLeft ((float) iconWidth).reduced (7, 5);
 
         bounds.removeFromRight ((float) buttons.size() * bounds.getHeight());
 
-        item.paintIcon    (g, iconBounds);
-        item.paintContent (g, bounds.toNearestInt());
+        item->paintIcon    (g, iconBounds);
+        item->paintContent (g, bounds.toNearestInt());
     }
 
     void resized() override
@@ -225,7 +228,7 @@ public:
         auto r = getLocalBounds();
 
         for (int i = buttons.size(); --i >= 0;)
-            buttons.getUnchecked(i)->setBounds (r.removeFromRight (r.getHeight()));
+            buttons.getUnchecked (i)->setBounds (r.removeFromRight (r.getHeight()));
     }
 
     void addRightHandButton (Component* button)
@@ -234,7 +237,7 @@ public:
         addAndMakeVisible (button);
     }
 
-    JucerTreeViewBase& item;
+    WeakReference<JucerTreeViewBase> item;
     OwnedArray<Component> buttons;
 
     const int iconWidth = 25;

@@ -1746,7 +1746,7 @@ private:
     {
     public:
         ChangeNotificationClient (WASAPIAudioIODeviceType* d)
-            : ComBaseClassHelper<IMMNotificationClient> (0), device (d) {}
+            : ComBaseClassHelper (0), device (d) {}
 
         JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             { return notify(); }
         JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           { return notify(); }

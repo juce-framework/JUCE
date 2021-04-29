@@ -215,7 +215,7 @@ private:
             return ptr;
         }();
 
-        if (item == nullptr || FAILED (dialog.SetFolder (item)))
+        if (item == nullptr || FAILED (dialog.SetDefaultFolder (item)))
             return false;
 
         String filename (files.getData());
