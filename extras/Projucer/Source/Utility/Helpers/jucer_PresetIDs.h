@@ -386,6 +386,7 @@ namespace Ids
     DECLARE_ID (liveBuildEnabled);
     DECLARE_ID (guiEditorEnabled);
     DECLARE_ID (jucerFormatVersion);
+    DECLARE_ID (buildNumber);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");
