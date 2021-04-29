@@ -1890,6 +1890,7 @@ public:
             {
                 auto v = addBuildPhase ("PBXShellScriptBuildPhase", {});
                 v.setProperty (Ids::name, phaseName, nullptr);
+                v.setProperty ("alwaysOutOfDate", "1", nullptr);
                 v.setProperty ("shellPath", "/bin/sh", nullptr);
                 v.setProperty ("shellScript", script.replace ("\\", "\\\\")
                                                     .replace ("\"", "\\\"")
