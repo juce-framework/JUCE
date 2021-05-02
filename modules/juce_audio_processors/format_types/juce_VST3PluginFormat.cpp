@@ -2450,11 +2450,11 @@ public:
         for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
+        inputParameterChanges->clear();
+        outputParameterChanges->clear();
+
         associateWith (data, buffer);
         associateWith (data, midiMessages);
-
-        inputParameterChanges ->clear();
-        outputParameterChanges->clear();
 
         cachedParamValues.ifSet ([&] (size_t index, float value)
         {
