@@ -1448,15 +1448,13 @@ void TextEditor::checkLayout()
 {
     if (getWordWrapWidth() > 0)
     {
-        auto textBottom = Iterator (*this).getTotalTextHeight() + topIndent;
-        auto textRight = jmax (viewport->getMaximumVisibleWidth(),
-                               Iterator (*this).getTextRight() + leftIndent + rightEdgeSpace);
+        const auto textBottom = Iterator (*this).getTotalTextHeight() + topIndent;
+        const auto textRight = jmax (viewport->getMaximumVisibleWidth(),
+                                     Iterator (*this).getTextRight() + leftIndent + rightEdgeSpace);
 
         textHolder->setSize (textRight, textBottom);
-        viewport->setScrollBarsShown (scrollbarVisible
-                                        && multiline
-                                        && (textBottom > viewport->getMaximumVisibleHeight()),
-                                      false);
+        viewport->setScrollBarsShown (scrollbarVisible && multiline && textBottom > viewport->getMaximumVisibleHeight(),
+                                      scrollbarVisible && multiline && ! wordWrap && textRight > viewport->getMaximumVisibleWidth());
     }
 }
 
