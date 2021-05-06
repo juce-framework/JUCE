@@ -942,9 +942,9 @@ public:
     void set (size_t index, float value)
     {
         jassert (index < size());
-        values[index].store (value, std::memory_order_relaxed);
-        flags[index / numFlagBits].fetch_or ((FlagType) 1 << (index % numFlagBits),
-                                             std::memory_order_acq_rel);
+        const auto previous = values[index].exchange (value, std::memory_order_relaxed);
+        const auto bit = previous == value ? ((FlagType) 0) : ((FlagType) 1 << (index % numFlagBits));
+        flags[index / numFlagBits].fetch_or (bit, std::memory_order_acq_rel);
     }
 
     float get (size_t index) const noexcept
