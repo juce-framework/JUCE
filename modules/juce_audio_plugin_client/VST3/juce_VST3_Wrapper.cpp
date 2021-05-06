@@ -437,7 +437,7 @@ public:
     Vst::ParamID getProgramParamID()         const noexcept { return programParamID; }
     bool isBypassRegularParameter()          const noexcept { return bypassIsRegularParameter; }
 
-    void setParameterValue (size_t paramIndex, float value)
+    void setParameterValue (Steinberg::int32 paramIndex, float value)
     {
         cachedParamValues.set (paramIndex, value);
     }
@@ -445,7 +445,7 @@ public:
     template <typename Callback>
     void forAllChangedParameters (Callback&& callback)
     {
-        cachedParamValues.ifSet ([&] (size_t index, float value)
+        cachedParamValues.ifSet ([&] (Steinberg::int32 index, float value)
         {
             callback (cachedParamValues.getParamID (index), value);
         });
@@ -1176,7 +1176,7 @@ public:
             endEdit (vstParamId);
     }
 
-    void paramChanged (int parameterIndex, Vst::ParamID vstParamId, double newValue)
+    void paramChanged (Steinberg::int32 parameterIndex, Vst::ParamID vstParamId, double newValue)
     {
         if (inParameterChangedCallback.get())
             return;
@@ -1189,7 +1189,7 @@ public:
         }
         else
         {
-            audioProcessor->setParameterValue ((size_t) parameterIndex, (float) newValue);
+            audioProcessor->setParameterValue (parameterIndex, (float) newValue);
         }
     }
 
