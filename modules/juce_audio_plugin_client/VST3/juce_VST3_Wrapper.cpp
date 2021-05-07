@@ -603,7 +603,8 @@ class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
                                public Vst::IUnitInfo,
                                public Vst::ChannelContext::IInfoListener,
-                               public AudioProcessorListener
+                               public AudioProcessorListener,
+                               private ComponentRestarter::Listener
 {
 public:
     JuceVST3EditController (Vst::IHostApplication* host)
@@ -1273,42 +1274,6 @@ private:
     friend struct Param;
 
     //==============================================================================
-    class ComponentRestarter : private AsyncUpdater
-    {
-    public:
-        explicit ComponentRestarter (JuceVST3EditController& controllerIn)
-            : controller (controllerIn) {}
-
-        ~ComponentRestarter() noexcept override
-        {
-            cancelPendingUpdate();
-        }
-
-        void restart (int32 newFlags)
-        {
-            if (newFlags == 0)
-                return;
-
-            flags = newFlags;
-
-            if (MessageManager::getInstance()->isThisTheMessageThread())
-                handleAsyncUpdate();
-            else
-                triggerAsyncUpdate();
-        }
-
-    private:
-        void handleAsyncUpdate() override
-        {
-            if (auto* handler = controller.componentHandler)
-                handler->restartComponent (flags);
-        }
-
-        JuceVST3EditController& controller;
-        int32 flags = 0;
-    };
-
-    //==============================================================================
     VSTComSmartPtr<JuceAudioProcessor> audioProcessor;
 
     struct MidiController
@@ -1322,6 +1287,12 @@ private:
     Vst::ParamID parameterToMidiControllerOffset;
     MidiController parameterToMidiController[(int) numMIDIChannels * (int) Vst::kCountCtrlNumber];
     Vst::ParamID midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
+
+    void restartComponentOnMessageThread (int32 flags) override
+    {
+        if (auto* handler = componentHandler)
+            handler->restartComponent (flags);
+    }
 
     //==============================================================================
     struct OwnedParameterListener  : public AudioProcessorParameter::Listener
