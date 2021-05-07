@@ -2294,6 +2294,8 @@ public:
         JUCE_ASSERT_MESSAGE_THREAD
         MessageManagerLock lock;
 
+        const SpinLock::ScopedLockType processLock (processMutex);
+
         // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
         if (isActive
               && getSampleRate() == newSampleRate
@@ -2353,6 +2355,8 @@ public:
 
     void releaseResources() override
     {
+        const SpinLock::ScopedLockType lock (processMutex);
+
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
@@ -2392,6 +2396,8 @@ public:
     {
         jassert (! isUsingDoublePrecision());
 
+        const SpinLock::ScopedLockType processLock (processMutex);
+
         if (isActive && processor != nullptr)
             processAudio (buffer, midiMessages, Vst::kSample32, false);
     }
@@ -2400,6 +2406,8 @@ public:
     {
         jassert (isUsingDoublePrecision());
 
+        const SpinLock::ScopedLockType processLock (processMutex);
+
         if (isActive && processor != nullptr)
             processAudio (buffer, midiMessages, Vst::kSample64, false);
     }
@@ -2407,6 +2415,8 @@ public:
     void processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
+
+        const SpinLock::ScopedLockType processLock (processMutex);
 
         if (bypassParam != nullptr)
         {
@@ -2422,6 +2432,8 @@ public:
     void processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (isUsingDoublePrecision());
+
+        const SpinLock::ScopedLockType processLock (processMutex);
 
         if (bypassParam != nullptr)
         {
@@ -2489,6 +2501,8 @@ public:
 
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
+        const SpinLock::ScopedLockType processLock (processMutex);
+
         // if the processor is not active, we ask the underlying plug-in if the
         // layout is actually supported
         if (! isActive)
@@ -2743,6 +2757,8 @@ public:
     //==============================================================================
     void reset() override
     {
+        const SpinLock::ScopedLockType lock (processMutex);
+
         if (holder->component != nullptr && processor != nullptr)
         {
             processor->setProcessing (false);
@@ -2896,6 +2912,14 @@ private:
 
     std::map<Vst::ParamID, VST3Parameter*> idToParamMap;
     EditControllerParameterDispatcher parameterDispatcher;
+
+    /*  The plugin may request a restart during playback, which may in turn
+        attempt to call functions such as setProcessing and setActive. It is an
+        error to call these functions simultaneously with
+        IAudioProcessor::process, so we use this mutex to ensure that this
+        scenario is impossible.
+    */
+    SpinLock processMutex;
 
     //==============================================================================
     template <typename Type>
@@ -3210,7 +3234,7 @@ private:
     {
         Vst::ParameterInfo paramInfo{};
 
-        if (processor != nullptr)
+        if (editController != nullptr)
             editController->getParameterInfo ((int32) index, paramInfo);
 
         return paramInfo;
@@ -3380,6 +3404,8 @@ tresult VST3HostContext::restartComponent (Steinberg::int32 flags)
             auto sampleRate = plugin->getSampleRate();
             auto blockSize  = plugin->getBlockSize();
 
+            // Have to deactivate here, otherwise prepareToPlay might not pick up the new bus layouts
+            plugin->releaseResources();
             plugin->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
                                    blockSize > 0 ? blockSize : 1024);
         }
