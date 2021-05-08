@@ -119,29 +119,37 @@ void MidiBuffer::clear (int startSample, int numSamples)
     data.removeRange ((int) (start - data.begin()), (int) (end - start));
 }
 
-void MidiBuffer::addEvent (const MidiMessage& m, int sampleNumber)
+bool MidiBuffer::addEvent (const MidiMessage& m, int sampleNumber)
 {
-    addEvent (m.getRawData(), m.getRawDataSize(), sampleNumber);
+    return addEvent (m.getRawData(), m.getRawDataSize(), sampleNumber);
 }
 
-void MidiBuffer::addEvent (const void* newData, int maxBytes, int sampleNumber)
+bool MidiBuffer::addEvent (const void* newData, int maxBytes, int sampleNumber)
 {
     auto numBytes = MidiBufferHelpers::findActualEventLength (static_cast<const uint8*> (newData), maxBytes);
 
-    if (numBytes > 0)
+    if (numBytes <= 0)
+        return true;
+
+    if (std::numeric_limits<uint16>::max() < numBytes)
     {
-        auto newItemSize = (size_t) numBytes + sizeof (int32) + sizeof (uint16);
-        auto offset = (int) (MidiBufferHelpers::findEventAfter (data.begin(), data.end(), sampleNumber) - data.begin());
-
-        data.insertMultiple (offset, 0, (int) newItemSize);
-
-        auto* d = data.begin() + offset;
-        writeUnaligned<int32>  (d, sampleNumber);
-        d += sizeof (int32);
-        writeUnaligned<uint16> (d, static_cast<uint16> (numBytes));
-        d += sizeof (uint16);
-        memcpy (d, newData, (size_t) numBytes);
+        // This method only supports messages smaller than (1 << 16) bytes
+        return false;
     }
+
+    auto newItemSize = (size_t) numBytes + sizeof (int32) + sizeof (uint16);
+    auto offset = (int) (MidiBufferHelpers::findEventAfter (data.begin(), data.end(), sampleNumber) - data.begin());
+
+    data.insertMultiple (offset, 0, (int) newItemSize);
+
+    auto* d = data.begin() + offset;
+    writeUnaligned<int32>  (d, sampleNumber);
+    d += sizeof (int32);
+    writeUnaligned<uint16> (d, static_cast<uint16> (numBytes));
+    d += sizeof (uint16);
+    memcpy (d, newData, (size_t) numBytes);
+
+    return true;
 }
 
 void MidiBuffer::addEvents (const MidiBuffer& otherBuffer,

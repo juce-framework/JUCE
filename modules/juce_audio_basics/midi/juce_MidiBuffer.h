@@ -184,9 +184,11 @@ public:
         If an event is added whose sample position is the same as one or more events
         already in the buffer, the new event will be placed after the existing ones.
 
-        To retrieve events, use a MidiBufferIterator object
+        To retrieve events, use a MidiBufferIterator object.
+
+        Returns true on success, or false on failure.
     */
-    void addEvent (const MidiMessage& midiMessage, int sampleNumber);
+    bool addEvent (const MidiMessage& midiMessage, int sampleNumber);
 
     /** Adds an event to the buffer from raw midi data.
 
@@ -202,9 +204,11 @@ public:
         it'll actually only store 3 bytes. If the midi data is invalid, it might not
         add an event at all.
 
-        To retrieve events, use a MidiBufferIterator object
+        To retrieve events, use a MidiBufferIterator object.
+
+        Returns true on success, or false on failure.
     */
-    void addEvent (const void* rawMidiData,
+    bool addEvent (const void* rawMidiData,
                    int maxBytesOfMidiData,
                    int sampleNumber);
 

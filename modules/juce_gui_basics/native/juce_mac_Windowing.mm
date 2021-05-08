@@ -465,7 +465,6 @@ struct DisplaySettingsChangeCallback  : private DeletedAtShutdown
 
 JUCE_IMPLEMENT_SINGLETON (DisplaySettingsChangeCallback)
 
-
 static Rectangle<int> convertDisplayRect (NSRect r, CGFloat mainScreenBottom)
 {
     r.origin.y = mainScreenBottom - (r.origin.y + r.size.height);

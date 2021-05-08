@@ -68,7 +68,11 @@ public:
         See also the setReturnKeyStartsNewLine() method, which will also need to be turned
         on if you want a multi-line editor with line-breaks.
 
-        @see isMultiLine, setReturnKeyStartsNewLine
+        @param shouldWordWrap  sets whether long lines should be broken up in multi-line editors.
+                               If this is false and scrollbars are enabled a horizontal scrollbar
+                               will be shown.
+
+        @see isMultiLine, setReturnKeyStartsNewLine, setScrollbarsShown
     */
     void setMultiLine (bool shouldBeMultiLine,
                        bool shouldWordWrap = true);
@@ -140,13 +144,13 @@ public:
     bool isCaretVisible() const noexcept                            { return caretVisible && ! isReadOnly(); }
 
     //==============================================================================
-    /** Enables/disables a vertical scrollbar.
+    /** Enables or disables scrollbars (this only applies when in multi-line mode).
 
-        (This only applies when in multi-line mode). When the text gets too long to fit
-        in the component, a scrollbar can appear to allow it to be scrolled. Even when
-        this is enabled, the scrollbar will be hidden unless it's needed.
+        When the text gets too long to fit in the component, a scrollbar can appear to
+        allow it to be scrolled. Even when this is enabled, the scrollbar will be hidden
+        unless it's needed.
 
-        By default the scrollbar is enabled.
+        By default scrollbars are enabled.
     */
     void setScrollbarsShown (bool shouldBeEnabled);
 

@@ -942,9 +942,9 @@ public:
     void set (size_t index, float value)
     {
         jassert (index < size());
-        values[index].store (value, std::memory_order_relaxed);
-        flags[index / numFlagBits].fetch_or ((FlagType) 1 << (index % numFlagBits),
-                                             std::memory_order_acq_rel);
+        const auto previous = values[index].exchange (value, std::memory_order_relaxed);
+        const auto bit = previous == value ? ((FlagType) 0) : ((FlagType) 1 << (index % numFlagBits));
+        flags[index / numFlagBits].fetch_or (bit, std::memory_order_acq_rel);
     }
 
     float get (size_t index) const noexcept
@@ -991,6 +991,11 @@ private:
     We must iterate all parameters on each processBlock call to check whether any
     parameter value has changed. This class attempts to make this polling process
     as quick as possible.
+
+    The indices here are of type Steinberg::int32, as they are expected to correspond
+    to parameter information obtained from the IEditController. These indices may not
+    match the indices of parameters returned from AudioProcessor::getParameters(), so
+    be careful!
 */
 class CachedParamValues
 {
@@ -1002,14 +1007,20 @@ public:
 
     size_t size() const noexcept { return floatCache.size(); }
 
-    Steinberg::Vst::ParamID getParamID (size_t index) const noexcept { return paramIds[index]; }
+    Steinberg::Vst::ParamID getParamID (Steinberg::int32 index) const noexcept { return paramIds[(size_t) index]; }
 
-    void set (size_t index, float value) { floatCache.set (index, value); }
+    void set (Steinberg::int32 index, float value) { floatCache.set ((size_t) index, value); }
 
-    float get (size_t index) const noexcept { return floatCache.get (index); }
+    float get (Steinberg::int32 index) const noexcept { return floatCache.get ((size_t) index); }
 
     template <typename Callback>
-    void ifSet (Callback&& callback) { floatCache.ifSet (std::forward<Callback> (callback)); }
+    void ifSet (Callback&& callback)
+    {
+        floatCache.ifSet ([&] (size_t index, float value)
+        {
+            callback ((Steinberg::int32) index, value);
+        });
+    }
 
 private:
     std::vector<Steinberg::Vst::ParamID> paramIds;
