@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+#if ! JUCE_ANDROID && ! JUCE_MINGW && ! JUCE_WASM && ! JUCE_WINDOWS
+ #include <cxxabi.h>
+#endif
+
 namespace juce
 {
 
@@ -178,7 +182,24 @@ String SystemStats::getStackBacktrace()
     char** frameStrings = backtrace_symbols (stack, frames);
 
     for (int i = 0; i < frames; ++i)
+    {
+        if (Dl_info info; dladdr (stack[i], &info))
+        {
+            int status;
+            std::unique_ptr<char, decltype (::free)*> demangled (abi::__cxa_demangle (info.dli_sname, nullptr, 0, &status), ::free);
+            if (status == 0)
+            {
+                result
+                    << juce::String (i).paddedRight (' ', 3)
+                    << " " << juce::File (juce::String (info.dli_fname)).getFileName().paddedRight (' ', 35)
+                    << " 0x" << juce::String::toHexString ((size_t) stack[i]).paddedLeft ('0', sizeof (void*) * 2)
+                    << " " << demangled.get()
+                    << " + " << ((char*) stack[i] - (char*) info.dli_saddr) << newLine;
+                continue;
+            }
+        }
         result << frameStrings[i] << newLine;
+    }
 
     ::free (frameStrings);
    #endif
