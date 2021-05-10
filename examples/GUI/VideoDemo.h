@@ -156,6 +156,7 @@ public:
         movieList.setDirectory (File::getSpecialLocation (File::userMoviesDirectory), true, true);
         directoryThread.startThread (1);
 
+        fileTree.setTitle ("Files");
         fileTree.addListener (this);
         fileTree.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
         addAndMakeVisible (fileTree);

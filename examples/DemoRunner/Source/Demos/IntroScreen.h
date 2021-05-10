@@ -44,6 +44,9 @@ public:
                               dontSendNotification);
 
         linkButton.setColour (HyperlinkButton::textColourId, Colours::lightblue);
+
+        setTitle ("Home");
+        setFocusContainerType (FocusContainerType::focusContainer);
     }
 
     void paint (Graphics& g) override
@@ -72,6 +75,7 @@ private:
     {
         LogoDrawComponent()
         {
+            setTitle ("JUCE Logo");
             startTimerHz (30); // repaint at 30 fps
         }
 
@@ -108,6 +112,11 @@ private:
         {
             repaint();
             elapsed += 0.02f;
+        }
+
+        std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+        {
+            return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::image);
         }
 
         Path logoPath  { getJUCELogoPath() };

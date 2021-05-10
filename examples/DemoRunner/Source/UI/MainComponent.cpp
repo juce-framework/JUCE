@@ -165,21 +165,7 @@ public:
         }
 
         g.setColour (textColour);
-
-        if (selectedCategory.isEmpty())
-        {
-            if (isPositiveAndBelow (rowNumber, JUCEDemos::getCategories().size()))
-                g.drawFittedText (JUCEDemos::getCategories()[(size_t) rowNumber].name,
-                                  bounds, Justification::centred, 1);
-        }
-        else
-        {
-            auto& category = JUCEDemos::getCategory (selectedCategory);
-
-            if (isPositiveAndBelow (rowNumber, category.demos.size()))
-                g.drawFittedText (category.demos[(size_t) rowNumber].demoFile.getFileName(),
-                                  bounds, Justification::centred, 1);
-        }
+        g.drawFittedText (getNameForRow (rowNumber), bounds, Justification::centred, 1);
     }
 
     int getNumRows() override
@@ -188,16 +174,26 @@ public:
                                                  : JUCEDemos::getCategory (selectedCategory).demos.size());
     }
 
-    void selectedRowsChanged (int row) override
+    String getNameForRow (int rowNumber) override
     {
-        if (row < 0)
-            return;
-
         if (selectedCategory.isEmpty())
-            showCategory (JUCEDemos::getCategories()[(size_t) row].name);
+        {
+            if (isPositiveAndBelow (rowNumber, JUCEDemos::getCategories().size()))
+                return JUCEDemos::getCategories()[(size_t) rowNumber].name;
+        }
         else
-            demoHolder.setDemo (selectedCategory, row);
+        {
+            auto& category = JUCEDemos::getCategory (selectedCategory);
+
+            if (isPositiveAndBelow (rowNumber, category.demos.size()))
+                return category.demos[(size_t) rowNumber].demoFile.getFileName();
+        }
+
+        return {};
     }
+
+    void returnKeyPressed (int row) override                       { selectRow (row); }
+    void listBoxItemClicked (int row, const MouseEvent&) override  { selectRow (row); }
 
     //==============================================================================
     void showCategory (const String& categoryName) noexcept
@@ -206,37 +202,75 @@ public:
 
         demos.deselectAllRows();
         demos.setHeaderComponent (categoryName.isEmpty() ? nullptr
-                                                         : std::make_unique<Header> (*this));
+                                                         : std::make_unique<CategoryListHeaderComponent> (*this));
         demos.updateContent();
     }
 
 private:
-    String selectedCategory;
-
-    DemoContentComponent& demoHolder;
-    ListBox demos;
-
-    struct Header    : public Component
+    //==============================================================================
+    class CategoryListHeaderComponent  : public Button
     {
-        Header (DemoList& o)
-            : owner (o)
+    public:
+        explicit CategoryListHeaderComponent (DemoList& o)
+            : Button ({}),
+              owner (o)
         {
+            setTitle ("Previous");
             setSize (0, 30);
         }
 
-        void paint (Graphics& g) override
+        void paintButton (Graphics& g, bool, bool) override
         {
             g.setColour (findColour (Label::textColourId));
             g.drawFittedText ("<", getLocalBounds().reduced (20, 0), Justification::centredLeft, 1);
         }
 
-        void mouseDown (const MouseEvent&) override
+
+        void clicked() override
         {
             owner.showCategory ({});
         }
 
+        using Button::clicked;
+
+    private:
         DemoList& owner;
     };
+
+    //==============================================================================
+    void selectRow (int row)
+    {
+        if (row < 0)
+            return;
+
+        if (selectedCategory.isEmpty())
+            showCategory (JUCEDemos::getCategories()[(size_t) row].name);
+        else
+            demoHolder.setDemo (selectedCategory, row);
+
+        selectFirstRow();
+    }
+
+    void selectFirstRow()
+    {
+        if (auto* handler = demos.getAccessibilityHandler())
+        {
+            for (auto* child : handler->getChildren())
+            {
+                if (child->getRole() == AccessibilityRole::listItem)
+                {
+                    child->grabFocus();
+                    break;
+                }
+            }
+        }
+    }
+
+    //==============================================================================
+    String selectedCategory;
+
+    DemoContentComponent& demoHolder;
+    ListBox demos;
 };
 
 //==============================================================================
@@ -266,6 +300,9 @@ MainComponent::MainComponent()
     addAndMakeVisible (showDemosButton);
     addAndMakeVisible (demosPanel);
 
+    demosPanel.setTitle ("Demos");
+    demosPanel.setFocusContainerType (FocusContainerType::focusContainer);
+
     showDemosButton.onClick = [this] { demosPanel.showOrHide (true); };
 
     demosPanel.onPanelMove = [this]
@@ -284,6 +321,9 @@ MainComponent::MainComponent()
 
             if (isShowingHeavyweightDemo)
                 resized();
+
+            if (auto* handler = demosPanel.getAccessibilityHandler())
+                handler->grabFocus();
         }
         else
         {

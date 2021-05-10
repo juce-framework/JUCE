@@ -296,6 +296,7 @@ public:
 
         directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
 
+        fileTreeComp.setTitle ("Files");
         fileTreeComp.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
         fileTreeComp.addListener (this);
 
