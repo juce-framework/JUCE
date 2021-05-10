@@ -117,4 +117,10 @@ void ImagePreviewComponent::paint (Graphics& g)
     }
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ImagePreviewComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::image);
+}
+
 } // namespace juce

@@ -459,4 +459,10 @@ void ConcertinaPanel::panelHeaderDoubleClicked (Component* component)
         setPanelSize (component, 0, true);
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ConcertinaPanel::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
+
 } // namespace juce

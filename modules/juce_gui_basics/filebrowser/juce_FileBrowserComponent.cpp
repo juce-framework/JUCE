@@ -616,4 +616,10 @@ void FileBrowserComponent::timerCallback()
     }
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> FileBrowserComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
+
 } // namespace juce

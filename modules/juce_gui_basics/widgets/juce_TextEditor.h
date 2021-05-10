@@ -464,7 +464,7 @@ public:
     /** Finds the index of the character at a given position.
         The coordinates are relative to the component's top-left.
     */
-    int getTextIndexAt (int x, int y);
+    int getTextIndexAt (int x, int y) const;
 
     /** Counts the number of characters in the text.
 
@@ -491,6 +491,16 @@ public:
         By default there's a gap of 4 pixels.
     */
     void setIndents (int newLeftIndent, int newTopIndent);
+
+    /** Returns the gap at the top edge of the editor.
+        @see setIndents
+    */
+    int getTopIndent() const noexcept   { return topIndent; }
+
+    /** Returns the gap at the left edge of the editor.
+        @see setIndents
+    */
+    int getLeftIndent() const noexcept  { return leftIndent; }
 
     /** Changes the size of border left around the edge of the component.
         @see getBorder
@@ -523,6 +533,11 @@ public:
 
     /** Returns the current line spacing of the TextEditor. */
     float getLineSpacing() const noexcept                           { return lineSpacing; }
+
+    /** Returns the bounding box for a range of text in the editor. As the range may span
+        multiple lines, this method returns a RectangleList.
+    */
+    RectangleList<int> getTextBounds (Range<int> textRange);
 
     //==============================================================================
     void moveCaretToEnd();
@@ -699,6 +714,8 @@ public:
     void setTemporaryUnderlining (const Array<Range<int>>&) override;
     /** @internal */
     VirtualKeyboardType getKeyboardType() override    { return keyboardType; }
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 protected:
     //==============================================================================
@@ -791,7 +808,7 @@ private:
     void updateCaretPosition();
     void updateValueFromText();
     void textWasChangedByValue();
-    int indexAtPosition (float x, float y);
+    int indexAtPosition (float x, float y) const;
     int findWordBreakAfter (int position) const;
     int findWordBreakBefore (int position) const;
     bool moveCaretWithTransaction (int newPos, bool selecting);
@@ -806,6 +823,7 @@ private:
     void scrollByLines (int deltaLines);
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;
+    void setSelection (Range<int>) noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor)
 };

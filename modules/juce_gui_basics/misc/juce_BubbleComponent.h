@@ -156,6 +156,10 @@ public:
                                  const Rectangle<float>& body) = 0;
     };
 
+    //==============================================================================
+    /** @internal */
+    void paint (Graphics&) override;
+
 protected:
     //==============================================================================
     /** Subclasses should override this to return the size of the content they
@@ -169,10 +173,6 @@ protected:
         set up to paint just the rectangle inside the bubble.
     */
     virtual void paintContent (Graphics& g, int width, int height) = 0;
-
-public:
-    /** @internal */
-    void paint (Graphics&) override;
 
 private:
     Rectangle<int> content;

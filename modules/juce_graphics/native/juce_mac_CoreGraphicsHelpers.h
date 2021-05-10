@@ -64,6 +64,34 @@ namespace
     {
         return CGPointMake ((CGFloat) p.x, (CGFloat) p.y);
     }
+
+   #if JUCE_MAC
+    inline CGFloat getMainScreenHeight() noexcept
+    {
+        if ([[NSScreen screens] count] == 0)
+            return 0.0f;
+
+        return [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
+    }
+
+    inline NSRect flippedScreenRect (NSRect r) noexcept
+    {
+        r.origin.y = getMainScreenHeight() - (r.origin.y + r.size.height);
+        return r;
+    }
+
+    inline NSPoint flippedScreenPoint (NSPoint p) noexcept
+    {
+        p.y = getMainScreenHeight() - p.y;
+        return p;
+    }
+
+    template <class PointType>
+    Point<int> convertToIntPoint (PointType p) noexcept
+    {
+        return Point<int> (roundToInt (p.x), roundToInt (p.y));
+    }
+   #endif
 }
 
 CGImageRef juce_createCoreGraphicsImage (const Image&, CGColorSpaceRef, bool mustOutliveSource);

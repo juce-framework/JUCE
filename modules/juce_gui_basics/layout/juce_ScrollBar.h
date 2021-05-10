@@ -211,6 +211,11 @@ public:
     */
     void setSingleStepSize (double newSingleStepSize) noexcept;
 
+    /** Returns the current step size.
+        @see setSingleStepSize
+    */
+    double getSingleStepSize() const noexcept                       { return singleStepSize; }
+
     /** Moves the scrollbar by a number of single-steps.
 
         This will move the bar by a multiple of its single-step interval (as
@@ -409,6 +414,8 @@ public:
     void parentHierarchyChanged() override;
     /** @internal */
     void setVisible (bool) override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================

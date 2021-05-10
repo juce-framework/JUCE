@@ -33,6 +33,7 @@ public:
         : target (comp), shadow (ds)
     {
         setVisible (true);
+        setAccessible (false);
         setInterceptsMouseClicks (false, false);
 
         if (comp->isOnDesktop())

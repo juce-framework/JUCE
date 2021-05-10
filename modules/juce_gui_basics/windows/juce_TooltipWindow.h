@@ -128,6 +128,10 @@ public:
        #endif
     };
 
+    //==============================================================================
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
 private:
     //==============================================================================
     Point<float> lastMousePos;

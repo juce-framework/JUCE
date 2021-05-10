@@ -462,11 +462,14 @@ protected:
     int getDesktopWindowStyleFlags() const override;
     /** @internal */
     float getDesktopScaleFactor() const override { return desktopScale; }
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
     String text;
     TextLayout textLayout;
+    Label accessibleMessageLabel;
     AlertIconType alertIconType;
     ComponentBoundsConstrainer constrainer;
     ComponentDragger dragger;

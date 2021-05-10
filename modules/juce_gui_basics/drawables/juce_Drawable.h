@@ -199,6 +199,8 @@ protected:
     void setBoundsToEnclose (Rectangle<float>);
     /** @internal */
     void applyDrawableClipPath (Graphics&);
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     Point<int> originRelativeToComponent;
     std::unique_ptr<Drawable> drawableClipPath;
