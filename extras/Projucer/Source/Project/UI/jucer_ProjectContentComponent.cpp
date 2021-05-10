@@ -35,62 +35,22 @@
 NewFileWizard::Type* createGUIComponentWizard();
 
 //==============================================================================
-ProjectContentComponent::LogoComponent::LogoComponent()
-{
-    if (auto svg = parseXML (BinaryData::background_logo_svg))
-        logo = Drawable::createFromSVG (*svg);
-}
-
-void ProjectContentComponent::LogoComponent::paint (Graphics& g)
-{
-    g.setColour (findColour (defaultTextColourId));
-
-    auto r = getLocalBounds();
-
-    g.setFont (15.0f);
-    g.drawFittedText (getVersionInfo(), r.removeFromBottom (50), Justification::centredBottom, 3);
-
-    logo->drawWithin (g, r.withTrimmedBottom (r.getHeight() / 4).toFloat(),
-                      RectanglePlacement (RectanglePlacement::centred), 1.0f);
-}
-
-String ProjectContentComponent::LogoComponent::getVersionInfo()
-{
-    return SystemStats::getJUCEVersion()
-            + newLine
-            + ProjucerApplication::getApp().getVersionDescription();
-}
-
-//==============================================================================
-ProjectContentComponent::ContentViewport::ContentViewport (Component* content)
-{
-    addAndMakeVisible (viewport);
-    viewport.setViewedComponent (content, true);
-}
-
-void ProjectContentComponent::ContentViewport::resized()
-{
-    viewport.setBounds (getLocalBounds());
-}
-
-//==============================================================================
 ProjectContentComponent::ProjectContentComponent()
 {
     setOpaque (true);
     setWantsKeyboardFocus (true);
 
-    addAndMakeVisible (logoComponent);
     addAndMakeVisible (headerComponent);
     addAndMakeVisible (projectMessagesComponent);
-
-    addAndMakeVisible (fileNameLabel);
-    fileNameLabel.setJustificationType (Justification::centred);
+    addAndMakeVisible (contentViewComponent);
 
     sidebarSizeConstrainer.setMinimumWidth (200);
     sidebarSizeConstrainer.setMaximumWidth (500);
 
     sidebarTabs.setOutline (0);
     sidebarTabs.getTabbedButtonBar().setMinimumTabScaleFactor (0.5);
+    sidebarTabs.setTitle ("Sidebar");
+    sidebarTabs.setFocusContainerType (FocusContainerType::focusContainer);
 
     ProjucerApplication::getApp().openDocumentManager.addListener (this);
 
@@ -140,15 +100,9 @@ void ProjectContentComponent::resized()
     if (resizerBar != nullptr)
         resizerBar->setBounds (r.withWidth (4));
 
+    contentViewComponent.setBounds (r);
+
     headerComponent.sidebarTabsWidthChanged (sidebarTabs.getWidth());
-
-    if (contentView != nullptr)
-    {
-        fileNameLabel.setBounds (r.removeFromTop (15));
-        contentView->setBounds (r);
-    }
-
-    logoComponent.setBounds (r.reduced (r.getWidth() / 6, r.getHeight() / 6));
 }
 
 void ProjectContentComponent::lookAndFeelChanged()
@@ -175,8 +129,8 @@ void ProjectContentComponent::setProject (Project* newProject)
         if (project != nullptr)
             project->removeChangeListener (this);
 
-        contentView.reset();
-        resizerBar.reset();
+        hideEditor();
+        resizerBar = nullptr;
 
         deleteProjectTabs();
         project = newProject;
@@ -360,16 +314,12 @@ void ProjectContentComponent::updateMissingFileStatuses()
             tree->updateMissingFileStatuses();
 }
 
-bool ProjectContentComponent::showEditorForFile (const File& f, bool grabFocus)
+bool ProjectContentComponent::showEditorForFile (const File& fileToShow, bool grabFocus)
 {
-    if (getCurrentFile() == f
-            || showDocument (ProjucerApplication::getApp().openDocumentManager.openFile (project, f), grabFocus))
-    {
-        fileNameLabel.setText (f.getFileName(), dontSendNotification);
-        return true;
-    }
+    if (getCurrentFile() != fileToShow)
+        return showDocument (ProjucerApplication::getApp().openDocumentManager.openFile (project, fileToShow), grabFocus);
 
-    return false;
+    return true;
 }
 
 bool ProjectContentComponent::hasFileInRecentList (const File& f) const
@@ -391,30 +341,22 @@ bool ProjectContentComponent::showDocument (OpenDocumentManager::Document* doc, 
     if (doc->hasFileBeenModifiedExternally())
         doc->reloadFromFile();
 
-    if (doc == getCurrentDocument() && contentView != nullptr)
+    if (doc != getCurrentDocument())
     {
-        if (grabFocus)
-            contentView->grabKeyboardFocus();
-
-        return true;
+        recentDocumentList.newDocumentOpened (doc);
+        setEditorDocument (doc->createEditor(), doc);
     }
 
-    recentDocumentList.newDocumentOpened (doc);
+    if (grabFocus)
+        contentViewComponent.grabKeyboardFocus();
 
-    auto opened = setEditorComponent (doc->createEditor(), doc);
-
-    if (opened && grabFocus && isShowing())
-        contentView->grabKeyboardFocus();
-
-    return opened;
+    return true;
 }
 
 void ProjectContentComponent::hideEditor()
 {
     currentDocument = nullptr;
-    contentView.reset();
-
-    fileNameLabel.setVisible (false);
+    contentViewComponent.setContent ({}, {});
 
     ProjucerApplication::getCommandManager().commandStatusChanged();
     resized();
@@ -422,68 +364,69 @@ void ProjectContentComponent::hideEditor()
 
 void ProjectContentComponent::hideDocument (OpenDocumentManager::Document* doc)
 {
-    if (doc == currentDocument)
-    {
-        if (auto* replacement = recentDocumentList.getClosestPreviousDocOtherThan (doc))
-            showDocument (replacement, true);
-        else
-            hideEditor();
-    }
+    if (doc != currentDocument)
+        return;
+
+    if (auto* replacement = recentDocumentList.getClosestPreviousDocOtherThan (currentDocument))
+        showDocument (replacement, true);
+    else
+        hideEditor();
 }
 
-bool ProjectContentComponent::setEditorComponent (Component* editor,
-                                                  OpenDocumentManager::Document* doc)
+void ProjectContentComponent::setScrollableEditorComponent (std::unique_ptr<Component> component)
 {
-    if (editor != nullptr)
+    jassert (component.get() != nullptr);
+
+    class ContentViewport  : public Component
     {
-        contentView.reset();
-
-        if (doc == nullptr)
+    public:
+        ContentViewport (std::unique_ptr<Component> content)
         {
-            auto* viewport = new ContentViewport (editor);
-
-            contentView.reset (viewport);
-            currentDocument = nullptr;
-            fileNameLabel.setVisible (false);
-
-            addAndMakeVisible (viewport);
-        }
-        else
-        {
-            contentView.reset (editor);
-            currentDocument = doc;
-            fileNameLabel.setText (doc->getFile().getFileName(), dontSendNotification);
-            fileNameLabel.setVisible (true);
-
-            addAndMakeVisible (editor);
+            contentViewport.setViewedComponent (content.release(), true);
+            addAndMakeVisible (contentViewport);
         }
 
-        resized();
+        void resized() override
+        {
+            contentViewport.setBounds (getLocalBounds());
+        }
 
-        ProjucerApplication::getCommandManager().commandStatusChanged();
-        return true;
-    }
+    private:
+        Viewport contentViewport;
+    };
 
-    return false;
+    contentViewComponent.setContent (std::make_unique<ContentViewport> (std::move (component)), {});
+    currentDocument = nullptr;
+
+    ProjucerApplication::getCommandManager().commandStatusChanged();
 }
 
-Component* ProjectContentComponent::getEditorComponentContent() const
+void ProjectContentComponent::setEditorDocument (std::unique_ptr<Component> component, OpenDocumentManager::Document* doc)
 {
-    if (contentView != nullptr)
-        if (auto* vp = dynamic_cast<ContentViewport*> (contentView.get()))
-            return vp->viewport.getViewedComponent();
+    currentDocument = doc;
+    contentViewComponent.setContent (std::move (component),
+                                     currentDocument != nullptr ? currentDocument->getFile().getFileName()
+                                                                : String());
 
-    return nullptr;
+    ProjucerApplication::getCommandManager().commandStatusChanged();
+}
+
+Component* ProjectContentComponent::getEditorComponent()
+{
+    return contentViewComponent.getCurrentComponent();
 }
 
 void ProjectContentComponent::closeDocument()
 {
     if (currentDocument != nullptr)
+    {
         ProjucerApplication::getApp().openDocumentManager
                                      .closeDocument (currentDocument, OpenDocumentManager::SaveIfNeeded::yes);
-    else if (contentView != nullptr)
-        if (! goToPreviousFile())
-            hideEditor();
+        return;
+    }
+
+    if (! goToPreviousFile())
+        hideEditor();
 }
 
 static void showSaveWarning (OpenDocumentManager::Document* currentDocument)
@@ -570,7 +513,7 @@ void ProjectContentComponent::closeProject()
 
 void ProjectContentComponent::showProjectSettings()
 {
-    setEditorComponent (new ProjectSettingsComponent (*project), nullptr);
+    setScrollableEditorComponent (std::make_unique<ProjectSettingsComponent> (*project));
 }
 
 void ProjectContentComponent::showCurrentExporterSettings()
@@ -634,7 +577,7 @@ void ProjectContentComponent::showModule (const String& moduleID)
 
 void ProjectContentComponent::showLiveBuildSettings()
 {
-    setEditorComponent (new LiveBuildSettingsComponent (*project), nullptr);
+    setScrollableEditorComponent (std::make_unique<LiveBuildSettingsComponent> (*project));
 }
 
 StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
@@ -851,7 +794,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
         result.setInfo ("Close" + documentName,
                         "Closes the current document",
                         CommandCategories::general, 0);
-        result.setActive (contentView != nullptr);
+        result.setActive (currentDocument != nullptr);
         result.defaultKeypresses.add ({ 'w', cmdCtrl, 0 });
         break;
 

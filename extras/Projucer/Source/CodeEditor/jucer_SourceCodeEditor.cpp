@@ -45,11 +45,14 @@ CodeDocument& SourceCodeDocument::getCodeDocument()
     return *codeDoc;
 }
 
-Component* SourceCodeDocument::createEditor()
+std::unique_ptr<Component> SourceCodeDocument::createEditor()
 {
-    auto* e = new SourceCodeEditor (this, getCodeDocument());
+    auto e = std::make_unique<SourceCodeEditor> (this, getCodeDocument());
     applyLastState (*(e->editor));
-    return e;
+
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wredundant-move")
+    return std::move (e);
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 }
 
 void SourceCodeDocument::reloadFromFile()
@@ -380,7 +383,7 @@ public:
         addAndMakeVisible (findNext);
 
         setWantsKeyboardFocus (false);
-        setFocusContainer (true);
+        setFocusContainerType (FocusContainerType::keyboardFocusContainer);
         findPrev.setWantsKeyboardFocus (false);
         findNext.setWantsKeyboardFocus (false);
 

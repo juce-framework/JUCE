@@ -35,6 +35,9 @@ struct ProjectSettingsComponent  : public Component,
           group (project.getProjectFilenameRootString(),
                  Icon (getIcons().settings, Colours::transparentBlack))
     {
+        setTitle ("Project Settings");
+        setFocusContainerType (FocusContainerType::focusContainer);
+
         addAndMakeVisible (group);
 
         updatePropertyList();
@@ -238,16 +241,34 @@ private:
 
         headers.clear();
 
-        if (project != nullptr)
+        auto addPanel = [this] (const String& name,
+                                TreePanelBase* tree,
+                                ConcertinaTreeComponent::AdditionalComponents components,
+                                const Path& icon)
         {
-            concertinaPanel.addPanel (0, new ConcertinaTreeComponent (new FileTreePanel (*project), true, false, true), true);
-            concertinaPanel.addPanel (1, new ConcertinaTreeComponent (new ModuleTreePanel (*project), true, true), true);
-            concertinaPanel.addPanel (2, new ConcertinaTreeComponent (new ExportersTreePanel (*project), true), true);
-        }
+            if (project != nullptr)
+                concertinaPanel.addPanel (-1, new ConcertinaTreeComponent (name, tree, components), true);
 
-        headers.add (new ConcertinaHeader ("File explorer", getIcons().fileExplorer));
-        headers.add (new ConcertinaHeader ("Modules",       getIcons().modules));
-        headers.add (new ConcertinaHeader ("Exporters",     getIcons().exporter));
+            headers.add (new ConcertinaHeader (name, icon));
+        };
+
+        using AdditionalComponents = ConcertinaTreeComponent::AdditionalComponents;
+
+        addPanel ("File Explorer", new FileTreePanel (*project),
+                  AdditionalComponents{}
+                      .with (AdditionalComponents::addButton)
+                      .with (AdditionalComponents::findPanel),
+                  getIcons().fileExplorer);
+
+        addPanel ("Modules", new ModuleTreePanel (*project),
+                  AdditionalComponents{}
+                      .with (AdditionalComponents::addButton)
+                      .with (AdditionalComponents::settingsButton),
+                  getIcons().modules);
+
+        addPanel ("Exporters", new ExportersTreePanel (*project),
+                  AdditionalComponents{}.with (AdditionalComponents::addButton),
+                  getIcons().exporter);
 
         for (int i = 0; i < concertinaPanel.getNumPanels(); ++i)
         {

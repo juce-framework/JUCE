@@ -708,17 +708,16 @@ public:
         }
     };
 
-    Component* createEditor() override
+    std::unique_ptr<Component> createEditor() override
     {
-        SourceCodeEditor* e = nullptr;
-
-        if (fileNeedsCppSyntaxHighlighting (getFile()))
-            e = new SourceCodeEditor (this, new LiveBuildCodeEditor (*this, getCodeDocument()));
-        else
-            e = new SourceCodeEditor (this, getCodeDocument());
+        auto e = fileNeedsCppSyntaxHighlighting (getFile()) ? std::make_unique<SourceCodeEditor> (this, new LiveBuildCodeEditor (*this, getCodeDocument()))
+                                                            : std::make_unique<SourceCodeEditor> (this, getCodeDocument());
 
         applyLastState (*(e->editor));
-        return e;
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wredundant-move")
+        return std::move (e);
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     // override save() to make a few more attempts at saving if it fails, since on Windows

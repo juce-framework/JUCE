@@ -845,6 +845,17 @@ public:
                     {
                         auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
 
+                        if (shouldAddBigobjFlag (path))
+                        {
+                            const String bigobjFlag ("/bigobj");
+
+                            if (! extraCompilerFlags.contains (bigobjFlag))
+                            {
+                                extraCompilerFlags << " " << bigobjFlag;
+                                extraCompilerFlags.trim();
+                            }
+                        }
+
                         if (extraCompilerFlags.isNotEmpty())
                             e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
 
@@ -1727,6 +1738,11 @@ protected:
     static bool shouldUseStdCall (const build_tools::RelativePath& path)
     {
         return path.getFileNameWithoutExtension().startsWithIgnoreCase ("include_juce_audio_plugin_client_RTAS_");
+    }
+
+    static bool shouldAddBigobjFlag (const build_tools::RelativePath& path)
+    {
+        return path.getFileNameWithoutExtension().equalsIgnoreCase ("include_juce_gui_basics");
     }
 
     StringArray getModuleLibs() const
