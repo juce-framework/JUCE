@@ -1564,6 +1564,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\juce_graphics.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityHandler.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\application\juce_Application.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1610,6 +1613,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\components\juce_ComponentListener.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\components\juce_FocusTraverser.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\components\juce_ModalComponentManager.cpp">
@@ -1811,6 +1817,12 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_Accessibility.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_AccessibilityElement.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_X11_DragAndDrop.cpp">
@@ -2105,7 +2117,9 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics.cpp"/>
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp">
+      <AdditionalOptions> /bigobj %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
@@ -2693,6 +2707,22 @@
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_Justification.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\placement\juce_RectanglePlacement.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\juce_graphics.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\enums\juce_AccessibilityActions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\enums\juce_AccessibilityEvent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\enums\juce_AccessibilityRole.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityCellInterface.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityTableInterface.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityTextInterface.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityValueInterface.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ButtonAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ComboBoxAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_LabelAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_SliderAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TableListBoxAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TextEditorAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TreeViewAccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityHandler.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityState.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\application\juce_Application.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\buttons\juce_ArrowButton.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\buttons\juce_Button.h"/>
@@ -2711,6 +2741,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_CachedComponentImage.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_Component.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_ComponentListener.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_ComponentTraverser.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_FocusTraverser.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\components\juce_ModalComponentManager.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_Desktop.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\desktop\juce_Displays.h"/>
@@ -2791,6 +2823,22 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_SelectedItemSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TextDragAndDropTarget.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_TooltipClient.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_AccessibilityElement.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAExpandCollapseProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAGridItemProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAGridProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAHelpers.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAInvokeProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAProviderBase.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAProviders.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIARangeValueProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIASelectionProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIATextProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAToggleProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIATransformProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAValueProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_UIAWindowProvider.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_WindowsUIAWrapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_X11_Symbols.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_XWindowSystem.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h"/>
