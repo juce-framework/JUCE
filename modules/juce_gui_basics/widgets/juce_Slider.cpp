@@ -599,7 +599,7 @@ public:
             auto setupButton = [&] (Button& b, bool isIncrement)
             {
                 owner.addAndMakeVisible (b);
-                b.onClick = [&] { incrementOrDecrement (isIncrement ? normRange.interval : -normRange.interval); };
+                b.onClick = [this, isIncrement] { incrementOrDecrement (isIncrement ? normRange.interval : -normRange.interval); };
 
                 if (incDecButtonMode != incDecButtonsNotDraggable)
                     b.addMouseListener (&owner, false);
