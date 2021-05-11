@@ -65,7 +65,6 @@ void* getUser32Function (const char*);
 
 namespace WindowsAccessibility
 {
-    void initialiseUIAWrapper();
     long getUiaRootObjectId();
     bool handleWmGetObject (AccessibilityHandler*, WPARAM, LPARAM, LRESULT*);
     void revokeUIAMapEntriesForWindow (HWND);
@@ -1380,9 +1379,6 @@ public:
           parentToAddTo (parent),
           currentRenderingEngine (softwareRenderingEngine)
     {
-        // make sure that the UIA wrapper singleton is loaded
-        WindowsAccessibility::initialiseUIAWrapper();
-
         callFunctionIfNotLocked (&createWindowCallback, this);
 
         setTitle (component.getName());

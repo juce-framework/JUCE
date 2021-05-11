@@ -60,6 +60,7 @@ public:
     ~AccessibilityNativeImpl()
     {
         accessibilityElement->invalidateElement();
+        --providerCount;
 
         if (auto* wrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
         {
@@ -68,7 +69,7 @@ public:
 
             wrapper->disconnectProvider (provider);
 
-            if (--providerCount == 0)
+            if (providerCount == 0)
                 wrapper->disconnectAllProviders();
         }
     }
@@ -228,11 +229,6 @@ void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::
 //==============================================================================
 namespace WindowsAccessibility
 {
-    void initialiseUIAWrapper()
-    {
-        WindowsUIAWrapper::getInstance();
-    }
-
     long getUiaRootObjectId()
     {
         return static_cast<long> (UiaRootObjectId);
@@ -243,7 +239,7 @@ namespace WindowsAccessibility
         if (isStartingUpOrShuttingDown() || (handler == nullptr || ! isHandlerValid (*handler)))
             return false;
 
-        if (auto* wrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+        if (auto* wrapper = WindowsUIAWrapper::getInstance())
         {
             ComSmartPtr<IRawElementProviderSimple> provider;
             handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
