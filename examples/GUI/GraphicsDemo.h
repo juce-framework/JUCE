@@ -644,35 +644,44 @@ public:
         demos.add (new LinesDemo  (controls));
 
         addAndMakeVisible (listBox);
+        listBox.setTitle ("Test List");
         listBox.setModel (this);
         listBox.selectRow (0);
     }
 
-    void resized()
+    void resized() override
     {
         listBox.setBounds (getLocalBounds());
     }
 
-    int getNumRows()
+    int getNumRows() override
     {
         return demos.size();
     }
 
-    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected)
+    void paintListBoxItem (int rowNumber, Graphics& g, int width, int height, bool rowIsSelected) override
     {
-        if (auto* demo = demos[rowNumber])
-        {
-            if (rowIsSelected)
-                g.fillAll (Colour::contrasting (findColour (ListBox::textColourId),
-                                                findColour (ListBox::backgroundColourId)));
+        if (demos[rowNumber] == nullptr)
+            return;
 
-            g.setColour (findColour (ListBox::textColourId));
-            g.setFont (14.0f);
-            g.drawFittedText (demo->getName(), 8, 0, width - 10, height, Justification::centredLeft, 2);
-        }
+        if (rowIsSelected)
+            g.fillAll (Colour::contrasting (findColour (ListBox::textColourId),
+                                            findColour (ListBox::backgroundColourId)));
+
+        g.setColour (findColour (ListBox::textColourId));
+        g.setFont (14.0f);
+        g.drawFittedText (getNameForRow (rowNumber), 8, 0, width - 10, height, Justification::centredLeft, 2);
     }
 
-    void selectedRowsChanged (int lastRowSelected)
+    String getNameForRow (int rowNumber) override
+    {
+        if (auto* demo = demos[rowNumber])
+            return demo->getName();
+
+        return {};
+    }
+
+    void selectedRowsChanged (int lastRowSelected) override
     {
         demoHolder.setDemo (demos [lastRowSelected]);
     }

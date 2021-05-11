@@ -34,6 +34,12 @@
 //==============================================================================
 struct ContentComponent  : public Component
 {
+    ContentComponent()
+    {
+        setTitle ("Content");
+        setFocusContainerType (FocusContainerType::focusContainer);
+    }
+
     void resized() override
     {
         if (content != nullptr)
@@ -88,7 +94,8 @@ static std::unique_ptr<Component> createExampleProjectsTab (ContentComponent& co
         content.setContent (std::make_unique<ExampleComponent> (findExampleFile (category, index), cb));
     };
 
-    return std::make_unique<StartPageTreeHolder> (exampleCategories,
+    return std::make_unique<StartPageTreeHolder> ("Examples",
+                                                  exampleCategories,
                                                   examples,
                                                   std::move (selectedCallback),
                                                   StartPageTreeHolder::Open::no);
@@ -144,7 +151,8 @@ static std::unique_ptr<Component> createProjectTemplatesTab (ContentComponent& c
         content.setContent (std::make_unique<TemplateComponent> (templates[(size_t) index], std::move (cb)));
     };
 
-    auto holder = std::make_unique<StartPageTreeHolder> (categories,
+    auto holder = std::make_unique<StartPageTreeHolder> ("Templates",
+                                                         categories,
                                                          templateNames,
                                                          std::move (selectedCallback),
                                                          StartPageTreeHolder::Open::yes);
@@ -165,7 +173,14 @@ struct ProjectTemplatesAndExamples  : public TabbedComponent
           content (c),
           exampleSelectedCallback (std::move (exampleCb))
     {
-        addTab ("New Project", Colours::transparentBlack, createProjectTemplatesTab (content, std::move (newProjectCb)).release(), true);
+        setTitle ("Templates and Examples");
+        setFocusContainerType (FocusContainerType::focusContainer);
+
+        addTab ("New Project",
+                Colours::transparentBlack,
+                createProjectTemplatesTab (content, std::move (newProjectCb)).release(),
+                true);
+
         refreshExamplesTab();
     }
 
@@ -177,8 +192,9 @@ struct ProjectTemplatesAndExamples  : public TabbedComponent
 
         auto exampleTabs = createExampleProjectsTab (content, exampleSelectedCallback);
 
-        addTab ("Open Example", Colours::transparentBlack, exampleTabs == nullptr ? new SetJUCEPathComponent (*this)
-                                                                                  : exampleTabs.release(),
+        addTab ("Open Example",
+                Colours::transparentBlack,
+                exampleTabs == nullptr ? new SetJUCEPathComponent (*this) : exampleTabs.release(),
                 true);
 
         if (wasOpen)

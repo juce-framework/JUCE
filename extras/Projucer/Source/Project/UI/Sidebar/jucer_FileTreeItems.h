@@ -131,7 +131,7 @@ public:
                 {
                     if (auto* pcc = treeRootItem->getProjectContentComponent())
                     {
-                        if (auto* fileInfoComp = dynamic_cast<FileGroupInformationComponent*> (pcc->getEditorComponentContent()))
+                        if (auto* fileInfoComp = dynamic_cast<FileGroupInformationComponent*> (pcc->getEditorComponent()))
                             if (fileInfoComp->getGroupPath() == itemToRemove->getFile().getFullPathName())
                                 pcc->hideEditor();
                     }
@@ -197,12 +197,12 @@ public:
         jassertfalse;
     }
 
-    void showMultiSelectionPopupMenu() override
+    void showMultiSelectionPopupMenu (Point<int> p) override
     {
         PopupMenu m;
         m.addItem (1, "Delete");
 
-        m.showMenuAsync (PopupMenu::Options(),
+        m.showMenuAsync (PopupMenu::Options().withTargetScreenArea ({ p.x, p.y, 1, 1 }),
                          ModalCallbackFunction::create (treeViewMultiSelectItemChosen, this));
     }
 
@@ -548,7 +548,7 @@ public:
                 pcc->showEditorForFile (f, false);
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         PopupMenu m;
 
@@ -571,13 +571,13 @@ public:
 
         m.addItem (3, "Delete");
 
-        launchPopupMenu (m);
+        launchPopupMenu (m, p);
     }
 
-    void showAddMenu() override
+    void showAddMenu (Point<int> p) override
     {
         if (auto* group = dynamic_cast<GroupItem*> (getParentItem()))
-            group->showAddMenu();
+            group->showAddMenu (p);
     }
 
     void handlePopupMenuResult (int resultCode) override
@@ -696,7 +696,7 @@ public:
     void showDocument() override
     {
         if (auto* pcc = getProjectContentComponent())
-            pcc->setEditorComponent (new FileGroupInformationComponent (item), nullptr);
+            pcc->setScrollableEditorComponent (std::make_unique<FileGroupInformationComponent> (item));
     }
 
     static void openAllGroups (TreeViewItem* root)
@@ -731,7 +731,7 @@ public:
             setFilesToCompile (projectItem.getChild (i), shouldCompile);
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         PopupMenu m;
         addCreateFileMenuItems (m);
@@ -764,15 +764,15 @@ public:
             m.addItem (10, "Delete");
         }
 
-        launchPopupMenu (m);
+        launchPopupMenu (m, p);
     }
 
-    void showAddMenu() override
+    void showAddMenu (Point<int> p) override
     {
         PopupMenu m;
         addCreateFileMenuItems (m);
 
-        launchPopupMenu (m);
+        launchPopupMenu (m, p);
     }
 
     void handlePopupMenuResult (int resultCode) override

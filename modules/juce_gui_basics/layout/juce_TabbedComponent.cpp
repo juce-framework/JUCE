@@ -310,4 +310,10 @@ void TabbedComponent::changeCallback (int newCurrentTabIndex, const String& newT
 void TabbedComponent::currentTabChanged (int, const String&) {}
 void TabbedComponent::popupMenuClickOnTab (int, const String&) {}
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> TabbedComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
+
 } // namespace juce

@@ -94,6 +94,7 @@ public:
 
         Font::findFonts (fonts);   // Generate the list of fonts
 
+        listBox.setTitle ("Fonts");
         listBox.setRowHeight (20);
         listBox.setModel (this);   // Tell the listbox where to get its data model
         listBox.setColour (ListBox::textColourId, Colours::black);
@@ -218,10 +219,15 @@ public:
         AttributedString s;
         s.setWordWrap (AttributedString::none);
         s.setJustification (Justification::centredLeft);
-        s.append (font.getTypefaceName(), font.withHeight ((float) height * 0.7f), Colours::black);
+        s.append (getNameForRow (rowNumber), font.withHeight ((float) height * 0.7f), Colours::black);
         s.append ("   " + font.getTypefaceName(), Font ((float) height * 0.5f, Font::italic), Colours::grey);
 
         s.draw (g, Rectangle<int> (width, height).expanded (-4, 50).toFloat());
+    }
+
+    String getNameForRow (int rowNumber) override
+    {
+        return fonts[rowNumber].getTypefaceName();
     }
 
     void selectedRowsChanged (int /*lastRowselected*/) override

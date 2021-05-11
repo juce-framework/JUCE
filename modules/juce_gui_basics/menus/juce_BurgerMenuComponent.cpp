@@ -293,4 +293,10 @@ void BurgerMenuComponent::lookAndFeelChanged()
     listBox.setRowHeight (roundToInt (getLookAndFeel().getPopupMenuFont().getHeight() * 2.0f));
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> BurgerMenuComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::menuBar);
+}
+
 } // namespace juce

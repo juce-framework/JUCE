@@ -55,8 +55,8 @@ public:
         virtual bool saveAs() = 0;
         virtual bool hasFileBeenModifiedExternally() = 0;
         virtual void reloadFromFile() = 0;
-        virtual Component* createEditor() = 0;
-        virtual Component* createViewer() = 0;
+        virtual std::unique_ptr<Component> createEditor() = 0;
+        virtual std::unique_ptr<Component> createViewer() = 0;
         virtual void fileHasBeenRenamed (const File& newFile) = 0;
         virtual String getState() const = 0;
         virtual void restoreState (const String& state) = 0;

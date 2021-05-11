@@ -25,6 +25,7 @@
 
 #pragma once
 
+#include "../../Utility/UI/PropertyComponents/jucer_LabelPropertyComponent.h"
 
 //==============================================================================
 struct ContentViewHeader    : public Component
@@ -32,6 +33,7 @@ struct ContentViewHeader    : public Component
     ContentViewHeader (String headerName, Icon headerIcon)
         : name (headerName), icon (headerIcon)
     {
+        setTitle (name);
     }
 
     void paint (Graphics& g) override
@@ -152,14 +154,18 @@ private:
 };
 
 //==============================================================================
-class InfoButton    : public Button
+class InfoButton  : public Button
 {
 public:
     InfoButton (const String& infoToDisplay = {})
         : Button ({})
     {
+        setTitle ("Info");
+
         if (infoToDisplay.isNotEmpty())
             setInfoToDisplay (infoToDisplay);
+
+        setSize (20, 20);
     }
 
     void paintButton (Graphics& g, bool isMouseOverButton, bool isButtonDown) override
@@ -196,6 +202,8 @@ public:
             width = jmin (300, stringWidth);
 
             numLines += static_cast<int> (stringWidth / width);
+
+            setHelpText (info);
         }
     }
 
@@ -242,37 +250,48 @@ public:
           description (desc)
     {
         addAndMakeVisible (header);
-
-        description.setFont ({ 16.0f });
-        description.setColour (getLookAndFeel().findColour (defaultTextColourId));
-        description.setLineSpacing (5.0f);
-        description.setJustification (Justification::centredLeft);
     }
 
     void setProperties (const PropertyListBuilder& newProps)
     {
-        infoButtons.clear();
-        properties.clear();
-        properties.addArray (newProps.components);
+        clearProperties();
 
-        for (auto* prop : properties)
+        if (description.isNotEmpty())
+            properties.push_back (std::make_unique<LabelPropertyComponent> (description, 16, Font (16.0f),
+                                                                            Justification::centredLeft));
+
+        for (auto* comp : newProps.components)
+            properties.push_back (std::unique_ptr<PropertyComponent> (comp));
+
+        for (auto& prop : properties)
         {
-            addAndMakeVisible (prop);
+            const auto propertyTooltip = prop->getTooltip();
 
-            if (! prop->getTooltip().isEmpty())
+            if (propertyTooltip.isNotEmpty())
             {
-                addAndMakeVisible (infoButtons.add (new InfoButton (prop->getTooltip())));
-                infoButtons.getLast()->setAssociatedComponent (prop);
-                prop->setTooltip ({}); // set the tooltip to empty so it only displays when its button is clicked
+                // set the tooltip to empty so it only displays when its button is clicked
+                prop->setTooltip ({});
+
+                auto infoButton = std::make_unique<InfoButton> (propertyTooltip);
+                infoButton->setAssociatedComponent (prop.get());
+
+                auto propertyAndInfoWrapper = std::make_unique<PropertyAndInfoWrapper> (*prop, *infoButton.get());
+                addAndMakeVisible (propertyAndInfoWrapper.get());
+                propertyComponentsWithInfo.push_back (std::move (propertyAndInfoWrapper));
+
+                infoButtons.push_back (std::move (infoButton));
+            }
+            else
+            {
+                addAndMakeVisible (prop.get());
             }
 
-            if (auto* multiChoice = dynamic_cast<MultiChoicePropertyComponent*> (prop))
+            if (auto* multiChoice = dynamic_cast<MultiChoicePropertyComponent*> (prop.get()))
                 multiChoice->onHeightChange = [this] { updateSize(); };
 
-            if (auto* text = dynamic_cast<TextPropertyComponent*> (prop))
+            if (auto* text = dynamic_cast<TextPropertyComponent*> (prop.get()))
                 if (text->isTextEditorMultiLine())
                     text->addListener (this);
-
         }
     }
 
@@ -281,31 +300,21 @@ public:
         header.setBounds (0, 0, width, headerSize);
         auto height = header.getBottom() + 10;
 
-        descriptionLayout.createLayout (description, (float) (width - 40));
-        auto descriptionHeight = (int) descriptionLayout.getHeight();
-
-        if (descriptionHeight > 0)
-            height += (int) descriptionLayout.getHeight() + 25;
-
-        for (auto* pp : properties)
+        for (auto& pp : properties)
         {
-            auto propertyHeight = pp->getPreferredHeight() + (getHeightMultiplier (pp) * pp->getPreferredHeight());
+            const auto propertyHeight = pp->getPreferredHeight()
+                                       + (getHeightMultiplier (pp.get()) * pp->getPreferredHeight());
 
-            InfoButton* buttonToUse = nullptr;
-            for (auto* b : infoButtons)
-                if (b->getAssociatedComponent() == pp)
-                    buttonToUse = b;
+            auto iter = std::find_if (propertyComponentsWithInfo.begin(), propertyComponentsWithInfo.end(),
+                                      [&pp] (const std::unique_ptr<PropertyAndInfoWrapper>& w) { return &w->propertyComponent == pp.get(); });
 
-            if (buttonToUse != nullptr)
-            {
-                buttonToUse->setSize (20, 20);
-                buttonToUse->setCentrePosition (20, height + (propertyHeight / 2));
-            }
+            if (iter != propertyComponentsWithInfo.end())
+                (*iter)->setBounds (0, height, width - 10, propertyHeight);
+            else
+                pp->setBounds (40, height, width - 50, propertyHeight);
 
-            pp->setBounds (40, height, width - 50, propertyHeight);
-
-            if (shouldResizePropertyComponent (pp))
-                resizePropertyComponent (pp);
+            if (shouldResizePropertyComponent (pp.get()))
+                resizePropertyComponent (pp.get());
 
             height += pp->getHeight() + 10;
         }
@@ -319,19 +328,51 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.setColour (findColour (secondaryBackgroundColourId));
-        g.fillRect (getLocalBounds());
-
-        auto textArea = getLocalBounds().toFloat()
-                                        .withTop ((float) headerSize)
-                                        .reduced (20.0f, 10.0f)
-                                        .withHeight (descriptionLayout.getHeight());
-        descriptionLayout.draw (g, textArea);
+        g.fillAll (findColour (secondaryBackgroundColourId));
     }
 
-    OwnedArray<PropertyComponent> properties;
+    const std::vector<std::unique_ptr<PropertyComponent>>& getProperties() const noexcept
+    {
+        return properties;
+    }
+
+    void clearProperties()
+    {
+        propertyComponentsWithInfo.clear();
+        infoButtons.clear();
+        properties.clear();
+    }
 
 private:
+    //==============================================================================
+    struct PropertyAndInfoWrapper  : public Component
+    {
+        PropertyAndInfoWrapper (PropertyComponent& c, InfoButton& i)
+            : propertyComponent (c),
+              infoButton (i)
+        {
+            setFocusContainerType (FocusContainerType::focusContainer);
+            setTitle (propertyComponent.getName());
+
+            addAndMakeVisible (propertyComponent);
+            addAndMakeVisible (infoButton);
+        }
+
+        void resized() override
+        {
+            auto bounds = getLocalBounds();
+
+            bounds.removeFromLeft (40);
+            bounds.removeFromRight (10);
+
+            propertyComponent.setBounds (bounds);
+            infoButton.setCentrePosition (20, bounds.getHeight() / 2);
+        }
+
+        PropertyComponent& propertyComponent;
+        InfoButton& infoButton;
+    };
+
     //==============================================================================
     void textPropertyComponentChanged (TextPropertyComponent* comp) override
     {
@@ -348,7 +389,6 @@ private:
         updateSize();
     }
 
-    //==============================================================================
     void updateSize()
     {
         updateSize (getX(), getY(), getWidth());
@@ -357,7 +397,6 @@ private:
             parent->parentSizeChanged();
     }
 
-    //==============================================================================
     bool shouldResizePropertyComponent (PropertyComponent* p)
     {
         if (auto* textComp = dynamic_cast<TextPropertyComponent*> (p))
@@ -392,11 +431,15 @@ private:
         return static_cast<int> (nameWidth / (float) availableTextWidth);
     }
 
-    OwnedArray<InfoButton> infoButtons;
+    //==============================================================================
+    static constexpr int headerSize = 40;
+
+    std::vector<std::unique_ptr<PropertyComponent>> properties;
+    std::vector<std::unique_ptr<InfoButton>> infoButtons;
+    std::vector<std::unique_ptr<PropertyAndInfoWrapper>> propertyComponentsWithInfo;
+
     ContentViewHeader header;
-    AttributedString description;
-    TextLayout descriptionLayout;
-    int headerSize = 40;
+    String description;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PropertyGroupComponent)

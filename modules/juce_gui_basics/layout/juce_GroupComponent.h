@@ -98,6 +98,8 @@ public:
     void enablementChanged() override;
     /** @internal */
     void colourChanged() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     String text;

@@ -127,9 +127,9 @@ public:
 
         PropertyComponent* jucePathPropertyComponent = nullptr;
 
-        for (auto* prop : propertyGroup.properties)
+        for (const auto& prop : propertyGroup.getProperties())
             if (prop->getName() == "Path to JUCE")
-                jucePathPropertyComponent = prop;
+                jucePathPropertyComponent = prop.get();
 
         if (jucePathPropertyComponent != nullptr)
         {

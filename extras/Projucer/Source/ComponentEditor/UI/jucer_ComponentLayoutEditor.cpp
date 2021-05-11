@@ -41,7 +41,7 @@ public:
     {
         setInterceptsMouseClicks (false, false);
         setWantsKeyboardFocus (false);
-        setFocusContainer (true);
+        setFocusContainerType (FocusContainerType::keyboardFocusContainer);
     }
 
     void paint (Graphics& g) override
@@ -254,7 +254,7 @@ void ComponentLayoutEditor::refreshAllComponents()
         lastComp = c;
 
         c->setWantsKeyboardFocus (false);
-        c->setFocusContainer (true);
+        c->setFocusContainerType (FocusContainerType::keyboardFocusContainer);
 
         if (isNewOverlay)
             overlay->updateBoundsToMatchTarget();

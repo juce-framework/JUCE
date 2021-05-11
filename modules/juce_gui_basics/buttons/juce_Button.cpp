@@ -188,6 +188,9 @@ void Button::setToggleState (bool shouldBeOn, NotificationType clickNotification
             sendStateMessage();
         else
             buttonStateChanged();
+
+        if (auto* handler = getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::valueChanged);
     }
 }
 
@@ -205,6 +208,8 @@ void Button::setClickingTogglesState (bool shouldToggle) noexcept
     // it is that this button represents, and the button will update its state to reflect this
     // in the applicationCommandListChanged() method.
     jassert (commandManagerToUse == nullptr || ! clickTogglesState);
+
+    invalidateAccessibilityHandler();
 }
 
 bool Button::getClickingTogglesState() const noexcept
@@ -220,6 +225,8 @@ void Button::setRadioGroupId (int newGroupId, NotificationType notification)
 
         if (lastToggleState)
             turnOffOtherButtonsInGroup (notification, notification);
+
+        invalidateAccessibilityHandler();
     }
 }
 
@@ -690,6 +697,12 @@ void Button::repeatTimerCallback()
     {
         callbackHelper->stopTimer();
     }
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> Button::createAccessibilityHandler()
+{
+    return std::make_unique<ButtonAccessibilityHandler> (*this);
 }
 
 } // namespace juce

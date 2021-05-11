@@ -192,6 +192,10 @@ might slow down configuration a bit. If you enable this, you should probably als
 `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists as this is required for
 source grouping to work.
 
+Source groupings are a little sensitive to the project layout. As such, you should always ensure
+that the call to `juce_add_module` which adds a specific module happens *before* calling
+`juce_add_*` to add any dependent targets.
+
 The modules will be placed in a group named "JUCE Modules" within the group for each target,
 alongside the "Source Files" and "Header Files" groups.
 

@@ -158,15 +158,19 @@ private:
         bool mightContainSubItems() override        { return false; }
         String getUniqueName() const override       { return comp.getName(); }
         int getRightHandButtonSpace() override      { return canBeLaunched() ? 60 : 40; }
-        Component* createItemComponent() override
+
+        std::unique_ptr<Component> createItemComponent() override
         {
-            auto* content = new TreeItemComponent (*this);
+            auto content = std::make_unique<TreeItemComponent> (*this);
 
             content->addRightHandButton (new ClassItemButton (*this, true));
+
             if (canBeLaunched())
                 content->addRightHandButton (new ClassItemButton (*this, false));
 
-            return content;
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wredundant-move")
+            return std::move (content);
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         Colour getContentColour (bool isIcon) const override

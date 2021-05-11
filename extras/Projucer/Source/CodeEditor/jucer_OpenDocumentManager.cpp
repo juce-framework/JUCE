@@ -59,8 +59,8 @@ public:
     void reloadFromFile() override                           { fileModificationTime = file.getLastModificationTime(); }
     String getName() const override                          { return file.getFileName(); }
     File getFile() const override                            { return file; }
-    Component* createEditor() override                       { return new ItemPreviewComponent (file); }
-    Component* createViewer() override                       { return createEditor(); }
+    std::unique_ptr<Component> createEditor() override       { return std::make_unique<ItemPreviewComponent> (file); }
+    std::unique_ptr<Component> createViewer() override       { return createEditor(); }
     void fileHasBeenRenamed (const File& newFile) override   { file = newFile; }
     String getState() const override                         { return {}; }
     void restoreState (const String&) override               {}

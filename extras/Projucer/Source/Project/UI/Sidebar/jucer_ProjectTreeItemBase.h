@@ -35,17 +35,16 @@ struct ProjectTreeItemBase  : public JucerTreeViewBase,
     void showSettingsPage (Component* content)
     {
         content->setComponentID (getUniqueName());
-
         std::unique_ptr<Component> comp (content);
 
-        if (ProjectContentComponent* pcc = getProjectContentComponent())
-            pcc->setEditorComponent (comp.release(), nullptr);
+        if (auto* pcc = getProjectContentComponent())
+            pcc->setScrollableEditorComponent (std::move (comp));
     }
 
     void closeSettingsPage()
     {
         if (auto* pcc = getProjectContentComponent())
-            if (auto* content = pcc->getEditorComponentContent())
+            if (auto* content = pcc->getEditorComponent())
                 if (content->getComponentID() == getUniqueName())
                     pcc->hideEditor();
     }

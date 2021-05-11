@@ -487,6 +487,10 @@ void MainWindow::showLoginFormOverlay()
 {
     blurOverlayComponent = std::make_unique<BlurOverlayWithComponent> (*this, std::make_unique<LoginFormComponent> (*this));
     loginFormOpen = true;
+
+    if (auto* loginForm = blurOverlayComponent->getChildComponent (0))
+        if (auto* handler = loginForm->getAccessibilityHandler())
+            handler->grabFocus();
 }
 
 void MainWindow::hideLoginFormOverlay()

@@ -82,6 +82,7 @@ private:
 
     void changeListenerCallback (ChangeBroadcaster*) override;
     int getNumRows() override;
+    String getNameForRow (int rowNumber) override;
     void paintListBoxItem (int, Graphics&, int, int, bool) override;
     Component* refreshComponentForRow (int rowNumber, bool isRowSelected, Component*) override;
     void selectedRowsChanged (int row) override;

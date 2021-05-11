@@ -133,4 +133,10 @@ Path DrawableImage::getOutlineAsPath() const
     return {}; // not applicable for images
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> DrawableImage::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::image);
+}
+
 } // namespace juce

@@ -40,6 +40,9 @@
 HeaderComponent::HeaderComponent (ProjectContentComponent* pcc)
     : projectContentComponent (pcc)
 {
+    setTitle ("Header");
+    setFocusContainerType (FocusContainerType::focusContainer);
+
     addAndMakeVisible (configLabel);
     addAndMakeVisible (exporterBox);
 

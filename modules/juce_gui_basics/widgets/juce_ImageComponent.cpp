@@ -80,4 +80,10 @@ void ImageComponent::paint (Graphics& g)
     g.drawImage (image, getLocalBounds().toFloat(), placement);
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ImageComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::image);
+}
+
 } // namespace juce

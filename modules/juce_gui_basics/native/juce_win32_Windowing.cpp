@@ -63,6 +63,14 @@ static bool shouldDeactivateTitleBar = true;
 
 void* getUser32Function (const char*);
 
+namespace WindowsAccessibility
+{
+    void initialiseUIAWrapper();
+    long getUiaRootObjectId();
+    bool handleWmGetObject (AccessibilityHandler*, WPARAM, LPARAM, LRESULT*);
+    void revokeUIAMapEntriesForWindow (HWND);
+}
+
 #if JUCE_DEBUG
  int numActiveScopedDpiAwarenessDisablers = 0;
  bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
@@ -1372,12 +1380,14 @@ public:
           parentToAddTo (parent),
           currentRenderingEngine (softwareRenderingEngine)
     {
+        // make sure that the UIA wrapper singleton is loaded
+        WindowsAccessibility::initialiseUIAWrapper();
+
         callFunctionIfNotLocked (&createWindowCallback, this);
 
         setTitle (component.getName());
         updateShadower();
 
-        // make sure that the on-screen keyboard code is loaded
         OnScreenKeyboard::getInstance();
 
         getNativeRealtimeModifiers = []
@@ -1397,12 +1407,14 @@ public:
 
     ~HWNDComponentPeer()
     {
+        // do this first to avoid messages arriving for this window before it's destroyed
+        JuceWindowIdentifier::setAsJUCEWindow (hwnd, false);
+
+        if (isAccessibilityActive)
+            WindowsAccessibility::revokeUIAMapEntriesForWindow (hwnd);
+
         shadower = nullptr;
         currentTouches.deleteAllTouchesForPeer (this);
-
-        // do this before the next bit to avoid messages arriving for this window
-        // before it's destroyed
-        JuceWindowIdentifier::setAsJUCEWindow (hwnd, false);
 
         callFunctionIfNotLocked (&destroyWindowCallback, (void*) hwnd);
 
@@ -1988,6 +2000,8 @@ private:
 
     double scaleFactor = 1.0;
     bool isInDPIChange = false;
+
+    bool isAccessibilityActive = false;
 
     //==============================================================================
     static MultiTouchMapper<DWORD> currentTouches;
@@ -3907,6 +3921,24 @@ private:
             case WM_GETDLGCODE:
                 return DLGC_WANTALLKEYS;
 
+            case WM_GETOBJECT:
+            {
+                if (static_cast<long> (lParam) == WindowsAccessibility::getUiaRootObjectId())
+                {
+                    if (auto* handler = component.getAccessibilityHandler())
+                    {
+                        LRESULT res = 0;
+
+                        if (WindowsAccessibility::handleWmGetObject (handler, wParam, lParam, &res))
+                        {
+                            isAccessibilityActive = true;
+                            return res;
+                        }
+                    }
+                }
+
+                break;
+            }
             default:
                 break;
         }

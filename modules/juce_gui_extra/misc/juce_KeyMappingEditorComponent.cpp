@@ -225,7 +225,7 @@ public:
         for (int i = 0; i < jmin ((int) maxNumAssignments, keyPresses.size()); ++i)
             addKeyPressButton (owner.getDescriptionForKeyPress (keyPresses.getReference (i)), i, isReadOnly);
 
-        addKeyPressButton (String(), -1, isReadOnly);
+        addKeyPressButton ("Change Key Mapping", -1, isReadOnly);
     }
 
     void addKeyPressButton (const String& desc, const int index, const bool isReadOnly)
@@ -262,6 +262,11 @@ public:
         }
     }
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return nullptr;
+    }
+
 private:
     KeyMappingEditorComponent& owner;
     OwnedArray<ChangeKeyButton> keyChangeButtons;
@@ -280,10 +285,11 @@ public:
         : owner (kec), commandID (command)
     {}
 
-    String getUniqueName() const override         { return String ((int) commandID) + "_id"; }
-    bool mightContainSubItems() override          { return false; }
-    int getItemHeight() const override            { return 20; }
-    Component* createItemComponent() override     { return new ItemComponent (owner, commandID); }
+    String getUniqueName() const override                      { return String ((int) commandID) + "_id"; }
+    bool mightContainSubItems() override                       { return false; }
+    int getItemHeight() const override                         { return 20; }
+    std::unique_ptr<Component> createItemComponent() override  { return std::make_unique<ItemComponent> (owner, commandID); }
+    String getAccessibilityName() override                     { return TRANS (owner.getCommandManager().getNameOfCommand (commandID)); }
 
 private:
     KeyMappingEditorComponent& owner;
@@ -304,6 +310,7 @@ public:
     String getUniqueName() const override       { return categoryName + "_cat"; }
     bool mightContainSubItems() override        { return true; }
     int getItemHeight() const override          { return 22; }
+    String getAccessibilityName() override      { return categoryName; }
 
     void paintItem (Graphics& g, int width, int height) override
     {
@@ -406,6 +413,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     }
 
     addAndMakeVisible (tree);
+    tree.setTitle ("Key Mappings");
     tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);

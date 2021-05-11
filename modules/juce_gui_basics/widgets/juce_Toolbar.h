@@ -309,6 +309,8 @@ public:
     /** @internal */
     static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
     /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+    /** @internal */
     static const char* const toolbarDragDescriptor;
 
 private:

@@ -130,6 +130,8 @@ public:
     //==============================================================================
     /** @internal */
     void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 protected:
     //==============================================================================

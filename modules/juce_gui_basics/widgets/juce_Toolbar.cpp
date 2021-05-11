@@ -809,4 +809,10 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
         ->enterModalState (true, nullptr, true);
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> Toolbar::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
+
 } // namespace juce

@@ -37,6 +37,9 @@ public:
         settingsViewport.setViewedComponent (&innerContent, false);
         addAndMakeVisible (settingsViewport);
 
+        setFocusContainerType (FocusContainerType::focusContainer);
+        setTitle ("DemoRunner Settings");
+
         setOpaque (true);
     }
 
@@ -47,39 +50,43 @@ public:
 
     void resized() override
     {
-        auto r = getLocalBounds();
-        auto scrollBarWidth = getLookAndFeel().getDefaultScrollbarWidth();
+        constexpr int minimumWidth  = 350;
+        constexpr int minimumHeight = 550;
 
-        innerContent.setSize (jmax (r.getWidth() - scrollBarWidth, innerContent.getMinimumWidth()),
-                              jmax (r.getHeight(), innerContent.getMinimumHeight()));
+        auto r = getLocalBounds();
+        const auto scrollBarWidth = getLookAndFeel().getDefaultScrollbarWidth();
+
+        innerContent.setSize (jmax (r.getWidth() - scrollBarWidth, minimumWidth),
+                              jmax (r.getHeight(), minimumHeight));
 
         settingsViewport.setBounds (r);
     }
 
 private:
-    Viewport settingsViewport;
+    static constexpr float titleLabelFontHeight = 18.0f;
+    static constexpr int itemHeight = 30;
+    static constexpr int itemSpacing = 7;
 
-    //==============================================================================
-    class InnerContent    : public Component,
-                            public ComponentMovementWatcher
+    class GraphicsSettingsGroup  : public Component,
+                                   private ComponentMovementWatcher
     {
     public:
-        InnerContent (MainComponent& topLevelComponent)
-            : ComponentMovementWatcher (this), mainComponent (topLevelComponent)
+        GraphicsSettingsGroup (MainComponent& comp)
+            : ComponentMovementWatcher (&comp),
+              mainComponent (comp)
         {
-            addAndMakeVisible (graphicsTitleLabel);
-            graphicsTitleLabel.setFont (18.0f);
-
-            addAndMakeVisible (audioTitleLabel);
-            audioTitleLabel.setFont (18.0f);
+            addAndMakeVisible (titleLabel);
+            titleLabel.setFont (titleLabelFontHeight);
 
             addLookAndFeels();
 
             addAndMakeVisible (lookAndFeelSelector);
+
             for (int i = 0; i < lookAndFeelNames.size(); ++i)
                 lookAndFeelSelector.addItem (lookAndFeelNames.getReference (i), i + 1);
 
             lookAndFeelSelector.setSelectedItemIndex (lookAndFeelNames.indexOf ("LookAndFeel_V4 (Dark)"));
+
             lookAndFeelSelector.onChange = [this]
             {
                 auto* lf = lookAndFeels.getUnchecked (lookAndFeelSelector.getSelectedItemIndex());
@@ -97,87 +104,37 @@ private:
             rendererLabel.setJustificationType (Justification::centredRight);
             rendererLabel.attachToComponent (&rendererSelector, true);
 
-            audioSettings.reset (new AudioDeviceSelectorComponent (getSharedAudioDeviceManager(),
-                                                                   0, 256, 0, 256, true, true, true, false));
-            addAndMakeVisible (audioSettings.get());
-            audioSettings->setItemHeight (itemHeight);
-
-            setOpaque (true);
-        }
-
-        void paint (Graphics& g) override
-        {
-            g.fillAll (findColour (ResizableWindow::backgroundColourId).contrasting (0.2f));
+            setFocusContainerType (FocusContainerType::focusContainer);
+            setTitle ("Graphics Settings");
         }
 
         void resized() override
         {
             auto bounds = getLocalBounds();
 
-            auto space = itemHeight / 4;
+            titleLabel.setBounds (bounds.removeFromTop (itemHeight));
+            bounds.removeFromTop (itemSpacing);
 
-            graphicsTitleLabel.setBounds (bounds.removeFromTop (30));
-            bounds.removeFromTop (space);
+            const auto xPos  = roundToInt ((float) bounds.getX() + ((float) bounds.getWidth() * 0.35f));
+            const auto width = roundToInt ((float) bounds.getWidth() * 0.6f);
 
-            auto xPos = (float) bounds.getX() + ((float) bounds.getWidth() * 0.35f);
-            auto width = (float) bounds.getWidth() * 0.6f;
+            lookAndFeelSelector.setBounds (bounds.removeFromTop (itemHeight).withWidth (width).withX (xPos));
+            bounds.removeFromTop (itemSpacing);
 
-            lookAndFeelSelector.setBounds (bounds.removeFromTop (itemHeight).withWidth ((int) width).withX ((int) xPos));
-
-            bounds.removeFromTop (space);
-
-            rendererSelector.setBounds (bounds.removeFromTop (itemHeight).withWidth ((int) width).withX ((int) xPos));
-
-            bounds.removeFromTop (space);
-            audioTitleLabel.setBounds (bounds.removeFromTop (30));
-            bounds.removeFromTop (space);
-
-            audioSettings->setBounds (bounds);
+            rendererSelector.setBounds (bounds.removeFromTop (itemHeight).withWidth (width).withX (xPos));
         }
-
-        //==============================================================================
-        int getMinimumHeight() const noexcept    { return 550; }
-        int getMinimumWidth() const noexcept     { return 350; }
 
     private:
-        MainComponent& mainComponent;
-        ComponentPeer* peer = nullptr;
-
-        const int itemHeight = 30;
-
-        Label graphicsTitleLabel  { {}, "Graphics" },
-              audioTitleLabel     { {}, "Audio" },
-              lookAndFeelLabel    { {}, "LookAndFeel:" },
-              rendererLabel       { {}, "Renderer:" };
-
-        ComboBox lookAndFeelSelector, rendererSelector;
-
-        StringArray lookAndFeelNames;
-        OwnedArray<LookAndFeel> lookAndFeels;
-
-        std::unique_ptr<AudioDeviceSelectorComponent> audioSettings;
-
-        //==============================================================================
-        void refreshRenderingEngineSelector()
-        {
-            StringArray renderingEngines (mainComponent.getRenderingEngines());
-
-            rendererSelector.clear (NotificationType::dontSendNotification);
-
-            for (int i = 0; i < renderingEngines.size(); ++i)
-                rendererSelector.addItem (renderingEngines.getReference (i), i + 1);
-
-            rendererSelector.setSelectedItemIndex (mainComponent.getCurrentRenderingEngine());
-        }
-
-        //==============================================================================
         void componentMovedOrResized (bool, bool) override    {}
         using ComponentListener::componentMovedOrResized;
+
         void componentVisibilityChanged() override            {}
         using ComponentListener::componentVisibilityChanged;
+
         void componentPeerChanged() override
         {
-            auto* newPeer = getPeer();
+            auto* newPeer = mainComponent.getPeer();
+
             if (peer != newPeer)
             {
                 peer = newPeer;
@@ -187,7 +144,14 @@ private:
             }
         }
 
-        //==============================================================================
+        void refreshRenderingEngineSelector()
+        {
+            rendererSelector.clear (NotificationType::dontSendNotification);
+
+            rendererSelector.addItemList (mainComponent.getRenderingEngines(), 1);
+            rendererSelector.setSelectedItemIndex (mainComponent.getCurrentRenderingEngine());
+        }
+
         void addLookAndFeels()
         {
             lookAndFeelNames.addArray ({ "LookAndFeel_V1", "LookAndFeel_V2", "LookAndFeel_V3",
@@ -202,7 +166,81 @@ private:
             lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getGreyColourScheme()));
             lookAndFeels.add (new LookAndFeel_V4 (LookAndFeel_V4::getLightColourScheme()));
         }
+
+        MainComponent& mainComponent;
+        ComponentPeer* peer = nullptr;
+
+        Label titleLabel       { {}, "Graphics" },
+              lookAndFeelLabel { {}, "LookAndFeel:" },
+              rendererLabel    { {}, "Renderer:" };
+
+        ComboBox lookAndFeelSelector, rendererSelector;
+        StringArray lookAndFeelNames;
+        OwnedArray<LookAndFeel> lookAndFeels;
     };
 
+    class AudioSettingsGroup  : public Component
+    {
+    public:
+        AudioSettingsGroup()
+            : deviceSelectorComp (getSharedAudioDeviceManager(), 0, 256, 0, 256, true, true, true, false)
+        {
+            addAndMakeVisible (titleLabel);
+            titleLabel.setFont (titleLabelFontHeight);
+
+            addAndMakeVisible (deviceSelectorComp);
+            deviceSelectorComp.setItemHeight (itemHeight);
+
+            setFocusContainerType (FocusContainerType::focusContainer);
+            setTitle ("Audio Settings");
+        }
+
+        void resized() override
+        {
+            auto bounds = getLocalBounds();
+
+            titleLabel.setBounds (bounds.removeFromTop (itemHeight));
+            bounds.removeFromTop (itemSpacing);
+
+            deviceSelectorComp.setBounds (bounds);
+        }
+
+    private:
+        Label titleLabel { {}, "Audio" };
+        AudioDeviceSelectorComponent deviceSelectorComp;
+    };
+
+    //==============================================================================
+    class InnerContent    : public Component
+    {
+    public:
+        InnerContent (MainComponent& mainComponent)
+            : graphicsSettings (mainComponent)
+        {
+            addAndMakeVisible (graphicsSettings);
+            addAndMakeVisible (audioSettings);
+
+            setOpaque (true);
+        }
+
+        void paint (Graphics& g) override
+        {
+            g.fillAll (findColour (ResizableWindow::backgroundColourId).contrasting (0.2f));
+        }
+
+        void resized() override
+        {
+            auto bounds = getLocalBounds();
+
+            graphicsSettings.setBounds (bounds.removeFromTop (150));
+            audioSettings.setBounds (bounds);
+        }
+
+    private:
+        GraphicsSettingsGroup graphicsSettings;
+        AudioSettingsGroup audioSettings;
+    };
+
+    Viewport settingsViewport;
     InnerContent innerContent;
 };

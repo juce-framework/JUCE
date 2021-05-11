@@ -713,14 +713,14 @@ public:
         return false;
     }
 
-    Component* createEditor() override
+    std::unique_ptr<Component> createEditor() override
     {
         if (ProjucerApplication::getApp().isGUIEditorEnabled())
         {
             std::unique_ptr<JucerDocument> jucerDoc (JucerDocument::createForCppFile (getProject(), getFile()));
 
             if (jucerDoc != nullptr)
-                return new JucerDocumentEditor (jucerDoc.release());
+                return std::make_unique<JucerDocumentEditor> (jucerDoc.release());
         }
 
         return SourceCodeDocument::createEditor();

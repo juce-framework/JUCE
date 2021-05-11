@@ -29,6 +29,16 @@ namespace juce
 {
 
 //==============================================================================
+inline Range<int> nsRangeToJuce (NSRange range)
+{
+    return { (int) range.location, (int) (range.location + range.length) };
+}
+
+inline NSRange juceRangeToNS (Range<int> range)
+{
+    return NSMakeRange ((NSUInteger) range.getStart(), (NSUInteger) range.getLength());
+}
+
 inline String nsStringToJuce (NSString* s)
 {
     return CharPointer_UTF8 ([s UTF8String]);

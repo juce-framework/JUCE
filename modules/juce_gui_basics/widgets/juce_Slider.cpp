@@ -339,6 +339,9 @@ public:
 
         if (owner.onValueChange != nullptr)
             owner.onValueChange();
+
+        if (auto* handler = owner.getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::valueChanged);
     }
 
     void sendDragStart()
@@ -465,8 +468,10 @@ public:
         if (style != newStyle)
         {
             style = newStyle;
+
             owner.repaint();
             owner.lookAndFeelChanged();
+            owner.invalidateAccessibilityHandler();
         }
     }
 
@@ -567,6 +572,7 @@ public:
             owner.addAndMakeVisible (valueBox.get());
 
             valueBox->setWantsKeyboardFocus (false);
+            valueBox->setAccessible (false);
             valueBox->setText (previousTextBoxContent, dontSendNotification);
             valueBox->setTooltip (owner.getTooltip());
             updateTextBoxEnablement();
@@ -588,26 +594,24 @@ public:
             incButton.reset (lf.createSliderButton (owner, true));
             decButton.reset (lf.createSliderButton (owner, false));
 
-            owner.addAndMakeVisible (incButton.get());
-            owner.addAndMakeVisible (decButton.get());
-
-            incButton->onClick = [this] { incrementOrDecrement (normRange.interval); };
-            decButton->onClick = [this] { incrementOrDecrement (-normRange.interval); };
-
-            if (incDecButtonMode != incDecButtonsNotDraggable)
-            {
-                incButton->addMouseListener (&owner, false);
-                decButton->addMouseListener (&owner, false);
-            }
-            else
-            {
-                incButton->setRepeatSpeed (300, 100, 20);
-                decButton->setRepeatSpeed (300, 100, 20);
-            }
-
             auto tooltip = owner.getTooltip();
-            incButton->setTooltip (tooltip);
-            decButton->setTooltip (tooltip);
+
+            auto setupButton = [&] (Button& b, bool isIncrement)
+            {
+                owner.addAndMakeVisible (b);
+                b.onClick = [&] { incrementOrDecrement (isIncrement ? normRange.interval : -normRange.interval); };
+
+                if (incDecButtonMode != incDecButtonsNotDraggable)
+                    b.addMouseListener (&owner, false);
+                else
+                    b.setRepeatSpeed (300, 100, 20);
+
+                b.setTooltip (tooltip);
+                b.setAccessible (false);
+            };
+
+            setupButton (*incButton, true);
+            setupButton (*decButton, false);
         }
         else
         {
@@ -1210,7 +1214,6 @@ public:
     }
 
     //==============================================================================
-
     void resizeIncDecButtons()
     {
         auto buttonRect = sliderRect;
@@ -1673,6 +1676,11 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
 {
     if (! (isEnabled() && pimpl->mouseWheelMove (e, wheel)))
         Component::mouseWheelMove (e, wheel);
+}
+
+std::unique_ptr<AccessibilityHandler> Slider::createAccessibilityHandler()
+{
+    return std::make_unique<SliderAccessibilityHandler> (*this);
 }
 
 } // namespace juce
