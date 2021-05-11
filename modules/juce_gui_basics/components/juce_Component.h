@@ -2415,14 +2415,14 @@ public:
 
         By default this is set to true.
 
-        @see getAccessibilityHandler, createAccessibilityHandler
+        @see getAccessibilityHandler
     */
     void setAccessible (bool shouldBeAccessible);
 
     /** Returns the accessibility handler for this component, or nullptr if this component is not
         accessible.
 
-        @see createAccessibilityHandler, setAccessible
+        @see setAccessible
     */
     AccessibilityHandler* getAccessibilityHandler();
 
@@ -2435,6 +2435,7 @@ public:
     void invalidateAccessibilityHandler();
 
     //==============================================================================
+   #ifndef DOXYGEN
     // This method has been deprecated in favour of the setFocusContainerType() method
     // that takes a more descriptive enum.
     JUCE_DEPRECATED_WITH_BODY (void setFocusContainer (bool shouldBeFocusContainer) noexcept,
@@ -2442,6 +2443,7 @@ public:
         setFocusContainerType (shouldBeFocusContainer ? FocusContainerType::keyboardFocusContainer
                                                       : FocusContainerType::none);
     })
+   #endif
 
 private:
     //==============================================================================

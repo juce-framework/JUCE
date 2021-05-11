@@ -68,9 +68,10 @@ public:
         See also the setReturnKeyStartsNewLine() method, which will also need to be turned
         on if you want a multi-line editor with line-breaks.
 
-        @param shouldWordWrap  sets whether long lines should be broken up in multi-line editors.
-                               If this is false and scrollbars are enabled a horizontal scrollbar
-                               will be shown.
+        @param shouldBeMultiLine whether the editor should be multi- or single-line.
+        @param shouldWordWrap    sets whether long lines should be broken up in multi-line editors.
+                                 If this is false and scrollbars are enabled a horizontal scrollbar
+                                 will be shown.
 
         @see isMultiLine, setReturnKeyStartsNewLine, setScrollbarsShown
     */
