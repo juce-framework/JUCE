@@ -61,7 +61,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wextra",
                                      "-Wclass-memaccess",
                                      "-Wmissing-prototypes",
-                                     "-Wtype-limits")
+                                     "-Wtype-limits",
+                                     "-Wcpp",
+                                     "-W#warnings")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
@@ -111,6 +113,14 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
  #include <base/source/fobject.cpp>
  #include <base/source/fstreamer.cpp>
  #include <base/source/fstring.cpp>
+
+ // The following shouldn't leak from fstring.cpp
+ #undef stricmp
+ #undef strnicmp
+ #undef snprintf
+ #undef vsnprintf
+ #undef snwprintf
+ #undef vsnwprintf
 
  #if VST_VERSION >= 0x030608
   #include <base/thread/source/flock.cpp>
