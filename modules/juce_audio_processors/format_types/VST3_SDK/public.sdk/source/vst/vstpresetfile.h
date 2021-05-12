@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -107,8 +107,8 @@ inline bool isEqualID (const ChunkID id1, const ChunkID id2)
 //------------------------------------------------------------------------
 /** Handler for a VST 3 Preset File.
 \ingroup vstClasses
-\see \ref presetformat */
-//------------------------------------------------------------------------
+\see \ref presetformat
+*/
 class PresetFile
 {
 public:
@@ -150,7 +150,7 @@ public:
 	bool writeChunk (const void* data, int32 size, ChunkType which = kComponentState);
 
 	//-------------------------------------------------------------
-	// for storing and restoring the whole Plug-in state (component and controller states)
+	// for storing and restoring the whole plug-in state (component and controller states)
 	bool seekToComponentState ();							///< Seeks to the begin of the Component State.
 	bool storeComponentState (IComponent* component);		///< Stores the component state (only one time).
 	bool storeComponentState (IBStream* componentStream);	///< Stores the component state from stream (only one time).
@@ -165,10 +165,11 @@ public:
 
 	//--- ----------------------------------------------------------
 	/** Store program data or unit data from stream (including the header chunk).
+	 \param inStream 
 	 \param listID could be ProgramListID or UnitID. */
 	bool storeProgramData (IBStream* inStream, ProgramListID listID);
 
-	//---when Plug-in uses IProgramListData-----------------------
+	//---when plug-in uses IProgramListData-----------------------
 	/** Stores a IProgramListData with a given identifier and index (including the header chunk). */
 	bool storeProgramData (IProgramListData* programListData, ProgramListID programListID,
 	                       int32 programIndex);
@@ -176,14 +177,14 @@ public:
 	bool restoreProgramData (IProgramListData* programListData, ProgramListID* programListID = nullptr,
 	                         int32 programIndex = 0);
 
-	//---when Plug-in uses IUnitData------------------------------
+	//---when plug-in uses IUnitData------------------------------
 	/** Stores a IUnitData with a given unitID (including the header chunk). */
 	bool storeProgramData (IUnitData* unitData, UnitID unitID);
 	/** Restores a IUnitData with a given unitID (optional). */
 	bool restoreProgramData (IUnitData* unitData, UnitID* unitID = nullptr);
 
 	//--- ----------------------------------------------------------
-	/** for keeping the Controller part in sync concerning preset data stream, unitProgramListID
+	/** for keeping the controller part in sync concerning preset data stream, unitProgramListID
 	 * could be ProgramListID or UnitID. */
 	bool restoreProgramData (IUnitInfo* unitInfo, int32 unitProgramListID, int32 programIndex = -1);
 
@@ -226,8 +227,8 @@ protected:
 };
 
 //------------------------------------------------------------------------
-/** Stream implementation for a file using stdio. */
-//------------------------------------------------------------------------
+/** Stream implementation for a file using stdio. 
+*/
 class FileStream: public IBStream
 {
 public:
@@ -252,8 +253,8 @@ protected:
 };
 
 //------------------------------------------------------------------------
-/** Stream representing a Read-Only subsection of its source stream. */
-//------------------------------------------------------------------------
+/** Stream representing a Read-Only subsection of its source stream.
+*/
 class ReadOnlyBStream: public IBStream
 {
 public:
@@ -279,8 +280,8 @@ protected:
 };
 
 //------------------------------------------------------------------------
-/** Stream implementation for a memory buffer. */
-//------------------------------------------------------------------------
+/** Stream implementation for a memory buffer. 
+*/
 class BufferStream : public IBStream
 {
 public:

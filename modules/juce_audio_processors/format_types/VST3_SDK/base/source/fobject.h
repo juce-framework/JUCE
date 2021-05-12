@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -43,41 +43,39 @@
 
 #include "pluginterfaces/base/funknown.h"
 #include "pluginterfaces/base/iupdatehandler.h"
-//#include "base/source/basefwd.h"
-#include "base/source/fdebug.h" // NEW
-
+#include "base/source/fdebug.h" // use of NEW
 
 namespace Steinberg {
 
 //----------------------------------
 
-typedef FIDString FClassID;
+using FClassID = FIDString;
 
 //------------------------------------------------------------------------
 // Basic FObject - implements FUnknown + IDependent
 //------------------------------------------------------------------------
 /** Implements FUnknown and IDependent.
 
-FObject is a polymorphic class that implements IDependent (of SKI module)
-and therefore derived from FUnknown, which is the most abstract base class of all. 
+FObject is a polymorphic class that implements IDependent (of SKI module) and therefore derived from
+FUnknown, which is the most abstract base class of all.
 
-All COM-like virtual methods of FUnknown such as queryInterface(), addRef(), release()
-are implemented here. On top of that, dependency-related methods are implemented too.
+All COM-like virtual methods of FUnknown such as queryInterface(), addRef(), release() are
+implemented here. On top of that, dependency-related methods are implemented too.
 
-Pointer casting is done via the template methods FCast, either FObject to FObject or
-FUnknown to FObject.
+Pointer casting is done via the template methods FCast, either FObject to FObject or FUnknown to
+FObject.
 
-FObject supports a new singleton concept, therefore these objects are deleted automatically upon program termination.
+FObject supports a new singleton concept, therefore these objects are deleted automatically upon
+program termination.
 
-- Runtime type information: An object can be queried at runtime, of what class
-it is. To do this correctly, every class must override some methods. This
-is simplified by using the OBJ_METHODS macros
+- Runtime type information: An object can be queried at runtime, of what class it is. To do this
+correctly, every class must override some methods. This is simplified by using the OBJ_METHODS
+macros
 
-
-@see 
-	- FUnknown
-	- IDependent
-	- IUpdateHandler
+@see
+    - FUnknown
+    - IDependent
+    - IUpdateHandler
 */
 //------------------------------------------------------------------------
 class FObject : public IDependent
@@ -99,19 +97,19 @@ public:
 	FUnknown* unknownCast () {return this;}									///< get FUnknown interface from object
 
 	// FUnknown
-	virtual tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE; ///< please refer to FUnknown::queryInterface ()
-	virtual uint32 PLUGIN_API addRef () SMTG_OVERRIDE;									///< please refer to FUnknown::addref ()
-	virtual uint32 PLUGIN_API release () SMTG_OVERRIDE;									///< please refer to FUnknown::release ()
+	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE; ///< please refer to FUnknown::queryInterface ()
+	uint32 PLUGIN_API addRef () SMTG_OVERRIDE;						///< please refer to FUnknown::addref ()
+	uint32 PLUGIN_API release () SMTG_OVERRIDE;						///< please refer to FUnknown::release ()
 
 	// IDependent
-	virtual void PLUGIN_API update (FUnknown* /*changedUnknown*/, int32 /*message*/) SMTG_OVERRIDE {}
+	void PLUGIN_API update (FUnknown* /*changedUnknown*/, int32 /*message*/) SMTG_OVERRIDE {}
 																			///< empty virtual method that should be overridden by derived classes for data updates upon changes	
 	// IDependency
 	virtual void addDependent (IDependent* dep);							///< adds dependency to the object
 	virtual void removeDependent (IDependent* dep);							///< removes dependency from the object
 	virtual void changed (int32 msg = kChanged);							///< Inform all dependents, that the object has changed.
 	virtual void deferUpdate (int32 msg = kChanged);						///< Similar to triggerUpdates, except only delivered in idle (usefull in collecting updates).
-	virtual void updateDone (int32 /* msg */) {}											///< empty virtual method that should be overridden by derived classes
+	virtual void updateDone (int32 /* msg */) {}							///< empty virtual method that should be overridden by derived classes
 	virtual bool isEqualInstance (FUnknown* d) {return this == d;}
 	
 	static void setUpdateHandler (IUpdateHandler* handler) {gUpdateHandler = handler;}	///< set method for the local attribute
@@ -137,7 +135,7 @@ protected:
 //------------------------------------------------------------------------
 inline FObject* FObject::unknownToObject (FUnknown* unknown)
 {
-	FObject* object = 0;
+	FObject* object = nullptr;
 	if (unknown) 
 	{
 		unknown->queryInterface (FObject::iid, (void**)&object);
@@ -180,7 +178,7 @@ inline C* FCast (FUnknown* unknown)
 template <class C>
 inline C* FUCast (FObject* object)
 {
-	return FUnknownPtr<C> (object ? object->unknownCast () : 0);
+	return FUnknownPtr<C> (object ? object->unknownCast () : nullptr);
 }
 
 template <class C>

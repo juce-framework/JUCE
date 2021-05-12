@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -47,8 +47,8 @@ namespace Vst {
 //------------------------------------------------------------------------
 /** Default implementation for a VST 3 Component.
 \ingroup vstClasses
-Can be used as base class for a VST 3 component implementation. */
-//------------------------------------------------------------------------
+Can be used as base class for a VST 3 component implementation.
+*/
 class Component : public ComponentBase, public IComponent
 {
 public:
@@ -60,10 +60,10 @@ public:
 	/** Sets the controller Class ID associated to its component. */
 	void setControllerClass (const FUID& cid) { controllerClass = cid; }
 
-	/** Removes all Audio Buses. */
+	/** Removes all Audio Busses. */
 	tresult removeAudioBusses ();
 
-	/** Removes all Event Buses. */
+	/** Removes all Event Busses. */
 	tresult removeEventBusses ();
 
 	/** Renames a specific bus. Do not forget to inform the host about this (see \ref

@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -217,7 +217,7 @@ class IBStream;
 // IBStreamer
 //------------------------------------------------------------------------
 /** Wrapper class for typed reading/writing from or to IBStream. 
-	Can be used framework-independent in Plug-ins. */
+	Can be used framework-independent in plug-ins. */
 //------------------------------------------------------------------------
 class IBStreamer: public FStreamer
 {

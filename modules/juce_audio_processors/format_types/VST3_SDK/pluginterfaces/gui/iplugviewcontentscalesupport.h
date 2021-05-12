@@ -30,12 +30,13 @@ namespace Steinberg {
 \ingroup pluginGUI vstIPlug vst366
 - [plug impl]
 - [extends IPlugView]
+- [released: 3.6.6]
 - [optional]
 
 This interface communicates the content scale factor from the host to the plug-in view on
 systems where plug-ins cannot get this information directly like Microsoft Windows.
 
-The host calls setContentScaleFactor directly after the plug view was attached and when the scale
+The host calls setContentScaleFactor directly after the plug-in view is attached and when the scale
 factor changes (system change or window moved to another screen with different scaling settings).
 The host could call setContentScaleFactor in a different context, for example: scaling the
 plug-in editor for better readability.
@@ -43,7 +44,7 @@ When a plug-in handles this (by returning kResultTrue), it needs to scale the wi
 its view by the scale factor and inform the host via a IPlugFrame::resizeView(), the host will then
 call IPlugView::onSize().
 
-Note that the host is allowed to call setContentScaleFactor() at any time the IPlugView is alive.
+Note that the host is allowed to call setContentScaleFactor() at any time the IPlugView is valid.
  */
 class IPlugViewContentScaleSupport : public FUnknown
 {

@@ -49,22 +49,31 @@
 	#define SMTG_OS_IOS		0
 	#define SMTG_OS_OSX		0
 
+	#define SMTG_CPU_X86	_M_IX86
+	#define SMTG_CPU_X86_64	_M_AMD64
+	#define SMTG_CPU_ARM	(_M_ARM && !_M_ARM64)
+	#define SMTG_CPU_ARM_64	_M_ARM64
+
 	#define BYTEORDER kLittleEndian
 	
 	#define COM_COMPATIBLE	1
 	#define PLUGIN_API __stdcall
 	#define SMTG_PTHREADS	0
 
+	#define SMTG_EXPORT_SYMBOL __declspec (dllexport)
+
 	#ifndef _CRT_SECURE_NO_WARNINGS
 		#define _CRT_SECURE_NO_WARNINGS
 	#endif
 
-	#pragma warning (disable : 4244) // Conversion from 'type1' to 'type2', possible loss of data.
-	#pragma warning (disable : 4250) // Inheritance via dominance is allowed
-	#pragma warning (disable : 4996) // deprecated functions
+	#ifdef _MSC_VER
+		#pragma warning (disable : 4244) // Conversion from 'type1' to 'type2', possible loss of data.
+		#pragma warning (disable : 4250) // Inheritance via dominance is allowed
+		#pragma warning (disable : 4996) // deprecated functions
 
-	#pragma warning (3 : 4189) // local variable is initialized but not referenced
-	#pragma warning (3 : 4238) // nonstandard extension used : class rvalue used as lvalue
+		#pragma warning (3 : 4189) // local variable is initialized but not referenced
+		#pragma warning (3 : 4238) // nonstandard extension used : class rvalue used as lvalue
+	#endif
 
 	#if defined (_WIN64) || defined (_M_ARM64)
 		#define SMTG_PLATFORM_64 1
@@ -86,12 +95,17 @@
 //-----------------------------------------------------------------------------
 // LINUX
 //-----------------------------------------------------------------------------
-#elif __gnu_linux__
+#elif __gnu_linux__ || __linux__
 	#define SMTG_OS_LINUX	1
 	#define SMTG_OS_MACOS	0
 	#define SMTG_OS_WINDOWS	0
 	#define SMTG_OS_IOS		0
 	#define SMTG_OS_OSX		0
+
+	#define SMTG_CPU_X86	__i386__
+	#define SMTG_CPU_X86_64	__x86_64__
+	#define SMTG_CPU_ARM	__arm__
+	#define SMTG_CPU_ARM_64	__aarch64__
 
 	#include <endian.h>
 	#if __BYTE_ORDER == __LITTLE_ENDIAN
@@ -104,6 +118,8 @@
 	#define PLUGIN_API
 	#define SMTG_PTHREADS	1
 
+	#define SMTG_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
+
 	#if __LP64__
 		#define SMTG_PLATFORM_64 1
 	#else
@@ -115,7 +131,11 @@
 		#ifndef SMTG_CPP11
 			#error unsupported compiler
 		#endif
-		#define SMTG_CPP11_STDLIBSUPPORT 1
+		#if defined(__GNUG__) && __GNUG__ < 8
+			#define SMTG_CPP11_STDLIBSUPPORT 0
+		#else
+			#define SMTG_CPP11_STDLIBSUPPORT 1
+		#endif
 		#define SMTG_HAS_NOEXCEPT 1
 	#endif
 //-----------------------------------------------------------------------------
@@ -128,6 +148,11 @@
 	#define SMTG_OS_WINDOWS	0
 	#define SMTG_OS_IOS		TARGET_OS_IPHONE
 	#define SMTG_OS_OSX		TARGET_OS_MAC && !TARGET_OS_IPHONE
+
+	#define SMTG_CPU_X86	TARGET_CPU_X86
+	#define SMTG_CPU_X86_64	TARGET_CPU_X86_64
+	#define SMTG_CPU_ARM	TARGET_CPU_ARM
+	#define SMTG_CPU_ARM_64	TARGET_CPU_ARM64
 
 	#if !SMTG_OS_IOS
 		#ifndef __CF_USE_FRAMEWORK_INCLUDES__
@@ -151,6 +176,8 @@
 	#define COM_COMPATIBLE	0
 	#define PLUGIN_API
 	#define SMTG_PTHREADS	1
+
+	#define SMTG_EXPORT_SYMBOL __attribute__ ((visibility ("default")))
 
 	#if !defined(__PLIST__) && !defined(SMTG_DISABLE_DEFAULT_DIAGNOSTICS)
 		#ifdef __clang__
@@ -209,8 +236,10 @@
 //-----------------------------------------------------------------------------
 #if SMTG_CPP11
 #define SMTG_OVERRIDE override
+#define SMTG_CONSTEXPR constexpr
 #else
 #define SMTG_OVERRIDE
+#define SMTG_CONSTEXPR
 #endif
 #if SMTG_HAS_NOEXCEPT
 #define SMTG_NOEXCEPT noexcept

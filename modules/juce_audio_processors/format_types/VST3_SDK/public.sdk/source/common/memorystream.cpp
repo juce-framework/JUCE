@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -105,7 +105,7 @@ tresult PLUGIN_API MemoryStream::read (void* data, int32 numBytes, int32* numByt
 		
 		if (numBytes)
 		{
-			memcpy (data, &memory[cursor], numBytes);
+			memcpy (data, &memory[cursor], static_cast<size_t> (numBytes));
 			cursor += numBytes;
 		}
 	}
@@ -137,7 +137,7 @@ tresult PLUGIN_API MemoryStream::write (void* buffer, int32 numBytes, int32* num
 	// Copy data
 	if (memory && cursor >= 0 && numBytes > 0)
 	{
-		memcpy (&memory[cursor], buffer, numBytes);
+		memcpy (&memory[cursor], buffer, static_cast<size_t> (numBytes));
 		// Update cursor
 		cursor += numBytes;
 	}
@@ -187,7 +187,7 @@ tresult PLUGIN_API MemoryStream::tell  (int64* pos)
 }
 
 //------------------------------------------------------------------------
-TSize MemoryStream::getSize ()
+TSize MemoryStream::getSize () const
 {
 	return size;
 }
@@ -258,7 +258,7 @@ void MemoryStream::setSize (TSize s)
 }
 
 //------------------------------------------------------------------------
-char* MemoryStream::getData ()
+char* MemoryStream::getData () const
 {
 	return memory;
 }

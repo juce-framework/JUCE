@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2018, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -91,6 +91,11 @@ PlugInterfaceSupport::PlugInterfaceSupport ()
 
 	//---VST 3.6.12--------------------------------
 	addPlugInterfaceSupported (IMidiLearn::iid);
+
+	//---VST 3.7-----------------------------------
+	addPlugInterfaceSupported (IProcessContextRequirements::iid);
+	addPlugInterfaceSupported (IParameterFunctionName::iid);
+	addPlugInterfaceSupported (IProgress::iid);
 	*/
 }
 
