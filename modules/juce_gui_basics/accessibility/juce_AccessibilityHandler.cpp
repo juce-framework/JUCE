@@ -333,7 +333,7 @@ void AccessibilityHandler::takeFocus()
 }
 
 //==============================================================================
-#if ! (JUCE_MAC || JUCE_WINDOWS)
+#if ! (JUCE_MAC || (JUCE_WINDOWS && ! JUCE_MINGW))
 class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
 void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}

@@ -63,13 +63,6 @@ static bool shouldDeactivateTitleBar = true;
 
 void* getUser32Function (const char*);
 
-namespace WindowsAccessibility
-{
-    long getUiaRootObjectId();
-    bool handleWmGetObject (AccessibilityHandler*, WPARAM, LPARAM, LRESULT*);
-    void revokeUIAMapEntriesForWindow (HWND);
-}
-
 #if JUCE_DEBUG
  int numActiveScopedDpiAwarenessDisablers = 0;
  bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
