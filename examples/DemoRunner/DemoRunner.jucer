@@ -32,7 +32,7 @@
   </MAINGROUP>
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="YyqWd2" bigIcon="YyqWd2"
-               customXcodeResourceFolders="../Assets&#10;../Audio &#10;../BLOCKS &#10;../DSP &#10;../GUI &#10;../Utilities"
+               customXcodeResourceFolders="../Assets&#10;../Audio &#10;../DSP &#10;../GUI &#10;../Utilities"
                microphonePermissionNeeded="1" cameraPermissionNeeded="1" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>
@@ -54,7 +54,6 @@
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_analytics" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
         <MODULEPATH id="juce_dsp" path="../../modules"/>
         <MODULEPATH id="juce_osc" path="../../modules"/>
@@ -80,7 +79,6 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
@@ -111,7 +109,6 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
@@ -144,7 +141,6 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
@@ -173,7 +169,6 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
@@ -202,7 +197,6 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
@@ -231,7 +225,6 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
         <MODULEPATH id="juce_core" path="../../modules"/>
         <MODULEPATH id="juce_box2d" path="../../modules"/>
-        <MODULEPATH id="juce_blocks_basics" path="../../modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../modules"/>
         <MODULEPATH id="juce_audio_formats" path="../../modules"/>
@@ -248,7 +241,6 @@
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
-    <MODULE id="juce_blocks_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_box2d" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
