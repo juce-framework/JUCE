@@ -1250,6 +1250,20 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         setLatencySamples (vstEffect->initialDelay);
     }
 
+    void getExtensions (ExtensionsVisitor& visitor) const override
+    {
+        struct Extensions : public ExtensionsVisitor::VSTClient
+        {
+            explicit Extensions (const VSTPluginInstance* instanceIn) : instance (instanceIn) {}
+
+            void* getAEffectPtr() const noexcept override   { return instance->vstEffect; }
+
+            const VSTPluginInstance* instance = nullptr;
+        };
+
+        visitor.visitVSTClient (Extensions { this });
+    }
+
     void* getPlatformSpecificData() override    { return vstEffect; }
 
     const String getName() const override
