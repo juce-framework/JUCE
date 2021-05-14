@@ -212,6 +212,7 @@
 		6FD8DBC0FF42C87D8BEE2452 /* jucer_TranslationHelpers.h */ /* jucer_TranslationHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_TranslationHelpers.h; path = ../../Source/Utility/Helpers/jucer_TranslationHelpers.h; sourceTree = SOURCE_ROOT; };
 		7031E8CB6D4D84BD980A0BD0 /* jucer_PaintElementImage.h */ /* jucer_PaintElementImage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_PaintElementImage.h; path = ../../Source/ComponentEditor/PaintElements/jucer_PaintElementImage.h; sourceTree = SOURCE_ROOT; };
 		705DE88C5C4CC6C871E951B1 /* jucer_GroupComponentHandler.h */ /* jucer_GroupComponentHandler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_GroupComponentHandler.h; path = ../../Source/ComponentEditor/Components/jucer_GroupComponentHandler.h; sourceTree = SOURCE_ROOT; };
+		70D3399C01D1EF2CD059B2A4 /* jucer_Sidebar.h */ /* jucer_Sidebar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_Sidebar.h; path = ../../Source/Project/UI/Sidebar/jucer_Sidebar.h; sourceTree = SOURCE_ROOT; };
 		719B56C8587863D7AE9B69C6 /* jucer_RelativePositionedRectangle.h */ /* jucer_RelativePositionedRectangle.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_RelativePositionedRectangle.h; path = ../../Source/ComponentEditor/UI/jucer_RelativePositionedRectangle.h; sourceTree = SOURCE_ROOT; };
 		728FE25157E9874D50BBECB2 /* CoreAudio.framework */ /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
 		72ED72174F9DBD0ABD8AFCED /* jucer_PaintElementImage.cpp */ /* jucer_PaintElementImage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_PaintElementImage.cpp; path = ../../Source/ComponentEditor/PaintElements/jucer_PaintElementImage.cpp; sourceTree = SOURCE_ROOT; };
@@ -503,6 +504,7 @@
 				4974E7808F9B57E9A627F878,
 				5E4EB84A7983AB31366A3490,
 				E3BADF21095BC23DE2CB454F,
+				70D3399C01D1EF2CD059B2A4,
 				68F41A216E7454E7442AB1F4,
 			);
 			name = Sidebar;

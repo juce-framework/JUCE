@@ -514,6 +514,7 @@
                 file="Source/Project/UI/Sidebar/jucer_ModuleTreeItems.h"/>
           <FILE id="Htgucp" name="jucer_ProjectTreeItemBase.h" compile="0" resource="0"
                 file="Source/Project/UI/Sidebar/jucer_ProjectTreeItemBase.h"/>
+          <FILE id="IO8GgB" name="jucer_Sidebar.h" compile="0" resource="0" file="Source/Project/UI/Sidebar/jucer_Sidebar.h"/>
           <FILE id="jr8KTF" name="jucer_TreeItemTypes.h" compile="0" resource="0"
                 file="Source/Project/UI/Sidebar/jucer_TreeItemTypes.h"/>
         </GROUP>

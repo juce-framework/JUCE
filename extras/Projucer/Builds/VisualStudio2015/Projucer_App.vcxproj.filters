@@ -2235,6 +2235,9 @@
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ProjectTreeItemBase.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_Sidebar.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_TreeItemTypes.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
@@ -2575,9 +2578,6 @@
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_CFHelpers.h">
-      <Filter>JUCE Modules\juce_core\native</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ClangBugWorkaround.h">
       <Filter>JUCE Modules\juce_core\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\native\juce_mac_ObjCHelpers.h">
