@@ -32,7 +32,7 @@ NewFileWizard::Type* createGUIComponentWizard();
 
 //==============================================================================
 ProjectContentComponent::ProjectContentComponent()
-    : sidebar (new Sidebar (project))
+    : sidebar (std::make_unique<Sidebar> (project))
 {
     setOpaque (true);
     setWantsKeyboardFocus (true);
@@ -76,10 +76,10 @@ void ProjectContentComponent::resized()
 
     r.removeFromTop (10);
 
-    auto sidebarArea = r.removeFromLeft (sidebar->getWidth() != 0 ? sidebar->getWidth()
-                                                                  : r.getWidth() / 4);
+    auto sidebarArea = r.removeFromLeft (sidebar != nullptr && sidebar->getWidth() != 0 ? sidebar->getWidth()
+                                                                                        : r.getWidth() / 4);
 
-    if (sidebar->isVisible())
+    if (sidebar != nullptr && sidebar->isVisible())
         sidebar->setBounds (sidebarArea);
 
     if (resizerBar != nullptr)
@@ -87,7 +87,7 @@ void ProjectContentComponent::resized()
 
     contentViewComponent.setBounds (r);
 
-    headerComponent.sidebarTabsWidthChanged (sidebar->getWidth());
+    headerComponent.sidebarTabsWidthChanged (sidebarArea.getWidth());
 }
 
 void ProjectContentComponent::lookAndFeelChanged()
@@ -113,6 +113,7 @@ void ProjectContentComponent::setProject (Project* newProject)
 
         hideEditor();
         resizerBar = nullptr;
+        sidebar = nullptr;
 
         project = newProject;
 
@@ -122,8 +123,8 @@ void ProjectContentComponent::setProject (Project* newProject)
             addAndMakeVisible (sidebar.get());
 
             //==============================================================================
-            resizerBar.reset (new ResizableEdgeComponent (sidebar.get(), &sidebarSizeConstrainer,
-                                                          ResizableEdgeComponent::rightEdge));
+            resizerBar = std::make_unique<ResizableEdgeComponent> (sidebar.get(), &sidebarSizeConstrainer,
+                                                                   ResizableEdgeComponent::rightEdge);
             addAndMakeVisible (resizerBar.get());
             resizerBar->setAlwaysOnTop (true);
 
@@ -138,7 +139,6 @@ void ProjectContentComponent::setProject (Project* newProject)
         }
         else
         {
-            sidebar->setVisible (false);
             headerComponent.setVisible (false);
             projectMessagesComponent.setVisible (false);
         }
@@ -190,14 +190,16 @@ void ProjectContentComponent::changeListenerCallback (ChangeBroadcaster* broadca
 
 void ProjectContentComponent::refreshProjectTreeFileStatuses()
 {
-    if (auto* fileTree = sidebar->getFileTreePanel())
-        fileTree->repaint();
+    if (sidebar != nullptr)
+        if (auto* fileTree = sidebar->getFileTreePanel())
+            fileTree->repaint();
 }
 
 void ProjectContentComponent::updateMissingFileStatuses()
 {
-    if (auto* tree = sidebar->getFileTreePanel())
-        tree->updateMissingFileStatuses();
+    if (sidebar != nullptr)
+        if (auto* tree = sidebar->getFileTreePanel())
+            tree->updateMissingFileStatuses();
 }
 
 bool ProjectContentComponent::showEditorForFile (const File& fileToShow, bool grabFocus)
@@ -415,6 +417,9 @@ void ProjectContentComponent::showExporterSettings (const String& exporterName)
 
     showExportersPanel();
 
+    if (sidebar == nullptr)
+        return;
+
     if (auto* exportersPanel = sidebar->getExportersTreePanel())
     {
         if (auto* exporters = dynamic_cast<TreeItemTypes::ExportersTreeRoot*> (exportersPanel->rootItem.get()))
@@ -439,6 +444,9 @@ void ProjectContentComponent::showExporterSettings (const String& exporterName)
 void ProjectContentComponent::showModule (const String& moduleID)
 {
     showModulesPanel();
+
+    if (sidebar == nullptr)
+        return;
 
     if (auto* modsPanel = sidebar->getModuleTreePanel())
     {
@@ -521,8 +529,9 @@ void ProjectContentComponent::showNewExporterMenu()
 
 void ProjectContentComponent::deleteSelectedTreeItems()
 {
-    if (auto* tree = sidebar->getTreeWithSelectedItems())
-        tree->deleteSelectedItems();
+    if (sidebar != nullptr)
+        if (auto* tree = sidebar->getTreeWithSelectedItems())
+            tree->deleteSelectedItems();
 }
 
 void ProjectContentComponent::showBubbleMessage (Rectangle<int> pos, const String& text)
@@ -869,5 +878,6 @@ void ProjectContentComponent::addNewGUIFile()
 //==============================================================================
 void ProjectContentComponent::showProjectPanel (const int index)
 {
-    sidebar->showPanel (index);
+    if (sidebar != nullptr)
+        sidebar->showPanel (index);
 }
