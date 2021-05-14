@@ -30,17 +30,13 @@
 #include "jucer_ProjectMessagesComponent.h"
 #include "jucer_ContentViewComponent.h"
 
-class CompileEngineChildProcess;
-class ProjectTab;
-class LiveBuildTab;
+class Sidebar;
 
 //==============================================================================
 class ProjectContentComponent  : public Component,
                                  public ApplicationCommandTarget,
                                  private ChangeListener,
-                                 private OpenDocumentManager::DocumentCloseListener,
-                                 private FocusChangeListener,
-                                 private Timer
+                                 private OpenDocumentManager::DocumentCloseListener
 {
 public:
     //==============================================================================
@@ -70,7 +66,7 @@ public:
     void setEditorDocument (std::unique_ptr<Component> component, OpenDocumentManager::Document* doc);
     Component* getEditorComponent();
 
-    Component& getSidebarComponent()  { return sidebarTabs; }
+    Component& getSidebarComponent();
 
     bool goToPreviousFile();
     bool goToNextFile();
@@ -82,10 +78,6 @@ public:
     void openInSelectedIDE (bool saveFirst);
     void showNewExporterMenu();
 
-    void showProjectTab()        { sidebarTabs.setCurrentTabIndex (0); }
-    void showBuildTab()          { sidebarTabs.setCurrentTabIndex (1); }
-    int getCurrentTabIndex()     { return sidebarTabs.getCurrentTabIndex(); }
-
     void showFilesPanel()        { showProjectPanel (0); }
     void showModulesPanel()      { showProjectPanel (1); }
     void showExportersPanel()    { showProjectPanel (2); }
@@ -94,21 +86,12 @@ public:
     void showCurrentExporterSettings();
     void showExporterSettings (const String& exporterName);
     void showModule (const String& moduleID);
-    void showLiveBuildSettings();
     void showUserSettings();
 
     void deleteSelectedTreeItems();
 
     void refreshProjectTreeFileStatuses();
     void updateMissingFileStatuses();
-    void createProjectTabs();
-    void deleteProjectTabs();
-    void rebuildProjectUI();
-    void refreshTabsIfBuildStatusChanged();
-    void toggleWarnings();
-    void showNextError();
-    void showPreviousError();
-    void reinstantiateLivePreviewWindows();
     void addNewGUIFile();
 
     void showBubbleMessage (Rectangle<int>, const String&);
@@ -117,15 +100,6 @@ public:
 
     static void getSelectedProjectItemsBeingDragged (const DragAndDropTarget::SourceDetails&,
                                                      OwnedArray<Project::Item>& selectedNodes);
-
-    //==============================================================================
-    void killChildProcess();
-    void cleanAll();
-    void handleMissingSystemHeaders();
-    bool isBuildTabEnabled() const;
-    void setBuildEnabled (bool enabled, bool displayError = false);
-    bool isBuildEnabled() const;
-    bool areWarningsEnabled() const;
 
     //==============================================================================
     ApplicationCommandTarget* getNextCommandTarget() override;
@@ -143,7 +117,6 @@ public:
     ProjectMessagesComponent& getProjectMessagesComponent()  { return projectMessagesComponent; }
 
     static String getProjectTabName()    { return "Project"; }
-    static String getBuildTabName()      { return "Build"; }
 
 private:
     //==============================================================================
@@ -151,26 +124,8 @@ private:
     void changeListenerCallback (ChangeBroadcaster*) override;
     void showTranslationTool();
 
-    void globalFocusChanged (Component*) override;
-    void timerCallback() override;
-
-    void liveBuildEnablementChanged (bool isEnabled);
-
-    bool isContinuousRebuildEnabled();
-    void setContinuousRebuildEnabled (bool b);
-
-    void rebuildNow();
-    void handleCrash (const String& message);
-    void updateWarningState();
-    void launchApp();
-    void killApp();
-
-    ReferenceCountedObjectPtr<CompileEngineChildProcess> getChildProcess();
-
     //==============================================================================
     void showProjectPanel (const int index);
-    ProjectTab* getProjectTab();
-    LiveBuildTab* getLiveBuildTab();
     bool canSelectedProjectBeLaunch();
 
     //==============================================================================
@@ -179,7 +134,7 @@ private:
     RecentDocumentList recentDocumentList;
 
     HeaderComponent headerComponent { this };
-    TabbedComponent sidebarTabs { TabbedButtonBar::TabsAtTop };
+    std::unique_ptr<Sidebar> sidebar;
     ProjectMessagesComponent projectMessagesComponent;
     ContentViewComponent contentViewComponent;
 
@@ -188,10 +143,7 @@ private:
     std::unique_ptr<Component> translationTool;
     BubbleMessageComponent bubbleMessage;
 
-    ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
-    String lastCrashMessage;
-
-    bool isForeground = false, isLiveBuildEnabled = false;
+    bool isForeground = false;
     int lastViewedTab = 0;
 
     //==============================================================================

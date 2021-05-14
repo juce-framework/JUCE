@@ -74,19 +74,6 @@ void ProjectSaver::saveBasicProjectItems (const OwnedArray<LibraryModule>& modul
     writeModuleCppWrappers (modules);
 }
 
-Result ProjectSaver::saveContentNeededForLiveBuild()
-{
-    auto modules = getModules();
-
-    if (errors.isEmpty())
-    {
-        saveBasicProjectItems (modules, loadUserContentFromAppConfig());
-        return Result::ok();
-    }
-
-    return Result::fail (errors[0]);
-}
-
 Project::Item ProjectSaver::addFileToGeneratedGroup (const File& file)
 {
     auto item = generatedFilesGroup.findItemForFile (file);

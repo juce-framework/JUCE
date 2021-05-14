@@ -39,27 +39,6 @@
 #include "Windows/jucer_PIPCreatorWindowComponent.h"
 #include "Windows/jucer_FloatingToolWindow.h"
 
-#include "../LiveBuildEngine/jucer_MessageIDs.h"
-#include "../LiveBuildEngine/jucer_CppHelpers.h"
-#include "../LiveBuildEngine/jucer_SourceCodeRange.h"
-#include "../LiveBuildEngine/jucer_ClassDatabase.h"
-#include "../LiveBuildEngine/jucer_DiagnosticMessage.h"
-
-#include "../LiveBuildEngine/jucer_CompileEngineDLL.h"
-#include "../LiveBuildEngine/jucer_CompileEngineClient.h"
-#include "../LiveBuildEngine/UI/jucer_ActivityListComponent.h"
-#include "../LiveBuildEngine/UI/jucer_BuildTabStatusComponent.h"
-#include "../LiveBuildEngine/UI/jucer_ComponentListComponent.h"
-#include "../LiveBuildEngine/jucer_CompileEngineServer.h"
-
-JUCE_IMPLEMENT_SINGLETON (CompileEngineDLL)
-
-struct ProjucerAppClasses
-{
-    #include "../CodeEditor/jucer_LiveBuildCodeEditor.h"
-    #include "../LiveBuildEngine/UI/jucer_ErrorListComponent.h"
-};
-
 #include "jucer_CommandLine.h"
 
 #include "../Project/UI/jucer_ProjectContentComponent.cpp"

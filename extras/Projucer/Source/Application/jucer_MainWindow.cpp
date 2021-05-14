@@ -376,15 +376,8 @@ void MainWindow::setupTemporaryPIPProject (PIPGenerator& generator)
 
     currentProject->setTemporaryDirectory (generator.getOutputDirectory());
 
-    ProjectSaver liveBuildSaver (*currentProject);
-    liveBuildSaver.saveContentNeededForLiveBuild();
-
     if (auto* pcc = getProjectContentComponent())
     {
-        pcc->invokeDirectly (CommandIDs::toggleBuildEnabled, true);
-        pcc->invokeDirectly (CommandIDs::buildNow, true);
-        pcc->invokeDirectly (CommandIDs::toggleContinuousBuild, true);
-
         auto fileToDisplay = generator.getPIPFile();
 
         if (fileToDisplay != File())

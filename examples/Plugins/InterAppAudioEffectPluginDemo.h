@@ -112,37 +112,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SimpleMeter)
 };
 
-#if JUCE_PROJUCER_LIVE_BUILD
-
-// Animate the meter in the Projucer live build.
-struct MockSimpleMeter  : public Component,
-                          private Timer
-{
-    MockSimpleMeter()
-    {
-        addAndMakeVisible (meter);
-        resized();
-        startTimerHz (100);
-    }
-
-    void paint (Graphics&) override {}
-
-    void resized() override
-    {
-        meter.setBounds (getBounds());
-    }
-
-    void timerCallback() override
-    {
-        meter.update (std::pow (randomNumberGenerator.nextFloat(), 2));
-    }
-
-    SimpleMeter meter;
-    Random randomNumberGenerator;
-};
-
-#endif
-
 //==============================================================================
 // A simple Inter-App Audio plug-in with a gain control and some meters.
 class IAAEffectProcessor  : public AudioProcessor

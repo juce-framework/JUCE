@@ -31,7 +31,6 @@
 class ProjectExporter;
 class LibraryModule;
 class EnabledModulesList;
-class CompileEngineSettings;
 
 namespace ProjectMessages
 {
@@ -494,9 +493,6 @@ public:
     void setTemporaryDirectory (const File&) noexcept;
 
     //==============================================================================
-    CompileEngineSettings& getCompileEngineSettings()    { return *compileEngineSettings; }
-
-    //==============================================================================
     ValueTree getProjectMessages() const  { return projectMessages; }
 
     void addProjectMessage (const Identifier& messageToAdd, std::vector<ProjectMessages::MessageAction>&& messageActions);
@@ -547,7 +543,6 @@ private:
                      pluginVSTNumMidiInputsValue, pluginVSTNumMidiOutputsValue;
 
     //==============================================================================
-    std::unique_ptr<CompileEngineSettings> compileEngineSettings;
     std::unique_ptr<EnabledModulesList> enabledModulesList;
 
     AvailableModulesList exporterPathsModulesList;

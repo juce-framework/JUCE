@@ -25,10 +25,6 @@
 
 #include "../../Application/jucer_Headers.h"
 
-#ifdef BUILDING_JUCE_COMPILEENGINE
- const char* getPreferredLineFeed() { return "\r\n"; }
-#endif
-
 //==============================================================================
 String joinLinesIntoSourceFile (StringArray& lines)
 {

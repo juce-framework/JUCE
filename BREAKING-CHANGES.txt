@@ -6,6 +6,26 @@ Develop
 
 Change
 ------
+The live build functionality of the Projucer has been removed.
+
+Possible Issues
+---------------
+You will no longer be able to use live build in the Projucer.
+
+Workaround
+----------
+None.
+
+Rationale
+---------
+Keeping the live build compatible with the latest compilers on all our
+supported platforms is a very substantial maintenance burden, but very few
+people are using this feature of the Projucer. Removing the live build will
+simplify the code and our release process.
+
+
+Change
+------
 `Component::createFocusTraverser()` has been renamed to
 `Component::createKeyboardFocusTraverser()` and now returns a `std::unique_ptr`
 instead of a raw pointer. `Component::createFocusTraverser()` is a new method

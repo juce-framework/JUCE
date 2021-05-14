@@ -62,11 +62,7 @@ static void callCPUID (int result[4], uint32 type)
 #else
 static void callCPUID (int result[4], int infoType)
 {
-   #if JUCE_PROJUCER_LIVE_BUILD
-    std::fill (result, result + 4, 0);
-   #else
     __cpuid (result, infoType);
-   #endif
 }
 #endif
 

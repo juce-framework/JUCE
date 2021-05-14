@@ -47,12 +47,6 @@
     <Filter Include="Projucer\ComponentEditor">
       <UniqueIdentifier>{5F21E507-E5E8-0A74-F1AE-874BB67C26CC}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\LiveBuildEngine\UI">
-      <UniqueIdentifier>{E880260F-D9FB-64B6-244B-6F06B70FE9EE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Projucer\LiveBuildEngine">
-      <UniqueIdentifier>{0A3B9446-F50B-3D4E-230F-7ED493541A07}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Projucer\Project\Modules">
       <UniqueIdentifier>{F5C79836-30DE-9DC7-9392-DAAB3F04C18E}</UniqueIdentifier>
     </Filter>
@@ -465,15 +459,6 @@
     </ClCompile>
     <ClCompile Include="..\..\Source\ComponentEditor\jucer_PaintRoutine.cpp">
       <Filter>Projucer\ComponentEditor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.cpp">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.cpp">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.cpp">
-      <Filter>Projucer\LiveBuildEngine</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\Project\Modules\jucer_Modules.cpp">
       <Filter>Projucer\Project\Modules</Filter>
@@ -2031,9 +2016,6 @@
     <ClInclude Include="..\..\Source\CodeEditor\jucer_ItemPreviewComponent.h">
       <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\CodeEditor\jucer_LiveBuildCodeEditor.h">
-      <Filter>Projucer\CodeEditor</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\CodeEditor\jucer_OpenDocumentManager.h">
       <Filter>Projucer\CodeEditor</Filter>
     </ClInclude>
@@ -2232,63 +2214,6 @@
     <ClInclude Include="..\..\Source\ComponentEditor\jucer_UtilityFunctions.h">
       <Filter>Projucer\ComponentEditor</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_ActivityListComponent.h">
-      <Filter>Projucer\LiveBuildEngine\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_BuildTabStatusComponent.h">
-      <Filter>Projucer\LiveBuildEngine\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_ComponentListComponent.h">
-      <Filter>Projucer\LiveBuildEngine\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\UI\jucer_ErrorListComponent.h">
-      <Filter>Projucer\LiveBuildEngine\UI</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ActivityList.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ClassDatabase.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ClientServerMessages.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineClient.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineDLL.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineServer.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CompileEngineSettings.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_CppHelpers.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_DiagnosticMessage.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_DownloadCompileEngineThread.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ErrorList.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_LiveCodeBuilderDLL.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_MessageIDs.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_ProjectBuildInfo.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\LiveBuildEngine\jucer_SourceCodeRange.h">
-      <Filter>Projucer\LiveBuildEngine</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\Modules\jucer_AvailableModulesList.h">
       <Filter>Projucer\Project\Modules</Filter>
     </ClInclude>
@@ -2304,19 +2229,10 @@
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_FileTreeItems.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_LiveBuildTab.h">
-      <Filter>Projucer\Project\UI\Sidebar</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ModuleTreeItems.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ProjectTab.h">
-      <Filter>Projucer\Project\UI\Sidebar</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ProjectTreeItemBase.h">
-      <Filter>Projucer\Project\UI\Sidebar</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_TabComponents.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_TreeItemTypes.h">
