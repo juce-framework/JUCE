@@ -108,9 +108,6 @@ void SidePanel::showOrHide (bool show)
 
         if (isShowing && ! isVisible())
             setVisible (true);
-
-        if (onPanelShowHide != nullptr)
-            onPanelShowHide (isShowing);
     }
 }
 
@@ -255,8 +252,14 @@ void SidePanel::componentMovedOrResized (Component& component, bool wasMoved, bo
 
 void SidePanel::changeListenerCallback (ChangeBroadcaster*)
 {
-    if (isVisible() && ! isShowing && ! Desktop::getInstance().getAnimator().isAnimating (this))
-        setVisible (false);
+    if (! Desktop::getInstance().getAnimator().isAnimating (this))
+    {
+        if (onPanelShowHide != nullptr)
+            onPanelShowHide (isShowing);
+
+        if (isVisible() && ! isShowing)
+            setVisible (false);
+    }
 }
 
 Rectangle<int> SidePanel::calculateBoundsInParent (Component& parentComp) const
@@ -289,6 +292,12 @@ bool SidePanel::isMouseEventInThisOrChildren (Component* eventComponent)
             return true;
 
     return false;
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> SidePanel::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
 }
 
 } // namespace juce

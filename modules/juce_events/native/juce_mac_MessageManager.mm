@@ -341,9 +341,6 @@ void MessageManager::runDispatchLoop()
             // must only be called by the message thread!
             jassert (isThisTheMessageThread());
 
-          #if JUCE_PROJUCER_LIVE_BUILD
-            runDispatchLoopUntil (std::numeric_limits<int>::max());
-          #else
            #if JUCE_CATCH_UNHANDLED_EXCEPTIONS
             @try
             {
@@ -361,7 +358,6 @@ void MessageManager::runDispatchLoop()
            #else
             [NSApp run];
            #endif
-          #endif
         }
     }
 }
@@ -374,10 +370,6 @@ static void shutdownNSApp()
 
 void MessageManager::stopDispatchLoop()
 {
-   #if JUCE_PROJUCER_LIVE_BUILD
-    quitMessagePosted = true;
-   #else
-
     if (isThisTheMessageThread())
     {
         quitMessagePosted = true;
@@ -393,7 +385,6 @@ void MessageManager::stopDispatchLoop()
 
         (new QuitCallback())->post();
     }
-   #endif
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED

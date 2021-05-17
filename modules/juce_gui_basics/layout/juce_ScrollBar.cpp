@@ -61,7 +61,7 @@ private:
 ScrollBar::ScrollBar (bool shouldBeVertical)  : vertical (shouldBeVertical)
 {
     setRepaintsOnMouseActivity (true);
-    setFocusContainer (true);
+    setFocusContainerType (FocusContainerType::keyboardFocusContainer);
 }
 
 ScrollBar::~ScrollBar()
@@ -438,6 +438,48 @@ bool ScrollBar::getVisibility() const noexcept
 
     return (! autohides) || (totalRange.getLength() > visibleRange.getLength()
                                     && visibleRange.getLength() > 0.0);
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ScrollBar::createAccessibilityHandler()
+{
+    class ScrollBarValueInterface  : public AccessibilityRangedNumericValueInterface
+    {
+    public:
+        explicit ScrollBarValueInterface (ScrollBar& scrollBarToWrap)
+            : scrollBar (scrollBarToWrap)
+        {
+        }
+
+        bool isReadOnly() const override  { return false; }
+
+        double getCurrentValue() const override
+        {
+            return scrollBar.getCurrentRangeStart();
+        }
+
+        void setValue (double newValue) override
+        {
+            scrollBar.setCurrentRangeStart (newValue);
+        }
+
+        AccessibleValueRange getRange() const override
+        {
+            if (scrollBar.getRangeLimit().isEmpty())
+                return {};
+
+            return { { scrollBar.getMinimumRangeLimit(), scrollBar.getMaximumRangeLimit() },
+                     scrollBar.getSingleStepSize() };
+        }
+
+    private:
+        ScrollBar& scrollBar;
+    };
+
+    return std::make_unique<AccessibilityHandler> (*this,
+                                                   AccessibilityRole::scrollBar,
+                                                   AccessibilityActions{},
+                                                   AccessibilityHandler::Interfaces { std::make_unique<ScrollBarValueInterface> (*this) });
 }
 
 } // namespace juce

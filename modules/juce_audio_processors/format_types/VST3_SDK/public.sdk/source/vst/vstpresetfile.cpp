@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -712,7 +712,7 @@ IMPLEMENT_FUNKNOWN_METHODS (FileStream, IBStream, IBStream::iid)
 //------------------------------------------------------------------------
 tresult PLUGIN_API FileStream::read (void* buffer, int32 numBytes, int32* numBytesRead)
 {
-	size_t result = fread (buffer, 1, numBytes, file);
+	size_t result = fread (buffer, 1, static_cast<size_t> (numBytes), file);
 	if (numBytesRead)
 		*numBytesRead = (int32)result;
 	return static_cast<int32> (result) == numBytes ? kResultOk : kResultFalse;
@@ -721,7 +721,7 @@ tresult PLUGIN_API FileStream::read (void* buffer, int32 numBytes, int32* numByt
 //------------------------------------------------------------------------
 tresult PLUGIN_API FileStream::write (void* buffer, int32 numBytes, int32* numBytesWritten)
 {
-	size_t result = fwrite (buffer, 1, numBytes, file);
+	size_t result = fwrite (buffer, 1, static_cast<size_t> (numBytes), file);
 	if (numBytesWritten)
 		*numBytesWritten = (int32)result;
 	return static_cast<int32> (result) == numBytes ? kResultOk : kResultFalse;
@@ -863,9 +863,9 @@ BufferStream::~BufferStream () {FUNKNOWN_DTOR}
 //------------------------------------------------------------------------
 tresult PLUGIN_API BufferStream::read (void* buffer, int32 numBytes, int32* numBytesRead)
 {
-	uint32 size = mBuffer.get (buffer, numBytes);
+	uint32 size = mBuffer.get (buffer, static_cast<uint32> (numBytes));
 	if (numBytesRead)
-		*numBytesRead = size;
+		*numBytesRead = static_cast<int32> (size);
 
 	return kResultTrue;
 }
@@ -873,7 +873,7 @@ tresult PLUGIN_API BufferStream::read (void* buffer, int32 numBytes, int32* numB
 //------------------------------------------------------------------------
 tresult PLUGIN_API BufferStream::write (void* buffer, int32 numBytes, int32* numBytesWritten)
 {
-	bool res = mBuffer.put (buffer, numBytes);
+	bool res = mBuffer.put (buffer, static_cast<uint32> (numBytes));
 	if (numBytesWritten)
 		*numBytesWritten = res ? numBytes : 0;
 

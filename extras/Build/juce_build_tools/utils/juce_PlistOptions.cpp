@@ -157,8 +157,8 @@ namespace build_tools
         addPlistDictionaryKey (*dict, "CFBundleDisplayName",         projectName);
         addPlistDictionaryKey (*dict, "CFBundlePackageType",         getXcodePackageType (type));
         addPlistDictionaryKey (*dict, "CFBundleSignature",           getXcodeBundleSignature (type));
-        addPlistDictionaryKey (*dict, "CFBundleShortVersionString",  version);
-        addPlistDictionaryKey (*dict, "CFBundleVersion",             version);
+        addPlistDictionaryKey (*dict, "CFBundleShortVersionString",  marketingVersion);
+        addPlistDictionaryKey (*dict, "CFBundleVersion",             currentProjectVersion);
         addPlistDictionaryKey (*dict, "NSHumanReadableCopyright",    companyCopyright);
         addPlistDictionaryKey (*dict, "NSHighResolutionCapable", true);
 

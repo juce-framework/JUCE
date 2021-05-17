@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,10 +44,9 @@ namespace Steinberg {
 //------------------------------------------------------------------------
 /** Plug-In view default implementation.
 \ingroup sdkBase
-Can be used as base class for an IPlugView implementation. */
-//------------------------------------------------------------------------
-class CPluginView: public FObject,
-	               public IPlugView
+Can be used as base class for an IPlugView implementation.
+*/
+class CPluginView : public FObject, public IPlugView
 {
 public:
 //------------------------------------------------------------------------
@@ -55,13 +54,13 @@ public:
 	virtual ~CPluginView ();
 
 	/** Returns its current frame rectangle. */
-	const ViewRect& getRect () const	{ return rect; }
-	
+	const ViewRect& getRect () const { return rect; }
+
 	/** Sets a new frame rectangle. */
-	void setRect (const ViewRect& r)	{ rect = r; }
+	void setRect (const ViewRect& r) { rect = r; }
 
 	/** Checks if this view is attached to its parent view. */
-	bool isAttached () const			{ return systemWindow != nullptr; }
+	bool isAttached () const { return systemWindow != nullptr; }
 
 	/** Calls when this view will be attached to its parent view. */
 	virtual void attachedToParent () {}
@@ -75,28 +74,42 @@ public:
 	tresult PLUGIN_API removed () SMTG_OVERRIDE;
 
 	tresult PLUGIN_API onWheel (float /*distance*/) SMTG_OVERRIDE { return kResultFalse; }
-	tresult PLUGIN_API onKeyDown (char16 /*key*/, int16 /*keyMsg*/, int16 /*modifiers*/) SMTG_OVERRIDE { return kResultFalse; }
-	tresult PLUGIN_API onKeyUp (char16 /*key*/, int16 /*keyMsg*/, int16 /*modifiers*/) SMTG_OVERRIDE { return kResultFalse; }
+	tresult PLUGIN_API onKeyDown (char16 /*key*/, int16 /*keyMsg*/,
+	                              int16 /*modifiers*/) SMTG_OVERRIDE
+	{
+		return kResultFalse;
+	}
+	tresult PLUGIN_API onKeyUp (char16 /*key*/, int16 /*keyMsg*/, int16 /*modifiers*/) SMTG_OVERRIDE
+	{
+		return kResultFalse;
+	}
 	tresult PLUGIN_API getSize (ViewRect* size) SMTG_OVERRIDE;
 	tresult PLUGIN_API onSize (ViewRect* newSize) SMTG_OVERRIDE;
 
 	tresult PLUGIN_API onFocus (TBool /*state*/) SMTG_OVERRIDE { return kResultFalse; }
-	tresult PLUGIN_API setFrame (IPlugFrame* frame) SMTG_OVERRIDE { plugFrame = frame; return kResultTrue; }
+	tresult PLUGIN_API setFrame (IPlugFrame* frame) SMTG_OVERRIDE
+	{
+		plugFrame = frame;
+		return kResultTrue;
+	}
 
 	tresult PLUGIN_API canResize () SMTG_OVERRIDE { return kResultFalse; }
-	tresult PLUGIN_API checkSizeConstraint (ViewRect* /*rect*/) SMTG_OVERRIDE { return kResultFalse; }
+	tresult PLUGIN_API checkSizeConstraint (ViewRect* /*rect*/) SMTG_OVERRIDE
+	{
+		return kResultFalse;
+	}
 
 	//---Interface------
 	OBJ_METHODS (CPluginView, FObject)
 	DEFINE_INTERFACES
 		DEF_INTERFACE (IPlugView)
 	END_DEFINE_INTERFACES (FObject)
-	REFCOUNT_METHODS(FObject)
+	REFCOUNT_METHODS (FObject)
 //------------------------------------------------------------------------
 protected:
 	ViewRect rect;
-	void* systemWindow;
-	IPlugFrame* plugFrame;
+	void* systemWindow {nullptr};
+	IPlugFrame* plugFrame {nullptr};
 };
 
-}	// namespace
+} // namespace

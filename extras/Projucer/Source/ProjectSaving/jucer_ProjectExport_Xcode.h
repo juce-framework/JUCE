@@ -187,7 +187,8 @@ public:
           customLaunchStoryboardValue                  (settings, Ids::customLaunchStoryboard,                  getUndoManager()),
           exporterBundleIdentifierValue                (settings, Ids::bundleIdentifier,                        getUndoManager()),
           suppressPlistResourceUsageValue              (settings, Ids::suppressPlistResourceUsage,              getUndoManager()),
-          useLegacyBuildSystemValue                    (settings, Ids::useLegacyBuildSystem,                    getUndoManager())
+          useLegacyBuildSystemValue                    (settings, Ids::useLegacyBuildSystem,                    getUndoManager()),
+          buildNumber                                  (settings, Ids::buildNumber,                             getUndoManager())
     {
         if (iOS)
         {
@@ -288,6 +289,12 @@ public:
     String getDevelopmentTeamIDString() const               { return iosDevelopmentTeamIDValue.get(); }
     String getAppGroupIdString() const                      { return iosAppGroupsIDValue.get(); }
 
+    String getBuildNumber() const
+    {
+        const auto buildNumberString = buildNumber.get().toString();
+        return buildNumberString.isNotEmpty() ? buildNumberString : project.getVersionString();
+    }
+
     String getDefaultLaunchStoryboardName() const           { return "LaunchScreen"; }
 
     //==============================================================================
@@ -369,6 +376,11 @@ public:
         if (getProject().isAudioPluginProject())
             props.add (new ChoicePropertyComponent (duplicateAppExResourcesFolderValue, "Add Duplicate Resources Folder to App Extension"),
                        "Disable this to prevent the Projucer from creating a duplicate resources folder for AUv3 app extensions.");
+
+        props.add (new TextPropertyComponent (buildNumber, "Build Number", 128, false),
+                   "The current version of the project. Used to disambiguate different builds of the same project on App Store Connect. "
+                   "If this field is empty, the project's version will be used as the build number. "
+                   "For more details about the difference between the project version and build version, see developer.apple.com/library/archive/technotes/tn2420/_index.html");
 
         if (iOS)
         {
@@ -1820,7 +1832,8 @@ public:
             options.shouldAddStoryboardToProject     = owner.shouldAddStoryboardToProject();
             options.iconFile                         = owner.iconFile;
             options.projectName                      = owner.projectName;
-            options.version                          = owner.project.getVersionString();
+            options.marketingVersion                 = owner.project.getVersionString();
+            options.currentProjectVersion            = owner.getBuildNumber();
             options.companyCopyright                 = owner.project.getCompanyCopyrightString();
             options.allPreprocessorDefs              = owner.getAllPreprocessorDefs();
             options.documentExtensions               = owner.getDocumentExtensionsString();
@@ -1870,6 +1883,7 @@ public:
             {
                 auto v = addBuildPhase ("PBXShellScriptBuildPhase", {});
                 v.setProperty (Ids::name, phaseName, nullptr);
+                v.setProperty ("alwaysOutOfDate", 1, nullptr);
                 v.setProperty ("shellPath", "/bin/sh", nullptr);
                 v.setProperty ("shellScript", script.replace ("\\", "\\\\")
                                                     .replace ("\"", "\\\"")
@@ -2062,8 +2076,6 @@ private:
         addSubprojects();
 
         addFrameworks();
-        addCustomFrameworks();
-        addEmbeddedFrameworks();
 
         addCustomResourceFolders();
         addPlistFileReferences();
@@ -2550,6 +2562,24 @@ private:
         return s;
     }
 
+    template<typename AddFrameworkFn>
+    void addFrameworkList (const String& frameworksString, AddFrameworkFn&& addFrameworkFn) const
+    {
+        auto frameworks = StringArray::fromTokens (frameworksString, "\n\r", "\"'");
+        frameworks.trim();
+
+        for (auto& framework : frameworks)
+        {
+            auto frameworkID = addFrameworkFn (framework);
+
+            for (auto& target : targets)
+            {
+                target->frameworkIDs.add (frameworkID);
+                target->frameworkNames.add (framework);
+            }
+        }
+    }
+
     void addFrameworks() const
     {
         if (! projectType.isStaticLibrary())
@@ -2557,14 +2587,16 @@ private:
             if (isInAppPurchasesEnabled())
                 xcodeFrameworks.addIfNotAlreadyThere ("StoreKit");
 
-            if (iOS && isPushNotificationsEnabled())
-                xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
-
-            if (iOS
-                && project.getEnabledModules().isModuleEnabled ("juce_video")
-                && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+            if (iOS)
             {
-                xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+                if (isPushNotificationsEnabled())
+                    xcodeFrameworks.addIfNotAlreadyThere ("UserNotifications");
+
+                if (project.getEnabledModules().isModuleEnabled ("juce_video")
+                    && project.isConfigFlagEnabled ("JUCE_USE_CAMERA", false))
+                {
+                    xcodeFrameworks.addIfNotAlreadyThere ("ImageIO");
+                }
             }
 
             xcodeFrameworks.addTokens (getExtraFrameworksString(), ",;", "\"'");
@@ -2607,43 +2639,18 @@ private:
                 }
             }
         }
-    }
 
-    void addCustomFrameworks() const
-    {
-        StringArray customFrameworks;
-        customFrameworks.addTokens (getExtraCustomFrameworksString(), true);
-        customFrameworks.trim();
+        addFrameworkList (getExtraCustomFrameworksString(),
+                          [this] (const String& framework) { return addCustomFramework (framework); });
 
-        for (auto& framework : customFrameworks)
-        {
-            auto frameworkID = addCustomFramework (framework);
+        addFrameworkList (getEmbeddedFrameworksString(),
+                          [this] (const String& framework)
+                          {
+                              auto frameworkId = addEmbeddedFramework (framework);
+                              embeddedFrameworkIDs.add (frameworkId);
 
-            for (auto& target : targets)
-            {
-                target->frameworkIDs.add (frameworkID);
-                target->frameworkNames.add (framework);
-            }
-        }
-    }
-
-    void addEmbeddedFrameworks() const
-    {
-        StringArray frameworks;
-        frameworks.addTokens (getEmbeddedFrameworksString(), true);
-        frameworks.trim();
-
-        for (auto& framework : frameworks)
-        {
-            auto frameworkID = addEmbeddedFramework (framework);
-            embeddedFrameworkIDs.add (frameworkID);
-
-            for (auto& target : targets)
-            {
-                target->frameworkIDs.add (frameworkID);
-                target->frameworkNames.add (framework);
-            }
-        }
+                              return frameworkId;
+                          });
 
         if (! embeddedFrameworkIDs.isEmpty())
             for (auto& target : targets)
@@ -3122,7 +3129,7 @@ private:
             auto itemPath = projectItem.getFilePath();
             build_tools::RelativePath path;
 
-            if (itemPath.startsWith ("${"))
+            if (itemPath.startsWith ("${") || build_tools::isAbsolutePath (itemPath))
                 path = build_tools::RelativePath (itemPath, build_tools::RelativePath::unknown);
             else
                 path = build_tools::RelativePath (projectItem.getFile(), getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
@@ -3573,7 +3580,7 @@ private:
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, uiRequiresFullScreenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                      iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
-                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue;
+                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)
 };

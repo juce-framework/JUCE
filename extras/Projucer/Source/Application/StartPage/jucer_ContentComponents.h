@@ -254,6 +254,9 @@ public:
           header (metadata[Ids::name].toString(), metadata[Ids::description].toString(), BinaryData::background_logo_svg),
           codeViewer (doc, &cppTokeniser)
     {
+        setTitle (exampleFile.getFileName());
+        setFocusContainerType (FocusContainerType::focusContainer);
+
         addAndMakeVisible (header);
 
         openExampleButton.onClick = [this] { exampleSelectedCallback (exampleFile); };
@@ -286,6 +289,7 @@ private:
 
         codeViewer.setScrollbarThickness (6);
         codeViewer.setReadOnly (true);
+        codeViewer.setTitle ("Code");
         getAppSettings().appearance.applyToCodeEditor (codeViewer);
 
         codeViewer.scrollToLine (findBestLineToScrollToForClass (StringArray::fromLines (fileString),

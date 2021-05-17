@@ -419,6 +419,8 @@ public:
     void valueChanged (Value&) override;
     /** @internal */
     void parentHierarchyChanged() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     // These methods' bool parameters have changed: see their new method signatures.
     JUCE_DEPRECATED (void clear (bool));

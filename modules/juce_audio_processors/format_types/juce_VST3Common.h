@@ -401,6 +401,67 @@ private:
 };
 
 //==============================================================================
+/*  This class stores a plugin's preferred MIDI mappings.
+
+    The IMidiMapping is normally an extension of the IEditController which
+    should only be accessed from the UI thread. If we're being strict about
+    things, then we shouldn't call IMidiMapping functions from the audio thread.
+
+    This code is very similar to that found in the audioclient demo code in the
+    VST3 SDK repo.
+*/
+class StoredMidiMapping
+{
+public:
+    StoredMidiMapping()
+    {
+        for (auto& channel : channels)
+            channel.resize (Steinberg::Vst::kCountCtrlNumber);
+    }
+
+    void storeMappings (Steinberg::Vst::IMidiMapping& mapping)
+    {
+        for (size_t channelIndex = 0; channelIndex < channels.size(); ++channelIndex)
+            storeControllers (mapping, channels[channelIndex], channelIndex);
+    }
+
+    /* Returns kNoParamId if there is no mapping for this controller. */
+    Steinberg::Vst::ParamID getMapping (Steinberg::int16 channel,
+                                        Steinberg::Vst::CtrlNumber controller) const noexcept
+    {
+        return channels[(size_t) channel][(size_t) controller];
+    }
+
+private:
+    // Maps controller numbers to ParamIDs
+    using Controllers = std::vector<Steinberg::Vst::ParamID>;
+
+    // Each channel may have a different CC mapping
+    using Channels = std::array<Controllers, 16>;
+
+    static void storeControllers (Steinberg::Vst::IMidiMapping& mapping, Controllers& channel, size_t channelIndex)
+    {
+        for (size_t controllerIndex = 0; controllerIndex < channel.size(); ++controllerIndex)
+            channel[controllerIndex] = getSingleMapping (mapping, channelIndex, controllerIndex);
+    }
+
+    static Steinberg::Vst::ParamID getSingleMapping (Steinberg::Vst::IMidiMapping& mapping,
+                                                     size_t channelIndex,
+                                                     size_t controllerIndex)
+    {
+        Steinberg::Vst::ParamID result{};
+        const auto returnCode = mapping.getMidiControllerAssignment (0,
+                                                                     (int16) channelIndex,
+                                                                     (Steinberg::Vst::CtrlNumber) controllerIndex,
+                                                                     result);
+
+        return returnCode == Steinberg::kResultTrue ? result : Steinberg::Vst::kNoParamId;
+    }
+
+    Channels channels;
+};
+
+//==============================================================================
 class MidiEventList  : public Steinberg::Vst::IEventList
 {
 public:
@@ -460,12 +521,12 @@ public:
 
     static void hostToPluginEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
                                        Steinberg::Vst::IParameterChanges* parameterChanges,
-                                       Steinberg::Vst::IMidiMapping* midiMapping)
+                                       const StoredMidiMapping& midiMapping)
     {
         toEventList (result,
                      midiBuffer,
                      parameterChanges,
-                     midiMapping,
+                     &midiMapping,
                      EventConversionKind::hostToPlugin);
     }
 
@@ -493,7 +554,7 @@ private:
 
     static void toEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
                              Steinberg::Vst::IParameterChanges* parameterChanges,
-                             Steinberg::Vst::IMidiMapping* midiMapping,
+                             const StoredMidiMapping* midiMapping,
                              EventConversionKind kind)
     {
         enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states that no more than 2048 events are allowed at once
@@ -512,11 +573,10 @@ private:
 
                 if (toVst3ControlEvent (msg, controlEvent))
                 {
-                    Steinberg::Vst::ParamID controlParamID;
+                    const auto controlParamID = midiMapping->getMapping (createSafeChannel (msg.getChannel()),
+                                                                         controlEvent.controllerNumber);
 
-                    if (midiMapping->getMidiControllerAssignment (0, createSafeChannel (msg.getChannel()),
-                                                                  controlEvent.controllerNumber,
-                                                                  controlParamID) == Steinberg::kResultOk)
+                    if (controlParamID != Steinberg::Vst::kNoParamId)
                     {
                         Steinberg::int32 ignore;
 
@@ -942,9 +1002,9 @@ public:
     void set (size_t index, float value)
     {
         jassert (index < size());
-        values[index].store (value, std::memory_order_relaxed);
-        flags[index / numFlagBits].fetch_or ((FlagType) 1 << (index % numFlagBits),
-                                             std::memory_order_acq_rel);
+        const auto previous = values[index].exchange (value, std::memory_order_relaxed);
+        const auto bit = previous == value ? ((FlagType) 0) : ((FlagType) 1 << (index % numFlagBits));
+        flags[index / numFlagBits].fetch_or (bit, std::memory_order_acq_rel);
     }
 
     float get (size_t index) const noexcept
@@ -991,6 +1051,11 @@ private:
     We must iterate all parameters on each processBlock call to check whether any
     parameter value has changed. This class attempts to make this polling process
     as quick as possible.
+
+    The indices here are of type Steinberg::int32, as they are expected to correspond
+    to parameter information obtained from the IEditController. These indices may not
+    match the indices of parameters returned from AudioProcessor::getParameters(), so
+    be careful!
 */
 class CachedParamValues
 {
@@ -1002,18 +1067,65 @@ public:
 
     size_t size() const noexcept { return floatCache.size(); }
 
-    Steinberg::Vst::ParamID getParamID (size_t index) const noexcept { return paramIds[index]; }
+    Steinberg::Vst::ParamID getParamID (Steinberg::int32 index) const noexcept { return paramIds[(size_t) index]; }
 
-    void set (size_t index, float value) { floatCache.set (index, value); }
+    void set (Steinberg::int32 index, float value) { floatCache.set ((size_t) index, value); }
 
-    float get (size_t index) const noexcept { return floatCache.get (index); }
+    float get (Steinberg::int32 index) const noexcept { return floatCache.get ((size_t) index); }
 
     template <typename Callback>
-    void ifSet (Callback&& callback) { floatCache.ifSet (std::forward<Callback> (callback)); }
+    void ifSet (Callback&& callback)
+    {
+        floatCache.ifSet ([&] (size_t index, float value)
+        {
+            callback ((Steinberg::int32) index, value);
+        });
+    }
 
 private:
     std::vector<Steinberg::Vst::ParamID> paramIds;
     FloatCache floatCache;
+};
+
+/*  Ensures that a 'restart' call only ever happens on the main thread. */
+class ComponentRestarter : private AsyncUpdater
+{
+public:
+    struct Listener
+    {
+        virtual ~Listener() = default;
+        virtual void restartComponentOnMessageThread (int32 flags) = 0;
+    };
+
+    explicit ComponentRestarter (Listener& listenerIn)
+        : listener (listenerIn) {}
+
+    ~ComponentRestarter() noexcept override
+    {
+        cancelPendingUpdate();
+    }
+
+    void restart (int32 newFlags)
+    {
+        if (newFlags == 0)
+            return;
+
+        flags.fetch_or (newFlags);
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            handleAsyncUpdate();
+        else
+            triggerAsyncUpdate();
+    }
+
+private:
+    void handleAsyncUpdate() override
+    {
+        listener.restartComponentOnMessageThread (flags.exchange (0));
+    }
+
+    Listener& listener;
+    std::atomic<int32> flags { 0 };
 };
 
 } // namespace juce

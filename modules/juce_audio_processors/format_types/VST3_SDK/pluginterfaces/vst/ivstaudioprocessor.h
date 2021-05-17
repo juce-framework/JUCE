@@ -33,13 +33,13 @@
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
+
 class IEventList;
 class IParameterChanges;
 struct ProcessContext;
 
 //------------------------------------------------------------------------
 /** Component Types used as subCategories in PClassInfo2 */
-//------------------------------------------------------------------------
 namespace PlugType
 {
 /**
@@ -77,15 +77,17 @@ const CString kInstrumentSynthSampler = "Instrument|Synth|Sampler";	///< Instrum
 const CString kSpatial				= "Spatial";		///< used for SurroundPanner
 const CString kSpatialFx			= "Spatial|Fx";		///< used for SurroundPanner and as insert effect
 const CString kOnlyRealTime			= "OnlyRT";			///< indicates that it supports only realtime process call, no processing faster than realtime
-const CString kOnlyOfflineProcess	= "OnlyOfflineProcess";	///< used for Plug-in offline processing  (will not work as normal insert Plug-in)
-const CString kNoOfflineProcess		= "NoOfflineProcess";	///< will be NOT used for Plug-in offline processing (will work as normal insert Plug-in)
+const CString kOnlyOfflineProcess	= "OnlyOfflineProcess";	///< used for plug-in offline processing  (will not work as normal insert plug-in)
+const CString kOnlyARA				= "OnlyARA";		///< used for plug-ins that require ARA to operate (will not work as normal insert plug-in)
+
+const CString kNoOfflineProcess		= "NoOfflineProcess";	///< will be NOT used for plug-in offline processing (will work as normal insert plug-in)
 const CString kUpDownMix			= "Up-Downmix";		///< used for Mixconverter/Up-Mixer/Down-Mixer
-const CString kAnalyzer			    = "Analyzer";	    ///< Meter, Scope, FFT-Display, not selectable as insert plugin
+const CString kAnalyzer			    = "Analyzer";	    ///< Meter, Scope, FFT-Display, not selectable as insert plug-in
 const CString kAmbisonics			= "Ambisonics";		///< used for Ambisonics channel (FX or Panner/Mixconverter/Up-Mixer/Down-Mixer when combined with other category)
 
-const CString kMono					= "Mono";			///< used for Mono only Plug-in [optional]
-const CString kStereo				= "Stereo";			///< used for Stereo only Plug-in [optional]
-const CString kSurround				= "Surround";		///< used for Surround only Plug-in [optional]
+const CString kMono					= "Mono";			///< used for Mono only plug-in [optional]
+const CString kStereo				= "Stereo";			///< used for Stereo only plug-in [optional]
+const CString kSurround				= "Surround";		///< used for Surround only plug-in [optional]
 
 //------------------------------------------------------------------------
 /*@}*/
@@ -93,7 +95,6 @@ const CString kSurround				= "Surround";		///< used for Surround only Plug-in [o
 
 //------------------------------------------------------------------------
 /** Component Flags used as classFlags in PClassInfo2 */
-//------------------------------------------------------------------------
 enum ComponentFlags
 {
 //------------------------------------------------------------------------
@@ -104,8 +105,8 @@ enum ComponentFlags
 
 //------------------------------------------------------------------------
 /** Symbolic sample size.
-\see ProcessSetup, ProcessData */
-//------------------------------------------------------------------------
+\see ProcessSetup, ProcessData
+*/
 enum SymbolicSampleSizes
 {
 	kSample32,		///< 32-bit precision
@@ -113,27 +114,27 @@ enum SymbolicSampleSizes
 };
 
 //------------------------------------------------------------------------
-/** Processing mode informs the Plug-in about the context and at which frequency the process call is called.
+/** Processing mode informs the plug-in about the context and at which frequency the process call is called.
 VST3 defines 3 modes:
 - kRealtime: each process call is called at a realtime frequency (defined by [numSamples of ProcessData] / samplerate).
-             The Plug-in should always try to process as fast as possible in order to let enough time slice to other Plug-ins.
+             The plug-in should always try to process as fast as possible in order to let enough time slice to other plug-ins.
 - kPrefetch: each process call could be called at a variable frequency (jitter, slower / faster than realtime),
-             the Plug-in should process at the same quality level than realtime, Plug-in must not slow down to realtime
+             the plug-in should process at the same quality level than realtime, plug-in must not slow down to realtime
 			 (e.g. disk streaming)!
-			 The host should avoid to process in kPrefetch mode such sampler based Plug-in.
+			 The host should avoid to process in kPrefetch mode such sampler based plug-in.
 - kOffline:  each process call could be faster than realtime or slower, higher quality than realtime could be used.
-             Plug-ins using disk streaming should be sure that they have enough time in the process call for streaming,
+             plug-ins using disk streaming should be sure that they have enough time in the process call for streaming,
 			 if needed by slowing down to realtime or slower.
 .
 Note about Process Modes switching:
-	-Switching between kRealtime and kPrefetch process modes are done in realtime thread without need of calling
-	 IAudioProcessor::setupProcessing, the Plug-in should check in process call the member processMode of ProcessData
+	- Switching between kRealtime and kPrefetch process modes are done in realtime thread without need of calling
+	 IAudioProcessor::setupProcessing, the plug-in should check in process call the member processMode of ProcessData
 	 in order to know in which mode it is processed.
-	-Switching between kRealtime (or kPrefetch) and kOffline requires that the host calls IAudioProcessor::setupProcessing
-	 in order to inform the Plug-in about this mode change.
-.
-\see ProcessSetup, ProcessData */
-//------------------------------------------------------------------------
+	- Switching between kRealtime (or kPrefetch) and kOffline requires that the host calls IAudioProcessor::setupProcessing
+	 in order to inform the plug-in about this mode change.
+	.
+\see ProcessSetup, ProcessData
+*/
 enum ProcessModes
 {
 	kRealtime,		///< realtime processing
@@ -145,21 +146,22 @@ enum ProcessModes
 /** kNoTail
  *
  * to be returned by getTailSamples when no tail is wanted
- \see IAudioProcessor::getTailSamples */
-//------------------------------------------------------------------------
+ \see IAudioProcessor::getTailSamples
+*/
 static const uint32 kNoTail = 0;
+
 //------------------------------------------------------------------------
 /** kInfiniteTail
  *
  * to be returned by getTailSamples when infinite tail is wanted
- \see IAudioProcessor::getTailSamples */
-//------------------------------------------------------------------------
+ \see IAudioProcessor::getTailSamples
+ */
 static const uint32 kInfiniteTail = kMaxInt32u;
 
 //------------------------------------------------------------------------
 /** Audio processing setup.
-\see IAudioProcessor::setupProcessing */
-//------------------------------------------------------------------------
+\see IAudioProcessor::setupProcessing
+*/
 struct ProcessSetup
 {
 //------------------------------------------------------------------------
@@ -174,21 +176,21 @@ struct ProcessSetup
 /** Processing buffers of an audio bus.
 This structure contains the processing buffer for each channel of an audio bus.
 - The number of channels (numChannels) must always match the current bus arrangement.
-  It could be set to value '0' when the host wants to flush the parameters (when the Plug-in is not processed).
+  It could be set to value '0' when the host wants to flush the parameters (when the plug-in is not processed).
 - The size of the channel buffer array must always match the number of channels. So the host
   must always supply an array for the channel buffers, regardless if the
   bus is active or not. However, if an audio bus is currently inactive, the actual sample
   buffer addresses are safe to be null.
 - The silence flag is set when every sample of the according buffer has the value '0'. It is
-  intended to be used as help for optimizations allowing a Plug-in to reduce processing activities.
+  intended to be used as help for optimizations allowing a plug-in to reduce processing activities.
   But even if this flag is set for a channel, the channel buffers must still point to valid memory!
   This flag is optional. A host is free to support it or not.
 .
-\see ProcessData */
-//------------------------------------------------------------------------
+\see ProcessData
+*/
 struct AudioBusBuffers
 {
-	AudioBusBuffers () : numChannels (0), silenceFlags (0), channelBuffers64 (0) {}
+	AudioBusBuffers () : numChannels (0), silenceFlags (0), channelBuffers64 (nullptr) {}
 
 //------------------------------------------------------------------------
 	int32 numChannels;		///< number of audio channels in bus
@@ -206,23 +208,34 @@ struct AudioBusBuffers
 	The host prepares AudioBusBuffers for each input/output bus,
 	regardless of the bus activation state. Bus buffer indices always match
 	with bus indices used in IComponent::getBusInfo of media type kAudio.
-\see AudioBusBuffers, IParameterChanges, IEventList, ProcessContext */
-//------------------------------------------------------------------------
+\see AudioBusBuffers, IParameterChanges, IEventList, ProcessContext, IProcessContextRequirements
+*/
 struct ProcessData
 {
 	ProcessData ()
-	: processMode (0), symbolicSampleSize (kSample32), numSamples (0), numInputs (0)
-	, numOutputs (0), inputs (0), outputs (0), inputParameterChanges (0), outputParameterChanges (0)
-	, inputEvents (0), outputEvents (0), processContext (0) {}
+	: processMode (0)
+	, symbolicSampleSize (kSample32)
+	, numSamples (0)
+	, numInputs (0)
+	, numOutputs (0)
+	, inputs (nullptr)
+	, outputs (nullptr)
+	, inputParameterChanges (nullptr)
+	, outputParameterChanges (nullptr)
+	, inputEvents (nullptr)
+	, outputEvents (nullptr)
+	, processContext (nullptr)
+	{
+	}
 
 //------------------------------------------------------------------------
 	int32 processMode;			///< processing mode - value of \ref ProcessModes
 	int32 symbolicSampleSize;   ///< sample size - value of \ref SymbolicSampleSizes
 	int32 numSamples;			///< number of samples to process
-	int32 numInputs;			///< number of audio input buses
-	int32 numOutputs;			///< number of audio output buses
-	AudioBusBuffers* inputs;	///< buffers of input buses
-	AudioBusBuffers* outputs;	///< buffers of output buses
+	int32 numInputs;			///< number of audio input busses
+	int32 numOutputs;			///< number of audio output busses
+	AudioBusBuffers* inputs;	///< buffers of input busses
+	AudioBusBuffers* outputs;	///< buffers of output busses
 
 	IParameterChanges* inputParameterChanges;	///< incoming parameter changes for this block
 	IParameterChanges* outputParameterChanges;	///< outgoing parameter changes for this block (optional)
@@ -233,60 +246,77 @@ struct ProcessData
 };
 
 //------------------------------------------------------------------------
-/** Audio Processing Interface.
+/** Audio processing interface: Vst::IAudioProcessor
 \ingroup vstIPlug vst300
 - [plug imp]
 - [extends IComponent]
 - [released: 3.0.0]
 - [mandatory]
 
-This interface must always be supported by audio processing Plug-ins. */
-//------------------------------------------------------------------------
-class IAudioProcessor: public FUnknown
+This interface must always be supported by audio processing plug-ins.
+*/
+class IAudioProcessor : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Try to set (from host) a predefined arrangement for inputs and outputs.
-	    The host should always deliver the same number of input and output buses than the Plug-in needs 
-		(see \ref IComponent::getBusCount).
-		The Plug-in returns kResultFalse if wanted arrangements are not supported.
-		If the Plug-in accepts these arrangements, it should modify its buses to match the new arrangements
-		(asked by the host with IComponent::getInfo () or IAudioProcessor::getBusArrangement ()) and then return kResultTrue.
-		If the Plug-in does not accept these arrangements, but can adapt its current arrangements (according to the wanted ones),
-		it should modify its buses arrangements and return kResultFalse. */
+	/** Try to set (host => plug-in) a wanted arrangement for inputs and outputs.
+	   The host should always deliver the same number of input and output busses than the plug-in
+	   needs (see \ref IComponent::getBusCount). The plug-in has 3 possibilities to react on this
+	   setBusArrangements call:\n
+	   1. The plug-in accepts these arrangements, then it should modify, if needed, its busses to match 
+	     these new arrangements (later on asked by the host with IComponent::getBusInfo () or
+	     IAudioProcessor::getBusArrangement ()) and then should return kResultTrue.\n
+	   2. The plug-in does not accept or support these requested arrangements for all
+	     inputs/outputs or just for some or only one bus, but the plug-in can try to adapt its current
+	     arrangements according to the requested ones (requested arrangements for kMain busses should be
+		 handled with more priority than the ones for kAux busses), then it should modify its busses arrangements
+		 and should return kResultFalse.\n
+	   3. Same than the point 2 above the plug-in does not support these requested arrangements 
+	     but the plug-in cannot find corresponding arrangements, the plug-in could keep its current arrangement
+		 or fall back to a default arrangement by modifying its busses arrangements and should return kResultFalse.\n
+		\param inputs pointer to an array of /ref SpeakerArrangement
+		\param numIns number of /ref SpeakerArrangement in inputs array
+		\param outputs pointer to an array of /ref SpeakerArrangement
+		\param numOuts number of /ref SpeakerArrangement in outputs array 
+		Returns kResultTrue when Arrangements is supported and is the current one, else returns kResultFalse. */
 	virtual tresult PLUGIN_API setBusArrangements (SpeakerArrangement* inputs, int32 numIns,
 												   SpeakerArrangement* outputs, int32 numOuts) = 0;
 
 	/** Gets the bus arrangement for a given direction (input/output) and index.
-		Note: IComponent::getInfo () and IAudioProcessor::getBusArrangement () should be always return the same 
-		information about the buses arrangements. */
+		Note: IComponent::getBusInfo () and IAudioProcessor::getBusArrangement () should be always return the same 
+		information about the busses arrangements. */
 	virtual tresult PLUGIN_API getBusArrangement (BusDirection dir, int32 index, SpeakerArrangement& arr) = 0;
 
 	/** Asks if a given sample size is supported see \ref SymbolicSampleSizes. */
 	virtual tresult PLUGIN_API canProcessSampleSize (int32 symbolicSampleSize) = 0;
 
 	/** Gets the current Latency in samples.
-		The returned value defines the group delay or the latency of the Plug-in. For example, if the Plug-in internally needs
-		to look in advance (like compressors) 512 samples then this Plug-in should report 512 as latency.
-		If during the use of the Plug-in this latency change, the Plug-in has to inform the host by
+		The returned value defines the group delay or the latency of the plug-in. For example, if the plug-in internally needs
+		to look in advance (like compressors) 512 samples then this plug-in should report 512 as latency.
+		If during the use of the plug-in this latency change, the plug-in has to inform the host by
 		using IComponentHandler::restartComponent (kLatencyChanged), this could lead to audio playback interruption
 		because the host has to recompute its internal mixer delay compensation.
 		Note that for player live recording this latency should be zero or small. */
 	virtual uint32 PLUGIN_API getLatencySamples () = 0;
 
-	/** Called in disable state (not active) before processing will begin. */
+	/** Called in disable state (setActive not called with true) before setProcessing is called and processing will begin. */
 	virtual tresult PLUGIN_API setupProcessing (ProcessSetup& setup) = 0;
 
-	/** Informs the Plug-in about the processing state. This will be called before any process calls start with true and after with false.
-		Note that setProcessing (false) may be called after setProcessing (true) without any process calls.
-		In this call the Plug-in should do only light operation (no memory allocation or big setup reconfiguration), 
-		this could be used to reset some buffers (like Delay line or Reverb). */
+	/** Informs the plug-in about the processing state. This will be called before any process calls
+	   start with true and after with false.
+	   Note that setProcessing (false) may be called after setProcessing (true) without any process
+	   calls.
+	   Note this function could be called in the UI or in Processing Thread, thats why the plug-in
+	   should only light operation (no memory allocation or big setup reconfiguration), 
+	   this could be used to reset some buffers (like Delay line or Reverb).
+	   The host has to be sure that it is called only when the plug-in is enable (setActive (true)
+	   was called). */
 	virtual tresult PLUGIN_API setProcessing (TBool state) = 0;
 
 	/** The Process call, where all information (parameter changes, event, audio buffer) are passed. */
 	virtual tresult PLUGIN_API process (ProcessData& data) = 0;
 
-	/** Gets tail size in samples. For example, if the Plug-in is a Reverb Plug-in and it knows that
+	/** Gets tail size in samples. For example, if the plug-in is a Reverb plug-in and it knows that
 		the maximum length of the Reverb is 2sec, then it has to return in getTailSamples() 
 		(in VST2 it was getGetTailSize ()): 2*sampleRate.
 		This information could be used by host for offline processing, process optimization and 
@@ -304,40 +334,40 @@ public:
 DECLARE_CLASS_IID (IAudioProcessor, 0x42043F99, 0xB7DA453C, 0xA569E79D, 0x9AAEC33D)
 
 //------------------------------------------------------------------------
-/** Extended IAudioProcessor interface for a component.
+/** Extended IAudioProcessor interface for a component: Vst::IAudioPresentationLatency
 \ingroup vstIPlug vst310
 - [plug imp]
 - [extends IAudioProcessor]
 - [released: 3.1.0]
 - [optional]
 
-Inform the Plug-in about how long from the moment of generation/acquiring (from file or from Input)
-it will take for its input to arrive, and how long it will take for its output to be presented (to output or to Speaker).
+Inform the plug-in about how long from the moment of generation/acquiring (from file or from Input)
+it will take for its input to arrive, and how long it will take for its output to be presented (to output or to speaker).
 
-Note for Input Presentation Latency: when reading from file, the first Plug-in will have an input presentation latency set to zero.
-When monitoring audio input from a Audio Device, then this initial input latency will be the input latency of the Audio Device itself.
+Note for Input Presentation Latency: when reading from file, the first plug-in will have an input presentation latency set to zero.
+When monitoring audio input from an audio device, the initial input latency is the input latency of the audio device itself.
 
-Note for Output Presentation Latency: when writing to a file, the last Plug-in will have an output presentation latency set to zero.
-When the output of this Plug-in is connected to a Audio Device then this initial output latency will be the output
-latency of the Audio Device itself.
+Note for Output Presentation Latency: when writing to a file, the last plug-in will have an output presentation latency set to zero.
+When the output of this plug-in is connected to an audio device, the initial output latency is the output
+latency of the audio device itself.
 
-A value of zero means either no latency or an unknown latency.
+A value of zero either means no latency or an unknown latency.
 
-Each Plug-in adding a latency (returning a none zero value for IAudioProcessor::getLatencySamples) will modify the input 
-presentation latency of the next Plug-ins in the mixer routing graph and will modify the output presentation latency 
-of the previous Plug-ins.
+Each plug-in adding a latency (returning a none zero value for IAudioProcessor::getLatencySamples) will modify the input 
+presentation latency of the next plug-ins in the mixer routing graph and will modify the output presentation latency 
+of the previous plug-ins.
 
 \n
 \image html "iaudiopresentationlatency_usage.png"
 \n
 \see IAudioProcessor
-\see IComponent*/
-//------------------------------------------------------------------------
-class IAudioPresentationLatency: public FUnknown
+\see IComponent
+*/
+class IAudioPresentationLatency : public FUnknown
 {
 public:
 	//------------------------------------------------------------------------
-	/** Informs the Plug-in about the Audio Presentation Latency in samples for a given direction (kInput/kOutput) and bus index. */
+	/** Informs the plug-in about the Audio Presentation Latency in samples for a given direction (kInput/kOutput) and bus index. */
 	virtual tresult PLUGIN_API setAudioPresentationLatencySamples (BusDirection dir, int32 busIndex, uint32 latencyInSamples) = 0;
 
 	//------------------------------------------------------------------------
@@ -345,6 +375,50 @@ public:
 };
 
 DECLARE_CLASS_IID (IAudioPresentationLatency, 0x309ECE78, 0xEB7D4fae, 0x8B2225D9, 0x09FD08B6)
+
+//------------------------------------------------------------------------
+/** Extended IAudioProcessor interface for a component: Vst::IProcessContextRequirements
+ \ingroup vstIPlug vst370
+ - [plug imp]
+ - [extends IAudioProcessor]
+ - [released: 3.7.0]
+ - [mandatory]
+ 
+To get accurate process context information (Vst::ProcessContext), it is now required to implement this interface and
+return the desired bit mask of flags which your audio effect needs. If you do not implement this
+interface, you may not get any information at all of the process function.
+
+The host asks for this information once between initialize and setActive. It cannot be changed afterwards.
+
+This gives the host the opportunity to better optimize the audio process graph when it knows which
+plug-ins need which information.
+
+Plug-Ins built with an earlier SDK version (< 3.7) will still get the old information, but the information
+may not be as accurate as when using this interface.
+*/
+class IProcessContextRequirements : public FUnknown
+{
+public:
+	enum Flags
+	{
+		kNeedSystemTime				= 1 <<  0, // kSystemTimeValid
+		kNeedContinousTimeSamples	= 1 <<  1, // kContTimeValid
+		kNeedProjectTimeMusic		= 1 <<  2, // kProjectTimeMusicValid
+		kNeedBarPositionMusic		= 1 <<  3, // kBarPositionValid
+		kNeedCycleMusic				= 1 <<  4, // kCycleValid
+		kNeedSamplesToNextClock		= 1 <<  5, // kClockValid
+		kNeedTempo					= 1 <<  6, // kTempoValid
+		kNeedTimeSignature			= 1 <<  7, // kTimeSigValid
+		kNeedChord					= 1 <<  8, // kChordValid
+		kNeedFrameRate				= 1 <<  9, // kSmpteValid
+		kNeedTransportState			= 1 << 10, // kPlaying, kCycleActive, kRecording
+	};
+	virtual uint32 PLUGIN_API getProcessContextRequirements () = 0;
+//------------------------------------------------------------------------
+	static const FUID iid;
+};
+
+DECLARE_CLASS_IID (IProcessContextRequirements, 0x2A654303, 0xEF764E3D, 0x95B5FE83, 0x730EF6D0)
 
 //------------------------------------------------------------------------
 } // namespace Vst

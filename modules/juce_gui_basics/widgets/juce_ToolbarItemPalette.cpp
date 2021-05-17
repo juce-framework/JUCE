@@ -107,4 +107,10 @@ void ToolbarItemPalette::resized()
     itemHolder->setSize (maxX, y + height + 8);
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ToolbarItemPalette::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
+
 } // namespace juce

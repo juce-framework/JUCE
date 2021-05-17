@@ -185,6 +185,9 @@ private:
     {
         return std::make_unique<ModuleScannerJob> (paths, [this] (ModuleIDAndFolderList scannedModulesList)
         {
+            if (scannedModulesList == modulesList)
+                return;
+
             {
                 const ScopedLock swapLock (lock);
                 modulesList.swap (scannedModulesList);

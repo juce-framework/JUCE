@@ -31,14 +31,18 @@ class StartPageTreeHolder  : public Component
 public:
     enum class Open { no, yes };
 
-    StartPageTreeHolder (const StringArray& headerNames, const std::vector<StringArray>& itemNames,
-                         std::function<void (int, int)>&& selectedCallback, Open shouldBeOpen)
+    StartPageTreeHolder (const String& title,
+                         const StringArray& headerNames,
+                         const std::vector<StringArray>& itemNames,
+                         std::function<void (int, int)>&& selectedCallback,
+                         Open shouldBeOpen)
         : headers (headerNames),
           items (itemNames),
           itemSelectedCallback (std::move (selectedCallback))
     {
         jassert (headers.size() == (int) items.size());
 
+        tree.setTitle (title);
         tree.setRootItem (new TreeRootItem (*this));
         tree.setRootItemVisible (false);
         tree.setIndentSize (15);
@@ -88,13 +92,14 @@ private:
                 addSubItem (new TreeSubItem (owner, s, {}));
         }
 
-        bool mightContainSubItems() override     { return isHeader; }
-        bool canBeSelected() const override      { return ! isHeader; }
+        bool mightContainSubItems() override    { return isHeader; }
+        bool canBeSelected() const override     { return ! isHeader; }
 
-        int getItemWidth() const override        { return -1; }
-        int getItemHeight() const override       { return 25; }
+        int getItemWidth() const override       { return -1; }
+        int getItemHeight() const override      { return 25; }
 
-        String getUniqueName() const override    { return name; }
+        String getUniqueName() const override   { return name; }
+        String getAccessibilityName() override  { return getUniqueName(); }
 
         void paintOpenCloseButton (Graphics& g, const Rectangle<float>& area, Colour, bool isMouseOver) override
         {
@@ -122,10 +127,13 @@ private:
             g.drawFittedText (name, bounds.reduced (5).withTrimmedLeft (10), Justification::centredLeft, 1);
         }
 
-        void itemClicked (const MouseEvent&) override
+        void itemClicked (const MouseEvent& e) override
         {
             if (isSelected())
                 itemSelectionChanged (true);
+
+            if (e.mods.isPopupMenu() && mightContainSubItems())
+                setOpen (! isOpen());
         }
 
         void itemSelectionChanged (bool isNowSelected) override

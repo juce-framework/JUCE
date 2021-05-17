@@ -657,17 +657,17 @@ public:
 
                 case kAudioUnitProperty_OfflineRender:
                 {
-                    auto shouldBeRealtime = (*reinterpret_cast<const UInt32*> (inData) != 0);
+                    const auto shouldBeOffline = (*reinterpret_cast<const UInt32*> (inData) != 0);
 
                     if (juceFilter != nullptr)
                     {
-                        auto isCurrentlyRealtime = juceFilter->isNonRealtime();
+                        const auto isOffline = juceFilter->isNonRealtime();
 
-                        if (isCurrentlyRealtime != shouldBeRealtime)
+                        if (isOffline != shouldBeOffline)
                         {
                             const ScopedLock sl (juceFilter->getCallbackLock());
 
-                            juceFilter->setNonRealtime (shouldBeRealtime);
+                            juceFilter->setNonRealtime (shouldBeOffline);
                             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
                         }
                     }

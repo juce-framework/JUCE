@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,7 +44,6 @@ namespace Steinberg {
 /** Memory based Stream for IBStream implementation (using malloc).
 \ingroup sdkBase
 */
-//------------------------------------------------------------------------
 class MemoryStream : public IBStream
 {
 public:
@@ -54,14 +53,14 @@ public:
 	virtual ~MemoryStream ();
 
 	//---IBStream---------------------------------------
-	virtual tresult PLUGIN_API read  (void* buffer, int32 numBytes, int32* numBytesRead) SMTG_OVERRIDE;
-	virtual tresult PLUGIN_API write (void* buffer, int32 numBytes, int32* numBytesWritten) SMTG_OVERRIDE;
-	virtual tresult PLUGIN_API seek  (int64 pos, int32 mode, int64* result) SMTG_OVERRIDE;
-	virtual tresult PLUGIN_API tell  (int64* pos) SMTG_OVERRIDE;
+	tresult PLUGIN_API read  (void* buffer, int32 numBytes, int32* numBytesRead) SMTG_OVERRIDE;
+	tresult PLUGIN_API write (void* buffer, int32 numBytes, int32* numBytesWritten) SMTG_OVERRIDE;
+	tresult PLUGIN_API seek  (int64 pos, int32 mode, int64* result) SMTG_OVERRIDE;
+	tresult PLUGIN_API tell  (int64* pos) SMTG_OVERRIDE;
 
-	TSize getSize ();		///< returns the current memory size
+	TSize getSize () const;		///< returns the current memory size
 	void setSize (TSize size);	///< set the memory size, a realloc will occur if memory already used
-	char* getData ();		///< returns the memory pointer
+	char* getData () const;		///< returns the memory pointer
 	char* detachData ();	///< returns the memory pointer and give up ownership
 	bool truncate ();		///< realloc to the current use memory size if needed
 	bool truncateToCursor ();	///< truncate memory at current cursor position

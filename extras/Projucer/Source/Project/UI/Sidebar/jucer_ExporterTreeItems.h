@@ -93,7 +93,7 @@ public:
             addSubItem (new ConfigItem (config.config, *exporter));
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         PopupMenu menu;
         menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
@@ -101,15 +101,15 @@ public:
         menu.addSeparator();
         menu.addItem (3, "Delete this exporter");
 
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
-    void showAddMenu() override
+    void showAddMenu (Point<int> p) override
     {
         PopupMenu menu;
         menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
 
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
     void handlePopupMenuResult (int resultCode) override
@@ -239,7 +239,7 @@ public:
         }
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         bool enabled = exporter.supportsUserDefinedConfigurations();
 
@@ -248,7 +248,7 @@ public:
         menu.addSeparator();
         menu.addItem (2, "Delete this configuration", enabled);
 
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
     void handlePopupMenuResult (int resultCode) override
@@ -320,7 +320,7 @@ public:
     void setName (const String&) override            {}
     Icon getIcon() const override                    { return project.getMainGroup().getIcon (isOpen()).withColour (getContentColour (true)); }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int>) override
     {
         if (auto* pcc = getProjectContentComponent())
             pcc->showNewExporterMenu();

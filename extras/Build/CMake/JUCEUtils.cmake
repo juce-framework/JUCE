@@ -355,7 +355,7 @@ function(_juce_module_sources module_path output_path built_sources other_source
         endif()
     endforeach()
 
-    if(NOT module_files_to_build STREQUAL "")
+    if(NOT "${module_files_to_build}" STREQUAL "")
         list(REMOVE_ITEM headers ${module_files_to_build})
     endif()
 
@@ -385,11 +385,7 @@ function(_juce_get_platform_plugin_kinds out)
     endif()
 
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-        list(APPEND result AAX Unity VST)
-
-        if(NOT MINGW AND NOT MSYS)
-            list(APPEND result VST3)
-        endif()
+        list(APPEND result AAX Unity VST VST3)
     endif()
 
     set(${out} ${result} PARENT_SCOPE)
@@ -482,7 +478,14 @@ function(_juce_link_frameworks target visibility)
             find_library("juce_found_${framework}" "${framework}" REQUIRED)
             target_link_libraries("${target}" "${visibility}" "${juce_found_${framework}}")
         elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-            target_link_libraries("${target}" "${visibility}" "-framework ${framework}")
+            # CoreServices is only available on iOS 12+, we must link it weakly on earlier platforms
+            if((framework STREQUAL "CoreServices") AND (CMAKE_OSX_DEPLOYMENT_TARGET LESS 12.0))
+                set(framework_flags "-weak_framework ${framework}")
+            else()
+                set(framework_flags "-framework ${framework}")
+            endif()
+
+            target_link_libraries("${target}" "${visibility}" "${framework_flags}")
         endif()
     endforeach()
 endfunction()
@@ -786,6 +789,7 @@ endfunction()
 function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content EXECUTABLE_NAME                      ${target} JUCE_PRODUCT_NAME)
     _juce_append_target_property(file_content VERSION                              ${target} JUCE_VERSION)
+    _juce_append_target_property(file_content BUILD_VERSION                        ${target} JUCE_BUILD_VERSION)
     _juce_append_target_property(file_content PLIST_TO_MERGE                       ${target} JUCE_PLIST_TO_MERGE)
     _juce_append_target_property(file_content BUNDLE_ID                            ${target} JUCE_BUNDLE_ID)
     _juce_append_target_property(file_content XCODE_EXTRA_PLIST_ENTRIES            ${target} JUCE_XCODE_EXTRA_PLIST_ENTRIES)
@@ -1280,6 +1284,7 @@ function(_juce_create_windows_package source_target dest_target extension defaul
 
     set_target_properties(${dest_target}
         PROPERTIES
+        PDB_OUTPUT_DIRECTORY "${products_folder}"
         LIBRARY_OUTPUT_DIRECTORY "${output_folder}/Contents/${arch_string}")
 
     get_target_property(icon_file ${source_target} JUCE_ICON_FILE)
@@ -1783,6 +1788,8 @@ function(_juce_set_fallback_properties target)
         message(FATAL_ERROR "Target ${target} must have its VERSION argument set, or must be part of a project with a PROJECT_VERSION")
     endif()
 
+    _juce_set_property_if_not_set(${target} BUILD_VERSION "${final_version}")
+
     get_target_property(custom_xcassets ${target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
     set(needs_storyboard TRUE)
@@ -1966,6 +1973,7 @@ endfunction()
 function(_juce_initialise_target target)
     set(one_value_args
         VERSION
+        BUILD_VERSION
         PRODUCT_NAME
         PLIST_TO_MERGE
         BUNDLE_ID

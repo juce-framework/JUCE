@@ -262,6 +262,7 @@ public:
         addAndMakeVisible (codeDocumentComponent);
         codeDocument.addListener (this);
 
+        resultsTree.setTitle ("Results");
         addAndMakeVisible (resultsTree);
         resultsTree.setColour (TreeView::backgroundColourId, Colours::white);
         resultsTree.setDefaultOpenness (true);

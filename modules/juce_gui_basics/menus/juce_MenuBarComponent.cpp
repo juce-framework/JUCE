@@ -26,11 +26,63 @@
 namespace juce
 {
 
+class MenuBarComponent::AccessibleItemComponent  : public Component
+{
+public:
+    AccessibleItemComponent (MenuBarComponent& comp, const String& menuItemName)
+        : owner (comp),
+          name (menuItemName)
+    {
+        setInterceptsMouseClicks (false, false);
+    }
+
+    const String& getName() const noexcept    { return name; }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        class ComponentHandler  : public AccessibilityHandler
+        {
+        public:
+            explicit ComponentHandler (AccessibleItemComponent& item)
+                : AccessibilityHandler (item,
+                                        AccessibilityRole::menuItem,
+                                        getAccessibilityActions (item)),
+                  itemComponent (item)
+            {
+            }
+
+            AccessibleState getCurrentState() const override
+            {
+                auto state = AccessibilityHandler::getCurrentState().withSelectable();
+
+                return state.isFocused() ? state.withSelected() : state;
+            }
+
+            String getTitle() const override  { return itemComponent.name; }
+
+        private:
+            static AccessibilityActions getAccessibilityActions (AccessibleItemComponent& item)
+            {
+                auto showMenu = [&item] { item.owner.showMenu (item.owner.indexOfItemComponent (&item)); };
+
+                return AccessibilityActions().addAction (AccessibilityActionType::focus,
+                                                         [&item] { item.owner.setItemUnderMouse (item.owner.indexOfItemComponent (&item)); })
+                                             .addAction (AccessibilityActionType::press,    showMenu)
+                                             .addAction (AccessibilityActionType::showMenu, showMenu);
+            }
+
+            AccessibleItemComponent& itemComponent;
+        };
+
+        return std::make_unique<ComponentHandler> (*this);
+    }
+
+private:
+    MenuBarComponent& owner;
+    const String name;
+};
+
 MenuBarComponent::MenuBarComponent (MenuBarModel* m)
-    : model (nullptr),
-      itemUnderMouse (-1),
-      currentPopupIndex (-1),
-      topLevelIndexClicked (0)
 {
     setRepaintsOnMouseActivity (true);
     setWantsKeyboardFocus (false);
@@ -70,77 +122,83 @@ void MenuBarComponent::setModel (MenuBarModel* const newModel)
 //==============================================================================
 void MenuBarComponent::paint (Graphics& g)
 {
-    const bool isMouseOverBar = currentPopupIndex >= 0 || itemUnderMouse >= 0 || isMouseOver();
+    const auto isMouseOverBar = (currentPopupIndex >= 0 || itemUnderMouse >= 0 || isMouseOver());
 
-    getLookAndFeel().drawMenuBarBackground (g,
-                                            getWidth(),
-                                            getHeight(),
-                                            isMouseOverBar,
-                                            *this);
+    getLookAndFeel().drawMenuBarBackground (g, getWidth(), getHeight(), isMouseOverBar, *this);
 
-    if (model != nullptr)
+    if (model == nullptr)
+        return;
+
+    for (size_t i = 0; i < itemComponents.size(); ++i)
     {
-        for (int i = 0; i < menuNames.size(); ++i)
-        {
-            Graphics::ScopedSaveState ss (g);
+        const auto& itemComponent = itemComponents[i];
+        const auto itemBounds = itemComponent->getBounds();
 
-            g.setOrigin (xPositions [i], 0);
-            g.reduceClipRegion (0, 0, xPositions[i + 1] - xPositions[i], getHeight());
+        Graphics::ScopedSaveState ss (g);
 
-            getLookAndFeel().drawMenuBarItem (g,
-                                              xPositions[i + 1] - xPositions[i],
-                                              getHeight(),
-                                              i,
-                                              menuNames[i],
-                                              i == itemUnderMouse,
-                                              i == currentPopupIndex,
-                                              isMouseOverBar,
-                                              *this);
-        }
+        g.setOrigin (itemBounds.getX(), 0);
+        g.reduceClipRegion (0, 0, itemBounds.getWidth(), itemBounds.getHeight());
+
+        getLookAndFeel().drawMenuBarItem (g,
+                                          itemBounds.getWidth(),
+                                          itemBounds.getHeight(),
+                                          (int) i,
+                                          itemComponent->getName(),
+                                          (int) i == itemUnderMouse,
+                                          (int) i == currentPopupIndex,
+                                          isMouseOverBar,
+                                          *this);
     }
 }
 
 void MenuBarComponent::resized()
 {
-    xPositions.clear();
     int x = 0;
-    xPositions.add (x);
 
-    for (int i = 0; i < menuNames.size(); ++i)
+    for (size_t i = 0; i < itemComponents.size(); ++i)
     {
-        x += getLookAndFeel().getMenuBarItemWidth (*this, i, menuNames[i]);
-        xPositions.add (x);
+        auto& itemComponent = itemComponents[i];
+
+        auto w = getLookAndFeel().getMenuBarItemWidth (*this, (int) i, itemComponent->getName());
+        itemComponent->setBounds (x, 0, w, getHeight());
+        x += w;
     }
 }
 
 int MenuBarComponent::getItemAt (Point<int> p)
 {
-    for (int i = 0; i < xPositions.size(); ++i)
-        if (p.x >= xPositions[i] && p.x < xPositions[i + 1])
-            return reallyContains (p, true) ? i : -1;
+    for (size_t i = 0; i < itemComponents.size(); ++i)
+        if (itemComponents[i]->getBounds().contains (p) && reallyContains (p, true))
+            return (int) i;
 
     return -1;
 }
 
 void MenuBarComponent::repaintMenuItem (int index)
 {
-    if (isPositiveAndBelow (index, xPositions.size()))
+    if (isPositiveAndBelow (index, (int) itemComponents.size()))
     {
-        const int x1 = xPositions [index];
-        const int x2 = xPositions [index + 1];
+        auto itemBounds = itemComponents[(size_t) index]->getBounds();
 
-        repaint (x1 - 2, 0, x2 - x1 + 4, getHeight());
+        repaint (itemBounds.getX() - 2,
+                 0,
+                 itemBounds.getWidth() + 4,
+                 itemBounds.getHeight());
     }
 }
 
-void MenuBarComponent::setItemUnderMouse (const int index)
+void MenuBarComponent::setItemUnderMouse (int index)
 {
-    if (itemUnderMouse != index)
-    {
-        repaintMenuItem (itemUnderMouse);
-        itemUnderMouse = index;
-        repaintMenuItem (itemUnderMouse);
-    }
+    if (itemUnderMouse == index)
+        return;
+
+    repaintMenuItem (itemUnderMouse);
+    itemUnderMouse = index;
+    repaintMenuItem (itemUnderMouse);
+
+    if (isPositiveAndBelow (itemUnderMouse, (int) itemComponents.size()))
+        if (auto* handler = itemComponents[(size_t) itemUnderMouse]->getAccessibilityHandler())
+            handler->grabFocus();
 }
 
 void MenuBarComponent::setOpenItem (int index)
@@ -156,7 +214,7 @@ void MenuBarComponent::setOpenItem (int index)
         currentPopupIndex = index;
         repaintMenuItem (currentPopupIndex);
 
-        Desktop& desktop = Desktop::getInstance();
+        auto& desktop = Desktop::getInstance();
 
         if (index >= 0)
             desktop.addGlobalMouseListener (this);
@@ -180,28 +238,22 @@ void MenuBarComponent::showMenu (int index)
         setOpenItem (index);
         setItemUnderMouse (index);
 
-        if (index >= 0)
+        if (isPositiveAndBelow (index, (int) itemComponents.size()))
         {
-            PopupMenu m (model->getMenuForIndex (itemUnderMouse,
-                                                 menuNames [itemUnderMouse]));
+            const auto& itemComponent = itemComponents[(size_t) index];
+            auto m = model->getMenuForIndex (itemUnderMouse, itemComponent->getName());
 
             if (m.lookAndFeel == nullptr)
                 m.setLookAndFeel (&getLookAndFeel());
 
-            const Rectangle<int> itemPos (xPositions [index], 0, xPositions [index + 1] - xPositions [index], getHeight());
+            auto itemBounds = itemComponent->getBounds();
 
             m.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                                 .withTargetScreenArea (localAreaToGlobal (itemPos))
-                                                 .withMinimumWidth (itemPos.getWidth()),
-                             ModalCallbackFunction::forComponent (menuBarMenuDismissedCallback, this, index));
+                                                 .withTargetScreenArea (localAreaToGlobal (itemBounds))
+                                                 .withMinimumWidth (itemBounds.getWidth()),
+                             [this, index] (int result) { menuDismissed (index, result); });
         }
     }
-}
-
-void MenuBarComponent::menuBarMenuDismissedCallback (int result, MenuBarComponent* bar, int topLevelIndex)
-{
-    if (bar != nullptr)
-        bar->menuDismissed (topLevelIndex, result);
 }
 
 void MenuBarComponent::menuDismissed (int topLevelIndex, int itemId)
@@ -212,8 +264,7 @@ void MenuBarComponent::menuDismissed (int topLevelIndex, int itemId)
 
 void MenuBarComponent::handleCommandMessage (int commandId)
 {
-    const Point<int> mousePos (getMouseXYRelative());
-    updateItemUnderMouse (mousePos);
+    updateItemUnderMouse (getMouseXYRelative());
 
     if (currentPopupIndex == topLevelIndexClicked)
         setOpenItem (-1);
@@ -239,8 +290,7 @@ void MenuBarComponent::mouseDown (const MouseEvent& e)
 {
     if (currentPopupIndex < 0)
     {
-        const MouseEvent e2 (e.getEventRelativeTo (this));
-        updateItemUnderMouse (e2.getPosition());
+        updateItemUnderMouse (e.getEventRelativeTo (this).getPosition());
 
         currentPopupIndex = -2;
         showMenu (itemUnderMouse);
@@ -249,8 +299,7 @@ void MenuBarComponent::mouseDown (const MouseEvent& e)
 
 void MenuBarComponent::mouseDrag (const MouseEvent& e)
 {
-    const MouseEvent e2 (e.getEventRelativeTo (this));
-    const int item = getItemAt (e2.getPosition());
+    const auto item = getItemAt (e.getEventRelativeTo (this).getPosition());
 
     if (item >= 0)
         showMenu (item);
@@ -258,7 +307,7 @@ void MenuBarComponent::mouseDrag (const MouseEvent& e)
 
 void MenuBarComponent::mouseUp (const MouseEvent& e)
 {
-    const MouseEvent e2 (e.getEventRelativeTo (this));
+    const auto e2 = e.getEventRelativeTo (this);
 
     updateItemUnderMouse (e2.getPosition());
 
@@ -271,13 +320,13 @@ void MenuBarComponent::mouseUp (const MouseEvent& e)
 
 void MenuBarComponent::mouseMove (const MouseEvent& e)
 {
-    const MouseEvent e2 (e.getEventRelativeTo (this));
+    const auto e2 = e.getEventRelativeTo (this);
 
     if (lastMousePos != e2.getPosition())
     {
         if (currentPopupIndex >= 0)
         {
-            const int item = getItemAt (e2.getPosition());
+            const auto item = getItemAt (e2.getPosition());
 
             if (item >= 0)
                 showMenu (item);
@@ -293,11 +342,11 @@ void MenuBarComponent::mouseMove (const MouseEvent& e)
 
 bool MenuBarComponent::keyPressed (const KeyPress& key)
 {
-    const int numMenus = menuNames.size();
+    const auto numMenus = (int) itemComponents.size();
 
     if (numMenus > 0)
     {
-        const int currentIndex = jlimit (0, numMenus - 1, currentPopupIndex);
+        const auto currentIndex = jlimit (0, numMenus - 1, currentPopupIndex);
 
         if (key.isKeyCode (KeyPress::leftKey))
         {
@@ -315,34 +364,69 @@ bool MenuBarComponent::keyPressed (const KeyPress& key)
     return false;
 }
 
-void MenuBarComponent::menuBarItemsChanged (MenuBarModel* /*menuBarModel*/)
+void MenuBarComponent::menuBarItemsChanged (MenuBarModel*)
 {
     StringArray newNames;
 
     if (model != nullptr)
         newNames = model->getMenuBarNames();
 
-    if (newNames != menuNames)
+    auto itemsHaveChanged = [this, &newNames]
     {
-        menuNames = newNames;
+        if ((int) itemComponents.size() != newNames.size())
+            return true;
+
+        for (size_t i = 0; i < itemComponents.size(); ++i)
+            if (itemComponents[i]->getName() != newNames[(int) i])
+                return true;
+
+        return false;
+    }();
+
+    if (itemsHaveChanged)
+    {
+        updateItemComponents (newNames);
+
         repaint();
         resized();
     }
 }
 
-void MenuBarComponent::menuCommandInvoked (MenuBarModel* /*menuBarModel*/,
-                                           const ApplicationCommandTarget::InvocationInfo& info)
+void MenuBarComponent::updateItemComponents (const StringArray& menuNames)
+{
+    itemComponents.clear();
+
+    for (const auto& name : menuNames)
+    {
+        itemComponents.push_back (std::make_unique<AccessibleItemComponent> (*this, name));
+        addAndMakeVisible (*itemComponents.back());
+    }
+}
+
+int MenuBarComponent::indexOfItemComponent (AccessibleItemComponent* itemComponent) const
+{
+    const auto iter = std::find_if (itemComponents.cbegin(), itemComponents.cend(),
+                                    [itemComponent] (const std::unique_ptr<AccessibleItemComponent>& c) { return c.get() == itemComponent; });
+
+    if (iter != itemComponents.cend())
+        return (int) std::distance (itemComponents.cbegin(), iter);
+
+    jassertfalse;
+    return -1;
+}
+
+void MenuBarComponent::menuCommandInvoked (MenuBarModel*, const ApplicationCommandTarget::InvocationInfo& info)
 {
     if (model == nullptr || (info.commandFlags & ApplicationCommandInfo::dontTriggerVisualFeedback) != 0)
         return;
 
-    for (int i = 0; i < menuNames.size(); ++i)
+    for (size_t i = 0; i < itemComponents.size(); ++i)
     {
-        const PopupMenu menu (model->getMenuForIndex (i, menuNames [i]));
+        const auto menu = model->getMenuForIndex ((int) i, itemComponents[i]->getName());
 
         if (menu.containsCommandItem (info.commandID))
         {
-            setItemUnderMouse (i);
+            setItemUnderMouse ((int) i);
             startTimer (200);
             break;
         }
@@ -353,6 +437,22 @@ void MenuBarComponent::timerCallback()
 {
     stopTimer();
     updateItemUnderMouse (getMouseXYRelative());
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> MenuBarComponent::createAccessibilityHandler()
+{
+    struct MenuBarComponentAccessibilityHandler  : public AccessibilityHandler
+    {
+        explicit MenuBarComponentAccessibilityHandler (MenuBarComponent& menuBarComponent)
+            : AccessibilityHandler (menuBarComponent, AccessibilityRole::menuBar)
+        {
+        }
+
+        AccessibleState getCurrentState() const override  { return AccessibleState().withIgnored(); }
+    };
+
+    return std::make_unique<MenuBarComponentAccessibilityHandler> (*this);
 }
 
 } // namespace juce

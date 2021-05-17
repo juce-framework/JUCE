@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -128,28 +128,28 @@ struct UpdateData
 };
 
 //------------------------------------------------------------------------
-typedef std::deque<DeferedChange> DeferedChangeList;
-typedef DeferedChangeList::const_iterator DeferedChangeListIterConst;
-typedef DeferedChangeList::iterator DeferedChangeListIter;
+using DeferedChangeList = std::deque<DeferedChange>;
+using DeferedChangeListIterConst = DeferedChangeList::const_iterator;
+using DeferedChangeListIter = DeferedChangeList::iterator;
 
-typedef std::deque<UpdateData> UpdateDataList;
-typedef UpdateDataList::const_iterator UpdateDataListIterConst;
+using UpdateDataList = std::deque<UpdateData>;
+using UpdateDataListIterConst = UpdateDataList::const_iterator;
 
 #if CLASS_NAME_TRACKED
-typedef std::vector<Dependency> DependentList;
+using DependentList = std::vector<Dependency>;
 #else
 typedef std::vector<IDependent*> DependentList;
 #endif
-typedef DependentList::iterator DependentListIter;
-typedef DependentList::const_iterator DependentListIterConst;
+using DependentListIter = DependentList::iterator;
+using DependentListIterConst = DependentList::const_iterator;
 
 #if SMTG_CPP11_STDLIBSUPPORT
-typedef std::unordered_map<const FUnknown*, DependentList> DependentMap;
+using DependentMap = std::unordered_map<const FUnknown*, DependentList>;
 #else
 typedef std::map<const FUnknown*, DependentList> DependentMap;
 #endif
-typedef DependentMap::iterator DependentMapIter;
-typedef DependentMap::const_iterator DependentMapIterConst;
+using DependentMapIter = DependentMap::iterator;
+using DependentMapIterConst = DependentMap::const_iterator;
 
 struct Table
 {
@@ -261,7 +261,7 @@ tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* depe
 			for (uint32 count = 0; count < (*iter).count; count++)
 			{
 				if ((*iter).dependents[count] == dependent)
-					(*iter).dependents[count] = 0;
+					(*iter).dependents[count] = nullptr;
 			}
 		}
 		++iter;
@@ -277,6 +277,8 @@ tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* depe
 			{
 				Update::DependentList& list = (*iterMap).second;
 				Update::DependentListIter iterList = list.begin ();
+				bool listIsEmpty = false;
+				
 				while (iterList != list.end ())
 				{
 #if CLASS_NAME_TRACKED
@@ -285,14 +287,24 @@ tresult PLUGIN_API UpdateHandler::removeDependent (FUnknown* u, IDependent* depe
 					if ((*iterList) == dependent)
 #endif
 					{
-						iterList = list.erase (iterList);
+						if (list.size () == 1u)
+						{
+							listIsEmpty = true;
+							break;
+						}
+						else
+							iterList = list.erase (iterList);
 					}
 					else
 					{
 						++iterList;
 					}
 				}
-				++iterMap;
+				
+				if (listIsEmpty)
+					iterMap = map.erase (iterMap);
+				else
+					++iterMap;
 			}
 		}
 	}
@@ -594,7 +606,7 @@ tresult PLUGIN_API UpdateHandler::cancelUpdates (FUnknown* u)
 	FGuard guard (lock);
 
 	Update::DeferedChange change (unknown, 0);
-	while (1)
+	while (true)
 	{
 		auto iter = std::find (table->defered.begin (), table->defered.end (), change);
 		if (iter != table->defered.end ())

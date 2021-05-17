@@ -28,10 +28,9 @@ namespace juce
 
 class TreeView;
 
-
 //==============================================================================
 /**
-    An item in a treeview.
+    An item in a TreeView.
 
     A TreeViewItem can either be a leaf-node in the tree, or it can contain its
     own sub-items.
@@ -53,11 +52,12 @@ public:
     TreeViewItem();
 
     /** Destructor. */
-    virtual ~TreeViewItem();
+    virtual ~TreeViewItem() = default;
 
     //==============================================================================
     /** Returns the number of sub-items that have been added to this item.
         Note that this doesn't mean much if the node isn't open.
+
         @see getSubItem, mightContainSubItems, addSubItem
     */
     int getNumSubItems() const noexcept;
@@ -133,7 +133,8 @@ public:
     TreeViewItem* getParentItem() const noexcept        { return parentItem; }
 
     //==============================================================================
-    /** True if this item is currently open in the treeview.
+    /** True if this item is currently open in the TreeView.
+
         @see getOpenness
     */
     bool isOpen() const noexcept;
@@ -154,14 +155,15 @@ public:
     void setOpen (bool shouldBeOpen);
 
     /** An enum of states to describe the explicit or implicit openness of an item. */
-    enum Openness
+    enum class Openness
     {
-        opennessDefault = 0,
-        opennessClosed = 1,
-        opennessOpen = 2
+        opennessDefault,
+        opennessClosed,
+        opennessOpen
     };
 
     /** Returns the openness state of this item.
+
         @see isOpen
     */
     Openness getOpenness() const noexcept;
@@ -177,11 +179,13 @@ public:
     void setOpenness (Openness newOpenness);
 
     /** True if this item is currently selected.
+
         Use this when painting the node, to decide whether to draw it as selected or not.
     */
     bool isSelected() const noexcept;
 
     /** Selects or deselects the item.
+
         If shouldNotify == sendNotification, then a callback will be made
         to itemSelectionChanged() if the item's selection has changed.
     */
@@ -198,7 +202,8 @@ public:
     */
     Rectangle<int> getItemPosition (bool relativeToTreeViewTopLeft) const noexcept;
 
-    /** Sends a signal to the treeview to make it refresh itself.
+    /** Sends a signal to the TreeView to make it refresh itself.
+
         Call this if your items have changed and you want the tree to update to reflect this.
     */
     void treeHasChanged() const noexcept;
@@ -211,17 +216,21 @@ public:
     void repaintItem() const;
 
     /** Returns the row number of this item in the tree.
+
         The row number of an item will change according to which items are open.
+
         @see TreeView::getNumRowsInTree(), TreeView::getItemOnRow()
     */
     int getRowNumberInTree() const noexcept;
 
     /** Returns true if all the item's parent nodes are open.
+
         This is useful to check whether the item might actually be visible or not.
     */
     bool areAllParentsOpen() const noexcept;
 
     /** Changes whether lines are drawn to connect any sub-items to this item.
+
         By default, line-drawing is turned on according to LookAndFeel::areLinesDrawnForTreeView().
     */
     void setLinesDrawnForSubItems (bool shouldDrawLines) noexcept;
@@ -272,17 +281,17 @@ public:
     /** Must return the width required by this item.
 
         If your item needs to have a particular width in pixels, return that value; if
-        you'd rather have it just fill whatever space is available in the treeview,
+        you'd rather have it just fill whatever space is available in the TreeView,
         return -1.
 
         If all your items return -1, no horizontal scrollbar will be shown, but if any
-        items have fixed widths and extend beyond the width of the treeview, a
+        items have fixed widths and extend beyond the width of the TreeView, a
         scrollbar will appear.
 
         Each item can be a different width, but if they change width, you should call
         treeHasChanged() to update the tree.
     */
-    virtual int getItemWidth() const                                { return -1; }
+    virtual int getItemWidth() const                          { return -1; }
 
     /** Must return the height required by this item.
 
@@ -290,22 +299,22 @@ public:
         can be different heights, but if they change height, you should call
         treeHasChanged() to update the tree.
     */
-    virtual int getItemHeight() const                               { return 20; }
+    virtual int getItemHeight() const                         { return 20; }
 
     /** You can override this method to return false if you don't want to allow the
         user to select this item.
     */
-    virtual bool canBeSelected() const                              { return true; }
+    virtual bool canBeSelected() const                        { return true; }
 
     /** Creates a component that will be used to represent this item.
 
         You don't have to implement this method - if it returns nullptr then no component
         will be used for the item, and you can just draw it using the paintItem()
         callback. But if you do return a component, it will be positioned in the
-        treeview so that it can be used to represent this item.
+        TreeView so that it can be used to represent this item.
 
-        The component returned will be managed by the treeview, so always return
-        a new component, and don't keep a reference to it, as the treeview will
+        The component returned will be managed by the TreeView, so always return
+        a new component, and don't keep a reference to it, as the TreeView will
         delete it later when it goes off the screen or is no longer needed. Also
         bear in mind that if the component keeps a reference to the item that
         created it, that item could be deleted before the component. Its position
@@ -321,7 +330,7 @@ public:
         component you like. It's most useful if you're doing things like drag-and-drop
         of items, or want to use a Label component to edit item names, etc.
     */
-    virtual Component* createItemComponent()                        { return nullptr; }
+    virtual std::unique_ptr<Component> createItemComponent()  { return nullptr; }
 
     //==============================================================================
     /** Draws the item's contents.
@@ -361,7 +370,7 @@ public:
     /** Called when the user clicks on this item.
 
         If you're using createItemComponent() to create a custom component for the
-        item, the mouse-clicks might not make it through to the treeview, but this
+        item, the mouse-clicks might not make it through to the TreeView, but this
         is how you find out about clicks when just drawing each item individually.
 
         The associated mouse-event details are passed in, so you can find out about
@@ -374,7 +383,7 @@ public:
     /** Called when the user double-clicks on this item.
 
         If you're using createItemComponent() to create a custom component for the
-        item, the mouse-clicks might not make it through to the treeview, but this
+        item, the mouse-clicks might not make it through to the TreeView, but this
         is how you find out about clicks when just drawing each item individually.
 
         The associated mouse-event details are passed in, so you can find out about
@@ -398,16 +407,28 @@ public:
     virtual void ownerViewChanged (TreeView* newOwner);
 
     /** The item can return a tool tip string here if it wants to.
+
         @see TooltipClient
     */
     virtual String getTooltip();
 
-    //==============================================================================
-    /** To allow items from your treeview to be dragged-and-dropped, implement this method.
+    /** Use this to set the name for this item that will be read out by accessibility
+        clients.
 
-        If this returns a non-null variant then when the user drags an item, the treeview will
+        The default implementation will return the tooltip string from getTooltip()
+        if it is not empty, otherwise it will return a description of the nested level
+        and row number of the item.
+
+        @see AccessibilityHandler
+    */
+    virtual String getAccessibilityName();
+
+    //==============================================================================
+    /** To allow items from your TreeView to be dragged-and-dropped, implement this method.
+
+        If this returns a non-null variant then when the user drags an item, the TreeView will
         try to find a DragAndDropContainer in its parent hierarchy, and will use it to trigger
-        a drag-and-drop operation, using this string as the source description, with the treeview
+        a drag-and-drop operation, using this string as the source description, with the TreeView
         itself as the source component.
 
         If you need more complex drag-and-drop behaviour, you can use custom components for
@@ -430,6 +451,7 @@ public:
         certainly no time to try opening the files and having a think about what's inside them!
 
         For responding to internal drag-and-drop of other types of object, see isInterestedInDragSource().
+
         @see FileDragAndDropTarget::isInterestedInFileDrag, isInterestedInDragSource
     */
     virtual bool isInterestedInFileDrag (const StringArray& files);
@@ -440,6 +462,7 @@ public:
         The insertIndex value indicates where in the list of sub-items the files were dropped.
         If files are dropped onto an area of the tree where there are no visible items, this
         method is called on the root item of the tree, with an insert index of 0.
+
         @see FileDragAndDropTarget::filesDropped, isInterestedInFileDrag
     */
     virtual void filesDropped (const StringArray& files, int insertIndex);
@@ -449,6 +472,7 @@ public:
         If you implement this method, you'll also need to implement itemDropped() in order to handle
         the items when they are dropped.
         To respond to drag-and-drop of files from external applications, see isInterestedInFileDrag().
+
         @see DragAndDropTarget::isInterestedInDragSource, itemDropped
     */
     virtual bool isInterestedInDragSource (const DragAndDropTarget::SourceDetails& dragSourceDetails);
@@ -459,13 +483,14 @@ public:
         The insertIndex value indicates where in the list of sub-items the new items should be placed.
         If files are dropped onto an area of the tree where there are no visible items, this
         method is called on the root item of the tree, with an insert index of 0.
+
         @see isInterestedInDragSource, DragAndDropTarget::itemDropped
     */
     virtual void itemDropped (const DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex);
 
     //==============================================================================
     /** Sets a flag to indicate that the item wants to be allowed
-        to draw all the way across to the left edge of the treeview.
+        to draw all the way across to the left edge of the TreeView.
 
         By default this is false, which means that when the paintItem()
         method is called, its graphics context is clipped to only allow
@@ -480,7 +505,7 @@ public:
     void setDrawsInLeftMargin (bool canDrawInLeftMargin) noexcept;
 
     /** Sets a flag to indicate that the item wants to be allowed
-        to draw all the way across to the right edge of the treeview.
+        to draw all the way across to the right edge of the TreeView.
 
         Similar to setDrawsInLeftMargin: when this flag is set to true,
         then the graphics context isn't clipped on the right side. Unlike
@@ -537,6 +562,7 @@ public:
         The string that is returned can be passed to TreeView::findItemFromIdentifierString().
         The string takes the form of a path, constructed from the getUniqueName() of this
         item and all its parents, so these must all be correctly implemented for it to work.
+
         @see TreeView::findItemFromIdentifierString, getUniqueName
     */
     String getItemIdentifierString() const;
@@ -563,7 +589,7 @@ public:
         }
         @endcode
     */
-    class OpennessRestorer
+    class JUCE_API  OpennessRestorer
     {
     public:
         OpennessRestorer (TreeViewItem&);
@@ -578,52 +604,46 @@ public:
 
 private:
     //==============================================================================
-    TreeView* ownerView = nullptr;
-    TreeViewItem* parentItem = nullptr;
-    OwnedArray<TreeViewItem> subItems;
-    int y = 0, itemHeight = 0, totalHeight = 0, itemWidth = 0, totalWidth = 0;
-    int uid = 0;
-    bool selected           : 1;
-    bool redrawNeeded       : 1;
-    bool drawLinesInside    : 1;
-    bool drawLinesSet       : 1;
-    bool drawsInLeftMargin  : 1;
-    bool drawsInRightMargin : 1;
-    unsigned int openness   : 2;
-
     friend class TreeView;
 
-    void updatePositions (int newY);
+    void updatePositions (int);
     int getIndentX() const noexcept;
     void setOwnerView (TreeView*) noexcept;
-    void paintRecursively (Graphics&, int width);
     TreeViewItem* getTopLevelItem() noexcept;
-    TreeViewItem* findItemRecursively (int y) noexcept;
     TreeViewItem* getDeepestOpenParentItem() noexcept;
     int getNumRows() const noexcept;
-    TreeViewItem* getItemOnRow (int index) noexcept;
-    void deselectAllRecursively (TreeViewItem* itemToIgnore);
-    int countSelectedItemsRecursively (int depth) const noexcept;
-    TreeViewItem* getSelectedItemWithIndex (int index) noexcept;
-    TreeViewItem* getNextVisibleItem (bool recurse) const noexcept;
+    TreeViewItem* getItemOnRow (int) noexcept;
+    void deselectAllRecursively (TreeViewItem*);
+    int countSelectedItemsRecursively (int) const noexcept;
+    TreeViewItem* getSelectedItemWithIndex (int) noexcept;
     TreeViewItem* findItemFromIdentifierString (const String&);
     void restoreToDefaultOpenness();
     bool isFullyOpen() const noexcept;
-    XmlElement* getOpennessState (bool canReturnNull) const;
-    bool removeSubItemFromList (int index, bool deleteItem);
+    std::unique_ptr<XmlElement> getOpennessState (bool) const;
+    bool removeSubItemFromList (int, bool);
     void removeAllSubItemsFromList();
     bool areLinesDrawn() const;
+    void draw (Graphics&, int, bool);
 
+    //==============================================================================
+    TreeView* ownerView = nullptr;
+    TreeViewItem* parentItem = nullptr;
+    OwnedArray<TreeViewItem> subItems;
+
+    Openness openness = Openness::opennessDefault;
+    int y = 0, itemHeight = 0, totalHeight = 0, itemWidth = 0, totalWidth = 0, uid = 0;
+    bool selected = false, redrawNeeded = true, drawLinesInside = false, drawLinesSet = false,
+         drawsInLeftMargin = false, drawsInRightMargin = false;
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewItem)
 };
-
 
 //==============================================================================
 /**
     A tree-view component.
 
     Use one of these to hold and display a structure of TreeViewItem objects.
-
 
     @tags{GUI}
 */
@@ -634,18 +654,18 @@ class JUCE_API  TreeView  : public Component,
 {
 public:
     //==============================================================================
-    /** Creates an empty treeview.
+    /** Creates an empty TreeView.
 
-        Once you've got a treeview component, you'll need to give it something to
+        Once you've got a TreeView component, you'll need to give it something to
         display, using the setRootItem() method.
     */
-    TreeView (const String& componentName = String());
+    TreeView (const String& componentName = {});
 
     /** Destructor. */
     ~TreeView() override;
 
     //==============================================================================
-    /** Sets the item that is displayed in the treeview.
+    /** Sets the item that is displayed in the TreeView.
 
         A tree has a single root item which contains as many sub-items as it needs. If
         you want the tree to contain a number of root items, you should still use a single
@@ -653,7 +673,7 @@ public:
 
         You can pass nullptr to this method to clear the tree and remove its current root item.
 
-        The object passed in will not be deleted by the treeview, it's up to the caller
+        The object passed in will not be deleted by the TreeView, it's up to the caller
         to delete it when no longer needed. BUT make absolutely sure that you don't delete
         this item until you've removed it from the tree, either by calling setRootItem (nullptr),
         or by deleting the tree first. You can also use deleteRootItem() as a quick way
@@ -665,18 +685,19 @@ public:
 
         This will be the last object passed to setRootItem(), or nullptr if none has been set.
     */
-    TreeViewItem* getRootItem() const noexcept                      { return rootItem; }
+    TreeViewItem* getRootItem() const noexcept        { return rootItem; }
 
     /** This will remove and delete the current root item.
+
         It's a convenient way of deleting the item and calling setRootItem (nullptr).
     */
     void deleteRootItem();
 
     /** Changes whether the tree's root item is shown or not.
 
-        If the root item is hidden, only its sub-items will be shown in the treeview - this
+        If the root item is hidden, only its sub-items will be shown in the TreeView - this
         lets you make the tree look as if it's got many root items. If it's hidden, this call
-        will also make sure the root item is open (otherwise the treeview would look empty).
+        will also make sure the root item is open (otherwise the TreeView would look empty).
     */
     void setRootItemVisible (bool shouldBeVisible);
 
@@ -684,7 +705,7 @@ public:
 
         @see setRootItemVisible
     */
-    bool isRootItemVisible() const noexcept                         { return rootItemVisible; }
+    bool isRootItemVisible() const noexcept           { return rootItemVisible; }
 
     /** Sets whether items are open or closed by default.
 
@@ -699,7 +720,7 @@ public:
 
         @see setDefaultOpenness
     */
-    bool areItemsOpenByDefault() const noexcept                     { return defaultOpenness; }
+    bool areItemsOpenByDefault() const noexcept       { return defaultOpenness; }
 
     /** This sets a flag to indicate that the tree can be used for multi-selection.
 
@@ -717,7 +738,7 @@ public:
 
         @see setMultiSelectEnabled
     */
-    bool isMultiSelectEnabled() const noexcept                      { return multiSelectEnabled; }
+    bool isMultiSelectEnabled() const noexcept        { return multiSelectEnabled; }
 
     /** Sets a flag to indicate whether to hide the open/close buttons.
 
@@ -729,20 +750,23 @@ public:
 
         @see setOpenCloseButtonsVisible
     */
-    bool areOpenCloseButtonsVisible() const noexcept                { return openCloseButtonsVisible; }
+    bool areOpenCloseButtonsVisible() const noexcept  { return openCloseButtonsVisible; }
 
     //==============================================================================
     /** Deselects any items that are currently selected. */
     void clearSelectedItems();
 
     /** Returns the number of items that are currently selected.
+
         If maximumDepthToSearchTo is >= 0, it lets you specify a maximum depth to which the
         tree will be recursed.
+
         @see getSelectedItem, clearSelectedItems
     */
     int getNumSelectedItems (int maximumDepthToSearchTo = -1) const noexcept;
 
     /** Returns one of the selected items in the tree.
+
         @param index    the index, 0 to (getNumSelectedItems() - 1)
     */
     TreeViewItem* getSelectedItem (int index) const noexcept;
@@ -751,45 +775,53 @@ public:
     void moveSelectedRow (int deltaRows);
 
     //==============================================================================
-    /** Returns the number of rows the tree is using.
-        This will depend on which items are open.
+    /** Returns the number of rows the tree is using, depending on which items are open.
+
         @see TreeViewItem::getRowNumberInTree()
     */
     int getNumRowsInTree() const;
 
     /** Returns the item on a particular row of the tree.
+
         If the index is out of range, this will return nullptr.
+
         @see getNumRowsInTree, TreeViewItem::getRowNumberInTree()
     */
     TreeViewItem* getItemOnRow (int index) const;
 
-    /** Returns the item that contains a given y position.
-        The y is relative to the top of the TreeView component.
+    /** Returns the item that contains a given y-position relative to the top
+        of the TreeView component.
     */
     TreeViewItem* getItemAt (int yPosition) const noexcept;
 
     /** Tries to scroll the tree so that this item is on-screen somewhere. */
     void scrollToKeepItemVisible (TreeViewItem* item);
 
-    /** Returns the treeview's Viewport object. */
+    /** Returns the TreeView's Viewport object. */
     Viewport* getViewport() const noexcept;
 
     /** Returns the number of pixels by which each nested level of the tree is indented.
+
         @see setIndentSize
     */
     int getIndentSize() noexcept;
 
     /** Changes the distance by which each nested level of the tree is indented.
+
         @see getIndentSize
     */
     void setIndentSize (int newIndentSize);
 
     /** Searches the tree for an item with the specified identifier.
+
         The identifier string must have been created by calling TreeViewItem::getItemIdentifierString().
         If no such item exists, this will return false. If the item is found, all of its items
         will be automatically opened.
     */
     TreeViewItem* findItemFromIdentifierString (const String& identifierString) const;
+
+    /** Returns the component that currently represents a given TreeViewItem. */
+    Component* getItemComponent (const TreeViewItem* item) const;
 
     //==============================================================================
     /** Saves the current state of open/closed nodes so it can be restored later.
@@ -820,11 +852,10 @@ public:
 
         @see getOpennessState
     */
-    void restoreOpennessState (const XmlElement& newState,
-                               bool restoreStoredSelection);
+    void restoreOpennessState (const XmlElement& newState, bool restoreStoredSelection);
 
     //==============================================================================
-    /** A set of colour IDs to use to change the colour of various aspects of the treeview.
+    /** A set of colour IDs to use to change the colour of various aspects of the TreeView.
 
         These constants can be used either via the Component::setColour(), or LookAndFeel::setColour()
         methods.
@@ -843,7 +874,7 @@ public:
 
     //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
-        treeview drawing functionality.
+        TreeView drawing functionality.
     */
     struct JUCE_API  LookAndFeelMethods
     {
@@ -868,15 +899,15 @@ public:
     /** @internal */
     void enablementChanged() override;
     /** @internal */
-    bool isInterestedInFileDrag (const StringArray& files) override;
+    bool isInterestedInFileDrag (const StringArray&) override;
     /** @internal */
-    void fileDragEnter (const StringArray& files, int x, int y) override;
+    void fileDragEnter (const StringArray&, int, int) override;
     /** @internal */
-    void fileDragMove (const StringArray& files, int x, int y) override;
+    void fileDragMove (const StringArray&, int, int) override;
     /** @internal */
-    void fileDragExit (const StringArray& files) override;
+    void fileDragExit (const StringArray&) override;
     /** @internal */
-    void filesDropped (const StringArray& files, int x, int y) override;
+    void filesDropped (const StringArray&, int, int) override;
     /** @internal */
     bool isInterestedInDragSource (const SourceDetails&) override;
     /** @internal */
@@ -887,28 +918,23 @@ public:
     void itemDragExit (const SourceDetails&) override;
     /** @internal */
     void itemDropped (const SourceDetails&) override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     friend class TreeViewItem;
 
+    class ItemComponent;
     class ContentComponent;
     class TreeViewport;
     class InsertPointHighlight;
     class TargetGroupHighlight;
-
-    std::unique_ptr<TreeViewport> viewport;
-    CriticalSection nodeAlterationLock;
-    TreeViewItem* rootItem = nullptr;
-    std::unique_ptr<InsertPointHighlight> dragInsertPointHighlight;
-    std::unique_ptr<TargetGroupHighlight> dragTargetGroupHighlight;
-    int indentSize = -1;
-    bool defaultOpenness = false, needsRecalculating = true, rootItemVisible = true;
-    bool multiSelectEnabled = false, openCloseButtonsVisible = true;
+    class TreeAccessibilityHandler;
+    struct InsertPoint;
 
     void itemsChanged() noexcept;
-    void recalculateIfNeeded();
+    void updateVisibleItems();
     void updateButtonUnderMouse (const MouseEvent&);
-    struct InsertPoint;
     void showDragHighlight (const InsertPoint&) noexcept;
     void hideDragHighlight() noexcept;
     void handleDrag (const StringArray&, const SourceDetails&);
@@ -916,7 +942,14 @@ private:
     bool toggleOpenSelectedItem();
     void moveOutOfSelectedItem();
     void moveIntoSelectedItem();
-    void moveByPages (int numPages);
+    void moveByPages (int);
+
+    std::unique_ptr<TreeViewport> viewport;
+    TreeViewItem* rootItem = nullptr;
+    std::unique_ptr<InsertPointHighlight> dragInsertPointHighlight;
+    std::unique_ptr<TargetGroupHighlight> dragTargetGroupHighlight;
+    int indentSize = -1;
+    bool defaultOpenness = false, rootItemVisible = true, multiSelectEnabled = false, openCloseButtonsVisible = true;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // this method has been deprecated - see the new version..

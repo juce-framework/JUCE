@@ -390,7 +390,7 @@ public:
 
             jbyteArray postDataArray = nullptr;
 
-            if (postData.getSize() > 0)
+            if (! postData.isEmpty())
             {
                 postDataArray = env->NewByteArray (static_cast<jsize> (postData.getSize()));
                 env->SetByteArrayRegion (postDataArray, 0, static_cast<jsize> (postData.getSize()), (const jbyte*) postData.getData());

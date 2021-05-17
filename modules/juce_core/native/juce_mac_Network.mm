@@ -1121,7 +1121,7 @@ private:
                                                                   postData,
                                                                   addParametersToRequestBody);
 
-                        if (postData.getSize() > 0)
+                        if (! postData.isEmpty())
                             [req setHTTPBody: [NSData dataWithBytes: postData.getData()
                                                              length: postData.getSize()]];
                     }

@@ -1509,7 +1509,7 @@ private:
         usesFloatingPointData = (bitsPerSample == 32);
     }
 
-    static size_t chunkSize (const MemoryBlock& data) noexcept     { return data.getSize() > 0 ? (8 + data.getSize()) : 0; }
+    static size_t chunkSize (const MemoryBlock& data) noexcept     { return data.isEmpty() ? 0 : (8 + data.getSize()); }
 
     void writeChunkHeader (int chunkType, int size) const
     {
@@ -1519,7 +1519,7 @@ private:
 
     void writeChunk (const MemoryBlock& data, int chunkType, int size = 0) const
     {
-        if (data.getSize() > 0)
+        if (! data.isEmpty())
         {
             writeChunkHeader (chunkType, size != 0 ? size : (int) data.getSize());
             *output << data;

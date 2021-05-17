@@ -239,4 +239,15 @@ void ToolbarItemComponent::setEditingMode (const ToolbarEditingMode newMode)
     }
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ToolbarItemComponent::createAccessibilityHandler()
+{
+    const auto shouldItemBeAccessible = (itemId != ToolbarItemFactory::separatorBarId
+                                      && itemId != ToolbarItemFactory::spacerId
+                                      && itemId != ToolbarItemFactory::flexibleSpacerId);
+
+    return shouldItemBeAccessible ? std::make_unique<ButtonAccessibilityHandler> (*this)
+                                  : nullptr;
+}
+
 } // namespace juce

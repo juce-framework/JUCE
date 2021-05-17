@@ -1327,23 +1327,44 @@ private:
         void update (const ChangeDetails& details)
         {
             if (details.latencyChanged)
+            {
                 owner.vstEffect.initialDelay = owner.processor->getLatencySamples();
+                callbackBits |= audioMasterIOChangedBit;
+            }
 
             if (details.parameterInfoChanged || details.programChanged)
-                triggerAsyncUpdate();
+                callbackBits |= audioMasterUpdateDisplayBit;
+
+            triggerAsyncUpdate();
         }
 
     private:
         void handleAsyncUpdate() override
         {
+            const auto callbacksToFire = callbackBits.exchange (0);
+
             if (auto* callback = owner.hostCallback)
             {
-                callback (&owner.vstEffect, Vst2::audioMasterUpdateDisplay, 0, 0, nullptr, 0);
-                callback (&owner.vstEffect, Vst2::audioMasterIOChanged,     0, 0, nullptr, 0);
+                struct FlagPair
+                {
+                    Vst2::AudioMasterOpcodesX opcode;
+                    int bit;
+                };
+
+                constexpr FlagPair pairs[] { { Vst2::audioMasterUpdateDisplay, audioMasterUpdateDisplayBit },
+                                             { Vst2::audioMasterIOChanged,     audioMasterIOChangedBit } };
+
+                for (const auto& pair : pairs)
+                    if ((callbacksToFire & pair.bit) != 0)
+                        callback (&owner.vstEffect, pair.opcode, 0, 0, nullptr, 0);
             }
         }
 
+        static constexpr auto audioMasterUpdateDisplayBit = 1 << 0;
+        static constexpr auto audioMasterIOChangedBit     = 1 << 1;
+
         JuceVSTWrapper& owner;
+        std::atomic<int> callbackBits { 0 };
     };
 
     static JuceVSTWrapper* getWrapper (Vst2::AEffect* v) noexcept  { return static_cast<JuceVSTWrapper*> (v->object); }

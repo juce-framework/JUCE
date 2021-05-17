@@ -28,6 +28,8 @@
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
 
+#include <unordered_map>
+
 namespace juce
 {
 
@@ -103,7 +105,7 @@ class EditControllerParameterDispatcher  : private Timer
 public:
     ~EditControllerParameterDispatcher() override { stopTimer(); }
 
-    void push (size_t index, float value)
+    void push (Steinberg::int32 index, float value)
     {
         if (controller == nullptr)
             return;
@@ -123,7 +125,7 @@ public:
 
     void flush()
     {
-        cache.ifSet ([this] (size_t index, float value)
+        cache.ifSet ([this] (Steinberg::int32 index, float value)
         {
             controller->setParamNormalized (cache.getParamID (index), value);
         });
@@ -319,7 +321,8 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
                           public Vst::IComponentHandler3, // From VST V3.5.0 (also very well named!)
                           public Vst::IContextMenuTarget,
                           public Vst::IHostApplication,
-                          public Vst::IUnitHandler
+                          public Vst::IUnitHandler,
+                          private ComponentRestarter::Listener
 {
     VST3HostContext()
     {
@@ -327,7 +330,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
         attributeList = new AttributeList (this);
     }
 
-    virtual ~VST3HostContext() {}
+    virtual ~VST3HostContext() override {}
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
@@ -566,6 +569,10 @@ private:
     VST3PluginInstance* plugin = nullptr;
     Atomic<int> refCount;
     String appName;
+
+    ComponentRestarter componentRestarter { *this };
+
+    void restartComponentOnMessageThread (int32 flags) override;
 
     //==============================================================================
     struct Message  : public Vst::IMessage
@@ -1351,10 +1358,13 @@ struct VST3PluginWindow : public AudioProcessorEditor,
                           public ComponentPeer::ScaleFactorListener,
                           public IPlugFrame
 {
-    VST3PluginWindow (AudioProcessor* owner, IPlugView* pluginView)
+    VST3PluginWindow (AudioPluginInstance* owner, IPlugView* pluginView)
       : AudioProcessorEditor (owner),
         ComponentMovementWatcher (this),
         view (pluginView, false)
+       #if JUCE_MAC
+      , embeddedComponent (*owner)
+       #endif
     {
         setSize (10, 10);
         setOpaque (true);
@@ -1616,7 +1626,7 @@ private:
     std::unique_ptr<ComponentPeer> peer;
     using HandleFormat = HWND;
    #elif JUCE_MAC
-    AutoResizingNSViewComponentWithParent embeddedComponent;
+    NSViewComponentWithParent embeddedComponent;
     using HandleFormat = NSView*;
    #elif JUCE_LINUX || JUCE_BSD
     SharedResourcePointer<RunLoop> runLoop;
@@ -1836,7 +1846,7 @@ struct VST3ComponentHolder
 class ParamValueQueue : public Vst::IParamValueQueue
 {
 public:
-    ParamValueQueue (Vst::ParamID idIn, size_t parameterIndexIn)
+    ParamValueQueue (Vst::ParamID idIn, Steinberg::int32 parameterIndexIn)
         : paramId (idIn), parameterIndex (parameterIndexIn) {}
 
     virtual ~ParamValueQueue() = default;
@@ -1846,7 +1856,7 @@ public:
 
     Vst::ParamID PLUGIN_API getParameterId() override { return paramId; }
 
-    size_t getParameterIndex() const noexcept { return parameterIndex; }
+    Steinberg::int32 getParameterIndex() const noexcept { return parameterIndex; }
 
     Steinberg::int32 PLUGIN_API getPointCount() override { return size; }
 
@@ -1889,7 +1899,7 @@ public:
 
 private:
     const Vst::ParamID paramId;
-    const size_t parameterIndex;
+    const Steinberg::int32 parameterIndex;
     float cachedValue;
     Steinberg::int32 size = 0;
     Atomic<int> refCount;
@@ -1978,10 +1988,10 @@ public:
 
     void initialise (const std::vector<Vst::ParamID>& idsIn)
     {
-        size_t index = 0;
+        Steinberg::int32 index = 0;
 
         for (const auto& id : idsIn)
-            map.emplace (id, Entry { std::make_unique<ParamValueQueue> (id, index++) });
+            map.emplace (id, Entry { std::make_unique<ParamValueQueue> (id, Steinberg::int32 { index++ }) });
 
         queues.reserve (map.size());
         queues.clear();
@@ -2011,7 +2021,7 @@ public:
     struct VST3Parameter final  : public Parameter
     {
         VST3Parameter (VST3PluginInstance& parent,
-                       int vstParameterIndex,
+                       Steinberg::int32 vstParameterIndex,
                        Steinberg::Vst::ParamID parameterID,
                        bool parameterIsAutomatable)
             : pluginInstance (parent),
@@ -2023,15 +2033,15 @@ public:
 
         float getValue() const override
         {
-            return pluginInstance.cachedParamValues.get ((size_t) vstParamIndex);
+            return pluginInstance.cachedParamValues.get (vstParamIndex);
         }
 
         /*  The 'normal' setValue call, which will update both the processor and editor.
         */
         void setValue (float newValue) override
         {
-            pluginInstance.cachedParamValues.set ((size_t) vstParamIndex, newValue);
-            pluginInstance.parameterDispatcher.push ((size_t) vstParamIndex, newValue);
+            pluginInstance.cachedParamValues.set (vstParamIndex, newValue);
+            pluginInstance.parameterDispatcher.push (vstParamIndex, newValue);
         }
 
         /*  If the editor set the value, there's no need to notify it that the parameter
@@ -2041,7 +2051,7 @@ public:
         */
         void setValueFromEditor (float newValue)
         {
-            pluginInstance.cachedParamValues.set ((size_t) vstParamIndex, newValue);
+            pluginInstance.cachedParamValues.set (vstParamIndex, newValue);
             sendValueChangedMessageToListeners (newValue);
         }
 
@@ -2119,7 +2129,7 @@ public:
         }
 
         VST3PluginInstance& pluginInstance;
-        const int vstParamIndex;
+        const Steinberg::int32 vstParamIndex;
         const Steinberg::Vst::ParamID paramID;
         const bool automatable;
         const bool discrete = getNumSteps() != AudioProcessor::getDefaultNumParameterSteps();
@@ -2224,6 +2234,7 @@ public:
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
+        updateMidiMappings();
 
         auto configureParameters = [this]
         {
@@ -2246,6 +2257,16 @@ public:
     }
 
     void* getPlatformSpecificData() override   { return holder->component; }
+
+    void updateMidiMappings()
+    {
+        // MIDI mappings will always be updated on the main thread, but we need to ensure
+        // that we're not simultaneously reading them on the audio thread.
+        const SpinLock::ScopedLockType processLock (processMutex);
+
+        if (midiMapping != nullptr)
+            storedMidiMapping.storeMappings (*midiMapping);
+    }
 
     //==============================================================================
     const String getName() const override
@@ -2290,6 +2311,8 @@ public:
         // thread. If you call it from a different thread, some plugins may break.
         JUCE_ASSERT_MESSAGE_THREAD
         MessageManagerLock lock;
+
+        const SpinLock::ScopedLockType processLock (processMutex);
 
         // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
         if (isActive
@@ -2350,6 +2373,8 @@ public:
 
     void releaseResources() override
     {
+        const SpinLock::ScopedLockType lock (processMutex);
+
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
@@ -2370,16 +2395,26 @@ public:
     }
 
     //==============================================================================
-    VST3Parameter* getParameterForID (Vst::ParamID paramID)
+    /*  Important: It is strongly recommended to use this function if you need to
+        find the JUCE parameter corresponding to a particular IEditController
+        parameter.
+
+        Note that a parameter at a given index in the IEditController does not
+        necessarily correspond to the parameter at the same index in
+        AudioProcessor::getParameters().
+    */
+    VST3Parameter* getParameterForID (Vst::ParamID paramID) const
     {
-        const auto index = getIndexOfParamID (paramID);
-        return index < 0 ? nullptr : static_cast<VST3Parameter*> (getParameters()[index]);
+        const auto it = idToParamMap.find (paramID);
+        return it != idToParamMap.end() ? it->second : nullptr;
     }
 
     //==============================================================================
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
+
+        const SpinLock::ScopedLockType processLock (processMutex);
 
         if (isActive && processor != nullptr)
             processAudio (buffer, midiMessages, Vst::kSample32, false);
@@ -2389,6 +2424,8 @@ public:
     {
         jassert (isUsingDoublePrecision());
 
+        const SpinLock::ScopedLockType processLock (processMutex);
+
         if (isActive && processor != nullptr)
             processAudio (buffer, midiMessages, Vst::kSample64, false);
     }
@@ -2396,6 +2433,8 @@ public:
     void processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
+
+        const SpinLock::ScopedLockType processLock (processMutex);
 
         if (bypassParam != nullptr)
         {
@@ -2411,6 +2450,8 @@ public:
     void processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (isUsingDoublePrecision());
+
+        const SpinLock::ScopedLockType processLock (processMutex);
 
         if (bypassParam != nullptr)
         {
@@ -2450,20 +2491,20 @@ public:
         for (int i = getTotalNumInputChannels(); i < buffer.getNumChannels(); ++i)
             buffer.clear (i, 0, numSamples);
 
+        inputParameterChanges->clear();
+        outputParameterChanges->clear();
+
         associateWith (data, buffer);
         associateWith (data, midiMessages);
 
-        inputParameterChanges ->clear();
-        outputParameterChanges->clear();
-
-        cachedParamValues.ifSet ([&] (size_t index, float value)
+        cachedParamValues.ifSet ([&] (Steinberg::int32 index, float value)
         {
             inputParameterChanges->set (cachedParamValues.getParamID (index), value);
         });
 
         processor->process (data);
 
-        outputParameterChanges->forEach ([&] (size_t index, float value)
+        outputParameterChanges->forEach ([&] (Steinberg::int32 index, float value)
         {
             parameterDispatcher.push (index, value);
         });
@@ -2478,6 +2519,8 @@ public:
 
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
+        const SpinLock::ScopedLockType processLock (processMutex);
+
         // if the processor is not active, we ask the underlying plug-in if the
         // layout is actually supported
         if (! isActive)
@@ -2732,6 +2775,8 @@ public:
     //==============================================================================
     void reset() override
     {
+        const SpinLock::ScopedLockType lock (processMutex);
+
         if (holder->component != nullptr && processor != nullptr)
         {
             processor->setProcessing (false);
@@ -2883,39 +2928,17 @@ private:
     StringArray programNames;
     Vst::ParamID programParameterID = (Vst::ParamID) -1;
 
-    std::map<Vst::ParamID, int> paramToIndexMap;
-
-    int getMappedParamID (Vst::ParamID paramID) const
-    {
-        auto it = paramToIndexMap.find (paramID);
-        return it != paramToIndexMap.end() ? it->second : -1;
-    }
-
-    int getIndexOfParamID (Vst::ParamID paramID)
-    {
-        if (editController == nullptr)
-            return -1;
-
-        auto result = getMappedParamID (paramID);
-
-        if (result < 0)
-        {
-            auto numParams = editController->getParameterCount();
-
-            for (int i = 0; i < numParams; ++i)
-            {
-                Vst::ParameterInfo paramInfo;
-                editController->getParameterInfo (i, paramInfo);
-                paramToIndexMap[paramInfo.id] = i;
-            }
-
-            result = getMappedParamID (paramID);
-        }
-
-        return result;
-    }
-
+    std::map<Vst::ParamID, VST3Parameter*> idToParamMap;
     EditControllerParameterDispatcher parameterDispatcher;
+    StoredMidiMapping storedMidiMapping;
+
+    /*  The plugin may request a restart during playback, which may in turn
+        attempt to call functions such as setProcessing and setActive. It is an
+        error to call these functions simultaneously with
+        IAudioProcessor::process, so we use this mutex to ensure that this
+        scenario is impossible.
+    */
+    SpinLock processMutex;
 
     //==============================================================================
     template <typename Type>
@@ -3042,6 +3065,19 @@ private:
         }
 
         setParameterTree (std::move (newParameterTree));
+
+        idToParamMap = [this]
+        {
+            std::map<Vst::ParamID, VST3Parameter*> result;
+
+            for (auto* parameter : getParameters())
+            {
+                auto* vst3Param = static_cast<VST3Parameter*> (parameter);
+                result.emplace (vst3Param->getParamID(), vst3Param);
+            }
+
+            return result;
+        }();
     }
 
     void synchroniseStates()
@@ -3198,10 +3234,12 @@ private:
         midiOutputs->clear();
 
         if (acceptsMidi())
+        {
             MidiEventList::hostToPluginEventList (*midiInputs,
                                                   midiBuffer,
                                                   destination.inputParameterChanges,
-                                                  midiMapping);
+                                                  storedMidiMapping);
+        }
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;
@@ -3213,12 +3251,12 @@ private:
         destination.processContext = &timingInfo;
     }
 
-    Vst::ParameterInfo getParameterInfoForIndex (int index) const
+    Vst::ParameterInfo getParameterInfoForIndex (Steinberg::int32 index) const
     {
         Vst::ParameterInfo paramInfo{};
 
-        if (processor != nullptr)
-            editController->getParameterInfo (index, paramInfo);
+        if (editController != nullptr)
+            editController->getParameterInfo ((int32) index, paramInfo);
 
         return paramInfo;
     }
@@ -3377,32 +3415,46 @@ tresult VST3HostContext::endEdit (Vst::ParamID paramID)
 
 tresult VST3HostContext::restartComponent (Steinberg::int32 flags)
 {
-    if (plugin != nullptr)
+    // If you hit this, the plugin has requested a restart from a thread other than
+    // the UI thread. JUCE should be able to cope, but you should consider filing a bug
+    // report against the plugin.
+    JUCE_ASSERT_MESSAGE_THREAD
+
+    componentRestarter.restart (flags);
+    return kResultTrue;
+}
+
+void VST3HostContext::restartComponentOnMessageThread (int32 flags)
+{
+    if (plugin == nullptr)
     {
-        if (hasFlag (flags, Vst::kReloadComponent))
-            plugin->reset();
-
-        if (hasFlag (flags, Vst::kIoChanged))
-        {
-            auto sampleRate = plugin->getSampleRate();
-            auto blockSize  = plugin->getBlockSize();
-
-            plugin->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
-                                   blockSize > 0 ? blockSize : 1024);
-        }
-
-        if (hasFlag (flags, Vst::kLatencyChanged))
-            if (plugin->processor != nullptr)
-                plugin->setLatencySamples (jmax (0, (int) plugin->processor->getLatencySamples()));
-
-        plugin->updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
-                                                                          .withParameterInfoChanged (true));
-
-        return kResultTrue;
+        jassertfalse;
+        return;
     }
 
-    jassertfalse;
-    return kResultFalse;
+    if (hasFlag (flags, Vst::kReloadComponent))
+        plugin->reset();
+
+    if (hasFlag (flags, Vst::kIoChanged))
+    {
+        auto sampleRate = plugin->getSampleRate();
+        auto blockSize  = plugin->getBlockSize();
+
+        // Have to deactivate here, otherwise prepareToPlay might not pick up the new bus layouts
+        plugin->releaseResources();
+        plugin->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
+        blockSize > 0 ? blockSize : 1024);
+    }
+
+    if (hasFlag (flags, Vst::kLatencyChanged))
+        if (plugin->processor != nullptr)
+            plugin->setLatencySamples (jmax (0, (int) plugin->processor->getLatencySamples()));
+
+    if (hasFlag (flags, Vst::kMidiCCAssignmentChanged))
+        plugin->updateMidiMappings();
+
+    plugin->updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
+                                                                      .withParameterInfoChanged (true));
 }
 
 //==============================================================================

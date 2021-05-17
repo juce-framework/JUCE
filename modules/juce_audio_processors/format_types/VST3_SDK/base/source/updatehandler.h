@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -57,7 +57,7 @@ public:
 	/** cancel pending messages send by \param object or by any if object is 0 */
 	virtual tresult PLUGIN_API cancelUpdates (FUnknown* object) = 0;
 	/** send pending messages send by \param object or by any if object is 0 */
-	virtual tresult PLUGIN_API triggerDeferedUpdates (FUnknown* object = 0) = 0;
+	virtual tresult PLUGIN_API triggerDeferedUpdates (FUnknown* object = nullptr) = 0;
 	static const FUID iid;
 };
 
@@ -86,20 +86,20 @@ public:
 
 	// IUpdateHandler
 	/** register \param dependent to get messages from \param object */
-	virtual tresult PLUGIN_API addDependent (FUnknown* object, IDependent* dependent) SMTG_OVERRIDE;
+	tresult PLUGIN_API addDependent (FUnknown* object, IDependent* dependent) SMTG_OVERRIDE;
 	/** unregister \param dependent to get no messages from \param object */
-	virtual tresult PLUGIN_API removeDependent (FUnknown* object,
+	tresult PLUGIN_API removeDependent (FUnknown* object,
 	                                            IDependent* dependent) SMTG_OVERRIDE;
 	/** send \param message to all dependents of \param object immediately */
-	virtual tresult PLUGIN_API triggerUpdates (FUnknown* object, int32 message) SMTG_OVERRIDE;
+	tresult PLUGIN_API triggerUpdates (FUnknown* object, int32 message) SMTG_OVERRIDE;
 	/** send \param message to all dependents of \param object when idle */
-	virtual tresult PLUGIN_API deferUpdates (FUnknown* object, int32 message) SMTG_OVERRIDE;
+	tresult PLUGIN_API deferUpdates (FUnknown* object, int32 message) SMTG_OVERRIDE;
 
 	// IUpdateManager
 	/** cancel pending messages send by \param object or by any if object is 0 */
-	virtual tresult PLUGIN_API cancelUpdates (FUnknown* object) SMTG_OVERRIDE;
+	tresult PLUGIN_API cancelUpdates (FUnknown* object) SMTG_OVERRIDE;
 	/** send pending messages send by \param object or by any if object is 0 */
-	virtual tresult PLUGIN_API triggerDeferedUpdates (FUnknown* object = 0) SMTG_OVERRIDE;
+	tresult PLUGIN_API triggerDeferedUpdates (FUnknown* object = nullptr) SMTG_OVERRIDE;
 
 	/// @cond ignore
 	// obsolete functions kept for compatibility

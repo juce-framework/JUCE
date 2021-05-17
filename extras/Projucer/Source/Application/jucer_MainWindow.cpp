@@ -376,15 +376,8 @@ void MainWindow::setupTemporaryPIPProject (PIPGenerator& generator)
 
     currentProject->setTemporaryDirectory (generator.getOutputDirectory());
 
-    ProjectSaver liveBuildSaver (*currentProject);
-    liveBuildSaver.saveContentNeededForLiveBuild();
-
     if (auto* pcc = getProjectContentComponent())
     {
-        pcc->invokeDirectly (CommandIDs::toggleBuildEnabled, true);
-        pcc->invokeDirectly (CommandIDs::buildNow, true);
-        pcc->invokeDirectly (CommandIDs::toggleContinuousBuild, true);
-
         auto fileToDisplay = generator.getPIPFile();
 
         if (fileToDisplay != File())
@@ -487,6 +480,10 @@ void MainWindow::showLoginFormOverlay()
 {
     blurOverlayComponent = std::make_unique<BlurOverlayWithComponent> (*this, std::make_unique<LoginFormComponent> (*this));
     loginFormOpen = true;
+
+    if (auto* loginForm = blurOverlayComponent->getChildComponent (0))
+        if (auto* handler = loginForm->getAccessibilityHandler())
+            handler->grabFocus();
 }
 
 void MainWindow::hideLoginFormOverlay()

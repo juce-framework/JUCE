@@ -365,9 +365,6 @@ namespace Ids
     DECLARE_ID (website);
     DECLARE_ID (mainClass);
     DECLARE_ID (moduleFlags);
-    DECLARE_ID (buildEnabled);
-    DECLARE_ID (continuousRebuildEnabled);
-    DECLARE_ID (warningsEnabled);
     DECLARE_ID (projectLineFeed);
     DECLARE_ID (compilerFlagSchemes);
     DECLARE_ID (compilerFlagScheme);
@@ -375,9 +372,9 @@ namespace Ids
     DECLARE_ID (dontAskAboutJUCEPath);
     DECLARE_ID (postExportShellCommandPosix);
     DECLARE_ID (postExportShellCommandWin);
-    DECLARE_ID (liveBuildEnabled);
     DECLARE_ID (guiEditorEnabled);
     DECLARE_ID (jucerFormatVersion);
+    DECLARE_ID (buildNumber);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

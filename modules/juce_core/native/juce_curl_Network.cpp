@@ -144,7 +144,7 @@ public:
     //==============================================================================
     // Input Stream overrides
     bool isError() const                 { return curl == nullptr || lastError != CURLE_OK; }
-    bool isExhausted()                   { return (isError() || finished) && curlBuffer.getSize() == 0; }
+    bool isExhausted()                   { return (isError() || finished) && curlBuffer.isEmpty(); }
     int64 getPosition()                  { return streamPos; }
     int64 getTotalLength()               { return contentLength; }
 
@@ -336,7 +336,7 @@ public:
 
         // step until either: 1) there is an error 2) the transaction is complete
         // or 3) data is in the in buffer
-        while ((! finished) && curlBuffer.getSize() == 0)
+        while ((! finished) && curlBuffer.isEmpty())
         {
             {
                 const ScopedLock lock (cleanupLock);

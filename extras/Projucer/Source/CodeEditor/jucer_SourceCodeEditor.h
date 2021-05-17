@@ -83,8 +83,8 @@ public:
     bool save() override;
     bool saveAs() override;
 
-    Component* createEditor() override;
-    Component* createViewer() override       { return createEditor(); }
+    std::unique_ptr<Component> createEditor() override;
+    std::unique_ptr<Component> createViewer() override  { return createEditor(); }
 
     void updateLastState (CodeEditorComponent&);
     void applyLastState (CodeEditorComponent&) const;

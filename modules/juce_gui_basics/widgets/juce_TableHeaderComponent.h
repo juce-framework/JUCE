@@ -416,6 +416,8 @@ public:
     void mouseUp (const MouseEvent&) override;
     /** @internal */
     MouseCursor getMouseCursor() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
     /** Can be overridden for more control over the pop-up menu behaviour. */
     virtual void showColumnChooserMenu (int columnIdClicked);

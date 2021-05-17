@@ -896,4 +896,10 @@ void TableHeaderComponent::Listener::tableColumnDraggingChanged (TableHeaderComp
 {
 }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> TableHeaderComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::tableHeader);
+}
+
 } // namespace juce

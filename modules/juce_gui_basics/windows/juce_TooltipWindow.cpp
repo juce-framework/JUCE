@@ -117,6 +117,12 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
        #endif
 
         toFront (false);
+
+        if (auto* handler = getAccessibilityHandler())
+        {
+            setDescription (tip);
+            handler->grabFocus();
+        }
     }
 }
 
@@ -137,6 +143,9 @@ void TooltipWindow::hideTip()
 {
     if (! reentrant)
     {
+        if (auto* handler = getAccessibilityHandler())
+            handler->giveAwayFocus();
+
         tipShowing.clear();
         removeFromDesktop();
         setVisible (false);
@@ -204,6 +213,12 @@ void TooltipWindow::timerCallback()
             }
         }
     }
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> TooltipWindow::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::tooltip);
 }
 
 } // namespace juce

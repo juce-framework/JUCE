@@ -59,6 +59,7 @@ public:
         imageList.setDirectory (File::getSpecialLocation (File::userPicturesDirectory), true, true);
         directoryThread.startThread (1);
 
+        fileTree.setTitle ("Files");
         fileTree.addListener (this);
         fileTree.setColour (TreeView::backgroundColourId, Colours::grey);
         addAndMakeVisible (fileTree);

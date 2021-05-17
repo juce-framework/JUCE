@@ -66,9 +66,6 @@ target_sources(Projucer PRIVATE
     Source/ComponentEditor/jucer_JucerDocument.cpp
     Source/ComponentEditor/jucer_ObjectTypes.cpp
     Source/ComponentEditor/jucer_PaintRoutine.cpp
-    Source/LiveBuildEngine/jucer_CompileEngineClient.cpp
-    Source/LiveBuildEngine/jucer_CompileEngineServer.cpp
-    Source/LiveBuildEngine/jucer_DownloadCompileEngineThread.cpp
     Source/Project/Modules/jucer_Modules.cpp
     Source/Project/UI/jucer_HeaderComponent.cpp
     Source/Project/jucer_Project.cpp

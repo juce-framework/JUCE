@@ -62,11 +62,7 @@ static void callCPUID (int result[4], uint32 type)
 #else
 static void callCPUID (int result[4], int infoType)
 {
-   #if JUCE_PROJUCER_LIVE_BUILD
-    std::fill (result, result + 4, 0);
-   #else
     __cpuid (result, infoType);
-   #endif
 }
 #endif
 
@@ -291,8 +287,11 @@ String SystemStats::getOperatingSystemName()
         case MacOSX_10_12:      JUCE_FALLTHROUGH
         case MacOSX_10_13:      JUCE_FALLTHROUGH
         case MacOSX_10_14:      JUCE_FALLTHROUGH
+        case MacOSX_10_15:      JUCE_FALLTHROUGH
+        case MacOS_11:          JUCE_FALLTHROUGH
 
         case UnknownOS:         JUCE_FALLTHROUGH
+        case WASM:              JUCE_FALLTHROUGH
         default:                jassertfalse; break; // !! new type of OS?
     }
 

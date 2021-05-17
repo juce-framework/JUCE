@@ -263,6 +263,8 @@ protected:
     bool keyPressed (const KeyPress&) override;
     /** @internal */
     float getDesktopScaleFactor() const override { return desktopScale; }
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     float desktopScale = 1.0f;

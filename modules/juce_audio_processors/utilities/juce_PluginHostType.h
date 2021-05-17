@@ -60,6 +60,7 @@ public:
         AppleLogic,                 /**< Represents Apple Logic Pro. */
         AppleMainStage,             /**< Represents Apple Main Stage. */
         Ardour,                     /**< Represents Ardour. */
+        AULab,                      /**< Represents AU Lab. */
         AvidProTools,               /**< Represents Avid Pro Tools. */
         BitwigStudio,               /**< Represents Bitwig Studio. */
         CakewalkSonar8,             /**< Represents Cakewalk Sonar 8. */
@@ -120,6 +121,8 @@ public:
     bool isAdobeAudition() const noexcept     { return type == AdobeAudition; }
     /** Returns true if the host is Ardour. */
     bool isArdour() const noexcept            { return type == Ardour; }
+    /** Returns true if the host is AU Lab. */
+    bool isAULab() const noexcept             { return type == AULab; }
     /** Returns true if the host is Bitwig Studio. */
     bool isBitwigStudio() const noexcept      { return type == BitwigStudio; }
     /** Returns true if the host is any version of Steinberg Cubase. */

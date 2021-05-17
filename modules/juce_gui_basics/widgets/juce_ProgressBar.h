@@ -127,6 +127,8 @@ protected:
     void visibilityChanged() override;
     /** @internal */
     void colourChanged() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     double& progress;

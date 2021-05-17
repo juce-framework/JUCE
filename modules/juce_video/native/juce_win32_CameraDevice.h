@@ -522,7 +522,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
     struct GrabberCallback   : public ComBaseClassHelperBase<ISampleGrabberCB>
     {
         GrabberCallback (Pimpl& p)
-            : ComBaseClassHelperBase<ISampleGrabberCB> (0), owner (p) {}
+            : ComBaseClassHelperBase (0), owner (p) {}
 
         JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
         {

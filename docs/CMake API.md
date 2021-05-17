@@ -192,6 +192,10 @@ might slow down configuration a bit. If you enable this, you should probably als
 `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists as this is required for
 source grouping to work.
 
+Source groupings are a little sensitive to the project layout. As such, you should always ensure
+that the call to `juce_add_module` which adds a specific module happens *before* calling
+`juce_add_*` to add any dependent targets.
+
 The modules will be placed in a group named "JUCE Modules" within the group for each target,
 alongside the "Source Files" and "Header Files" groups.
 
@@ -231,7 +235,15 @@ attributes directly to these creation functions, rather than adding them later.
 
 - `VERSION`
   - A version number string in the format "major.minor.bugfix". If not specified, the `VERSION` of
-    the project containing the target will be used instead.
+    the project containing the target will be used instead. On Apple platforms, this is the
+    user-facing version string. This option corresponds to the `CFBundleShortVersionString` field in
+    the target's plist.
+
+- `BUILD_VERSION`
+  - A version number string in the format "major.minor.bugfix". If not specified, this will match
+    the `VERSION` of the target. On Apple platforms, this is the private version string used to
+    distinguish between App Store builds. This option corresponds to the `CFBundleVersion` field in
+    the target's plist.
 
 - `BUNDLE_ID`
   - An identifier string in the form "com.yourcompany.productname" which should uniquely identify
@@ -270,7 +282,7 @@ attributes directly to these creation functions, rather than adding them later.
 
 - `STATUS_BAR_HIDDEN`
   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
-  
+
  - `REQUIRES_FULL_SCREEN`
    - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
 
