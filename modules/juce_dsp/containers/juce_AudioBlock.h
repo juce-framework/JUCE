@@ -457,14 +457,14 @@ public:
 
     //==============================================================================
     /** Multiplies each channels of this block by a smoothly changing value. */
-    template <typename SmoothingType>
-    AudioBlock&       multiplyBy (SmoothedValue<SampleType, SmoothingType>& value)       noexcept   { multiplyByInternal (value); return *this; }
-    template <typename SmoothingType>
-    const AudioBlock& multiplyBy (SmoothedValue<SampleType, SmoothingType>& value) const noexcept   { multiplyByInternal (value); return *this; }
+    template <typename SmoothingType,typename SmoothingSampleType>
+    AudioBlock&       multiplyBy (SmoothedValue<SmoothingSampleType, SmoothingType>& value)       noexcept   { multiplyByInternal (value); return *this; }
+    template <typename SmoothingType,typename SmoothingSampleType>
+    const AudioBlock& multiplyBy (SmoothedValue<SmoothingSampleType, SmoothingType>& value) const noexcept   { multiplyByInternal (value); return *this; }
 
     /** Replaces each channel of this block with the product of the src block and a smoothed value. */
-    template <typename OtherSampleType, typename SmoothingType>
-    AudioBlock&       replaceWithProductOf (AudioBlock<OtherSampleType> src, SmoothedValue<SampleType, SmoothingType>& value)       noexcept   { replaceWithProductOfInternal (src, value); return *this; }
+    template <typename OtherSampleType, typename SmoothingType, typename SmoothingSampleType>
+    AudioBlock&       replaceWithProductOf (AudioBlock<OtherSampleType> src, SmoothedValue<SmoothingSampleType, SmoothingType>& value)       noexcept   { replaceWithProductOfInternal (src, value); return *this; }
     template <typename OtherSampleType, typename SmoothingType, typename SmoothingSampleType>
     const AudioBlock& replaceWithProductOf (AudioBlock<OtherSampleType> src, SmoothedValue<SmoothingSampleType, SmoothingType>& value) const noexcept   { replaceWithProductOfInternal (src, value); return *this; }
 
@@ -756,18 +756,18 @@ private:
             FloatVectorOperations::multiply (getDataPointer (ch), src1.getDataPointer (ch), src2.getDataPointer (ch), n);
     }
 
-    template <typename SmoothingType>
-    void multiplyByInternal (SmoothedValue<SampleType, SmoothingType>& value) const noexcept
+    template <typename SmoothingType, typename SmoothingSampleType>
+    void multiplyByInternal (SmoothedValue<SmoothingSampleType, SmoothingType>& value) const noexcept
     {
         if (! value.isSmoothing())
         {
-            multiplyByInternal (value.getTargetValue());
+            multiplyByInternal (SampleType(value.getTargetValue()));
         }
         else
         {
             for (size_t i = 0; i < numSamples; ++i)
             {
-                const auto scaler = value.getNextValue();
+                const auto scaler = SampleType(value.getNextValue());
 
                 for (size_t ch = 0; ch < numChannels; ++ch)
                     getDataPointer (ch)[i] *= scaler;
