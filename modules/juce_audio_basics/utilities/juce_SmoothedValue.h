@@ -67,6 +67,8 @@ public:
     /** Returns the current value of the ramp. */
     FloatType getCurrentValue() const noexcept           { return currentValue; }
 
+    int getCountdown() const noexcept               { return countdown; }
+
     //==============================================================================
     /** Returns the target value towards which the smoothed value is currently moving. */
     FloatType getTargetValue() const noexcept            { return target; }
