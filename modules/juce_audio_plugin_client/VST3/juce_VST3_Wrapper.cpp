@@ -652,15 +652,7 @@ public:
     tresult PLUGIN_API initialize (FUnknown* context) override
     {
         if (hostContext != context)
-        {
-            if (hostContext != nullptr)
-                hostContext->release();
-
             hostContext = context;
-
-            if (hostContext != nullptr)
-                hostContext->addRef();
-        }
 
         return kResultTrue;
     }
