@@ -149,10 +149,6 @@ void ProjectContentComponent::setProject (Project* newProject)
     }
 }
 
-void ProjectContentComponent::saveTreeViewState()
-{
-}
-
 void ProjectContentComponent::saveOpenDocumentList()
 {
     if (project != nullptr)

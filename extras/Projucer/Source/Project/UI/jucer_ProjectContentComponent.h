@@ -46,7 +46,6 @@ public:
     Project* getProject() const noexcept    { return project; }
     void setProject (Project*);
 
-    void saveTreeViewState();
     void saveOpenDocumentList();
     void reloadLastOpenDocuments();
 
