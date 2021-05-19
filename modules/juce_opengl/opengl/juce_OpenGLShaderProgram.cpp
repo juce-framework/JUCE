@@ -75,7 +75,7 @@ bool OpenGLShaderProgram::addShader (const String& code, GLenum type)
     GLint status = GL_FALSE;
     context.extensions.glGetShaderiv (shaderID, GL_COMPILE_STATUS, &status);
 
-    if (status == GL_FALSE)
+    if (status == (GLint) GL_FALSE)
     {
         GLchar infoLog [16384];
         GLsizei infoLogLength = 0;
@@ -113,7 +113,7 @@ bool OpenGLShaderProgram::link() noexcept
     GLint status = GL_FALSE;
     context.extensions.glGetProgramiv (progID, GL_LINK_STATUS, &status);
 
-    if (status == GL_FALSE)
+    if (status == (GLint) GL_FALSE)
     {
         GLchar infoLog [16384];
         GLsizei infoLogLength = 0;
@@ -129,7 +129,7 @@ bool OpenGLShaderProgram::link() noexcept
     }
 
     JUCE_CHECK_OPENGL_ERROR
-    return status != GL_FALSE;
+    return status != (GLint) GL_FALSE;
 }
 
 void OpenGLShaderProgram::use() const noexcept

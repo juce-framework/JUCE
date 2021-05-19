@@ -6,6 +6,39 @@ Develop
 
 Change
 ------
+Platform GL headers are no longer included in juce_opengl.h
+
+Possible Issues
+---------------
+Projects depending on symbols declared in these headers may fail to build.
+
+Workaround
+----------
+The old platform-supplied headers have been replaced with a new juce_gl.h
+header which is generated using the XML registry files supplied by Khronos.
+This custom header declares GL symbols in the juce::gl namespace. If your code
+only needs to be JUCE-compatible, you can explicitly qualify each name with
+`juce::gl::`. If you need your code to build with different extension-loader
+libraries (GLEW, GL3W etc.) you can make all GL symbols visible without
+additional qualification with `using namespace juce::gl`.
+
+Rationale
+---------
+Using our own GL headers allows us to generate platform-independent headers
+which include symbols for all specified OpenGL versions and extensions. Note
+that although the function signatures exist, they may not resolve to a function
+at runtime. If your code uses commands from an extension or recent GL version,
+you should check each function pointer against `nullptr` before attempting to
+use it. To avoid repeatedly checking, you could query a subset of functions
+after calling gl::loadFunctions() and cache the results. Supplying custom GL
+headers also allows us to use C++ techniques (namespaces, references), making
+the headers safer than the platform-defined headers. Platform headers are
+generally written in C, and export a significant portion of their symbols as
+preprocessor definitions.
+
+
+Change
+------
 The functions `getComponentAsyncLayerBackedViewDisabled`
 and `setComponentAsyncLayerBackedViewDisabled` were moved into the juce
 namespace.

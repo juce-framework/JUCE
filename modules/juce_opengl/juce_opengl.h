@@ -55,82 +55,28 @@
 #pragma once
 #define JUCE_OPENGL_H_INCLUDED
 
-#include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_core/system/juce_TargetPlatform.h>
 
 #undef JUCE_OPENGL
 #define JUCE_OPENGL 1
 
 #if JUCE_IOS || JUCE_ANDROID
  #define JUCE_OPENGL_ES 1
+ #include "opengl/juce_gles2.h"
+#else
+ #include "opengl/juce_gl.h"
 #endif
 
-#if JUCE_WINDOWS
- #ifndef APIENTRY
-  #define APIENTRY __stdcall
-  #define CLEAR_TEMP_APIENTRY 1
- #endif
- #ifndef WINGDIAPI
-  #define WINGDIAPI __declspec(dllimport)
-  #define CLEAR_TEMP_WINGDIAPI 1
- #endif
-
- #if JUCE_MINGW
-  #include <GL/gl.h>
- #else
-  #include <gl/GL.h>
- #endif
-
- #ifdef CLEAR_TEMP_WINGDIAPI
-  #undef WINGDIAPI
-  #undef CLEAR_TEMP_WINGDIAPI
- #endif
- #ifdef CLEAR_TEMP_APIENTRY
-  #undef APIENTRY
-  #undef CLEAR_TEMP_APIENTRY
- #endif
-#elif JUCE_LINUX || JUCE_BSD
- #include <GL/gl.h>
- #undef KeyPress
-#elif JUCE_IOS
- #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_12_0
-  #define GLES_SILENCE_DEPRECATION 1
- #endif
- #include <OpenGLES/ES3/gl.h>
-#elif JUCE_MAC
- #define JUCE_OPENGL3 1
- #if defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
-  #define GL_SILENCE_DEPRECATION 1
- #endif
- #include <OpenGL/gl3.h>
- #include <OpenGL/gl3ext.h>
-#elif JUCE_ANDROID
- #include <android/native_window.h>
- #include <android/native_window_jni.h>
- #if JUCE_ANDROID_GL_ES_VERSION_3_0
-  #define JUCE_OPENGL3 1
-  #include <GLES3/gl3.h>
- #else
-  #include <GLES2/gl2.h>
- #endif
- #include <EGL/egl.h>
-#endif
-
-#if GL_ES_VERSION_3_0
- #define JUCE_OPENGL3 1
-#endif
+#include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
 /** This macro is a helper for use in GLSL shader code which needs to compile on both OpenGL 2.1 and OpenGL 3.0.
     It's mandatory in OpenGL 3.0 to specify the GLSL version.
 */
-#if JUCE_OPENGL3
- #if JUCE_OPENGL_ES
-  #define JUCE_GLSL_VERSION "#version 300 es"
- #else
-  #define JUCE_GLSL_VERSION "#version 150"
- #endif
+#if JUCE_OPENGL_ES
+ #define JUCE_GLSL_VERSION "#version 300 es"
 #else
- #define JUCE_GLSL_VERSION ""
+ #define JUCE_GLSL_VERSION "#version 150"
 #endif
 
 //==============================================================================
@@ -170,7 +116,6 @@ namespace juce
 #include "geometry/juce_Matrix3D.h"
 #include "geometry/juce_Quaternion.h"
 #include "geometry/juce_Draggable3DOrientation.h"
-#include "native/juce_MissingGLDefinitions.h"
 #include "opengl/juce_OpenGLHelpers.h"
 #include "opengl/juce_OpenGLPixelFormat.h"
 #include "native/juce_OpenGLExtensions.h"

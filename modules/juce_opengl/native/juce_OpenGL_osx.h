@@ -80,11 +80,9 @@ public:
         ignoreUnused (version);
         int numAttribs = 0;
 
-       #if JUCE_OPENGL3
         attribs[numAttribs++] = NSOpenGLPFAOpenGLProfile;
         attribs[numAttribs++] = version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core
                                                      : NSOpenGLProfileVersionLegacy;
-       #endif
 
         attribs[numAttribs++] = NSOpenGLPFADoubleBuffer;
         attribs[numAttribs++] = NSOpenGLPFAClosestPolicy;
