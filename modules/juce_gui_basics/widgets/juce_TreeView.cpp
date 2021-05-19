@@ -420,7 +420,11 @@ private:
                         if (auto* dragContainer = DragAndDropContainer::findParentDragContainerFor (this))
                         {
                             pos.setSize (pos.getWidth(), item.itemHeight);
-                            auto dragImage = Component::createComponentSnapshot (pos, true);
+
+                            auto dragImage = Component::createComponentSnapshot (pos,
+                                                                                 true,
+                                                                                 Component::getApproximateScaleFactorForComponent (itemComponent));
+
                             dragImage.multiplyAllAlphas (0.6f);
 
                             auto imageOffset = pos.getPosition() - e.getPosition();
