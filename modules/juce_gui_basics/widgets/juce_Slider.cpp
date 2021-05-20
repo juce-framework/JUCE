@@ -1680,7 +1680,48 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
 
 std::unique_ptr<AccessibilityHandler> Slider::createAccessibilityHandler()
 {
-    return std::make_unique<SliderAccessibilityHandler> (*this);
+    class ValueInterface  : public AccessibilityValueInterface
+    {
+    public:
+        explicit ValueInterface (Slider& sliderToWrap)
+            : slider (sliderToWrap),
+              valueToControl (slider.isTwoValue() ? slider.getMaxValueObject() : slider.getValueObject())
+        {
+        }
+
+        bool isReadOnly() const override                         { return false; }
+
+        double getCurrentValue() const override                  { return valueToControl.getValue(); }
+        void setValue (double newValue) override                 { valueToControl = newValue; }
+
+        String getCurrentValueAsString() const override          { return slider.getTextFromValue (getCurrentValue()); }
+        void setValueAsString (const String& newValue) override  { setValue (slider.getValueFromText (newValue)); }
+
+        AccessibleValueRange getRange() const override
+        {
+            return { { slider.getMinimum(), slider.getMaximum() },
+                     getStepSize() };
+        }
+
+    private:
+        double getStepSize() const
+        {
+            auto interval = slider.getInterval();
+
+            return interval != 0.0 ? interval
+                                   : slider.proportionOfLengthToValue (0.01);
+        }
+
+        Slider& slider;
+        Value valueToControl;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
+    };
+
+    return std::make_unique<AccessibilityHandler> (*this,
+                                                   AccessibilityRole::slider,
+                                                   AccessibilityActions{},
+                                                   AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (*this) });
 }
 
 } // namespace juce

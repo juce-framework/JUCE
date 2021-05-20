@@ -443,25 +443,15 @@ bool ScrollBar::getVisibility() const noexcept
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> ScrollBar::createAccessibilityHandler()
 {
-    class ScrollBarValueInterface  : public AccessibilityRangedNumericValueInterface
+    class ValueInterface  : public AccessibilityRangedNumericValueInterface
     {
     public:
-        explicit ScrollBarValueInterface (ScrollBar& scrollBarToWrap)
-            : scrollBar (scrollBarToWrap)
-        {
-        }
+        explicit ValueInterface (ScrollBar& scrollBarToWrap)  : scrollBar (scrollBarToWrap) {}
 
-        bool isReadOnly() const override  { return false; }
+        bool isReadOnly() const override          { return false; }
 
-        double getCurrentValue() const override
-        {
-            return scrollBar.getCurrentRangeStart();
-        }
-
-        void setValue (double newValue) override
-        {
-            scrollBar.setCurrentRangeStart (newValue);
-        }
+        double getCurrentValue() const override   { return scrollBar.getCurrentRangeStart(); }
+        void setValue (double newValue) override  { scrollBar.setCurrentRangeStart (newValue); }
 
         AccessibleValueRange getRange() const override
         {
@@ -474,12 +464,14 @@ std::unique_ptr<AccessibilityHandler> ScrollBar::createAccessibilityHandler()
 
     private:
         ScrollBar& scrollBar;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
     };
 
     return std::make_unique<AccessibilityHandler> (*this,
                                                    AccessibilityRole::scrollBar,
                                                    AccessibilityActions{},
-                                                   AccessibilityHandler::Interfaces { std::make_unique<ScrollBarValueInterface> (*this) });
+                                                   AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (*this) });
 }
 
 } // namespace juce

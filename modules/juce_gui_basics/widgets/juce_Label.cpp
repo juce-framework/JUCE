@@ -515,6 +515,35 @@ void Label::textEditorFocusLost (TextEditor& ed)
     textEditorTextChanged (ed);
 }
 
+//==============================================================================
+class LabelAccessibilityHandler  : public AccessibilityHandler
+{
+public:
+    explicit LabelAccessibilityHandler (Label& labelToWrap)
+        : AccessibilityHandler (labelToWrap,
+                                AccessibilityRole::staticText,
+                                getAccessibilityActions (labelToWrap)),
+          label (labelToWrap)
+    {
+    }
+
+    String getTitle() const override  { return label.getText(); }
+
+private:
+    static AccessibilityActions getAccessibilityActions (Label& label)
+    {
+        if (label.isEditable())
+            return AccessibilityActions().addAction (AccessibilityActionType::press, [&label] { label.showEditor(); });
+
+        return {};
+    }
+
+    Label& label;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LabelAccessibilityHandler)
+};
+
 std::unique_ptr<AccessibilityHandler> Label::createAccessibilityHandler()
 {
     return std::make_unique<LabelAccessibilityHandler> (*this);

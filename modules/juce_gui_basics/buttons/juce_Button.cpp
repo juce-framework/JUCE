@@ -700,6 +700,69 @@ void Button::repeatTimerCallback()
 }
 
 //==============================================================================
+class ButtonAccessibilityHandler  : public AccessibilityHandler
+{
+public:
+    explicit ButtonAccessibilityHandler (Button& buttonToWrap)
+        : AccessibilityHandler (buttonToWrap,
+                                getButtonRole (buttonToWrap),
+                                getAccessibilityActions (buttonToWrap)),
+          button (buttonToWrap)
+    {
+    }
+
+    AccessibleState getCurrentState() const override
+    {
+        auto state = AccessibilityHandler::getCurrentState();
+
+        if (button.getClickingTogglesState())
+        {
+            state = state.withCheckable();
+
+            if (button.getToggleState())
+                state = state.withChecked();
+        }
+
+        return state;
+    }
+
+    String getTitle() const override
+    {
+        auto title = AccessibilityHandler::getTitle();
+
+        if (title.isEmpty())
+            return button.getButtonText();
+
+        return title;
+    }
+
+private:
+    static AccessibilityRole getButtonRole (const Button& b)
+    {
+        if (b.getRadioGroupId() != 0)     return AccessibilityRole::radioButton;
+        if (b.getClickingTogglesState())  return AccessibilityRole::toggleButton;
+
+        return AccessibilityRole::button;
+    }
+
+    static AccessibilityActions getAccessibilityActions (Button& button)
+    {
+        auto actions = AccessibilityActions().addAction (AccessibilityActionType::press,
+                                                         [&button] { button.triggerClick(); });
+
+        if (button.getClickingTogglesState())
+            actions = actions.addAction (AccessibilityActionType::toggle,
+                                         [&button] { button.setToggleState (! button.getToggleState(), sendNotification); });
+
+        return actions;
+    }
+
+    Button& button;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAccessibilityHandler)
+};
+
 std::unique_ptr<AccessibilityHandler> Button::createAccessibilityHandler()
 {
     return std::make_unique<ButtonAccessibilityHandler> (*this);

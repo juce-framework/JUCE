@@ -1328,7 +1328,32 @@ void TreeView::itemDropped (const SourceDetails& dragSourceDetails)
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> TreeView::createAccessibilityHandler()
 {
-    return std::make_unique<TreeViewAccessibilityHandler> (*this);
+    class TableInterface  : public AccessibilityTableInterface
+    {
+    public:
+        explicit TableInterface (TreeView& treeViewToWrap)  : treeView (treeViewToWrap) {}
+
+        int getNumRows() const override     { return treeView.getNumRowsInTree(); }
+        int getNumColumns() const override  { return 1; }
+
+        const AccessibilityHandler* getCellHandler (int row, int) const override
+        {
+            if (auto* itemComp = treeView.getItemComponent (treeView.getItemOnRow (row)))
+                return itemComp->getAccessibilityHandler();
+
+            return nullptr;
+        }
+
+    private:
+        TreeView& treeView;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableInterface)
+    };
+
+    return std::make_unique<AccessibilityHandler> (*this,
+                                                   AccessibilityRole::tree,
+                                                   AccessibilityActions{},
+                                                   AccessibilityHandler::Interfaces { std::make_unique<TableInterface> (*this) });
 }
 
 //==============================================================================
