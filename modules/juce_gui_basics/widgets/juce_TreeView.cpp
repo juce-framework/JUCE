@@ -625,6 +625,10 @@ public:
         const auto hasScrolledSideways = (newVisibleArea.getX() != lastX);
         lastX = newVisibleArea.getX();
         updateComponents (hasScrolledSideways);
+
+        if (auto* tree = getParentComponent())
+            if (auto* handler = tree->getAccessibilityHandler())
+                handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
     }
 
     ContentComponent* getContentComp() const noexcept
