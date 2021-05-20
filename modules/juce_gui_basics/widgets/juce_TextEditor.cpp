@@ -1498,7 +1498,9 @@ RectangleList<int> TextEditor::getTextBounds (Range<int> textRange)
         }
     }
 
-    boundingBox.offsetAll (getLeftIndent(), roundToInt ((float) getTopIndent() + yOffset));
+    boundingBox.offsetAll (getLeftIndent() - viewport->getViewPositionX(),
+                           roundToInt ((float) getTopIndent() + yOffset) - viewport->getViewPositionY());
+
     return boundingBox;
 }
 
