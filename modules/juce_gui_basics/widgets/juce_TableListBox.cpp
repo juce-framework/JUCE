@@ -235,7 +235,7 @@ public:
         RowAccessibilityHandler (RowComp& rowComp)
             : AccessibilityHandler (rowComp,
                                     AccessibilityRole::row,
-                                    getListRowAccessibilityActions (*this, rowComp),
+                                    getListRowAccessibilityActions (rowComp),
                                     { std::make_unique<RowComponentCellInterface> (*this) }),
               rowComponent (rowComp)
         {

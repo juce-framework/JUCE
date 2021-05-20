@@ -26,27 +26,24 @@
 namespace juce
 {
 
-template<typename RowHandlerType, typename RowComponent>
-static AccessibilityActions getListRowAccessibilityActions (RowHandlerType& handler, RowComponent& rowComponent)
+template<typename RowComponentType>
+static AccessibilityActions getListRowAccessibilityActions (RowComponentType& rowComponent)
 {
     auto onFocus = [&rowComponent]
     {
         rowComponent.owner.scrollToEnsureRowIsOnscreen (rowComponent.row);
-        rowComponent.owner.selectRow (rowComponent.row);
     };
 
     auto onPress = [&rowComponent, onFocus]
     {
         onFocus();
+        rowComponent.owner.selectRow (rowComponent.row);
         rowComponent.owner.keyPressed (KeyPress (KeyPress::returnKey));
     };
 
-    auto onToggle = [&handler, &rowComponent, onFocus]
+    auto onToggle = [&rowComponent]
     {
-        if (handler.getCurrentState().isSelected())
-            rowComponent.owner.deselectRow (rowComponent.row);
-        else
-            onFocus();
+        rowComponent.owner.flipRowSelection (rowComponent.row);
     };
 
     return AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
@@ -199,7 +196,7 @@ public:
         explicit RowAccessibilityHandler (RowComponent& rowComponentToWrap)
             : AccessibilityHandler (rowComponentToWrap,
                                     AccessibilityRole::listItem,
-                                    getListRowAccessibilityActions (*this, rowComponentToWrap)),
+                                    getListRowAccessibilityActions (rowComponentToWrap)),
               rowComponent (rowComponentToWrap)
         {
         }
@@ -298,6 +295,9 @@ public:
 
         if (auto* m = owner.getModel())
             m->listWasScrolled();
+
+        if (auto* handler = owner.getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
     }
 
     void updateVisibleArea (const bool makeSureItUpdatesContent)
