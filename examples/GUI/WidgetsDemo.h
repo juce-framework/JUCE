@@ -514,10 +514,42 @@ struct MenuPage   : public Component
         {
             PopupMenu menu;
 
-            for (auto i = 0; i < 40; ++i)
+            for (int i = 0; i < 40; ++i)
                 menu.addItem ("Item " + String (i), nullptr);
 
             menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (longMenuButton));
+        };
+
+        addAndMakeVisible (nestedMenusButton);
+        nestedMenusButton.onClick = [&]
+        {
+            PopupMenu menu;
+
+            for (int i = 0; i < 15; ++i)
+            {
+                PopupMenu subMenu;
+
+                for (int j = 0; j < 10; ++j)
+                {
+                    if (j % 2 == 0)
+                    {
+                        PopupMenu subSubMenu;
+
+                        for (int z = 0; z < 5; ++z)
+                            subSubMenu.addItem ("Sub-sub-item " + String (z), nullptr);
+
+                        subMenu.addSubMenu ("Sub-item " + String (j), subSubMenu);
+                    }
+                    else
+                    {
+                        subMenu.addItem ("Sub-item " + String (j), nullptr);
+                    }
+                }
+
+                menu.addSubMenu ("Item " + String (i), subMenu);
+            }
+
+            menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (nestedMenusButton));
         };
 
         addAndMakeVisible (multiColumnMenuButton);
@@ -525,7 +557,7 @@ struct MenuPage   : public Component
         {
             PopupMenu menu;
 
-            for (auto i = 0; i < 200; ++i)
+            for (int i = 0; i < 200; ++i)
                 menu.addItem ("Item " + String (i), nullptr);
 
             menu.showMenuAsync (PopupMenu::Options{}.withTargetComponent (multiColumnMenuButton)
@@ -574,14 +606,12 @@ struct MenuPage   : public Component
             const auto colour = Colour::fromHSL (randomColourGenerator.nextFloat(), 0.5f, 0.5f, 1.0f);
             fancyThemeButton.setColour (TextButton::buttonColourId, colour);
 
-            const int columnLengths[] { 5, 10, 7, 3 };
-
             PopupMenu menu;
             menu.setLookAndFeel (&popupLookAndFeel);
 
-            for (auto length : columnLengths)
+            for (auto length : { 5, 10, 7, 3 })
             {
-                for (auto i = 0; i < length; ++i)
+                for (int i = 0; i < length; ++i)
                     menu.addItem ("Item " + String (i), nullptr);
 
                 menu.addColumnBreak();
@@ -602,6 +632,7 @@ struct MenuPage   : public Component
         box.flexDirection = FlexBox::Direction::column;
         box.items = { makeItem (shortMenuButton),
                       makeItem (longMenuButton),
+                      makeItem (nestedMenusButton),
                       makeItem (multiColumnMenuButton),
                       makeItem (customItemButton),
                       makeItem (fancyThemeButton) };
@@ -651,6 +682,7 @@ struct MenuPage   : public Component
 
     TextButton shortMenuButton       { "Short" },
                longMenuButton        { "Long" },
+               nestedMenusButton     { "Nested Sub-Menus" },
                multiColumnMenuButton { "Multi Column" },
                customItemButton      { "Custom Items" },
                fancyThemeButton      { "Fancy Theme with Column Breaks" };
