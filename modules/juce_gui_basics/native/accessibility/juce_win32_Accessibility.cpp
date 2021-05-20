@@ -133,15 +133,24 @@ void sendAccessibilityPropertyChangedEvent (const AccessibilityHandler& handler,
 
 void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent eventType)
 {
+    if (eventType == InternalAccessibilityEvent::elementCreated
+        || eventType == InternalAccessibilityEvent::elementDestroyed)
+    {
+        if (auto* parent = handler.getParent())
+            sendAccessibilityAutomationEvent (*parent, UIA_LayoutInvalidatedEventId);
+
+        return;
+    }
+
     auto event = [eventType]() -> EVENTID
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::elementCreated:
-            case InternalAccessibilityEvent::elementDestroyed:  return UIA_StructureChangedEventId;
             case InternalAccessibilityEvent::focusChanged:      return UIA_AutomationFocusChangedEventId;
             case InternalAccessibilityEvent::windowOpened:      return UIA_Window_WindowOpenedEventId;
             case InternalAccessibilityEvent::windowClosed:      return UIA_Window_WindowClosedEventId;
+            case InternalAccessibilityEvent::elementCreated:
+            case InternalAccessibilityEvent::elementDestroyed:  break;
         }
 
         return {};
