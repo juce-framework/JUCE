@@ -369,7 +369,8 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
                           public Vst::IComponentHandler3, // From VST V3.5.0 (also very well named!)
                           public Vst::IContextMenuTarget,
                           public Vst::IHostApplication,
-                          public Vst::IUnitHandler
+                          public Vst::IUnitHandler,
+                          private ComponentRestarter::Listener
 {
     VST3HostContext()
     {
@@ -377,7 +378,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
         attributeList = new AttributeList (this);
     }
 
-    virtual ~VST3HostContext() {}
+    virtual ~VST3HostContext() override {}
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
@@ -616,6 +617,10 @@ private:
     VST3PluginInstance* plugin = nullptr;
     Atomic<int> refCount;
     String appName;
+
+    ComponentRestarter componentRestarter { *this };
+
+    void restartComponentOnMessageThread (int32 flags) override;
 
     //==============================================================================
     struct Message  : public Vst::IMessage
@@ -2279,6 +2284,7 @@ public:
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
+        updateMidiMappings();
 
         auto configureParameters = [this]
         {
@@ -2301,6 +2307,16 @@ public:
     }
 
     void* getPlatformSpecificData() override   { return holder->component; }
+
+    void updateMidiMappings()
+    {
+        // MIDI mappings will always be updated on the main thread, but we need to ensure
+        // that we're not simultaneously reading them on the audio thread.
+        const SpinLock::ScopedLockType processLock (processMutex);
+
+        if (midiMapping != nullptr)
+            storedMidiMapping.storeMappings (*midiMapping);
+    }
 
     //==============================================================================
     const String getName() const override
@@ -2971,6 +2987,7 @@ private:
 
     std::map<Vst::ParamID, VST3Parameter*> idToParamMap;
     EditControllerParameterDispatcher parameterDispatcher;
+    StoredMidiMapping storedMidiMapping;
 
     /*  The plugin may request a restart during playback, which may in turn
         attempt to call functions such as setProcessing and setActive. It is an
@@ -3274,10 +3291,12 @@ private:
         midiOutputs->clear();
 
         if (acceptsMidi())
+        {
             MidiEventList::hostToPluginEventList (*midiInputs,
                                                   midiBuffer,
                                                   destination.inputParameterChanges,
-                                                  midiMapping);
+                                                  storedMidiMapping);
+        }
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;
@@ -3453,34 +3472,46 @@ tresult VST3HostContext::endEdit (Vst::ParamID paramID)
 
 tresult VST3HostContext::restartComponent (Steinberg::int32 flags)
 {
-    if (plugin != nullptr)
+    // If you hit this, the plugin has requested a restart from a thread other than
+    // the UI thread. JUCE should be able to cope, but you should consider filing a bug
+    // report against the plugin.
+    JUCE_ASSERT_MESSAGE_THREAD
+
+    componentRestarter.restart (flags);
+    return kResultTrue;
+}
+
+void VST3HostContext::restartComponentOnMessageThread (int32 flags)
+{
+    if (plugin == nullptr)
     {
-        if (hasFlag (flags, Vst::kReloadComponent))
-            plugin->reset();
-
-        if (hasFlag (flags, Vst::kIoChanged))
-        {
-            auto sampleRate = plugin->getSampleRate();
-            auto blockSize  = plugin->getBlockSize();
-
-            // Have to deactivate here, otherwise prepareToPlay might not pick up the new bus layouts
-            plugin->releaseResources();
-            plugin->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
-                                   blockSize > 0 ? blockSize : 1024);
-        }
-
-        if (hasFlag (flags, Vst::kLatencyChanged))
-            if (plugin->processor != nullptr)
-                plugin->setLatencySamples (jmax (0, (int) plugin->processor->getLatencySamples()));
-
-        plugin->updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
-                                                                          .withParameterInfoChanged (true));
-
-        return kResultTrue;
+        jassertfalse;
+        return;
     }
 
-    jassertfalse;
-    return kResultFalse;
+    if (hasFlag (flags, Vst::kReloadComponent))
+        plugin->reset();
+
+    if (hasFlag (flags, Vst::kIoChanged))
+    {
+        auto sampleRate = plugin->getSampleRate();
+        auto blockSize  = plugin->getBlockSize();
+
+        // Have to deactivate here, otherwise prepareToPlay might not pick up the new bus layouts
+        plugin->releaseResources();
+        plugin->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
+        blockSize > 0 ? blockSize : 1024);
+    }
+
+    if (hasFlag (flags, Vst::kLatencyChanged))
+        if (plugin->processor != nullptr)
+            plugin->setLatencySamples (jmax (0, (int) plugin->processor->getLatencySamples()));
+
+    if (hasFlag (flags, Vst::kMidiCCAssignmentChanged))
+        plugin->updateMidiMappings();
+
+    plugin->updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
+                                                                      .withParameterInfoChanged (true));
 }
 
 //==============================================================================
