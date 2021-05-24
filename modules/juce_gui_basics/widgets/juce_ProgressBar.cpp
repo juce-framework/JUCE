@@ -120,10 +120,10 @@ void ProgressBar::timerCallback()
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> ProgressBar::createAccessibilityHandler()
 {
-    class ProgressBarValueInterface  : public AccessibilityRangedNumericValueInterface
+    class ValueInterface  : public AccessibilityRangedNumericValueInterface
     {
     public:
-        explicit ProgressBarValueInterface (ProgressBar& progressBarToWrap)
+        explicit ValueInterface (ProgressBar& progressBarToWrap)
             : progressBar (progressBarToWrap)
         {
         }
@@ -135,12 +135,14 @@ std::unique_ptr<AccessibilityHandler> ProgressBar::createAccessibilityHandler()
 
     private:
         ProgressBar& progressBar;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
     };
 
     return std::make_unique<AccessibilityHandler> (*this,
                                                    AccessibilityRole::progressBar,
                                                    AccessibilityActions{},
-                                                   AccessibilityHandler::Interfaces { std::make_unique<ProgressBarValueInterface> (*this) });
+                                                   AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (*this) });
 }
 
 } // namespace juce

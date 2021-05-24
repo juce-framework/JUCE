@@ -161,6 +161,13 @@ public:
     /** Returns true if this UI element should be ignored by accessibility clients. */
     bool isIgnored() const;
 
+    /** Returns true if this UI element is visible within its parent.
+
+        This will always return true for UI elements with the AccessibleState::accessibleOffscreen
+        flag set.
+    */
+    bool isVisibleWithinParent() const;
+
     //==============================================================================
     /** Returns the set of actions that the UI element supports and the associated
         callbacks.
@@ -232,10 +239,9 @@ public:
 
     /** Tries to give focus to this UI element.
 
-        If the UI element is focusable, as indicated by AccessibleState::isFocusable(),
-        this will perform its AccessibilityActionType::focus action, try to give keyboard
-        focus to the Component it represents, and notify any listening accessibility
-        clients that the current focus has changed.
+        If the UI element is focusable and not ignored this will update the currently focused
+        element, try to give keyboard focus to the Component it represents, and notify any
+        listening accessibility clients that the current focus has changed.
 
         @see hasFocus, giveAwayFocus
     */

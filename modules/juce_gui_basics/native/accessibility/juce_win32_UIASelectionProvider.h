@@ -112,7 +112,7 @@ public:
 
         AddToSelection();
 
-        if (! isRadioButton)
+        if (isElementValid() && ! isRadioButton)
         {
             const auto& handler = getHandler();
 

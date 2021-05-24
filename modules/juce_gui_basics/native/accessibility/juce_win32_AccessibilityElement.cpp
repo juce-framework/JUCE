@@ -87,12 +87,6 @@ static long roleToControlTypeId (AccessibilityRole roleType)
     return UIA_CustomControlTypeId;
 }
 
-static bool isEditableText (const AccessibilityHandler& handler)
-{
-    return handler.getRole() == AccessibilityRole::editableText
-          && handler.getTextInterface() != nullptr;
-}
-
 //==============================================================================
 AccessibilityNativeHandle::AccessibilityNativeHandle (AccessibilityHandler& handler)
     : ComBaseClassHelper (0),
@@ -171,10 +165,12 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 }
                 case UIA_ValuePatternId:
                 {
-                    auto editableText = isEditableText (accessibilityHandler);
-
-                    if (accessibilityHandler.getValueInterface() != nullptr || editableText)
-                        return new UIAValueProvider (this, editableText);
+                    if (accessibilityHandler.getValueInterface() != nullptr
+                        || isEditableText (accessibilityHandler)
+                        || nameIsAccessibilityValue (role))
+                    {
+                        return new UIAValueProvider (this);
+                    }
 
                     break;
                 }
@@ -223,21 +219,15 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 }
                 case UIA_GridPatternId:
                 {
-                    if ((role == AccessibilityRole::table || role == AccessibilityRole::tree)
-                        && accessibilityHandler.getTableInterface() != nullptr)
-                    {
+                    if (accessibilityHandler.getTableInterface() != nullptr)
                         return new UIAGridProvider (this);
-                    }
 
                     break;
                 }
                 case UIA_GridItemPatternId:
                 {
-                    if ((role == AccessibilityRole::cell || role == AccessibilityRole::treeItem)
-                        && accessibilityHandler.getCellInterface() != nullptr)
-                    {
+                    if (accessibilityHandler.getCellInterface() != nullptr)
                         return new UIAGridItemProvider (this);
-                    }
 
                     break;
                 }
@@ -250,11 +240,8 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 }
                 case UIA_ExpandCollapsePatternId:
                 {
-                    if (role == AccessibilityRole::menuItem
-                        && accessibilityHandler.getActions().contains (AccessibilityActionType::showMenu))
-                    {
+                    if (accessibilityHandler.getActions().contains (AccessibilityActionType::showMenu))
                         return new UIAExpandCollapseProvider (this);
-                    }
 
                     break;
                 }
@@ -277,14 +264,16 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
 
         const auto fragmentRoot = isFragmentRoot();
 
+        const auto role = accessibilityHandler.getRole();
+        const auto state = accessibilityHandler.getCurrentState();
+
         switch (propertyId)
         {
             case UIA_AutomationIdPropertyId:
                 VariantHelpers::setString (getAutomationId (accessibilityHandler), pRetVal);
                 break;
             case UIA_ControlTypePropertyId:
-                VariantHelpers::setInt (roleToControlTypeId (accessibilityHandler.getRole()),
-                                        pRetVal);
+                VariantHelpers::setInt (roleToControlTypeId (role), pRetVal);
                 break;
             case UIA_FrameworkIdPropertyId:
                 VariantHelpers::setString ("JUCE", pRetVal);
@@ -296,25 +285,26 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
                 VariantHelpers::setString (accessibilityHandler.getHelp(), pRetVal);
                 break;
             case UIA_IsContentElementPropertyId:
-                VariantHelpers::setBool (! accessibilityHandler.isIgnored(), pRetVal);
+                VariantHelpers::setBool (! accessibilityHandler.isIgnored() && accessibilityHandler.isVisibleWithinParent(),
+                                         pRetVal);
                 break;
             case UIA_IsControlElementPropertyId:
                 VariantHelpers::setBool (true, pRetVal);
                 break;
             case UIA_IsDialogPropertyId:
-                VariantHelpers::setBool (accessibilityHandler.getRole() == AccessibilityRole::dialogWindow, pRetVal);
+                VariantHelpers::setBool (role == AccessibilityRole::dialogWindow, pRetVal);
                 break;
             case UIA_IsEnabledPropertyId:
                 VariantHelpers::setBool (accessibilityHandler.getComponent().isEnabled(), pRetVal);
                 break;
             case UIA_IsKeyboardFocusablePropertyId:
-                VariantHelpers::setBool (accessibilityHandler.getCurrentState().isFocusable(), pRetVal);
+                VariantHelpers::setBool (state.isFocusable(), pRetVal);
                 break;
             case UIA_HasKeyboardFocusPropertyId:
                 VariantHelpers::setBool (accessibilityHandler.hasFocus (true), pRetVal);
                 break;
             case UIA_IsOffscreenPropertyId:
-                VariantHelpers::setBool (false, pRetVal);
+                VariantHelpers::setBool (! accessibilityHandler.isVisibleWithinParent(), pRetVal);
                 break;
             case UIA_IsPasswordPropertyId:
                 if (auto* textInterface = accessibilityHandler.getTextInterface())
@@ -322,9 +312,9 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
 
                 break;
             case UIA_IsPeripheralPropertyId:
-                VariantHelpers::setBool (accessibilityHandler.getRole() == AccessibilityRole::tooltip
-                                         || accessibilityHandler.getRole() == AccessibilityRole::popupMenu
-                                         || accessibilityHandler.getRole() == AccessibilityRole::splashScreen,
+                VariantHelpers::setBool (role == AccessibilityRole::tooltip
+                                         || role == AccessibilityRole::popupMenu
+                                         || role == AccessibilityRole::splashScreen,
                                          pRetVal);
                 break;
             case UIA_NamePropertyId:
@@ -451,7 +441,12 @@ JUCE_COMRESULT AccessibilityNativeHandle::SetFocus()
     if (! isElementValid())
         return UIA_E_ELEMENTNOTAVAILABLE;
 
-    accessibilityHandler.grabFocus();
+    const WeakReference<Component> safeComponent (&accessibilityHandler.getComponent());
+
+    accessibilityHandler.getActions().invoke (AccessibilityActionType::focus);
+
+    if (safeComponent != nullptr)
+        accessibilityHandler.grabFocus();
 
     return S_OK;
 }
@@ -544,7 +539,12 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (IRawElementProviderFragment*
 //==============================================================================
 String AccessibilityNativeHandle::getElementName() const
 {
-    if (accessibilityHandler.getRole() == AccessibilityRole::tooltip)
+    const auto role = accessibilityHandler.getRole();
+
+    if (nameIsAccessibilityValue (role))
+        return {};
+
+    if (role == AccessibilityRole::tooltip)
         return accessibilityHandler.getDescription();
 
     auto name = accessibilityHandler.getTitle();

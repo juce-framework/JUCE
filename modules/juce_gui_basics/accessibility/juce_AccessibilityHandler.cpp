@@ -79,6 +79,13 @@ AccessibleState AccessibilityHandler::getCurrentState() const
     return hasFocus (false) ? state.withFocused() : state;
 }
 
+bool AccessibilityHandler::isIgnored() const
+{
+    return role == AccessibilityRole::ignored
+        || getCurrentState().isIgnored()
+        || component.isCurrentlyBlockedByAnotherModalComponent();
+}
+
 static bool isComponentVisibleWithinWindow (const Component& comp)
 {
     if (auto* peer = comp.getPeer())
@@ -100,16 +107,10 @@ static bool isComponentVisibleWithinParent (Component* comp)
     return true;
 }
 
-bool AccessibilityHandler::isIgnored() const
+bool AccessibilityHandler::isVisibleWithinParent() const
 {
-    const auto state = getCurrentState();
-
-    return role == AccessibilityRole::ignored
-          || state.isIgnored()
-          || ! component.isShowing()
-          || (! state.isAccessibleOffscreen()
-              && (! isComponentVisibleWithinParent (&component)
-                  || ! isComponentVisibleWithinWindow (component)));
+    return getCurrentState().isAccessibleOffscreen()
+          || (isComponentVisibleWithinParent (&component) && isComponentVisibleWithinWindow (component));
 }
 
 //==============================================================================
@@ -155,7 +156,7 @@ static AccessibilityHandler* findEnclosingHandler (Component* comp)
 static AccessibilityHandler* getUnignoredAncestor (AccessibilityHandler* handler)
 {
     while (handler != nullptr
-           && handler->isIgnored()
+           && (handler->isIgnored() || ! handler->isVisibleWithinParent())
            && handler->getParent() != nullptr)
     {
         handler = handler->getParent();
@@ -169,7 +170,7 @@ static AccessibilityHandler* findFirstUnignoredChild (const std::vector<Accessib
     if (! handlers.empty())
     {
         const auto iter = std::find_if (handlers.cbegin(), handlers.cend(),
-                                        [] (const AccessibilityHandler* handler) { return ! handler->isIgnored(); });
+                                        [] (const AccessibilityHandler* handler) { return ! handler->isIgnored() && handler->isVisibleWithinParent(); });
 
         if (iter != handlers.cend())
             return *iter;
@@ -184,7 +185,7 @@ static AccessibilityHandler* findFirstUnignoredChild (const std::vector<Accessib
 
 static AccessibilityHandler* getFirstUnignoredDescendant (AccessibilityHandler* handler)
 {
-    if (handler != nullptr && handler->isIgnored())
+    if (handler != nullptr && (handler->isIgnored() || ! handler->isVisibleWithinParent()))
         return findFirstUnignoredChild (handler->getChildren());
 
     return handler;
@@ -308,28 +309,18 @@ void AccessibilityHandler::grabFocusInternal (bool canTryParent)
 void AccessibilityHandler::giveAwayFocusInternal() const
 {
     currentlyFocusedHandler = nullptr;
-    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
 
-    if (auto* focusedComponent = Component::getCurrentlyFocusedComponent())
-        if (auto* handler = focusedComponent->getAccessibilityHandler())
-            handler->grabFocus();
+    if (auto* parent = getParent())
+        notifyAccessibilityEventInternal (*parent, InternalAccessibilityEvent::focusChanged);
 }
 
 void AccessibilityHandler::takeFocus()
 {
     currentlyFocusedHandler = this;
-
-    WeakReference<Component> weakComponent (&component);
-    actions.invoke (AccessibilityActionType::focus);
-
-    if (weakComponent != nullptr
-        && component.getWantsKeyboardFocus()
-        && ! component.hasKeyboardFocus (true))
-    {
-        component.grabKeyboardFocus();
-    }
-
     notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
+
+    if (component.getWantsKeyboardFocus() && ! component.hasKeyboardFocus (true))
+        component.grabKeyboardFocus();
 }
 
 //==============================================================================

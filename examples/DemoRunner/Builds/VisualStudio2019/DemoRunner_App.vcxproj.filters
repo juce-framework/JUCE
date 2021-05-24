@@ -227,27 +227,6 @@
     <Filter Include="JUCE Modules\juce_audio_utils">
       <UniqueIdentifier>{3197198B-A978-E330-C7FB-07E5CE8236C7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_blocks_basics\blocks">
-      <UniqueIdentifier>{C1AE9AA4-A692-C60C-9892-486757DEC4CE}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_blocks_basics\littlefoot">
-      <UniqueIdentifier>{58DC204E-D0E2-182E-BFC2-E863F245D5D2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_blocks_basics\protocol">
-      <UniqueIdentifier>{56B98154-96AF-63C0-CF58-1E2698CA95AB}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_blocks_basics\topology\internal">
-      <UniqueIdentifier>{BBFDA49F-EE50-D570-2101-7DC71D7E7DA1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_blocks_basics\topology">
-      <UniqueIdentifier>{01174C18-A414-8669-5964-5D0BEEFB965B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_blocks_basics\visualisers">
-      <UniqueIdentifier>{C5BF4FE0-80C3-4D2B-7376-A92937D89998}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="JUCE Modules\juce_blocks_basics">
-      <UniqueIdentifier>{C4ECF515-17CC-0685-65B1-031B52EE626B}</UniqueIdentifier>
-    </Filter>
     <Filter Include="JUCE Modules\juce_box2d\box2d\Collision\Shapes">
       <UniqueIdentifier>{ED064203-CFE3-44F5-49E6-0BE948CCC752}</UniqueIdentifier>
     </Filter>
@@ -1350,60 +1329,6 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.mm">
       <Filter>JUCE Modules\juce_audio_utils</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlocksVersion.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BandwidthStatsLogger.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BlockImplementation.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_BlockSerialReader.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_ConnectedDeviceGroup.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_DepreciatedVersionReader.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_Detector.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_DetectorHolder.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_DeviceInfo.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_MidiDeviceConnection.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\internal\juce_MIDIDeviceDetector.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology\internal</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_BlockGraph.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_RuleBasedTopologySource.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_BitmapLEDProgram.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\visualisers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_DrumPadLEDProgram.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics\visualisers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.cpp">
-      <Filter>JUCE Modules\juce_blocks_basics</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2ChainShape.cpp">
       <Filter>JUCE Modules\juce_box2d\box2d\Collision\Shapes</Filter>
@@ -3082,9 +3007,6 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\JuceLibraryCode\include_juce_blocks_basics.cpp">
-      <Filter>JUCE Library Code</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_box2d.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -4178,81 +4100,6 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h">
       <Filter>JUCE Modules\juce_audio_utils</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_Block.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlockConfigManager.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_BlocksVersion.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_ControlButton.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDGrid.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_LEDRow.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_StatusLight.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_TouchList.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\blocks\juce_TouchSurface.h">
-      <Filter>JUCE Modules\juce_blocks_basics\blocks</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootCompiler.h">
-      <Filter>JUCE Modules\juce_blocks_basics\littlefoot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootRemoteHeap.h">
-      <Filter>JUCE Modules\juce_blocks_basics\littlefoot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\juce_LittleFootRunner.h">
-      <Filter>JUCE Modules\juce_blocks_basics\littlefoot</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BitPackingUtilities.h">
-      <Filter>JUCE Modules\juce_blocks_basics\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BlockModels.h">
-      <Filter>JUCE Modules\juce_blocks_basics\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_BlocksProtocolDefinitions.h">
-      <Filter>JUCE Modules\juce_blocks_basics\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_HostPacketBuilder.h">
-      <Filter>JUCE Modules\juce_blocks_basics\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\protocol\juce_HostPacketDecoder.h">
-      <Filter>JUCE Modules\juce_blocks_basics\protocol</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_BlockGraph.h">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_PhysicalTopologySource.h">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_RuleBasedTopologySource.h">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_Topology.h">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\topology\juce_TopologySource.h">
-      <Filter>JUCE Modules\juce_blocks_basics\topology</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_BitmapLEDProgram.h">
-      <Filter>JUCE Modules\juce_blocks_basics\visualisers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\visualisers\juce_DrumPadLEDProgram.h">
-      <Filter>JUCE Modules\juce_blocks_basics\visualisers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_blocks_basics\juce_blocks_basics.h">
-      <Filter>JUCE Modules\juce_blocks_basics</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2ChainShape.h">
       <Filter>JUCE Modules\juce_box2d\box2d\Collision\Shapes</Filter>
@@ -6067,15 +5914,6 @@
     </None>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\README.md">
       <Filter>JUCE Modules\juce_audio_processors\format_types\VST3_SDK</Filter>
-    </None>
-    <None Include="..\..\..\..\modules\juce_blocks_basics\littlefoot\LittleFoot Language README.txt">
-      <Filter>JUCE Modules\juce_blocks_basics\littlefoot</Filter>
-    </None>
-    <None Include="..\..\..\..\modules\juce_blocks_basics\protocol\Protocol Format.txt">
-      <Filter>JUCE Modules\juce_blocks_basics\protocol</Filter>
-    </None>
-    <None Include="..\..\..\..\modules\juce_blocks_basics\README.txt">
-      <Filter>JUCE Modules\juce_blocks_basics</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_box2d\box2d\README.txt">
       <Filter>JUCE Modules\juce_box2d\box2d</Filter>

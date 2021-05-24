@@ -306,13 +306,6 @@ namespace juce
 #include "accessibility/enums/juce_AccessibilityRole.h"
 #include "accessibility/juce_AccessibilityState.h"
 #include "accessibility/juce_AccessibilityHandler.h"
-#include "accessibility/widget_handlers/juce_ButtonAccessibilityHandler.h"
-#include "accessibility/widget_handlers/juce_ComboBoxAccessibilityHandler.h"
-#include "accessibility/widget_handlers/juce_LabelAccessibilityHandler.h"
-#include "accessibility/widget_handlers/juce_SliderAccessibilityHandler.h"
-#include "accessibility/widget_handlers/juce_TableListBoxAccessibilityHandler.h"
-#include "accessibility/widget_handlers/juce_TextEditorAccessibilityHandler.h"
-#include "accessibility/widget_handlers/juce_TreeViewAccessibilityHandler.h"
 
 #if JUCE_LINUX || JUCE_BSD
  #if JUCE_GUI_BASICS_INCLUDE_XHEADERS

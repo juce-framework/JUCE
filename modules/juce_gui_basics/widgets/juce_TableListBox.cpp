@@ -235,7 +235,7 @@ public:
         RowAccessibilityHandler (RowComp& rowComp)
             : AccessibilityHandler (rowComp,
                                     AccessibilityRole::row,
-                                    getListRowAccessibilityActions (*this, rowComp),
+                                    getListRowAccessibilityActions (rowComp),
                                     { std::make_unique<RowComponentCellInterface> (*this) }),
               rowComponent (rowComp)
         {
@@ -544,7 +544,46 @@ void TableListBox::updateColumnComponents() const
 
 std::unique_ptr<AccessibilityHandler> TableListBox::createAccessibilityHandler()
 {
-    return std::make_unique<TableListBoxAccessibilityHandler> (*this);
+    class TableInterface  : public AccessibilityTableInterface
+    {
+    public:
+        explicit TableInterface (TableListBox& tableListBoxToWrap)
+            : tableListBox (tableListBoxToWrap)
+        {
+        }
+
+        int getNumRows() const override
+        {
+            if (auto* tableModel = tableListBox.getModel())
+                return tableModel->getNumRows();
+
+            return 0;
+        }
+
+        int getNumColumns() const override
+        {
+            return tableListBox.getHeader().getNumColumns (false);
+        }
+
+        const AccessibilityHandler* getCellHandler (int row, int column) const override
+        {
+            if (isPositiveAndBelow (row, getNumRows()) && isPositiveAndBelow (column, getNumColumns()))
+                if (auto* cellComponent = tableListBox.getCellComponent (tableListBox.getHeader().getColumnIdOfIndex (column, false), row))
+                    return cellComponent->getAccessibilityHandler();
+
+            return nullptr;
+        }
+
+    private:
+        TableListBox& tableListBox;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableInterface)
+    };
+
+    return std::make_unique<AccessibilityHandler> (*this,
+                                                   AccessibilityRole::list,
+                                                   AccessibilityActions{},
+                                                   AccessibilityHandler::Interfaces { std::make_unique<TableInterface> (*this) });
 }
 
 //==============================================================================

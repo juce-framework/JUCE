@@ -31,9 +31,8 @@ class UIAValueProvider  : public UIAProviderBase,
                           public ComBaseClassHelper<IValueProvider>
 {
 public:
-    UIAValueProvider (AccessibilityNativeHandle* nativeHandle, bool editableText)
-        : UIAProviderBase (nativeHandle),
-          isEditableText (editableText)
+    UIAValueProvider (AccessibilityNativeHandle* nativeHandle)
+        : UIAProviderBase (nativeHandle)
     {
     }
 
@@ -45,6 +44,9 @@ public:
 
         const auto& handler = getHandler();
 
+        if (nameIsAccessibilityValue (handler.getRole()))
+            return UIA_E_NOTSUPPORTED;
+
         const auto sendValuePropertyChangeMessage = [&]()
         {
             VARIANT newValue;
@@ -53,7 +55,7 @@ public:
             sendAccessibilityPropertyChangedEvent (handler, UIA_ValueValuePropertyId, newValue);
         };
 
-        if (isEditableText)
+        if (isEditableText (handler))
         {
             handler.getTextInterface()->setText (String (val));
             sendValuePropertyChangeMessage();
@@ -90,9 +92,16 @@ public:
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
-            if (! isEditableText)
-                if (auto* valueInterface = getHandler().getValueInterface())
-                    *pRetVal = valueInterface->isReadOnly();
+            *pRetVal = true;
+
+            const auto& handler = getHandler();
+
+            if (isEditableText (handler)
+                || (handler.getValueInterface() != nullptr
+                    && ! handler.getValueInterface()->isReadOnly()))
+            {
+                *pRetVal = false;
+            }
 
             return S_OK;
         });
@@ -101,7 +110,12 @@ public:
 private:
     String getCurrentValueString() const
     {
-        if (isEditableText)
+        const auto& handler = getHandler();
+
+        if (nameIsAccessibilityValue (handler.getRole()))
+            return handler.getTitle();
+
+        if (isEditableText (handler))
             if (auto* textInterface = getHandler().getTextInterface())
                 return textInterface->getText ({ 0, textInterface->getTotalNumCharacters() });
 
@@ -111,8 +125,6 @@ private:
         jassertfalse;
         return {};
     }
-
-    const bool isEditableText;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIAValueProvider)
