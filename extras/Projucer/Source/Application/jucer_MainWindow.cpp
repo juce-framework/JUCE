@@ -229,7 +229,6 @@ bool MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
 
     if (auto* pcc = getProjectContentComponent())
     {
-        pcc->saveTreeViewState();
         pcc->saveOpenDocumentList();
         pcc->hideEditor();
     }

@@ -1625,6 +1625,7 @@
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_FileTreeItems.h"/>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ModuleTreeItems.h"/>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ProjectTreeItemBase.h"/>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_Sidebar.h"/>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_TreeItemTypes.h"/>
     <ClInclude Include="..\..\Source\Project\UI\jucer_ContentViewComponents.h"/>
     <ClInclude Include="..\..\Source\Project\UI\jucer_FileGroupInformationComponent.h"/>

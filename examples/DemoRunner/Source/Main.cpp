@@ -111,8 +111,10 @@ public:
     void shutdown() override             { mainWindow = nullptr; }
 
     //==============================================================================
-    void systemRequestedQuit() override                                 { quit(); }
-    void anotherInstanceStarted (const String&) override                {}
+    void systemRequestedQuit() override                   { quit(); }
+    void anotherInstanceStarted (const String&) override  {}
+
+    ApplicationCommandManager& getGlobalCommandManager()  { return commandManager; }
 
 private:
     class MainAppWindow    : public DocumentWindow
@@ -161,7 +163,13 @@ private:
     };
 
     std::unique_ptr<MainAppWindow> mainWindow;
+    ApplicationCommandManager commandManager;
 };
+
+ApplicationCommandManager& getGlobalCommandManager()
+{
+    return dynamic_cast<DemoRunnerApplication*> (JUCEApplication::getInstance())->getGlobalCommandManager();
+}
 
 //==============================================================================
 // This macro generates the main() routine that launches the app.

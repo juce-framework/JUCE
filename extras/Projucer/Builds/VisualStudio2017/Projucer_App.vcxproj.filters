@@ -2247,6 +2247,9 @@
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_ProjectTreeItemBase.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_Sidebar.h">
+      <Filter>Projucer\Project\UI\Sidebar</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Project\UI\Sidebar\jucer_TreeItemTypes.h">
       <Filter>Projucer\Project\UI\Sidebar</Filter>
     </ClInclude>
