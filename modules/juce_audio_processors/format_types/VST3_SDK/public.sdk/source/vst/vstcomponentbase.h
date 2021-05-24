@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -47,8 +47,8 @@ namespace Vst {
 
 //------------------------------------------------------------------------
 /** Base class for VST 3 Component and Edit Controller.
-\ingroup vstClasses */
-//------------------------------------------------------------------------
+\ingroup vstClasses 
+*/
 class ComponentBase: public FObject,
 					 public IPluginBase,
 	                 public IConnectionPoint
@@ -56,25 +56,28 @@ class ComponentBase: public FObject,
 public:
 //------------------------------------------------------------------------
 	ComponentBase ();
-	virtual ~ComponentBase ();
+	~ComponentBase () override;
 
 	//--- Internal Methods------
 	/** Returns the hostContext (set by the host during initialize call). */
-	FUnknown* getHostContext () { return hostContext; }
+	FUnknown* getHostContext () const { return hostContext; }
 
 	/** Returns the peer for the messaging communication (you can only use IConnectionPoint::notify
 	 * for communicate between peers, do not try to cast peerConnection. */
-	IConnectionPoint* getPeer () { return peerConnection; }
+	IConnectionPoint* getPeer () const { return peerConnection; }
 
-	/** Allocates a message instance (don't forget to release it). */
-	IMessage* allocateMessage ();
+	/** Allocates a message instance (do not forget to release it). */
+	IMessage* allocateMessage () const;
 
 	/** Sends the given message to the peer. */
-	tresult sendMessage (IMessage* message);
+	tresult sendMessage (IMessage* message) const;
 
-	/** Sends a simple text message to the peer (max 255 characters). Text is interpreted as UTF-8.
-	 */
-	tresult sendTextMessage (const char8* text);
+	/** Sends a simple text message to the peer (max 255 characters).
+	Text is interpreted as UTF-8.	 */
+	tresult sendTextMessage (const char8* text) const;
+
+	/** Sends a message with a given ID without any other payload. */
+	tresult sendMessageID (const char8* messageID) const;
 
 	/** Receives a simple text message from the peer (max 255 characters). Text is UTF-8 encoded. */
 	virtual tresult receiveText (const char8* text);
@@ -98,8 +101,8 @@ public:
 
 //------------------------------------------------------------------------
 protected:
-	FUnknown* hostContext;
-	IConnectionPoint* peerConnection;
+	IPtr<FUnknown> hostContext;
+	IPtr<IConnectionPoint> peerConnection;
 };
 
 //------------------------------------------------------------------------

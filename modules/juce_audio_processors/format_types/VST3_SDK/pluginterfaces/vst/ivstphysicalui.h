@@ -27,11 +27,17 @@ namespace Steinberg {
 namespace Vst {
 
 //------------------------------------------------------------------------
+/** \defgroup vst3typedef VST 3 Data Types */
+/*@{*/
+//------------------------------------------------------------------------
+/** Physical UI Type */
 typedef uint32 PhysicalUITypeID;
+/*@}*/
 
 //------------------------------------------------------------------------
 /** PhysicalUITypeIDs describes the type of Physical UI (PUI) which could be associated to a note
-expression. \see PhysicalUIMap
+expression.
+\see PhysicalUIMap
 */
 enum PhysicalUITypeIDs
 {
@@ -50,7 +56,8 @@ enum PhysicalUITypeIDs
 //------------------------------------------------------------------------
 /** PhysicalUIMap describes a mapping of a noteExpression Type to a Physical UI Type.
 It is used in PhysicalUIMapList.
-\see PhysicalUIMapList */
+\see PhysicalUIMapList 
+*/
 struct PhysicalUIMap
 {
 	/** This represents the physical UI. /see PhysicalUITypeIDs, this is set by the caller of
@@ -65,7 +72,8 @@ struct PhysicalUIMap
 
 //------------------------------------------------------------------------
 /** PhysicalUIMapList describes a list of PhysicalUIMap
-\see INoteExpressionPhysicalUIMapping*/
+\see INoteExpressionPhysicalUIMapping
+*/
 struct PhysicalUIMapList
 {
 	/** Count of entries in the map array, set by the caller of getPhysicalUIMapping. */
@@ -76,21 +84,51 @@ struct PhysicalUIMapList
 };
 
 //------------------------------------------------------------------------
-/** Extended Plug-in interface IEditController for note expression event support
+/** Extended plug-in interface IEditController for note expression event support: Vst::INoteExpressionPhysicalUIMapping
 \ingroup vstIPlug vst3611
 - [plug imp]
 - [extends IEditController]
 - [released: 3.6.11]
 - [optional]
 
-With this Plug-in interface, the host can retrieve the preferred physical mapping associated to note
-expression supported by the Plug-in.
-When the mapping changes (for example when switching presets) the Plug-in needs
+With this plug-in interface, the host can retrieve the preferred physical mapping associated to note
+expression supported by the plug-in.
+When the mapping changes (for example when switching presets) the plug-in needs
 to inform the host about it via \ref IComponentHandler::restartComponent (kNoteExpressionChanged).
 
 \section INoteExpressionPhysicalUIMappingExample Example
-\code
-tresult PLUGIN_API myPlug::::getPhysicalUIMapping (int32 busIndex, int16 channel, PhysicalUIMapList& list)
+
+\code{.cpp}
+//------------------------------------------------------------------------
+// here an example of how a VST3 plug-in could support this INoteExpressionPhysicalUIMapping interface.
+// we need to define somewhere the iids:
+
+//in MyController class declaration
+class MyController : public Vst::EditController, public Vst::INoteExpressionPhysicalUIMapping
+{
+	// ...
+	//--- INoteExpressionPhysicalUIMapping ---------------------------------
+	tresult PLUGIN_API getPhysicalUIMapping (int32 busIndex, int16 channel, PhysicalUIMapList& list) SMTG_OVERRIDE;
+	// ...
+
+	OBJ_METHODS (MyController, Vst::EditController)
+	DEFINE_INTERFACES
+		// ...
+		DEF_INTERFACE (Vst::INoteExpressionPhysicalUIMapping)
+	END_DEFINE_INTERFACES (Vst::EditController)
+	//...
+}
+
+// In mycontroller.cpp
+#include "pluginterfaces/vst/ivstnoteexpression.h"
+
+namespace Steinberg {
+	namespace Vst {
+		DEF_CLASS_IID (INoteExpressionPhysicalUIMapping)
+	}
+}
+//------------------------------------------------------------------------
+tresult PLUGIN_API MyController::getPhysicalUIMapping (int32 busIndex, int16 channel, PhysicalUIMapList& list)
 {
 	if (busIndex == 0 && channel == 0)
 	{
@@ -106,7 +144,8 @@ tresult PLUGIN_API myPlug::::getPhysicalUIMapping (int32 busIndex, int16 channel
 	}
 	return kResultFalse;
 }
-\endcode */
+\endcode
+*/
 class INoteExpressionPhysicalUIMapping : public FUnknown
 {
 public:

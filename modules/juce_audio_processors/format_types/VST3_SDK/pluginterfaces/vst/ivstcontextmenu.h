@@ -17,7 +17,7 @@
 #pragma once
 
 #include "pluginterfaces/base/funknown.h"
-#include "vsttypes.h"
+#include "pluginterfaces/vst/vsttypes.h"
 
 //------------------------------------------------------------------------
 #include "pluginterfaces/base/falignpush.h"
@@ -30,30 +30,35 @@ namespace Vst {
 class IContextMenu;
 
 //------------------------------------------------------------------------
-/** Extended Host callback interface IComponentHandler3 for an edit controller. 
+/** Extended host callback interface Vst::IComponentHandler3 for an edit controller. 
 \ingroup vstIHost vst350
 - [host imp]
 - [extends IComponentHandler]
 - [released: 3.5.0]
 - [optional]
 
-A Plug-in can ask the host to create a context menu for a given exported Parameter ID or a generic context menu.\n
+A plug-in can ask the host to create a context menu for a given exported parameter ID or a generic context menu.\n
 
 The host may pre-fill this context menu with specific items regarding the parameter ID like "Show automation for parameter",
 "MIDI learn" etc...\n
 
-The Plug-in can use the context menu in two ways :
-- add its own items to the menu via the IContextMenu interface and call IContextMenu::popup(..) to pop-up it. See the \ref IContextMenuExample.
-- extract the host menu items and add them to its own created context menu
+The plug-in can use the context menu in two ways :
+- add its own items to the menu via the IContextMenu interface and call IContextMenu::popup(..) to create the pop-up. See the \ref IContextMenuExample.
+- extract the host menu items and add them to a context menu created by the plug-in.
 
-\b Note: You can and should use this even if you don't add your own items to the menu as this is considered to be a big user value.
+\b Note: You can and should use this even if you do not add your own items to the menu as this is considered to be a big user value.
 
 \sa IContextMenu
 \sa IContextMenuTarget
 
-\section IContextMenuExample Example
-Adding Plug-in specific items to the context menu
-\code
+\section IContextMenuExample Examples
+- For example, Cubase adds its owned entries in the context menu opened with right-click on an exported parameter when the plug-in uses createContextMenu.
+\image html "contextmenuexample.png"
+\n
+- Adding plug-in specific items to the context menu:
+
+\code{.cpp}
+//------------------------------------------------------------------------
 class PluginContextMenuTarget : public IContextMenuTarget, public FObject
 {
 public:
@@ -61,8 +66,8 @@ public:
 
 	virtual tresult PLUGIN_API executeMenuItem (int32 tag)
 	{
-		// this will be called if the user has executed one of the menu items of the Plug-in.
-		// It won't be called for items of the host.
+		// this will be called if the user has executed one of the menu items of the plug-in.
+		// It will not be called for items of the host.
 		switch (tag)
 		{
 			case 1: break;
@@ -110,14 +115,13 @@ void popupContextMenu (IComponentHandler* componentHandler, IPlugView* view, con
 }
 \endcode
 */
-//------------------------------------------------------------------------
 class IComponentHandler3 : public FUnknown
 {
 public:
-	/** Creates a host context menu for a Plug-in:
+	/** Creates a host context menu for a plug-in:
 		- If paramID is zero, the host may create a generic context menu.
 		- The IPlugView object must be valid.
-		- The return IContextMenu object needs to be released afterwards by the Plug-in.
+		- The return IContextMenu object needs to be released afterwards by the plug-in.
 	*/
 	virtual IContextMenu* PLUGIN_API createContextMenu (IPlugView* plugView, const ParamID* paramID) = 0;
 	//------------------------------------------------------------------------
@@ -127,7 +131,7 @@ public:
 DECLARE_CLASS_IID (IComponentHandler3, 0x69F11617, 0xD26B400D, 0xA4B6B964, 0x7B6EBBAB)
 	
 //------------------------------------------------------------------------
-/** Context Menu Item Target Interface.
+/** Context Menu Item Target interface: Vst::IContextMenuTarget
 \ingroup vstIHost vstIPlug vst350
 - [host imp]
 - [plug imp]
@@ -137,9 +141,8 @@ DECLARE_CLASS_IID (IComponentHandler3, 0x69F11617, 0xD26B400D, 0xA4B6B964, 0x7B6
 A receiver of a menu item should implement this interface, which will be called after the user has selected
 this menu item.
 
-See IComponentHandler3 for more.
+\see IComponentHandler3 for more information.
 */
-//------------------------------------------------------------------------
 class IContextMenuTarget : public FUnknown
 {
 public:
@@ -168,7 +171,7 @@ struct IContextMenuItem
 	};
 };
 //------------------------------------------------------------------------
-/** Context Menu Interface.
+/** Context Menu interface: Vst::IContextMenu
 \ingroup vstIHost vst350
 - [host imp]
 - [create with IComponentHandler3::createContextMenu(..)]
@@ -177,11 +180,10 @@ struct IContextMenuItem
 
 A context menu is composed of Item (entry). A Item is defined by a name, a tag, a flag
 and a associated target (called when this item will be selected/executed). 
-With IContextMenu the Plug-in can retrieve a Item, add a Item, remove a Item and pop-up the menu.
+With IContextMenu the plug-in can retrieve a Item, add a Item, remove a Item and pop-up the menu.
 
-See IComponentHandler3 for more.
+\see IComponentHandler3 for more information.
 */
-//------------------------------------------------------------------------
 class IContextMenu : public FUnknown
 {
 public:
@@ -199,7 +201,7 @@ public:
 	/** Removes a menu item. */
 	virtual tresult PLUGIN_API removeItem (const Item& item, IContextMenuTarget* target) = 0;
 
-	/** Pop-ups the menu. Coordinates are relative to the top-left position of the Plug-ins view. */
+	/** Pop-ups the menu. Coordinates are relative to the top-left position of the plug-ins view. */
 	virtual tresult PLUGIN_API popup (UCoord x, UCoord y) = 0;
 
 	//------------------------------------------------------------------------

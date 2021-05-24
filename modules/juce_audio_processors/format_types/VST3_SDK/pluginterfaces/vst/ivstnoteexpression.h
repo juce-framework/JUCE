@@ -17,16 +17,25 @@
 #pragma once
 
 #include "pluginterfaces/base/funknown.h"
-#include "vsttypes.h"
+#include "pluginterfaces/vst/vsttypes.h"
 
 //------------------------------------------------------------------------
 #include "pluginterfaces/base/falignpush.h"
 //------------------------------------------------------------------------
 
+//------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
+
+//------------------------------------------------------------------------
+/** \defgroup vst3typedef VST 3 Data Types */
+/*@{*/
+//------------------------------------------------------------------------
+/** Note Expression Types */
 typedef uint32 NoteExpressionTypeID;
+/** Note Expression Value */
 typedef double NoteExpressionValue;
+/*@}*/
 
 //------------------------------------------------------------------------
 /** NoteExpressionTypeIDs describes the type of the note expression.
@@ -44,13 +53,13 @@ enum NoteExpressionTypeIDs : uint32
 	kVibratoTypeID,			///< Vibrato
 	kExpressionTypeID,		///< Expression
 	kBrightnessTypeID,		///< Brightness
-	kTextTypeID,			///< TODO:
+	kTextTypeID,			///< See NoteExpressionTextEvent
 	kPhonemeTypeID,			///< TODO:
 
 	kCustomStart = 100000,	///< start of custom note expression type ids
 	kCustomEnd   = 200000,  ///< end of custom note expression type ids
 	
-	kInvalidTypeID = 0xFFFFFFFF		///< indicates an invalid note expression type
+	kInvalidTypeID = 0xFFFFFFFF	///< indicates an invalid note expression type
 };
 
 //------------------------------------------------------------------------
@@ -60,13 +69,12 @@ This structure is part of the NoteExpressionTypeInfo structure, it describes for
 and a stepCount when the given NoteExpressionTypeID is limited to discrete values (like on/off state).
 \see NoteExpressionTypeInfo
 */
-//------------------------------------------------------------------------
 struct NoteExpressionValueDescription
 {
-	NoteExpressionValue defaultValue;		///< default normalized value [0,1]
-	NoteExpressionValue minimum;			///< minimum normalized value [0,1]
-	NoteExpressionValue maximum;			///< maximum normalized value [0,1]
-	int32 stepCount;						///< number of discrete steps (0: continuous, 1: toggle, discrete value otherwise - see \ref vst3parameterIntro)
+	NoteExpressionValue defaultValue;	///< default normalized value [0,1]
+	NoteExpressionValue minimum;		///< minimum normalized value [0,1]
+	NoteExpressionValue maximum;		///< maximum normalized value [0,1]
+	int32 stepCount;					///< number of discrete steps (0: continuous, 1: toggle, discrete value otherwise - see \ref vst3ParameterIntro)
 };
 
 #if SMTG_OS_WINDOWS && !SMTG_PLATFORM_64
@@ -75,13 +83,12 @@ struct NoteExpressionValueDescription
 //------------------------------------------------------------------------
 /** Note Expression Value event. Used in \ref Event (union)
 A note expression event affects one single playing note (referring its noteId).
-This kind of event is send from host to the Plug-in like other events (NoteOnEvent, NoteOffEvent,...) in \ref ProcessData during the process call.
+This kind of event is send from host to the plug-in like other events (NoteOnEvent, NoteOffEvent,...) in \ref ProcessData during the process call.
 Note expression events for a specific noteId can only occur after a NoteOnEvent. The host must take care that the event list (\ref IEventList) is properly sorted.
 Expression events are always absolute normalized values [0.0, 1.0].
 The predefined types have a predefined mapping of the normalized values (see \ref NoteExpressionTypeIDs)
 \sa INoteExpressionController
 */
-//------------------------------------------------------------------------
 struct NoteExpressionValueEvent
 {
 	NoteExpressionTypeID typeId;	///< see \ref NoteExpressionTypeID
@@ -94,8 +101,8 @@ struct NoteExpressionValueEvent
 /** Note Expression Text event. Used in Event (union)
 A Expression event affects one single playing note. \sa INoteExpressionController
 
-\see NoteExpressionTypeInfo*/
-//------------------------------------------------------------------------
+\see NoteExpressionTypeInfo
+*/
 struct NoteExpressionTextEvent
 {
 	NoteExpressionTypeID typeId;	///< see \ref NoteExpressionTypeID (kTextTypeID or kPhoneticTypeID)
@@ -112,18 +119,17 @@ struct NoteExpressionTextEvent
 #endif
 
 //------------------------------------------------------------------------
-/** NoteExpressionTypeInfo is the structure describing a note expression supported by the Plug-in.
+/** NoteExpressionTypeInfo is the structure describing a note expression supported by the plug-in.
 This structure is used by the method \ref INoteExpressionController::getNoteExpressionInfo.
 \see INoteExpressionController
 */
-//------------------------------------------------------------------------
 struct NoteExpressionTypeInfo
 {
 	NoteExpressionTypeID typeId;			///< unique identifier of this note Expression type
 	String128 title;						///< note Expression type title (e.g. "Volume")
 	String128 shortTitle;					///< note Expression type short title (e.g. "Vol")
 	String128 units;						///< note Expression type unit (e.g. "dB")
-	int32 unitId;							///< id of unit this NoteExpression belongs to (see \ref vst3UnitsIntro), in order to sort the note expression, it is possible to use unitId like for parameters. -1 means no unit used.
+	int32 unitId;							///< id of unit this NoteExpression belongs to (see \ref vst3Units), in order to sort the note expression, it is possible to use unitId like for parameters. -1 means no unit used.
 	NoteExpressionValueDescription valueDesc;	///< value description see \ref NoteExpressionValueDescription
 	ParamID associatedParameterId;			///< optional associated parameter ID (for mapping from note expression to global (using the parameter automation for example) and back). Only used when kAssociatedParameterIDValid is set in flags.
 
@@ -138,14 +144,14 @@ struct NoteExpressionTypeInfo
 };
 
 //------------------------------------------------------------------------
-/** Extended Plug-in interface IEditController for note expression event support
+/** Extended plug-in interface IEditController for note expression event support: Vst::INoteExpressionController
 \ingroup vstIPlug vst350
 - [plug imp]
 - [extends IEditController]
 - [released: 3.5.0]
 - [optional]
 
-With this Plug-in interface, the host can retrieve all necessary note expression information supported by the Plug-in.
+With this plug-in interface, the host can retrieve all necessary note expression information supported by the plug-in.
 Note expression information (\ref NoteExpressionTypeInfo) are specific for given channel and event bus.
 
 Note that there is only one NoteExpressionTypeID per given channel of an event bus.
@@ -153,11 +159,10 @@ Note that there is only one NoteExpressionTypeID per given channel of an event b
 The method getNoteExpressionStringByValue allows conversion from a normalized value to a string representation
 and the getNoteExpressionValueByString method from a string to a normalized value.
 
-When the note expression state changes (for example when switching presets) the Plug-in needs
+When the note expression state changes (for example when switching presets) the plug-in needs
 to inform the host about it via \ref IComponentHandler::restartComponent (kNoteExpressionChanged).
 */
-//------------------------------------------------------------------------
-class INoteExpressionController: public FUnknown
+class INoteExpressionController : public FUnknown
 {
 public:
 	/** Returns number of supported note change types for event bus index and channel. */
@@ -185,10 +190,10 @@ DECLARE_CLASS_IID (INoteExpressionController, 0xB7F8F859, 0x41234872, 0x91169581
 */
 enum KeyswitchTypeIDs : uint32
 {
-	kNoteOnKeyswitchTypeID = 0,				///< press before noteOn is played
-	kOnTheFlyKeyswitchTypeID,				///< press while noteOn is played
-	kOnReleaseKeyswitchTypeID,				///< press before entering release
-	kKeyRangeTypeID							///< key should be maintained pressed for playing
+	kNoteOnKeyswitchTypeID = 0,	///< press before noteOn is played
+	kOnTheFlyKeyswitchTypeID,	///< press while noteOn is played
+	kOnReleaseKeyswitchTypeID,	///< press before entering release
+	kKeyRangeTypeID				///< key should be maintained pressed for playing
 };
 
 typedef uint32 KeyswitchTypeID;
@@ -200,34 +205,33 @@ This structure is used by the method \ref IKeyswitchController::getKeyswitchInfo
 */
 struct KeyswitchInfo
 {
-	KeyswitchTypeID typeId;					///< see KeyswitchTypeID
-	String128 title;						///< name of key switch (e.g. "Accentuation")
-	String128 shortTitle;					///< short title (e.g. "Acc")
+	KeyswitchTypeID typeId;		///< see KeyswitchTypeID
+	String128 title;			///< name of key switch (e.g. "Accentuation")
+	String128 shortTitle;		///< short title (e.g. "Acc")
 
-	int32 keyswitchMin;						///< associated main key switch min (value between [0, 127])
-	int32 keyswitchMax;						///< associated main key switch max (value between [0, 127])
-	int32 keyRemapped;						/** optional remapped key switch (default -1), the Plug-in could provide one remapped
-											key for a key switch (allowing better location on the keyboard of the key switches) */
+	int32 keyswitchMin;			///< associated main key switch min (value between [0, 127])
+	int32 keyswitchMax;			///< associated main key switch max (value between [0, 127])
+	int32 keyRemapped;			/** optional remapped key switch (default -1), the plug-in could provide one remapped
+								key for a key switch (allowing better location on the keyboard of the key switches) */
 
-	int32 unitId;							///< id of unit this key switch belongs to (see \ref vst3UnitsIntro), -1 means no unit used.
+	int32 unitId;				///< id of unit this key switch belongs to (see \ref vst3Units), -1 means no unit used.
 
-	int32 flags;							///< not yet used (set to 0)
+	int32 flags;				///< not yet used (set to 0)
 };
 
 //------------------------------------------------------------------------
-/** Extended Plug-in interface IEditController for key switches support
+/** Extended plug-in interface IEditController for key switches support: Vst::IKeyswitchController
 \ingroup vstIPlug vst350
 - [plug imp]
 - [extends IEditController]
 - [released: 3.5.0]
 - [optional]
 
-When a (instrument) Plug-in supports such interface, the host could get from the Plug-in the current set
+When a (instrument) plug-in supports such interface, the host could get from the plug-in the current set
 of used key switches (megatrig/articulation) for a given channel of a event bus and then automatically use them (like in Cubase 6) to
 create VST Expression Map (allowing to associated symbol to a given articulation / key switch).
 */
-//------------------------------------------------------------------------
-class IKeyswitchController: public FUnknown
+class IKeyswitchController : public FUnknown
 {
 public:
 	/** Returns number of supported key switches for event bus index and channel. */

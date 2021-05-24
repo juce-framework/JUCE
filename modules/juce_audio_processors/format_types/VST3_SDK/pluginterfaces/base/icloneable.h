@@ -22,10 +22,9 @@ namespace Steinberg {
 
 //------------------------------------------------------------------------
 /**  Interface allowing an object to be copied.
-[plug & host imp] \n 
-[released: N4.12] \n
+- [plug & host imp] 
+- [released: N4.12]
 */
-//------------------------------------------------------------------------
 class ICloneable : public FUnknown
 {
 public:

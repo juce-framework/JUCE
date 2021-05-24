@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -44,7 +44,7 @@
 
 #include "base/source/fobject.h"
 
-#include <stdarg.h>
+#include <cstdarg>
 
 namespace Steinberg {
 
@@ -126,7 +126,7 @@ public:
 
 	// access -----------------------------------------------------------------
 	virtual int32 length () const {return static_cast<int32> (len);}	///< Return length of string
-	inline bool isEmpty () const {return buffer == 0 || len == 0;}		///< Return true if string is empty
+	inline bool isEmpty () const {return buffer == nullptr || len == 0;}		///< Return true if string is empty
 
 	operator const char8* () const {return text8 ();} 							///< Returns pointer to string of type char8 (no modification allowed)
 	operator const char16* () const {return text16 ();}							///< Returns pointer to string of type char16(no modification allowed)
@@ -307,6 +307,7 @@ Extends class ConstString by operations which allow modifications.
 class String : public ConstString
 {
 public:
+	
 //-----------------------------------------------------------------------------
 	String ();
 	String (const char8* str, MBCodePage codepage, int32 n = -1, bool isTerminated = true);							///< assign n characters of str and convert to wide string by using the specified codepage
@@ -325,10 +326,10 @@ public:
 
 	// access------------------------------------------------------------------
 	void updateLength (); ///< Call this when the string is truncated outside (not recommended though)
-	virtual const char8* text8 () const SMTG_OVERRIDE;
-	virtual const char16* text16 () const SMTG_OVERRIDE;
-	virtual char8 getChar8 (uint32 index) const SMTG_OVERRIDE;
-	virtual char16 getChar16 (uint32 index) const SMTG_OVERRIDE;
+	const char8* text8 () const SMTG_OVERRIDE;
+	const char16* text16 () const SMTG_OVERRIDE;
+	char8 getChar8 (uint32 index) const SMTG_OVERRIDE;
+	char16 getChar16 (uint32 index) const SMTG_OVERRIDE;
 
 	bool setChar8 (uint32 index, char8 c);
 	bool setChar16 (uint32 index, char16 c);
@@ -725,18 +726,18 @@ public:
 	using String::operator=;
 
 	// IStringResult ----------------------------------------------------------
-	virtual void PLUGIN_API setText (const char8* text) SMTG_OVERRIDE;
+	void PLUGIN_API setText (const char8* text) SMTG_OVERRIDE;
 	//-------------------------------------------------------------------------
 
 	// IString-----------------------------------------------------------------
-	virtual void PLUGIN_API setText8 (const char8* text) SMTG_OVERRIDE;
-	virtual void PLUGIN_API setText16 (const char16* text) SMTG_OVERRIDE;
+	void PLUGIN_API setText8 (const char8* text) SMTG_OVERRIDE;
+	void PLUGIN_API setText16 (const char16* text) SMTG_OVERRIDE;
 
-	virtual const char8* PLUGIN_API getText8 () SMTG_OVERRIDE;
-	virtual const char16* PLUGIN_API getText16 () SMTG_OVERRIDE;
+	const char8* PLUGIN_API getText8 () SMTG_OVERRIDE;
+	const char16* PLUGIN_API getText16 () SMTG_OVERRIDE;
 
-	virtual void PLUGIN_API take (void* s, bool _isWide) SMTG_OVERRIDE;
-	virtual bool PLUGIN_API isWideString () const SMTG_OVERRIDE;
+	void PLUGIN_API take (void* s, bool _isWide) SMTG_OVERRIDE;
+	bool PLUGIN_API isWideString () const SMTG_OVERRIDE;
 	//-------------------------------------------------------------------------
 
 	OBJ_METHODS (StringObject, FObject)

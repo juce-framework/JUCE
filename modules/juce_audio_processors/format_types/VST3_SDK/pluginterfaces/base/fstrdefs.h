@@ -19,7 +19,7 @@
 #include "ftypes.h"
 
 //----------------------------------------------------------------------------
-// string methods defines unicode / ASCII
+/** string methods defines unicode / ASCII */
 //----------------------------------------------------------------------------
 
 // 16 bit string operations
@@ -265,10 +265,8 @@ inline void str8ToStr16 (char16* dst, const char8* src, int32 n = -1)
 #else
 		dst[i] = static_cast<char16> (src[i]);
 #endif
-
 		if (src[i] == 0)
 			break;
-
 		i++;
 	}
 

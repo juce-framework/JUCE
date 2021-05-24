@@ -24,9 +24,9 @@ class IDependent;
 
 //------------------------------------------------------------------------
 /** Host implements dependency handling for plugins.
-[host imp] \n
-[get this interface from IHostClasses] \n
-[released N3.1] \n
+- [host imp]
+- [get this interface from IHostClasses]
+- [released N3.1]
 
 - Install/Remove change notifications
 - Trigger updates when an object has changed
@@ -37,7 +37,6 @@ inside the Plug-In to handle internal updates!
 \see IDependent
 \ingroup frameworkHostClasses
 */
-//------------------------------------------------------------------------
 class IUpdateHandler: public FUnknown
 {
 public:
@@ -73,7 +72,6 @@ DECLARE_CLASS_IID (IUpdateHandler, 0xF5246D56, 0x86544d60, 0xB026AFB5, 0x7B697B3
 \see IUpdateHandler
 \ingroup frameworkHostClasses
 */
-//------------------------------------------------------------------------
 class IDependent: public FUnknown
 {
 public:

@@ -23,6 +23,10 @@
   ==============================================================================
 */
 
+#if JUCE_BSD && ! JUCE_CUSTOM_VST3_SDK
+ #error To build JUCE VST3 plug-ins on BSD you must use an external BSD-compatible VST3 SDK with JUCE_CUSTOM_VST3_SDK=1
+#endif
+
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702)
 

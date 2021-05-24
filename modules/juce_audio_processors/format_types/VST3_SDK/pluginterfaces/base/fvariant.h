@@ -138,10 +138,10 @@ public:
 		return (type & kInteger) ? static_cast<double> (intValue) : (type & kFloat) ? floatValue :
 																					  0.;
 	}
-	inline const char8* getString8 () const { return (type & kString8) ? string8 : 0; }
-	inline const char16* getString16 () const { return (type & kString16) ? string16 : 0; }
+	inline const char8* getString8 () const { return (type & kString8) ? string8 : nullptr; }
+	inline const char16* getString16 () const { return (type & kString16) ? string16 : nullptr; }
 
-	inline FUnknown* getObject () const { return (type & kObject) ? object : 0; }
+	inline FUnknown* getObject () const { return (type & kObject) ? object : nullptr; }
 
 	inline uint16 getType () const { return static_cast<uint16> (type & ~(kOwner)); }
 	inline bool isEmpty () const { return getType () == kEmpty; }
@@ -274,7 +274,7 @@ inline FVariant& FVariant::operator= (const FVariant& variant)
 	}
 	else if ((type & kString16) && variant.string16)
 	{
-		int32 len = strlen16 (variant.string16);
+		auto len = static_cast<size_t> (strlen16 (variant.string16));
 		string16 = new char16[len + 1];
 		char16* tmp = const_cast<char16*> (string16);
 		memcpy (tmp, variant.string16, len * sizeof (char16));

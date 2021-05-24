@@ -25,9 +25,9 @@ namespace Steinberg {
     In order to manage memory allocation and deallocation properly, 
 	this interface is used to transfer a string as result parameter of
 	a method requires a string of unknown size. 
-[host imp] or [plug imp] \n
-[released: SX 4] */
-//------------------------------------------------------------------------
+- [host imp] or [plug imp]
+- [released: SX 4]
+*/
 class IStringResult : public FUnknown
 {
 public:
@@ -43,9 +43,9 @@ DECLARE_CLASS_IID (IStringResult, 0x550798BC, 0x872049DB, 0x84920A15, 0x3B50B7A8
 
 //------------------------------------------------------------------------
 /** Interface to a string of variable size and encoding. 
-[host imp] or [plug imp] \n
-[released: ] */
-//------------------------------------------------------------------------
+- [host imp] or [plug imp]
+- [released: ] 
+*/
 class IString : public FUnknown
 {
 public:
