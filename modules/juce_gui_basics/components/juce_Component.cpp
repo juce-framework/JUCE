@@ -634,7 +634,8 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
                  jmax (1, getHeight()));
        #endif
 
-        auto topLeft = getScreenPosition();
+        const auto unscaledPosition = ScalingHelpers::scaledScreenPosToUnscaled (getScreenPosition());
+        const auto topLeft = ScalingHelpers::unscaledScreenPosToScaled (*this, unscaledPosition);
 
         bool wasFullscreen = false;
         bool wasMinimised = false;
