@@ -882,12 +882,11 @@ struct MenuWindow  : public Component
             insertColumnBreaks (maxMenuW, maxMenuH);
 
         workOutManualSize (maxMenuW);
-        auto actualH = jmin (contentHeight, maxMenuH);
+        height = jmin (contentHeight, maxMenuH);
 
-        needsToScroll = contentHeight > actualH;
+        needsToScroll = contentHeight > height;
 
         width = updateYPositions();
-        height = actualH + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2;
     }
 
     void insertColumnBreaks (const int maxMenuW, const int maxMenuH)
@@ -971,6 +970,8 @@ struct MenuWindow  : public Component
             columnWidths.add (adjustedColW);
             it = columnEnd;
         }
+
+        contentHeight += getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2;
 
         correctColumnWidths (maxMenuW);
     }
