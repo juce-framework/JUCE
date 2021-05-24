@@ -99,9 +99,6 @@ OBJECTS_APP := \
   $(JUCE_OBJDIR)/jucer_JucerDocument_ff8afcc2.o \
   $(JUCE_OBJDIR)/jucer_ObjectTypes_4406f01c.o \
   $(JUCE_OBJDIR)/jucer_PaintRoutine_e1e891ee.o \
-  $(JUCE_OBJDIR)/jucer_CompileEngineClient_aee8c99c.o \
-  $(JUCE_OBJDIR)/jucer_CompileEngineServer_5d8914.o \
-  $(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_19bb4bb3.o \
   $(JUCE_OBJDIR)/jucer_Modules_e20cbd10.o \
   $(JUCE_OBJDIR)/jucer_HeaderComponent_1ebf72ba.o \
   $(JUCE_OBJDIR)/jucer_Project_c131864a.o \
@@ -296,21 +293,6 @@ $(JUCE_OBJDIR)/jucer_ObjectTypes_4406f01c.o: ../../Source/ComponentEditor/jucer_
 $(JUCE_OBJDIR)/jucer_PaintRoutine_e1e891ee.o: ../../Source/ComponentEditor/jucer_PaintRoutine.cpp
 	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
 	@echo "Compiling jucer_PaintRoutine.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_CompileEngineClient_aee8c99c.o: ../../Source/LiveBuildEngine/jucer_CompileEngineClient.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_CompileEngineClient.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_CompileEngineServer_5d8914.o: ../../Source/LiveBuildEngine/jucer_CompileEngineServer.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_CompileEngineServer.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/jucer_DownloadCompileEngineThread_19bb4bb3.o: ../../Source/LiveBuildEngine/jucer_DownloadCompileEngineThread.cpp
-	-$(V_AT)mkdir -p $(JUCE_OBJDIR)
-	@echo "Compiling jucer_DownloadCompileEngineThread.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/jucer_Modules_e20cbd10.o: ../../Source/Project/Modules/jucer_Modules.cpp

@@ -32,8 +32,6 @@
 #include "../CodeEditor/jucer_SourceCodeEditor.h"
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 
-struct ChildProcessCache;
-
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
                               private AsyncUpdater
@@ -65,7 +63,6 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const InvocationInfo&) override;
 
-    bool isLiveBuildEnabled() const;
     bool isGUIEditorEnabled() const;
 
     //==============================================================================
@@ -107,7 +104,6 @@ public:
     std::unique_ptr<ApplicationCommandManager> commandManager;
 
     bool isRunningCommandLine = false;
-    std::unique_ptr<ChildProcessCache> childProcessCache;
 
 private:
     //==============================================================================
@@ -133,7 +129,6 @@ private:
     PopupMenu createFileMenu();
     PopupMenu createEditMenu();
     PopupMenu createViewMenu();
-    PopupMenu createBuildMenu();
     void createColourSchemeItems (PopupMenu&);
     PopupMenu createWindowMenu();
     PopupMenu createDocumentMenu();
@@ -168,7 +163,6 @@ private:
     void doLoginOrLogout();
     void showLoginForm();
 
-    void enableOrDisableLiveBuild();
     void enableOrDisableGUIEditor();
 
     //==============================================================================
@@ -207,7 +201,6 @@ private:
     //==============================================================================
     std::unique_ptr<LicenseController> licenseController;
 
-    void* server = nullptr;
     std::unique_ptr<TooltipWindow> tooltipWindow;
     AvailableModulesList jucePathModulesList, userPathsModulesList;
 

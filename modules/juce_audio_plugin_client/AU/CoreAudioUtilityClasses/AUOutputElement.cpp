@@ -45,7 +45,6 @@
 
 */
 
-#include <juce_core/native/juce_mac_ClangBugWorkaround.h>
 #include "AUOutputElement.h"
 #include "AUBase.h"
 

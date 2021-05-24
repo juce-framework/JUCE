@@ -139,7 +139,7 @@ public:
         tree.setRootItem (nullptr);
     }
 
-    void setRoot (JucerTreeViewBase*);
+    void setRoot (std::unique_ptr<JucerTreeViewBase>);
     void saveOpenness();
 
     virtual void deleteSelectedItems()

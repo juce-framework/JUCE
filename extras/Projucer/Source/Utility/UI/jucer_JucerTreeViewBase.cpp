@@ -28,10 +28,10 @@
 #include "../../Project/UI/jucer_ProjectContentComponent.h"
 
 //==============================================================================
-void TreePanelBase::setRoot (JucerTreeViewBase* root)
+void TreePanelBase::setRoot (std::unique_ptr<JucerTreeViewBase> root)
 {
-    rootItem.reset (root);
-    tree.setRootItem (root);
+    rootItem = std::move (root);
+    tree.setRootItem (rootItem.get());
     tree.getRootItem()->setOpen (true);
 
     if (project != nullptr)
