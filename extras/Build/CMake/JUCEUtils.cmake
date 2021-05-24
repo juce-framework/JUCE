@@ -2213,13 +2213,13 @@ function(juce_add_pip header)
     _juce_get_metadata("${metadata_dict}" name JUCE_PIP_NAME)
 
     if(NOT JUCE_PIP_NAME)
-        message(FATAL_ERROR "PIP headers must declare a `name` field")
+        message(FATAL_ERROR "Error in '${header}': PIP headers must declare a `name` field")
     endif()
 
     string(MAKE_C_IDENTIFIER "${JUCE_PIP_NAME}" pip_name_sanitised)
 
     if(NOT JUCE_PIP_NAME STREQUAL pip_name_sanitised)
-        message(FATAL_ERROR "PIP `name` value '${JUCE_PIP_NAME}' must be a valid C identifier")
+        message(FATAL_ERROR "Error in '${header}': PIP `name` value '${JUCE_PIP_NAME}' must be a valid C identifier")
     endif()
 
     if(TARGET "${JUCE_PIP_NAME}")
@@ -2228,13 +2228,13 @@ function(juce_add_pip header)
     endif()
 
     if(TARGET "${JUCE_PIP_NAME}")
-        message(FATAL_ERROR "Could not create a unique target name for PIP ${header}")
+        message(FATAL_ERROR "Error in '${header}': Could not create a unique target name for PIP ${header}")
     endif()
 
     _juce_get_metadata("${metadata_dict}" type pip_kind)
 
     if(NOT pip_kind)
-        message(FATAL_ERROR "PIP headers must declare a `type` field")
+        message(FATAL_ERROR "Error in '${header}': PIP headers must declare a `type` field")
     endif()
 
     _juce_get_metadata("${metadata_dict}" pluginCharacteristics pip_charateristics)
@@ -2281,7 +2281,7 @@ function(juce_add_pip header)
         set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPConsole.cpp.in")
         juce_add_console_app(${JUCE_PIP_NAME} ${extra_target_args})
     else()
-        message(FATAL_ERROR "PIP kind must be either AudioProcessor, Component, or Console")
+        message(FATAL_ERROR "Error in '${header}': PIP kind must be either AudioProcessor, Component, or Console")
     endif()
 
     if(NOT ARGV1 STREQUAL "")
@@ -2311,7 +2311,7 @@ function(juce_add_pip header)
         if(TARGET "${module}")
             set(discovered_module "${module}")
         else()
-            message(FATAL_ERROR "No such module: ${module}")
+            message(FATAL_ERROR "Error in '${header}': No such module: ${module}")
         endif()
 
         target_link_libraries(${JUCE_PIP_NAME} PRIVATE ${discovered_module})
