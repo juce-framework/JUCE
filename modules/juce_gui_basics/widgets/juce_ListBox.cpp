@@ -79,12 +79,7 @@ public:
                 row = newRow;
 
             if (selectionHasChanged)
-            {
                 isSelected = nowSelected;
-
-                if (auto* handler = getAccessibilityHandler())
-                    isSelected ? handler->grabFocus() : handler->giveAwayFocus();
-            }
         }
 
         if (auto* m = owner.getModel())
@@ -102,6 +97,10 @@ public:
                     invalidateAccessibilityHandler();
             }
         }
+
+        if (selectionHasChanged)
+            if (auto* handler = getAccessibilityHandler())
+                isSelected ? handler->grabFocus() : handler->giveAwayFocus();
     }
 
     void performSelection (const MouseEvent& e, bool isMouseUp)
