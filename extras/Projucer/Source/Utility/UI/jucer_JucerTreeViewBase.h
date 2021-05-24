@@ -44,8 +44,9 @@ public:
     void itemClicked (const MouseEvent& e) override;
     void itemSelectionChanged (bool isNowSelected) override;
     void itemDoubleClicked (const MouseEvent&) override;
-    Component* createItemComponent() override;
-    String getTooltip() override    { return {}; }
+    std::unique_ptr<Component> createItemComponent() override;
+    String getTooltip() override            { return {}; }
+    String getAccessibilityName() override  { return getDisplayName(); }
 
     void cancelDelayedSelectionTimer();
 
@@ -67,17 +68,18 @@ public:
     virtual File getDraggableFile() const                         { return {}; }
 
     void refreshSubItems();
-    virtual void deleteItem();
-    virtual void deleteAllSelectedItems();
-    virtual void showDocument();
-    virtual void showMultiSelectionPopupMenu();
-    virtual void showRenameBox();
+    void showRenameBox();
 
-    void launchPopupMenu (PopupMenu&); // runs asynchronously, and produces a callback to handlePopupMenuResult().
-    virtual void showPopupMenu();
-    virtual void showAddMenu();
-    virtual void handlePopupMenuResult (int resultCode);
-    virtual void setSearchFilter (const String&) {}
+    virtual void deleteItem()                              {}
+    virtual void deleteAllSelectedItems()                  {}
+    virtual void showDocument()                            {}
+    virtual void showMultiSelectionPopupMenu (Point<int>)  {}
+    virtual void showPopupMenu (Point<int>)                {}
+    virtual void showAddMenu (Point<int>)                  {}
+    virtual void handlePopupMenuResult (int)               {}
+    virtual void setSearchFilter (const String&)           {}
+
+    void launchPopupMenu (PopupMenu&, Point<int>); // runs asynchronously, and produces a callback to handlePopupMenuResult().
 
     //==============================================================================
     // To handle situations where an item gets deleted before openness is
@@ -187,7 +189,7 @@ public:
             tree.clearSelectedItems();
 
             if (e.mods.isRightButtonDown())
-                rootItem->showPopupMenu();
+                rootItem->showPopupMenu (e.getMouseDownScreenPosition());
         }
     }
 
@@ -205,6 +207,7 @@ class TreeItemComponent   : public Component
 public:
     TreeItemComponent (JucerTreeViewBase& i)  : item (&i)
     {
+        setAccessible (false);
         setInterceptsMouseClicks (false, true);
         item->textX = iconWidth;
     }

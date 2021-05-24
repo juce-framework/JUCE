@@ -204,7 +204,7 @@ void PropertyPanel::init()
 
     addAndMakeVisible (viewport);
     viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());
-    viewport.setFocusContainer (true);
+    viewport.setFocusContainerType (FocusContainerType::keyboardFocusContainer);
 }
 
 PropertyPanel::~PropertyPanel()

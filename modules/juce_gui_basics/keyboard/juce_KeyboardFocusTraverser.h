@@ -28,63 +28,60 @@ namespace juce
 
 //==============================================================================
 /**
-    Controls the order in which focus moves between components.
+    Controls the order in which keyboard focus moves between components.
 
-    The default algorithm used by this class to work out the order of traversal
-    is as follows:
-    - if two components both have an explicit focus order specified, then the
-      one with the lowest number comes first (see the Component::setExplicitFocusOrder()
-      method).
-    - any component with an explicit focus order greater than 0 comes before ones
-      that don't have an order specified.
-    - any unspecified components are traversed in a left-to-right, then top-to-bottom
-      order.
+    The default behaviour of this class uses a FocusTraverser object internally to
+    determine the default/next/previous component until it finds one which wants
+    keyboard focus, as set by the Component::setWantsKeyboardFocus() method.
 
-    If you need traversal in a more customised way, you can create a subclass
-    of KeyboardFocusTraverser that uses your own algorithm, and use
-    Component::createFocusTraverser() to create it.
+    If you need keyboard focus traversal in a more customised way, you can create
+    a subclass of ComponentTraverser that uses your own algorithm, and use
+    Component::createKeyboardFocusTraverser() to create it.
 
-    @see Component::setExplicitFocusOrder, Component::createFocusTraverser
+    @see FocusTraverser, ComponentTraverser, Component::createKeyboardFocusTraverser
 
     @tags{GUI}
 */
-class JUCE_API  KeyboardFocusTraverser
+class JUCE_API  KeyboardFocusTraverser  : public ComponentTraverser
 {
 public:
-    KeyboardFocusTraverser();
-
     /** Destructor. */
-    virtual ~KeyboardFocusTraverser();
+    ~KeyboardFocusTraverser() override = default;
 
-    /** Returns the component that should be given focus after the specified one
-        when moving "forwards".
+    /** Returns the component that should receive keyboard focus by default within the
+        given parent component.
 
-        The default implementation will return the next component which is to the
-        right of or below this one.
-
-        This may return nullptr if there's no suitable candidate.
+        The default implementation will return the foremost focusable component (as
+        determined by FocusTraverser) that also wants keyboard focus, or nullptr if
+        there is no suitable component.
     */
-    virtual Component* getNextComponent (Component* current);
+    Component* getDefaultComponent (Component* parentComponent) override;
 
-    /** Returns the component that should be given focus after the specified one
-        when moving "backwards".
+    /** Returns the component that should be given keyboard focus after the specified
+        one when moving "forwards".
 
-        The default implementation will return the next component which is to the
-        left of or above this one.
-
-        This may return nullptr if there's no suitable candidate.
+        The default implementation will return the next focusable component (as
+        determined by FocusTraverser) that also wants keyboard focus, or nullptr if
+        there is no suitable component.
     */
-    virtual Component* getPreviousComponent (Component* current);
+    Component* getNextComponent (Component* current) override;
 
-    /** Returns the component that should receive focus be default within the given
-        parent component.
+    /** Returns the component that should be given keyboard focus after the specified
+        one when moving "backwards".
 
-        The default implementation will just return the foremost child component that
-        wants focus.
-
-        This may return nullptr if there's no suitable candidate.
+        The default implementation will return the previous focusable component (as
+        determined by FocusTraverser) that also wants keyboard focus, or nullptr if
+        there is no suitable component.
     */
-    virtual Component* getDefaultComponent (Component* parentComponent);
+    Component* getPreviousComponent (Component* current) override;
+
+    /** Returns all of the components that can receive keyboard focus within the given
+        parent component in traversal order.
+
+        The default implementation will return all focusable child components (as
+        determined by FocusTraverser) that also wants keyboard focus.
+    */
+    std::vector<Component*> getAllComponents (Component* parentComponent) override;
 };
 
 } // namespace juce

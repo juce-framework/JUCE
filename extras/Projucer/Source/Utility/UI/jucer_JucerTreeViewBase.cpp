@@ -119,9 +119,9 @@ void JucerTreeViewBase::paintContent (Graphics& g, Rectangle<int> area)
     g.drawFittedText (getDisplayName(), area, Justification::centredLeft, 1, 1.0f);
 }
 
-Component* JucerTreeViewBase::createItemComponent()
+std::unique_ptr<Component> JucerTreeViewBase::createItemComponent()
 {
-    return new TreeItemComponent (*this);
+    return std::make_unique<TreeItemComponent> (*this);
 }
 
 //==============================================================================
@@ -177,9 +177,9 @@ void JucerTreeViewBase::itemClicked (const MouseEvent& e)
     if (e.mods.isPopupMenu())
     {
         if (getOwnerView()->getNumSelectedItems() > 1)
-            showMultiSelectionPopupMenu();
+            showMultiSelectionPopupMenu (e.getMouseDownScreenPosition());
         else
-            showPopupMenu();
+            showPopupMenu (e.getMouseDownScreenPosition());
     }
     else if (isSelected())
     {
@@ -187,27 +187,16 @@ void JucerTreeViewBase::itemClicked (const MouseEvent& e)
     }
 }
 
-void JucerTreeViewBase::deleteItem()    {}
-void JucerTreeViewBase::deleteAllSelectedItems() {}
-void JucerTreeViewBase::showDocument()  {}
-void JucerTreeViewBase::showPopupMenu() {}
-void JucerTreeViewBase::showAddMenu()  {}
-void JucerTreeViewBase::showMultiSelectionPopupMenu() {}
-
 static void treeViewMenuItemChosen (int resultCode, WeakReference<JucerTreeViewBase> item)
 {
     if (item != nullptr)
         item->handlePopupMenuResult (resultCode);
 }
 
-void JucerTreeViewBase::launchPopupMenu (PopupMenu& m)
+void JucerTreeViewBase::launchPopupMenu (PopupMenu& m, Point<int> p)
 {
-    m.showMenuAsync (PopupMenu::Options(),
+    m.showMenuAsync (PopupMenu::Options().withTargetScreenArea ({ p.x, p.y, 1, 1 }),
                      ModalCallbackFunction::create (treeViewMenuItemChosen, WeakReference<JucerTreeViewBase> (this)));
-}
-
-void JucerTreeViewBase::handlePopupMenuResult (int)
-{
 }
 
 ProjectContentComponent* JucerTreeViewBase::getProjectContentComponent() const

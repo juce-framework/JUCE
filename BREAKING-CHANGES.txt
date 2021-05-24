@@ -6,6 +6,32 @@ Develop
 
 Change
 ------
+`Component::createFocusTraverser()` has been renamed to
+`Component::createKeyboardFocusTraverser()` and now returns a `std::unique_ptr`
+instead of a raw pointer. `Component::createFocusTraverser()` is a new method
+for controlling basic focus traversal and not keyboard focus traversal.
+
+Possible Issues
+---------------
+Derived Components that override the old method will no longer compile.
+
+Workaround
+----------
+Override the new method. Be careful to override
+`createKeyboardFocusTraverser()` and not `createFocusTraverser()` to ensure
+that the behaviour is the same.
+
+Rationale
+---------
+The ownership of this method is now clearer as the previous code relied on the
+caller deleting the object. The name has changed to accomodate the new
+`Component::createFocusTraverser()` method that returns an object for
+determining basic focus traversal, of which keyboard focus is generally a
+subset.
+
+
+Change
+------
 PluginDescription::uid has been deprecated and replaced with a new 'uniqueId'
 data member.
 

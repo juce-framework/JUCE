@@ -392,6 +392,9 @@ class ProjectMessagesComponent  : public Component
 public:
     ProjectMessagesComponent()
     {
+        setFocusContainerType (FocusContainerType::focusContainer);
+        setTitle ("Project Messages");
+
         addAndMakeVisible (warningsComponent);
         addAndMakeVisible (notificationsComponent);
 
@@ -445,8 +448,15 @@ public:
         isMouseDown = false;
         repaint();
 
-        if (messagesWindow != nullptr)
-            showOrHideAllMessages (! messagesWindow->isListShowing());
+        showOrHideMessagesWindow();
+    }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return std::make_unique<AccessibilityHandler> (*this,
+                                                       AccessibilityRole::button,
+                                                       AccessibilityActions().addAction (AccessibilityActionType::press,
+                                                                                         [this] { showOrHideMessagesWindow(); }));
     }
 
     //==============================================================================
@@ -473,6 +483,20 @@ public:
                 notificationsComponent.setTree ({});
             }
         }
+    }
+
+    void numMessagesChanged()
+    {
+        const auto total = warningsComponent.getNumMessages()
+                           + notificationsComponent.getNumMessages();
+
+        setHelpText (String (total) + (total == 1 ? " message" : " messages"));
+    }
+
+    void showOrHideMessagesWindow()
+    {
+        if (messagesWindow != nullptr)
+            showOrHideAllMessages (! messagesWindow->isListShowing());
     }
 
 private:
@@ -511,8 +535,11 @@ private:
         void updateNumMessages()
         {
             numMessages = messagesTree.getNumChildren();
+            owner.numMessagesChanged();
             repaint();
         }
+
+        int getNumMessages() const noexcept  { return numMessages; }
 
     private:
         void valueTreeChildAdded   (ValueTree&, ValueTree&)        override  { updateNumMessages(); }

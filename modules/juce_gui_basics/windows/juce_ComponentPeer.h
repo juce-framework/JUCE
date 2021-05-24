@@ -177,7 +177,7 @@ public:
     /** Returns the area in peer coordinates that is covered by the given sub-comp (which
         may be at any depth)
     */
-    Rectangle<int> getAreaCoveredBy (Component& subComponent) const;
+    Rectangle<int> getAreaCoveredBy (const Component& subComponent) const;
 
     /** Minimises the window. */
     virtual void setMinimised (bool shouldBeMinimised) = 0;
@@ -247,8 +247,8 @@ public:
     */
     virtual bool setAlwaysOnTop (bool alwaysOnTop) = 0;
 
-    /** Brings the window to the top, optionally also giving it focus. */
-    virtual void toFront (bool makeActive) = 0;
+    /** Brings the window to the top, optionally also giving it keyboard focus. */
+    virtual void toFront (bool takeKeyboardFocus) = 0;
 
     /** Moves the window to be just behind another one. */
     virtual void toBehind (ComponentPeer* other) = 0;

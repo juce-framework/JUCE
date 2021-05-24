@@ -1377,7 +1377,6 @@ public:
         setTitle (component.getName());
         updateShadower();
 
-        // make sure that the on-screen keyboard code is loaded
         OnScreenKeyboard::getInstance();
 
         getNativeRealtimeModifiers = []
@@ -1397,12 +1396,14 @@ public:
 
     ~HWNDComponentPeer()
     {
+        // do this first to avoid messages arriving for this window before it's destroyed
+        JuceWindowIdentifier::setAsJUCEWindow (hwnd, false);
+
+        if (isAccessibilityActive)
+            WindowsAccessibility::revokeUIAMapEntriesForWindow (hwnd);
+
         shadower = nullptr;
         currentTouches.deleteAllTouchesForPeer (this);
-
-        // do this before the next bit to avoid messages arriving for this window
-        // before it's destroyed
-        JuceWindowIdentifier::setAsJUCEWindow (hwnd, false);
 
         callFunctionIfNotLocked (&destroyWindowCallback, (void*) hwnd);
 
@@ -1988,6 +1989,8 @@ private:
 
     double scaleFactor = 1.0;
     bool isInDPIChange = false;
+
+    bool isAccessibilityActive = false;
 
     //==============================================================================
     static MultiTouchMapper<DWORD> currentTouches;
@@ -3907,6 +3910,24 @@ private:
             case WM_GETDLGCODE:
                 return DLGC_WANTALLKEYS;
 
+            case WM_GETOBJECT:
+            {
+                if (static_cast<long> (lParam) == WindowsAccessibility::getUiaRootObjectId())
+                {
+                    if (auto* handler = component.getAccessibilityHandler())
+                    {
+                        LRESULT res = 0;
+
+                        if (WindowsAccessibility::handleWmGetObject (handler, wParam, lParam, &res))
+                        {
+                            isAccessibilityActive = true;
+                            return res;
+                        }
+                    }
+                }
+
+                break;
+            }
             default:
                 break;
         }
@@ -4160,7 +4181,7 @@ private:
 
     void windowShouldDismissModals (HWND originator)
     {
-        if (isAncestor (originator, hwnd))
+        if (component.isShowing() && isAncestor (originator, hwnd))
             sendInputAttemptWhenModalMessage();
     }
 
@@ -4190,6 +4211,7 @@ private:
 
             constexpr UINT events[] { WM_MOVE,
                                       WM_SIZE,
+                                      WM_WINDOWPOSCHANGING,
                                       WM_NCPOINTERDOWN,
                                       WM_NCLBUTTONDOWN,
                                       WM_NCRBUTTONDOWN,
@@ -4197,6 +4219,17 @@ private:
 
             if (std::find (std::begin (events), std::end (events), info->message) == std::end (events))
                 return;
+
+            if (info->message == WM_WINDOWPOSCHANGING)
+            {
+                const auto* windowPos = reinterpret_cast<const WINDOWPOS*> (info->lParam);
+                const auto windowPosFlags = windowPos->flags;
+
+                constexpr auto maskToCheck = SWP_NOMOVE | SWP_NOSIZE;
+
+                if ((windowPosFlags & maskToCheck) == maskToCheck)
+                    return;
+            }
 
             // windowMayDismissModals could affect the number of active ComponentPeer instances
             for (auto i = ComponentPeer::getNumPeers(); --i >= 0;)

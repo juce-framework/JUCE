@@ -28,6 +28,7 @@
 #include "../../CodeEditor/jucer_OpenDocumentManager.h"
 #include "jucer_HeaderComponent.h"
 #include "jucer_ProjectMessagesComponent.h"
+#include "jucer_ContentViewComponent.h"
 
 class CompileEngineChildProcess;
 class ProjectTab;
@@ -65,10 +66,11 @@ public:
     void saveAs();
 
     void hideEditor();
-    bool setEditorComponent (Component* editor, OpenDocumentManager::Document* doc);
-    Component* getEditorComponentContent() const;
-    Component* getEditorComponent() const    { return contentView.get(); }
-    Component& getSidebarComponent()         { return sidebarTabs; }
+    void setScrollableEditorComponent (std::unique_ptr<Component> component);
+    void setEditorDocument (std::unique_ptr<Component> component, OpenDocumentManager::Document* doc);
+    Component* getEditorComponent();
+
+    Component& getSidebarComponent()  { return sidebarTabs; }
 
     bool goToPreviousFile();
     bool goToNextFile();
@@ -145,26 +147,6 @@ public:
 
 private:
     //==============================================================================
-    struct LogoComponent  : public Component
-    {
-        LogoComponent();
-        void paint (Graphics& g) override;
-        static String getVersionInfo();
-
-        std::unique_ptr<Drawable> logo;
-    };
-
-    struct ContentViewport  : public Component
-    {
-        ContentViewport (Component* content);
-        void resized() override;
-
-        Viewport viewport;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentViewport)
-    };
-
-    //==============================================================================
     bool documentAboutToClose (OpenDocumentManager::Document*) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
     void showTranslationTool();
@@ -196,14 +178,14 @@ private:
     OpenDocumentManager::Document* currentDocument = nullptr;
     RecentDocumentList recentDocumentList;
 
-    LogoComponent logoComponent;
     HeaderComponent headerComponent { this };
+    TabbedComponent sidebarTabs { TabbedButtonBar::TabsAtTop };
     ProjectMessagesComponent projectMessagesComponent;
-    Label fileNameLabel;
-    TabbedComponent sidebarTabs  { TabbedButtonBar::TabsAtTop };
+    ContentViewComponent contentViewComponent;
+
     std::unique_ptr<ResizableEdgeComponent> resizerBar;
     ComponentBoundsConstrainer sidebarSizeConstrainer;
-    std::unique_ptr<Component> translationTool, contentView;
+    std::unique_ptr<Component> translationTool;
     BubbleMessageComponent bubbleMessage;
 
     ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;

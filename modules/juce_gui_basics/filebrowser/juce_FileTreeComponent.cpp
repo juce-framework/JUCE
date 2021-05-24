@@ -190,6 +190,11 @@ public:
                                                    indexInContentsList, owner);
     }
 
+    String getAccessibilityName() override
+    {
+        return file.getFileName();
+    }
+
     void itemClicked (const MouseEvent& e) override
     {
         owner.sendMouseClickMessage (file, e);

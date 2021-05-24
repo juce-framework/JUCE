@@ -631,7 +631,7 @@ void LADSPAPluginFormat::createPluginInstance (const PluginDescription& desc,
 
         if (module != nullptr)
         {
-            shellLADSPAUIDToCreate = desc.uniqueId;
+            shellLADSPAUIDToCreate = desc.uniqueId != 0 ? desc.uniqueId : desc.deprecatedUid;
 
             result.reset (new LADSPAPluginInstance (module));
 

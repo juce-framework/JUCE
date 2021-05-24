@@ -65,6 +65,11 @@ public:
 
     void mouseUp (const MouseEvent&) override
     {
+        triggerClick();
+    }
+
+    void triggerClick()
+    {
         if (interactive)
         {
             PopupMenu menu;
@@ -75,6 +80,15 @@ public:
     }
 
     bool isDisplaingGPLLogo() const noexcept  { return isGPL; }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return interactive ? std::make_unique<AccessibilityHandler> (*this,
+                                                                     AccessibilityRole::button,
+                                                                     AccessibilityActions().addAction (AccessibilityActionType::press,
+                                                                                                       [this] { triggerClick(); }))
+                           : nullptr;
+    }
 
 private:
     //==============================================================================

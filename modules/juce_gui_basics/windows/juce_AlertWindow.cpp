@@ -47,6 +47,9 @@ AlertWindow::AlertWindow (const String& title,
 {
     setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 
+    accessibleMessageLabel.setColour (Label::textColourId, Colours::transparentBlack);
+    addAndMakeVisible (accessibleMessageLabel);
+
     if (message.isEmpty())
         text = " "; // to force an update if the message is empty
 
@@ -65,8 +68,7 @@ AlertWindow::~AlertWindow()
 
     // Give away focus before removing the editors, so that any TextEditor
     // with focus has a chance to dismiss native keyboard if shown.
-    if (hasKeyboardFocus (true))
-        Component::unfocusAllComponents();
+    giveAwayKeyboardFocus();
 
     removeAllChildren();
 }
@@ -85,6 +87,11 @@ void AlertWindow::setMessage (const String& message)
     if (text != newMessage)
     {
         text = newMessage;
+
+        auto accessibleText = getName() + ". " + text;
+        accessibleMessageLabel.setText (accessibleText, NotificationType::dontSendNotification);
+        setDescription (accessibleText);
+
         updateLayout (true);
         repaint();
     }
@@ -107,6 +114,7 @@ void AlertWindow::addButton (const String& name,
     buttons.add (b);
 
     b->setWantsKeyboardFocus (true);
+    b->setExplicitFocusOrder (1);
     b->setMouseClickGrabsKeyboardFocus (false);
     b->setCommandToTrigger (nullptr, returnValue, false);
     b->addShortcut (shortcutKey1);
@@ -436,6 +444,7 @@ void AlertWindow::updateLayout (const bool onlyIncreaseSize)
         setBounds (getBounds().withSizeKeepingCentre (w, h));
 
     textArea.setBounds (edgeGap, edgeGap, w - (edgeGap * 2), h - edgeGap);
+    accessibleMessageLabel.setBounds (textArea);
 
     const int spacer = 16;
     int totalWidth = -spacer;
@@ -704,5 +713,11 @@ bool AlertWindow::showNativeDialogBox (const String& title,
     return true;
 }
 #endif
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> AlertWindow::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::dialogWindow);
+}
 
 } // namespace juce

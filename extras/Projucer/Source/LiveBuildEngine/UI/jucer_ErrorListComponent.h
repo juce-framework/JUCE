@@ -274,11 +274,11 @@ private:
                                                             : defaultTextColourId);
         }
 
-        void showPopupMenu() override
+        void showPopupMenu (Point<int> p) override
         {
             PopupMenu menu;
             menu.addItem (1, "Copy");
-            launchPopupMenu (menu);
+            launchPopupMenu (menu, p);
         }
 
         void handlePopupMenuResult (int resultCode) override
@@ -294,17 +294,12 @@ private:
 
         SourceCodeEditor* getEditor()
         {
-            if (ProjectContentComponent* pcc = getProjectContentComponent())
+            if (auto* pcc = getProjectContentComponent())
             {
-                const File file (File::createFileWithoutCheckingPath (message.range.file));
+                const auto file = File::createFileWithoutCheckingPath (message.range.file);
 
                 if (message.range.isValid() && file.exists() && pcc->showEditorForFile (file, false))
-                {
-                    if (SourceCodeEditor* ed = dynamic_cast<SourceCodeEditor*> (pcc->getEditorComponent()))
-                    {
-                        return ed;
-                    }
-                }
+                    return dynamic_cast<SourceCodeEditor*> (pcc->getEditorComponent());
             }
 
             return nullptr;
@@ -337,7 +332,7 @@ private:
 
             if (ProjectContentComponent* pcc = getProjectContentComponent())
             {
-                if (SourceCodeEditor* ed = dynamic_cast<SourceCodeEditor*> (pcc->getEditorComponent()))
+                if (auto* ed = dynamic_cast<SourceCodeEditor*> (pcc->getEditorComponent()))
                 {
                     auto start = CodeDocument::Position (ed->editor->getDocument(), message.range.range.getStart());
                     auto end   = CodeDocument::Position (ed->editor->getDocument(), message.range.range.getEnd());

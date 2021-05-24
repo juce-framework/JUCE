@@ -424,6 +424,7 @@ void ComboBox::lookAndFeelChanged()
 
     label->onTextChange = [this] { triggerAsyncUpdate(); };
     label->addMouseListener (this, false);
+    label->setAccessible (labelEditableState == labelIsEditable);
 
     label->setColour (Label::backgroundColourId, Colours::transparentBlack);
     label->setColour (Label::textColourId, findColour (ComboBox::textColourId));
@@ -640,5 +641,11 @@ void ComboBox::clear (const bool dontSendChange)                                
 void ComboBox::setSelectedItemIndex (const int index, const bool dontSendChange) { setSelectedItemIndex (index, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setSelectedId (const int newItemId, const bool dontSendChange)    { setSelectedId (newItemId, dontSendChange ? dontSendNotification : sendNotification); }
 void ComboBox::setText (const String& newText, const bool dontSendChange)        { setText (newText, dontSendChange ? dontSendNotification : sendNotification); }
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ComboBox::createAccessibilityHandler()
+{
+    return std::make_unique<ComboBoxAccessibilityHandler> (*this);
+}
 
 } // namespace juce

@@ -187,6 +187,8 @@ public:
     void paintButton (Graphics&, bool isMouseOver, bool isMouseDown) override;
     /** @internal */
     void resized() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     friend class Toolbar;

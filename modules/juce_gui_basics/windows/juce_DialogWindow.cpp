@@ -172,4 +172,10 @@ int DialogWindow::showModalDialog (const String& dialogTitle,
 }
 #endif
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> DialogWindow::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::dialogWindow);
+}
+
 } // namespace juce

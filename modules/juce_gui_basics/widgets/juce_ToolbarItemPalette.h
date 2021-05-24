@@ -60,6 +60,8 @@ public:
     //==============================================================================
     /** @internal */
     void resized() override;
+    /** @internal */
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     ToolbarItemFactory& factory;

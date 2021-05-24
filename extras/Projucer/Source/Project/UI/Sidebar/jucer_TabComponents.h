@@ -34,11 +34,14 @@ public:
     ConcertinaHeader (String n, Path p)
         : Component (n), name (n), iconPath (p)
     {
+        setTitle (getName());
+
         panelIcon = Icon (iconPath, Colours::white);
 
         nameLabel.setText (name, dontSendNotification);
         nameLabel.setJustificationType (Justification::centredLeft);
         nameLabel.setInterceptsMouseClicks (false, false);
+        nameLabel.setAccessible (false);
         nameLabel.setColour (Label::textColourId, Colours::white);
 
         addAndMakeVisible (nameLabel);
@@ -70,6 +73,14 @@ public:
     {
         if (! e.mouseWasDraggedSinceMouseDown())
             sendChangeMessage();
+    }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return std::make_unique<AccessibilityHandler> (*this,
+                                                       AccessibilityRole::button,
+                                                       AccessibilityActions().addAction (AccessibilityActionType::press,
+                                                                                         [this] { sendChangeMessage(); }));
     }
 
     int direction = 0;
@@ -166,25 +177,57 @@ private:
 class ConcertinaTreeComponent    : public Component
 {
 public:
-    ConcertinaTreeComponent (TreePanelBase* tree, bool hasAddButton = false,
-                             bool hasSettingsButton = false, bool hasFindPanel = false)
-         : treeToDisplay (tree)
+    class AdditionalComponents
     {
-        if (hasAddButton)
+    public:
+        enum Type
+        {
+            addButton      = (1 << 0),
+            settingsButton = (1 << 1),
+            findPanel      = (1 << 2)
+        };
+
+        AdditionalComponents with (Type t)
+        {
+            auto copy = *this;
+            copy.componentTypes |= t;
+
+            return copy;
+        }
+
+        bool has (Type t) const noexcept
+        {
+            return (componentTypes & t) != 0;
+        }
+
+    private:
+        int componentTypes = 0;
+    };
+
+    ConcertinaTreeComponent (const String& name,
+                             TreePanelBase* tree,
+                             AdditionalComponents additionalComponents)
+         : Component (name),
+           treeToDisplay (tree)
+    {
+        setTitle (getName());
+        setFocusContainerType (FocusContainerType::focusContainer);
+
+        if (additionalComponents.has (AdditionalComponents::addButton))
         {
             addButton = std::make_unique<IconButton> ("Add", getIcons().plus);
             addAndMakeVisible (addButton.get());
             addButton->onClick = [this] { showAddMenu(); };
         }
 
-        if (hasSettingsButton)
+        if (additionalComponents.has (AdditionalComponents::settingsButton))
         {
             settingsButton = std::make_unique<IconButton> ("Settings", getIcons().settings);
             addAndMakeVisible (settingsButton.get());
             settingsButton->onClick = [this] { showSettings(); };
         }
 
-        if (hasFindPanel)
+        if (additionalComponents.has (AdditionalComponents::findPanel))
         {
             findPanel = std::make_unique<FindPanel> ([this] (const String& filter) { treeToDisplay->rootItem->setSearchFilter (filter); });
             addAndMakeVisible (findPanel.get());
@@ -232,12 +275,12 @@ private:
         if (numSelected == 0)
         {
             if (auto* root = dynamic_cast<JucerTreeViewBase*> (treeToDisplay->tree.getRootItem()))
-                root->showPopupMenu();
+                root->showPopupMenu (addButton->getScreenBounds().getCentre());
         }
         else
         {
             if (auto* item = dynamic_cast<JucerTreeViewBase*> (treeToDisplay->tree.getSelectedItem (0)))
-                item->showAddMenu();
+                item->showAddMenu (addButton->getScreenBounds().getCentre());
         }
     }
 

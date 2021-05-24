@@ -192,7 +192,7 @@ bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
-                keyWasUsed = keyListeners->getUnchecked(i)->keyPressed (keyInfo, target);
+                keyWasUsed = keyListeners->getUnchecked (i)->keyPressed (keyInfo, target);
 
                 if (keyWasUsed || deletionChecker == nullptr)
                     return keyWasUsed;
@@ -205,20 +205,14 @@ bool ComponentPeer::handleKeyPress (const KeyPress& keyInfo)
 
         if (keyWasUsed || deletionChecker == nullptr)
             break;
+    }
 
+    if (! keyWasUsed && keyInfo.isKeyCode (KeyPress::tabKey))
+    {
         if (auto* currentlyFocused = Component::getCurrentlyFocusedComponent())
         {
-            const bool isTab      = (keyInfo == KeyPress::tabKey);
-            const bool isShiftTab = (keyInfo == KeyPress (KeyPress::tabKey, ModifierKeys::shiftModifier, 0));
-
-            if (isTab || isShiftTab)
-            {
-                currentlyFocused->moveKeyboardFocusToSibling (isTab);
-                keyWasUsed = (currentlyFocused != Component::getCurrentlyFocusedComponent());
-
-                if (keyWasUsed || deletionChecker == nullptr)
-                    break;
-            }
+            currentlyFocused->moveKeyboardFocusToSibling (! keyInfo.getModifiers().isShiftDown());
+            return true;
         }
     }
 
@@ -242,7 +236,7 @@ bool ComponentPeer::handleKeyUpOrDown (const bool isKeyDown)
         {
             for (int i = keyListeners->size(); --i >= 0;)
             {
-                keyWasUsed = keyListeners->getUnchecked(i)->keyStateChanged (isKeyDown, target);
+                keyWasUsed = keyListeners->getUnchecked (i)->keyStateChanged (isKeyDown, target);
 
                 if (keyWasUsed || deletionChecker == nullptr)
                     return keyWasUsed;
@@ -340,7 +334,7 @@ void ComponentPeer::handleFocusGain()
     {
         Component::currentlyFocusedComponent = lastFocusedComponent;
         Desktop::getInstance().triggerFocusCallback();
-        lastFocusedComponent->internalFocusGain (Component::focusChangedDirectly);
+        lastFocusedComponent->internalKeyboardFocusGain (Component::focusChangedDirectly);
     }
     else
     {
@@ -361,7 +355,7 @@ void ComponentPeer::handleFocusLoss()
         {
             Component::currentlyFocusedComponent = nullptr;
             Desktop::getInstance().triggerFocusCallback();
-            lastFocusedComponent->internalFocusLoss (Component::focusChangedByMouseClick);
+            lastFocusedComponent->internalKeyboardFocusLoss (Component::focusChangedByMouseClick);
         }
     }
 }
@@ -412,7 +406,7 @@ Rectangle<float> ComponentPeer::globalToLocal (const Rectangle<float>& screenPos
     return screenPosition.withPosition (globalToLocal (screenPosition.getPosition()));
 }
 
-Rectangle<int> ComponentPeer::getAreaCoveredBy (Component& subComponent) const
+Rectangle<int> ComponentPeer::getAreaCoveredBy (const Component& subComponent) const
 {
     return ScalingHelpers::scaledScreenPosToUnscaled
             (component, component.getLocalArea (&subComponent, subComponent.getLocalBounds()));
