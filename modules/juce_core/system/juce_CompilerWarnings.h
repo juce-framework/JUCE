@@ -127,7 +127,7 @@
 /** Quote the argument, turning it into a string. */
 #define JUCE_TO_STRING(x) #x
 
-#if JUCE_CLANG || JUCE_GCC
+#if JUCE_CLANG || JUCE_GCC || JUCE_MINGW
     #define JUCE_IGNORE_GCC_IMPL_(compiler, warning)
     #define JUCE_IGNORE_GCC_IMPL_0(compiler, warning)
     #define JUCE_IGNORE_GCC_IMPL_1(compiler, warning)                          \
