@@ -6,6 +6,27 @@ Develop
 
 Change
 ------
+The functions `getComponentAsyncLayerBackedViewDisabled`
+and `setComponentAsyncLayerBackedViewDisabled` were moved into the juce
+namespace.
+
+Possible Issues
+---------------
+Code that declares these functions may fail to link.
+
+Workaround
+----------
+Move declarations of these functions into the juce namespace.
+
+Rationale
+---------
+Although the names of these functions are unlikely to collide with functions
+from other libraries, we can make such collisions much more unlikely by keeping
+JUCE code in the juce namespace.
+
+
+Change
+------
 The `juce_blocks_basics` module was removed.
 
 Possible Issues

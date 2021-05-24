@@ -583,6 +583,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     view.opaque = component.isOpaque();
     view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
 
+   #if JUCE_COREGRAPHICS_DRAW_ASYNC
+    if (! getComponentAsyncLayerBackedViewDisabled (component))
+    {
+        [[view layer] setDrawsAsynchronously: YES];
+    }
+   #endif
+
     if (isSharedWindow)
     {
         window = [viewToAttachTo window];
