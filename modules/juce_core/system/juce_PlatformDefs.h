@@ -77,7 +77,7 @@ namespace juce
   #else
    #define JUCE_BREAK_IN_DEBUGGER       { asm ("int $3"); }
   #endif
-#elif JUCE_MAC
+#elif JUCE_ARM && JUCE_MAC
   #define JUCE_BREAK_IN_DEBUGGER        { __builtin_debugtrap(); }
 #elif JUCE_ANDROID
   #define JUCE_BREAK_IN_DEBUGGER        { __builtin_trap(); }
