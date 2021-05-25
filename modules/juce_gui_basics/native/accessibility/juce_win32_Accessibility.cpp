@@ -60,6 +60,7 @@ public:
     ~AccessibilityNativeImpl()
     {
         accessibilityElement->invalidateElement();
+        --providerCount;
 
         if (auto* wrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
         {
@@ -68,7 +69,7 @@ public:
 
             wrapper->disconnectProvider (provider);
 
-            if (--providerCount == 0)
+            if (providerCount == 0)
                 wrapper->disconnectAllProviders();
         }
     }
@@ -132,15 +133,24 @@ void sendAccessibilityPropertyChangedEvent (const AccessibilityHandler& handler,
 
 void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent eventType)
 {
+    if (eventType == InternalAccessibilityEvent::elementCreated
+        || eventType == InternalAccessibilityEvent::elementDestroyed)
+    {
+        if (auto* parent = handler.getParent())
+            sendAccessibilityAutomationEvent (*parent, UIA_LayoutInvalidatedEventId);
+
+        return;
+    }
+
     auto event = [eventType]() -> EVENTID
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::elementCreated:
-            case InternalAccessibilityEvent::elementDestroyed:  return UIA_StructureChangedEventId;
             case InternalAccessibilityEvent::focusChanged:      return UIA_AutomationFocusChangedEventId;
             case InternalAccessibilityEvent::windowOpened:      return UIA_Window_WindowOpenedEventId;
             case InternalAccessibilityEvent::windowClosed:      return UIA_Window_WindowClosedEventId;
+            case InternalAccessibilityEvent::elementCreated:
+            case InternalAccessibilityEvent::elementDestroyed:  break;
         }
 
         return {};
@@ -228,11 +238,6 @@ void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::
 //==============================================================================
 namespace WindowsAccessibility
 {
-    void initialiseUIAWrapper()
-    {
-        WindowsUIAWrapper::getInstance();
-    }
-
     long getUiaRootObjectId()
     {
         return static_cast<long> (UiaRootObjectId);
@@ -243,7 +248,7 @@ namespace WindowsAccessibility
         if (isStartingUpOrShuttingDown() || (handler == nullptr || ! isHandlerValid (*handler)))
             return false;
 
-        if (auto* wrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
+        if (auto* wrapper = WindowsUIAWrapper::getInstance())
         {
             ComSmartPtr<IRawElementProviderSimple> provider;
             handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));

@@ -1498,7 +1498,9 @@ RectangleList<int> TextEditor::getTextBounds (Range<int> textRange)
         }
     }
 
-    boundingBox.offsetAll (getLeftIndent(), roundToInt ((float) getTopIndent() + yOffset));
+    boundingBox.offsetAll (getLeftIndent() - viewport->getViewPositionX(),
+                           roundToInt ((float) getTopIndent() + yOffset) - viewport->getViewPositionY());
+
     return boundingBox;
 }
 
@@ -2687,6 +2689,81 @@ void TextEditor::coalesceSimilarSections()
 }
 
 //==============================================================================
+class TextEditorAccessibilityHandler  : public AccessibilityHandler
+{
+public:
+    explicit TextEditorAccessibilityHandler (TextEditor& textEditorToWrap)
+        : AccessibilityHandler (textEditorToWrap,
+                                textEditorToWrap.isReadOnly() ? AccessibilityRole::staticText : AccessibilityRole::editableText,
+                                {},
+                                { textEditorToWrap.isReadOnly() ? nullptr : std::make_unique<TextEditorTextInterface> (textEditorToWrap) }),
+          textEditor (textEditorToWrap)
+    {
+    }
+
+    String getTitle() const override
+    {
+        return textEditor.isReadOnly() ? textEditor.getText() : textEditor.getTitle();
+    }
+
+private:
+    class TextEditorTextInterface  : public AccessibilityTextInterface
+    {
+    public:
+        explicit TextEditorTextInterface (TextEditor& editor)
+            : textEditor (editor)
+        {
+        }
+
+        bool isDisplayingProtectedText() const override      { return textEditor.getPasswordCharacter() != 0; }
+
+        int getTotalNumCharacters() const override           { return textEditor.getText().length(); }
+        Range<int> getSelection() const override             { return textEditor.getHighlightedRegion(); }
+        void setSelection (Range<int> r) override            { textEditor.setHighlightedRegion (r); }
+
+        String getText (Range<int> r) const override
+        {
+            if (isDisplayingProtectedText())
+                return String::repeatedString (String::charToString (textEditor.getPasswordCharacter()),
+                                               getTotalNumCharacters());
+
+            return textEditor.getTextInRange (r);
+        }
+
+        void setText (const String& newText) override
+        {
+            textEditor.setText (newText);
+        }
+
+        int getTextInsertionOffset() const override          { return textEditor.getCaretPosition(); }
+
+        RectangleList<int> getTextBounds (Range<int> textRange) const override
+        {
+            auto localRects = textEditor.getTextBounds (textRange);
+            RectangleList<int> globalRects;
+
+            std::for_each (localRects.begin(), localRects.end(),
+                           [&] (const Rectangle<int>& r) { globalRects.add (textEditor.localAreaToGlobal (r)); });
+
+            return globalRects;
+        }
+
+        int getOffsetAtPoint (Point<int> point) const override
+        {
+            auto localPoint = textEditor.getLocalPoint (nullptr, point);
+            return textEditor.getTextIndexAt (localPoint.x, localPoint.y);
+        }
+
+    private:
+        TextEditor& textEditor;
+    };
+
+    TextEditor& textEditor;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditorAccessibilityHandler)
+};
+
 std::unique_ptr<AccessibilityHandler> TextEditor::createAccessibilityHandler()
 {
     return std::make_unique<TextEditorAccessibilityHandler> (*this);

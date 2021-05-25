@@ -93,6 +93,8 @@ namespace Steinberg
 	typedef char char8;
 #ifdef _NATIVE_WCHAR_T_DEFINED
 	typedef __wchar_t char16;
+#elif defined(__MINGW32__)
+	typedef wchar_t char16;
 #elif SMTG_CPP11
 	typedef char16_t char16;
 #else
@@ -137,8 +139,8 @@ namespace Steinberg
 
 
 //----------------------------------------------------------------------------
-/** Byte-order Conversion Macros */
-//----------------------------------------------------------------------------
+/** Byte-order Conversion Macros 
+*/
 #define SWAP_32(l) { \
 	unsigned char* p = (unsigned char*)& (l); \
 	unsigned char t; \
@@ -170,7 +172,7 @@ namespace Steinberg
 // always inline macros (only when RELEASE is 1)
 //----------------------------------------------------------------------------
 #if RELEASE
-    #if SMTG_OS_MACOS || SMTG_OS_LINUX
+    #if SMTG_OS_MACOS || SMTG_OS_LINUX || defined(__MINGW32__)
 		#define SMTG_ALWAYS_INLINE	__inline__ __attribute__((__always_inline__))
 		#define SMTG_NEVER_INLINE __attribute__((noinline))
 	#elif SMTG_OS_WINDOWS

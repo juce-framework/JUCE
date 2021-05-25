@@ -19,25 +19,37 @@
 #include "pluginterfaces/base/fplatform.h"
 
 #if SMTG_CPP11
+#define SMTG_TYPE_STATIC_CHECK(Operator, Type, Platform64Size, MacOS32Size, Win32Size,             \
+                               Linux32Size)                                                        \
+	namespace {                                                                                    \
+	template <typename Type, size_t w, size_t x, size_t y, size_t z>                               \
+	struct Operator##Check##Type                                                                   \
+	{                                                                                              \
+		constexpr Operator##Check##Type ()                                                         \
+		{                                                                                          \
+			static_assert (Operator (Type) ==                                                      \
+			                   (SMTG_PLATFORM_64 ? w : SMTG_OS_MACOS ? x : SMTG_OS_LINUX ? z : y), \
+			               "Struct " #Operator " error: " #Type);                                     \
+		}                                                                                          \
+	};                                                                                             \
+	static constexpr Operator##Check##Type<Type, Platform64Size, MacOS32Size, Win32Size,           \
+	                                       Linux32Size>                                            \
+	    instance##Operator##Type;                                                                  \
+	}
+
 /** Check the size of a structure depending on compilation platform
  *	Used to check that structure sizes don't change between SDK releases.
  */
-#define SMTG_TYPE_SIZE_CHECK(Type, Platform64Size, MacOS32Size, Win32Size, Linux32Size)                         \
-	namespace {                                                                                                 \
-	template <typename Type, size_t w, size_t x, size_t y, size_t z>                                            \
-	struct SizeCheck##Type                                                                                      \
-	{                                                                                                           \
-		constexpr SizeCheck##Type ()                                                                            \
-		{                                                                                                       \
-			static_assert (sizeof (Type) == (SMTG_PLATFORM_64 ? w : SMTG_OS_MACOS ? x : SMTG_OS_LINUX ? z : y), \
-			               "Struct Size Error: " #Type);                                                        \
-		}                                                                                                       \
-	};                                                                                                          \
-	static constexpr SizeCheck##Type<Type, Platform64Size, MacOS32Size, Win32Size, Linux32Size> instance##Type; \
-	}
+#define SMTG_TYPE_SIZE_CHECK(Type, Platform64Size, MacOS32Size, Win32Size, Linux32Size) \
+	SMTG_TYPE_STATIC_CHECK (sizeof, Type, Platform64Size, MacOS32Size, Win32Size, Linux32Size)
+
+/** Check the alignment of a structure depending on compilation platform
+ *	Used to check that structure alignments don't change between SDK releases.
+ */
+#define SMTG_TYPE_ALIGN_CHECK(Type, Platform64Size, MacOS32Size, Win32Size, Linux32Size) \
+	SMTG_TYPE_STATIC_CHECK (alignof, Type, Platform64Size, MacOS32Size, Win32Size, Linux32Size)
 
 #else
 // need static_assert
 #define SMTG_TYPE_SIZE_CHECK(Type, Platform64Size, MacOS32Size, Win32Size, Linux32Size)
 #endif
-

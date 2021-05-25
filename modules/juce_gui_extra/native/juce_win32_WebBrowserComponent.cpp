@@ -275,7 +275,7 @@ private:
                 {
                     LPTSTR messageBuffer = nullptr;
                     auto size = FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                                               nullptr, statusCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                               nullptr, (DWORD) statusCode, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
                                                (LPTSTR) &messageBuffer, 0, nullptr);
 
                     String message (messageBuffer, size);
@@ -305,6 +305,9 @@ private:
         void componentMovedOrResized (bool, bool) override   {}
         void componentPeerChanged() override                 {}
         void componentVisibilityChanged() override           { owner.visibilityChanged(); }
+
+        using ComponentMovementWatcher::componentVisibilityChanged;
+        using ComponentMovementWatcher::componentMovedOrResized;
 
     private:
         WebBrowserComponent& owner;
@@ -872,7 +875,7 @@ void WebBrowserComponent::checkWindowAssociation()
             // page to avoid this..
 
             blankPageShown = true;
-            browser->getInternalWebView().goToURL ("about:blank", 0, 0);
+            browser->getInternalWebView().goToURL ("about:blank", nullptr, nullptr);
         }
     }
 }

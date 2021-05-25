@@ -20,7 +20,7 @@ text and its position in the hierarchy of UI elements.
 The `setTitle()`, `setDescription()` and `setHelpText()` methods can be used
 to customise the text that will be read out by accessibility clients when
 interacting with UI elements and the `setExplicitFocusOrder()`,
-`setFocusContainer()` and `createFocusTraverser()` methods can be used to
+`setFocusContainerType()` and `createFocusTraverser()` methods can be used to
 control the parent/child relationships and the order of navigation between UI
 elements.
 
@@ -38,9 +38,6 @@ to convey further information to accessibility clients via the
 To implement the desired behaviours for a custom component, subclass
 `AccessibilityHandler` and return an instance of this from the
 `Component::createAccessibilityHandler()` method.
-
-Examples of some common UI element handlers for existing JUCE widgets can be
-found in the [`widget_handlers`](/modules/juce_gui_basics/accessibility/widget_handlers) directory.
 
 ## Further Reading
 

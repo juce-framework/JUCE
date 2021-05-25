@@ -17,7 +17,7 @@
 #pragma once
 
 #include "pluginterfaces/base/ipluginbase.h"
-#include "vsttypes.h"
+#include "pluginterfaces/vst/vsttypes.h"
 
 //------------------------------------------------------------------------
 #include "pluginterfaces/base/falignpush.h"
@@ -28,31 +28,36 @@ class IBStream;
 
 //------------------------------------------------------------------------
 /** All VST specific interfaces are located in Vst namespace */
-//------------------------------------------------------------------------
 namespace Vst {
-const int32 kDefaultFactoryFlags = PFactoryInfo::kUnicode; ///< Standard value for PFactoryInfo::flags
+
+/** Standard value for PFactoryInfo::flags */
+const int32 kDefaultFactoryFlags = PFactoryInfo::kUnicode; 
 
 #define BEGIN_FACTORY_DEF(vendor,url,email) using namespace Steinberg; \
-	EXPORT_FACTORY IPluginFactory* PLUGIN_API GetPluginFactory () { \
+	SMTG_EXPORT_SYMBOL IPluginFactory* PLUGIN_API GetPluginFactory () {	\
 	if (!gPluginFactory) \
-	{	static PFactoryInfo factoryInfo (vendor,url,email,Vst::kDefaultFactoryFlags); \
+	{ \
+		static PFactoryInfo factoryInfo (vendor, url, email, Vst::kDefaultFactoryFlags); \
 		gPluginFactory = new CPluginFactory (factoryInfo);
 
 //------------------------------------------------------------------------
-/** \defgroup vstBus VST Buses
+/** \defgroup vstBus VST busses
 Bus Description
 
 A bus can be understood as a "collection of data channels" belonging together.
-It describes a data input or a data output of the Plug-in.
-A VST component can define any desired number of buses, but this number must \b never change.
-Dynamic usage of buses is handled in the host by activating and deactivating buses.
-The component has to define the maximum number of supported buses and it has to
-define which of them are active by default. A host that can handle multiple buses,
-allows the user to activate buses that were initially inactive.
+It describes a data input or a data output of the plug-in.
+A VST component can define any desired number of busses.
+Dynamic usage of busses is handled in the host by activating and deactivating busses.
+All busses are initially inactive.
+The component has to define the maximum number of supported busses and it has to
+define which of them have to be activated by default after instantiation of the plug-in (This is
+only a wish, the host is allow to not follow it, and only activate the first bus for example).
+A host that can handle multiple busses, allows the user to activate busses which are initially all inactive.
+The kMain busses have to place before any others kAux busses.
 
 See also: IComponent::getBusInfo, IComponent::activateBus
-
-@{*/
+*/
+/*@{*/
 
 //------------------------------------------------------------------------
 /** Bus media types */
@@ -82,7 +87,8 @@ enum BusTypes
 //------------------------------------------------------------------------
 /** BusInfo:
 This is the structure used with getBusInfo, informing the host about what is a specific given bus.
-\n See also: IComponent::getBusInfo */
+\n See also: Steinberg::Vst::IComponent::getBusInfo
+*/
 struct BusInfo
 {
 	MediaType mediaType;	///< Media type - has to be a value of \ref MediaTypes
@@ -96,7 +102,15 @@ struct BusInfo
 	uint32 flags;			///< flags - a combination of \ref BusFlags
 	enum BusFlags
 	{
-		kDefaultActive = 1 << 0 ///< bus active per default
+		/** The bus should be activated by the host per default on instantiation (activateBus call is requested).
+ 		 	By default a bus is inactive. */
+		kDefaultActive = 1 << 0,
+		/** The bus does not contain ordinary audio data, but data used for control changes at sample rate.
+ 			The data is in the same format as the audio data [-1..1].
+ 			A host has to prevent unintended routing to speakers to prevent damage.
+		 	Only valid for audio media type busses.
+		 	[released: 3.7.0] */
+		kIsControlVoltage = 1 << 1
 	};
 };
 
@@ -108,15 +122,16 @@ enum IoModes
 {
 	kSimple = 0,		///< 1:1 Input / Output. Only used for Instruments. See \ref vst3IoMode
 	kAdvanced,			///< n:m Input / Output. Only used for Instruments.
-	kOfflineProcessing	///< Plug-in used in an offline processing context
+	kOfflineProcessing	///< plug-in used in an offline processing context
 };
 
 //------------------------------------------------------------------------
 /** Routing Information:
-When the Plug-in supports multiple I/O buses, a host may want to know how the buses are related. The
+When the plug-in supports multiple I/O busses, a host may want to know how the busses are related. The
 relation of an event-input-channel to an audio-output-bus in particular is of interest to the host
 (in order to relate MIDI-tracks to audio-channels)
-\n See also: IComponent::getRoutingInfo, \ref vst3Routing */
+\n See also: IComponent::getRoutingInfo, \ref vst3Routing
+*/
 struct RoutingInfo
 {
 	MediaType mediaType;	///< media type see \ref MediaTypes
@@ -127,7 +142,7 @@ struct RoutingInfo
 //------------------------------------------------------------------------
 // IComponent Interface
 //------------------------------------------------------------------------
-/** Component Base Interface
+/** Component base interface: Vst::IComponent
 \ingroup vstIPlug vst300
 - [plug imp]
 - [released: 3.0.0]
@@ -137,8 +152,9 @@ This is the basic interface for a VST component and must always be supported.
 It contains the common parts of any kind of processing class. The parts that
 are specific to a media type are defined in a separate interface. An implementation
 component must provide both the specific interface and IComponent.
+\see IPluginBase
 */
-class IComponent: public IPluginBase
+class IComponent : public IPluginBase
 {
 public:
 //------------------------------------------------------------------------
@@ -148,19 +164,22 @@ public:
 	/** Called before 'initialize' to set the component usage (optional). See \ref IoModes */
 	virtual tresult PLUGIN_API setIoMode (IoMode mode) = 0;
 
-	/** Called after the Plug-in is initialized. See \ref MediaTypes, BusDirections */
+	/** Called after the plug-in is initialized. See \ref MediaTypes, BusDirections */
 	virtual int32 PLUGIN_API getBusCount (MediaType type, BusDirection dir) = 0;
 
-	/** Called after the Plug-in is initialized. See \ref MediaTypes, BusDirections */
+	/** Called after the plug-in is initialized. See \ref MediaTypes, BusDirections */
 	virtual tresult PLUGIN_API getBusInfo (MediaType type, BusDirection dir, int32 index, BusInfo& bus /*out*/) = 0;
 
 	/** Retrieves routing information (to be implemented when more than one regular input or output bus exists).
 	    The inInfo always refers to an input bus while the returned outInfo must refer to an output bus! */
 	virtual tresult PLUGIN_API getRoutingInfo (RoutingInfo& inInfo, RoutingInfo& outInfo /*out*/) = 0;
 
-	/** Called upon (de-)activating a bus in the host application. The Plug-in should only processed an activated bus,
-	    the host could provide less see \ref AudioBusBuffers in the process call (see \ref IAudioProcessor::process) if last buses are not activated */
-	virtual tresult PLUGIN_API activateBus (MediaType type, BusDirection dir, int32 index, TBool state) = 0;
+	/** Called upon (de-)activating a bus in the host application. The plug-in should only processed
+	   an activated bus, the host could provide less see \ref AudioBusBuffers in the process call
+	   (see \ref IAudioProcessor::process) if last busses are not activated. An already activated bus 
+	   does not need to be reactivated after a IAudioProcessor::setBusArrangements call. */
+	virtual tresult PLUGIN_API activateBus (MediaType type, BusDirection dir, int32 index,
+	                                        TBool state) = 0;
 
 	/** Activates / deactivates the component. */
 	virtual tresult PLUGIN_API setActive (TBool state) = 0;

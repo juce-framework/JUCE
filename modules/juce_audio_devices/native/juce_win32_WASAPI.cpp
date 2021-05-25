@@ -632,10 +632,10 @@ private:
                                                                     &minPeriod,
                                                                     &maxPeriod)))
                 {
-                    minBufferSize = minPeriod;
-                    defaultBufferSize = defaultPeriod;
-                    lowLatencyMaxBufferSize = maxPeriod;
-                    lowLatencyBufferSizeMultiple = fundamentalPeriod;
+                    minBufferSize = (int) minPeriod;
+                    defaultBufferSize = (int) defaultPeriod;
+                    lowLatencyMaxBufferSize = (int) maxPeriod;
+                    lowLatencyBufferSizeMultiple = (int) fundamentalPeriod;
                 }
             }
         }
@@ -672,7 +672,7 @@ private:
                                                                                         : &nearestFormat)))
             {
                 if (nearestFormat != nullptr)
-                    rate = nearestFormat->nSamplesPerSec;
+                    rate = (int) nearestFormat->nSamplesPerSec;
 
                 if (! rates.contains (rate))
                     rates.addUsingDefaultSort (rate);
@@ -780,7 +780,7 @@ private:
     {
         if (auto audioClient3 = client.getInterface<IAudioClient3>())
             return check (audioClient3->InitializeSharedAudioStream (getStreamFlags(),
-                                                                     bufferSizeSamples,
+                                                                     (UINT32) bufferSizeSamples,
                                                                      (WAVEFORMATEX*) &format,
                                                                      nullptr));
 
@@ -822,7 +822,7 @@ private:
             client = nullptr;
             client = createClient();
 
-            defaultPeriod = samplesToRefTime (numFrames, format.Format.nSamplesPerSec);
+            defaultPeriod = samplesToRefTime ((int) numFrames, format.Format.nSamplesPerSec);
         }
 
         return false;
@@ -903,9 +903,9 @@ public:
 
     bool start (int userBufferSize)
     {
-        reservoirSize = actualBufferSize + userBufferSize;
+        reservoirSize = (int) (actualBufferSize + (UINT32) userBufferSize);
         reservoirMask = nextPowerOfTwo (reservoirSize) - 1;
-        reservoir.setSize ((reservoirMask + 1) * bytesPerFrame, true);
+        reservoir.setSize ((size_t) ((reservoirMask + 1) * bytesPerFrame), true);
         reservoirReadPos = 0;
         reservoirWritePos = 0;
         xruns = 0;
@@ -957,9 +957,9 @@ public:
                 void* reservoirPtr = addBytesToPointer (reservoir.getData(), localWrite * bytesPerFrame);
 
                 if ((flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0)
-                    zeromem (reservoirPtr, samplesToDoBytes);
+                    zeromem (reservoirPtr, (size_t) samplesToDoBytes);
                 else
-                    memcpy (reservoirPtr, inputData, samplesToDoBytes);
+                    memcpy (reservoirPtr, inputData, (size_t) samplesToDoBytes);
 
                 reservoirWritePos += samplesToDo;
                 inputData += samplesToDoBytes;
@@ -983,7 +983,7 @@ public:
         if (offset > 0)
         {
             for (int i = 0; i < numDestBuffers; ++i)
-                zeromem (destBuffers[i], offset * sizeof (float));
+                zeromem (destBuffers[i], (size_t) offset * sizeof (float));
 
             bufferSize -= offset;
             reservoirReadPos -= offset / 2;
@@ -1066,8 +1066,8 @@ public:
         auto samplesToDo = getNumSamplesAvailableToCopy();
         uint8* outputData;
 
-        if (check (renderClient->GetBuffer (samplesToDo, &outputData)))
-            renderClient->ReleaseBuffer (samplesToDo, AUDCLNT_BUFFERFLAGS_SILENT);
+        if (check (renderClient->GetBuffer ((UINT32) samplesToDo, &outputData)))
+            renderClient->ReleaseBuffer ((UINT32) samplesToDo, AUDCLNT_BUFFERFLAGS_SILENT);
 
         if (! check (client->Start()))
             return false;
@@ -1087,10 +1087,10 @@ public:
             UINT32 padding = 0;
 
             if (check (client->GetCurrentPadding (&padding)))
-                return actualBufferSize - (int) padding;
+                return (int) actualBufferSize - (int) padding;
         }
 
-        return actualBufferSize;
+        return (int) actualBufferSize;
     }
 
     void copyBuffers (const float** srcBuffers, int numSrcBuffers, int bufferSize,
@@ -1334,8 +1334,8 @@ public:
                 return lastError;
             }
 
-            currentBufferSizeSamples = outputDevice != nullptr ? outputDevice->actualBufferSize
-                                                               : inputDevice->actualBufferSize;
+            currentBufferSizeSamples = (int) (outputDevice != nullptr ? outputDevice->actualBufferSize
+                                                                      : inputDevice->actualBufferSize);
         }
 
         if (inputDevice != nullptr)   ResetEvent (inputDevice->clientEvent);
@@ -1435,7 +1435,7 @@ public:
         JUCE_LOAD_WINAPI_FUNCTION (dll, AvSetMmThreadCharacteristicsW, avSetMmThreadCharacteristics, HANDLE, (LPCWSTR, LPDWORD))
         JUCE_LOAD_WINAPI_FUNCTION (dll, AvSetMmThreadPriority, avSetMmThreadPriority, HANDLE, (HANDLE, AVRT_PRIORITY))
 
-        if (avSetMmThreadCharacteristics != 0 && avSetMmThreadPriority != 0)
+        if (avSetMmThreadCharacteristics != nullptr && avSetMmThreadPriority != nullptr)
         {
             DWORD dummy = 0;
 

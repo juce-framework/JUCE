@@ -39,7 +39,6 @@ public:
     Result save (ProjectExporter* exporterToSave = nullptr);
     Result saveResourcesOnly();
     void saveBasicProjectItems (const OwnedArray<LibraryModule>& modules, const String& appConfigUserContent);
-    Result saveContentNeededForLiveBuild();
 
     Project& getProject()  { return project; }
 

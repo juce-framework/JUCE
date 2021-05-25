@@ -301,8 +301,6 @@
             resource="0" file="Source/CodeEditor/jucer_DocumentEditorComponent.h"/>
       <FILE id="uKOPR9" name="jucer_ItemPreviewComponent.h" compile="0" resource="0"
             file="Source/CodeEditor/jucer_ItemPreviewComponent.h"/>
-      <FILE id="SHg96q" name="jucer_LiveBuildCodeEditor.h" compile="0" resource="0"
-            file="Source/CodeEditor/jucer_LiveBuildCodeEditor.h"/>
       <FILE id="iHU8kh" name="jucer_OpenDocumentManager.cpp" compile="1"
             resource="0" file="Source/CodeEditor/jucer_OpenDocumentManager.cpp"/>
       <FILE id="Bz5yDH" name="jucer_OpenDocumentManager.h" compile="0" resource="0"
@@ -496,54 +494,6 @@
       <FILE id="pl4vjj" name="jucer_UtilityFunctions.h" compile="0" resource="0"
             file="Source/ComponentEditor/jucer_UtilityFunctions.h"/>
     </GROUP>
-    <GROUP id="{1F4F21DC-6856-2C06-EEC5-39EE3B95C206}" name="LiveBuildEngine">
-      <GROUP id="{A09CCB6F-E688-7D17-BF10-AE3C7916AACA}" name="UI">
-        <FILE id="ESpwdA" name="jucer_ActivityListComponent.h" compile="0"
-              resource="0" file="Source/LiveBuildEngine/UI/jucer_ActivityListComponent.h"/>
-        <FILE id="uHJDl5" name="jucer_BuildTabStatusComponent.h" compile="0"
-              resource="0" file="Source/LiveBuildEngine/UI/jucer_BuildTabStatusComponent.h"/>
-        <FILE id="R6e43N" name="jucer_ComponentListComponent.h" compile="0"
-              resource="0" file="Source/LiveBuildEngine/UI/jucer_ComponentListComponent.h"/>
-        <FILE id="XQw8IS" name="jucer_ErrorListComponent.h" compile="0" resource="0"
-              file="Source/LiveBuildEngine/UI/jucer_ErrorListComponent.h"/>
-      </GROUP>
-      <FILE id="Q5k906" name="jucer_ActivityList.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_ActivityList.h"/>
-      <FILE id="XWb7H2" name="jucer_ClassDatabase.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_ClassDatabase.h"/>
-      <FILE id="ze2gZc" name="jucer_ClientServerMessages.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_ClientServerMessages.h"/>
-      <FILE id="DbgXxU" name="jucer_CompileEngineClient.cpp" compile="1"
-            resource="0" file="Source/LiveBuildEngine/jucer_CompileEngineClient.cpp"/>
-      <FILE id="cIQAZS" name="jucer_CompileEngineClient.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_CompileEngineClient.h"/>
-      <FILE id="rPpmYH" name="jucer_CompileEngineDLL.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_CompileEngineDLL.h"/>
-      <FILE id="fAas0g" name="jucer_CompileEngineServer.cpp" compile="1"
-            resource="0" file="Source/LiveBuildEngine/jucer_CompileEngineServer.cpp"/>
-      <FILE id="RraER0" name="jucer_CompileEngineServer.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_CompileEngineServer.h"/>
-      <FILE id="hKqvP1" name="jucer_CompileEngineSettings.h" compile="0"
-            resource="0" file="Source/LiveBuildEngine/jucer_CompileEngineSettings.h"/>
-      <FILE id="YlfzAt" name="jucer_CppHelpers.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_CppHelpers.h"/>
-      <FILE id="yW3rHq" name="jucer_DiagnosticMessage.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_DiagnosticMessage.h"/>
-      <FILE id="v0coQ0" name="jucer_DownloadCompileEngineThread.cpp" compile="1"
-            resource="0" file="Source/LiveBuildEngine/jucer_DownloadCompileEngineThread.cpp"/>
-      <FILE id="vs5P8J" name="jucer_DownloadCompileEngineThread.h" compile="0"
-            resource="0" file="Source/LiveBuildEngine/jucer_DownloadCompileEngineThread.h"/>
-      <FILE id="rhXBjT" name="jucer_ErrorList.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_ErrorList.h"/>
-      <FILE id="w6cwIQ" name="jucer_LiveCodeBuilderDLL.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_LiveCodeBuilderDLL.h"/>
-      <FILE id="Cm6ctH" name="jucer_MessageIDs.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_MessageIDs.h"/>
-      <FILE id="TwC93V" name="jucer_ProjectBuildInfo.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_ProjectBuildInfo.h"/>
-      <FILE id="d0I7nM" name="jucer_SourceCodeRange.h" compile="0" resource="0"
-            file="Source/LiveBuildEngine/jucer_SourceCodeRange.h"/>
-    </GROUP>
     <GROUP id="{6653587F-C475-46AA-E7CF-1D0DFA0FEAA9}" name="Project">
       <GROUP id="{F2E7D5CA-F002-2635-DA2C-898FA5EA2936}" name="Modules">
         <FILE id="w7QIJd" name="jucer_AvailableModulesList.h" compile="0" resource="0"
@@ -560,16 +510,11 @@
                 file="Source/Project/UI/Sidebar/jucer_ExporterTreeItems.h"/>
           <FILE id="zrho6r" name="jucer_FileTreeItems.h" compile="0" resource="0"
                 file="Source/Project/UI/Sidebar/jucer_FileTreeItems.h"/>
-          <FILE id="g0b0eE" name="jucer_LiveBuildTab.h" compile="0" resource="0"
-                file="Source/Project/UI/Sidebar/jucer_LiveBuildTab.h"/>
           <FILE id="HAByBK" name="jucer_ModuleTreeItems.h" compile="0" resource="0"
                 file="Source/Project/UI/Sidebar/jucer_ModuleTreeItems.h"/>
-          <FILE id="rmISUI" name="jucer_ProjectTab.h" compile="0" resource="0"
-                file="Source/Project/UI/Sidebar/jucer_ProjectTab.h"/>
           <FILE id="Htgucp" name="jucer_ProjectTreeItemBase.h" compile="0" resource="0"
                 file="Source/Project/UI/Sidebar/jucer_ProjectTreeItemBase.h"/>
-          <FILE id="kIPfPL" name="jucer_TabComponents.h" compile="0" resource="0"
-                file="Source/Project/UI/Sidebar/jucer_TabComponents.h"/>
+          <FILE id="IO8GgB" name="jucer_Sidebar.h" compile="0" resource="0" file="Source/Project/UI/Sidebar/jucer_Sidebar.h"/>
           <FILE id="jr8KTF" name="jucer_TreeItemTypes.h" compile="0" resource="0"
                 file="Source/Project/UI/Sidebar/jucer_TreeItemTypes.h"/>
         </GROUP>

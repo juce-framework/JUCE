@@ -53,6 +53,8 @@ public:
 
         static_cast<Component&> (mainWindow).addChildComponent (this);
         componentMovedOrResized (true, true);
+
+        enterModalState();
     }
 
     void resized() override
@@ -65,6 +67,11 @@ public:
     void paint (Graphics& g) override
     {
         g.drawImage (componentImage, getLocalBounds().toFloat());
+    }
+
+    void inputAttemptWhenModal() override
+    {
+        mainWindow.hideLoginFormOverlay();
     }
 
 private:
@@ -92,7 +99,8 @@ private:
 
     void refreshBackgroundImage()
     {
-        setVisible (false);
+        setAlwaysOnTop (false);
+        toBack();
 
         auto parentBounds = mainWindow.getBounds();
 
@@ -102,7 +110,8 @@ private:
 
         kernel.applyToImage (componentImage, componentImage, getLocalBounds());
 
-        setVisible (true);
+        setAlwaysOnTop (true);
+        toFront (true);
     }
 
     //==============================================================================
@@ -229,7 +238,6 @@ bool MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
 
     if (auto* pcc = getProjectContentComponent())
     {
-        pcc->saveTreeViewState();
         pcc->saveOpenDocumentList();
         pcc->hideEditor();
     }
@@ -376,15 +384,8 @@ void MainWindow::setupTemporaryPIPProject (PIPGenerator& generator)
 
     currentProject->setTemporaryDirectory (generator.getOutputDirectory());
 
-    ProjectSaver liveBuildSaver (*currentProject);
-    liveBuildSaver.saveContentNeededForLiveBuild();
-
     if (auto* pcc = getProjectContentComponent())
     {
-        pcc->invokeDirectly (CommandIDs::toggleBuildEnabled, true);
-        pcc->invokeDirectly (CommandIDs::buildNow, true);
-        pcc->invokeDirectly (CommandIDs::toggleContinuousBuild, true);
-
         auto fileToDisplay = generator.getPIPFile();
 
         if (fileToDisplay != File())
@@ -487,10 +488,6 @@ void MainWindow::showLoginFormOverlay()
 {
     blurOverlayComponent = std::make_unique<BlurOverlayWithComponent> (*this, std::make_unique<LoginFormComponent> (*this));
     loginFormOpen = true;
-
-    if (auto* loginForm = blurOverlayComponent->getChildComponent (0))
-        if (auto* handler = loginForm->getAccessibilityHandler())
-            handler->grabFocus();
 }
 
 void MainWindow::hideLoginFormOverlay()

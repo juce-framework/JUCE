@@ -385,11 +385,7 @@ function(_juce_get_platform_plugin_kinds out)
     endif()
 
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-        list(APPEND result AAX Unity VST)
-
-        if(NOT MINGW AND NOT MSYS)
-            list(APPEND result VST3)
-        endif()
+        list(APPEND result AAX Unity VST VST3)
     endif()
 
     set(${out} ${result} PARENT_SCOPE)
@@ -1288,6 +1284,7 @@ function(_juce_create_windows_package source_target dest_target extension defaul
 
     set_target_properties(${dest_target}
         PROPERTIES
+        PDB_OUTPUT_DIRECTORY "${products_folder}"
         LIBRARY_OUTPUT_DIRECTORY "${output_folder}/Contents/${arch_string}")
 
     get_target_property(icon_file ${source_target} JUCE_ICON_FILE)

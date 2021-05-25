@@ -506,6 +506,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstmidilearn.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstnoteexpression.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstparameterchanges.h"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstparameterfunctionname.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstphysicalui.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstpluginterfacesupport.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstplugview.h"
@@ -542,7 +543,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.h"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/LICENSE.txt"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/README.md"
-    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/JUCE_README.txt"
+    "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/JUCE_README.md"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt"
     "../../../../../modules/juce_audio_processors/format_types/VST3_SDK/README.md"
     "../../../../../modules/juce_audio_processors/format_types/juce_AU_Shared.h"
@@ -744,7 +745,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_core/native/juce_linux_SystemStats.cpp"
     "../../../../../modules/juce_core/native/juce_linux_Threads.cpp"
     "../../../../../modules/juce_core/native/juce_mac_CFHelpers.h"
-    "../../../../../modules/juce_core/native/juce_mac_ClangBugWorkaround.h"
     "../../../../../modules/juce_core/native/juce_mac_Files.mm"
     "../../../../../modules/juce_core/native/juce_mac_Network.mm"
     "../../../../../modules/juce_core/native/juce_mac_ObjCHelpers.h"
@@ -1993,6 +1993,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstmidilearn.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstnoteexpression.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstparameterchanges.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstparameterfunctionname.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstphysicalui.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstpluginterfacesupport.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/pluginterfaces/vst/ivstplugview.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2029,7 +2030,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/source/vst/vstpresetfile.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/public.sdk/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/JUCE_README.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/JUCE_README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/LICENSE.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/VST3_SDK/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_AU_Shared.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2231,7 +2232,6 @@ set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_
 set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_SystemStats.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_linux_Threads.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_CFHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_ClangBugWorkaround.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_Files.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_Network.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_core/native/juce_mac_ObjCHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)

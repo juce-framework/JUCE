@@ -58,7 +58,7 @@ namespace VariantHelpers
     }
 }
 
-JUCE_COMRESULT addHandlersToArray (const std::vector<const AccessibilityHandler*>& handlers, SAFEARRAY** pRetVal)
+inline JUCE_COMRESULT addHandlersToArray (const std::vector<const AccessibilityHandler*>& handlers, SAFEARRAY** pRetVal)
 {
     auto numHandlers = handlers.size();
 
@@ -87,7 +87,7 @@ JUCE_COMRESULT addHandlersToArray (const std::vector<const AccessibilityHandler*
 }
 
 template <typename Value, typename Object, typename Callback>
-JUCE_COMRESULT withCheckedComArgs (Value* pRetVal, Object& handle, Callback&& callback)
+inline JUCE_COMRESULT withCheckedComArgs (Value* pRetVal, Object& handle, Callback&& callback)
 {
     if (pRetVal == nullptr)
         return E_INVALIDARG;
@@ -98,6 +98,17 @@ JUCE_COMRESULT withCheckedComArgs (Value* pRetVal, Object& handle, Callback&& ca
         return UIA_E_ELEMENTNOTAVAILABLE;
 
     return callback();
+}
+
+inline bool isEditableText (const AccessibilityHandler& handler)
+{
+    return handler.getRole() == AccessibilityRole::editableText
+        && handler.getTextInterface() != nullptr;
+}
+
+inline bool nameIsAccessibilityValue (AccessibilityRole role)
+{
+    return role == AccessibilityRole::staticText;
 }
 
 } // namespace juce

@@ -27,16 +27,15 @@ namespace Steinberg {
 namespace Vst {
 
 //------------------------------------------------------------------------
-/** Extended Plug-in interface IEditController.
+/** Extended plug-in interface IEditController: Vst::IAutomationState
 \ingroup vstIPlug vst365
 - [plug imp]
 - [extends IEditController]
 - [released: 3.6.5]
 - [optional]
 
-Hosts could inform the Plug-in about its current automation state (Read/Write/Nothing).
+Hosts can inform the plug-in about its current automation state (Read/Write/Nothing).
 */
-//------------------------------------------------------------------------
 class IAutomationState : public FUnknown
 {
 public:
@@ -59,6 +58,7 @@ public:
 
 DECLARE_CLASS_IID (IAutomationState, 0xB4E8287F, 0x1BB346AA, 0x83A46667, 0x68937BAB)
 
+//------------------------------------------------------------------------
 } // namespace Vst
 } // namespace Steinberg
 

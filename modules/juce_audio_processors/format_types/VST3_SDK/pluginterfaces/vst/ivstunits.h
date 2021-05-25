@@ -17,21 +17,21 @@
 #pragma once
 
 #include "pluginterfaces/base/funknown.h"
-#include "vsttypes.h"
+#include "pluginterfaces/vst/vsttypes.h"
 
 //------------------------------------------------------------------------
 #include "pluginterfaces/base/falignpush.h"
 //------------------------------------------------------------------------
 
+//------------------------------------------------------------------------
 namespace Steinberg {
 class IBStream;
-
 //------------------------------------------------------------------------
 namespace Vst {
 //------------------------------------------------------------------------
 /** Special UnitIDs for UnitInfo */
 static const UnitID kRootUnitId	= 0;        ///< identifier for the top level unit (root)
-static const UnitID kNoParentUnitId = -1;	///< used for the root unit which doesn't have a parent.
+static const UnitID kNoParentUnitId = -1;	///< used for the root unit which does not have a parent.
 
 //------------------------------------------------------------------------
 /** Special ProgramListIDs for UnitInfo */
@@ -39,8 +39,8 @@ static const ProgramListID kNoProgramListId = -1;	///< no programs are used in t
 
 //------------------------------------------------------------------------
 /** Basic Unit Description.
-\see IUnitInfo */
-//------------------------------------------------------------------------
+\see IUnitInfo
+*/
 struct UnitInfo
 {
 	UnitID id;						///< unit identifier
@@ -51,8 +51,8 @@ struct UnitInfo
 
 //------------------------------------------------------------------------
 /** Basic Program List Description.
-\see IUnitInfo */
-//------------------------------------------------------------------------
+\see IUnitInfo
+*/
 struct ProgramListInfo
 {
 	ProgramListID id;				///< program list identifier
@@ -65,7 +65,7 @@ struct ProgramListInfo
 static const int32 kAllProgramInvalid =	-1;		///< all program information is invalid
 
 //------------------------------------------------------------------------
-/** Host callback for unit support.
+/** Host callback for unit support: Vst::IUnitHandler
 \ingroup vstIHost vst300
 - [host imp]
 - [extends IComponentHandler]
@@ -75,16 +75,16 @@ static const int32 kAllProgramInvalid =	-1;		///< all program information is inv
 Host callback interface, used with IUnitInfo.
 Retrieve via queryInterface from IComponentHandler.
 
-\see \ref vst3Units, IUnitInfo */
-//------------------------------------------------------------------------
-class IUnitHandler: public FUnknown
+\see \ref vst3Units, IUnitInfo
+*/
+class IUnitHandler : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
-	/** Notify host when a module is selected in Plug-in GUI. */
+	/** Notify host when a module is selected in plug-in GUI. */
 	virtual tresult PLUGIN_API notifyUnitSelection (UnitID unitId) = 0;
 
-	/** Tell host that the Plug-in controller changed a program list (rename, load, PitchName changes).
+	/** Tell host that the plug-in controller changed a program list (rename, load, PitchName changes).
 	    \param listId is the specified program list ID to inform.
 		\param programIndex : when kAllProgramInvalid, all program information is invalid, otherwise only the program of given index. */
 	virtual tresult PLUGIN_API notifyProgramListChange (ProgramListID listId, int32 programIndex) = 0;
@@ -95,9 +95,8 @@ public:
 
 DECLARE_CLASS_IID (IUnitHandler, 0x4B5147F8, 0x4654486B, 0x8DAB30BA, 0x163A3C56)
 
-
 //------------------------------------------------------------------------
-/** Host callback for extended unit support.
+/** Host callback for extended unit support: Vst::IUnitHandler2
 \ingroup vstIHost vst365
 - [host imp]
 - [extends IUnitHandler]
@@ -107,8 +106,12 @@ DECLARE_CLASS_IID (IUnitHandler, 0x4B5147F8, 0x4654486B, 0x8DAB30BA, 0x163A3C56)
 Host callback interface, used with IUnitInfo.
 Retrieve via queryInterface from IComponentHandler.
 
-\see \ref vst3Units, IUnitHandler */
-//------------------------------------------------------------------------
+The plug-in has the possibility to inform the host with notifyUnitByBusChange that something has
+changed in the bus - unit assignment, the host then has to recall IUnitInfo::getUnitByBus in order
+to get the new relations between busses and unit.
+
+\see \ref vst3Units, IUnitHandler
+*/
 class IUnitHandler2 : public FUnknown
 {
 public:
@@ -122,24 +125,23 @@ public:
 
 DECLARE_CLASS_IID (IUnitHandler2, 0xF89F8CDF, 0x699E4BA5, 0x96AAC9A4, 0x81452B01)
 
-
 //------------------------------------------------------------------------
-/** Edit controller extension to describe the Plug-in structure.
+/** Edit controller extension to describe the plug-in structure: Vst::IUnitInfo
 \ingroup vstIPlug vst300
 - [plug imp]
 - [extends IEditController]
 - [released: 3.0.0]
 - [optional]
 
-IUnitInfo describes the internal structure of the Plug-in.
+IUnitInfo describes the internal structure of the plug-in.
 - The root unit is the component itself, so getUnitCount must return 1 at least.
 - The root unit id has to be 0 (kRootUnitId).
 - Each unit can reference one program list - this reference must not change.
-- Each unit using a program list, references one program of the list.
+- Each unit, using a program list, references one program of the list.
 
-\see \ref vst3Units, IUnitHandler */
-//------------------------------------------------------------------------
-class IUnitInfo: public FUnknown
+\see \ref vst3Units, IUnitHandler
+*/
+class IUnitInfo : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
@@ -167,7 +169,7 @@ public:
 	virtual tresult PLUGIN_API hasProgramPitchNames (ProgramListID listId, int32 programIndex) = 0;
 
 	/** Gets the PitchName for a given program list ID, program index and pitch.
-		If PitchNames are changed the Plug-in should inform the host with IUnitHandler::notifyProgramListChange. */
+		If PitchNames are changed the plug-in should inform the host with IUnitHandler::notifyProgramListChange. */
 	virtual tresult PLUGIN_API getProgramPitchName (ProgramListID listId, int32 programIndex,
 		int16 midiPitch, String128 name /*out*/) = 0;
 
@@ -197,19 +199,19 @@ public:
 DECLARE_CLASS_IID (IUnitInfo, 0x3D4BD6B5, 0x913A4FD2, 0xA886E768, 0xA5EB92C1)
 
 //------------------------------------------------------------------------
-/** Component extension to access program list data.
+/** Component extension to access program list data: Vst::IProgramListData
 \ingroup vstIPlug vst300
 - [plug imp]
 - [extends IComponent]
 - [released: 3.0.0]
 - [optional]
 
-A component can either support program list data via this interface or
-unit preset data (IUnitData), but not both!
+A component can support program list data via this interface or/and
+unit preset data (IUnitData).
 
-\see \ref vst3UnitPrograms */
-//------------------------------------------------------------------------
-class IProgramListData: public FUnknown
+\see IUnitData, \ref vst3MultitimbralPrograms
+*/
+class IProgramListData : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
@@ -229,19 +231,19 @@ public:
 DECLARE_CLASS_IID (IProgramListData, 0x8683B01F, 0x7B354F70, 0xA2651DEC, 0x353AF4FF)
 
 //------------------------------------------------------------------------
-/** Component extension to access unit data.
+/** Component extension to access unit data: Vst::IUnitData
 \ingroup vstIPlug vst300
 - [plug imp]
 - [extends IComponent]
 - [released: 3.0.0]
 - [optional]
 
-A component can either support unit preset data via this interface or
-program list data (IProgramListData), but not both!
+A component can support unit preset data via this interface or
+program list data (IProgramListData).
 
-\see \ref vst3UnitPrograms */
-//------------------------------------------------------------------------
-class IUnitData: public FUnknown
+\see \ref vst3ProgramLists
+*/
+class IUnitData : public FUnknown
 {
 public:
 //------------------------------------------------------------------------

@@ -19,9 +19,9 @@
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
+
 //------------------------------------------------------------------------
 /** Controller Numbers (MIDI) */
-//------------------------------------------------------------------------
 enum ControllerNumbers
 {
 	kCtrlBankSelectMSB	=	0,	///< Bank Select MSB
@@ -78,10 +78,10 @@ enum ControllerNumbers
 
 	//---Effect Controllers---
 	kCtrlEff1Depth		=	91,	///< Effect 1 Depth (Reverb Send Level)
-	kCtrlEff2Depth		=	92,	///< Effect 2 Depth
+	kCtrlEff2Depth		=	92,	///< Effect 2 Depth (Tremolo Level)
 	kCtrlEff3Depth		=	93,	///< Effect 3 Depth (Chorus Send Level)
-	kCtrlEff4Depth		=	94,	///< Effect 4 Depth (Delay/Variation Level)
-	kCtrlEff5Depth		=	95,	///< Effect 5 Depth
+	kCtrlEff4Depth		=	94,	///< Effect 4 Depth (Delay/Variation/Detune Level)
+	kCtrlEff5Depth		=	95,	///< Effect 5 Depth (Phaser Level)
 
 	kCtrlDataIncrement	=	96,	///< Data Increment (+1)
 	kCtrlDataDecrement	=	97,	///< Data Decrement (-1)
@@ -101,14 +101,14 @@ enum ControllerNumbers
 	kCtrlPolyModeOn		=	127, ///< Poly Mode On
 
 	//---Extra--------------------------
-	kAfterTouch = 128,			///< After Touch
-	kPitchBend  = 129,			///< Pitch Bend
+	kAfterTouch = 128,			///< After Touch (associated to Channel Pressure)
+	kPitchBend  = 129,			///< Pitch Bend Change
 
 	kCountCtrlNumber,			///< Count of Controller Number
 
 	//---Extra for kLegacyMIDICCOutEvent-
 	kCtrlProgramChange = 130,	///< Program Change (use LegacyMIDICCOutEvent.value only)
-	kCtrlPolyPressure  = 131,	///< Poly Pressure (use LegacyMIDICCOutEvent.value for pitch and
+	kCtrlPolyPressure  = 131,	///< Polyphonic Key Pressure (use LegacyMIDICCOutEvent.value for pitch and
 								/// LegacyMIDICCOutEvent.value2 for pressure)
 	kCtrlQuarterFrame  = 132	///< Quarter Frame ((use LegacyMIDICCOutEvent.value only)
 };

@@ -537,6 +537,9 @@ public:
 
     /** Returns the bounding box for a range of text in the editor. As the range may span
         multiple lines, this method returns a RectangleList.
+
+        The bounds are relative to the component's top-left and may extend beyond the bounds
+        of the component if the text is long and word wrapping is disabled.
     */
     RectangleList<int> getTextBounds (Range<int> textRange);
 

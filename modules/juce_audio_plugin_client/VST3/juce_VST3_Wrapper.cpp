@@ -603,7 +603,8 @@ class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
                                public Vst::IUnitInfo,
                                public Vst::ChannelContext::IInfoListener,
-                               public AudioProcessorListener
+                               public AudioProcessorListener,
+                               private ComponentRestarter::Listener
 {
 public:
     JuceVST3EditController (Vst::IHostApplication* host)
@@ -651,15 +652,7 @@ public:
     tresult PLUGIN_API initialize (FUnknown* context) override
     {
         if (hostContext != context)
-        {
-            if (hostContext != nullptr)
-                hostContext->release();
-
             hostContext = context;
-
-            if (hostContext != nullptr)
-                hostContext->addRef();
-        }
 
         return kResultTrue;
     }
@@ -955,10 +948,7 @@ public:
     void setAudioProcessor (JuceAudioProcessor* audioProc)
     {
         if (audioProcessor != audioProc)
-        {
-            audioProcessor = audioProc;
-            setupParameters();
-        }
+            installAudioProcessor (audioProc);
     }
 
     tresult PLUGIN_API connect (IConnectionPoint* other) override
@@ -970,7 +960,7 @@ public:
             if (! audioProcessor.loadFrom (other))
                 sendIntMessage ("JuceVST3EditController", (Steinberg::int64) (pointer_sized_int) this);
             else
-                setupParameters();
+                installAudioProcessor (audioProcessor);
 
             return result;
         }
@@ -1273,42 +1263,6 @@ private:
     friend struct Param;
 
     //==============================================================================
-    class ComponentRestarter : private AsyncUpdater
-    {
-    public:
-        explicit ComponentRestarter (JuceVST3EditController& controllerIn)
-            : controller (controllerIn) {}
-
-        ~ComponentRestarter() noexcept override
-        {
-            cancelPendingUpdate();
-        }
-
-        void restart (int32 newFlags)
-        {
-            if (newFlags == 0)
-                return;
-
-            flags = newFlags;
-
-            if (MessageManager::getInstance()->isThisTheMessageThread())
-                handleAsyncUpdate();
-            else
-                triggerAsyncUpdate();
-        }
-
-    private:
-        void handleAsyncUpdate() override
-        {
-            if (auto* handler = controller.componentHandler)
-                handler->restartComponent (flags);
-        }
-
-        JuceVST3EditController& controller;
-        int32 flags = 0;
-    };
-
-    //==============================================================================
     VSTComSmartPtr<JuceAudioProcessor> audioProcessor;
 
     struct MidiController
@@ -1322,6 +1276,12 @@ private:
     Vst::ParamID parameterToMidiControllerOffset;
     MidiController parameterToMidiController[(int) numMIDIChannels * (int) Vst::kCountCtrlNumber];
     Vst::ParamID midiControllerToParameter[numMIDIChannels][Vst::kCountCtrlNumber];
+
+    void restartComponentOnMessageThread (int32 flags) override
+    {
+        if (auto* handler = componentHandler)
+            handler->restartComponent (flags);
+    }
 
     //==============================================================================
     struct OwnedParameterListener  : public AudioProcessorParameter::Listener
@@ -1364,10 +1324,14 @@ private:
     float lastScaleFactorReceived = 1.0f;
    #endif
 
-    void setupParameters()
+    void installAudioProcessor (const VSTComSmartPtr<JuceAudioProcessor>& newAudioProcessor)
     {
+        audioProcessor = newAudioProcessor;
+
         if (auto* pluginInstance = getPluginInstance())
         {
+            lastLatencySamples = pluginInstance->getLatencySamples();
+
             pluginInstance->addListener (this);
 
             // as the bypass is not part of the regular parameters we need to listen for it explicitly

@@ -63,14 +63,6 @@ static bool shouldDeactivateTitleBar = true;
 
 void* getUser32Function (const char*);
 
-namespace WindowsAccessibility
-{
-    void initialiseUIAWrapper();
-    long getUiaRootObjectId();
-    bool handleWmGetObject (AccessibilityHandler*, WPARAM, LPARAM, LRESULT*);
-    void revokeUIAMapEntriesForWindow (HWND);
-}
-
 #if JUCE_DEBUG
  int numActiveScopedDpiAwarenessDisablers = 0;
  bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
@@ -1380,9 +1372,6 @@ public:
           parentToAddTo (parent),
           currentRenderingEngine (softwareRenderingEngine)
     {
-        // make sure that the UIA wrapper singleton is loaded
-        WindowsAccessibility::initialiseUIAWrapper();
-
         callFunctionIfNotLocked (&createWindowCallback, this);
 
         setTitle (component.getName());
@@ -1438,6 +1427,8 @@ public:
 
     void setVisible (bool shouldBeVisible) override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         ShowWindow (hwnd, shouldBeVisible ? SW_SHOWNA : SW_HIDE);
 
         if (shouldBeVisible)
@@ -1479,6 +1470,8 @@ public:
 
     void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         fullScreen = isNowFullScreen;
 
         auto newBounds = windowBorder.addedTo (bounds);
@@ -1545,6 +1538,8 @@ public:
 
     void setAlpha (float newAlpha) override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         auto intAlpha = (uint8) jlimit (0, 255, (int) (newAlpha * 255.0f));
 
         if (component.isOpaque())
@@ -1569,6 +1564,8 @@ public:
 
     void setMinimised (bool shouldBeMinimised) override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         if (shouldBeMinimised != isMinimised())
             ShowWindow (hwnd, shouldBeMinimised ? SW_MINIMIZE : SW_SHOWNORMAL);
     }
@@ -1584,6 +1581,8 @@ public:
 
     void setFullScreen (bool shouldBeFullScreen) override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         setMinimised (false);
 
         if (isFullScreen() != shouldBeFullScreen)
@@ -1667,6 +1666,8 @@ public:
 
     void toFront (bool makeActive) override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         setMinimised (false);
 
         const bool oldDeactivate = shouldDeactivateTitleBar;
@@ -1685,6 +1686,8 @@ public:
 
     void toBehind (ComponentPeer* other) override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         if (auto* otherPeer = dynamic_cast<HWNDComponentPeer*> (other))
         {
             setMinimised (false);
@@ -1709,6 +1712,8 @@ public:
 
     void grabFocus() override
     {
+        const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
+
         const bool oldDeactivate = shouldDeactivateTitleBar;
         shouldDeactivateTitleBar = ((styleFlags & windowIsTemporary) == 0);
 
@@ -4192,7 +4197,10 @@ private:
 
     void windowShouldDismissModals (HWND originator)
     {
-        if (component.isShowing() && isAncestor (originator, hwnd))
+        if (shouldIgnoreModalDismiss)
+            return;
+
+        if (isAncestor (originator, hwnd))
             sendInputAttemptWhenModalMessage();
     }
 
@@ -4260,6 +4268,7 @@ private:
 
     SharedResourcePointer<TopLevelModalDismissBroadcaster> modalDismissBroadcaster;
     IMEHandler imeHandler;
+    bool shouldIgnoreModalDismiss = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HWNDComponentPeer)

@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2020, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -83,6 +83,26 @@ public:
 };
 
 DECLARE_CLASS_IID (ITestPlugProvider, 0x86BE70EE, 0x4E99430F, 0x978F1E6E, 0xD68FB5BA)
+
+//------------------------------------------------------------------------
+/** Test Helper extension.
+ * \ingroup TestClass
+ */
+class ITestPlugProvider2 : public ITestPlugProvider
+{
+public:
+	/** get the plugin factory.
+	 *
+	 * The reference count of the returned factory object is not increased when calling this
+	 * function.
+	 */
+	virtual IPluginFactory* PLUGIN_API getPluginFactory () = 0;
+
+//------------------------------------------------------------------------
+	static const FUID iid;
+};
+
+DECLARE_CLASS_IID (ITestPlugProvider2, 0xC7C75364, 0x7B8343AC, 0xA4495B0A, 0x3E5A46C7)
 
 //------------------------------------------------------------------------
 } // Vst

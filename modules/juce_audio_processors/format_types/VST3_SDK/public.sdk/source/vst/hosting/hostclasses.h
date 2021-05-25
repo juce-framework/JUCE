@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -82,9 +82,9 @@ public:
 	tresult PLUGIN_API setFloat (AttrID aid, double value) SMTG_OVERRIDE;
 	tresult PLUGIN_API getFloat (AttrID aid, double& value) SMTG_OVERRIDE;
 	tresult PLUGIN_API setString (AttrID aid, const TChar* string) SMTG_OVERRIDE;
-	tresult PLUGIN_API getString (AttrID aid, TChar* string, uint32 size) SMTG_OVERRIDE;
-	tresult PLUGIN_API setBinary (AttrID aid, const void* data, uint32 size) SMTG_OVERRIDE;
-	tresult PLUGIN_API getBinary (AttrID aid, const void*& data, uint32& size) SMTG_OVERRIDE;
+	tresult PLUGIN_API getString (AttrID aid, TChar* string, uint32 sizeInBytes) SMTG_OVERRIDE;
+	tresult PLUGIN_API setBinary (AttrID aid, const void* data, uint32 sizeInBytes) SMTG_OVERRIDE;
+	tresult PLUGIN_API getBinary (AttrID aid, const void*& data, uint32& sizeInBytes) SMTG_OVERRIDE;
 
 	DECLARE_FUNKNOWN_METHODS
 protected:

@@ -17,22 +17,25 @@
 #pragma once
 
 #include "pluginterfaces/base/funknown.h"
-#include "vsttypes.h"
+#include "pluginterfaces/vst/vsttypes.h"
 
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
 //------------------------------------------------------------------------
-/** Host callback interface for an edit controller.
+/** Host callback interface for an edit controller: Vst::IPlugInterfaceSupport
 \ingroup vstIHost vst3612
 - [host imp]
 - [released: 3.6.12]
 - [optional]
 
-Allow a Plug-in to ask the host if a given Plug-in interface is supported/used by the host.
+Allows a plug-in to ask the host if a given plug-in interface is supported/used by the host.
 It is implemented by the hostContext given when the component is initialized.
 
-\code
+\section IPlugInterfaceSupportExample Example
+
+\code{.cpp}
+//------------------------------------------------------------------------
 tresult PLUGIN_API MyPluginController::initialize (FUnknown* context)
 {
 	// ...
@@ -45,8 +48,8 @@ tresult PLUGIN_API MyPluginController::initialize (FUnknown* context)
 	// ...
 }
 \endcode
-\see IPluginBase */
-//------------------------------------------------------------------------
+\see IPluginBase
+*/
 class IPlugInterfaceSupport : public FUnknown
 {
 public:

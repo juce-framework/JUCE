@@ -76,7 +76,7 @@ public:
     Icons();
 
     Path folder, document, imageDoc, config, juceLogo, graph, jigsaw, info, warning, bug,
-         code, box, mainJuceLogo, user, closedFolder, exporter, fileExplorer, file, buildTab,
+         code, box, mainJuceLogo, user, closedFolder, exporter, fileExplorer, file,
          modules, openFolder, play, settings, singleModule, edit, plus, android, codeBlocks,
          linux, xcode, visualStudio, clion;
 
@@ -84,6 +84,4 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Icons)
 };
 
-#ifndef BUILDING_JUCE_COMPILEENGINE
- const Icons& getIcons();
-#endif
+const Icons& getIcons();
