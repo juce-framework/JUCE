@@ -95,6 +95,7 @@ public:
                                                          backing: NSBackingStoreBuffered
                                                            defer: YES];
             setOwner (window, this);
+            [window setAccessibilityElement: component.getAccessibilityHandler() != nullptr];
             [window orderOut: nil];
             [window setDelegate: (id<NSWindowDelegate>) window];
 
