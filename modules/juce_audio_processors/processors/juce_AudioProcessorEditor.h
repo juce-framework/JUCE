@@ -211,6 +211,7 @@ private:
     void initialise();
     void editorResized (bool wasResized);
     void updatePeer();
+    void attachConstrainer (ComponentBoundsConstrainer*);
     void attachResizableCornerComponent();
 
     //==============================================================================

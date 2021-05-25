@@ -73,7 +73,7 @@ void AudioProcessorEditor::initialise()
 
     // END SECTION A
 
-    setConstrainer (&defaultConstrainer);
+    attachConstrainer (&defaultConstrainer);
     resizeListener.reset (new AudioProcessorEditorListener (*this));
     addComponentListener (resizeListener.get());
 }
@@ -124,8 +124,7 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
 {
     if (constrainer != newConstrainer)
     {
-        constrainer = newConstrainer;
-        updatePeer();
+        attachConstrainer (newConstrainer);
 
         if (constrainer != nullptr)
             resizableByHost = (newConstrainer->getMinimumWidth() != newConstrainer->getMaximumWidth()
@@ -133,6 +132,15 @@ void AudioProcessorEditor::setConstrainer (ComponentBoundsConstrainer* newConstr
 
         if (resizableCorner != nullptr)
             attachResizableCornerComponent();
+    }
+}
+
+void AudioProcessorEditor::attachConstrainer (ComponentBoundsConstrainer* newConstrainer)
+{
+    if (constrainer != newConstrainer)
+    {
+        constrainer = newConstrainer;
+        updatePeer();
     }
 }
 
