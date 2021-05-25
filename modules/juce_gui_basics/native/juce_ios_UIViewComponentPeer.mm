@@ -1029,12 +1029,15 @@ BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const Str
             if (currentSelection.isEmpty())
                 target->setHighlightedRegion (currentSelection.withStart (currentSelection.getStart() - 1));
 
+        WeakReference<Component> deletionChecker (dynamic_cast<Component*> (target));
+
         if (text == "\r" || text == "\n" || text == "\r\n")
             handleKeyPress (KeyPress::returnKey, text[0]);
         else
             target->insertTextAtCaret (text);
 
-        updateHiddenTextContent (target);
+        if (deletionChecker != nullptr)
+            updateHiddenTextContent (target);
     }
 
     return NO;
