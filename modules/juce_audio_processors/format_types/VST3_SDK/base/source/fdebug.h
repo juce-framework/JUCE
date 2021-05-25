@@ -11,7 +11,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -51,14 +51,11 @@
 #pragma once
 
 #include "pluginterfaces/base/ftypes.h"
-#include <cstring>
+#include <string.h>
 
 #if SMTG_OS_MACOS
 #include <new>
 #endif
-
-/** Returns true if a debugger is attached. */
-bool AmIBeingDebugged ();
 
 //-----------------------------------------------------------------------------
 // development / release
@@ -155,10 +152,10 @@ void FPrintLastError (const char* file, int line);
         the debug output to a file or stream.
 */
 ///@{
-using AssertionHandler = bool (*) (const char* message);
+typedef bool (*AssertionHandler) (const char* message);
 extern AssertionHandler gAssertionHandler;
 extern AssertionHandler gPreAssertionHook;
-using DebugPrintLogger = void (*) (const char* message);
+typedef void (*DebugPrintLogger) (const char* message);
 extern DebugPrintLogger gDebugPrintLogger;
 ///@}
 
@@ -215,9 +212,11 @@ void* operator new (size_t, int, const char*, int);
 #endif
 #endif
 
-// replace #if SMTG_CPPUNIT_TESTING
-bool isSmtgUnitTesting ();
-void setSmtgUnitTesting ();
+#if SMTG_CPPUNIT_TESTING
+#define SMTG_IS_TEST true
+#else
+#define SMTG_IS_TEST false
+#endif
 
 #if !SMTG_RENAME_ASSERT
 #if SMTG_OS_WINDOWS

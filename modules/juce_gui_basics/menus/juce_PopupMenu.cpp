@@ -233,18 +233,13 @@ private:
                                                  .addAction (AccessibilityActionType::toggle, std::move (onToggle));
 
             if (hasActiveSubMenu (item.item))
-            {
-                auto showSubMenu = [&item]
-                {
-                    item.parentWindow.showSubMenuFor (&item);
+                actions.addAction (AccessibilityActionType::showMenu, [&item]
+                                   {
+                                       item.parentWindow.showSubMenuFor (&item);
 
-                    if (auto* subMenu = item.parentWindow.activeSubMenu.get())
-                        subMenu->setCurrentlyHighlightedChild (subMenu->items.getFirst());
-                };
-
-                actions.addAction (AccessibilityActionType::press,    showSubMenu);
-                actions.addAction (AccessibilityActionType::showMenu, showSubMenu);
-            }
+                                       if (auto* subMenu = item.parentWindow.activeSubMenu.get())
+                                           subMenu->setCurrentlyHighlightedChild (subMenu->items.getFirst());
+                                   });
 
             return actions;
         }
@@ -523,24 +518,6 @@ struct MenuWindow  : public Component
     }
 
     float getDesktopScaleFactor() const override    { return scaleFactor * Desktop::getInstance().getGlobalScaleFactor(); }
-
-    void visibilityChanged() override
-    {
-        if (! isShowing())
-            return;
-
-        auto* accessibleFocus = [this]
-        {
-          if (currentChild != nullptr)
-              if (auto* childHandler = currentChild->getAccessibilityHandler())
-                  return childHandler;
-
-            return getAccessibilityHandler();
-        }();
-
-        if (accessibleFocus != nullptr)
-            accessibleFocus->grabFocus();
-    }
 
     //==============================================================================
     bool keyPressed (const KeyPress& key) override
@@ -1123,6 +1100,9 @@ struct MenuWindow  : public Component
 
     void setCurrentlyHighlightedChild (ItemComponent* child)
     {
+        if (currentChild == child)
+            return;
+
         if (currentChild != nullptr)
             currentChild->setHighlighted (false);
 
@@ -1237,14 +1217,8 @@ struct MenuWindow  : public Component
                                                        AccessibilityActions().addAction (AccessibilityActionType::focus, [this]
                                                        {
                                                            if (currentChild != nullptr)
-                                                           {
                                                                if (auto* handler = currentChild->getAccessibilityHandler())
                                                                    handler->grabFocus();
-                                                           }
-                                                           else
-                                                           {
-                                                               selectNextItem (MenuSelectionDirection::forwards);
-                                                           }
                                                        }));
     }
 
@@ -2053,6 +2027,9 @@ int PopupMenu::showWithOptionalCallback (const Options& options,
 
         window->toFront (false);  // need to do this after making it modal, or it could
                                   // be stuck behind other comps that are already modal..
+
+        if (auto* handler = window->getAccessibilityHandler())
+            handler->grabFocus();
 
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (userCallback == nullptr && canBeModal)

@@ -27,3 +27,9 @@
 
 #include <JuceHeader.h>
 #include "jucer_CommonHeaders.h"
+
+#if JUCE_DEBUG
+ #define RUN_CLANG_IN_CHILD_PROCESS 1
+#else
+ #define RUN_CLANG_IN_CHILD_PROCESS 1
+#endif

@@ -56,9 +56,12 @@ namespace CommandIDs
         showAboutWindow         = 0x300024,
         checkForNewVersion      = 0x300025,
         enableNewVersionCheck   = 0x300026,
-        enableGUIEditor         = 0x300027,
+        enableLiveBuild         = 0x300027,
+        enableGUIEditor         = 0x300028,
 
         showProjectSettings     = 0x300030,
+        showProjectTab          = 0x300031,
+        showBuildTab            = 0x300032,
         showFileExplorerPanel   = 0x300033,
         showModulesPanel        = 0x300034,
         showExportersPanel      = 0x300035,
@@ -80,11 +83,23 @@ namespace CommandIDs
         findNext                = 0x300052,
         findPrevious            = 0x300053,
 
+        cleanAll                = 0x300060,
+        toggleBuildEnabled      = 0x300061,
+        showWarnings            = 0x300062,
+        reinstantiateComp       = 0x300063,
+        launchApp               = 0x300064,
+        killApp                 = 0x300065,
+        buildNow                = 0x300066,
+        toggleContinuousBuild   = 0x300067,
+
         enableSnapToGrid        = 0x300070,
         zoomIn                  = 0x300071,
         zoomOut                 = 0x300072,
         zoomNormal              = 0x300073,
         spaceBarDrag            = 0x300074,
+
+        nextError               = 0x300080,
+        prevError               = 0x300081,
 
         loginLogout             = 0x300090,
 

@@ -27,6 +27,7 @@
 #include "jucer_Project.h"
 #include "../ProjectSaving/jucer_ProjectSaver.h"
 #include "../Application/jucer_Application.h"
+#include "../LiveBuildEngine/jucer_CompileEngineSettings.h"
 
 //==============================================================================
 Project::ProjectFileModificationPoller::ProjectFileModificationPoller (Project& p)
@@ -639,6 +640,8 @@ Result Project::loadDocument (const File& file)
     moveOldPropertyFromProjectToAllExporters (Ids::bigIcon);
     moveOldPropertyFromProjectToAllExporters (Ids::smallIcon);
     getEnabledModules().sortAlphabetically();
+
+    compileEngineSettings.reset (new CompileEngineSettings (projectRoot));
 
     rescanExporterPathModules (! ProjucerApplication::getApp().isRunningCommandLine);
     exporterPathsModulesList.addListener (this);

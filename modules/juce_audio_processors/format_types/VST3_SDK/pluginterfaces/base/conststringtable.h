@@ -24,6 +24,7 @@ namespace Steinberg {
 /**	Constant unicode string table.
 Used for conversion from ASCII string literals to char16.
 */
+//------------------------------------------------------------------------
 class ConstStringTable
 {
 public:

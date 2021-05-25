@@ -634,8 +634,7 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
                  jmax (1, getHeight()));
        #endif
 
-        const auto unscaledPosition = ScalingHelpers::scaledScreenPosToUnscaled (getScreenPosition());
-        const auto topLeft = ScalingHelpers::unscaledScreenPosToScaled (*this, unscaledPosition);
+        auto topLeft = getScreenPosition();
 
         bool wasFullscreen = false;
         bool wasMinimised = false;
@@ -1702,9 +1701,6 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
 
         if (shouldTakeKeyboardFocus)
             grabKeyboardFocus();
-
-        if (auto* handler = getAccessibilityHandler())
-            notifyAccessibilityEventInternal (*handler, InternalAccessibilityEvent::focusChanged);
     }
     else
     {

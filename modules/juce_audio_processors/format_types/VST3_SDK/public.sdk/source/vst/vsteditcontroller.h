@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -56,9 +56,11 @@ class EditorView;
 //------------------------------------------------------------------------
 /** Default implementation for a VST 3 edit controller.
 \ingroup vstClasses
-Can be used as base class for a specific controller implementation
-*/
-class EditController : public ComponentBase, public IEditController, public IEditController2
+Can be used as base class for a specific controller implementation */
+//------------------------------------------------------------------------
+class EditController: public ComponentBase,
+					  public IEditController,
+					  public IEditController2
 {
 public:
 //------------------------------------------------------------------------
@@ -86,7 +88,7 @@ public:
 
 	//---from ComponentBase---------
 	tresult PLUGIN_API initialize (FUnknown* context) SMTG_OVERRIDE;
-	tresult PLUGIN_API terminate () SMTG_OVERRIDE;
+	tresult PLUGIN_API terminate  () SMTG_OVERRIDE;
 
 	//---Internal Methods-------
 	virtual tresult beginEdit (ParamID tag);	///< to be called before a serie of performEdit
@@ -135,17 +137,17 @@ protected:
 
 //------------------------------------------------------------------------
 /** View related to an edit controller.
-\ingroup vstClasses
-*/
+\ingroup vstClasses  */
+//------------------------------------------------------------------------
 class EditorView : public CPluginView
 {
 public:
 //------------------------------------------------------------------------
 	EditorView (EditController* controller, ViewRect* size = nullptr);
-	~EditorView () override;
+	virtual ~EditorView ();
 
 	/** Gets its controller part. */
-	EditController* getController () const { return controller; }
+	EditController* getController () { return controller; }
 
 	//---from CPluginView-------------
 	void attachedToParent () SMTG_OVERRIDE;
@@ -158,8 +160,8 @@ protected:
 
 //------------------------------------------------------------------------
 /** Unit element.
-\ingroup vstClasses 
-*/
+\ingroup vstClasses  */
+//------------------------------------------------------------------------
 class Unit : public FObject
 {
 public:
@@ -198,8 +200,8 @@ protected:
 
 //------------------------------------------------------------------------
 /** ProgramList element.
-\ingroup vstClasses 
-*/
+\ingroup vstClasses  */
+//------------------------------------------------------------------------
 class ProgramList : public FObject
 {
 public:
@@ -253,8 +255,8 @@ protected:
 
 //------------------------------------------------------------------------
 /** ProgramListWithPitchNames element.
-\ingroup vstClasses
-*/
+\ingroup vstClasses  */
+//-----------------------------------------------------------------------------
 class ProgramListWithPitchNames : public ProgramList
 {
 public:
@@ -285,14 +287,12 @@ protected:
 \ingroup vstClasses
 - [extends EditController]
 */
+//------------------------------------------------------------------------
 class EditControllerEx1 : public EditController, public IUnitInfo
 {
 public:
 	EditControllerEx1 ();
-	~EditControllerEx1 () override;
-
-	//---from ComponentBase---------
-	tresult PLUGIN_API terminate () SMTG_OVERRIDE;
+	virtual ~EditControllerEx1 ();
 
 	/** Adds a given unit. */
 	bool addUnit (Unit* unit);

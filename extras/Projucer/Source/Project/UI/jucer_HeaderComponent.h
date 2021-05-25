@@ -32,6 +32,7 @@
 class Project;
 class ProjectContentComponent;
 class ProjectExporter;
+class CompileEngineChildProcess;
 
 //==============================================================================
 class HeaderComponent    : public Component,
@@ -42,6 +43,7 @@ class HeaderComponent    : public Component,
 {
 public:
     HeaderComponent (ProjectContentComponent* projectContentComponent);
+    ~HeaderComponent() override;
 
     //==============================================================================
     void resized() override;
@@ -55,6 +57,7 @@ public:
     bool canCurrentExporterLaunchProject() const;
 
     void sidebarTabsWidthChanged (int newWidth);
+    void liveBuildEnablementChanged (bool isEnabled);
 
 private:
     //==============================================================================
@@ -80,7 +83,13 @@ private:
     void updateExporterButton();
 
     //==============================================================================
+    void buildPing();
+    void buildFinished (bool);
+    void setRunAppButtonState (bool);
+
+    //==============================================================================
     int tabsWidth = 200;
+    bool isBuilding = false;
 
     ProjectContentComponent* projectContentComponent = nullptr;
     Project* project = nullptr;
@@ -95,7 +104,10 @@ private:
     UserAvatarComponent userAvatar { true };
 
     IconButton projectSettingsButton { "Project Settings", getIcons().settings },
-               saveAndOpenInIDEButton { "Save and Open in IDE", Image() };
+               saveAndOpenInIDEButton { "Save and Open in IDE", Image() },
+               runAppButton { "Run Application", getIcons().play };
+
+    ReferenceCountedObjectPtr<CompileEngineChildProcess> childProcess;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HeaderComponent)
 };

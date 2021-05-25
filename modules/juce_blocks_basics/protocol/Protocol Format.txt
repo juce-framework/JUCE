@@ -1,0 +1,96 @@
+
+A blocks packet consists of a stream of packed bits.
+
+The first 7 bits of a message is the index of the device within the topology to which the
+message should be delivered, or from which it originated. The 0x40 bit of this will be set
+to indicate that it's a device->host message, or clear for host->device
+
+The next 32 bits are a timestamp, in milliseconds since the source device was booted.
+If sending from the host to the device, or for types of packet 
+where the timestamp is irrelevant, this can be 0.
+
+This is followed by a sequence of 1 or more messages. Each message starts with
+a 7 bit message type, followed by message-type-specific data.
+
+
+---------------------------------------------------------------------------------------
+Device topology update (device -> host)
+
+7 bits - message type (0x01)
+7 bits - number of device-info blocks to follow
+8 bits - number of connection-info blocks to follow
+
+This is followed by a series of device-info blocks of the form:
+
+10 bits - device model identifier (see code for list of types)
+32 bits - device GUID
+10 bits - device firmware version
+6 bits - battery status
+
+Next follows by a series of connection-info blocks of the form:
+
+7 bits - device 1 index (i.e. index in the list of devices sent above)
+5 bits - device 1 port type
+7 bits - device 2 index
+5 bits - device 2 port type
+
+Ports are indicated by being either North, South, East or West on a device, plus
+an index to indicate their position along that edge.
+
+---------------------------------------------------------------------------------------
+Control button down/up (device -> host)
+
+7 bits - message type (down = 0x20, up = 0x21)
+7 bits - device index
+12 bits - control button ID (see code for values)
+
+---------------------------------------------------------------------------------------
+Touch start/move/end (device -> host)
+
+7 bits - message type (start = 0x10, move = 0x11, end = 0x12)
+7 bits - device index
+5 bits - touch index
+12 bits - touch X position
+12 bits - touch Y position
+8 bits - touch Z position
+
+---------------------------------------------------------------------------------------
+Touch start/move/end with velocity (device -> host)
+
+7 bits - message type (start = 0x13, move = 0x14, end = 0x15)
+7 bits - device index
+5 bits - touch index
+12 bits - touch X position
+12 bits - touch Y position
+8 bits - touch Z position
+8 bits - X velocity
+8 bits - Y velocity
+8 bits - Z velocity
+
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+Device command message (host -> device)
+
+7 bits - message type (0x01)
+8 bits - command type
+
+Command types:
+
+    resetDevice                         = 0x00,
+    requestTopologyMessage              = 0x01,
+    setHighResTouchDetectionMode        = 0x02,
+    setLowResTouchDetectionMode         = 0x03,
+
+---------------------------------------------------------------------------------------
+Modify shared state data block
+
+7 bits - message type (0x02)
+
+..then repeatedly:
+  3 bits - type of data change command
+  ...extra command-specific bits..
+  3 bits - type of data change command
+  ..etc..
+  3 bits - end of sequence command
+
+

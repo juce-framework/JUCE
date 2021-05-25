@@ -26,7 +26,9 @@
 #include "../../Application/jucer_Headers.h"
 #include "jucer_ProjucerLookAndFeel.h"
 
-#include "../../Project/UI/jucer_ProjectContentComponent.h"
+#ifndef BUILDING_JUCE_COMPILEENGINE
+ #include "../../Project/UI/jucer_ProjectContentComponent.h"
+#endif
 
 //==============================================================================
 ProjucerLookAndFeel::ProjucerLookAndFeel()
@@ -48,14 +50,16 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
     const auto alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
     auto textColour = findColour (defaultTextColourId).withMultipliedAlpha (alpha);
 
+   #ifndef BUILDING_JUCE_COMPILEENGINE
     auto iconColour = findColour (button.isFrontTab() ? activeTabIconColourId
                                                       : inactiveTabIconColourId);
 
     auto isProjectTab = button.getName() == ProjectContentComponent::getProjectTabName();
+    auto isBuildTab = button.getName() == ProjectContentComponent::getBuildTabName();
 
-    if (isProjectTab)
+    if (isProjectTab || isBuildTab)
     {
-        auto icon = Icon (getIcons().closedFolder,
+        auto icon = Icon (isProjectTab ? getIcons().closedFolder : getIcons().buildTab,
                           iconColour.withMultipliedAlpha (alpha));
 
         auto isSingleTab = (button.getTabbedButtonBar().getNumTabs() == 1);
@@ -69,7 +73,7 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
             activeArea.removeFromLeft (10);
 
             g.setColour (textColour);
-            g.drawFittedText (ProjectContentComponent::getProjectTabName(),
+            g.drawFittedText (isProjectTab ? ProjectContentComponent::getProjectTabName() : ProjectContentComponent::getBuildTabName(),
                               activeArea, Justification::centredLeft, 1);
         }
         else
@@ -78,6 +82,7 @@ void ProjucerLookAndFeel::drawTabButton (TabBarButton& button, Graphics& g, bool
         }
     }
     else
+   #endif
     {
         TextLayout textLayout;
         LookAndFeel_V3::createTabTextLayout (button, (float) area.getWidth(), (float) area.getHeight(), textColour, textLayout);

@@ -75,4 +75,3 @@ CodeEditorComponent::ColourScheme getLightColourScheme();
 extern std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
 
 AudioDeviceManager& getSharedAudioDeviceManager (int numInputChannels = -1, int numOutputChannels = -1);
-ApplicationCommandManager& getGlobalCommandManager();

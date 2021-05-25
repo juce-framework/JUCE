@@ -51,6 +51,7 @@ function(_juce_add_pips)
 endfunction()
 
 add_subdirectory(Audio)
+add_subdirectory(BLOCKS)
 add_subdirectory(DSP)
 add_subdirectory(GUI)
 add_subdirectory(Plugins)

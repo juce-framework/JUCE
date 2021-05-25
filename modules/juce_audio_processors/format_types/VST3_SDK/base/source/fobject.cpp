@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -42,7 +42,7 @@
 
 namespace Steinberg {
 
-IUpdateHandler* FObject::gUpdateHandler = nullptr;
+IUpdateHandler* FObject::gUpdateHandler = 0;
 
 //------------------------------------------------------------------------
 const FUID FObject::iid;
@@ -84,7 +84,7 @@ tresult PLUGIN_API FObject::queryInterface (const TUID _iid, void** obj)
 	QUERY_INTERFACE (_iid, obj, FUnknown::iid, FUnknown)             
 	QUERY_INTERFACE (_iid, obj, IDependent::iid, IDependent)             
 	QUERY_INTERFACE (_iid, obj, FObject::iid, FObject)             
-	*obj = nullptr;
+	*obj = 0;
 	return kNoInterface; 
 }
 
@@ -125,8 +125,8 @@ void FObject::deferUpdate (int32 msg)
 //------------------------------------------------------------------------
 namespace Singleton 
 {
-	using ObjectVector = std::vector<FObject**>;
-	ObjectVector* singletonInstances = nullptr;
+	typedef std::vector<FObject**> ObjectVector;
+	ObjectVector* singletonInstances = 0;
 	bool singletonsTerminated = false;
 	Steinberg::Base::Thread::FLock* singletonsLock;
 
@@ -148,7 +148,7 @@ namespace Singleton
 		SMTG_ASSERT (singletonsTerminated == false)
 		if (singletonsTerminated == false)
 		{
-			if (singletonInstances == nullptr)
+			if (singletonInstances == 0)
 				singletonInstances = NEW std::vector<FObject**>;
 			singletonInstances->push_back (o);
 		}
@@ -167,15 +167,15 @@ namespace Singleton
 				{
 					FObject** obj = (*it);
 					(*obj)->release ();
-					*obj = nullptr;
-					obj = nullptr;
+					*obj = 0;
+					obj = 0;
 				}
 
 				delete singletonInstances;
-				singletonInstances = nullptr;
+				singletonInstances = 0;
 			}
 			delete singletonsLock;
-			singletonsLock = nullptr;
+			singletonsLock = 0;
 		}
 	} deleter;
 }

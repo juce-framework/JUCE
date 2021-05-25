@@ -79,13 +79,6 @@ AccessibleState AccessibilityHandler::getCurrentState() const
     return hasFocus (false) ? state.withFocused() : state;
 }
 
-bool AccessibilityHandler::isIgnored() const
-{
-    return role == AccessibilityRole::ignored
-        || getCurrentState().isIgnored()
-        || component.isCurrentlyBlockedByAnotherModalComponent();
-}
-
 static bool isComponentVisibleWithinWindow (const Component& comp)
 {
     if (auto* peer = comp.getPeer())
@@ -107,10 +100,16 @@ static bool isComponentVisibleWithinParent (Component* comp)
     return true;
 }
 
-bool AccessibilityHandler::isVisibleWithinParent() const
+bool AccessibilityHandler::isIgnored() const
 {
-    return getCurrentState().isAccessibleOffscreen()
-          || (isComponentVisibleWithinParent (&component) && isComponentVisibleWithinWindow (component));
+    const auto state = getCurrentState();
+
+    return role == AccessibilityRole::ignored
+          || state.isIgnored()
+          || ! component.isShowing()
+          || (! state.isAccessibleOffscreen()
+              && (! isComponentVisibleWithinParent (&component)
+                  || ! isComponentVisibleWithinWindow (component)));
 }
 
 //==============================================================================
@@ -156,7 +155,7 @@ static AccessibilityHandler* findEnclosingHandler (Component* comp)
 static AccessibilityHandler* getUnignoredAncestor (AccessibilityHandler* handler)
 {
     while (handler != nullptr
-           && (handler->isIgnored() || ! handler->isVisibleWithinParent())
+           && handler->isIgnored()
            && handler->getParent() != nullptr)
     {
         handler = handler->getParent();
@@ -170,7 +169,7 @@ static AccessibilityHandler* findFirstUnignoredChild (const std::vector<Accessib
     if (! handlers.empty())
     {
         const auto iter = std::find_if (handlers.cbegin(), handlers.cend(),
-                                        [] (const AccessibilityHandler* handler) { return ! handler->isIgnored() && handler->isVisibleWithinParent(); });
+                                        [] (const AccessibilityHandler* handler) { return ! handler->isIgnored(); });
 
         if (iter != handlers.cend())
             return *iter;
@@ -185,7 +184,7 @@ static AccessibilityHandler* findFirstUnignoredChild (const std::vector<Accessib
 
 static AccessibilityHandler* getFirstUnignoredDescendant (AccessibilityHandler* handler)
 {
-    if (handler != nullptr && (handler->isIgnored() || ! handler->isVisibleWithinParent()))
+    if (handler != nullptr && handler->isIgnored())
         return findFirstUnignoredChild (handler->getChildren());
 
     return handler;
@@ -309,22 +308,32 @@ void AccessibilityHandler::grabFocusInternal (bool canTryParent)
 void AccessibilityHandler::giveAwayFocusInternal() const
 {
     currentlyFocusedHandler = nullptr;
+    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
 
-    if (auto* parent = getParent())
-        notifyAccessibilityEventInternal (*parent, InternalAccessibilityEvent::focusChanged);
+    if (auto* focusedComponent = Component::getCurrentlyFocusedComponent())
+        if (auto* handler = focusedComponent->getAccessibilityHandler())
+            handler->grabFocus();
 }
 
 void AccessibilityHandler::takeFocus()
 {
     currentlyFocusedHandler = this;
-    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
 
-    if (component.getWantsKeyboardFocus() && ! component.hasKeyboardFocus (true))
+    WeakReference<Component> weakComponent (&component);
+    actions.invoke (AccessibilityActionType::focus);
+
+    if (weakComponent != nullptr
+        && component.getWantsKeyboardFocus()
+        && ! component.hasKeyboardFocus (true))
+    {
         component.grabKeyboardFocus();
+    }
+
+    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
 }
 
 //==============================================================================
-#if ! (JUCE_MAC || (JUCE_WINDOWS && ! JUCE_MINGW))
+#if ! (JUCE_MAC || JUCE_WINDOWS)
 class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
 void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}

@@ -25,19 +25,18 @@
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
-
 //------------------------------------------------------------------------
-/** Private plug-in message: Vst::IMessage
+/** Private Plug-in message.
 \ingroup vstIHost vst300
 - [host imp]
 - [create via IHostApplication::createInstance]
 - [released: 3.0.0]
 - [mandatory]
 
-Messages are sent from a VST controller component to a VST editor component and vice versa.
-\see IAttributeList, IConnectionPoint, \ref vst3Communication
-*/
-class IMessage : public FUnknown
+Messages are sent from a VST-controller component to a VST-editor component and vice versa.
+\see IAttributeList, IConnectionPoint, \ref vst3Communication */
+//------------------------------------------------------------------------
+class IMessage: public FUnknown
 {
 public:
 //------------------------------------------------------------------------
@@ -57,7 +56,7 @@ public:
 DECLARE_CLASS_IID (IMessage, 0x936F033B, 0xC6C047DB, 0xBB0882F8, 0x13C1E613)
 
 //------------------------------------------------------------------------
-/** Connect a component with another one: Vst::IConnectionPoint
+/** Connect a component with another one.
 \ingroup vstIPlug vst300
 - [plug imp]
 - [host imp]
@@ -67,9 +66,9 @@ DECLARE_CLASS_IID (IMessage, 0x936F033B, 0xC6C047DB, 0xBB0882F8, 0x13C1E613)
 This interface is used for the communication of separate components.
 Note that some hosts will place a proxy object between the components so that they are not directly connected.
 
-\see \ref vst3Communication
-*/
-class IConnectionPoint : public FUnknown
+\see \ref vst3Communication*/
+//------------------------------------------------------------------------
+class IConnectionPoint: public FUnknown
 {
 public:
 //------------------------------------------------------------------------

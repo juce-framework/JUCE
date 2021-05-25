@@ -109,7 +109,7 @@ private:
         {
             stop();
 
-            if (deviceHandle != nullptr)
+            if (deviceHandle != 0)
             {
                 for (int count = 5; --count >= 0;)
                 {
@@ -183,7 +183,7 @@ private:
 
         void start()
         {
-            if (deviceHandle != nullptr && ! isStarted.load())
+            if (deviceHandle != 0 && ! isStarted.load())
             {
                 activeMidiCollectors.addIfNotAlreadyThere (this);
 
@@ -232,7 +232,7 @@ private:
         }
 
         MidiDeviceInfo deviceInfo;
-        HMIDIIN deviceHandle = nullptr;
+        HMIDIIN deviceHandle = 0;
 
     private:
         Win32MidiService& midiService;
@@ -413,7 +413,7 @@ private:
 
                 if (d.identifier == deviceIdentifier)
                 {
-                    deviceID = (UINT) i;
+                    deviceID = i;
                     deviceName = d.name;
                     break;
                 }
@@ -526,7 +526,7 @@ private:
 
                 if (d.identifier == deviceIdentifier)
                 {
-                    deviceID = (UINT) i;
+                    deviceID = i;
                     deviceName = d.name;
                     break;
                 }
@@ -554,7 +554,7 @@ private:
 
             for (int i = 4; --i >= 0;)
             {
-                HMIDIOUT h = nullptr;
+                HMIDIOUT h = 0;
                 auto res = midiOutOpen (&h, deviceID, 0, 0, CALLBACK_NULL);
 
                 if (res == MMSYSERR_NOERROR)

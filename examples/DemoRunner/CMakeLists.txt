@@ -65,6 +65,7 @@ target_compile_definitions(DemoRunner PRIVATE
 target_link_libraries(DemoRunner PRIVATE
     juce::juce_analytics
     juce::juce_audio_utils
+    juce::juce_blocks_basics
     juce::juce_box2d
     juce::juce_dsp
     juce::juce_opengl
@@ -75,6 +76,6 @@ target_link_libraries(DemoRunner PRIVATE
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags)
 
-foreach(folder IN ITEMS ../Assets ../Audio ../DSP ../GUI ../Utilities)
+foreach(folder IN ITEMS ../Assets ../Audio ../BLOCKS ../DSP ../GUI ../Utilities)
     juce_add_bundle_resources_directory(DemoRunner ${folder})
 endforeach()

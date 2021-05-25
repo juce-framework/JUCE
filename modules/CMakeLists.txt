@@ -31,6 +31,7 @@ juce_add_modules(
     juce_audio_plugin_client
     juce_audio_processors
     juce_audio_utils
+    juce_blocks_basics
     juce_box2d
     juce_core
     juce_cryptography

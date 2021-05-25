@@ -257,30 +257,32 @@ private:
                 {
                     selectionRange.setStart (jlimit (0, numCharacters - 1, selectionRange.getStart()));
                     selectionRange.setEnd (selectionRange.getStart() + 1);
+
+                    return S_OK;
                 }
-                else if (unit == TextUnit_Paragraph
-                      || unit == TextUnit_Page
-                      || unit == TextUnit_Document)
+
+                if (unit == TextUnit_Paragraph
+                    || unit == TextUnit_Page
+                    || unit == TextUnit_Document)
                 {
-                    selectionRange = { 0, numCharacters };
+                    selectionRange = { 0, textInterface->getTotalNumCharacters() };
+                    return S_OK;
                 }
-                else if (unit == TextUnit_Word
-                      || unit == TextUnit_Format
-                      || unit == TextUnit_Line)
+
+                auto start = getNextEndpointPosition (*textInterface,
+                                                      selectionRange.getStart(),
+                                                      unit,
+                                                      NextEndpointDirection::backwards);
+
+                if (start >= 0)
                 {
-                    const auto boundaryType = (unit == TextUnit_Line ? BoundaryType::line : BoundaryType::word);
+                    auto end = getNextEndpointPosition (*textInterface,
+                                                        start,
+                                                        unit,
+                                                        NextEndpointDirection::forwards);
 
-                    auto start = findBoundary (*textInterface,
-                                               selectionRange.getStart(),
-                                               boundaryType,
-                                               NextEndpointDirection::backwards);
-
-                    auto end = findBoundary (*textInterface,
-                                             start,
-                                             boundaryType,
-                                             NextEndpointDirection::forwards);
-
-                    selectionRange = Range<int> (start, end);
+                    if (end >= 0)
+                        selectionRange = Range<int> (start, end);
                 }
 
                 return S_OK;
@@ -493,12 +495,12 @@ private:
                 if (count == 0 || numCharacters == 0)
                     return S_OK;
 
-                const auto isStart = (endpoint == TextPatternRangeEndpoint_Start);
+                auto isStart = (endpoint == TextPatternRangeEndpoint_Start);
                 auto endpointToMove = (isStart ? selectionRange.getStart() : selectionRange.getEnd());
 
                 if (unit == TextUnit_Character)
                 {
-                    const auto targetPoint = jlimit (0, numCharacters, endpointToMove + count);
+                    auto targetPoint = jlimit (0, numCharacters, endpointToMove + count);
 
                     *pRetVal = targetPoint - endpointToMove;
                     setEndpointChecked (endpoint, targetPoint);
@@ -518,30 +520,25 @@ private:
                     return S_OK;
                 }
 
-                if (unit == TextUnit_Word
-                    || unit == TextUnit_Format
-                    || unit == TextUnit_Line)
+                for (int i = 0; i < std::abs (count); ++i)
                 {
-                    const auto boundaryType = unit == TextUnit_Line ? BoundaryType::line : BoundaryType::word;
+                    auto nextEndpoint = getNextEndpointPosition (textInterface,
+                                                                 endpointToMove,
+                                                                 unit,
+                                                                 direction);
 
-                    // handle case where endpoint is on a boundary
-                    if (findBoundary (textInterface, endpointToMove, boundaryType, direction) == endpointToMove)
-                        endpointToMove += (direction == NextEndpointDirection::forwards ? 1 : -1);
-
-                    int numMoved;
-                    for (numMoved = 0; numMoved < std::abs (count); ++numMoved)
+                    if (nextEndpoint < 0)
                     {
-                        auto nextEndpoint = findBoundary (textInterface, endpointToMove, boundaryType, direction);
-
-                        if (nextEndpoint == endpointToMove)
-                            break;
-
-                        endpointToMove = nextEndpoint;
+                        *pRetVal = (direction == NextEndpointDirection::forwards ? i : -i);
+                        setEndpointChecked (endpoint, endpointToMove);
+                        return S_OK;
                     }
 
-                    *pRetVal = numMoved;
-                    setEndpointChecked (endpoint, endpointToMove);
+                    endpointToMove = nextEndpoint;
                 }
+
+                *pRetVal = count;
+                setEndpointChecked (endpoint, endpointToMove);
 
                 return S_OK;
             });
@@ -587,27 +584,52 @@ private:
 
     private:
         enum class NextEndpointDirection { forwards, backwards };
-        enum class BoundaryType { word, line };
 
-        static int findBoundary (const AccessibilityTextInterface& textInterface,
-                                 int currentPosition,
-                                 BoundaryType boundary,
-                                 NextEndpointDirection direction)
+        static int getNextEndpointPosition (const AccessibilityTextInterface& textInterface,
+                                            int currentPosition,
+                                            TextUnit unit,
+                                            NextEndpointDirection direction)
         {
-            const auto text = [&]() -> String
+            auto isTextUnitSeparator = [unit] (const juce_wchar c)
             {
-                if (direction == NextEndpointDirection::forwards)
-                    return textInterface.getText ({ currentPosition, textInterface.getTotalNumCharacters() });
+                return ((unit == TextUnit_Word || unit == TextUnit_Format) && CharacterFunctions::isWhitespace (c))
+                       || (unit == TextUnit_Line && (c == '\r' || c == '\n'));
+            };
 
-                auto stdString = textInterface.getText ({ 0, currentPosition }).toStdString();
-                std::reverse (stdString.begin(), stdString.end());
-                return stdString;
-            }();
+            constexpr int textBufferSize = 1024;
+            int numChars = 0;
 
-            auto tokens = (boundary == BoundaryType::line ? StringArray::fromLines (text)
-                                                          : StringArray::fromTokens (text, false));
+            if (direction == NextEndpointDirection::forwards)
+            {
+                auto textBuffer = textInterface.getText ({ currentPosition,
+                                                           jmin (textInterface.getTotalNumCharacters(), currentPosition + textBufferSize) });
 
-            return currentPosition + (direction == NextEndpointDirection::forwards ? tokens[0].length() : -(tokens[0].length()));
+                for (auto charPtr = textBuffer.getCharPointer(); ! charPtr.isEmpty();)
+                {
+                    auto character = charPtr.getAndAdvance();
+                    ++numChars;
+
+                    if (isTextUnitSeparator (character))
+                        return currentPosition + numChars;
+                }
+            }
+            else
+            {
+                auto textBuffer = textInterface.getText ({ jmax (0, currentPosition - textBufferSize),
+                                                           currentPosition });
+
+                for (auto charPtr = textBuffer.end() - 1; charPtr != textBuffer.begin(); --charPtr)
+                {
+                    auto character = *charPtr;
+
+                    if (isTextUnitSeparator (character))
+                        return currentPosition - numChars;
+
+                    ++numChars;
+                }
+            }
+
+            return -1;
         }
 
         void setEndpointChecked (TextPatternRangeEndpoint endpoint, int newEndpoint)

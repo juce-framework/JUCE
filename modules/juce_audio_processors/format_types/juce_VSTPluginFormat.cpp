@@ -2289,7 +2289,7 @@ private:
         if (effect->numInputs == 0)
             return { nullptr, nullptr };
 
-        SpeakerArrangements result { nullptr, nullptr };
+        SpeakerArrangements result;
         const auto dispatchResult = effect->dispatcher (effect,
                                                         Vst2::effGetSpeakerArrangement,
                                                         0,

@@ -249,12 +249,7 @@ public:
     }
 
 private:
-   #if JUCE_DEMO_RUNNER
-    ApplicationCommandManager& commandManager = getGlobalCommandManager();
-   #else
     ApplicationCommandManager commandManager;
-   #endif
-
     KeyMappingEditorComponent keyMappingEditor  { *commandManager.getKeyMappings(), true};
 
     KeyPressTarget keyTarget;

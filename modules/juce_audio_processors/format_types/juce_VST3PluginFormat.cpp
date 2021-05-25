@@ -28,8 +28,6 @@
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
 
-#include <unordered_map>
-
 namespace juce
 {
 
@@ -321,8 +319,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
                           public Vst::IComponentHandler3, // From VST V3.5.0 (also very well named!)
                           public Vst::IContextMenuTarget,
                           public Vst::IHostApplication,
-                          public Vst::IUnitHandler,
-                          private ComponentRestarter::Listener
+                          public Vst::IUnitHandler
 {
     VST3HostContext()
     {
@@ -330,7 +327,7 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
         attributeList = new AttributeList (this);
     }
 
-    virtual ~VST3HostContext() override {}
+    virtual ~VST3HostContext() {}
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
 
@@ -569,10 +566,6 @@ private:
     VST3PluginInstance* plugin = nullptr;
     Atomic<int> refCount;
     String appName;
-
-    ComponentRestarter componentRestarter { *this };
-
-    void restartComponentOnMessageThread (int32 flags) override;
 
     //==============================================================================
     struct Message  : public Vst::IMessage
@@ -2234,7 +2227,6 @@ public:
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
-        updateMidiMappings();
 
         auto configureParameters = [this]
         {
@@ -2257,16 +2249,6 @@ public:
     }
 
     void* getPlatformSpecificData() override   { return holder->component; }
-
-    void updateMidiMappings()
-    {
-        // MIDI mappings will always be updated on the main thread, but we need to ensure
-        // that we're not simultaneously reading them on the audio thread.
-        const SpinLock::ScopedLockType processLock (processMutex);
-
-        if (midiMapping != nullptr)
-            storedMidiMapping.storeMappings (*midiMapping);
-    }
 
     //==============================================================================
     const String getName() const override
@@ -2311,8 +2293,6 @@ public:
         // thread. If you call it from a different thread, some plugins may break.
         JUCE_ASSERT_MESSAGE_THREAD
         MessageManagerLock lock;
-
-        const SpinLock::ScopedLockType processLock (processMutex);
 
         // Avoid redundantly calling things like setActive, which can be a heavy-duty call for some plugins:
         if (isActive
@@ -2373,8 +2353,6 @@ public:
 
     void releaseResources() override
     {
-        const SpinLock::ScopedLockType lock (processMutex);
-
         if (! isActive)
             return; // Avoids redundantly calling things like setActive
 
@@ -2414,8 +2392,6 @@ public:
     {
         jassert (! isUsingDoublePrecision());
 
-        const SpinLock::ScopedLockType processLock (processMutex);
-
         if (isActive && processor != nullptr)
             processAudio (buffer, midiMessages, Vst::kSample32, false);
     }
@@ -2424,8 +2400,6 @@ public:
     {
         jassert (isUsingDoublePrecision());
 
-        const SpinLock::ScopedLockType processLock (processMutex);
-
         if (isActive && processor != nullptr)
             processAudio (buffer, midiMessages, Vst::kSample64, false);
     }
@@ -2433,8 +2407,6 @@ public:
     void processBlockBypassed (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (! isUsingDoublePrecision());
-
-        const SpinLock::ScopedLockType processLock (processMutex);
 
         if (bypassParam != nullptr)
         {
@@ -2450,8 +2422,6 @@ public:
     void processBlockBypassed (AudioBuffer<double>& buffer, MidiBuffer& midiMessages) override
     {
         jassert (isUsingDoublePrecision());
-
-        const SpinLock::ScopedLockType processLock (processMutex);
 
         if (bypassParam != nullptr)
         {
@@ -2519,8 +2489,6 @@ public:
 
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override
     {
-        const SpinLock::ScopedLockType processLock (processMutex);
-
         // if the processor is not active, we ask the underlying plug-in if the
         // layout is actually supported
         if (! isActive)
@@ -2775,8 +2743,6 @@ public:
     //==============================================================================
     void reset() override
     {
-        const SpinLock::ScopedLockType lock (processMutex);
-
         if (holder->component != nullptr && processor != nullptr)
         {
             processor->setProcessing (false);
@@ -2930,15 +2896,6 @@ private:
 
     std::map<Vst::ParamID, VST3Parameter*> idToParamMap;
     EditControllerParameterDispatcher parameterDispatcher;
-    StoredMidiMapping storedMidiMapping;
-
-    /*  The plugin may request a restart during playback, which may in turn
-        attempt to call functions such as setProcessing and setActive. It is an
-        error to call these functions simultaneously with
-        IAudioProcessor::process, so we use this mutex to ensure that this
-        scenario is impossible.
-    */
-    SpinLock processMutex;
 
     //==============================================================================
     template <typename Type>
@@ -3234,12 +3191,10 @@ private:
         midiOutputs->clear();
 
         if (acceptsMidi())
-        {
             MidiEventList::hostToPluginEventList (*midiInputs,
                                                   midiBuffer,
                                                   destination.inputParameterChanges,
-                                                  storedMidiMapping);
-        }
+                                                  midiMapping);
 
         destination.inputEvents = midiInputs;
         destination.outputEvents = midiOutputs;
@@ -3255,7 +3210,7 @@ private:
     {
         Vst::ParameterInfo paramInfo{};
 
-        if (editController != nullptr)
+        if (processor != nullptr)
             editController->getParameterInfo ((int32) index, paramInfo);
 
         return paramInfo;
@@ -3415,46 +3370,32 @@ tresult VST3HostContext::endEdit (Vst::ParamID paramID)
 
 tresult VST3HostContext::restartComponent (Steinberg::int32 flags)
 {
-    // If you hit this, the plugin has requested a restart from a thread other than
-    // the UI thread. JUCE should be able to cope, but you should consider filing a bug
-    // report against the plugin.
-    JUCE_ASSERT_MESSAGE_THREAD
-
-    componentRestarter.restart (flags);
-    return kResultTrue;
-}
-
-void VST3HostContext::restartComponentOnMessageThread (int32 flags)
-{
-    if (plugin == nullptr)
+    if (plugin != nullptr)
     {
-        jassertfalse;
-        return;
+        if (hasFlag (flags, Vst::kReloadComponent))
+            plugin->reset();
+
+        if (hasFlag (flags, Vst::kIoChanged))
+        {
+            auto sampleRate = plugin->getSampleRate();
+            auto blockSize  = plugin->getBlockSize();
+
+            plugin->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
+                                   blockSize > 0 ? blockSize : 1024);
+        }
+
+        if (hasFlag (flags, Vst::kLatencyChanged))
+            if (plugin->processor != nullptr)
+                plugin->setLatencySamples (jmax (0, (int) plugin->processor->getLatencySamples()));
+
+        plugin->updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
+                                                                          .withParameterInfoChanged (true));
+
+        return kResultTrue;
     }
 
-    if (hasFlag (flags, Vst::kReloadComponent))
-        plugin->reset();
-
-    if (hasFlag (flags, Vst::kIoChanged))
-    {
-        auto sampleRate = plugin->getSampleRate();
-        auto blockSize  = plugin->getBlockSize();
-
-        // Have to deactivate here, otherwise prepareToPlay might not pick up the new bus layouts
-        plugin->releaseResources();
-        plugin->prepareToPlay (sampleRate >= 8000 ? sampleRate : 44100.0,
-        blockSize > 0 ? blockSize : 1024);
-    }
-
-    if (hasFlag (flags, Vst::kLatencyChanged))
-        if (plugin->processor != nullptr)
-            plugin->setLatencySamples (jmax (0, (int) plugin->processor->getLatencySamples()));
-
-    if (hasFlag (flags, Vst::kMidiCCAssignmentChanged))
-        plugin->updateMidiMappings();
-
-    plugin->updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true)
-                                                                      .withParameterInfoChanged (true));
+    jassertfalse;
+    return kResultFalse;
 }
 
 //==============================================================================
