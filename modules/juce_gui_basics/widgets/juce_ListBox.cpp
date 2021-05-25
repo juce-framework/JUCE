@@ -32,12 +32,12 @@ static AccessibilityActions getListRowAccessibilityActions (RowComponentType& ro
     auto onFocus = [&rowComponent]
     {
         rowComponent.owner.scrollToEnsureRowIsOnscreen (rowComponent.row);
+        rowComponent.owner.selectRow (rowComponent.row);
     };
 
     auto onPress = [&rowComponent, onFocus]
     {
         onFocus();
-        rowComponent.owner.selectRow (rowComponent.row);
         rowComponent.owner.keyPressed (KeyPress (KeyPress::returnKey));
     };
 
