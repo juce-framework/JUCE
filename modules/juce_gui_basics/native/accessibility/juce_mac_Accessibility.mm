@@ -26,6 +26,8 @@
 namespace juce
 {
 
+#if (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
+
 #if (! defined MAC_OS_X_VERSION_10_13) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_13
  using NSAccessibilityRole = NSString*;
  using NSAccessibilityNotificationName = NSString*;
@@ -1140,5 +1142,7 @@ void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::
 {
     delete impl;
 }
+
+#endif
 
 } // namespace juce

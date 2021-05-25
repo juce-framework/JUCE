@@ -324,7 +324,9 @@ void AccessibilityHandler::takeFocus()
 }
 
 //==============================================================================
-#if ! (JUCE_MAC || (JUCE_WINDOWS && ! JUCE_MINGW))
+#if ! ((JUCE_MAC && (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)) \
+     || (JUCE_WINDOWS && ! JUCE_MINGW))
+
 class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
 void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}
@@ -332,6 +334,7 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
 AccessibilityHandler::AccessibilityNativeImpl* AccessibilityHandler::createNativeImpl (AccessibilityHandler&) { return nullptr; }
 void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::AccessibilityNativeImpl*) const noexcept {}
 void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent) {}
+
 #endif
 
 } // namespace juce
