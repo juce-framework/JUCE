@@ -282,7 +282,9 @@ void Label::hideEditor (bool discardCurrentEditorContents)
         const bool changed = (! discardCurrentEditorContents)
                                && updateFromTextEditorContents (*outgoingEditor);
         outgoingEditor.reset();
-        repaint();
+
+        if (deletionChecker != nullptr)
+            repaint();
 
         if (changed)
             textWasEdited();
