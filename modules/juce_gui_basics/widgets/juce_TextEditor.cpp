@@ -1746,7 +1746,8 @@ void TextEditor::drawContent (Graphics& g)
             g.setColour (findColour (highlightColourId).withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
 
             auto boundingBox = getTextBounds (selection);
-            boundingBox.offsetAll (-leftIndent, -roundToInt ((float) topIndent + yOffset));
+            boundingBox.offsetAll (viewport->getViewPositionX() - leftIndent,
+                                   viewport->getViewPositionY() - roundToInt ((float) topIndent + yOffset));
 
             g.fillPath (boundingBox.toPath(), transform);
         }
