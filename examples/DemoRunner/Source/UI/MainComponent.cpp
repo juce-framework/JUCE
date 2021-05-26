@@ -248,7 +248,8 @@ private:
         else
             demoHolder.setDemo (selectedCategory, row);
 
-        selectFirstRow();
+        if (demos.isShowing())
+            selectFirstRow();
     }
 
     void selectFirstRow()
