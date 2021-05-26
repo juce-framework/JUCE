@@ -319,8 +319,12 @@ void AccessibilityHandler::takeFocus()
     currentlyFocusedHandler = this;
     notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
 
-    if (component.getWantsKeyboardFocus() && ! component.hasKeyboardFocus (true))
+    if ((component.isShowing() || component.isOnDesktop())
+        && component.getWantsKeyboardFocus()
+        && ! component.hasKeyboardFocus (true))
+    {
         component.grabKeyboardFocus();
+    }
 }
 
 //==============================================================================
