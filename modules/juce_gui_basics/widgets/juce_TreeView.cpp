@@ -808,8 +808,9 @@ TreeViewItem* TreeView::getItemOnRow (int index) const
 
 TreeViewItem* TreeView::getItemAt (int y) const noexcept
 {
-    if (auto* itemComponent = viewport->getContentComp()->getItemComponentAt (Point<int> (0, y)))
-        return &itemComponent->getRepresentedItem();
+    if (auto* contentComp = viewport->getContentComp())
+        if (auto* itemComponent = contentComp->getItemComponentAt (contentComp->getLocalPoint (this, Point<int> (0, y))))
+            return &itemComponent->getRepresentedItem();
 
     return nullptr;
 }
