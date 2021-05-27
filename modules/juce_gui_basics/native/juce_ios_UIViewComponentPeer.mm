@@ -583,6 +583,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     view.opaque = component.isOpaque();
     view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
 
+   #if JUCE_COREGRAPHICS_DRAW_ASYNC
+    if (! getComponentAsyncLayerBackedViewDisabled (component))
+    {
+        [[view layer] setDrawsAsynchronously: YES];
+    }
+   #endif
+
     if (isSharedWindow)
     {
         window = [viewToAttachTo window];
@@ -1022,12 +1029,15 @@ BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const Str
             if (currentSelection.isEmpty())
                 target->setHighlightedRegion (currentSelection.withStart (currentSelection.getStart() - 1));
 
+        WeakReference<Component> deletionChecker (dynamic_cast<Component*> (target));
+
         if (text == "\r" || text == "\n" || text == "\r\n")
             handleKeyPress (KeyPress::returnKey, text[0]);
         else
             target->insertTextAtCaret (text);
 
-        updateHiddenTextContent (target);
+        if (deletionChecker != nullptr)
+            updateHiddenTextContent (target);
     }
 
     return NO;

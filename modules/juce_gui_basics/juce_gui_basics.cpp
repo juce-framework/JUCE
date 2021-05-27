@@ -236,6 +236,25 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
+namespace juce
+{
+
+static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
+
+/** Used by the macOS and iOS peers. */
+void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
+{
+    comp.getProperties().set (disableAsyncLayerBackedViewIdentifier, shouldDisableAsyncLayerBackedView);
+}
+
+/** Used by the macOS and iOS peers. */
+bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
+{
+    return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
+}
+
+} // namespace juce
+
 #if JUCE_MAC || JUCE_IOS
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"

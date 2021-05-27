@@ -32,12 +32,12 @@ static AccessibilityActions getListRowAccessibilityActions (RowComponentType& ro
     auto onFocus = [&rowComponent]
     {
         rowComponent.owner.scrollToEnsureRowIsOnscreen (rowComponent.row);
+        rowComponent.owner.selectRow (rowComponent.row);
     };
 
     auto onPress = [&rowComponent, onFocus]
     {
         onFocus();
-        rowComponent.owner.selectRow (rowComponent.row);
         rowComponent.owner.keyPressed (KeyPress (KeyPress::returnKey));
     };
 
@@ -594,8 +594,14 @@ void ListBox::updateContent()
     viewport->updateVisibleArea (isVisible());
     viewport->resized();
 
-    if (selectionChanged && model != nullptr)
-        model->selectedRowsChanged (lastRowSelected);
+    if (selectionChanged)
+    {
+        if (model != nullptr)
+            model->selectedRowsChanged (lastRowSelected);
+
+        if (auto* handler = getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::rowSelectionChanged);
+    }
 }
 
 //==============================================================================
@@ -630,6 +636,9 @@ void ListBox::selectRowInternal (const int row,
 
             lastRowSelected = row;
             model->selectedRowsChanged (row);
+
+            if (auto* handler = getAccessibilityHandler())
+                handler->notifyAccessibilityEvent (AccessibilityEvent::rowSelectionChanged);
         }
         else
         {
@@ -650,6 +659,9 @@ void ListBox::deselectRow (const int row)
 
         viewport->updateContents();
         model->selectedRowsChanged (lastRowSelected);
+
+        if (auto* handler = getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::rowSelectionChanged);
     }
 }
 
@@ -666,6 +678,9 @@ void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
 
     if (model != nullptr && sendNotificationEventToModel == sendNotification)
         model->selectedRowsChanged (lastRowSelected);
+
+    if (auto* handler = getAccessibilityHandler())
+        handler->notifyAccessibilityEvent (AccessibilityEvent::rowSelectionChanged);
 }
 
 SparseSet<int> ListBox::getSelectedRows() const
@@ -709,6 +724,9 @@ void ListBox::deselectAllRows()
 
         if (model != nullptr)
             model->selectedRowsChanged (lastRowSelected);
+
+        if (auto* handler = getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::rowSelectionChanged);
     }
 }
 

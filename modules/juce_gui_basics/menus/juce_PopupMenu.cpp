@@ -854,8 +854,9 @@ struct MenuWindow  : public Component
             if (getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) == 0) // workaround for dismissing the window on mouse up when border size is 0
                 x += tendTowardsRight ? 1 : -1;
 
-            y = target.getCentreY() > parentArea.getCentreY() ? jmax (parentArea.getY(), target.getBottom() - heightToUse)
-                                                              : target.getY();
+            const auto border = getLookAndFeel().getPopupMenuBorderSizeWithOptions (options);
+            y = target.getCentreY() > parentArea.getCentreY() ? jmax (parentArea.getY(), target.getBottom() - heightToUse) + border
+                                                              : target.getY() - border;
         }
 
         x = jmax (parentArea.getX() + 1, jmin (parentArea.getRight()  - (widthToUse  + 6), x));
@@ -882,12 +883,11 @@ struct MenuWindow  : public Component
             insertColumnBreaks (maxMenuW, maxMenuH);
 
         workOutManualSize (maxMenuW);
-        auto actualH = jmin (contentHeight, maxMenuH);
+        height = jmin (contentHeight, maxMenuH);
 
-        needsToScroll = contentHeight > actualH;
+        needsToScroll = contentHeight > height;
 
         width = updateYPositions();
-        height = actualH + getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2;
     }
 
     void insertColumnBreaks (const int maxMenuW, const int maxMenuH)
@@ -971,6 +971,8 @@ struct MenuWindow  : public Component
             columnWidths.add (adjustedColW);
             it = columnEnd;
         }
+
+        contentHeight += getLookAndFeel().getPopupMenuBorderSizeWithOptions (options) * 2;
 
         correctColumnWidths (maxMenuW);
     }

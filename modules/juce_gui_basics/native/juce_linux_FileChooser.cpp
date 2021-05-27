@@ -214,9 +214,12 @@ private:
         }
         else
         {
-            if (isDirectory)  args.add ("--directory");
-            if (isSave)       args.add ("--save");
+            if (isSave)
+                args.add ("--save");
         }
+
+        if (isDirectory)
+            args.add ("--directory");
 
         if (owner.filters.isNotEmpty() && owner.filters != "*" && owner.filters != "*.*")
         {
