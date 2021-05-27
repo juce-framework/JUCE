@@ -2208,10 +2208,10 @@ private:
         if (owner == nullptr || owner->isZooming)
             return proposedFrameSize;
 
-        NSRect frameRect = [(NSWindow*) self frame];
+        NSRect frameRect = flippedScreenRect ([(NSWindow*) self frame]);
         frameRect.size = proposedFrameSize;
 
-        frameRect = owner->constrainRect (frameRect);
+        frameRect = owner->constrainRect (flippedScreenRect (frameRect));
 
         owner->dismissModals();
 

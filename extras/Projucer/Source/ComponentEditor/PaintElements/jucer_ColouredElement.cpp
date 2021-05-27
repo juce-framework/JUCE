@@ -273,7 +273,11 @@ public:
                                                       PathStrokeType::curved,
                                                       PathStrokeType::beveled };
 
-        jassert (newIndex >= 0 && newIndex < 3);
+        if (! isPositiveAndBelow (newIndex, numElementsInArray (joints)))
+        {
+            jassertfalse;
+            return;
+        }
 
         listener.owner->setStrokeType (PathStrokeType (listener.owner->getStrokeType().stroke.getStrokeThickness(),
                                                        joints [newIndex],
@@ -318,7 +322,11 @@ public:
                                                      PathStrokeType::square,
                                                      PathStrokeType::rounded };
 
-        jassert (newIndex >= 0 && newIndex < 3);
+        if (! isPositiveAndBelow (newIndex, numElementsInArray (ends)))
+        {
+            jassertfalse;
+            return;
+        }
 
         listener.owner->setStrokeType (PathStrokeType (listener.owner->getStrokeType().stroke.getStrokeThickness(),
                                                        listener.owner->getStrokeType().stroke.getJointStyle(),

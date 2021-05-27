@@ -1929,7 +1929,9 @@ private:
 
     pointer_sized_int handleKeyboardFocusRequired (VstOpCodeArguments)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6326)
         return (JucePlugin_EditorRequiresKeyboardFocus != 0) ? 1 : 0;
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     pointer_sized_int handleGetVstInterfaceVersion (VstOpCodeArguments)

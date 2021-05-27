@@ -506,7 +506,12 @@ private:
         if (modifiers.isShiftDown() && ((firstSelected = owner.getSelectedItem (0)) != nullptr))
         {
             auto* lastSelected = owner.getSelectedItem (owner.getNumSelectedItems() - 1);
-            jassert (lastSelected != nullptr);
+
+            if (lastSelected == nullptr)
+            {
+                jassertfalse;
+                return;
+            }
 
             auto rowStart = firstSelected->getRowNumberInTree();
             auto rowEnd = lastSelected->getRowNumberInTree();

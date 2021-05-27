@@ -57,7 +57,9 @@ static struct OwnedArrayTest : public UnitTest
             {
                 parent.expect (o != nullptr);
                 parent.expect (o != this);
-                parent.expectEquals (o->data, 956);
+
+                if (o != nullptr)
+                    parent.expectEquals (o->data, 956);
             }
         }
 

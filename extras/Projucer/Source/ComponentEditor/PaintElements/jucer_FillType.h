@@ -89,6 +89,12 @@ public:
     //==============================================================================
     void setFillType (Graphics& g, JucerDocument* const document, const Rectangle<int>& parentArea)
     {
+        if (document == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
+
         if (mode == solidColour)
         {
             image = Image();
@@ -96,7 +102,6 @@ public:
         }
         else if (mode == imageBrush)
         {
-            jassert (document != nullptr);
             loadImage (document);
 
             Rectangle<int> r (imageAnchor.getRectangle (parentArea, document->getComponentLayout()));

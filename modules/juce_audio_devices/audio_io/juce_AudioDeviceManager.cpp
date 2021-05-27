@@ -857,8 +857,9 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
         auto* src = testSound->getReadPointer (0, testSoundPosition);
 
         for (int i = 0; i < numOutputChannels; ++i)
-            for (int j = 0; j < numSamps; ++j)
-                outputChannelData [i][j] += src[j];
+            if (auto* dst = outputChannelData [i])
+                for (int j = 0; j < numSamps; ++j)
+                    dst[j] += src[j];
 
         testSoundPosition += numSamps;
 

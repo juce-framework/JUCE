@@ -571,7 +571,11 @@ struct Expression::Helpers
 
     static Constant* findTermToAdjust (Term* const term, const bool mustBeFlagged)
     {
-        jassert (term != nullptr);
+        if (term == nullptr)
+        {
+            jassertfalse;
+            return nullptr;
+        }
 
         if (term->getType() == constantType)
         {

@@ -34,6 +34,7 @@
 
 #include "juce_box2d.h"
 
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                      "-Wsign-conversion",
                                      "-Wfloat-conversion",
@@ -101,3 +102,4 @@ using uint32 = juce::uint32;
 #include "utils/juce_Box2DRenderer.cpp"
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC

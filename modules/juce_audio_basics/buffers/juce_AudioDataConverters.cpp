@@ -480,6 +480,7 @@ public:
             test (unitTest, true, r);
         }
 
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6262)
         static void test (UnitTest& unitTest, bool inPlace, Random& r)
         {
             const int numSamples = 2048;
@@ -537,6 +538,7 @@ public:
                 unitTest.expect (biggestDiff <= errorMargin);
             }
         }
+        JUCE_END_IGNORE_WARNINGS_MSVC
     };
 
     template <class F1, class E1, class FormatType>

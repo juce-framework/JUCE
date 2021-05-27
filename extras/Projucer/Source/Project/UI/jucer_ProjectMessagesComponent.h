@@ -468,9 +468,8 @@ public:
 
             if (currentProject != nullptr)
             {
-                auto* projectWindow = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (currentProject->getFile());
-                jassert (projectWindow != nullptr);
-                messagesWindow = std::make_unique<MessagesPopupWindow> (*this, *projectWindow, *currentProject);
+                if (auto* projectWindow = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (currentProject->getFile()))
+                    messagesWindow = std::make_unique<MessagesPopupWindow> (*this, *projectWindow, *currentProject);
 
                 auto projectMessagesTree = currentProject->getProjectMessages();
 

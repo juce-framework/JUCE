@@ -584,7 +584,7 @@ void PaintElement::applyBoundsToComponent (Component&, Rectangle<int> newBounds)
         {
             for (auto selectedElement : owner->getSelectedElements())
             {
-                if (selectedElement != this)
+                if (selectedElement != nullptr && selectedElement != this)
                 {
                     if (auto* pe = dynamic_cast<PaintRoutineEditor*> (selectedElement->getParentComponent()))
                     {

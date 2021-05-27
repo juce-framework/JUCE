@@ -96,12 +96,12 @@ public:
 
             if (connectionPoint != nullptr)
             {
-                auto* owner = dynamic_cast<WebBrowserComponent*> (Component::getParentComponent());
-                jassert (owner != nullptr);
-
-                auto handler = new EventHandler (*owner);
-                connectionPoint->Advise (handler, &adviseCookie);
-                handler->Release();
+                if (auto* owner = dynamic_cast<WebBrowserComponent*> (Component::getParentComponent()))
+                {
+                    auto handler = new EventHandler (*owner);
+                    connectionPoint->Advise (handler, &adviseCookie);
+                    handler->Release();
+                }
             }
         }
     }

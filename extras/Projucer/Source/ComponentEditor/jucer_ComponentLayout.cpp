@@ -572,9 +572,9 @@ PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDime
 
     for (int i = 0; i < components.size(); ++i)
     {
-        Component* const c = components.getUnchecked(i);
+        auto* const c = components.getUnchecked (i);
 
-        if (c != comp)
+        if (c != nullptr && c != comp)
             m.addItem (menuIdBase + i + 1,
                        "Relative to " + getComponentMemberVariableName (c)
                         + " (class: " + ComponentTypeHandler::getHandlerFor (*c)->getClassName (c) + ")",

@@ -286,7 +286,7 @@ GLuint OpenGLFrameBuffer::getFrameBufferID() const noexcept
 
 GLuint OpenGLFrameBuffer::getCurrentFrameBufferTarget() noexcept
 {
-    GLint fb;
+    GLint fb = {};
     glGetIntegerv (GL_FRAMEBUFFER_BINDING, &fb);
     return (GLuint) fb;
 }

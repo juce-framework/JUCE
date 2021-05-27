@@ -507,7 +507,7 @@ private:
             struct ScopedCoInitialize
             {
                 // IUnknown_GetWindow will only succeed when instantiated in a single-thread apartment
-                ScopedCoInitialize() { CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE); }
+                ScopedCoInitialize() { ignoreUnused (CoInitializeEx (nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE)); }
                 ~ScopedCoInitialize() { CoUninitialize(); }
             };
 
