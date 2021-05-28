@@ -2697,17 +2697,27 @@ public:
         : AccessibilityHandler (textEditorToWrap,
                                 textEditorToWrap.isReadOnly() ? AccessibilityRole::staticText : AccessibilityRole::editableText,
                                 {},
-                                { textEditorToWrap.isReadOnly() ? nullptr : std::make_unique<TextEditorTextInterface> (textEditorToWrap) }),
-          textEditor (textEditorToWrap)
+                                makeInterfaces (textEditorToWrap))
     {
-    }
-
-    String getTitle() const override
-    {
-        return textEditor.isReadOnly() ? textEditor.getText() : textEditor.getTitle();
     }
 
 private:
+    class TextEditorValueInterface  : public AccessibilityTextValueInterface
+    {
+    public:
+        explicit TextEditorValueInterface (TextEditor& textEditorToWrap)
+            : textEditor (textEditorToWrap)
+        {
+        }
+
+        bool isReadOnly() const override                 { return true; }
+        String getCurrentValueAsString() const override  { return textEditor.getText(); }
+        void setValueAsString (const String&) override   {}
+
+    private:
+        TextEditor& textEditor;
+    };
+
     class TextEditorTextInterface  : public AccessibilityTextInterface
     {
     public:
@@ -2759,7 +2769,13 @@ private:
         TextEditor& textEditor;
     };
 
-    TextEditor& textEditor;
+    static AccessibilityHandler::Interfaces makeInterfaces (TextEditor& textEditor)
+    {
+        if (textEditor.isReadOnly())
+            return { std::make_unique<TextEditorValueInterface> (textEditor) };
+
+        return { std::make_unique<TextEditorTextInterface> (textEditor) };
+    }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditorAccessibilityHandler)

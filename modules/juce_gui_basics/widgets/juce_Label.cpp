@@ -524,14 +524,34 @@ public:
     explicit LabelAccessibilityHandler (Label& labelToWrap)
         : AccessibilityHandler (labelToWrap,
                                 AccessibilityRole::staticText,
-                                getAccessibilityActions (labelToWrap)),
+                                getAccessibilityActions (labelToWrap),
+                                { std::make_unique<LabelValueInterface> (labelToWrap) }),
           label (labelToWrap)
     {
     }
 
-    String getTitle() const override  { return label.getText(); }
+    String getTitle() const override
+    {
+        return label.getText();
+    }
 
 private:
+    class LabelValueInterface  : public AccessibilityTextValueInterface
+    {
+    public:
+        explicit LabelValueInterface (Label& labelToWrap)
+            : label (labelToWrap)
+        {
+        }
+
+        bool isReadOnly() const override                 { return true; }
+        String getCurrentValueAsString() const override  { return label.getText(); }
+        void setValueAsString (const String&) override   {}
+
+    private:
+        Label& label;
+    };
+
     static AccessibilityActions getAccessibilityActions (Label& label)
     {
         if (label.isEditable())
