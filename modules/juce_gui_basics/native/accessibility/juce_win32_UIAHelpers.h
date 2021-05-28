@@ -106,9 +106,10 @@ inline bool isEditableText (const AccessibilityHandler& handler)
         && handler.getTextInterface() != nullptr;
 }
 
-inline bool nameIsAccessibilityValue (AccessibilityRole role)
+inline bool isReadOnlyText (const AccessibilityHandler& handler)
 {
-    return role == AccessibilityRole::staticText;
+    return handler.getRole() == AccessibilityRole::staticText
+        && handler.getValueInterface() != nullptr;
 }
 
 } // namespace juce

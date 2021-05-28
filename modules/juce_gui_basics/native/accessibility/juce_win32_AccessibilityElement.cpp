@@ -158,16 +158,18 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 case UIA_TextPatternId:
                 case UIA_TextPattern2Id:
                 {
-                    if (accessibilityHandler.getTextInterface() != nullptr)
+                    if (accessibilityHandler.getTextInterface() != nullptr
+                        || isReadOnlyText (accessibilityHandler))
+                    {
                         return new UIATextProvider (this);
+                    }
 
                     break;
                 }
                 case UIA_ValuePatternId:
                 {
                     if (accessibilityHandler.getValueInterface() != nullptr
-                        || isEditableText (accessibilityHandler)
-                        || nameIsAccessibilityValue (role))
+                        || isEditableText (accessibilityHandler))
                     {
                         return new UIAValueProvider (this);
                     }
@@ -539,12 +541,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (IRawElementProviderFragment*
 //==============================================================================
 String AccessibilityNativeHandle::getElementName() const
 {
-    const auto role = accessibilityHandler.getRole();
-
-    if (nameIsAccessibilityValue (role))
-        return {};
-
-    if (role == AccessibilityRole::tooltip)
+    if (accessibilityHandler.getRole() == AccessibilityRole::tooltip)
         return accessibilityHandler.getDescription();
 
     auto name = accessibilityHandler.getTitle();

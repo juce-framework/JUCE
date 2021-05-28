@@ -44,9 +44,6 @@ public:
 
         const auto& handler = getHandler();
 
-        if (nameIsAccessibilityValue (handler.getRole()))
-            return UIA_E_NOTSUPPORTED;
-
         const auto sendValuePropertyChangeMessage = [&]()
         {
             VARIANT newValue;
@@ -111,9 +108,6 @@ private:
     String getCurrentValueString() const
     {
         const auto& handler = getHandler();
-
-        if (nameIsAccessibilityValue (handler.getRole()))
-            return handler.getTitle();
 
         if (isEditableText (handler))
             if (auto* textInterface = getHandler().getTextInterface())
