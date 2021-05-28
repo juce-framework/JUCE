@@ -173,11 +173,6 @@ private:
                 && handler.getTextInterface() != nullptr;
         }
 
-        static bool nameIsAccessibilityValue (AccessibilityRole role) noexcept
-        {
-            return role == AccessibilityRole::staticText;
-        }
-
         static bool isSelectable (AccessibleState state) noexcept
         {
             return state.isSelectable() || state.isMultiSelectable();
@@ -473,15 +468,17 @@ private:
         {
             if (auto* handler = getHandler (self))
             {
-                if (nameIsAccessibilityValue (handler->getRole()))
-                    return @"";
-
                 auto title = handler->getTitle();
 
                 if (title.isEmpty() && handler->getComponent().isOnDesktop())
                     title = getAccessibleApplicationOrPluginName();
 
-                return juceStringToNS (title);
+                NSString* nsString = juceStringToNS (title);
+
+                if (nsString != nil && [[self accessibilityValue] isEqual: nsString])
+                    return @"";
+
+                return nsString;
             }
 
             return nil;
@@ -507,9 +504,6 @@ private:
         {
             if (auto* handler = getHandler (self))
             {
-                if (nameIsAccessibilityValue (handler->getRole()))
-                    return juceStringToNS (handler->getTitle());
-
                 if (hasEditableText (*handler))
                 {
                     auto* textInterface = handler->getTextInterface();
@@ -984,7 +978,6 @@ private:
                     if (selector == @selector (accessibilityValue))
                         return valueInterface != nullptr
                             || hasEditableText (*handler)
-                            || nameIsAccessibilityValue (role)
                             || currentState.isCheckable();
 
                     auto hasEditableValue = [valueInterface] { return valueInterface != nullptr && ! valueInterface->isReadOnly(); };
