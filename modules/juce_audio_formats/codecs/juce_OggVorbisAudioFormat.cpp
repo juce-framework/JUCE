@@ -55,6 +55,7 @@ namespace OggVorbisNamespace
  #include "oggvorbis/codec.h"
  #include "oggvorbis/vorbisfile.h"
 
+ #ifndef __clang_analyzer__
  #include "oggvorbis/bitwise.c"
  #include "oggvorbis/framing.c"
  #include "oggvorbis/libvorbis-1.3.7/lib/analysis.c"
@@ -78,6 +79,7 @@ namespace OggVorbisNamespace
  #include "oggvorbis/libvorbis-1.3.7/lib/vorbisenc.c"
  #include "oggvorbis/libvorbis-1.3.7/lib/vorbisfile.c"
  #include "oggvorbis/libvorbis-1.3.7/lib/window.c"
+ #endif // _clang_analyzer
 
  JUCE_END_IGNORE_WARNINGS_MSVC
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
