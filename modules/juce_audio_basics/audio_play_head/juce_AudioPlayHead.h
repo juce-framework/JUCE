@@ -129,7 +129,7 @@ public:
         bool isLooping = false;
 
         /** True if the continuous time is valid/supported. */
-        bool isContinuousValid;
+        bool isContinuousValid = false;
 
         //==============================================================================
         bool operator== (const CurrentPositionInfo& other) const noexcept
