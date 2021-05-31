@@ -1102,15 +1102,41 @@ namespace DisplayHelpers
 
         if (scaleFactorFromXSettings > 0.0)
             return scaleFactorFromXSettings;
-
-        if (name.isNotEmpty())
+        
+        // KDE systems use a global scale factor as a variable in System Settings > Display and Monitor.
+        // This can be queried by passing the group and key to /bin/kreadconfig5.
+        // KDE must be detected before GNOME or Ubuntu as both /usr/bin/dconf and /usr/bin/gsettings
+        // can be installed by GTK applications and coexist within a KDE environment, but will not
+        // necessarily return the actual scale factor.
+        if (File ("/bin/kreadconfig5").existsAsFile())
         {
-            // Ubuntu and derived distributions now save a per-display scale factor as a configuration
-            // variable. This can be changed in the Monitor system settings panel.
+            // Get the global display scale factor for KDE systems
+            ChildProcess kreadconfig;
+            
+            if (kreadconfig.start ("/bin/kreadconfig5 --group KScreen --key ScaleFactor", ChildProcess::wantStdOut))
+            {
+                if (kreadconfig.waitForProcessToFinish (200))
+                {
+                    auto kreadconfigOutput = StringArray::fromTokens (kreadconfig.readAllProcessOutput(), true);
+                    
+                    if (kreadconfigOutput.size() >= 2 && kreadconfigOutput[0].length() > 0)
+                    {
+                        auto scaleFactor = kreadconfigOutput[0].getDoubleValue();
+                        
+                        if (scaleFactor > 0.0)
+                            return scaleFactor;
+                    }
+                }
+            }
+        }
+        
+        // Ubuntu and derived distributions now save a per-display scale factor as a configuration
+        // variable. This can be changed in the Monitor system settings panel.
+        if (File ("/usr/bin/dconf").existsAsFile() && name.isNotEmpty())
+        {
             ChildProcess dconf;
 
-            if (File ("/usr/bin/dconf").existsAsFile()
-                && dconf.start ("/usr/bin/dconf read /com/ubuntu/user-interface/scale-factor", ChildProcess::wantStdOut))
+            if (dconf.start ("/usr/bin/dconf read /com/ubuntu/user-interface/scale-factor", ChildProcess::wantStdOut))
             {
                 if (dconf.waitForProcessToFinish (200))
                 {
@@ -1136,13 +1162,13 @@ namespace DisplayHelpers
                 }
             }
         }
-
+        
+        // Other gnome based distros now use gsettings for a global scale factor
+        if (File ("/usr/bin/gsettings").existsAsFile())
         {
-            // Other gnome based distros now use gsettings for a global scale factor
             ChildProcess gsettings;
 
-            if (File ("/usr/bin/gsettings").existsAsFile()
-                && gsettings.start ("/usr/bin/gsettings get org.gnome.desktop.interface scaling-factor", ChildProcess::wantStdOut))
+            if (gsettings.start ("/usr/bin/gsettings get org.gnome.desktop.interface scaling-factor", ChildProcess::wantStdOut))
             {
                 if (gsettings.waitForProcessToFinish (200))
                 {
@@ -1161,7 +1187,7 @@ namespace DisplayHelpers
             }
         }
 
-        // If no scale factor is set by GNOME or Ubuntu then calculate from monitor dpi
+        // If no scale factor is set by KDE, GNOME, or Ubuntu, then calculate from monitor dpi
         // We use the same approach as chromium which simply divides the dpi by 96
         // and then rounds the result
         return round (dpi / 96.0);
