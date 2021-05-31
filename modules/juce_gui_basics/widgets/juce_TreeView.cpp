@@ -265,7 +265,10 @@ public:
     ItemComponent* getItemComponentAt (Point<int> p)
     {
         auto iter = std::find_if (itemComponents.cbegin(), itemComponents.cend(),
-                                  [p] (const std::unique_ptr<ItemComponent>& c) { return c->getBounds().contains (p); });
+                                  [p] (const std::unique_ptr<ItemComponent>& c)
+                                  {
+                                      return c->getBounds().contains (p);
+                                  });
 
         if (iter != itemComponents.cend())
             return iter->get();
@@ -275,19 +278,33 @@ public:
 
     ItemComponent* getComponentForItem (const TreeViewItem* item) const
     {
-        if (item != nullptr)
-        {
-            auto iter = std::find_if (itemComponents.cbegin(), itemComponents.cend(),
-                                      [item] (const std::unique_ptr<ItemComponent>& c)
-                                      {
-                                          return &c->getRepresentedItem() == item;
-                                      });
+        const auto iter = std::find_if (itemComponents.begin(), itemComponents.end(),
+                                        [item] (const std::unique_ptr<ItemComponent>& c)
+                                        {
+                                            return &c->getRepresentedItem() == item;
+                                        });
 
-            if (iter != itemComponents.cend())
-                return iter->get();
-        }
+        if (iter != itemComponents.end())
+            return iter->get();
 
         return nullptr;
+    }
+
+    void itemBeingDeleted (const TreeViewItem* item)
+    {
+        const auto iter = std::find_if (itemComponents.begin(), itemComponents.end(),
+                                        [item] (const std::unique_ptr<ItemComponent>& c)
+                                        {
+                                            return &c->getRepresentedItem() == item;
+                                        });
+
+        if (iter != itemComponents.end())
+        {
+            if (isMouseDraggingInChildComp (*(iter->get())))
+                owner.hideDragHighlight();
+
+            itemComponents.erase (iter);
+        }
     }
 
     void updateComponents()
@@ -324,10 +341,7 @@ public:
             }
             else
             {
-                if (isMouseDraggingInChildComp (*comp))
-                    comp->setSize (0, 0);
-                else
-                    itemComponents.erase (itemComponents.begin() + i);
+                itemComponents.erase (itemComponents.begin() + i);
             }
         }
     }
@@ -445,7 +459,7 @@ private:
     void mouseMoveInternal (const MouseEvent& e)  { updateItemUnderMouse (e); }
     void mouseExitInternal (const MouseEvent& e)  { updateItemUnderMouse (e); }
 
-    bool isMouseDraggingInChildComp (const Component& comp) const
+    static bool isMouseDraggingInChildComp (const Component& comp)
     {
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (ms.isDragging())
@@ -808,8 +822,9 @@ TreeViewItem* TreeView::getItemOnRow (int index) const
 
 TreeViewItem* TreeView::getItemAt (int y) const noexcept
 {
-    if (auto* itemComponent = viewport->getContentComp()->getItemComponentAt (Point<int> (0, y)))
-        return &itemComponent->getRepresentedItem();
+    if (auto* contentComp = viewport->getContentComp())
+        if (auto* itemComponent = contentComp->getItemComponentAt (contentComp->getLocalPoint (this, Point<int> (0, y))))
+            return &itemComponent->getRepresentedItem();
 
     return nullptr;
 }
@@ -1370,6 +1385,12 @@ TreeViewItem::TreeViewItem()
 {
     static int nextUID = 0;
     uid = nextUID++;
+}
+
+TreeViewItem::~TreeViewItem()
+{
+    if (ownerView != nullptr)
+        ownerView->viewport->getContentComp()->itemBeingDeleted (this);
 }
 
 String TreeViewItem::getUniqueName() const

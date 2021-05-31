@@ -34,6 +34,10 @@ public:
     explicit UIATextProvider (AccessibilityNativeHandle* nativeHandle)
         : UIAProviderBase (nativeHandle)
     {
+        const auto& handler = getHandler();
+
+        if (isReadOnlyText (handler))
+            readOnlyTextInterface = std::make_unique<ReadOnlyTextInterface> (handler.getValueInterface()->getCurrentValueAsString());
     }
 
     //==============================================================================
@@ -63,7 +67,9 @@ public:
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
-            *pRetVal = SupportedTextSelection_Single;
+            *pRetVal = (readOnlyTextInterface != nullptr ? SupportedTextSelection_None
+                                                         : SupportedTextSelection_Single);
+
             return S_OK;
         });
     }
@@ -163,6 +169,15 @@ public:
         });
     }
 
+    //==============================================================================
+    AccessibilityTextInterface* getTextInterface() const
+    {
+        if (readOnlyTextInterface != nullptr)
+            return readOnlyTextInterface.get();
+
+        return getHandler().getTextInterface();
+    }
+
 private:
     //==============================================================================
     template <typename Value, typename Callback>
@@ -170,7 +185,7 @@ private:
     {
         return withCheckedComArgs (pRetVal, *this, [&]() -> HRESULT
         {
-            if (auto* textInterface = getHandler().getTextInterface())
+            if (auto* textInterface = getTextInterface())
                 return callback (*textInterface);
 
             return UIA_E_NOTSUPPORTED;
@@ -243,7 +258,7 @@ private:
             if (! isElementValid())
                 return UIA_E_ELEMENTNOTAVAILABLE;
 
-            if (auto* textInterface = getHandler().getTextInterface())
+            if (auto* textInterface = owner->getTextInterface())
             {
                 auto numCharacters = textInterface->getTotalNumCharacters();
 
@@ -468,7 +483,7 @@ private:
             if (! isElementValid())
                 return UIA_E_ELEMENTNOTAVAILABLE;
 
-            if (auto* textInterface = getHandler().getTextInterface())
+            if (auto* textInterface = owner->getTextInterface())
             {
                 auto otherRange = static_cast<UIATextRangeProvider*> (targetRange)->getSelectionRange();
                 auto targetPoint = (targetEndpoint == TextPatternRangeEndpoint_Start ? otherRange.getStart()
@@ -552,7 +567,7 @@ private:
             if (! isElementValid())
                 return UIA_E_ELEMENTNOTAVAILABLE;
 
-            if (auto* textInterface = getHandler().getTextInterface())
+            if (auto* textInterface = owner->getTextInterface())
             {
                 textInterface->setSelection ({});
                 return S_OK;
@@ -574,7 +589,7 @@ private:
             if (! isElementValid())
                 return UIA_E_ELEMENTNOTAVAILABLE;
 
-            if (auto* textInterface = getHandler().getTextInterface())
+            if (auto* textInterface = owner->getTextInterface())
             {
                 textInterface->setSelection ({});
                 textInterface->setSelection (selectionRange);
@@ -634,6 +649,34 @@ private:
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIATextRangeProvider)
     };
+
+    //==============================================================================
+    class ReadOnlyTextInterface : public AccessibilityTextInterface
+    {
+    public:
+        explicit ReadOnlyTextInterface (const String& t)
+            : text (t)
+        {
+        }
+
+        bool isDisplayingProtectedText() const override               { return false; }
+        int getTotalNumCharacters() const                             { return text.length(); }
+        Range<int> getSelection() const override                      { return selection; }
+        void setSelection (Range<int> s) override                     { selection = s; }
+        int getTextInsertionOffset() const override                   { return 0; }
+        String getText (Range<int> range) const override              { return text.substring (range.getStart(), range.getEnd()); }
+        void setText (const String&) override                         {}
+        RectangleList<int> getTextBounds (Range<int>) const override  { return {}; }
+        int getOffsetAtPoint (Point<int>) const override              { return 0; }
+
+    private:
+        const String text;
+        Range<int> selection;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReadOnlyTextInterface)
+    };
+
+    std::unique_ptr<ReadOnlyTextInterface> readOnlyTextInterface;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIATextProvider)

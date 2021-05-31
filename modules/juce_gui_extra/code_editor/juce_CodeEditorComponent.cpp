@@ -35,19 +35,27 @@ public:
                                 codeEditorComponentToWrap.isReadOnly() ? AccessibilityRole::staticText
                                                                        : AccessibilityRole::editableText,
                                 {},
-                                { codeEditorComponentToWrap.isReadOnly() ? nullptr
-                                                                         : std::make_unique<CodeEditorComponentTextInterface> (codeEditorComponentToWrap) }),
-          codeEditorComponent (codeEditorComponentToWrap)
+                                makeInterfaces (codeEditorComponentToWrap))
     {
-    }
-
-    String getTitle() const override
-    {
-        return codeEditorComponent.isReadOnly() ? codeEditorComponent.document.getAllContent()
-                                                : codeEditorComponent.getTitle();
     }
 
 private:
+    class CodeEditorComponentValueInterface  : public AccessibilityTextValueInterface
+    {
+    public:
+        explicit CodeEditorComponentValueInterface (CodeEditorComponent& codeEditorComponentToWrap)
+            : codeEditorComponent (codeEditorComponentToWrap)
+        {
+        }
+
+        bool isReadOnly() const override                 { return true; }
+        String getCurrentValueAsString() const override  { return codeEditorComponent.document.getAllContent(); }
+        void setValueAsString (const String&) override   {}
+
+    private:
+        CodeEditorComponent& codeEditorComponent;
+    };
+
     class CodeEditorComponentTextInterface  : public AccessibilityTextInterface
     {
     public:
@@ -144,7 +152,13 @@ private:
         CodeEditorComponent& codeEditorComponent;
     };
 
-    CodeEditorComponent& codeEditorComponent;
+    static AccessibilityHandler::Interfaces makeInterfaces (CodeEditorComponent& codeEditorComponent)
+    {
+        if (codeEditorComponent.isReadOnly())
+            return { std::make_unique<CodeEditorComponentValueInterface> (codeEditorComponent) };
+
+        return { std::make_unique<CodeEditorComponentTextInterface> (codeEditorComponent) };
+    }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorAccessibilityHandler)

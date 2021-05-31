@@ -4041,20 +4041,20 @@
 
 #define X(returns, name, params) \
     extern "C" KHRONOS_APICALL returns KHRONOS_APIENTRY name params; \
-    returns (* const& ::juce::gl::name) params = ::name;
+    returns (KHRONOS_APIENTRY* const& ::juce::gl::name) params = ::name;
 JUCE_STATIC_GL_FUNCTIONS
 #undef X
 
 #define X(returns, name, params) \
-    static returns (* juce_ ## name) params = nullptr; \
-    returns (* const& ::juce::gl::name) params = juce_ ## name;
+    static returns (KHRONOS_APIENTRY* juce_ ## name) params = nullptr; \
+    returns (KHRONOS_APIENTRY* const& ::juce::gl::name) params = juce_ ## name;
 JUCE_DYNAMIC_GL_FUNCTIONS
 #undef X
 
 void juce::gl::loadFunctions()
 {
    #define X(returns, name, params) \
-       juce_ ## name = reinterpret_cast<returns (*) params> (::juce::OpenGLHelpers::getExtensionFunction (#name));
+       juce_ ## name = reinterpret_cast<returns (KHRONOS_APIENTRY*) params> (::juce::OpenGLHelpers::getExtensionFunction (#name));
     JUCE_DYNAMIC_GL_FUNCTIONS
    #undef X
 }
