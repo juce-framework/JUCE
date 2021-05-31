@@ -73,10 +73,8 @@ namespace juce
     X (glIsRenderbuffer) \
     X (glBindRenderbuffer) \
     X (glDeleteRenderbuffers) \
-    X (glDrawBuffers) \
     X (glGenRenderbuffers) \
     X (glRenderbufferStorage) \
-    X (glGenerateMipmap) \
     X (glGetRenderbufferParameteriv) \
     X (glIsFramebuffer) \
     X (glBindFramebuffer) \
@@ -85,10 +83,7 @@ namespace juce
     X (glCheckFramebufferStatus) \
     X (glFramebufferTexture2D) \
     X (glFramebufferRenderbuffer) \
-    X (glGetFramebufferAttachmentParameteriv) \
-    X (glBlendEquation) \
-    X (glBlendEquationSeparate) \
-    X (glBlendFuncSeparate)
+    X (glGetFramebufferAttachmentParameteriv)
 
 /** @internal This macro contains a list of GL extension functions that need to be dynamically loaded on Windows/Linux.
     @see OpenGLExtensionFunctions
