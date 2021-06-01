@@ -1472,14 +1472,20 @@ Rectangle<float> TextEditor::getCaretRectangleFloat() const
     return { anchor.x, anchor.y, 2.0f, cursorHeight };
 }
 
+Point<int> TextEditor::getTextOffset() const noexcept
+{
+    Iterator i (*this);
+    auto yOffset = i.getYOffset();
+
+    return { getLeftIndent() + borderSize.getLeft() - viewport->getViewPositionX(),
+             roundToInt ((float) getTopIndent() + (float) borderSize.getTop() + yOffset) - viewport->getViewPositionY() };
+}
+
 RectangleList<int> TextEditor::getTextBounds (Range<int> textRange)
 {
     RectangleList<int> boundingBox;
 
-    Iterator i (*this);
-    auto yOffset = i.getYOffset();
-
-    for (auto lineRange : i.getLineRanges())
+    for (auto lineRange : Iterator { *this }.getLineRanges())
     {
         auto intersection = lineRange.getIntersectionWith (textRange);
 
@@ -1498,9 +1504,7 @@ RectangleList<int> TextEditor::getTextBounds (Range<int> textRange)
         }
     }
 
-    boundingBox.offsetAll (getLeftIndent() - viewport->getViewPositionX(),
-                           roundToInt ((float) getTopIndent() + yOffset) - viewport->getViewPositionY());
-
+    boundingBox.offsetAll (getTextOffset());
     return boundingBox;
 }
 
@@ -1653,10 +1657,10 @@ void TextEditor::moveCaretTo (const int newPosition, const bool isSelecting)
 
 int TextEditor::getTextIndexAt (const int x, const int y) const
 {
-    Iterator i (*this);
+    const auto offset = getTextOffset();
 
-    return indexAtPosition ((float) (x + viewport->getViewPositionX() - leftIndent - borderSize.getLeft()),
-                            (float) (y + viewport->getViewPositionY() - topIndent  - borderSize.getTop()) - i.getYOffset());
+    return indexAtPosition ((float) (x - offset.x),
+                            (float) (y - offset.y));
 }
 
 void TextEditor::insertTextAtCaret (const String& t)
@@ -1746,8 +1750,7 @@ void TextEditor::drawContent (Graphics& g)
             g.setColour (findColour (highlightColourId).withMultipliedAlpha (hasKeyboardFocus (true) ? 1.0f : 0.5f));
 
             auto boundingBox = getTextBounds (selection);
-            boundingBox.offsetAll (viewport->getViewPositionX() - leftIndent,
-                                   viewport->getViewPositionY() - roundToInt ((float) topIndent + yOffset));
+            boundingBox.offsetAll (-getTextOffset());
 
             g.fillPath (boundingBox.toPath(), transform);
         }
