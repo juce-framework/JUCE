@@ -2573,14 +2573,38 @@ public:
                 case 30:
                 {
                     if ((processContext.frameRate.flags & Vst::FrameRate::kDropRate) != 0)
-                        info.frameRate = AudioPlayHead::fps30drop;
+                    {
+                        if ((processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0)
+                            info.frameRate = AudioPlayHead::fps2997drop;
+                        else
+                            info.frameRate = AudioPlayHead::fps30drop;
+                    }
                     else
-                        info.frameRate = AudioPlayHead::fps30;
+                    {
+                        if ((processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0)
+                            info.frameRate = AudioPlayHead::fps2997;
+                        else
+                            info.frameRate = AudioPlayHead::fps30;
+                    }
+                }
+                break;
+                    
+                case 60:
+                {
+                    if ((processContext.frameRate.flags & Vst::FrameRate::kDropRate) != 0)
+                        info.frameRate = AudioPlayHead::fps60drop;
+                    else
+                        info.frameRate = AudioPlayHead::fps60;
                 }
                 break;
 
                 default: break;
             }
+
+            double fps = static_cast<double>(processContext.frameRate.framesPerSecond);
+            if ((processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0)
+                fps *= 1000.0 / 1001.0;
+            info.editOriginTime = processContext.smpteOffsetSubframes / (80.0 * fps);
         }
 
         return true;
