@@ -40,7 +40,7 @@ public:
     JUCE_COMRESULT Invoke() override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         const auto& handler = getHandler();
 
@@ -52,7 +52,7 @@ public:
             return S_OK;
         }
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     //==============================================================================

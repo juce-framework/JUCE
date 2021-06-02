@@ -118,7 +118,8 @@ namespace FlacNamespace
                                       "-Wimplicit-fallthrough",
                                       "-Wzero-as-null-pointer-constant",
                                       "-Wsign-conversion",
-                                      "-Wredundant-decls")
+                                      "-Wredundant-decls",
+                                      "-Wlanguage-extension-token")
 
  #if JUCE_INTEL
   #if JUCE_32BIT

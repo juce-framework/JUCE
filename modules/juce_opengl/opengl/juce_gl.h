@@ -148,6 +148,10 @@
 
 // END_GLEW_LICENSE
 
+#include <juce_core/system/juce_CompilerWarnings.h>
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 #include "juce_khrplatform.h"
 typedef unsigned int GLenum;
 typedef unsigned char GLboolean;
@@ -196,6 +200,8 @@ typedef unsigned short GLhalfNV;
 typedef GLintptr GLvdpauSurfaceNV;
 typedef void ( *GLVULKANPROCNV)(void);
 
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
 namespace juce
 {
 namespace gl
@@ -203,7 +209,7 @@ namespace gl
 
 #ifndef GL_VERSION_1_0
 #define GL_VERSION_1_0 1
-enum
+enum : GLenum
 {
     GL_DEPTH_BUFFER_BIT                                     = 0x00000100,
     GL_STENCIL_BUFFER_BIT                                   = 0x00000400,
@@ -940,7 +946,7 @@ extern void         (KHRONOS_APIENTRY* const& glTranslatef) (GLfloat x, GLfloat 
 
 #ifndef GL_VERSION_1_1
 #define GL_VERSION_1_1 1
-enum
+enum : GLenum
 {
     GL_COLOR_LOGIC_OP                                       = 0x0BF2,
     GL_POLYGON_OFFSET_UNITS                                 = 0x2A00,
@@ -1081,7 +1087,7 @@ extern void         (KHRONOS_APIENTRY* const& glPushClientAttrib) (GLbitfield ma
 
 #ifndef GL_VERSION_1_2
 #define GL_VERSION_1_2 1
-enum
+enum : GLenum
 {
     GL_UNSIGNED_BYTE_3_3_2                                  = 0x8032,
     GL_UNSIGNED_SHORT_4_4_4_4                               = 0x8033,
@@ -1133,7 +1139,7 @@ extern void         (KHRONOS_APIENTRY* const& glCopyTexSubImage3D) (GLenum targe
 
 #ifndef GL_VERSION_1_3
 #define GL_VERSION_1_3 1
-enum
+enum : GLenum
 {
     GL_TEXTURE0                                             = 0x84C0,
     GL_TEXTURE1                                             = 0x84C1,
@@ -1282,7 +1288,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultTransposeMatrixd) (const GLd
 
 #ifndef GL_VERSION_1_4
 #define GL_VERSION_1_4 1
-enum
+enum : GLenum
 {
     GL_BLEND_DST_RGB                                        = 0x80C8,
     GL_BLEND_SRC_RGB                                        = 0x80C9,
@@ -1386,7 +1392,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendEquation) (GLenum mode);
 
 #ifndef GL_VERSION_1_5
 #define GL_VERSION_1_5 1
-enum
+enum : GLenum
 {
     GL_BUFFER_SIZE                                          = 0x8764,
     GL_BUFFER_USAGE                                         = 0x8765,
@@ -1462,7 +1468,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetBufferPointerv) (GLenum targe
 
 #ifndef GL_VERSION_2_0
 #define GL_VERSION_2_0 1
-enum
+enum : GLenum
 {
     GL_BLEND_EQUATION_RGB                                   = 0x8009,
     GL_VERTEX_ATTRIB_ARRAY_ENABLED                          = 0x8622,
@@ -1646,7 +1652,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexAttribPointer) (GLuint ind
 
 #ifndef GL_VERSION_2_1
 #define GL_VERSION_2_1 1
-enum
+enum : GLenum
 {
     GL_PIXEL_PACK_BUFFER                                    = 0x88EB,
     GL_PIXEL_UNPACK_BUFFER                                  = 0x88EC,
@@ -1682,7 +1688,7 @@ extern void         (KHRONOS_APIENTRY* const& glUniformMatrix4x3fv) (GLint locat
 
 #ifndef GL_VERSION_3_0
 #define GL_VERSION_3_0 1
-enum
+enum : GLenum
 {
     GL_COMPARE_REF_TO_TEXTURE                               = 0x884E,
     GL_CLIP_DISTANCE0                                       = 0x3000,
@@ -2010,7 +2016,7 @@ extern GLboolean    (KHRONOS_APIENTRY* const& glIsVertexArray) (GLuint array);
 
 #ifndef GL_VERSION_3_1
 #define GL_VERSION_3_1 1
-enum
+enum : GLenum
 {
     GL_SAMPLER_2D_RECT                                      = 0x8B63,
     GL_SAMPLER_2D_RECT_SHADOW                               = 0x8B64,
@@ -2090,7 +2096,7 @@ extern void         (KHRONOS_APIENTRY* const& glUniformBlockBinding) (GLuint pro
 
 #ifndef GL_VERSION_3_2
 #define GL_VERSION_3_2 1
-enum
+enum : GLenum
 {
     GL_CONTEXT_CORE_PROFILE_BIT                             = 0x00000001,
     GL_CONTEXT_COMPATIBILITY_PROFILE_BIT                    = 0x00000002,
@@ -2133,7 +2139,13 @@ enum
     GL_TIMEOUT_EXPIRED                                      = 0x911B,
     GL_CONDITION_SATISFIED                                  = 0x911C,
     GL_WAIT_FAILED                                          = 0x911D,
+};
+enum : GLuint64
+{
     GL_TIMEOUT_IGNORED                                      = 0xFFFFFFFFFFFFFFFF,
+};
+enum : GLenum
+{
     GL_SYNC_FLUSH_COMMANDS_BIT                              = 0x00000001,
     GL_SAMPLE_POSITION                                      = 0x8E50,
     GL_SAMPLE_MASK                                          = 0x8E51,
@@ -2180,7 +2192,7 @@ extern void         (KHRONOS_APIENTRY* const& glSampleMaski) (GLuint maskNumber,
 
 #ifndef GL_VERSION_3_3
 #define GL_VERSION_3_3 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ATTRIB_ARRAY_DIVISOR                          = 0x88FE,
     GL_SRC1_COLOR                                           = 0x88F9,
@@ -2261,7 +2273,7 @@ extern void         (KHRONOS_APIENTRY* const& glSecondaryColorP3uiv) (GLenum typ
 
 #ifndef GL_VERSION_4_0
 #define GL_VERSION_4_0 1
-enum
+enum : GLenum
 {
     GL_SAMPLE_SHADING                                       = 0x8C36,
     GL_MIN_SAMPLE_SHADING_VALUE                             = 0x8C37,
@@ -2391,7 +2403,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetQueryIndexediv) (GLenum targe
 
 #ifndef GL_VERSION_4_1
 #define GL_VERSION_4_1 1
-enum
+enum : GLenum
 {
     GL_FIXED                                                = 0x140C,
     GL_IMPLEMENTATION_COLOR_READ_TYPE                       = 0x8B9A,
@@ -2521,7 +2533,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetDoublei_v) (GLenum target, GL
 
 #ifndef GL_VERSION_4_2
 #define GL_VERSION_4_2 1
-enum
+enum : GLenum
 {
     GL_COPY_READ_BUFFER_BINDING                             = 0x8F36,
     GL_COPY_WRITE_BUFFER_BINDING                            = 0x8F37,
@@ -2652,7 +2664,7 @@ extern void         (KHRONOS_APIENTRY* const& glDrawTransformFeedbackStreamInsta
 
 #ifndef GL_VERSION_4_3
 #define GL_VERSION_4_3 1
-enum
+enum : GLenum
 {
     GL_NUM_SHADING_LANGUAGE_VERSIONS                        = 0x82E9,
     GL_VERTEX_ATTRIB_ARRAY_LONG                             = 0x874E,
@@ -2961,7 +2973,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetObjectPtrLabel) (const void *
 
 #ifndef GL_VERSION_4_4
 #define GL_VERSION_4_4 1
-enum
+enum : GLenum
 {
     GL_MAX_VERTEX_ATTRIB_STRIDE                             = 0x82E5,
     GL_PRIMITIVE_RESTART_FOR_PATCHES_SUPPORTED              = 0x8221,
@@ -2996,7 +3008,7 @@ extern void         (KHRONOS_APIENTRY* const& glBindVertexBuffers) (GLuint first
 
 #ifndef GL_VERSION_4_5
 #define GL_VERSION_4_5 1
-enum
+enum : GLenum
 {
     GL_CONTEXT_LOST                                         = 0x0507,
     GL_NEGATIVE_ONE_TO_ONE                                  = 0x935E,
@@ -3159,7 +3171,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureBarrier) ();
 
 #ifndef GL_VERSION_4_6
 #define GL_VERSION_4_6 1
-enum
+enum : GLenum
 {
     GL_SHADER_BINARY_FORMAT_SPIR_V                          = 0x9551,
     GL_SPIR_V_BINARY                                        = 0x9552,
@@ -3192,7 +3204,7 @@ extern void         (KHRONOS_APIENTRY* const& glPolygonOffsetClamp) (GLfloat fac
 
 #ifndef GL_3DFX_multisample
 #define GL_3DFX_multisample 1
-enum
+enum : GLenum
 {
     GL_MULTISAMPLE_3DFX                                     = 0x86B2,
     GL_SAMPLE_BUFFERS_3DFX                                  = 0x86B3,
@@ -3208,7 +3220,7 @@ extern void         (KHRONOS_APIENTRY* const& glTbufferMask3DFX) (GLuint mask);
 
 #ifndef GL_3DFX_texture_compression_FXT1
 #define GL_3DFX_texture_compression_FXT1 1
-enum
+enum : GLenum
 {
     GL_COMPRESSED_RGB_FXT1_3DFX                             = 0x86B0,
     GL_COMPRESSED_RGBA_FXT1_3DFX                            = 0x86B1,
@@ -3217,7 +3229,7 @@ enum
 
 #ifndef GL_AMD_blend_minmax_factor
 #define GL_AMD_blend_minmax_factor 1
-enum
+enum : GLenum
 {
     GL_FACTOR_MIN_AMD                                       = 0x901C,
     GL_FACTOR_MAX_AMD                                       = 0x901D,
@@ -3230,7 +3242,7 @@ enum
 
 #ifndef GL_AMD_debug_output
 #define GL_AMD_debug_output 1
-enum
+enum : GLenum
 {
     GL_MAX_DEBUG_MESSAGE_LENGTH_AMD                         = 0x9143,
     GL_MAX_DEBUG_LOGGED_MESSAGES_AMD                        = 0x9144,
@@ -3255,7 +3267,7 @@ extern GLuint       (KHRONOS_APIENTRY* const& glGetDebugMessageLogAMD) (GLuint c
 
 #ifndef GL_AMD_depth_clamp_separate
 #define GL_AMD_depth_clamp_separate 1
-enum
+enum : GLenum
 {
     GL_DEPTH_CLAMP_NEAR_AMD                                 = 0x901E,
     GL_DEPTH_CLAMP_FAR_AMD                                  = 0x901F,
@@ -3272,7 +3284,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendEquationSeparateIndexedAMD)
 
 #ifndef GL_AMD_framebuffer_multisample_advanced
 #define GL_AMD_framebuffer_multisample_advanced 1
-enum
+enum : GLenum
 {
     GL_RENDERBUFFER_STORAGE_SAMPLES_AMD                     = 0x91B2,
     GL_MAX_COLOR_FRAMEBUFFER_SAMPLES_AMD                    = 0x91B3,
@@ -3287,7 +3299,7 @@ extern void         (KHRONOS_APIENTRY* const& glNamedRenderbufferStorageMultisam
 
 #ifndef GL_AMD_framebuffer_sample_positions
 #define GL_AMD_framebuffer_sample_positions 1
-enum
+enum : GLenum
 {
     GL_SUBSAMPLE_DISTANCE_AMD                               = 0x883F,
     GL_PIXELS_PER_SAMPLE_PATTERN_X_AMD                      = 0x91AE,
@@ -3306,7 +3318,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetNamedFramebufferParameterfvAM
 
 #ifndef GL_AMD_gpu_shader_half_float
 #define GL_AMD_gpu_shader_half_float 1
-enum
+enum : GLenum
 {
     GL_FLOAT16_NV                                           = 0x8FF8,
     GL_FLOAT16_VEC2_NV                                      = 0x8FF9,
@@ -3330,7 +3342,7 @@ enum
 
 #ifndef GL_AMD_gpu_shader_int64
 #define GL_AMD_gpu_shader_int64 1
-enum
+enum : GLenum
 {
     GL_INT64_NV                                             = 0x140E,
     GL_UNSIGNED_INT64_NV                                    = 0x140F,
@@ -3395,7 +3407,7 @@ extern void         (KHRONOS_APIENTRY* const& glProgramUniform4ui64vNV) (GLuint 
 
 #ifndef GL_AMD_interleaved_elements
 #define GL_AMD_interleaved_elements 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ELEMENT_SWIZZLE_AMD                           = 0x91A4,
     GL_VERTEX_ID_SWIZZLE_AMD                                = 0x91A5,
@@ -3411,7 +3423,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultiDrawElementsIndirectAMD) (G
 
 #ifndef GL_AMD_name_gen_delete
 #define GL_AMD_name_gen_delete 1
-enum
+enum : GLenum
 {
     GL_DATA_BUFFER_AMD                                      = 0x9151,
     GL_PERFORMANCE_MONITOR_AMD                              = 0x9152,
@@ -3426,7 +3438,7 @@ extern GLboolean    (KHRONOS_APIENTRY* const& glIsNameAMD) (GLenum identifier, G
 
 #ifndef GL_AMD_occlusion_query_event
 #define GL_AMD_occlusion_query_event 1
-enum
+enum : GLenum
 {
     GL_OCCLUSION_QUERY_EVENT_MASK_AMD                       = 0x874F,
     GL_QUERY_DEPTH_PASS_EVENT_BIT_AMD                       = 0x00000001,
@@ -3440,7 +3452,7 @@ extern void         (KHRONOS_APIENTRY* const& glQueryObjectParameteruiAMD) (GLen
 
 #ifndef GL_AMD_performance_monitor
 #define GL_AMD_performance_monitor 1
-enum
+enum : GLenum
 {
     GL_COUNTER_TYPE_AMD                                     = 0x8BC0,
     GL_COUNTER_RANGE_AMD                                    = 0x8BC1,
@@ -3465,7 +3477,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetPerfMonitorCounterDataAMD) (G
 
 #ifndef GL_AMD_pinned_memory
 #define GL_AMD_pinned_memory 1
-enum
+enum : GLenum
 {
     GL_EXTERNAL_VIRTUAL_MEMORY_BUFFER_AMD                   = 0x9160,
 };
@@ -3473,7 +3485,7 @@ enum
 
 #ifndef GL_AMD_query_buffer_object
 #define GL_AMD_query_buffer_object 1
-enum
+enum : GLenum
 {
     GL_QUERY_BUFFER_AMD                                     = 0x9192,
     GL_QUERY_BUFFER_BINDING_AMD                             = 0x9193,
@@ -3520,7 +3532,7 @@ extern void         (KHRONOS_APIENTRY* const& glSetMultisamplefvAMD) (GLenum pna
 
 #ifndef GL_AMD_sparse_texture
 #define GL_AMD_sparse_texture 1
-enum
+enum : GLenum
 {
     GL_VIRTUAL_PAGE_SIZE_X_AMD                              = 0x9195,
     GL_VIRTUAL_PAGE_SIZE_Y_AMD                              = 0x9196,
@@ -3538,7 +3550,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureStorageSparseAMD) (GLuint
 
 #ifndef GL_AMD_stencil_operation_extended
 #define GL_AMD_stencil_operation_extended 1
-enum
+enum : GLenum
 {
     GL_SET_AMD                                              = 0x874A,
     GL_REPLACE_VALUE_AMD                                    = 0x874B,
@@ -3562,7 +3574,7 @@ extern void         (KHRONOS_APIENTRY* const& glStencilOpValueAMD) (GLenum face,
 
 #ifndef GL_AMD_transform_feedback4
 #define GL_AMD_transform_feedback4 1
-enum
+enum : GLenum
 {
     GL_STREAM_RASTERIZATION_AMD                             = 0x91A0,
 };
@@ -3574,7 +3586,7 @@ enum
 
 #ifndef GL_AMD_vertex_shader_tessellator
 #define GL_AMD_vertex_shader_tessellator 1
-enum
+enum : GLenum
 {
     GL_SAMPLER_BUFFER_AMD                                   = 0x9001,
     GL_INT_SAMPLER_BUFFER_AMD                               = 0x9002,
@@ -3594,7 +3606,7 @@ extern void         (KHRONOS_APIENTRY* const& glTessellationModeAMD) (GLenum mod
 
 #ifndef GL_APPLE_aux_depth_stencil
 #define GL_APPLE_aux_depth_stencil 1
-enum
+enum : GLenum
 {
     GL_AUX_DEPTH_STENCIL_APPLE                              = 0x8A14,
 };
@@ -3602,7 +3614,7 @@ enum
 
 #ifndef GL_APPLE_client_storage
 #define GL_APPLE_client_storage 1
-enum
+enum : GLenum
 {
     GL_UNPACK_CLIENT_STORAGE_APPLE                          = 0x85B2,
 };
@@ -3610,7 +3622,7 @@ enum
 
 #ifndef GL_APPLE_element_array
 #define GL_APPLE_element_array 1
-enum
+enum : GLenum
 {
     GL_ELEMENT_ARRAY_APPLE                                  = 0x8A0C,
     GL_ELEMENT_ARRAY_TYPE_APPLE                             = 0x8A0D,
@@ -3625,7 +3637,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultiDrawRangeElementArrayAPPLE)
 
 #ifndef GL_APPLE_fence
 #define GL_APPLE_fence 1
-enum
+enum : GLenum
 {
     GL_DRAW_PIXELS_APPLE                                    = 0x8A0A,
     GL_FENCE_APPLE                                          = 0x8A0B,
@@ -3642,7 +3654,7 @@ extern void         (KHRONOS_APIENTRY* const& glFinishObjectAPPLE) (GLenum objec
 
 #ifndef GL_APPLE_float_pixels
 #define GL_APPLE_float_pixels 1
-enum
+enum : GLenum
 {
     GL_HALF_APPLE                                           = 0x140B,
     GL_RGBA_FLOAT32_APPLE                                   = 0x8814,
@@ -3663,7 +3675,7 @@ enum
 
 #ifndef GL_APPLE_flush_buffer_range
 #define GL_APPLE_flush_buffer_range 1
-enum
+enum : GLenum
 {
     GL_BUFFER_SERIALIZED_MODIFY_APPLE                       = 0x8A12,
     GL_BUFFER_FLUSHING_UNMAP_APPLE                          = 0x8A13,
@@ -3674,7 +3686,7 @@ extern void         (KHRONOS_APIENTRY* const& glFlushMappedBufferRangeAPPLE) (GL
 
 #ifndef GL_APPLE_object_purgeable
 #define GL_APPLE_object_purgeable 1
-enum
+enum : GLenum
 {
     GL_BUFFER_OBJECT_APPLE                                  = 0x85B3,
     GL_RELEASED_APPLE                                       = 0x8A19,
@@ -3690,7 +3702,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetObjectParameterivAPPLE) (GLen
 
 #ifndef GL_APPLE_rgb_422
 #define GL_APPLE_rgb_422 1
-enum
+enum : GLenum
 {
     GL_RGB_422_APPLE                                        = 0x8A1F,
     GL_UNSIGNED_SHORT_8_8_APPLE                             = 0x85BA,
@@ -3701,7 +3713,7 @@ enum
 
 #ifndef GL_APPLE_row_bytes
 #define GL_APPLE_row_bytes 1
-enum
+enum : GLenum
 {
     GL_PACK_ROW_BYTES_APPLE                                 = 0x8A15,
     GL_UNPACK_ROW_BYTES_APPLE                               = 0x8A16,
@@ -3710,7 +3722,7 @@ enum
 
 #ifndef GL_APPLE_specular_vector
 #define GL_APPLE_specular_vector 1
-enum
+enum : GLenum
 {
     GL_LIGHT_MODEL_SPECULAR_VECTOR_APPLE                    = 0x85B0,
 };
@@ -3718,7 +3730,7 @@ enum
 
 #ifndef GL_APPLE_texture_range
 #define GL_APPLE_texture_range 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_RANGE_LENGTH_APPLE                           = 0x85B7,
     GL_TEXTURE_RANGE_POINTER_APPLE                          = 0x85B8,
@@ -3733,7 +3745,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetTexParameterPointervAPPLE) (G
 
 #ifndef GL_APPLE_transform_hint
 #define GL_APPLE_transform_hint 1
-enum
+enum : GLenum
 {
     GL_TRANSFORM_HINT_APPLE                                 = 0x85B1,
 };
@@ -3741,7 +3753,7 @@ enum
 
 #ifndef GL_APPLE_vertex_array_object
 #define GL_APPLE_vertex_array_object 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ARRAY_BINDING_APPLE                           = 0x85B5,
 };
@@ -3753,7 +3765,7 @@ extern GLboolean    (KHRONOS_APIENTRY* const& glIsVertexArrayAPPLE) (GLuint arra
 
 #ifndef GL_APPLE_vertex_array_range
 #define GL_APPLE_vertex_array_range 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ARRAY_RANGE_APPLE                             = 0x851D,
     GL_VERTEX_ARRAY_RANGE_LENGTH_APPLE                      = 0x851E,
@@ -3768,7 +3780,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexArrayParameteriAPPLE) (GLe
 
 #ifndef GL_APPLE_vertex_program_evaluators
 #define GL_APPLE_vertex_program_evaluators 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ATTRIB_MAP1_APPLE                             = 0x8A00,
     GL_VERTEX_ATTRIB_MAP2_APPLE                             = 0x8A01,
@@ -3792,7 +3804,7 @@ extern void         (KHRONOS_APIENTRY* const& glMapVertexAttrib2fAPPLE) (GLuint 
 
 #ifndef GL_APPLE_ycbcr_422
 #define GL_APPLE_ycbcr_422 1
-enum
+enum : GLenum
 {
     GL_YCBCR_422_APPLE                                      = 0x85B9,
 };
@@ -3808,7 +3820,7 @@ enum
 
 #ifndef GL_ARB_ES3_2_compatibility
 #define GL_ARB_ES3_2_compatibility 1
-enum
+enum : GLenum
 {
     GL_PRIMITIVE_BOUNDING_BOX_ARB                           = 0x92BE,
     GL_MULTISAMPLE_LINE_WIDTH_RANGE_ARB                     = 0x9381,
@@ -3831,7 +3843,7 @@ extern void         (KHRONOS_APIENTRY* const& glPrimitiveBoundingBoxARB) (GLfloa
 
 #ifndef GL_ARB_bindless_texture
 #define GL_ARB_bindless_texture 1
-enum
+enum : GLenum
 {
     GL_UNSIGNED_INT64_ARB                                   = 0x140F,
 };
@@ -3863,7 +3875,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetVertexAttribLui64vARB) (GLuin
 
 #ifndef GL_ARB_cl_event
 #define GL_ARB_cl_event 1
-enum
+enum : GLenum
 {
     GL_SYNC_CL_EVENT_ARB                                    = 0x8240,
     GL_SYNC_CL_EVENT_COMPLETE_ARB                           = 0x8241,
@@ -3885,7 +3897,7 @@ extern GLsync       (KHRONOS_APIENTRY* const& glCreateSyncFromCLeventARB) (struc
 
 #ifndef GL_ARB_color_buffer_float
 #define GL_ARB_color_buffer_float 1
-enum
+enum : GLenum
 {
     GL_RGBA_FLOAT_MODE_ARB                                  = 0x8820,
     GL_CLAMP_VERTEX_COLOR_ARB                               = 0x891A,
@@ -3910,7 +3922,7 @@ extern void         (KHRONOS_APIENTRY* const& glClampColorARB) (GLenum target, G
 
 #ifndef GL_ARB_compute_variable_group_size
 #define GL_ARB_compute_variable_group_size 1
-enum
+enum : GLenum
 {
     GL_MAX_COMPUTE_VARIABLE_GROUP_INVOCATIONS_ARB           = 0x9344,
     GL_MAX_COMPUTE_FIXED_GROUP_INVOCATIONS_ARB              = 0x90EB,
@@ -3942,7 +3954,7 @@ extern void         (KHRONOS_APIENTRY* const& glDispatchComputeGroupSizeARB) (GL
 
 #ifndef GL_ARB_debug_output
 #define GL_ARB_debug_output 1
-enum
+enum : GLenum
 {
     GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB                         = 0x8242,
     GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_ARB                 = 0x8243,
@@ -3983,7 +3995,7 @@ extern GLuint       (KHRONOS_APIENTRY* const& glGetDebugMessageLogARB) (GLuint c
 
 #ifndef GL_ARB_depth_texture
 #define GL_ARB_depth_texture 1
-enum
+enum : GLenum
 {
     GL_DEPTH_COMPONENT16_ARB                                = 0x81A5,
     GL_DEPTH_COMPONENT24_ARB                                = 0x81A6,
@@ -4003,7 +4015,7 @@ enum
 
 #ifndef GL_ARB_draw_buffers
 #define GL_ARB_draw_buffers 1
-enum
+enum : GLenum
 {
     GL_MAX_DRAW_BUFFERS_ARB                                 = 0x8824,
     GL_DRAW_BUFFER0_ARB                                     = 0x8825,
@@ -4070,7 +4082,7 @@ extern void         (KHRONOS_APIENTRY* const& glDrawElementsInstancedARB) (GLenu
 
 #ifndef GL_ARB_fragment_program
 #define GL_ARB_fragment_program 1
-enum
+enum : GLenum
 {
     GL_FRAGMENT_PROGRAM_ARB                                 = 0x8804,
     GL_PROGRAM_FORMAT_ASCII_ARB                             = 0x8875,
@@ -4178,7 +4190,7 @@ extern GLboolean    (KHRONOS_APIENTRY* const& glIsProgramARB) (GLuint program);
 
 #ifndef GL_ARB_fragment_shader
 #define GL_ARB_fragment_shader 1
-enum
+enum : GLenum
 {
     GL_FRAGMENT_SHADER_ARB                                  = 0x8B30,
     GL_MAX_FRAGMENT_UNIFORM_COMPONENTS_ARB                  = 0x8B49,
@@ -4204,7 +4216,7 @@ enum
 
 #ifndef GL_ARB_geometry_shader4
 #define GL_ARB_geometry_shader4 1
-enum
+enum : GLenum
 {
     GL_LINES_ADJACENCY_ARB                                  = 0x000A,
     GL_LINE_STRIP_ADJACENCY_ARB                             = 0x000B,
@@ -4241,7 +4253,7 @@ extern void         (KHRONOS_APIENTRY* const& glFramebufferTextureFaceARB) (GLen
 
 #ifndef GL_ARB_gl_spirv
 #define GL_ARB_gl_spirv 1
-enum
+enum : GLenum
 {
     GL_SHADER_BINARY_FORMAT_SPIR_V_ARB                      = 0x9551,
     GL_SPIR_V_BINARY_ARB                                    = 0x9552,
@@ -4259,7 +4271,7 @@ extern void         (KHRONOS_APIENTRY* const& glSpecializeShaderARB) (GLuint sha
 
 #ifndef GL_ARB_gpu_shader_int64
 #define GL_ARB_gpu_shader_int64 1
-enum
+enum : GLenum
 {
     GL_INT64_ARB                                            = 0x140E,
     GL_INT64_VEC2_ARB                                       = 0x8FE9,
@@ -4309,7 +4321,7 @@ extern void         (KHRONOS_APIENTRY* const& glProgramUniform4ui64vARB) (GLuint
 
 #ifndef GL_ARB_half_float_pixel
 #define GL_ARB_half_float_pixel 1
-enum
+enum : GLenum
 {
     GL_HALF_FLOAT_ARB                                       = 0x140B,
 };
@@ -4321,7 +4333,7 @@ enum
 
 #ifndef GL_ARB_imaging
 #define GL_ARB_imaging 1
-enum
+enum : GLenum
 {
     GL_CONVOLUTION_BORDER_MODE                              = 0x8013,
     GL_CONVOLUTION_FILTER_SCALE                             = 0x8014,
@@ -4412,7 +4424,7 @@ extern void         (KHRONOS_APIENTRY* const& glResetMinmax) (GLenum target);
 
 #ifndef GL_ARB_indirect_parameters
 #define GL_ARB_indirect_parameters 1
-enum
+enum : GLenum
 {
     GL_PARAMETER_BUFFER_ARB                                 = 0x80EE,
     GL_PARAMETER_BUFFER_BINDING_ARB                         = 0x80EF,
@@ -4423,7 +4435,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultiDrawElementsIndirectCountAR
 
 #ifndef GL_ARB_instanced_arrays
 #define GL_ARB_instanced_arrays 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ATTRIB_ARRAY_DIVISOR_ARB                      = 0x88FE,
 };
@@ -4436,7 +4448,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexAttribDivisorARB) (GLuint 
 
 #ifndef GL_ARB_internalformat_query2
 #define GL_ARB_internalformat_query2 1
-enum
+enum : GLenum
 {
     GL_SRGB_DECODE_ARB                                      = 0x8299,
     GL_VIEW_CLASS_EAC_R11                                   = 0x9383,
@@ -4475,7 +4487,7 @@ enum
 
 #ifndef GL_ARB_matrix_palette
 #define GL_ARB_matrix_palette 1
-enum
+enum : GLenum
 {
     GL_MATRIX_PALETTE_ARB                                   = 0x8840,
     GL_MAX_MATRIX_PALETTE_STACK_DEPTH_ARB                   = 0x8841,
@@ -4505,7 +4517,7 @@ extern void         (KHRONOS_APIENTRY* const& glMatrixIndexPointerARB) (GLint si
 
 #ifndef GL_ARB_multisample
 #define GL_ARB_multisample 1
-enum
+enum : GLenum
 {
     GL_MULTISAMPLE_ARB                                      = 0x809D,
     GL_SAMPLE_ALPHA_TO_COVERAGE_ARB                         = 0x809E,
@@ -4522,7 +4534,7 @@ extern void         (KHRONOS_APIENTRY* const& glSampleCoverageARB) (GLfloat valu
 
 #ifndef GL_ARB_multitexture
 #define GL_ARB_multitexture 1
-enum
+enum : GLenum
 {
     GL_TEXTURE0_ARB                                         = 0x84C0,
     GL_TEXTURE1_ARB                                         = 0x84C1,
@@ -4598,7 +4610,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultiTexCoord4svARB) (GLenum tar
 
 #ifndef GL_ARB_occlusion_query
 #define GL_ARB_occlusion_query 1
-enum
+enum : GLenum
 {
     GL_QUERY_COUNTER_BITS_ARB                               = 0x8864,
     GL_CURRENT_QUERY_ARB                                    = 0x8865,
@@ -4622,7 +4634,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetQueryObjectuivARB) (GLuint id
 
 #ifndef GL_ARB_parallel_shader_compile
 #define GL_ARB_parallel_shader_compile 1
-enum
+enum : GLenum
 {
     GL_MAX_SHADER_COMPILER_THREADS_ARB                      = 0x91B0,
     GL_COMPLETION_STATUS_ARB                                = 0x91B1,
@@ -4632,7 +4644,7 @@ extern void         (KHRONOS_APIENTRY* const& glMaxShaderCompilerThreadsARB) (GL
 
 #ifndef GL_ARB_pipeline_statistics_query
 #define GL_ARB_pipeline_statistics_query 1
-enum
+enum : GLenum
 {
     GL_VERTICES_SUBMITTED_ARB                               = 0x82EE,
     GL_PRIMITIVES_SUBMITTED_ARB                             = 0x82EF,
@@ -4649,7 +4661,7 @@ enum
 
 #ifndef GL_ARB_pixel_buffer_object
 #define GL_ARB_pixel_buffer_object 1
-enum
+enum : GLenum
 {
     GL_PIXEL_PACK_BUFFER_ARB                                = 0x88EB,
     GL_PIXEL_UNPACK_BUFFER_ARB                              = 0x88EC,
@@ -4660,7 +4672,7 @@ enum
 
 #ifndef GL_ARB_point_parameters
 #define GL_ARB_point_parameters 1
-enum
+enum : GLenum
 {
     GL_POINT_SIZE_MIN_ARB                                   = 0x8126,
     GL_POINT_SIZE_MAX_ARB                                   = 0x8127,
@@ -4673,7 +4685,7 @@ extern void         (KHRONOS_APIENTRY* const& glPointParameterfvARB) (GLenum pna
 
 #ifndef GL_ARB_point_sprite
 #define GL_ARB_point_sprite 1
-enum
+enum : GLenum
 {
     GL_POINT_SPRITE_ARB                                     = 0x8861,
     GL_COORD_REPLACE_ARB                                    = 0x8862,
@@ -4706,7 +4718,7 @@ enum
 
 #ifndef GL_ARB_robustness
 #define GL_ARB_robustness 1
-enum
+enum : GLenum
 {
     GL_CONTEXT_FLAG_ROBUST_ACCESS_BIT_ARB                   = 0x00000004,
     GL_LOSE_CONTEXT_ON_RESET_ARB                            = 0x8252,
@@ -4744,7 +4756,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetnMinmaxARB) (GLenum target, G
 
 #ifndef GL_ARB_sample_locations
 #define GL_ARB_sample_locations 1
-enum
+enum : GLenum
 {
     GL_SAMPLE_LOCATION_SUBPIXEL_BITS_ARB                    = 0x933D,
     GL_SAMPLE_LOCATION_PIXEL_GRID_WIDTH_ARB                 = 0x933E,
@@ -4762,7 +4774,7 @@ extern void         (KHRONOS_APIENTRY* const& glEvaluateDepthValuesARB) ();
 
 #ifndef GL_ARB_sample_shading
 #define GL_ARB_sample_shading 1
-enum
+enum : GLenum
 {
     GL_SAMPLE_SHADING_ARB                                   = 0x8C36,
     GL_MIN_SAMPLE_SHADING_VALUE_ARB                         = 0x8C37,
@@ -4824,7 +4836,7 @@ extern void         (KHRONOS_APIENTRY* const& glMinSampleShadingARB) (GLfloat va
 
 #ifndef GL_ARB_shader_objects
 #define GL_ARB_shader_objects 1
-enum
+enum : GLenum
 {
     GL_PROGRAM_OBJECT_ARB                                   = 0x8B40,
     GL_SHADER_OBJECT_ARB                                    = 0x8B48,
@@ -4932,7 +4944,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetShaderSourceARB) (GLhandleARB
 
 #ifndef GL_ARB_shading_language_100
 #define GL_ARB_shading_language_100 1
-enum
+enum : GLenum
 {
     GL_SHADING_LANGUAGE_VERSION_ARB                         = 0x8B8C,
 };
@@ -4944,7 +4956,7 @@ enum
 
 #ifndef GL_ARB_shading_language_include
 #define GL_ARB_shading_language_include 1
-enum
+enum : GLenum
 {
     GL_SHADER_INCLUDE_ARB                                   = 0x8DAE,
     GL_NAMED_STRING_LENGTH_ARB                              = 0x8DE9,
@@ -4964,7 +4976,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetNamedStringivARB) (GLint name
 
 #ifndef GL_ARB_shadow
 #define GL_ARB_shadow 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_COMPARE_MODE_ARB                             = 0x884C,
     GL_TEXTURE_COMPARE_FUNC_ARB                             = 0x884D,
@@ -4974,7 +4986,7 @@ enum
 
 #ifndef GL_ARB_shadow_ambient
 #define GL_ARB_shadow_ambient 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_COMPARE_FAIL_VALUE_ARB                       = 0x80BF,
 };
@@ -4982,7 +4994,7 @@ enum
 
 #ifndef GL_ARB_sparse_buffer
 #define GL_ARB_sparse_buffer 1
-enum
+enum : GLenum
 {
     GL_SPARSE_STORAGE_BIT_ARB                               = 0x0400,
     GL_SPARSE_BUFFER_PAGE_SIZE_ARB                          = 0x82F8,
@@ -4994,7 +5006,7 @@ extern void         (KHRONOS_APIENTRY* const& glNamedBufferPageCommitmentARB) (G
 
 #ifndef GL_ARB_sparse_texture
 #define GL_ARB_sparse_texture 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_SPARSE_ARB                                   = 0x91A6,
     GL_VIRTUAL_PAGE_SIZE_INDEX_ARB                          = 0x91A7,
@@ -5041,7 +5053,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexPageCommitmentARB) (GLenum ta
 
 #ifndef GL_ARB_texture_border_clamp
 #define GL_ARB_texture_border_clamp 1
-enum
+enum : GLenum
 {
     GL_CLAMP_TO_BORDER_ARB                                  = 0x812D,
 };
@@ -5049,7 +5061,7 @@ enum
 
 #ifndef GL_ARB_texture_buffer_object
 #define GL_ARB_texture_buffer_object 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_BUFFER_ARB                                   = 0x8C2A,
     GL_MAX_TEXTURE_BUFFER_SIZE_ARB                          = 0x8C2B,
@@ -5070,7 +5082,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexBufferARB) (GLenum target, GL
 
 #ifndef GL_ARB_texture_compression
 #define GL_ARB_texture_compression 1
-enum
+enum : GLenum
 {
     GL_COMPRESSED_ALPHA_ARB                                 = 0x84E9,
     GL_COMPRESSED_LUMINANCE_ARB                             = 0x84EA,
@@ -5095,7 +5107,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetCompressedTexImageARB) (GLenu
 
 #ifndef GL_ARB_texture_compression_bptc
 #define GL_ARB_texture_compression_bptc 1
-enum
+enum : GLenum
 {
     GL_COMPRESSED_RGBA_BPTC_UNORM_ARB                       = 0x8E8C,
     GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB                 = 0x8E8D,
@@ -5110,7 +5122,7 @@ enum
 
 #ifndef GL_ARB_texture_cube_map
 #define GL_ARB_texture_cube_map 1
-enum
+enum : GLenum
 {
     GL_NORMAL_MAP_ARB                                       = 0x8511,
     GL_REFLECTION_MAP_ARB                                   = 0x8512,
@@ -5129,7 +5141,7 @@ enum
 
 #ifndef GL_ARB_texture_cube_map_array
 #define GL_ARB_texture_cube_map_array 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_CUBE_MAP_ARRAY_ARB                           = 0x9009,
     GL_TEXTURE_BINDING_CUBE_MAP_ARRAY_ARB                   = 0x900A,
@@ -5147,7 +5159,7 @@ enum
 
 #ifndef GL_ARB_texture_env_combine
 #define GL_ARB_texture_env_combine 1
-enum
+enum : GLenum
 {
     GL_COMBINE_ARB                                          = 0x8570,
     GL_COMBINE_RGB_ARB                                      = 0x8571,
@@ -5180,7 +5192,7 @@ enum
 
 #ifndef GL_ARB_texture_env_dot3
 #define GL_ARB_texture_env_dot3 1
-enum
+enum : GLenum
 {
     GL_DOT3_RGB_ARB                                         = 0x86AE,
     GL_DOT3_RGBA_ARB                                        = 0x86AF,
@@ -5193,7 +5205,7 @@ enum
 
 #ifndef GL_ARB_texture_filter_minmax
 #define GL_ARB_texture_filter_minmax 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_REDUCTION_MODE_ARB                           = 0x9366,
     GL_WEIGHTED_AVERAGE_ARB                                 = 0x9367,
@@ -5202,7 +5214,7 @@ enum
 
 #ifndef GL_ARB_texture_float
 #define GL_ARB_texture_float 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_RED_TYPE_ARB                                 = 0x8C10,
     GL_TEXTURE_GREEN_TYPE_ARB                               = 0x8C11,
@@ -5229,7 +5241,7 @@ enum
 
 #ifndef GL_ARB_texture_gather
 #define GL_ARB_texture_gather 1
-enum
+enum : GLenum
 {
     GL_MIN_PROGRAM_TEXTURE_GATHER_OFFSET_ARB                = 0x8E5E,
     GL_MAX_PROGRAM_TEXTURE_GATHER_OFFSET_ARB                = 0x8E5F,
@@ -5243,7 +5255,7 @@ enum
 
 #ifndef GL_ARB_texture_mirrored_repeat
 #define GL_ARB_texture_mirrored_repeat 1
-enum
+enum : GLenum
 {
     GL_MIRRORED_REPEAT_ARB                                  = 0x8370,
 };
@@ -5267,7 +5279,7 @@ enum
 
 #ifndef GL_ARB_texture_rectangle
 #define GL_ARB_texture_rectangle 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_RECTANGLE_ARB                                = 0x84F5,
     GL_TEXTURE_BINDING_RECTANGLE_ARB                        = 0x84F6,
@@ -5322,7 +5334,7 @@ enum
 
 #ifndef GL_ARB_transform_feedback_overflow_query
 #define GL_ARB_transform_feedback_overflow_query 1
-enum
+enum : GLenum
 {
     GL_TRANSFORM_FEEDBACK_OVERFLOW_ARB                      = 0x82EC,
     GL_TRANSFORM_FEEDBACK_STREAM_OVERFLOW_ARB               = 0x82ED,
@@ -5331,7 +5343,7 @@ enum
 
 #ifndef GL_ARB_transpose_matrix
 #define GL_ARB_transpose_matrix 1
-enum
+enum : GLenum
 {
     GL_TRANSPOSE_MODELVIEW_MATRIX_ARB                       = 0x84E3,
     GL_TRANSPOSE_PROJECTION_MATRIX_ARB                      = 0x84E4,
@@ -5366,7 +5378,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultTransposeMatrixdARB) (const 
 
 #ifndef GL_ARB_vertex_blend
 #define GL_ARB_vertex_blend 1
-enum
+enum : GLenum
 {
     GL_MAX_VERTEX_UNITS_ARB                                 = 0x86A4,
     GL_ACTIVE_VERTEX_UNITS_ARB                              = 0x86A5,
@@ -5425,7 +5437,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexBlendARB) (GLint count);
 
 #ifndef GL_ARB_vertex_buffer_object
 #define GL_ARB_vertex_buffer_object 1
-enum
+enum : GLenum
 {
     GL_BUFFER_SIZE_ARB                                      = 0x8764,
     GL_BUFFER_USAGE_ARB                                     = 0x8765,
@@ -5474,7 +5486,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetBufferPointervARB) (GLenum ta
 
 #ifndef GL_ARB_vertex_program
 #define GL_ARB_vertex_program 1
-enum
+enum : GLenum
 {
     GL_COLOR_SUM_ARB                                        = 0x8458,
     GL_VERTEX_PROGRAM_ARB                                   = 0x8620,
@@ -5540,7 +5552,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetVertexAttribPointervARB) (GLu
 
 #ifndef GL_ARB_vertex_shader
 #define GL_ARB_vertex_shader 1
-enum
+enum : GLenum
 {
     GL_VERTEX_SHADER_ARB                                    = 0x8B31,
     GL_MAX_VERTEX_UNIFORM_COMPONENTS_ARB                    = 0x8B4A,
@@ -5591,7 +5603,7 @@ extern void         (KHRONOS_APIENTRY* const& glWindowPos3svARB) (const GLshort 
 
 #ifndef GL_ATI_draw_buffers
 #define GL_ATI_draw_buffers 1
-enum
+enum : GLenum
 {
     GL_MAX_DRAW_BUFFERS_ATI                                 = 0x8824,
     GL_DRAW_BUFFER0_ATI                                     = 0x8825,
@@ -5616,7 +5628,7 @@ extern void         (KHRONOS_APIENTRY* const& glDrawBuffersATI) (GLsizei n, cons
 
 #ifndef GL_ATI_element_array
 #define GL_ATI_element_array 1
-enum
+enum : GLenum
 {
     GL_ELEMENT_ARRAY_ATI                                    = 0x8768,
     GL_ELEMENT_ARRAY_TYPE_ATI                               = 0x8769,
@@ -5629,7 +5641,7 @@ extern void         (KHRONOS_APIENTRY* const& glDrawRangeElementArrayATI) (GLenu
 
 #ifndef GL_ATI_envmap_bumpmap
 #define GL_ATI_envmap_bumpmap 1
-enum
+enum : GLenum
 {
     GL_BUMP_ROT_MATRIX_ATI                                  = 0x8775,
     GL_BUMP_ROT_MATRIX_SIZE_ATI                             = 0x8776,
@@ -5648,7 +5660,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetTexBumpParameterfvATI) (GLenu
 
 #ifndef GL_ATI_fragment_shader
 #define GL_ATI_fragment_shader 1
-enum
+enum : GLenum
 {
     GL_FRAGMENT_SHADER_ATI                                  = 0x8920,
     GL_REG_0_ATI                                            = 0x8921,
@@ -5779,7 +5791,7 @@ extern void         (KHRONOS_APIENTRY* const& glUnmapObjectBufferATI) (GLuint bu
 
 #ifndef GL_ATI_meminfo
 #define GL_ATI_meminfo 1
-enum
+enum : GLenum
 {
     GL_VBO_FREE_MEMORY_ATI                                  = 0x87FB,
     GL_TEXTURE_FREE_MEMORY_ATI                              = 0x87FC,
@@ -5789,7 +5801,7 @@ enum
 
 #ifndef GL_ATI_pixel_format_float
 #define GL_ATI_pixel_format_float 1
-enum
+enum : GLenum
 {
     GL_RGBA_FLOAT_MODE_ATI                                  = 0x8820,
     GL_COLOR_CLEAR_UNCLAMPED_VALUE_ATI                      = 0x8835,
@@ -5798,7 +5810,7 @@ enum
 
 #ifndef GL_ATI_pn_triangles
 #define GL_ATI_pn_triangles 1
-enum
+enum : GLenum
 {
     GL_PN_TRIANGLES_ATI                                     = 0x87F0,
     GL_MAX_PN_TRIANGLES_TESSELATION_LEVEL_ATI               = 0x87F1,
@@ -5816,7 +5828,7 @@ extern void         (KHRONOS_APIENTRY* const& glPNTrianglesfATI) (GLenum pname, 
 
 #ifndef GL_ATI_separate_stencil
 #define GL_ATI_separate_stencil 1
-enum
+enum : GLenum
 {
     GL_STENCIL_BACK_FUNC_ATI                                = 0x8800,
     GL_STENCIL_BACK_FAIL_ATI                                = 0x8801,
@@ -5829,7 +5841,7 @@ extern void         (KHRONOS_APIENTRY* const& glStencilFuncSeparateATI) (GLenum 
 
 #ifndef GL_ATI_text_fragment_shader
 #define GL_ATI_text_fragment_shader 1
-enum
+enum : GLenum
 {
     GL_TEXT_FRAGMENT_SHADER_ATI                             = 0x8200,
 };
@@ -5837,7 +5849,7 @@ enum
 
 #ifndef GL_ATI_texture_env_combine3
 #define GL_ATI_texture_env_combine3 1
-enum
+enum : GLenum
 {
     GL_MODULATE_ADD_ATI                                     = 0x8744,
     GL_MODULATE_SIGNED_ADD_ATI                              = 0x8745,
@@ -5847,7 +5859,7 @@ enum
 
 #ifndef GL_ATI_texture_float
 #define GL_ATI_texture_float 1
-enum
+enum : GLenum
 {
     GL_RGBA_FLOAT32_ATI                                     = 0x8814,
     GL_RGB_FLOAT32_ATI                                      = 0x8815,
@@ -5866,7 +5878,7 @@ enum
 
 #ifndef GL_ATI_texture_mirror_once
 #define GL_ATI_texture_mirror_once 1
-enum
+enum : GLenum
 {
     GL_MIRROR_CLAMP_ATI                                     = 0x8742,
     GL_MIRROR_CLAMP_TO_EDGE_ATI                             = 0x8743,
@@ -5875,7 +5887,7 @@ enum
 
 #ifndef GL_ATI_vertex_array_object
 #define GL_ATI_vertex_array_object 1
-enum
+enum : GLenum
 {
     GL_STATIC_ATI                                           = 0x8760,
     GL_DYNAMIC_ATI                                          = 0x8761,
@@ -5909,7 +5921,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetVertexAttribArrayObjectivATI)
 
 #ifndef GL_ATI_vertex_streams
 #define GL_ATI_vertex_streams 1
-enum
+enum : GLenum
 {
     GL_MAX_VERTEX_STREAMS_ATI                               = 0x876B,
     GL_VERTEX_STREAM0_ATI                                   = 0x876C,
@@ -5971,7 +5983,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexBlendEnvfATI) (GLenum pnam
 
 #ifndef GL_EXT_422_pixels
 #define GL_EXT_422_pixels 1
-enum
+enum : GLenum
 {
     GL_422_EXT                                              = 0x80CC,
     GL_422_REV_EXT                                          = 0x80CD,
@@ -5992,7 +6004,7 @@ extern void         (KHRONOS_APIENTRY* const& glEGLImageTargetTextureStorageEXT)
 
 #ifndef GL_EXT_abgr
 #define GL_EXT_abgr 1
-enum
+enum : GLenum
 {
     GL_ABGR_EXT                                             = 0x8000,
 };
@@ -6000,7 +6012,7 @@ enum
 
 #ifndef GL_EXT_bgra
 #define GL_EXT_bgra 1
-enum
+enum : GLenum
 {
     GL_BGR_EXT                                              = 0x80E0,
     GL_BGRA_EXT                                             = 0x80E1,
@@ -6009,7 +6021,7 @@ enum
 
 #ifndef GL_EXT_bindable_uniform
 #define GL_EXT_bindable_uniform 1
-enum
+enum : GLenum
 {
     GL_MAX_VERTEX_BINDABLE_UNIFORMS_EXT                     = 0x8DE2,
     GL_MAX_FRAGMENT_BINDABLE_UNIFORMS_EXT                   = 0x8DE3,
@@ -6025,7 +6037,7 @@ extern GLintptr     (KHRONOS_APIENTRY* const& glGetUniformOffsetEXT) (GLuint pro
 
 #ifndef GL_EXT_blend_color
 #define GL_EXT_blend_color 1
-enum
+enum : GLenum
 {
     GL_CONSTANT_COLOR_EXT                                   = 0x8001,
     GL_ONE_MINUS_CONSTANT_COLOR_EXT                         = 0x8002,
@@ -6038,7 +6050,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendColorEXT) (GLfloat red, GLf
 
 #ifndef GL_EXT_blend_equation_separate
 #define GL_EXT_blend_equation_separate 1
-enum
+enum : GLenum
 {
     GL_BLEND_EQUATION_RGB_EXT                               = 0x8009,
     GL_BLEND_EQUATION_ALPHA_EXT                             = 0x883D,
@@ -6048,7 +6060,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendEquationSeparateEXT) (GLenu
 
 #ifndef GL_EXT_blend_func_separate
 #define GL_EXT_blend_func_separate 1
-enum
+enum : GLenum
 {
     GL_BLEND_DST_RGB_EXT                                    = 0x80C8,
     GL_BLEND_SRC_RGB_EXT                                    = 0x80C9,
@@ -6064,7 +6076,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendFuncSeparateEXT) (GLenum sf
 
 #ifndef GL_EXT_blend_minmax
 #define GL_EXT_blend_minmax 1
-enum
+enum : GLenum
 {
     GL_MIN_EXT                                              = 0x8007,
     GL_MAX_EXT                                              = 0x8008,
@@ -6076,7 +6088,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendEquationEXT) (GLenum mode);
 
 #ifndef GL_EXT_blend_subtract
 #define GL_EXT_blend_subtract 1
-enum
+enum : GLenum
 {
     GL_FUNC_SUBTRACT_EXT                                    = 0x800A,
     GL_FUNC_REVERSE_SUBTRACT_EXT                            = 0x800B,
@@ -6085,7 +6097,7 @@ enum
 
 #ifndef GL_EXT_clip_volume_hint
 #define GL_EXT_clip_volume_hint 1
-enum
+enum : GLenum
 {
     GL_CLIP_VOLUME_CLIPPING_HINT_EXT                        = 0x80F0,
 };
@@ -6093,7 +6105,7 @@ enum
 
 #ifndef GL_EXT_cmyka
 #define GL_EXT_cmyka 1
-enum
+enum : GLenum
 {
     GL_CMYK_EXT                                             = 0x800C,
     GL_CMYKA_EXT                                            = 0x800D,
@@ -6110,7 +6122,7 @@ extern void         (KHRONOS_APIENTRY* const& glCopyColorSubTableEXT) (GLenum ta
 
 #ifndef GL_EXT_compiled_vertex_array
 #define GL_EXT_compiled_vertex_array 1
-enum
+enum : GLenum
 {
     GL_ARRAY_ELEMENT_LOCK_FIRST_EXT                         = 0x81A8,
     GL_ARRAY_ELEMENT_LOCK_COUNT_EXT                         = 0x81A9,
@@ -6121,7 +6133,7 @@ extern void         (KHRONOS_APIENTRY* const& glUnlockArraysEXT) ();
 
 #ifndef GL_EXT_convolution
 #define GL_EXT_convolution 1
-enum
+enum : GLenum
 {
     GL_CONVOLUTION_1D_EXT                                   = 0x8010,
     GL_CONVOLUTION_2D_EXT                                   = 0x8011,
@@ -6161,7 +6173,7 @@ extern void         (KHRONOS_APIENTRY* const& glSeparableFilter2DEXT) (GLenum ta
 
 #ifndef GL_EXT_coordinate_frame
 #define GL_EXT_coordinate_frame 1
-enum
+enum : GLenum
 {
     GL_TANGENT_ARRAY_EXT                                    = 0x8439,
     GL_BINORMAL_ARRAY_EXT                                   = 0x843A,
@@ -6213,7 +6225,7 @@ extern void         (KHRONOS_APIENTRY* const& glCopyTexSubImage3DEXT) (GLenum ta
 
 #ifndef GL_EXT_cull_vertex
 #define GL_EXT_cull_vertex 1
-enum
+enum : GLenum
 {
     GL_CULL_VERTEX_EXT                                      = 0x81AA,
     GL_CULL_VERTEX_EYE_POSITION_EXT                         = 0x81AB,
@@ -6225,7 +6237,7 @@ extern void         (KHRONOS_APIENTRY* const& glCullParameterfvEXT) (GLenum pnam
 
 #ifndef GL_EXT_debug_label
 #define GL_EXT_debug_label 1
-enum
+enum : GLenum
 {
     GL_PROGRAM_PIPELINE_OBJECT_EXT                          = 0x8A4F,
     GL_PROGRAM_OBJECT_EXT                                   = 0x8B40,
@@ -6247,7 +6259,7 @@ extern void         (KHRONOS_APIENTRY* const& glPopGroupMarkerEXT) ();
 
 #ifndef GL_EXT_depth_bounds_test
 #define GL_EXT_depth_bounds_test 1
-enum
+enum : GLenum
 {
     GL_DEPTH_BOUNDS_TEST_EXT                                = 0x8890,
     GL_DEPTH_BOUNDS_EXT                                     = 0x8891,
@@ -6257,7 +6269,7 @@ extern void         (KHRONOS_APIENTRY* const& glDepthBoundsEXT) (GLclampd zmin, 
 
 #ifndef GL_EXT_direct_state_access
 #define GL_EXT_direct_state_access 1
-enum
+enum : GLenum
 {
     GL_PROGRAM_MATRIX_EXT                                   = 0x8E2D,
     GL_TRANSPOSE_PROGRAM_MATRIX_EXT                         = 0x8E2E,
@@ -6533,7 +6545,7 @@ extern void         (KHRONOS_APIENTRY* const& glDrawElementsInstancedEXT) (GLenu
 
 #ifndef GL_EXT_draw_range_elements
 #define GL_EXT_draw_range_elements 1
-enum
+enum : GLenum
 {
     GL_MAX_ELEMENTS_VERTICES_EXT                            = 0x80E8,
     GL_MAX_ELEMENTS_INDICES_EXT                             = 0x80E9,
@@ -6549,7 +6561,7 @@ extern void         (KHRONOS_APIENTRY* const& glNamedBufferStorageExternalEXT) (
 
 #ifndef GL_EXT_fog_coord
 #define GL_EXT_fog_coord 1
-enum
+enum : GLenum
 {
     GL_FOG_COORDINATE_SOURCE_EXT                            = 0x8450,
     GL_FOG_COORDINATE_EXT                                   = 0x8451,
@@ -6569,7 +6581,7 @@ extern void         (KHRONOS_APIENTRY* const& glFogCoordPointerEXT) (GLenum type
 
 #ifndef GL_EXT_framebuffer_blit
 #define GL_EXT_framebuffer_blit 1
-enum
+enum : GLenum
 {
     GL_READ_FRAMEBUFFER_EXT                                 = 0x8CA8,
     GL_DRAW_FRAMEBUFFER_EXT                                 = 0x8CA9,
@@ -6581,7 +6593,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlitFramebufferEXT) (GLint srcX0
 
 #ifndef GL_EXT_framebuffer_multisample
 #define GL_EXT_framebuffer_multisample 1
-enum
+enum : GLenum
 {
     GL_RENDERBUFFER_SAMPLES_EXT                             = 0x8CAB,
     GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE_EXT               = 0x8D56,
@@ -6592,7 +6604,7 @@ extern void         (KHRONOS_APIENTRY* const& glRenderbufferStorageMultisampleEX
 
 #ifndef GL_EXT_framebuffer_multisample_blit_scaled
 #define GL_EXT_framebuffer_multisample_blit_scaled 1
-enum
+enum : GLenum
 {
     GL_SCALED_RESOLVE_FASTEST_EXT                           = 0x90BA,
     GL_SCALED_RESOLVE_NICEST_EXT                            = 0x90BB,
@@ -6601,7 +6613,7 @@ enum
 
 #ifndef GL_EXT_framebuffer_object
 #define GL_EXT_framebuffer_object 1
-enum
+enum : GLenum
 {
     GL_INVALID_FRAMEBUFFER_OPERATION_EXT                    = 0x0506,
     GL_MAX_RENDERBUFFER_SIZE_EXT                            = 0x84E8,
@@ -6676,7 +6688,7 @@ extern void         (KHRONOS_APIENTRY* const& glGenerateMipmapEXT) (GLenum targe
 
 #ifndef GL_EXT_framebuffer_sRGB
 #define GL_EXT_framebuffer_sRGB 1
-enum
+enum : GLenum
 {
     GL_FRAMEBUFFER_SRGB_EXT                                 = 0x8DB9,
     GL_FRAMEBUFFER_SRGB_CAPABLE_EXT                         = 0x8DBA,
@@ -6685,7 +6697,7 @@ enum
 
 #ifndef GL_EXT_geometry_shader4
 #define GL_EXT_geometry_shader4 1
-enum
+enum : GLenum
 {
     GL_GEOMETRY_SHADER_EXT                                  = 0x8DD9,
     GL_GEOMETRY_VERTICES_OUT_EXT                            = 0x8DDA,
@@ -6719,7 +6731,7 @@ extern void         (KHRONOS_APIENTRY* const& glProgramLocalParameters4fvEXT) (G
 
 #ifndef GL_EXT_gpu_shader4
 #define GL_EXT_gpu_shader4 1
-enum
+enum : GLenum
 {
     GL_SAMPLER_1D_ARRAY_EXT                                 = 0x8DC0,
     GL_SAMPLER_2D_ARRAY_EXT                                 = 0x8DC1,
@@ -6788,7 +6800,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetVertexAttribIuivEXT) (GLuint 
 
 #ifndef GL_EXT_histogram
 #define GL_EXT_histogram 1
-enum
+enum : GLenum
 {
     GL_HISTOGRAM_EXT                                        = 0x8024,
     GL_PROXY_HISTOGRAM_EXT                                  = 0x8025,
@@ -6819,7 +6831,7 @@ extern void         (KHRONOS_APIENTRY* const& glResetMinmaxEXT) (GLenum target);
 
 #ifndef GL_EXT_index_array_formats
 #define GL_EXT_index_array_formats 1
-enum
+enum : GLenum
 {
     GL_IUI_V2F_EXT                                          = 0x81AD,
     GL_IUI_V3F_EXT                                          = 0x81AE,
@@ -6834,7 +6846,7 @@ enum
 
 #ifndef GL_EXT_index_func
 #define GL_EXT_index_func 1
-enum
+enum : GLenum
 {
     GL_INDEX_TEST_EXT                                       = 0x81B5,
     GL_INDEX_TEST_FUNC_EXT                                  = 0x81B6,
@@ -6845,7 +6857,7 @@ extern void         (KHRONOS_APIENTRY* const& glIndexFuncEXT) (GLenum func, GLcl
 
 #ifndef GL_EXT_index_material
 #define GL_EXT_index_material 1
-enum
+enum : GLenum
 {
     GL_INDEX_MATERIAL_EXT                                   = 0x81B8,
     GL_INDEX_MATERIAL_PARAMETER_EXT                         = 0x81B9,
@@ -6860,7 +6872,7 @@ extern void         (KHRONOS_APIENTRY* const& glIndexMaterialEXT) (GLenum face, 
 
 #ifndef GL_EXT_light_texture
 #define GL_EXT_light_texture 1
-enum
+enum : GLenum
 {
     GL_FRAGMENT_MATERIAL_EXT                                = 0x8349,
     GL_FRAGMENT_NORMAL_EXT                                  = 0x834A,
@@ -6879,7 +6891,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureMaterialEXT) (GLenum face
 
 #ifndef GL_EXT_memory_object
 #define GL_EXT_memory_object 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_TILING_EXT                                   = 0x9580,
     GL_DEDICATED_MEMORY_OBJECT_EXT                          = 0x9581,
@@ -6916,7 +6928,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureStorageMem1DEXT) (GLuint 
 
 #ifndef GL_EXT_memory_object_fd
 #define GL_EXT_memory_object_fd 1
-enum
+enum : GLenum
 {
     GL_HANDLE_TYPE_OPAQUE_FD_EXT                            = 0x9586,
 };
@@ -6925,7 +6937,7 @@ extern void         (KHRONOS_APIENTRY* const& glImportMemoryFdEXT) (GLuint memor
 
 #ifndef GL_EXT_memory_object_win32
 #define GL_EXT_memory_object_win32 1
-enum
+enum : GLenum
 {
     GL_HANDLE_TYPE_OPAQUE_WIN32_EXT                         = 0x9587,
     GL_HANDLE_TYPE_OPAQUE_WIN32_KMT_EXT                     = 0x9588,
@@ -6953,7 +6965,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultiDrawElementsEXT) (GLenum mo
 
 #ifndef GL_EXT_multisample
 #define GL_EXT_multisample 1
-enum
+enum : GLenum
 {
     GL_MULTISAMPLE_EXT                                      = 0x809D,
     GL_SAMPLE_ALPHA_TO_MASK_EXT                             = 0x809E,
@@ -6991,7 +7003,7 @@ extern void         (KHRONOS_APIENTRY* const& glSamplePatternEXT) (GLenum patter
 
 #ifndef GL_EXT_packed_depth_stencil
 #define GL_EXT_packed_depth_stencil 1
-enum
+enum : GLenum
 {
     GL_DEPTH_STENCIL_EXT                                    = 0x84F9,
     GL_UNSIGNED_INT_24_8_EXT                                = 0x84FA,
@@ -7002,7 +7014,7 @@ enum
 
 #ifndef GL_EXT_packed_float
 #define GL_EXT_packed_float 1
-enum
+enum : GLenum
 {
     GL_R11F_G11F_B10F_EXT                                   = 0x8C3A,
     GL_UNSIGNED_INT_10F_11F_11F_REV_EXT                     = 0x8C3B,
@@ -7012,7 +7024,7 @@ enum
 
 #ifndef GL_EXT_packed_pixels
 #define GL_EXT_packed_pixels 1
-enum
+enum : GLenum
 {
     GL_UNSIGNED_BYTE_3_3_2_EXT                              = 0x8032,
     GL_UNSIGNED_SHORT_4_4_4_4_EXT                           = 0x8033,
@@ -7024,7 +7036,7 @@ enum
 
 #ifndef GL_EXT_paletted_texture
 #define GL_EXT_paletted_texture 1
-enum
+enum : GLenum
 {
     GL_COLOR_INDEX1_EXT                                     = 0x80E2,
     GL_COLOR_INDEX2_EXT                                     = 0x80E3,
@@ -7042,7 +7054,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetColorTableParameterfvEXT) (GL
 
 #ifndef GL_EXT_pixel_buffer_object
 #define GL_EXT_pixel_buffer_object 1
-enum
+enum : GLenum
 {
     GL_PIXEL_PACK_BUFFER_EXT                                = 0x88EB,
     GL_PIXEL_UNPACK_BUFFER_EXT                              = 0x88EC,
@@ -7053,7 +7065,7 @@ enum
 
 #ifndef GL_EXT_pixel_transform
 #define GL_EXT_pixel_transform 1
-enum
+enum : GLenum
 {
     GL_PIXEL_TRANSFORM_2D_EXT                               = 0x8330,
     GL_PIXEL_MAG_FILTER_EXT                                 = 0x8331,
@@ -7079,7 +7091,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetPixelTransformParameterfvEXT)
 
 #ifndef GL_EXT_point_parameters
 #define GL_EXT_point_parameters 1
-enum
+enum : GLenum
 {
     GL_POINT_SIZE_MIN_EXT                                   = 0x8126,
     GL_POINT_SIZE_MAX_EXT                                   = 0x8127,
@@ -7092,7 +7104,7 @@ extern void         (KHRONOS_APIENTRY* const& glPointParameterfvEXT) (GLenum pna
 
 #ifndef GL_EXT_polygon_offset
 #define GL_EXT_polygon_offset 1
-enum
+enum : GLenum
 {
     GL_POLYGON_OFFSET_EXT                                   = 0x8037,
     GL_POLYGON_OFFSET_FACTOR_EXT                            = 0x8038,
@@ -7103,7 +7115,7 @@ extern void         (KHRONOS_APIENTRY* const& glPolygonOffsetEXT) (GLfloat facto
 
 #ifndef GL_EXT_polygon_offset_clamp
 #define GL_EXT_polygon_offset_clamp 1
-enum
+enum : GLenum
 {
     GL_POLYGON_OFFSET_CLAMP_EXT                             = 0x8E1B,
 };
@@ -7116,7 +7128,7 @@ extern void         (KHRONOS_APIENTRY* const& glPolygonOffsetClampEXT) (GLfloat 
 
 #ifndef GL_EXT_provoking_vertex
 #define GL_EXT_provoking_vertex 1
-enum
+enum : GLenum
 {
     GL_QUADS_FOLLOW_PROVOKING_VERTEX_CONVENTION_EXT         = 0x8E4C,
     GL_FIRST_VERTEX_CONVENTION_EXT                          = 0x8E4D,
@@ -7128,7 +7140,7 @@ extern void         (KHRONOS_APIENTRY* const& glProvokingVertexEXT) (GLenum mode
 
 #ifndef GL_EXT_raster_multisample
 #define GL_EXT_raster_multisample 1
-enum
+enum : GLenum
 {
     GL_RASTER_MULTISAMPLE_EXT                               = 0x9327,
     GL_RASTER_SAMPLES_EXT                                   = 0x9328,
@@ -7142,7 +7154,7 @@ extern void         (KHRONOS_APIENTRY* const& glRasterSamplesEXT) (GLuint sample
 
 #ifndef GL_EXT_rescale_normal
 #define GL_EXT_rescale_normal 1
-enum
+enum : GLenum
 {
     GL_RESCALE_NORMAL_EXT                                   = 0x803A,
 };
@@ -7150,7 +7162,7 @@ enum
 
 #ifndef GL_EXT_semaphore
 #define GL_EXT_semaphore 1
-enum
+enum : GLenum
 {
     GL_LAYOUT_GENERAL_EXT                                   = 0x958D,
     GL_LAYOUT_COLOR_ATTACHMENT_EXT                          = 0x958E,
@@ -7178,7 +7190,7 @@ extern void         (KHRONOS_APIENTRY* const& glImportSemaphoreFdEXT) (GLuint se
 
 #ifndef GL_EXT_semaphore_win32
 #define GL_EXT_semaphore_win32 1
-enum
+enum : GLenum
 {
     GL_HANDLE_TYPE_D3D12_FENCE_EXT                          = 0x9594,
     GL_D3D12_FENCE_VALUE_EXT                                = 0x9595,
@@ -7189,7 +7201,7 @@ extern void         (KHRONOS_APIENTRY* const& glImportSemaphoreWin32NameEXT) (GL
 
 #ifndef GL_EXT_secondary_color
 #define GL_EXT_secondary_color 1
-enum
+enum : GLenum
 {
     GL_COLOR_SUM_EXT                                        = 0x8458,
     GL_CURRENT_SECONDARY_COLOR_EXT                          = 0x8459,
@@ -7220,7 +7232,7 @@ extern void         (KHRONOS_APIENTRY* const& glSecondaryColorPointerEXT) (GLint
 
 #ifndef GL_EXT_separate_shader_objects
 #define GL_EXT_separate_shader_objects 1
-enum
+enum : GLenum
 {
     GL_ACTIVE_PROGRAM_EXT                                   = 0x8B8D,
     GL_VERTEX_SHADER_BIT_EXT                                = 0x00000001,
@@ -7246,7 +7258,7 @@ extern void         (KHRONOS_APIENTRY* const& glValidateProgramPipelineEXT) (GLu
 
 #ifndef GL_EXT_separate_specular_color
 #define GL_EXT_separate_specular_color 1
-enum
+enum : GLenum
 {
     GL_LIGHT_MODEL_COLOR_CONTROL_EXT                        = 0x81F8,
     GL_SINGLE_COLOR_EXT                                     = 0x81F9,
@@ -7256,7 +7268,7 @@ enum
 
 #ifndef GL_EXT_shader_framebuffer_fetch
 #define GL_EXT_shader_framebuffer_fetch 1
-enum
+enum : GLenum
 {
     GL_FRAGMENT_SHADER_DISCARDS_SAMPLES_EXT                 = 0x8A52,
 };
@@ -7273,7 +7285,7 @@ extern void         (KHRONOS_APIENTRY* const& glFramebufferFetchBarrierEXT) ();
 
 #ifndef GL_EXT_shader_image_load_store
 #define GL_EXT_shader_image_load_store 1
-enum
+enum : GLenum
 {
     GL_MAX_IMAGE_UNITS_EXT                                  = 0x8F38,
     GL_MAX_COMBINED_IMAGE_UNITS_AND_FRAGMENT_OUTPUTS_EXT    = 0x8F39,
@@ -7345,7 +7357,7 @@ extern void         (KHRONOS_APIENTRY* const& glMemoryBarrierEXT) (GLbitfield ba
 
 #ifndef GL_EXT_shared_texture_palette
 #define GL_EXT_shared_texture_palette 1
-enum
+enum : GLenum
 {
     GL_SHARED_TEXTURE_PALETTE_EXT                           = 0x81FB,
 };
@@ -7357,7 +7369,7 @@ enum
 
 #ifndef GL_EXT_stencil_clear_tag
 #define GL_EXT_stencil_clear_tag 1
-enum
+enum : GLenum
 {
     GL_STENCIL_TAG_BITS_EXT                                 = 0x88F2,
     GL_STENCIL_CLEAR_TAG_VALUE_EXT                          = 0x88F3,
@@ -7367,7 +7379,7 @@ extern void         (KHRONOS_APIENTRY* const& glStencilClearTagEXT) (GLsizei ste
 
 #ifndef GL_EXT_stencil_two_side
 #define GL_EXT_stencil_two_side 1
-enum
+enum : GLenum
 {
     GL_STENCIL_TEST_TWO_SIDE_EXT                            = 0x8910,
     GL_ACTIVE_STENCIL_FACE_EXT                              = 0x8911,
@@ -7377,7 +7389,7 @@ extern void         (KHRONOS_APIENTRY* const& glActiveStencilFaceEXT) (GLenum fa
 
 #ifndef GL_EXT_stencil_wrap
 #define GL_EXT_stencil_wrap 1
-enum
+enum : GLenum
 {
     GL_INCR_WRAP_EXT                                        = 0x8507,
     GL_DECR_WRAP_EXT                                        = 0x8508,
@@ -7392,7 +7404,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexSubImage2DEXT) (GLenum target
 
 #ifndef GL_EXT_texture
 #define GL_EXT_texture 1
-enum
+enum : GLenum
 {
     GL_ALPHA4_EXT                                           = 0x803B,
     GL_ALPHA8_EXT                                           = 0x803C,
@@ -7442,7 +7454,7 @@ enum
 
 #ifndef GL_EXT_texture3D
 #define GL_EXT_texture3D 1
-enum
+enum : GLenum
 {
     GL_PACK_SKIP_IMAGES_EXT                                 = 0x806B,
     GL_PACK_IMAGE_HEIGHT_EXT                                = 0x806C,
@@ -7460,7 +7472,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexSubImage3DEXT) (GLenum target
 
 #ifndef GL_EXT_texture_array
 #define GL_EXT_texture_array 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_1D_ARRAY_EXT                                 = 0x8C18,
     GL_PROXY_TEXTURE_1D_ARRAY_EXT                           = 0x8C19,
@@ -7476,7 +7488,7 @@ extern void         (KHRONOS_APIENTRY* const& glFramebufferTextureLayerEXT) (GLe
 
 #ifndef GL_EXT_texture_buffer_object
 #define GL_EXT_texture_buffer_object 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_BUFFER_EXT                                   = 0x8C2A,
     GL_MAX_TEXTURE_BUFFER_SIZE_EXT                          = 0x8C2B,
@@ -7489,7 +7501,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexBufferEXT) (GLenum target, GL
 
 #ifndef GL_EXT_texture_compression_latc
 #define GL_EXT_texture_compression_latc 1
-enum
+enum : GLenum
 {
     GL_COMPRESSED_LUMINANCE_LATC1_EXT                       = 0x8C70,
     GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT                = 0x8C71,
@@ -7500,7 +7512,7 @@ enum
 
 #ifndef GL_EXT_texture_compression_rgtc
 #define GL_EXT_texture_compression_rgtc 1
-enum
+enum : GLenum
 {
     GL_COMPRESSED_RED_RGTC1_EXT                             = 0x8DBB,
     GL_COMPRESSED_SIGNED_RED_RGTC1_EXT                      = 0x8DBC,
@@ -7511,7 +7523,7 @@ enum
 
 #ifndef GL_EXT_texture_compression_s3tc
 #define GL_EXT_texture_compression_s3tc 1
-enum
+enum : GLenum
 {
     GL_COMPRESSED_RGB_S3TC_DXT1_EXT                         = 0x83F0,
     GL_COMPRESSED_RGBA_S3TC_DXT1_EXT                        = 0x83F1,
@@ -7522,7 +7534,7 @@ enum
 
 #ifndef GL_EXT_texture_cube_map
 #define GL_EXT_texture_cube_map 1
-enum
+enum : GLenum
 {
     GL_NORMAL_MAP_EXT                                       = 0x8511,
     GL_REFLECTION_MAP_EXT                                   = 0x8512,
@@ -7545,7 +7557,7 @@ enum
 
 #ifndef GL_EXT_texture_env_combine
 #define GL_EXT_texture_env_combine 1
-enum
+enum : GLenum
 {
     GL_COMBINE_EXT                                          = 0x8570,
     GL_COMBINE_RGB_EXT                                      = 0x8571,
@@ -7573,7 +7585,7 @@ enum
 
 #ifndef GL_EXT_texture_env_dot3
 #define GL_EXT_texture_env_dot3 1
-enum
+enum : GLenum
 {
     GL_DOT3_RGB_EXT                                         = 0x8740,
     GL_DOT3_RGBA_EXT                                        = 0x8741,
@@ -7582,7 +7594,7 @@ enum
 
 #ifndef GL_EXT_texture_filter_anisotropic
 #define GL_EXT_texture_filter_anisotropic 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_MAX_ANISOTROPY_EXT                           = 0x84FE,
     GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT                       = 0x84FF,
@@ -7591,7 +7603,7 @@ enum
 
 #ifndef GL_EXT_texture_filter_minmax
 #define GL_EXT_texture_filter_minmax 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_REDUCTION_MODE_EXT                           = 0x9366,
     GL_WEIGHTED_AVERAGE_EXT                                 = 0x9367,
@@ -7600,7 +7612,7 @@ enum
 
 #ifndef GL_EXT_texture_integer
 #define GL_EXT_texture_integer 1
-enum
+enum : GLenum
 {
     GL_RGBA32UI_EXT                                         = 0x8D70,
     GL_RGB32UI_EXT                                          = 0x8D71,
@@ -7660,7 +7672,7 @@ extern void         (KHRONOS_APIENTRY* const& glClearColorIuiEXT) (GLuint red, G
 
 #ifndef GL_EXT_texture_lod_bias
 #define GL_EXT_texture_lod_bias 1
-enum
+enum : GLenum
 {
     GL_MAX_TEXTURE_LOD_BIAS_EXT                             = 0x84FD,
     GL_TEXTURE_FILTER_CONTROL_EXT                           = 0x8500,
@@ -7670,7 +7682,7 @@ enum
 
 #ifndef GL_EXT_texture_mirror_clamp
 #define GL_EXT_texture_mirror_clamp 1
-enum
+enum : GLenum
 {
     GL_MIRROR_CLAMP_EXT                                     = 0x8742,
     GL_MIRROR_CLAMP_TO_EDGE_EXT                             = 0x8743,
@@ -7680,7 +7692,7 @@ enum
 
 #ifndef GL_EXT_texture_object
 #define GL_EXT_texture_object 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_PRIORITY_EXT                                 = 0x8066,
     GL_TEXTURE_RESIDENT_EXT                                 = 0x8067,
@@ -7698,7 +7710,7 @@ extern void         (KHRONOS_APIENTRY* const& glPrioritizeTexturesEXT) (GLsizei 
 
 #ifndef GL_EXT_texture_perturb_normal
 #define GL_EXT_texture_perturb_normal 1
-enum
+enum : GLenum
 {
     GL_PERTURB_EXT                                          = 0x85AE,
     GL_TEXTURE_NORMAL_EXT                                   = 0x85AF,
@@ -7708,7 +7720,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureNormalEXT) (GLenum mode);
 
 #ifndef GL_EXT_texture_sRGB
 #define GL_EXT_texture_sRGB 1
-enum
+enum : GLenum
 {
     GL_SRGB_EXT                                             = 0x8C40,
     GL_SRGB8_EXT                                            = 0x8C41,
@@ -7731,7 +7743,7 @@ enum
 
 #ifndef GL_EXT_texture_sRGB_R8
 #define GL_EXT_texture_sRGB_R8 1
-enum
+enum : GLenum
 {
     GL_SR8_EXT                                              = 0x8FBD,
 };
@@ -7739,7 +7751,7 @@ enum
 
 #ifndef GL_EXT_texture_sRGB_RG8
 #define GL_EXT_texture_sRGB_RG8 1
-enum
+enum : GLenum
 {
     GL_SRG8_EXT                                             = 0x8FBE,
 };
@@ -7747,7 +7759,7 @@ enum
 
 #ifndef GL_EXT_texture_sRGB_decode
 #define GL_EXT_texture_sRGB_decode 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_SRGB_DECODE_EXT                              = 0x8A48,
     GL_DECODE_EXT                                           = 0x8A49,
@@ -7757,7 +7769,7 @@ enum
 
 #ifndef GL_EXT_texture_shared_exponent
 #define GL_EXT_texture_shared_exponent 1
-enum
+enum : GLenum
 {
     GL_RGB9_E5_EXT                                          = 0x8C3D,
     GL_UNSIGNED_INT_5_9_9_9_REV_EXT                         = 0x8C3E,
@@ -7767,7 +7779,7 @@ enum
 
 #ifndef GL_EXT_texture_snorm
 #define GL_EXT_texture_snorm 1
-enum
+enum : GLenum
 {
     GL_ALPHA_SNORM                                          = 0x9010,
     GL_LUMINANCE_SNORM                                      = 0x9011,
@@ -7790,7 +7802,7 @@ enum
 
 #ifndef GL_EXT_texture_swizzle
 #define GL_EXT_texture_swizzle 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_SWIZZLE_R_EXT                                = 0x8E42,
     GL_TEXTURE_SWIZZLE_G_EXT                                = 0x8E43,
@@ -7802,7 +7814,7 @@ enum
 
 #ifndef GL_NV_timeline_semaphore
 #define GL_NV_timeline_semaphore 1
-enum
+enum : GLenum
 {
     GL_TIMELINE_SEMAPHORE_VALUE_NV                          = 0x9595,
     GL_SEMAPHORE_TYPE_NV                                    = 0x95B3,
@@ -7817,7 +7829,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetSemaphoreParameterivNV) (GLui
 
 #ifndef GL_EXT_timer_query
 #define GL_EXT_timer_query 1
-enum
+enum : GLenum
 {
     GL_TIME_ELAPSED_EXT                                     = 0x88BF,
 };
@@ -7827,7 +7839,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetQueryObjectui64vEXT) (GLuint 
 
 #ifndef GL_EXT_transform_feedback
 #define GL_EXT_transform_feedback 1
-enum
+enum : GLenum
 {
     GL_TRANSFORM_FEEDBACK_BUFFER_EXT                        = 0x8C8E,
     GL_TRANSFORM_FEEDBACK_BUFFER_START_EXT                  = 0x8C84,
@@ -7856,7 +7868,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetTransformFeedbackVaryingEXT) 
 
 #ifndef GL_EXT_vertex_array
 #define GL_EXT_vertex_array 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ARRAY_EXT                                     = 0x8074,
     GL_NORMAL_ARRAY_EXT                                     = 0x8075,
@@ -7908,7 +7920,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexPointerEXT) (GLint size, G
 
 #ifndef GL_EXT_vertex_attrib_64bit
 #define GL_EXT_vertex_attrib_64bit 1
-enum
+enum : GLenum
 {
     GL_DOUBLE_VEC2_EXT                                      = 0x8FFC,
     GL_DOUBLE_VEC3_EXT                                      = 0x8FFD,
@@ -7937,7 +7949,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetVertexAttribLdvEXT) (GLuint i
 
 #ifndef GL_EXT_vertex_shader
 #define GL_EXT_vertex_shader 1
-enum
+enum : GLenum
 {
     GL_VERTEX_SHADER_EXT                                    = 0x8780,
     GL_VERTEX_SHADER_BINDING_EXT                            = 0x8781,
@@ -8096,7 +8108,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetLocalConstantFloatvEXT) (GLui
 
 #ifndef GL_EXT_vertex_weighting
 #define GL_EXT_vertex_weighting 1
-enum
+enum : GLenum
 {
     GL_MODELVIEW0_STACK_DEPTH_EXT                           = 0x0BA3,
     GL_MODELVIEW1_STACK_DEPTH_EXT                           = 0x8502,
@@ -8125,7 +8137,7 @@ extern GLboolean    (KHRONOS_APIENTRY* const& glReleaseKeyedMutexWin32EXT) (GLui
 
 #ifndef GL_EXT_window_rectangles
 #define GL_EXT_window_rectangles 1
-enum
+enum : GLenum
 {
     GL_INCLUSIVE_EXT                                        = 0x8F10,
     GL_EXCLUSIVE_EXT                                        = 0x8F11,
@@ -8139,7 +8151,7 @@ extern void         (KHRONOS_APIENTRY* const& glWindowRectanglesEXT) (GLenum mod
 
 #ifndef GL_EXT_x11_sync_object
 #define GL_EXT_x11_sync_object 1
-enum
+enum : GLenum
 {
     GL_SYNC_X11_FENCE_EXT                                   = 0x90E1,
 };
@@ -8158,7 +8170,7 @@ extern void         (KHRONOS_APIENTRY* const& glStringMarkerGREMEDY) (GLsizei le
 
 #ifndef GL_HP_convolution_border_modes
 #define GL_HP_convolution_border_modes 1
-enum
+enum : GLenum
 {
     GL_IGNORE_BORDER_HP                                     = 0x8150,
     GL_CONSTANT_BORDER_HP                                   = 0x8151,
@@ -8169,7 +8181,7 @@ enum
 
 #ifndef GL_HP_image_transform
 #define GL_HP_image_transform 1
-enum
+enum : GLenum
 {
     GL_IMAGE_SCALE_X_HP                                     = 0x8155,
     GL_IMAGE_SCALE_Y_HP                                     = 0x8156,
@@ -8197,7 +8209,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetImageTransformParameterfvHP) 
 
 #ifndef GL_HP_occlusion_test
 #define GL_HP_occlusion_test 1
-enum
+enum : GLenum
 {
     GL_OCCLUSION_TEST_HP                                    = 0x8165,
     GL_OCCLUSION_TEST_RESULT_HP                             = 0x8166,
@@ -8206,7 +8218,7 @@ enum
 
 #ifndef GL_HP_texture_lighting
 #define GL_HP_texture_lighting 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_LIGHTING_MODE_HP                             = 0x8167,
     GL_TEXTURE_POST_SPECULAR_HP                             = 0x8168,
@@ -8216,7 +8228,7 @@ enum
 
 #ifndef GL_IBM_cull_vertex
 #define GL_IBM_cull_vertex 1
-enum
+enum : GLenum
 {
     GL_CULL_VERTEX_IBM                                      = 103050,
 };
@@ -8230,7 +8242,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultiModeDrawElementsIBM) (const
 
 #ifndef GL_IBM_rasterpos_clip
 #define GL_IBM_rasterpos_clip 1
-enum
+enum : GLenum
 {
     GL_RASTER_POSITION_UNCLIPPED_IBM                        = 0x19262,
 };
@@ -8238,7 +8250,7 @@ enum
 
 #ifndef GL_IBM_static_data
 #define GL_IBM_static_data 1
-enum
+enum : GLenum
 {
     GL_ALL_STATIC_DATA_IBM                                  = 103060,
     GL_STATIC_VERTEX_ARRAY_IBM                              = 103061,
@@ -8248,7 +8260,7 @@ extern void         (KHRONOS_APIENTRY* const& glFlushStaticDataIBM) (GLenum targ
 
 #ifndef GL_IBM_texture_mirrored_repeat
 #define GL_IBM_texture_mirrored_repeat 1
-enum
+enum : GLenum
 {
     GL_MIRRORED_REPEAT_IBM                                  = 0x8370,
 };
@@ -8256,7 +8268,7 @@ enum
 
 #ifndef GL_IBM_vertex_array_lists
 #define GL_IBM_vertex_array_lists 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ARRAY_LIST_IBM                                = 103070,
     GL_NORMAL_ARRAY_LIST_IBM                                = 103071,
@@ -8292,7 +8304,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendFuncSeparateINGR) (GLenum s
 
 #ifndef GL_INGR_color_clamp
 #define GL_INGR_color_clamp 1
-enum
+enum : GLenum
 {
     GL_RED_MIN_CLAMP_INGR                                   = 0x8560,
     GL_GREEN_MIN_CLAMP_INGR                                 = 0x8561,
@@ -8307,7 +8319,7 @@ enum
 
 #ifndef GL_INGR_interlace_read
 #define GL_INGR_interlace_read 1
-enum
+enum : GLenum
 {
     GL_INTERLACE_READ_INGR                                  = 0x8568,
 };
@@ -8315,7 +8327,7 @@ enum
 
 #ifndef GL_INTEL_conservative_rasterization
 #define GL_INTEL_conservative_rasterization 1
-enum
+enum : GLenum
 {
     GL_CONSERVATIVE_RASTERIZATION_INTEL                     = 0x83FE,
 };
@@ -8332,7 +8344,7 @@ extern void         (KHRONOS_APIENTRY* const& glApplyFramebufferAttachmentCMAAIN
 
 #ifndef GL_INTEL_map_texture
 #define GL_INTEL_map_texture 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_MEMORY_LAYOUT_INTEL                          = 0x83FF,
     GL_LAYOUT_DEFAULT_INTEL                                 = 0,
@@ -8346,7 +8358,7 @@ extern void *       (KHRONOS_APIENTRY* const& glMapTexture2DINTEL) (GLuint textu
 
 #ifndef GL_INTEL_blackhole_render
 #define GL_INTEL_blackhole_render 1
-enum
+enum : GLenum
 {
     GL_BLACKHOLE_RENDER_INTEL                               = 0x83FC,
 };
@@ -8354,7 +8366,7 @@ enum
 
 #ifndef GL_INTEL_parallel_arrays
 #define GL_INTEL_parallel_arrays 1
-enum
+enum : GLenum
 {
     GL_PARALLEL_ARRAYS_INTEL                                = 0x83F4,
     GL_VERTEX_ARRAY_PARALLEL_POINTERS_INTEL                 = 0x83F5,
@@ -8370,7 +8382,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexCoordPointervINTEL) (GLint si
 
 #ifndef GL_INTEL_performance_query
 #define GL_INTEL_performance_query 1
-enum
+enum : GLenum
 {
     GL_PERFQUERY_SINGLE_CONTEXT_INTEL                       = 0x00000000,
     GL_PERFQUERY_GLOBAL_CONTEXT_INTEL                       = 0x00000001,
@@ -8407,7 +8419,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetPerfQueryInfoINTEL) (GLuint q
 
 #ifndef GL_KHR_blend_equation_advanced
 #define GL_KHR_blend_equation_advanced 1
-enum
+enum : GLenum
 {
     GL_MULTIPLY_KHR                                         = 0x9294,
     GL_SCREEN_KHR                                           = 0x9295,
@@ -8430,7 +8442,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendBarrierKHR) ();
 
 #ifndef GL_KHR_blend_equation_advanced_coherent
 #define GL_KHR_blend_equation_advanced_coherent 1
-enum
+enum : GLenum
 {
     GL_BLEND_ADVANCED_COHERENT_KHR                          = 0x9285,
 };
@@ -8438,7 +8450,7 @@ enum
 
 #ifndef GL_KHR_context_flush_control
 #define GL_KHR_context_flush_control 1
-enum
+enum : GLenum
 {
     GL_CONTEXT_RELEASE_BEHAVIOR_KHR                         = 0x82FB,
     GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_KHR                   = 0x82FC,
@@ -8447,7 +8459,7 @@ enum
 
 #ifndef GL_KHR_debug
 #define GL_KHR_debug 1
-enum
+enum : GLenum
 {
     GL_DEBUG_OUTPUT_SYNCHRONOUS_KHR                         = 0x8242,
     GL_DEBUG_NEXT_LOGGED_MESSAGE_LENGTH_KHR                 = 0x8243,
@@ -8505,7 +8517,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetPointervKHR) (GLenum pname, v
 
 #ifndef GL_KHR_no_error
 #define GL_KHR_no_error 1
-enum
+enum : GLenum
 {
     GL_CONTEXT_FLAG_NO_ERROR_BIT_KHR                        = 0x00000008,
 };
@@ -8517,7 +8529,7 @@ enum
 
 #ifndef GL_KHR_robustness
 #define GL_KHR_robustness 1
-enum
+enum : GLenum
 {
     GL_CONTEXT_ROBUST_ACCESS                                = 0x90F3,
     GL_CONTEXT_ROBUST_ACCESS_KHR                            = 0x90F3,
@@ -8538,7 +8550,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetnUniformuivKHR) (GLuint progr
 
 #ifndef GL_KHR_shader_subgroup
 #define GL_KHR_shader_subgroup 1
-enum
+enum : GLenum
 {
     GL_SUBGROUP_SIZE_KHR                                    = 0x9532,
     GL_SUBGROUP_SUPPORTED_STAGES_KHR                        = 0x9533,
@@ -8557,7 +8569,7 @@ enum
 
 #ifndef GL_KHR_texture_compression_astc_hdr
 #define GL_KHR_texture_compression_astc_hdr 1
-enum
+enum : GLenum
 {
     GL_COMPRESSED_RGBA_ASTC_4x4_KHR                         = 0x93B0,
     GL_COMPRESSED_RGBA_ASTC_5x4_KHR                         = 0x93B1,
@@ -8600,7 +8612,7 @@ enum
 
 #ifndef GL_KHR_parallel_shader_compile
 #define GL_KHR_parallel_shader_compile 1
-enum
+enum : GLenum
 {
     GL_MAX_SHADER_COMPILER_THREADS_KHR                      = 0x91B0,
     GL_COMPLETION_STATUS_KHR                                = 0x91B1,
@@ -8610,7 +8622,7 @@ extern void         (KHRONOS_APIENTRY* const& glMaxShaderCompilerThreadsKHR) (GL
 
 #ifndef GL_MESAX_texture_stack
 #define GL_MESAX_texture_stack 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_1D_STACK_MESAX                               = 0x8759,
     GL_TEXTURE_2D_STACK_MESAX                               = 0x875A,
@@ -8623,7 +8635,7 @@ enum
 
 #ifndef GL_MESA_framebuffer_flip_x
 #define GL_MESA_framebuffer_flip_x 1
-enum
+enum : GLenum
 {
     GL_FRAMEBUFFER_FLIP_X_MESA                              = 0x8BBC,
 };
@@ -8631,7 +8643,7 @@ enum
 
 #ifndef GL_MESA_framebuffer_flip_y
 #define GL_MESA_framebuffer_flip_y 1
-enum
+enum : GLenum
 {
     GL_FRAMEBUFFER_FLIP_Y_MESA                              = 0x8BBB,
 };
@@ -8641,7 +8653,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetFramebufferParameterivMESA) (
 
 #ifndef GL_MESA_framebuffer_swap_xy
 #define GL_MESA_framebuffer_swap_xy 1
-enum
+enum : GLenum
 {
     GL_FRAMEBUFFER_SWAP_XY_MESA                             = 0x8BBD,
 };
@@ -8649,7 +8661,7 @@ enum
 
 #ifndef GL_MESA_pack_invert
 #define GL_MESA_pack_invert 1
-enum
+enum : GLenum
 {
     GL_PACK_INVERT_MESA                                     = 0x8758,
 };
@@ -8657,7 +8669,7 @@ enum
 
 #ifndef GL_MESA_program_binary_formats
 #define GL_MESA_program_binary_formats 1
-enum
+enum : GLenum
 {
     GL_PROGRAM_BINARY_FORMAT_MESA                           = 0x875F,
 };
@@ -8674,7 +8686,7 @@ extern void         (KHRONOS_APIENTRY* const& glResizeBuffersMESA) ();
 
 #ifndef GL_MESA_tile_raster_order
 #define GL_MESA_tile_raster_order 1
-enum
+enum : GLenum
 {
     GL_TILE_RASTER_ORDER_FIXED_MESA                         = 0x8BB8,
     GL_TILE_RASTER_ORDER_INCREASING_X_MESA                  = 0x8BB9,
@@ -8712,7 +8724,7 @@ extern void         (KHRONOS_APIENTRY* const& glWindowPos4svMESA) (const GLshort
 
 #ifndef GL_MESA_ycbcr_texture
 #define GL_MESA_ycbcr_texture 1
-enum
+enum : GLenum
 {
     GL_UNSIGNED_SHORT_8_8_MESA                              = 0x85BA,
     GL_UNSIGNED_SHORT_8_8_REV_MESA                          = 0x85BB,
@@ -8732,7 +8744,7 @@ extern void         (KHRONOS_APIENTRY* const& glEndConditionalRenderNVX) ();
 
 #ifndef GL_NVX_gpu_memory_info
 #define GL_NVX_gpu_memory_info 1
-enum
+enum : GLenum
 {
     GL_GPU_MEMORY_INFO_DEDICATED_VIDMEM_NVX                 = 0x9047,
     GL_GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX           = 0x9048,
@@ -8744,7 +8756,7 @@ enum
 
 #ifndef GL_NVX_linked_gpu_multicast
 #define GL_NVX_linked_gpu_multicast 1
-enum
+enum : GLenum
 {
     GL_LGPU_SEPARATE_STORAGE_BIT_NVX                        = 0x0800,
     GL_MAX_LGPU_GPUS_NVX                                    = 0x92BA,
@@ -8756,7 +8768,7 @@ extern void         (KHRONOS_APIENTRY* const& glLGPUInterlockNVX) ();
 
 #ifndef GL_NV_alpha_to_coverage_dither_control
 #define GL_NV_alpha_to_coverage_dither_control 1
-enum
+enum : GLenum
 {
     GL_ALPHA_TO_COVERAGE_DITHER_DEFAULT_NV                  = 0x934D,
     GL_ALPHA_TO_COVERAGE_DITHER_ENABLE_NV                   = 0x934E,
@@ -8797,7 +8809,7 @@ extern GLboolean    (KHRONOS_APIENTRY* const& glIsImageHandleResidentNV) (GLuint
 
 #ifndef GL_NV_blend_equation_advanced
 #define GL_NV_blend_equation_advanced 1
-enum
+enum : GLenum
 {
     GL_BLEND_OVERLAP_NV                                     = 0x9281,
     GL_BLEND_PREMULTIPLIED_SRC_NV                           = 0x9280,
@@ -8855,7 +8867,7 @@ extern void         (KHRONOS_APIENTRY* const& glBlendBarrierNV) ();
 
 #ifndef GL_NV_blend_equation_advanced_coherent
 #define GL_NV_blend_equation_advanced_coherent 1
-enum
+enum : GLenum
 {
     GL_BLEND_ADVANCED_COHERENT_NV                           = 0x9285,
 };
@@ -8871,7 +8883,7 @@ enum
 
 #ifndef GL_NV_clip_space_w_scaling
 #define GL_NV_clip_space_w_scaling 1
-enum
+enum : GLenum
 {
     GL_VIEWPORT_POSITION_W_SCALE_NV                         = 0x937C,
     GL_VIEWPORT_POSITION_W_SCALE_X_COEFF_NV                 = 0x937D,
@@ -8882,7 +8894,7 @@ extern void         (KHRONOS_APIENTRY* const& glViewportPositionWScaleNV) (GLuin
 
 #ifndef GL_NV_command_list
 #define GL_NV_command_list 1
-enum
+enum : GLenum
 {
     GL_TERMINATE_SEQUENCE_COMMAND_NV                        = 0x0000,
     GL_NOP_COMMAND_NV                                       = 0x0001,
@@ -8925,7 +8937,7 @@ extern void         (KHRONOS_APIENTRY* const& glCallCommandListNV) (GLuint list)
 
 #ifndef GL_NV_compute_program5
 #define GL_NV_compute_program5 1
-enum
+enum : GLenum
 {
     GL_COMPUTE_PROGRAM_NV                                   = 0x90FB,
     GL_COMPUTE_PROGRAM_PARAMETER_BUFFER_NV                  = 0x90FC,
@@ -8938,7 +8950,7 @@ enum
 
 #ifndef GL_NV_conditional_render
 #define GL_NV_conditional_render 1
-enum
+enum : GLenum
 {
     GL_QUERY_WAIT_NV                                        = 0x8E13,
     GL_QUERY_NO_WAIT_NV                                     = 0x8E14,
@@ -8951,7 +8963,7 @@ extern void         (KHRONOS_APIENTRY* const& glEndConditionalRenderNV) ();
 
 #ifndef GL_NV_conservative_raster
 #define GL_NV_conservative_raster 1
-enum
+enum : GLenum
 {
     GL_CONSERVATIVE_RASTERIZATION_NV                        = 0x9346,
     GL_SUBPIXEL_PRECISION_BIAS_X_BITS_NV                    = 0x9347,
@@ -8963,7 +8975,7 @@ extern void         (KHRONOS_APIENTRY* const& glSubpixelPrecisionBiasNV) (GLuint
 
 #ifndef GL_NV_conservative_raster_dilate
 #define GL_NV_conservative_raster_dilate 1
-enum
+enum : GLenum
 {
     GL_CONSERVATIVE_RASTER_DILATE_NV                        = 0x9379,
     GL_CONSERVATIVE_RASTER_DILATE_RANGE_NV                  = 0x937A,
@@ -8974,7 +8986,7 @@ extern void         (KHRONOS_APIENTRY* const& glConservativeRasterParameterfNV) 
 
 #ifndef GL_NV_conservative_raster_pre_snap
 #define GL_NV_conservative_raster_pre_snap 1
-enum
+enum : GLenum
 {
     GL_CONSERVATIVE_RASTER_MODE_PRE_SNAP_NV                 = 0x9550,
 };
@@ -8982,7 +8994,7 @@ enum
 
 #ifndef GL_NV_conservative_raster_pre_snap_triangles
 #define GL_NV_conservative_raster_pre_snap_triangles 1
-enum
+enum : GLenum
 {
     GL_CONSERVATIVE_RASTER_MODE_NV                          = 0x954D,
     GL_CONSERVATIVE_RASTER_MODE_POST_SNAP_NV                = 0x954E,
@@ -8997,7 +9009,7 @@ extern void         (KHRONOS_APIENTRY* const& glConservativeRasterParameteriNV) 
 
 #ifndef GL_NV_copy_depth_to_color
 #define GL_NV_copy_depth_to_color 1
-enum
+enum : GLenum
 {
     GL_DEPTH_STENCIL_TO_RGBA_NV                             = 0x886E,
     GL_DEPTH_STENCIL_TO_BGRA_NV                             = 0x886F,
@@ -9011,7 +9023,7 @@ extern void         (KHRONOS_APIENTRY* const& glCopyImageSubDataNV) (GLuint srcN
 
 #ifndef GL_NV_deep_texture3D
 #define GL_NV_deep_texture3D 1
-enum
+enum : GLenum
 {
     GL_MAX_DEEP_3D_TEXTURE_WIDTH_HEIGHT_NV                  = 0x90D0,
     GL_MAX_DEEP_3D_TEXTURE_DEPTH_NV                         = 0x90D1,
@@ -9020,7 +9032,7 @@ enum
 
 #ifndef GL_NV_depth_buffer_float
 #define GL_NV_depth_buffer_float 1
-enum
+enum : GLenum
 {
     GL_DEPTH_COMPONENT32F_NV                                = 0x8DAB,
     GL_DEPTH32F_STENCIL8_NV                                 = 0x8DAC,
@@ -9034,7 +9046,7 @@ extern void         (KHRONOS_APIENTRY* const& glDepthBoundsdNV) (GLdouble zmin, 
 
 #ifndef GL_NV_depth_clamp
 #define GL_NV_depth_clamp 1
-enum
+enum : GLenum
 {
     GL_DEPTH_CLAMP_NV                                       = 0x864F,
 };
@@ -9056,7 +9068,7 @@ extern void         (KHRONOS_APIENTRY* const& glSignalVkFenceNV) (GLuint64 vkFen
 
 #ifndef GL_NV_evaluators
 #define GL_NV_evaluators 1
-enum
+enum : GLenum
 {
     GL_EVAL_2D_NV                                           = 0x86C0,
     GL_EVAL_TRIANGULAR_2D_NV                                = 0x86C1,
@@ -9096,7 +9108,7 @@ extern void         (KHRONOS_APIENTRY* const& glEvalMapsNV) (GLenum target, GLen
 
 #ifndef GL_NV_explicit_multisample
 #define GL_NV_explicit_multisample 1
-enum
+enum : GLenum
 {
     GL_SAMPLE_POSITION_NV                                   = 0x8E50,
     GL_SAMPLE_MASK_NV                                       = 0x8E51,
@@ -9116,7 +9128,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexRenderbufferNV) (GLenum targe
 
 #ifndef GL_NV_fence
 #define GL_NV_fence 1
-enum
+enum : GLenum
 {
     GL_ALL_COMPLETED_NV                                     = 0x84F2,
     GL_FENCE_STATUS_NV                                      = 0x84F3,
@@ -9133,7 +9145,7 @@ extern void         (KHRONOS_APIENTRY* const& glSetFenceNV) (GLuint fence, GLenu
 
 #ifndef GL_NV_fill_rectangle
 #define GL_NV_fill_rectangle 1
-enum
+enum : GLenum
 {
     GL_FILL_RECTANGLE_NV                                    = 0x933C,
 };
@@ -9141,7 +9153,7 @@ enum
 
 #ifndef GL_NV_float_buffer
 #define GL_NV_float_buffer 1
-enum
+enum : GLenum
 {
     GL_FLOAT_R_NV                                           = 0x8880,
     GL_FLOAT_RG_NV                                          = 0x8881,
@@ -9163,7 +9175,7 @@ enum
 
 #ifndef GL_NV_fog_distance
 #define GL_NV_fog_distance 1
-enum
+enum : GLenum
 {
     GL_FOG_DISTANCE_MODE_NV                                 = 0x855A,
     GL_EYE_RADIAL_NV                                        = 0x855B,
@@ -9173,7 +9185,7 @@ enum
 
 #ifndef GL_NV_fragment_coverage_to_color
 #define GL_NV_fragment_coverage_to_color 1
-enum
+enum : GLenum
 {
     GL_FRAGMENT_COVERAGE_TO_COLOR_NV                        = 0x92DD,
     GL_FRAGMENT_COVERAGE_COLOR_NV                           = 0x92DE,
@@ -9183,7 +9195,7 @@ extern void         (KHRONOS_APIENTRY* const& glFragmentCoverageColorNV) (GLuint
 
 #ifndef GL_NV_fragment_program
 #define GL_NV_fragment_program 1
-enum
+enum : GLenum
 {
     GL_MAX_FRAGMENT_PROGRAM_LOCAL_PARAMETERS_NV             = 0x8868,
     GL_FRAGMENT_PROGRAM_NV                                  = 0x8870,
@@ -9202,7 +9214,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetProgramNamedParameterdvNV) (G
 
 #ifndef GL_NV_fragment_program2
 #define GL_NV_fragment_program2 1
-enum
+enum : GLenum
 {
     GL_MAX_PROGRAM_EXEC_INSTRUCTIONS_NV                     = 0x88F4,
     GL_MAX_PROGRAM_CALL_DEPTH_NV                            = 0x88F5,
@@ -9230,7 +9242,7 @@ enum
 
 #ifndef GL_NV_framebuffer_mixed_samples
 #define GL_NV_framebuffer_mixed_samples 1
-enum
+enum : GLenum
 {
     GL_COVERAGE_MODULATION_TABLE_NV                         = 0x9331,
     GL_COLOR_SAMPLES_NV                                     = 0x8E20,
@@ -9248,7 +9260,7 @@ extern void         (KHRONOS_APIENTRY* const& glCoverageModulationNV) (GLenum co
 
 #ifndef GL_NV_framebuffer_multisample_coverage
 #define GL_NV_framebuffer_multisample_coverage 1
-enum
+enum : GLenum
 {
     GL_RENDERBUFFER_COVERAGE_SAMPLES_NV                     = 0x8CAB,
     GL_RENDERBUFFER_COLOR_SAMPLES_NV                        = 0x8E10,
@@ -9260,7 +9272,7 @@ extern void         (KHRONOS_APIENTRY* const& glRenderbufferStorageMultisampleCo
 
 #ifndef GL_NV_geometry_program4
 #define GL_NV_geometry_program4 1
-enum
+enum : GLenum
 {
     GL_GEOMETRY_PROGRAM_NV                                  = 0x8C26,
     GL_MAX_PROGRAM_OUTPUT_VERTICES_NV                       = 0x8C27,
@@ -9281,7 +9293,7 @@ extern void         (KHRONOS_APIENTRY* const& glFramebufferTextureFaceEXT) (GLen
 
 #ifndef GL_NV_gpu_program4
 #define GL_NV_gpu_program4 1
-enum
+enum : GLenum
 {
     GL_MIN_PROGRAM_TEXEL_OFFSET_NV                          = 0x8904,
     GL_MAX_PROGRAM_TEXEL_OFFSET_NV                          = 0x8905,
@@ -9312,7 +9324,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetProgramEnvParameterIuivNV) (G
 
 #ifndef GL_NV_gpu_program5
 #define GL_NV_gpu_program5 1
-enum
+enum : GLenum
 {
     GL_MAX_GEOMETRY_PROGRAM_INVOCATIONS_NV                  = 0x8E5A,
     GL_MIN_FRAGMENT_INTERPOLATION_OFFSET_NV                 = 0x8E5B,
@@ -9337,7 +9349,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetProgramSubroutineParameteruiv
 
 #ifndef GL_NV_half_float
 #define GL_NV_half_float 1
-enum
+enum : GLenum
 {
     GL_HALF_FLOAT_NV                                        = 0x140B,
 };
@@ -9391,7 +9403,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexAttribs4hvNV) (GLuint inde
 
 #ifndef GL_NV_internalformat_sample_query
 #define GL_NV_internalformat_sample_query 1
-enum
+enum : GLenum
 {
     GL_MULTISAMPLES_NV                                      = 0x9371,
     GL_SUPERSAMPLE_SCALE_X_NV                               = 0x9372,
@@ -9403,7 +9415,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetInternalformatSampleivNV) (GL
 
 #ifndef GL_NV_light_max_exponent
 #define GL_NV_light_max_exponent 1
-enum
+enum : GLenum
 {
     GL_MAX_SHININESS_NV                                     = 0x8504,
     GL_MAX_SPOT_EXPONENT_NV                                 = 0x8505,
@@ -9412,7 +9424,7 @@ enum
 
 #ifndef GL_NV_gpu_multicast
 #define GL_NV_gpu_multicast 1
-enum
+enum : GLenum
 {
     GL_PER_GPU_STORAGE_BIT_NV                               = 0x0800,
     GL_MULTICAST_GPUS_NV                                    = 0x92BA,
@@ -9436,7 +9448,7 @@ extern void         (KHRONOS_APIENTRY* const& glMulticastGetQueryObjectui64vNV) 
 
 #ifndef GL_NVX_gpu_multicast2
 #define GL_NVX_gpu_multicast2 1
-enum
+enum : GLenum
 {
     GL_UPLOAD_GPU_MASK_NVX                                  = 0x954A,
 };
@@ -9458,7 +9470,7 @@ extern void         (KHRONOS_APIENTRY* const& glClientWaitSemaphoreui64NVX) (GLs
 
 #ifndef GL_NV_memory_attachment
 #define GL_NV_memory_attachment 1
-enum
+enum : GLenum
 {
     GL_ATTACHED_MEMORY_OBJECT_NV                            = 0x95A4,
     GL_ATTACHED_MEMORY_OFFSET_NV                            = 0x95A5,
@@ -9489,7 +9501,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexturePageCommitmentMemNV) (GLu
 
 #ifndef GL_NV_mesh_shader
 #define GL_NV_mesh_shader 1
-enum
+enum : GLenum
 {
     GL_MESH_SHADER_NV                                       = 0x9559,
     GL_TASK_SHADER_NV                                       = 0x955A,
@@ -9552,7 +9564,7 @@ extern void         (KHRONOS_APIENTRY* const& glMultiDrawMeshTasksIndirectCountN
 
 #ifndef GL_NV_multisample_filter_hint
 #define GL_NV_multisample_filter_hint 1
-enum
+enum : GLenum
 {
     GL_MULTISAMPLE_FILTER_HINT_NV                           = 0x8534,
 };
@@ -9560,7 +9572,7 @@ enum
 
 #ifndef GL_NV_occlusion_query
 #define GL_NV_occlusion_query 1
-enum
+enum : GLenum
 {
     GL_PIXEL_COUNTER_BITS_NV                                = 0x8864,
     GL_CURRENT_OCCLUSION_QUERY_ID_NV                        = 0x8865,
@@ -9578,7 +9590,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetOcclusionQueryuivNV) (GLuint 
 
 #ifndef GL_NV_packed_depth_stencil
 #define GL_NV_packed_depth_stencil 1
-enum
+enum : GLenum
 {
     GL_DEPTH_STENCIL_NV                                     = 0x84F9,
     GL_UNSIGNED_INT_24_8_NV                                 = 0x84FA,
@@ -9587,7 +9599,7 @@ enum
 
 #ifndef GL_NV_parameter_buffer_object
 #define GL_NV_parameter_buffer_object 1
-enum
+enum : GLenum
 {
     GL_MAX_PROGRAM_PARAMETER_BUFFER_BINDINGS_NV             = 0x8DA0,
     GL_MAX_PROGRAM_PARAMETER_BUFFER_SIZE_NV                 = 0x8DA1,
@@ -9606,7 +9618,7 @@ extern void         (KHRONOS_APIENTRY* const& glProgramBufferParametersIuivNV) (
 
 #ifndef GL_NV_path_rendering
 #define GL_NV_path_rendering 1
-enum
+enum : GLenum
 {
     GL_PATH_FORMAT_SVG_NV                                   = 0x9070,
     GL_PATH_FORMAT_PS_NV                                    = 0x9071,
@@ -9840,7 +9852,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetPathTexGenfvNV) (GLenum texCo
 
 #ifndef GL_NV_path_rendering_shared_edge
 #define GL_NV_path_rendering_shared_edge 1
-enum
+enum : GLenum
 {
     GL_SHARED_EDGE_NV                                       = 0xC0,
 };
@@ -9848,7 +9860,7 @@ enum
 
 #ifndef GL_NV_pixel_data_range
 #define GL_NV_pixel_data_range 1
-enum
+enum : GLenum
 {
     GL_WRITE_PIXEL_DATA_RANGE_NV                            = 0x8878,
     GL_READ_PIXEL_DATA_RANGE_NV                             = 0x8879,
@@ -9863,7 +9875,7 @@ extern void         (KHRONOS_APIENTRY* const& glFlushPixelDataRangeNV) (GLenum t
 
 #ifndef GL_NV_point_sprite
 #define GL_NV_point_sprite 1
-enum
+enum : GLenum
 {
     GL_POINT_SPRITE_NV                                      = 0x8861,
     GL_COORD_REPLACE_NV                                     = 0x8862,
@@ -9875,7 +9887,7 @@ extern void         (KHRONOS_APIENTRY* const& glPointParameterivNV) (GLenum pnam
 
 #ifndef GL_NV_present_video
 #define GL_NV_present_video 1
-enum
+enum : GLenum
 {
     GL_FRAME_NV                                             = 0x8E26,
     GL_FIELDS_NV                                            = 0x8E27,
@@ -9894,7 +9906,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetVideoui64vNV) (GLuint video_s
 
 #ifndef GL_NV_primitive_restart
 #define GL_NV_primitive_restart 1
-enum
+enum : GLenum
 {
     GL_PRIMITIVE_RESTART_NV                                 = 0x8558,
     GL_PRIMITIVE_RESTART_INDEX_NV                           = 0x8559,
@@ -9905,7 +9917,7 @@ extern void         (KHRONOS_APIENTRY* const& glPrimitiveRestartIndexNV) (GLuint
 
 #ifndef GL_NV_primitive_shading_rate
 #define GL_NV_primitive_shading_rate 1
-enum
+enum : GLenum
 {
     GL_SHADING_RATE_IMAGE_PER_PRIMITIVE_NV                  = 0x95B1,
     GL_SHADING_RATE_IMAGE_PALETTE_COUNT_NV                  = 0x95B2,
@@ -9914,7 +9926,7 @@ enum
 
 #ifndef GL_NV_query_resource
 #define GL_NV_query_resource 1
-enum
+enum : GLenum
 {
     GL_QUERY_RESOURCE_TYPE_VIDMEM_ALLOC_NV                  = 0x9540,
     GL_QUERY_RESOURCE_MEMTYPE_VIDMEM_NV                     = 0x9542,
@@ -9935,7 +9947,7 @@ extern void         (KHRONOS_APIENTRY* const& glQueryResourceTagNV) (GLint tagId
 
 #ifndef GL_NV_register_combiners
 #define GL_NV_register_combiners 1
-enum
+enum : GLenum
 {
     GL_REGISTER_COMBINERS_NV                                = 0x8522,
     GL_VARIABLE_A_NV                                        = 0x8523,
@@ -10004,7 +10016,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetFinalCombinerInputParameteriv
 
 #ifndef GL_NV_register_combiners2
 #define GL_NV_register_combiners2 1
-enum
+enum : GLenum
 {
     GL_PER_STAGE_CONSTANTS_NV                               = 0x8535,
 };
@@ -10014,7 +10026,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetCombinerStageParameterfvNV) (
 
 #ifndef GL_NV_representative_fragment_test
 #define GL_NV_representative_fragment_test 1
-enum
+enum : GLenum
 {
     GL_REPRESENTATIVE_FRAGMENT_TEST_NV                      = 0x937F,
 };
@@ -10022,7 +10034,7 @@ enum
 
 #ifndef GL_NV_robustness_video_memory_purge
 #define GL_NV_robustness_video_memory_purge 1
-enum
+enum : GLenum
 {
     GL_PURGED_CONTEXT_RESET_NV                              = 0x92BB,
 };
@@ -10030,7 +10042,7 @@ enum
 
 #ifndef GL_NV_sample_locations
 #define GL_NV_sample_locations 1
-enum
+enum : GLenum
 {
     GL_SAMPLE_LOCATION_SUBPIXEL_BITS_NV                     = 0x933D,
     GL_SAMPLE_LOCATION_PIXEL_GRID_WIDTH_NV                  = 0x933E,
@@ -10052,7 +10064,7 @@ extern void         (KHRONOS_APIENTRY* const& glResolveDepthValuesNV) ();
 
 #ifndef GL_NV_scissor_exclusive
 #define GL_NV_scissor_exclusive 1
-enum
+enum : GLenum
 {
     GL_SCISSOR_TEST_EXCLUSIVE_NV                            = 0x9555,
     GL_SCISSOR_BOX_EXCLUSIVE_NV                             = 0x9556,
@@ -10083,7 +10095,7 @@ extern void         (KHRONOS_APIENTRY* const& glScissorExclusiveArrayvNV) (GLuin
 
 #ifndef GL_NV_shader_buffer_load
 #define GL_NV_shader_buffer_load 1
-enum
+enum : GLenum
 {
     GL_BUFFER_GPU_ADDRESS_NV                                = 0x8F1D,
     GL_GPU_ADDRESS_NV                                       = 0x8F34,
@@ -10106,7 +10118,7 @@ extern void         (KHRONOS_APIENTRY* const& glProgramUniformui64vNV) (GLuint p
 
 #ifndef GL_NV_shader_buffer_store
 #define GL_NV_shader_buffer_store 1
-enum
+enum : GLenum
 {
     GL_SHADER_GLOBAL_ACCESS_BARRIER_BIT_NV                  = 0x00000010,
 };
@@ -10118,7 +10130,7 @@ enum
 
 #ifndef GL_NV_shader_subgroup_partitioned
 #define GL_NV_shader_subgroup_partitioned 1
-enum
+enum : GLenum
 {
     GL_SUBGROUP_FEATURE_PARTITIONED_BIT_NV                  = 0x00000100,
 };
@@ -10130,7 +10142,7 @@ enum
 
 #ifndef GL_NV_shader_thread_group
 #define GL_NV_shader_thread_group 1
-enum
+enum : GLenum
 {
     GL_WARP_SIZE_NV                                         = 0x9339,
     GL_WARPS_PER_SM_NV                                      = 0x933A,
@@ -10144,7 +10156,7 @@ enum
 
 #ifndef GL_NV_shading_rate_image
 #define GL_NV_shading_rate_image 1
-enum
+enum : GLenum
 {
     GL_SHADING_RATE_IMAGE_NV                                = 0x9563,
     GL_SHADING_RATE_NO_INVOCATIONS_NV                       = 0x9564,
@@ -10183,7 +10195,7 @@ extern void         (KHRONOS_APIENTRY* const& glShadingRateSampleOrderCustomNV) 
 
 #ifndef GL_NV_tessellation_program5
 #define GL_NV_tessellation_program5 1
-enum
+enum : GLenum
 {
     GL_MAX_PROGRAM_PATCH_ATTRIBS_NV                         = 0x86D8,
     GL_TESS_CONTROL_PROGRAM_NV                              = 0x891E,
@@ -10195,7 +10207,7 @@ enum
 
 #ifndef GL_NV_texgen_emboss
 #define GL_NV_texgen_emboss 1
-enum
+enum : GLenum
 {
     GL_EMBOSS_LIGHT_NV                                      = 0x855D,
     GL_EMBOSS_CONSTANT_NV                                   = 0x855E,
@@ -10205,7 +10217,7 @@ enum
 
 #ifndef GL_NV_texgen_reflection
 #define GL_NV_texgen_reflection 1
-enum
+enum : GLenum
 {
     GL_NORMAL_MAP_NV                                        = 0x8511,
     GL_REFLECTION_MAP_NV                                    = 0x8512,
@@ -10223,7 +10235,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureBarrierNV) ();
 
 #ifndef GL_NV_texture_env_combine4
 #define GL_NV_texture_env_combine4 1
-enum
+enum : GLenum
 {
     GL_COMBINE4_NV                                          = 0x8503,
     GL_SOURCE3_RGB_NV                                       = 0x8583,
@@ -10235,7 +10247,7 @@ enum
 
 #ifndef GL_NV_texture_expand_normal
 #define GL_NV_texture_expand_normal 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_UNSIGNED_REMAP_MODE_NV                       = 0x888F,
 };
@@ -10243,7 +10255,7 @@ enum
 
 #ifndef GL_NV_texture_multisample
 #define GL_NV_texture_multisample 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_COVERAGE_SAMPLES_NV                          = 0x9045,
     GL_TEXTURE_COLOR_SAMPLES_NV                             = 0x9046,
@@ -10258,7 +10270,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureImage3DMultisampleCoverag
 
 #ifndef GL_NV_texture_rectangle
 #define GL_NV_texture_rectangle 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_RECTANGLE_NV                                 = 0x84F5,
     GL_TEXTURE_BINDING_RECTANGLE_NV                         = 0x84F6,
@@ -10273,7 +10285,7 @@ enum
 
 #ifndef GL_NV_texture_shader
 #define GL_NV_texture_shader 1
-enum
+enum : GLenum
 {
     GL_OFFSET_TEXTURE_RECTANGLE_NV                          = 0x864C,
     GL_OFFSET_TEXTURE_RECTANGLE_SCALE_NV                    = 0x864D,
@@ -10353,7 +10365,7 @@ enum
 
 #ifndef GL_NV_texture_shader2
 #define GL_NV_texture_shader2 1
-enum
+enum : GLenum
 {
     GL_DOT_PRODUCT_TEXTURE_3D_NV                            = 0x86EF,
 };
@@ -10361,7 +10373,7 @@ enum
 
 #ifndef GL_NV_texture_shader3
 #define GL_NV_texture_shader3 1
-enum
+enum : GLenum
 {
     GL_OFFSET_PROJECTIVE_TEXTURE_2D_NV                      = 0x8850,
     GL_OFFSET_PROJECTIVE_TEXTURE_2D_SCALE_NV                = 0x8851,
@@ -10385,7 +10397,7 @@ enum
 
 #ifndef GL_NV_transform_feedback
 #define GL_NV_transform_feedback 1
-enum
+enum : GLenum
 {
     GL_BACK_PRIMARY_COLOR_NV                                = 0x8C77,
     GL_BACK_SECONDARY_COLOR_NV                              = 0x8C78,
@@ -10413,6 +10425,9 @@ enum
     GL_TRANSFORM_FEEDBACK_BUFFER_NV                         = 0x8C8E,
     GL_TRANSFORM_FEEDBACK_BUFFER_BINDING_NV                 = 0x8C8F,
     GL_LAYER_NV                                             = 0x8DAA,
+};
+enum : GLint
+{
     GL_NEXT_BUFFER_NV                                       = -2,
     GL_SKIP_COMPONENTS4_NV                                  = -3,
     GL_SKIP_COMPONENTS3_NV                                  = -4,
@@ -10435,7 +10450,7 @@ extern void         (KHRONOS_APIENTRY* const& glTransformFeedbackStreamAttribsNV
 
 #ifndef GL_NV_transform_feedback2
 #define GL_NV_transform_feedback2 1
-enum
+enum : GLenum
 {
     GL_TRANSFORM_FEEDBACK_NV                                = 0x8E22,
     GL_TRANSFORM_FEEDBACK_BUFFER_PAUSED_NV                  = 0x8E23,
@@ -10453,7 +10468,7 @@ extern void         (KHRONOS_APIENTRY* const& glDrawTransformFeedbackNV) (GLenum
 
 #ifndef GL_NV_uniform_buffer_unified_memory
 #define GL_NV_uniform_buffer_unified_memory 1
-enum
+enum : GLenum
 {
     GL_UNIFORM_BUFFER_UNIFIED_NV                            = 0x936E,
     GL_UNIFORM_BUFFER_ADDRESS_NV                            = 0x936F,
@@ -10463,7 +10478,7 @@ enum
 
 #ifndef GL_NV_vdpau_interop
 #define GL_NV_vdpau_interop 1
-enum
+enum : GLenum
 {
     GL_SURFACE_STATE_NV                                     = 0x86EB,
     GL_SURFACE_REGISTERED_NV                                = 0x86FD,
@@ -10489,7 +10504,7 @@ extern GLvdpauSurfaceNV (KHRONOS_APIENTRY* const& glVDPAURegisterVideoSurfaceWit
 
 #ifndef GL_NV_vertex_array_range
 #define GL_NV_vertex_array_range 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ARRAY_RANGE_NV                                = 0x851D,
     GL_VERTEX_ARRAY_RANGE_LENGTH_NV                         = 0x851E,
@@ -10503,7 +10518,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexArrayRangeNV) (GLsizei len
 
 #ifndef GL_NV_vertex_array_range2
 #define GL_NV_vertex_array_range2 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ARRAY_RANGE_WITHOUT_FLUSH_NV                  = 0x8533,
 };
@@ -10534,7 +10549,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexAttribLFormatNV) (GLuint i
 
 #ifndef GL_NV_vertex_buffer_unified_memory
 #define GL_NV_vertex_buffer_unified_memory 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV                       = 0x8F1E,
     GL_ELEMENT_ARRAY_UNIFIED_NV                             = 0x8F1F,
@@ -10578,7 +10593,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetIntegerui64i_vNV) (GLenum val
 
 #ifndef GL_NV_vertex_program
 #define GL_NV_vertex_program 1
-enum
+enum : GLenum
 {
     GL_VERTEX_PROGRAM_NV                                    = 0x8620,
     GL_VERTEX_STATE_PROGRAM_NV                              = 0x8621,
@@ -10748,7 +10763,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertexAttribs4ubvNV) (GLuint ind
 
 #ifndef GL_NV_vertex_program4
 #define GL_NV_vertex_program4 1
-enum
+enum : GLenum
 {
     GL_VERTEX_ATTRIB_ARRAY_INTEGER_NV                       = 0x88FD,
 };
@@ -10756,7 +10771,7 @@ enum
 
 #ifndef GL_NV_video_capture
 #define GL_NV_video_capture 1
-enum
+enum : GLenum
 {
     GL_VIDEO_BUFFER_NV                                      = 0x9020,
     GL_VIDEO_BUFFER_BINDING_NV                              = 0x9021,
@@ -10808,7 +10823,7 @@ extern void         (KHRONOS_APIENTRY* const& glVideoCaptureStreamParameterdvNV)
 
 #ifndef GL_NV_viewport_swizzle
 #define GL_NV_viewport_swizzle 1
-enum
+enum : GLenum
 {
     GL_VIEWPORT_SWIZZLE_POSITIVE_X_NV                       = 0x9350,
     GL_VIEWPORT_SWIZZLE_NEGATIVE_X_NV                       = 0x9351,
@@ -10854,7 +10869,7 @@ extern void         (KHRONOS_APIENTRY* const& glVertex4bvOES) (const GLbyte *coo
 
 #ifndef GL_OES_compressed_paletted_texture
 #define GL_OES_compressed_paletted_texture 1
-enum
+enum : GLenum
 {
     GL_PALETTE4_RGB8_OES                                    = 0x8B90,
     GL_PALETTE4_RGBA8_OES                                   = 0x8B91,
@@ -10871,7 +10886,7 @@ enum
 
 #ifndef GL_OES_fixed_point
 #define GL_OES_fixed_point 1
-enum
+enum : GLenum
 {
     GL_FIXED_OES                                            = 0x140C,
 };
@@ -10991,7 +11006,7 @@ extern GLbitfield   (KHRONOS_APIENTRY* const& glQueryMatrixxOES) (GLfixed *manti
 
 #ifndef GL_OES_read_format
 #define GL_OES_read_format 1
-enum
+enum : GLenum
 {
     GL_IMPLEMENTATION_COLOR_READ_TYPE_OES                   = 0x8B9A,
     GL_IMPLEMENTATION_COLOR_READ_FORMAT_OES                 = 0x8B9B,
@@ -11010,7 +11025,7 @@ extern void         (KHRONOS_APIENTRY* const& glOrthofOES) (GLfloat l, GLfloat r
 
 #ifndef GL_OML_interlace
 #define GL_OML_interlace 1
-enum
+enum : GLenum
 {
     GL_INTERLACE_OML                                        = 0x8980,
     GL_INTERLACE_READ_OML                                   = 0x8981,
@@ -11019,7 +11034,7 @@ enum
 
 #ifndef GL_OML_resample
 #define GL_OML_resample 1
-enum
+enum : GLenum
 {
     GL_PACK_RESAMPLE_OML                                    = 0x8984,
     GL_UNPACK_RESAMPLE_OML                                  = 0x8985,
@@ -11032,7 +11047,7 @@ enum
 
 #ifndef GL_OML_subsample
 #define GL_OML_subsample 1
-enum
+enum : GLenum
 {
     GL_FORMAT_SUBSAMPLE_24_24_OML                           = 0x8982,
     GL_FORMAT_SUBSAMPLE_244_244_OML                         = 0x8983,
@@ -11041,7 +11056,7 @@ enum
 
 #ifndef GL_OVR_multiview
 #define GL_OVR_multiview 1
-enum
+enum : GLenum
 {
     GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_NUM_VIEWS_OVR         = 0x9630,
     GL_FRAMEBUFFER_ATTACHMENT_TEXTURE_BASE_VIEW_INDEX_OVR   = 0x9632,
@@ -11057,7 +11072,7 @@ extern void         (KHRONOS_APIENTRY* const& glFramebufferTextureMultiviewOVR) 
 
 #ifndef GL_PGI_misc_hints
 #define GL_PGI_misc_hints 1
-enum
+enum : GLenum
 {
     GL_PREFER_DOUBLEBUFFER_HINT_PGI                         = 0x1A1F8,
     GL_CONSERVE_MEMORY_HINT_PGI                             = 0x1A1FD,
@@ -11085,7 +11100,7 @@ extern void         (KHRONOS_APIENTRY* const& glHintPGI) (GLenum target, GLint m
 
 #ifndef GL_PGI_vertex_hints
 #define GL_PGI_vertex_hints 1
-enum
+enum : GLenum
 {
     GL_VERTEX_DATA_HINT_PGI                                 = 0x1A22A,
     GL_VERTEX_CONSISTENT_HINT_PGI                           = 0x1A22B,
@@ -11114,7 +11129,7 @@ enum
 
 #ifndef GL_REND_screen_coordinates
 #define GL_REND_screen_coordinates 1
-enum
+enum : GLenum
 {
     GL_SCREEN_COORDINATES_REND                              = 0x8490,
     GL_INVERTED_SCREEN_W_REND                               = 0x8491,
@@ -11123,7 +11138,7 @@ enum
 
 #ifndef GL_S3_s3tc
 #define GL_S3_s3tc 1
-enum
+enum : GLenum
 {
     GL_RGB_S3TC                                             = 0x83A0,
     GL_RGB4_S3TC                                            = 0x83A1,
@@ -11136,7 +11151,7 @@ enum
 
 #ifndef GL_SGIS_detail_texture
 #define GL_SGIS_detail_texture 1
-enum
+enum : GLenum
 {
     GL_DETAIL_TEXTURE_2D_SGIS                               = 0x8095,
     GL_DETAIL_TEXTURE_2D_BINDING_SGIS                       = 0x8096,
@@ -11153,7 +11168,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetDetailTexFuncSGIS) (GLenum ta
 
 #ifndef GL_SGIS_fog_function
 #define GL_SGIS_fog_function 1
-enum
+enum : GLenum
 {
     GL_FOG_FUNC_SGIS                                        = 0x812A,
     GL_FOG_FUNC_POINTS_SGIS                                 = 0x812B,
@@ -11165,7 +11180,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetFogFuncSGIS) (GLfloat *points
 
 #ifndef GL_SGIS_generate_mipmap
 #define GL_SGIS_generate_mipmap 1
-enum
+enum : GLenum
 {
     GL_GENERATE_MIPMAP_SGIS                                 = 0x8191,
     GL_GENERATE_MIPMAP_HINT_SGIS                            = 0x8192,
@@ -11174,7 +11189,7 @@ enum
 
 #ifndef GL_SGIS_multisample
 #define GL_SGIS_multisample 1
-enum
+enum : GLenum
 {
     GL_MULTISAMPLE_SGIS                                     = 0x809D,
     GL_SAMPLE_ALPHA_TO_MASK_SGIS                            = 0x809E,
@@ -11199,7 +11214,7 @@ extern void         (KHRONOS_APIENTRY* const& glSamplePatternSGIS) (GLenum patte
 
 #ifndef GL_SGIS_pixel_texture
 #define GL_SGIS_pixel_texture 1
-enum
+enum : GLenum
 {
     GL_PIXEL_TEXTURE_SGIS                                   = 0x8353,
     GL_PIXEL_FRAGMENT_RGB_SOURCE_SGIS                       = 0x8354,
@@ -11216,7 +11231,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetPixelTexGenParameterfvSGIS) (
 
 #ifndef GL_SGIS_point_line_texgen
 #define GL_SGIS_point_line_texgen 1
-enum
+enum : GLenum
 {
     GL_EYE_DISTANCE_TO_POINT_SGIS                           = 0x81F0,
     GL_OBJECT_DISTANCE_TO_POINT_SGIS                        = 0x81F1,
@@ -11231,7 +11246,7 @@ enum
 
 #ifndef GL_SGIS_point_parameters
 #define GL_SGIS_point_parameters 1
-enum
+enum : GLenum
 {
     GL_POINT_SIZE_MIN_SGIS                                  = 0x8126,
     GL_POINT_SIZE_MAX_SGIS                                  = 0x8127,
@@ -11244,7 +11259,7 @@ extern void         (KHRONOS_APIENTRY* const& glPointParameterfvSGIS) (GLenum pn
 
 #ifndef GL_SGIS_sharpen_texture
 #define GL_SGIS_sharpen_texture 1
-enum
+enum : GLenum
 {
     GL_LINEAR_SHARPEN_SGIS                                  = 0x80AD,
     GL_LINEAR_SHARPEN_ALPHA_SGIS                            = 0x80AE,
@@ -11257,7 +11272,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetSharpenTexFuncSGIS) (GLenum t
 
 #ifndef GL_SGIS_texture4D
 #define GL_SGIS_texture4D 1
-enum
+enum : GLenum
 {
     GL_PACK_SKIP_VOLUMES_SGIS                               = 0x8130,
     GL_PACK_IMAGE_DEPTH_SGIS                                = 0x8131,
@@ -11276,7 +11291,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexSubImage4DSGIS) (GLenum targe
 
 #ifndef GL_SGIS_texture_border_clamp
 #define GL_SGIS_texture_border_clamp 1
-enum
+enum : GLenum
 {
     GL_CLAMP_TO_BORDER_SGIS                                 = 0x812D,
 };
@@ -11284,7 +11299,7 @@ enum
 
 #ifndef GL_SGIS_texture_color_mask
 #define GL_SGIS_texture_color_mask 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_COLOR_WRITEMASK_SGIS                         = 0x81EF,
 };
@@ -11293,7 +11308,7 @@ extern void         (KHRONOS_APIENTRY* const& glTextureColorMaskSGIS) (GLboolean
 
 #ifndef GL_SGIS_texture_edge_clamp
 #define GL_SGIS_texture_edge_clamp 1
-enum
+enum : GLenum
 {
     GL_CLAMP_TO_EDGE_SGIS                                   = 0x812F,
 };
@@ -11301,7 +11316,7 @@ enum
 
 #ifndef GL_SGIS_texture_filter4
 #define GL_SGIS_texture_filter4 1
-enum
+enum : GLenum
 {
     GL_FILTER4_SGIS                                         = 0x8146,
     GL_TEXTURE_FILTER4_SIZE_SGIS                            = 0x8147,
@@ -11312,7 +11327,7 @@ extern void         (KHRONOS_APIENTRY* const& glTexFilterFuncSGIS) (GLenum targe
 
 #ifndef GL_SGIS_texture_lod
 #define GL_SGIS_texture_lod 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_MIN_LOD_SGIS                                 = 0x813A,
     GL_TEXTURE_MAX_LOD_SGIS                                 = 0x813B,
@@ -11323,7 +11338,7 @@ enum
 
 #ifndef GL_SGIS_texture_select
 #define GL_SGIS_texture_select 1
-enum
+enum : GLenum
 {
     GL_DUAL_ALPHA4_SGIS                                     = 0x8110,
     GL_DUAL_ALPHA8_SGIS                                     = 0x8111,
@@ -11352,7 +11367,7 @@ enum
 
 #ifndef GL_SGIX_async
 #define GL_SGIX_async 1
-enum
+enum : GLenum
 {
     GL_ASYNC_MARKER_SGIX                                    = 0x8329,
 };
@@ -11366,7 +11381,7 @@ extern GLboolean    (KHRONOS_APIENTRY* const& glIsAsyncMarkerSGIX) (GLuint marke
 
 #ifndef GL_SGIX_async_histogram
 #define GL_SGIX_async_histogram 1
-enum
+enum : GLenum
 {
     GL_ASYNC_HISTOGRAM_SGIX                                 = 0x832C,
     GL_MAX_ASYNC_HISTOGRAM_SGIX                             = 0x832D,
@@ -11375,7 +11390,7 @@ enum
 
 #ifndef GL_SGIX_async_pixel
 #define GL_SGIX_async_pixel 1
-enum
+enum : GLenum
 {
     GL_ASYNC_TEX_IMAGE_SGIX                                 = 0x835C,
     GL_ASYNC_DRAW_PIXELS_SGIX                               = 0x835D,
@@ -11388,7 +11403,7 @@ enum
 
 #ifndef GL_SGIX_blend_alpha_minmax
 #define GL_SGIX_blend_alpha_minmax 1
-enum
+enum : GLenum
 {
     GL_ALPHA_MIN_SGIX                                       = 0x8320,
     GL_ALPHA_MAX_SGIX                                       = 0x8321,
@@ -11397,7 +11412,7 @@ enum
 
 #ifndef GL_SGIX_calligraphic_fragment
 #define GL_SGIX_calligraphic_fragment 1
-enum
+enum : GLenum
 {
     GL_CALLIGRAPHIC_FRAGMENT_SGIX                           = 0x8183,
 };
@@ -11405,7 +11420,7 @@ enum
 
 #ifndef GL_SGIX_clipmap
 #define GL_SGIX_clipmap 1
-enum
+enum : GLenum
 {
     GL_LINEAR_CLIPMAP_LINEAR_SGIX                           = 0x8170,
     GL_TEXTURE_CLIPMAP_CENTER_SGIX                          = 0x8171,
@@ -11424,7 +11439,7 @@ enum
 
 #ifndef GL_SGIX_convolution_accuracy
 #define GL_SGIX_convolution_accuracy 1
-enum
+enum : GLenum
 {
     GL_CONVOLUTION_HINT_SGIX                                = 0x8316,
 };
@@ -11436,7 +11451,7 @@ enum
 
 #ifndef GL_SGIX_depth_texture
 #define GL_SGIX_depth_texture 1
-enum
+enum : GLenum
 {
     GL_DEPTH_COMPONENT16_SGIX                               = 0x81A5,
     GL_DEPTH_COMPONENT24_SGIX                               = 0x81A6,
@@ -11451,7 +11466,7 @@ extern void         (KHRONOS_APIENTRY* const& glFlushRasterSGIX) ();
 
 #ifndef GL_SGIX_fog_offset
 #define GL_SGIX_fog_offset 1
-enum
+enum : GLenum
 {
     GL_FOG_OFFSET_SGIX                                      = 0x8198,
     GL_FOG_OFFSET_VALUE_SGIX                                = 0x8199,
@@ -11460,7 +11475,7 @@ enum
 
 #ifndef GL_SGIX_fragment_lighting
 #define GL_SGIX_fragment_lighting 1
-enum
+enum : GLenum
 {
     GL_FRAGMENT_LIGHTING_SGIX                               = 0x8400,
     GL_FRAGMENT_COLOR_MATERIAL_SGIX                         = 0x8401,
@@ -11505,7 +11520,7 @@ extern void         (KHRONOS_APIENTRY* const& glLightEnviSGIX) (GLenum pname, GL
 
 #ifndef GL_SGIX_framezoom
 #define GL_SGIX_framezoom 1
-enum
+enum : GLenum
 {
     GL_FRAMEZOOM_SGIX                                       = 0x818B,
     GL_FRAMEZOOM_FACTOR_SGIX                                = 0x818C,
@@ -11521,7 +11536,7 @@ extern void         (KHRONOS_APIENTRY* const& glIglooInterfaceSGIX) (GLenum pnam
 
 #ifndef GL_SGIX_instruments
 #define GL_SGIX_instruments 1
-enum
+enum : GLenum
 {
     GL_INSTRUMENT_BUFFER_POINTER_SGIX                       = 0x8180,
     GL_INSTRUMENT_MEASUREMENTS_SGIX                         = 0x8181,
@@ -11536,7 +11551,7 @@ extern void         (KHRONOS_APIENTRY* const& glStopInstrumentsSGIX) (GLint mark
 
 #ifndef GL_SGIX_interlace
 #define GL_SGIX_interlace 1
-enum
+enum : GLenum
 {
     GL_INTERLACE_SGIX                                       = 0x8094,
 };
@@ -11544,7 +11559,7 @@ enum
 
 #ifndef GL_SGIX_ir_instrument1
 #define GL_SGIX_ir_instrument1 1
-enum
+enum : GLenum
 {
     GL_IR_INSTRUMENT1_SGIX                                  = 0x817F,
 };
@@ -11552,7 +11567,7 @@ enum
 
 #ifndef GL_SGIX_list_priority
 #define GL_SGIX_list_priority 1
-enum
+enum : GLenum
 {
     GL_LIST_PRIORITY_SGIX                                   = 0x8182,
 };
@@ -11566,7 +11581,7 @@ extern void         (KHRONOS_APIENTRY* const& glListParameterivSGIX) (GLuint lis
 
 #ifndef GL_SGIX_pixel_texture
 #define GL_SGIX_pixel_texture 1
-enum
+enum : GLenum
 {
     GL_PIXEL_TEX_GEN_SGIX                                   = 0x8139,
     GL_PIXEL_TEX_GEN_MODE_SGIX                              = 0x832B,
@@ -11576,7 +11591,7 @@ extern void         (KHRONOS_APIENTRY* const& glPixelTexGenSGIX) (GLenum mode);
 
 #ifndef GL_SGIX_pixel_tiles
 #define GL_SGIX_pixel_tiles 1
-enum
+enum : GLenum
 {
     GL_PIXEL_TILE_BEST_ALIGNMENT_SGIX                       = 0x813E,
     GL_PIXEL_TILE_CACHE_INCREMENT_SGIX                      = 0x813F,
@@ -11591,7 +11606,7 @@ enum
 
 #ifndef GL_SGIX_polynomial_ffd
 #define GL_SGIX_polynomial_ffd 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_DEFORMATION_BIT_SGIX                         = 0x00000001,
     GL_GEOMETRY_DEFORMATION_BIT_SGIX                        = 0x00000002,
@@ -11608,7 +11623,7 @@ extern void         (KHRONOS_APIENTRY* const& glLoadIdentityDeformationMapSGIX) 
 
 #ifndef GL_SGIX_reference_plane
 #define GL_SGIX_reference_plane 1
-enum
+enum : GLenum
 {
     GL_REFERENCE_PLANE_SGIX                                 = 0x817D,
     GL_REFERENCE_PLANE_EQUATION_SGIX                        = 0x817E,
@@ -11618,7 +11633,7 @@ extern void         (KHRONOS_APIENTRY* const& glReferencePlaneSGIX) (const GLdou
 
 #ifndef GL_SGIX_resample
 #define GL_SGIX_resample 1
-enum
+enum : GLenum
 {
     GL_PACK_RESAMPLE_SGIX                                   = 0x842E,
     GL_UNPACK_RESAMPLE_SGIX                                 = 0x842F,
@@ -11630,7 +11645,7 @@ enum
 
 #ifndef GL_SGIX_scalebias_hint
 #define GL_SGIX_scalebias_hint 1
-enum
+enum : GLenum
 {
     GL_SCALEBIAS_HINT_SGIX                                  = 0x8322,
 };
@@ -11638,7 +11653,7 @@ enum
 
 #ifndef GL_SGIX_shadow
 #define GL_SGIX_shadow 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_COMPARE_SGIX                                 = 0x819A,
     GL_TEXTURE_COMPARE_OPERATOR_SGIX                        = 0x819B,
@@ -11649,7 +11664,7 @@ enum
 
 #ifndef GL_SGIX_shadow_ambient
 #define GL_SGIX_shadow_ambient 1
-enum
+enum : GLenum
 {
     GL_SHADOW_AMBIENT_SGIX                                  = 0x80BF,
 };
@@ -11657,7 +11672,7 @@ enum
 
 #ifndef GL_SGIX_sprite
 #define GL_SGIX_sprite 1
-enum
+enum : GLenum
 {
     GL_SPRITE_SGIX                                          = 0x8148,
     GL_SPRITE_MODE_SGIX                                     = 0x8149,
@@ -11675,7 +11690,7 @@ extern void         (KHRONOS_APIENTRY* const& glSpriteParameterivSGIX) (GLenum p
 
 #ifndef GL_SGIX_subsample
 #define GL_SGIX_subsample 1
-enum
+enum : GLenum
 {
     GL_PACK_SUBSAMPLE_RATE_SGIX                             = 0x85A0,
     GL_UNPACK_SUBSAMPLE_RATE_SGIX                           = 0x85A1,
@@ -11692,7 +11707,7 @@ extern void         (KHRONOS_APIENTRY* const& glTagSampleBufferSGIX) ();
 
 #ifndef GL_SGIX_texture_add_env
 #define GL_SGIX_texture_add_env 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_ENV_BIAS_SGIX                                = 0x80BE,
 };
@@ -11700,7 +11715,7 @@ enum
 
 #ifndef GL_SGIX_texture_coordinate_clamp
 #define GL_SGIX_texture_coordinate_clamp 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_MAX_CLAMP_S_SGIX                             = 0x8369,
     GL_TEXTURE_MAX_CLAMP_T_SGIX                             = 0x836A,
@@ -11710,7 +11725,7 @@ enum
 
 #ifndef GL_SGIX_texture_lod_bias
 #define GL_SGIX_texture_lod_bias 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_LOD_BIAS_S_SGIX                              = 0x818E,
     GL_TEXTURE_LOD_BIAS_T_SGIX                              = 0x818F,
@@ -11720,7 +11735,7 @@ enum
 
 #ifndef GL_SGIX_texture_multi_buffer
 #define GL_SGIX_texture_multi_buffer 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_MULTI_BUFFER_HINT_SGIX                       = 0x812E,
 };
@@ -11728,7 +11743,7 @@ enum
 
 #ifndef GL_SGIX_texture_scale_bias
 #define GL_SGIX_texture_scale_bias 1
-enum
+enum : GLenum
 {
     GL_POST_TEXTURE_FILTER_BIAS_SGIX                        = 0x8179,
     GL_POST_TEXTURE_FILTER_SCALE_SGIX                       = 0x817A,
@@ -11739,7 +11754,7 @@ enum
 
 #ifndef GL_SGIX_vertex_preclip
 #define GL_SGIX_vertex_preclip 1
-enum
+enum : GLenum
 {
     GL_VERTEX_PRECLIP_SGIX                                  = 0x83EE,
     GL_VERTEX_PRECLIP_HINT_SGIX                             = 0x83EF,
@@ -11748,7 +11763,7 @@ enum
 
 #ifndef GL_SGIX_ycrcb
 #define GL_SGIX_ycrcb 1
-enum
+enum : GLenum
 {
     GL_YCRCB_422_SGIX                                       = 0x81BB,
     GL_YCRCB_444_SGIX                                       = 0x81BC,
@@ -11761,7 +11776,7 @@ enum
 
 #ifndef GL_SGIX_ycrcba
 #define GL_SGIX_ycrcba 1
-enum
+enum : GLenum
 {
     GL_YCRCB_SGIX                                           = 0x8318,
     GL_YCRCBA_SGIX                                          = 0x8319,
@@ -11770,7 +11785,7 @@ enum
 
 #ifndef GL_SGI_color_matrix
 #define GL_SGI_color_matrix 1
-enum
+enum : GLenum
 {
     GL_COLOR_MATRIX_SGI                                     = 0x80B1,
     GL_COLOR_MATRIX_STACK_DEPTH_SGI                         = 0x80B2,
@@ -11788,7 +11803,7 @@ enum
 
 #ifndef GL_SGI_color_table
 #define GL_SGI_color_table 1
-enum
+enum : GLenum
 {
     GL_COLOR_TABLE_SGI                                      = 0x80D0,
     GL_POST_CONVOLUTION_COLOR_TABLE_SGI                     = 0x80D1,
@@ -11818,7 +11833,7 @@ extern void         (KHRONOS_APIENTRY* const& glGetColorTableParameterivSGI) (GL
 
 #ifndef GL_SGI_texture_color_table
 #define GL_SGI_texture_color_table 1
-enum
+enum : GLenum
 {
     GL_TEXTURE_COLOR_TABLE_SGI                              = 0x80BC,
     GL_PROXY_TEXTURE_COLOR_TABLE_SGI                        = 0x80BD,
@@ -11827,7 +11842,7 @@ enum
 
 #ifndef GL_SUNX_constant_data
 #define GL_SUNX_constant_data 1
-enum
+enum : GLenum
 {
     GL_UNPACK_CONSTANT_DATA_SUNX                            = 0x81D5,
     GL_TEXTURE_CONSTANT_DATA_SUNX                           = 0x81D6,
@@ -11837,7 +11852,7 @@ extern void         (KHRONOS_APIENTRY* const& glFinishTextureSUNX) ();
 
 #ifndef GL_SUN_convolution_border_modes
 #define GL_SUN_convolution_border_modes 1
-enum
+enum : GLenum
 {
     GL_WRAP_BORDER_SUN                                      = 0x81D4,
 };
@@ -11845,7 +11860,7 @@ enum
 
 #ifndef GL_SUN_global_alpha
 #define GL_SUN_global_alpha 1
-enum
+enum : GLenum
 {
     GL_GLOBAL_ALPHA_SUN                                     = 0x81D9,
     GL_GLOBAL_ALPHA_FACTOR_SUN                              = 0x81DA,
@@ -11862,7 +11877,7 @@ extern void         (KHRONOS_APIENTRY* const& glGlobalAlphaFactoruiSUN) (GLuint 
 
 #ifndef GL_SUN_mesh_array
 #define GL_SUN_mesh_array 1
-enum
+enum : GLenum
 {
     GL_QUAD_MESH_SUN                                        = 0x8614,
     GL_TRIANGLE_MESH_SUN                                    = 0x8615,
@@ -11872,7 +11887,7 @@ extern void         (KHRONOS_APIENTRY* const& glDrawMeshArraysSUN) (GLenum mode,
 
 #ifndef GL_SUN_slice_accum
 #define GL_SUN_slice_accum 1
-enum
+enum : GLenum
 {
     GL_SLICE_ACCUM_SUN                                      = 0x85CC,
 };
@@ -11880,7 +11895,7 @@ enum
 
 #ifndef GL_SUN_triangle_list
 #define GL_SUN_triangle_list 1
-enum
+enum : GLenum
 {
     GL_RESTART_SUN                                          = 0x0001,
     GL_REPLACE_MIDDLE_SUN                                   = 0x0002,
@@ -11955,7 +11970,7 @@ extern void         (KHRONOS_APIENTRY* const& glReplacementCodeuiTexCoord2fColor
 
 #ifndef GL_WIN_phong_shading
 #define GL_WIN_phong_shading 1
-enum
+enum : GLenum
 {
     GL_PHONG_WIN                                            = 0x80EA,
     GL_PHONG_HINT_WIN                                       = 0x80EB,
@@ -11964,7 +11979,7 @@ enum
 
 #ifndef GL_WIN_specular_fog
 #define GL_WIN_specular_fog 1
-enum
+enum : GLenum
 {
     GL_FOG_SPECULAR_TEXTURE_WIN                             = 0x80EC,
 };

@@ -133,7 +133,7 @@ private:
     void removeFromParent()
     {
         ShowWindow (hwnd, SW_HIDE);
-        SetParent (hwnd, NULL);
+        SetParent (hwnd, nullptr);
     }
 
     Component& owner;

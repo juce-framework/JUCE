@@ -1045,7 +1045,7 @@ struct StateHelpers
             if (currentActiveTexture != index)
             {
                 currentActiveTexture = index;
-                context.extensions.glActiveTexture ((GLenum) (GL_TEXTURE0 + index));
+                context.extensions.glActiveTexture (GL_TEXTURE0 + (GLenum) index);
                 JUCE_CHECK_OPENGL_ERROR
             }
         }

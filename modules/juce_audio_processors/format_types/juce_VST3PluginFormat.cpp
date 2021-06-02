@@ -1615,7 +1615,7 @@ private:
 
             ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
 
-            SetWindowPos (pluginHandle, 0,
+            SetWindowPos (pluginHandle, nullptr,
                           pos.x, pos.y,
                           rect.getWidth(), rect.getHeight(),
                           isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);

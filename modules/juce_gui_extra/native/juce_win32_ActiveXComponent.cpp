@@ -151,6 +151,8 @@ namespace ActiveXHelpers
 
         JUCE_COMRESULT QueryInterface (REFIID type, void** result)
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
             if (type == __uuidof (IOleInPlaceSite))
             {
                 inplaceSite->AddRef();
@@ -159,6 +161,8 @@ namespace ActiveXHelpers
             }
 
             return ComBaseClassHelper <IOleClientSite>::QueryInterface (type, result);
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         JUCE_COMRESULT SaveObject()                                  { return E_NOTIMPL; }
@@ -184,6 +188,8 @@ namespace ActiveXHelpers
 
     static HWND getHWND (const ActiveXControlComponent* const component)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         HWND hwnd = {};
         const IID iid = __uuidof (IOleWindow);
 
@@ -194,6 +200,8 @@ namespace ActiveXHelpers
         }
 
         return hwnd;
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     static void offerActiveXMouseEventToPeer (ComponentPeer* peer, HWND hwnd, UINT message, LPARAM lParam)
@@ -243,7 +251,7 @@ public:
     {
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         if (control != nullptr)
         {
@@ -394,9 +402,13 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
         std::unique_ptr<Pimpl> newControl (new Pimpl (hwnd, *this));
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         HRESULT hr = OleCreate (*(const IID*) controlIID, __uuidof (IOleObject), 1 /*OLERENDER_DRAW*/, nullptr,
                                 newControl->clientSite, newControl->storage,
                                 (void**) &(newControl->control));
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (hr == S_OK)
         {

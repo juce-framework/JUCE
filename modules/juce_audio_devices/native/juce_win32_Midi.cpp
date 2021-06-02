@@ -396,7 +396,7 @@ private:
             collector->addClient (this);
         }
 
-        ~Win32InputWrapper()
+        ~Win32InputWrapper() override
         {
             collector->removeClient (this);
         }
@@ -608,7 +608,7 @@ private:
             {
                 for (int i = 0; i < 50; ++i)
                 {
-                    if (midiOutShortMsg (han->handle, *(unsigned int*) message.getRawData()) != MIDIERR_NOTREADY)
+                    if (midiOutShortMsg (han->handle, *unalignedPointerCast<const unsigned int*> (message.getRawData())) != MIDIERR_NOTREADY)
                         break;
 
                     Sleep (1);

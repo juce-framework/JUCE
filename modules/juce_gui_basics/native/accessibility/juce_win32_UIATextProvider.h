@@ -43,6 +43,8 @@ public:
     //==============================================================================
     JUCE_COMRESULT QueryInterface (REFIID iid, void** result) override
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         if (iid == _uuidof (IUnknown) || iid == _uuidof (ITextProvider))
             return castToType<ITextProvider> (result);
 
@@ -51,6 +53,8 @@ public:
 
         *result = nullptr;
         return E_NOINTERFACE;
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     //=============================================================================
@@ -188,7 +192,7 @@ private:
             if (auto* textInterface = getTextInterface())
                 return callback (*textInterface);
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 
@@ -256,7 +260,7 @@ private:
         JUCE_COMRESULT ExpandToEnclosingUnit (TextUnit unit) override
         {
             if (! isElementValid())
-                return UIA_E_ELEMENTNOTAVAILABLE;
+                return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
             if (auto* textInterface = owner->getTextInterface())
             {
@@ -301,7 +305,7 @@ private:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         }
 
         JUCE_COMRESULT FindAttribute (TEXTATTRIBUTEID, VARIANT, BOOL, ITextRangeProvider** pRetVal) override
@@ -386,7 +390,7 @@ private:
                 auto rectangleList = textInterface.getTextBounds (selectionRange);
                 auto numRectangles = rectangleList.getNumRectangles();
 
-                *pRetVal = SafeArrayCreateVector (VT_R8, 0, 4 * numRectangles);
+                *pRetVal = SafeArrayCreateVector (VT_R8, 0, 4 * (ULONG) numRectangles);
 
                 if (*pRetVal == nullptr)
                     return E_FAIL;
@@ -433,11 +437,15 @@ private:
 
         JUCE_COMRESULT GetEnclosingElement (IRawElementProviderSimple** pRetVal) override
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
             return withCheckedComArgs (pRetVal, *this, [&]
             {
                 getHandler().getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
                 return S_OK;
             });
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         JUCE_COMRESULT GetText (int maxLength, BSTR* pRetVal) override
@@ -481,7 +489,7 @@ private:
                 return E_INVALIDARG;
 
             if (! isElementValid())
-                return UIA_E_ELEMENTNOTAVAILABLE;
+                return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
             if (auto* textInterface = owner->getTextInterface())
             {
@@ -493,7 +501,7 @@ private:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         }
 
         JUCE_COMRESULT MoveEndpointByUnit (TextPatternRangeEndpoint endpoint,
@@ -565,7 +573,7 @@ private:
         JUCE_COMRESULT RemoveFromSelection() override
         {
             if (! isElementValid())
-                return UIA_E_ELEMENTNOTAVAILABLE;
+                return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
             if (auto* textInterface = owner->getTextInterface())
             {
@@ -573,21 +581,21 @@ private:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         }
 
         JUCE_COMRESULT ScrollIntoView (BOOL) override
         {
             if (! isElementValid())
-                return UIA_E_ELEMENTNOTAVAILABLE;
+                return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         }
 
         JUCE_COMRESULT Select() override
         {
             if (! isElementValid())
-                return UIA_E_ELEMENTNOTAVAILABLE;
+                return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
             if (auto* textInterface = owner->getTextInterface())
             {
@@ -597,7 +605,7 @@ private:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         }
 
     private:
@@ -660,7 +668,7 @@ private:
         }
 
         bool isDisplayingProtectedText() const override               { return false; }
-        int getTotalNumCharacters() const                             { return text.length(); }
+        int getTotalNumCharacters() const override                    { return text.length(); }
         Range<int> getSelection() const override                      { return selection; }
         void setSelection (Range<int> s) override                     { selection = s; }
         int getTextInsertionOffset() const override                   { return 0; }

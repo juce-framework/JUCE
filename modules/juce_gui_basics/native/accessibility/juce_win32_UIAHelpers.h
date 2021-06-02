@@ -68,13 +68,15 @@ inline JUCE_COMRESULT addHandlersToArray (const std::vector<const AccessibilityH
     {
         for (LONG i = 0; i < (LONG) numHandlers; ++i)
         {
-            auto* handler = handlers[i];
+            auto* handler = handlers[(size_t) i];
 
             if (handler == nullptr)
                 continue;
 
             ComSmartPtr<IRawElementProviderSimple> provider;
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
             handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             auto hr = SafeArrayPutElement (*pRetVal, &i, provider);
 
@@ -95,7 +97,7 @@ inline JUCE_COMRESULT withCheckedComArgs (Value* pRetVal, Object& handle, Callba
     *pRetVal = Value{};
 
     if (! handle.isElementValid())
-        return UIA_E_ELEMENTNOTAVAILABLE;
+        return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
     return callback();
 }

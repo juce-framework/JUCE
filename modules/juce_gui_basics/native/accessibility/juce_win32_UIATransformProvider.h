@@ -40,7 +40,7 @@ public:
     JUCE_COMRESULT Move (double x, double y) override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         if (auto* peer = getPeer())
         {
@@ -62,7 +62,7 @@ public:
     JUCE_COMRESULT Resize (double width, double height) override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         if (auto* peer = getPeer())
         {
@@ -78,9 +78,9 @@ public:
     JUCE_COMRESULT Rotate (double) override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     JUCE_COMRESULT get_CanMove (BOOL* pRetVal) override
