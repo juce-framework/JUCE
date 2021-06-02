@@ -1,7 +1,7 @@
 add_library(juce_recommended_warning_flags INTERFACE)
 add_library(juce::juce_recommended_warning_flags ALIAS juce_recommended_warning_flags)
 
-if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
     target_compile_options(juce_recommended_warning_flags INTERFACE "/W4")
 elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
     target_compile_options(juce_recommended_warning_flags INTERFACE
@@ -33,7 +33,7 @@ endif()
 add_library(juce_recommended_config_flags INTERFACE)
 add_library(juce::juce_recommended_config_flags ALIAS juce_recommended_config_flags)
 
-if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
     target_compile_options(juce_recommended_config_flags INTERFACE
         $<IF:$<CONFIG:Debug>,/Od,/Ox> $<$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">:/MP> /EHsc)
 elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -49,7 +49,7 @@ endif()
 add_library(juce_recommended_lto_flags INTERFACE)
 add_library(juce::juce_recommended_lto_flags ALIAS juce_recommended_lto_flags)
 
-if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
+if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
     target_compile_options(juce_recommended_lto_flags INTERFACE
         $<$<CONFIG:Release>:$<IF:$<STREQUAL:"${CMAKE_CXX_COMPILER_ID}","MSVC">,-GL,-flto>>)
     target_link_libraries(juce_recommended_lto_flags INTERFACE
