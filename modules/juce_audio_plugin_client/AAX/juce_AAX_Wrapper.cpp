@@ -2223,6 +2223,10 @@ namespace AAXClasses
         properties->AddProperty (AAX_eProperty_Constraint_AlwaysProcess, true);
        #endif
 
+       #if JucePlugin_AAXDisableDefaultSettingsChunks
+        properties->AddProperty (AAX_eProperty_Constraint_DoNotApplyDefaultSettings, true);
+       #endif
+
        #if JucePlugin_AAXDisableSaveRestore
         properties->AddProperty (AAX_eProperty_SupportsSaveRestore, false);
        #endif
