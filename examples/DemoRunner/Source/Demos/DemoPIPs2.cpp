@@ -30,6 +30,9 @@
 #include "../../../Assets/AudioLiveScrollingDisplay.h"
 
 //==============================================================================
+#if JUCE_MAC || JUCE_WINDOWS
+ #include "../../../GUI/AccessibilityDemo.h"
+#endif
 #include "../../../GUI/AnimationAppDemo.h"
 #include "../../../GUI/AnimationDemo.h"
 #include "../../../GUI/BouncingBallWavetableDemo.h"
@@ -67,6 +70,9 @@
 
 void registerDemos_Two() noexcept
 {
+   #if JUCE_MAC || JUCE_WINDOWS
+    REGISTER_DEMO (AccessibilityDemo,         GUI, false)
+   #endif
     REGISTER_DEMO (AnimationAppDemo,          GUI, false)
     REGISTER_DEMO (AnimationDemo,             GUI, false)
     REGISTER_DEMO (BouncingBallWavetableDemo, GUI, false)
