@@ -1096,6 +1096,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
             case AccessibilityEvent::textChanged:
             case AccessibilityEvent::valueChanged:          return NSAccessibilityValueChangedNotification;
+            case AccessibilityEvent::titleChanged:          return NSAccessibilityTitleChangedNotification;
             case AccessibilityEvent::structureChanged:      return NSAccessibilityLayoutChangedNotification;
         }
 

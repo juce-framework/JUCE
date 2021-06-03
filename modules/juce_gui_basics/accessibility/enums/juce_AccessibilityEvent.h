@@ -43,10 +43,16 @@ enum class AccessibilityEvent
     */
     valueChanged,
 
+    /** Indicates that the title of the UI element has changed.
+
+        This should be called on the handler whose title has changed.
+    */
+    titleChanged,
+
     /** Indicates that the structure of the UI elements has changed in a
         significant way.
 
-        This should be posted on the top-level handler whose structure has changed.
+        This should be called on the top-level handler whose structure has changed.
     */
     structureChanged,
 

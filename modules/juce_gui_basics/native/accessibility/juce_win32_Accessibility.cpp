@@ -166,6 +166,14 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
 
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventType) const
 {
+    if (eventType == AccessibilityEvent::titleChanged)
+    {
+        VARIANT newValue;
+        VariantHelpers::setString (getTitle(), &newValue);
+
+        sendAccessibilityPropertyChangedEvent (*this, UIA_NamePropertyId, newValue);
+    }
+
     auto event = [eventType] () -> EVENTID
     {
         switch (eventType)
@@ -174,6 +182,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
             case AccessibilityEvent::textChanged:           return UIA_Text_TextChangedEventId;
             case AccessibilityEvent::structureChanged:      return UIA_StructureChangedEventId;
             case AccessibilityEvent::rowSelectionChanged:   return UIA_SelectionItem_ElementSelectedEventId;
+            case AccessibilityEvent::titleChanged:
             case AccessibilityEvent::valueChanged:          break;
         }
 
