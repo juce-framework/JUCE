@@ -1023,7 +1023,7 @@ namespace AAXClasses
                  || transport.GetTimelineSelectionStartPosition (&info.timeInSamples) != AAX_SUCCESS)
                 check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
 
-            info.timeInSeconds = info.timeInSamples / sampleRate;
+            info.timeInSeconds = (float) info.timeInSamples / sampleRate;
 
             int64_t ticks = 0;
 
@@ -1032,13 +1032,13 @@ namespace AAXClasses
             else
                 check (transport.GetCurrentTickPosition (&ticks));
 
-            info.ppqPosition = ticks / 960000.0;
+            info.ppqPosition = (double) ticks / 960000.0;
 
             info.isLooping = false;
             int64_t loopStartTick = 0, loopEndTick = 0;
             check (transport.GetCurrentLoopPosition (&info.isLooping, &loopStartTick, &loopEndTick));
-            info.ppqLoopStart = loopStartTick / 960000.0;
-            info.ppqLoopEnd   = loopEndTick   / 960000.0;
+            info.ppqLoopStart = (double) loopStartTick / 960000.0;
+            info.ppqLoopEnd   = (double) loopEndTick   / 960000.0;
 
             info.editOriginTime = 0;
             info.frameRate = AudioPlayHead::fpsUnknown;

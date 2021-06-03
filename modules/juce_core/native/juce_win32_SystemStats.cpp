@@ -330,8 +330,16 @@ bool SystemStats::isOperatingSystem64Bit()
    #else
     typedef BOOL (WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
+    const auto moduleHandle = GetModuleHandleA ("kernel32");
+
+    if (moduleHandle == nullptr)
+    {
+        jassertfalse;
+        return false;
+    }
+
     LPFN_ISWOW64PROCESS fnIsWow64Process
-        = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandleA ("kernel32"), "IsWow64Process");
+        = (LPFN_ISWOW64PROCESS) GetProcAddress (moduleHandle, "IsWow64Process");
 
     BOOL isWow64 = FALSE;
 
