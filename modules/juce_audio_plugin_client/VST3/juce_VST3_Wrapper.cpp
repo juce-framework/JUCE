@@ -2552,36 +2552,55 @@ public:
         info.isRecording                = (processContext.state & Vst::ProcessContext::kRecording) != 0;
         info.isPlaying                  = (processContext.state & Vst::ProcessContext::kPlaying) != 0;
         info.isLooping                  = (processContext.state & Vst::ProcessContext::kCycleActive) != 0;
-        info.editOriginTime             = 0.0;
-        info.frameRate                  = AudioPlayHead::fpsUnknown;
 
-        if ((processContext.state & Vst::ProcessContext::kSmpteValid) != 0)
+        info.frameRate = [&]
         {
+            if ((processContext.state & Vst::ProcessContext::kSmpteValid) == 0)
+                return fpsUnknown;
+
+            const auto interpretFlags = [&] (FrameRateType basicRate,
+                                             FrameRateType pullDownRate,
+                                             FrameRateType dropRate,
+                                             FrameRateType pullDownDropRate)
+            {
+                switch (processContext.frameRate.flags & (Vst::FrameRate::kPullDownRate | Vst::FrameRate::kDropRate))
+                {
+                    case Vst::FrameRate::kPullDownRate | Vst::FrameRate::kDropRate:
+                        return pullDownDropRate;
+
+                    case Vst::FrameRate::kPullDownRate:
+                        return pullDownRate;
+
+                    case Vst::FrameRate::kDropRate:
+                        return dropRate;
+                }
+
+                return basicRate;
+            };
+
             switch (processContext.frameRate.framesPerSecond)
             {
                 case 24:
-                {
-                    if ((processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0)
-                        info.frameRate = AudioPlayHead::fps23976;
-                    else
-                        info.frameRate = AudioPlayHead::fps24;
-                }
-                break;
-                case 25: info.frameRate = AudioPlayHead::fps25; break;
-                case 29: info.frameRate = AudioPlayHead::fps30drop; break;
+                    return interpretFlags (fps24, fps23976, fps24, fps23976);
+
+                case 25:
+                    return interpretFlags (fps25, fps25, fps25, fps25);
 
                 case 30:
-                {
-                    if ((processContext.frameRate.flags & Vst::FrameRate::kDropRate) != 0)
-                        info.frameRate = AudioPlayHead::fps30drop;
-                    else
-                        info.frameRate = AudioPlayHead::fps30;
-                }
-                break;
+                    return interpretFlags (fps30, fps2997, fps30drop, fps2997drop);
 
-                default: break;
+                case 60:
+                    return interpretFlags (fps60, fps60, fps60drop, fps60drop);
             }
-        }
+
+            return fpsUnknown;
+        }();
+
+        const auto baseFps = (double) processContext.frameRate.framesPerSecond;
+        const auto effectiveFps = (processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0
+                                ? baseFps * 1000.0 / 1001.0
+                                : baseFps;
+        info.editOriginTime = (double) processContext.smpteOffsetSubframes / (80.0 * effectiveFps);
 
         return true;
     }
