@@ -272,20 +272,13 @@ public:
     {
         ignoreUnused (owner);
 
-        WKWebViewConfiguration* config = [[WKWebViewConfiguration alloc] init];
-
        #if JUCE_MAC
-        auto frame = NSMakeRect (0, 0, 100.0f, 100.0f);
-
         static WebViewKeyEquivalentResponder webviewClass;
         webView = (WKWebView*) webviewClass.createInstance();
 
-        webView = [webView initWithFrame: frame
-                           configuration: config];
+        webView = [webView initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
        #else
-        auto frame = CGRectMake (0, 0, 100.0f, 100.0f);
-        webView = [[WKWebView alloc] initWithFrame: frame
-                                     configuration: config];
+        webView = [[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)];
        #endif
 
         static WebViewDelegateClass cls;
