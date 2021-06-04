@@ -310,8 +310,9 @@ void AccessibilityHandler::giveAwayFocusInternal() const
 {
     currentlyFocusedHandler = nullptr;
 
-    if (auto* parent = getParent())
-        notifyAccessibilityEventInternal (*parent, InternalAccessibilityEvent::focusChanged);
+    if (auto* focusedComponent = Component::getCurrentlyFocusedComponent())
+        if (auto* handler = focusedComponent->getAccessibilityHandler())
+            handler->grabFocus();
 }
 
 void AccessibilityHandler::takeFocus()
