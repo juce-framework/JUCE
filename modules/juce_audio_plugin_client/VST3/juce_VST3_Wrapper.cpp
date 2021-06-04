@@ -859,8 +859,8 @@ public:
             return String (CharPointer_UTF16 (reinterpret_cast<const CharPointer_UTF16::CharType*> (text)));
         }
 
-        Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v * info.stepCount; }
-        Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v / info.stepCount; }
+        Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v * (info.stepCount + 1); }
+        Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v / (info.stepCount + 1); }
 
     private:
         AudioProcessor& owner;
