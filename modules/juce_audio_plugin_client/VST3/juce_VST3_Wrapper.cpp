@@ -2669,7 +2669,12 @@ public:
                 info.busType = (index == 0 ? Vst::kMain : Vst::kAux);
                #endif
 
+               #ifdef JucePlugin_PreferredChannelConfigurations
+                info.flags = Vst::BusInfo::kDefaultActive;
+               #else
                 info.flags = (bus->isEnabledByDefault()) ? Vst::BusInfo::kDefaultActive : 0;
+               #endif
+
                 return kResultTrue;
             }
         }
