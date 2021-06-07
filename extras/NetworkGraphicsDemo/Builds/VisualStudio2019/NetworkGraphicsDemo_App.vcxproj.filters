@@ -353,9 +353,6 @@
     <Filter Include="JUCE Modules\juce_gui_basics\accessibility\interfaces">
       <UniqueIdentifier>{E56CB4FC-32E8-8740-A3BB-B323CD937A99}</UniqueIdentifier>
     </Filter>
-    <Filter Include="JUCE Modules\juce_gui_basics\accessibility\widget_handlers">
-      <UniqueIdentifier>{057BD667-001C-9B86-6D0E-ADF7E048DB54}</UniqueIdentifier>
-    </Filter>
     <Filter Include="JUCE Modules\juce_gui_basics\accessibility">
       <UniqueIdentifier>{4ECDCA0C-BB38-0729-A6B6-2FB0B4D0863B}</UniqueIdentifier>
     </Filter>
@@ -2521,6 +2518,12 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.mm">
       <Filter>JUCE Modules\juce_gui_extra</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_gl.cpp">
+      <Filter>JUCE Modules\juce_opengl\opengl</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_gles2.cpp">
+      <Filter>JUCE Modules\juce_opengl\opengl</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.cpp">
       <Filter>JUCE Modules\juce_opengl\opengl</Filter>
     </ClCompile>
@@ -4407,27 +4410,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityValueInterface.h">
       <Filter>JUCE Modules\juce_gui_basics\accessibility\interfaces</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ButtonAccessibilityHandler.h">
-      <Filter>JUCE Modules\juce_gui_basics\accessibility\widget_handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ComboBoxAccessibilityHandler.h">
-      <Filter>JUCE Modules\juce_gui_basics\accessibility\widget_handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_LabelAccessibilityHandler.h">
-      <Filter>JUCE Modules\juce_gui_basics\accessibility\widget_handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_SliderAccessibilityHandler.h">
-      <Filter>JUCE Modules\juce_gui_basics\accessibility\widget_handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TableListBoxAccessibilityHandler.h">
-      <Filter>JUCE Modules\juce_gui_basics\accessibility\widget_handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TextEditorAccessibilityHandler.h">
-      <Filter>JUCE Modules\juce_gui_basics\accessibility\widget_handlers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TreeViewAccessibilityHandler.h">
-      <Filter>JUCE Modules\juce_gui_basics\accessibility\widget_handlers</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityHandler.h">
       <Filter>JUCE Modules\juce_gui_basics\accessibility</Filter>
     </ClInclude>
@@ -5013,9 +4995,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Vector3D.h">
       <Filter>JUCE Modules\juce_opengl\geometry</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h">
-      <Filter>JUCE Modules\juce_opengl\native</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_android.h">
       <Filter>JUCE Modules\juce_opengl\native</Filter>
     </ClInclude>
@@ -5033,6 +5012,15 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGLExtensions.h">
       <Filter>JUCE Modules\juce_opengl\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_gl.h">
+      <Filter>JUCE Modules\juce_opengl\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_gles2.h">
+      <Filter>JUCE Modules\juce_opengl\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_khrplatform.h">
+      <Filter>JUCE Modules\juce_opengl\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h">
       <Filter>JUCE Modules\juce_opengl\opengl</Filter>
@@ -5059,6 +5047,9 @@
       <Filter>JUCE Modules\juce_opengl\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h">
+      <Filter>JUCE Modules\juce_opengl\opengl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_wgl.h">
       <Filter>JUCE Modules\juce_opengl\opengl</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.h">
