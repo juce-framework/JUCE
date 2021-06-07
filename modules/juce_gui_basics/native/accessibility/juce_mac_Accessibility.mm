@@ -170,7 +170,8 @@ private:
         static bool hasEditableText (AccessibilityHandler& handler) noexcept
         {
             return handler.getRole() == AccessibilityRole::editableText
-                && handler.getTextInterface() != nullptr;
+                && handler.getTextInterface() != nullptr
+                && ! handler.getTextInterface()->isReadOnly();
         }
 
         static bool isSelectable (AccessibleState state) noexcept
@@ -396,6 +397,7 @@ private:
                     case AccessibilityRole::comboBox:     return NSAccessibilityPopUpButtonRole;
                     case AccessibilityRole::image:        return NSAccessibilityImageRole;
                     case AccessibilityRole::slider:       return NSAccessibilitySliderRole;
+                    case AccessibilityRole::label:        return NSAccessibilityStaticTextRole;
                     case AccessibilityRole::staticText:   return NSAccessibilityStaticTextRole;
                     case AccessibilityRole::editableText: return NSAccessibilityTextAreaRole;
                     case AccessibilityRole::menuItem:     return NSAccessibilityMenuItemRole;
@@ -504,11 +506,8 @@ private:
         {
             if (auto* handler = getHandler (self))
             {
-                if (hasEditableText (*handler))
-                {
-                    auto* textInterface = handler->getTextInterface();
+                if (auto* textInterface = handler->getTextInterface())
                     return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
-                }
 
                 if (handler->getCurrentState().isCheckable())
                     return handler->getCurrentState().isChecked() ? @(1) : @(0);

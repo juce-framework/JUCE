@@ -46,6 +46,9 @@ public:
     */
     virtual bool isDisplayingProtectedText() const = 0;
 
+    /** Returns true if the text being displayed is read-only or false if editable. */
+    virtual bool isReadOnly() const = 0;
+
     /** Returns the total number of characters in the text element. */
     virtual int getTotalNumCharacters() const = 0;
 
