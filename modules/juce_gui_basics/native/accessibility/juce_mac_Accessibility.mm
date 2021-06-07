@@ -1109,7 +1109,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
         sendAccessibilityEvent (accessibilityElement, notification,
                                 (notification == NSAccessibilityLayoutChangedNotification
-                                   ? @{ NSAccessibilityUIElementsKey: accessibilityElement }
+                                   ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
                                    : nil));
     }
 }
