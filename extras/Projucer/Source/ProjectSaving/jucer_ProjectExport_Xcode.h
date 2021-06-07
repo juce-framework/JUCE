@@ -1710,6 +1710,7 @@ public:
             }
             else
             {
+                s.set ("GCC_GENERATE_DEBUGGING_SYMBOLS", "NO");
                 s.set ("DEAD_CODE_STRIPPING", "YES");
             }
 
