@@ -323,3 +323,16 @@ bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
  #endif
 
 #endif
+
+#if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
+namespace juce
+{
+    class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
+    void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
+    void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}
+    AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const { return nullptr; }
+    AccessibilityHandler::AccessibilityNativeImpl* AccessibilityHandler::createNativeImpl (AccessibilityHandler&) { return nullptr; }
+    void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::AccessibilityNativeImpl*) const noexcept {}
+    void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent) {}
+}
+#endif

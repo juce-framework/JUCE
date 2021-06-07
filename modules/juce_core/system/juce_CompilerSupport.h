@@ -70,6 +70,10 @@
  #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
 
+ #if defined (__OBJC__)
+  #define JUCE_OBJC_HAS_AVAILABLE_FEATURE (__clang_major__ >= 9)
+ #endif
+
 #endif
 
 //==============================================================================

@@ -31,7 +31,9 @@ namespace juce
  using NSAccessibilityNotificationName = NSString*;
 #endif
 
-#if (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
+#if JUCE_OBJC_HAS_AVAILABLE_FEATURE || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
+
+#define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 //==============================================================================
 class AccessibilityHandler::AccessibilityNativeImpl
@@ -65,10 +67,17 @@ private:
 
         static Holder create (AccessibilityHandler& handler)
         {
-            static AccessibilityElement cls;
-            Holder element ([cls.createInstance() init]);
-            object_setInstanceVariable (element.get(), "handler", &handler);
-            return element;
+           #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
+            if (@available (macOS 10.10, *))
+           #endif
+            {
+                static AccessibilityElement cls;
+                Holder element ([cls.createInstance() init]);
+                object_setInstanceVariable (element.get(), "handler", &handler);
+                return element;
+            }
+
+            return {};
         }
 
     private:

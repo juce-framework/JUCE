@@ -26,6 +26,8 @@
 namespace juce
 {
 
+#define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
+
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
 static bool isStartingUpOrShuttingDown()
