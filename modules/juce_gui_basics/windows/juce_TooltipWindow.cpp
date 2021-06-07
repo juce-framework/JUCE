@@ -130,7 +130,7 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
 
 String TooltipWindow::getTipFor (Component& c)
 {
-    if (Process::isForegroundProcess()
+    if (isForegroundOrEmbeddedProcess (&c)
          && ! ModifierKeys::currentModifiers.isAnyMouseButtonDown())
     {
         if (auto* ttc = dynamic_cast<TooltipClient*> (&c))

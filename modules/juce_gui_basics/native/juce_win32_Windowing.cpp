@@ -4333,15 +4333,36 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 bool offerKeyMessageToJUCEWindow (MSG& m)   { return HWNDComponentPeer::offerKeyMessageToJUCEWindow (m); }
 
 //==============================================================================
+static DWORD getProcess (HWND hwnd)
+{
+    DWORD result = 0;
+    GetWindowThreadProcessId (hwnd, &result);
+    return result;
+}
+
+/*  Returns true if the viewComponent is embedded into a window
+    owned by the foreground process.
+*/
+bool isEmbeddedInForegroundProcess (Component* c)
+{
+    if (c == nullptr)
+        return false;
+
+    auto* peer = c->getPeer();
+    auto* hwnd = peer != nullptr ? static_cast<HWND> (peer->getNativeHandle()) : nullptr;
+
+    if (hwnd == nullptr)
+        return true;
+
+    const auto fgProcess    = getProcess (GetForegroundWindow());
+    const auto ownerProcess = getProcess (GetAncestor (hwnd, GA_ROOTOWNER));
+    return fgProcess == ownerProcess;
+}
+
 bool JUCE_CALLTYPE Process::isForegroundProcess()
 {
     if (auto fg = GetForegroundWindow())
-    {
-        DWORD processID = 0;
-        GetWindowThreadProcessId (fg, &processID);
-
-        return processID == GetCurrentProcessId();
-    }
+        return getProcess (fg) == GetCurrentProcessId();
 
     return true;
 }

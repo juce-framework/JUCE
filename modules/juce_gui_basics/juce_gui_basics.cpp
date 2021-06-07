@@ -105,7 +105,21 @@
 
 namespace juce
 {
-    extern bool juce_areThereAnyAlwaysOnTopWindows();
+    bool juce_areThereAnyAlwaysOnTopWindows();
+
+    bool isEmbeddedInForegroundProcess (Component* c);
+
+   #if ! JUCE_WINDOWS
+    bool isEmbeddedInForegroundProcess (Component*) { return false; }
+   #endif
+
+    /*  Returns true if this process is in the foreground, or if the viewComponent
+        is embedded into a window owned by the foreground process.
+    */
+    bool isForegroundOrEmbeddedProcess (Component* viewComponent)
+    {
+        return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
+    }
 }
 
 #include "accessibility/juce_AccessibilityHandler.cpp"

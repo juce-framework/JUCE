@@ -263,15 +263,17 @@ ApplicationCommandTarget* ApplicationCommandManager::findDefaultComponentTarget(
         }
     }
 
-    if (c == nullptr && Process::isForegroundProcess())
+    if (c == nullptr)
     {
         auto& desktop = Desktop::getInstance();
 
         // getting a bit desperate now: try all desktop comps..
         for (int i = desktop.getNumComponents(); --i >= 0;)
-            if (auto* peer = desktop.getComponent(i)->getPeer())
-                if (auto* target = findTargetForComponent (peer->getLastFocusedSubcomponent()))
-                    return target;
+            if (auto* component = desktop.getComponent (i))
+                if (isForegroundOrEmbeddedProcess (component))
+                    if (auto* peer = component->getPeer())
+                        if (auto* target = findTargetForComponent (peer->getLastFocusedSubcomponent()))
+                            return target;
     }
 
     if (c != nullptr)
