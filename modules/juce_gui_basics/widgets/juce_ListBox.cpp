@@ -274,7 +274,8 @@ public:
 
 
 //==============================================================================
-class ListBox::ListViewport  : public Viewport
+class ListBox::ListViewport  : public Viewport,
+                               private Timer
 {
 public:
     ListViewport (ListBox& lb)  : owner (lb)
@@ -319,8 +320,7 @@ public:
         if (auto* m = owner.getModel())
             m->listWasScrolled();
 
-        if (auto* handler = owner.getAccessibilityHandler())
-            handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+        startTimer (50);
     }
 
     void updateVisibleArea (const bool makeSureItUpdatesContent)
@@ -456,6 +456,14 @@ public:
     }
 
 private:
+    void timerCallback() override
+    {
+        stopTimer();
+
+        if (auto* handler = owner.getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+    }
+
     ListBox& owner;
     OwnedArray<RowComponent> rows;
     int firstIndex = 0, firstWholeIndex = 0, lastWholeIndex = 0;
