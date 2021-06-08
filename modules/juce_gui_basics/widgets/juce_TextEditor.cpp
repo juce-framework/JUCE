@@ -2718,7 +2718,14 @@ private:
 
         int getTotalNumCharacters() const override           { return textEditor.getText().length(); }
         Range<int> getSelection() const override             { return textEditor.getHighlightedRegion(); }
-        void setSelection (Range<int> r) override            { textEditor.setHighlightedRegion (r); }
+
+        void setSelection (Range<int> r) override
+        {
+            if (r.isEmpty())
+                textEditor.setCaretPosition (r.getStart());
+            else
+                textEditor.setHighlightedRegion (r);
+        }
 
         String getText (Range<int> r) const override
         {

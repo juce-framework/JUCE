@@ -71,6 +71,12 @@ private:
 
         void setSelection (Range<int> r) override
         {
+            if (r.isEmpty())
+            {
+                codeEditorComponent.caretPos.setPosition (r.getStart());
+                return;
+            }
+
             auto& doc = codeEditorComponent.document;
 
             codeEditorComponent.selectRegion (CodeDocument::Position (doc, r.getStart()),
