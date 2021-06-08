@@ -1378,14 +1378,19 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
 
 bool Component::contains (Point<int> point)
 {
-    if (ComponentHelpers::hitTest (*this, point))
+    return containsInternal (point.toFloat());
+}
+
+bool Component::containsInternal (Point<float> point)
+{
+    if (ComponentHelpers::hitTest (*this, point.roundToInt()))
     {
         if (parentComponent != nullptr)
-            return parentComponent->contains (ComponentHelpers::convertToParentSpace (*this, point));
+            return parentComponent->containsInternal (ComponentHelpers::convertToParentSpace (*this, point));
 
         if (flags.hasHeavyweightPeerFlag)
             if (auto* peer = getPeer())
-                return peer->contains (ComponentHelpers::localPositionToRawPeerPos (*this, point), true);
+                return peer->contains (ComponentHelpers::localPositionToRawPeerPos (*this, point).roundToInt(), true);
     }
 
     return false;
@@ -1393,24 +1398,34 @@ bool Component::contains (Point<int> point)
 
 bool Component::reallyContains (Point<int> point, bool returnTrueIfWithinAChild)
 {
-    if (! contains (point))
+    return reallyContainsInternal (point.toFloat(), returnTrueIfWithinAChild);
+}
+
+bool Component::reallyContainsInternal (Point<float> point, bool returnTrueIfWithinAChild)
+{
+    if (! containsInternal (point))
         return false;
 
     auto* top = getTopLevelComponent();
-    auto* compAtPosition = top->getComponentAt (top->getLocalPoint (this, point));
+    auto* compAtPosition = top->getComponentAtInternal (top->getLocalPoint (this, point));
 
     return (compAtPosition == this) || (returnTrueIfWithinAChild && isParentOf (compAtPosition));
 }
 
 Component* Component::getComponentAt (Point<int> position)
 {
-    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position))
+    return getComponentAtInternal (position.toFloat());
+}
+
+Component* Component::getComponentAtInternal (Point<float> position)
+{
+    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position.roundToInt()))
     {
         for (int i = childComponentList.size(); --i >= 0;)
         {
-            auto* child = childComponentList.getUnchecked(i);
+            auto* child = childComponentList.getUnchecked (i);
 
-            child = child->getComponentAt (ComponentHelpers::convertFromParentSpace (*child, position));
+            child = child->getComponentAtInternal (ComponentHelpers::convertFromParentSpace (*child, position));
 
             if (child != nullptr)
                 return child;
@@ -3019,7 +3034,7 @@ bool Component::isMouseOver (bool includeChildren) const
 
         if (c != nullptr && (c == this || (includeChildren && isParentOf (c))))
             if (ms.isDragging() || ! (ms.isTouch() || ms.isPen()))
-                if (c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition().roundToInt()), false))
+                if (c->reallyContainsInternal (c->getLocalPoint (nullptr, ms.getScreenPosition()), false))
                     return true;
     }
 
