@@ -110,21 +110,16 @@ private:
             addMethod (@selector (accessibilityOrientation),               getAccessibilityOrientation,           "i@:@");
 
             addMethod (@selector (accessibilityInsertionPointLineNumber),  getAccessibilityInsertionPointLineNumber, "i@:");
-            addMethod (@selector (accessibilitySharedCharacterRange),      getAccessibilitySharedCharacterRange,     @encode (NSRange), "@:");
-            addMethod (@selector (accessibilitySharedTextUIElements),      getAccessibilitySharedTextUIElements,     "@@:");
             addMethod (@selector (accessibilityVisibleCharacterRange),     getAccessibilityVisibleCharacterRange,    @encode (NSRange), "@:");
             addMethod (@selector (accessibilityNumberOfCharacters),        getAccessibilityNumberOfCharacters,       "i@:");
             addMethod (@selector (accessibilitySelectedText),              getAccessibilitySelectedText,             "@@:");
             addMethod (@selector (accessibilitySelectedTextRange),         getAccessibilitySelectedTextRange,        @encode (NSRange), "@:");
-            addMethod (@selector (accessibilitySelectedTextRanges),        getAccessibilitySelectedTextRanges,       "@@:");
             addMethod (@selector (accessibilityAttributedStringForRange:), getAccessibilityAttributedStringForRange, "@@:", @encode (NSRange));
             addMethod (@selector (accessibilityRangeForLine:),             getAccessibilityRangeForLine,             @encode (NSRange), "@:i");
             addMethod (@selector (accessibilityStringForRange:),           getAccessibilityStringForRange,           "@@:", @encode (NSRange));
             addMethod (@selector (accessibilityRangeForPosition:),         getAccessibilityRangeForPosition,         @encode (NSRange), "@:", @encode (NSPoint));
             addMethod (@selector (accessibilityRangeForIndex:),            getAccessibilityRangeForIndex,            @encode (NSRange), "@:i");
             addMethod (@selector (accessibilityFrameForRange:),            getAccessibilityFrameForRange,            @encode (NSRect), "@:", @encode (NSRange));
-            addMethod (@selector (accessibilityRTFForRange:),              getAccessibilityRTFForRange,              "@@:", @encode (NSRange));
-            addMethod (@selector (accessibilityStyleRangeForIndex:),       getAccessibilityStyleRangeForIndex,       @encode (NSRange), "@:i");
             addMethod (@selector (accessibilityLineForIndex:),             getAccessibilityLineForIndex,             "i@:i");
             addMethod (@selector (setAccessibilitySelectedTextRange:),     setAccessibilitySelectedTextRange,        "v@:", @encode (NSRange));
 
@@ -553,16 +548,6 @@ private:
             return 0;
         }
 
-        static NSRange getAccessibilitySharedCharacterRange (id self, SEL)
-        {
-            return [self accessibilityVisibleCharacterRange];
-        }
-
-        static NSArray* getAccessibilitySharedTextUIElements (id self, SEL)
-        {
-            return [NSArray arrayWithObject: self];
-        }
-
         static NSRange getAccessibilityVisibleCharacterRange (id self, SEL)
         {
             if (auto* textInterface = getTextInterface (self))
@@ -590,14 +575,16 @@ private:
         static NSRange getAccessibilitySelectedTextRange (id self, SEL)
         {
             if (auto* textInterface = getTextInterface (self))
-                return juceRangeToNS (textInterface->getSelection());
+            {
+                const auto currentSelection = textInterface->getSelection();
+
+                if (currentSelection.isEmpty())
+                    return NSMakeRange ((NSUInteger) textInterface->getTextInsertionOffset(), 0);
+
+                return juceRangeToNS (currentSelection);
+            }
 
             return NSMakeRange (0, 0);
-        }
-
-        static NSArray* getAccessibilitySelectedTextRanges (id self, SEL)
-        {
-            return [NSArray arrayWithObject: [NSValue valueWithRange: [self accessibilitySelectedTextRange]]];
         }
 
         static NSAttributedString* getAccessibilityAttributedStringForRange (id self, SEL, NSRange range)
@@ -676,16 +663,6 @@ private:
             return NSZeroRect;
         }
 
-        static NSData* getAccessibilityRTFForRange (id, SEL, NSRange)
-        {
-            return nil;
-        }
-
-        static NSRange getAccessibilityStyleRangeForIndex (id self, SEL, NSInteger)
-        {
-            return [self accessibilityVisibleCharacterRange];
-        }
-
         static NSInteger getAccessibilityLineForIndex (id self, SEL, NSInteger index)
         {
             if (auto* textInterface = getTextInterface (self))
@@ -702,10 +679,7 @@ private:
         static void setAccessibilitySelectedTextRange (id self, SEL, NSRange selectedRange)
         {
             if (auto* textInterface = getTextInterface (self))
-            {
-                textInterface->setSelection ({});
                 textInterface->setSelection (nsRangeToJuce (selectedRange));
-            }
         }
 
         //==============================================================================
@@ -930,21 +904,16 @@ private:
                 const auto currentState = handler->getCurrentState();
 
                 for (auto textSelector : { @selector (accessibilityInsertionPointLineNumber),
-                                           @selector (accessibilitySharedCharacterRange),
-                                           @selector (accessibilitySharedTextUIElements),
                                            @selector (accessibilityVisibleCharacterRange),
                                            @selector (accessibilityNumberOfCharacters),
                                            @selector (accessibilitySelectedText),
                                            @selector (accessibilitySelectedTextRange),
-                                           @selector (accessibilitySelectedTextRanges),
                                            @selector (accessibilityAttributedStringForRange:),
                                            @selector (accessibilityRangeForLine:),
                                            @selector (accessibilityStringForRange:),
                                            @selector (accessibilityRangeForPosition:),
                                            @selector (accessibilityRangeForIndex:),
                                            @selector (accessibilityFrameForRange:),
-                                           @selector (accessibilityRTFForRange:),
-                                           @selector (accessibilityStyleRangeForIndex:),
                                            @selector (accessibilityLineForIndex:),
                                            @selector (setAccessibilitySelectedTextRange:) })
                 {
