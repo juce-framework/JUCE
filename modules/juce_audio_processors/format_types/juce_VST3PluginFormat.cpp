@@ -2054,6 +2054,16 @@ public:
             sendValueChangedMessageToListeners (newValue);
         }
 
+        /*  If we're syncing the editor to the processor, the processor won't need to
+            be notified about the parameter updates, so we can avoid flagging the
+            change when updating the float cache.
+        */
+        void setValueWithoutUpdatingProcessor (float newValue)
+        {
+            pluginInstance.cachedParamValues.setWithoutNotifying (vstParamIndex, newValue);
+            sendValueChangedMessageToListeners (newValue);
+        }
+
         String getText (float value, int maximumLength) const override
         {
             MessageManagerLock lock;
@@ -2872,7 +2882,7 @@ public:
         for (auto* parameter : getParameters())
         {
             auto* vst3Param = static_cast<VST3Parameter*> (parameter);
-            vst3Param->setValueFromEditor ((float) editController->getParamNormalized (vst3Param->getParamID()));
+            vst3Param->setValueWithoutUpdatingProcessor ((float) editController->getParamNormalized (vst3Param->getParamID()));
         }
     }
 
