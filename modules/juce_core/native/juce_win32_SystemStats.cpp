@@ -554,20 +554,36 @@ String SystemStats::getUserRegion()       { return getLocaleValue (LOCALE_USER_D
 String SystemStats::getDisplayLanguage()
 {
     DynamicLibrary dll ("kernel32.dll");
-    JUCE_LOAD_WINAPI_FUNCTION (dll, GetUserDefaultUILanguage, getUserDefaultUILanguage, LANGID, (void))
+    JUCE_LOAD_WINAPI_FUNCTION (dll,
+                               GetUserPreferredUILanguages,
+                               getUserPreferredUILanguages,
+                               BOOL,
+                               (DWORD, PULONG, PZZWSTR, PULONG))
 
-    if (getUserDefaultUILanguage == nullptr)
-        return "en";
+    constexpr auto defaultResult = "en";
 
-    auto langID = MAKELCID (getUserDefaultUILanguage(), SORT_DEFAULT);
+    if (getUserPreferredUILanguages == nullptr)
+        return defaultResult;
 
-    auto mainLang = getLocaleValue (langID, LOCALE_SISO639LANGNAME, "en");
-    auto region   = getLocaleValue (langID, LOCALE_SISO3166CTRYNAME, nullptr);
+    ULONG numLanguages = 0;
+    ULONG numCharsInLanguagesBuffer = 0;
 
-    if (region.isNotEmpty())
-        mainLang << '-' << region;
+    // Retrieving the necessary buffer size for storing the list of languages
+    if (! getUserPreferredUILanguages (MUI_LANGUAGE_NAME, &numLanguages, nullptr, &numCharsInLanguagesBuffer))
+        return defaultResult;
 
-    return mainLang;
+    std::vector<WCHAR> languagesBuffer (numCharsInLanguagesBuffer);
+    const auto success = getUserPreferredUILanguages (MUI_LANGUAGE_NAME,
+                                                      &numLanguages,
+                                                      languagesBuffer.data(),
+                                                      &numCharsInLanguagesBuffer);
+
+    if (! success || numLanguages == 0)
+        return defaultResult;
+
+    // The buffer contains a zero delimited list of languages, the first being
+    // the currently displayed language.
+    return languagesBuffer.data();
 }
 
 } // namespace juce
