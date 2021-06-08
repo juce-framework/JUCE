@@ -21,6 +21,10 @@
 
 #include <JuceHeader.h>
 
+#ifndef PIP_DEMO_UTILITIES_INCLUDED
+ #define PIP_DEMO_UTILITIES_INCLUDED 1
+#endif
+
 //==============================================================================
 /*
     This file contains a bunch of miscellaneous utilities that are
