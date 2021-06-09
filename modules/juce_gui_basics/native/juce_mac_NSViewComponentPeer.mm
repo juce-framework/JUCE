@@ -1309,7 +1309,14 @@ public:
 
     static NSArray* getSupportedDragTypes()
     {
-        return [NSArray arrayWithObjects: (NSString*) kUTTypeFileURL, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
+        const auto type =
+               #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_13
+                NSPasteboardTypeFileURL;
+               #else
+                kUTTypeFileURL;
+               #endif
+
+        return [NSArray arrayWithObjects: (NSString*) type, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
     }
 
     BOOL sendDragCallback (const int type, id <NSDraggingInfo> sender)

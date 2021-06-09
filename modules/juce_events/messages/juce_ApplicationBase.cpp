@@ -201,7 +201,7 @@ String JUCEApplicationBase::getCommandLineParameters()
 
     for (int i = 1; i < juce_argc; ++i)
     {
-        String arg (juce_argv[i]);
+        String arg { CharPointer_UTF8 (juce_argv[i]) };
 
         if (arg.containsChar (' ') && ! arg.isQuotedString())
             arg = arg.quoted ('"');

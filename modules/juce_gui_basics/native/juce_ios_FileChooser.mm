@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if ! (defined (__IPHONE_15_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_15_0)
+#if ! (defined (__IPHONE_16_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_16_0)
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
  #define JUCE_DEPRECATION_IGNORED 1
 #endif
