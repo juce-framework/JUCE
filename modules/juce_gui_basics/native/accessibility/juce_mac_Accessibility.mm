@@ -1051,7 +1051,8 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
     }();
 
     if (notification != NSAccessibilityNotificationName{})
-        sendAccessibilityEvent ((id) handler.getNativeImplementation(), notification, nil);
+        if (id accessibilityElement = (id) handler.getNativeImplementation())
+            sendAccessibilityEvent (accessibilityElement, notification, nil);
 }
 
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventType) const
@@ -1074,34 +1075,40 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
     if (notification != NSAccessibilityNotificationName{})
     {
-        id accessibilityElement = (id) getNativeImplementation();
-
-        sendAccessibilityEvent (accessibilityElement, notification,
-                                (notification == NSAccessibilityLayoutChangedNotification
-                                   ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
-                                   : nil));
+        if (id accessibilityElement = (id) getNativeImplementation())
+        {
+            sendAccessibilityEvent (accessibilityElement, notification,
+                                    (notification == NSAccessibilityLayoutChangedNotification
+                                       ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
+                                       : nil));
+        }
     }
 }
 
 void AccessibilityHandler::postAnnouncement (const String& announcementString, AnnouncementPriority priority)
 {
-    auto nsPriority = [priority]
-    {
-        switch (priority)
+    #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
+     if (@available (macOS 10.10, *))
+    #endif
+     {
+        auto nsPriority = [priority]
         {
-            case AnnouncementPriority::low:    return NSAccessibilityPriorityLow;
-            case AnnouncementPriority::medium: return NSAccessibilityPriorityMedium;
-            case AnnouncementPriority::high:   return NSAccessibilityPriorityHigh;
-        }
+            switch (priority)
+            {
+                case AnnouncementPriority::low:    return NSAccessibilityPriorityLow;
+                case AnnouncementPriority::medium: return NSAccessibilityPriorityMedium;
+                case AnnouncementPriority::high:   return NSAccessibilityPriorityHigh;
+            }
 
-        jassertfalse;
-        return NSAccessibilityPriorityLow;
-    }();
+            jassertfalse;
+            return NSAccessibilityPriorityLow;
+        }();
 
-    sendAccessibilityEvent ((id) [NSApp mainWindow],
-                            NSAccessibilityAnnouncementRequestedNotification,
-                            @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
-                               NSAccessibilityPriorityKey:     @(nsPriority) });
+        sendAccessibilityEvent ((id) [NSApp mainWindow],
+                                NSAccessibilityAnnouncementRequestedNotification,
+                                @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
+                                   NSAccessibilityPriorityKey:     @(nsPriority) });
+     }
 }
 
 AccessibilityHandler::AccessibilityNativeImpl* AccessibilityHandler::createNativeImpl (AccessibilityHandler& handler)
