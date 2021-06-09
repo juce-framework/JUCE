@@ -127,4 +127,3 @@
 #endif
 
 #include "utility/juce_CreatePluginFilter.h"
-#include "VST/juce_VSTCallbackHandler.h"
