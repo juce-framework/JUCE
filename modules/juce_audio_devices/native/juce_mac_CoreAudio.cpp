@@ -665,7 +665,7 @@ public:
             {
                 if (OK (AudioDeviceCreateIOProcID (deviceID, audioIOProc, this, &audioProcID)))
                 {
-                    if (OK (AudioDeviceStart (deviceID, audioIOProc)))
+                    if (OK (AudioDeviceStart (deviceID, audioProcID)))
                     {
                         started = true;
                     }
@@ -696,7 +696,7 @@ public:
 
         if (started && (deviceID != 0) && ! leaveInterruptRunning)
         {
-            OK (AudioDeviceStop (deviceID, audioIOProc));
+            OK (AudioDeviceStop (deviceID, audioProcID));
             OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
             audioProcID = {};
 
