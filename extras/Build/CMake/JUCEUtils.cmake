@@ -1044,6 +1044,14 @@ function(_juce_set_output_name target name)
     endif()
 endfunction()
 
+function(_juce_check_icon_files_exist icon_files)
+    foreach(file IN LISTS icon_files)
+        if(NOT EXISTS "${file}")
+            message(FATAL_ERROR "Could not find icon file: ${file}")
+        endif()
+    endforeach()
+endfunction()
+
 function(_juce_generate_icon source_target dest_target)
     get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
     get_target_property(juce_property_icon_big ${source_target} JUCE_ICON_BIG)
@@ -1066,6 +1074,8 @@ function(_juce_generate_icon source_target dest_target)
             return()
         endif()
 
+        _juce_check_icon_files_exist("${icon_args}")
+
         set(generated_icon "${juce_library_code}/Icon.icns")
         # To get compiled properly, we need the icon before the plist is generated!
         _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
@@ -1075,12 +1085,16 @@ function(_juce_generate_icon source_target dest_target)
             return()
         endif()
 
+        _juce_check_icon_files_exist("${icon_args}")
+
         set(generated_icon "${juce_library_code}/icon.ico")
         _juce_execute_juceaide(winicon "${generated_icon}" ${icon_args})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         get_target_property(generated_icon ${source_target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
         if(icon_args AND (NOT generated_icon))
+            _juce_check_icon_files_exist("${icon_args}")
+
             set(out_path "${juce_library_code}/${dest_target}")
             set(generated_icon "${out_path}/Images.xcassets")
 
@@ -1104,6 +1118,8 @@ function(_juce_generate_icon source_target dest_target)
     endif()
 
     if(generated_icon)
+        _juce_check_icon_files_exist("${generated_icon}")
+
         target_sources(${dest_target} PRIVATE ${generated_icon})
         set_target_properties(${source_target} ${dest_target} PROPERTIES
             JUCE_ICON_FILE "${generated_icon}"
