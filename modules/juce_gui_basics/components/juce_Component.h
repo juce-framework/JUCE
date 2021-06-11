@@ -2518,6 +2518,7 @@ private:
         bool isResizeCallbackPending      : 1;
         bool viewportIgnoreDragFlag       : 1;
         bool accessibilityIgnoredFlag     : 1;
+        bool cachedMouseInsideComponent   : 1;
        #if JUCE_DEBUG
         bool isInsidePaintCall            : 1;
        #endif
