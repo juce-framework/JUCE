@@ -1232,6 +1232,8 @@ private:
             addAndMakeVisible (defaultToggle);
             addAndMakeVisible (orderLabel);
             addAndMakeVisible (orderBox);
+
+            setFocusContainerType (FocusContainerType::focusContainer);
         }
 
         void paint (Graphics& g) override
