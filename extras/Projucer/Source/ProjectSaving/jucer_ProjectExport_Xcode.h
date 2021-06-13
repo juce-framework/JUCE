@@ -1489,11 +1489,7 @@ public:
 
             if      (arch == osxArch_Native)           s.set ("ARCHS", "\"$(NATIVE_ARCH_ACTUAL)\"");
             else if (arch == osxArch_32BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_BIT)\"");
-            else if (arch == osxArch_64BitUniversal)
-            {
-                s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_64_BIT)\"");
-                s.set ("\"ARCHS[sdk=macosx10.14]\"", "\"$(ARCHS_STANDARD)\"");
-            }
+            else if (arch == osxArch_64BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_64_BIT)\"");
             else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
             else if (arch == osxArch_64BitIntel )      s.set ("ARCHS", "\"x86_64\"");
 
