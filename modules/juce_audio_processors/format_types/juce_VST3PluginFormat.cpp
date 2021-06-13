@@ -602,16 +602,15 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
             return kResultOk;
         }
 
-        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IComponentHandler)
-        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IComponentHandler2)
-        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IComponentHandler3)
-        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IContextMenuTarget)
-        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IHostApplication)
-        TEST_FOR_AND_RETURN_IF_VALID (iid, Vst::IUnitHandler)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (iid, FUnknown, Vst::IComponentHandler)
-
-        *obj = nullptr;
-        return kNotImplemented;
+        return testForMultiple (*this,
+                                iid,
+                                UniqueBase<Vst::IComponentHandler>{},
+                                UniqueBase<Vst::IComponentHandler2>{},
+                                UniqueBase<Vst::IComponentHandler3>{},
+                                UniqueBase<Vst::IContextMenuTarget>{},
+                                UniqueBase<Vst::IHostApplication>{},
+                                UniqueBase<Vst::IUnitHandler>{},
+                                SharedBase<FUnknown, Vst::IComponentHandler>{}).extract (obj);
     }
 
 private:
@@ -2695,11 +2694,10 @@ public:
 
         tresult PLUGIN_API queryInterface (const TUID queryIid, void** obj) override
         {
-            TEST_FOR_AND_RETURN_IF_VALID (queryIid, Vst::IAttributeList)
-            TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (queryIid, FUnknown, Vst::IAttributeList)
-
-            *obj = nullptr;
-            return kNotImplemented;
+            return testForMultiple (*this,
+                                    queryIid,
+                                    UniqueBase<Vst::IAttributeList>{},
+                                    SharedBase<FUnknown, Vst::IAttributeList>{}).extract (obj);
         }
 
         tresult PLUGIN_API setInt    (AttrID, Steinberg::int64) override                 { return kOutOfMemory; }

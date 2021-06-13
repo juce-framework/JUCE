@@ -146,10 +146,7 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Steinberg::Linux::IEventHandler)
-
-        *obj = nullptr;
-        return kNoInterface;
+        return testFor (*this, targetIID, UniqueBase<Steinberg::Linux::IEventHandler>{}).extract (obj);
     }
 
     void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
@@ -300,6 +297,45 @@ public:
 private:
     ThreadLocalValue<bool>& toSet;
 };
+
+template <typename Member>
+static QueryInterfaceResult queryAdditionalInterfaces (AudioProcessor* processor,
+                                                       const TUID targetIID,
+                                                       Member&& member)
+{
+    if (processor == nullptr)
+        return {};
+
+    void* obj = nullptr;
+
+    if (auto* extensions = dynamic_cast<VST3ClientExtensions*> (processor))
+    {
+        const auto result = (extensions->*member) (targetIID, &obj);
+        return { result, obj };
+    }
+
+    return {};
+}
+
+tresult extractResult (const QueryInterfaceResult& userInterface,
+                       const InterfaceResultWithDeferredAddRef& juceInterface,
+                       void** obj)
+{
+    if (userInterface.isOk() && juceInterface.isOk())
+    {
+        // If you hit this assertion, you've provided a custom implementation of an interface
+        // that JUCE implements already. As a result, your plugin may not behave correctly.
+        // Consider removing your custom implementation.
+        jassertfalse;
+
+        return userInterface.extract (obj);
+    }
+
+    if (userInterface.isOk())
+        return userInterface.extract (obj);
+
+    return juceInterface.extract (obj);
+}
 
 //==============================================================================
 class JuceAudioProcessor   : public Vst::IUnitInfo
@@ -655,27 +691,11 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, JuceVST3EditController)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IEditController)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IEditController2)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IMidiMapping)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IUnitInfo)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::ChannelContext::IInfoListener)
-       #if JucePlugin_Enable_ARA
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Presonus::IPlugInViewEmbedding)
-       #endif
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IPluginBase, Vst::IEditController)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, IDependent, Vst::IEditController)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IEditController)
+        const auto userProvidedInterface = queryAdditionalInterfaces (getPluginInstance(),
+                                                                      targetIID,
+                                                                      &VST3ClientExtensions::queryIEditController);
 
-        if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
-        {
-            audioProcessor->addRef();
-            *obj = audioProcessor;
-            return kResultOk;
-        }
+        const auto juceProvidedInterface = queryInterfaceInternal (targetIID);
 
         if (doUIDsMatch (targetIID, Presonus::IGainReductionInfo::iid)
             && audioProcessor != nullptr
@@ -686,8 +706,7 @@ public:
             return kResultOk;
         }
 
-        *obj = nullptr;
-        return kNoInterface;
+        return extractResult (userProvidedInterface, juceProvidedInterface, obj);
     }
 
     //==============================================================================
@@ -1225,7 +1244,7 @@ public:
                                       && (pluginInstance->getActiveEditor() == nullptr || getHostType().isAdobeAudition());
 
             if (mayCreateEditor)
-                return new JuceVST3Editor (*this, *pluginInstance);
+                return new JuceVST3Editor (*this, *audioProcessor);
         }
 
         return nullptr;
@@ -1405,9 +1424,43 @@ private:
     float lastScaleFactorReceived = 1.0f;
    #endif
 
+    InterfaceResultWithDeferredAddRef queryInterfaceInternal (const TUID targetIID)
+    {
+        const auto result = testForMultiple (*this,
+                                             targetIID,
+                                             UniqueBase<FObject>{},
+                                             UniqueBase<JuceVST3EditController>{},
+                                             UniqueBase<Vst::IEditController>{},
+                                             UniqueBase<Vst::IEditController2>{},
+                                             UniqueBase<Vst::IConnectionPoint>{},
+                                             UniqueBase<Vst::IMidiMapping>{},
+                                             UniqueBase<Vst::IUnitInfo>{},
+                                             UniqueBase<Vst::ChannelContext::IInfoListener>{},
+                                            #if JucePlugin_Enable_ARA
+                                             UniqueBase<Presonus::IPlugInViewEmbedding>{},
+                                            #endif
+                                             SharedBase<IPluginBase, Vst::IEditController>{},
+                                             UniqueBase<IDependent>{},
+                                             SharedBase<FUnknown, Vst::IEditController>{});
+
+        if (result.isOk())
+            return result;
+
+        if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
+            return { kResultOk, audioProcessor.get() };
+
+        return {};
+    }
+
     void installAudioProcessor (const VSTComSmartPtr<JuceAudioProcessor>& newAudioProcessor)
     {
         audioProcessor = newAudioProcessor;
+
+        if (auto* extensions = dynamic_cast<VST3ClientExtensions*> (audioProcessor->get()))
+        {
+            extensions->setIComponentHandler (componentHandler);
+            extensions->setIHostApplication (hostContext.get());
+        }
 
         if (auto* pluginInstance = getPluginInstance())
         {
@@ -1503,10 +1556,10 @@ private:
                             private Timer
     {
     public:
-        JuceVST3Editor (JuceVST3EditController& ec, AudioProcessor& p)
-          : Vst::EditorView (&ec, nullptr),
-            owner (&ec),
-            pluginInstance (p)
+        JuceVST3Editor (JuceVST3EditController& ec, JuceAudioProcessor& p)
+            : EditorView (&ec, nullptr),
+              owner (&ec),
+              pluginInstance (*p.get())
         {
             createContentWrapperComponentIfNeeded();
 
@@ -1521,7 +1574,11 @@ private:
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
         {
-            TEST_FOR_AND_RETURN_IF_VALID (targetIID, Steinberg::IPlugViewContentScaleSupport)
+            const auto result = testFor (*this, targetIID, UniqueBase<IPlugViewContentScaleSupport>{});
+
+            if (result.isOk())
+                return result.extract (obj);
+
             return Vst::EditorView::queryInterface (targetIID, obj);
         }
 
@@ -2089,8 +2146,7 @@ private:
 
     tresult PLUGIN_API queryInterface (const ::Steinberg::TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
+        const auto juceProvidedInterface = queryInterfaceInternal (targetIID);
 
         if (doUIDsMatch (targetIID, JuceARAFactory::iid))
         {
@@ -2098,6 +2154,9 @@ private:
             *obj = this;
             return kResultOk;
         }
+
+        if (juceProvidedInterface.isOk())
+            return juceProvidedInterface.extract (obj);
 
         *obj = nullptr;
         return kNoInterface;
@@ -2111,6 +2170,20 @@ private:
     static const FUID iid;
 
  private:
+    InterfaceResultWithDeferredAddRef queryInterfaceInternal (const TUID targetIID)
+    {
+        // This differs from Celemony's branch, see
+        // https://github.com/Celemony/JUCE_ARA/commit/62d1e15eb637156832257aa3b6ac084495787a22#r52101552
+        const auto result = testForMultiple (*this,
+                                             targetIID,
+                                             UniqueBase<ARA::IMainFactory>{});
+
+        if (result.isOk())
+            return result;
+
+        return {};
+    }
+
      //==============================================================================
      std::atomic<int> refCount { 1 };
  };
@@ -2196,28 +2269,13 @@ public:
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginBase)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, JuceVST3Component)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IComponent)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IAudioProcessor)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IUnitInfo)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, Vst::IConnectionPoint)
-        TEST_FOR_COMMON_BASE_AND_RETURN_IF_VALID (targetIID, FUnknown, Vst::IComponent)
+        const auto userProvidedInterface = queryAdditionalInterfaces (&getPluginInstance(),
+                                                                      targetIID,
+                                                                      &VST3ClientExtensions::queryIAudioProcessor);
 
-       #if JucePlugin_Enable_ARA
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IPlugInEntryPoint)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IPlugInEntryPoint2)
-       #endif
+        const auto juceProvidedInterface = queryInterfaceInternal (targetIID);
 
-        if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
-        {
-            comPluginInstance->addRef();
-            *obj = comPluginInstance;
-            return kResultOk;
-        }
-
-        *obj = nullptr;
-        return kNoInterface;
+        return extractResult (userProvidedInterface, juceProvidedInterface, obj);
     }
 
     //==============================================================================
@@ -3154,6 +3212,32 @@ public:
     }
 
 private:
+    InterfaceResultWithDeferredAddRef queryInterfaceInternal (const TUID targetIID)
+    {
+        const auto result = testForMultiple (*this,
+                                             targetIID,
+                                             UniqueBase<IPluginBase>{},
+                                             UniqueBase<JuceVST3Component>{},
+                                             UniqueBase<Vst::IComponent>{},
+                                             UniqueBase<Vst::IAudioProcessor>{},
+                                             UniqueBase<Vst::IUnitInfo>{},
+                                             UniqueBase<Vst::IConnectionPoint>{},
+                                             SharedBase<FUnknown, Vst::IComponent>{}
+                                            #if JucePlugin_Enable_ARA
+                                             , UniqueBase<ARA::IPlugInEntryPoint>{}
+                                             , UniqueBase<ARA::IPlugInEntryPoint2>{}
+                                            #endif
+                                             );
+
+        if (result.isOk())
+            return result;
+
+        if (doUIDsMatch (targetIID, JuceAudioProcessor::iid))
+            return { kResultOk, comPluginInstance.get() };
+
+        return {};
+    }
+
     //==============================================================================
     struct ScopedInSetupProcessingSetter
     {
@@ -3466,6 +3550,7 @@ private:
         }
 
         T* operator->()               { return ptr.operator->(); }
+        T* get() const noexcept       { return ptr.get(); }
         operator T*() const noexcept  { return ptr.get(); }
 
         template <typename... Args>
@@ -3714,10 +3799,15 @@ struct JucePluginFactory  : public IPluginFactory3
 
     tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory3)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory2)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, IPluginFactory)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FUnknown)
+        const auto result = testForMultiple (*this,
+                                             targetIID,
+                                             UniqueBase<IPluginFactory3>{},
+                                             UniqueBase<IPluginFactory2>{},
+                                             UniqueBase<IPluginFactory>{},
+                                             UniqueBase<FUnknown>{});
+
+        if (result.isOk())
+            return result.extract (obj);
 
         jassertfalse; // Something new?
         *obj = nullptr;
