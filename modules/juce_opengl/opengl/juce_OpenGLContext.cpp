@@ -134,7 +134,7 @@ public:
 
         if (renderThread != nullptr)
         {
-            repaintEvent.signal();
+            repaintCondition.notify_all();
             renderThread->removeJob (this, true, -1);
         }
     }
@@ -178,7 +178,7 @@ public:
     void triggerRepaint()
     {
         needsUpdate = 1;
-        repaintEvent.signal();
+        repaintCondition.notify_all();
     }
 
     //==============================================================================
@@ -469,7 +469,8 @@ public:
            #if JUCE_IOS
             if (backgroundProcessCheck.isBackgroundProcess())
             {
-                repaintEvent.wait (300);
+                std::unique_lock<std::mutex> lock (repaintMutex);
+                repaintCondition.wait_for (lock, std::chrono::milliseconds (300));
                 continue;
             }
            #endif
@@ -480,15 +481,22 @@ public:
            #if JUCE_MAC
             if (cvDisplayLinkWrapper != nullptr)
             {
-                repaintEvent.wait (-1);
+                std::unique_lock<std::mutex> lock (repaintMutex);
+                repaintCondition.wait (lock);
                 renderFrame();
             }
             else
            #endif
             if (! renderFrame())
-                repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
+            {
+                std::unique_lock<std::mutex> lock (repaintMutex);
+                repaintCondition.wait_for (lock, std::chrono::milliseconds (5)); // failed to render, so avoid a tight fail-loop.
+            }
             else if (! context.continuousRepaint && ! shouldExit())
-                repaintEvent.wait (-1);
+            {
+                std::unique_lock<std::mutex> lock (repaintMutex);
+                repaintCondition.wait (lock);
+            }
         }
 
         hasInitialised = false;
@@ -665,7 +673,9 @@ public:
     StringArray associatedObjectNames;
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
 
-    WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent;
+    WaitableEvent canPaintNowFlag, finishedPaintingFlag;
+    std::mutex repaintMutex;
+    std::condition_variable repaintCondition;
    #if JUCE_OPENGL_ES
     bool shadersAvailable = true;
    #else
@@ -694,7 +704,7 @@ public:
                                              CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
         {
             auto* self = (CachedImage*) displayLinkContext;
-            self->repaintEvent.signal();
+            self->repaintCondition.notify_all();
             return kCVReturnSuccess;
         }
 
