@@ -239,7 +239,8 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 }
                 case UIA_ExpandCollapsePatternId:
                 {
-                    if (accessibilityHandler.getActions().contains (AccessibilityActionType::showMenu))
+                    if (accessibilityHandler.getActions().contains (AccessibilityActionType::showMenu)
+                        && accessibilityHandler.getCurrentState().isExpandable())
                         return new UIAExpandCollapseProvider (this);
 
                     break;

@@ -1550,6 +1550,115 @@ private:
         }
     }
 
+    class EditorContextMenu  : public HostProvidedContextMenu
+    {
+    public:
+        EditorContextMenu (VSTComSmartPtr<Steinberg::Vst::IContextMenu> contextMenuIn)
+            : contextMenu (contextMenuIn) {}
+
+        PopupMenu getEquivalentPopupMenu() const override
+        {
+            using MenuItem   = Steinberg::Vst::IContextMenuItem;
+            using MenuTarget = Steinberg::Vst::IContextMenuTarget;
+
+            struct Submenu
+            {
+                PopupMenu menu;
+                String name;
+                bool enabled;
+            };
+
+            std::vector<Submenu> menuStack (1);
+
+            for (int32_t i = 0, end = contextMenu->getItemCount(); i < end; ++i)
+            {
+                MenuItem item{};
+                MenuTarget* target = nullptr;
+                contextMenu->getItem (i, item, &target);
+
+                if ((item.flags & MenuItem::kIsGroupStart) == MenuItem::kIsGroupStart)
+                {
+                    menuStack.push_back ({ PopupMenu{},
+                                           toString (item.name),
+                                           (item.flags & MenuItem::kIsDisabled) == 0 });
+                }
+                else if ((item.flags & MenuItem::kIsGroupEnd) == MenuItem::kIsGroupEnd)
+                {
+                    const auto back = menuStack.back();
+                    menuStack.pop_back();
+
+                    if (menuStack.empty())
+                    {
+                        // malformed menu
+                        jassertfalse;
+                        return {};
+                    }
+
+                    menuStack.back().menu.addSubMenu (back.name, back.menu, back.enabled);
+                }
+                else if ((item.flags & MenuItem::kIsSeparator) == MenuItem::kIsSeparator)
+                {
+                    menuStack.back().menu.addSeparator();
+                }
+                else
+                {
+                    VSTComSmartPtr<MenuTarget> ownedTarget (target);
+                    const auto tag = item.tag;
+                    menuStack.back().menu.addItem (toString (item.name),
+                                                   (item.flags & MenuItem::kIsDisabled) == 0,
+                                                   (item.flags & MenuItem::kIsChecked) != 0,
+                                                   [ownedTarget, tag] { ownedTarget->executeMenuItem (tag); });
+                }
+            }
+
+            if (menuStack.size() != 1)
+            {
+                // malformed menu
+                jassertfalse;
+                return {};
+            }
+
+            return menuStack.back().menu;
+        }
+
+        void showNativeMenu (Point<int> pos) const override
+        {
+            contextMenu->popup (pos.x, pos.y);
+        }
+
+    private:
+        VSTComSmartPtr<Steinberg::Vst::IContextMenu> contextMenu;
+    };
+
+    class EditorHostContext  : public AudioProcessorEditorHostContext
+    {
+    public:
+        EditorHostContext (JuceAudioProcessor& processorIn,
+                           Steinberg::Vst::IComponentHandler* handler,
+                           Steinberg::IPlugView* viewIn)
+            : processor (processorIn), componentHandler (handler), view (viewIn) {}
+
+        std::unique_ptr<HostProvidedContextMenu> getContextMenuForParameterIndex (const AudioProcessorParameter* parameter) const override
+        {
+            if (componentHandler == nullptr || view == nullptr)
+                return {};
+
+            Steinberg::FUnknownPtr<Steinberg::Vst::IComponentHandler3> handler (componentHandler);
+
+            if (handler == nullptr)
+                return {};
+
+            const auto idToUse = parameter != nullptr ? processor.getVSTParamIDForIndex (parameter->getParameterIndex()) : 0;
+            const auto menu = VSTComSmartPtr<Steinberg::Vst::IContextMenu> (handler->createContextMenu (view, &idToUse));
+            return std::make_unique<EditorContextMenu> (menu);
+        }
+
+    private:
+        JuceAudioProcessor& processor;
+        Steinberg::Vst::IComponentHandler* componentHandler = nullptr;
+        Steinberg::IPlugView* view = nullptr;
+    };
+
     //==============================================================================
     class JuceVST3Editor  : public Vst::EditorView,
                             public Steinberg::IPlugViewContentScaleSupport,
@@ -1558,6 +1667,7 @@ private:
     public:
         JuceVST3Editor (JuceVST3EditController& ec, JuceAudioProcessor& p)
             : EditorView (&ec, nullptr),
+              editorHostContext (p, ec.getComponentHandler(), this),
               owner (&ec),
               pluginInstance (*p.get())
         {
@@ -1902,6 +2012,8 @@ private:
 
                 if (pluginEditor != nullptr)
                 {
+                    pluginEditor->setHostContext (&owner.editorHostContext);
+
                     addAndMakeVisible (pluginEditor.get());
                     pluginEditor->setTopLeftPosition (0, 0);
 
@@ -2068,6 +2180,8 @@ private:
 
         //==============================================================================
         ScopedJuceInitialiser_GUI libraryInitialiser;
+
+        EditorHostContext editorHostContext;
 
        #if JUCE_LINUX || JUCE_BSD
         SharedResourcePointer<MessageThread> messageThread;

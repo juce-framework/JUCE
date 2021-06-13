@@ -112,12 +112,14 @@ private:
             }
 
             if (treeItem.mightContainSubItems())
+            {
                 state = state.withExpandable();
 
-            if (treeItem.isOpen())
-                state = state.withExpanded();
-            else
-                state = state.withCollapsed();
+                if (treeItem.isOpen())
+                    state = state.withExpanded();
+                else
+                    state = state.withCollapsed();
+            }
 
             if (treeItem.isSelected())
                 state = state.withSelected();

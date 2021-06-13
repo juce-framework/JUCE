@@ -653,10 +653,10 @@ private:
         {
             AccessibilityActions result;
 
-            if (press.isEnabled())     result.addAction (AccessibilityActionType::press,    [this] { press.onAction(); });
-            if (toggle.isEnabled())    result.addAction (AccessibilityActionType::toggle,   [this] { toggle.onAction(); });
-            if (focus.isEnabled())     result.addAction (AccessibilityActionType::focus,    [this] { focus.onAction(); });
-            if (showMenu.isEnabled())  result.addAction (AccessibilityActionType::showMenu, [this] { showMenu.onAction(); });
+            if (press.isActionEnabled())     result.addAction (AccessibilityActionType::press,    [this] { press.onAction(); });
+            if (toggle.isActionEnabled())    result.addAction (AccessibilityActionType::toggle,   [this] { toggle.onAction(); });
+            if (focus.isActionEnabled())     result.addAction (AccessibilityActionType::focus,    [this] { focus.onAction(); });
+            if (showMenu.isActionEnabled())  result.addAction (AccessibilityActionType::showMenu, [this] { showMenu.onAction(); });
 
             return result;
         }
@@ -701,6 +701,8 @@ private:
                 startTime = Time::getMillisecondCounter();
                 startTimer (5);
             }
+
+            bool isActionEnabled() const noexcept  { return enabledToggle.getToggleState(); }
 
         private:
             void timerCallback() override
@@ -1230,6 +1232,8 @@ private:
             addAndMakeVisible (defaultToggle);
             addAndMakeVisible (orderLabel);
             addAndMakeVisible (orderBox);
+
+            setFocusContainerType (FocusContainerType::focusContainer);
         }
 
         void paint (Graphics& g) override

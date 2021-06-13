@@ -1083,6 +1083,12 @@ public:
 
     size_t size() const noexcept { return values.size(); }
 
+    void setWithoutNotifying (size_t index, float value)
+    {
+        jassert (index < size());
+        values[index].store (value, std::memory_order_relaxed);
+    }
+
     void set (size_t index, float value)
     {
         jassert (index < size());
@@ -1153,7 +1159,8 @@ public:
 
     Steinberg::Vst::ParamID getParamID (Steinberg::int32 index) const noexcept { return paramIds[(size_t) index]; }
 
-    void set (Steinberg::int32 index, float value) { floatCache.set ((size_t) index, value); }
+    void set                 (Steinberg::int32 index, float value)   { floatCache.set                 ((size_t) index, value); }
+    void setWithoutNotifying (Steinberg::int32 index, float value)   { floatCache.setWithoutNotifying ((size_t) index, value); }
 
     float get (Steinberg::int32 index) const noexcept { return floatCache.get ((size_t) index); }
 

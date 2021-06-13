@@ -80,6 +80,8 @@ JUCESplashScreen::JUCESplashScreen (Component& parent)
     {
         startTimer (1);
     }
+
+    setAccessible (false);
 }
 
 std::unique_ptr<Drawable> JUCESplashScreen::getSplashScreenLogo()

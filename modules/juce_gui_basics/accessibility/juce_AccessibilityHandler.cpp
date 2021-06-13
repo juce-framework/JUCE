@@ -81,9 +81,7 @@ AccessibleState AccessibilityHandler::getCurrentState() const
 
 bool AccessibilityHandler::isIgnored() const
 {
-    return role == AccessibilityRole::ignored
-        || getCurrentState().isIgnored()
-        || component.isCurrentlyBlockedByAnotherModalComponent();
+    return role == AccessibilityRole::ignored || getCurrentState().isIgnored();
 }
 
 static bool isComponentVisibleWithinWindow (const Component& comp)
@@ -204,22 +202,31 @@ std::vector<AccessibilityHandler*> AccessibilityHandler::getChildren() const
     if (! component.isFocusContainer() && component.getParentComponent() != nullptr)
         return {};
 
+    const auto addChildComponentHandler = [this] (Component* focusableComponent,
+                                                  std::vector<AccessibilityHandler*>& childHandlers)
+    {
+        if (focusableComponent == nullptr)
+            return;
+
+        if (auto* handler = findEnclosingHandler (focusableComponent))
+        {
+            if (! isParentOf (handler))
+                return;
+
+            if (auto* unignored = getFirstUnignoredDescendant (handler))
+                if (std::find (childHandlers.cbegin(), childHandlers.cend(), unignored) == childHandlers.cend())
+                    childHandlers.push_back (unignored);
+        }
+    };
+
     std::vector<AccessibilityHandler*> children;
 
     if (auto traverser = component.createFocusTraverser())
     {
-        for (auto* focusableChild : traverser->getAllComponents (&component))
-        {
-            if (auto* handler = findEnclosingHandler (focusableChild))
-            {
-                if (! isParentOf (handler))
-                    continue;
+        addChildComponentHandler (traverser->getDefaultComponent (&component), children);
 
-                if (auto* unignored = getFirstUnignoredDescendant (handler))
-                    if (std::find (children.cbegin(), children.cend(), unignored) == children.cend())
-                        children.push_back (unignored);
-            }
-        }
+        for (auto* focusableChild : traverser->getAllComponents (&component))
+            addChildComponentHandler (focusableChild, children);
     }
 
     return children;
@@ -276,26 +283,31 @@ void AccessibilityHandler::grabFocusInternal (bool canTryParent)
 {
     if (getCurrentState().isFocusable() && ! isIgnored())
     {
-        takeFocus();
-        return;
+        const auto blockedByModal = component.isCurrentlyBlockedByAnotherModalComponent();
+
+        if (blockedByModal)
+            Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
+
+        if (! blockedByModal || ! component.isCurrentlyBlockedByAnotherModalComponent())
+        {
+            takeFocus();
+            return;
+        }
     }
 
-    if (isParentOf (currentlyFocusedHandler) && ! currentlyFocusedHandler->isIgnored())
+    if (isParentOf (currentlyFocusedHandler))
         return;
 
-    if (component.isFocusContainer() || component.getParentComponent() == nullptr)
+    if (auto traverser = component.createFocusTraverser())
     {
-        if (auto traverser = component.createFocusTraverser())
+        if (auto* defaultComp = traverser->getDefaultComponent (&component))
         {
-            if (auto* defaultComp = traverser->getDefaultComponent (&component))
+            if (auto* handler = getUnignoredAncestor (findEnclosingHandler (defaultComp)))
             {
-                if (auto* handler = getUnignoredAncestor (findEnclosingHandler (defaultComp)))
+                if (isParentOf (handler))
                 {
-                    if (isParentOf (handler))
-                    {
-                        handler->grabFocusInternal (false);
-                        return;
-                    }
+                    handler->grabFocusInternal (false);
+                    return;
                 }
             }
         }

@@ -535,6 +535,14 @@ public:
         return label.getText();
     }
 
+    AccessibleState getCurrentState() const override
+    {
+        if (label.isBeingEdited())
+            return {}; // allow focus to pass through to the TextEditor
+
+        return AccessibilityHandler::getCurrentState();
+    }
+
 private:
     class LabelValueInterface  : public AccessibilityTextValueInterface
     {
