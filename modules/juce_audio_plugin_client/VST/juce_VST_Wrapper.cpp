@@ -153,11 +153,11 @@ namespace
     {
         const int frameThickness = GetSystemMetrics (SM_CYFIXEDFRAME);
 
-        while (w != 0)
+        while (w != nullptr)
         {
             auto parent = getWindowParent (w);
 
-            if (parent == 0)
+            if (parent == nullptr)
                 break;
 
             TCHAR windowType[32] = { 0 };
@@ -1176,11 +1176,11 @@ public:
 
                 HWND w = (HWND) getWindowHandle();
 
-                while (w != 0)
+                while (w != nullptr)
                 {
                     HWND parent = getWindowParent (w);
 
-                    if (parent == 0)
+                    if (parent == nullptr)
                         break;
 
                     TCHAR windowType [32] = { 0 };
@@ -1194,7 +1194,7 @@ public:
                     GetWindowRect (parent, &parentPos);
 
                     if (w != (HWND) getWindowHandle())
-                        SetWindowPos (w, 0, 0, 0, newWidth + dw, newHeight + dh,
+                        SetWindowPos (w, nullptr, 0, 0, newWidth + dw, newHeight + dh,
                                       SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
 
                     dw = (parentPos.right - parentPos.left) - (windowPos.right - windowPos.left);
@@ -1206,11 +1206,11 @@ public:
                         break;
 
                     if (dw > 100 || dh > 100)
-                        w = 0;
+                        w = nullptr;
                 }
 
-                if (w != 0)
-                    SetWindowPos (w, 0, 0, 0, newWidth + dw, newHeight + dh,
+                if (w != nullptr)
+                    SetWindowPos (w, nullptr, 0, 0, newWidth + dw, newHeight + dh,
                                   SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
                #endif
             }

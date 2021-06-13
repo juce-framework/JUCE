@@ -42,6 +42,9 @@ if(JUCE_BUILD_HELPER_TOOLS)
         juce::juce_recommended_lto_flags
         juce::juce_recommended_warning_flags)
 
+    set_target_properties(juceaide PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
     export(TARGETS juceaide
            NAMESPACE juce_tools::
            FILE "${JUCE_BINARY_DIR}/JUCEToolsExport.cmake")

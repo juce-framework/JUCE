@@ -883,7 +883,7 @@ public:
         imageData = bitmapData - (lineStride * (h - 1));
     }
 
-    ~WindowsBitmapImage()
+    ~WindowsBitmapImage() override
     {
         SelectObject (hdc, previousBitmap); // Selecting the previous bitmap before deleting the DC avoids a warning in BoundsChecker
         DeleteDC (hdc);
@@ -987,7 +987,7 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
     {
         auto scale = getScaleFactorForWindow (hwnd);
         auto prevStretchMode = SetStretchBltMode (nativeBitmap->hdc, HALFTONE);
-        SetBrushOrgEx (nativeBitmap->hdc, 0, 0, NULL);
+        SetBrushOrgEx (nativeBitmap->hdc, 0, 0, nullptr);
 
         StretchBlt (nativeBitmap->hdc, 0, 0, w, h,
                     deviceContext.dc, 0, 0, roundToInt (w * scale), roundToInt (h * scale),
@@ -1044,6 +1044,7 @@ namespace IconConverters
 
         if (auto* dc = ::CreateCompatibleDC (deviceContext.dc))
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
             BITMAPV5HEADER header = {};
             header.bV5Size = sizeof (BITMAPV5HEADER);
             header.bV5Width = bm.bmWidth;
@@ -1057,6 +1058,7 @@ namespace IconConverters
             header.bV5AlphaMask = 0xFF000000;
             header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
             header.bV5Intent = LCS_GM_IMAGES;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             uint32* bitmapImageData = nullptr;
 
@@ -1170,7 +1172,7 @@ private:
         tipInvocation.CoCreateInstance (ITipInvocation::getCLSID(), CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
     }
 
-    ~OnScreenKeyboard()
+    ~OnScreenKeyboard() override
     {
         clearSingletonInstance();
     }
@@ -1194,7 +1196,7 @@ private:
             }
             else
             {
-                if (auto hwnd = FindWindow (L"IPTip_Main_Window", NULL))
+                if (auto hwnd = FindWindow (L"IPTip_Main_Window", nullptr))
                     PostMessage (hwnd, WM_SYSCOMMAND, (int) SC_CLOSE, 0);
             }
         }
@@ -1202,15 +1204,15 @@ private:
 
     bool isVisible()
     {
-        if (auto hwnd = FindWindowEx (NULL, NULL, L"ApplicationFrameWindow", NULL))
-            return FindWindowEx (hwnd, NULL, L"Windows.UI.Core.CoreWindow", L"Microsoft Text Input Application") != NULL;
+        if (auto hwnd = FindWindowEx (nullptr, nullptr, L"ApplicationFrameWindow", nullptr))
+            return FindWindowEx (hwnd, nullptr, L"Windows.UI.Core.CoreWindow", L"Microsoft Text Input Application") != nullptr;
 
         return false;
     }
 
     bool isVisibleLegacy()
     {
-        if (auto hwnd = FindWindow (L"IPTip_Main_Window", NULL))
+        if (auto hwnd = FindWindow (L"IPTip_Main_Window", nullptr))
         {
             auto style = GetWindowLong (hwnd, GWL_STYLE);
             return (style & WS_DISABLED) == 0 && (style & WS_VISIBLE) != 0;
@@ -1291,8 +1293,10 @@ struct UWPUIViewSettings
                  || uwpClassId == nullptr)
                 return;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
             status = roGetActivationFactory (uwpClassId, __uuidof (IUIViewSettingsInterop),
                                              (void**) viewSettingsInterop.resetAndGetPointerAddress());
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             deleteHString (uwpClassId);
 
             if (status != S_OK || viewSettingsInterop == nullptr)
@@ -1310,6 +1314,8 @@ struct UWPUIViewSettings
 
         ComSmartPtr<IUIViewSettings> viewSettings;
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         if (viewSettingsInterop->GetForWindow (hWnd, __uuidof (IUIViewSettings),
                                                (void**) viewSettings.resetAndGetPointerAddress()) == S_OK
              && viewSettings != nullptr)
@@ -1319,6 +1325,8 @@ struct UWPUIViewSettings
             if (viewSettings->GetUserInteractionMode (&mode) == S_OK)
                 return mode == IUIViewSettings::Touch;
         }
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         return false;
     }
@@ -1395,7 +1403,7 @@ public:
         };
     }
 
-    ~HWNDComponentPeer()
+    ~HWNDComponentPeer() override
     {
         // do this first to avoid messages arriving for this window before it's destroyed
         JuceWindowIdentifier::setAsJUCEWindow (hwnd, false);
@@ -2484,12 +2492,12 @@ private:
                 CombineRgn (rgn, rgn, clipRgn, RGN_AND);
                 DeleteObject (clipRgn);
 
-                char rgnData[8192];
-                const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) rgnData);
+                std::aligned_storage<8192, alignof (RGNDATA)>::type rgnData;
+                const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) &rgnData);
 
                 if (res > 0 && res <= sizeof (rgnData))
                 {
-                    const RGNDATAHEADER* const hdr = &(((const RGNDATA*) rgnData)->rdh);
+                    const RGNDATAHEADER* const hdr = &(((const RGNDATA*) &rgnData)->rdh);
 
                     if (hdr->iType == RDH_RECTANGLES
                          && hdr->rcBound.right - hdr->rcBound.left >= w
@@ -2497,9 +2505,9 @@ private:
                     {
                         needToPaintAll = false;
 
-                        auto rects = (const RECT*) (rgnData + sizeof (RGNDATAHEADER));
+                        auto rects = unalignedPointerCast<const RECT*> ((char*) &rgnData + sizeof (RGNDATAHEADER));
 
-                        for (int i = (int) ((RGNDATA*) rgnData)->rdh.nCount; --i >= 0;)
+                        for (int i = (int) ((RGNDATA*) &rgnData)->rdh.nCount; --i >= 0;)
                         {
                             if (rects->right <= x + w && rects->bottom <= y + h)
                             {
@@ -2613,7 +2621,7 @@ private:
         // https://msdn.microsoft.com/en-us/library/windows/desktop/ms703320(v=vs.85).aspx
         // http://www.petertissen.de/?p=4
 
-        return (GetMessageExtraInfo() & 0xFFFFFF80 /*SIGNATURE_MASK*/) == 0xFF515780 /*MI_WP_SIGNATURE*/;
+        return ((uint32_t) GetMessageExtraInfo() & 0xFFFFFF80 /*SIGNATURE_MASK*/) == 0xFF515780 /*MI_WP_SIGNATURE*/;
     }
 
     static bool areOtherTouchSourcesActive()
@@ -2759,7 +2767,7 @@ private:
 
     ComponentPeer* findPeerUnderMouse (Point<float>& localPos)
     {
-        auto currentMousePos = getPOINTFromLParam (GetMessagePos());
+        auto currentMousePos = getPOINTFromLParam ((LPARAM) GetMessagePos());
 
         // Because Windows stupidly sends all wheel events to the window with the keyboard
         // focus, we have to redirect them here according to the mouse pos..
@@ -2827,7 +2835,7 @@ private:
                     case 3: /*GID_ZOOM*/
                         if (gi.dwFlags != 1 /*GF_BEGIN*/ && lastMagnifySize > 0)
                             peer->handleMagnifyGesture (MouseInputSource::InputSourceType::touch, localPos, getMouseEventTime(),
-                                                        (float) (gi.ullArguments / (double) lastMagnifySize));
+                                                        (float) ((double) gi.ullArguments / (double) lastMagnifySize));
 
                         lastMagnifySize = gi.ullArguments;
                         return true;
@@ -2947,7 +2955,7 @@ private:
             if (! getPointerTouchInfo (GET_POINTERID_WPARAM (wParam), &touchInfo))
                 return false;
 
-            const auto pressure = touchInfo.touchMask & TOUCH_MASK_PRESSURE ? touchInfo.pressure
+            const auto pressure = touchInfo.touchMask & TOUCH_MASK_PRESSURE ? static_cast<float> (touchInfo.pressure)
                                                                             : MouseInputSource::invalidPressure;
             const auto orientation = touchInfo.touchMask & TOUCH_MASK_ORIENTATION ? degreesToRadians (static_cast<float> (touchInfo.orientation))
                                                                                   : MouseInputSource::invalidOrientation;
@@ -2963,7 +2971,7 @@ private:
             if (! getPointerPenInfo (GET_POINTERID_WPARAM (wParam), &penInfo))
                 return false;
 
-            const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? penInfo.pressure / 1024.0f : MouseInputSource::invalidPressure;
+            const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? (float) penInfo.pressure / 1024.0f : MouseInputSource::invalidPressure;
 
             if (! handlePenInput (penInfo, globalToLocal (convertPhysicalScreenPointToLogical (pointFromPOINT (getPOINTFromLParam (lParam)), hwnd).toFloat()),
                                   pressure, isDown, isUp))
@@ -2995,8 +3003,8 @@ private:
         PenDetails penDetails;
 
         penDetails.rotation = (penInfo.penMask & PEN_MASK_ROTATION) ? degreesToRadians (static_cast<float> (penInfo.rotation)) : MouseInputSource::invalidRotation;
-        penDetails.tiltX = (penInfo.penMask & PEN_MASK_TILT_X) ? penInfo.tiltX / 90.0f : MouseInputSource::invalidTiltX;
-        penDetails.tiltY = (penInfo.penMask & PEN_MASK_TILT_Y) ? penInfo.tiltY / 90.0f : MouseInputSource::invalidTiltY;
+        penDetails.tiltX = (penInfo.penMask & PEN_MASK_TILT_X) ? (float) penInfo.tiltX / 90.0f : MouseInputSource::invalidTiltX;
+        penDetails.tiltY = (penInfo.penMask & PEN_MASK_TILT_Y) ? (float) penInfo.tiltY / 90.0f : MouseInputSource::invalidTiltY;
 
         auto pInfoFlags = penInfo.pointerInfo.pointerFlags;
 
@@ -3302,9 +3310,9 @@ private:
 
                 auto physicalBounds = convertLogicalScreenRectangleToPhysical (ScalingHelpers::scaledScreenPosToUnscaled (component, pos.toFloat()), hwnd);
 
-                auto getNewPositionIfNotRoundingError = [] (int pos, float newPos)
+                auto getNewPositionIfNotRoundingError = [] (int posIn, float newPos)
                 {
-                    return (std::abs ((float) pos - newPos) >= 1.0f) ? roundToInt (newPos) : pos;
+                    return (std::abs ((float) posIn - newPos) >= 1.0f) ? roundToInt (newPos) : posIn;
                 };
 
                 wp.x  = getNewPositionIfNotRoundingError (wp.x,  physicalBounds.getX());
@@ -3586,7 +3594,7 @@ private:
 
     Point<float> getCurrentMousePos() noexcept
     {
-        return globalToLocal (convertPhysicalScreenPointToLogical (pointFromPOINT (getPOINTFromLParam (GetMessagePos())), hwnd).toFloat());
+        return globalToLocal (convertPhysicalScreenPointToLogical (pointFromPOINT (getPOINTFromLParam ((LPARAM) GetMessagePos())), hwnd).toFloat());
     }
 
     LRESULT peerWindowProc (HWND h, UINT message, WPARAM wParam, LPARAM lParam)

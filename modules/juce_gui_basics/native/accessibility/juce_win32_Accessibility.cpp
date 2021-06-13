@@ -26,6 +26,8 @@
 namespace juce
 {
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 static bool isStartingUpOrShuttingDown()
 {
     if (auto* app = JUCEApplicationBase::getInstance())
@@ -271,5 +273,7 @@ namespace WindowsAccessibility
 
 
 JUCE_IMPLEMENT_SINGLETON (WindowsUIAWrapper)
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

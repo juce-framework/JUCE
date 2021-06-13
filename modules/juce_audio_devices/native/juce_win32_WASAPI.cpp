@@ -23,6 +23,8 @@
 namespace juce
 {
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 #ifndef JUCE_WASAPI_LOGGING
  #define JUCE_WASAPI_LOGGING 0
 #endif
@@ -865,7 +867,7 @@ public:
     {
     }
 
-    ~WASAPIInputDevice()
+    ~WASAPIInputDevice() override
     {
         close();
     }
@@ -1028,7 +1030,7 @@ public:
     {
     }
 
-    ~WASAPIOutputDevice()
+    ~WASAPIOutputDevice() override
     {
         close();
     }
@@ -1150,11 +1152,11 @@ class WASAPIAudioIODevice  : public AudioIODevice,
 {
 public:
     WASAPIAudioIODevice (const String& deviceName,
-                         const String& typeName,
+                         const String& typeNameIn,
                          const String& outputDeviceID,
                          const String& inputDeviceID,
                          WASAPIDeviceMode mode)
-        : AudioIODevice (deviceName, typeName),
+        : AudioIODevice (deviceName, typeNameIn),
           Thread ("JUCE WASAPI"),
           outputDeviceId (outputDeviceID),
           inputDeviceId (inputDeviceID),
@@ -1162,7 +1164,7 @@ public:
     {
     }
 
-    ~WASAPIAudioIODevice()
+    ~WASAPIAudioIODevice() override
     {
         cancelPendingUpdate();
         close();
@@ -1659,7 +1661,7 @@ public:
     {
     }
 
-    ~WASAPIAudioIODeviceType()
+    ~WASAPIAudioIODeviceType() override
     {
         if (notifyClient != nullptr)
             enumerator->UnregisterEndpointNotificationCallback (notifyClient);
@@ -1967,5 +1969,7 @@ float JUCE_CALLTYPE SystemAudioVolume::getGain()              { return WasapiCla
 bool  JUCE_CALLTYPE SystemAudioVolume::setGain (float gain)   { return WasapiClasses::MMDeviceMasterVolume().setGain (gain); }
 bool  JUCE_CALLTYPE SystemAudioVolume::isMuted()              { return WasapiClasses::MMDeviceMasterVolume().isMuted(); }
 bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool mute)   { return WasapiClasses::MMDeviceMasterVolume().setMuted (mute); }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

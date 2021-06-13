@@ -40,7 +40,7 @@ public:
     JUCE_COMRESULT SetValue (LPCWSTR val) override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         const auto& handler = getHandler();
 
@@ -71,7 +71,7 @@ public:
             }
         }
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     JUCE_COMRESULT get_Value (BSTR* pRetVal) override

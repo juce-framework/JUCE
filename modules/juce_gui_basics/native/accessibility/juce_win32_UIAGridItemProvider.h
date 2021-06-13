@@ -73,8 +73,12 @@ public:
     {
         return withCellInterface (pRetVal, [&] (const AccessibilityCellInterface& cellInterface)
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
             if (auto* handler = cellInterface.getTableHandler())
                 handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         });
     }
 
@@ -90,7 +94,7 @@ private:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 

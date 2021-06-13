@@ -764,7 +764,7 @@ public:
         }
     }
 
-    ~DSoundAudioIODevice()
+    ~DSoundAudioIODevice() override
     {
         close();
     }

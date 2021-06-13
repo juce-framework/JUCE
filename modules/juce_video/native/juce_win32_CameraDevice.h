@@ -76,7 +76,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         {
             ComSmartPtr<IAMStreamConfig> streamConfig;
 
-            hr = captureGraphBuilder->FindInterface (&PIN_CATEGORY_CAPTURE, 0, filter,
+            hr = captureGraphBuilder->FindInterface (&PIN_CATEGORY_CAPTURE, nullptr, filter,
                                                      IID_IAMStreamConfig, (void**) streamConfig.resetAndGetPointerAddress());
 
             if (streamConfig != nullptr)
@@ -140,7 +140,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         AM_MEDIA_TYPE mt = {};
         hr = sampleGrabber->GetConnectedMediaType (&mt);
 
-        if (auto* pVih = (VIDEOINFOHEADER*) (mt.pbFormat))
+        if (auto* pVih = unalignedPointerCast<VIDEOINFOHEADER*> (mt.pbFormat))
         {
             width = pVih->bmiHeader.biWidth;
             height = pVih->bmiHeader.biHeight;
@@ -316,7 +316,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                 for (int i = 0; i < height; ++i)
                     memcpy (destData.getLinePointer ((height - 1) - i),
                             buffer + lineStride * i,
-                            lineStride);
+                            (size_t) lineStride);
             }
 
             imageNeedsFlipping = true;
@@ -366,7 +366,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
         {
             if (auto fileSink = asfWriter.getInterface<IFileSinkFilter>())
             {
-                hr = fileSink->SetFileName (file.getFullPathName().toWideCharPointer(), 0);
+                hr = fileSink->SetFileName (file.getFullPathName().toWideCharPointer(), nullptr);
 
                 if (SUCCEEDED (hr))
                 {
@@ -402,7 +402,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                             const int fps[] = { 10, 15, 30 };
                             int maxFramesPerSecond = fps[jlimit (0, numElementsInArray (fps) - 1, quality & 0xff)];
 
-                            if ((quality & 0xff000000) != 0) // (internal hacky way to pass explicit frame rates for testing)
+                            if (((uint32_t) quality & 0xff000000) != 0) // (internal hacky way to pass explicit frame rates for testing)
                                 maxFramesPerSecond = (quality >> 24) & 0xff;
 
                             prof = prof.replace ("$WIDTH", String (width))
@@ -495,19 +495,19 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                     }();
 
                     ComSmartPtr<IBaseFilter> captureFilter;
-                    hr = moniker->BindToObject (context.get(), 0, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
+                    hr = moniker->BindToObject (context.get(), nullptr, IID_IBaseFilter, (void**) captureFilter.resetAndGetPointerAddress());
 
                     if (SUCCEEDED (hr))
                     {
                         ComSmartPtr<IPropertyBag> propertyBag;
-                        hr = moniker->BindToStorage (context.get(), 0, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
+                        hr = moniker->BindToStorage (context.get(), nullptr, IID_IPropertyBag, (void**) propertyBag.resetAndGetPointerAddress());
 
                         if (SUCCEEDED (hr))
                         {
                             VARIANT var;
                             var.vt = VT_BSTR;
 
-                            hr = propertyBag->Read (_T("FriendlyName"), &var, 0);
+                            hr = propertyBag->Read (_T("FriendlyName"), &var, nullptr);
                             propertyBag = nullptr;
 
                             if (SUCCEEDED (hr))
@@ -699,7 +699,7 @@ private:
 
         filter->EnumPins (enumerator.resetAndGetPointerAddress());
 
-        while (enumerator->Next (1, pin.resetAndGetPointerAddress(), 0) == S_OK)
+        while (enumerator->Next (1, pin.resetAndGetPointerAddress(), nullptr) == S_OK)
         {
             PIN_DIRECTION dir;
             pin->QueryDirection (&dir);
@@ -783,7 +783,7 @@ struct CameraDevice::ViewerComponent  : public Component,
         setSize (owner->width, owner->height);
     }
 
-    ~ViewerComponent()
+    ~ViewerComponent() override
     {
         if (owner != nullptr)
         {

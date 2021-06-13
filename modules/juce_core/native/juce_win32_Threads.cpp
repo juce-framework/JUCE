@@ -43,13 +43,13 @@ CriticalSection::CriticalSection() noexcept
     static_assert (sizeof (CRITICAL_SECTION) <= sizeof (lock),
                    "win32 lock array too small to hold CRITICAL_SECTION: please report this JUCE bug!");
 
-    InitializeCriticalSection ((CRITICAL_SECTION*) lock);
+    InitializeCriticalSection ((CRITICAL_SECTION*) &lock);
 }
 
-CriticalSection::~CriticalSection() noexcept        { DeleteCriticalSection ((CRITICAL_SECTION*) lock); }
-void CriticalSection::enter() const noexcept        { EnterCriticalSection ((CRITICAL_SECTION*) lock); }
-bool CriticalSection::tryEnter() const noexcept     { return TryEnterCriticalSection ((CRITICAL_SECTION*) lock) != FALSE; }
-void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRITICAL_SECTION*) lock); }
+CriticalSection::~CriticalSection() noexcept        { DeleteCriticalSection ((CRITICAL_SECTION*) &lock); }
+void CriticalSection::enter() const noexcept        { EnterCriticalSection ((CRITICAL_SECTION*) &lock); }
+bool CriticalSection::tryEnter() const noexcept     { return TryEnterCriticalSection ((CRITICAL_SECTION*) &lock) != FALSE; }
+void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRITICAL_SECTION*) &lock); }
 
 
 //==============================================================================
@@ -301,17 +301,17 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 class InterProcessLock::Pimpl
 {
 public:
-    Pimpl (String name, const int timeOutMillisecs)
+    Pimpl (String nameIn, const int timeOutMillisecs)
         : handle (nullptr), refCount (1)
     {
-        name = name.replaceCharacter ('\\', '/');
-        handle = CreateMutexW (nullptr, TRUE, ("Global\\" + name).toWideCharPointer());
+        nameIn = nameIn.replaceCharacter ('\\', '/');
+        handle = CreateMutexW (nullptr, TRUE, ("Global\\" + nameIn).toWideCharPointer());
 
         // Not 100% sure why a global mutex sometimes can't be allocated, but if it fails, fall back to
         // a local one. (A local one also sometimes fails on other machines so neither type appears to be
         // universally reliable)
         if (handle == nullptr)
-            handle = CreateMutexW (nullptr, TRUE, ("Local\\" + name).toWideCharPointer());
+            handle = CreateMutexW (nullptr, TRUE, ("Local\\" + nameIn).toWideCharPointer());
 
         if (handle != nullptr && GetLastError() == ERROR_ALREADY_EXISTS)
         {

@@ -26,6 +26,8 @@
 namespace juce
 {
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 int AccessibilityNativeHandle::idCounter = 0;
 
 //==============================================================================
@@ -100,7 +102,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::QueryInterface (REFIID refId, void** r
     *result = nullptr;
 
     if (! isElementValid())
-        return UIA_E_ELEMENTNOTAVAILABLE;
+        return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
     if ((refId == __uuidof (IRawElementProviderFragmentRoot) && ! isFragmentRoot()))
         return E_NOINTERFACE;
@@ -403,7 +405,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetRuntimeId (SAFEARRAY** pRetVal)
 
             for (LONG i = 0; i < 2; ++i)
             {
-                auto hr = SafeArrayPutElement (*pRetVal, &i, &rtid[i]);
+                auto hr = SafeArrayPutElement (*pRetVal, &i, &rtid[(size_t) i]);
 
                 if (FAILED (hr))
                     return E_FAIL;
@@ -441,7 +443,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetEmbeddedFragmentRoots (SAFEARRAY** 
 JUCE_COMRESULT AccessibilityNativeHandle::SetFocus()
 {
     if (! isElementValid())
-        return UIA_E_ELEMENTNOTAVAILABLE;
+        return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
     const WeakReference<Component> safeComponent (&accessibilityHandler.getComponent());
 
@@ -463,8 +465,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (IRawElementProviderF
                 return &accessibilityHandler;
 
             if (auto* peer = accessibilityHandler.getComponent().getPeer())
-                if (auto* handler = peer->getComponent().getAccessibilityHandler())
-                    return handler;
+                return peer->getComponent().getAccessibilityHandler();
 
             return nullptr;
         }();
@@ -475,7 +476,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (IRawElementProviderF
             return S_OK;
         }
 
-        return UIA_E_ELEMENTNOTAVAILABLE;
+        return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
     });
 }
 
@@ -551,5 +552,7 @@ String AccessibilityNativeHandle::getElementName() const
 
     return name;
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

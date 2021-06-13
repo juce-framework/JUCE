@@ -146,7 +146,10 @@ void CPUInformation::initialise() noexcept
     hasSSSE3 = (info[2] & (1 <<  9)) != 0;
     hasSSE41 = (info[2] & (1 << 19)) != 0;
     hasSSE42 = (info[2] & (1 << 20)) != 0;
+
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshift-sign-overflow")
     has3DNow = (info[1] & (1 << 31)) != 0;
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     callCPUID (info, 0x80000001);
     hasFMA4  = (info[2] & (1 << 16)) != 0;
@@ -327,8 +330,16 @@ bool SystemStats::isOperatingSystem64Bit()
    #else
     typedef BOOL (WINAPI* LPFN_ISWOW64PROCESS) (HANDLE, PBOOL);
 
+    const auto moduleHandle = GetModuleHandleA ("kernel32");
+
+    if (moduleHandle == nullptr)
+    {
+        jassertfalse;
+        return false;
+    }
+
     LPFN_ISWOW64PROCESS fnIsWow64Process
-        = (LPFN_ISWOW64PROCESS) GetProcAddress (GetModuleHandleA ("kernel32"), "IsWow64Process");
+        = (LPFN_ISWOW64PROCESS) GetProcAddress (moduleHandle, "IsWow64Process");
 
     BOOL isWow64 = FALSE;
 
@@ -396,7 +407,7 @@ public:
         LARGE_INTEGER f;
         QueryPerformanceFrequency (&f);
         hiResTicksPerSecond = f.QuadPart;
-        hiResTicksScaleFactor = 1000.0 / hiResTicksPerSecond;
+        hiResTicksScaleFactor = 1000.0 / (double) hiResTicksPerSecond;
     }
 
     inline int64 getHighResolutionTicks() noexcept
@@ -408,7 +419,7 @@ public:
 
     inline double getMillisecondCounterHiRes() noexcept
     {
-        return getHighResolutionTicks() * hiResTicksScaleFactor;
+        return (double) getHighResolutionTicks() * hiResTicksScaleFactor;
     }
 
     int64 hiResTicksPerSecond, hiResTicksOffset;

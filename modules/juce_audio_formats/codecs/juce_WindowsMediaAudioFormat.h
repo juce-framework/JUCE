@@ -39,7 +39,7 @@ class WindowsMediaAudioFormat  : public AudioFormat
 public:
     //==============================================================================
     WindowsMediaAudioFormat();
-    ~WindowsMediaAudioFormat();
+    ~WindowsMediaAudioFormat() override;
 
     //==============================================================================
     Array<int> getPossibleSampleRates() override;

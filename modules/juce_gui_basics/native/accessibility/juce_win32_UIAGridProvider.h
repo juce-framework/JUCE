@@ -45,8 +45,12 @@ public:
                 || ! isPositiveAndBelow (column, tableInterface.getNumColumns()))
                 return E_INVALIDARG;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
             if (auto* handler = tableInterface.getCellHandler (row, column))
                 handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             return S_OK;
         });
@@ -79,7 +83,7 @@ private:
             if (auto* tableInterface = getHandler().getTableInterface())
                 return callback (*tableInterface);
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 

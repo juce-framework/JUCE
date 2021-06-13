@@ -994,7 +994,7 @@ private:
 
    #if JUCE_WINDOWS && ! JUCE_MINGW
     #define JUCE_CHECKED_ITERATOR(msg, size) \
-        stdext::checked_array_iterator<typename std::remove_reference<decltype (msg)>::type> ((msg), (size))
+        stdext::checked_array_iterator<typename std::remove_reference<decltype (msg)>::type> ((msg), (size_t) (size))
    #else
     #define JUCE_CHECKED_ITERATOR(msg, size) (msg)
    #endif

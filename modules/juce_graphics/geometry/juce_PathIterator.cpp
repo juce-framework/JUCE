@@ -166,7 +166,11 @@ bool PathFlatteningIterator::next()
             auto errorX = m3x - x2;
             auto errorY = m3y - y2;
 
-            if (errorX * errorX + errorY * errorY > toleranceSquared)
+            auto outsideTolerance = errorX * errorX + errorY * errorY > toleranceSquared;
+            auto canBeSubdivided = (m3x != m1x && m3x != m2x)
+                                || (m3y != m1y && m3y != m2y);
+
+            if (outsideTolerance && canBeSubdivided)
             {
                 *stackPos++ = y3;
                 *stackPos++ = x3;
@@ -220,8 +224,14 @@ bool PathFlatteningIterator::next()
             auto error2X = m5x - x3;
             auto error2Y = m5y - y3;
 
-            if (error1X * error1X + error1Y * error1Y > toleranceSquared
-                 || error2X * error2X + error2Y * error2Y > toleranceSquared)
+            auto outsideTolerance = error1X * error1X + error1Y * error1Y > toleranceSquared
+                                 || error2X * error2X + error2Y * error2Y > toleranceSquared;
+            auto canBeSubdivided = (m4x != m1x && m4x != m2x)
+                                || (m4y != m1y && m4y != m2y)
+                                || (m5x != m3x && m5x != m2x)
+                                || (m5y != m3y && m5y != m2y);
+
+            if (outsideTolerance && canBeSubdivided)
             {
                 *stackPos++ = y4;
                 *stackPos++ = x4;

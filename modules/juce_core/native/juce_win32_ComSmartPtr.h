@@ -54,6 +54,8 @@ namespace juce
 #define JUCE_COMRESULT                   HRESULT STDMETHODCALLTYPE
 #define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 inline GUID uuidFromString (const char* s) noexcept
 {
     uint32 ints[4] = {};
@@ -222,5 +224,7 @@ private:
         return queryInterfaceWithType (refId, result, Tag<Ts>{}...);
     }
 };
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

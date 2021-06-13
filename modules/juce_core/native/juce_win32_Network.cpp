@@ -569,9 +569,9 @@ namespace MACAddressHelpers
         for (auto addr = start; addr != nullptr; addr = addr->Next)
         {
             if (addr->Address.lpSockaddr->sa_family == AF_INET)
-                result.addIfNotAlreadyThere (createAddress ((sockaddr_in*) addr->Address.lpSockaddr));
+                result.addIfNotAlreadyThere (createAddress (unalignedPointerCast<sockaddr_in*> (addr->Address.lpSockaddr)));
             else if (addr->Address.lpSockaddr->sa_family == AF_INET6 && includeIPv6)
-                result.addIfNotAlreadyThere (createAddress ((sockaddr_in6*) addr->Address.lpSockaddr));
+                result.addIfNotAlreadyThere (createAddress (unalignedPointerCast<sockaddr_in6*> (addr->Address.lpSockaddr)));
         }
     }
 }

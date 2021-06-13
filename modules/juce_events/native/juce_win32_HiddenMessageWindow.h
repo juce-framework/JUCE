@@ -97,8 +97,6 @@ public:
         SetWindowLongPtr (messageWindow.getHWND(), GWLP_USERDATA, (LONG_PTR) this);
     }
 
-    virtual ~DeviceChangeDetector() {}
-
     virtual void systemDeviceChanged() = 0;
 
     void triggerAsyncDeviceChangeCallback()

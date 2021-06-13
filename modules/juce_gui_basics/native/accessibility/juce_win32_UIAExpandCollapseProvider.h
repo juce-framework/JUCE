@@ -63,7 +63,7 @@ private:
     JUCE_COMRESULT invokeShowMenu()
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         const auto& handler = getHandler();
 
@@ -76,7 +76,7 @@ private:
             return S_OK;
         }
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     //==============================================================================

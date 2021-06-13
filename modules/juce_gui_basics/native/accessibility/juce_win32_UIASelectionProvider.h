@@ -26,6 +26,8 @@
 namespace juce
 {
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 JUCE_COMCLASS (ISelectionProvider2, "14f68475-ee1c-44f6-a869-d239381f0fe7")  : public ISelectionProvider
 {
     JUCE_COMCALL get_FirstSelectedItem   (IRawElementProviderSimple** retVal) = 0;
@@ -49,7 +51,7 @@ public:
     JUCE_COMRESULT AddToSelection() override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         const auto& handler = getHandler();
 
@@ -92,7 +94,7 @@ public:
     JUCE_COMRESULT RemoveFromSelection() override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         if (! isRadioButton)
         {
@@ -108,7 +110,7 @@ public:
     JUCE_COMRESULT Select() override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         AddToSelection();
 
@@ -248,5 +250,7 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIASelectionProvider)
 };
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce
