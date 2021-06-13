@@ -985,7 +985,7 @@ private:
                             auto resSourcesVar = targetVarName + "_REZ_SOURCES";
                             auto resOutputVar = targetVarName + "_REZ_OUTPUT";
 
-                            auto sdkVersion = config.getOSXSDKVersionString().upToFirstOccurrenceOf (" ", false, false);
+                            auto sdkVersion = config.getMacOSBaseSDKString().upToFirstOccurrenceOf (" ", false, false);
                             auto sysroot = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX" + sdkVersion + ".sdk";
 
                             build_tools::RelativePath rFile ("JuceLibraryCode/include_juce_audio_plugin_client_AU.r", build_tools::RelativePath::projectFolder);
