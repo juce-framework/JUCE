@@ -102,16 +102,4 @@ inline JUCE_COMRESULT withCheckedComArgs (Value* pRetVal, Object& handle, Callba
     return callback();
 }
 
-inline bool isEditableText (const AccessibilityHandler& handler)
-{
-    return handler.getRole() == AccessibilityRole::editableText
-        && handler.getTextInterface() != nullptr;
-}
-
-inline bool isReadOnlyText (const AccessibilityHandler& handler)
-{
-    return handler.getRole() == AccessibilityRole::staticText
-        && handler.getValueInterface() != nullptr;
-}
-
 } // namespace juce

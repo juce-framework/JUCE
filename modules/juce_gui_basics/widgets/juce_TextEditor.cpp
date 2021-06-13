@@ -2700,27 +2700,11 @@ public:
         : AccessibilityHandler (textEditorToWrap,
                                 textEditorToWrap.isReadOnly() ? AccessibilityRole::staticText : AccessibilityRole::editableText,
                                 {},
-                                makeInterfaces (textEditorToWrap))
+                                { std::make_unique<TextEditorTextInterface> (textEditorToWrap) })
     {
     }
 
 private:
-    class TextEditorValueInterface  : public AccessibilityTextValueInterface
-    {
-    public:
-        explicit TextEditorValueInterface (TextEditor& textEditorToWrap)
-            : textEditor (textEditorToWrap)
-        {
-        }
-
-        bool isReadOnly() const override                 { return true; }
-        String getCurrentValueAsString() const override  { return textEditor.getText(); }
-        void setValueAsString (const String&) override   {}
-
-    private:
-        TextEditor& textEditor;
-    };
-
     class TextEditorTextInterface  : public AccessibilityTextInterface
     {
     public:
@@ -2730,6 +2714,7 @@ private:
         }
 
         bool isDisplayingProtectedText() const override      { return textEditor.getPasswordCharacter() != 0; }
+        bool isReadOnly() const override                     { return textEditor.isReadOnly(); }
 
         int getTotalNumCharacters() const override           { return textEditor.getText().length(); }
         Range<int> getSelection() const override             { return textEditor.getHighlightedRegion(); }
@@ -2771,14 +2756,6 @@ private:
     private:
         TextEditor& textEditor;
     };
-
-    static AccessibilityHandler::Interfaces makeInterfaces (TextEditor& textEditor)
-    {
-        if (textEditor.isReadOnly())
-            return { std::make_unique<TextEditorValueInterface> (textEditor) };
-
-        return { std::make_unique<TextEditorTextInterface> (textEditor) };
-    }
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditorAccessibilityHandler)

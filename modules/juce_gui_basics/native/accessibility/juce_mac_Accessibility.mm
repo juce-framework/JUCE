@@ -31,7 +31,9 @@ namespace juce
  using NSAccessibilityNotificationName = NSString*;
 #endif
 
-#if (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
+#if JUCE_OBJC_HAS_AVAILABLE_FEATURE || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
+
+#define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 //==============================================================================
 class AccessibilityHandler::AccessibilityNativeImpl
@@ -65,10 +67,17 @@ private:
 
         static Holder create (AccessibilityHandler& handler)
         {
-            static AccessibilityElement cls;
-            Holder element ([cls.createInstance() init]);
-            object_setInstanceVariable (element.get(), "handler", &handler);
-            return element;
+           #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
+            if (@available (macOS 10.10, *))
+           #endif
+            {
+                static AccessibilityElement cls;
+                Holder element ([cls.createInstance() init]);
+                object_setInstanceVariable (element.get(), "handler", &handler);
+                return element;
+            }
+
+            return {};
         }
 
     private:
@@ -170,7 +179,8 @@ private:
         static bool hasEditableText (AccessibilityHandler& handler) noexcept
         {
             return handler.getRole() == AccessibilityRole::editableText
-                && handler.getTextInterface() != nullptr;
+                && handler.getTextInterface() != nullptr
+                && ! handler.getTextInterface()->isReadOnly();
         }
 
         static bool isSelectable (AccessibleState state) noexcept
@@ -396,6 +406,7 @@ private:
                     case AccessibilityRole::comboBox:     return NSAccessibilityPopUpButtonRole;
                     case AccessibilityRole::image:        return NSAccessibilityImageRole;
                     case AccessibilityRole::slider:       return NSAccessibilitySliderRole;
+                    case AccessibilityRole::label:        return NSAccessibilityStaticTextRole;
                     case AccessibilityRole::staticText:   return NSAccessibilityStaticTextRole;
                     case AccessibilityRole::editableText: return NSAccessibilityTextAreaRole;
                     case AccessibilityRole::menuItem:     return NSAccessibilityMenuItemRole;
@@ -504,11 +515,8 @@ private:
         {
             if (auto* handler = getHandler (self))
             {
-                if (hasEditableText (*handler))
-                {
-                    auto* textInterface = handler->getTextInterface();
+                if (auto* textInterface = handler->getTextInterface())
                     return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
-                }
 
                 if (handler->getCurrentState().isCheckable())
                     return handler->getCurrentState().isChecked() ? @(1) : @(0);
@@ -1088,6 +1096,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
             case AccessibilityEvent::textChanged:
             case AccessibilityEvent::valueChanged:          return NSAccessibilityValueChangedNotification;
+            case AccessibilityEvent::titleChanged:          return NSAccessibilityTitleChangedNotification;
             case AccessibilityEvent::structureChanged:      return NSAccessibilityLayoutChangedNotification;
         }
 
@@ -1100,7 +1109,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
         sendAccessibilityEvent (accessibilityElement, notification,
                                 (notification == NSAccessibilityLayoutChangedNotification
-                                   ? @{ NSAccessibilityUIElementsKey: accessibilityElement }
+                                   ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
                                    : nil));
     }
 }

@@ -523,7 +523,7 @@ class LabelAccessibilityHandler  : public AccessibilityHandler
 public:
     explicit LabelAccessibilityHandler (Label& labelToWrap)
         : AccessibilityHandler (labelToWrap,
-                                AccessibilityRole::staticText,
+                                AccessibilityRole::label,
                                 getAccessibilityActions (labelToWrap),
                                 { std::make_unique<LabelValueInterface> (labelToWrap) }),
           label (labelToWrap)

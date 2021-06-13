@@ -746,7 +746,7 @@ struct MenuWindow  : public Component
 
     bool doesAnyJuceCompHaveFocus()
     {
-        if (! Process::isForegroundProcess())
+        if (! isForegroundOrEmbeddedProcess (componentAttachedTo))
             return false;
 
         if (Component::getCurrentlyFocusedComponent() != nullptr)

@@ -1127,13 +1127,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTableInterface.h"
     "../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTextInterface.h"
     "../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityValueInterface.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ButtonAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ComboBoxAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_LabelAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_SliderAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TableListBoxAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TextEditorAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TreeViewAccessibilityHandler.h"
     "../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.cpp"
     "../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.h"
     "../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityState.h"
@@ -2614,13 +2607,6 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/accessibilit
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTableInterface.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTextInterface.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityValueInterface.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ButtonAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ComboBoxAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_LabelAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_SliderAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TableListBoxAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TextEditorAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TreeViewAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityState.h" PROPERTIES HEADER_FILE_ONLY TRUE)

@@ -95,7 +95,16 @@ public:
                                                          backing: NSBackingStoreBuffered
                                                            defer: YES];
             setOwner (window, this);
-            [window setAccessibilityElement: component.getAccessibilityHandler() != nullptr];
+
+          #if JUCE_OBJC_HAS_AVAILABLE_FEATURE || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
+           #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
+            if (@available (macOS 10.10, *))
+           #endif
+            {
+                [window setAccessibilityElement: component.getAccessibilityHandler() != nullptr];
+            }
+           #endif
+
             [window orderOut: nil];
             [window setDelegate: (id<NSWindowDelegate>) window];
 

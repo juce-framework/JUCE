@@ -916,8 +916,8 @@ public:
             return String (CharPointer_UTF16 (reinterpret_cast<const CharPointer_UTF16::CharType*> (text)));
         }
 
-        Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v * info.stepCount; }
-        Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v / info.stepCount; }
+        Vst::ParamValue toPlain (Vst::ParamValue v) const override       { return v * (info.stepCount + 1); }
+        Vst::ParamValue toNormalized (Vst::ParamValue v) const override  { return v / (info.stepCount + 1); }
 
     private:
         AudioProcessor& owner;
@@ -2824,7 +2824,12 @@ public:
                 info.busType = (index == 0 ? Vst::kMain : Vst::kAux);
                #endif
 
+               #ifdef JucePlugin_PreferredChannelConfigurations
+                info.flags = Vst::BusInfo::kDefaultActive;
+               #else
                 info.flags = (bus->isEnabledByDefault()) ? Vst::BusInfo::kDefaultActive : 0;
+               #endif
+
                 return kResultTrue;
             }
         }

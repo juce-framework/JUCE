@@ -2068,6 +2068,12 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_gl.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_gles2.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2714,13 +2720,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityTableInterface.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityTextInterface.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityValueInterface.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ButtonAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ComboBoxAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_LabelAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_SliderAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TableListBoxAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TextEditorAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TreeViewAccessibilityHandler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityHandler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityState.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\application\juce_Application.h"/>
@@ -2916,13 +2915,15 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Matrix3D.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Quaternion.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\geometry\juce_Vector3D.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_MissingGLDefinitions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_android.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_ios.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_linux_X11.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_osx.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGL_win32.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\native\juce_OpenGLExtensions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_gl.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_gles2.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_khrplatform.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLFrameBuffer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLGraphicsContext.h"/>
@@ -2932,6 +2933,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLRenderer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLShaderProgram.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_OpenGLTexture.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_wgl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h"/>

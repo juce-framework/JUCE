@@ -621,7 +621,8 @@ private:
 };
 
 //==============================================================================
-class TreeView::TreeViewport  : public Viewport
+class TreeView::TreeViewport  : public Viewport,
+                                private Timer
 {
 public:
     TreeViewport() = default;
@@ -645,9 +646,7 @@ public:
         lastX = newVisibleArea.getX();
         updateComponents (hasScrolledSideways);
 
-        if (auto* tree = getParentComponent())
-            if (auto* handler = tree->getAccessibilityHandler())
-                handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+        startTimer (50);
     }
 
     ContentComponent* getContentComp() const noexcept
@@ -665,6 +664,15 @@ public:
     }
 
 private:
+    void timerCallback() override
+    {
+        stopTimer();
+
+        if (auto* tree = getParentComponent())
+            if (auto* handler = tree->getAccessibilityHandler())
+                handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+    }
+
     int lastX = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewport)

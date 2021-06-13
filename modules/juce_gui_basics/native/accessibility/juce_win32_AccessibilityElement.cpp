@@ -60,6 +60,7 @@ static long roleToControlTypeId (AccessibilityRole roleType)
         case AccessibilityRole::comboBox:     return UIA_ComboBoxControlTypeId;
         case AccessibilityRole::image:        return UIA_ImageControlTypeId;
         case AccessibilityRole::slider:       return UIA_SliderControlTypeId;
+        case AccessibilityRole::label:        return UIA_TextControlTypeId;
         case AccessibilityRole::staticText:   return UIA_TextControlTypeId;
         case AccessibilityRole::editableText: return UIA_EditControlTypeId;
         case AccessibilityRole::menuItem:     return UIA_MenuItemControlTypeId;
@@ -160,21 +161,15 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 case UIA_TextPatternId:
                 case UIA_TextPattern2Id:
                 {
-                    if (accessibilityHandler.getTextInterface() != nullptr
-                        || isReadOnlyText (accessibilityHandler))
-                    {
+                    if (accessibilityHandler.getTextInterface() != nullptr)
                         return new UIATextProvider (this);
-                    }
 
                     break;
                 }
                 case UIA_ValuePatternId:
                 {
-                    if (accessibilityHandler.getValueInterface() != nullptr
-                        || isEditableText (accessibilityHandler))
-                    {
+                    if (accessibilityHandler.getValueInterface() != nullptr)
                         return new UIAValueProvider (this);
-                    }
 
                     break;
                 }

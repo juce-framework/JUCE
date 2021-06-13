@@ -105,7 +105,21 @@
 
 namespace juce
 {
-    extern bool juce_areThereAnyAlwaysOnTopWindows();
+    bool juce_areThereAnyAlwaysOnTopWindows();
+
+    bool isEmbeddedInForegroundProcess (Component* c);
+
+   #if ! JUCE_WINDOWS
+    bool isEmbeddedInForegroundProcess (Component*) { return false; }
+   #endif
+
+    /*  Returns true if this process is in the foreground, or if the viewComponent
+        is embedded into a window owned by the foreground process.
+    */
+    bool isForegroundOrEmbeddedProcess (Component* viewComponent)
+    {
+        return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
+    }
 }
 
 #include "accessibility/juce_AccessibilityHandler.cpp"
@@ -322,4 +336,17 @@ bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
   #include "native/juce_android_ContentSharer.cpp"
  #endif
 
+#endif
+
+#if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
+namespace juce
+{
+    class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
+    void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
+    void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}
+    AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const { return nullptr; }
+    AccessibilityHandler::AccessibilityNativeImpl* AccessibilityHandler::createNativeImpl (AccessibilityHandler&) { return nullptr; }
+    void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::AccessibilityNativeImpl*) const noexcept {}
+    void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent) {}
+}
 #endif
