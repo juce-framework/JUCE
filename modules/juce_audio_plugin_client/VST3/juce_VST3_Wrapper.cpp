@@ -1521,15 +1521,8 @@ private:
 
         tresult PLUGIN_API queryInterface (const TUID targetIID, void** obj) override
         {
-            // TODO JUCE_ARA Why is TEST_FOR_AND_RETURN_IF_VALID below commented out in main line JUCE?
-            // It seems to work just fine. We're enabling it here because for ARA view embedding is mandatory.
-           #if JucePlugin_Enable_ARA
             TEST_FOR_AND_RETURN_IF_VALID (targetIID, Steinberg::IPlugViewContentScaleSupport)
             return Vst::EditorView::queryInterface (targetIID, obj);
-           #else
-            ignoreUnused (targetIID, obj);
-            return kResultFalse;
-           #endif
         }
 
         REFCOUNT_METHODS (Vst::EditorView)
