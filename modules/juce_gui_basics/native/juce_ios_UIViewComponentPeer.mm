@@ -39,7 +39,11 @@ static UIInterfaceOrientation getWindowOrientation()
     UIApplication* sharedApplication = [UIApplication sharedApplication];
 
    #if (defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0)
-    return [[[[sharedApplication windows] firstObject] windowScene] interfaceOrientation];
+    for (UIScene* scene in [sharedApplication connectedScenes])
+        if ([scene isKindOfClass: [UIWindowScene class]])
+            return [(UIWindowScene*) scene interfaceOrientation];
+
+    return UIInterfaceOrientationPortrait;
    #else
     return [sharedApplication statusBarOrientation];
    #endif

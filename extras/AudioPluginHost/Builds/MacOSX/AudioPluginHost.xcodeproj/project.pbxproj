@@ -307,7 +307,7 @@
 		ADE6E539DB98A302483A82D0 = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1250;
+				LastUpgradeCheck = 1300;
 				ORGANIZATIONNAME = "Raw Material Software Limited";
 				TargetAttributes = {
 					DE12B7643D374BFF7E4FEB1C = {
