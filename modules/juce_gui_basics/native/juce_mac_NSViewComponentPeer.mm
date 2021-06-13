@@ -470,9 +470,14 @@ public:
     void toFront (bool makeActiveWindow) override
     {
         if (isSharedWindow)
-            [[view superview] addSubview: view
-                              positioned: NSWindowAbove
-                              relativeTo: nil];
+        {
+            NSView* superview = [view superview];
+            bool isAboveSiblings = [[superview.subviews lastObject] isEqual: view];
+            if (! isAboveSiblings)
+                [superview addSubview: view
+                           positioned: NSWindowAbove
+                           relativeTo: nil];
+        }
 
         if (window != nil && component.isVisible())
         {
