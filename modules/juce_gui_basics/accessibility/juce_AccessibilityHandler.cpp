@@ -74,7 +74,10 @@ AccessibilityHandler::~AccessibilityHandler()
 //==============================================================================
 AccessibleState AccessibilityHandler::getCurrentState() const
 {
-    auto state = AccessibleState().withFocusable();
+    AccessibleState state;
+
+    if (! component.isCurrentlyBlockedByAnotherModalComponent())
+        state = state.withFocusable();
 
     return hasFocus (false) ? state.withFocused() : state;
 }
@@ -210,7 +213,7 @@ std::vector<AccessibilityHandler*> AccessibilityHandler::getChildren() const
 
         if (auto* handler = findEnclosingHandler (focusableComponent))
         {
-            if (! isParentOf (handler))
+            if (! handler->getCurrentState().isFocusable() || ! isParentOf (handler))
                 return;
 
             if (auto* unignored = getFirstUnignoredDescendant (handler))
@@ -283,16 +286,8 @@ void AccessibilityHandler::grabFocusInternal (bool canTryParent)
 {
     if (getCurrentState().isFocusable() && ! isIgnored())
     {
-        const auto blockedByModal = component.isCurrentlyBlockedByAnotherModalComponent();
-
-        if (blockedByModal)
-            Component::getCurrentlyModalComponent()->inputAttemptWhenModal();
-
-        if (! blockedByModal || ! component.isCurrentlyBlockedByAnotherModalComponent())
-        {
-            takeFocus();
-            return;
-        }
+        takeFocus();
+        return;
     }
 
     if (isParentOf (currentlyFocusedHandler))
