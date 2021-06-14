@@ -103,7 +103,7 @@ public:
             {
                 [window setAccessibilityElement: component.getAccessibilityHandler() != nullptr];
             }
-           #endif
+          #endif
 
             [window orderOut: nil];
             [window setDelegate: (id<NSWindowDelegate>) window];
