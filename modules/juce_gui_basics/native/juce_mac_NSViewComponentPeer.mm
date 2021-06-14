@@ -2136,6 +2136,7 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
         addMethod (@selector (window:shouldPopUpDocumentPathMenu:), shouldPopUpPathMenu, "B@:@", @encode (NSMenu*));
         addMethod (@selector (isFlipped),                           isFlipped,                 "c@:");
 
+        addMethod (@selector (accessibilityTitle),                  getAccessibilityTitle,     "@@:");
         addMethod (@selector (accessibilityLabel),                  getAccessibilityLabel,     "@@:");
         addMethod (@selector (accessibilityTopLevelUIElement),      getAccessibilityWindow,    "@@:");
         addMethod (@selector (accessibilityWindow),                 getAccessibilityWindow,    "@@:");
@@ -2289,6 +2290,11 @@ private:
             return owner->windowRepresentsFile;
 
         return false;
+    }
+
+    static NSString* getAccessibilityTitle (id self, SEL)
+    {
+        return [self title];
     }
 
     static NSString* getAccessibilityLabel (id self, SEL)
