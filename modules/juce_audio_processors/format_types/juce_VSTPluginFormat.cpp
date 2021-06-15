@@ -1978,6 +1978,21 @@ struct VSTPluginInstance     : public AudioPluginInstance,
         return false;
     }
 
+    bool updateSizeFromEditor (int w, int h)
+    {
+        editorSize = { w, h };
+
+        if (auto* editor = getActiveEditor())
+        {
+            editor->setSize (w, h);
+            return true;
+        }
+
+        return false;
+    }
+
+    Rectangle<int> getEditorSize() const { return editorSize; }
+
     Vst2::AEffect* vstEffect;
     ModuleHandle::Ptr vstModule;
 
@@ -2056,6 +2071,7 @@ private:
     AudioBuffer<double> tmpBufferDouble;
     HeapBlock<double*> channelBufferDouble;
     std::unique_ptr<VST2BypassParameter> bypassParam;
+    Rectangle<int> editorSize;
 
     std::unique_ptr<VSTXMLInfo> xmlInfo;
 
@@ -2130,13 +2146,13 @@ private:
             if (auto* peer = ed->getTopLevelComponent()->getPeer())
             {
                 auto scale = peer->getPlatformScaleFactor();
-                ed->setSize (roundToInt (width / scale), roundToInt (height / scale));
+                updateSizeFromEditor (roundToInt (width / scale), roundToInt (height / scale));
 
                 return;
             }
            #endif
 
-            ed->setSize (width, height);
+            updateSizeFromEditor (width, height);
         }
     }
 
@@ -2787,9 +2803,9 @@ public:
         dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
 
         if (rect != nullptr)
-            setSize (rect->right - rect->left, rect->bottom - rect->top);
+            updateSizeFromEditor (rect->right - rect->left, rect->bottom - rect->top);
         else
-            setSize (1, 1);
+            updateSizeFromEditor (1, 1);
 
         setOpaque (true);
         setVisible (true);
@@ -2813,6 +2829,12 @@ public:
     }
 
     //==============================================================================
+    void updateSizeFromEditor (int w, int h)
+    {
+        if (! plugin.updateSizeFromEditor (w, h))
+            setSize (w, h);
+    }
+
    #if JUCE_MAC
     void paint (Graphics& g) override
     {
@@ -2872,24 +2894,32 @@ public:
         {
             const ScopedValueSetter<bool> recursiveResizeSetter (recursiveResize, true);
 
-            auto pos = (peer->getAreaCoveredBy (*this).toFloat() * nativeScaleFactor).toNearestInt();
+            const auto editorSize = plugin.getEditorSize();
+            const auto pos = (peer->getAreaCoveredBy (*this).toFloat() * nativeScaleFactor).toNearestInt();
 
            #if JUCE_WINDOWS
             if (pluginHWND != 0)
             {
                 ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
-                MoveWindow (pluginHWND, pos.getX(), pos.getY(), pos.getWidth(), pos.getHeight(), TRUE);
+                MoveWindow (pluginHWND,
+                            pos.getX(),
+                            pos.getY(),
+                            editorSize.getWidth(),
+                            editorSize.getHeight(),
+                            TRUE);
             }
            #elif JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
             {
-                X11Symbols::getInstance()->xMoveResizeWindow (display, pluginWindow,
-                                                              pos.getX(), pos.getY(),
-                                                              (unsigned int) pos.getWidth(),
-                                                              (unsigned int) pos.getHeight());
-
-                X11Symbols::getInstance()->xMapRaised (display, pluginWindow);
-                X11Symbols::getInstance()->xFlush (display);
+                auto* symbols = X11Symbols::getInstance();
+                symbols->xMoveResizeWindow (display,
+                                            pluginWindow,
+                                            pos.getX(),
+                                            pos.getY(),
+                                            (unsigned int) editorSize.getWidth(),
+                                            (unsigned int) editorSize.getHeight());
+                symbols->xMapRaised (display, pluginWindow);
+                symbols->xFlush (display);
             }
            #endif
         }
@@ -3069,7 +3099,7 @@ private:
         w = jmax (w, 32);
         h = jmax (h, 32);
 
-        setSize (w, h);
+        updateSizeFromEditor (w, h);
 
         startTimer (18 + juce::Random::getSystemRandom().nextInt (5));
         repaint();
@@ -3185,7 +3215,7 @@ private:
         w = jmax (w, 32);
         h = jmax (h, 32);
 
-        setSize (w, h);
+        updateSizeFromEditor (w, h);
 
        #if JUCE_WINDOWS
         checkPluginWindowSize();
@@ -3268,7 +3298,7 @@ private:
                 // If plug-in isn't DPI aware then we need to resize our window, but this may cause a recursive resize
                 // so add a check
                 if (! willCauseRecursiveResize (w, h))
-                    setSize (w, h);
+                    updateSizeFromEditor (w, h);
 
                 sizeCheckCount = 0;
             }
