@@ -2174,6 +2174,7 @@ class JuceVST3Component : public Vst::IComponent,
                           public Vst::IAudioProcessor,
                           public Vst::IUnitInfo,
                           public Vst::IConnectionPoint,
+                          public Vst::IProcessContextRequirements,
                           public AudioPlayHead
 {
 public:
@@ -3177,6 +3178,7 @@ private:
                                              UniqueBase<Vst::IAudioProcessor>{},
                                              UniqueBase<Vst::IUnitInfo>{},
                                              UniqueBase<Vst::IConnectionPoint>{},
+                                             UniqueBase<Vst::IProcessContextRequirements>{},
                                              SharedBase<FUnknown, Vst::IComponent>{});
 
         if (result.isOk())
@@ -3432,6 +3434,21 @@ private:
             return nullptr;
 
         return buffer.getWritePointer (channel);
+    }
+
+    Steinberg::uint32 PLUGIN_API getProcessContextRequirements() override
+    {
+        return kNeedSystemTime
+             | kNeedContinousTimeSamples
+             | kNeedProjectTimeMusic
+             | kNeedBarPositionMusic
+             | kNeedCycleMusic
+             | kNeedSamplesToNextClock
+             | kNeedTempo
+             | kNeedTimeSignature
+             | kNeedChord
+             | kNeedFrameRate
+             | kNeedTransportState;
     }
 
     void preparePlugin (double sampleRate, int bufferSize)
