@@ -86,8 +86,9 @@ namespace ColourHelpers
 
                 if (lightness > 0.0f)
                     hue = getHue (col);
-
-                saturation = ((float) (hi - lo) / 255.0f) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
+    
+                if (!approximatelyEqual(hi, lo))
+                    saturation = ((float) (hi - lo) / 255.0f) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
             }
         }
 
