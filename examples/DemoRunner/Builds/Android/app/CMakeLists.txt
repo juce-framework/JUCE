@@ -585,6 +585,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.h"
+    "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditorHostContext.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorListener.h"
@@ -613,12 +614,15 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorParameterWithID.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h"
+    "../../../../../modules/juce_audio_processors/utilities/juce_ExtensionsVisitor.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.h"
+    "../../../../../modules/juce_audio_processors/utilities/juce_VST3ClientExtensions.h"
+    "../../../../../modules/juce_audio_processors/utilities/juce_VSTCallbackHandler.h"
     "../../../../../modules/juce_audio_processors/juce_audio_processors.cpp"
     "../../../../../modules/juce_audio_processors/juce_audio_processors.mm"
     "../../../../../modules/juce_audio_processors/juce_audio_processors.h"
@@ -2366,6 +2370,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/proces
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditorHostContext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorListener.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2394,12 +2399,15 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/utilit
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorParameterWithID.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ExtensionsVisitor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_VST3ClientExtensions.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_VSTCallbackHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/juce_audio_processors.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/juce_audio_processors.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/juce_audio_processors.h" PROPERTIES HEADER_FILE_ONLY TRUE)
