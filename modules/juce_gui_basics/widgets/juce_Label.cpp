@@ -374,8 +374,7 @@ void Label::focusGained (FocusChangeType cause)
 {
     if (editSingleClick
          && isEnabled()
-         && (cause == focusChangedByTabKey
-             || (cause == focusChangedDirectly && ! isCurrentlyModal())))
+         && cause == focusChangedByTabKey)
     {
         showEditor();
     }
