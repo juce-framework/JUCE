@@ -42,6 +42,9 @@ namespace ColourHelpers
         auto hi = jmax (r, g, b);
         auto lo = jmin (r, g, b);
 
+        if (approximatelyEqual(hi, lo))
+            return 0;
+
         float hue = 0.0f;
 
         if (hi > 0)
