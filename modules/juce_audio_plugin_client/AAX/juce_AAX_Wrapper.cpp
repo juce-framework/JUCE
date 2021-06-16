@@ -1343,7 +1343,7 @@ namespace AAXClasses
                     return foundValid;
 
                 for (int i = 2; i < numInputBuses; ++i)
-                    if (currentLayout.outputBuses.getReference (i) != AudioChannelSet::disabled())
+                    if (! currentLayout.inputBuses.getReference (i).isDisabled())
                         return foundValid;
             }
 
