@@ -116,9 +116,9 @@ struct SIMDRegisterDemoDSP
 
             switch (typeParam.getCurrentSelectedID())
             {
-                case 1:   *iirCoefficients = *IIR::Coefficients<float>::makeLowPass  (sampleRate, cutoff, qVal); break;
-                case 2:   *iirCoefficients = *IIR::Coefficients<float>::makeHighPass (sampleRate, cutoff, qVal); break;
-                case 3:   *iirCoefficients = *IIR::Coefficients<float>::makeBandPass (sampleRate, cutoff, qVal); break;
+                case 1:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeLowPass  (sampleRate, cutoff, qVal); break;
+                case 2:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, cutoff, qVal); break;
+                case 3:   *iirCoefficients = IIR::ArrayCoefficients<float>::makeBandPass (sampleRate, cutoff, qVal); break;
                 default:  break;
             }
         }

@@ -32,6 +32,26 @@ namespace IIR
 
 #ifndef DOXYGEN
 
+template <typename NumericType>
+template <size_t Num>
+Coefficients<NumericType>& Coefficients<NumericType>::assignImpl (const NumericType* values)
+{
+    static_assert (Num % 2 == 0, "Must supply an even number of coefficients");
+    const auto a0Index = Num / 2;
+    const auto a0 = values[a0Index];
+    const auto a0Inv = a0 != NumericType() ? static_cast<NumericType> (1) / values[a0Index]
+                                           : NumericType();
+
+    coefficients.clearQuick();
+    coefficients.ensureStorageAllocated ((int) jmax ((size_t) 8, Num));
+
+    for (size_t i = 0; i < Num; ++i)
+        if (i != a0Index)
+            coefficients.add (values[i] * a0Inv);
+
+    return *this;
+}
+
 //==============================================================================
 template <typename SampleType>
 Filter<SampleType>::Filter()
@@ -192,7 +212,7 @@ SampleType JUCE_VECTOR_CALLTYPE Filter<SampleType>::processSample (SampleType sa
     check();
     auto* c = coefficients->getRawCoefficients();
 
-    auto output= (c[0] * sample) + state[0];
+    auto output = (c[0] * sample) + state[0];
 
     for (size_t j = 0; j < order - 1; ++j)
         state[j] = (c[j + 1] * sample) - (c[order + j + 1] * output) + state[j + 1];

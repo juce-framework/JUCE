@@ -83,9 +83,9 @@ struct IIRFilterDemoDSP
 
             switch (typeParam.getCurrentSelectedID())
             {
-                case 1:     *iir.state = *IIR::Coefficients<float>::makeLowPass  (sampleRate, cutoff, qVal); break;
-                case 2:     *iir.state = *IIR::Coefficients<float>::makeHighPass (sampleRate, cutoff, qVal); break;
-                case 3:     *iir.state = *IIR::Coefficients<float>::makeBandPass (sampleRate, cutoff, qVal); break;
+                case 1:     *iir.state = IIR::ArrayCoefficients<float>::makeLowPass  (sampleRate, cutoff, qVal); break;
+                case 2:     *iir.state = IIR::ArrayCoefficients<float>::makeHighPass (sampleRate, cutoff, qVal); break;
+                case 3:     *iir.state = IIR::ArrayCoefficients<float>::makeBandPass (sampleRate, cutoff, qVal); break;
                 default:    break;
             }
         }
