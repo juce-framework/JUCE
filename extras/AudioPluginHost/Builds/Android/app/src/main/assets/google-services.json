@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "50526851168",
+    "firebase_url": "https://pushnotificationsdemorunner.firebaseio.com",
+    "project_id": "pushnotificationsdemorunner",
+    "storage_bucket": "pushnotificationsdemorunner.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:50526851168:android:6fa3f0d4b79f1940",
+        "android_client_info": {
+          "package_name": "com.juce.demorunner"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "50526851168-vgn4rv0vimpc8kdm7ecmb3g95t1et0t5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMwLOFACFo7_SHm9iiVhoa0zCjFyMsgFc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "50526851168-vgn4rv0vimpc8kdm7ecmb3g95t1et0t5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
