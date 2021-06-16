@@ -168,11 +168,12 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::focusChanged:      return UIA_AutomationFocusChangedEventId;
-            case InternalAccessibilityEvent::windowOpened:      return UIA_Window_WindowOpenedEventId;
-            case InternalAccessibilityEvent::windowClosed:      return UIA_Window_WindowClosedEventId;
+            case InternalAccessibilityEvent::focusChanged:           return UIA_AutomationFocusChangedEventId;
+            case InternalAccessibilityEvent::windowOpened:           return UIA_Window_WindowOpenedEventId;
+            case InternalAccessibilityEvent::windowClosed:           return UIA_Window_WindowClosedEventId;
             case InternalAccessibilityEvent::elementCreated:
-            case InternalAccessibilityEvent::elementDestroyed:  break;
+            case InternalAccessibilityEvent::elementDestroyed:
+            case InternalAccessibilityEvent::elementMovedOrResized:  break;
         }
 
         return {};

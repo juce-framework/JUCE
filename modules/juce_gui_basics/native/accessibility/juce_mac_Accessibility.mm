@@ -1069,11 +1069,12 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::elementCreated:    return NSAccessibilityCreatedNotification;
-            case InternalAccessibilityEvent::elementDestroyed:  return NSAccessibilityUIElementDestroyedNotification;
-            case InternalAccessibilityEvent::focusChanged:      return NSAccessibilityFocusedUIElementChangedNotification;
-            case InternalAccessibilityEvent::windowOpened:      return NSAccessibilityWindowCreatedNotification;
-            case InternalAccessibilityEvent::windowClosed:      break;
+            case InternalAccessibilityEvent::elementCreated:         return NSAccessibilityCreatedNotification;
+            case InternalAccessibilityEvent::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
+            case InternalAccessibilityEvent::elementMovedOrResized:  return NSAccessibilityLayoutChangedNotification;
+            case InternalAccessibilityEvent::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
+            case InternalAccessibilityEvent::windowOpened:           return NSAccessibilityWindowCreatedNotification;
+            case InternalAccessibilityEvent::windowClosed:           break;
         }
 
         return NSAccessibilityNotificationName{};

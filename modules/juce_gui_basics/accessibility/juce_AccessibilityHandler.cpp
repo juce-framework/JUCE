@@ -34,6 +34,7 @@ enum class InternalAccessibilityEvent
 {
     elementCreated,
     elementDestroyed,
+    elementMovedOrResized,
     focusChanged,
     windowOpened,
     windowClosed
