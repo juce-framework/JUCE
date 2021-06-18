@@ -631,9 +631,9 @@ public:
                    "This is useful if you want to use different bundle identifiers for Mac and iOS exporters in the same project.");
 
         props.add (new TextPropertyComponent (iosDevelopmentTeamIDValue, "Development Team ID", 10, false),
-                   "The Development Team ID to be used for setting up code-signing your app. This is a ten-character "
-                   "string (for example, \"S7B6T5XJ2Q\") that describes the distribution certificate Apple issued to you. "
-                   "You can find this string in the OS X app Keychain Access under \"Certificates\".");
+                   "The Team ID to be used for setting up code-signing for your application. "
+                   "This is a ten-character string (for example \"S7B6T5XJ2Q\") that can be found under the \"Organisational Unit\" "
+                   "field of your developer certificate in Keychain Access or in the membership page of your account on developer.apple.com.");
 
         if (iOS)
             props.add (new TextPropertyComponentWithEnablement (iosAppGroupsIDValue, iosAppGroupsValue, "App Group ID", 256, false),
