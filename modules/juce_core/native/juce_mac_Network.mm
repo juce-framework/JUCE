@@ -1106,9 +1106,17 @@ private:
 
         if (NSURL* nsURL = [NSURL URLWithString: juceStringToNS (url.toString (! addParametersToRequestBody))])
         {
+            const auto timeOutSeconds = [this]
+            {
+                if (timeOutMs > 0)
+                    return timeOutMs / 1000.0;
+
+                return timeOutMs < 0 ? std::numeric_limits<double>::infinity() : 60.0;
+            }();
+
             if (NSMutableURLRequest* req = [NSMutableURLRequest requestWithURL: nsURL
                                                                    cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
-                                                               timeoutInterval: timeOutMs <= 0 ? 60.0 : (timeOutMs / 1000.0)])
+                                                               timeoutInterval: timeOutSeconds])
             {
                 if (NSString* httpMethod = [NSString stringWithUTF8String: httpRequestCmd.toRawUTF8()])
                 {
