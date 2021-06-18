@@ -103,7 +103,7 @@ public:
           androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidAdditionalJavaFolders         (settings, Ids::androidAdditionalJavaFolders,         getUndoManager()),
           androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
-          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\njcenter()"),
+          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\nmavenCentral()"),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
@@ -603,7 +603,7 @@ private:
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
         mo << "       google()"                                                                            << newLine;
-        mo << "       jcenter()"                                                                           << newLine;
+        mo << "       mavenCentral()"                                                                      << newLine;
         mo << "   }"                                                                                       << newLine;
         mo << "   dependencies {"                                                                          << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
