@@ -1741,7 +1741,7 @@ private:
 
     //==============================================================================
     ComboBox comboEffect;
-    Label labelEffect { "Audio effect: " };
+    Label labelEffect { {}, "Audio effect: " };
 
     struct GetTrackInfo
     {
