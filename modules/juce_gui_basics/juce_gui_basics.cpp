@@ -347,6 +347,7 @@ namespace juce
     AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const { return nullptr; }
     AccessibilityHandler::AccessibilityNativeImpl* AccessibilityHandler::createNativeImpl (AccessibilityHandler&) { return nullptr; }
     void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::AccessibilityNativeImpl*) const noexcept {}
+    bool areAnyAccessibilityClientsActive() { return false; }
     void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent) {}
 }
 #endif

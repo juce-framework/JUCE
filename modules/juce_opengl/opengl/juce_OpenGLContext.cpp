@@ -482,6 +482,7 @@ public:
             {
                 repaintEvent.wait (-1);
                 renderFrame();
+                repaintEvent.reset();
             }
             else
            #endif
@@ -665,7 +666,7 @@ public:
     StringArray associatedObjectNames;
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
 
-    WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent;
+    WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent { true };
    #if JUCE_OPENGL_ES
     bool shadersAvailable = true;
    #else

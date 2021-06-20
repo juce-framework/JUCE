@@ -374,8 +374,7 @@ void Label::focusGained (FocusChangeType cause)
 {
     if (editSingleClick
          && isEnabled()
-         && (cause == focusChangedByTabKey
-             || (cause == focusChangedDirectly && ! isCurrentlyModal())))
+         && cause == focusChangedByTabKey)
     {
         showEditor();
     }
@@ -523,7 +522,7 @@ class LabelAccessibilityHandler  : public AccessibilityHandler
 public:
     explicit LabelAccessibilityHandler (Label& labelToWrap)
         : AccessibilityHandler (labelToWrap,
-                                AccessibilityRole::label,
+                                labelToWrap.isEditable() ? AccessibilityRole::editableText : AccessibilityRole::label,
                                 getAccessibilityActions (labelToWrap),
                                 { std::make_unique<LabelValueInterface> (labelToWrap) }),
           label (labelToWrap)

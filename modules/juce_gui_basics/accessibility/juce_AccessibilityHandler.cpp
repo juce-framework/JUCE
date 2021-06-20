@@ -28,16 +28,19 @@ namespace juce
 
 AccessibilityHandler* AccessibilityHandler::currentlyFocusedHandler = nullptr;
 
+bool areAnyAccessibilityClientsActive();
+
 enum class InternalAccessibilityEvent
 {
     elementCreated,
     elementDestroyed,
+    elementMovedOrResized,
     focusChanged,
     windowOpened,
     windowClosed
 };
 
-void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent event);
+void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent);
 
 inline String getAccessibleApplicationOrPluginName()
 {

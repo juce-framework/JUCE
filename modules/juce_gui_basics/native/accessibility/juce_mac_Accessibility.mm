@@ -1025,6 +1025,20 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
 }
 
+bool areAnyAccessibilityClientsActive()
+{
+    const String voiceOverKeyString ("voiceOverOnOffKey");
+    const String applicationIDString ("com.apple.universalaccess");
+
+    CFUniquePtr<CFPropertyListRef> value (CFPreferencesCopyAppValue (voiceOverKeyString.toCFString(),
+                                                                     applicationIDString.toCFString()));
+
+    if (value != nullptr)
+        return CFBooleanGetValue ((CFBooleanRef) value.get());
+
+    return false;
+}
+
 static void sendAccessibilityEvent (id accessibilityElement,
                                     NSAccessibilityNotificationName notification,
                                     NSDictionary* userInfo)
@@ -1034,25 +1048,39 @@ static void sendAccessibilityEvent (id accessibilityElement,
     NSAccessibilityPostNotificationWithUserInfo (accessibilityElement, notification, userInfo);
 }
 
+static void sendHandlerNotification (const AccessibilityHandler& handler,
+                                     NSAccessibilityNotificationName notification)
+{
+    if (! areAnyAccessibilityClientsActive() || notification == NSAccessibilityNotificationName{})
+        return;
+
+    if (id accessibilityElement = (id) handler.getNativeImplementation())
+    {
+        sendAccessibilityEvent (accessibilityElement, notification,
+                                (notification == NSAccessibilityLayoutChangedNotification
+                                   ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
+                                   : nil));
+    }
+}
+
 void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent eventType)
 {
     auto notification = [eventType]
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::elementCreated:    return NSAccessibilityCreatedNotification;
-            case InternalAccessibilityEvent::elementDestroyed:  return NSAccessibilityUIElementDestroyedNotification;
-            case InternalAccessibilityEvent::focusChanged:      return NSAccessibilityFocusedUIElementChangedNotification;
-            case InternalAccessibilityEvent::windowOpened:      return NSAccessibilityWindowCreatedNotification;
-            case InternalAccessibilityEvent::windowClosed:      break;
+            case InternalAccessibilityEvent::elementCreated:         return NSAccessibilityCreatedNotification;
+            case InternalAccessibilityEvent::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
+            case InternalAccessibilityEvent::elementMovedOrResized:  return NSAccessibilityLayoutChangedNotification;
+            case InternalAccessibilityEvent::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
+            case InternalAccessibilityEvent::windowOpened:           return NSAccessibilityWindowCreatedNotification;
+            case InternalAccessibilityEvent::windowClosed:           break;
         }
 
         return NSAccessibilityNotificationName{};
     }();
 
-    if (notification != NSAccessibilityNotificationName{})
-        if (id accessibilityElement = (id) handler.getNativeImplementation())
-            sendAccessibilityEvent (accessibilityElement, notification, nil);
+    sendHandlerNotification (handler, notification);
 }
 
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventType) const
@@ -1073,20 +1101,14 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
         return NSAccessibilityNotificationName{};
     }();
 
-    if (notification != NSAccessibilityNotificationName{})
-    {
-        if (id accessibilityElement = (id) getNativeImplementation())
-        {
-            sendAccessibilityEvent (accessibilityElement, notification,
-                                    (notification == NSAccessibilityLayoutChangedNotification
-                                       ? @{ NSAccessibilityUIElementsKey: @[ accessibilityElement ] }
-                                       : nil));
-        }
-    }
+    sendHandlerNotification (*this, notification);
 }
 
 void AccessibilityHandler::postAnnouncement (const String& announcementString, AnnouncementPriority priority)
 {
+    if (! areAnyAccessibilityClientsActive())
+        return;
+
     #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
      if (@available (macOS 10.10, *))
     #endif
