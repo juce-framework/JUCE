@@ -59,7 +59,7 @@ of the target you wish to build.
 #### Building JUCE Projects
 
 - __macOS/iOS__: macOS 10.11 and Xcode 7.3.1
-- __Windows__: Windows 8.1 and Visual Studio 2015 64-bit
+- __Windows__: Windows 8.1 and Visual Studio 2015 Update 3 64-bit
 - __Linux__: GCC 4.8 (for a full list of dependencies, see
 [here](/docs/Linux%20Dependencies.md)).
 - __Android__: Android Studio on Windows, macOS or Linux
