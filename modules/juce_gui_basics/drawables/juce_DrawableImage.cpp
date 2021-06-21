@@ -40,6 +40,11 @@ DrawableImage::DrawableImage (const DrawableImage& other)
     setBounds (other.getBounds());
 }
 
+DrawableImage::DrawableImage (const Image& imageToUse)
+{
+    setImageInternal (imageToUse);
+}
+
 DrawableImage::~DrawableImage()
 {
 }
@@ -52,13 +57,8 @@ std::unique_ptr<Drawable> DrawableImage::createCopy() const
 //==============================================================================
 void DrawableImage::setImage (const Image& imageToUse)
 {
-    if (image != imageToUse)
-    {
-        image = imageToUse;
-        setBounds (image.getBounds());
-        setBoundingBox (image.getBounds().toFloat());
+    if (setImageInternal (imageToUse))
         repaint();
-    }
 }
 
 void DrawableImage::setOpacity (const float newOpacity)
@@ -131,6 +131,20 @@ bool DrawableImage::hitTest (int x, int y)
 Path DrawableImage::getOutlineAsPath() const
 {
     return {}; // not applicable for images
+}
+
+//==============================================================================
+bool DrawableImage::setImageInternal (const Image& imageToUse)
+{
+    if (image != imageToUse)
+    {
+        image = imageToUse;
+        setBounds (image.getBounds());
+        setBoundingBox (image.getBounds().toFloat());
+        return true;
+    }
+
+    return false;
 }
 
 //==============================================================================

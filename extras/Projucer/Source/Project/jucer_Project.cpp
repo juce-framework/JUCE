@@ -1514,11 +1514,6 @@ void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, 
 
 std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
 {
-    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
-
-    if (! mml.lockWasGained())
-        return nullptr;
-
     if (isValid())
         return Drawable::createFromImageFile (getFile());
 
