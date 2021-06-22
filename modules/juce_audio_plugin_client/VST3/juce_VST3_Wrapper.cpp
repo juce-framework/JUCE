@@ -2209,6 +2209,10 @@ public:
         processSetup.symbolicSampleSize = Vst::kSample32;
 
         pluginInstance->setPlayHead (this);
+
+        // Constructing the underlying static object involves dynamic allocation.
+        // This call ensures that the construction won't happen on the audio thread.
+        getHostType();
     }
 
     ~JuceVST3Component() override
