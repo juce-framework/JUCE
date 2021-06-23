@@ -1181,22 +1181,7 @@ public:
 
     void audioProcessorChanged (AudioProcessor*, const ChangeDetails& details) override
     {
-        if (details.latencyChanged)
-            PropertyChanged (kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
-
-        if (details.parameterInfoChanged)
-        {
-            PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
-            PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
-        }
-
-        PropertyChanged (kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, 0);
-
-        if (details.programChanged)
-        {
-            refreshCurrentPreset();
-            PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
-        }
+        audioProcessorChangedUpdater.update (details);
     }
 
     //==============================================================================
@@ -1757,6 +1742,70 @@ public:
 
 private:
     //==============================================================================
+    /*  The call to AUBase::PropertyChanged may allocate hence the need for this class */
+    class AudioProcessorChangedUpdater final  : private AsyncUpdater
+    {
+    public:
+        explicit AudioProcessorChangedUpdater (JuceAU& o) : owner (o) {}
+        ~AudioProcessorChangedUpdater() override { cancelPendingUpdate(); }
+
+        void update (const ChangeDetails& details)
+        {
+            int flags = 0;
+
+            if (details.latencyChanged)
+                flags |= latencyChangedFlag;
+
+            if (details.parameterInfoChanged)
+                flags |= parameterInfoChangedFlag;
+
+            if (details.programChanged)
+                flags |= programChangedFlag;
+
+            if (flags != 0)
+            {
+                callbackFlags.fetch_or (flags);
+
+                if (MessageManager::getInstance()->isThisTheMessageThread())
+                    handleAsyncUpdate();
+                else
+                    triggerAsyncUpdate();
+            }
+        }
+
+    private:
+        void handleAsyncUpdate() override
+        {
+            const auto flags = callbackFlags.exchange (0);
+
+            if ((flags & latencyChangedFlag) != 0)
+                owner.PropertyChanged (kAudioUnitProperty_Latency, kAudioUnitScope_Global, 0);
+
+            if ((flags & parameterInfoChangedFlag) != 0)
+            {
+                owner.PropertyChanged (kAudioUnitProperty_ParameterList, kAudioUnitScope_Global, 0);
+                owner.PropertyChanged (kAudioUnitProperty_ParameterInfo, kAudioUnitScope_Global, 0);
+            }
+
+            owner.PropertyChanged (kAudioUnitProperty_ClassInfo, kAudioUnitScope_Global, 0);
+
+            if ((flags & programChangedFlag) != 0)
+            {
+                owner.refreshCurrentPreset();
+                owner.PropertyChanged (kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0);
+            }
+        }
+
+        JuceAU& owner;
+
+        static constexpr int latencyChangedFlag       = 1 << 0,
+                             parameterInfoChangedFlag = 1 << 1,
+                             programChangedFlag       = 1 << 2;
+
+        std::atomic<int> callbackFlags { 0 };
+    };
+
+    //==============================================================================
     AudioUnitHelpers::CoreAudioBufferList audioBuffer;
     MidiBuffer midiEvents, incomingEvents;
     bool prepared = false, isBypassed = false;
@@ -1788,6 +1837,8 @@ private:
     HeapBlock<MIDIPacketList> packetList { packetListBytes, 1 };
 
     ThreadLocalValue<bool> inParameterChangedCallback;
+
+    AudioProcessorChangedUpdater audioProcessorChangedUpdater { *this };
 
     //==============================================================================
     Array<AUChannelInfo> channelInfo;
