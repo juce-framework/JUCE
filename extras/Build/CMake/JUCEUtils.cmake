@@ -453,7 +453,7 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
 
     add_custom_command(OUTPUT "${au_rez_output}"
         COMMAND "${JUCE_XCRUN}" Rez
-            -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64"
+            -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64" -d "arm64_$arm64"
             -I "${secret_au_resource_dir}"
             -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
             -I "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/AudioUnit.framework/Headers"
