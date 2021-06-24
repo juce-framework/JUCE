@@ -214,7 +214,7 @@ bool Project::setCppVersionFromOldExporterSettings()
         }
     }
 
-    if (highestLanguageStandard != -1 && highestLanguageStandard >= 11)
+    if (highestLanguageStandard >= 14)
     {
         cppStandardValue = highestLanguageStandard;
         return true;
@@ -225,6 +225,9 @@ bool Project::setCppVersionFromOldExporterSettings()
 
 void Project::updateDeprecatedProjectSettings()
 {
+    if (cppStandardValue.get().toString() == "11")
+        cppStandardValue.resetToDefault();
+
     for (ExporterIterator exporter (*this); exporter.next();)
         exporter->updateDeprecatedSettings();
 }

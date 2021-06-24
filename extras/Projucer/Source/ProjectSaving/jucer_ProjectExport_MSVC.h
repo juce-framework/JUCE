@@ -576,10 +576,6 @@ public:
                         cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
 
                     auto cppStandard = owner.project.getCppStandardString();
-
-                    if (cppStandard == "11") // VS doesn't support the C++11 flag so we have to bump it to C++14
-                        cppStandard = "14";
-
                     cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
                 }
 

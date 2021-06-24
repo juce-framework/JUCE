@@ -205,8 +205,8 @@ public:
     bool shouldDisplaySplashScreen() const               { return displaySplashScreenValue.get(); }
     String getSplashScreenColourString() const           { return splashScreenColourValue.get(); }
 
-    static StringArray getCppStandardStrings()           { return { "C++11", "C++14", "C++17", "Use Latest" }; }
-    static Array<var> getCppStandardVars()               { return { "11",    "14",    "17",    "latest" }; }
+    static StringArray getCppStandardStrings()           { return { "C++14", "C++17", "Use Latest" }; }
+    static Array<var> getCppStandardVars()               { return { "14",    "17",    "latest" }; }
 
     String getCppStandardString() const                  { return cppStandardValue.get(); }
 
