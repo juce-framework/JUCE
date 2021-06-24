@@ -56,11 +56,9 @@ bool WaitableEvent::wait (int timeOutMilliseconds) const
 
 void WaitableEvent::signal() const
 {
-    {
-        std::lock_guard<std::mutex> lock (mutex);
-        triggered = true;
-    }
+    std::lock_guard<std::mutex> lock (mutex);
 
+    triggered = true;
     condition.notify_all();
 }
 
