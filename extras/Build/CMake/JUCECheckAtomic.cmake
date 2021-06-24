@@ -81,3 +81,6 @@ function(_juce_create_atomic_target target_name)
     file(REMOVE "${test_file_name}")
     file(REMOVE_RECURSE "${test_bindir}")
 endfunction()
+
+_juce_create_atomic_target(juce_atomic_wrapper)
+
