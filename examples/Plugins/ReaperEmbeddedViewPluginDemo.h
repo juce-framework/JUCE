@@ -73,7 +73,8 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 namespace reaper
 {
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wzero-as-null-pointer-constant",
-                                         "-Wunused-parameter")
+                                         "-Wunused-parameter",
+                                         "-Wnon-virtual-dtor")
     JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 
     using namespace Steinberg;
