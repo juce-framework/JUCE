@@ -26,6 +26,7 @@
 #include "jucer_Headers.h"
 #include "jucer_Application.h"
 #include "../Utility/Helpers/jucer_TranslationHelpers.h"
+#include "../ProjectSaving/jucer_ProjectExporter.h"
 
 #include "jucer_CommandLine.h"
 
@@ -90,8 +91,9 @@ namespace
             preferredLineFeed = project->getProjectLineFeed().toRawUTF8();
         }
 
-        void save (bool justSaveResources, bool fixMissingDependencies)
+        void save (bool justSaveResources, bool fixMissingDependencies, ProjectExporter* exporter = nullptr)
         {
+            
             if (project != nullptr)
             {
                 if (! justSaveResources)
@@ -101,7 +103,7 @@ namespace
                     tryToFixMissingModuleDependencies();
 
                 auto error = justSaveResources ? project->saveResourcesOnly()
-                                               : project->saveProject();
+                                               : project->saveProject(exporter);
 
                 project.reset();
 
@@ -153,16 +155,36 @@ namespace
     //==============================================================================
     /* Running a command-line of the form "projucer --resave foobar.jucer" will try to load
        that project and re-export all of its targets.
+       Running a command-line of the form "projucer --resave-exporter foobar.jucer target_name"
+       will try to load that project and re-export only the desired target.
     */
-    static void resaveProject (const ArgumentList& args, bool justSaveResources)
+    static void resaveProject (const ArgumentList& args, bool justSaveResources, bool singleExporterOnly)
     {
-        args.checkMinNumArguments (2);
+        args.checkMinNumArguments (singleExporterOnly ? 3 : 2);
         LoadedProject proj (args[1]);
-
+                
+        if (singleExporterOnly)
+        {
+            String exporterName (args[2].text);
+            ProjectExporter* exporterToSave = nullptr;
+            for (Project::ExporterIterator exporter (*proj.project); exporter.next();) 
+            {
+                if (exporter->getUniqueName() == exporterName) 
+                {
+                    exporterToSave = exporter.exporter.get();
+                    std::cout << "Re-saving file: " << proj.project->getFile().getFullPathName() << std::endl;
+                    proj.save (false, args.containsOption ("--fix-missing-dependencies"), exporterToSave);
+                    return;
+                }
+            }
+            
+            ConsoleApplication::fail ("Could not find exporter with name: " + exporterName);
+        }
+        
         std::cout << (justSaveResources ? "Re-saving project resources: "
                                         : "Re-saving file: ")
                   << proj.project->getFile().getFullPathName() << std::endl;
-
+        
         proj.save (justSaveResources, args.containsOption ("--fix-missing-dependencies"));
     }
 
@@ -825,6 +847,9 @@ namespace
                   << " " << appName << " --resave-resources project_file" << std::endl
                   << "    Resaves just the binary resources for a project." << std::endl
                   << std::endl
+                  << " " << appName << " --resave-exporter project_file exporter_name" << std::endl
+                  << "    Resaves all files and resources in a project for a single exporter only. Add the \"--fix-missing-dependencies\" option to automatically fix any missing module dependencies." << std::endl
+                  << std::endl
                   << " " << appName << " --get-version project_file" << std::endl
                   << "    Returns the version number of a project." << std::endl
                   << std::endl
@@ -900,8 +925,9 @@ int performCommandLine (const ArgumentList& args)
 
         if (matchCommand ("help"))                     { showHelp();                            return 0; }
         if (matchCommand ("h"))                        { showHelp();                            return 0; }
-        if (matchCommand ("resave"))                   { resaveProject (args, false);           return 0; }
-        if (matchCommand ("resave-resources"))         { resaveProject (args, true);            return 0; }
+        if (matchCommand ("resave"))                   { resaveProject (args, false, false);    return 0; }
+        if (matchCommand ("resave-resources"))         { resaveProject (args, true, false);     return 0; }
+        if (matchCommand ("resave-exporter"))          { resaveProject (args, false, true);     return 0; }
         if (matchCommand ("get-version"))              { getVersion (args);                     return 0; }
         if (matchCommand ("set-version"))              { setVersion (args);                     return 0; }
         if (matchCommand ("bump-version"))             { bumpVersion (args);                    return 0; }
