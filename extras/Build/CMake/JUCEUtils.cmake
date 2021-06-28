@@ -33,7 +33,7 @@
 # ==================================================================================================
 
 include_guard(GLOBAL)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.15)
 
 define_property(TARGET PROPERTY JUCE_COMPANY_NAME INHERITED
     BRIEF_DOCS "The company name for a particular target"
@@ -80,29 +80,9 @@ define_property(TARGET PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD INHERITED
     FULL_DOCS "Whether or not plugins should be copied after building")
 set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
 
-# ==================================================================================================
-
-# Tries to discover the target platform architecture, which is necessary for
-# naming VST3 bundle folders correctly.
-function(_juce_find_linux_target_architecture result)
-    set(test_file "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp")
-    try_compile(compile_result "${CMAKE_CURRENT_BINARY_DIR}" "${test_file}"
-        OUTPUT_VARIABLE compile_output)
-    string(REGEX REPLACE ".*JUCE_ARCH ([a-zA-Z0-9_-]*).*" "\\1" match_result "${compile_output}")
-    set("${result}" "${match_result}" PARENT_SCOPE)
-endfunction()
-
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
     _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
-
-    # If you really need to override the detected arch for some reason,
-    # you can configure the build with -DJUCE_LINUX_TARGET_ARCHITECTURE=<custom arch>
-    if(NOT DEFINED JUCE_LINUX_TARGET_ARCHITECTURE)
-        _juce_find_linux_target_architecture(target_arch)
-        set(JUCE_LINUX_TARGET_ARCHITECTURE "${target_arch}"
-            CACHE INTERNAL "The target architecture, used to name internal folders in VST3 bundles")
-    endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_program(JUCE_XCRUN xcrun)
 
@@ -441,24 +421,6 @@ endfunction()
 
 # ==================================================================================================
 
-# math(EXPR ... OUTPUT_FORMAT HEXADECIMAL) wasn't added until 3.13, but we need 3.12 for vcpkg
-# compatibility
-function(_juce_dec_to_hex num out_var)
-    while(num)
-        math(EXPR digit "${num} % 16")
-        math(EXPR num "${num} / 16")
-
-        if(digit GREATER_EQUAL 10)
-            math(EXPR ascii_code "${digit} + 55")
-            string(ASCII "${ascii_code}" digit)
-        endif()
-
-        set(result "${digit}${result}")
-    endwhile()
-
-    set(${out_var} "${result}" PARENT_SCOPE)
-endfunction()
-
 function(_juce_version_code version_in out_var)
     string(REGEX REPLACE "\\." ";" version_list ${version_in})
     list(LENGTH version_list num_version_components)
@@ -479,8 +441,8 @@ function(_juce_version_code version_in out_var)
         list(GET version_list 2 version_patch)
     endif()
 
-    math(EXPR decimal "(${version_major} << 16) + (${version_minor} << 8) + ${version_patch}")
-    _juce_dec_to_hex(${decimal} hex)
+    math(EXPR hex "(${version_major} << 16) + (${version_minor} << 8) + ${version_patch}"
+        OUTPUT_FORMAT HEXADECIMAL)
     set(${out_var} "${hex}" PARENT_SCOPE)
 endfunction()
 
@@ -929,7 +891,7 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
         if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
             set_target_properties(${target_name} PROPERTIES
                 SUFFIX .so
-                LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_LINUX_TARGET_ARCHITECTURE}-linux")
+                LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_TARGET_ARCHITECTURE}-linux")
         endif()
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
@@ -1060,7 +1022,7 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
     endif()
 
     if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
-        target_link_libraries(${target_name} PRIVATE "-Wl,--no-undefined")
+        target_link_options(${target_name} PRIVATE "-Wl,--no-undefined")
     endif()
 
     # We re-export the shared code's private include dirs, because the wrapper targets need to
@@ -1124,10 +1086,6 @@ function(_juce_get_vst3_category_string target out_var)
 endfunction()
 
 function(_juce_configure_plugin_targets target)
-    if(CMAKE_VERSION VERSION_LESS "3.15.0")
-        message(FATAL_ERROR "Plugin targets require CMake 3.15 or higher")
-    endif()
-
     _juce_set_output_name(${target} $<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>_SharedCode)
 
     target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client_utils)
@@ -1156,7 +1114,6 @@ function(_juce_configure_plugin_targets target)
     # juce_audio_utils and juce_gui_basics. We achieve this by searching for
     # JUCE_MODULE_AVAILABLE_ private compile definitions, and reexporting them in
     # the interface compile definitions.
-    # Unfortunately this requires CMake 3.15.
     _juce_get_module_definitions(${target} ON enabled_modules)
     target_compile_definitions(${target} INTERFACE ${enabled_modules})
 
@@ -1195,7 +1152,7 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_Desc="$<TARGET_PROPERTY:${target},JUCE_DESCRIPTION>"
         JucePlugin_Version=${project_version_string}
         JucePlugin_VersionString="${project_version_string}"
-        JucePlugin_VersionCode=0x${project_version_hex}
+        JucePlugin_VersionCode=${project_version_hex}
         JucePlugin_VSTUniqueID=JucePlugin_PluginCode
         JucePlugin_VSTCategory=$<TARGET_PROPERTY:${target},JUCE_VST2_CATEGORY>
         JucePlugin_Vst3Category="${vst3_category_string}"

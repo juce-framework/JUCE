@@ -33,14 +33,7 @@
 # ==================================================================================================
 
 include_guard(GLOBAL)
-cmake_minimum_required(VERSION 3.12)
-
-# ==================================================================================================
-
-function(_juce_add_interface_library target)
-    add_library(${target} INTERFACE)
-    target_sources(${target} INTERFACE ${ARGN})
-endfunction()
+cmake_minimum_required(VERSION 3.15)
 
 # ==================================================================================================
 
@@ -49,6 +42,33 @@ set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
 
 include("${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake")
 include("${JUCE_CMAKE_UTILS_DIR}/JUCECheckAtomic.cmake")
+
+# Tries to discover the target platform architecture, which is necessary for
+# naming VST3 bundle folders and including bundled libraries from modules
+function(_juce_find_target_architecture result)
+    set(test_file "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp")
+    try_compile(compile_result "${CMAKE_CURRENT_BINARY_DIR}" "${test_file}"
+        OUTPUT_VARIABLE compile_output)
+    string(REGEX REPLACE ".*JUCE_ARCH ([a-zA-Z0-9_-]*).*" "\\1" match_result "${compile_output}")
+    set("${result}" "${match_result}" PARENT_SCOPE)
+endfunction()
+
+if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD") OR MSYS OR MINGW)
+    # If you really need to override the detected arch for some reason,
+    # you can configure the build with -DJUCE_TARGET_ARCHITECTURE=<custom arch>
+    if(NOT DEFINED JUCE_TARGET_ARCHITECTURE)
+        _juce_find_target_architecture(target_arch)
+        set(JUCE_TARGET_ARCHITECTURE "${target_arch}"
+            CACHE INTERNAL "The target architecture, used to name internal folders in VST3 bundles, and to locate bundled libraries in modules")
+    endif()
+endif()
+
+# ==================================================================================================
+
+function(_juce_add_interface_library target)
+    add_library(${target} INTERFACE)
+    target_sources(${target} INTERFACE ${ARGN})
+endfunction()
 
 # ==================================================================================================
 
@@ -340,6 +360,44 @@ endfunction()
 
 # ==================================================================================================
 
+function(_juce_add_library_path target path)
+    if(EXISTS "${path}")
+        target_link_directories(${target} INTERFACE ${path})
+    endif()
+endfunction()
+
+function(_juce_add_module_staticlib_paths module_target module_path)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+        _juce_add_library_path(${module_target} "${module_path}/libs/MacOSX")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
+        _juce_add_library_path(${module_target} "${module_path}/libs/iOS")
+    elseif((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
+        _juce_add_library_path(${module_target} "${module_path}/libs/Linux/${JUCE_TARGET_ARCHITECTURE}")
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        if(CMAKE_GENERATOR MATCHES "Visual Studio [0-9]+ (20[0-9]+)")
+            set(arch "$<IF:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>,x64,Win32>")
+
+            if(NOT CMAKE_GENERATOR_PLATFORM STREQUAL "")
+                set(arch ${CMAKE_GENERATOR_PLATFORM})
+            endif()
+
+            set(runtime_lib "$<GENEX_EVAL:$<TARGET_PROPERTY:MSVC_RUNTIME_LIBRARY>>")
+            set(subfolder "MDd")
+            set(subfolder "$<IF:$<STREQUAL:${runtime_lib},MultiThreadedDebug>,MTd,${subfolder}>")
+            set(subfolder "$<IF:$<STREQUAL:${runtime_lib},MultiThreadedDLL>,MD,${subfolder}>")
+            set(subfolder "$<IF:$<STREQUAL:${runtime_lib},MultiThreaded>,MT,${subfolder}>")
+            target_link_directories(${module_target} INTERFACE
+                "${module_path}/libs/VisualStudio${CMAKE_MATCH_1}/${arch}/${subfolder}")
+        elseif(MSYS OR MINGW)
+            _juce_add_library_path(${module_target} "${module_path}/libs/MinGW/${JUCE_TARGET_ARCHITECTURE}")
+        endif()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
+        _juce_add_library_path(${module_target} "${module_path}/libs/Android/${CMAKE_ANDROID_ARCH_ABI}")
+    endif()
+endfunction()
+
+# ==================================================================================================
+
 function(juce_add_module module_path)
     set(one_value_args INSTALL_PATH ALIAS_NAMESPACE)
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
@@ -509,6 +567,8 @@ function(juce_add_module module_path)
                 INTERFACE "${module_path}/${module_searchpath}")
         endforeach()
     endif()
+
+    _juce_add_module_staticlib_paths("${module_name}" "${module_path}")
 
     if(JUCE_ARG_INSTALL_PATH)
         install(DIRECTORY "${module_path}" DESTINATION "${JUCE_ARG_INSTALL_PATH}")

@@ -6,6 +6,28 @@ Develop
 
 Change
 ------
+The minimum support CMake version is now 3.15.
+
+Possible Issues
+---------------
+It will no longer be possible to configure JUCE projects with CMake versions
+between 3.12 and 3.14 inclusive.
+
+Workaround
+----------
+No workaround is available.
+
+Rationale
+---------
+Moving to 3.15 allows us to use target_link_directories and
+target_link_options, which were introduced in 3.13, which in turn allows us to
+provide support for bundled precompiled libraries in modules. Plugins already
+required CMake 3.15, so this change just brings other target types in line with
+the requirements for plugins.
+
+
+Change
+------
 The default value of JUCE_MODAL_LOOPS_PERMITTED has been changed from 1 to 0.
 
 Possible Issues
