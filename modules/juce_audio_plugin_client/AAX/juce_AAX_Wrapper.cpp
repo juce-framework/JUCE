@@ -1146,7 +1146,7 @@ namespace AAXClasses
                     if (data != nullptr)
                     {
                         AudioProcessor::TrackProperties props;
-                        props.name = static_cast<const AAX_IString*> (data)->Get();
+                        props.name = String::fromUTF8 (static_cast<const AAX_IString*> (data)->Get());
 
                         pluginInstance->updateTrackProperties (props);
                     }
