@@ -205,7 +205,7 @@ public:
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
-        const std::tuple<REFIID, void*> bases[]
+        const std::tuple<IID, void*> bases[]
         {
             std::make_tuple (__uuidof (ComClasses),
                              static_cast<void*> (static_cast<ComClasses*> (this)))...
