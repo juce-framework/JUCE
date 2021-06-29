@@ -69,7 +69,7 @@ public:
         {
             COPYDATASTRUCT data;
             data.dwData = broadcastMessageMagicNumber;
-            data.cbData = ((size_t) localCopy.length() + 1) * sizeof (CharPointer_UTF32::CharType);
+            data.cbData = (DWORD) (((size_t) localCopy.length() + 1) * sizeof (CharPointer_UTF32::CharType));
             data.lpData = (void*) localCopy.toUTF32().getAddress();
 
             DWORD_PTR result;
