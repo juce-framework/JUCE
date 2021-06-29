@@ -671,6 +671,8 @@ public:
 
     bool start()
     {
+        const ScopedLock sl (callbackLock);
+
         if (! started)
         {
             callback = nullptr;
@@ -703,41 +705,27 @@ public:
 
     void stop (bool leaveInterruptRunning)
     {
-        {
-            const ScopedLock sl (callbackLock);
-            callback = nullptr;
-        }
+        const ScopedLock sl (callbackLock);
+
+        callback = nullptr;
 
         if (started && (deviceID != 0) && ! leaveInterruptRunning)
         {
-            OK (AudioDeviceStop (deviceID, audioProcID));
-            OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
-            audioProcID = {};
+            audioDeviceStopPending = true;
 
-            started = false;
-
-            { const ScopedLock sl (callbackLock); }
-
-            // wait until it's definitely stopped calling back..
+            // wait until AudioDeviceStop() has been called on the IO thread
             for (int i = 40; --i >= 0;)
             {
-                Thread::sleep (50);
-
-                UInt32 running = 0;
-                UInt32 size = sizeof (running);
-
-                AudioObjectPropertyAddress pa;
-                pa.mSelector = kAudioDevicePropertyDeviceIsRunning;
-                pa.mScope = kAudioObjectPropertyScopeWildcard;
-                pa.mElement = juceAudioObjectPropertyElementMain;
-
-                OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, &running));
-
-                if (running == 0)
+                if (audioDeviceStopPending == false)
                     break;
+
+                const ScopedUnlock ul (callbackLock);
+                Thread::sleep (50);
             }
 
-            const ScopedLock sl (callbackLock);
+            OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
+            audioProcID = {};
+            started = false;
         }
     }
 
@@ -748,6 +736,14 @@ public:
                         AudioBufferList* outOutputData)
     {
         const ScopedLock sl (callbackLock);
+
+        if (audioDeviceStopPending)
+        {
+            if (OK (AudioDeviceStop (deviceID, audioProcID)))
+                audioDeviceStopPending = false;
+
+            return;
+        }
 
         if (callback != nullptr)
         {
@@ -836,7 +832,7 @@ public:
 private:
     CriticalSection callbackLock;
     AudioDeviceID deviceID;
-    bool started = false;
+    bool started = false, audioDeviceStopPending = false;
     double sampleRate = 0;
     int bufferSize = 512;
     HeapBlock<float> audioBuffer;
