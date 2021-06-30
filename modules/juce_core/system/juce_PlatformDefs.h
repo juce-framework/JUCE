@@ -171,7 +171,7 @@ namespace juce
   #if JUCE_LOG_ASSERTIONS
    #define jassert(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
   #else
-   #define jassert(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON ( ; )
+   #define jassert(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::ignoreUnused (expression);)
   #endif
 
 #endif
