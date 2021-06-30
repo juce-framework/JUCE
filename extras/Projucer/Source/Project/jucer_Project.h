@@ -31,6 +31,7 @@
 class ProjectExporter;
 class LibraryModule;
 class EnabledModulesList;
+class ProjectSaver;
 
 namespace ProjectMessages
 {
@@ -109,6 +110,8 @@ namespace ProjectMessages
     using MessageAction = std::pair<String, std::function<void()>>;
 }
 
+enum class Async { no, yes };
+
 //==============================================================================
 class Project  : public FileBasedDocument,
                  private ValueTree::Listener,
@@ -125,10 +128,11 @@ public:
     String getDocumentTitle() override;
     Result loadDocument (const File& file) override;
     Result saveDocument (const File& file) override;
+    void saveDocumentAsync (const File& file, std::function<void (Result)> callback) override;
 
-    Result saveProject (ProjectExporter* exporterToSave = nullptr);
+    void saveProject (Async, ProjectExporter* exporterToSave, std::function<void (Result)> onCompletion);
     Result saveResourcesOnly();
-    Result openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst);
+    void openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst, std::function<void (Result)> onCompletion);
 
     File getLastDocumentOpened() override;
     void setLastDocumentOpened (const File& file) override;
@@ -433,7 +437,6 @@ public:
     struct ExporterIterator
     {
         ExporterIterator (Project& project);
-        ~ExporterIterator();
 
         bool next();
 
@@ -486,7 +489,7 @@ public:
     String getUniqueTargetFolderSuffixForExporter (const Identifier& exporterIdentifier, const String& baseTargetFolder);
 
     //==============================================================================
-    bool isCurrentlySaving() const noexcept              { return isSaving; }
+    bool isCurrentlySaving() const noexcept              { return saver != nullptr; }
 
     bool isTemporaryProject() const noexcept             { return tempDirectory != File(); }
     File getTemporaryDirectory() const noexcept          { return tempDirectory; }
@@ -572,7 +575,6 @@ private:
 
     //==============================================================================
     friend class Item;
-    bool isSaving = false;
     StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================
@@ -612,12 +614,21 @@ private:
     void updateCLionWarning (bool showWarning);
     void updateModuleNotFoundWarning (bool showWarning);
 
+    void openProjectInIDEImpl (ExporterIterator exporter,
+                               String exporterToOpen,
+                               bool saveFirst,
+                               std::function<void (Result)> onCompletion);
+
     ValueTree projectMessages { ProjectMessages::Ids::projectMessages, {},
                                 { { ProjectMessages::Ids::notification, {} }, { ProjectMessages::Ids::warning, {} } } };
     std::map<Identifier, std::vector<ProjectMessages::MessageAction>> messageActions;
 
     ProjectFileModificationPoller fileModificationPoller { *this };
 
+    std::unique_ptr<FileChooser> chooser;
+    std::unique_ptr<ProjectSaver> saver;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Project)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (Project)
 };

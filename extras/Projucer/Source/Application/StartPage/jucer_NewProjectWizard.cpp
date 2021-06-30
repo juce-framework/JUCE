@@ -220,63 +220,91 @@ File NewProjectWizard::getLastWizardFolder()
     return lastFolderFallback;
 }
 
-std::unique_ptr<Project> NewProjectWizard::createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
-                                                             const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
-                                                             const String& modulePath, bool useGlobalModulePath)
+static void displayFailedFilesMessage (const StringArray& failedFiles)
+{
+    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                      TRANS("Errors in Creating Project!"),
+                                      TRANS("The following files couldn't be written:")
+                                        + "\n\n"
+                                        + failedFiles.joinIntoString ("\n", 0, 10));
+}
+
+template <typename Callback>
+static void prepareDirectory (const File& targetFolder, Callback&& callback)
 {
     StringArray failedFiles;
 
     if (! targetFolder.exists())
     {
         if (! targetFolder.createDirectory())
-            failedFiles.add (targetFolder.getFullPathName());
+        {
+            displayFailedFilesMessage ({ targetFolder.getFullPathName() });
+            return;
+        }
     }
     else if (FileHelpers::containsAnyNonHiddenFiles (targetFolder))
     {
-        if (! AlertWindow::showOkCancelBox (AlertWindow::InfoIcon,
-                                            TRANS("New JUCE Project"),
-                                            TRANS("You chose the folder:\n\nXFLDRX\n\n").replace ("XFLDRX", targetFolder.getFullPathName())
-                                              + TRANS("This folder isn't empty - are you sure you want to create the project there?")
-                                              + "\n\n"
-                                              + TRANS("Any existing files with the same names may be overwritten by the new files.")))
-        {
-            return nullptr;
-        }
+        AlertWindow::showOkCancelBox (AlertWindow::InfoIcon,
+                                      TRANS("New JUCE Project"),
+                                      TRANS("You chose the folder:\n\nXFLDRX\n\n").replace ("XFLDRX", targetFolder.getFullPathName())
+                                        + TRANS("This folder isn't empty - are you sure you want to create the project there?")
+                                        + "\n\n"
+                                        + TRANS("Any existing files with the same names may be overwritten by the new files."),
+                                      {},
+                                      {},
+                                      nullptr,
+                                      ModalCallbackFunction::create ([callback] (int result)
+                                      {
+                                          if (result != 0)
+                                              callback();
+                                      }));
+
+        return;
     }
 
-    auto project = std::make_unique<Project> (targetFolder.getChildFile (File::createLegalFileName (name))
-                                                          .withFileExtension (Project::projectFileExtension));
+    callback();
+}
 
-    if (failedFiles.isEmpty())
+void NewProjectWizard::createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
+                                         const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
+                                         const String& modulePath, bool useGlobalModulePath,
+                                         std::function<void (std::unique_ptr<Project>)> callback)
+{
+    prepareDirectory (targetFolder, [=]
     {
+        auto project = std::make_unique<Project> (targetFolder.getChildFile (File::createLegalFileName (name))
+                                                              .withFileExtension (Project::projectFileExtension));
+
         doBasicProjectSetup (*project, projectTemplate, name);
+
+        StringArray failedFiles;
 
         if (addFiles (*project, projectTemplate, name, fileOptions, failedFiles))
         {
             addExporters (*project, *exporters.getArray());
             addModules   (*project, *modules.getArray(), modulePath, useGlobalModulePath);
 
-            if (project->save (false, true) == FileBasedDocument::savedOk)
+            auto sharedProject = std::make_shared<std::unique_ptr<Project>> (std::move (project));
+            (*sharedProject)->saveAsync (false, true, [sharedProject, failedFiles, callback] (FileBasedDocument::SaveResult r)
             {
-                project->setChangedFlag (false);
-                project->loadFrom (project->getFile(), true);
-            }
-            else
-            {
-                failedFiles.add (project->getFile().getFullPathName());
-            }
+                auto uniqueProject = std::move (*sharedProject.get());
+
+                if (r == FileBasedDocument::savedOk)
+                {
+                    uniqueProject->setChangedFlag (false);
+                    uniqueProject->loadFrom (uniqueProject->getFile(), true);
+                    callback (std::move (uniqueProject));
+                    return;
+                }
+
+                auto failedFilesCopy = failedFiles;
+                failedFilesCopy.add (uniqueProject->getFile().getFullPathName());
+                displayFailedFilesMessage (failedFilesCopy);
+            });
+
+            return;
         }
-    }
 
-    if (! failedFiles.isEmpty())
-    {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          TRANS("Errors in Creating Project!"),
-                                          TRANS("The following files couldn't be written:")
-                                            + "\n\n"
-                                            + failedFiles.joinIntoString ("\n", 0, 10));
-        return nullptr;
-    }
-
-    return project;
+        displayFailedFilesMessage (failedFiles);
+    });
 }

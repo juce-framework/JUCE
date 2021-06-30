@@ -31,6 +31,7 @@
 #include "jucer_ContentViewComponent.h"
 
 class Sidebar;
+struct WizardHolder;
 
 //==============================================================================
 class ProjectContentComponent  : public Component,
@@ -57,8 +58,8 @@ public:
     void hideDocument (OpenDocumentManager::Document*);
     OpenDocumentManager::Document* getCurrentDocument() const    { return currentDocument; }
     void closeDocument();
-    void saveDocument();
-    void saveAs();
+    void saveDocumentAsync();
+    void saveAsAsync();
 
     void hideEditor();
     void setScrollableEditorComponent (std::unique_ptr<Component> component);
@@ -72,7 +73,7 @@ public:
     bool canGoToCounterpart() const;
     bool goToCounterpart();
 
-    bool saveProject();
+    void saveProjectAsync();
     void closeProject();
     void openInSelectedIDE (bool saveFirst);
     void showNewExporterMenu();
@@ -144,6 +145,8 @@ private:
 
     bool isForeground = false;
     int lastViewedTab = 0;
+
+    std::unique_ptr<WizardHolder> wizardHolder;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectContentComponent)

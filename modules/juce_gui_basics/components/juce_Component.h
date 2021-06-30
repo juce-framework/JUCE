@@ -2020,7 +2020,7 @@ public:
     virtual void handleCommandMessage (int commandId);
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Runs a component modally, waiting until the loop terminates.
 
         This method first makes the component visible, brings it to the front and

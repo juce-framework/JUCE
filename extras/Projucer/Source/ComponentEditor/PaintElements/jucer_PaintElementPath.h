@@ -127,7 +127,7 @@ public:
 private:
     friend class PathPoint;
     friend class PathPointComponent;
-    OwnedArray <PathPoint> points;
+    OwnedArray<PathPoint> points;
     bool nonZeroWinding;
     mutable Path path;
     mutable Rectangle<int> lastPathBounds;

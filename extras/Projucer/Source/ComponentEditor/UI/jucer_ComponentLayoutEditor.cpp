@@ -282,7 +282,7 @@ void ComponentLayoutEditor::mouseDown (const MouseEvent& e)
         for (int i = 0; i < ObjectTypes::numComponentTypes; ++i)
             m.addCommandItem (commandManager, JucerCommandIDs::newComponentBase + i);
 
-        m.show();
+        m.showMenuAsync (PopupMenu::Options());
     }
     else
     {
@@ -387,7 +387,7 @@ bool ComponentLayoutEditor::isInterestedInDragSource (const SourceDetails& dragS
 
 void ComponentLayoutEditor::itemDropped (const SourceDetails& dragSourceDetails)
 {
-    OwnedArray <Project::Item> selectedNodes;
+    OwnedArray<Project::Item> selectedNodes;
     ProjectContentComponent::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
 
     StringArray filenames;

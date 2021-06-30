@@ -191,11 +191,18 @@ public:
     /** Pops up a dialog letting the user save the processor's state to a file. */
     void askUserToSaveState (const String& fileSuffix = String())
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser fc (TRANS("Save current state"), getLastFile(), getFilePatterns (fileSuffix));
+        stateFileChooser = std::make_unique<FileChooser> (TRANS("Save current state"),
+                                                          getLastFile(),
+                                                          getFilePatterns (fileSuffix));
+        auto flags = FileBrowserComponent::saveMode
+                   | FileBrowserComponent::canSelectFiles
+                   | FileBrowserComponent::warnAboutOverwriting;
 
-        if (fc.browseForFileToSave (true))
+        stateFileChooser->launchAsync (flags, [this] (const FileChooser& fc)
         {
+            if (fc.getResult() == File{})
+                return;
+
             setLastFile (fc);
 
             MemoryBlock data;
@@ -205,20 +212,23 @@ public:
                 AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                                   TRANS("Error whilst saving"),
                                                   TRANS("Couldn't write to the specified file!"));
-        }
-       #else
-        ignoreUnused (fileSuffix);
-       #endif
+        });
     }
 
     /** Pops up a dialog letting the user re-load the processor's state from a file. */
     void askUserToLoadState (const String& fileSuffix = String())
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser fc (TRANS("Load a saved state"), getLastFile(), getFilePatterns (fileSuffix));
+        stateFileChooser = std::make_unique<FileChooser> (TRANS("Load a saved state"),
+                                                          getLastFile(),
+                                                          getFilePatterns (fileSuffix));
+        auto flags = FileBrowserComponent::openMode
+                   | FileBrowserComponent::canSelectFiles;
 
-        if (fc.browseForFileToOpen())
+        stateFileChooser->launchAsync (flags, [this] (const FileChooser& fc)
         {
+            if (fc.getResult() == File{})
+                return;
+
             setLastFile (fc);
 
             MemoryBlock data;
@@ -229,10 +239,7 @@ public:
                 AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                                   TRANS("Error whilst loading"),
                                                   TRANS("Couldn't read from the specified file!"));
-        }
-       #else
-        ignoreUnused (fileSuffix);
-       #endif
+        });
     }
 
     //==============================================================================
@@ -406,6 +413,8 @@ public:
 
     std::unique_ptr<AudioDeviceManager::AudioDeviceSetup> options;
     Array<MidiDeviceInfo> lastMidiDevices;
+
+    std::unique_ptr<FileChooser> stateFileChooser;
 
 private:
     /*  This class can be used to ensure that audio callbacks use buffers with a

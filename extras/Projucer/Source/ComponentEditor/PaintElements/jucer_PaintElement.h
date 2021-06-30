@@ -124,7 +124,7 @@ protected:
 
     void siblingComponentsChanged();
 
-    OwnedArray <ElementSiblingComponent> siblingComponents;
+    OwnedArray<ElementSiblingComponent> siblingComponents;
 
     void updateSiblingComps();
 

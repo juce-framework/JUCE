@@ -149,18 +149,18 @@ void FileSearchPathListComponent::deleteKeyPressed (int row)
 
 void FileSearchPathListComponent::returnKeyPressed (int row)
 {
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    FileChooser chooser (TRANS("Change folder..."), path[row], "*");
+    chooser = std::make_unique<FileChooser> (TRANS("Change folder..."), path[row], "*");
+    auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-    if (chooser.browseForDirectory())
+    chooser->launchAsync (chooserFlags, [this, row] (const FileChooser& fc)
     {
+        if (fc.getResult() == File{})
+            return;
+
         path.remove (row);
-        path.add (chooser.getResult(), row);
+        path.add (fc.getResult(), row);
         changed();
-    }
-   #else
-    ignoreUnused (row);
-   #endif
+    });
 }
 
 void FileSearchPathListComponent::listBoxItemDoubleClicked (int row, const MouseEvent&)
@@ -226,16 +226,17 @@ void FileSearchPathListComponent::addPath()
     if (start == File())
         start = File::getCurrentWorkingDirectory();
 
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    FileChooser chooser (TRANS("Add a folder..."), start, "*");
+    chooser = std::make_unique<FileChooser> (TRANS("Add a folder..."), start, "*");
+    auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-    if (chooser.browseForDirectory())
-        path.add (chooser.getResult(), listBox.getSelectedRow());
+    chooser->launchAsync (chooserFlags, [this] (const FileChooser& fc)
+    {
+        if (fc.getResult() == File{})
+            return;
 
-    changed();
-   #else
-    jassertfalse; // needs rewriting to deal with non-modal environments
-   #endif
+        path.add (fc.getResult(), listBox.getSelectedRow());
+        changed();
+    });
 }
 
 void FileSearchPathListComponent::deleteSelected()

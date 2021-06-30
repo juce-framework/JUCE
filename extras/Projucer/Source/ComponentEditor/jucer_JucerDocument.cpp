@@ -692,25 +692,52 @@ public:
     {
     }
 
-    bool save() override
+    void saveAsync (std::function<void (bool)> callback) override
     {
-        return SourceCodeDocument::save() && saveHeader();
+        WeakReference<JucerComponentDocument> parent { this };
+        SourceCodeDocument::saveAsync ([parent, callback] (bool saveResult)
+        {
+            if (parent == nullptr)
+                return;
+
+            if (! saveResult)
+            {
+                callback (false);
+                return;
+            }
+
+            parent->saveHeaderAsync ([parent, callback] (bool headerSaveResult)
+            {
+                if (parent != nullptr)
+                    callback (headerSaveResult);
+            });
+        });
     }
 
-    bool saveHeader()
+    void saveHeaderAsync (std::function<void (bool)> callback)
     {
         auto& odm = ProjucerApplication::getApp().openDocumentManager;
 
         if (auto* header = odm.openFile (nullptr, getFile().withFileExtension (".h")))
         {
-            if (header->save())
+            WeakReference<JucerComponentDocument> parent { this };
+            header->saveAsync ([parent, callback] (bool saveResult)
             {
-                odm.closeFile (getFile().withFileExtension(".h"), OpenDocumentManager::SaveIfNeeded::no);
-                return true;
-            }
+                if (parent == nullptr)
+                    return;
+
+                if (saveResult)
+                    ProjucerApplication::getApp()
+                        .openDocumentManager
+                        .closeFileWithoutSaving (parent->getFile().withFileExtension (".h"));
+
+                callback (saveResult);
+            });
+
+            return;
         }
 
-        return false;
+        callback (false);
     }
 
     std::unique_ptr<Component> createEditor() override
@@ -733,6 +760,8 @@ public:
         bool canOpenFile (const File& f) override                { return JucerDocument::isValidJucerCppFile (f); }
         Document* openFile (Project* p, const File& f) override  { return new JucerComponentDocument (p, f); }
     };
+
+    JUCE_DECLARE_WEAK_REFERENCEABLE (JucerComponentDocument)
 };
 
 OpenDocumentManager::DocumentType* createGUIDocumentType();
@@ -744,53 +773,65 @@ OpenDocumentManager::DocumentType* createGUIDocumentType()
 //==============================================================================
 struct NewGUIComponentWizard  : public NewFileWizard::Type
 {
-    NewGUIComponentWizard() {}
+    NewGUIComponentWizard (Project& proj)
+        : project (proj)
+    {}
 
     String getName() override  { return "GUI Component"; }
 
-    void createNewFile (Project& project, Project::Item parent) override
+    void createNewFile (Project& p, Project::Item parent) override
     {
-        auto newFile = askUserToChooseNewFile (String (defaultClassName) + ".h", "*.h;*.cpp", parent);
+        jassert (&p == &project);
 
-        if (newFile != File())
+        askUserToChooseNewFile (String (defaultClassName) + ".h", "*.h;*.cpp", parent, [this, parent] (File newFile) mutable
         {
-            auto headerFile = newFile.withFileExtension (".h");
-            auto cppFile = newFile.withFileExtension (".cpp");
-
-            headerFile.replaceWithText (String());
-            cppFile.replaceWithText (String());
-
-            auto& odm = ProjucerApplication::getApp().openDocumentManager;
-
-            if (auto* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, cppFile)))
+            if (newFile != File())
             {
-                if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, headerFile)))
+                auto headerFile = newFile.withFileExtension (".h");
+                auto cppFile = newFile.withFileExtension (".cpp");
+
+                headerFile.replaceWithText (String());
+                cppFile.replaceWithText (String());
+
+                auto& odm = ProjucerApplication::getApp().openDocumentManager;
+
+                if (auto* cpp = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, cppFile)))
                 {
-                    std::unique_ptr<JucerDocument> jucerDoc (new ComponentDocument (cpp));
-
-                    if (jucerDoc != nullptr)
+                    if (auto* header = dynamic_cast<SourceCodeDocument*> (odm.openFile (&project, headerFile)))
                     {
-                        jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
+                        std::unique_ptr<JucerDocument> jucerDoc (new ComponentDocument (cpp));
 
-                        jucerDoc->flushChangesToDocuments (&project, true);
-                        jucerDoc.reset();
+                        if (jucerDoc != nullptr)
+                        {
+                            jucerDoc->setClassName (newFile.getFileNameWithoutExtension());
 
-                        cpp->save();
-                        header->save();
-                        odm.closeDocument (cpp, OpenDocumentManager::SaveIfNeeded::yes);
-                        odm.closeDocument (header, OpenDocumentManager::SaveIfNeeded::yes);
+                            jucerDoc->flushChangesToDocuments (&project, true);
+                            jucerDoc.reset();
 
-                        parent.addFileRetainingSortOrder (headerFile, true);
-                        parent.addFileRetainingSortOrder (cppFile, true);
+                            for (auto* doc : { cpp, header })
+                            {
+                                doc->saveAsync ([doc] (bool)
+                                {
+                                    ProjucerApplication::getApp()
+                                        .openDocumentManager
+                                        .closeDocumentAsync (doc, OpenDocumentManager::SaveIfNeeded::yes, nullptr);
+                                });
+                            }
+
+                            parent.addFileRetainingSortOrder (headerFile, true);
+                            parent.addFileRetainingSortOrder (cppFile, true);
+                        }
                     }
                 }
             }
-        }
+        });
     }
+
+    Project& project;
 };
 
-NewFileWizard::Type* createGUIComponentWizard();
-NewFileWizard::Type* createGUIComponentWizard()
+NewFileWizard::Type* createGUIComponentWizard (Project&);
+NewFileWizard::Type* createGUIComponentWizard (Project& p)
 {
-    return new NewGUIComponentWizard();
+    return new NewGUIComponentWizard (p);
 }

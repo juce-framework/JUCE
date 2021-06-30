@@ -119,7 +119,7 @@ public:
     */
     bool cancelAllModalComponents();
 
-   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Runs the event loop until the currently topmost modal component is dismissed, and
         returns the exit code for that component.
     */
@@ -164,6 +164,7 @@ class JUCE_API ModalCallbackFunction
 public:
     /** This is a utility function to create a ModalComponentManager::Callback that will
         call a lambda function.
+
         The lambda that you supply must take an integer parameter, which is the result code that
         was returned when the modal component was dismissed.
 

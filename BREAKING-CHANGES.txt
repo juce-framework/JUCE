@@ -6,6 +6,31 @@ Develop
 
 Change
 ------
+The default value of JUCE_MODAL_LOOPS_PERMITTED has been changed from 1 to 0.
+
+Possible Issues
+---------------
+With JUCE_MODAL_LOOPS_PERMITTED set to 0 code that previously relied upon modal
+loops will need to be rewritten to use asynchronous versions of the modal
+functions. There is no non-modal alternative to
+AlterWindow::showNativeDialogBox and the previously modal behaviour of the
+MultiDocumentPanel destructor has changed.
+
+Workaround
+----------
+Set JUCE_MODAL_LOOPS_PERMITTED back to 1.
+
+Rationale
+---------
+Modal operations are a frequent source of problems, particularly when used in
+plug-ins. On Android modal loops are not possible, so people wanting to target
+Android often have an unwelcome surprise when then have to rewrite what they
+assumed to be platform independent code. Changing the default addresses these
+problems.
+
+
+Change
+------
 The minimum supported C++ standard is now C++14 and the oldest supported
 compilers on macOS and Linux are now Xcode 9.2, GCC 5.0 and Clang 3.4.
 

@@ -223,8 +223,11 @@ void ProjucerApplication::systemRequestedQuit()
     }
     else
     {
-        if (closeAllMainWindows())
-            quit();
+        closeAllMainWindows ([] (bool closedSuccessfully)
+        {
+            if (closedSuccessfully)
+                ProjucerApplication::quit();
+        });
     }
 }
 
@@ -251,7 +254,7 @@ void ProjucerApplication::anotherInstanceStarted (const String& commandLine)
         ArgumentList list ({}, commandLine);
 
         for (auto& arg : list.arguments)
-            openFile (arg.resolveAsFile());
+            openFile (arg.resolveAsFile(), nullptr);
     }
 }
 
@@ -651,7 +654,7 @@ void ProjucerApplication::findAndLaunchExample (int selectedIndex)
     // example doesn't exist?
     jassert (example != File());
 
-    openFile (example);
+    openFile (example, nullptr);
 }
 
 //==============================================================================
@@ -863,7 +866,7 @@ void ProjucerApplication::handleMainMenuCommand (int menuItemID)
     if (menuItemID >= recentProjectsBaseID && menuItemID < (recentProjectsBaseID + 100))
     {
         // open a file from the "recent files" menu
-        openFile (settings->recentFiles.getFile (menuItemID - recentProjectsBaseID));
+        openFile (settings->recentFiles.getFile (menuItemID - recentProjectsBaseID), nullptr);
     }
     else if (menuItemID >= openWindowsBaseID && menuItemID < (openWindowsBaseID + 100))
     {
@@ -1095,23 +1098,33 @@ void ProjucerApplication::createNewProjectFromClipboard()
     tempFile.create();
     tempFile.appendText (SystemClipboard::getTextFromClipboard());
 
-    String errorString;
+    auto cleanup = [tempFile] (String errorString)
+    {
+        if (errorString.isNotEmpty())
+        {
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", errorString);
+            tempFile.deleteFile();
+        }
+    };
 
     if (! isPIPFile (tempFile))
     {
-        errorString = "Clipboard does not contain a valid PIP.";
-    }
-    else if (! openFile (tempFile))
-    {
-        errorString = "Couldn't create project from clipboard contents.";
-        mainWindowList.closeWindow (mainWindowList.windows.getLast());
+        cleanup ("Clipboard does not contain a valid PIP.");
+        return;
     }
 
-    if (errorString.isNotEmpty())
+    WeakReference<ProjucerApplication> parent { this };
+    openFile (tempFile, [parent, cleanup] (bool openedSuccessfully)
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", errorString);
-        tempFile.deleteFile();
-    }
+        if (parent == nullptr)
+            return;
+
+        if (! openedSuccessfully)
+        {
+            cleanup ("Couldn't create project from clipboard contents.");
+            parent->mainWindowList.closeWindow (parent->mainWindowList.windows.getLast());
+        }
+    });
 }
 
 void ProjucerApplication::createNewPIP()
@@ -1121,45 +1134,57 @@ void ProjucerApplication::createNewPIP()
 
 void ProjucerApplication::askUserToOpenFile()
 {
-    FileChooser fc ("Open File");
+    chooser = std::make_unique<FileChooser> ("Open File");
+    auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
 
-    if (fc.browseForFileToOpen())
-        openFile (fc.getResult());
+    chooser->launchAsync (flags, [this] (const FileChooser& fc)
+    {
+        const auto result = fc.getResult();
+
+        if (result != File{})
+            openFile (result, nullptr);
+    });
 }
 
-bool ProjucerApplication::openFile (const File& file)
+void ProjucerApplication::openFile (const File& file, std::function<void (bool)> callback)
 {
-    return mainWindowList.openFile (file);
+    mainWindowList.openFile (file, std::move (callback));
 }
 
 void ProjucerApplication::saveAllDocuments()
 {
-    openDocumentManager.saveAll();
+    openDocumentManager.saveAllSyncWithoutAsking();
 
     for (int i = 0; i < mainWindowList.windows.size(); ++i)
         if (auto* pcc = mainWindowList.windows.getUnchecked(i)->getProjectContentComponent())
             pcc->refreshProjectTreeFileStatuses();
 }
 
-bool ProjucerApplication::closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave)
+void ProjucerApplication::closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave)
 {
-    return openDocumentManager.closeAll (askUserToSave);
+    openDocumentManager.closeAllAsync (askUserToSave, nullptr);
 }
 
-bool ProjucerApplication::closeAllMainWindows()
+void ProjucerApplication::closeAllMainWindows (std::function<void (bool)> callback)
 {
-    return mainWindowList.askAllWindowsToClose();
+    mainWindowList.askAllWindowsToClose (std::move (callback));
 }
 
 void ProjucerApplication::closeAllMainWindowsAndQuitIfNeeded()
 {
-    if (closeAllMainWindows())
+    WeakReference<ProjucerApplication> parent;
+    closeAllMainWindows ([parent] (bool closedSuccessfully)
     {
-       #if ! JUCE_MAC
-        if (mainWindowList.windows.size() == 0)
-            systemRequestedQuit();
+       #if JUCE_MAC
+        ignoreUnused (parent, closedSuccessfully);
+       #else
+        if (parent == nullptr)
+            return;
+
+        if (closedSuccessfully && parent->mainWindowList.windows.size() == 0)
+            parent->systemRequestedQuit();
        #endif
-    }
+    });
 }
 
 void ProjucerApplication::clearRecentFiles()

@@ -335,7 +335,7 @@ namespace juce
 #elif ! defined (JUCE_MODAL_LOOPS_PERMITTED)
  /** Some operating environments don't provide a modal loop mechanism, so this flag can be
      used to disable any functions that try to run a modal loop. */
- #define JUCE_MODAL_LOOPS_PERMITTED 1
+ #define JUCE_MODAL_LOOPS_PERMITTED 0
 #endif
 
 //==============================================================================

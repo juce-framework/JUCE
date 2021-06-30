@@ -100,6 +100,7 @@ private:
     //==============================================================================
     FileSearchPath path;
     File defaultBrowseTarget;
+    std::unique_ptr<FileChooser> chooser;
 
     ListBox listBox;
     TextButton addButton, removeButton, changeButton;

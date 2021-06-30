@@ -99,25 +99,34 @@ public:
     {
         createProjectButton.onClick = [this]
         {
-            FileChooser fc ("Save Project", NewProjectWizard::getLastWizardFolder());
+            chooser = std::make_unique<FileChooser> ("Save Project", NewProjectWizard::getLastWizardFolder());
+            auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-            if (fc.browseForDirectory())
+            chooser->launchAsync (flags, [this] (const FileChooser& fc)
             {
                 auto dir = fc.getResult();
 
-                if (auto project = NewProjectWizard::createNewProject (projectTemplate,
-                                                                       dir.getChildFile (projectNameValue.get().toString()),
-                                                                       projectNameValue.get(),
-                                                                       modulesValue.get(),
-                                                                       exportersValue.get(),
-                                                                       fileOptionsValue.get(),
-                                                                       modulePathValue.getCurrentValue(),
-                                                                       modulePathValue.getWrappedValueWithDefault().isUsingDefault()))
+                if (dir == File{})
+                    return;
+
+                SafePointer<TemplateComponent> safeThis { this };
+                NewProjectWizard::createNewProject (projectTemplate,
+                                                    dir.getChildFile (projectNameValue.get().toString()),
+                                                    projectNameValue.get(),
+                                                    modulesValue.get(),
+                                                    exportersValue.get(),
+                                                    fileOptionsValue.get(),
+                                                    modulePathValue.getCurrentValue(),
+                                                    modulePathValue.getWrappedValueWithDefault().isUsingDefault(),
+                                                    [safeThis, dir] (std::unique_ptr<Project> project)
                 {
-                    projectCreatedCallback (std::move (project));
+                    if (safeThis == nullptr)
+                        return;
+
+                    safeThis->projectCreatedCallback (std::move (project));
                     getAppSettings().lastWizardFolder = dir;
-                }
-            }
+                });
+            });
         };
 
         addAndMakeVisible (createProjectButton);
@@ -150,6 +159,7 @@ public:
 private:
     NewProjectTemplates::ProjectTemplate projectTemplate;
 
+    std::unique_ptr<FileChooser> chooser;
     std::function<void (std::unique_ptr<Project>)> projectCreatedCallback;
 
     ItemHeader header;

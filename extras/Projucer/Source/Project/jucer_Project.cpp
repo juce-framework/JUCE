@@ -66,12 +66,22 @@ void Project::ProjectFileModificationPoller::reloadProjectFromDisk()
     {
         if (auto* mw = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (projectFile))
         {
-            mw->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no);
-            mw->openFile (projectFile);
+            Component::SafePointer<MainWindow> parent { mw };
+            mw->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no, [parent, oldTemporaryDirectory, projectFile] (bool)
+            {
+                if (parent == nullptr)
+                    return;
 
-            if (oldTemporaryDirectory != File())
-                if (auto* newProject = mw->getProject())
-                    newProject->setTemporaryDirectory (oldTemporaryDirectory);
+                parent->openFile (projectFile, [parent, oldTemporaryDirectory] (bool openedSuccessfully)
+                {
+                    if (parent == nullptr)
+                        return;
+
+                    if (openedSuccessfully && oldTemporaryDirectory != File())
+                        if (auto* newProject = parent->getProject())
+                            newProject->setTemporaryDirectory (oldTemporaryDirectory);
+                });
+            });
         }
     });
 }
@@ -79,7 +89,7 @@ void Project::ProjectFileModificationPoller::reloadProjectFromDisk()
 void Project::ProjectFileModificationPoller::resaveProject()
 {
     reset();
-    project.saveProject();
+    project.saveProject (Async::yes, nullptr, nullptr);
 }
 
 //==============================================================================
@@ -122,7 +132,7 @@ Project::~Project()
 
     auto& app = ProjucerApplication::getApp();
 
-    app.openDocumentManager.closeAllDocumentsUsingProject (*this, OpenDocumentManager::SaveIfNeeded::no);
+    app.openDocumentManager.closeAllDocumentsUsingProjectWithoutSaving (*this);
 
     if (! app.isRunningCommandLine)
         app.getLicenseController().removeListener (this);
@@ -397,9 +407,9 @@ void Project::removeDefunctExporters()
             if (ProjucerApplication::getApp().isRunningCommandLine)
                 std::cout <<  "WARNING! The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project." << std::endl;
             else
-                AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                             TRANS (oldExporters[key]),
-                                             TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
+                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                                  TRANS (oldExporters[key]),
+                                                  TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
 
             exporters.removeChild (oldExporter, nullptr);
         }
@@ -664,40 +674,73 @@ Result Project::saveDocument (const File& file)
     jassert (file == getFile());
     ignoreUnused (file);
 
-    return saveProject();
+    auto sharedResult = Result::ok();
+
+    saveProject (Async::no, nullptr, [&sharedResult] (Result actualResult)
+    {
+        sharedResult = actualResult;
+    });
+
+    return sharedResult;
 }
 
-Result Project::saveProject (ProjectExporter* exporterToSave)
+void Project::saveDocumentAsync (const File& file, std::function<void (Result)> afterSave)
+{
+    jassert (file == getFile());
+    ignoreUnused (file);
+
+    saveProject (Async::yes, nullptr, std::move (afterSave));
+}
+
+void Project::saveProject (Async async,
+                           ProjectExporter* exporterToSave,
+                           std::function<void (Result)> onCompletion)
 {
     if (isSaveAndExportDisabled())
-        return Result::fail ("Save and export is disabled.");
+    {
+        onCompletion (Result::fail ("Save and export is disabled."));
+        return;
+    }
 
-    if (isSaving)
-        return Result::ok();
+    if (saver != nullptr)
+    {
+        onCompletion (Result::ok());
+        return;
+    }
 
     if (isTemporaryProject())
     {
         saveAndMoveTemporaryProject (false);
-        return Result::ok();
+        onCompletion (Result::ok());
+        return;
     }
 
     updateProjectSettings();
 
     if (! ProjucerApplication::getApp().isRunningCommandLine)
     {
-        ProjucerApplication::getApp().openDocumentManager.saveAll();
+        ProjucerApplication::getApp().openDocumentManager.saveAllSyncWithoutAsking();
 
         if (! isTemporaryProject())
             registerRecentFile (getFile());
     }
 
-    const ScopedValueSetter<bool> vs (isSaving, true, false);
+    WeakReference<Project> ref (this);
 
-    ProjectSaver saver (*this);
-    return saver.save (exporterToSave);
+    saver = std::make_unique<ProjectSaver> (*this);
+    saver->save (async, exporterToSave, [ref, onCompletion] (Result result)
+    {
+        if (ref == nullptr)
+            return;
+
+        ref->saver = nullptr;
+
+        if (onCompletion != nullptr)
+            onCompletion (result);
+    });
 }
 
-Result Project::openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst)
+void Project::openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst, std::function<void (Result)> onCompletion)
 {
     for (ExporterIterator exporter (*this); exporter.next();)
     {
@@ -706,33 +749,57 @@ Result Project::openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirs
             if (isTemporaryProject())
             {
                 saveAndMoveTemporaryProject (true);
-                return Result::ok();
+
+                if (onCompletion != nullptr)
+                    onCompletion (Result::ok());
+
+                return;
             }
 
             if (saveFirst)
             {
-                auto result = saveProject();
+                struct Callback
+                {
+                    void operator() (Result saveResult) noexcept
+                    {
+                        if (! saveResult.wasOk())
+                        {
+                            if (onCompletion != nullptr)
+                                onCompletion (saveResult);
 
-                if (! result.wasOk())
-                    return result;
+                            return;
+                        }
+
+                        // Workaround for a bug where Xcode thinks the project is invalid if opened immediately
+                        // after writing
+                        auto exporterCopy = exporter;
+                        Timer::callAfterDelay (exporter->isXcode() ? 1000 : 0, [exporterCopy]
+                        {
+                            exporterCopy->launchProject();
+                        });
+                    }
+
+                    std::shared_ptr<ProjectExporter> exporter;
+                    std::function<void (Result)> onCompletion;
+                };
+
+                saveProject (Async::yes, nullptr, Callback { std::move (exporter.exporter), onCompletion });
+                return;
             }
 
-            // Workaround for a bug where Xcode thinks the project is invalid if opened immediately
-            // after writing
-            if (saveFirst && exporter->isXcode())
-                Thread::sleep (1000);
-
             exporter->launchProject();
+            break;
         }
     }
 
-    return Result::ok();
+    if (onCompletion != nullptr)
+        onCompletion (Result::ok());
 }
 
 Result Project::saveResourcesOnly()
 {
-    ProjectSaver saver (*this);
-    return saver.saveResourcesOnly();
+    saver = std::make_unique<ProjectSaver> (*this);
+    return saver->saveResourcesOnly();
 }
 
 bool Project::hasIncompatibleLicenseTypeAndSplashScreenSetting() const
@@ -988,37 +1055,41 @@ void Project::setTemporaryDirectory (const File& dir) noexcept
 
 void Project::saveAndMoveTemporaryProject (bool openInIDE)
 {
-    FileChooser fc ("Save Project");
-    fc.browseForDirectory();
+    chooser = std::make_unique<FileChooser> ("Save Project");
+    auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-    auto newParentDirectory = fc.getResult();
-
-    if (! newParentDirectory.exists())
-        return;
-
-    auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
-    auto oldJucerFileName = getFile().getFileName();
-
-    ProjectSaver saver (*this);
-    saver.save();
-
-    tempDirectory.copyDirectoryTo (newDirectory);
-    tempDirectory.deleteRecursively();
-    tempDirectory = File();
-
-    // reload project from new location
-    if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile()))
+    chooser->launchAsync (flags, [this, openInIDE] (const FileChooser& fc)
     {
-        Component::SafePointer<MainWindow> safeWindow (window);
+        auto newParentDirectory = fc.getResult();
 
-        MessageManager::callAsync ([safeWindow, newDirectory, oldJucerFileName, openInIDE]() mutable
+        if (! newParentDirectory.exists())
+            return;
+
+        auto newDirectory = newParentDirectory.getChildFile (tempDirectory.getFileName());
+        auto oldJucerFileName = getFile().getFileName();
+
+        saver = std::make_unique<ProjectSaver> (*this);
+        saver->save (Async::yes, nullptr, [this, newDirectory, oldJucerFileName, openInIDE] (Result)
         {
-            if (safeWindow != nullptr)
-                safeWindow->moveProject (newDirectory.getChildFile (oldJucerFileName),
-                                         openInIDE ? MainWindow::OpenInIDE::yes
-                                                   : MainWindow::OpenInIDE::no);
+            tempDirectory.copyDirectoryTo (newDirectory);
+            tempDirectory.deleteRecursively();
+            tempDirectory = File();
+
+            // reload project from new location
+            if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile()))
+            {
+                Component::SafePointer<MainWindow> safeWindow (window);
+
+                MessageManager::callAsync ([safeWindow, newDirectory, oldJucerFileName, openInIDE]() mutable
+                                           {
+                                               if (safeWindow != nullptr)
+                                                   safeWindow->moveProject (newDirectory.getChildFile (oldJucerFileName),
+                                                                            openInIDE ? MainWindow::OpenInIDE::yes
+                                                                                      : MainWindow::OpenInIDE::no);
+                                           });
+            }
         });
-    }
+    });
 }
 
 //==============================================================================
@@ -2620,7 +2691,6 @@ StringPairArray Project::getAudioPluginFlags() const
 
 //==============================================================================
 Project::ExporterIterator::ExporterIterator (Project& p) : index (-1), project (p) {}
-Project::ExporterIterator::~ExporterIterator() {}
 
 bool Project::ExporterIterator::next()
 {

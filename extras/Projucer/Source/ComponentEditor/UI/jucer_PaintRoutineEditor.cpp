@@ -212,7 +212,7 @@ void PaintRoutineEditor::mouseDown (const MouseEvent& e)
         for (int i = 0; i < ObjectTypes::numElementTypes; ++i)
             m.addCommandItem (commandManager, JucerCommandIDs::newElementBase + i);
 
-        m.show();
+        m.showMenuAsync (PopupMenu::Options());
     }
     else
     {

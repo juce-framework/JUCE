@@ -78,13 +78,25 @@ public:
 
     void deleteItem() override
     {
-        if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Exporter",
-                                          "Are you sure you want to delete this export target?"))
+        WeakReference<ExporterItem> safeThis { this };
+        AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                      "Delete Exporter",
+                                      "Are you sure you want to delete this export target?",
+                                      "",
+                                      "",
+                                      nullptr,
+                                      ModalCallbackFunction::create ([safeThis] (int result)
         {
-            closeSettingsPage();
-            ValueTree parent (exporter->settings.getParent());
-            parent.removeChild (exporter->settings, project.getUndoManagerFor (parent));
-        }
+            if (safeThis == nullptr)
+                return;
+
+            if (result == 0)
+                return;
+
+            safeThis->closeSettingsPage();
+            auto parent = safeThis->exporter->settings.getParent();
+            parent.removeChild (safeThis->exporter->settings, safeThis->project.getUndoManagerFor (parent));
+        }));
     }
 
     void addSubItems() override
@@ -117,7 +129,7 @@ public:
         if (resultCode == 1)
             exporter->addNewConfiguration (false);
         else if (resultCode == 2)
-            project.saveProject (exporter.get());
+            project.saveProject (Async::yes, exporter.get(), nullptr);
         else if (resultCode == 3)
             deleteAllSelectedItems();
     }
@@ -200,6 +212,7 @@ private:
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterItem)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ExporterItem)
 };
 
 
@@ -231,12 +244,24 @@ public:
 
     void deleteItem() override
     {
-        if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Configuration",
-                                          "Are you sure you want to delete this configuration?"))
+        WeakReference<ConfigItem> parent { this };
+        AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                                      "Delete Configuration",
+                                      "Are you sure you want to delete this configuration?",
+                                      "",
+                                      "",
+                                      nullptr,
+                                      ModalCallbackFunction::create ([parent] (int result)
         {
-            closeSettingsPage();
-            config->removeFromExporter();
-        }
+            if (parent == nullptr)
+                return;
+
+            if (result == 0)
+                return;
+
+            parent->closeSettingsPage();
+            parent->config->removeFromExporter();
+        }));
     }
 
     void showPopupMenu (Point<int> p) override
@@ -297,6 +322,8 @@ private:
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigItem)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ConfigItem)
+
 };
 
 //==============================================================================
