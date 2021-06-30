@@ -69,6 +69,24 @@ private:
  extern JUCE_API double getScaleFactorForWindow (HWND);
 #endif
 
+static bool contextHasTextureNpotFeature()
+{
+    if (getOpenGLVersion() >= Version (2))
+        return true;
+
+    // If the version is < 2, we can't use the newer extension-checking API
+    // so we have to use glGetString
+    const auto* extensionsBegin = glGetString (GL_EXTENSIONS);
+
+    if (extensionsBegin == nullptr)
+        return false;
+
+    const auto* extensionsEnd = findNullTerminator (extensionsBegin);
+    const std::string extensionsString (extensionsBegin, extensionsEnd);
+    const auto stringTokens = StringArray::fromTokens (extensionsString.c_str(), false);
+    return stringTokens.contains ("GL_ARB_texture_non_power_of_two");
+}
+
 //==============================================================================
 class OpenGLContext::CachedImage  : public CachedComponentImage,
                                     private ThreadPoolJob
@@ -530,6 +548,8 @@ public:
         shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
         clearGLError();
 
+        textureNpotSupported = contextHasTextureNpotFeature();
+
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
 
@@ -665,6 +685,7 @@ public:
    #else
     bool shadersAvailable = false;
    #endif
+    bool textureNpotSupported = false;
     std::atomic<bool> hasInitialised { false }, needsUpdate { true }, destroying { false };
     uint32 lastMMLockReleaseTime = 0;
 
@@ -1066,6 +1087,12 @@ bool OpenGLContext::areShadersAvailable() const
 {
     auto* c = getCachedImage();
     return c != nullptr && c->shadersAvailable;
+}
+
+bool OpenGLContext::isTextureNpotSupported() const
+{
+    auto* c = getCachedImage();
+    return c != nullptr && c->textureNpotSupported;
 }
 
 ReferenceCountedObject* OpenGLContext::getAssociatedObject (const char* name) const
