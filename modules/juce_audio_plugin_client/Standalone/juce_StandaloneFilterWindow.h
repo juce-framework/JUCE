@@ -712,20 +712,38 @@ public:
        #else
         setContentOwned (new MainContentComponent (*this), true);
 
-        if (auto* props = pluginHolder->settings.get())
+        const auto windowScreenBounds = [this]() -> Rectangle<int>
         {
-            const int x = props->getIntValue ("windowX", -100);
-            const int y = props->getIntValue ("windowY", -100);
+            const auto width = getWidth();
+            const auto height = getHeight();
 
-            if (x != -100 && y != -100)
-                setBoundsConstrained ({ x, y, getWidth(), getHeight() });
-            else
-                centreWithSize (getWidth(), getHeight());
-        }
-        else
-        {
-            centreWithSize (getWidth(), getHeight());
-        }
+            const auto& displays = Desktop::getInstance().getDisplays();
+
+            if (auto* props = pluginHolder->settings.get())
+            {
+                constexpr int defaultValue = -100;
+
+                const auto x = props->getIntValue ("windowX", defaultValue);
+                const auto y = props->getIntValue ("windowY", defaultValue);
+
+                if (x != defaultValue && y != defaultValue)
+                {
+                    const auto screenLimits = displays.getDisplayForRect ({ x, y, width, height })->userArea;
+
+                    return { jlimit (screenLimits.getX(), jmax (screenLimits.getX(), screenLimits.getRight()  - width),  x),
+                             jlimit (screenLimits.getY(), jmax (screenLimits.getY(), screenLimits.getBottom() - height), y),
+                             width, height };
+                }
+            }
+
+            const auto displayArea = displays.getPrimaryDisplay()->userArea;
+
+            return { displayArea.getCentreX() - width / 2,
+                     displayArea.getCentreY() - height / 2,
+                     width, height };
+        }();
+
+        setBoundsConstrained (windowScreenBounds);
 
         if (auto* processor = getAudioProcessor())
             if (auto* editor = processor->getActiveEditor())
