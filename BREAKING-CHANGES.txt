@@ -6,6 +6,26 @@ Develop
 
 Change
 ------
+The JUCE_GLSL_VERSION preprocessor definition has been removed.
+
+Possible Issues
+---------------
+Code which used this definition will no longer compile.
+
+Workaround
+----------
+Use OpenGLHelpers::getGLSLVersionString to retrieve a version string which is
+consistent with the capabilities of the current OpenGL context.
+
+Rationale
+---------
+A compile-time version string is not very useful, as OpenGL versions and
+capabilities can change at runtime. Replacing this macro with a function allows
+querying the capabilities of the current context at runtime.
+
+
+Change
+------
 The minimum support CMake version is now 3.15.
 
 Possible Issues
