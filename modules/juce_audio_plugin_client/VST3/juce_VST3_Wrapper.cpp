@@ -2323,6 +2323,7 @@ class JuceVST3Component : public Vst::IComponent,
                           public Vst::IAudioProcessor,
                           public Vst::IUnitInfo,
                           public Vst::IConnectionPoint,
+                          public Vst::IProcessContextRequirements,
                           public AudioPlayHead
                         #if JucePlugin_Enable_ARA
                         , public ARA::IPlugInEntryPoint,
@@ -3336,6 +3337,7 @@ private:
                                              UniqueBase<Vst::IAudioProcessor>{},
                                              UniqueBase<Vst::IUnitInfo>{},
                                              UniqueBase<Vst::IConnectionPoint>{},
+                                             UniqueBase<Vst::IProcessContextRequirements>{},
                                              SharedBase<FUnknown, Vst::IComponent>{}
                                             #if JucePlugin_Enable_ARA
                                              , UniqueBase<ARA::IPlugInEntryPoint>{}
@@ -3596,6 +3598,21 @@ private:
             return nullptr;
 
         return buffer.getWritePointer (channel);
+    }
+
+    Steinberg::uint32 PLUGIN_API getProcessContextRequirements() override
+    {
+        return kNeedSystemTime
+             | kNeedContinousTimeSamples
+             | kNeedProjectTimeMusic
+             | kNeedBarPositionMusic
+             | kNeedCycleMusic
+             | kNeedSamplesToNextClock
+             | kNeedTempo
+             | kNeedTimeSignature
+             | kNeedChord
+             | kNeedFrameRate
+             | kNeedTransportState;
     }
 
     // TODO JUCE_ARA preparePlugin() is called several times, not just from setActive() -
