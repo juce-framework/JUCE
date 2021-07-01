@@ -30,6 +30,7 @@ Drawable::Drawable()
 {
     setInterceptsMouseClicks (false, false);
     setPaintingIsUnclipped (true);
+    setAccessible (false);
 }
 
 Drawable::Drawable (const Drawable& other)
@@ -37,6 +38,7 @@ Drawable::Drawable (const Drawable& other)
 {
     setInterceptsMouseClicks (false, false);
     setPaintingIsUnclipped (true);
+    setAccessible (false);
 
     setComponentID (other.getComponentID());
     setTransform (other.getTransform());
@@ -194,12 +196,6 @@ std::unique_ptr<Drawable> Drawable::createFromImageFile (const File& file)
         return createFromImageDataStream (fin);
 
     return {};
-}
-
-//==============================================================================
-std::unique_ptr<AccessibilityHandler> Drawable::createAccessibilityHandler()
-{
-    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::ignored);
 }
 
 } // namespace juce
