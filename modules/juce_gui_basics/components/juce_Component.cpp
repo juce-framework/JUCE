@@ -1203,7 +1203,7 @@ void Component::sendMovedResizedMessages (bool wasMoved, bool wasResized)
         });
     }
 
-    if (wasMoved || wasResized)
+    if ((wasMoved || wasResized) && ! checker.shouldBailOut())
         if (auto* handler = getAccessibilityHandler())
             notifyAccessibilityEventInternal (*handler, InternalAccessibilityEvent::elementMovedOrResized);
 }
