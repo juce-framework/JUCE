@@ -1051,7 +1051,12 @@ StringArray ProjectExporter::BuildConfiguration::getLibrarySearchPaths() const
     auto s = getSearchPathsFromString (getLibrarySearchPathString());
 
     for (auto path : exporter.moduleLibSearchPaths)
+    {
+        if (exporter.isXcode())
+            s.add (path);
+
         s.add (path + separator + getModuleLibraryArchName());
+    }
 
     return s;
 }

@@ -73,7 +73,7 @@ void LibraryModule::addSearchPathsToExporter (ProjectExporter& exporter) const
     }();
 
     auto libSubdirPath = moduleRelativePath.toUnixStyle() + "/libs/" + libDirPlatform;
-    auto moduleLibDir = File (exporter.getProject().getProjectFolder().getFullPathName() + "/" + libSubdirPath);
+    auto moduleLibDir = exporter.getProject().resolveFilename (libSubdirPath);
 
     if (moduleLibDir.exists())
         exporter.addToModuleLibPaths ({ libSubdirPath, moduleRelativePath.getRoot() });

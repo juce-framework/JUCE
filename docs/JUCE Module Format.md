@@ -99,8 +99,11 @@ windowsLibs, linuxLibs and mingwLibs keywords in the module declaration (see the
 section).
 
 - OS X
-  - libs/MacOSX/{arch}, where {arch} is the architecture you are targeting in Xcode ("x86_64" or
-    "i386", for example).
+  - libs/MacOSX - to support multiple architectures, you may place libraries built as universal
+    binaries at this location. For backwards compatibility, the Projucer will also include the
+    directories libs/MacOSX/{arch}, where {arch} is the architecture you are targeting in Xcode
+    ("x86_64" or "i386", for example). When building with CMake, only libraries built as universal
+    binaries are supported and the arch subfolders are ignored.
 
 - Visual Studio
   - libs/VisualStudio{year}/{arch}/{run-time}, where {year} is the four digit year of the Visual Studio
@@ -116,8 +119,11 @@ section).
   - libs/MinGW/{arch}, where {arch} can take the same values as Linux.
 
 - iOS
-  - libs/iOS/{arch}, where {arch} is the architecture you are targeting in Xcode ("arm64" or
-    "x86_64", for example).
+  - libs/iOS - to support multiple architectures, you may place libraries built as universal
+    binaries at this location. For backwards compatibility, the Projucer will also include the
+    directories libs/iOS/{arch}, where {arch} is the architecture you are targeting in Xcode
+    ("arm64" or "x86_64", for example). When building with CMake, only libraries built as universal
+    binaries are supported and the arch subfolders are ignored.
 
 - Android
   - libs/Android/{arch}, where {arch} is the architecture provided by the Android Studio variable
