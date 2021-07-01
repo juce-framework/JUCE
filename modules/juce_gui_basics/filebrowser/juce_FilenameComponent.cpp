@@ -114,22 +114,22 @@ File FilenameComponent::getLocationToBrowse()
 
 void FilenameComponent::showChooser()
 {
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    FileChooser fc (isDir ? TRANS ("Choose a new directory")
-                          : TRANS ("Choose a new file"),
-                    getLocationToBrowse(),
-                    wildcard);
+    chooser = std::make_unique<FileChooser> (isDir ? TRANS ("Choose a new directory")
+                                                   : TRANS ("Choose a new file"),
+                                             getLocationToBrowse(),
+                                             wildcard);
 
-    if (isDir ? fc.browseForDirectory()
-              : (isSaving ? fc.browseForFileToSave (false)
-                          : fc.browseForFileToOpen()))
+    auto chooserFlags = isDir ? FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories
+                              : FileBrowserComponent::canSelectFiles | (isSaving ? FileBrowserComponent::saveMode
+                                                                                 : FileBrowserComponent::openMode);
+
+    chooser->launchAsync (chooserFlags, [this] (const FileChooser&)
     {
-        setCurrentFile (fc.getResult(), true);
-    }
-   #else
-    ignoreUnused (isSaving);
-    jassertfalse; // needs rewriting to deal with non-modal environments
-   #endif
+        if (chooser->getResult() == File{})
+            return;
+
+        setCurrentFile (chooser->getResult(), true);
+    });
 }
 
 bool FilenameComponent::isInterestedInFileDrag (const StringArray&)

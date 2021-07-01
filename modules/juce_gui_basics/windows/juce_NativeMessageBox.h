@@ -47,7 +47,7 @@ public:
                             alert window should be associated with. Depending on the look
                             and feel, this might be used for positioning of the alert window.
     */
-   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
+   #if JUCE_MODAL_LOOPS_PERMITTED
     static void JUCE_CALLTYPE showMessageBox (AlertWindow::AlertIconType iconType,
                                               const String& title,
                                               const String& message,

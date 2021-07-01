@@ -45,7 +45,6 @@ public:
     /** Destructor. */
     ~ImagePreviewComponent() override;
 
-
     //==============================================================================
     /** @internal */
     void selectedFileChanged (const File& newSelectedFile) override;

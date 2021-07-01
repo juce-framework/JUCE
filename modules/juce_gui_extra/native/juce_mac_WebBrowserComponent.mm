@@ -95,17 +95,11 @@ struct WebViewKeyEquivalentResponder : public WebViewBase
     WebViewKeyEquivalentResponder()
         : WebViewBase ("WebViewKeyEquivalentResponder_")
     {
-        addIvar<WebViewKeyEquivalentResponder*> ("owner");
         addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
         registerClass();
     }
 
 private:
-    static WebViewKeyEquivalentResponder* getOwner (id self)
-    {
-        return getIvar<WebViewKeyEquivalentResponder*> (self, "owner");
-    }
-
     static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
     {
         NSResponder* first = [[self window] firstResponder];
@@ -225,9 +219,42 @@ private:
     static void runOpenPanel (id, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*,
                               void (^completionHandler)(NSArray<NSURL*>*))
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser chooser (TRANS("Select the file you want to upload..."),
-                             File::getSpecialLocation (File::userHomeDirectory), "*");
+        using CompletionHandlerType = decltype (completionHandler);
+
+        class DeletedFileChooserWrapper   : private DeletedAtShutdown
+        {
+        public:
+            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, CompletionHandlerType h)
+                : chooser (std::move (fc)), handler (h)
+            {
+                [handler retain];
+            }
+
+            ~DeletedFileChooserWrapper()
+            {
+                callHandler (nullptr);
+                [handler release];
+            }
+
+            void callHandler (NSArray<NSURL*>* urls)
+            {
+                if (handlerCalled)
+                    return;
+
+                handler (urls);
+                handlerCalled = true;
+            }
+
+            std::unique_ptr<FileChooser> chooser;
+
+        private:
+            CompletionHandlerType handler;
+            bool handlerCalled = false;
+        };
+
+        auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
+                                                      File::getSpecialLocation (File::userHomeDirectory), "*");
+        auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), completionHandler);
 
         auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
                     | ([parameters allowsMultipleSelection] ? FileBrowserComponent::canSelectMultipleItems : 0);
@@ -237,24 +264,17 @@ private:
              flags |= FileBrowserComponent::canSelectDirectories;
         #endif
 
-        if (chooser.showDialog (flags, nullptr))
+        wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
         {
-            auto results = chooser.getResults();
+            auto results = wrapper->chooser->getResults();
             auto urls = [NSMutableArray arrayWithCapacity: (NSUInteger) results.size()];
 
             for (auto& f : results)
                 [urls addObject: [NSURL fileURLWithPath: juceStringToNS (f.getFullPathName())]];
 
-            completionHandler (urls);
-        }
-        else
-        {
-            completionHandler (nil);
-        }
-       #else
-        ignoreUnused (parameters, completionHandler);
-        jassertfalse; // Can't use this without modal loops being enabled!
-       #endif
+            wrapper->callHandler (urls);
+            delete wrapper;
+        });
     }
    #endif
 };
@@ -270,8 +290,6 @@ class WebBrowserComponent::Pimpl
 public:
     Pimpl (WebBrowserComponent* owner)
     {
-        ignoreUnused (owner);
-
        #if JUCE_MAC
         static WebViewKeyEquivalentResponder webviewClass;
         webView = (WKWebView*) webviewClass.createInstance();
@@ -421,20 +439,37 @@ private:
 
     static void runOpenPanel (id, SEL, WebView*, id<WebOpenPanelResultListener> resultListener, BOOL allowMultipleFiles)
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser chooser (TRANS("Select the file you want to upload..."),
-                             File::getSpecialLocation (File::userHomeDirectory), "*");
-
-        if (allowMultipleFiles ? chooser.browseForMultipleFilesToOpen()
-                               : chooser.browseForFileToOpen())
+        struct DeletedFileChooserWrapper   : private DeletedAtShutdown
         {
-            for (auto& f : chooser.getResults())
-                [resultListener chooseFilename: juceStringToNS (f.getFullPathName())];
-        }
-       #else
-        ignoreUnused (resultListener, allowMultipleFiles);
-        jassertfalse; // Can't use this without modal loops being enabled!
-       #endif
+            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, id<WebOpenPanelResultListener> rl)
+                : chooser (std::move (fc)), listener (rl)
+            {
+                [listener retain];
+            }
+
+            ~DeletedFileChooserWrapper()
+            {
+                [listener release];
+            }
+
+            std::unique_ptr<FileChooser> chooser;
+            id<WebOpenPanelResultListener> listener;
+        };
+
+        auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
+                                                      File::getSpecialLocation (File::userHomeDirectory), "*");
+        auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), resultListener);
+
+        auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
+                    | (allowMultipleFiles ? FileBrowserComponent::canSelectMultipleItems : 0);
+
+        wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
+        {
+            for (auto& f : wrapper->chooser->getResults())
+                [wrapper->listener chooseFilename: juceStringToNS (f.getFullPathName())];
+
+            delete wrapper;
+        });
     }
 };
 

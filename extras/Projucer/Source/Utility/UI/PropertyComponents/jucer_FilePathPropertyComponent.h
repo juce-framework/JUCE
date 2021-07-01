@@ -134,17 +134,29 @@ private:
 
         if (isDirectory)
         {
-            FileChooser chooser ("Select directory", currentFile);
+            chooser = std::make_unique<FileChooser> ("Select directory", currentFile);
+            auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-            if (chooser.browseForDirectory())
-                setTo (chooser.getResult());
+            chooser->launchAsync (chooserFlags, [this] (const FileChooser& fc)
+            {
+                if (fc.getResult() == File{})
+                    return;
+
+                setTo (fc.getResult());
+            });
         }
         else
         {
-            FileChooser chooser ("Select file", currentFile, wildcards);
+            chooser = std::make_unique<FileChooser> ("Select file", currentFile, wildcards);
+            auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
 
-            if (chooser.browseForFileToOpen())
-                setTo (chooser.getResult());
+            chooser->launchAsync (chooserFlags, [this] (const FileChooser& fc)
+            {
+                if (fc.getResult() == File{})
+                    return;
+
+                setTo (fc.getResult());
+            });
         }
     }
 
@@ -188,6 +200,8 @@ private:
     bool isDirectory, isThisOS, highlightForDragAndDrop = false;
     String wildcards;
     File root;
+
+    std::unique_ptr<FileChooser> chooser;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilePathPropertyComponent)

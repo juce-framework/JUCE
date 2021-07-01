@@ -191,11 +191,18 @@ public:
     /** Pops up a dialog letting the user save the processor's state to a file. */
     void askUserToSaveState (const String& fileSuffix = String())
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser fc (TRANS("Save current state"), getLastFile(), getFilePatterns (fileSuffix));
+        stateFileChooser = std::make_unique<FileChooser> (TRANS("Save current state"),
+                                                          getLastFile(),
+                                                          getFilePatterns (fileSuffix));
+        auto flags = FileBrowserComponent::saveMode
+                   | FileBrowserComponent::canSelectFiles
+                   | FileBrowserComponent::warnAboutOverwriting;
 
-        if (fc.browseForFileToSave (true))
+        stateFileChooser->launchAsync (flags, [this] (const FileChooser& fc)
         {
+            if (fc.getResult() == File{})
+                return;
+
             setLastFile (fc);
 
             MemoryBlock data;
@@ -205,20 +212,23 @@ public:
                 AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                                   TRANS("Error whilst saving"),
                                                   TRANS("Couldn't write to the specified file!"));
-        }
-       #else
-        ignoreUnused (fileSuffix);
-       #endif
+        });
     }
 
     /** Pops up a dialog letting the user re-load the processor's state from a file. */
     void askUserToLoadState (const String& fileSuffix = String())
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser fc (TRANS("Load a saved state"), getLastFile(), getFilePatterns (fileSuffix));
+        stateFileChooser = std::make_unique<FileChooser> (TRANS("Load a saved state"),
+                                                          getLastFile(),
+                                                          getFilePatterns (fileSuffix));
+        auto flags = FileBrowserComponent::openMode
+                   | FileBrowserComponent::canSelectFiles;
 
-        if (fc.browseForFileToOpen())
+        stateFileChooser->launchAsync (flags, [this] (const FileChooser& fc)
         {
+            if (fc.getResult() == File{})
+                return;
+
             setLastFile (fc);
 
             MemoryBlock data;
@@ -229,10 +239,7 @@ public:
                 AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                                   TRANS("Error whilst loading"),
                                                   TRANS("Couldn't read from the specified file!"));
-        }
-       #else
-        ignoreUnused (fileSuffix);
-       #endif
+        });
     }
 
     //==============================================================================
@@ -406,6 +413,8 @@ public:
 
     std::unique_ptr<AudioDeviceManager::AudioDeviceSetup> options;
     Array<MidiDeviceInfo> lastMidiDevices;
+
+    std::unique_ptr<FileChooser> stateFileChooser;
 
 private:
     /*  This class can be used to ensure that audio callbacks use buffers with a
@@ -712,20 +721,38 @@ public:
        #else
         setContentOwned (new MainContentComponent (*this), true);
 
-        if (auto* props = pluginHolder->settings.get())
+        const auto windowScreenBounds = [this]() -> Rectangle<int>
         {
-            const int x = props->getIntValue ("windowX", -100);
-            const int y = props->getIntValue ("windowY", -100);
+            const auto width = getWidth();
+            const auto height = getHeight();
 
-            if (x != -100 && y != -100)
-                setBoundsConstrained ({ x, y, getWidth(), getHeight() });
-            else
-                centreWithSize (getWidth(), getHeight());
-        }
-        else
-        {
-            centreWithSize (getWidth(), getHeight());
-        }
+            const auto& displays = Desktop::getInstance().getDisplays();
+
+            if (auto* props = pluginHolder->settings.get())
+            {
+                constexpr int defaultValue = -100;
+
+                const auto x = props->getIntValue ("windowX", defaultValue);
+                const auto y = props->getIntValue ("windowY", defaultValue);
+
+                if (x != defaultValue && y != defaultValue)
+                {
+                    const auto screenLimits = displays.getDisplayForRect ({ x, y, width, height })->userArea;
+
+                    return { jlimit (screenLimits.getX(), jmax (screenLimits.getX(), screenLimits.getRight()  - width),  x),
+                             jlimit (screenLimits.getY(), jmax (screenLimits.getY(), screenLimits.getBottom() - height), y),
+                             width, height };
+                }
+            }
+
+            const auto displayArea = displays.getPrimaryDisplay()->userArea;
+
+            return { displayArea.getCentreX() - width / 2,
+                     displayArea.getCentreY() - height / 2,
+                     width, height };
+        }();
+
+        setBoundsConstrained (windowScreenBounds);
 
         if (auto* processor = getAudioProcessor())
             if (auto* editor = processor->getActiveEditor())

@@ -142,7 +142,7 @@ public:
         */
         DialogWindow* create();
 
-       #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
+       #if JUCE_MODAL_LOOPS_PERMITTED
         /** Launches and runs the dialog modally, returning the status code that was
             used to terminate the modal loop.
 
@@ -201,7 +201,7 @@ public:
                             bool shouldBeResizable = false,
                             bool useBottomRightCornerResizer = false);
 
-   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Easy way of quickly showing a dialog box containing a given component.
 
         Note: This method has been superseded by the DialogWindow::LaunchOptions structure,

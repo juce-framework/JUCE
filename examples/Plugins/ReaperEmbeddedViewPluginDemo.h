@@ -105,6 +105,8 @@ struct EmbeddedViewListener
                                                          Steinberg::TPtrInt parm3) = 0;
 };
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor")
+
 //==============================================================================
 class EmbeddedUI : public reaper::IReaperUIEmbedInterface
 {
@@ -137,6 +139,8 @@ private:
     EmbeddedViewListener& listener;
     std::atomic<int> refCount { 1 };
 };
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 class Editor : public AudioProcessorEditor

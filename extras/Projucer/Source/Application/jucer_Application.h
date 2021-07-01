@@ -66,7 +66,7 @@ public:
     bool isGUIEditorEnabled() const;
 
     //==============================================================================
-    bool openFile (const File&);
+    void openFile (const File&, std::function<void (bool)>);
     void showPathsWindow (bool highlightJUCEPath = false);
     PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
     void selectEditorColourSchemeWithName (const String& schemeName);
@@ -119,8 +119,8 @@ private:
     void createNewPIP();
     void askUserToOpenFile();
     void saveAllDocuments();
-    bool closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave);
-    bool closeAllMainWindows();
+    void closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave);
+    void closeAllMainWindows (std::function<void (bool)>);
     void closeAllMainWindowsAndQuitIfNeeded();
     void clearRecentFiles();
 
@@ -216,6 +216,9 @@ private:
 
     int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0;
 
+    std::unique_ptr<FileChooser> chooser;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjucerApplication)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ProjucerApplication)
 };

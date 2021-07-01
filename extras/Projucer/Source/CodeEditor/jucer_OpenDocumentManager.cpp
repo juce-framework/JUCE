@@ -53,8 +53,9 @@ public:
     bool refersToProject (Project& p) const override         { return project == &p; }
     Project* getProject() const override                     { return project; }
     bool needsSaving() const override                        { return false; }
-    bool save() override                                     { return true; }
-    bool saveAs() override                                   { return false; }
+    bool saveSyncWithoutAsking() override                    { return true; }
+    void saveAsync (std::function<void (bool)>) override     {}
+    void saveAsAsync (std::function<void (bool)>) override   {}
     bool hasFileBeenModifiedExternally() override            { return fileModificationTime != file.getLastModificationTime(); }
     void reloadFromFile() override                           { fileModificationTime = file.getLastModificationTime(); }
     String getName() const override                          { return file.getFileName(); }
@@ -164,86 +165,201 @@ OpenDocumentManager::Document* OpenDocumentManager::getOpenDocument (int index) 
     return documents.getUnchecked (index);
 }
 
-FileBasedDocument::SaveResult OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Document* doc)
+void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Document* doc,
+                                                    std::function<void (FileBasedDocument::SaveResult)> callback)
 {
     if (! doc->needsSaving())
-        return FileBasedDocument::savedOk;
+    {
+        if (callback != nullptr)
+            callback (FileBasedDocument::savedOk);
 
-    const int r = AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
-                                                   TRANS("Closing document..."),
-                                                   TRANS("Do you want to save the changes to \"")
-                                                       + doc->getName() + "\"?",
-                                                   TRANS("Save"),
-                                                   TRANS("Discard changes"),
-                                                   TRANS("Cancel"));
+        return;
+    }
 
-    if (r == 1)  // save changes
-        return doc->save() ? FileBasedDocument::savedOk
-                           : FileBasedDocument::failedToWriteToFile;
+    WeakReference<OpenDocumentManager> parent { this };
+    AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
+                                     TRANS("Closing document..."),
+                                     TRANS("Do you want to save the changes to \"")
+                                         + doc->getName() + "\"?",
+                                     TRANS("Save"),
+                                     TRANS("Discard changes"),
+                                     TRANS("Cancel"),
+                                     nullptr,
+                                     ModalCallbackFunction::create ([parent, doc, callback] (int r)
+    {
+        if (parent == nullptr)
+            return;
 
-    if (r == 2)  // discard changes
-        return FileBasedDocument::savedOk;
+        if (r == 1)
+        {
+            doc->saveAsync ([parent, callback] (bool hasSaved)
+            {
+                if (parent == nullptr)
+                    return;
 
-    return FileBasedDocument::userCancelledSave;
+                if (callback != nullptr)
+                    callback (hasSaved ? FileBasedDocument::savedOk : FileBasedDocument::failedToWriteToFile);
+            });
+            return;
+        }
+
+        if (callback != nullptr)
+            callback (r == 2 ? FileBasedDocument::savedOk : FileBasedDocument::userCancelledSave);
+    }));
 }
 
-
-bool OpenDocumentManager::closeDocument (int index, SaveIfNeeded saveIfNeeded)
+bool OpenDocumentManager::closeDocumentWithoutSaving (Document* doc)
 {
-    if (Document* doc = documents [index])
+    if (documents.contains (doc))
     {
-        if (saveIfNeeded == SaveIfNeeded::yes)
-            if (saveIfNeededAndUserAgrees (doc) != FileBasedDocument::savedOk)
-                return false;
-
         bool canClose = true;
 
         for (int i = listeners.size(); --i >= 0;)
-            if (DocumentCloseListener* l = listeners[i])
+            if (auto* l = listeners[i])
                 if (! l->documentAboutToClose (doc))
                     canClose = false;
 
         if (! canClose)
             return false;
 
-        documents.remove (index);
+        documents.removeObject (doc);
         ProjucerApplication::getCommandManager().commandStatusChanged();
     }
 
     return true;
 }
 
-bool OpenDocumentManager::closeDocument (Document* document, SaveIfNeeded saveIfNeeded)
+void OpenDocumentManager::closeDocumentAsync (Document* doc, SaveIfNeeded saveIfNeeded, std::function<void (bool)> callback)
 {
-    return closeDocument (documents.indexOf (document), saveIfNeeded);
+    if (! documents.contains (doc))
+    {
+        if (callback != nullptr)
+            callback (true);
+
+        return;
+    }
+
+    if (saveIfNeeded == SaveIfNeeded::yes)
+    {
+        WeakReference<OpenDocumentManager> parent { this };
+        saveIfNeededAndUserAgrees (doc, [parent, doc, callback] (FileBasedDocument::SaveResult result)
+        {
+            if (parent == nullptr)
+                return;
+
+            if (result != FileBasedDocument::savedOk)
+            {
+                if (callback != nullptr)
+                    callback (false);
+
+                return;
+            }
+
+            if (callback != nullptr)
+                callback (parent->closeDocumentWithoutSaving (doc));
+        });
+
+        return;
+    }
+
+    if (callback != nullptr)
+        callback (closeDocumentWithoutSaving (doc));
 }
 
-void OpenDocumentManager::closeFile (const File& f, SaveIfNeeded saveIfNeeded)
+void OpenDocumentManager::closeFileWithoutSaving (const File& f)
 {
     for (int i = documents.size(); --i >= 0;)
-        if (Document* d = documents[i])
+        if (auto* d = documents[i])
             if (d->isForFile (f))
-                closeDocument (i, saveIfNeeded);
+                closeDocumentWithoutSaving (d);
 }
 
-bool OpenDocumentManager::closeAll (SaveIfNeeded askUserToSave)
+static void closeLastAsyncRecusrsive (WeakReference<OpenDocumentManager> parent,
+                                      OpenDocumentManager::SaveIfNeeded askUserToSave,
+                                      std::function<void (bool)> callback)
 {
-    for (int i = getNumOpenDocuments(); --i >= 0;)
-        if (! closeDocument (i, askUserToSave))
-            return false;
+    auto lastIndex = parent->getNumOpenDocuments() - 1;
 
-    return true;
+    if (lastIndex < 0)
+    {
+        if (callback != nullptr)
+            callback (true);
+
+        return;
+    }
+
+    parent->closeDocumentAsync (parent->getOpenDocument (lastIndex),
+                                askUserToSave,
+                                [parent, askUserToSave, callback] (bool closedSuccessfully)
+    {
+        if (parent == nullptr)
+            return;
+
+        if (! closedSuccessfully)
+        {
+            if (callback != nullptr)
+                callback (false);
+
+            return;
+        }
+
+        closeLastAsyncRecusrsive (parent, askUserToSave, std::move (callback));
+    });
 }
 
-bool OpenDocumentManager::closeAllDocumentsUsingProject (Project& project, SaveIfNeeded saveIfNeeded)
+void OpenDocumentManager::closeAllAsync (SaveIfNeeded askUserToSave, std::function<void (bool)> callback)
+{
+    closeLastAsyncRecusrsive (this, askUserToSave, std::move (callback));
+}
+
+void OpenDocumentManager::closeLastDocumentUsingProjectRecursive (WeakReference<OpenDocumentManager> parent,
+                                                                  Project* project,
+                                                                  SaveIfNeeded askUserToSave,
+                                                                  std::function<void (bool)> callback)
+{
+    for (int i = documents.size(); --i >= 0;)
+    {
+        if (auto* d = documents[i])
+        {
+            if (d->getProject() == project)
+            {
+                closeDocumentAsync (d, askUserToSave, [parent, project, askUserToSave, callback] (bool closedSuccessfully)
+                {
+                    if (parent == nullptr)
+                        return;
+
+                    if (! closedSuccessfully)
+                    {
+                        if (callback != nullptr)
+                            callback (false);
+
+                        return;
+                    }
+
+                    parent->closeLastDocumentUsingProjectRecursive (parent, project, askUserToSave, std::move (callback));
+                });
+
+                return;
+            }
+        }
+    }
+
+    if (callback != nullptr)
+        callback (true);
+}
+
+void OpenDocumentManager::closeAllDocumentsUsingProjectAsync (Project& project, SaveIfNeeded askUserToSave, std::function<void (bool)> callback)
+{
+    WeakReference<OpenDocumentManager> parent { this };
+    closeLastDocumentUsingProjectRecursive (parent, &project, askUserToSave, std::move (callback));
+}
+
+void OpenDocumentManager::closeAllDocumentsUsingProjectWithoutSaving (Project& project)
 {
     for (int i = documents.size(); --i >= 0;)
         if (Document* d = documents[i])
             if (d->refersToProject (project))
-                if (! closeDocument (i, saveIfNeeded))
-                    return false;
-
-    return true;
+                closeDocumentWithoutSaving (d);
 }
 
 bool OpenDocumentManager::anyFilesNeedSaving() const
@@ -255,17 +371,13 @@ bool OpenDocumentManager::anyFilesNeedSaving() const
     return false;
 }
 
-bool OpenDocumentManager::saveAll()
+void OpenDocumentManager::saveAllSyncWithoutAsking()
 {
     for (int i = documents.size(); --i >= 0;)
     {
-        if (! documents.getUnchecked (i)->save())
-            return false;
-
-        ProjucerApplication::getCommandManager().commandStatusChanged();
+        if (documents.getUnchecked (i)->saveSyncWithoutAsking())
+            ProjucerApplication::getCommandManager().commandStatusChanged();
     }
-
-    return true;
 }
 
 void OpenDocumentManager::reloadModifiedFiles()

@@ -660,7 +660,6 @@ void PaintElement::updateSiblingComps()
     }
 }
 
-
 void PaintElement::showPopupMenu()
 {
     auto* commandManager = &ProjucerApplication::getCommandManager();
@@ -685,5 +684,5 @@ void PaintElement::showPopupMenu()
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::paste);
     m.addCommandItem (commandManager, StandardApplicationCommandIDs::del);
 
-    m.show();
+    m.showMenuAsync ({});
 }

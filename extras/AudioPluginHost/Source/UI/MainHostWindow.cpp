@@ -189,23 +189,45 @@ void MainHostWindow::tryToQuitApplication()
         // to flush any GUI events that may have been in transit before the app forces them to
         // be unloaded
         new AsyncQuitRetrier();
+        return;
     }
-    else if (ModalComponentManager::getInstance()->cancelAllModalComponents())
+
+    if (ModalComponentManager::getInstance()->cancelAllModalComponents())
     {
         new AsyncQuitRetrier();
+        return;
     }
-   #if JUCE_ANDROID || JUCE_IOS
-    else if (graphHolder == nullptr || graphHolder->graph->saveDocument (PluginGraph::getDefaultGraphDocumentOnMobile()))
-   #else
-    else if (graphHolder == nullptr || graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-   #endif
-    {
-        // Some plug-ins do not want [NSApp stop] to be called
-        // before the plug-ins are not deallocated.
-        graphHolder->releaseGraph();
 
-        JUCEApplication::quit();
+    if (graphHolder != nullptr)
+    {
+        auto releaseAndQuit = [this]
+        {
+            // Some plug-ins do not want [NSApp stop] to be called
+            // before the plug-ins are not deallocated.
+            graphHolder->releaseGraph();
+
+            JUCEApplication::quit();
+        };
+
+       #if JUCE_ANDROID || JUCE_IOS
+        if (graphHolder->graph->saveDocument (PluginGraph::getDefaultGraphDocumentOnMobile()))
+            releaseAndQuit();
+       #else
+        SafePointer<MainHostWindow> parent { this };
+        graphHolder->graph->saveIfNeededAndUserAgreesAsync ([parent, releaseAndQuit] (FileBasedDocument::SaveResult r)
+        {
+            if (parent == nullptr)
+                return;
+
+            if (r == FileBasedDocument::savedOk)
+                releaseAndQuit();
+        });
+       #endif
+
+        return;
     }
+
+    JUCEApplication::quit();
 }
 
 void MainHostWindow::changeListenerCallback (ChangeBroadcaster* changed)
@@ -329,9 +351,20 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
                                             ->getValue ("recentFilterGraphFiles"));
 
         if (graphHolder != nullptr)
+        {
             if (auto* graph = graphHolder->graph.get())
-                if (graph != nullptr && graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-                    graph->loadFrom (recentFiles.getFile (menuItemID - 100), true);
+            {
+                SafePointer<MainHostWindow> parent { this };
+                graph->saveIfNeededAndUserAgreesAsync ([parent, recentFiles, menuItemID] (FileBasedDocument::SaveResult r)
+                {
+                    if (parent == nullptr)
+                        return;
+
+                    if (r == FileBasedDocument::savedOk)
+                        parent->graphHolder->graph->loadFrom (recentFiles.getFile (menuItemID - 100), true);
+                });
+            }
+        }
     }
    #endif
     else if (menuItemID >= 200 && menuItemID < 210)
@@ -492,23 +525,43 @@ bool MainHostWindow::perform (const InvocationInfo& info)
     {
    #if ! (JUCE_IOS || JUCE_ANDROID)
     case CommandIDs::newFile:
-        if (graphHolder != nullptr && graphHolder->graph != nullptr && graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-            graphHolder->graph->newDocument();
+        if (graphHolder != nullptr && graphHolder->graph != nullptr)
+        {
+            SafePointer<MainHostWindow> parent { this };
+            graphHolder->graph->saveIfNeededAndUserAgreesAsync ([parent] (FileBasedDocument::SaveResult r)
+            {
+                if (parent == nullptr)
+                    return;
+
+                if (r == FileBasedDocument::savedOk)
+                    parent->graphHolder->graph->newDocument();
+            });
+        }
         break;
 
     case CommandIDs::open:
-        if (graphHolder != nullptr && graphHolder->graph != nullptr && graphHolder->graph->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-            graphHolder->graph->loadFromUserSpecifiedFile (true);
+         if (graphHolder != nullptr && graphHolder->graph != nullptr)
+         {
+             SafePointer<MainHostWindow> parent { this };
+             graphHolder->graph->saveIfNeededAndUserAgreesAsync ([parent] (FileBasedDocument::SaveResult r)
+             {
+                 if (parent == nullptr)
+                     return;
+
+                 if (r == FileBasedDocument::savedOk)
+                     parent->graphHolder->graph->loadFromUserSpecifiedFileAsync (true, [] (Result) {});
+             });
+         }
         break;
 
     case CommandIDs::save:
         if (graphHolder != nullptr && graphHolder->graph != nullptr)
-            graphHolder->graph->save (true, true);
+            graphHolder->graph->saveAsync (true, true, nullptr);
         break;
 
     case CommandIDs::saveAs:
         if (graphHolder != nullptr && graphHolder->graph != nullptr)
-            graphHolder->graph->saveAs (File(), true, true, true);
+            graphHolder->graph->saveAsAsync ({}, true, true, true, nullptr);
         break;
    #endif
 
@@ -630,11 +683,22 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
     if (graphHolder != nullptr)
     {
        #if ! (JUCE_ANDROID || JUCE_IOS)
-        if (files.size() == 1 && File (files[0]).hasFileExtension (PluginGraph::getFilenameSuffix()))
+        File firstFile { files[0] };
+
+        if (files.size() == 1 && firstFile.hasFileExtension (PluginGraph::getFilenameSuffix()))
         {
             if (auto* g = graphHolder->graph.get())
-                if (g->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk)
-                    g->loadFrom (File (files[0]), true);
+            {
+                SafePointer<MainHostWindow> parent;
+                g->saveIfNeededAndUserAgreesAsync ([parent, g, firstFile] (FileBasedDocument::SaveResult r)
+                {
+                    if (parent == nullptr)
+                        return;
+
+                    if (r == FileBasedDocument::savedOk)
+                        g->loadFrom (firstFile, true);
+                });
+            }
         }
         else
        #endif

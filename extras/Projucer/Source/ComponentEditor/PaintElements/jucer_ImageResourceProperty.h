@@ -74,14 +74,16 @@ public:
     {
         if (newIndex == 0)
         {
-            String resource (document.getResources()
-                     .browseForResource ("Select an image file to add as a resource",
-                                         "*.jpg;*.jpeg;*.png;*.gif;*.svg",
-                                         File(),
-                                         String()));
-
-            if (resource.isNotEmpty())
-                setResource (resource);
+            document.getResources()
+                .browseForResource ("Select an image file to add as a resource",
+                                    "*.jpg;*.jpeg;*.png;*.gif;*.svg",
+                                    File(),
+                                    String(),
+                                    [this] (String resource)
+                                    {
+                                        if (resource.isNotEmpty())
+                                            setResource (resource);
+                                    });
         }
         else
         {

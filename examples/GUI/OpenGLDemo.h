@@ -1103,25 +1103,25 @@ private:
 
         void selectTexture (int itemID)
         {
-           #if JUCE_MODAL_LOOPS_PERMITTED
             if (itemID == 1000)
             {
-                auto lastLocation = File::getSpecialLocation (File::userPicturesDirectory);
+                textureFileChooser = std::make_unique<FileChooser> ("Choose an image to open...",
+                                                                    File::getSpecialLocation (File::userPicturesDirectory),
+                                                                    "*.jpg;*.jpeg;*.png;*.gif");
+                auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
 
-                FileChooser fc ("Choose an image to open...", lastLocation, "*.jpg;*.jpeg;*.png;*.gif");
-
-                if (fc.browseForFileToOpen())
+                textureFileChooser->launchAsync (chooserFlags, [this] (const FileChooser& fc)
                 {
-                    lastLocation = fc.getResult();
+                    if (fc.getResult() == File{})
+                        return;
 
                     textures.add (new OpenGLUtils::TextureFromFile (fc.getResult()));
                     updateTexturesList();
 
                     textureBox.setSelectedId (textures.size());
-                }
+                });
             }
             else
-           #endif
             {
                 if (auto* t = textures[itemID - 1])
                     demo.setTexture (t);
@@ -1135,10 +1135,8 @@ private:
             for (int i = 0; i < textures.size(); ++i)
                 textureBox.addItem (textures.getUnchecked (i)->name, i + 1);
 
-           #if JUCE_MODAL_LOOPS_PERMITTED
             textureBox.addSeparator();
             textureBox.addItem ("Load from a file...", 1000);
-           #endif
         }
 
         void updateShader()
@@ -1207,6 +1205,8 @@ private:
         ToggleButton showBackgroundToggle  { "Draw 2D graphics in background" };
 
         OwnedArray<OpenGLUtils::DemoTexture> textures;
+
+        std::unique_ptr<FileChooser> textureFileChooser;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoControlsOverlay)
     };

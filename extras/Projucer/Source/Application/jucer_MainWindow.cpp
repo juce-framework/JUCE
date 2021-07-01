@@ -229,10 +229,15 @@ void MainWindow::closeButtonPressed()
     ProjucerApplication::getApp().mainWindowList.closeWindow (this);
 }
 
-bool MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserToSave)
+void MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserToSave, std::function<void (bool)> callback)
 {
     if (currentProject == nullptr)
-        return true;
+    {
+        if (callback != nullptr)
+            callback (true);
+
+        return;
+    }
 
     currentProject->getStoredProperties().setValue (getProjectWindowPosName(), getWindowStateAsString());
 
@@ -242,27 +247,65 @@ bool MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
         pcc->hideEditor();
     }
 
-    if (ProjucerApplication::getApp().openDocumentManager
-         .closeAllDocumentsUsingProject (*currentProject, askUserToSave))
+    SafePointer<MainWindow> parent { this };
+    ProjucerApplication::getApp().openDocumentManager
+        .closeAllDocumentsUsingProjectAsync (*currentProject, askUserToSave, [parent, askUserToSave, callback] (bool closedSuccessfully)
     {
-        if (askUserToSave == OpenDocumentManager::SaveIfNeeded::no
-            || (currentProject->saveIfNeededAndUserAgrees() == FileBasedDocument::savedOk))
-        {
-            setProject (nullptr);
-            return true;
-        }
-    }
+        if (parent == nullptr)
+            return;
 
-    return false;
+        if (! closedSuccessfully)
+        {
+            if (callback != nullptr)
+                callback (false);
+
+            return;
+        }
+
+        auto setProjectAndCallback = [parent, callback]
+        {
+            parent->setProject (nullptr);
+
+            if (callback != nullptr)
+                callback (true);
+        };
+
+        if (askUserToSave == OpenDocumentManager::SaveIfNeeded::no)
+        {
+            setProjectAndCallback();
+            return;
+        }
+
+        parent->currentProject->saveIfNeededAndUserAgreesAsync ([parent, setProjectAndCallback, callback] (FileBasedDocument::SaveResult saveResult)
+        {
+            if (parent == nullptr)
+                return;
+
+            if (saveResult == FileBasedDocument::savedOk)
+                setProjectAndCallback();
+            else if (callback != nullptr)
+                callback (false);
+        });
+    });
 }
 
 void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
 {
-    closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no);
-    openFile (newProjectFileToOpen);
+    SafePointer<MainWindow> parent { this };
+    closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no, [parent, newProjectFileToOpen, openInIDE] (bool)
+    {
+        if (parent == nullptr)
+            return;
 
-    if (currentProject != nullptr && openInIDE == OpenInIDE::yes)
-        ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::openInIDE, false);
+        parent->openFile (newProjectFileToOpen, [parent, openInIDE] (bool openedSuccessfully)
+        {
+            if (parent == nullptr)
+                return;
+
+            if (openedSuccessfully && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes)
+                ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::openInIDE, false);
+        });
+    });
 }
 
 void MainWindow::setProject (std::unique_ptr<Project> newProject)
@@ -308,44 +351,102 @@ bool MainWindow::canOpenFile (const File& file) const
                   || ProjucerApplication::getApp().openDocumentManager.canOpenFile (file));
 }
 
-bool MainWindow::openFile (const File& file)
+void MainWindow::openFile (const File& file, std::function<void (bool)> callback)
 {
     if (file.hasFileExtension (Project::projectFileExtension))
     {
         auto newDoc = std::make_unique<Project> (file);
         auto result = newDoc->loadFrom (file, true);
 
-        if (result.wasOk() && closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes))
+        if (result.wasOk())
         {
-            setProject (std::move (newDoc));
-            currentProject->setChangedFlag (false);
+            SafePointer<MainWindow> parent { this };
+            auto sharedDoc = std::make_shared<std::unique_ptr<Project>> (std::move (newDoc));
+            closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes, [parent, sharedDoc, callback] (bool saveResult)
+            {
+                if (parent == nullptr)
+                    return;
 
-            createProjectContentCompIfNeeded();
-            getProjectContentComponent()->reloadLastOpenDocuments();
+                if (saveResult)
+                {
+                    parent->setProject (std::move (*sharedDoc.get()));
+                    parent->currentProject->setChangedFlag (false);
 
-            currentProject->updateDeprecatedProjectSettingsInteractively();
+                    parent->createProjectContentCompIfNeeded();
+                    parent->getProjectContentComponent()->reloadLastOpenDocuments();
 
-            return true;
+                    parent->currentProject->updateDeprecatedProjectSettingsInteractively();
+                }
+
+                if (callback != nullptr)
+                    callback (saveResult);
+            });
+
+            return;
         }
+
+        if (callback != nullptr)
+            callback (false);
+
+        return;
     }
-    else if (file.exists())
+
+    if (file.exists())
     {
-        if (isPIPFile (file) && openPIP ({ file }))
-            return true;
+        SafePointer<MainWindow> parent { this };
+        auto createCompAndShowEditor = [parent, file, callback]
+        {
+            if (parent != nullptr)
+            {
+                parent->createProjectContentCompIfNeeded();
 
-        createProjectContentCompIfNeeded();
-        return getProjectContentComponent()->showEditorForFile (file, true);
+                if (callback != nullptr)
+                    callback (parent->getProjectContentComponent()->showEditorForFile (file, true));
+            }
+        };
+
+        if (isPIPFile (file))
+        {
+            openPIP (file, [parent, createCompAndShowEditor, callback] (bool openedSuccessfully)
+            {
+                if (parent == nullptr)
+                    return;
+
+                if (openedSuccessfully)
+                {
+                    if (callback != nullptr)
+                        callback (true);
+
+                    return;
+                }
+
+                createCompAndShowEditor();
+            });
+
+            return;
+        }
+
+        createCompAndShowEditor();
+        return;
     }
 
-    return false;
+    if (callback != nullptr)
+        callback (false);
 }
 
-bool MainWindow::openPIP (PIPGenerator generator)
+void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callback)
 {
-    if (! generator.hasValidPIP())
-        return false;
+    auto generator = std::make_shared<PIPGenerator> (pipFile);
 
-    auto generatorResult = generator.createJucerFile();
+    if (! generator->hasValidPIP())
+    {
+        if (callback != nullptr)
+            callback (false);
+
+        return;
+    }
+
+    auto generatorResult = generator->createJucerFile();
 
     if (generatorResult != Result::ok())
     {
@@ -353,29 +454,47 @@ bool MainWindow::openPIP (PIPGenerator generator)
                                           "PIP Error.",
                                           generatorResult.getErrorMessage());
 
-        return false;
+        if (callback != nullptr)
+            callback (false);
+
+        return;
     }
 
-    if (! generator.createMainCpp())
+    if (! generator->createMainCpp())
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                                           "PIP Error.",
                                           "Failed to create Main.cpp.");
 
-        return false;
+        if (callback != nullptr)
+            callback (false);
+
+        return;
     }
 
-    if (! openFile (generator.getJucerFile()))
+    SafePointer<MainWindow> parent { this };
+    openFile (generator->getJucerFile(), [parent, generator, callback] (bool openedSuccessfully)
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                          "PIP Error.",
-                                          "Failed to open .jucer file.");
+        if (parent == nullptr)
+            return;
 
-        return false;
-    }
+        if (! openedSuccessfully)
+        {
+            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                              "PIP Error.",
+                                              "Failed to open .jucer file.");
 
-    setupTemporaryPIPProject (generator);
-    return true;
+            if (callback != nullptr)
+                callback (false);
+
+            return;
+        }
+
+        parent->setupTemporaryPIPProject (*generator);
+
+        if (callback != nullptr)
+            callback (true);
+    });
 }
 
 void MainWindow::setupTemporaryPIPProject (PIPGenerator& generator)
@@ -408,15 +527,32 @@ bool MainWindow::isInterestedInFileDrag (const StringArray& filenames)
     return false;
 }
 
+static void filesDroppedRecursive (Component::SafePointer<MainWindow> parent, StringArray filenames)
+{
+    if (filenames.isEmpty())
+        return;
+
+    auto f = filenames[0];
+    filenames.remove (0);
+
+    if (! parent->canOpenFile (f))
+    {
+        filesDroppedRecursive (parent, filenames);
+        return;
+    }
+
+    parent->openFile (f, [parent, filenames] (bool openedSuccessfully)
+    {
+        if (parent == nullptr || ! openedSuccessfully)
+            return;
+
+        filesDroppedRecursive (parent, filenames);
+    });
+}
+
 void MainWindow::filesDropped (const StringArray& filenames, int /*mouseX*/, int /*mouseY*/)
 {
-    for (auto& filename : filenames)
-    {
-        const File f (filename);
-
-        if (canOpenFile (f) && openFile (f))
-            break;
-    }
+    filesDroppedRecursive (this, filenames);
 }
 
 bool MainWindow::shouldDropFilesWhenDraggedExternally (const DragAndDropTarget::SourceDetails& sourceDetails,
@@ -472,7 +608,7 @@ void MainWindow::showStartPage()
     jassert (currentProject == nullptr);
 
     setContentOwned (new StartPageComponent ([this] (std::unique_ptr<Project>&& newProject) { setProject (std::move (newProject)); },
-                                             [this] (const File& exampleFile) { openFile (exampleFile); }),
+                                             [this] (const File& exampleFile) { openFile (exampleFile, nullptr); }),
                      true);
 
     setResizable (false, false);
@@ -580,19 +716,38 @@ void MainWindowList::forceCloseAllWindows()
     windows.clear();
 }
 
-bool MainWindowList::askAllWindowsToClose()
+static void askAllWindowsToCloseRecursive (WeakReference<MainWindowList> parent, std::function<void (bool)> callback)
 {
-    saveCurrentlyOpenProjectList();
-
-    while (windows.size() > 0)
+    if (parent->windows.size() == 0)
     {
-        if (! windows[0]->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes))
-            return false;
+        if (callback != nullptr)
+            callback (true);
 
-        windows.remove (0);
+        return;
     }
 
-    return true;
+    parent->windows[0]->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes, [parent, callback] (bool closedSuccessfully)
+    {
+        if (parent == nullptr)
+            return;
+
+        if (! closedSuccessfully)
+        {
+            if (callback != nullptr)
+                callback (false);
+
+            return;
+        }
+
+        parent->windows.remove (0);
+        askAllWindowsToCloseRecursive (parent, std::move (callback));
+    });
+}
+
+void MainWindowList::askAllWindowsToClose (std::function<void (bool)> callback)
+{
+    saveCurrentlyOpenProjectList();
+    askAllWindowsToCloseRecursive (this, std::move (callback));
 }
 
 void MainWindowList::createWindowIfNoneAreOpen()
@@ -613,11 +768,18 @@ void MainWindowList::closeWindow (MainWindow* w)
     else
    #endif
     {
-        if (w->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes))
+        WeakReference<MainWindowList> parent { this };
+        w->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes, [parent, w] (bool closedSuccessfully)
         {
-            windows.removeObject (w);
-            saveCurrentlyOpenProjectList();
-        }
+            if (parent == nullptr)
+                return;
+
+            if (closedSuccessfully)
+            {
+                parent->windows.removeObject (w);
+                parent->saveCurrentlyOpenProjectList();
+            }
+        });
     }
 }
 
@@ -653,19 +815,30 @@ void MainWindowList::openDocument (OpenDocumentManager::Document* doc, bool grab
     getFrontmostWindow()->getProjectContentComponent()->showDocument (doc, grabFocus);
 }
 
-bool MainWindowList::openFile (const File& file, bool openInBackground)
+void MainWindowList::openFile (const File& file, std::function<void (bool)> callback, bool openInBackground)
 {
     if (! file.exists())
-        return false;
+    {
+        if (callback != nullptr)
+            callback (false);
+
+        return;
+    }
 
     for (auto* w : windows)
     {
         if (w->getProject() != nullptr && w->getProject()->getFile() == file)
         {
             w->toFront (true);
-            return true;
+
+            if (callback != nullptr)
+                callback (true);
+
+            return;
         }
     }
+
+    WeakReference<MainWindowList> parent { this };
 
     if (file.hasFileExtension (Project::projectFileExtension)
         || isPIPFile (file))
@@ -675,23 +848,37 @@ bool MainWindowList::openFile (const File& file, bool openInBackground)
         auto* w = getOrCreateEmptyWindow();
         jassert (w != nullptr);
 
-        if (w->openFile (file))
+        w->openFile (file, [parent, previousFrontWindow, w, openInBackground, callback] (bool openedSuccessfully)
         {
-            w->makeVisible();
-            w->setResizable (true, false);
-            checkWindowBounds (*w);
+            if (parent == nullptr)
+                return;
 
-            if (openInBackground && previousFrontWindow != nullptr)
-                previousFrontWindow->toFront (true);
+            if (openedSuccessfully)
+            {
+                w->makeVisible();
+                w->setResizable (true, false);
+                parent->checkWindowBounds (*w);
 
-            return true;
-        }
+                if (openInBackground && previousFrontWindow != nullptr)
+                    previousFrontWindow->toFront (true);
+            }
+            else
+            {
+                parent->closeWindow (w);
+            }
 
-        closeWindow (w);
-        return false;
+            if (callback != nullptr)
+                callback (openedSuccessfully);
+        });
+
+        return;
     }
 
-    return getFrontmostWindow()->openFile (file);
+    getFrontmostWindow()->openFile (file, [parent, callback] (bool openedSuccessfully)
+    {
+        if (parent != nullptr && callback != nullptr)
+            callback (openedSuccessfully);
+    });
 }
 
 MainWindow* MainWindowList::createNewMainWindow()
@@ -841,7 +1028,7 @@ void MainWindowList::reopenLastProjects()
 
     for (auto& p : getAppSettings().getLastProjects())
         if (p.existsAsFile())
-            openFile (p, true);
+            openFile (p, nullptr, true);
 }
 
 void MainWindowList::sendLookAndFeelChange()

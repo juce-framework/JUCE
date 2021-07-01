@@ -498,14 +498,13 @@ private:
     {
         if (btn == &chooseFileButton && fileChooser.get() == nullptr)
         {
-            SafePointer<AudioPlaybackDemo> safeThis (this);
-
             if (! RuntimePermissions::isGranted (RuntimePermissions::readExternalStorage))
             {
+                SafePointer<AudioPlaybackDemo> safeThis (this);
                 RuntimePermissions::request (RuntimePermissions::readExternalStorage,
                                              [safeThis] (bool granted) mutable
                                              {
-                                                 if (granted)
+                                                 if (safeThis != nullptr && granted)
                                                      safeThis->buttonClicked (&safeThis->chooseFileButton);
                                              });
                 return;
@@ -516,16 +515,16 @@ private:
                 fileChooser.reset (new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif"));
 
                 fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
-                                          [safeThis] (const FileChooser& fc) mutable
+                                          [this] (const FileChooser& fc) mutable
                                           {
-                                              if (safeThis != nullptr && fc.getURLResults().size() > 0)
+                                              if (fc.getURLResults().size() > 0)
                                               {
                                                   auto u = fc.getURLResult();
 
-                                                  safeThis->showAudioResource (std::move (u));
+                                                  showAudioResource (std::move (u));
                                               }
 
-                                              safeThis->fileChooser = nullptr;
+                                              fileChooser = nullptr;
                                           }, nullptr);
             }
             else
