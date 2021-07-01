@@ -527,7 +527,18 @@ void ResizableWindow::parentSizeChanged()
 String ResizableWindow::getWindowStateAsString()
 {
     updateLastPosIfShowing();
-    return (isFullScreen() && ! isKioskMode() ? "fs " : "") + lastNonFullScreenPos.toString();
+    auto stateString = (isFullScreen() && ! isKioskMode() ? "fs " : "") + lastNonFullScreenPos.toString();
+
+   #if JUCE_LINUX
+    if (auto* peer = isOnDesktop() ? getPeer() : nullptr)
+    {
+        const auto frameSize = peer->getFrameSize();
+        stateString << " frame " << frameSize.getTop() << ' ' << frameSize.getLeft()
+                    << ' ' << frameSize.getBottom() << ' ' << frameSize.getRight();
+    }
+   #endif
+
+    return stateString;
 }
 
 bool ResizableWindow::restoreWindowStateFromString (const String& s)
@@ -540,7 +551,7 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     const bool fs = tokens[0].startsWithIgnoreCase ("fs");
     const int firstCoord = fs ? 1 : 0;
 
-    if (tokens.size() != firstCoord + 4)
+    if (tokens.size() < firstCoord + 4)
         return false;
 
     Rectangle<int> newPos (tokens[firstCoord].getIntValue(),
@@ -554,7 +565,26 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
     auto* peer = isOnDesktop() ? getPeer() : nullptr;
 
     if (peer != nullptr)
+    {
         peer->getFrameSize().addTo (newPos);
+    }
+   #if JUCE_LINUX
+    else
+    {
+        // We need to adjust for the frame size before we create a peer, as X11
+        // doesn't provide this information at construction time.
+        if (tokens[firstCoord + 4] == "frame" && tokens.size() == firstCoord + 9)
+        {
+            BorderSize<int> frame { tokens[firstCoord + 5].getIntValue(),
+                                    tokens[firstCoord + 6].getIntValue(),
+                                    tokens[firstCoord + 7].getIntValue(),
+                                    tokens[firstCoord + 8].getIntValue() };
+
+            frame.addTo (newPos);
+            setBounds (newPos);
+        }
+    }
+   #endif
 
     {
         auto& desktop = Desktop::getInstance();
