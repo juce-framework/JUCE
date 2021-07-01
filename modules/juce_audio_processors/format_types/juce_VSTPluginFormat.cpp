@@ -2866,9 +2866,9 @@ public:
    #else
     void paint (Graphics& g) override
     {
+       #if JUCE_LINUX || JUCE_BSD
         if (isOpen)
         {
-           #if JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
             {
                 auto clip = g.getClipBounds();
@@ -2877,9 +2877,9 @@ public:
                                                        static_cast<unsigned int> (clip.getWidth()),
                                                        static_cast<unsigned int> (clip.getHeight()), True);
             }
-           #endif
         }
         else
+       #endif
         {
             g.fillAll (Colours::black);
         }

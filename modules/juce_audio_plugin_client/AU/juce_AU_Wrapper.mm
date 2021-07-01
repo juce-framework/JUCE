@@ -389,6 +389,8 @@ public:
             totalInChannels  = juceFilter->getTotalNumInputChannels();
             totalOutChannels = juceFilter->getTotalNumOutputChannels();
 
+            addSupportedLayoutTagsForDirection (isInput);
+
             if (err != noErr)
                 return err;
            #endif
@@ -2332,7 +2334,7 @@ private:
     void addSupportedLayoutTagsForDirection (bool isInput)
     {
         auto& layouts = isInput ? supportedInputLayouts : supportedOutputLayouts;
-        layouts.clear();
+        layouts.clearQuick();
         auto numBuses = AudioUnitHelpers::getBusCount (*juceFilter, isInput);
 
         for (int busNr = 0; busNr < numBuses; ++busNr)

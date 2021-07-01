@@ -40,6 +40,7 @@
   description:        Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_audio_processors
 

@@ -6,6 +6,26 @@ Develop
 
 Change
 ------
+The minimum supported C++ standard is now C++14 and the oldest supported
+compilers on macOS and Linux are now Xcode 9.2, GCC 5.0 and Clang 3.4.
+
+Possible Issues
+---------------
+Older compilers will no longer be able to compile JUCE. People using Xcode 8.5
+on OS X 10.11 will need to update the operating system to OS X 10.12 to be able
+to use Xcode 9.2.
+
+Workaround
+----------
+No workaround is available.
+
+Rationale
+---------
+This compiler upgrade will allow the use of C++14 within the framework.
+
+
+Change
+------
 Platform GL headers are no longer included in juce_opengl.h
 
 Possible Issues

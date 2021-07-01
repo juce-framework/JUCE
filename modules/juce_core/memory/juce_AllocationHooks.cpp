@@ -65,8 +65,6 @@ void operator delete[] (void* p) noexcept
     std::free (p);
 }
 
-#if JUCE_CXX14_IS_AVAILABLE
-
 void operator delete (void* p, size_t) noexcept
 {
     juce::notifyAllocationHooksForThread();
@@ -78,8 +76,6 @@ void operator delete[] (void* p, size_t) noexcept
     juce::notifyAllocationHooksForThread();
     std::free (p);
 }
-
-#endif
 
 namespace juce
 {

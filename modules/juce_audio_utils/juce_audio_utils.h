@@ -40,6 +40,7 @@
   description:        Classes for audio-related GUI and miscellaneous tasks.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_audio_processors, juce_audio_formats, juce_audio_devices
   OSXFrameworks:      CoreAudioKit DiscRecording

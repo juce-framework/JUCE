@@ -54,7 +54,7 @@ public:
     using value_type         = View;
     using reference          = const View&;
     using pointer            = const View*;
-    using iterator_category  = std::input_iterator_tag;
+    using iterator_category  = std::forward_iterator_tag;
 
     /** Moves this iterator to the next packet in the range. */
     Iterator& operator++() noexcept

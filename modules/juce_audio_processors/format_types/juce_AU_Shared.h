@@ -409,7 +409,7 @@ struct AudioUnitHelpers
             Channels channelConfiguration { static_cast<SInt16> (inChanNum),
                                             static_cast<SInt16> (hasInOutMismatch ? defaultOutputs : inChanNum) };
 
-            if (supportedChannels.contains (channelConfiguration))
+            if (! supportedChannels.contains (channelConfiguration))
             {
                 hasUnsupportedInput = true;
                 break;
@@ -421,7 +421,7 @@ struct AudioUnitHelpers
             Channels channelConfiguration { static_cast<SInt16> (hasInOutMismatch ? defaultInputs : outChanNum),
                                             static_cast<SInt16> (outChanNum) };
 
-            if (supportedChannels.contains (channelConfiguration))
+            if (! supportedChannels.contains (channelConfiguration))
             {
                 hasUnsupportedOutput = true;
                 break;

@@ -148,7 +148,7 @@ private:
 
     //==============================================================================
     Oscillator<SampleType> osc;
-    DelayLine<SampleType, DelayLineInterpolationTypes::Linear> delay { 5000 };
+    DelayLine<SampleType, DelayLineInterpolationTypes::Linear> delay;
     SmoothedValue<SampleType, ValueSmoothingTypes::Linear> oscVolume;
     std::vector<SmoothedValue<SampleType, ValueSmoothingTypes::Linear>> feedbackVolume { 2 };
     DryWetMixer<SampleType> dryWet;
@@ -157,7 +157,12 @@ private:
 
     double sampleRate = 44100.0;
     SampleType rate = 1.0, depth = 0.25, feedback = 0.0, mix = 0.5,
-               centreDelay = 7.0, maximumDelayModulation = 20.0;
+               centreDelay = 7.0;
+
+    static constexpr SampleType maxDepth               = 1.0,
+                                maxCentreDelayMs       = 100.0,
+                                oscVolumeMultiplier    = 0.5,
+                                maximumDelayModulation = 20.0;
 };
 
 } // namespace dsp

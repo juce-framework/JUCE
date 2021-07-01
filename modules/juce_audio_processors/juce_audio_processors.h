@@ -40,6 +40,7 @@
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_gui_extra, juce_audio_basics
   OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox
