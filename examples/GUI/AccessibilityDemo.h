@@ -1089,220 +1089,252 @@ class CustomNavigationComponent  : public Component
 public:
     CustomNavigationComponent()
     {
-        addAndMakeVisible (descriptionLabel);
-
-        setTitle ("Navigation");
-        setHelpText ("Control the navigation order of child components.");
+        setTitle ("Custom Navigation");
+        setDescription ("A demo of custom component navigation.");
         setFocusContainerType (FocusContainerType::focusContainer);
 
-        constexpr int numChildren = 12;
-
-        for (int i = 1; i <= numChildren; ++i)
-        {
-            children.push_back (std::make_unique<NavigableComponent> (i, numChildren, *this));
-            addAndMakeVisible (*children.back());
-        }
+        addAndMakeVisible (descriptionLabel);
+        addAndMakeVisible (navigableComponents);
     }
 
     void resized() override
     {
         Grid grid;
 
-        grid.templateRows = { Grid::TrackInfo (Grid::Fr (2)),
-                              Grid::TrackInfo (Grid::Fr (1)),
-                              Grid::TrackInfo (Grid::Fr (1)),
-                              Grid::TrackInfo (Grid::Fr (1)),
-                              Grid::TrackInfo (Grid::Fr (1)) };
+        grid.templateRows = { Grid::TrackInfo (Grid::Fr (1)),
+                              Grid::TrackInfo (Grid::Fr (2)) };
 
-        grid.templateColumns = { Grid::TrackInfo (Grid::Fr (1)), Grid::TrackInfo (Grid::Fr (1)), Grid::TrackInfo (Grid::Fr (1)) };
+        grid.templateColumns = { Grid::TrackInfo (Grid::Fr (1)) };
 
-        grid.items.add (GridItem (descriptionLabel).withMargin (2).withColumn ({ GridItem::Span (3) }));
-
-        for (auto& child : children)
-            grid.items.add (GridItem (*child).withMargin (5));
+        grid.items = { GridItem (descriptionLabel).withMargin (2),
+                       GridItem (navigableComponents).withMargin (5) };
 
         grid.performLayout (getLocalBounds());
     }
 
-    std::unique_ptr<ComponentTraverser> createFocusTraverser() override
-    {
-        struct CustomTraverser  : public FocusTraverser
-        {
-            explicit CustomTraverser (CustomNavigationComponent& owner)
-                : customNavigationComponent (owner)  {}
-
-            Component* getDefaultComponent (Component*) override
-            {
-                for (auto& child : customNavigationComponent.children)
-                    if (child->defaultToggle.getToggleState() && child->focusableToggle.getToggleState())
-                        return child.get();
-
-                return nullptr;
-            }
-
-            Component* getNextComponent (Component* current) override
-            {
-                const auto& comps = customNavigationComponent.children;
-
-                const auto iter = std::find_if (comps.cbegin(), comps.cend(),
-                                                [current] (const std::unique_ptr<NavigableComponent>& c) { return c.get() == current; });
-
-                if (iter != comps.cend() && iter != std::prev (comps.cend()))
-                    return std::next (iter)->get();
-
-                return nullptr;
-            }
-
-            Component* getPreviousComponent (Component* current) override
-            {
-                const auto& comps = customNavigationComponent.children;
-
-                const auto iter = std::find_if (comps.cbegin(), comps.cend(),
-                                                [current] (const std::unique_ptr<NavigableComponent>& c) { return c.get() == current; });
-
-                if (iter != comps.cend() && iter != comps.cbegin())
-                    return std::prev (iter)->get();
-
-                return nullptr;
-            }
-
-            std::vector<Component*> getAllComponents (Component*) override
-            {
-                std::vector<Component*> comps;
-
-                for (auto& child : customNavigationComponent.children)
-                    if (child->focusableToggle.getToggleState())
-                        comps.push_back (child.get());
-
-                return comps;
-            }
-
-            CustomNavigationComponent& customNavigationComponent;
-        };
-
-        return std::make_unique<CustomTraverser> (*this);
-    }
-
 private:
-    struct NavigableComponent  : public Component
+    //==============================================================================
+    class NavigableComponentsHolder  : public Component
     {
-        NavigableComponent (int index, int total, CustomNavigationComponent& owner)
+    public:
+        NavigableComponentsHolder()
         {
-            const auto textColour = Colours::black.withAlpha (0.8f);
-
-            titleLabel.setColour (Label::textColourId, textColour);
-            orderLabel.setColour (Label::textColourId, textColour);
-
-            const auto setToggleButtonColours = [textColour] (ToggleButton& b)
-            {
-                b.setColour (ToggleButton::textColourId, textColour);
-                b.setColour (ToggleButton::tickDisabledColourId, textColour);
-                b.setColour (ToggleButton::tickColourId, textColour);
-            };
-
-            setToggleButtonColours (focusableToggle);
-            setToggleButtonColours (defaultToggle);
-
-            const auto title = "Component " + String (index);
-            setTitle (title);
-            titleLabel.setText (title, dontSendNotification);
-            focusableToggle.setToggleState (true, dontSendNotification);
-            defaultToggle.setToggleState (index == 1, dontSendNotification);
-
-            for (int i = 1; i <= total; ++i)
-                orderBox.addItem (String (i), i);
-
-            orderBox.setSelectedId (index);
-
-            orderBox.onChange = [this, &owner] { owner.orderChanged (*this); };
-
-            focusableToggle.onClick = [this] { repaint(); };
-
-            defaultToggle.onClick = [this, &owner]
-            {
-                if (! defaultToggle.getToggleState())
-                    defaultToggle.setToggleState (true, dontSendNotification);
-                else
-                    owner.defaultChanged (*this);
-            };
-
-            addAndMakeVisible (titleLabel);
-
-            addAndMakeVisible (focusableToggle);
-            addAndMakeVisible (defaultToggle);
-            addAndMakeVisible (orderLabel);
-            addAndMakeVisible (orderBox);
-
+            setTitle ("Navigable Components");
+            setDescription ("A container of some navigable components.");
             setFocusContainerType (FocusContainerType::focusContainer);
-        }
 
-        void paint (Graphics& g) override
-        {
-            g.fillAll (backgroundColour.withAlpha (focusableToggle.getToggleState() ? 1.0f : 0.5f));
+            constexpr int numChildren = 12;
+
+            for (int i = 1; i <= numChildren; ++i)
+            {
+                children.push_back (std::make_unique<NavigableComponent> (i, numChildren, *this));
+                addAndMakeVisible (*children.back());
+            }
         }
 
         void resized() override
         {
             Grid grid;
 
-            grid.templateRows = { Grid::TrackInfo (Grid::Fr (2)),
-                                  Grid::TrackInfo (Grid::Fr (3)),
-                                  Grid::TrackInfo (Grid::Fr (3)) };
+            grid.templateRows = { Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)),
+                                  Grid::TrackInfo (Grid::Fr (1)) };
 
-            grid.templateColumns = { Grid::TrackInfo (Grid::Fr (1)),
-                                     Grid::TrackInfo (Grid::Fr (1)),
-                                     Grid::TrackInfo (Grid::Fr (1)),
-                                     Grid::TrackInfo (Grid::Fr (1)) };
+            grid.templateColumns = { Grid::TrackInfo (Grid::Fr (1)), Grid::TrackInfo (Grid::Fr (1)), Grid::TrackInfo (Grid::Fr (1)) };
 
-            grid.items = { GridItem (titleLabel).withMargin (2).withColumn ({ GridItem::Span (4) }),
-                           GridItem (focusableToggle).withMargin (2).withColumn ({ GridItem::Span (2) }),
-                           GridItem (defaultToggle).withMargin (2).withColumn ({ GridItem::Span (2) }),
-                           GridItem (orderLabel).withMargin (2),
-                           GridItem (orderBox).withMargin (2).withColumn ({ GridItem::Span (3) }) };
+            for (auto& child : children)
+                grid.items.add (GridItem (*child).withMargin (5));
 
             grid.performLayout (getLocalBounds());
         }
 
-        Colour backgroundColour = getRandomBrightColour();
-        Label titleLabel;
-        ToggleButton focusableToggle { "Focusable" }, defaultToggle { "Default" };
-        Label orderLabel { {}, "Order" };
-        ComboBox orderBox;
-    };
-
-    void orderChanged (const NavigableComponent& changedChild)
-    {
-        const auto addressMatches = [&] (const std::unique_ptr<NavigableComponent>& child)
+        std::unique_ptr<ComponentTraverser> createFocusTraverser() override
         {
-            return child.get() == &changedChild;
+            struct CustomTraverser  : public FocusTraverser
+            {
+                explicit CustomTraverser (NavigableComponentsHolder& owner)
+                    : navigableComponentsHolder (owner)  {}
+
+                Component* getDefaultComponent (Component*) override
+                {
+                    for (auto& child : navigableComponentsHolder.children)
+                        if (child->defaultToggle.getToggleState() && child->focusableToggle.getToggleState())
+                            return child.get();
+
+                    return nullptr;
+                }
+
+                Component* getNextComponent (Component* current) override
+                {
+                    const auto& comps = navigableComponentsHolder.children;
+
+                    const auto iter = std::find_if (comps.cbegin(), comps.cend(),
+                                                    [current] (const std::unique_ptr<NavigableComponent>& c) { return c.get() == current; });
+
+                    if (iter != comps.cend() && iter != std::prev (comps.cend()))
+                        return std::next (iter)->get();
+
+                    return nullptr;
+                }
+
+                Component* getPreviousComponent (Component* current) override
+                {
+                    const auto& comps = navigableComponentsHolder.children;
+
+                    const auto iter = std::find_if (comps.cbegin(), comps.cend(),
+                                                    [current] (const std::unique_ptr<NavigableComponent>& c) { return c.get() == current; });
+
+                    if (iter != comps.cend() && iter != comps.cbegin())
+                        return std::prev (iter)->get();
+
+                    return nullptr;
+                }
+
+                std::vector<Component*> getAllComponents (Component*) override
+                {
+                    std::vector<Component*> comps;
+
+                    for (auto& child : navigableComponentsHolder.children)
+                        if (child->focusableToggle.getToggleState())
+                            comps.push_back (child.get());
+
+                    return comps;
+                }
+
+                NavigableComponentsHolder& navigableComponentsHolder;
+            };
+
+            return std::make_unique<CustomTraverser> (*this);
+        }
+
+    private:
+        struct NavigableComponent  : public Component
+        {
+            NavigableComponent (int index, int total, NavigableComponentsHolder& owner)
+            {
+                const auto textColour = Colours::black.withAlpha (0.8f);
+
+                titleLabel.setColour (Label::textColourId, textColour);
+                orderLabel.setColour (Label::textColourId, textColour);
+
+                const auto setToggleButtonColours = [textColour] (ToggleButton& b)
+                {
+                    b.setColour (ToggleButton::textColourId, textColour);
+                    b.setColour (ToggleButton::tickDisabledColourId, textColour);
+                    b.setColour (ToggleButton::tickColourId, textColour);
+                };
+
+                setToggleButtonColours (focusableToggle);
+                setToggleButtonColours (defaultToggle);
+
+                const auto title = "Component " + String (index);
+                setTitle (title);
+                titleLabel.setText (title, dontSendNotification);
+                focusableToggle.setToggleState (true, dontSendNotification);
+                defaultToggle.setToggleState (index == 1, dontSendNotification);
+
+                for (int i = 1; i <= total; ++i)
+                    orderBox.addItem (String (i), i);
+
+                orderBox.setSelectedId (index);
+
+                orderBox.onChange = [this, &owner] { owner.orderChanged (*this); };
+
+                focusableToggle.onClick = [this] { repaint(); };
+
+                defaultToggle.onClick = [this, &owner]
+                {
+                    if (! defaultToggle.getToggleState())
+                        defaultToggle.setToggleState (true, dontSendNotification);
+                    else
+                        owner.defaultChanged (*this);
+                };
+
+                addAndMakeVisible (titleLabel);
+
+                addAndMakeVisible (focusableToggle);
+                addAndMakeVisible (defaultToggle);
+                addAndMakeVisible (orderLabel);
+                addAndMakeVisible (orderBox);
+
+                setFocusContainerType (FocusContainerType::focusContainer);
+            }
+
+            void paint (Graphics& g) override
+            {
+                g.fillAll (backgroundColour.withAlpha (focusableToggle.getToggleState() ? 1.0f : 0.5f));
+            }
+
+            void resized() override
+            {
+                Grid grid;
+
+                grid.templateRows = { Grid::TrackInfo (Grid::Fr (2)),
+                                      Grid::TrackInfo (Grid::Fr (3)),
+                                      Grid::TrackInfo (Grid::Fr (3)) };
+
+                grid.templateColumns = { Grid::TrackInfo (Grid::Fr (1)),
+                                         Grid::TrackInfo (Grid::Fr (1)),
+                                         Grid::TrackInfo (Grid::Fr (1)),
+                                         Grid::TrackInfo (Grid::Fr (1)) };
+
+                grid.items = { GridItem (titleLabel).withMargin (2).withColumn ({ GridItem::Span (4) }),
+                               GridItem (focusableToggle).withMargin (2).withColumn ({ GridItem::Span (2) }),
+                               GridItem (defaultToggle).withMargin (2).withColumn ({ GridItem::Span (2) }),
+                               GridItem (orderLabel).withMargin (2),
+                               GridItem (orderBox).withMargin (2).withColumn ({ GridItem::Span (3) }) };
+
+                grid.performLayout (getLocalBounds());
+            }
+
+            Colour backgroundColour = getRandomBrightColour();
+            Label titleLabel;
+            ToggleButton focusableToggle { "Focusable" }, defaultToggle { "Default" };
+            Label orderLabel { {}, "Order" };
+            ComboBox orderBox;
         };
 
-        const auto iter = std::find_if (children.begin(), children.end(), addressMatches);
+        void orderChanged (const NavigableComponent& changedChild)
+        {
+            const auto addressMatches = [&] (const std::unique_ptr<NavigableComponent>& child)
+            {
+                return child.get() == &changedChild;
+            };
 
-        if (iter != children.end())
-            std::swap (*iter, *std::next (children.begin(), changedChild.orderBox.getSelectedItemIndex()));
+            const auto iter = std::find_if (children.begin(), children.end(), addressMatches);
 
-        int order = 1;
+            if (iter != children.end())
+                std::swap (*iter, *std::next (children.begin(), changedChild.orderBox.getSelectedItemIndex()));
 
-        for (auto& child : children)
-            child->orderBox.setSelectedId (order++);
+            int order = 1;
 
-        if (auto* handler = getAccessibilityHandler())
-            handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
-    }
+            for (auto& child : children)
+                child->orderBox.setSelectedId (order++);
 
-    void defaultChanged (const NavigableComponent& newDefault)
-    {
-        for (auto& child : children)
-            if (child->defaultToggle.getToggleState() && child.get() != &newDefault)
-                child->defaultToggle.setToggleState (false, dontSendNotification);
-    }
+            if (auto* handler = getAccessibilityHandler())
+                handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+        }
 
+        void defaultChanged (const NavigableComponent& newDefault)
+        {
+            for (auto& child : children)
+                if (child->defaultToggle.getToggleState() && child.get() != &newDefault)
+                    child->defaultToggle.setToggleState (false, dontSendNotification);
+        }
+
+        std::vector<std::unique_ptr<NavigableComponent>> children;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NavigableComponentsHolder)
+    };
+
+    //==============================================================================
     Label descriptionLabel { {}, "This is a demo of how to control the navigation order of components when navigating with an accessibility client.\n\n"
                                  "You can set the order of navigation, whether components are focusable and set a default component which will "
                                  "receive the focus first." };
 
-    std::vector<std::unique_ptr<NavigableComponent>> children;
+    NavigableComponentsHolder navigableComponents;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomNavigationComponent)

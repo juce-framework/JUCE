@@ -204,10 +204,6 @@ public:
         if (! mainInput.isDisabled() && mainInput != mainOutput)
             return false;
 
-        // do not allow disabling the main buses
-        if (mainOutput.isDisabled())
-            return false;
-
         // only allow stereo and mono
         if (mainOutput.size() > 2)
             return false;
@@ -282,7 +278,7 @@ public:
     int getNumPrograms() override                                     { return 0; }
     int getCurrentProgram() override                                  { return 0; }
     void setCurrentProgram (int) override                             {}
-    const String getProgramName (int) override                        { return {}; }
+    const String getProgramName (int) override                        { return "None"; }
     void changeProgramName (int, const String&) override              {}
 
     //==============================================================================

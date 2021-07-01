@@ -103,7 +103,7 @@ public:
           androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidAdditionalJavaFolders         (settings, Ids::androidAdditionalJavaFolders,         getUndoManager()),
           androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
-          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\njcenter()"),
+          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\nmavenCentral()"),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
@@ -135,9 +135,9 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "6.1.1"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "6.7.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "4.0.0"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "4.2.1"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -603,7 +603,7 @@ private:
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
         mo << "       google()"                                                                            << newLine;
-        mo << "       jcenter()"                                                                           << newLine;
+        mo << "       mavenCentral()"                                                                      << newLine;
         mo << "   }"                                                                                       << newLine;
         mo << "   dependencies {"                                                                          << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;

@@ -215,7 +215,7 @@ public:
     int getNumPrograms()    override { return 1; }
     int getCurrentProgram() override { return 0; }
     void setCurrentProgram (int) override {}
-    const String getProgramName (int) override { return {}; }
+    const String getProgramName (int) override { return "None"; }
 
     void changeProgramName (int, const String&) override {}
 
@@ -1741,7 +1741,7 @@ private:
 
     //==============================================================================
     ComboBox comboEffect;
-    Label labelEffect { "Audio effect: " };
+    Label labelEffect { {}, "Audio effect: " };
 
     struct GetTrackInfo
     {
