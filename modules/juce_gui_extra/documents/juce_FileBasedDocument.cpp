@@ -440,15 +440,13 @@ private:
     int askToSaveChanges (SafeParentPointer parent,
                           std::function<void (SafeParentPointer, int)> callback)
     {
-        auto wrappedCallback = [parent, callback = std::move (callback)] (int alertResult)
-        {
-            if (parent != nullptr)
-                callback (parent, alertResult);
-        };
-
-        auto modalCallback = callback == nullptr
-                                 ? nullptr
-                                 : ModalCallbackFunction::create (std::move (wrappedCallback));
+        auto* modalCallback = callback == nullptr
+                                  ? nullptr
+                                  : ModalCallbackFunction::create ([parent, callback = std::move (callback)] (int alertResult)
+                                                                   {
+                                                                       if (parent != nullptr)
+                                                                           callback (parent, alertResult);
+                                                                   });
 
         return AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
                                                 TRANS ("Closing document..."),
@@ -458,7 +456,7 @@ private:
                                                 TRANS ("Discard changes"),
                                                 TRANS ("Cancel"),
                                                 nullptr,
-                                                std::move (modalCallback));
+                                                modalCallback);
     }
 
     //==============================================================================
@@ -676,17 +674,13 @@ private:
         if (parent == nullptr)
             return false;
 
-        auto wrappedCallback = [parent, callback = std::move (callback)] (int r)
-        {
-            if (parent == nullptr)
-                return;
-
-            callback (parent, r == 1);
-        };
-
-        auto modalCallback = callback == nullptr
-                                 ? nullptr
-                                 : ModalCallbackFunction::create (std::move (wrappedCallback));
+        auto* modalCallback = callback == nullptr
+                                  ? nullptr
+                                  : ModalCallbackFunction::create ([parent, callback = std::move (callback)] (int r)
+                                                                   {
+                                                                       if (parent != nullptr)
+                                                                           callback (parent, r == 1);
+                                                                   });
 
         return AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                              TRANS ("File already exists"),
@@ -697,7 +691,7 @@ private:
                                              TRANS ("Overwrite"),
                                              TRANS ("Cancel"),
                                              nullptr,
-                                             std::move (modalCallback));
+                                             modalCallback);
     }
 
     //==============================================================================
