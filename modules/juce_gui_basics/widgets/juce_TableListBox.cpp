@@ -249,6 +249,8 @@ public:
             return {};
         }
 
+        String getHelp() const override  { return rowComponent.getTooltip(); }
+
         AccessibleState getCurrentState() const override
         {
             if (auto* m = rowComponent.owner.getModel())

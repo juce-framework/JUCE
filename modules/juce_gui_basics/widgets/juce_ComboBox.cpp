@@ -662,6 +662,7 @@ public:
     }
 
     String getTitle() const override  { return comboBox.getText(); }
+    String getHelp() const override   { return comboBox.getTooltip(); }
 
 private:
     static AccessibilityActions getAccessibilityActions (ComboBox& comboBox)

@@ -120,29 +120,48 @@ void ProgressBar::timerCallback()
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> ProgressBar::createAccessibilityHandler()
 {
-    class ValueInterface  : public AccessibilityRangedNumericValueInterface
+    class ProgressBarAccessibilityHandler  : public AccessibilityHandler
     {
     public:
-        explicit ValueInterface (ProgressBar& progressBarToWrap)
-            : progressBar (progressBarToWrap)
+        explicit ProgressBarAccessibilityHandler (ProgressBar& progressBarToWrap)
+            : AccessibilityHandler (progressBarToWrap,
+                                    AccessibilityRole::progressBar,
+                                    AccessibilityActions{},
+                                    AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (progressBarToWrap) }),
+              progressBar (progressBarToWrap)
         {
         }
 
-        bool isReadOnly() const override                { return true; }
-        void setValue (double) override                 { jassertfalse; }
-        double getCurrentValue() const override         { return progressBar.progress; }
-        AccessibleValueRange getRange() const override  { return { { 0.0, 1.0 }, 0.001 }; }
+        String getHelp() const override   { return progressBar.getTooltip(); }
 
     private:
+        class ValueInterface  : public AccessibilityRangedNumericValueInterface
+        {
+        public:
+            explicit ValueInterface (ProgressBar& progressBarToWrap)
+                : progressBar (progressBarToWrap)
+            {
+            }
+
+            bool isReadOnly() const override                { return true; }
+            void setValue (double) override                 { jassertfalse; }
+            double getCurrentValue() const override         { return progressBar.progress; }
+            AccessibleValueRange getRange() const override  { return { { 0.0, 1.0 }, 0.001 }; }
+
+        private:
+            ProgressBar& progressBar;
+
+            //==============================================================================
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
+        };
+
         ProgressBar& progressBar;
 
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBarAccessibilityHandler)
     };
 
-    return std::make_unique<AccessibilityHandler> (*this,
-                                                   AccessibilityRole::progressBar,
-                                                   AccessibilityActions{},
-                                                   AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (*this) });
+    return std::make_unique<ProgressBarAccessibilityHandler> (*this);
 }
 
 } // namespace juce

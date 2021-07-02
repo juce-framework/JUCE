@@ -2700,9 +2700,12 @@ public:
         : AccessibilityHandler (textEditorToWrap,
                                 textEditorToWrap.isReadOnly() ? AccessibilityRole::staticText : AccessibilityRole::editableText,
                                 {},
-                                { std::make_unique<TextEditorTextInterface> (textEditorToWrap) })
+                                { std::make_unique<TextEditorTextInterface> (textEditorToWrap) }),
+          textEditor (textEditorToWrap)
     {
     }
+
+    String getHelp() const override  { return textEditor.getTooltip(); }
 
 private:
     class TextEditorTextInterface  : public AccessibilityTextInterface
@@ -2762,7 +2765,12 @@ private:
 
     private:
         TextEditor& textEditor;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditorTextInterface)
     };
+
+    TextEditor& textEditor;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditorAccessibilityHandler)

@@ -97,6 +97,11 @@ private:
             return itemComponent.getRepresentedItem().getAccessibilityName();
         }
 
+        String getHelp() const override
+        {
+            return itemComponent.getRepresentedItem().getTooltip();
+        }
+
         AccessibleState getCurrentState() const override
         {
             auto& treeItem = itemComponent.getRepresentedItem();

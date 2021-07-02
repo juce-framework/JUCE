@@ -1678,8 +1678,22 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
         Component::mouseWheelMove (e, wheel);
 }
 
-std::unique_ptr<AccessibilityHandler> Slider::createAccessibilityHandler()
+//==============================================================================
+class SliderAccessibilityHandler  : public AccessibilityHandler
 {
+public:
+    explicit SliderAccessibilityHandler (Slider& sliderToWrap)
+        : AccessibilityHandler (sliderToWrap,
+                                AccessibilityRole::slider,
+                                AccessibilityActions{},
+                                AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (sliderToWrap) }),
+          slider (sliderToWrap)
+    {
+    }
+
+    String getHelp() const override   { return slider.getTooltip(); }
+
+private:
     class ValueInterface  : public AccessibilityValueInterface
     {
     public:
@@ -1715,13 +1729,19 @@ std::unique_ptr<AccessibilityHandler> Slider::createAccessibilityHandler()
         Slider& slider;
         Value valueToControl;
 
+        //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
     };
 
-    return std::make_unique<AccessibilityHandler> (*this,
-                                                   AccessibilityRole::slider,
-                                                   AccessibilityActions{},
-                                                   AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (*this) });
+    Slider& slider;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAccessibilityHandler)
+};
+
+std::unique_ptr<AccessibilityHandler> Slider::createAccessibilityHandler()
+{
+    return std::make_unique<SliderAccessibilityHandler> (*this);
 }
 
 } // namespace juce
