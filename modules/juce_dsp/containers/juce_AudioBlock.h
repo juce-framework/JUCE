@@ -548,9 +548,9 @@ public:
     const AudioBlock&                      operator*= (AudioBlock src)   const noexcept   { return multiplyBy (src); }
 
     template <typename OtherSampleType, typename SmoothingType>
-    AudioBlock&       operator*= (SmoothedValue<OtherSampleType, SmoothingType>& value)       noexcept   { return multiplyBy ((NumericType) value); }
+    AudioBlock&       operator*= (SmoothedValue<OtherSampleType, SmoothingType>& value)       noexcept   { return multiplyBy (value); }
     template <typename OtherSampleType, typename SmoothingType>
-    const AudioBlock& operator*= (SmoothedValue<OtherSampleType, SmoothingType>& value) const noexcept   { return multiplyBy ((NumericType) value); }
+    const AudioBlock& operator*= (SmoothedValue<OtherSampleType, SmoothingType>& value) const noexcept   { return multiplyBy (value); }
 
     //==============================================================================
     // This class can only be used with floating point types
