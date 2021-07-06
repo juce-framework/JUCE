@@ -90,6 +90,11 @@ namespace DirectWriteTypeLayout
                                      DWRITE_GLYPH_RUN const* glyphRun, DWRITE_GLYPH_RUN_DESCRIPTION const* runDescription,
                                      IUnknown* clientDrawingEffect) noexcept override
         {
+            const String runString (runDescription->string, runDescription->stringLength);
+
+            if (! runString.containsNonWhitespaceChars())
+                return S_OK;
+
             auto layout = static_cast<TextLayout*> (clientDrawingContext);
 
             if (! (baselineOriginY >= -1.0e10f && baselineOriginY <= 1.0e10f))
