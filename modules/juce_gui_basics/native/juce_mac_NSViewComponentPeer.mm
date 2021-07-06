@@ -636,6 +636,9 @@ public:
 
     void redirectMouseEnter (NSEvent* ev)
     {
+        if (shouldIgnoreMouseEnterExit (ev))
+            return;
+
         Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
         ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
         sendMouseEvent (ev);
@@ -643,6 +646,9 @@ public:
 
     void redirectMouseExit (NSEvent* ev)
     {
+        if (shouldIgnoreMouseEnterExit (ev))
+            return;
+
         ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
         sendMouseEvent (ev);
     }
@@ -1512,6 +1518,12 @@ public:
 private:
     static NSView* createViewInstance();
     static NSWindow* createWindowInstance();
+
+    bool shouldIgnoreMouseEnterExit (NSEvent* ev) const
+    {
+        auto* eventTrackingArea = [ev trackingArea];
+        return eventTrackingArea != nil && ! [[view trackingAreas] containsObject: eventTrackingArea];
+    }
 
     static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
     {

@@ -356,7 +356,9 @@ double MidiFile::getLastTimestamp() const
 }
 
 //==============================================================================
-bool MidiFile::readFrom (InputStream& sourceStream, bool createMatchingNoteOffs)
+bool MidiFile::readFrom (InputStream& sourceStream,
+                         bool createMatchingNoteOffs,
+                         int* fileType)
 {
     clear();
     MemoryBlock data;
@@ -405,7 +407,12 @@ bool MidiFile::readFrom (InputStream& sourceStream, bool createMatchingNoteOffs)
         d += chunkSize;
     }
 
-    return size == 0;
+    const auto successful = (size == 0);
+
+    if (successful && fileType != nullptr)
+        *fileType = header.fileType;
+
+    return successful;
 }
 
 void MidiFile::readNextTrack (const uint8* data, int size, bool createMatchingNoteOffs)
@@ -778,7 +785,9 @@ struct MidiFileTest  : public UnitTest
         MemoryInputStream is (os.getData(), os.getDataSize(), false);
         MidiFile mf;
 
-        if (mf.readFrom (is))
+        int fileType = 0;
+
+        if (mf.readFrom (is, true, &fileType))
             return mf;
 
         return {};

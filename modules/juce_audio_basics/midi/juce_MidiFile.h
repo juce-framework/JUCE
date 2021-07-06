@@ -160,10 +160,14 @@ public:
         @param createMatchingNoteOffs    if true, any missing note-offs for previous note-ons will
                                          be automatically added at the end of the file by calling
                                          MidiMessageSequence::updateMatchedPairs on each track.
+        @param midiFileType              if not nullptr, the integer at this address will be set
+                                         to 0, 1, or 2 depending on the type of the midi file
 
         @returns true if the stream was read successfully
     */
-    bool readFrom (InputStream& sourceStream, bool createMatchingNoteOffs = true);
+    bool readFrom (InputStream& sourceStream,
+                   bool createMatchingNoteOffs = true,
+                   int* midiFileType = nullptr);
 
     /** Writes the midi tracks as a standard midi file.
         The midiFileType value is written as the file's format type, which can be 0, 1

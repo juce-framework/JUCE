@@ -26,15 +26,6 @@
 namespace juce
 {
 
-static int getAllowedTextureSize (int x)
-{
-   #if JUCE_OPENGL_ALLOW_NON_POWER_OF_TWO_TEXTURES
-    return x;
-   #else
-    return nextPowerOfTwo (x);
-   #endif
-}
-
 OpenGLTexture::OpenGLTexture()
     : textureID (0), width (0), height (0), ownerContext (nullptr)
 {
@@ -79,6 +70,13 @@ void OpenGLTexture::create (const int w, const int h, const void* pixels, GLenum
 
     glPixelStorei (GL_UNPACK_ALIGNMENT, 1);
     JUCE_CHECK_OPENGL_ERROR
+
+    const auto textureNpotSupported = ownerContext->isTextureNpotSupported();
+
+    const auto getAllowedTextureSize = [&] (int n)
+    {
+        return textureNpotSupported ? n : nextPowerOfTwo (n);
+    };
 
     width  = getAllowedTextureSize (w);
     height = getAllowedTextureSize (h);

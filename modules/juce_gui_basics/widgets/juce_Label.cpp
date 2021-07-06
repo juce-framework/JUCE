@@ -529,10 +529,8 @@ public:
     {
     }
 
-    String getTitle() const override
-    {
-        return label.getText();
-    }
+    String getTitle() const override  { return label.getText(); }
+    String getHelp() const override   { return label.getTooltip(); }
 
     AccessibleState getCurrentState() const override
     {
@@ -557,6 +555,9 @@ private:
 
     private:
         Label& label;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LabelValueInterface)
     };
 
     static AccessibilityActions getAccessibilityActions (Label& label)

@@ -128,6 +128,17 @@ public:
         [view release];
     }
 
+    void componentMovedOrResized (Component& comp, bool wasMoved, bool wasResized) override
+    {
+        ComponentMovementWatcher::componentMovedOrResized (comp, wasMoved, wasResized);
+
+        // The ComponentMovementWatcher version of this method avoids calling
+        // us when the top-level comp is resized, but if we're listening to the
+        // top-level comp we still want the NSView to track its size.
+        if (comp.isOnDesktop() && wasResized)
+            componentMovedOrResized (wasMoved, wasResized);
+    }
+
     void componentMovedOrResized (bool /*wasMoved*/, bool /*wasResized*/) override
     {
         if (auto* peer = owner.getTopLevelComponent()->getPeer())
