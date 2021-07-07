@@ -736,6 +736,8 @@ public:
         return title;
     }
 
+    String getHelp() const override  { return button.getTooltip(); }
+
 private:
     static AccessibilityRole getButtonRole (const Button& b)
     {

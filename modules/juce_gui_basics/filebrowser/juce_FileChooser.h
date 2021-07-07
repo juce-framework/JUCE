@@ -30,7 +30,9 @@ namespace juce
 /**
     Creates a dialog box to choose a file or directory to load or save.
 
-    e.g. @code
+    @code
+    std::unique_ptr<FileChooser> myChooser;
+
     void loadMooseFile()
     {
         myChooser = std::make_unique<FileChooser> ("Please select the moose you want to load...",

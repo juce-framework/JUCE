@@ -185,10 +185,14 @@ public:
 
         if (fullScreen != shouldBeFullScreen)
         {
-            XWindowSystem::getInstance()->setMaximised (windowH, shouldBeFullScreen);
+            const auto usingNativeTitleBar = ((styleFlags & windowHasTitleBar) != 0);
+
+            if (usingNativeTitleBar)
+                XWindowSystem::getInstance()->setMaximised (windowH, shouldBeFullScreen);
 
             if (shouldBeFullScreen)
-                r = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
+                r = usingNativeTitleBar ? XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow)
+                                        : Desktop::getInstance().getDisplays().getDisplayForRect (bounds)->userArea;
 
             if (! r.isEmpty())
                 setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
