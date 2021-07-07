@@ -28,8 +28,6 @@
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
 
-#include <unordered_map>
-
 namespace juce
 {
 
