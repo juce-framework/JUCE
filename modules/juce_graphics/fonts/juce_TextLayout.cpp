@@ -354,30 +354,29 @@ namespace TextLayoutHelpers
 
                 if (newGlyphs.size() > 0)
                 {
-                    currentRun->glyphs.ensureStorageAllocated (currentRun->glyphs.size() + newGlyphs.size());
-                    auto tokenOrigin = t.area.getPosition().translated (0, t.font.getAscent());
-
-                    if (needToSetLineOrigin)
+                    if (! t.isWhitespace && ! t.isNewLine)
                     {
-                        needToSetLineOrigin = false;
-                        currentLine->lineOrigin = tokenOrigin;
-                    }
+                        currentRun->glyphs.ensureStorageAllocated (currentRun->glyphs.size() + newGlyphs.size());
+                        auto tokenOrigin = t.area.getPosition().translated (0, t.font.getAscent());
 
-                    auto glyphOffset = tokenOrigin - currentLine->lineOrigin;
+                        if (needToSetLineOrigin)
+                        {
+                            needToSetLineOrigin = false;
+                            currentLine->lineOrigin = tokenOrigin;
+                        }
 
-                    for (int j = 0; j < newGlyphs.size(); ++j)
-                    {
-                        auto x = xOffsets.getUnchecked (j);
-                        currentRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked(j),
-                                                                   glyphOffset.translated (x, 0),
-                                                                   xOffsets.getUnchecked (j + 1) - x));
+                        auto glyphOffset = tokenOrigin - currentLine->lineOrigin;
+
+                        for (int j = 0; j < newGlyphs.size(); ++j)
+                        {
+                            auto x = xOffsets.getUnchecked (j);
+                            currentRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked (j),
+                                                                       glyphOffset.translated (x, 0),
+                                                                       xOffsets.getUnchecked (j + 1) - x));
+                        }
                     }
 
                     charPosition += newGlyphs.size();
-                }
-                else if (t.isWhitespace || t.isNewLine)
-                {
-                    ++charPosition;
                 }
 
                 if (auto* nextToken = tokens[i + 1])
