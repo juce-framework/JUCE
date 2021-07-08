@@ -83,7 +83,9 @@ public:
         filters.removeEmptyStrings();
 
         [panel setTitle: juceStringToNS (owner.title)];
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         [panel setAllowedFileTypes: createAllowedTypesArray (filters)];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (! isSave)
         {

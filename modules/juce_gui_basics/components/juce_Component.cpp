@@ -329,47 +329,48 @@ struct Component::ComponentHelpers
     }
 
     template <typename PointOrRect>
-    static PointOrRect convertFromParentSpace (const Component& comp, PointOrRect pointInParentSpace)
+    static PointOrRect convertFromParentSpace (const Component& comp, const PointOrRect pointInParentSpace)
     {
-        if (comp.affineTransform != nullptr)
-            pointInParentSpace = pointInParentSpace.transformedBy (comp.affineTransform->inverted());
+        const auto transformed = comp.affineTransform != nullptr ? pointInParentSpace.transformedBy (comp.affineTransform->inverted())
+                                                                 : pointInParentSpace;
 
         if (comp.isOnDesktop())
         {
             if (auto* peer = comp.getPeer())
-                pointInParentSpace = ScalingHelpers::unscaledScreenPosToScaled
-                                        (comp, peer->globalToLocal (ScalingHelpers::scaledScreenPosToUnscaled (pointInParentSpace)));
-            else
-                jassertfalse;
-        }
-        else
-        {
-            pointInParentSpace = ScalingHelpers::subtractPosition (pointInParentSpace, comp);
+                return ScalingHelpers::unscaledScreenPosToScaled (comp, peer->globalToLocal (ScalingHelpers::scaledScreenPosToUnscaled (transformed)));
+
+            jassertfalse;
+            return transformed;
         }
 
-        return pointInParentSpace;
+        if (comp.getParentComponent() == nullptr)
+            return ScalingHelpers::subtractPosition (ScalingHelpers::unscaledScreenPosToScaled (comp, ScalingHelpers::scaledScreenPosToUnscaled (transformed)), comp);
+
+        return ScalingHelpers::subtractPosition (transformed, comp);
     }
 
     template <typename PointOrRect>
-    static PointOrRect convertToParentSpace (const Component& comp, PointOrRect pointInLocalSpace)
+    static PointOrRect convertToParentSpace (const Component& comp, const PointOrRect pointInLocalSpace)
     {
-        if (comp.isOnDesktop())
+        const auto preTransform = [&]
         {
-            if (auto* peer = comp.getPeer())
-                pointInLocalSpace = ScalingHelpers::unscaledScreenPosToScaled
-                                        (peer->localToGlobal (ScalingHelpers::scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
-            else
+            if (comp.isOnDesktop())
+            {
+                if (auto* peer = comp.getPeer())
+                    return ScalingHelpers::unscaledScreenPosToScaled (peer->localToGlobal (ScalingHelpers::scaledScreenPosToUnscaled (comp, pointInLocalSpace)));
+
                 jassertfalse;
-        }
-        else
-        {
-            pointInLocalSpace = ScalingHelpers::addPosition (pointInLocalSpace, comp);
-        }
+                return pointInLocalSpace;
+            }
 
-        if (comp.affineTransform != nullptr)
-            pointInLocalSpace = pointInLocalSpace.transformedBy (*comp.affineTransform);
+            if (comp.getParentComponent() == nullptr)
+                return ScalingHelpers::unscaledScreenPosToScaled (ScalingHelpers::scaledScreenPosToUnscaled (comp, ScalingHelpers::addPosition (pointInLocalSpace, comp)));
 
-        return pointInLocalSpace;
+            return ScalingHelpers::addPosition (pointInLocalSpace, comp);
+        }();
+
+        return comp.affineTransform != nullptr ? preTransform.transformedBy (*comp.affineTransform)
+                                               : preTransform;
     }
 
     template <typename PointOrRect>
@@ -381,7 +382,9 @@ struct Component::ComponentHelpers
         if (directParent == parent)
             return convertFromParentSpace (target, coordInParent);
 
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
         return convertFromParentSpace (target, convertFromDistantParentSpace (parent, *directParent, coordInParent));
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     template <typename PointOrRect>
@@ -392,8 +395,12 @@ struct Component::ComponentHelpers
             if (source == target)
                 return p;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
+
             if (source->isParentOf (target))
                 return convertFromDistantParentSpace (source, *target, p);
+
+            JUCE_END_IGNORE_WARNINGS_MSVC
 
             p = convertToParentSpace (*source, p);
             source = source->getParentComponent();
@@ -1194,6 +1201,10 @@ void Component::sendMovedResizedMessages (bool wasMoved, bool wasResized)
             l.componentMovedOrResized (*this, wasMoved, wasResized);
         });
     }
+
+    if ((wasMoved || wasResized) && ! checker.shouldBailOut())
+        if (auto* handler = getAccessibilityHandler())
+            notifyAccessibilityEventInternal (*handler, InternalAccessibilityEvent::elementMovedOrResized);
 }
 
 void Component::setSize (int w, int h)                  { setBounds (getX(), getY(), w, h); }
@@ -1370,14 +1381,19 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
 
 bool Component::contains (Point<int> point)
 {
-    if (ComponentHelpers::hitTest (*this, point))
+    return containsInternal (point.toFloat());
+}
+
+bool Component::containsInternal (Point<float> point)
+{
+    if (ComponentHelpers::hitTest (*this, point.roundToInt()))
     {
         if (parentComponent != nullptr)
-            return parentComponent->contains (ComponentHelpers::convertToParentSpace (*this, point));
+            return parentComponent->containsInternal (ComponentHelpers::convertToParentSpace (*this, point));
 
         if (flags.hasHeavyweightPeerFlag)
             if (auto* peer = getPeer())
-                return peer->contains (ComponentHelpers::localPositionToRawPeerPos (*this, point), true);
+                return peer->contains (ComponentHelpers::localPositionToRawPeerPos (*this, point).roundToInt(), true);
     }
 
     return false;
@@ -1385,24 +1401,34 @@ bool Component::contains (Point<int> point)
 
 bool Component::reallyContains (Point<int> point, bool returnTrueIfWithinAChild)
 {
-    if (! contains (point))
+    return reallyContainsInternal (point.toFloat(), returnTrueIfWithinAChild);
+}
+
+bool Component::reallyContainsInternal (Point<float> point, bool returnTrueIfWithinAChild)
+{
+    if (! containsInternal (point))
         return false;
 
     auto* top = getTopLevelComponent();
-    auto* compAtPosition = top->getComponentAt (top->getLocalPoint (this, point));
+    auto* compAtPosition = top->getComponentAtInternal (top->getLocalPoint (this, point));
 
     return (compAtPosition == this) || (returnTrueIfWithinAChild && isParentOf (compAtPosition));
 }
 
 Component* Component::getComponentAt (Point<int> position)
 {
-    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position))
+    return getComponentAtInternal (position.toFloat());
+}
+
+Component* Component::getComponentAtInternal (Point<float> position)
+{
+    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position.roundToInt()))
     {
         for (int i = childComponentList.size(); --i >= 0;)
         {
-            auto* child = childComponentList.getUnchecked(i);
+            auto* child = childComponentList.getUnchecked (i);
 
-            child = child->getComponentAt (ComponentHelpers::convertFromParentSpace (*child, position));
+            child = child->getComponentAtInternal (ComponentHelpers::convertFromParentSpace (*child, position));
 
             if (child != nullptr)
                 return child;
@@ -2342,6 +2368,8 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
                          this, this, time, relativePos, time, 0, false);
     mouseEnter (me);
 
+    flags.cachedMouseInsideComponent = true;
+
     if (checker.shouldBailOut())
         return;
 
@@ -2361,6 +2389,8 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
 
     if (flags.repaintOnMouseActivityFlag)
         repaint();
+
+    flags.cachedMouseInsideComponent = false;
 
     BailOutChecker checker (this);
 
@@ -3005,13 +3035,16 @@ void Component::sendEnablementChangeMessage()
 //==============================================================================
 bool Component::isMouseOver (bool includeChildren) const
 {
+    if (! MessageManager::getInstance()->isThisTheMessageThread())
+        return flags.cachedMouseInsideComponent;
+
     for (auto& ms : Desktop::getInstance().getMouseSources())
     {
         auto* c = ms.getComponentUnderMouse();
 
-        if (c == this || (includeChildren && isParentOf (c)))
+        if (c != nullptr && (c == this || (includeChildren && isParentOf (c))))
             if (ms.isDragging() || ! (ms.isTouch() || ms.isPen()))
-                if (c->reallyContains (c->getLocalPoint (nullptr, ms.getScreenPosition()).roundToInt(), false))
+                if (c->reallyContainsInternal (c->getLocalPoint (nullptr, ms.getScreenPosition()), false))
                     return true;
     }
 

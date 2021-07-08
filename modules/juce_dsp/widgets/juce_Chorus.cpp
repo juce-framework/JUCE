@@ -50,7 +50,7 @@ void Chorus<SampleType>::setRate (SampleType newRateHz)
 template <typename SampleType>
 void Chorus<SampleType>::setDepth (SampleType newDepth)
 {
-    jassert (isPositiveAndNotGreaterThan (newDepth, static_cast<SampleType> (1.0)));
+    jassert (isPositiveAndNotGreaterThan (newDepth, maxDepth));
 
     depth = newDepth;
     update();
@@ -59,9 +59,9 @@ void Chorus<SampleType>::setDepth (SampleType newDepth)
 template <typename SampleType>
 void Chorus<SampleType>::setCentreDelay (SampleType newDelayMs)
 {
-    jassert (isPositiveAndBelow (newDelayMs, static_cast<SampleType> (100.0)));
+    jassert (isPositiveAndBelow (newDelayMs, maxCentreDelayMs));
 
-    centreDelay = jlimit (static_cast<SampleType> (1.0), static_cast<SampleType> (100.0), newDelayMs);
+    centreDelay = jlimit (static_cast<SampleType> (1.0), maxCentreDelayMs, newDelayMs);
 }
 
 template <typename SampleType>
@@ -91,6 +91,9 @@ void Chorus<SampleType>::prepare (const ProcessSpec& spec)
 
     sampleRate = spec.sampleRate;
 
+    const auto maxPossibleDelay = std::ceil ((maximumDelayModulation * maxDepth * oscVolumeMultiplier + maxCentreDelayMs)
+                                             * sampleRate / 1000.0);
+    delay = DelayLine<SampleType, DelayLineInterpolationTypes::Linear>{ static_cast<int> (maxPossibleDelay) };
     delay.prepare (spec);
 
     dryWet.prepare (spec);
@@ -123,7 +126,7 @@ template <typename SampleType>
 void Chorus<SampleType>::update()
 {
     osc.setFrequency (rate);
-    oscVolume.setTargetValue (depth * (SampleType) 0.5);
+    oscVolume.setTargetValue (depth * oscVolumeMultiplier);
     dryWet.setWetMixProportion (mix);
 
     for (auto& vol : feedbackVolume)

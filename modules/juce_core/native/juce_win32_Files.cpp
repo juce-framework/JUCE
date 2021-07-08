@@ -32,6 +32,8 @@ namespace WindowsFileHelpers
 {
     //==============================================================================
    #if JUCE_WINDOWS
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnested-anon-types")
+
     typedef struct _REPARSE_DATA_BUFFER {
       ULONG  ReparseTag;
       USHORT ReparseDataLength;
@@ -57,6 +59,8 @@ namespace WindowsFileHelpers
         } GenericReparseBuffer;
       } DUMMYUNIONNAME;
     } *PREPARSE_DATA_BUFFER, REPARSE_DATA_BUFFER;
+
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 
     //==============================================================================
@@ -717,7 +721,7 @@ static String readWindowsLnkFile (File lnkFile, bool wantsAbsolutePath)
              && SUCCEEDED (persistFile->Load (lnkFile.getFullPathName().toWideCharPointer(), STGM_READ))
              && (! wantsAbsolutePath || SUCCEEDED (shellLink->Resolve (nullptr, SLR_ANY_MATCH | SLR_NO_UI))))
         {
-            WIN32_FIND_DATA winFindData;
+            WIN32_FIND_DATA winFindData = {};
             WCHAR resolvedPath[MAX_PATH];
 
             DWORD flags = SLGP_UNCPRIORITY;
@@ -861,7 +865,7 @@ bool File::createShortcut (const String& description, const File& linkFileToCrea
     ComSmartPtr<IShellLink> shellLink;
     ComSmartPtr<IPersistFile> persistFile;
 
-    CoInitialize (nullptr);
+    ignoreUnused (CoInitialize (nullptr));
 
     return SUCCEEDED (shellLink.CoCreateInstance (CLSID_ShellLink))
         && SUCCEEDED (shellLink->SetPath (getFullPathName().toWideCharPointer()))
@@ -874,8 +878,8 @@ bool File::createShortcut (const String& description, const File& linkFileToCrea
 class DirectoryIterator::NativeIterator::Pimpl
 {
 public:
-    Pimpl (const File& directory, const String& wildCard)
-        : directoryWithWildCard (directory.getFullPathName().isNotEmpty() ? File::addTrailingSeparator (directory.getFullPathName()) + wildCard : String()),
+    Pimpl (const File& directory, const String& wildCardIn)
+        : directoryWithWildCard (directory.getFullPathName().isNotEmpty() ? File::addTrailingSeparator (directory.getFullPathName()) + wildCardIn : String()),
           handle (INVALID_HANDLE_VALUE)
     {
     }
@@ -925,8 +929,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
 
-DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCard)
-    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildCard))
+DirectoryIterator::NativeIterator::NativeIterator (const File& directory, const String& wildCardIn)
+    : pimpl (new DirectoryIterator::NativeIterator::Pimpl (directory, wildCardIn))
 {
 }
 

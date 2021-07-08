@@ -36,13 +36,12 @@ For further help getting started, please refer to the JUCE
 
 ### CMake
 
-Version 3.15 or higher is required for plugin projects, and strongly
-recommended for other project types. To use CMake, you will need to install it,
+Version 3.15 or higher is required. To use CMake, you will need to install it,
 either from your system package manager or from the [official download
 page](https://cmake.org/download/). For comprehensive documentation on JUCE's
-CMake API, see the [JUCE CMake documentation](/docs/CMake%20API.md). For examples
-which may be useful as starting points for new CMake projects, see the [CMake
-examples directory](/examples/CMake).
+CMake API, see the [JUCE CMake documentation](/docs/CMake%20API.md). For
+examples which may be useful as starting points for new CMake projects, see the
+[CMake examples directory](/examples/CMake).
 
 #### Building Examples
 
@@ -58,9 +57,9 @@ of the target you wish to build.
 
 #### Building JUCE Projects
 
-- __macOS/iOS__: macOS 10.11 and Xcode 7.3.1
-- __Windows__: Windows 8.1 and Visual Studio 2015 64-bit
-- __Linux__: GCC 4.8 (for a full list of dependencies, see
+- __macOS/iOS__: Xcode 9.2 (macOS 10.12.6)
+- __Windows__: Windows 8.1 and Visual Studio 2015 Update 3 64-bit
+- __Linux__: g++ 5.0 or Clang 3.4 (for a full list of dependencies, see
 [here](/docs/Linux%20Dependencies.md)).
 - __Android__: Android Studio on Windows, macOS or Linux
 

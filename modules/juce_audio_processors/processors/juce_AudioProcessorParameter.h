@@ -26,6 +26,8 @@
 namespace juce
 {
 
+class AudioProcessor;
+
 //==============================================================================
 /** An abstract base class for parameter objects that can be added to an
     AudioProcessor.

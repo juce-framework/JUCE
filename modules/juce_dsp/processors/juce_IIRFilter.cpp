@@ -27,115 +27,56 @@ namespace juce
 {
 namespace dsp
 {
-
-template <typename NumericType>
-IIR::Coefficients<NumericType>::Coefficients()
-    : coefficients ({ NumericType(),
-                      NumericType(),
-                      NumericType(),
-                      NumericType(),
-                      NumericType() })
+namespace IIR
 {
-}
 
 template <typename NumericType>
-IIR::Coefficients<NumericType>::Coefficients (NumericType b0, NumericType b1,
-                                              NumericType a0, NumericType a1)
-{
-    jassert (a0 != 0);
-
-    coefficients.clear();
-
-    auto a0inv = static_cast<NumericType> (1) / a0;
-
-    coefficients.add (b0 * a0inv,
-                      b1 * a0inv,
-                      a1 * a0inv);
-}
-
-template <typename NumericType>
-IIR::Coefficients<NumericType>::Coefficients (NumericType b0, NumericType b1, NumericType b2,
-                                              NumericType a0, NumericType a1, NumericType a2)
-{
-    jassert (a0 != 0);
-
-    coefficients.clear();
-
-    auto a0inv = static_cast<NumericType> (1) / a0;
-
-    coefficients.add (b0 * a0inv,
-                      b1 * a0inv,
-                      b2 * a0inv,
-                      a1 * a0inv,
-                      a2 * a0inv);
-}
-
-template <typename NumericType>
-IIR::Coefficients<NumericType>::Coefficients (NumericType b0, NumericType b1, NumericType b2, NumericType b3,
-                                              NumericType a0, NumericType a1, NumericType a2, NumericType a3)
-{
-    jassert (a0 != 0);
-
-    coefficients.clear();
-
-    auto a0inv = static_cast<NumericType> (1) / a0;
-
-    coefficients.add (b0 * a0inv,
-                      b1 * a0inv,
-                      b2 * a0inv,
-                      b3 * a0inv,
-                      a1 * a0inv,
-                      a2 * a0inv,
-                      a3 * a0inv);
-}
-
-template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeFirstOrderLowPass (double sampleRate,
-                                                                                                    NumericType frequency)
+std::array<NumericType, 4> ArrayCoefficients<NumericType>::makeFirstOrderLowPass (double sampleRate,
+                                                                                  NumericType frequency)
 {
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
 
     auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
 
-    return *new Coefficients (n, n, n + 1, n - 1);
+    return { { n, n, n + 1, n - 1 } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeFirstOrderHighPass (double sampleRate,
-                                                                                                     NumericType frequency)
+std::array<NumericType, 4> ArrayCoefficients<NumericType>::makeFirstOrderHighPass (double sampleRate,
+                                                                                   NumericType frequency)
 {
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
 
     auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
 
-    return *new Coefficients (1, -1, n + 1, n - 1);
+    return { { 1, -1, n + 1, n - 1 } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeFirstOrderAllPass (double sampleRate,
-                                                                                                    NumericType frequency)
+std::array<NumericType, 4> ArrayCoefficients<NumericType>::makeFirstOrderAllPass (double sampleRate,
+                                                                                  NumericType frequency)
 {
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
 
     auto n = std::tan (MathConstants<NumericType>::pi * frequency / static_cast<NumericType> (sampleRate));
 
-    return *new Coefficients (n - 1, n + 1, n + 1, n - 1);
+    return { { n - 1, n + 1, n + 1, n - 1 } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeLowPass (double sampleRate,
-                                                                                          NumericType frequency)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeLowPass (double sampleRate,
+                                                                        NumericType frequency)
 {
     return makeLowPass (sampleRate, frequency, inverseRootTwo);
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeLowPass (double sampleRate,
-                                                                                          NumericType frequency,
-                                                                                          NumericType Q)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeLowPass (double sampleRate,
+                                                                        NumericType frequency,
+                                                                        NumericType Q)
 {
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
@@ -146,22 +87,22 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto invQ = 1 / Q;
     auto c1 = 1 / (1 + invQ * n + nSquared);
 
-    return *new Coefficients (c1, c1 * 2, c1,
-                              1, c1 * 2 * (1 - nSquared),
-                              c1 * (1 - invQ * n + nSquared));
+    return { { c1, c1 * 2, c1,
+               1, c1 * 2 * (1 - nSquared),
+               c1 * (1 - invQ * n + nSquared) } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeHighPass (double sampleRate,
-                                                                                           NumericType frequency)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeHighPass (double sampleRate,
+                                                                         NumericType frequency)
 {
     return makeHighPass (sampleRate, frequency, inverseRootTwo);
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeHighPass (double sampleRate,
-                                                                                           NumericType frequency,
-                                                                                           NumericType Q)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeHighPass (double sampleRate,
+                                                                         NumericType frequency,
+                                                                         NumericType Q)
 {
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
@@ -172,22 +113,22 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto invQ = 1 / Q;
     auto c1 = 1 / (1 + invQ * n + nSquared);
 
-    return *new Coefficients (c1, c1 * -2, c1,
-                              1, c1 * 2 * (nSquared - 1),
-                              c1 * (1 - invQ * n + nSquared));
+    return { { c1, c1 * -2, c1,
+               1, c1 * 2 * (nSquared - 1),
+               c1 * (1 - invQ * n + nSquared) } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeBandPass (double sampleRate,
-                                                                                           NumericType frequency)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeBandPass (double sampleRate,
+                                                                         NumericType frequency)
 {
     return makeBandPass (sampleRate, frequency, inverseRootTwo);
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeBandPass (double sampleRate,
-                                                                                           NumericType frequency,
-                                                                                           NumericType Q)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeBandPass (double sampleRate,
+                                                                         NumericType frequency,
+                                                                         NumericType Q)
 {
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
@@ -198,23 +139,23 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto invQ = 1 / Q;
     auto c1 = 1 / (1 + invQ * n + nSquared);
 
-    return *new Coefficients (c1 * n * invQ, 0,
-                             -c1 * n * invQ, 1,
-                              c1 * 2 * (1 - nSquared),
-                              c1 * (1 - invQ * n + nSquared));
+    return { { c1 * n * invQ, 0,
+               -c1 * n * invQ, 1,
+               c1 * 2 * (1 - nSquared),
+               c1 * (1 - invQ * n + nSquared) } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeNotch (double sampleRate,
-                                                                                        NumericType frequency)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeNotch (double sampleRate,
+                                                                      NumericType frequency)
 {
     return makeNotch (sampleRate, frequency, inverseRootTwo);
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeNotch (double sampleRate,
-                                                                                        NumericType frequency,
-                                                                                        NumericType Q)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeNotch (double sampleRate,
+                                                                      NumericType frequency,
+                                                                      NumericType Q)
 {
     jassert (sampleRate > 0.0);
     jassert (frequency > 0 && frequency <= static_cast<float> (sampleRate * 0.5));
@@ -227,20 +168,20 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto b0 = c1 * (1 + nSquared);
     auto b1 = 2 * c1 * (1 - nSquared);
 
-    return *new Coefficients (b0, b1, b0, 1, b1, c1 * (1 - n * invQ + nSquared));
+    return { { b0, b1, b0, 1, b1, c1 * (1 - n * invQ + nSquared) } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeAllPass (double sampleRate,
-                                                                                          NumericType frequency)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeAllPass (double sampleRate,
+                                                                        NumericType frequency)
 {
     return makeAllPass (sampleRate, frequency, inverseRootTwo);
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeAllPass (double sampleRate,
-                                                                                          NumericType frequency,
-                                                                                          NumericType Q)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeAllPass (double sampleRate,
+                                                                        NumericType frequency,
+                                                                        NumericType Q)
 {
     jassert (sampleRate > 0);
     jassert (frequency > 0 && frequency <= sampleRate * 0.5);
@@ -253,14 +194,14 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto b0 = c1 * (1 - n * invQ + nSquared);
     auto b1 = c1 * 2 * (1 - nSquared);
 
-    return *new Coefficients (b0, b1, 1, 1, b1, b0);
+    return { { b0, b1, 1, 1, b1, b0 } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeLowShelf (double sampleRate,
-                                                                                           NumericType cutOffFrequency,
-                                                                                           NumericType Q,
-                                                                                           NumericType gainFactor)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeLowShelf (double sampleRate,
+                                                                         NumericType cutOffFrequency,
+                                                                         NumericType Q,
+                                                                         NumericType gainFactor)
 {
     jassert (sampleRate > 0.0);
     jassert (cutOffFrequency > 0.0 && cutOffFrequency <= sampleRate * 0.5);
@@ -274,19 +215,19 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto beta = std::sin (omega) * std::sqrt (A) / Q;
     auto aminus1TimesCoso = aminus1 * coso;
 
-    return *new Coefficients (A * (aplus1 - aminus1TimesCoso + beta),
-                              A * 2 * (aminus1 - aplus1 * coso),
-                              A * (aplus1 - aminus1TimesCoso - beta),
-                              aplus1 + aminus1TimesCoso + beta,
-                              -2 * (aminus1 + aplus1 * coso),
-                              aplus1 + aminus1TimesCoso - beta);
+    return { { A * (aplus1 - aminus1TimesCoso + beta),
+               A * 2 * (aminus1 - aplus1 * coso),
+               A * (aplus1 - aminus1TimesCoso - beta),
+               aplus1 + aminus1TimesCoso + beta,
+               -2 * (aminus1 + aplus1 * coso),
+               aplus1 + aminus1TimesCoso - beta } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makeHighShelf (double sampleRate,
-                                                                                            NumericType cutOffFrequency,
-                                                                                            NumericType Q,
-                                                                                            NumericType gainFactor)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makeHighShelf (double sampleRate,
+                                                                          NumericType cutOffFrequency,
+                                                                          NumericType Q,
+                                                                          NumericType gainFactor)
 {
     jassert (sampleRate > 0);
     jassert (cutOffFrequency > 0 && cutOffFrequency <= static_cast<NumericType> (sampleRate * 0.5));
@@ -300,19 +241,19 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto beta = std::sin (omega) * std::sqrt (A) / Q;
     auto aminus1TimesCoso = aminus1 * coso;
 
-    return *new Coefficients (A * (aplus1 + aminus1TimesCoso + beta),
-                              A * -2 * (aminus1 + aplus1 * coso),
-                              A * (aplus1 + aminus1TimesCoso - beta),
-                              aplus1 - aminus1TimesCoso + beta,
-                              2 * (aminus1 - aplus1 * coso),
-                              aplus1 - aminus1TimesCoso - beta);
+    return { { A * (aplus1 + aminus1TimesCoso + beta),
+               A * -2 * (aminus1 + aplus1 * coso),
+               A * (aplus1 + aminus1TimesCoso - beta),
+               aplus1 - aminus1TimesCoso + beta,
+               2 * (aminus1 - aplus1 * coso),
+               aplus1 - aminus1TimesCoso - beta } };
 }
 
 template <typename NumericType>
-typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::makePeakFilter (double sampleRate,
-                                                                                             NumericType frequency,
-                                                                                             NumericType Q,
-                                                                                             NumericType gainFactor)
+std::array<NumericType, 6> ArrayCoefficients<NumericType>::makePeakFilter (double sampleRate,
+                                                                           NumericType frequency,
+                                                                           NumericType Q,
+                                                                           NumericType gainFactor)
 {
     jassert (sampleRate > 0);
     jassert (frequency > 0 && frequency <= static_cast<NumericType> (sampleRate * 0.5));
@@ -326,20 +267,175 @@ typename IIR::Coefficients<NumericType>::Ptr IIR::Coefficients<NumericType>::mak
     auto alphaTimesA = alpha * A;
     auto alphaOverA = alpha / A;
 
-    return *new Coefficients (1 + alphaTimesA, c2,
-                              1 - alphaTimesA,
-                              1 + alphaOverA, c2,
-                              1 - alphaOverA);
+    return { { 1 + alphaTimesA, c2, 1 - alphaTimesA, 1 + alphaOverA, c2, 1 - alphaOverA } };
+}
+
+template struct ArrayCoefficients<float>;
+template struct ArrayCoefficients<double>;
+
+//==============================================================================
+template <typename NumericType>
+Coefficients<NumericType>::Coefficients()
+{
+    assign ({ NumericType(), NumericType(), NumericType(),
+              NumericType(), NumericType(), NumericType() });
 }
 
 template <typename NumericType>
-size_t IIR::Coefficients<NumericType>::getFilterOrder() const noexcept
+Coefficients<NumericType>::Coefficients (NumericType b0, NumericType b1,
+                                         NumericType a0, NumericType a1)
+{
+    assign ({ b0, b1,
+              a0, a1 });
+}
+
+template <typename NumericType>
+Coefficients<NumericType>::Coefficients (NumericType b0, NumericType b1, NumericType b2,
+                                         NumericType a0, NumericType a1, NumericType a2)
+{
+    assign ({ b0, b1, b2,
+              a0, a1, a2 });
+}
+
+template <typename NumericType>
+Coefficients<NumericType>::Coefficients (NumericType b0, NumericType b1, NumericType b2, NumericType b3,
+                                         NumericType a0, NumericType a1, NumericType a2, NumericType a3)
+{
+    assign ({ b0, b1, b2, b3,
+              a0, a1, a2, a3 });
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeFirstOrderLowPass (double sampleRate,
+                                                                                          NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeFirstOrderLowPass (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeFirstOrderHighPass (double sampleRate,
+                                                                                           NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeFirstOrderHighPass (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeFirstOrderAllPass (double sampleRate,
+                                                                                          NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeFirstOrderAllPass (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeLowPass (double sampleRate,
+                                                                                NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeLowPass (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeLowPass (double sampleRate,
+                                                                                NumericType frequency,
+                                                                                NumericType Q)
+{
+    return *new Coefficients (ArrayCoeffs::makeLowPass (sampleRate, frequency, Q));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeHighPass (double sampleRate,
+                                                                                 NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeHighPass (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeHighPass (double sampleRate,
+                                                                                 NumericType frequency,
+                                                                                 NumericType Q)
+{
+    return *new Coefficients (ArrayCoeffs::makeHighPass (sampleRate, frequency, Q));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeBandPass (double sampleRate,
+                                                                                 NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeBandPass (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeBandPass (double sampleRate,
+                                                                                 NumericType frequency,
+                                                                                 NumericType Q)
+{
+    return *new Coefficients (ArrayCoeffs::makeBandPass (sampleRate, frequency, Q));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeNotch (double sampleRate,
+                                                                              NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeNotch (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeNotch (double sampleRate,
+                                                                              NumericType frequency,
+                                                                              NumericType Q)
+{
+    return *new Coefficients (ArrayCoeffs::makeNotch (sampleRate, frequency, Q));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeAllPass (double sampleRate,
+                                                                                NumericType frequency)
+{
+    return *new Coefficients (ArrayCoeffs::makeAllPass (sampleRate, frequency));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeAllPass (double sampleRate,
+                                                                                NumericType frequency,
+                                                                                NumericType Q)
+{
+    return *new Coefficients (ArrayCoeffs::makeAllPass (sampleRate, frequency, Q));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeLowShelf (double sampleRate,
+                                                                                 NumericType cutOffFrequency,
+                                                                                 NumericType Q,
+                                                                                 NumericType gainFactor)
+{
+    return *new Coefficients (ArrayCoeffs::makeLowShelf (sampleRate, cutOffFrequency, Q, gainFactor));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makeHighShelf (double sampleRate,
+                                                                                  NumericType cutOffFrequency,
+                                                                                  NumericType Q,
+                                                                                  NumericType gainFactor)
+{
+    return *new Coefficients (ArrayCoeffs::makeHighShelf (sampleRate, cutOffFrequency, Q, gainFactor));
+}
+
+template <typename NumericType>
+typename Coefficients<NumericType>::Ptr Coefficients<NumericType>::makePeakFilter (double sampleRate,
+                                                                                   NumericType frequency,
+                                                                                   NumericType Q,
+                                                                                   NumericType gainFactor)
+{
+    return *new Coefficients (ArrayCoeffs::makePeakFilter (sampleRate, frequency, Q, gainFactor));
+}
+
+template <typename NumericType>
+size_t Coefficients<NumericType>::getFilterOrder() const noexcept
 {
     return (static_cast<size_t> (coefficients.size()) - 1) / 2;
 }
 
 template <typename NumericType>
-double IIR::Coefficients<NumericType>::getMagnitudeForFrequency (double frequency, double sampleRate) const noexcept
+double Coefficients<NumericType>::getMagnitudeForFrequency (double frequency, double sampleRate) const noexcept
 {
     constexpr Complex<double> j (0, 1);
     const auto order = getFilterOrder();
@@ -369,8 +465,8 @@ double IIR::Coefficients<NumericType>::getMagnitudeForFrequency (double frequenc
 }
 
 template <typename NumericType>
-void IIR::Coefficients<NumericType>::getMagnitudeForFrequencyArray (const double* frequencies, double* magnitudes,
-                                                                    size_t numSamples, double sampleRate) const noexcept
+void Coefficients<NumericType>::getMagnitudeForFrequencyArray (const double* frequencies, double* magnitudes,
+                                                               size_t numSamples, double sampleRate) const noexcept
 {
     constexpr Complex<double> j (0, 1);
     const auto order = getFilterOrder();
@@ -405,7 +501,7 @@ void IIR::Coefficients<NumericType>::getMagnitudeForFrequencyArray (const double
 }
 
 template <typename NumericType>
-double IIR::Coefficients<NumericType>::getPhaseForFrequency (double frequency, double sampleRate) const noexcept
+double Coefficients<NumericType>::getPhaseForFrequency (double frequency, double sampleRate) const noexcept
 {
     constexpr Complex<double> j (0, 1);
     const auto order = getFilterOrder();
@@ -435,8 +531,8 @@ double IIR::Coefficients<NumericType>::getPhaseForFrequency (double frequency, d
 }
 
 template <typename NumericType>
-void IIR::Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequencies, double* phases,
-                                                                size_t numSamples, double sampleRate) const noexcept
+void Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequencies, double* phases,
+                                                           size_t numSamples, double sampleRate) const noexcept
 {
     jassert (sampleRate > 0);
 
@@ -473,8 +569,9 @@ void IIR::Coefficients<NumericType>::getPhaseForFrequencyArray (double* frequenc
     }
 }
 
-template struct IIR::Coefficients<float>;
-template struct IIR::Coefficients<double>;
+template struct Coefficients<float>;
+template struct Coefficients<double>;
 
+} // namespace IIR
 } // namespace dsp
 } // namespace juce

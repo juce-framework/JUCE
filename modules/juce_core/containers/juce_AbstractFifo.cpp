@@ -215,6 +215,8 @@ public:
         Random random;
     };
 
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6262)
+
     void runTest() override
     {
         beginTest ("AbstractFifo");
@@ -258,6 +260,8 @@ public:
             }
         }
     }
+
+    JUCE_END_IGNORE_WARNINGS_MSVC
 };
 
 static AbstractFifoTests fifoUnitTests;

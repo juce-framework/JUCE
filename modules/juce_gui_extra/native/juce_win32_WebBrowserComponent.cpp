@@ -82,6 +82,8 @@ public:
 
     void createBrowser() override
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         auto webCLSID = __uuidof (WebBrowser);
         createControl (&webCLSID);
 
@@ -96,14 +98,16 @@ public:
 
             if (connectionPoint != nullptr)
             {
-                auto* owner = dynamic_cast<WebBrowserComponent*> (Component::getParentComponent());
-                jassert (owner != nullptr);
-
-                auto handler = new EventHandler (*owner);
-                connectionPoint->Advise (handler, &adviseCookie);
-                handler->Release();
+                if (auto* owner = dynamic_cast<WebBrowserComponent*> (Component::getParentComponent()))
+                {
+                    auto handler = new EventHandler (*owner);
+                    connectionPoint->Advise (handler, &adviseCookie);
+                    handler->Release();
+                }
             }
         }
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     bool hasBrowserBeenCreated() override
@@ -194,6 +198,8 @@ public:
 
     void focusGained() override
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         auto iidOleObject = __uuidof (IOleObject);
         auto iidOleWindow = __uuidof (IOleWindow);
 
@@ -216,6 +222,8 @@ public:
 
             oleObject->Release();
         }
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     using ActiveXControlComponent::focusGained;

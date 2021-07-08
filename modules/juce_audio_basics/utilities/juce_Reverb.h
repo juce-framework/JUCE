@@ -131,6 +131,7 @@ public:
     /** Applies the reverb to two stereo channels of audio data. */
     void processStereo (float* const left, float* const right, const int numSamples) noexcept
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
         jassert (left != nullptr && right != nullptr);
 
         for (int i = 0; i < numSamples; ++i)
@@ -160,11 +161,13 @@ public:
             left[i]  = outL * wet1 + outR * wet2 + left[i]  * dry;
             right[i] = outR * wet1 + outL * wet2 + right[i] * dry;
         }
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     /** Applies the reverb to a single mono channel of audio data. */
     void processMono (float* const samples, const int numSamples) noexcept
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
         jassert (samples != nullptr);
 
         for (int i = 0; i < numSamples; ++i)
@@ -186,6 +189,7 @@ public:
 
             samples[i] = output * wet1 + samples[i] * dry;
         }
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
 private:

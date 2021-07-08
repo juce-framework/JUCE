@@ -108,7 +108,7 @@ TimeSliceClient* TimeSliceThread::getNextClient (int index) const
     {
         auto* c = clients.getUnchecked ((i + index) % clients.size());
 
-        if (client == nullptr || c->nextCallTime < soonest)
+        if (c != nullptr && (client == nullptr || c->nextCallTime < soonest))
         {
             client = c;
             soonest = c->nextCallTime;

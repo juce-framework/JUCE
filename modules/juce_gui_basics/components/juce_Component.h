@@ -2020,7 +2020,7 @@ public:
     virtual void handleCommandMessage (int commandId);
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED || DOXYGEN
+   #if JUCE_MODAL_LOOPS_PERMITTED
     /** Runs a component modally, waiting until the loop terminates.
 
         This method first makes the component visible, brings it to the front and
@@ -2518,6 +2518,7 @@ private:
         bool isResizeCallbackPending      : 1;
         bool viewportIgnoreDragFlag       : 1;
         bool accessibilityIgnoredFlag     : 1;
+        bool cachedMouseInsideComponent   : 1;
        #if JUCE_DEBUG
         bool isInsidePaintCall            : 1;
        #endif
@@ -2564,6 +2565,10 @@ private:
     void giveAwayKeyboardFocusInternal (bool sendFocusLossEvent);
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
+
+    bool containsInternal (Point<float>);
+    bool reallyContainsInternal (Point<float>, bool);
+    Component* getComponentAtInternal (Point<float>);
 
     struct ComponentHelpers;
     friend struct ComponentHelpers;

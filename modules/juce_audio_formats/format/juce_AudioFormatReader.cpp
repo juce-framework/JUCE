@@ -175,8 +175,12 @@ void AudioFormatReader::read (AudioBuffer<float>* buffer,
             read (chans, 2, readerStartSample, numSamples, true);
 
             // if the target's stereo and the source is mono, dupe the first channel..
-            if (numTargetChannels > 1 && (chans[0] == nullptr || chans[1] == nullptr))
+            if (numTargetChannels > 1
+                && (chans[0] == nullptr || chans[1] == nullptr)
+                && (dests[0] != nullptr && dests[1] != nullptr))
+            {
                 memcpy (dests[1], dests[0], (size_t) numSamples * sizeof (float));
+            }
 
             if (! usesFloatingPointData)
                 convertFixedToFloat (dests, 2, numSamples);

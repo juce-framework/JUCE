@@ -76,11 +76,10 @@ public:
             auto relativePos = ScalingHelpers::unscaledScreenPosToScaled (peer->getComponent(),
                                                                           peer->globalToLocal (screenPos));
             auto& comp = peer->getComponent();
-            auto pos = relativePos.roundToInt();
 
             // (the contains() call is needed to test for overlapping desktop windows)
-            if (comp.contains (pos))
-                return comp.getComponentAt (pos);
+            if (comp.containsInternal (relativePos))
+                return comp.getComponentAtInternal (relativePos);
         }
 
         return nullptr;

@@ -40,7 +40,7 @@ public:
     JUCE_COMRESULT SetVisualState (WindowVisualState state) override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         if (auto* peer = getPeer())
         {
@@ -66,13 +66,13 @@ public:
             return S_OK;
         }
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     JUCE_COMRESULT Close() override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         if (auto* peer = getPeer())
         {
@@ -80,14 +80,14 @@ public:
             return S_OK;
         }
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     JUCE_COMRESULT WaitForInputIdle (int, BOOL* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, []
         {
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 
@@ -101,7 +101,7 @@ public:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 
@@ -115,7 +115,7 @@ public:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 
@@ -129,7 +129,7 @@ public:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 
@@ -149,7 +149,7 @@ public:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 
@@ -166,7 +166,7 @@ public:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 
@@ -180,7 +180,7 @@ public:
                 return S_OK;
             }
 
-            return UIA_E_NOTSUPPORTED;
+            return (HRESULT) UIA_E_NOTSUPPORTED;
         });
     }
 

@@ -44,7 +44,7 @@ namespace ColourHelpers
 
         float hue = 0.0f;
 
-        if (hi > 0)
+        if (hi > 0 && ! approximatelyEqual (hi, lo))
         {
             auto invDiff = 1.0f / (float) (hi - lo);
 
@@ -77,15 +77,21 @@ namespace ColourHelpers
             auto hi = jmax (r, g, b);
             auto lo = jmin (r, g, b);
 
-            if (hi > 0)
-            {
-                lightness = ((float) (hi + lo) / 2.0f) / 255.0f;
+            if (hi < 0)
+                return;
 
-                if (lightness > 0.0f)
-                    hue = getHue (col);
+            lightness = ((float) (hi + lo) / 2.0f) / 255.0f;
 
-                saturation = ((float) (hi - lo) / 255.0f) / (1.0f - std::abs ((2.0f * lightness) - 1.0f));
-            }
+            if (lightness <= 0.0f)
+                return;
+
+            hue = getHue (col);
+
+            if (1.0f <= lightness)
+                return;
+
+            auto denominator = 1.0f - std::abs ((2.0f * lightness) - 1.0f);
+            saturation = ((float) (hi - lo) / 255.0f) / denominator;
         }
 
         Colour toColour (Colour original) const noexcept
@@ -454,6 +460,7 @@ Colour Colour::withMultipliedLightness (float amount) const noexcept
 //==============================================================================
 Colour Colour::brighter (float amount) const noexcept
 {
+    jassert (amount >= 0.0f);
     amount = 1.0f / (1.0f + amount);
 
     return Colour ((uint8) (255 - (amount * (255 - getRed()))),
@@ -464,6 +471,7 @@ Colour Colour::brighter (float amount) const noexcept
 
 Colour Colour::darker (float amount) const noexcept
 {
+    jassert (amount >= 0.0f);
     amount = 1.0f / (1.0f + amount);
 
     return Colour ((uint8) (amount * getRed()),

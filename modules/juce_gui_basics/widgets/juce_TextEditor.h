@@ -825,6 +825,7 @@ private:
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;
     void setSelection (Range<int>) noexcept;
+    Point<int> getTextOffset() const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor)
 };

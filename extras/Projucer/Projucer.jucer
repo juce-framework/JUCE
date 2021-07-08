@@ -3,8 +3,8 @@
 <JUCERPROJECT id="M70qfTRRk" name="Projucer" projectType="guiapp" juceFolder="../../juce"
               version="6.0.8" bundleIdentifier="com.juce.theprojucer" splashScreenColour="Dark"
               displaySplashScreen="0" reportAppUsage="0" companyName="Raw Material Software Limited"
-              companyCopyright="Raw Material Software Limited" cppLanguageStandard="11"
-              useAppConfig="0" addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
+              companyCopyright="Raw Material Software Limited" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
                documentExtensions=".jucer" objCExtraSuffix="zkVtji" bigIcon="Zrx1Gl"
@@ -13,9 +13,9 @@
                applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" cppLibType="libc++"
-                       recommendedWarnings="LLVM"/>
+                       recommendedWarnings="LLVM" macOSDeploymentTarget="10.12"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" cppLibType="libc++"
-                       linkTimeOptimisation="0" recommendedWarnings="LLVM"/>
+                       linkTimeOptimisation="0" recommendedWarnings="LLVM" macOSDeploymentTarget="10.12"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_gui_extra" path="../../modules"/>

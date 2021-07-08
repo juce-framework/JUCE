@@ -26,7 +26,6 @@
 namespace juce
 {
 
-class AudioProcessor;
 class AudioProcessorEditorListener;
 
 //==============================================================================
@@ -186,6 +185,22 @@ public:
      */
     void setBoundsConstrained (Rectangle<int> newBounds);
 
+    /** Gets a context object, if one is available.
+
+        Returns nullptr if the host does not provide any information that the editor
+        can query.
+
+        The returned pointer is non-owning, so do not attempt to free it.
+    */
+    AudioProcessorEditorHostContext* getHostContext() const noexcept          { return hostContext; }
+
+    /** Sets a context object that can be queried to find information that the host
+        makes available to the plugin.
+
+        You will only need to call this function if you are implementing a plugin host.
+    */
+    void setHostContext (AudioProcessorEditorHostContext* context) noexcept   { hostContext = context; }
+
     /** The ResizableCornerComponent which is currently being used by this editor,
         or nullptr if it does not have one.
     */
@@ -211,6 +226,7 @@ private:
     void initialise();
     void editorResized (bool wasResized);
     void updatePeer();
+    void attachConstrainer (ComponentBoundsConstrainer*);
     void attachResizableCornerComponent();
 
     //==============================================================================
@@ -218,6 +234,7 @@ private:
     bool resizableByHost = false;
     ComponentBoundsConstrainer defaultConstrainer;
     ComponentBoundsConstrainer* constrainer = nullptr;
+    AudioProcessorEditorHostContext* hostContext = nullptr;
     Component::SafePointer<Component> splashScreen;
     AffineTransform hostScaleTransform;
 

@@ -878,6 +878,20 @@ public:
         desc.isInstrument = (componentDesc.componentType == kAudioUnitType_MusicDevice);
     }
 
+    void getExtensions (ExtensionsVisitor& visitor) const override
+    {
+        struct Extensions : public ExtensionsVisitor::AudioUnitClient
+        {
+            explicit Extensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
+
+            void* getAudioUnitHandle() const noexcept override   { return instance->audioUnit; }
+
+            const AudioUnitPluginInstance* instance = nullptr;
+        };
+
+        visitor.visitAudioUnitClient (Extensions { this });
+    }
+
     void* getPlatformSpecificData() override             { return audioUnit; }
     const String getName() const override                { return pluginName; }
 

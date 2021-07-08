@@ -37,6 +37,7 @@
   description:        Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:            http://www.juce.com/juce
   license:            ISC
+  minimumCppStandard: 14
 
   dependencies:       juce_core
 

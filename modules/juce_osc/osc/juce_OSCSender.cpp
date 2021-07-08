@@ -461,7 +461,7 @@ public:
             {
                 // string:
                 expect (testString.length() % 4 != 0); // check whether we actually cover padding
-                expect (sizeof (testStringRepresentation) % 4 == 0);
+                static_assert (sizeof (testStringRepresentation) % 4 == 0, "Size must be a multiple of 4");
 
                 OSCArgument arg (testString);
                 OSCOutputStream outStream;
@@ -474,7 +474,7 @@ public:
             {
                 // blob:
                 expect (testBlob.getSize() % 4 != 0);  // check whether we actually cover padding
-                expect (sizeof (testBlobRepresentation) % 4 == 0);
+                static_assert (sizeof (testBlobRepresentation) % 4 == 0, "Size must be a multiple of 4");
 
                 OSCArgument arg (testBlob);
                 OSCOutputStream outStream;

@@ -102,7 +102,21 @@
 
 namespace juce
 {
-    extern bool juce_areThereAnyAlwaysOnTopWindows();
+    bool juce_areThereAnyAlwaysOnTopWindows();
+
+    bool isEmbeddedInForegroundProcess (Component* c);
+
+   #if ! JUCE_WINDOWS
+    bool isEmbeddedInForegroundProcess (Component*) { return false; }
+   #endif
+
+    /*  Returns true if this process is in the foreground, or if the viewComponent
+        is embedded into a window owned by the foreground process.
+    */
+    bool isForegroundOrEmbeddedProcess (Component* viewComponent)
+    {
+        return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
+    }
 }
 
 #include "accessibility/juce_AccessibilityHandler.cpp"
@@ -233,6 +247,25 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
+namespace juce
+{
+
+static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
+
+/** Used by the macOS and iOS peers. */
+void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
+{
+    comp.getProperties().set (disableAsyncLayerBackedViewIdentifier, shouldDisableAsyncLayerBackedView);
+}
+
+/** Used by the macOS and iOS peers. */
+bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
+{
+    return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
+}
+
+} // namespace juce
+
 #if JUCE_MAC || JUCE_IOS
  #if JUCE_IOS
   #include "native/juce_ios_UIViewComponentPeer.mm"
@@ -286,4 +319,18 @@ namespace juce
   #include "native/juce_android_ContentSharer.cpp"
  #endif
 
+#endif
+
+#if ! JUCE_NATIVE_ACCESSIBILITY_INCLUDED
+namespace juce
+{
+    class AccessibilityHandler::AccessibilityNativeImpl { public: AccessibilityNativeImpl (AccessibilityHandler&) {} };
+    void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent) const {}
+    void AccessibilityHandler::postAnnouncement (const String&, AnnouncementPriority) {}
+    AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const { return nullptr; }
+    AccessibilityHandler::AccessibilityNativeImpl* AccessibilityHandler::createNativeImpl (AccessibilityHandler&) { return nullptr; }
+    void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::AccessibilityNativeImpl*) const noexcept {}
+    bool areAnyAccessibilityClientsActive() { return false; }
+    void notifyAccessibilityEventInternal (const AccessibilityHandler&, InternalAccessibilityEvent) {}
+}
 #endif

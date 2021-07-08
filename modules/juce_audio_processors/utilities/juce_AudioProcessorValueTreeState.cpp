@@ -668,6 +668,7 @@ public:
         : UnitTest ("Audio Processor Value Tree State", UnitTestCategories::audioProcessorParameters)
     {}
 
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6262)
     void runTest() override
     {
         ScopedJuceInitialiser_GUI scopedJuceInitialiser_gui;
@@ -952,6 +953,7 @@ public:
             expectEquals (listener.id, String (key));
         }
     }
+    JUCE_END_IGNORE_WARNINGS_MSVC
 };
 
 static AudioProcessorValueTreeStateTests audioProcessorValueTreeStateTests;

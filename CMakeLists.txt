@@ -21,18 +21,44 @@
 #
 # ==============================================================================
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.15)
 
 project(JUCE VERSION 6.0.8 LANGUAGES C CXX)
+
+include(CMakeDependentOption)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 
 set(JUCE_MODULES_DIR "${JUCE_SOURCE_DIR}/modules" CACHE INTERNAL
     "The path to JUCE modules")
 
-include(extras/Build/CMake/JUCEUtils.cmake)
+# This option will disable most of the JUCE helper functions and tools. This option exists to
+# facilitate existing CMake builds which handle things like bundle creation, icons, plists, and
+# binary data independently of JUCE. This option is not recommended - use at your own risk!
 
-juce_disable_default_flags()
+option(JUCE_MODULES_ONLY "Only configure the JUCE modules" OFF)
+
+include(extras/Build/CMake/JUCEModuleSupport.cmake)
+
+# This option controls whether dummy targets are added to the build, where these targets contain all
+# of the source files for each JUCE module. If you're planning to use an IDE and want to be able to
+# browse all of JUCE's source files, this may be useful. However, it will increase the size of
+# generated IDE projects and might slow down configuration a bit. If you enable this, you should
+# probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists,
+# otherwise the module sources will be added directly to the top level of the project, instead of in
+# a nice 'Modules' subfolder.
+
+cmake_dependent_option(JUCE_ENABLE_MODULE_SOURCE_GROUPS
+    "Show all module sources in IDE projects" OFF
+    "JUCE_MODULES_ONLY" OFF)
+
+add_subdirectory(modules)
+
+if(JUCE_MODULES_ONLY)
+    return()
+endif()
+
+include(extras/Build/CMake/JUCEUtils.cmake)
 
 set_directory_properties(PROPERTIES
     JUCE_COMPANY_NAME       "JUCE"
@@ -46,17 +72,8 @@ set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD ${JUCE_COPY_PLUGIN_AFT
 
 set(CMAKE_CXX_EXTENSIONS FALSE)
 
-# This option controls whether dummy targets are added to the build, where these targets contain all
-# of the source files for each JUCE module. If you're planning to use an IDE and want to be able to
-# browse all of JUCE's source files, this may be useful. However, it will increase the size of
-# generated IDE projects and might slow down configuration a bit. If you enable this, you should
-# probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists,
-# otherwise the module sources will be added directly to the top level of the project, instead of in
-# a nice 'Modules' subfolder.
+juce_disable_default_flags()
 
-option(JUCE_ENABLE_MODULE_SOURCE_GROUPS "Show all module sources in IDE projects" OFF)
-
-add_subdirectory(modules)
 add_subdirectory(extras/Build)
 
 # If you want to build the JUCE examples with VST2/AAX support, you'll need to make the VST2/AAX

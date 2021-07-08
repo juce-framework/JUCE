@@ -37,7 +37,7 @@ class OpenGLContext::NativeContext
 public:
     NativeContext (Component& component,
                    const OpenGLPixelFormat& pixelFormat,
-                   void* contextToShareWith,
+                   void* contextToShareWithIn,
                    bool /*useMultisampling*/,
                    OpenGLVersion)
     {
@@ -77,15 +77,15 @@ public:
                 }
             }
 
-            if (contextToShareWith != nullptr)
-                wglShareLists ((HGLRC) contextToShareWith, renderContext);
+            if (contextToShareWithIn != nullptr)
+                wglShareLists ((HGLRC) contextToShareWithIn, renderContext);
 
             component.getTopLevelComponent()->repaint();
             component.repaint();
         }
     }
 
-    ~NativeContext()
+    ~NativeContext() override
     {
         deleteRenderContext();
         releaseDC();

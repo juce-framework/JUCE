@@ -270,7 +270,7 @@ private:
         Array<Value> exporterModulePathValues, globalPathValues;
         Value useGlobalPathValue;
 
-        OwnedArray <Project::ConfigFlag> configFlags;
+        OwnedArray<Project::ConfigFlag> configFlags;
 
         PropertyGroupComponent group;
         Project& project;

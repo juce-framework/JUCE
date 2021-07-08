@@ -36,9 +36,6 @@ class BinaryResources
 {
 public:
     //==============================================================================
-    BinaryResources();
-    ~BinaryResources();
-
     BinaryResources& operator= (const BinaryResources& other);
 
     void loadFromCpp (const File& cppFileLocation, const String& cpp);
@@ -57,8 +54,9 @@ public:
     void add (const String& name, const String& originalFileName, const MemoryBlock& data);
     void remove (const int index);
     bool reload (const int index);
-    String browseForResource (const String& title, const String& wildcard,
-                              const File& fileToStartFrom, const String& resourceToReplace);
+    void browseForResource (const String& title, const String& wildcard,
+                            const File& fileToStartFrom, const String& resourceToReplace,
+                            std::function<void (String)> callback);
 
     String findUniqueName (const String& rootName) const;
 
@@ -86,12 +84,13 @@ public:
 
     void fillInGeneratedCode (GeneratedCode& code) const;
 
-
 private:
     //==============================================================================
-    JucerDocument* document;
-    OwnedArray <BinaryResource> resources;
-
     BinaryResource* findResource (const String& name) const noexcept;
     void changed();
+
+    //==============================================================================
+    JucerDocument* document;
+    OwnedArray<BinaryResource> resources;
+    std::unique_ptr<FileChooser> chooser;
 };

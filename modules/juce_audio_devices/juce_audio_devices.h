@@ -37,6 +37,7 @@
   description:        Classes to play and record from audio and MIDI I/O devices
   website:            http://www.juce.com/juce
   license:            ISC
+  minimumCppStandard: 14
 
   dependencies:       juce_audio_basics, juce_events
   OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox

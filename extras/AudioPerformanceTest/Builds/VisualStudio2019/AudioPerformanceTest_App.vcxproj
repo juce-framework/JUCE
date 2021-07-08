@@ -2372,6 +2372,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioPluginInstance.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorEditor.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorEditorHostContext.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorGraph.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\processors\juce_AudioProcessorParameter.h"/>
@@ -2387,9 +2388,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioParameterInt.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorParameterWithID.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_AudioProcessorValueTreeState.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_ExtensionsVisitor.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_ParameterAttachments.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_PluginHostType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_RangedAudioParameter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_VST3ClientExtensions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\juce_VSTCallbackHandler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\juce_audio_processors.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDBurner.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\audio_cd\juce_AudioCDReader.h"/>
@@ -2646,13 +2650,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityTableInterface.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityTextInterface.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\interfaces\juce_AccessibilityValueInterface.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ButtonAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_ComboBoxAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_LabelAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_SliderAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TableListBoxAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TextEditorAccessibilityHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\widget_handlers\juce_TreeViewAccessibilityHandler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityHandler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\accessibility\juce_AccessibilityState.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\application\juce_Application.h"/>

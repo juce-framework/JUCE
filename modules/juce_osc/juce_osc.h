@@ -40,6 +40,7 @@
   description:        Open Sound Control implementation.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_events
 

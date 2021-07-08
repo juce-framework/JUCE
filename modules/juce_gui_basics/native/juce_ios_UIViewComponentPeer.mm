@@ -33,7 +33,11 @@ static UIInterfaceOrientation getWindowOrientation()
     UIApplication* sharedApplication = [UIApplication sharedApplication];
 
    #if (defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0)
-    return [[[[sharedApplication windows] firstObject] windowScene] interfaceOrientation];
+    for (UIScene* scene in [sharedApplication connectedScenes])
+        if ([scene isKindOfClass: [UIWindowScene class]])
+            return [(UIWindowScene*) scene interfaceOrientation];
+
+    return UIInterfaceOrientationPortrait;
    #else
     return [sharedApplication statusBarOrientation];
    #endif
@@ -524,6 +528,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     view.opaque = component.isOpaque();
     view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
 
+   #if JUCE_COREGRAPHICS_DRAW_ASYNC
+    if (! getComponentAsyncLayerBackedViewDisabled (component))
+    {
+        [[view layer] setDrawsAsynchronously: YES];
+    }
+   #endif
+
     if (isSharedWindow)
     {
         window = [viewToAttachTo window];
@@ -926,12 +937,15 @@ BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const Str
             if (currentSelection.isEmpty())
                 target->setHighlightedRegion (currentSelection.withStart (currentSelection.getStart() - 1));
 
+        WeakReference<Component> deletionChecker (dynamic_cast<Component*> (target));
+
         if (text == "\r" || text == "\n" || text == "\r\n")
             handleKeyPress (KeyPress::returnKey, text[0]);
         else
             target->insertTextAtCaret (text);
 
-        updateHiddenTextContent (target);
+        if (deletionChecker != nullptr)
+            updateHiddenTextContent (target);
     }
 
     return NO;

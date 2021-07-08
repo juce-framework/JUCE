@@ -41,6 +41,7 @@ enum class AccessibilityRole
     comboBox,
     image,
     slider,
+    label,
     staticText,
     editableText,
     menuItem,

@@ -155,7 +155,7 @@ namespace VideoRenderers
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EVR)
     };
-};
+}
 
 //==============================================================================
 struct VideoComponent::Pimpl  : public Component
@@ -172,7 +172,7 @@ struct VideoComponent::Pimpl  : public Component
         componentWatcher.reset (new ComponentWatcher (*this));
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         close();
         context = nullptr;
@@ -394,10 +394,10 @@ private:
     {
         DirectShowContext (Pimpl& c)  : component (c)
         {
-            CoInitialize (0);
+            ignoreUnused (CoInitialize (nullptr));
         }
 
-        ~DirectShowContext()
+        ~DirectShowContext() override
         {
             release();
             CoUninitialize();
@@ -454,7 +454,7 @@ private:
 
         void handleAsyncUpdate() override
         {
-            if (hwnd != 0)
+            if (hwnd != nullptr)
             {
                 if (needToRecreateNativeWindow)
                 {
@@ -606,7 +606,7 @@ private:
                 mediaEvent->SetNotifyWindow (0, 0, 0);
 
             if (videoRenderer != nullptr)
-                videoRenderer->setVideoWindow (0);
+                videoRenderer->setVideoWindow (nullptr);
 
             hasVideo = false;
             videoRenderer = nullptr;
@@ -736,7 +736,7 @@ private:
         {
             long volume;
             basicAudio->get_Volume (&volume);
-            return (volume + 10000) / 10000.0f;
+            return (float) (volume + 10000) / 10000.0f;
         }
 
         enum State { uninitializedState, runningState, pausedState, stoppedState };
@@ -776,7 +776,7 @@ private:
                 topLevelPeer->addScaleFactorListener (&component);
                #endif
 
-                if (hwnd != 0)
+                if (hwnd != nullptr)
                 {
                     hdc = GetDC (hwnd);
                     component.updateContextPosition();
@@ -911,22 +911,22 @@ private:
                     DWORD type = WS_CHILD;
 
                     hwnd = CreateWindowEx (exstyle, wc->getWindowClassName(),
-                                           L"", type, 0, 0, 0, 0, parentToAddTo, 0,
-                                           (HINSTANCE) Process::getCurrentModuleInstanceHandle(), 0);
+                                           L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
+                                           (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
 
-                    if (hwnd != 0)
+                    if (hwnd != nullptr)
                     {
                         hdc = GetDC (hwnd);
                         SetWindowLongPtr (hwnd, GWLP_USERDATA, (LONG_PTR) userData);
                     }
                 }
 
-                jassert (hwnd != 0);
+                jassert (hwnd != nullptr);
             }
 
             ~NativeWindow()
             {
-                if (hwnd != 0)
+                if (hwnd != nullptr)
                 {
                     SetWindowLongPtr (hwnd, GWLP_USERDATA, (LONG_PTR) 0);
                     DestroyWindow (hwnd);
@@ -935,7 +935,7 @@ private:
 
             void setWindowPosition (Rectangle<int> newBounds)
             {
-                SetWindowPos (hwnd, 0, newBounds.getX(), newBounds.getY(),
+                SetWindowPos (hwnd, nullptr, newBounds.getX(), newBounds.getY(),
                               newBounds.getWidth(), newBounds.getHeight(),
                               SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
             }

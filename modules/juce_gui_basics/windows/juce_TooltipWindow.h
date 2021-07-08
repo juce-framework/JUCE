@@ -130,7 +130,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+    float getDesktopScaleFactor() const override;
 
 private:
     //==============================================================================

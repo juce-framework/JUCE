@@ -29,6 +29,11 @@ namespace juce
 /** An interface to allow an AudioProcessor to send and receive VST specific calls from
     the host.
 
+    To use this class, ensure that your AudioProcessor publicly inherits
+    from VSTCallbackHandler.
+
+    @see VST3ClientExtensions
+
     @tags{Audio}
 */
 struct VSTCallbackHandler

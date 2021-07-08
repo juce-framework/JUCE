@@ -83,7 +83,25 @@ void ImageComponent::paint (Graphics& g)
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> ImageComponent::createAccessibilityHandler()
 {
-    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::image);
+    class ImageComponentAccessibilityHandler  : public AccessibilityHandler
+    {
+    public:
+        explicit ImageComponentAccessibilityHandler (ImageComponent& imageComponentToWrap)
+            : AccessibilityHandler (imageComponentToWrap, AccessibilityRole::image),
+              imageComponent (imageComponentToWrap)
+        {
+        }
+
+        String getHelp() const override   { return imageComponent.getTooltip(); }
+
+    private:
+        ImageComponent& imageComponent;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageComponentAccessibilityHandler)
+    };
+
+    return std::make_unique<ImageComponentAccessibilityHandler> (*this);
 }
 
 } // namespace juce

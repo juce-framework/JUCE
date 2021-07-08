@@ -584,6 +584,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.h"
+    "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditorHostContext.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.cpp"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.h"
     "../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorListener.h"
@@ -612,12 +613,15 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorParameterWithID.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h"
+    "../../../../../modules/juce_audio_processors/utilities/juce_ExtensionsVisitor.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.h"
     "../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.cpp"
     "../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.h"
+    "../../../../../modules/juce_audio_processors/utilities/juce_VST3ClientExtensions.h"
+    "../../../../../modules/juce_audio_processors/utilities/juce_VSTCallbackHandler.h"
     "../../../../../modules/juce_audio_processors/juce_audio_processors.cpp"
     "../../../../../modules/juce_audio_processors/juce_audio_processors.mm"
     "../../../../../modules/juce_audio_processors/juce_audio_processors.h"
@@ -1387,13 +1391,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTableInterface.h"
     "../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTextInterface.h"
     "../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityValueInterface.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ButtonAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ComboBoxAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_LabelAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_SliderAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TableListBoxAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TextEditorAccessibilityHandler.h"
-    "../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TreeViewAccessibilityHandler.h"
     "../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.cpp"
     "../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.h"
     "../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityState.h"
@@ -1772,13 +1769,17 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_opengl/geometry/juce_Matrix3D.h"
     "../../../../../modules/juce_opengl/geometry/juce_Quaternion.h"
     "../../../../../modules/juce_opengl/geometry/juce_Vector3D.h"
-    "../../../../../modules/juce_opengl/native/juce_MissingGLDefinitions.h"
     "../../../../../modules/juce_opengl/native/juce_OpenGL_android.h"
     "../../../../../modules/juce_opengl/native/juce_OpenGL_ios.h"
     "../../../../../modules/juce_opengl/native/juce_OpenGL_linux_X11.h"
     "../../../../../modules/juce_opengl/native/juce_OpenGL_osx.h"
     "../../../../../modules/juce_opengl/native/juce_OpenGL_win32.h"
     "../../../../../modules/juce_opengl/native/juce_OpenGLExtensions.h"
+    "../../../../../modules/juce_opengl/opengl/juce_gl.cpp"
+    "../../../../../modules/juce_opengl/opengl/juce_gl.h"
+    "../../../../../modules/juce_opengl/opengl/juce_gles2.cpp"
+    "../../../../../modules/juce_opengl/opengl/juce_gles2.h"
+    "../../../../../modules/juce_opengl/opengl/juce_khrplatform.h"
     "../../../../../modules/juce_opengl/opengl/juce_OpenGLContext.cpp"
     "../../../../../modules/juce_opengl/opengl/juce_OpenGLContext.h"
     "../../../../../modules/juce_opengl/opengl/juce_OpenGLFrameBuffer.cpp"
@@ -1796,6 +1797,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_opengl/opengl/juce_OpenGLShaderProgram.h"
     "../../../../../modules/juce_opengl/opengl/juce_OpenGLTexture.cpp"
     "../../../../../modules/juce_opengl/opengl/juce_OpenGLTexture.h"
+    "../../../../../modules/juce_opengl/opengl/juce_wgl.h"
     "../../../../../modules/juce_opengl/utils/juce_OpenGLAppComponent.cpp"
     "../../../../../modules/juce_opengl/utils/juce_OpenGLAppComponent.h"
     "../../../../../modules/juce_opengl/juce_opengl.cpp"
@@ -2414,6 +2416,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/proces
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorEditorHostContext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorGraph.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/processors/juce_AudioProcessorListener.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2442,12 +2445,15 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/utilit
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorParameterWithID.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_AudioProcessorValueTreeState.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ExtensionsVisitor.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_ParameterAttachments.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_PluginHostType.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_RangedAudioParameter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_VST3ClientExtensions.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/utilities/juce_VSTCallbackHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/juce_audio_processors.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/juce_audio_processors.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/juce_audio_processors.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -3217,13 +3223,6 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/accessibilit
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTableInterface.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityTextInterface.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/interfaces/juce_AccessibilityValueInterface.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ButtonAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_ComboBoxAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_LabelAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_SliderAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TableListBoxAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TextEditorAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/widget_handlers/juce_TreeViewAccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/accessibility/juce_AccessibilityState.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -3602,13 +3601,17 @@ set_source_files_properties("../../../../../modules/juce_opengl/geometry/juce_Dr
 set_source_files_properties("../../../../../modules/juce_opengl/geometry/juce_Matrix3D.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/geometry/juce_Quaternion.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/geometry/juce_Vector3D.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_opengl/native/juce_MissingGLDefinitions.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/native/juce_OpenGL_android.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/native/juce_OpenGL_ios.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/native/juce_OpenGL_linux_X11.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/native/juce_OpenGL_osx.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/native/juce_OpenGL_win32.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/native/juce_OpenGLExtensions.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_gl.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_gl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_gles2.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_gles2.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_khrplatform.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_OpenGLContext.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_OpenGLContext.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_OpenGLFrameBuffer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -3626,6 +3629,7 @@ set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_Open
 set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_OpenGLShaderProgram.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_OpenGLTexture.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_OpenGLTexture.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_opengl/opengl/juce_wgl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/utils/juce_OpenGLAppComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/utils/juce_OpenGLAppComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

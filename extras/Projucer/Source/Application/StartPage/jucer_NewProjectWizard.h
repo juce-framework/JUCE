@@ -32,7 +32,8 @@ namespace NewProjectWizard
 {
     File getLastWizardFolder();
 
-    std::unique_ptr<Project> createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
-                                               const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
-                                               const String& modulePath, bool useGlobalModulePath);
+    void createNewProject (const NewProjectTemplates::ProjectTemplate& projectTemplate,
+                           const File& targetFolder, const String& name, var modules, var exporters, var fileOptions,
+                           const String& modulePath, bool useGlobalModulePath,
+                           std::function<void (std::unique_ptr<Project>)> callback);
 }

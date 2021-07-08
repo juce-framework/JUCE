@@ -88,7 +88,10 @@ public:
  #define START_JUCE_APPLICATION(AppClass)
 #else
  #if JUCE_WINDOWS && ! defined (_CONSOLE)
-  #define JUCE_MAIN_FUNCTION       int __stdcall WinMain (struct HINSTANCE__*, struct HINSTANCE__*, char*, int)
+  #define JUCE_MAIN_FUNCTION                                                        \
+      JUCE_BEGIN_IGNORE_WARNINGS_MSVC (28251)                                       \
+      int __stdcall WinMain (struct HINSTANCE__*, struct HINSTANCE__*, char*, int)  \
+      JUCE_END_IGNORE_WARNINGS_MSVC
   #define JUCE_MAIN_FUNCTION_ARGS
  #else
   #define JUCE_MAIN_FUNCTION       int main (int argc, char* argv[])

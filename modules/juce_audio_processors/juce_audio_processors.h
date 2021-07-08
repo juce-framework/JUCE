@@ -40,6 +40,7 @@
   description:        Classes for loading and playing VST, AU, LADSPA, or internally-generated audio processors.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_gui_extra, juce_audio_basics
   OSXFrameworks:      CoreAudio CoreMIDI AudioToolbox
@@ -115,9 +116,13 @@
 #endif
 
 //==============================================================================
+#include "utilities/juce_VSTCallbackHandler.h"
+#include "utilities/juce_VST3ClientExtensions.h"
+#include "utilities/juce_ExtensionsVisitor.h"
+#include "processors/juce_AudioProcessorParameter.h"
+#include "processors/juce_AudioProcessorEditorHostContext.h"
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
-#include "processors/juce_AudioProcessorParameter.h"
 #include "processors/juce_AudioProcessorParameterGroup.h"
 #include "processors/juce_AudioProcessor.h"
 #include "processors/juce_PluginDescription.h"

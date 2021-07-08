@@ -48,10 +48,14 @@ public:
 
     protected:
         //==============================================================================
-        File askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
-                                     const Project::Item& projectGroupToAddTo);
+        void askUserToChooseNewFile (const String& suggestedFilename, const String& wildcard,
+                                     const Project::Item& projectGroupToAddTo,
+                                     std::function<void (File)> callback);
 
         static void showFailedToWriteMessage (const File& file);
+
+    private:
+        std::unique_ptr<FileChooser> chooser;
     };
 
     //==============================================================================

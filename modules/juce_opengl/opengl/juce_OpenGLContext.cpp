@@ -69,6 +69,24 @@ private:
  extern JUCE_API double getScaleFactorForWindow (HWND);
 #endif
 
+static bool contextHasTextureNpotFeature()
+{
+    if (getOpenGLVersion() >= Version (2))
+        return true;
+
+    // If the version is < 2, we can't use the newer extension-checking API
+    // so we have to use glGetString
+    const auto* extensionsBegin = glGetString (GL_EXTENSIONS);
+
+    if (extensionsBegin == nullptr)
+        return false;
+
+    const auto* extensionsEnd = findNullTerminator (extensionsBegin);
+    const std::string extensionsString (extensionsBegin, extensionsEnd);
+    const auto stringTokens = StringArray::fromTokens (extensionsString.c_str(), false);
+    return stringTokens.contains ("GL_ARB_texture_non_power_of_two");
+}
+
 //==============================================================================
 class OpenGLContext::CachedImage  : public CachedComponentImage,
                                     private ThreadPoolJob
@@ -317,10 +335,8 @@ public:
 
     void bindVertexArray() noexcept
     {
-       #if JUCE_OPENGL3
         if (vertexArrayObject != 0)
             context.extensions.glBindVertexArray (vertexArrayObject);
-       #endif
     }
 
     void checkViewportBounds()
@@ -480,6 +496,7 @@ public:
             {
                 repaintEvent.wait (-1);
                 renderFrame();
+                repaintEvent.reset();
             }
             else
            #endif
@@ -515,25 +532,23 @@ public:
         context.makeActive();
        #endif
 
-        context.extensions.initialise();
+        gl::loadFunctions();
 
-       #if JUCE_OPENGL3
         if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
         {
             context.extensions.glGenVertexArrays (1, &vertexArrayObject);
             bindVertexArray();
         }
-       #endif
 
         glViewport (0, 0, component.getWidth(), component.getHeight());
 
         nativeContext->setSwapInterval (1);
 
-       #if ! JUCE_OPENGL_ES
         JUCE_CHECK_OPENGL_ERROR
         shadersAvailable = OpenGLShaderProgram::getLanguageVersion() > 0;
         clearGLError();
-       #endif
+
+        textureNpotSupported = contextHasTextureNpotFeature();
 
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
@@ -555,10 +570,8 @@ public:
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
 
-       #if JUCE_OPENGL3
         if (vertexArrayObject != 0)
             context.extensions.glDeleteVertexArrays (1, &vertexArrayObject);
-       #endif
 
         associatedObjectNames.clear();
         associatedObjects.clear();
@@ -661,19 +674,18 @@ public:
     Rectangle<int> viewportArea, lastScreenBounds;
     double scale = 1.0;
     AffineTransform transform;
-   #if JUCE_OPENGL3
     GLuint vertexArrayObject = 0;
-   #endif
 
     StringArray associatedObjectNames;
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
 
-    WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent;
+    WaitableEvent canPaintNowFlag, finishedPaintingFlag, repaintEvent { true };
    #if JUCE_OPENGL_ES
     bool shadersAvailable = true;
    #else
     bool shadersAvailable = false;
    #endif
+    bool textureNpotSupported = false;
     std::atomic<bool> hasInitialised { false }, needsUpdate { true }, destroying { false };
     uint32 lastMMLockReleaseTime = 0;
 
@@ -1075,6 +1087,12 @@ bool OpenGLContext::areShadersAvailable() const
 {
     auto* c = getCachedImage();
     return c != nullptr && c->shadersAvailable;
+}
+
+bool OpenGLContext::isTextureNpotSupported() const
+{
+    auto* c = getCachedImage();
+    return c != nullptr && c->textureNpotSupported;
 }
 
 ReferenceCountedObject* OpenGLContext::getAssociatedObject (const char* name) const

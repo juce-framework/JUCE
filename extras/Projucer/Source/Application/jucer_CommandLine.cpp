@@ -100,13 +100,18 @@ namespace
                 if (fixMissingDependencies)
                     tryToFixMissingModuleDependencies();
 
-                auto error = justSaveResources ? project->saveResourcesOnly()
-                                               : project->saveProject();
+                const auto onCompletion = [this] (Result result)
+                {
+                    project.reset();
 
-                project.reset();
+                    if (result.failed())
+                        ConsoleApplication::fail ("Error when saving: " + result.getErrorMessage());
+                };
 
-                if (error.failed())
-                    ConsoleApplication::fail ("Error when saving: " + error.getErrorMessage());
+                if (justSaveResources)
+                    onCompletion (project->saveResourcesOnly());
+                else
+                    project->saveProject (Async::no, nullptr, onCompletion);
             }
         }
 

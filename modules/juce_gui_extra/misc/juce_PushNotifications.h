@@ -317,7 +317,7 @@ public:
         GroupAlertBehaviour groupAlertBehaviour = alertAll;
 
         int timeoutAfterMs = 0;    /**< specifies a duration in milliseconds, after which the notification should be
-                                        cancelled, if it is not already canceled. Available from Android API 26 or above. */
+                                        cancelled, if it is not already cancelled. Available from Android API 26 or above. */
         /**@}*/
     };
 

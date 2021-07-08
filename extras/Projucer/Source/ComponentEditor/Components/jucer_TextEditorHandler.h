@@ -114,20 +114,20 @@ public:
     {
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
-        auto te = dynamic_cast<TextEditor*> (component);
-        jassert (te != nullptr);
+        if (auto* te = dynamic_cast<TextEditor*> (component))
+        {
+            String s;
+            s << memberVariableName << "->setMultiLine (" << CodeHelpers::boolLiteral (te->isMultiLine()) << ");\n"
+              << memberVariableName << "->setReturnKeyStartsNewLine (" << CodeHelpers::boolLiteral (te->getReturnKeyStartsNewLine()) << ");\n"
+              << memberVariableName << "->setReadOnly (" << CodeHelpers::boolLiteral (te->isReadOnly()) << ");\n"
+              << memberVariableName << "->setScrollbarsShown (" << CodeHelpers::boolLiteral (te->areScrollbarsShown()) << ");\n"
+              << memberVariableName << "->setCaretVisible (" << CodeHelpers::boolLiteral (te->isCaretVisible()) << ");\n"
+              << memberVariableName << "->setPopupMenuEnabled (" << CodeHelpers::boolLiteral (te->isPopupMenuEnabled()) << ");\n"
+              << getColourIntialisationCode (component, memberVariableName)
+              << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString(), code.shouldUseTransMacro()) << ");\n\n";
 
-        String s;
-        s << memberVariableName << "->setMultiLine (" << CodeHelpers::boolLiteral (te->isMultiLine()) << ");\n"
-          << memberVariableName << "->setReturnKeyStartsNewLine (" << CodeHelpers::boolLiteral (te->getReturnKeyStartsNewLine()) << ");\n"
-          << memberVariableName << "->setReadOnly (" << CodeHelpers::boolLiteral (te->isReadOnly()) << ");\n"
-          << memberVariableName << "->setScrollbarsShown (" << CodeHelpers::boolLiteral (te->areScrollbarsShown()) << ");\n"
-          << memberVariableName << "->setCaretVisible (" << CodeHelpers::boolLiteral (te->isCaretVisible()) << ");\n"
-          << memberVariableName << "->setPopupMenuEnabled (" << CodeHelpers::boolLiteral (te->isPopupMenuEnabled()) << ");\n"
-          << getColourIntialisationCode (component, memberVariableName)
-          << memberVariableName << "->setText (" << quotedString (te->getProperties() ["initialText"].toString(), code.shouldUseTransMacro()) << ");\n\n";
-
-        code.constructorCode += s;
+            code.constructorCode += s;
+        }
     }
 
 private:

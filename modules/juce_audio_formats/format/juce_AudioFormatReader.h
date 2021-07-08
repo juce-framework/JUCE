@@ -306,7 +306,12 @@ protected:
                                                    int startOffsetInDestBuffer, int64 startSampleInFile,
                                                    int& numSamples, int64 fileLengthInSamples)
     {
-        jassert (destChannels != nullptr);
+        if (destChannels == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
+
         const int64 samplesAvailable = fileLengthInSamples - startSampleInFile;
 
         if (samplesAvailable < numSamples)

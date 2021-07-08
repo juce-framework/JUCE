@@ -73,7 +73,7 @@ void LibraryModule::addSearchPathsToExporter (ProjectExporter& exporter) const
     }();
 
     auto libSubdirPath = moduleRelativePath.toUnixStyle() + "/libs/" + libDirPlatform;
-    auto moduleLibDir = File (exporter.getProject().getProjectFolder().getFullPathName() + "/" + libSubdirPath);
+    auto moduleLibDir = exporter.getProject().resolveFilename (libSubdirPath);
 
     if (moduleLibDir.exists())
         exporter.addToModuleLibPaths ({ libSubdirPath, moduleRelativePath.getRoot() });
@@ -664,15 +664,16 @@ void EnabledModulesList::addModuleInteractive (const String& moduleID)
 
 void EnabledModulesList::addModuleFromUserSelectedFile()
 {
-    auto lastLocation = getDefaultModulesFolder();
+    chooser = std::make_unique<FileChooser> ("Select a module to add...", getDefaultModulesFolder(), "");
+    auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-    FileChooser fc ("Select a module to add...", lastLocation, {});
-
-    if (fc.browseForDirectory())
+    chooser->launchAsync (flags, [this] (const FileChooser& fc)
     {
-        lastLocation = fc.getResult();
-        addModuleOfferingToCopy (lastLocation, true);
-    }
+        if (fc.getResult() == File{})
+            return;
+
+        addModuleOfferingToCopy (fc.getResult(), true);
+    });
 }
 
 void EnabledModulesList::addModuleOfferingToCopy (const File& f, bool isFromUserSpecifiedFolder)

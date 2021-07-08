@@ -351,15 +351,15 @@ public:
 
     //==============================================================================
     /** Returns a brighter version of this colour.
-        @param amountBrighter   how much brighter to make it - a value from 0 to 1.0 where 0 is
-                                unchanged, and higher values make it brighter
+        @param amountBrighter   how much brighter to make it - a value greater than or equal to 0,
+                                where 0 is unchanged, and higher values make it brighter
         @see withMultipliedBrightness
     */
     Colour brighter (float amountBrighter = 0.4f) const noexcept;
 
     /** Returns a darker version of this colour.
-        @param amountDarker     how much darker to make it - a value from 0 to 1.0 where 0 is
-                                unchanged, and higher values make it darker
+        @param amountDarker     how much darker to make it - a value greater than or equal to 0,
+                                where 0 is unchanged, and higher values make it darker
         @see withMultipliedBrightness
     */
     Colour darker (float amountDarker = 0.4f) const noexcept;

@@ -41,18 +41,21 @@ public:
 
     XmlElement* createXmlFor (Component* comp, const ComponentLayout* layout) override
     {
-        ComboBox* const c = dynamic_cast<ComboBox*> (comp);
-        jassert (c != nullptr);
+        if (auto* const c = dynamic_cast<ComboBox*> (comp))
+        {
+            if (auto* e = ComponentTypeHandler::createXmlFor (comp, layout))
+            {
+                e->setAttribute ("editable", c->isTextEditable());
+                e->setAttribute ("layout", c->getJustificationType().getFlags());
+                e->setAttribute ("items", c->getProperties() ["items"].toString());
+                e->setAttribute ("textWhenNonSelected", c->getTextWhenNothingSelected());
+                e->setAttribute ("textWhenNoItems", c->getTextWhenNoChoicesAvailable());
 
-        XmlElement* e = ComponentTypeHandler::createXmlFor (comp, layout);
+                return e;
+            }
+        }
 
-        e->setAttribute ("editable", c->isTextEditable());
-        e->setAttribute ("layout", c->getJustificationType().getFlags());
-        e->setAttribute ("items", c->getProperties() ["items"].toString());
-        e->setAttribute ("textWhenNonSelected", c->getTextWhenNothingSelected());
-        e->setAttribute ("textWhenNoItems", c->getTextWhenNoChoicesAvailable());
-
-        return e;
+        return nullptr;
     }
 
     bool restoreFromXml (const XmlElement& xml, Component* comp, const ComponentLayout* layout) override
@@ -62,18 +65,20 @@ public:
 
         ComboBox defaultBox;
 
-        ComboBox* const c = dynamic_cast<ComboBox*> (comp);
-        jassert (c != nullptr);
+        if (ComboBox* const c = dynamic_cast<ComboBox*> (comp))
+        {
+            c->setEditableText (xml.getBoolAttribute ("editable", defaultBox.isTextEditable()));
+            c->setJustificationType (Justification (xml.getIntAttribute ("layout", defaultBox.getJustificationType().getFlags())));
+            c->getProperties().set ("items", xml.getStringAttribute ("items", String()));
+            c->setTextWhenNothingSelected (xml.getStringAttribute ("textWhenNonSelected", defaultBox.getTextWhenNothingSelected()));
+            c->setTextWhenNoChoicesAvailable (xml.getStringAttribute ("textWhenNoItems", defaultBox.getTextWhenNoChoicesAvailable()));
 
-        c->setEditableText (xml.getBoolAttribute ("editable", defaultBox.isTextEditable()));
-        c->setJustificationType (Justification (xml.getIntAttribute ("layout", defaultBox.getJustificationType().getFlags())));
-        c->getProperties().set ("items", xml.getStringAttribute ("items", String()));
-        c->setTextWhenNothingSelected (xml.getStringAttribute ("textWhenNonSelected", defaultBox.getTextWhenNothingSelected()));
-        c->setTextWhenNoChoicesAvailable (xml.getStringAttribute ("textWhenNoItems", defaultBox.getTextWhenNoChoicesAvailable()));
+            updateItems (c);
 
-        updateItems (c);
+            return true;
+        }
 
-        return true;
+        return false;
     }
 
     void getEditableProperties (Component* component, JucerDocument& document,
@@ -104,7 +109,12 @@ public:
         ComponentTypeHandler::fillInCreationCode (code, component, memberVariableName);
 
         ComboBox* const c = dynamic_cast<ComboBox*> (component);
-        jassert (c != nullptr);
+
+        if (c == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
 
         String s;
         s << memberVariableName << "->setEditableText (" << CodeHelpers::boolLiteral (c->isTextEditable()) << ");\n"

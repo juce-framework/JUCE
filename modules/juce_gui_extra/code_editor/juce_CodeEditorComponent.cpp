@@ -35,16 +35,8 @@ public:
                                 codeEditorComponentToWrap.isReadOnly() ? AccessibilityRole::staticText
                                                                        : AccessibilityRole::editableText,
                                 {},
-                                { codeEditorComponentToWrap.isReadOnly() ? nullptr
-                                                                         : std::make_unique<CodeEditorComponentTextInterface> (codeEditorComponentToWrap) }),
-          codeEditorComponent (codeEditorComponentToWrap)
+                                { std::make_unique<CodeEditorComponentTextInterface> (codeEditorComponentToWrap) })
     {
-    }
-
-    String getTitle() const override
-    {
-        return codeEditorComponent.isReadOnly() ? codeEditorComponent.document.getAllContent()
-                                                : codeEditorComponent.getTitle();
     }
 
 private:
@@ -61,6 +53,11 @@ private:
             return false;
         }
 
+        bool isReadOnly() const override
+        {
+            return codeEditorComponent.isReadOnly();
+        }
+
         int getTotalNumCharacters() const override
         {
             return codeEditorComponent.document.getAllContent().length();
@@ -74,6 +71,12 @@ private:
 
         void setSelection (Range<int> r) override
         {
+            if (r.isEmpty())
+            {
+                codeEditorComponent.caretPos.setPosition (r.getStart());
+                return;
+            }
+
             auto& doc = codeEditorComponent.document;
 
             codeEditorComponent.selectRegion (CodeDocument::Position (doc, r.getStart()),
@@ -143,8 +146,6 @@ private:
     private:
         CodeEditorComponent& codeEditorComponent;
     };
-
-    CodeEditorComponent& codeEditorComponent;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CodeEditorAccessibilityHandler)

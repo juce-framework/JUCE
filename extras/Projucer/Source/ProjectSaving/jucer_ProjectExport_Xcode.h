@@ -28,91 +28,11 @@
 #include "jucer_XcodeProjectParser.h"
 
 //==============================================================================
-namespace
-{
-    static const char* const iOSDefaultVersion = "9.3";
-    static const StringArray iOSVersions { "9.0", "9.1", "9.2", "9.3", "10.0", "10.1", "10.2", "10.3",
-                                           "11.0", "12.0", "13.0", "14.0" };
-
-    enum class MacOSVersion
-    {
-        v10_7,
-        v10_8,
-        v10_9,
-        v10_10,
-        v10_11,
-        v10_12,
-        v10_13,
-        v10_14,
-        v10_15,
-        v10_16,
-        v11_0,
-        v11_1,
-    };
-
-    static const char* getName (MacOSVersion m)
-    {
-        switch (m)
-        {
-            case MacOSVersion::v10_7:   return "10.7";
-            case MacOSVersion::v10_8:   return "10.8";
-            case MacOSVersion::v10_9:   return "10.9";
-            case MacOSVersion::v10_10:  return "10.10";
-            case MacOSVersion::v10_11:  return "10.11";
-            case MacOSVersion::v10_12:  return "10.12";
-            case MacOSVersion::v10_13:  return "10.13";
-            case MacOSVersion::v10_14:  return "10.14";
-            case MacOSVersion::v10_15:  return "10.15";
-            case MacOSVersion::v10_16:  return "10.16";
-            case MacOSVersion::v11_0:   return "11.0";
-            case MacOSVersion::v11_1:   return "11.1";
-            default:                    break;
-        }
-
-        jassertfalse;
-        return "";
-    }
-
-    static String getDisplayName (MacOSVersion m) { return getName (m) + String (" SDK"); }
-    static String getRootName    (MacOSVersion m) { return String ("macosx") + getName (m); }
-
-    constexpr auto nextMacOSVersion       = (MacOSVersion) ((int) MacOSVersion::v11_1 + 1);
-    constexpr auto oldestDeploymentTarget = MacOSVersion::v10_7;
-    constexpr auto macOSDefaultVersion    = MacOSVersion::v10_11;
-    constexpr auto oldestSDKVersion       = MacOSVersion::v10_11;
-    constexpr auto minimumAUv3SDKVersion  = MacOSVersion::v10_11;
-
-    static MacOSVersion& operator++ (MacOSVersion& m)
-    {
-        return m = (MacOSVersion) ((int) m + 1);
-    }
-
-    static String getOSXSDKVersion (const String& sdkVersion)
-    {
-        for (auto v = oldestSDKVersion; v != nextMacOSVersion; ++v)
-            if (sdkVersion == getDisplayName (v))
-                return getRootName (v);
-
-        return "macosx";
-    }
-
-    template <class ContainerType>
-    static ContainerType getSDKChoiceList (MacOSVersion oldestVersion, bool displayName)
-    {
-        ContainerType container;
-
-        for (auto v = oldestVersion; v != nextMacOSVersion; ++v)
-            container.add (displayName ? getDisplayName (v) : getName (v));
-
-        return container;
-    }
-
-    static const char* const osxArch_Default        = "default";
-    static const char* const osxArch_Native         = "Native";
-    static const char* const osxArch_32BitUniversal = "32BitUniversal";
-    static const char* const osxArch_64BitUniversal = "64BitUniversal";
-    static const char* const osxArch_64Bit          = "64BitIntel";
-}
+constexpr auto* macOSArch_Default        = "default";
+constexpr auto* macOSArch_Native         = "Native";
+constexpr auto* macOSArch_32BitUniversal = "32BitUniversal";
+constexpr auto* macOSArch_64BitUniversal = "64BitUniversal";
+constexpr auto* macOSArch_64Bit          = "64BitIntel";
 
 //==============================================================================
 class XcodeProjectExporter  : public ProjectExporter
@@ -711,9 +631,9 @@ public:
                    "This is useful if you want to use different bundle identifiers for Mac and iOS exporters in the same project.");
 
         props.add (new TextPropertyComponent (iosDevelopmentTeamIDValue, "Development Team ID", 10, false),
-                   "The Development Team ID to be used for setting up code-signing your app. This is a ten-character "
-                   "string (for example, \"S7B6T5XJ2Q\") that describes the distribution certificate Apple issued to you. "
-                   "You can find this string in the OS X app Keychain Access under \"Certificates\".");
+                   "The Team ID to be used for setting up code-signing for your application. "
+                   "This is a ten-character string (for example \"S7B6T5XJ2Q\") that can be found under the \"Organisational Unit\" "
+                   "field of your developer certificate in Keychain Access or in the membership page of your account on developer.apple.com.");
 
         if (iOS)
             props.add (new TextPropertyComponentWithEnablement (iosAppGroupsIDValue, iosAppGroupsValue, "App Group ID", 256, false),
@@ -831,16 +751,18 @@ public:
 
 protected:
     //==============================================================================
-    class XcodeBuildConfiguration  : public BuildConfiguration
+    class XcodeBuildConfiguration  : public BuildConfiguration,
+                                     private ValueTree::Listener
     {
     public:
         XcodeBuildConfiguration (Project& p, const ValueTree& t, const bool isIOS, const ProjectExporter& e)
             : BuildConfiguration (p, t, e),
               iOS (isIOS),
-              osxSDKVersion                (config, Ids::osxSDK,                       getUndoManager()),
-              osxDeploymentTarget          (config, Ids::osxCompatibility,             getUndoManager(), getDisplayName (macOSDefaultVersion)),
-              iosDeploymentTarget          (config, Ids::iosCompatibility,             getUndoManager(), iOSDefaultVersion),
-              osxArchitecture              (config, Ids::osxArchitecture,              getUndoManager(), osxArch_Default),
+              macOSBaseSDK                 (config, Ids::macOSBaseSDK,                 getUndoManager()),
+              macOSDeploymentTarget        (config, Ids::macOSDeploymentTarget,        getUndoManager(), "10.11"),
+              macOSArchitecture            (config, Ids::osxArchitecture,              getUndoManager(), macOSArch_Default),
+              iosBaseSDK                   (config, Ids::iosBaseSDK,                   getUndoManager()),
+              iosDeploymentTarget          (config, Ids::iosDeploymentTarget,          getUndoManager(), "9.3"),
               customXcodeFlags             (config, Ids::customXcodeFlags,             getUndoManager()),
               plistPreprocessorDefinitions (config, Ids::plistPreprocessorDefinitions, getUndoManager()),
               codeSignIdentity             (config, Ids::codeSigningIdentity,          getUndoManager()),
@@ -858,6 +780,8 @@ protected:
             updateOldSDKDefaults();
 
             optimisationLevelValue.setDefault (isDebug() ? gccO0 : gccO3);
+
+            config.addListener (this);
         }
 
         //==============================================================================
@@ -869,29 +793,29 @@ protected:
             addRecommendedLLVMCompilerWarningsProperty (props);
             addGCCOptimisationProperty (props);
 
+            const String sdkInfoString ("\nThis must be in the format major.minor and contain only the numeric version number. "
+                                        "If this is left empty then the default will be used."
+                                        "\nThe minimum supported version is ");
+
             if (iOS)
             {
-                Array<var> iOSVersionVars;
+                props.add (new TextPropertyComponent (iosBaseSDK, "iOS Base SDK", 8, false),
+                           "The version of the iOS SDK to link against." + sdkInfoString + "9.3.");
 
-                for (auto& s : iOSVersions)
-                    iOSVersionVars.add (s);
-
-                props.add (new ChoicePropertyComponent (iosDeploymentTarget, "iOS Deployment Target", iOSVersions, iOSVersionVars),
-                           "The minimum version of iOS that the target binary will run on.");
+                props.add (new TextPropertyComponent (iosDeploymentTarget, "iOS Deployment Target", 8, false),
+                           "The minimum version of iOS to target." + sdkInfoString + "9.0.");
             }
             else
             {
-                props.add (new ChoicePropertyComponent (osxSDKVersion, "macOS Base SDK Version", getSDKChoiceList<StringArray> (oldestSDKVersion, true),
-                                                                                                 getSDKChoiceList<Array<var>>  (oldestSDKVersion, true)),
-                           "The version of the macOS SDK to link against. If \"Default\" is selected then the Xcode default will be used.");
+                props.add (new TextPropertyComponent (macOSBaseSDK, "macOS Base SDK", 8, false),
+                           "The version of the macOS SDK to link against." + sdkInfoString + "10.11.");
 
-                props.add (new ChoicePropertyComponent (osxDeploymentTarget, "macOS Deployment Target", getSDKChoiceList<StringArray> (oldestDeploymentTarget, false),
-                                                                                                        getSDKChoiceList<Array<var>>  (oldestDeploymentTarget, true)),
-                           "The minimum version of macOS that the target binary will be compatible with.");
+                props.add (new TextPropertyComponent (macOSDeploymentTarget, "macOS Deployment Target", 8, false),
+                           "The minimum version of macOS to target." + sdkInfoString + "10.7.");
 
-                props.add (new ChoicePropertyComponent (osxArchitecture, "macOS Architecture",
-                                                        { "Native architecture of build machine", "Standard 32-bit",        "Standard 32/64-bit",   "Standard 64-bit" },
-                                                        { osxArch_Native,                          osxArch_32BitUniversal,  osxArch_64BitUniversal, osxArch_64Bit }),
+                props.add (new ChoicePropertyComponent (macOSArchitecture, "macOS Architecture",
+                                                        { "Native architecture of build machine", "Standard 32-bit",        "Standard 32/64-bit",     "Standard 64-bit" },
+                                                        { macOSArch_Native,                       macOSArch_32BitUniversal, macOSArch_64BitUniversal, macOSArch_64Bit }),
                            "The type of macOS binary that will be produced.");
             }
 
@@ -922,7 +846,7 @@ protected:
         }
 
         //==============================================================================
-        String getOSXArchitectureString() const                 { return osxArchitecture.get(); }
+        String getMacOSArchitectureString() const               { return macOSArchitecture.get(); }
         String getPListPreprocessorDefinitionsString() const    { return plistPreprocessorDefinitions.get(); }
 
         bool isFastMathEnabled() const                          { return fastMathEnabled.get(); }
@@ -931,11 +855,12 @@ protected:
 
         String getCustomXcodeFlagsString() const                { return customXcodeFlags.get(); }
 
-        String getOSXSDKVersionString() const                   { return osxSDKVersion.get(); }
-        String getOSXDeploymentTargetString() const             { return osxDeploymentTarget.get(); }
+        String getMacOSBaseSDKString() const                    { return macOSBaseSDK.get(); }
+        String getMacOSDeploymentTargetString() const           { return macOSDeploymentTarget.get(); }
 
         String getCodeSignIdentityString() const                { return codeSignIdentity.get(); }
 
+        String getiOSBaseSDKString() const                      { return iosBaseSDK.get(); }
         String getiOSDeploymentTargetString() const             { return iosDeploymentTarget.get(); }
 
         bool isPluginBinaryCopyStepEnabled() const              { return pluginBinaryCopyStepEnabled.get(); }
@@ -950,13 +875,33 @@ protected:
         //==============================================================================
         bool iOS;
 
-        ValueWithDefault osxSDKVersion, osxDeploymentTarget, iosDeploymentTarget, osxArchitecture,
+        ValueWithDefault macOSBaseSDK, macOSDeploymentTarget, macOSArchitecture, iosBaseSDK, iosDeploymentTarget,
                          customXcodeFlags, plistPreprocessorDefinitions, codeSignIdentity,
                          fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled,
                          vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
                          aaxBinaryLocation, unityPluginBinaryLocation;
 
         //==============================================================================
+        void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
+        {
+            const auto updateOldSDKSetting = [this] (const Identifier& oldProperty,
+                                                     const String& sdkString,
+                                                     const String& sdkSuffix)
+            {
+                if (sdkString.isEmpty())
+                    config.removeProperty (oldProperty, nullptr);
+                else
+                    config.setProperty (oldProperty, sdkString + sdkSuffix, nullptr);
+            };
+
+            if (property == Ids::macOSBaseSDK)
+                updateOldSDKSetting (Ids::osxSDK, macOSBaseSDK.get(), " SDK");
+            else if (property == Ids::macOSDeploymentTarget)
+                updateOldSDKSetting (Ids::osxCompatibility, macOSDeploymentTarget.get(), " SDK");
+            else if (property == Ids::iosDeploymentTarget)
+                updateOldSDKSetting (Ids::iosCompatibility, iosDeploymentTarget.get(), {});
+        }
+
         void addXcodePluginInstallPathProperties (PropertyListBuilder& props)
         {
             auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildAU()
@@ -1008,10 +953,21 @@ protected:
 
         void updateOldSDKDefaults()
         {
-            if (iosDeploymentTarget.get() == "default")    iosDeploymentTarget.resetToDefault();
-            if (osxArchitecture.get() == "default")        osxArchitecture.resetToDefault();
-            if (osxSDKVersion.get() == "default")          osxSDKVersion.resetToDefault();
-            if (osxDeploymentTarget.get() == "default")    osxDeploymentTarget.resetToDefault();
+            if (config[Ids::iosCompatibility].toString() == "default")  iosDeploymentTarget.resetToDefault();
+            if (macOSArchitecture.get() == "default")                   macOSArchitecture.resetToDefault();
+
+            const auto updateSDKString = [this] (const Identifier& propertyName, ValueWithDefault& value)
+            {
+                auto sdkString = config[propertyName].toString();
+
+                if (sdkString == "default")
+                    value.resetToDefault();
+                else if (sdkString.isNotEmpty() && sdkString.contains (" SDK"))
+                    value = sdkString.upToFirstOccurrenceOf (" SDK", false, false);
+            };
+
+            updateSDKString (Ids::osxSDK, macOSBaseSDK);
+            updateSDKString (Ids::osxCompatibility, macOSDeploymentTarget);
         }
     };
 
@@ -1452,8 +1408,8 @@ public:
             {
                 // the aggregate target needs to have the deployment target set for
                 // pre-/post-build scripts
-                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
-                s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
+                s.set ("MACOSX_DEPLOYMENT_TARGET", config.getMacOSDeploymentTargetString());
+                s.set ("SDKROOT", "macosx" + config.getMacOSBaseSDKString());
 
                 return s;
             }
@@ -1461,13 +1417,21 @@ public:
             s.set ("PRODUCT_NAME", owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString (type == UnityPlugIn)).quoted());
             s.set ("PRODUCT_BUNDLE_IDENTIFIER", getBundleIdentifier());
 
-            auto arch = (! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? osxArch_64Bit
-                                                                               : config.getOSXArchitectureString();
+            auto arch = (! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? macOSArch_64Bit
+                                                                               : config.getMacOSArchitectureString();
 
-            if      (arch == osxArch_Native)           s.set ("ARCHS", "\"$(NATIVE_ARCH_ACTUAL)\"");
-            else if (arch == osxArch_32BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_BIT)\"");
-            else if (arch == osxArch_64BitUniversal)   s.set ("ARCHS", "\"$(ARCHS_STANDARD_32_64_BIT)\"");
-            else if (arch == osxArch_64Bit)            s.set ("ARCHS", "\"$(ARCHS_STANDARD_64_BIT)\"");
+            const auto archString = [&]() -> const char*
+            {
+                if (arch == macOSArch_Native)           return "\"$(NATIVE_ARCH_ACTUAL)\"";
+                if (arch == macOSArch_32BitUniversal)   return "\"$(ARCHS_STANDARD_32_BIT)\"";
+                if (arch == macOSArch_64BitUniversal)   return "\"$(ARCHS_STANDARD_32_64_BIT)\"";
+                if (arch == macOSArch_64Bit)            return "\"$(ARCHS_STANDARD_64_BIT)\"";
+
+                return nullptr;
+            }();
+
+            if (archString != nullptr)
+                s.set ("ARCHS", archString);
 
             if (! owner.isiOS())
             {
@@ -1639,7 +1603,7 @@ public:
             }
             else
             {
-                s.set ("MACOSX_DEPLOYMENT_TARGET", getOSXDeploymentTarget (config.getOSXDeploymentTargetString()));
+                s.set ("MACOSX_DEPLOYMENT_TARGET", config.getMacOSDeploymentTargetString());
             }
 
             s.set ("GCC_VERSION", gccVersion);
@@ -1944,7 +1908,7 @@ public:
         //==============================================================================
         void addExtraAudioUnitTargetSettings()
         {
-            xcodeOtherRezFlags = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
+            xcodeOtherRezFlags = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -d arm64_$arm64"
                                  " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
                                  " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\""
                                  " -I \\\"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\\\"";
@@ -2026,18 +1990,6 @@ public:
             }
 
             return targetExtraSearchPaths;
-        }
-
-        String getOSXDeploymentTarget (const String& deploymentTarget) const
-        {
-            auto minVersion = (type == Target::AudioUnitv3PlugIn ? minimumAUv3SDKVersion
-                                                                 : oldestDeploymentTarget);
-
-            for (auto v = minVersion; v != nextMacOSVersion; ++v)
-                if (deploymentTarget == getDisplayName (v))
-                    return ::getName (v);
-
-            return ::getName (minVersion);
         }
 
         //==============================================================================
@@ -2534,7 +2486,7 @@ private:
 
         if (config.isDebug())
         {
-            if (config.getOSXArchitectureString() == osxArch_Default)
+            if (config.getMacOSArchitectureString() == macOSArch_Default)
                 s.set ("ONLY_ACTIVE_ARCH", "YES");
         }
 
@@ -2543,13 +2495,13 @@ private:
 
         if (iOS)
         {
-            s.set ("SDKROOT", "iphoneos");
+            s.set ("SDKROOT", "iphoneos" + config.getiOSBaseSDKString());
             s.set ("TARGETED_DEVICE_FAMILY", getDeviceFamilyString().quoted());
             s.set ("IPHONEOS_DEPLOYMENT_TARGET", config.getiOSDeploymentTargetString());
         }
         else
         {
-            s.set ("SDKROOT", getOSXSDKVersion (config.getOSXSDKVersionString()));
+            s.set ("SDKROOT", "macosx" + config.getMacOSBaseSDKString());
         }
 
         s.set ("ZERO_LINK", "NO");
@@ -3377,7 +3329,7 @@ private:
     {
         std::map<String, String> attributes;
 
-        attributes["LastUpgradeCheck"] = "1240";
+        attributes["LastUpgradeCheck"] = "1300";
         attributes["ORGANIZATIONNAME"] = getProject().getCompanyNameString().quoted();
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())

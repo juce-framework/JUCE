@@ -518,6 +518,7 @@ struct GenericAudioProcessorEditor::Pimpl
 {
     Pimpl (GenericAudioProcessorEditor& parent)  : owner (parent)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
         auto* p = parent.getAudioProcessor();
         jassert (p != nullptr);
 
@@ -529,6 +530,7 @@ struct GenericAudioProcessorEditor::Pimpl
         owner.addAndMakeVisible (view);
 
         view.setScrollBarsShown (true, false);
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     ~Pimpl()

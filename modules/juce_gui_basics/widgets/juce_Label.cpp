@@ -150,7 +150,7 @@ void Label::attachToComponent (Component* owner, bool onLeft)
 
     if (ownerComponent != nullptr)
     {
-        setVisible (owner->isVisible());
+        setVisible (ownerComponent->isVisible());
         ownerComponent->addComponentListener (this);
         componentParentHierarchyChanged (*ownerComponent);
         componentMovedOrResized (*ownerComponent, true, true);
@@ -282,7 +282,9 @@ void Label::hideEditor (bool discardCurrentEditorContents)
         const bool changed = (! discardCurrentEditorContents)
                                && updateFromTextEditorContents (*outgoingEditor);
         outgoingEditor.reset();
-        repaint();
+
+        if (deletionChecker != nullptr)
+            repaint();
 
         if (changed)
             textWasEdited();
@@ -372,8 +374,7 @@ void Label::focusGained (FocusChangeType cause)
 {
     if (editSingleClick
          && isEnabled()
-         && (cause == focusChangedByTabKey
-             || (cause == focusChangedDirectly && ! isCurrentlyModal())))
+         && cause == focusChangedByTabKey)
     {
         showEditor();
     }
@@ -514,6 +515,64 @@ void Label::textEditorFocusLost (TextEditor& ed)
 {
     textEditorTextChanged (ed);
 }
+
+//==============================================================================
+class LabelAccessibilityHandler  : public AccessibilityHandler
+{
+public:
+    explicit LabelAccessibilityHandler (Label& labelToWrap)
+        : AccessibilityHandler (labelToWrap,
+                                labelToWrap.isEditable() ? AccessibilityRole::editableText : AccessibilityRole::label,
+                                getAccessibilityActions (labelToWrap),
+                                { std::make_unique<LabelValueInterface> (labelToWrap) }),
+          label (labelToWrap)
+    {
+    }
+
+    String getTitle() const override  { return label.getText(); }
+    String getHelp() const override   { return label.getTooltip(); }
+
+    AccessibleState getCurrentState() const override
+    {
+        if (label.isBeingEdited())
+            return {}; // allow focus to pass through to the TextEditor
+
+        return AccessibilityHandler::getCurrentState();
+    }
+
+private:
+    class LabelValueInterface  : public AccessibilityTextValueInterface
+    {
+    public:
+        explicit LabelValueInterface (Label& labelToWrap)
+            : label (labelToWrap)
+        {
+        }
+
+        bool isReadOnly() const override                 { return true; }
+        String getCurrentValueAsString() const override  { return label.getText(); }
+        void setValueAsString (const String&) override   {}
+
+    private:
+        Label& label;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LabelValueInterface)
+    };
+
+    static AccessibilityActions getAccessibilityActions (Label& label)
+    {
+        if (label.isEditable())
+            return AccessibilityActions().addAction (AccessibilityActionType::press, [&label] { label.showEditor(); });
+
+        return {};
+    }
+
+    Label& label;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LabelAccessibilityHandler)
+};
 
 std::unique_ptr<AccessibilityHandler> Label::createAccessibilityHandler()
 {

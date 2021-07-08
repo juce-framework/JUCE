@@ -32,7 +32,12 @@
 #include "Sidebar/jucer_ProjectTab.h"
 #include "Sidebar/jucer_LiveBuildTab.h"
 
-NewFileWizard::Type* createGUIComponentWizard();
+struct WizardHolder
+{
+    std::unique_ptr<NewFileWizard::Type> wizard;
+};
+
+NewFileWizard::Type* createGUIComponentWizard (Project&);
 
 //==============================================================================
 ProjectContentComponent::ProjectContentComponent()
@@ -421,7 +426,7 @@ void ProjectContentComponent::closeDocument()
     if (currentDocument != nullptr)
     {
         ProjucerApplication::getApp().openDocumentManager
-                                     .closeDocument (currentDocument, OpenDocumentManager::SaveIfNeeded::yes);
+                                     .closeDocumentAsync (currentDocument, OpenDocumentManager::SaveIfNeeded::yes, nullptr);
         return;
     }
 
@@ -431,35 +436,49 @@ void ProjectContentComponent::closeDocument()
 
 static void showSaveWarning (OpenDocumentManager::Document* currentDocument)
 {
-    AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                 TRANS("Save failed!"),
-                                 TRANS("Couldn't save the file:")
-                                   + "\n" + currentDocument->getFile().getFullPathName());
+    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                      TRANS("Save failed!"),
+                                      TRANS("Couldn't save the file:")
+                                          + "\n" + currentDocument->getFile().getFullPathName());
 }
 
-void ProjectContentComponent::saveDocument()
+void ProjectContentComponent::saveDocumentAsync()
 {
     if (currentDocument != nullptr)
     {
-        if (! currentDocument->save())
-            showSaveWarning (currentDocument);
+        SafePointer<ProjectContentComponent> parent { this };
+        currentDocument->saveAsync ([parent] (bool savedSuccessfully)
+        {
+            if (parent == nullptr)
+                return;
 
-        refreshProjectTreeFileStatuses();
+            if (! savedSuccessfully)
+                showSaveWarning (parent->currentDocument);
+
+            parent->refreshProjectTreeFileStatuses();
+        });
     }
     else
     {
-        saveProject();
+        saveProjectAsync();
     }
 }
 
-void ProjectContentComponent::saveAs()
+void ProjectContentComponent::saveAsAsync()
 {
     if (currentDocument != nullptr)
     {
-        if (! currentDocument->saveAs())
-            showSaveWarning (currentDocument);
+        SafePointer<ProjectContentComponent> parent { this };
+        currentDocument->saveAsAsync ([parent] (bool savedSuccessfully)
+        {
+            if (parent == nullptr)
+                return;
 
-        refreshProjectTreeFileStatuses();
+            if (! savedSuccessfully)
+                showSaveWarning (parent->currentDocument);
+
+            parent->refreshProjectTreeFileStatuses();
+        });
     }
 }
 
@@ -497,18 +516,16 @@ bool ProjectContentComponent::goToCounterpart()
     return false;
 }
 
-bool ProjectContentComponent::saveProject()
+void ProjectContentComponent::saveProjectAsync()
 {
     if (project != nullptr)
-        return (project->save (true, true) == FileBasedDocument::savedOk);
-
-    return false;
+        project->saveAsync (true, true, nullptr);
 }
 
 void ProjectContentComponent::closeProject()
 {
     if (auto* mw = findParentComponentOfClass<MainWindow>())
-        mw->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes);
+        mw->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes, nullptr);
 }
 
 void ProjectContentComponent::showProjectSettings()
@@ -596,7 +613,7 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
 {
     if (project != nullptr)
         if (auto selectedExporter = headerComponent.getSelectedExporter())
-            project->openProjectInIDE (*selectedExporter, saveFirst);
+            project->openProjectInIDE (*selectedExporter, saveFirst, nullptr);
 }
 
 void ProjectContentComponent::showNewExporterMenu()
@@ -1011,7 +1028,7 @@ void ProjectContentComponent::getCommandInfo (const CommandID commandID, Applica
 bool ProjectContentComponent::perform (const InvocationInfo& info)
 {
     // don't allow the project to be saved again if it's currently saving
-    if (isSaveCommand (info.commandID) && (project != nullptr && project->isCurrentlySaving()))
+    if (isSaveCommand (info.commandID) && project != nullptr && project->isCurrentlySaving())
         return false;
 
     switch (info.commandID)
@@ -1042,14 +1059,14 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
     switch (info.commandID)
     {
-        case CommandIDs::saveProject:               saveProject();      break;
-        case CommandIDs::closeProject:              closeProject();     break;
-        case CommandIDs::saveDocument:              saveDocument();     break;
-        case CommandIDs::saveDocumentAs:            saveAs();           break;
-        case CommandIDs::closeDocument:             closeDocument();    break;
-        case CommandIDs::goToPreviousDoc:           goToPreviousFile(); break;
-        case CommandIDs::goToNextDoc:               goToNextFile();     break;
-        case CommandIDs::goToCounterpart:           goToCounterpart();  break;
+        case CommandIDs::saveProject:               saveProjectAsync();  break;
+        case CommandIDs::closeProject:              closeProject();      break;
+        case CommandIDs::saveDocument:              saveDocumentAsync(); break;
+        case CommandIDs::saveDocumentAs:            saveAsAsync();       break;
+        case CommandIDs::closeDocument:             closeDocument();     break;
+        case CommandIDs::goToPreviousDoc:           goToPreviousFile();  break;
+        case CommandIDs::goToNextDoc:               goToNextFile();      break;
+        case CommandIDs::goToCounterpart:           goToCounterpart();   break;
 
         case CommandIDs::showProjectSettings:       showProjectSettings();         break;
         case CommandIDs::showProjectTab:            showProjectTab();              break;
@@ -1219,8 +1236,9 @@ void ProjectContentComponent::addNewGUIFile()
 {
     if (project != nullptr)
     {
-        std::unique_ptr<NewFileWizard::Type> wizard (createGUIComponentWizard());
-        wizard->createNewFile (*project, project->getMainGroup());
+        wizardHolder = std::make_unique<WizardHolder>();
+        wizardHolder->wizard.reset (createGUIComponentWizard (*project));
+        wizardHolder->wizard->createNewFile (*project, project->getMainGroup());
     }
 }
 

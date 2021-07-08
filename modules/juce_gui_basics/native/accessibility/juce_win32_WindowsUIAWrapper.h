@@ -50,19 +50,19 @@ public:
     JUCE_COMRESULT hostProviderFromHwnd (HWND hwnd, IRawElementProviderSimple** provider)
     {
         return uiaHostProviderFromHwnd != nullptr ? uiaHostProviderFromHwnd (hwnd, provider)
-                                                  : UIA_E_NOTSUPPORTED;
+                                                  : (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     JUCE_COMRESULT raiseAutomationPropertyChangedEvent (IRawElementProviderSimple* provider, PROPERTYID propID, VARIANT oldValue, VARIANT newValue)
     {
         return uiaRaiseAutomationPropertyChangedEvent != nullptr ? uiaRaiseAutomationPropertyChangedEvent (provider, propID, oldValue, newValue)
-                                                                 : UIA_E_NOTSUPPORTED;
+                                                                 : (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     JUCE_COMRESULT raiseAutomationEvent (IRawElementProviderSimple* provider, EVENTID eventID)
     {
         return uiaRaiseAutomationEvent != nullptr ? uiaRaiseAutomationEvent (provider, eventID)
-                                                  : UIA_E_NOTSUPPORTED;
+                                                  : (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     BOOL clientsAreListening()
@@ -79,7 +79,7 @@ public:
             return uiaDisconnectProvider (provider);
         }
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     JUCE_COMRESULT disconnectAllProviders()
@@ -90,7 +90,7 @@ public:
             return uiaDisconnectAllProviders();
         }
 
-        return UIA_E_NOTSUPPORTED;
+        return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
     //==============================================================================

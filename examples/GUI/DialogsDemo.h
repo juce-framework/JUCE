@@ -141,10 +141,21 @@ public:
         nativeButton.setButtonText ("Use Native Windows");
         nativeButton.onClick = [this] { getLookAndFeel().setUsingNativeAlertWindows (nativeButton.getToggleState()); };
 
-        StringArray windowNames { "Plain Alert Window", "Alert Window With Warning Icon", "Alert Window With Info Icon", "Alert Window With Question Icon",
-                                  "OK Cancel Alert Window", "Alert Window With Extra Components", "CalloutBox", "Thread With Progress Window",
-                                  "'Load' File Browser", "'Load' File Browser With Image Preview", "'Choose Directory' File Browser", "'Save' File Browser",
-                                  "Share Text", "Share Files", "Share Images" };
+        StringArray windowNames { "Plain Alert Window",
+                                  "Alert Window With Warning Icon",
+                                  "Alert Window With Info Icon",
+                                  "Alert Window With Question Icon",
+                                  "OK Cancel Alert Window",
+                                  "Alert Window With Extra Components",
+                                  "CalloutBox",
+                                  "Thread With Progress Window",
+                                  "'Load' File Browser",
+                                  "'Load' File Browser With Image Preview",
+                                  "'Choose Directory' File Browser",
+                                  "'Save' File Browser",
+                                  "Share Text",
+                                  "Share Files",
+                                  "Share Images" };
 
         // warn in case we add any windows
         jassert (windowNames.size() == numDialogs);
@@ -207,11 +218,42 @@ private:
     OwnedArray<TextButton> windowButtons;
     ToggleButton nativeButton;
 
-    static void alertBoxResultChosen (int result, DialogsDemo*)
+    struct AlertBoxResultChosen
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "Alert Box",
-                                          "Result code: " + String (result));
-    }
+        void operator() (int result) const noexcept
+        {
+            AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+                                              "Alert Box",
+                                              "Result code: " + String (result));
+        }
+    };
+
+    struct AsyncAlertBoxResultChosen
+    {
+        void operator() (int result) const noexcept
+        {
+            auto& aw = *demo.asyncAlertWindow;
+
+            aw.exitModalState (result);
+            aw.setVisible (false);
+
+            if (result == 0)
+            {
+                AlertBoxResultChosen{} (result);
+                return;
+            }
+
+            auto optionIndexChosen = aw.getComboBoxComponent ("option")->getSelectedItemIndex();
+            auto text = aw.getTextEditorContents ("text");
+
+            AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "Alert Box",
+                                              "Result code: " + String (result) + newLine
+                                              + "Option index chosen: " + String (optionIndexChosen) + newLine
+                                              + "Text: " + text);
+        }
+
+        DialogsDemo& demo;
+    };
 
     void showWindow (Component& button, DialogType type)
     {
@@ -232,7 +274,7 @@ private:
             AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon, "This is an ok/cancel AlertWindow",
                                           "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
                                           {}, {}, {},
-                                          ModalCallbackFunction::forComponent (alertBoxResultChosen, this));
+                                          ModalCallbackFunction::create (AlertBoxResultChosen{}));
         }
         else if (type == calloutBoxWindow)
         {
@@ -247,31 +289,16 @@ private:
         }
         else if (type == extraComponentsAlertWindow)
         {
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            // Modal loops are extremely dangerous. Do not copy the code below unless you are absolutely
-            // certain you are aware of all the many complicated things that can go catastrophically
-            // wrong. Read the documentation for Component::runModalLoop. If you find you are using code
-            // similar to this you should refactor things to remove it.
+            asyncAlertWindow = std::make_unique<AlertWindow> ("AlertWindow demo..",
+                                                              "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
+                                                              AlertWindow::QuestionIcon);
 
-            AlertWindow w ("AlertWindow demo..",
-                           "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
-                           AlertWindow::QuestionIcon);
+            asyncAlertWindow->addTextEditor ("text", "enter some text here", "text field:");
+            asyncAlertWindow->addComboBox ("option", { "option 1", "option 2", "option 3", "option 4" }, "some options");
+            asyncAlertWindow->addButton ("OK",     1, KeyPress (KeyPress::returnKey, 0, 0));
+            asyncAlertWindow->addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
 
-            w.addTextEditor ("text", "enter some text here", "text field:");
-            w.addComboBox ("option", { "option 1", "option 2", "option 3", "option 4" }, "some options");
-            w.addButton ("OK",     1, KeyPress (KeyPress::returnKey, 0, 0));
-            w.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
-
-            if (w.runModalLoop() != 0) // is they picked 'ok'
-            {
-                // this is the item they chose in the drop-down list..
-                auto optionIndexChosen = w.getComboBoxComponent ("option")->getSelectedItemIndex();
-                ignoreUnused (optionIndexChosen);
-
-                // this is the text they entered..
-                auto text = w.getTextEditorContents ("text");
-            }
-           #endif
+            asyncAlertWindow->enterModalState (true, ModalCallbackFunction::create (AsyncAlertBoxResultChosen { *this }));
         }
         else if (type == progressWindow)
         {
@@ -461,6 +488,7 @@ private:
 
     ImagePreviewComponent imagePreview;
     std::unique_ptr<FileChooser> fc;
+    std::unique_ptr<AlertWindow> asyncAlertWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogsDemo)
 };

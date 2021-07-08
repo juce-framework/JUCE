@@ -22,7 +22,7 @@
 # ==============================================================================
 
 # ==================================================================================================
-# JUCE/CMake Compatibility Module
+# JUCE Target Support Helper Functions
 #
 # In this file, functions intended for use by end-users have the prefix `juce_`.
 # Functions beginning with an underscore should be considered private and susceptible to
@@ -33,7 +33,7 @@
 # ==================================================================================================
 
 include_guard(GLOBAL)
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.15)
 
 define_property(TARGET PROPERTY JUCE_COMPANY_NAME INHERITED
     BRIEF_DOCS "The company name for a particular target"
@@ -80,74 +80,9 @@ define_property(TARGET PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD INHERITED
     FULL_DOCS "Whether or not plugins should be copied after building")
 set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
 
-# ==================================================================================================
-
-function(_juce_add_interface_library target)
-    add_library(${target} INTERFACE)
-    target_sources(${target} INTERFACE ${ARGN})
-endfunction()
-
-# ==================================================================================================
-
-function(_juce_create_pkgconfig_target name)
-    if(TARGET juce::pkgconfig_${name})
-        return()
-    endif()
-
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(${name} ${ARGN})
-
-    add_library(pkgconfig_${name} INTERFACE)
-    add_library(juce::pkgconfig_${name} ALIAS pkgconfig_${name})
-    install(TARGETS pkgconfig_${name} EXPORT JUCE)
-
-    set(pairs
-        "INCLUDE_DIRECTORIES\;INCLUDE_DIRS"
-        "LINK_LIBRARIES\;LINK_LIBRARIES"
-        "LINK_OPTIONS\;LDFLAGS_OTHER"
-        "COMPILE_OPTIONS\;CFLAGS_OTHER")
-
-    foreach(pair IN LISTS pairs)
-        list(GET pair 0 key)
-        list(GET pair 1 value)
-
-        if(${name}_${value})
-            set_target_properties(pkgconfig_${name} PROPERTIES INTERFACE_${key} "${${name}_${value}}")
-        endif()
-    endforeach()
-endfunction()
-
-# ==================================================================================================
-
-set(JUCE_CMAKE_UTILS_DIR ${CMAKE_CURRENT_LIST_DIR}
-    CACHE INTERNAL "The path to the folder holding this file and other resources")
-
-include("${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake")
-include("${JUCE_CMAKE_UTILS_DIR}/JUCECheckAtomic.cmake")
-
-_juce_create_atomic_target(juce_atomic_wrapper)
-
-# Tries to discover the target platform architecture, which is necessary for
-# naming VST3 bundle folders correctly.
-function(_juce_find_linux_target_architecture result)
-    set(test_file "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp")
-    try_compile(compile_result "${CMAKE_CURRENT_BINARY_DIR}" "${test_file}"
-        OUTPUT_VARIABLE compile_output)
-    string(REGEX REPLACE ".*JUCE_ARCH ([a-zA-Z0-9_-]*).*" "\\1" match_result "${compile_output}")
-    set("${result}" "${match_result}" PARENT_SCOPE)
-endfunction()
-
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
     _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
-
-    # If you really need to override the detected arch for some reason,
-    # you can configure the build with -DJUCE_LINUX_TARGET_ARCHITECTURE=<custom arch>
-    if(NOT DEFINED JUCE_LINUX_TARGET_ARCHITECTURE)
-        _juce_find_linux_target_architecture(target_arch)
-        set(JUCE_LINUX_TARGET_ARCHITECTURE "${target_arch}"
-            CACHE INTERNAL "The target architecture, used to name internal folders in VST3 bundles")
-    endif()
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     find_program(JUCE_XCRUN xcrun)
 
@@ -187,31 +122,6 @@ _juce_set_default_properties()
 
 # ==================================================================================================
 
-function(_juce_add_standard_defs juce_target)
-    target_compile_definitions(${juce_target} INTERFACE
-        JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
-        $<IF:$<CONFIG:DEBUG>,DEBUG=1 _DEBUG=1,NDEBUG=1 _NDEBUG=1>
-        $<$<PLATFORM_ID:Android>:JUCE_ANDROID=1>)
-endfunction()
-
-# ==================================================================================================
-
-macro(_juce_make_absolute path)
-    if(NOT IS_ABSOLUTE "${${path}}")
-        get_filename_component("${path}" "${${path}}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
-    endif()
-endmacro()
-
-macro(_juce_make_absolute_and_check path)
-    _juce_make_absolute("${path}")
-
-    if(NOT EXISTS "${${path}}")
-        message(FATAL_ERROR "No file at path ${${path}}")
-    endif()
-endmacro()
-
-# ==================================================================================================
-
 function(juce_add_bundle_resources_directory target folder)
     _juce_make_absolute(folder)
 
@@ -228,185 +138,6 @@ function(juce_add_bundle_resources_directory target folder)
         set_source_files_properties("${folder_parent_path}/${file}" PROPERTIES
             HEADER_FILE_ONLY TRUE
             MACOSX_PACKAGE_LOCATION "Resources/${resource_parent_path}")
-    endforeach()
-endfunction()
-
-# ==================================================================================================
-
-# This creates an imported interface library with a random name, and then adds
-# the fields from a JUCE module header to the target as INTERFACE_ properties.
-# We can extract properties later using `_juce_get_metadata`.
-# This way, the interface library ends up behaving a bit like a dictionary,
-# and we don't have to parse the module header from scratch every time we
-# want to find a specific key.
-function(_juce_extract_metadata_block delim_str file_with_block out_dict)
-    string(RANDOM LENGTH 16 random_string)
-    set(target_name "${random_string}_dict")
-    set(${out_dict} "${target_name}" PARENT_SCOPE)
-    add_library(${target_name} INTERFACE IMPORTED)
-
-    if(NOT EXISTS ${file_with_block})
-        message(FATAL_ERROR "Unable to find file ${file_with_block}")
-    endif()
-
-    file(STRINGS ${file_with_block} module_header_contents)
-
-    set(last_written_key)
-    set(append NO)
-
-    foreach(line IN LISTS module_header_contents)
-        if(NOT append)
-            if(line MATCHES " *BEGIN_${delim_str} *")
-                set(append YES)
-            endif()
-
-            continue()
-        endif()
-
-        if(append AND (line MATCHES " *END_${delim_str} *"))
-            break()
-        endif()
-
-        if(line MATCHES "^ *([a-zA-Z]+):")
-            set(last_written_key "${CMAKE_MATCH_1}")
-        endif()
-
-        string(REGEX REPLACE "^ *${last_written_key}: *" "" line "${line}")
-        string(REGEX REPLACE "[ ,]+" ";" line "${line}")
-
-        set_property(TARGET ${target_name} APPEND PROPERTY
-            "INTERFACE_JUCE_${last_written_key}" "${line}")
-    endforeach()
-endfunction()
-
-# Fetches properties attached to a metadata target.
-function(_juce_get_metadata target key out_var)
-    get_target_property(content "${target}" "INTERFACE_JUCE_${key}")
-
-    if(NOT "${content}" STREQUAL "content-NOTFOUND")
-        set(${out_var} "${content}" PARENT_SCOPE)
-    endif()
-endfunction()
-
-# ==================================================================================================
-
-function(_juce_should_build_module_source filename output_var)
-    get_filename_component(trimmed_name "${filename}" NAME_WE)
-
-    set(result TRUE)
-
-    set(pairs
-        "OSX\;Darwin"
-        "Windows\;Windows"
-        "Linux\;Linux"
-        "Android\;Android"
-        "iOS\;iOS")
-
-    foreach(pair IN LISTS pairs)
-        list(GET pair 0 suffix)
-        list(GET pair 1 system_name)
-
-        if((trimmed_name MATCHES "_${suffix}$") AND NOT (CMAKE_SYSTEM_NAME STREQUAL "${system_name}"))
-            set(result FALSE)
-        endif()
-    endforeach()
-
-    set("${output_var}" "${result}" PARENT_SCOPE)
-endfunction()
-
-function(_juce_module_sources module_path output_path built_sources other_sources)
-    get_filename_component(module_parent_path ${module_path} DIRECTORY)
-    get_filename_component(module_glob ${module_path} NAME)
-
-    file(GLOB_RECURSE all_module_files
-        CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
-        RELATIVE "${module_parent_path}"
-        "${module_path}/*")
-
-    set(base_path "${module_glob}/${module_glob}")
-
-    set(module_cpp ${all_module_files})
-    list(FILTER module_cpp INCLUDE REGEX "^${base_path}[^/]*\\.(c|cc|cpp|cxx|s|asm)$")
-
-    if(APPLE)
-        set(module_mm ${all_module_files})
-        list(FILTER module_mm INCLUDE REGEX "^${base_path}[^/]*\\.mm$")
-
-        if(module_mm)
-            set(module_mm_replaced ${module_mm})
-            list(TRANSFORM module_mm_replaced REPLACE "\\.mm$" ".cpp")
-            list(REMOVE_ITEM module_cpp ${module_mm_replaced})
-        endif()
-
-        set(module_apple_files ${all_module_files})
-        list(FILTER module_apple_files INCLUDE REGEX "${base_path}[^/]*\\.(m|mm|metal|r|swift)$")
-        list(APPEND module_cpp ${module_apple_files})
-    endif()
-
-    set(headers ${all_module_files})
-
-    set(module_files_to_build)
-
-    foreach(filename IN LISTS module_cpp)
-        _juce_should_build_module_source("${filename}" should_build_file)
-
-        if(should_build_file)
-            list(APPEND module_files_to_build "${filename}")
-        endif()
-    endforeach()
-
-    if(NOT "${module_files_to_build}" STREQUAL "")
-        list(REMOVE_ITEM headers ${module_files_to_build})
-    endif()
-
-    foreach(source_list IN ITEMS module_files_to_build headers)
-        list(TRANSFORM ${source_list} PREPEND "${output_path}/")
-    endforeach()
-
-    set(${built_sources} ${module_files_to_build} PARENT_SCOPE)
-    set(${other_sources} ${headers} PARENT_SCOPE)
-endfunction()
-
-# ==================================================================================================
-
-function(_juce_get_all_plugin_kinds out)
-    set(${out} AU AUv3 AAX Standalone Unity VST VST3 PARENT_SCOPE)
-endfunction()
-
-function(_juce_get_platform_plugin_kinds out)
-    set(result Standalone)
-
-    if(APPLE AND (CMAKE_GENERATOR STREQUAL "Xcode"))
-        list(APPEND result AUv3)
-    endif()
-
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        list(APPEND result AU)
-    endif()
-
-    if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-        list(APPEND result AAX Unity VST)
-
-        if(NOT MINGW AND NOT MSYS)
-            list(APPEND result VST3)
-        endif()
-    endif()
-
-    set(${out} ${result} PARENT_SCOPE)
-endfunction()
-
-function(_juce_add_plugin_definitions target visibility)
-    _juce_get_all_plugin_kinds(options)
-    cmake_parse_arguments(JUCE_ARG "${options}" "" "" ${ARGN})
-
-    foreach(opt IN LISTS options)
-        set(flag_value 0)
-
-        if(JUCE_ARG_${opt})
-            set(flag_value 1)
-        endif()
-
-        target_compile_definitions(${target} ${visibility} "JucePlugin_Build_${opt}=${flag_value}")
     endforeach()
 endfunction()
 
@@ -457,7 +188,7 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
 
     add_custom_command(OUTPUT "${au_rez_output}"
         COMMAND "${JUCE_XCRUN}" Rez
-            -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64"
+            -d "ppc_$ppc" -d "i386_$i386" -d "ppc64_$ppc64" -d "x86_64_$x86_64" -d "arm64_$arm64"
             -I "${secret_au_resource_dir}"
             -I "/System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
             -I "${CMAKE_OSX_SYSROOT}/System/Library/Frameworks/AudioUnit.framework/Headers"
@@ -469,256 +200,6 @@ function(_juce_add_au_resource_fork shared_code_target au_target)
         VERBATIM)
 
     set(au_resource_directory "$<TARGET_BUNDLE_DIR:${au_target}>/Contents/Resources")
-endfunction()
-
-# ==================================================================================================
-
-# Takes a target, a link visibility, and a variable-length list of framework
-# names. On macOS, finds the requested frameworks using `find_library` and
-# links them. On iOS, links directly with `-framework Name`.
-function(_juce_link_frameworks target visibility)
-    foreach(framework IN LISTS ARGN)
-        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            find_library("juce_found_${framework}" "${framework}" REQUIRED)
-            target_link_libraries("${target}" "${visibility}" "${juce_found_${framework}}")
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-            # CoreServices is only available on iOS 12+, we must link it weakly on earlier platforms
-            if((framework STREQUAL "CoreServices") AND (CMAKE_OSX_DEPLOYMENT_TARGET LESS 12.0))
-                set(framework_flags "-weak_framework ${framework}")
-            else()
-                set(framework_flags "-framework ${framework}")
-            endif()
-
-            target_link_libraries("${target}" "${visibility}" "${framework_flags}")
-        endif()
-    endforeach()
-endfunction()
-
-# ==================================================================================================
-
-function(_juce_add_plugin_wrapper_target format path out_path)
-    _juce_module_sources("${path}" "${out_path}" out_var headers)
-    list(FILTER out_var EXCLUDE REGEX "/juce_audio_plugin_client_utils.cpp$")
-    set(target_name juce_audio_plugin_client_${format})
-
-    _juce_add_interface_library("${target_name}" ${out_var})
-    _juce_add_plugin_definitions("${target_name}" INTERFACE ${format})
-    _juce_add_standard_defs("${target_name}")
-
-    target_compile_features("${target_name}" INTERFACE cxx_std_11)
-    add_library("juce::${target_name}" ALIAS "${target_name}")
-
-    if(format STREQUAL "AUv3")
-        _juce_link_frameworks("${target_name}" INTERFACE AVFoundation)
-
-        if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            _juce_link_frameworks("${target_name}" INTERFACE AudioUnit)
-        endif()
-    elseif(format STREQUAL "AU")
-        _juce_link_frameworks("${target_name}" INTERFACE AudioUnit CoreAudioKit)
-    endif()
-endfunction()
-
-# ==================================================================================================
-
-function(_juce_link_libs_from_metadata module_name dict key)
-    _juce_get_metadata("${dict}" "${key}" libs)
-
-    if(libs)
-        target_link_libraries(${module_name} INTERFACE ${libs})
-    endif()
-endfunction()
-
-# ==================================================================================================
-
-function(juce_add_module module_path)
-    set(one_value_args INSTALL_PATH ALIAS_NAMESPACE)
-    cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
-
-    _juce_make_absolute(module_path)
-
-    get_filename_component(module_name ${module_path} NAME)
-    get_filename_component(module_parent_path ${module_path} DIRECTORY)
-
-    set(module_header_name "${module_name}.h")
-
-    if(NOT EXISTS "${module_path}/${module_header_name}")
-        set(module_header_name "${module_header_name}pp")
-    endif()
-
-    if(NOT EXISTS "${module_path}/${module_header_name}")
-        message(FATAL_ERROR "Could not locate module header for module '${module_path}'")
-    endif()
-
-    set(base_path "${module_parent_path}")
-
-    _juce_module_sources("${module_path}" "${base_path}" globbed_sources headers)
-
-    if(${module_name} STREQUAL "juce_audio_plugin_client")
-        _juce_get_platform_plugin_kinds(plugin_kinds)
-
-        foreach(kind IN LISTS plugin_kinds)
-            _juce_add_plugin_wrapper_target(${kind} "${module_path}" "${base_path}")
-        endforeach()
-
-        set(utils_source
-            "${base_path}/${module_name}/juce_audio_plugin_client_utils.cpp")
-        add_library(juce_audio_plugin_client_utils INTERFACE)
-        target_sources(juce_audio_plugin_client_utils INTERFACE "${utils_source}")
-
-        if(JUCE_ARG_ALIAS_NAMESPACE)
-            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_audio_plugin_client_utils
-                ALIAS juce_audio_plugin_client_utils)
-        endif()
-
-        file(GLOB_RECURSE all_module_files
-            CONFIGURE_DEPENDS LIST_DIRECTORIES FALSE
-            RELATIVE "${module_parent_path}"
-            "${module_path}/*")
-    else()
-        list(APPEND all_module_sources ${globbed_sources})
-    endif()
-
-    _juce_add_interface_library(${module_name} ${all_module_sources})
-
-    set_property(GLOBAL APPEND PROPERTY _juce_module_names ${module_name})
-
-    set_target_properties(${module_name} PROPERTIES
-        INTERFACE_JUCE_MODULE_SOURCES   "${globbed_sources}"
-        INTERFACE_JUCE_MODULE_HEADERS   "${headers}"
-        INTERFACE_JUCE_MODULE_PATH      "${base_path}")
-
-    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
-        target_sources(${module_name} INTERFACE ${headers})
-    endif()
-
-    if(${module_name} STREQUAL "juce_core")
-        _juce_add_standard_defs(${module_name})
-
-        target_link_libraries(juce_core INTERFACE juce::juce_atomic_wrapper)
-
-        if(CMAKE_SYSTEM_NAME MATCHES ".*BSD")
-            target_link_libraries(juce_core INTERFACE execinfo)
-        elseif(CMAKE_SYSTEM_NAME STREQUAL "Android")
-            target_sources(juce_core INTERFACE "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
-            target_include_directories(juce_core INTERFACE "${ANDROID_NDK}/sources/android/cpufeatures")
-            target_link_libraries(juce_core INTERFACE android log)
-        endif()
-    endif()
-
-    if(${module_name} STREQUAL "juce_audio_processors")
-        add_library(juce_vst3_headers INTERFACE)
-
-        target_compile_definitions(juce_vst3_headers INTERFACE "$<$<TARGET_EXISTS:juce_vst3_sdk>:JUCE_CUSTOM_VST3_SDK=1>")
-
-        target_include_directories(juce_vst3_headers INTERFACE
-            "$<$<TARGET_EXISTS:juce_vst3_sdk>:$<TARGET_PROPERTY:juce_vst3_sdk,INTERFACE_INCLUDE_DIRECTORIES>>"
-            "$<$<NOT:$<TARGET_EXISTS:juce_vst3_sdk>>:${base_path}/juce_audio_processors/format_types/VST3_SDK>")
-
-        target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
-
-        if(JUCE_ARG_ALIAS_NAMESPACE)
-            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_vst3_headers ALIAS juce_vst3_headers)
-        endif()
-    endif()
-
-    target_include_directories(${module_name} INTERFACE ${base_path})
-
-    target_compile_definitions(${module_name} INTERFACE JUCE_MODULE_AVAILABLE_${module_name}=1)
-
-    if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
-        target_compile_definitions(${module_name} INTERFACE LINUX=1)
-    endif()
-
-    _juce_extract_metadata_block(JUCE_MODULE_DECLARATION "${module_path}/${module_header_name}" metadata_dict)
-
-    _juce_get_metadata("${metadata_dict}" minimumCppStandard module_cpp_standard)
-
-    if(module_cpp_standard)
-        target_compile_features(${module_name} INTERFACE cxx_std_${module_cpp_standard})
-    else()
-        target_compile_features(${module_name} INTERFACE cxx_std_11)
-    endif()
-
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        _juce_get_metadata("${metadata_dict}" OSXFrameworks module_osxframeworks)
-
-        foreach(module_framework IN LISTS module_osxframeworks)
-            if(module_framework STREQUAL "")
-                continue()
-            endif()
-
-            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
-        endforeach()
-
-        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" OSXLibs)
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
-        _juce_get_metadata("${metadata_dict}" iOSFrameworks module_iosframeworks)
-
-        foreach(module_framework IN LISTS module_iosframeworks)
-            if(module_framework STREQUAL "")
-                continue()
-            endif()
-
-            _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
-        endforeach()
-
-        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" iOSLibs)
-    elseif((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
-        _juce_get_metadata("${metadata_dict}" linuxPackages module_linuxpackages)
-
-        if(module_linuxpackages)
-            _juce_create_pkgconfig_target(${module_name}_LINUX_DEPS ${module_linuxpackages})
-            target_link_libraries(${module_name} INTERFACE juce::pkgconfig_${module_name}_LINUX_DEPS)
-        endif()
-
-        _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" linuxLibs)
-    elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-        if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC"))
-            if(module_name STREQUAL "juce_gui_basics")
-                target_compile_options(${module_name} INTERFACE /bigobj)
-            endif()
-
-            _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" windowsLibs)
-        elseif(MSYS OR MINGW)
-            if(module_name STREQUAL "juce_gui_basics")
-                target_compile_options(${module_name} INTERFACE "-Wa,-mbig-obj")
-            endif()
-
-            _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" mingwLibs)
-        endif()
-    endif()
-
-    _juce_get_metadata("${metadata_dict}" dependencies module_dependencies)
-    target_link_libraries(${module_name} INTERFACE ${module_dependencies})
-
-    _juce_get_metadata("${metadata_dict}" searchpaths module_searchpaths)
-
-    if(NOT module_searchpaths STREQUAL "")
-        foreach(module_searchpath IN LISTS module_searchpaths)
-            target_include_directories(${module_name}
-                INTERFACE "${module_path}/${module_searchpath}")
-        endforeach()
-    endif()
-
-    if(JUCE_ARG_INSTALL_PATH)
-        install(DIRECTORY "${module_path}" DESTINATION "${JUCE_ARG_INSTALL_PATH}")
-    endif()
-
-    if(JUCE_ARG_ALIAS_NAMESPACE)
-        add_library(${JUCE_ARG_ALIAS_NAMESPACE}::${module_name} ALIAS ${module_name})
-    endif()
-endfunction()
-
-function(juce_add_modules)
-    set(one_value_args INSTALL_PATH ALIAS_NAMESPACE)
-    cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "" ${ARGN})
-
-    foreach(path IN LISTS JUCE_ARG_UNPARSED_ARGUMENTS)
-        juce_add_module(${path}
-            INSTALL_PATH "${JUCE_ARG_INSTALL_PATH}"
-            ALIAS_NAMESPACE "${JUCE_ARG_ALIAS_NAMESPACE}")
-    endforeach()
 endfunction()
 
 # ==================================================================================================
@@ -926,7 +407,7 @@ function(juce_add_binary_data target)
 
     target_sources(${target} PRIVATE "${binary_file_names}")
     target_include_directories(${target} INTERFACE ${juce_binary_data_folder})
-    target_compile_features(${target} PRIVATE cxx_std_11)
+    target_compile_features(${target} PRIVATE cxx_std_14)
 
     # This fixes an issue where Xcode is unable to find binary data during archive.
     if(CMAKE_GENERATOR STREQUAL "Xcode")
@@ -939,24 +420,6 @@ function(juce_add_binary_data target)
 endfunction()
 
 # ==================================================================================================
-
-# math(EXPR ... OUTPUT_FORMAT HEXADECIMAL) wasn't added until 3.13, but we need 3.12 for vcpkg
-# compatibility
-function(_juce_dec_to_hex num out_var)
-    while(num)
-        math(EXPR digit "${num} % 16")
-        math(EXPR num "${num} / 16")
-
-        if(digit GREATER_EQUAL 10)
-            math(EXPR ascii_code "${digit} + 55")
-            string(ASCII "${ascii_code}" digit)
-        endif()
-
-        set(result "${digit}${result}")
-    endwhile()
-
-    set(${out_var} "${result}" PARENT_SCOPE)
-endfunction()
 
 function(_juce_version_code version_in out_var)
     string(REGEX REPLACE "\\." ";" version_list ${version_in})
@@ -978,8 +441,8 @@ function(_juce_version_code version_in out_var)
         list(GET version_list 2 version_patch)
     endif()
 
-    math(EXPR decimal "(${version_major} << 16) + (${version_minor} << 8) + ${version_patch}")
-    _juce_dec_to_hex(${decimal} hex)
+    math(EXPR hex "(${version_major} << 16) + (${version_minor} << 8) + ${version_patch}"
+        OUTPUT_FORMAT HEXADECIMAL)
     set(${out_var} "${hex}" PARENT_SCOPE)
 endfunction()
 
@@ -1048,6 +511,14 @@ function(_juce_set_output_name target name)
     endif()
 endfunction()
 
+function(_juce_check_icon_files_exist icon_files)
+    foreach(file IN LISTS icon_files)
+        if(NOT EXISTS "${file}")
+            message(FATAL_ERROR "Could not find icon file: ${file}")
+        endif()
+    endforeach()
+endfunction()
+
 function(_juce_generate_icon source_target dest_target)
     get_target_property(juce_library_code ${source_target} JUCE_GENERATED_SOURCES_DIRECTORY)
     get_target_property(juce_property_icon_big ${source_target} JUCE_ICON_BIG)
@@ -1070,6 +541,8 @@ function(_juce_generate_icon source_target dest_target)
             return()
         endif()
 
+        _juce_check_icon_files_exist("${icon_args}")
+
         set(generated_icon "${juce_library_code}/Icon.icns")
         # To get compiled properly, we need the icon before the plist is generated!
         _juce_execute_juceaide(macicon "${generated_icon}" ${icon_args})
@@ -1079,12 +552,16 @@ function(_juce_generate_icon source_target dest_target)
             return()
         endif()
 
+        _juce_check_icon_files_exist("${icon_args}")
+
         set(generated_icon "${juce_library_code}/icon.ico")
         _juce_execute_juceaide(winicon "${generated_icon}" ${icon_args})
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         get_target_property(generated_icon ${source_target} JUCE_CUSTOM_XCASSETS_FOLDER)
 
         if(icon_args AND (NOT generated_icon))
+            _juce_check_icon_files_exist("${icon_args}")
+
             set(out_path "${juce_library_code}/${dest_target}")
             set(generated_icon "${out_path}/Images.xcassets")
 
@@ -1108,6 +585,8 @@ function(_juce_generate_icon source_target dest_target)
     endif()
 
     if(generated_icon)
+        _juce_check_icon_files_exist("${generated_icon}")
+
         target_sources(${dest_target} PRIVATE ${generated_icon})
         set_target_properties(${source_target} ${dest_target} PROPERTIES
             JUCE_ICON_FILE "${generated_icon}"
@@ -1288,6 +767,7 @@ function(_juce_create_windows_package source_target dest_target extension defaul
 
     set_target_properties(${dest_target}
         PROPERTIES
+        PDB_OUTPUT_DIRECTORY "${products_folder}"
         LIBRARY_OUTPUT_DIRECTORY "${output_folder}/Contents/${arch_string}")
 
     get_target_property(icon_file ${source_target} JUCE_ICON_FILE)
@@ -1411,7 +891,7 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
         if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
             set_target_properties(${target_name} PROPERTIES
                 SUFFIX .so
-                LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_LINUX_TARGET_ARCHITECTURE}-linux")
+                LIBRARY_OUTPUT_DIRECTORY "${output_path}/Contents/${JUCE_TARGET_ARCHITECTURE}-linux")
         endif()
 
         _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_VST3_COPY_DIR)
@@ -1542,7 +1022,7 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
     endif()
 
     if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
-        target_link_libraries(${target_name} PRIVATE "-Wl,--no-undefined")
+        target_link_options(${target_name} PRIVATE "-Wl,--no-undefined")
     endif()
 
     # We re-export the shared code's private include dirs, because the wrapper targets need to
@@ -1606,10 +1086,6 @@ function(_juce_get_vst3_category_string target out_var)
 endfunction()
 
 function(_juce_configure_plugin_targets target)
-    if(CMAKE_VERSION VERSION_LESS "3.15.0")
-        message(FATAL_ERROR "Plugin targets require CMake 3.15 or higher")
-    endif()
-
     _juce_set_output_name(${target} $<TARGET_PROPERTY:${target},JUCE_PRODUCT_NAME>_SharedCode)
 
     target_link_libraries(${target} PRIVATE juce::juce_audio_plugin_client_utils)
@@ -1638,7 +1114,6 @@ function(_juce_configure_plugin_targets target)
     # juce_audio_utils and juce_gui_basics. We achieve this by searching for
     # JUCE_MODULE_AVAILABLE_ private compile definitions, and reexporting them in
     # the interface compile definitions.
-    # Unfortunately this requires CMake 3.15.
     _juce_get_module_definitions(${target} ON enabled_modules)
     target_compile_definitions(${target} INTERFACE ${enabled_modules})
 
@@ -1677,7 +1152,7 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_Desc="$<TARGET_PROPERTY:${target},JUCE_DESCRIPTION>"
         JucePlugin_Version=${project_version_string}
         JucePlugin_VersionString="${project_version_string}"
-        JucePlugin_VersionCode=0x${project_version_hex}
+        JucePlugin_VersionCode=${project_version_hex}
         JucePlugin_VSTUniqueID=JucePlugin_PluginCode
         JucePlugin_VSTCategory=$<TARGET_PROPERTY:${target},JUCE_VST2_CATEGORY>
         JucePlugin_Vst3Category="${vst3_category_string}"
@@ -2216,13 +1691,13 @@ function(juce_add_pip header)
     _juce_get_metadata("${metadata_dict}" name JUCE_PIP_NAME)
 
     if(NOT JUCE_PIP_NAME)
-        message(FATAL_ERROR "PIP headers must declare a `name` field")
+        message(FATAL_ERROR "Error in '${header}': PIP headers must declare a `name` field")
     endif()
 
     string(MAKE_C_IDENTIFIER "${JUCE_PIP_NAME}" pip_name_sanitised)
 
     if(NOT JUCE_PIP_NAME STREQUAL pip_name_sanitised)
-        message(FATAL_ERROR "PIP `name` value '${JUCE_PIP_NAME}' must be a valid C identifier")
+        message(FATAL_ERROR "Error in '${header}': PIP `name` value '${JUCE_PIP_NAME}' must be a valid C identifier")
     endif()
 
     if(TARGET "${JUCE_PIP_NAME}")
@@ -2231,13 +1706,13 @@ function(juce_add_pip header)
     endif()
 
     if(TARGET "${JUCE_PIP_NAME}")
-        message(FATAL_ERROR "Could not create a unique target name for PIP ${header}")
+        message(FATAL_ERROR "Error in '${header}': Could not create a unique target name for PIP ${header}")
     endif()
 
     _juce_get_metadata("${metadata_dict}" type pip_kind)
 
     if(NOT pip_kind)
-        message(FATAL_ERROR "PIP headers must declare a `type` field")
+        message(FATAL_ERROR "Error in '${header}': PIP headers must declare a `type` field")
     endif()
 
     _juce_get_metadata("${metadata_dict}" pluginCharacteristics pip_charateristics)
@@ -2284,7 +1759,7 @@ function(juce_add_pip header)
         set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPConsole.cpp.in")
         juce_add_console_app(${JUCE_PIP_NAME} ${extra_target_args})
     else()
-        message(FATAL_ERROR "PIP kind must be either AudioProcessor, Component, or Console")
+        message(FATAL_ERROR "Error in '${header}': PIP kind must be either AudioProcessor, Component, or Console")
     endif()
 
     if(NOT ARGV1 STREQUAL "")
@@ -2314,7 +1789,7 @@ function(juce_add_pip header)
         if(TARGET "${module}")
             set(discovered_module "${module}")
         else()
-            message(FATAL_ERROR "No such module: ${module}")
+            message(FATAL_ERROR "Error in '${header}': No such module: ${module}")
         endif()
 
         target_link_libraries(${JUCE_PIP_NAME} PRIVATE ${discovered_module})

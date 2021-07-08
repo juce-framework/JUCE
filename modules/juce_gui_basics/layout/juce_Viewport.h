@@ -248,12 +248,12 @@ public:
     */
     void setSingleStepSizes (int stepX, int stepY);
 
-    /** Returns a pointer to the scrollbar component being used.
+    /** Returns a reference to the scrollbar component being used.
         Handy if you need to customise the bar somehow.
     */
     ScrollBar& getVerticalScrollBar() noexcept                  { return *verticalScrollBar; }
 
-    /** Returns a pointer to the scrollbar component being used.
+    /** Returns a reference to the scrollbar component being used.
         Handy if you need to customise the bar somehow.
     */
     ScrollBar& getHorizontalScrollBar() noexcept                { return *horizontalScrollBar; }

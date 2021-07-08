@@ -2409,6 +2409,7 @@ private:
         return numBits;
     }
 
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6385)
     int getLayer3ScaleFactors2 (int* scf, Layer3SideInfo::Info& granule, const bool iStereo) noexcept
     {
         static const uint8 scaleTable[3][6][4] =
@@ -2460,6 +2461,7 @@ private:
 
         return numBits;
     }
+    JUCE_END_IGNORE_WARNINGS_MSVC
 
     bool layer3DequantizeSample (float xr[32][18], int* scf, Layer3SideInfo::Info& granule, int sampleRate, int part2bits) noexcept
     {
@@ -2926,7 +2928,7 @@ private:
             sum += window[12] * b0[12];  sum += window[14] * b0[14];
             *out++ = sum;
             b0 -= 16; window -= 32;
-            window += bo1 << 1;
+            window += (ptrdiff_t) bo1 << 1;
         }
 
         for (int j = 15; j != 0; --j, b0 -= 16, window -= 32)
@@ -2976,7 +2978,11 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
-        jassert (destSamples != nullptr);
+        if (destSamples == nullptr)
+        {
+            jassertfalse;
+            return false;
+        }
 
         if (currentPosition != startSampleInFile)
         {

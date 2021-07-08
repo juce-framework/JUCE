@@ -300,7 +300,7 @@ void HeaderComponent::initialiseButtons()
             else
             {
                 if (auto exporter = getSelectedExporter())
-                    project->openProjectInIDE (*exporter, true);
+                    project->openProjectInIDE (*exporter, true, nullptr);
             }
         }
     };

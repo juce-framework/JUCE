@@ -6,6 +6,189 @@ Develop
 
 Change
 ------
+The JUCE_GLSL_VERSION preprocessor definition has been removed.
+
+Possible Issues
+---------------
+Code which used this definition will no longer compile.
+
+Workaround
+----------
+Use OpenGLHelpers::getGLSLVersionString to retrieve a version string which is
+consistent with the capabilities of the current OpenGL context.
+
+Rationale
+---------
+A compile-time version string is not very useful, as OpenGL versions and
+capabilities can change at runtime. Replacing this macro with a function allows
+querying the capabilities of the current context at runtime.
+
+
+Change
+------
+The minimum support CMake version is now 3.15.
+
+Possible Issues
+---------------
+It will no longer be possible to configure JUCE projects with CMake versions
+between 3.12 and 3.14 inclusive.
+
+Workaround
+----------
+No workaround is available.
+
+Rationale
+---------
+Moving to 3.15 allows us to use target_link_directories and
+target_link_options, which were introduced in 3.13, which in turn allows us to
+provide support for bundled precompiled libraries in modules. Plugins already
+required CMake 3.15, so this change just brings other target types in line with
+the requirements for plugins.
+
+
+Change
+------
+The default value of JUCE_MODAL_LOOPS_PERMITTED has been changed from 1 to 0.
+
+Possible Issues
+---------------
+With JUCE_MODAL_LOOPS_PERMITTED set to 0 code that previously relied upon modal
+loops will need to be rewritten to use asynchronous versions of the modal
+functions. There is no non-modal alternative to
+AlterWindow::showNativeDialogBox and the previously modal behaviour of the
+MultiDocumentPanel destructor has changed.
+
+Workaround
+----------
+Set JUCE_MODAL_LOOPS_PERMITTED back to 1.
+
+Rationale
+---------
+Modal operations are a frequent source of problems, particularly when used in
+plug-ins. On Android modal loops are not possible, so people wanting to target
+Android often have an unwelcome surprise when then have to rewrite what they
+assumed to be platform independent code. Changing the default addresses these
+problems.
+
+
+Change
+------
+The minimum supported C++ standard is now C++14 and the oldest supported
+compilers on macOS and Linux are now Xcode 9.2, GCC 5.0 and Clang 3.4.
+
+Possible Issues
+---------------
+Older compilers will no longer be able to compile JUCE. People using Xcode 8.5
+on OS X 10.11 will need to update the operating system to OS X 10.12 to be able
+to use Xcode 9.2.
+
+Workaround
+----------
+No workaround is available.
+
+Rationale
+---------
+This compiler upgrade will allow the use of C++14 within the framework.
+
+
+Change
+------
+Platform GL headers are no longer included in juce_opengl.h
+
+Possible Issues
+---------------
+Projects depending on symbols declared in these headers may fail to build.
+
+Workaround
+----------
+The old platform-supplied headers have been replaced with a new juce_gl.h
+header which is generated using the XML registry files supplied by Khronos.
+This custom header declares GL symbols in the juce::gl namespace. If your code
+only needs to be JUCE-compatible, you can explicitly qualify each name with
+`juce::gl::`. If you need your code to build with different extension-loader
+libraries (GLEW, GL3W etc.) you can make all GL symbols visible without
+additional qualification with `using namespace juce::gl`.
+
+Rationale
+---------
+Using our own GL headers allows us to generate platform-independent headers
+which include symbols for all specified OpenGL versions and extensions. Note
+that although the function signatures exist, they may not resolve to a function
+at runtime. If your code uses commands from an extension or recent GL version,
+you should check each function pointer against `nullptr` before attempting to
+use it. To avoid repeatedly checking, you could query a subset of functions
+after calling gl::loadFunctions() and cache the results. Supplying custom GL
+headers also allows us to use C++ techniques (namespaces, references), making
+the headers safer than the platform-defined headers. Platform headers are
+generally written in C, and export a significant portion of their symbols as
+preprocessor definitions.
+
+
+Change
+------
+The functions `getComponentAsyncLayerBackedViewDisabled`
+and `setComponentAsyncLayerBackedViewDisabled` were moved into the juce
+namespace.
+
+Possible Issues
+---------------
+Code that declares these functions may fail to link.
+
+Workaround
+----------
+Move declarations of these functions into the juce namespace.
+
+Rationale
+---------
+Although the names of these functions are unlikely to collide with functions
+from other libraries, we can make such collisions much more unlikely by keeping
+JUCE code in the juce namespace.
+
+
+Change
+------
+The `juce_blocks_basics` module was removed.
+
+Possible Issues
+---------------
+Projects depending on `juce_blocks_basics` will not build.
+
+Workaround
+----------
+The BLOCKS API is now located in a separate repository:
+https://github.com/WeAreROLI/roli_blocks_basics
+Projects which used to depend on `juce_blocks_basics` can use
+`roli_blocks_basics` instead.
+
+Rationale
+---------
+ROLI is no longer involved with the development of JUCE. Therefore, development
+on the BLOCKS API has been moved out of the JUCE repository, and to a new
+repository managed by ROLI.
+
+
+Change
+------
+The live build functionality of the Projucer has been removed.
+
+Possible Issues
+---------------
+You will no longer be able to use live build in the Projucer.
+
+Workaround
+----------
+None.
+
+Rationale
+---------
+Keeping the live build compatible with the latest compilers on all our
+supported platforms is a very substantial maintenance burden, but very few
+people are using this feature of the Projucer. Removing the live build will
+simplify the code and our release process.
+
+
+Change
+------
 `Component::createFocusTraverser()` has been renamed to
 `Component::createKeyboardFocusTraverser()` and now returns a `std::unique_ptr`
 instead of a raw pointer. `Component::createFocusTraverser()` is a new method

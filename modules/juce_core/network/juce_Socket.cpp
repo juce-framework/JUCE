@@ -58,11 +58,9 @@ namespace SocketHelpers
 
         if (! socketsStarted)
         {
-            socketsStarted = true;
-
             WSADATA wsaData;
             const WORD wVersionRequested = MAKEWORD (1, 1);
-            WSAStartup (wVersionRequested, &wsaData);
+            socketsStarted = WSAStartup (wVersionRequested, &wsaData) == 0;
         }
        #endif
     }

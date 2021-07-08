@@ -97,6 +97,11 @@ private:
             return itemComponent.getRepresentedItem().getAccessibilityName();
         }
 
+        String getHelp() const override
+        {
+            return itemComponent.getRepresentedItem().getTooltip();
+        }
+
         AccessibleState getCurrentState() const override
         {
             auto& treeItem = itemComponent.getRepresentedItem();
@@ -112,12 +117,14 @@ private:
             }
 
             if (treeItem.mightContainSubItems())
+            {
                 state = state.withExpandable();
 
-            if (treeItem.isOpen())
-                state = state.withExpanded();
-            else
-                state = state.withCollapsed();
+                if (treeItem.isOpen())
+                    state = state.withExpanded();
+                else
+                    state = state.withCollapsed();
+            }
 
             if (treeItem.isSelected())
                 state = state.withSelected();
@@ -265,7 +272,10 @@ public:
     ItemComponent* getItemComponentAt (Point<int> p)
     {
         auto iter = std::find_if (itemComponents.cbegin(), itemComponents.cend(),
-                                  [p] (const std::unique_ptr<ItemComponent>& c) { return c->getBounds().contains (p); });
+                                  [p] (const std::unique_ptr<ItemComponent>& c)
+                                  {
+                                      return c->getBounds().contains (p);
+                                  });
 
         if (iter != itemComponents.cend())
             return iter->get();
@@ -275,19 +285,33 @@ public:
 
     ItemComponent* getComponentForItem (const TreeViewItem* item) const
     {
-        if (item != nullptr)
-        {
-            auto iter = std::find_if (itemComponents.cbegin(), itemComponents.cend(),
-                                      [item] (const std::unique_ptr<ItemComponent>& c)
-                                      {
-                                          return &c->getRepresentedItem() == item;
-                                      });
+        const auto iter = std::find_if (itemComponents.begin(), itemComponents.end(),
+                                        [item] (const std::unique_ptr<ItemComponent>& c)
+                                        {
+                                            return &c->getRepresentedItem() == item;
+                                        });
 
-            if (iter != itemComponents.cend())
-                return iter->get();
-        }
+        if (iter != itemComponents.end())
+            return iter->get();
 
         return nullptr;
+    }
+
+    void itemBeingDeleted (const TreeViewItem* item)
+    {
+        const auto iter = std::find_if (itemComponents.begin(), itemComponents.end(),
+                                        [item] (const std::unique_ptr<ItemComponent>& c)
+                                        {
+                                            return &c->getRepresentedItem() == item;
+                                        });
+
+        if (iter != itemComponents.end())
+        {
+            if (isMouseDraggingInChildComp (*(iter->get())))
+                owner.hideDragHighlight();
+
+            itemComponents.erase (iter);
+        }
     }
 
     void updateComponents()
@@ -324,10 +348,7 @@ public:
             }
             else
             {
-                if (isMouseDraggingInChildComp (*comp))
-                    comp->setSize (0, 0);
-                else
-                    itemComponents.erase (itemComponents.begin() + i);
+                itemComponents.erase (itemComponents.begin() + i);
             }
         }
     }
@@ -420,7 +441,11 @@ private:
                         if (auto* dragContainer = DragAndDropContainer::findParentDragContainerFor (this))
                         {
                             pos.setSize (pos.getWidth(), item.itemHeight);
-                            auto dragImage = Component::createComponentSnapshot (pos, true);
+
+                            auto dragImage = Component::createComponentSnapshot (pos,
+                                                                                 true,
+                                                                                 Component::getApproximateScaleFactorForComponent (itemComponent));
+
                             dragImage.multiplyAllAlphas (0.6f);
 
                             auto imageOffset = pos.getPosition() - e.getPosition();
@@ -441,7 +466,7 @@ private:
     void mouseMoveInternal (const MouseEvent& e)  { updateItemUnderMouse (e); }
     void mouseExitInternal (const MouseEvent& e)  { updateItemUnderMouse (e); }
 
-    bool isMouseDraggingInChildComp (const Component& comp) const
+    static bool isMouseDraggingInChildComp (const Component& comp)
     {
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (ms.isDragging())
@@ -502,7 +527,12 @@ private:
         if (modifiers.isShiftDown() && ((firstSelected = owner.getSelectedItem (0)) != nullptr))
         {
             auto* lastSelected = owner.getSelectedItem (owner.getNumSelectedItems() - 1);
-            jassert (lastSelected != nullptr);
+
+            if (lastSelected == nullptr)
+            {
+                jassertfalse;
+                return;
+            }
 
             auto rowStart = firstSelected->getRowNumberInTree();
             auto rowEnd = lastSelected->getRowNumberInTree();
@@ -598,7 +628,8 @@ private:
 };
 
 //==============================================================================
-class TreeView::TreeViewport  : public Viewport
+class TreeView::TreeViewport  : public Viewport,
+                                private Timer
 {
 public:
     TreeViewport() = default;
@@ -621,6 +652,8 @@ public:
         const auto hasScrolledSideways = (newVisibleArea.getX() != lastX);
         lastX = newVisibleArea.getX();
         updateComponents (hasScrolledSideways);
+
+        startTimer (50);
     }
 
     ContentComponent* getContentComp() const noexcept
@@ -638,6 +671,15 @@ public:
     }
 
 private:
+    void timerCallback() override
+    {
+        stopTimer();
+
+        if (auto* tree = getParentComponent())
+            if (auto* handler = tree->getAccessibilityHandler())
+                handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+    }
+
     int lastX = -1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewport)
@@ -795,8 +837,9 @@ TreeViewItem* TreeView::getItemOnRow (int index) const
 
 TreeViewItem* TreeView::getItemAt (int y) const noexcept
 {
-    if (auto* itemComponent = viewport->getContentComp()->getItemComponentAt (Point<int> (0, y)))
-        return &itemComponent->getRepresentedItem();
+    if (auto* contentComp = viewport->getContentComp())
+        if (auto* itemComponent = contentComp->getItemComponentAt (contentComp->getLocalPoint (this, Point<int> (0, y))))
+            return &itemComponent->getRepresentedItem();
 
     return nullptr;
 }
@@ -1324,7 +1367,32 @@ void TreeView::itemDropped (const SourceDetails& dragSourceDetails)
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> TreeView::createAccessibilityHandler()
 {
-    return std::make_unique<TreeViewAccessibilityHandler> (*this);
+    class TableInterface  : public AccessibilityTableInterface
+    {
+    public:
+        explicit TableInterface (TreeView& treeViewToWrap)  : treeView (treeViewToWrap) {}
+
+        int getNumRows() const override     { return treeView.getNumRowsInTree(); }
+        int getNumColumns() const override  { return 1; }
+
+        const AccessibilityHandler* getCellHandler (int row, int) const override
+        {
+            if (auto* itemComp = treeView.getItemComponent (treeView.getItemOnRow (row)))
+                return itemComp->getAccessibilityHandler();
+
+            return nullptr;
+        }
+
+    private:
+        TreeView& treeView;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableInterface)
+    };
+
+    return std::make_unique<AccessibilityHandler> (*this,
+                                                   AccessibilityRole::tree,
+                                                   AccessibilityActions{},
+                                                   AccessibilityHandler::Interfaces { std::make_unique<TableInterface> (*this) });
 }
 
 //==============================================================================
@@ -1332,6 +1400,12 @@ TreeViewItem::TreeViewItem()
 {
     static int nextUID = 0;
     uid = nextUID++;
+}
+
+TreeViewItem::~TreeViewItem()
+{
+    if (ownerView != nullptr)
+        ownerView->viewport->getContentComp()->itemBeingDeleted (this);
 }
 
 String TreeViewItem::getUniqueName() const

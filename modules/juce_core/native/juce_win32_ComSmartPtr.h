@@ -54,6 +54,8 @@ namespace juce
 #define JUCE_COMRESULT                   HRESULT STDMETHODCALLTYPE
 #define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 inline GUID uuidFromString (const char* s) noexcept
 {
     uint32 ints[4] = {};
@@ -198,29 +200,31 @@ template <class... ComClasses>
 class ComBaseClassHelper   : public ComBaseClassHelperBase<ComClasses...>
 {
 public:
-    ComBaseClassHelper (unsigned int initialRefCount = 1) : ComBaseClassHelperBase<ComClasses...> (initialRefCount) {}
+    explicit ComBaseClassHelper (unsigned int initialRefCount = 1)
+        : ComBaseClassHelperBase<ComClasses...> (initialRefCount) {}
 
     JUCE_COMRESULT QueryInterface (REFIID refId, void** result)
     {
-        return queryInterfaceWithType (refId, result, Tag<ComClasses>{}...);
-    }
+        const std::tuple<IID, void*> bases[]
+        {
+            std::make_tuple (__uuidof (ComClasses),
+                             static_cast<void*> (static_cast<ComClasses*> (this)))...
+        };
 
-private:
-    JUCE_COMRESULT queryInterfaceWithType (REFIID refId, void** result)
-    {
+        for (const auto& base : bases)
+        {
+            if (refId == std::get<0> (base))
+            {
+                this->AddRef();
+                *result = std::get<1> (base);
+                return S_OK;
+            }
+        }
+
         return ComBaseClassHelperBase<ComClasses...>::QueryInterface (refId, result);
     }
-
-    template <typename S> struct Tag {};
-
-    template <typename T, typename... Ts>
-    JUCE_COMRESULT queryInterfaceWithType (REFIID refId, void** result, Tag<T>, Tag<Ts>...)
-    {
-        if (refId == __uuidof (T))
-            return this->template castToType<T> (result);
-
-        return queryInterfaceWithType (refId, result, Tag<Ts>{}...);
-    }
 };
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

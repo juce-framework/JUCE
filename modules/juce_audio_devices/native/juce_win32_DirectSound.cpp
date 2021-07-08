@@ -209,12 +209,17 @@ namespace
     {
         if (dsDirectSoundCreate == nullptr)
         {
-            HMODULE h = LoadLibraryA ("dsound.dll");
+            if (auto* h = LoadLibraryA ("dsound.dll"))
+            {
+                DSOUND_FUNCTION_LOAD (DirectSoundCreate)
+                DSOUND_FUNCTION_LOAD (DirectSoundCaptureCreate)
+                DSOUND_FUNCTION_LOAD (DirectSoundEnumerateW)
+                DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateW)
 
-            DSOUND_FUNCTION_LOAD (DirectSoundCreate)
-            DSOUND_FUNCTION_LOAD (DirectSoundCaptureCreate)
-            DSOUND_FUNCTION_LOAD (DirectSoundEnumerateW)
-            DSOUND_FUNCTION_LOAD (DirectSoundCaptureEnumerateW)
+                return;
+            }
+
+            jassertfalse;
         }
     }
 
@@ -757,7 +762,7 @@ public:
         }
     }
 
-    ~DSoundAudioIODevice()
+    ~DSoundAudioIODevice() override
     {
         close();
     }

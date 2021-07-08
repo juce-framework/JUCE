@@ -124,10 +124,12 @@ public:
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6255 6386)
             auto* gains = static_cast<FloatType*> (alloca (sizeof (FloatType) * len));
 
             for (size_t i = 0; i < len; ++i)
                 gains[i] = gain.getNextValue();
+            JUCE_END_IGNORE_WARNINGS_MSVC
 
             for (size_t chan = 0; chan < numChannels; ++chan)
                 FloatVectorOperations::multiply (outBlock.getChannelPointer (chan),

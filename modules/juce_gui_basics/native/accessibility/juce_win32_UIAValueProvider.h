@@ -31,9 +31,8 @@ class UIAValueProvider  : public UIAProviderBase,
                           public ComBaseClassHelper<IValueProvider>
 {
 public:
-    UIAValueProvider (AccessibilityNativeHandle* nativeHandle, bool editableText)
-        : UIAProviderBase (nativeHandle),
-          isEditableText (editableText)
+    UIAValueProvider (AccessibilityNativeHandle* nativeHandle)
+        : UIAProviderBase (nativeHandle)
     {
     }
 
@@ -41,47 +40,31 @@ public:
     JUCE_COMRESULT SetValue (LPCWSTR val) override
     {
         if (! isElementValid())
-            return UIA_E_ELEMENTNOTAVAILABLE;
+            return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
         const auto& handler = getHandler();
+        auto& valueInterface = *handler.getValueInterface();
 
-        const auto sendValuePropertyChangeMessage = [&]()
-        {
-            VARIANT newValue;
-            VariantHelpers::setString (getCurrentValueString(), &newValue);
+        if (valueInterface.isReadOnly())
+            return (HRESULT) UIA_E_NOTSUPPORTED;
 
-            sendAccessibilityPropertyChangedEvent (handler, UIA_ValueValuePropertyId, newValue);
-        };
+        valueInterface.setValueAsString (String (val));
 
-        if (isEditableText)
-        {
-            handler.getTextInterface()->setText (String (val));
-            sendValuePropertyChangeMessage();
+        VARIANT newValue;
+        VariantHelpers::setString (valueInterface.getCurrentValueAsString(), &newValue);
 
-            return S_OK;
-        }
+        sendAccessibilityPropertyChangedEvent (handler, UIA_ValueValuePropertyId, newValue);
 
-        if (auto* valueInterface = handler.getValueInterface())
-        {
-            if (! valueInterface->isReadOnly())
-            {
-                valueInterface->setValueAsString (String (val));
-                sendValuePropertyChangeMessage();
-
-                return S_OK;
-            }
-        }
-
-        return UIA_E_NOTSUPPORTED;
+        return S_OK;
     }
 
     JUCE_COMRESULT get_Value (BSTR* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
-            auto currentValue = getCurrentValueString();
+            auto currentValueString = getHandler().getValueInterface()->getCurrentValueAsString();
 
-            *pRetVal = SysAllocString ((const OLECHAR*) currentValue.toWideCharPointer());
+            *pRetVal = SysAllocString ((const OLECHAR*) currentValueString.toWideCharPointer());
             return S_OK;
         });
     }
@@ -90,30 +73,12 @@ public:
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
-            if (! isEditableText)
-                if (auto* valueInterface = getHandler().getValueInterface())
-                    *pRetVal = valueInterface->isReadOnly();
-
+            *pRetVal = getHandler().getValueInterface()->isReadOnly();
             return S_OK;
         });
     }
 
 private:
-    String getCurrentValueString() const
-    {
-        if (isEditableText)
-            if (auto* textInterface = getHandler().getTextInterface())
-                return textInterface->getText ({ 0, textInterface->getTotalNumCharacters() });
-
-        if (auto* valueInterface = getHandler().getValueInterface())
-            return valueInterface->getCurrentValueAsString();
-
-        jassertfalse;
-        return {};
-    }
-
-    const bool isEditableText;
-
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIAValueProvider)
 };

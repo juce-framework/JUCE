@@ -605,7 +605,7 @@ void FileBrowserComponent::getRoots (StringArray& rootNames, StringArray& rootPa
 
 void FileBrowserComponent::timerCallback()
 {
-    const bool isProcessActive = Process::isForegroundProcess();
+    const auto isProcessActive = isForegroundOrEmbeddedProcess (this);
 
     if (wasProcessActive != isProcessActive)
     {

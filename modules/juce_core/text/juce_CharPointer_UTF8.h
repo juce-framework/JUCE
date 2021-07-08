@@ -274,8 +274,10 @@ public:
     */
     size_t sizeInBytes() const noexcept
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387)
         jassert (data != nullptr);
         return strlen (data) + 1;
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     /** Returns the number of bytes that would be needed to represent the given
@@ -552,12 +554,14 @@ public:
     */
     static bool isByteOrderMark (const void* possibleByteOrder) noexcept
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (28182)
         jassert (possibleByteOrder != nullptr);
         auto c = static_cast<const uint8*> (possibleByteOrder);
 
         return c[0] == (uint8) byteOrderMark1
             && c[1] == (uint8) byteOrderMark2
             && c[2] == (uint8) byteOrderMark3;
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
 private:

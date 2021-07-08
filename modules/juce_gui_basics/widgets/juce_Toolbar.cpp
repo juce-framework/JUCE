@@ -163,7 +163,7 @@ public:
         {
             auto* tc = bar.items.getUnchecked(i);
 
-            if (dynamic_cast<Spacer*> (tc) == nullptr && ! tc->isVisible())
+            if (tc != nullptr && dynamic_cast<Spacer*> (tc) == nullptr && ! tc->isVisible())
             {
                 oldIndexes.insert (0, i);
                 addAndMakeVisible (tc, 0);
