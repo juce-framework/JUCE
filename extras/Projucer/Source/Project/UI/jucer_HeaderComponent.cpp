@@ -226,31 +226,29 @@ void HeaderComponent::initialiseButtons()
     saveAndOpenInIDEButton.setIconInset (7);
     saveAndOpenInIDEButton.onClick = [this]
     {
-        if (project != nullptr)
+        if (project == nullptr)
+            return;
+
+        if (! project->isSaveAndExportDisabled())
         {
-            if (project->isSaveAndExportDisabled())
-            {
-                auto setWarningVisible = [this] (const Identifier& identifier)
-                {
-                    auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
-                                                              .getChildWithName (identifier);
-
-                    if (child.isValid())
-                        child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
-                };
-
-                if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
-                    setWarningVisible (ProjectMessages::Ids::incompatibleLicense);
-
-                if (project->isFileModificationCheckPending())
-                    setWarningVisible (ProjectMessages::Ids::jucerFileModified);
-            }
-            else
-            {
-                if (auto exporter = getSelectedExporter())
-                    project->openProjectInIDE (*exporter, true, nullptr);
-            }
+            projectContentComponent->openInSelectedIDE (true);
+            return;
         }
+
+        auto setWarningVisible = [this] (const Identifier& identifier)
+        {
+            auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
+                                                      .getChildWithName (identifier);
+
+            if (child.isValid())
+                child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
+        };
+
+        if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
+            setWarningVisible (ProjectMessages::Ids::incompatibleLicense);
+
+        if (project->isFileModificationCheckPending())
+            setWarningVisible (ProjectMessages::Ids::jucerFileModified);
     };
 
     updateExporterButton();

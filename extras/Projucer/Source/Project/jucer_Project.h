@@ -132,7 +132,7 @@ public:
 
     void saveProject (Async, ProjectExporter* exporterToSave, std::function<void (Result)> onCompletion);
     Result saveResourcesOnly();
-    void openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst, std::function<void (Result)> onCompletion);
+    void openProjectInIDE (ProjectExporter& exporterToOpen);
 
     File getLastDocumentOpened() override;
     void setLastDocumentOpened (const File& file) override;
@@ -613,11 +613,6 @@ private:
     void updateOldProjucerWarning (bool showWarning);
     void updateCLionWarning (bool showWarning);
     void updateModuleNotFoundWarning (bool showWarning);
-
-    void openProjectInIDEImpl (ExporterIterator exporter,
-                               String exporterToOpen,
-                               bool saveFirst,
-                               std::function<void (Result)> onCompletion);
 
     ValueTree projectMessages { ProjectMessages::Ids::projectMessages, {},
                                 { { ProjectMessages::Ids::notification, {} }, { ProjectMessages::Ids::warning, {} } } };
