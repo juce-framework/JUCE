@@ -192,8 +192,10 @@ void Desktop::handleAsyncUpdate()
 {
     // The component may be deleted during this operation, but we'll use a SafePointer rather than a
     // BailOutChecker so that any remaining listeners will still get a callback (with a null pointer).
-    WeakReference<Component> currentFocus (Component::getCurrentlyFocusedComponent());
-    focusListeners.call ([&] (FocusChangeListener& l) { l.globalFocusChanged (currentFocus.get()); });
+    focusListeners.call ([currentFocus = WeakReference<Component> { Component::getCurrentlyFocusedComponent() }] (FocusChangeListener& l)
+    {
+        l.globalFocusChanged (currentFocus.get());
+    });
 }
 
 //==============================================================================

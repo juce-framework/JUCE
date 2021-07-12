@@ -725,10 +725,9 @@ void Project::saveProject (Async async,
             registerRecentFile (getFile());
     }
 
-    WeakReference<Project> ref (this);
-
     saver = std::make_unique<ProjectSaver> (*this);
-    saver->save (async, exporterToSave, [ref, onCompletion] (Result result)
+
+    saver->save (async, exporterToSave, [ref = WeakReference<Project> { this }, onCompletion] (Result result)
     {
         if (ref == nullptr)
             return;
@@ -1040,9 +1039,8 @@ void Project::saveAndMoveTemporaryProject (bool openInIDE)
             // reload project from new location
             if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile()))
             {
-                Component::SafePointer<MainWindow> safeWindow (window);
-
-                MessageManager::callAsync ([safeWindow, newDirectory, oldJucerFileName, openInIDE]() mutable
+                MessageManager::callAsync ([newDirectory, oldJucerFileName, openInIDE,
+                                            safeWindow = Component::SafePointer<MainWindow> { window }]() mutable
                                            {
                                                if (safeWindow != nullptr)
                                                    safeWindow->moveProject (newDirectory.getChildFile (oldJucerFileName),

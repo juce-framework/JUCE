@@ -207,7 +207,7 @@ void ModalComponentManager::handleAsyncUpdate()
             Component::SafePointer<Component> compToDelete (item->autoDelete ? item->component : nullptr);
 
             for (int j = item->callbacks.size(); --j >= 0;)
-                item->callbacks.getUnchecked(j)->modalStateFinished (item->returnValue);
+                item->callbacks.getUnchecked (j)->modalStateFinished (item->returnValue);
 
             compToDelete.deleteAndZero();
         }

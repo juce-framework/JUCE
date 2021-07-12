@@ -1875,10 +1875,8 @@ void TextEditor::mouseDown (const MouseEvent& e)
 
             menuActive = true;
 
-            SafePointer<TextEditor> safeThis (this);
-
             m.showMenuAsync (PopupMenu::Options(),
-                             [safeThis] (int menuResult)
+                             [safeThis = SafePointer<TextEditor> { this }] (int menuResult)
                              {
                                  if (auto* editor = safeThis.getComponent())
                                  {

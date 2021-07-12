@@ -258,8 +258,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
                 return;
         }
 
-        WeakReference<Pimpl> weakRef (this);
-        MessageManager::callAsync ([weakRef, image]() mutable
+        MessageManager::callAsync ([weakRef = WeakReference<Pimpl> { this }, image]() mutable
                                    {
                                        if (weakRef == nullptr)
                                            return;

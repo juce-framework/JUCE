@@ -1113,8 +1113,7 @@ void ProjucerApplication::createNewProjectFromClipboard()
         return;
     }
 
-    WeakReference<ProjucerApplication> parent { this };
-    openFile (tempFile, [parent, cleanup] (bool openedSuccessfully)
+    openFile (tempFile, [parent = WeakReference<ProjucerApplication> { this }, cleanup] (bool openedSuccessfully)
     {
         if (parent == nullptr)
             return;
@@ -1172,8 +1171,7 @@ void ProjucerApplication::closeAllMainWindows (std::function<void (bool)> callba
 
 void ProjucerApplication::closeAllMainWindowsAndQuitIfNeeded()
 {
-    WeakReference<ProjucerApplication> parent;
-    closeAllMainWindows ([parent] (bool closedSuccessfully)
+    closeAllMainWindows ([parent = WeakReference<ProjucerApplication> { this }] (bool closedSuccessfully)
     {
        #if JUCE_MAC
         ignoreUnused (parent, closedSuccessfully);

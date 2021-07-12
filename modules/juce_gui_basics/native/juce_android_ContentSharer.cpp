@@ -490,10 +490,10 @@ public:
         auto chooserIntent = LocalRef<jobject> (env->CallStaticObjectMethod (AndroidIntent, AndroidIntent.createChooser,
                                                                              intent.get(), javaString ("Choose share target").get()));
 
-        WeakReference<ContentSharerNativeImpl> weakRef (this);
-
         startAndroidActivityForResult (chooserIntent, 1003,
-                                       [weakRef] (int /*requestCode*/, int resultCode, LocalRef<jobject> /*intentData*/) mutable
+                                       [weakRef = WeakReference<ContentSharerNativeImpl> { this }] (int /*requestCode*/,
+                                                                                                    int resultCode,
+                                                                                                    LocalRef<jobject> /*intentData*/) mutable
                                        {
                                            if (weakRef != nullptr)
                                                weakRef->sharingFinished (resultCode);
@@ -680,10 +680,11 @@ private:
                                                                              AndroidIntent.createChooser,
                                                                              intent.get(),
                                                                              javaString ("Choose share target").get()));
-        WeakReference<ContentSharerNativeImpl> weakRef (this);
 
         startAndroidActivityForResult (chooserIntent, 1003,
-                                       [weakRef] (int /*requestCode*/, int resultCode, LocalRef<jobject> /*intentData*/) mutable
+                                       [weakRef = WeakReference<ContentSharerNativeImpl> { this }] (int /*requestCode*/,
+                                                                                                    int resultCode,
+                                                                                                    LocalRef<jobject> /*intentData*/) mutable
                                        {
                                            if (weakRef != nullptr)
                                                weakRef->sharingFinished (resultCode);

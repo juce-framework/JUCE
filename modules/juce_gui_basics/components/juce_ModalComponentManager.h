@@ -198,7 +198,10 @@ public:
     static ModalComponentManager::Callback* create (void (*functionToCall) (int, ParamType),
                                                     ParamType parameterValue)
     {
-        return create ([=] (int r) { functionToCall (r, parameterValue); });
+        return create ([functionToCall, parameterValue] (int r)
+        {
+            functionToCall (r, parameterValue);
+        });
     }
 
     //==============================================================================
@@ -228,7 +231,10 @@ public:
                                                        ParamType1 parameterValue1,
                                                        ParamType2 parameterValue2)
     {
-        return create ([=] (int r) { functionToCall (r, parameterValue1, parameterValue2); });
+        return create ([functionToCall, parameterValue1, parameterValue2] (int r)
+        {
+            functionToCall (r, parameterValue1, parameterValue2);
+        });
     }
 
     //==============================================================================
@@ -258,8 +264,10 @@ public:
     static ModalComponentManager::Callback* forComponent (void (*functionToCall) (int, ComponentType*),
                                                           ComponentType* component)
     {
-        WeakReference<Component> comp (component);
-        return create ([=] (int r) { functionToCall (r, static_cast<ComponentType*> (comp.get())); });
+        return create ([functionToCall, comp = WeakReference<Component> { component }] (int r)
+        {
+            functionToCall (r, static_cast<ComponentType*> (comp.get()));
+        });
     }
 
     //==============================================================================
@@ -290,8 +298,10 @@ public:
                                                           ComponentType* component,
                                                           ParamType param)
     {
-        WeakReference<Component> comp (component);
-        return create ([=] (int r) { functionToCall (r, static_cast<ComponentType*> (comp.get()), param); });
+        return create ([functionToCall, param, comp = WeakReference<Component> { component }] (int r)
+        {
+            functionToCall (r, static_cast<ComponentType*> (comp.get()), param);
+        });
     }
 
 private:

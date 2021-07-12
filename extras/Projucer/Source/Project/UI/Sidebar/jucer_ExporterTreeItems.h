@@ -78,25 +78,25 @@ public:
 
     void deleteItem() override
     {
-        WeakReference<ExporterItem> safeThis { this };
+        auto resultCallback = [safeThis = WeakReference<ExporterItem> { this }] (int result)
+        {
+            if (safeThis == nullptr || result == 0)
+                return;
+
+            safeThis->closeSettingsPage();
+
+            auto parent = safeThis->exporter->settings.getParent();
+            parent.removeChild (safeThis->exporter->settings,
+                                safeThis->project.getUndoManagerFor (parent));
+        };
+
         AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                       "Delete Exporter",
                                       "Are you sure you want to delete this export target?",
                                       "",
                                       "",
                                       nullptr,
-                                      ModalCallbackFunction::create ([safeThis] (int result)
-        {
-            if (safeThis == nullptr)
-                return;
-
-            if (result == 0)
-                return;
-
-            safeThis->closeSettingsPage();
-            auto parent = safeThis->exporter->settings.getParent();
-            parent.removeChild (safeThis->exporter->settings, safeThis->project.getUndoManagerFor (parent));
-        }));
+                                      ModalCallbackFunction::create (std::move (resultCallback)));
     }
 
     void addSubItems() override
@@ -244,14 +244,13 @@ public:
 
     void deleteItem() override
     {
-        WeakReference<ConfigItem> parent { this };
         AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
                                       "Delete Configuration",
                                       "Are you sure you want to delete this configuration?",
                                       "",
                                       "",
                                       nullptr,
-                                      ModalCallbackFunction::create ([parent] (int result)
+                                      ModalCallbackFunction::create ([parent = WeakReference<ConfigItem> { this }] (int result)
         {
             if (parent == nullptr)
                 return;

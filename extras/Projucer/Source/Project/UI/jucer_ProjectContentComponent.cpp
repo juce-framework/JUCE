@@ -330,8 +330,7 @@ void ProjectContentComponent::saveDocumentAsync()
 {
     if (currentDocument != nullptr)
     {
-        SafePointer<ProjectContentComponent> parent { this };
-        currentDocument->saveAsync ([parent] (bool savedSuccessfully)
+        currentDocument->saveAsync ([parent = SafePointer<ProjectContentComponent> { this }] (bool savedSuccessfully)
         {
             if (parent == nullptr)
                 return;
@@ -352,8 +351,7 @@ void ProjectContentComponent::saveAsAsync()
 {
     if (currentDocument != nullptr)
     {
-        SafePointer<ProjectContentComponent> parent { this };
-        currentDocument->saveAsAsync ([parent] (bool savedSuccessfully)
+        currentDocument->saveAsAsync ([parent = SafePointer<ProjectContentComponent> { this }] (bool savedSuccessfully)
         {
             if (parent == nullptr)
                 return;

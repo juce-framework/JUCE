@@ -407,9 +407,7 @@ private:
 
                                 if (error.isNotEmpty())
                                 {
-                                    WeakReference<CaptureSession> weakRef (this);
-
-                                    MessageManager::callAsync ([weakRef, error]() mutable
+                                    MessageManager::callAsync ([weakRef = WeakReference<CaptureSession> { this }, error]() mutable
                                     {
                                         if (weakRef != nullptr)
                                             weakRef->owner.cameraOpenCallback ({}, error);
@@ -423,9 +421,7 @@ private:
 
                                 if (error.isNotEmpty())
                                 {
-                                    WeakReference<CaptureSession> weakRef (this);
-
-                                    MessageManager::callAsync ([weakRef, error]() mutable
+                                    MessageManager::callAsync ([weakRef = WeakReference<CaptureSession> { this }, error]() mutable
                                     {
                                         if (weakRef != nullptr)
                                             weakRef->owner.cameraOpenCallback ({}, error);

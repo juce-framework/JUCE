@@ -1716,9 +1716,7 @@ private:
         //==============================================================================
         void systemVolumeChanged()
         {
-            WeakReference<SystemVolumeListener> weakThis (this);
-
-            MessageManager::callAsync ([weakThis]() mutable
+            MessageManager::callAsync ([weakThis = WeakReference<SystemVolumeListener> { this }]() mutable
                                        {
                                            if (weakThis == nullptr)
                                                return;

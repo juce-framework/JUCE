@@ -213,22 +213,21 @@ private:
 
         updateLoginButtonStates (true);
 
-        WeakReference<Component> weakThis (this);
-        auto completionCallback = [this, weakThis] (const String& errorMessage)
+        auto completionCallback = [weakThis = SafePointer<LoginFormComponent> { this }] (const String& errorMessage)
         {
             if (weakThis == nullptr)
                 return;
 
-            updateLoginButtonStates (false);
+            weakThis->updateLoginButtonStates (false);
 
             if (errorMessage.isNotEmpty())
             {
-                showErrorMessage (errorMessage);
+                weakThis->showErrorMessage (errorMessage);
             }
             else
             {
-                hideErrorMessage();
-                mainWindow.hideLoginFormOverlay();
+                weakThis->hideErrorMessage();
+                weakThis->mainWindow.hideLoginFormOverlay();
                 ProjucerApplication::getApp().getCommandManager().commandStatusChanged();
             }
         };

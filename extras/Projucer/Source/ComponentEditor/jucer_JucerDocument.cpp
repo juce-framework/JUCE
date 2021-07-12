@@ -694,8 +694,7 @@ public:
 
     void saveAsync (std::function<void (bool)> callback) override
     {
-        WeakReference<JucerComponentDocument> parent { this };
-        SourceCodeDocument::saveAsync ([parent, callback] (bool saveResult)
+        SourceCodeDocument::saveAsync ([parent = WeakReference<JucerComponentDocument> { this }, callback] (bool saveResult)
         {
             if (parent == nullptr)
                 return;
@@ -720,8 +719,7 @@ public:
 
         if (auto* header = odm.openFile (nullptr, getFile().withFileExtension (".h")))
         {
-            WeakReference<JucerComponentDocument> parent { this };
-            header->saveAsync ([parent, callback] (bool saveResult)
+            header->saveAsync ([parent = WeakReference<JucerComponentDocument> { this }, callback] (bool saveResult)
             {
                 if (parent == nullptr)
                     return;

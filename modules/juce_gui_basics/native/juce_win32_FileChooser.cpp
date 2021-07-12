@@ -680,12 +680,11 @@ private:
                 }
                 else
                 {
-                    Component::SafePointer<FilePreviewComponent> safeComp (comp);
-
-                    File selectedFile (path);
-                    MessageManager::callAsync ([safeComp, selectedFile]() mutable
+                    MessageManager::callAsync ([safeComp = Component::SafePointer<FilePreviewComponent> { comp },
+                                                selectedFile = File { path }]() mutable
                                                {
-                                                    safeComp->selectedFileChanged (selectedFile);
+                                                    if (safeComp != nullptr)
+                                                        safeComp->selectedFileChanged (selectedFile);
                                                });
                 }
             }

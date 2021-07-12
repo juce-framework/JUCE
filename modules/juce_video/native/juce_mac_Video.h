@@ -435,9 +435,8 @@ private:
             //==============================================================================
             void notifyOwnerPreparationFinished (const URL& url, Result r, AVPlayer* preparedPlayer)
             {
-                WeakReference<PlayerAsyncInitialiser> safeThis (this);
-
-                MessageManager::callAsync ([safeThis, url, r, preparedPlayer]() mutable
+                MessageManager::callAsync ([url, preparedPlayer, r,
+                                            safeThis = WeakReference<PlayerAsyncInitialiser> { this }]() mutable
                 {
                     if (safeThis != nullptr)
                         safeThis->owner.playerPreparationFinished (url, r, preparedPlayer);
@@ -530,9 +529,7 @@ private:
 
         void playbackReachedEndTime()
         {
-            WeakReference<PlayerControllerBase> safeThis (this);
-
-            MessageManager::callAsync ([safeThis]() mutable
+            MessageManager::callAsync ([safeThis = WeakReference<PlayerControllerBase> { this }]() mutable
                                        {
                                            if (safeThis != nullptr)
                                                safeThis->owner.playbackReachedEndTime();

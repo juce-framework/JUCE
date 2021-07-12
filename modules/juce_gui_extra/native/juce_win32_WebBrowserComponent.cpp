@@ -631,15 +631,14 @@ private:
 
         auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
 
-        WeakReference<WebView2> weakThis (this);
         auto hr = createWebViewEnvironmentWithOptions (nullptr,
                                                        userDataFolder != File() ? userDataFolder.getFullPathName().toWideCharPointer() : nullptr,
                                                        options.Get(),
             Callback<ICoreWebView2CreateCoreWebView2EnvironmentCompletedHandler>(
-                [this, weakThis] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
+                [weakThis = WeakReference<WebView2> { this }] (HRESULT, ICoreWebView2Environment* env) -> HRESULT
                 {
                     if (weakThis != nullptr)
-                        webViewEnvironment = env;
+                        weakThis->webViewEnvironment = env;
 
                     return S_OK;
                 }).Get());
@@ -657,22 +656,22 @@ private:
 
             webViewEnvironment->CreateCoreWebView2Controller ((HWND) peer->getNativeHandle(),
                 Callback<ICoreWebView2CreateCoreWebView2ControllerCompletedHandler> (
-                    [this, weakThis] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
+                    [weakThis = WeakReference<WebView2> { this }] (HRESULT, ICoreWebView2Controller* controller) -> HRESULT
                     {
                         if (weakThis != nullptr)
                         {
-                            isCreating = false;
+                            weakThis->isCreating = false;
 
                             if (controller != nullptr)
                             {
-                                webViewController = controller;
-                                controller->get_CoreWebView2 (webView.resetAndGetPointerAddress());
+                                weakThis->webViewController = controller;
+                                controller->get_CoreWebView2 (weakThis->webView.resetAndGetPointerAddress());
 
-                                addEventHandlers();
-                                componentMovedOrResized (true, true);
+                                weakThis->addEventHandlers();
+                                weakThis->componentMovedOrResized (true, true);
 
-                                if (webView != nullptr && urlRequest.url.isNotEmpty())
-                                    webView->Navigate (urlRequest.url.toWideCharPointer());
+                                if (weakThis->webView != nullptr && weakThis->urlRequest.url.isNotEmpty())
+                                    weakThis->webView->Navigate (weakThis->urlRequest.url.toWideCharPointer());
                             }
                         }
 
