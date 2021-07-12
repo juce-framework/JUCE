@@ -312,7 +312,7 @@ private:
             addMethod (@selector (application:didReceiveRemoteNotification:),                     didReceiveRemoteNotification,           "v@:@@");
             addMethod (@selector (userNotificationCenter:didDeliverNotification:),                didDeliverNotification,                 "v@:@@");
             addMethod (@selector (userNotificationCenter:didActivateNotification:),               didActivateNotification,                "v@:@@");
-            addMethod (@selector (userNotificationCenter:shouldPresentNotification:),             shouldPresentNotification,              "B@:@@");
+            addMethod (@selector (userNotificationCenter:shouldPresentNotification:),             shouldPresentNotification,              "c@:@@");
 
             registerClass();
         }

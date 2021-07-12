@@ -245,7 +245,7 @@ private:
             addMethod (@selector (inputBusses),                     getInputBusses,                 "@@:");
             addMethod (@selector (outputBusses),                    getOutputBusses,                "@@:");
             addMethod (@selector (channelCapabilities),             getChannelCapabilities,         "@@:");
-            addMethod (@selector (shouldChangeToFormat:forBus:),    shouldChangeToFormat,           "B@:@@");
+            addMethod (@selector (shouldChangeToFormat:forBus:),    shouldChangeToFormat,           "c@:@@");
 
             //==============================================================================
             addMethod (@selector (virtualMIDICableCount),           getVirtualMIDICableCount,       @encode (NSInteger), "@:");
@@ -262,7 +262,7 @@ private:
             addMethod (@selector (setRenderingOffline:),            setRenderingOffline,            "v@:", @encode (BOOL));
             addMethod (@selector (shouldBypassEffect),              getShouldBypassEffect,          @encode (BOOL),  "@:");
             addMethod (@selector (setShouldBypassEffect:),          setShouldBypassEffect,          "v@:", @encode (BOOL));
-            addMethod (@selector (allocateRenderResourcesAndReturnError:),  allocateRenderResourcesAndReturnError, "B@:^@");
+            addMethod (@selector (allocateRenderResourcesAndReturnError:),  allocateRenderResourcesAndReturnError, "c@:^@");
             addMethod (@selector (deallocateRenderResources),       deallocateRenderResources,      "v@:");
 
             //==============================================================================

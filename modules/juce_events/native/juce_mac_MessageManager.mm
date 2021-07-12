@@ -157,13 +157,13 @@ private:
     static void mainMenuTrackingBegan (id /*self*/, SEL, NSNotification*)
     {
         if (menuTrackingChangedCallback != nullptr)
-            (*menuTrackingChangedCallback) (true);
+            menuTrackingChangedCallback (true);
     }
 
     static void mainMenuTrackingEnded (id /*self*/, SEL, NSNotification*)
     {
         if (menuTrackingChangedCallback != nullptr)
-            (*menuTrackingChangedCallback) (false);
+            menuTrackingChangedCallback (false);
     }
 
     static void dummyMethod (id /*self*/, SEL) {}   // (used as a way of running a dummy thread)
