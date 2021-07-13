@@ -44,7 +44,7 @@ or
 - libxrender-dev (unless `JUCE_USE_XRENDER=0`)
 
 #### juce_gui_extra
-- webkit2gtk-4.0 (unless `JUCE_WEB_BROWSER=0`)
+- libwebkit2gtk-4.0-dev (unless `JUCE_WEB_BROWSER=0`)
 
 #### juce_opengl
 - libglu1-mesa-dev
