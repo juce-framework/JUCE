@@ -215,8 +215,13 @@ private:
             return ptr;
         }();
 
-        if (item == nullptr || FAILED (dialog.SetDefaultFolder (item)))
-            return false;
+        if (item != nullptr)
+        {
+            dialog.SetDefaultFolder (item);
+
+            if (! initialPath.isEmpty())
+                dialog.SetFolder (item);
+        }
 
         String filename (files.getData());
 
@@ -431,6 +436,13 @@ private:
            #else
             of.lStructSize = sizeof (of);
            #endif
+
+            if (files[0] != 0)
+            {
+                auto startingFile = File (initialPath).getChildFile (String (files.get()));
+                startingFile.getFullPathName().copyToUTF16 (files, charsAvailableForResult * sizeof (WCHAR));
+            }
+
             of.hwndOwner = (HWND) (async ? nullptr : owner->getWindowHandle());
             of.lpstrFilter = filters.getData();
             of.nFilterIndex = 1;
