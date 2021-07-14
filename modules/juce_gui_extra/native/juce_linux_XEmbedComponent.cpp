@@ -26,10 +26,6 @@
 namespace juce
 {
 
-bool juce_handleXEmbedEvent (ComponentPeer*, void*);
-Window juce_getCurrentFocusWindow (ComponentPeer*);
-
-//==============================================================================
 ::Window juce_createKeyProxyWindow (ComponentPeer*);
 void juce_deleteKeyProxyWindow (::Window);
 
