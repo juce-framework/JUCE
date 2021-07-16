@@ -1036,8 +1036,10 @@ bool areAnyAccessibilityClientsActive()
     const String voiceOverKeyString ("voiceOverOnOffKey");
     const String applicationIDString ("com.apple.universalaccess");
 
-    CFUniquePtr<CFPropertyListRef> value (CFPreferencesCopyAppValue (voiceOverKeyString.toCFString(),
-                                                                     applicationIDString.toCFString()));
+    CFUniquePtr<CFStringRef> cfKey (voiceOverKeyString.toCFString());
+    CFUniquePtr<CFStringRef> cfID  (applicationIDString.toCFString());
+
+    CFUniquePtr<CFPropertyListRef> value (CFPreferencesCopyAppValue (cfKey.get(), cfID.get()));
 
     if (value != nullptr)
         return CFBooleanGetValue ((CFBooleanRef) value.get());
