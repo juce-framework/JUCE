@@ -339,15 +339,6 @@ void ProjectExporter::createIconProperties (PropertyListBuilder& props)
         ids.add (imageItem->getID());
     }
 
-    const auto resetToDefaultIfFileMissing = [&ids] (ValueWithDefault& v)
-    {
-        if (! v.isUsingDefault() && ! ids.contains (v.get()))
-            v.resetToDefault();
-    };
-
-    resetToDefaultIfFileMissing (smallIconValue);
-    resetToDefaultIfFileMissing (bigIconValue);
-
     props.add (new ChoicePropertyComponent (smallIconValue, "Icon (Small)", choices, ids),
                "Sets an icon to use for the executable.");
 
