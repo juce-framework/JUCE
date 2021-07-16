@@ -671,8 +671,7 @@ Result Project::loadDocument (const File& file)
 
 Result Project::saveDocument (const File& file)
 {
-    jassert (file == getFile());
-    ignoreUnused (file);
+    jassertquiet (file == getFile());
 
     auto sharedResult = Result::ok();
 
@@ -686,8 +685,7 @@ Result Project::saveDocument (const File& file)
 
 void Project::saveDocumentAsync (const File& file, std::function<void (Result)> afterSave)
 {
-    jassert (file == getFile());
-    ignoreUnused (file);
+    jassertquiet (file == getFile());
 
     saveProject (Async::yes, nullptr, std::move (afterSave));
 }

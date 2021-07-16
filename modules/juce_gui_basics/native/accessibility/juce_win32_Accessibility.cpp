@@ -218,8 +218,7 @@ struct SpVoiceWrapper  : public DeletedAtShutdown
     {
         auto hr = voice.CoCreateInstance (CLSID_SpVoice);
 
-        jassert (SUCCEEDED (hr));
-        ignoreUnused (hr);
+        jassertquiet (SUCCEEDED (hr));
     }
 
     ~SpVoiceWrapper() override

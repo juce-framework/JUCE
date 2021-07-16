@@ -503,8 +503,7 @@ void Label::textEditorEscapeKeyPressed (TextEditor& ed)
 {
     if (editor != nullptr)
     {
-        jassert (&ed == editor.get());
-        ignoreUnused (ed);
+        jassertquiet (&ed == editor.get());
 
         editor->setText (textValue.toString(), false);
         hideEditor (true);

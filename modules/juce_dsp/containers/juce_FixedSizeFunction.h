@@ -73,7 +73,7 @@ namespace detail
         auto& fn = *reinterpret_cast<Fn*> (s);
         fn.~Fn();
         // I know this looks insane, for some reason MSVC 14 sometimes thinks fn is unreferenced
-        juce::ignoreUnused (fn);
+        ignoreUnused (fn);
     }
 
     template <typename Fn, typename Ret, typename... Args>
@@ -138,8 +138,7 @@ public:
         vtable = &vtableForCallable;
 
         auto* ptr = new (&storage) Fn (std::forward<Callable> (callable));
-        jassert ((void*) ptr == (void*) &storage);
-        juce::ignoreUnused (ptr);
+        jassertquiet ((void*) ptr == (void*) &storage);
     }
 
     /** Move constructor. */

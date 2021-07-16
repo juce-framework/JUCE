@@ -591,8 +591,7 @@ private:
         // be deleted indirectly during the reallocation operation! To work around this,
         // make a local copy of the item you're trying to add (and maybe use std::move to
         // move it into the add() method to avoid any extra overhead)
-        jassert (std::addressof (element) < begin() || end() <= std::addressof (element));
-        ignoreUnused (element);
+        jassertquiet (std::addressof (element) < begin() || end() <= std::addressof (element));
     }
 
     //==============================================================================

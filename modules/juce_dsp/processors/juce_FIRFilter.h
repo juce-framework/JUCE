@@ -80,8 +80,7 @@ namespace FIR
         {
             // This class can only process mono signals. Use the ProcessorDuplicator class
             // to apply this filter on a multi-channel audio stream.
-            jassert (spec.numChannels == 1);
-            ignoreUnused (spec);
+            jassertquiet (spec.numChannels == 1);
             reset();
         }
 
