@@ -953,21 +953,22 @@ protected:
 
         void updateOldSDKDefaults()
         {
-            if (config[Ids::iosCompatibility].toString() == "default")  iosDeploymentTarget.resetToDefault();
-            if (macOSArchitecture.get() == "default")                   macOSArchitecture.resetToDefault();
+            if (macOSArchitecture.get() == "default")
+                macOSArchitecture.resetToDefault();
 
-            const auto updateSDKString = [this] (const Identifier& propertyName, ValueWithDefault& value)
+            const auto updateSDKString = [this] (const Identifier& propertyName, ValueWithDefault& value, const String& suffix)
             {
                 auto sdkString = config[propertyName].toString();
 
                 if (sdkString == "default")
                     value.resetToDefault();
-                else if (sdkString.isNotEmpty() && sdkString.contains (" SDK"))
-                    value = sdkString.upToFirstOccurrenceOf (" SDK", false, false);
+                else if (sdkString.isNotEmpty() && sdkString.endsWith (suffix))
+                    value = sdkString.upToLastOccurrenceOf (suffix, false, false);
             };
 
-            updateSDKString (Ids::osxSDK, macOSBaseSDK);
-            updateSDKString (Ids::osxCompatibility, macOSDeploymentTarget);
+            updateSDKString (Ids::osxSDK, macOSBaseSDK, " SDK");
+            updateSDKString (Ids::osxCompatibility, macOSDeploymentTarget, " SDK");
+            updateSDKString (Ids::iosCompatibility, iosDeploymentTarget, {});
         }
     };
 
