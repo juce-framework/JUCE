@@ -412,8 +412,7 @@ private:
 
             mo << "enable_language(ASM)" << newLine << newLine;
 
-            auto userLibraries = StringArray::fromTokens (getExternalLibrariesString(), ";", "");
-            userLibraries.addArray (androidLibs);
+            const auto userLibraries = getUserLibraries();
 
             if (getNumConfigurations() > 0)
             {
@@ -1513,6 +1512,20 @@ private:
     }
 
     //==============================================================================
+    StringArray getUserLibraries() const
+    {
+        auto userLibraries = StringArray::fromTokens (getExternalLibrariesString(), ";", "");
+        userLibraries = getCleanedStringArray (userLibraries);
+
+        const auto ppDefs = getAllPreprocessorDefs();
+
+        for (auto& lib : userLibraries)
+            lib = build_tools::replacePreprocessorDefs (ppDefs, lib);
+
+        userLibraries.addArray (androidLibs);
+        return userLibraries;
+    }
+
     StringArray getAndroidLibraries() const
     {
         StringArray libraries;
