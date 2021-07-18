@@ -2290,7 +2290,8 @@ private:
         // https://github.com/Celemony/JUCE_ARA/commit/62d1e15eb637156832257aa3b6ac084495787a22#r52101552
         const auto result = testForMultiple (*this,
                                              targetIID,
-                                             UniqueBase<ARA::IMainFactory>{});
+                                             UniqueBase<ARA::IMainFactory>{},
+                                             UniqueBase<FUnknown>{});
 
         if (result.isOk())
             return result;
