@@ -82,19 +82,17 @@ public:
 
     var getValue() const override
     {
-        if (valueWithDefault == nullptr)
-            return {};
+        if (valueWithDefault != nullptr
+            && ! valueWithDefault->isUsingDefault())
+        {
+            auto targetValue = sourceValue.getValue();
 
-        if (valueWithDefault->isUsingDefault())
-            return -1;
+            for (auto map : mappings)
+                if (map.equalsWithSameType (targetValue))
+                    return mappings.indexOf (map) + 1;
+        }
 
-        auto targetValue = sourceValue.getValue();
-
-        for (auto map : mappings)
-            if (map.equalsWithSameType (targetValue))
-                return mappings.indexOf (map) + 1;
-
-        return mappings.indexOf (targetValue) + 1;
+        return -1;
     }
 
     void setValue (const var& newValue) override

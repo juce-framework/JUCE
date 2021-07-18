@@ -392,8 +392,8 @@ void MultiDocumentPanel::closeDocumentAsync (Component* component,
     {
         if (checkItsOkToCloseFirst)
         {
-            SafePointer<MultiDocumentPanel> parent { this };
-            tryToCloseDocumentAsync (component, [parent, component, callback] (bool closedSuccessfully)
+            tryToCloseDocumentAsync (component,
+                                     [parent = SafePointer<MultiDocumentPanel> { this }, component, callback] (bool closedSuccessfully)
             {
                 if (parent == nullptr)
                     return;

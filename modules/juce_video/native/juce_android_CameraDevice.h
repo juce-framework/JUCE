@@ -530,8 +530,8 @@ struct CameraDevice::Pimpl
         if (cameraOpenCallback == nullptr || scopedCameraDevice != nullptr)
             return;
 
-        WeakReference<Pimpl> safeThis (this);
-        RuntimePermissions::request (RuntimePermissions::camera, [safeThis] (bool granted) mutable
+        RuntimePermissions::request (RuntimePermissions::camera,
+                                     [safeThis = WeakReference<Pimpl> { this }] (bool granted) mutable
                                      {
                                          if (safeThis != nullptr)
                                              safeThis->continueOpenRequest (granted);
@@ -1189,13 +1189,15 @@ private:
 
             env->CallVoidMethod (jImage, AndroidImage.close);
 
-            WeakReference<ImageReader> safeThis (this);
-
             owner.callListeners (image);
 
             // Android may take multiple pictures before it handles a request to stop.
             if (hasNotifiedListeners.compareAndSetBool (1, 0))
-                MessageManager::callAsync ([safeThis, image]() mutable { if (safeThis != nullptr) safeThis->owner.notifyPictureTaken (image); });
+                MessageManager::callAsync ([safeThis = WeakReference<ImageReader> { this }, image]() mutable
+                {
+                    if (safeThis != nullptr)
+                        safeThis->owner.notifyPictureTaken (image);
+                });
         }
 
         struct ImageBuffer
@@ -2183,14 +2185,10 @@ private:
                 JUCE_CAMERA_LOG ("cameraCaptureSessionConfigureFailed()");
                 ignoreUnused (session);
 
-                WeakReference<CaptureSession> weakRef (this);
-
-                MessageManager::callAsync ([this, weakRef]()
+                MessageManager::callAsync ([weakRef = WeakReference<CaptureSession> { this }]
                 {
-                    if (weakRef == nullptr)
-                        return;
-
-                    configuredCallback.captureSessionConfigured (nullptr);
+                    if (weakRef != nullptr)
+                        weakRef->configuredCallback.captureSessionConfigured (nullptr);
                 });
             }
 
@@ -2218,17 +2216,18 @@ private:
                     captureSession = GlobalRef (session);
                 }
 
-                WeakReference<CaptureSession> weakRef (this);
-
-                MessageManager::callAsync ([this, weakRef]()
+                MessageManager::callAsync ([weakRef = WeakReference<CaptureSession> { this }]
                 {
                     if (weakRef == nullptr)
                         return;
 
-                    stillPictureTaker.reset (new StillPictureTaker (captureSession, captureRequestBuilder,
-                                                                    previewCaptureRequest, handler, autoFocusMode));
+                    weakRef->stillPictureTaker.reset (new StillPictureTaker (weakRef->captureSession,
+                                                                             weakRef->captureRequestBuilder,
+                                                                             weakRef->previewCaptureRequest,
+                                                                             weakRef->handler,
+                                                                             weakRef->autoFocusMode));
 
-                    configuredCallback.captureSessionConfigured (this);
+                    weakRef->configuredCallback.captureSessionConfigured (weakRef.get());
                 });
             }
 
@@ -2542,18 +2541,11 @@ private:
               cameraLensFacing (cameraLensFacingToUse),
               streamConfigurationMap (streamConfigurationMapToUse)
         {
-            WeakReference<CaptureSessionMode<Mode>> weakRef (this);
-
-            if (weakRef == nullptr)
-                return;
-
             // async so that the object is fully constructed before the callback gets invoked
-            MessageManager::callAsync ([this, weakRef]()
+            MessageManager::callAsync ([weakRef = WeakReference<CaptureSessionMode<Mode>> { this }]
             {
-                if (weakRef == nullptr)
-                    return;
-
-                previewDisplay.addListener (this);
+                if (weakRef != nullptr)
+                    weakRef->previewDisplay.addListener (weakRef.get());
             });
         }
 

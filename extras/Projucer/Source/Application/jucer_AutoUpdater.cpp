@@ -346,9 +346,7 @@ void LatestVersionCheckerAndUpdater::addNotificationToOpenProjects (const Versio
     {
         if (auto* project = window->getProject())
         {
-            Component::SafePointer<MainWindow> safeWindow (window);
-
-            auto ignore = [safeWindow]
+            auto ignore = [safeWindow = Component::SafePointer<MainWindow> { window }]
             {
                 if (safeWindow != nullptr)
                     safeWindow->getProject()->removeProjectMessage (ProjectMessages::Ids::newVersionAvailable);

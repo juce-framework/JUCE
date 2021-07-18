@@ -330,8 +330,7 @@ void ProjectContentComponent::saveDocumentAsync()
 {
     if (currentDocument != nullptr)
     {
-        SafePointer<ProjectContentComponent> parent { this };
-        currentDocument->saveAsync ([parent] (bool savedSuccessfully)
+        currentDocument->saveAsync ([parent = SafePointer<ProjectContentComponent> { this }] (bool savedSuccessfully)
         {
             if (parent == nullptr)
                 return;
@@ -352,8 +351,7 @@ void ProjectContentComponent::saveAsAsync()
 {
     if (currentDocument != nullptr)
     {
-        SafePointer<ProjectContentComponent> parent { this };
-        currentDocument->saveAsAsync ([parent] (bool savedSuccessfully)
+        currentDocument->saveAsAsync ([parent = SafePointer<ProjectContentComponent> { this }] (bool savedSuccessfully)
         {
             if (parent == nullptr)
                 return;
@@ -496,9 +494,24 @@ StringArray ProjectContentComponent::getExportersWhichCanLaunch() const
 
 void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
 {
-    if (project != nullptr)
-        if (auto selectedExporter = headerComponent.getSelectedExporter())
-            project->openProjectInIDE (*selectedExporter, saveFirst, nullptr);
+    if (project == nullptr)
+        return;
+
+    if (auto selectedExporter = headerComponent.getSelectedExporter())
+    {
+        if (saveFirst)
+        {
+            SafePointer<ProjectContentComponent> safeThis { this };
+            project->saveAsync (true, true, [safeThis] (Project::SaveResult r)
+                                {
+                                    if (safeThis != nullptr && r == Project::SaveResult::savedOk)
+                                        safeThis->openInSelectedIDE (false);
+                                });
+            return;
+        }
+
+        project->openProjectInIDE (*selectedExporter);
+    }
 }
 
 void ProjectContentComponent::showNewExporterMenu()

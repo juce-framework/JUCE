@@ -756,10 +756,9 @@ void Project::saveProject (Async async,
             registerRecentFile (getFile());
     }
 
-    WeakReference<Project> ref (this);
-
     saver = std::make_unique<ProjectSaver> (*this);
-    saver->save (async, exporterToSave, [ref, onCompletion] (Result result)
+
+    saver->save (async, exporterToSave, [ref = WeakReference<Project> { this }, onCompletion] (Result result)
     {
         if (ref == nullptr)
             return;
@@ -771,7 +770,7 @@ void Project::saveProject (Async async,
     });
 }
 
-void Project::openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst, std::function<void (Result)> onCompletion)
+void Project::openProjectInIDE (ProjectExporter& exporterToOpen)
 {
     for (ExporterIterator exporter (*this); exporter.next();)
     {
@@ -780,51 +779,13 @@ void Project::openProjectInIDE (ProjectExporter& exporterToOpen, bool saveFirst,
             if (isTemporaryProject())
             {
                 saveAndMoveTemporaryProject (true);
-
-                if (onCompletion != nullptr)
-                    onCompletion (Result::ok());
-
-                return;
-            }
-
-            if (saveFirst)
-            {
-                struct Callback
-                {
-                    void operator() (Result saveResult) noexcept
-                    {
-                        if (! saveResult.wasOk())
-                        {
-                            if (onCompletion != nullptr)
-                                onCompletion (saveResult);
-
-                            return;
-                        }
-
-                        // Workaround for a bug where Xcode thinks the project is invalid if opened immediately
-                        // after writing
-                        auto exporterCopy = exporter;
-                        Timer::callAfterDelay (exporter->isXcode() ? 1000 : 0, [exporterCopy]
-                        {
-                            exporterCopy->launchProject();
-                        });
-                    }
-
-                    std::shared_ptr<ProjectExporter> exporter;
-                    std::function<void (Result)> onCompletion;
-                };
-
-                saveProject (Async::yes, nullptr, Callback { std::move (exporter.exporter), onCompletion });
                 return;
             }
 
             exporter->launchProject();
-            break;
+            return;
         }
     }
-
-    if (onCompletion != nullptr)
-        onCompletion (Result::ok());
 }
 
 Result Project::saveResourcesOnly()
@@ -1109,9 +1070,8 @@ void Project::saveAndMoveTemporaryProject (bool openInIDE)
             // reload project from new location
             if (auto* window = ProjucerApplication::getApp().mainWindowList.getMainWindowForFile (getFile()))
             {
-                Component::SafePointer<MainWindow> safeWindow (window);
-
-                MessageManager::callAsync ([safeWindow, newDirectory, oldJucerFileName, openInIDE]() mutable
+                MessageManager::callAsync ([newDirectory, oldJucerFileName, openInIDE,
+                                            safeWindow = Component::SafePointer<MainWindow> { window }]() mutable
                                            {
                                                if (safeWindow != nullptr)
                                                    safeWindow->moveProject (newDirectory.getChildFile (oldJucerFileName),
@@ -1647,6 +1607,11 @@ void Project::Item::setID (const String& newID)   { state.setProperty (Ids::ID, 
 
 std::unique_ptr<Drawable> Project::Item::loadAsImageFile() const
 {
+    const MessageManagerLock mml (ThreadPoolJob::getCurrentThreadPoolJob());
+
+    if (! mml.lockWasGained())
+        return nullptr;
+
     if (isValid())
         return Drawable::createFromImageFile (getFile());
 

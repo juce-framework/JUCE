@@ -177,8 +177,7 @@ private:
         asyncAlertWindow->addButton (TRANS ("Create Files"),  1, KeyPress (KeyPress::returnKey));
         asyncAlertWindow->addButton (TRANS ("Cancel"),        0, KeyPress (KeyPress::escapeKey));
 
-        WeakReference<NewComponentFileWizard> safeThis { this };
-        asyncAlertWindow->enterModalState (true, ModalCallbackFunction::create ([safeThis, parent] (int result)
+        auto resultCallback = [safeThis = WeakReference<NewComponentFileWizard> { this }, parent] (int result)
         {
             if (safeThis == nullptr)
                 return;
@@ -195,21 +194,24 @@ private:
 
             if (className == build_tools::makeValidIdentifier (className, false, true, false))
             {
-                safeThis->askUserToChooseNewFile (className + ".h", "*.h;*.cpp", parent, [safeThis, parent, className] (File newFile)
-                {
-                    if (safeThis == nullptr)
-                        return;
+                safeThis->askUserToChooseNewFile (className + ".h", "*.h;*.cpp",
+                                                  parent,
+                                                  [safeThis, parent, className] (File newFile)
+                                                  {
+                                                      if (safeThis == nullptr)
+                                                          return;
 
-                    if (newFile != File())
-                        safeThis->createFiles (parent, className, newFile);
-                });
+                                                      if (newFile != File())
+                                                          safeThis->createFiles (parent, className, newFile);
+                                                  });
 
                 return;
             }
 
             safeThis->createNewFileInternal (parent);
+        };
 
-        }), false);
+        asyncAlertWindow->enterModalState (true, ModalCallbackFunction::create (std::move (resultCallback)), false);
     }
 
     std::unique_ptr<AlertWindow> asyncAlertWindow;

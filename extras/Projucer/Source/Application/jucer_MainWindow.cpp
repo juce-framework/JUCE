@@ -247,9 +247,10 @@ void MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
         pcc->hideEditor();
     }
 
-    SafePointer<MainWindow> parent { this };
     ProjucerApplication::getApp().openDocumentManager
-        .closeAllDocumentsUsingProjectAsync (*currentProject, askUserToSave, [parent, askUserToSave, callback] (bool closedSuccessfully)
+        .closeAllDocumentsUsingProjectAsync (*currentProject,
+                                             askUserToSave,
+                                             [parent = SafePointer<MainWindow> { this }, askUserToSave, callback] (bool closedSuccessfully)
     {
         if (parent == nullptr)
             return;
@@ -291,8 +292,8 @@ void MainWindow::closeCurrentProject (OpenDocumentManager::SaveIfNeeded askUserT
 
 void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
 {
-    SafePointer<MainWindow> parent { this };
-    closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no, [parent, newProjectFileToOpen, openInIDE] (bool)
+    closeCurrentProject (OpenDocumentManager::SaveIfNeeded::no,
+                         [parent = SafePointer<MainWindow> { this }, newProjectFileToOpen, openInIDE] (bool)
     {
         if (parent == nullptr)
             return;
@@ -360,9 +361,10 @@ void MainWindow::openFile (const File& file, std::function<void (bool)> callback
 
         if (result.wasOk())
         {
-            SafePointer<MainWindow> parent { this };
-            auto sharedDoc = std::make_shared<std::unique_ptr<Project>> (std::move (newDoc));
-            closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes, [parent, sharedDoc, callback] (bool saveResult)
+            closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes,
+                                 [parent = SafePointer<MainWindow> { this },
+                                  sharedDoc = std::make_shared<std::unique_ptr<Project>> (std::move (newDoc)),
+                                  callback] (bool saveResult)
             {
                 if (parent == nullptr)
                     return;
@@ -472,8 +474,7 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
         return;
     }
 
-    SafePointer<MainWindow> parent { this };
-    openFile (generator->getJucerFile(), [parent, generator, callback] (bool openedSuccessfully)
+    openFile (generator->getJucerFile(), [parent = SafePointer<MainWindow> { this }, generator, callback] (bool openedSuccessfully)
     {
         if (parent == nullptr)
             return;
@@ -768,18 +769,18 @@ void MainWindowList::closeWindow (MainWindow* w)
     else
    #endif
     {
-        WeakReference<MainWindowList> parent { this };
-        w->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes, [parent, w] (bool closedSuccessfully)
-        {
-            if (parent == nullptr)
-                return;
+        w->closeCurrentProject (OpenDocumentManager::SaveIfNeeded::yes,
+                                [parent = WeakReference<MainWindowList> { this }, w] (bool closedSuccessfully)
+                                {
+                                    if (parent == nullptr)
+                                        return;
 
-            if (closedSuccessfully)
-            {
-                parent->windows.removeObject (w);
-                parent->saveCurrentlyOpenProjectList();
-            }
-        });
+                                    if (closedSuccessfully)
+                                    {
+                                        parent->windows.removeObject (w);
+                                        parent->saveCurrentlyOpenProjectList();
+                                    }
+                                });
     }
 }
 

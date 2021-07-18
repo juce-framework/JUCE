@@ -262,10 +262,9 @@ public:
             m.addSubMenu ("Relative to", compLayout->getRelativeTargetMenu (component, (int) dimension));
         }
 
-        SafePointer<PositionPropertyBase> ref (this);
-
         m.showMenuAsync (PopupMenu::Options().withTargetComponent (&button),
-                         [ref, compLayout, callback, xAnchor, yAnchor, xMode, yMode, sizeW, sizeH, p, rpr] (int menuResult) mutable
+                         [compLayout, callback, xAnchor, yAnchor, xMode, yMode, sizeW, sizeH, p, rpr,
+                          ref = SafePointer<PositionPropertyBase> { this }] (int menuResult) mutable
         {
             if (menuResult == 0 || ref == nullptr)
             {

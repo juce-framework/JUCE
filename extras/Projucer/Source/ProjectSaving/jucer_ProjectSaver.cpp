@@ -54,8 +54,8 @@ void ProjectSaver::saveProjectAsync (ProjectExporter* exporterToSave, std::funct
 {
     jassert (saveThread == nullptr);
 
-    WeakReference<ProjectSaver> ref (this);
-    saveThread = std::make_unique<SaveThreadWithProgressWindow> (*this, exporterToSave, [ref, onCompletion] (Result result)
+    saveThread = std::make_unique<SaveThreadWithProgressWindow> (*this, exporterToSave,
+                                                                 [ref = WeakReference<ProjectSaver> { this }, onCompletion] (Result result)
     {
         if (ref == nullptr)
             return;

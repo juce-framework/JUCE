@@ -465,8 +465,8 @@ void Button::mouseDown (const MouseEvent& e)
 
 void Button::mouseUp (const MouseEvent& e)
 {
-    const bool wasDown = isDown();
-    const bool wasOver = isOver();
+    const auto wasDown = isDown();
+    const auto wasOver = isOver();
     updateState (isMouseSourceOver (e), false);
 
     if (wasDown && wasOver && ! triggerOnMouseDown)
@@ -474,7 +474,12 @@ void Button::mouseUp (const MouseEvent& e)
         if (lastStatePainted != buttonDown)
             flashButtonState();
 
+        WeakReference<Component> deletionWatcher (this);
+
         internalClickCallback (e.mods);
+
+        if (deletionWatcher != nullptr)
+            updateState (isMouseSourceOver (e), false);
     }
 }
 

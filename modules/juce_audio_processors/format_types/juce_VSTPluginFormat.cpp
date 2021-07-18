@@ -80,6 +80,10 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4355)
 #define JUCE_VST_WRAPPER_INVOKE_MAIN  effect = module->moduleMain ((Vst2::audioMasterCallback) &audioMaster);
 #endif
 
+#ifndef JUCE_VST_FALLBACK_HOST_NAME
+ #define JUCE_VST_FALLBACK_HOST_NAME "Juce VST Host"
+#endif
+
 //==============================================================================
 namespace juce
 {
@@ -2096,7 +2100,7 @@ private:
 
     static pointer_sized_int getHostName (char* name)
     {
-        String hostName ("Juce VST Host");
+        String hostName (JUCE_VST_FALLBACK_HOST_NAME);
 
         if (auto* app = JUCEApplicationBase::getInstance())
             hostName = app->getApplicationName();
@@ -2938,12 +2942,10 @@ public:
             setScaleFactorAndDispatchMessage (peer->getPlatformScaleFactor());
 
        #if JUCE_LINUX || JUCE_BSD
-        SafePointer<VSTPluginWindow> safeThis (this);
-
-        MessageManager::callAsync ([this, safeThis]
+        MessageManager::callAsync ([safeThis = SafePointer<VSTPluginWindow> { this }]
         {
             if (safeThis != nullptr)
-                componentMovedOrResized (true, true);
+                safeThis->componentMovedOrResized (true, true);
         });
        #else
         componentMovedOrResized (true, true);

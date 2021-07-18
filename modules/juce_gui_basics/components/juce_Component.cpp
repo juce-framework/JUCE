@@ -1753,12 +1753,10 @@ void Component::exitModalState (int returnValue)
         }
         else
         {
-            WeakReference<Component> target (this);
-
-            MessageManager::callAsync ([=]
+            MessageManager::callAsync ([target = WeakReference<Component> { this }, returnValue]
             {
-                if (auto* c = target.get())
-                    c->exitModalState (returnValue);
+                if (target != nullptr)
+                    target->exitModalState (returnValue);
             });
         }
     }
@@ -2306,12 +2304,10 @@ void Component::internalModalInputAttempt()
 //==============================================================================
 void Component::postCommandMessage (int commandID)
 {
-    WeakReference<Component> target (this);
-
-    MessageManager::callAsync ([=]
+    MessageManager::callAsync ([target = WeakReference<Component> { this }, commandID]
     {
-        if (auto* c = target.get())
-            c->handleCommandMessage (commandID);
+        if (target != nullptr)
+            target->handleCommandMessage (commandID);
     });
 }
 

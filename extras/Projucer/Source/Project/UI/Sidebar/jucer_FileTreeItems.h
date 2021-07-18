@@ -538,14 +538,14 @@ public:
 
             if (correspondingItem.isValid())
             {
-                WeakReference<SourceFileItem> parent { this };
                 AlertWindow::showOkCancelBox (AlertWindow::NoIcon,
                                               "File Rename",
                                               "Do you also want to rename the corresponding file \"" + correspondingFile.getFileName() + "\" to match?",
                                               {},
                                               {},
                                               nullptr,
-                                              ModalCallbackFunction::create ([parent, oldFile, newFile, correspondingFile, correspondingItem] (int result) mutable
+                                              ModalCallbackFunction::create ([parent = WeakReference<SourceFileItem> { this },
+                                                                              oldFile, newFile, correspondingFile, correspondingItem] (int result) mutable
                 {
                     if (parent == nullptr || result == 0)
                         return;

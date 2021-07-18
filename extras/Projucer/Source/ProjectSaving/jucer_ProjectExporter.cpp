@@ -338,10 +338,10 @@ void ProjectExporter::createIconProperties (PropertyListBuilder& props)
     choices.add ("<None>");
     ids.add (var());
 
-    for (int i = 0; i < images.size(); ++i)
+    for (const auto* imageItem : images)
     {
-        choices.add (images.getUnchecked(i)->getName());
-        ids.add (images.getUnchecked(i)->getID());
+        choices.add (imageItem->getName());
+        ids.add (imageItem->getID());
     }
 
     props.add (new ChoicePropertyComponent (smallIconValue, "Icon (Small)", choices, ids),

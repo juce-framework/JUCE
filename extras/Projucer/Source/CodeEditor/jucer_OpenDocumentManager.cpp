@@ -176,7 +176,6 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
         return;
     }
 
-    WeakReference<OpenDocumentManager> parent { this };
     AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
                                      TRANS("Closing document..."),
                                      TRANS("Do you want to save the changes to \"")
@@ -185,7 +184,7 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
                                      TRANS("Discard changes"),
                                      TRANS("Cancel"),
                                      nullptr,
-                                     ModalCallbackFunction::create ([parent, doc, callback] (int r)
+                                     ModalCallbackFunction::create ([parent = WeakReference<OpenDocumentManager> { this }, doc, callback] (int r)
     {
         if (parent == nullptr)
             return;
@@ -241,8 +240,8 @@ void OpenDocumentManager::closeDocumentAsync (Document* doc, SaveIfNeeded saveIf
 
     if (saveIfNeeded == SaveIfNeeded::yes)
     {
-        WeakReference<OpenDocumentManager> parent { this };
-        saveIfNeededAndUserAgrees (doc, [parent, doc, callback] (FileBasedDocument::SaveResult result)
+        saveIfNeededAndUserAgrees (doc,
+                                   [parent = WeakReference<OpenDocumentManager> { this }, doc, callback] (FileBasedDocument::SaveResult result)
         {
             if (parent == nullptr)
                 return;

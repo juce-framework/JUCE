@@ -667,8 +667,8 @@ void CppCodeEditorComponent::insertComponentClass()
     asyncAlertWindow->addButton (TRANS ("Insert Code"),  1, KeyPress (KeyPress::returnKey));
     asyncAlertWindow->addButton (TRANS ("Cancel"),       0, KeyPress (KeyPress::escapeKey));
 
-    SafePointer<CppCodeEditorComponent> parent { this };
-    asyncAlertWindow->enterModalState (true, ModalCallbackFunction::create ([parent, classNameField] (int result)
+    asyncAlertWindow->enterModalState (true,
+                                       ModalCallbackFunction::create ([parent = SafePointer<CppCodeEditorComponent> { this }, classNameField] (int result)
     {
         if (parent == nullptr)
             return;
