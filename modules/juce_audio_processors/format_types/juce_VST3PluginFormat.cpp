@@ -28,8 +28,6 @@
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
 
-#include <unordered_map>
-
 #if JUCE_PLUGINHOST_ARA
 #include "ARA_API/ARAVST3.h"
 #include "ARA_Library/Dispatch/ARAHostDispatch.h"

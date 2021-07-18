@@ -67,8 +67,6 @@
   #include <cstdio>
  #endif
 
- #include <unordered_map>
-
  JUCE_END_IGNORE_WARNINGS_MSVC
 
 #elif JUCE_IOS
