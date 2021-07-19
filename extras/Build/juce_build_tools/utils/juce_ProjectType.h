@@ -121,7 +121,7 @@ namespace build_tools
                 return "undefined";
             }
 
-            static Type typeFromName (const juce::String& name)
+            static Type typeFromName (const String& name)
             {
                 if (name == "App") return Type::GUIApp;
                 if (name == "ConsoleApp") return Type::ConsoleApp;

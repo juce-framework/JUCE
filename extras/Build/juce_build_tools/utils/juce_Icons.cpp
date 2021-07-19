@@ -288,12 +288,12 @@ namespace build_tools
 
     void writeMacIcon (const Icons& icons, const File& file)
     {
-        writeStreamToFile (file, [&] (juce::MemoryOutputStream& mo) { writeMacIcon (icons, mo); });
+        writeStreamToFile (file, [&] (MemoryOutputStream& mo) { writeMacIcon (icons, mo); });
     }
 
     void writeWinIcon (const Icons& icons, const File& file)
     {
-        writeStreamToFile (file, [&] (juce::MemoryOutputStream& mo) { writeWinIcon (icons, mo); });
+        writeStreamToFile (file, [&] (MemoryOutputStream& mo) { writeWinIcon (icons, mo); });
     }
 
     Image rescaleImageForIcon (Drawable& d, const int size)

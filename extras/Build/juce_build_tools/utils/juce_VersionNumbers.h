@@ -27,11 +27,11 @@ namespace juce
 {
 namespace build_tools
 {
-    StringArray getVersionSegments (juce::StringRef p);
+    StringArray getVersionSegments (StringRef p);
 
     int getVersionAsHexIntegerFromParts (const StringArray& versionString);
-    int getVersionAsHexInteger (juce::StringRef versionString);
+    int getVersionAsHexInteger (StringRef versionString);
 
-    String getVersionAsHex (juce::StringRef versionString);
+    String getVersionAsHex (StringRef versionString);
 }
 }
