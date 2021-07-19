@@ -489,6 +489,10 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1,
     y2b+= *y1 * *y1;
     xyb+= *y1 *  x1;
     bn++;
+
+    // JUCE CHANGE STARTS HERE
+    (void) y2b;
+    // JUCE CHANGE ENDS HERE
   }
 
   {

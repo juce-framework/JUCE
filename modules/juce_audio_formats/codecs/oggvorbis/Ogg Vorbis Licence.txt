@@ -7,7 +7,7 @@ the appropriate libraries on every different platform.
 There are minimal changes to the Ogg-Vorbis code - a few include paths have
 been changed to make it build smoothly, and some headers have been added to
 allow you to exclude it from the build. Any significant code modifications
-are marked clearly by "JUCE CHANGE STARTS HERE" and "JUCE_CHANGE_ENDS_HERE"
+are marked clearly by "JUCE CHANGE STARTS HERE" and "JUCE CHANGE ENDS HERE"
 comments.
 
 =====================================================================

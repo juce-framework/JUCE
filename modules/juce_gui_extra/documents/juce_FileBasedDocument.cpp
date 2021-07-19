@@ -402,7 +402,7 @@ private:
             return;
         }
 
-        auto afterAsking = [doSave = std::move (doSave),
+        auto afterAsking = [doSave = std::forward<DoSave> (doSave),
                             completed = std::move (completed)] (SafeParentPointer ptr,
                                                                 int alertResult)
         {
@@ -562,7 +562,7 @@ private:
                                    newFile,
                                    showMessageOnFailure,
                                    showWaitCursor,
-                                   doSaveDocument = std::move (doSaveDocument)]
+                                   doSaveDocument = std::forward<DoSaveDocument> (doSaveDocument)]
         {
             if (! parent.shouldExitAsyncCallback())
                 parent->saveInternal (parent,
@@ -723,8 +723,8 @@ private:
     {
         doSelectFilename (parent,
                           warnAboutOverwritingExistingFiles,
-                          [doSaveAs = std::move (doSaveAs),
-                           doAskToOverwriteFile = std::move (doAskToOverwriteFile),
+                          [doSaveAs = std::forward<DoSaveAs> (doSaveAs),
+                           doAskToOverwriteFile = std::forward<DoAskToOverwriteFile> (doAskToOverwriteFile),
                            callback = std::move (callback)] (SafeParentPointer ptr, File chosen)
         {
             if (ptr.shouldExitAsyncCallback())

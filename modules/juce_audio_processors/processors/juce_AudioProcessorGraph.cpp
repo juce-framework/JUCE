@@ -196,18 +196,19 @@ private:
     OwnedArray<RenderingOp> renderOps;
 
     //==============================================================================
-    template <typename LambdaType>
+    template <typename LambdaType,
+              std::enable_if_t<std::is_rvalue_reference<LambdaType&&>::value, int> = 0>
     void createOp (LambdaType&& fn)
     {
         struct LambdaOp  : public RenderingOp
         {
-            LambdaOp (LambdaType&& f) : function (std::move (f)) {}
+            LambdaOp (LambdaType&& f) : function (std::forward<LambdaType> (f)) {}
             void perform (const Context& c) override    { function (c); }
 
             LambdaType function;
         };
 
-        renderOps.add (new LambdaOp (std::move (fn)));
+        renderOps.add (new LambdaOp (std::forward<LambdaType> (fn)));
     }
 
     //==============================================================================
