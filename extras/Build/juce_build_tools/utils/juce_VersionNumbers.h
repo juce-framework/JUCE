@@ -29,6 +29,7 @@ namespace build_tools
 {
     StringArray getVersionSegments (juce::StringRef p);
 
+    int getVersionAsHexIntegerFromParts (const StringArray& versionString);
     int getVersionAsHexInteger (juce::StringRef versionString);
 
     String getVersionAsHex (juce::StringRef versionString);

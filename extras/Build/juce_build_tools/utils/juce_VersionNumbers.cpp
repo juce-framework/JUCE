@@ -35,18 +35,21 @@ namespace build_tools
         return segments;
     }
 
-    int getVersionAsHexInteger (juce::StringRef versionString)
+    int getVersionAsHexIntegerFromParts (const StringArray& segments)
     {
-        auto segments = getVersionSegments (versionString);
-
         auto value = (segments[0].getIntValue() << 16)
-                     + (segments[1].getIntValue() << 8)
-                     +  segments[2].getIntValue();
+                   + (segments[1].getIntValue() << 8)
+                   +  segments[2].getIntValue();
 
         if (segments.size() > 3)
             value = (value << 8) + segments[3].getIntValue();
 
         return value;
+    }
+
+    int getVersionAsHexInteger (juce::StringRef versionString)
+    {
+        return getVersionAsHexIntegerFromParts (getVersionSegments (versionString));
     }
 
     String getVersionAsHex (juce::StringRef versionString)
