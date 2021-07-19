@@ -427,6 +427,46 @@ void AudioProcessor::updateHostDisplay (const AudioProcessorListener::ChangeDeta
             l->audioProcessorChanged (this, details);
 }
 
+void AudioProcessor::checkForUnsafeParamID (AudioProcessorParameter* param)
+{
+    checkForDuplicateParamID (param);
+    checkForDuplicateTrimmedParamID (param);
+}
+
+void AudioProcessor::checkForDuplicateTrimmedParamID (AudioProcessorParameter* param)
+{
+    ignoreUnused (param);
+
+   #if JUCE_DEBUG && ! JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
+    if (auto* withID = dynamic_cast<AudioProcessorParameterWithID*> (param))
+    {
+        constexpr auto maximumSafeAAXParameterIdLength = 31;
+
+        const auto paramID = withID->paramID;
+
+        // If you hit this assertion, a parameter name is too long to be supported
+        // by the AAX plugin format.
+        // If there's a chance that you'll release this plugin in AAX format, you
+        // should consider reducing the length of this paramID.
+        // If you need to retain backwards-compatibility and are unable to change
+        // the paramID for this reason, you can add JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
+        // to your preprocessor definitions to silence this assertion.
+        jassertquiet (paramID.length() <= maximumSafeAAXParameterIdLength);
+
+        // If you hit this assertion, two or more parameters have duplicate paramIDs
+        // after they have been truncated to support the AAX format.
+        // This is a serious issue, and will prevent the duplicated parameters from
+        // being automated when running as an AAX plugin.
+        // If there's a chance that you'll release this plugin in AAX format, you
+        // should reduce the length of this paramID.
+        // If you need to retain backwards-compatibility and are unable to change
+        // the paramID for this reason, you can add JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING
+        // to your preprocessor definitions to silence this assertion.
+        jassertquiet (trimmedParamIDs.insert (paramID.substring (0, maximumSafeAAXParameterIdLength)).second);
+    }
+   #endif
+}
+
 void AudioProcessor::checkForDuplicateParamID (AudioProcessorParameter* param)
 {
     ignoreUnused (param);
@@ -472,7 +512,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
     param->parameterIndex = flatParameterList.size();
     flatParameterList.add (param);
 
-    checkForDuplicateParamID (param);
+    checkForUnsafeParamID (param);
 }
 
 void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
@@ -489,7 +529,7 @@ void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterG
         p->processor = this;
         p->parameterIndex = i;
 
-        checkForDuplicateParamID (p);
+        checkForUnsafeParamID (p);
     }
 
     parameterTree.addChild (std::move (group));
@@ -513,7 +553,7 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
         p->processor = this;
         p->parameterIndex = i;
 
-        checkForDuplicateParamID (p);
+        checkForUnsafeParamID (p);
     }
 }
 
