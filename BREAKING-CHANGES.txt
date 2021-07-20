@@ -6,6 +6,28 @@ develop
 
 Change
 ------
+Resource forks are no longer generated for Audio Unit plug-ins.
+
+Possible Issues
+---------------
+New builds of JUCE Audio Units may no longer load in old hosts that use the
+Component Manager to discover plug-ins.
+
+Workaround
+----------
+No workaround is available.
+
+Rationale
+---------
+The Component Manager is deprecated in macOS 10.8 and later, so the majority of
+hosts have now implemented support for the new plist-based discovery mechanism.
+The new AudioUnitSDK (https://github.com/apple/AudioUnitSDK) provided by Apple
+to replace the old Core Audio Utility Classes no longer includes the files
+required to generate resource forks.
+
+
+Change
+------
 Previously, the AudioProcessorGraph would call processBlockBypassed on any
 processor for which setBypassed had previously been called. Now, the
 AudioProcessorGraph will now only call processBlockBypassed if those processors

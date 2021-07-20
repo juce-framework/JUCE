@@ -60,21 +60,42 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
  #define verify_noerr(errorCode)  __Verify_noErr(errorCode)
 #endif
 
-#include "AU/CoreAudioUtilityClasses/AUBase.cpp"
-#include "AU/CoreAudioUtilityClasses/AUBuffer.cpp"
-#include "AU/CoreAudioUtilityClasses/AUDispatch.cpp"
-#include "AU/CoreAudioUtilityClasses/AUInputElement.cpp"
-#include "AU/CoreAudioUtilityClasses/AUMIDIBase.cpp"
-#include "AU/CoreAudioUtilityClasses/AUOutputBase.cpp"
-#include "AU/CoreAudioUtilityClasses/AUOutputElement.cpp"
-#include "AU/CoreAudioUtilityClasses/AUScopeElement.cpp"
-#include "AU/CoreAudioUtilityClasses/CAAUParameter.cpp"
-#include "AU/CoreAudioUtilityClasses/CAAudioChannelLayout.cpp"
-#include "AU/CoreAudioUtilityClasses/CAMutex.cpp"
-#include "AU/CoreAudioUtilityClasses/CAStreamBasicDescription.cpp"
-#include "AU/CoreAudioUtilityClasses/CAVectorUnit.cpp"
-#include "AU/CoreAudioUtilityClasses/ComponentBase.cpp"
-#include "AU/CoreAudioUtilityClasses/MusicDeviceBase.cpp"
+#if ! defined (MAC_OS_VERSION_11_0) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_VERSION_11_0
+// These constants are only defined in the macOS 11+ SDKs
+
+enum MIDICVStatus : unsigned int
+{
+    kMIDICVStatusNoteOff                = 0x8,
+    kMIDICVStatusNoteOn                 = 0x9,
+    kMIDICVStatusPolyPressure           = 0xA,
+    kMIDICVStatusControlChange          = 0xB,
+    kMIDICVStatusProgramChange          = 0xC,
+    kMIDICVStatusChannelPressure        = 0xD,
+    kMIDICVStatusPitchBend              = 0xE,
+    kMIDICVStatusRegisteredPNC          = 0x0,
+    kMIDICVStatusAssignablePNC          = 0x1,
+    kMIDICVStatusRegisteredControl      = 0x2,
+    kMIDICVStatusAssignableControl      = 0x3,
+    kMIDICVStatusRelRegisteredControl   = 0x4,
+    kMIDICVStatusRelAssignableControl   = 0x5,
+    kMIDICVStatusPerNotePitchBend       = 0x6,
+    kMIDICVStatusPerNoteMgmt            = 0xF
+};
+
+#endif
+
+#include "AU/AudioUnitSDK/AUBase.cpp"
+#include "AU/AudioUnitSDK/AUBuffer.cpp"
+#include "AU/AudioUnitSDK/AUBufferAllocator.cpp"
+#include "AU/AudioUnitSDK/AUEffectBase.cpp"
+#include "AU/AudioUnitSDK/AUInputElement.cpp"
+#include "AU/AudioUnitSDK/AUMIDIBase.cpp"
+#include "AU/AudioUnitSDK/AUMIDIEffectBase.cpp"
+#include "AU/AudioUnitSDK/AUOutputElement.cpp"
+#include "AU/AudioUnitSDK/AUPlugInDispatch.cpp"
+#include "AU/AudioUnitSDK/AUScopeElement.cpp"
+#include "AU/AudioUnitSDK/ComponentBase.cpp"
+#include "AU/AudioUnitSDK/MusicDeviceBase.cpp"
 
 #undef verify
 #undef verify_noerr
