@@ -252,6 +252,10 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
+#if JUCE_WINDOWS
+ #include "native/accessibility/juce_AccessibilityTextHelpers.h"
+#endif
+
 namespace juce
 {
 
