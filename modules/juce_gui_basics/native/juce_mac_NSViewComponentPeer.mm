@@ -1703,7 +1703,7 @@ struct NSViewComponentPeerWrapper  : public Base
 
     static NSViewComponentPeer* getOwner (id self)
     {
-        return Base::template getIvar<NSViewComponentPeer*> (self, "owner");
+        return getIvar<NSViewComponentPeer*> (self, "owner");
     }
 
     static id getAccessibleChild (id self)
