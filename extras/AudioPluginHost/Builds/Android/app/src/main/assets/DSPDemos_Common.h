@@ -612,7 +612,11 @@ private:
                                               auto u = fc.getURLResult();
 
                                               if (! audioFileReader.loadURL (u))
-                                                  NativeMessageBox::showOkCancelBox (AlertWindow::WarningIcon, "Error loading file", "Unable to load audio file", nullptr, nullptr);
+                                                  NativeMessageBox::showAsync (MessageBoxOptions()
+                                                                                 .withIconType (MessageBoxIconType::WarningIcon)
+                                                                                 .withTitle ("Error loading file")
+                                                                                 .withMessage ("Unable to load audio file"),
+                                                                               nullptr);
                                               else
                                                   thumbnailComp.setCurrentURL (u);
                                           }
