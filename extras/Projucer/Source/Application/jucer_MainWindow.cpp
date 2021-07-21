@@ -452,7 +452,7 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
 
     if (generatorResult != Result::ok())
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                           "PIP Error.",
                                           generatorResult.getErrorMessage());
 
@@ -464,7 +464,7 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
 
     if (! generator->createMainCpp())
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                           "PIP Error.",
                                           "Failed to create Main.cpp.");
 
@@ -481,7 +481,7 @@ void MainWindow::openPIP (const File& pipFile, std::function<void (bool)> callba
 
         if (! openedSuccessfully)
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               "PIP Error.",
                                               "Failed to open .jucer file.");
 

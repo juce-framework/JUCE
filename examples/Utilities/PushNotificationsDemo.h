@@ -194,7 +194,11 @@ public:
             if (token.isEmpty())
                 showRemoteInstructions();
             else
-                NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon, "Device token", token);
+                NativeMessageBox::showAsync (MessageBoxOptions()
+                                               .withIconType (MessageBoxIconType::InfoIcon)
+                                               .withTitle ("Device token")
+                                               .withMessage (token),
+                                             nullptr);
         };
 
       #if JUCE_ANDROID
@@ -308,11 +312,11 @@ private:
             String requiredFields = "all required fields";
           #endif
 
-            NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                                   "Incorrect notifications setup",
-                                                   "Please make sure that "
-                                                   + requiredFields + " are set.");
-
+            NativeMessageBox::showAsync (MessageBoxOptions()
+                                           .withIconType (MessageBoxIconType::InfoIcon)
+                                           .withTitle ("Incorrect notifications setup")
+                                           .withMessage ("Please make sure that " + requiredFields + " are set."),
+                                         nullptr);
 
             return;
         }
@@ -559,11 +563,13 @@ private:
     {
         ignoreUnused (isLocalNotification);
 
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Received notification",
-                                               "ID: " + n.identifier
-                                               + ", title: " + n.title
-                                               + ", body: " + n.body);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Received notification")
+                                       .withMessage ("ID: " + n.identifier
+                                                     + ", title: " + n.title
+                                                     + ", body: " + n.body),
+                                     nullptr);
     }
 
     void handleNotificationAction (bool isLocalNotification,
@@ -573,24 +579,28 @@ private:
     {
         ignoreUnused (isLocalNotification);
 
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Received notification action",
-                                               "ID: " + n.identifier
-                                               + ", title: " + n.title
-                                               + ", body: " + n.body
-                                               + ", action: " + actionIdentifier
-                                               + ", optionalResponse: " + optionalResponse);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Received notification action")
+                                       .withMessage ("ID: " + n.identifier
+                                                     + ", title: " + n.title
+                                                     + ", body: " + n.body
+                                                     + ", action: " + actionIdentifier
+                                                     + ", optionalResponse: " + optionalResponse),
+                                     nullptr);
 
         PushNotifications::getInstance()->removeDeliveredNotification (n.identifier);
     }
 
     void localNotificationDismissedByUser (const PushNotifications::Notification& n) override
     {
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Notification dismissed by a user",
-                                               "ID: " + n.identifier
-                                               + ", title: " + n.title
-                                               + ", body: " + n.body);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Notification dismissed by a user")
+                                       .withMessage ("ID: " + n.identifier
+                                                     + ", title: " + n.title
+                                                     + ", body: " + n.body),
+                                     nullptr);
     }
 
     void deliveredNotificationsListReceived (const Array<PushNotifications::Notification>& notifs) override
@@ -600,7 +610,11 @@ private:
         for (auto& n : notifs)
             text << "(" << n.identifier << ", " << n.title << ", " << n.body << "), ";
 
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon, "Received notification list", text);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Received notification list")
+                                       .withMessage (text),
+                                     nullptr);
     }
 
     void pendingLocalNotificationsListReceived (const Array<PushNotifications::Notification>& notifs) override
@@ -610,37 +624,49 @@ private:
         for (auto& n : notifs)
             text << "(" << n.identifier << ", " << n.title << ", " << n.body << "), ";
 
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon, "Pending notification list", text);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Pending notification list")
+                                       .withMessage (text),
+                                     nullptr);
     }
 
     void deviceTokenRefreshed (const String& token) override
     {
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Device token refreshed",
-                                               token);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Device token refreshed")
+                                       .withMessage (token),
+                                     nullptr);
     }
 
   #if JUCE_ANDROID
     void remoteNotificationsDeleted() override
     {
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Remote notifications deleted",
-                                               "Some of the pending messages were removed!");
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Remote notifications deleted")
+                                       .withMessage ("Some of the pending messages were removed!"),
+                                     nullptr);
     }
 
     void upstreamMessageSent (const String& messageId) override
     {
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Upstream message sent",
-                                               "Message id: " + messageId);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Upstream message sent")
+                                       .withMessage ("Message id: " + messageId),
+                                     nullptr);
     }
 
     void upstreamMessageSendingError (const String& messageId, const String& error) override
     {
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Upstream message sending error",
-                                               "Message id: " + messageId
-                                               + "\nerror: " + error);
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Upstream message sending error")
+                                       .withMessage ("Message id: " + messageId
+                                                     + "\nerror: " + error),
+                                     nullptr);
     }
 
     static Array<PushNotifications::Channel> getAndroidChannels()
@@ -1191,12 +1217,14 @@ private:
     static void showRemoteInstructions()
     {
        #if JUCE_IOS || JUCE_MAC
-        NativeMessageBox::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                               "Remote Notifications instructions",
-                                               "In order to be able to test remote notifications "
-                                               "ensure that the app is signed and that you register "
-                                               "the bundle ID for remote notifications in "
-                                               "Apple Developer Center.");
+        NativeMessageBox::showAsync (MessageBoxOptions()
+                                       .withIconType (MessageBoxIconType::InfoIcon)
+                                       .withTitle ("Remote Notifications instructions")
+                                       .withMessage ("In order to be able to test remote notifications "
+                                                     "ensure that the app is signed and that you register "
+                                                     "the bundle ID for remote notifications in "
+                                                     "Apple Developer Center."),
+                                     nullptr);
        #endif
     }
 

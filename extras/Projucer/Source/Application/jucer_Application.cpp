@@ -835,7 +835,7 @@ void ProjucerApplication::launchDemoRunner()
                                                      "Couldn't find a compiled version of the Demo Runner."
                                                      " Please compile the Demo Runner project in the JUCE examples directory.",
                                                      "OK", {}, {},
-                                                     AlertWindow::WarningIcon, 1,
+                                                     MessageBoxIconType::WarningIcon, 1,
                                                      mainWindowList.getFrontmostWindow (false)));
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this] (int)
                                                 {
@@ -847,7 +847,7 @@ void ProjucerApplication::launchDemoRunner()
                                                      "Couldn't find a compiled version of the Demo Runner."
                                                      " Do you want to open the project?",
                                                      "Open project", "Cancel", {},
-                                                     AlertWindow::QuestionIcon, 2,
+                                                     MessageBoxIconType::QuestionIcon, 2,
                                                      mainWindowList.getFrontmostWindow (false)));
         demoRunnerAlert->enterModalState (true, ModalCallbackFunction::create ([this, demoRunnerFile] (int retVal)
                                                 {
@@ -1102,7 +1102,7 @@ void ProjucerApplication::createNewProjectFromClipboard()
     {
         if (errorString.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Error", errorString);
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Error", errorString);
             tempFile.deleteFile();
         }
     };

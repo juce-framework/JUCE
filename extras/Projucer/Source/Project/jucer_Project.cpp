@@ -407,7 +407,7 @@ void Project::removeDefunctExporters()
             if (ProjucerApplication::getApp().isRunningCommandLine)
                 std::cout <<  "WARNING! The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project." << std::endl;
             else
-                AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                                   TRANS (oldExporters[key]),
                                                   TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
 

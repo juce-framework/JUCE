@@ -90,7 +90,7 @@ public:
                                 safeThis->project.getUndoManagerFor (parent));
         };
 
-        AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                       "Delete Exporter",
                                       "Are you sure you want to delete this export target?",
                                       "",
@@ -244,7 +244,7 @@ public:
 
     void deleteItem() override
     {
-        AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                       "Delete Configuration",
                                       "Are you sure you want to delete this configuration?",
                                       "",

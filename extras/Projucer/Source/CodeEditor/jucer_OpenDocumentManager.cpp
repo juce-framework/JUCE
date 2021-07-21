@@ -176,7 +176,7 @@ void OpenDocumentManager::saveIfNeededAndUserAgrees (OpenDocumentManager::Docume
         return;
     }
 
-    AlertWindow::showYesNoCancelBox (AlertWindow::QuestionIcon,
+    AlertWindow::showYesNoCancelBox (MessageBoxIconType::QuestionIcon,
                                      TRANS("Closing document..."),
                                      TRANS("Do you want to save the changes to \"")
                                          + doc->getName() + "\"?",

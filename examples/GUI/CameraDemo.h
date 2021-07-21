@@ -252,7 +252,7 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Camera open failed",
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Camera open failed",
                                               "Camera open failed, reason: " + error);
         }
 
@@ -365,7 +365,7 @@ private:
 
     void errorOccurred (const String& error)
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           "Camera Device Error",
                                           "An error has occurred: " + error + " Camera will be closed.");
 
@@ -378,7 +378,7 @@ private:
 
     void sharingFinished (bool success, bool isCapture)
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           isCapture ? "Image sharing result" : "Video sharing result",
                                           success ? "Success!" : "Failed!");
 

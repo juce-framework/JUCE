@@ -222,7 +222,7 @@ File NewProjectWizard::getLastWizardFolder()
 
 static void displayFailedFilesMessage (const StringArray& failedFiles)
 {
-    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+    AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                       TRANS("Errors in Creating Project!"),
                                       TRANS("The following files couldn't be written:")
                                         + "\n\n"
@@ -244,7 +244,7 @@ static void prepareDirectory (const File& targetFolder, Callback&& callback)
     }
     else if (FileHelpers::containsAnyNonHiddenFiles (targetFolder))
     {
-        AlertWindow::showOkCancelBox (AlertWindow::InfoIcon,
+        AlertWindow::showOkCancelBox (MessageBoxIconType::InfoIcon,
                                       TRANS("New JUCE Project"),
                                       TRANS("You chose the folder:\n\nXFLDRX\n\n").replace ("XFLDRX", targetFolder.getFullPathName())
                                         + TRANS("This folder isn't empty - are you sure you want to create the project there?")

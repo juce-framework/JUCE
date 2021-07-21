@@ -1226,8 +1226,8 @@ DECLARE_JNI_CLASS (AndroidDialogOnClickListener, "android/content/DialogInterfac
 class DialogListener  : public juce::AndroidInterfaceImplementer
 {
 public:
-    DialogListener (ModalComponentManager::Callback* callbackToUse, int resultToUse)
-        : callback (callbackToUse), result (resultToUse)
+    DialogListener (std::shared_ptr<ModalComponentManager::Callback> callbackToUse, int resultToUse)
+        : callback (std::move (callbackToUse)), result (resultToUse)
     {}
 
     void onResult (jobject dialog)
@@ -1257,46 +1257,44 @@ private:
         return AndroidInterfaceImplementer::invoke (proxy, method, args);
     }
 
-    std::unique_ptr<ModalComponentManager::Callback> callback;
+    std::shared_ptr<ModalComponentManager::Callback> callback;
     int result;
 };
 
 //==============================================================================
-static void createAndroidDialog (const String& title, const String& message,
-                                 ModalComponentManager::Callback* callback,
-                                 const String& positiveButton = {}, const String& negativeButton = {},
-                                 const String& neutralButton = {})
+static void createAndroidDialog (const MessageBoxOptions& opts,
+                                 std::unique_ptr<ModalComponentManager::Callback> callback)
 {
     auto* env = getEnv();
 
     LocalRef<jobject> builder (env->NewObject (AndroidAlertDialogBuilder, AndroidAlertDialogBuilder.construct, getMainActivity().get()));
 
-    builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setTitle,   javaString (title).get()));
-    builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setMessage, javaString (message).get()));
+    builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setTitle,   javaString (opts.getTitle()).get()));
+    builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setMessage, javaString (opts.getMessage()).get()));
     builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setCancelable, true));
 
-    builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setOnCancelListener,
-                                     CreateJavaInterface (new DialogListener (callback, 0),
-                                                          "android/content/DialogInterface$OnCancelListener").get()));
+    std::shared_ptr<ModalComponentManager::Callback> sharedCallback (std::move (callback));
 
-    auto positiveButtonText = positiveButton.isEmpty() ? String ("OK") : positiveButton;
+    builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setOnCancelListener,
+                                                        CreateJavaInterface (new DialogListener (sharedCallback, 0),
+                                                                             "android/content/DialogInterface$OnCancelListener").get()));
 
     builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setPositiveButton,
-                                     javaString (positiveButtonText).get(),
-                                     CreateJavaInterface (new DialogListener (callback, positiveButton.isEmpty() ? 0 : 1),
-                                                          "android/content/DialogInterface$OnClickListener").get()));
+                                                        javaString (opts.getButtonText (0)).get(),
+                                                        CreateJavaInterface (new DialogListener (sharedCallback, 0),
+                                                                             "android/content/DialogInterface$OnClickListener").get()));
 
-    if (negativeButton.isNotEmpty())
+    if (opts.getButtonText (1).isNotEmpty())
         builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setNegativeButton,
-                                         javaString (negativeButton).get(),
-                                         CreateJavaInterface (new DialogListener (callback, neutralButton.isEmpty() ? 0 : 2),
-                                                              "android/content/DialogInterface$OnClickListener").get()));
+                                                            javaString (opts.getButtonText (1)).get(),
+                                                            CreateJavaInterface (new DialogListener (sharedCallback, 1),
+                                                                                 "android/content/DialogInterface$OnClickListener").get()));
 
-    if (neutralButton.isNotEmpty())
-        builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setNegativeButton,
-                                         javaString (neutralButton).get(),
-                                         CreateJavaInterface (new DialogListener (callback, 0),
-                                                              "android/content/DialogInterface$OnClickListener").get()));
+    if (opts.getButtonText (2).isNotEmpty())
+        builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setNeutralButton,
+                                                            javaString (opts.getButtonText (2)).get(),
+                                                            CreateJavaInterface (new DialogListener (sharedCallback, 2),
+                                                                                 "android/content/DialogInterface$OnClickListener").get()));
 
     LocalRef<jobject> dialog (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.create));
 
@@ -1315,45 +1313,74 @@ static void createAndroidDialog (const String& title, const String& message,
         env->CallVoidMethod (window.get(), AndroidWindow.clearFlags, FLAG_NOT_FOCUSABLE);
 }
 
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (MessageBoxIconType /*iconType*/,
                                                           const String& title, const String& message,
                                                           Component* /*associatedComponent*/,
                                                           ModalComponentManager::Callback* callback)
 {
-    createAndroidDialog (title, message, callback);
+    showAsync (MessageBoxOptions()
+                 .withTitle (title)
+                 .withMessage (message)
+                 .withButton (TRANS("OK")),
+               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::messageBox));
 }
 
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType /*iconType*/,
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType /*iconType*/,
                                                       const String& title, const String& message,
                                                       Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
-    jassert (callback != nullptr); // on android, all alerts must be non-modal!!
+    showAsync (MessageBoxOptions()
+                 .withTitle (title)
+                 .withMessage (message)
+                 .withButton (TRANS("OK"))
+                 .withButton (TRANS("Cancel")),
+               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel));
 
-    createAndroidDialog (title, message, callback, "OK", "Cancel");
     return false;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType /*iconType*/,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType /*iconType*/,
                                                         const String& title, const String& message,
                                                         Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
-    jassert (callback != nullptr); // on android, all alerts must be non-modal!!
+    showAsync (MessageBoxOptions()
+                 .withTitle (title)
+                 .withMessage (message)
+                 .withButton (TRANS("Yes"))
+                 .withButton (TRANS("No"))
+                 .withButton (TRANS("Cancel")),
+               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::yesNoCancel));
 
-    createAndroidDialog (title, message, callback, "Yes", "No", "Cancel");
     return 0;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*iconType*/,
-                                                   const String& title, const String& message,
-                                                   Component* /*associatedComponent*/,
-                                                   ModalComponentManager::Callback* callback)
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType /*iconType*/,
+                                                  const String& title, const String& message,
+                                                  Component* /*associatedComponent*/,
+                                                  ModalComponentManager::Callback* callback)
 {
-    jassert (callback != nullptr); // on android, all alerts must be non-modal!!
+    showAsync (MessageBoxOptions()
+                 .withTitle (title)
+                 .withMessage (message)
+                 .withButton (TRANS("Yes"))
+                 .withButton (TRANS("No")),
+               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel));
 
-    createAndroidDialog (title, message, callback, "Yes", "No");
     return 0;
+}
+
+void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
+                                                ModalComponentManager::Callback* callback)
+{
+    createAndroidDialog (options, std::unique_ptr<ModalComponentManager::Callback> (callback));
+}
+
+void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
+                                                std::function<void (int)> callback)
+{
+    showAsync (options, ModalCallbackFunction::create (callback));
 }
 
 //==============================================================================

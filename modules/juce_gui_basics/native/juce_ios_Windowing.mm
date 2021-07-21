@@ -437,19 +437,18 @@ void LookAndFeel::playAlertSound()
 class iOSMessageBox
 {
 public:
-    iOSMessageBox (const String& title, const String& message,
-                   NSString* button1, NSString* button2, NSString* button3,
-                   ModalComponentManager::Callback* cb, const bool async)
-        : result (0), resultReceived (false), callback (cb), isAsync (async)
+    iOSMessageBox (const MessageBoxOptions& opts, std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : callback (std::move (cb))
     {
         if (currentlyFocusedPeer != nullptr)
         {
-            UIAlertController* alert = [UIAlertController alertControllerWithTitle: juceStringToNS (title)
-                                                                           message: juceStringToNS (message)
+            UIAlertController* alert = [UIAlertController alertControllerWithTitle: juceStringToNS (opts.getTitle())
+                                                                           message: juceStringToNS (opts.getMessage())
                                                                     preferredStyle: UIAlertControllerStyleAlert];
-            addButton (alert, button1, 0);
-            addButton (alert, button2, 1);
-            addButton (alert, button3, 2);
+
+            addButton (alert, opts.getButtonText (0));
+            addButton (alert, opts.getButtonText (1));
+            addButton (alert, opts.getButtonText (2));
 
             [currentlyFocusedPeer->controller presentViewController: alert
                                                            animated: YES
@@ -469,105 +468,146 @@ public:
 
         JUCE_AUTORELEASEPOOL
         {
-            while (! resultReceived)
+            while (result < 0)
                 [[NSRunLoop mainRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.01]];
         }
 
         return result;
     }
 
-    void buttonClicked (const int buttonIndex) noexcept
+    void buttonClicked (int buttonIndex) noexcept
     {
-        result = buttonIndex;
-        resultReceived = true;
-
         if (callback != nullptr)
-            callback->modalStateFinished (result);
+            callback->modalStateFinished (buttonIndex);
 
-        if (isAsync)
-            delete this;
+        delete this;
     }
 
 private:
-    int result;
-    bool resultReceived;
-    std::unique_ptr<ModalComponentManager::Callback> callback;
-    const bool isAsync;
-
-    void addButton (UIAlertController* alert, NSString* text, int index)
+    void addButton (UIAlertController* alert, const String& text)
     {
-        if (text != nil)
-            [alert addAction: [UIAlertAction actionWithTitle: text
+        if (! text.isEmpty())
+        {
+            const auto index = [[alert actions] count];
+
+            [alert addAction: [UIAlertAction actionWithTitle: juceStringToNS (text)
                                                        style: UIAlertActionStyleDefault
-                                                     handler: ^(UIAlertAction*) { this->buttonClicked (index); }]];
+                                                     handler: ^(UIAlertAction*) { this->buttonClicked ((int) index); }]];
+        }
     }
+
+    int result = -1;
+    std::unique_ptr<ModalComponentManager::Callback> callback;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox)
 };
 
 //==============================================================================
+static int showDialog (const MessageBoxOptions& options,
+                       std::unique_ptr<ModalComponentManager::Callback> callback,
+                       Async async)
+{
+   #if JUCE_MODAL_LOOPS_PERMITTED
+    if (async == Async::no)
+    {
+        JUCE_AUTORELEASEPOOL
+        {
+            iOSMessageBox messageBox (options, std::move (callback));
+            return messageBox.getResult();
+        }
+    }
+   #endif
+
+    ignoreUnused (async);
+
+    new iOSMessageBox (options, std::move (callback));
+    return 0;
+}
+
 #if JUCE_MODAL_LOOPS_PERMITTED
-void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType /*iconType*/,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (MessageBoxIconType /*iconType*/,
                                                      const String& title, const String& message,
                                                      Component* /*associatedComponent*/)
 {
-    JUCE_AUTORELEASEPOOL
-    {
-        iOSMessageBox mb (title, message, @"OK", nil, nil, nullptr, false);
-        ignoreUnused (mb.getResult());
-    }
+    showDialog (MessageBoxOptions()
+                  .withTitle (title)
+                  .withMessage (message)
+                  .withButton (TRANS("OK")),
+                nullptr, Async::no);
+}
+
+int JUCE_CALLTYPE NativeMessageBox::show (const MessageBoxOptions& options)
+{
+    return showDialog (options, nullptr, Async::no);
 }
 #endif
 
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType /*iconType*/,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (MessageBoxIconType /*iconType*/,
                                                           const String& title, const String& message,
                                                           Component* /*associatedComponent*/,
                                                           ModalComponentManager::Callback* callback)
 {
-    new iOSMessageBox (title, message, @"OK", nil, nil, callback, true);
+    showDialog (MessageBoxOptions()
+                  .withTitle (title)
+                  .withMessage (message)
+                  .withButton (TRANS("OK")),
+                rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::messageBox)),
+                Async::yes);
 }
 
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType /*iconType*/,
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType /*iconType*/,
                                                       const String& title, const String& message,
                                                       Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
-    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK",
-                                                          nil, callback, callback != nullptr));
-
-    if (callback == nullptr)
-        return mb->getResult() == 1;
-
-    mb.release();
-    return false;
+    return showDialog (MessageBoxOptions()
+                         .withTitle (title)
+                         .withMessage (message)
+                         .withButton (TRANS("OK"))
+                         .withButton (TRANS("Cancel")),
+                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel)),
+                       callback != nullptr ? Async::yes : Async::no) == 1;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType /*iconType*/,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType /*iconType*/,
                                                         const String& title, const String& message,
                                                         Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
-    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"Yes", @"No", callback, callback != nullptr));
-
-    if (callback == nullptr)
-        return mb->getResult();
-
-    mb.release();
-    return 0;
+    return showDialog (MessageBoxOptions()
+                         .withTitle (title)
+                         .withMessage (message)
+                         .withButton (TRANS("Yes"))
+                         .withButton (TRANS("No"))
+                         .withButton (TRANS("Cancel")),
+                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::yesNoCancel)),
+                       callback != nullptr ? Async::yes : Async::no);
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType /*iconType*/,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType /*iconType*/,
                                                   const String& title, const String& message,
                                                   Component* /*associatedComponent*/,
                                                   ModalComponentManager::Callback* callback)
 {
-    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, @"No", @"Yes", nil, callback, callback != nullptr));
+    return showDialog (MessageBoxOptions()
+                         .withTitle (title)
+                         .withMessage (message)
+                         .withButton (TRANS("Yes"))
+                         .withButton (TRANS("No")),
+                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel)),
+                       callback != nullptr ? Async::yes : Async::no);
+}
 
-    if (callback == nullptr)
-        return mb->getResult();
+void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
+                                                ModalComponentManager::Callback* callback)
+{
+    showDialog (options, rawToUniquePtr (callback), Async::yes);
+}
 
-    mb.release();
-    return 0;
+void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
+                                                std::function<void (int)> callback)
+{
+    showAsync (options, ModalCallbackFunction::create (callback));
 }
 
 //==============================================================================

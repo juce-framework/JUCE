@@ -320,7 +320,7 @@ void ProjectContentComponent::closeDocument()
 
 static void showSaveWarning (OpenDocumentManager::Document* currentDocument)
 {
-    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+    AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                       TRANS("Save failed!"),
                                       TRANS("Couldn't save the file:")
                                           + "\n" + currentDocument->getFile().getFullPathName());

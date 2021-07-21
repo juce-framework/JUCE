@@ -138,7 +138,7 @@ public:
             if (filesToTrash.size() > maxFilesToList)
                 fileList << "\n...plus " << (filesToTrash.size() - maxFilesToList) << " more files...";
 
-            AlertWindow::showYesNoCancelBox (AlertWindow::NoIcon,
+            AlertWindow::showYesNoCancelBox (MessageBoxIconType::NoIcon,
                                              "Delete Project Items",
                                              "As well as removing the selected item(s) from the project, do you also want to move their files to the trash:\n\n"
                                                   + fileList,
@@ -521,7 +521,7 @@ public:
     {
         if (newName != File::createLegalFileName (newName))
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               "File Rename",
                                               "That filename contained some illegal characters!");
             triggerAsyncRename (item);
@@ -538,7 +538,7 @@ public:
 
             if (correspondingItem.isValid())
             {
-                AlertWindow::showOkCancelBox (AlertWindow::NoIcon,
+                AlertWindow::showOkCancelBox (MessageBoxIconType::NoIcon,
                                               "File Rename",
                                               "Do you also want to rename the corresponding file \"" + correspondingFile.getFileName() + "\" to match?",
                                               {},
@@ -552,7 +552,7 @@ public:
 
                     if (! parent->item.renameFile (newFile))
                     {
-                        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                                           "File Rename",
                                                           "Failed to rename \"" + oldFile.getFullPathName() + "\"!\n\nCheck your file permissions!");
                         return;
@@ -560,7 +560,7 @@ public:
 
                     if (! correspondingItem.renameFile (newFile.withFileExtension (correspondingFile.getFileExtension())))
                     {
-                        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                                           "File Rename",
                                                           "Failed to rename \"" + correspondingFile.getFullPathName() + "\"!\n\nCheck your file permissions!");
                     }
@@ -571,7 +571,7 @@ public:
 
         if (! item.renameFile (newFile))
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               "File Rename",
                                               "Failed to rename the file!\n\nCheck your file permissions!");
         }

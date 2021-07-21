@@ -265,7 +265,7 @@ void ResourceEditorPanel::reloadAll()
             failed.add (document.getResources().getResourceNames() [i]);
 
     if (failed.size() > 0)
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                           TRANS("Reloading resources"),
                                           TRANS("The following resources couldn't be reloaded from their original files:\n\n")
                                               + failed.joinIntoString (", "));

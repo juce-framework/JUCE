@@ -171,7 +171,7 @@ private:
     {
         asyncAlertWindow = std::make_unique<AlertWindow> (TRANS ("Create new Component class"),
                                                           TRANS ("Please enter the name for the new class"),
-                                                          AlertWindow::NoIcon, nullptr);
+                                                          MessageBoxIconType::NoIcon, nullptr);
 
         asyncAlertWindow->addTextEditor (getClassNameFieldName(), String(), String(), false);
         asyncAlertWindow->addButton (TRANS ("Create Files"),  1, KeyPress (KeyPress::returnKey));
@@ -235,7 +235,7 @@ public:
 //==============================================================================
 void NewFileWizard::Type::showFailedToWriteMessage (const File& file)
 {
-    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+    AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                       "Failed to Create File!",
                                       "Couldn't write to the file: " + file.getFullPathName());
 }

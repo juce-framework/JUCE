@@ -723,7 +723,7 @@ public:
                                            "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX/RTAS Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
                                            "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
 
-            if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+            if (AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                               "Project settings: " + project.getDocumentTitle(),
                                               alertWindowText, "Update", "Cancel", nullptr, nullptr))
                 postbuildCommandValue.resetToDefault();

@@ -98,7 +98,7 @@ public:
         KeyEntryWindow (KeyMappingEditorComponent& kec)
             : AlertWindow (TRANS("New key-mapping"),
                            TRANS("Please press a key combination now..."),
-                           AlertWindow::NoIcon),
+                           MessageBoxIconType::NoIcon),
               owner (kec)
         {
             addButton (TRANS("OK"), 1);
@@ -165,7 +165,7 @@ public:
             }
             else
             {
-                AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                               TRANS("Change key-mapping"),
                                               TRANS("This key is already assigned to the command \"CMDN\"")
                                                   .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
@@ -403,7 +403,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
 
         resetButton.onClick = [this]
         {
-            AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+            AlertWindow::showOkCancelBox (MessageBoxIconType::QuestionIcon,
                                           TRANS("Reset to defaults"),
                                           TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
                                           TRANS("Reset"),

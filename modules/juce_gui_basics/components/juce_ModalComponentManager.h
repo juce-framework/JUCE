@@ -163,14 +163,26 @@ class JUCE_API ModalCallbackFunction
 {
 public:
     /** This is a utility function to create a ModalComponentManager::Callback that will
-        call a lambda function.
+        call a callable object.
 
-        The lambda that you supply must take an integer parameter, which is the result code that
+        The function that you supply must take an integer parameter, which is the result code that
         was returned when the modal component was dismissed.
 
         @see ModalComponentManager::Callback
     */
-    static ModalComponentManager::Callback* create (std::function<void (int)>);
+    template <typename CallbackFn>
+    static ModalComponentManager::Callback* create (CallbackFn&& fn)
+    {
+        struct Callable  : public ModalComponentManager::Callback
+        {
+            explicit Callable (CallbackFn&& f)  : fn (std::forward<CallbackFn> (f)) {}
+            void modalStateFinished (int result) override  { fn (result); }
+
+            CallbackFn fn;
+        };
+
+        return new Callable (std::forward<CallbackFn> (fn));
+    }
 
     //==============================================================================
     /** This is a utility function to create a ModalComponentManager::Callback that will

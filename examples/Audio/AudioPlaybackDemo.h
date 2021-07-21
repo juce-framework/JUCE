@@ -529,10 +529,13 @@ private:
             }
             else
             {
-                NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon, "Enable Code Signing",
-                                                       "You need to enable code-signing for your iOS project and enable \"iCloud Documents\" "
-                                                       "permissions to be able to open audio files on your iDevice. See: "
-                                                       "https://forum.juce.com/t/native-ios-android-file-choosers");
+                NativeMessageBox::showAsync (MessageBoxOptions()
+                                               .withIconType (MessageBoxIconType::WarningIcon)
+                                               .withTitle ("Enable Code Signing")
+                                               .withMessage ("You need to enable code-signing for your iOS project and enable \"iCloud Documents\" "
+                                                             "permissions to be able to open audio files on your iDevice. See: "
+                                                             "https://forum.juce.com/t/native-ios-android-file-choosers"),
+                                             nullptr);
             }
         }
     }

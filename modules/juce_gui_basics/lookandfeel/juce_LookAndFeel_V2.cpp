@@ -407,7 +407,7 @@ void LookAndFeel_V2::drawDrawableButton (Graphics& g, DrawableButton& button,
 //==============================================================================
 AlertWindow* LookAndFeel_V2::createAlertWindow (const String& title, const String& message,
                                                 const String& button1, const String& button2, const String& button3,
-                                                AlertWindow::AlertIconType iconType,
+                                                MessageBoxIconType iconType,
                                                 int numButtons, Component* associatedComponent)
 {
     AlertWindow* aw = new AlertWindow (title, message, iconType, associatedComponent);
@@ -457,13 +457,13 @@ void LookAndFeel_V2::drawAlertBox (Graphics& g, AlertWindow& alert,
     const Rectangle<int> iconRect (iconSize / -10, iconSize / -10,
                                    iconSize, iconSize);
 
-    if (alert.getAlertType() != AlertWindow::NoIcon)
+    if (alert.getAlertType() != MessageBoxIconType::NoIcon)
     {
         Path icon;
         uint32 colour;
         char character;
 
-        if (alert.getAlertType() == AlertWindow::WarningIcon)
+        if (alert.getAlertType() == MessageBoxIconType::WarningIcon)
         {
             colour = 0x55ff5555;
             character = '!';
@@ -476,8 +476,8 @@ void LookAndFeel_V2::drawAlertBox (Graphics& g, AlertWindow& alert,
         }
         else
         {
-            colour    = alert.getAlertType() == AlertWindow::InfoIcon ? (uint32) 0x605555ff : (uint32) 0x40b69900;
-            character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
+            colour    = alert.getAlertType() == MessageBoxIconType::InfoIcon ? (uint32) 0x605555ff : (uint32) 0x40b69900;
+            character = alert.getAlertType() == MessageBoxIconType::InfoIcon ? 'i' : '?';
 
             icon.addEllipse (iconRect.toFloat());
         }

@@ -194,7 +194,7 @@ void FileChooserDialogBox::okButtonPressed()
          && content->chooserComponent.isSaveMode()
          && content->chooserComponent.getSelectedFile(0).exists())
     {
-        AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                       TRANS("File already exists"),
                                       TRANS("There's already a file called: FLNM")
                                          .replace ("FLNM", content->chooserComponent.getSelectedFile(0).getFullPathName())
@@ -229,7 +229,7 @@ void FileChooserDialogBox::createNewFolder()
     {
         auto* aw = new AlertWindow (TRANS("New Folder"),
                                     TRANS("Please enter the name for the folder"),
-                                    AlertWindow::NoIcon, this);
+                                    MessageBoxIconType::NoIcon, this);
 
         aw->addTextEditor ("Folder Name", String(), String(), false);
         aw->addButton (TRANS("Create Folder"), 1, KeyPress (KeyPress::returnKey));
@@ -251,7 +251,7 @@ void FileChooserDialogBox::createNewFolderConfirmed (const String& nameFromDialo
         auto parent = content->chooserComponent.getRoot();
 
         if (! parent.getChildFile (name).createDirectory())
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               TRANS ("New Folder"),
                                               TRANS ("Couldn't create the folder!"));
 
