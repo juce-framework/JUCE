@@ -3164,7 +3164,7 @@ void Component::invalidateAccessibilityHandler()
 
 AccessibilityHandler* Component::getAccessibilityHandler()
 {
-    if (flags.accessibilityIgnoredFlag)
+    if (flags.accessibilityIgnoredFlag || getWindowHandle() == nullptr)
         return nullptr;
 
     if (accessibilityHandler == nullptr
