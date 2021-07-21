@@ -276,7 +276,10 @@ bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
 } // namespace juce
 
 #if JUCE_MAC || JUCE_IOS
+ #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
+
  #if JUCE_IOS
+  #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_UIViewComponentPeer.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_FileChooser.mm"
