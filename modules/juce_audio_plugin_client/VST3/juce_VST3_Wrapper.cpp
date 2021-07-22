@@ -1164,7 +1164,9 @@ public:
             const auto mayCreateEditor = pluginInstance->hasEditor()
                                       && name != nullptr
                                       && std::strcmp (name, Vst::ViewType::kEditor) == 0
-                                      && (pluginInstance->getActiveEditor() == nullptr || getHostType().isAdobeAudition());
+                                      && (pluginInstance->getActiveEditor() == nullptr
+                                          || getHostType().isAdobeAudition()
+                                          || getHostType().isPremiere());
 
             if (mayCreateEditor)
                 return new JuceVST3Editor (*this, *audioProcessor);
