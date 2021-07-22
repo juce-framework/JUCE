@@ -178,7 +178,7 @@ public:
             explicit Callable (CallbackFn&& f)  : fn (std::forward<CallbackFn> (f)) {}
             void modalStateFinished (int result) override  { fn (result); }
 
-            CallbackFn fn;
+            std::remove_reference_t<CallbackFn> fn;
         };
 
         return new Callable (std::forward<CallbackFn> (fn));
