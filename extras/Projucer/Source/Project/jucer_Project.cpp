@@ -1968,9 +1968,6 @@ Icon Project::Item::getIcon (bool isOpen) const
         return { icons.file, Colours::transparentBlack };
     }
 
-    if (isMainGroup())
-        return { icons.juceLogo, Colours::orange };
-
     return { isOpen ? icons.openFolder : icons.closedFolder, Colours::transparentBlack };
 }
 

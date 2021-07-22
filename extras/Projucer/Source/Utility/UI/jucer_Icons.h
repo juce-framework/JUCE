@@ -75,9 +75,8 @@ class Icons
 public:
     Icons();
 
-    Path folder, document, imageDoc, config, juceLogo, graph, jigsaw, info, warning, bug,
-         code, box, mainJuceLogo, user, closedFolder, exporter, fileExplorer, file,
-         modules, openFolder, play, settings, singleModule, edit, plus, android, codeBlocks,
+    Path imageDoc, config, graph, info, warning, user, closedFolder, exporter, fileExplorer, file,
+         modules, openFolder, settings, singleModule, plus, android, codeBlocks,
          linux, xcode, visualStudio, clion;
 
 private:

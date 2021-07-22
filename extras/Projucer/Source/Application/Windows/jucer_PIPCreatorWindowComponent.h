@@ -336,7 +336,7 @@ private:
     std::unique_ptr<PIPCreatorLookAndFeel> lf;
 
     Viewport propertyViewport;
-    PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };
+    PropertyGroupComponent propertyGroup  { "PIP Creator", {} };
 
     TextButton createButton  { "Create PIP" };
 
