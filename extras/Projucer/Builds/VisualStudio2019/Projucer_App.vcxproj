@@ -2132,7 +2132,6 @@
     <None Include="..\..\Source\BinaryData\Icons\export_visualStudio.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\export_xcode.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\gpl_logo.svg"/>
-    <None Include="..\..\Source\BinaryData\Icons\juce-logo-with-text.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\juce_icon.png"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_AnimatedApp.svg"/>
     <None Include="..\..\Source\BinaryData\Icons\wizard_AudioApp.svg"/>

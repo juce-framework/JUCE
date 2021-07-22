@@ -205,8 +205,6 @@
         <FILE id="G0oYd6" name="export_xcode.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_xcode.svg"/>
         <FILE id="CfDTJ0" name="gpl_logo.svg" compile="0" resource="1" file="Source/BinaryData/Icons/gpl_logo.svg"/>
-        <FILE id="Pk2LIn" name="juce-logo-with-text.svg" compile="0" resource="1"
-              file="Source/BinaryData/Icons/juce-logo-with-text.svg"/>
         <FILE id="Zrx1Gl" name="juce_icon.png" compile="0" resource="1" file="Source/BinaryData/Icons/juce_icon.png"/>
         <FILE id="iPYmG9" name="wizard_AnimatedApp.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/wizard_AnimatedApp.svg"/>

@@ -3773,9 +3773,6 @@
     <None Include="..\..\Source\BinaryData\Icons\gpl_logo.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
-    <None Include="..\..\Source\BinaryData\Icons\juce-logo-with-text.svg">
-      <Filter>Projucer\BinaryData\Icons</Filter>
-    </None>
     <None Include="..\..\Source\BinaryData\Icons\juce_icon.png">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>

@@ -158,7 +158,6 @@
 		41105E536155E394E54BDD35 /* colourscheme_dark.xml */ /* colourscheme_dark.xml */ = {isa = PBXFileReference; lastKnownFileType = file.xml; name = colourscheme_dark.xml; path = ../../Source/BinaryData/colourscheme_dark.xml; sourceTree = SOURCE_ROOT; };
 		42F4AA3EF0883D506987CA99 /* export_codeBlocks.svg */ /* export_codeBlocks.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = export_codeBlocks.svg; path = ../../Source/BinaryData/Icons/export_codeBlocks.svg; sourceTree = SOURCE_ROOT; };
 		431D30038CBF67F80E8B3A13 /* OpenGL.framework */ /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
-		432EC251A122071809471804 /* juce-logo-with-text.svg */ /* juce-logo-with-text.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = "juce-logo-with-text.svg"; path = "../../Source/BinaryData/Icons/juce-logo-with-text.svg"; sourceTree = SOURCE_ROOT; };
 		463C8CF42FAA00014198B71B /* PIPComponent.cpp.in */ /* PIPComponent.cpp.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = PIPComponent.cpp.in; path = ../../../Build/CMake/PIPComponent.cpp.in; sourceTree = SOURCE_ROOT; };
 		472F9A90F685220D730EBF6C /* BinaryData.cpp */ /* BinaryData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = SOURCE_ROOT; };
 		486E8D02DAD2A0BF54A901C0 /* jucer_MiscUtilities.cpp */ /* jucer_MiscUtilities.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MiscUtilities.cpp; path = ../../Source/Utility/Helpers/jucer_MiscUtilities.cpp; sourceTree = SOURCE_ROOT; };
@@ -816,7 +815,6 @@
 				EAC1731150A7F79D59BAA0B6,
 				8F4D281E98808204E2846A7D,
 				CD267A28C16C4E79EB749005,
-				432EC251A122071809471804,
 				B83C9BD89F31EA9E5E12A3C6,
 				8FEF6F5EA676B824C021EB6F,
 				8FF26BF72A522FBEAAFDDF54,

@@ -62,9 +62,6 @@ namespace BinaryData
     extern const char*   gpl_logo_svg;
     const int            gpl_logo_svgSize = 27030;
 
-    extern const char*   jucelogowithtext_svg;
-    const int            jucelogowithtext_svgSize = 5312;
-
     extern const char*   juce_icon_png;
     const int            juce_icon_pngSize = 45854;
 
@@ -195,7 +192,7 @@ namespace BinaryData
     const int            juce_runtime_arch_detection_cppSize = 2129;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 62;
+    const int namedResourceListSize = 61;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];
