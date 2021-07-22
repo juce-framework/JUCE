@@ -1661,8 +1661,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_opengl/juce_opengl.cpp"
     "../../../../../modules/juce_opengl/juce_opengl.mm"
     "../../../../../modules/juce_opengl/juce_opengl.h"
-    "../../../JuceLibraryCode/BinaryData.cpp"
-    "../../../JuceLibraryCode/BinaryData.h"
     "../../../JuceLibraryCode/include_juce_audio_basics.cpp"
     "../../../JuceLibraryCode/include_juce_audio_devices.cpp"
     "../../../JuceLibraryCode/include_juce_audio_formats.cpp"
@@ -3295,7 +3293,6 @@ set_source_files_properties("../../../../../modules/juce_opengl/utils/juce_OpenG
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../JuceLibraryCode/BinaryData.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../JuceLibraryCode/JuceHeader.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 
 target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" )

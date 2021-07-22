@@ -203,7 +203,7 @@
         <FILE id="ygZQZ1" name="PluginWindow.h" compile="0" resource="0" file="Source/UI/PluginWindow.h"/>
       </GROUP>
       <FILE id="OmIhwQ" name="HostStartup.cpp" compile="1" resource="0" file="Source/HostStartup.cpp"/>
-      <FILE id="c97aUr" name="JUCEAppIcon.png" compile="0" resource="1" file="Source/JUCEAppIcon.png"/>
+      <FILE id="c97aUr" name="JUCEAppIcon.png" compile="0" resource="0" file="Source/JUCEAppIcon.png"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_WASAPI="1" JUCE_DIRECTSOUND="1" JUCE_ALSA="1" JUCE_USE_FLAC="0"
