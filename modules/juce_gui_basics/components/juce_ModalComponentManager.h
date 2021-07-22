@@ -176,7 +176,7 @@ public:
         struct Callable  : public ModalComponentManager::Callback
         {
             explicit Callable (CallbackFn&& f)  : fn (std::forward<CallbackFn> (f)) {}
-            void modalStateFinished (int result) override  { fn (result); }
+            void modalStateFinished (int result) override  { NullCheckedInvocation::invoke (std::move (fn), result); }
 
             std::remove_reference_t<CallbackFn> fn;
         };
