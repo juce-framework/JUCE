@@ -2825,11 +2825,29 @@ public:
                 info.channelCount = bus->getLastEnabledLayout().size();
                 toString128 (info.name, bus->getName());
 
-               #if JucePlugin_IsSynth
-                info.busType = (dir == Vst::kInput && index > 0 ? Vst::kAux : Vst::kMain);
-               #else
-                info.busType = (index == 0 ? Vst::kMain : Vst::kAux);
-               #endif
+                info.busType = [&]
+                {
+                    const auto isFirstBus = (index == 0);
+
+                    if (dir == Vst::kInput)
+                    {
+                        if (isFirstBus)
+                        {
+                            if (auto* extensions = dynamic_cast<VST3ClientExtensions*> (pluginInstance))
+                                return extensions->getPluginHasMainInput() ? Vst::kMain : Vst::kAux;
+
+                            return Vst::kMain;
+                        }
+
+                        return Vst::kAux;
+                    }
+
+                   #if JucePlugin_IsSynth
+                    return Vst::kMain;
+                   #else
+                    return isFirstBus ? Vst::kMain : Vst::kAux;
+                   #endif
+                }();
 
                #ifdef JucePlugin_PreferredChannelConfigurations
                 info.flags = Vst::BusInfo::kDefaultActive;
