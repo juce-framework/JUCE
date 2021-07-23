@@ -28,6 +28,8 @@ namespace juce
 
     If the object is a std::function it will check for nullptr before
     calling. For a callable object it will invoke the function call operator.
+
+    @tags{Core}
 */
 struct NullCheckedInvocation
 {
@@ -48,4 +50,4 @@ struct NullCheckedInvocation
     static void invoke (std::nullptr_t, Args&&...) {}
 };
 
-}
+} // namespace juce
