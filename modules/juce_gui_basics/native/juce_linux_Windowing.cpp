@@ -674,11 +674,9 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
                                                       const String& title, const String& message,
                                                       Component* associatedComponent,
-                                                      ModalComponentManager::Callback* callback,
-                                                      const String& button1Text,
-                                                      const String& button2Text)
+                                                      ModalComponentManager::Callback* callback)
 {
-    return AlertWindow::showOkCancelBox (iconType, title, message, button1Text, button2Text, associatedComponent, callback);
+    return AlertWindow::showOkCancelBox (iconType, title, message, {}, {}, associatedComponent, callback);
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,

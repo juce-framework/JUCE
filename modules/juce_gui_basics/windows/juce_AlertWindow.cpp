@@ -672,7 +672,7 @@ bool AlertWindow::showOkCancelBox (AlertIconType iconType,
                                    ModalComponentManager::Callback* callback)
 {
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        return NativeMessageBox::showOkCancelBox (iconType, title, message, associatedComponent, callback, button1Text, button2Text);
+        return NativeMessageBox::showOkCancelBox (iconType, title, message, associatedComponent, callback);
 
     AlertWindowInfo info (title, message, associatedComponent, iconType, 2, callback, callback == nullptr);
     info.button1 = button1Text.isEmpty() ? TRANS("OK")     : button1Text;

@@ -530,16 +530,10 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType /*iconType*/,
                                                       const String& title, const String& message,
                                                       Component* /*associatedComponent*/,
-                                                      ModalComponentManager::Callback* callback,
-                                                      const String& button1Text,
-                                                      const String& button2Text)
+                                                      ModalComponentManager::Callback* callback)
 {
-    NSString* button1NSStr = (NSString*) button1Text.toCFString();
-    NSString* button2NSStr = (NSString*) button2Text.toCFString();
-    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, button2NSStr, button1NSStr,
+    std::unique_ptr<iOSMessageBox> mb (new iOSMessageBox (title, message, @"Cancel", @"OK",
                                                           nil, callback, callback != nullptr));
-    [button1NSStr release];
-    [button2NSStr release];
 
     if (callback == nullptr)
         return mb->getResult() == 1;

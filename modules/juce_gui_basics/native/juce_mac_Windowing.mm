@@ -129,12 +129,10 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIcon
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
                                                       const String& title, const String& message,
                                                       Component* /*associatedComponent*/,
-                                                      ModalComponentManager::Callback* callback,
-                                                      const String& button1Text,
-                                                      const String& button2Text)
+                                                      ModalComponentManager::Callback* callback)
 {
     return OSXMessageBox::show (iconType, title, message, callback,
-                                button1Text.toRawUTF8(), button2Text.toRawUTF8(), nullptr, callback != nullptr) == 1;
+                                "OK", "Cancel", nullptr, callback != nullptr) == 1;
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
