@@ -102,7 +102,6 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Icons/export_visualStudio.svg
     Source/BinaryData/Icons/export_xcode.svg
     Source/BinaryData/Icons/gpl_logo.svg
-    Source/BinaryData/Icons/juce-logo-with-text.svg
     Source/BinaryData/Icons/juce_icon.png
     Source/BinaryData/Icons/wizard_AnimatedApp.svg
     Source/BinaryData/Icons/wizard_AudioApp.svg
