@@ -87,11 +87,6 @@ using uint32    = unsigned int;
 #endif
 
 //==============================================================================
-/** Handy function for avoiding unused variables warning. */
-template <typename... Types>
-void ignoreUnused (Types&&...) noexcept {}
-
-//==============================================================================
 // Some indispensable min/max functions
 
 /** Returns the larger of two values. */
@@ -331,6 +326,11 @@ bool approximatelyEqual (Type a, Type b) noexcept
     return std::abs (a - b) <= (std::numeric_limits<Type>::epsilon() * std::max (a, b))
             || std::abs (a - b) < std::numeric_limits<Type>::min();
 }
+
+//==============================================================================
+/** Handy function for avoiding unused variables warning. */
+template <typename... Types>
+void ignoreUnused (Types&&...) noexcept {}
 
 /** Handy function for getting the number of elements in a simple const C array.
     E.g.
