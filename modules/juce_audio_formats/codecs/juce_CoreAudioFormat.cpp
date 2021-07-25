@@ -573,7 +573,7 @@ static void fillAudioStreamBasicDescription (AudioStreamBasicDescription* fmt)
 {
     UInt32 sz = sizeof (AudioStreamBasicDescription);
     OSStatus e = AudioFormatGetProperty (kAudioFormatProperty_FormatInfo, 0, nullptr, &sz, fmt);
-    jassert (e == noErr);
+    jassertquiet (e == noErr);
 }
 
 class CoreAudioWriter : public AudioFormatWriter
@@ -600,7 +600,7 @@ public:
                 &fmt,
                 0,
                 &audioFileID);
-            jassert (e == noErr);
+            jassertquiet (e == noErr);
         }
         ExtAudioFileWrapAudioFileID (audioFileID, true, &audioFileRef);
         {
@@ -616,7 +616,7 @@ public:
             fillAudioStreamBasicDescription (&fmt);
             OSStatus e =
                 ExtAudioFileSetProperty (audioFileRef, kExtAudioFileProperty_ClientDataFormat, sizeof (fmt), &fmt);
-            jassert (e == noErr);
+            jassertquiet (e == noErr);
         }
         bufferList.malloc (1, sizeof (AudioBufferList) + numChannels * sizeof (::AudioBuffer));
         bufferList->mNumberBuffers = numChannels;
@@ -687,7 +687,7 @@ private:
             jassert (in.openedOk());
             {
                 bool setPositionOK = in.setPosition (inPosition);
-                jassert (setPositionOK);
+                jassertquiet (setPositionOK);
             }
             *actualCount = (UInt32) in.read (buffer, (int) requestCount);
             return noErr;
@@ -719,9 +719,9 @@ private:
         if (auto* out = dynamic_cast<FileOutputStream*> (self->output))
         {
             bool setPositionOK = out->setPosition (size);
-            jassert (setPositionOK);
+            jassertquiet (setPositionOK);
             Result truncatedOK = out->truncate();
-            jassert (truncatedOK);
+            jassertquiet (truncatedOK);
         }
         return noErr;
     }
