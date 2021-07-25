@@ -143,7 +143,7 @@ void BinaryResources::browseForResource (const String& title,
 
         if (! add (name, fc.getResult()))
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               TRANS("Adding Resource"),
                                               TRANS("Failed to load the file!"));
 

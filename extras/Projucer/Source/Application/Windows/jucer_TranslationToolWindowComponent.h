@@ -122,7 +122,7 @@ private:
 
         if (postStrings.size() != preStrings.size())
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               TRANS("Error"),
                                               TRANS("The pre- and post-translation text doesn't match!\n\n"
                                                     "Perhaps it got mangled by the translator?"));
@@ -138,7 +138,7 @@ private:
         if (Project* project = ProjucerApplication::getApp().mainWindowList.getFrontmostProject())
             setPreTranslationText (TranslationHelpers::getPreTranslationText (*project));
         else
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon, "Translation Tool",
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, "Translation Tool",
                                               "This will only work when you have a project open!");
     }
 

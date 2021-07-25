@@ -405,7 +405,7 @@ public:
         }
 
         if (error.isNotEmpty())
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               TRANS("Error when trying to open audio device!"),
                                               error);
     }

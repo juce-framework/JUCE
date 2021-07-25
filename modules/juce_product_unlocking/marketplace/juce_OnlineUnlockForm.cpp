@@ -100,13 +100,13 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
         if (result.errorMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               TRANS("Registration Failed"),
                                               result.errorMessage);
         }
         else if (result.informativeMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                               TRANS("Registration Complete!"),
                                               result.informativeMessage);
         }

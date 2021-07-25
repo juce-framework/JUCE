@@ -682,14 +682,14 @@ void EnabledModulesList::addModuleOfferingToCopy (const File& f, bool isFromUser
 
     if (! m.isValid())
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           "Add Module", "This wasn't a valid module folder!");
         return;
     }
 
     if (isModuleEnabled (m.getID()))
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           "Add Module", "The project already contains this module!");
         return;
     }

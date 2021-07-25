@@ -658,7 +658,7 @@ void CppCodeEditorComponent::insertComponentClass()
 {
     asyncAlertWindow = std::make_unique<AlertWindow> (TRANS ("Insert a new Component class"),
                                                       TRANS ("Please enter a name for the new class"),
-                                                      AlertWindow::NoIcon,
+                                                      MessageBoxIconType::NoIcon,
                                                       nullptr);
 
     const String classNameField { "Class Name" };

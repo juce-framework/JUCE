@@ -66,6 +66,7 @@
  #include <windowsx.h>
  #include <vfw.h>
  #include <commdlg.h>
+ #include <commctrl.h>
 
  #if ! JUCE_MINGW
   #include <UIAutomation.h>
@@ -82,6 +83,7 @@
  #elif ! JUCE_DONT_AUTOLINK_TO_WIN32_LIBRARIES
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
+  #pragma comment(lib, "comctl32.lib")
 
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")

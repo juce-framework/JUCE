@@ -289,25 +289,4 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
 }
 #endif
 
-//==============================================================================
-struct LambdaCallback  : public ModalComponentManager::Callback
-{
-    LambdaCallback (std::function<void (int)> fn) noexcept  : function (fn)  {}
-
-    void modalStateFinished (int result) override
-    {
-        if (function != nullptr)
-            function (result);
-    }
-
-    std::function<void (int)> function;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LambdaCallback)
-};
-
-ModalComponentManager::Callback* ModalCallbackFunction::create (std::function<void (int)> f)
-{
-    return new LambdaCallback (f);
-}
-
 } // namespace juce

@@ -4411,30 +4411,44 @@ bool juce_areThereAnyAlwaysOnTopWindows()
 }
 
 //==============================================================================
-class WindowsMessageBox  : public AsyncUpdater
+#if JUCE_MSVC
+ // required to enable the newer dialog box on vista and above
+ #pragma comment(linker,                             \
+         "\"/MANIFESTDEPENDENCY:type='Win32' "       \
+         "name='Microsoft.Windows.Common-Controls' " \
+         "version='6.0.0.0' "                        \
+         "processorArchitecture='*' "                \
+         "publicKeyToken='6595b64144ccf1df' "        \
+         "language='*'\""                            \
+     )
+#endif
+
+class WindowsMessageBoxBase  : private AsyncUpdater
 {
 public:
-    WindowsMessageBox (AlertWindow::AlertIconType iconType,
-                       const String& boxTitle, const String& m,
-                       Component* associatedComponent, UINT extraFlags,
-                       ModalComponentManager::Callback* cb, const bool runAsync)
-        : flags (extraFlags | getMessageBoxFlags (iconType)),
-          owner (getWindowForMessageBox (associatedComponent)),
-          title (boxTitle), message (m), callback (cb)
+    WindowsMessageBoxBase (Component* comp,
+                           std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : associatedComponent (comp),
+          callback (std::move (cb))
     {
-        if (runAsync)
-            triggerAsyncUpdate();
     }
 
-    int getResult() const
+    virtual int getResult() = 0;
+
+    HWND getParentHWND() const
     {
-        const int r = MessageBox (owner, message.toWideCharPointer(), title.toWideCharPointer(), flags);
-        return (r == IDYES || r == IDOK) ? 1 : (r == IDNO && (flags & 1) != 0 ? 2 : 0);
+        if (associatedComponent != nullptr)
+            return (HWND) associatedComponent->getWindowHandle();
+
+        return nullptr;
     }
 
+    using AsyncUpdater::triggerAsyncUpdate;
+
+private:
     void handleAsyncUpdate() override
     {
-        const int result = getResult();
+        const auto result = getResult();
 
         if (callback != nullptr)
             callback->modalStateFinished (result);
@@ -4442,97 +4456,303 @@ public:
         delete this;
     }
 
-private:
-    UINT flags;
-    HWND owner;
-    String title, message;
+    Component::SafePointer<Component> associatedComponent;
     std::unique_ptr<ModalComponentManager::Callback> callback;
 
-    static UINT getMessageBoxFlags (AlertWindow::AlertIconType iconType) noexcept
-    {
-        UINT flags = MB_TASKMODAL | MB_SETFOREGROUND;
-
-        // this window can get lost behind JUCE windows which are set to be alwaysOnTop
-        // so if there are any set it to be topmost
-        if (juce_areThereAnyAlwaysOnTopWindows())
-            flags |= MB_TOPMOST;
-
-        switch (iconType)
-        {
-            case AlertWindow::QuestionIcon:  flags |= MB_ICONQUESTION; break;
-            case AlertWindow::WarningIcon:   flags |= MB_ICONWARNING; break;
-            case AlertWindow::InfoIcon:      flags |= MB_ICONINFORMATION; break;
-            case AlertWindow::NoIcon:        JUCE_FALLTHROUGH
-            default: break;
-        }
-
-        return flags;
-    }
-
-    static HWND getWindowForMessageBox (Component* associatedComponent)
-    {
-        return associatedComponent != nullptr ? (HWND) associatedComponent->getWindowHandle() : nullptr;
-    }
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsMessageBoxBase)
 };
 
+class PreVistaMessageBox  : public WindowsMessageBoxBase
+{
+public:
+    PreVistaMessageBox (const MessageBoxOptions& opts,
+                        UINT extraFlags,
+                        std::unique_ptr<ModalComponentManager::Callback>&& callback)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+          flags (extraFlags | getMessageBoxFlags (opts.getIconType())),
+          title (opts.getTitle()), message (opts.getMessage())
+    {
+    }
+
+    int getResult() override
+    {
+        const auto result = MessageBox (getParentHWND(), message.toWideCharPointer(), title.toWideCharPointer(), flags);
+
+        if (result == IDYES || result == IDOK)     return 0;
+        if (result == IDNO && ((flags & 1) != 0))  return 1;
+
+        return 2;
+    }
+
+private:
+    static UINT getMessageBoxFlags (MessageBoxIconType iconType) noexcept
+    {
+        // this window can get lost behind JUCE windows which are set to be alwaysOnTop
+        // so if there are any set it to be topmost
+        const auto topmostFlag = juce_areThereAnyAlwaysOnTopWindows() ? MB_TOPMOST : 0;
+
+        const auto iconFlags = [&]() -> decltype (topmostFlag)
+        {
+            switch (iconType)
+            {
+                case MessageBoxIconType::QuestionIcon:  return MB_ICONQUESTION;
+                case MessageBoxIconType::WarningIcon:   return MB_ICONWARNING;
+                case MessageBoxIconType::InfoIcon:      return MB_ICONINFORMATION;
+                case MessageBoxIconType::NoIcon:        break;
+            }
+
+            return 0;
+        }();
+
+        return static_cast<UINT> (MB_TASKMODAL | MB_SETFOREGROUND | topmostFlag | iconFlags);
+    }
+
+    const UINT flags;
+    const String title, message;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PreVistaMessageBox)
+};
+
+using TaskDialogIndirectFunc = HRESULT (WINAPI*) (const TASKDIALOGCONFIG*, INT*, INT*, BOOL*);
+static TaskDialogIndirectFunc taskDialogIndirect = nullptr;
+
+class WindowsTaskDialog  : public WindowsMessageBoxBase
+{
+public:
+    WindowsTaskDialog (const MessageBoxOptions& opts,
+                       std::unique_ptr<ModalComponentManager::Callback>&& callback)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+          iconType (opts.getIconType()),
+          title (opts.getTitle()), message (opts.getMessage()),
+          button1 (opts.getButtonText (0)), button2 (opts.getButtonText (1)), button3 (opts.getButtonText (2))
+    {
+    }
+
+    int getResult() override
+    {
+        TASKDIALOGCONFIG config = { 0 };
+
+        config.cbSize         = sizeof (config);
+        config.pszWindowTitle = title.toWideCharPointer();
+        config.pszContent     = message.toWideCharPointer();
+        config.hInstance      = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
+
+        if (iconType == MessageBoxIconType::QuestionIcon)
+        {
+            if (auto* questionIcon = LoadIcon (nullptr, IDI_QUESTION))
+            {
+                config.hMainIcon = questionIcon;
+                config.dwFlags |= TDF_USE_HICON_MAIN;
+            }
+        }
+        else
+        {
+            auto icon = [this]() -> LPWSTR
+            {
+                switch (iconType)
+                {
+                    case MessageBoxIconType::WarningIcon:   return TD_WARNING_ICON;
+                    case MessageBoxIconType::InfoIcon:      return TD_INFORMATION_ICON;
+
+                    case MessageBoxIconType::QuestionIcon:  JUCE_FALLTHROUGH
+                    case MessageBoxIconType::NoIcon:
+                        break;
+                }
+
+                return nullptr;
+            }();
+
+            if (icon != nullptr)
+                config.pszMainIcon = icon;
+        }
+
+        std::vector<TASKDIALOG_BUTTON> buttons;
+
+        for (const auto* buttonText : { &button1, &button2, &button3 })
+            if (buttonText->isNotEmpty())
+                buttons.push_back ({ (int) buttons.size(), buttonText->toWideCharPointer() });
+
+        config.pButtons = buttons.data();
+        config.cButtons = (UINT) buttons.size();
+
+        int buttonIndex = 0;
+        taskDialogIndirect (&config, &buttonIndex, nullptr, nullptr);
+
+        return buttonIndex;
+    }
+
+    static bool loadTaskDialog()
+    {
+        static bool hasChecked = false;
+
+        if (! hasChecked)
+        {
+            hasChecked = true;
+
+            const auto comctl = "Comctl32.dll";
+            LoadLibraryA (comctl);
+            const auto comctlModule = GetModuleHandleA (comctl);
+
+            if (comctlModule != nullptr)
+                taskDialogIndirect = (TaskDialogIndirectFunc) GetProcAddress (comctlModule, "TaskDialogIndirect");
+        }
+
+        return taskDialogIndirect != nullptr;
+    }
+
+private:
+    MessageBoxIconType iconType;
+    String title, message, button1, button2, button3;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WindowsTaskDialog)
+};
+
+static std::unique_ptr<WindowsMessageBoxBase> createMessageBox (const MessageBoxOptions& options,
+                                                                std::unique_ptr<ModalComponentManager::Callback> callback)
+{
+    std::unique_ptr<WindowsMessageBoxBase> messageBox;
+
+    if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista
+        && WindowsTaskDialog::loadTaskDialog())
+    {
+        messageBox.reset (new WindowsTaskDialog (options, std::move (callback)));
+    }
+    else
+    {
+        const auto extraFlags = [&options]
+        {
+            const auto numButtons = options.getNumButtons();
+
+            if (numButtons == 3)
+                return MB_YESNOCANCEL;
+
+            if (numButtons == 2)
+                return options.getButtonText (0) == "OK" ? MB_OKCANCEL
+                                                         : MB_YESNO;
+
+            return MB_OK;
+        }();
+
+        messageBox.reset (new PreVistaMessageBox (options, (UINT) extraFlags, std::move (callback)));
+    }
+
+    return messageBox;
+}
+
+static int showDialog (const MessageBoxOptions& options,
+                       std::unique_ptr<ModalComponentManager::Callback> callback,
+                       Async async)
+{
+    auto messageBox = createMessageBox (options, std::move (callback));
+
+   #if JUCE_MODAL_LOOPS_PERMITTED
+    if (async == Async::no)
+        return messageBox->getResult();
+   #endif
+
+    ignoreUnused (async);
+
+    messageBox->triggerAsyncUpdate();
+    messageBox.release();
+
+    return 0;
+}
+
 #if JUCE_MODAL_LOOPS_PERMITTED
-void JUCE_CALLTYPE NativeMessageBox::showMessageBox (AlertWindow::AlertIconType iconType,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBox (MessageBoxIconType iconType,
                                                      const String& title, const String& message,
                                                      Component* associatedComponent)
 {
-    WindowsMessageBox box (iconType, title, message, associatedComponent, MB_OK, nullptr, false);
-    (void) box.getResult();
+    showDialog (MessageBoxOptions()
+                  .withIconType (iconType)
+                  .withTitle (title)
+                  .withMessage (message)
+                  .withButton (TRANS("OK"))
+                  .withAssociatedComponent (associatedComponent),
+                nullptr,
+                Async::no);
+}
+
+int JUCE_CALLTYPE NativeMessageBox::show (const MessageBoxOptions& options)
+{
+    return showDialog (options, nullptr, Async::no);
 }
 #endif
 
-void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (AlertWindow::AlertIconType iconType,
+void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (MessageBoxIconType iconType,
                                                           const String& title, const String& message,
                                                           Component* associatedComponent,
                                                           ModalComponentManager::Callback* callback)
 {
-    new WindowsMessageBox (iconType, title, message, associatedComponent, MB_OK, callback, true);
+    showDialog (MessageBoxOptions()
+                  .withIconType (iconType)
+                  .withTitle (title)
+                  .withMessage (message)
+                  .withButton (TRANS("OK"))
+                  .withAssociatedComponent (associatedComponent),
+                rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::messageBox)),
+                Async::yes);
 }
 
-bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (AlertWindow::AlertIconType iconType,
+bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType iconType,
                                                       const String& title, const String& message,
                                                       Component* associatedComponent,
                                                       ModalComponentManager::Callback* callback)
 {
-    std::unique_ptr<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
-                                                                  MB_OKCANCEL, callback, callback != nullptr));
-    if (callback == nullptr)
-        return mb->getResult() != 0;
-
-    mb.release();
-    return false;
+    return showDialog (MessageBoxOptions()
+                         .withIconType (iconType)
+                         .withTitle (title)
+                         .withMessage (message)
+                         .withButton (TRANS("OK"))
+                         .withButton (TRANS("Cancel"))
+                         .withAssociatedComponent (associatedComponent),
+                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel)),
+                       callback != nullptr ? Async::yes : Async::no) == 1;
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (AlertWindow::AlertIconType iconType,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType iconType,
                                                         const String& title, const String& message,
                                                         Component* associatedComponent,
                                                         ModalComponentManager::Callback* callback)
 {
-    std::unique_ptr<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
-                                                                  MB_YESNOCANCEL, callback, callback != nullptr));
-    if (callback == nullptr)
-        return mb->getResult();
-
-    mb.release();
-    return 0;
+    return showDialog (MessageBoxOptions()
+                         .withIconType (iconType)
+                         .withTitle (title)
+                         .withMessage (message)
+                         .withButton (TRANS("Yes"))
+                         .withButton (TRANS("No"))
+                         .withButton (TRANS("Cancel"))
+                         .withAssociatedComponent (associatedComponent),
+                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::yesNoCancel)),
+                       callback != nullptr ? Async::yes : Async::no);
 }
 
-int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (AlertWindow::AlertIconType iconType,
+int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType iconType,
                                                   const String& title, const String& message,
                                                   Component* associatedComponent,
                                                   ModalComponentManager::Callback* callback)
 {
-    std::unique_ptr<WindowsMessageBox> mb (new WindowsMessageBox (iconType, title, message, associatedComponent,
-                                                                  MB_YESNO, callback, callback != nullptr));
-    if (callback == nullptr)
-        return mb->getResult();
+    return showDialog (MessageBoxOptions()
+                         .withIconType (iconType)
+                         .withTitle (title)
+                         .withMessage (message)
+                         .withButton (TRANS("Yes"))
+                         .withButton (TRANS("No"))
+                         .withAssociatedComponent (associatedComponent),
+                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel)),
+                       callback != nullptr ? Async::yes : Async::no);
+}
 
-    mb.release();
-    return 0;
+void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
+                                                ModalComponentManager::Callback* callback)
+{
+    showDialog (options, rawToUniquePtr (callback), Async::yes);
+}
+
+void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
+                                                std::function<void (int)> callback)
+{
+    showAsync (options, ModalCallbackFunction::create (callback));
 }
 
 //==============================================================================

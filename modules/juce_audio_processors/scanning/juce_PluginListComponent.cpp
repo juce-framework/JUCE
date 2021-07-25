@@ -388,8 +388,8 @@ public:
              PropertiesFile* properties, bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
              const String& title, const String& text)
         : owner (plc), formatToScan (format), filesOrIdentifiersToScan (filesOrIdentifiers), propertiesToUse (properties),
-          pathChooserWindow (TRANS("Select folders to scan..."), String(), AlertWindow::NoIcon),
-          progressWindow (title, text, AlertWindow::NoIcon),
+          pathChooserWindow (TRANS("Select folders to scan..."), String(), MessageBoxIconType::NoIcon),
+          progressWindow (title, text, MessageBoxIconType::NoIcon),
           numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
@@ -467,7 +467,7 @@ private:
 
             if (isStupidPath (f))
             {
-                AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                               TRANS("Plugin Scanning"),
                                               TRANS("If you choose to scan folders that contain non-plugin files, "
                                                     "then scanning may take a long time, and can cause crashes when "
@@ -642,7 +642,7 @@ void PluginListComponent::scanFinished (const StringArray& failedFiles)
     currentScanner.reset(); // mustn't delete this before using the failed files array
 
     if (shortNames.size() > 0)
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           TRANS("Scan complete"),
                                           TRANS("Note that the following files appeared to be plugin files, but failed to load correctly")
                                             + ":\n\n"

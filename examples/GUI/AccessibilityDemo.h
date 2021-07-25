@@ -193,7 +193,7 @@ private:
             addAndMakeVisible (textButton);
 
             shapeButton.setShape (getJUCELogoPath(), false, true, false);
-            shapeButton.onClick = [] { AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "Alert", "This is an AlertWindow"); };
+            shapeButton.onClick = [] { AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon, "Alert", "This is an AlertWindow"); };
             addAndMakeVisible (shapeButton);
         }
 
