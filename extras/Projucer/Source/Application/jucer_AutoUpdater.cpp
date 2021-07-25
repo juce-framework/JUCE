@@ -240,10 +240,9 @@ void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const Version
 {
     chooser = std::make_unique<FileChooser> ("Please select the location into which you would like to install the new version",
                                              File { getAppSettings().getStoredPath (Ids::jucePath, TargetOS::getThisOS()).get() });
-    auto flags = FileBrowserComponent::openMode
-               | FileBrowserComponent::canSelectDirectories;
 
-    chooser->launchAsync (flags, [this, asset] (const FileChooser& fc)
+    chooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories,
+                          [weakThis = WeakReference<LatestVersionCheckerAndUpdater> { this }, asset] (const FileChooser& fc)
     {
         auto targetFolder = fc.getResult();
 
@@ -264,14 +263,13 @@ void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const Version
 
         auto targetFolderPath = targetFolder.getFullPathName();
 
-        WeakReference<LatestVersionCheckerAndUpdater> parent { this };
-        auto callback = ModalCallbackFunction::create ([parent, asset, targetFolder] (int result)
+        const auto onResult = [weakThis, asset, targetFolder] (int result)
         {
-            if (parent == nullptr || result == 0)
+            if (weakThis == nullptr || result == 0)
                 return;
 
-            parent->downloadAndInstall (asset, targetFolder);
-        });
+            weakThis->downloadAndInstall (asset, targetFolder);
+        };
 
         if (willOverwriteJuceFolder)
         {
@@ -291,7 +289,7 @@ void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const Version
                                           {},
                                           {},
                                           nullptr,
-                                          callback);
+                                          ModalCallbackFunction::create (onResult));
             return;
         }
 
@@ -303,11 +301,12 @@ void LatestVersionCheckerAndUpdater::askUserForLocationToDownload (const Version
                                           {},
                                           {},
                                           nullptr,
-                                          callback);
+                                          ModalCallbackFunction::create (onResult));
             return;
         }
 
-        downloadAndInstall (asset, targetFolder);
+        if (weakThis != nullptr)
+            weakThis->downloadAndInstall (asset, targetFolder);
     });
 }
 

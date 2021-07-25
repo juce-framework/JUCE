@@ -670,7 +670,7 @@ void PaintElement::showPopupMenu()
     m.addCommandItem (commandManager, JucerCommandIDs::toBack);
     m.addSeparator();
 
-    if (owner->getSelectedElements().getNumSelected() > 1)
+    if (owner != nullptr && owner->getSelectedElements().getNumSelected() > 1)
     {
         m.addCommandItem (commandManager, JucerCommandIDs::alignTop);
         m.addCommandItem (commandManager, JucerCommandIDs::alignRight);
