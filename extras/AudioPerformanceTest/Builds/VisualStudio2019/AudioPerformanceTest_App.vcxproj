@@ -2806,6 +2806,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\windows\juce_ComponentPeer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\windows\juce_DialogWindow.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\windows\juce_DocumentWindow.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\windows\juce_MessageBoxOptions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\windows\juce_NativeMessageBox.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\windows\juce_ResizableWindow.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\windows\juce_ThreadWithProgressWindow.h"/>
