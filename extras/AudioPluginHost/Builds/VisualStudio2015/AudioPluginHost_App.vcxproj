@@ -2220,7 +2220,6 @@
     <ClCompile Include="..\..\..\..\modules\juce_opengl\juce_opengl.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
@@ -2644,6 +2643,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Singleton.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_WeakReference.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_ConsoleApplication.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Functional.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Result.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_RuntimePermissions.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.h"/>
@@ -3102,7 +3102,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\opengl\juce_wgl.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\utils\juce_OpenGLAppComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h"/>
-    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>

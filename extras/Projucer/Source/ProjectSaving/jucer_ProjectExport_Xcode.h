@@ -1830,7 +1830,6 @@ public:
             options.pluginManufacturerCode           = owner.project.getPluginManufacturerCodeString();
             options.IAATypeCode                      = owner.project.getIAATypeCode();
             options.pluginCode                       = owner.project.getPluginCodeString();
-            options.versionAsHex                     = owner.project.getVersionAsHexInteger();
             options.iPhoneScreenOrientations         = owner.getiPhoneScreenOrientations();
             options.iPadScreenOrientations           = owner.getiPadScreenOrientations();
 

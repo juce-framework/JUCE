@@ -64,7 +64,7 @@ namespace build_tools
         String getFileNameWithoutExtension() const              { return getFakeFile().getFileNameWithoutExtension(); }
 
         String getFileExtension() const                         { return getFakeFile().getFileExtension(); }
-        bool hasFileExtension (juce::StringRef extension) const { return getFakeFile().hasFileExtension (extension); }
+        bool hasFileExtension (StringRef extension) const       { return getFakeFile().hasFileExtension (extension); }
         bool isAbsolute() const                                 { return isAbsolutePath (path); }
 
         RelativePath withFileExtension (const String& extension) const
