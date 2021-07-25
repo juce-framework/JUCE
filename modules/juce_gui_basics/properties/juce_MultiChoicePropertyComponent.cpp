@@ -219,8 +219,7 @@ MultiChoicePropertyComponent::MultiChoicePropertyComponent (const String& proper
 {
     // The array of corresponding values must contain one value for each of the items in
     // the choices array!
-    jassert (choices.size() == correspondingValues.size());
-    ignoreUnused (correspondingValues);
+    jassertquiet (choices.size() == correspondingValues.size());
 
     for (auto choice : choices)
         addAndMakeVisible (choiceButtons.add (new ToggleButton (choice)));

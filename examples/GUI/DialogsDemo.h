@@ -403,8 +403,7 @@ private:
                                          if (wi.get() != nullptr && wo.get() != nullptr)
                                          {
                                              auto numWritten = wo->writeFromInputStream (*wi, -1);
-                                             jassert (numWritten > 0);
-                                             ignoreUnused (numWritten);
+                                             jassertquiet (numWritten > 0);
                                              wo->flush();
                                          }
                                      }

@@ -451,9 +451,8 @@ private:
                                     int numOutputChannels,
                                     int numSamples) override
         {
-            jassert ((int) storedInputChannels.size()  == numInputChannels);
-            jassert ((int) storedOutputChannels.size() == numOutputChannels);
-            ignoreUnused (numInputChannels, numOutputChannels);
+            jassertquiet ((int) storedInputChannels.size()  == numInputChannels);
+            jassertquiet ((int) storedOutputChannels.size() == numOutputChannels);
 
             int position = 0;
 

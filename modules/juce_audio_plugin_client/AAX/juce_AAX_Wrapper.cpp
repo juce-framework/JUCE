@@ -137,7 +137,7 @@ namespace AAXClasses
 
     static void check (AAX_Result result)
     {
-        jassert (result == AAX_SUCCESS); ignoreUnused (result);
+        jassertquiet (result == AAX_SUCCESS);
     }
 
     // maps a channel index of an AAX format to an index of a juce format
@@ -1588,8 +1588,7 @@ namespace AAXClasses
         {
             auto currentLayout = getDefaultLayout (p, true);
             bool success = p.checkBusesLayoutSupported (currentLayout);
-            jassert (success);
-            ignoreUnused (success);
+            jassertquiet (success);
 
             auto numInputBuses  = p.getBusCount (true);
             auto numOutputBuses = p.getBusCount (false);

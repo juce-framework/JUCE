@@ -141,9 +141,7 @@ ChoicePropertyComponent::ChoicePropertyComponent (const String& name,
 {
     // The array of corresponding values must contain one value for each of the items in
     // the choices array!
-    jassert (correspondingValues.size() == choices.size());
-
-    ignoreUnused (correspondingValues);
+    jassertquiet (correspondingValues.size() == choices.size());
 }
 
 ChoicePropertyComponent::ChoicePropertyComponent (const Value& valueToControl,

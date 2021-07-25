@@ -347,8 +347,7 @@ public:
         if (client != nullptr)
         {
             const auto result = juce::jack_deactivate (client);
-            jassert (result == 0);
-            ignoreUnused (result);
+            jassertquiet (result == 0);
 
             juce::jack_set_xrun_callback (client, xrunCallback, nullptr);
             juce::jack_set_process_callback (client, processCallback, nullptr);
@@ -543,8 +542,7 @@ private:
 
     static void infoShutdownCallback (jack_status_t code, const char* reason, void* arg)
     {
-        jassert (code == 0);
-        ignoreUnused (code);
+        jassertquiet (code == 0);
 
         JUCE_JACK_LOG ("Shutting down with message:");
         JUCE_JACK_LOG (reason);

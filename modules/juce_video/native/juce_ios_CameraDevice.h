@@ -59,9 +59,7 @@ struct CameraDevice::Pimpl
          {
              // Access to video is required for camera to work,
              // black images will be produced otherwise!
-             jassert (granted);
-
-             ignoreUnused (granted);
+             jassertquiet (granted);
          }];
 
         [AVCaptureDevice requestAccessForMediaType: AVMediaTypeAudio
@@ -69,9 +67,7 @@ struct CameraDevice::Pimpl
          {
              // Access to audio is required for camera to work,
              // silence will be produced otherwise!
-             jassert (granted);
-
-             ignoreUnused (granted);
+             jassertquiet (granted);
          }];
 
         captureSession.startSessionForDeviceWithId (cameraId);
