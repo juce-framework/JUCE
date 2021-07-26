@@ -940,7 +940,7 @@ CGContextRef juce_getImageContext (const Image& image)
          [cicontext release];
          CGColorSpaceRelease (srgbSpace);
      }
-     const CGColorSpaceRef getSRGBColourSpace() { return srgbSpace; }
+     CGColorSpaceRef getSRGBColourSpace() { return srgbSpace; }
      const CIContext* getCIContext() { return cicontext; }
 
    private:
