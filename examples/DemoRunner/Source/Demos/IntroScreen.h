@@ -84,7 +84,7 @@ private:
             Path wavePath;
 
             auto waveStep = 10.0f;
-            auto waveY = (float) getHeight() * 0.44f;
+            auto waveY = (float) getHeight() * 0.5f;
             int i = 0;
 
             for (auto x = waveStep * 0.5f; x < (float) getWidth(); x += waveStep)
