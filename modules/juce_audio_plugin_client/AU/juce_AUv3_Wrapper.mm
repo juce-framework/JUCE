@@ -36,12 +36,18 @@
   #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
   #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
  #endif
+ #if defined (MAC_OS_VERSION_12_0)
+  #define JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED 1
+ #endif
 #endif
 
 #if JUCE_IOS
  #if (defined __IPHONE_11_0) && (__IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
   #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
   #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
+ #endif
+ #if (defined __IPHONE_15_0)
+  #define JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED 1
  #endif
 #endif
 
@@ -62,6 +68,10 @@
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
+
+#if JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED
+ #include <juce_audio_basics/midi/ump/juce_UMP.h>
+#endif
 
 #define JUCE_VIEWCONTROLLER_OBJC_NAME(x) JUCE_JOIN_MACRO (x, FactoryAUv3)
 
@@ -1419,6 +1429,25 @@ private:
                 }
                 break;
 
+               #if JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED
+                case AURenderEventMIDIEventList:
+                {
+                    const auto& list = event->MIDIEventsList.eventList;
+                    auto* packet = &list.packet[0];
+
+                    for (uint32_t i = 0; i < list.numPackets; ++i)
+                    {
+                        converter.dispatch (reinterpret_cast<const uint32_t*> (packet->words),
+                                            reinterpret_cast<const uint32_t*> (packet->words + packet->wordCount),
+                                            static_cast<int> (packet->timeStamp - (MIDITimeStamp) startTime),
+                                            [this] (const MidiMessage& message) { midiMessages.addEvent (message, int (message.getTimeStamp())); });
+
+                        packet = MIDIEventPacketNext (packet);
+                    }
+                }
+                break;
+               #endif
+
                 case AURenderEventParameter:
                 case AURenderEventParameterRamp:
                 {
@@ -1433,9 +1462,6 @@ private:
                 break;
 
                 case AURenderEventMIDISysEx:
-               #if defined (MAC_OS_VERSION_12_0)
-                case AURenderEventMIDIEventList:
-               #endif
                 default:
                     break;
             }
@@ -1721,6 +1747,10 @@ private:
 
     OwnedArray<BusBuffer> inBusBuffers, outBusBuffers;
     MidiBuffer midiMessages;
+
+   #if JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED
+    ump::ToBytestreamDispatcher converter { 2048 };
+   #endif
 
     ObjCBlock<AUHostMusicalContextBlock> hostMusicalContextCallback;
     ObjCBlock<AUHostTransportStateBlock> hostTransportStateCallback;
