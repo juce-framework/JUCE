@@ -1433,6 +1433,9 @@ private:
                 break;
 
                 case AURenderEventMIDISysEx:
+               #if defined (MAC_OS_VERSION_12_0)
+                case AURenderEventMIDIEventList:
+               #endif
                 default:
                     break;
             }
