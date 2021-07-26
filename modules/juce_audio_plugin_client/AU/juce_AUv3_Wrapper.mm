@@ -249,7 +249,10 @@ private:
 
             //==============================================================================
             addMethod (@selector (virtualMIDICableCount),           getVirtualMIDICableCount,       @encode (NSInteger), "@:");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             addMethod (@selector (supportsMPE),                     getSupportsMPE,                 @encode (BOOL),      "@:");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
            #if JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
             addMethod (@selector (MIDIOutputNames),                 getMIDIOutputNames,             "@@:");
