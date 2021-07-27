@@ -1056,7 +1056,13 @@ namespace IconConverters
             header.bV5GreenMask = 0x0000FF00;
             header.bV5BlueMask = 0x000000FF;
             header.bV5AlphaMask = 0xFF000000;
+
+           #if JUCE_MINGW
+            header.bV5CSType = 'Win ';
+           #else
             header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
+           #endif
+
             header.bV5Intent = LCS_GM_IMAGES;
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
@@ -3933,7 +3939,7 @@ private:
 
             case WM_IME_SETCONTEXT:
                 imeHandler.handleSetContext (h, wParam == TRUE);
-                lParam &= ~ISC_SHOWUICOMPOSITIONWINDOW;
+                lParam &= ~(LPARAM) ISC_SHOWUICOMPOSITIONWINDOW;
                 break;
 
             case WM_IME_STARTCOMPOSITION:  imeHandler.handleStartComposition (*this); return 0;
@@ -4080,7 +4086,7 @@ private:
 
         String getCompositionString (HIMC hImc, const DWORD type) const
         {
-            jassert (hImc != nullptr);
+            jassert (hImc != HIMC{});
 
             const auto stringSizeBytes = ImmGetCompositionString (hImc, type, nullptr, 0);
 
@@ -4097,7 +4103,7 @@ private:
 
         int getCompositionCaretPos (HIMC hImc, LPARAM lParam, const String& currentIMEString) const
         {
-            jassert (hImc != nullptr);
+            jassert (hImc != HIMC{});
 
             if ((lParam & CS_NOMOVECARET) != 0)
                 return compositionRange.getStart();
@@ -4115,7 +4121,7 @@ private:
         // returned range is relative to beginning of TextInputTarget, not composition string
         Range<int> getCompositionSelection (HIMC hImc, LPARAM lParam) const
         {
-            jassert (hImc != nullptr);
+            jassert (hImc != HIMC{});
             int selectionStart = 0;
             int selectionEnd = 0;
 
@@ -4163,7 +4169,7 @@ private:
         {
             Array<Range<int>> result;
 
-            if (hImc != nullptr && (lParam & GCS_COMPCLAUSE) != 0)
+            if (hImc != HIMC{} && (lParam & GCS_COMPCLAUSE) != 0)
             {
                 auto clauseDataSizeBytes = ImmGetCompositionString (hImc, GCS_COMPCLAUSE, nullptr, 0);
 
