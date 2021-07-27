@@ -252,7 +252,7 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
-#if JUCE_WINDOWS
+#if JUCE_ANDROID || JUCE_WINDOWS
  #include "native/accessibility/juce_AccessibilityTextHelpers.h"
 #endif
 
@@ -337,6 +337,7 @@ bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID
+ #include "native/accessibility/juce_android_Accessibility.cpp"
  #include "native/juce_android_Windowing.cpp"
  #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
