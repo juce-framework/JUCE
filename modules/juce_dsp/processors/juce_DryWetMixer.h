@@ -112,6 +112,8 @@ private:
     SampleType mix = 1.0;
     MixingRule currentMixingRule = MixingRule::linear;
     double sampleRate = 44100.0;
+    size_t offsetInBuffer = 0, numUsedSamples = 0;
+    int maximumWetLatencyInSamples = 0;
 };
 
 } // namespace dsp
