@@ -953,9 +953,11 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 
 bool Thread::setThreadPriority (void* handle, int priority)
 {
+    constexpr auto maxInputPriority = 10;
+    constexpr auto lowestRealtimePriority = 8;
+
     struct sched_param param;
     int policy;
-    priority = jlimit (0, 10, priority);
 
     if (handle == nullptr)
         handle = (void*) pthread_self();
@@ -963,12 +965,19 @@ bool Thread::setThreadPriority (void* handle, int priority)
     if (pthread_getschedparam ((pthread_t) handle, &policy, &param) != 0)
         return false;
 
-    policy = priority == 0 ? SCHED_OTHER : SCHED_RR;
+    policy = priority < lowestRealtimePriority ? SCHED_OTHER : SCHED_RR;
 
-    const int minPriority = sched_get_priority_min (policy);
-    const int maxPriority = sched_get_priority_max (policy);
+    const auto minPriority = sched_get_priority_min (policy);
+    const auto maxPriority = sched_get_priority_max (policy);
 
-    param.sched_priority = ((maxPriority - minPriority) * priority) / 10 + minPriority;
+    param.sched_priority = [&]
+    {
+        if (policy == SCHED_OTHER)
+            return 0;
+
+        return jmap (priority, lowestRealtimePriority, maxInputPriority, minPriority, maxPriority);
+    }();
+
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
 

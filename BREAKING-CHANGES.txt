@@ -6,6 +6,33 @@ Develop
 
 Change
 ------
+Thread::setPriority() will no longer set a realtime scheduling policy for all
+threads with non-zero priorities on POSIX systems.
+
+Possible Issues
+---------------
+Threads that implicitly relied on using a realtime policy will no longer
+request a realtime policy if their priority is 7 or lower.
+
+Workaround
+----------
+For threads that require a realtime policy on POSIX systems, request a priority
+of 8 or higher by calling Thread::setPriority() or
+Thread::setCurrentThreadPriority().
+
+Rationale
+---------
+By default, new Thread instances have a priority of 5. Previously, non-zero
+priorities corresponded to realtime scheduling policies, meaning that new
+Threads would use the realtime scheduling policy unless they explicitly
+requested a priority of 0. However, most threads do not and should not require
+realtime scheduling. Setting a realtime policy on all newly-created threads may
+degrade performance, as multiple realtime threads will end up fighting for
+limited resources.
+
+
+Change
+------
 The JUCE_GLSL_VERSION preprocessor definition has been removed.
 
 Possible Issues
