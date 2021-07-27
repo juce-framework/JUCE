@@ -576,6 +576,8 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
         {
             range = Range<int64>();
         }
+
+        close (fileHandle);
     }
 }
 
