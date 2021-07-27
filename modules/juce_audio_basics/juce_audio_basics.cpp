@@ -87,6 +87,13 @@
 #include "sources/juce_ToneGeneratorAudioSource.cpp"
 #include "synthesisers/juce_Synthesiser.cpp"
 
+#include "midi/ump/juce_UMP.h"
+#include "midi/ump/juce_UMPUtils.cpp"
+#include "midi/ump/juce_UMPView.cpp"
+#include "midi/ump/juce_UMPSysEx7.cpp"
+#include "midi/ump/juce_UMPMidi1ToMidi2DefaultTranslator.cpp"
+
 #if JUCE_UNIT_TESTS
  #include "utilities/juce_ADSR_test.cpp"
+ #include "midi/ump/juce_UMPTests.cpp"
 #endif
