@@ -3393,7 +3393,7 @@ private:
 
     static String indentList (StringArray list, char openBracket, char closeBracket, const String& separator, int extraTabs, bool shouldSort)
     {
-        auto content = [extraTabs, shouldSort, &list, &separator] () -> String
+        auto content = [extraTabs, shouldSort, &list, &separator]() -> String
         {
             if (list.isEmpty())
                 return "";

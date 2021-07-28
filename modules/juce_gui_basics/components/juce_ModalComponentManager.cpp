@@ -117,7 +117,7 @@ void ModalComponentManager::attachCallback (Component* component, Callback* call
 
         for (int i = stack.size(); --i >= 0;)
         {
-            auto* item = stack.getUnchecked(i);
+            auto* item = stack.getUnchecked (i);
 
             if (item->component == component)
             {
@@ -133,7 +133,7 @@ void ModalComponentManager::endModal (Component* component)
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (item->component == component)
             item->cancel();
@@ -144,7 +144,7 @@ void ModalComponentManager::endModal (Component* component, int returnValue)
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (item->component == component)
         {
@@ -171,7 +171,7 @@ Component* ModalComponentManager::getModalComponent (int index) const
 
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (item->isActive)
             if (n++ == index)
@@ -199,7 +199,7 @@ void ModalComponentManager::handleAsyncUpdate()
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (! item->isActive)
         {
@@ -252,7 +252,7 @@ bool ModalComponentManager::cancelAllModalComponents()
     auto numModal = getNumModalComponents();
 
     for (int i = numModal; --i >= 0;)
-        if (auto* c = getModalComponent(i))
+        if (auto* c = getModalComponent (i))
             c->exitModalState (0);
 
     return numModal > 0;
