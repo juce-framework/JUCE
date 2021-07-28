@@ -151,6 +151,7 @@ namespace Ids
     DECLARE_ID (windowsTargetPlatformVersion);
     DECLARE_ID (debugInformationFormat);
     DECLARE_ID (IPPLibrary);
+    DECLARE_ID (IPP1ALibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);
     DECLARE_ID (smallIcon);

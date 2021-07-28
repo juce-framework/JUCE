@@ -33,6 +33,7 @@ public:
     MSVCProjectExporterBase (Project& p, const ValueTree& t, String folderName)
         : ProjectExporter (p, t),
           IPPLibraryValue       (settings, Ids::IPPLibrary,                   getUndoManager()),
+          IPP1ALibraryValue     (settings, Ids::IPP1ALibrary,                 getUndoManager()),
           platformToolsetValue  (settings, Ids::toolset,                      getUndoManager()),
           targetPlatformVersion (settings, Ids::windowsTargetPlatformVersion, getUndoManager()),
           manifestFileValue     (settings, Ids::msvcManifestFile,             getUndoManager())
@@ -49,6 +50,7 @@ public:
 
     //==============================================================================
     String getIPPLibrary() const                      { return IPPLibraryValue.get(); }
+    String getIPP1ALibrary() const                    { return IPP1ALibraryValue.get(); }
     String getPlatformToolset() const                 { return platformToolsetValue.get(); }
     String getWindowsTargetPlatformVersion() const    { return targetPlatformVersion.get(); }
 
@@ -436,10 +438,18 @@ public:
 
                 addWindowsTargetPlatformToConfig (*e);
 
-                auto ippLibrary = owner.getIPPLibrary();
+                struct IPPLibraryInfo
+                {
+                    String libraryKind;
+                    String configString;
+                };
 
-                if (ippLibrary.isNotEmpty())
-                    e->createNewChildElement ("UseIntelIPP")->addTextElement (ippLibrary);
+                for (const auto& info : { IPPLibraryInfo { owner.getIPPLibrary(),   "UseIntelIPP" },
+                                          IPPLibraryInfo { owner.getIPP1ALibrary(), "UseIntelIPP1A" }})
+                {
+                    if (info.libraryKind.isNotEmpty())
+                        e->createNewChildElement (info.configString)->addTextElement (info.libraryKind);
+                }
             }
 
             {
@@ -1472,10 +1482,16 @@ public:
         props.add (new TextPropertyComponent (manifestFileValue, "Manifest file", 8192, false),
             "Path to a manifest input file which should be linked into your binary (path is relative to jucer file).");
 
-        props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
+        props.add (new ChoicePropertyComponent (IPPLibraryValue, "(deprecated) Use IPP Library",
                                                 { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
                                                 { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
-                   "Enable this to use Intel's Integrated Performance Primitives library.");
+                   "This option is deprecated, use the \"Use IPP Library (oneAPI)\" option instead. "
+                   "Enable this to use Intel's Integrated Performance Primitives library, if you have an older version that was not supplied in the oneAPI toolkit.");
+
+        props.add (new ChoicePropertyComponent (IPP1ALibraryValue, "Use IPP Library (oneAPI)",
+                                                { "No",  "Yes (Default Linking)",  "Static Library",     "Dynamic Library" },
+                                                { var(), "true",                   "Static_Library",     "Dynamic_Library" }),
+                   "Enable this to use Intel's Integrated Performance Primitives library, supplied as part of the oneAPI toolkit.");
 
         {
             auto isWindows10SDK = getVisualStudioVersion() > 14;
@@ -1560,7 +1576,7 @@ protected:
     mutable File rcFile, iconFile, packagesConfigFile;
     OwnedArray<MSVCTargetBase> targets;
 
-    ValueWithDefault IPPLibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
+    ValueWithDefault IPPLibraryValue, IPP1ALibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
 
     File getProjectFile (const String& extension, const String& target) const
     {
