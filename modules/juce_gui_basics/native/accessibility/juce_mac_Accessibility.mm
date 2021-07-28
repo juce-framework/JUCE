@@ -295,7 +295,7 @@ private:
         {
             if (auto* handler = getHandler (self))
             {
-                if (auto* child = handler->getChildAt (convertToIntPoint (flippedScreenPoint (point))))
+                if (auto* child = handler->getChildAt (roundToIntPoint (flippedScreenPoint (point))))
                     return (id) child->getNativeImplementation();
 
                 return self;
@@ -401,38 +401,43 @@ private:
             {
                 switch (handler->getRole())
                 {
-                    case AccessibilityRole::button:       return NSAccessibilityButtonRole;
-                    case AccessibilityRole::toggleButton: return NSAccessibilityCheckBoxRole;
-                    case AccessibilityRole::radioButton:  return NSAccessibilityRadioButtonRole;
-                    case AccessibilityRole::comboBox:     return NSAccessibilityPopUpButtonRole;
-                    case AccessibilityRole::image:        return NSAccessibilityImageRole;
-                    case AccessibilityRole::slider:       return NSAccessibilitySliderRole;
-                    case AccessibilityRole::label:        return NSAccessibilityStaticTextRole;
-                    case AccessibilityRole::staticText:   return NSAccessibilityStaticTextRole;
-                    case AccessibilityRole::editableText: return NSAccessibilityTextAreaRole;
-                    case AccessibilityRole::menuItem:     return NSAccessibilityMenuItemRole;
-                    case AccessibilityRole::menuBar:      return NSAccessibilityMenuRole;
-                    case AccessibilityRole::popupMenu:    return NSAccessibilityWindowRole;
-                    case AccessibilityRole::table:        return NSAccessibilityListRole;
-                    case AccessibilityRole::tableHeader:  return NSAccessibilityGroupRole;
-                    case AccessibilityRole::column:       return NSAccessibilityColumnRole;
-                    case AccessibilityRole::row:          return NSAccessibilityRowRole;
-                    case AccessibilityRole::cell:         return NSAccessibilityCellRole;
-                    case AccessibilityRole::hyperlink:    return NSAccessibilityLinkRole;
-                    case AccessibilityRole::list:         return NSAccessibilityOutlineRole;
-                    case AccessibilityRole::listItem:     return NSAccessibilityRowRole;
-                    case AccessibilityRole::tree:         return NSAccessibilityOutlineRole;
-                    case AccessibilityRole::treeItem:     return NSAccessibilityRowRole;
-                    case AccessibilityRole::progressBar:  return NSAccessibilityProgressIndicatorRole;
-                    case AccessibilityRole::group:        return NSAccessibilityGroupRole;
-                    case AccessibilityRole::dialogWindow: return NSAccessibilityWindowRole;
-                    case AccessibilityRole::window:       return NSAccessibilityWindowRole;
-                    case AccessibilityRole::scrollBar:    return NSAccessibilityScrollBarRole;
-                    case AccessibilityRole::tooltip:      return NSAccessibilityWindowRole;
-                    case AccessibilityRole::splashScreen: return NSAccessibilityWindowRole;
-                    case AccessibilityRole::ignored:      return NSAccessibilityUnknownRole;
-                    case AccessibilityRole::unspecified:  return NSAccessibilityGroupRole;
-                    default:                              break;
+                    case AccessibilityRole::popupMenu:
+                    case AccessibilityRole::tooltip:
+                    case AccessibilityRole::splashScreen:
+                    case AccessibilityRole::dialogWindow:
+                    case AccessibilityRole::window:        return NSAccessibilityWindowRole;
+
+                    case AccessibilityRole::tableHeader:
+                    case AccessibilityRole::unspecified:
+                    case AccessibilityRole::group:         return NSAccessibilityGroupRole;
+
+                    case AccessibilityRole::label:
+                    case AccessibilityRole::staticText:    return NSAccessibilityStaticTextRole;
+
+                    case AccessibilityRole::tree:
+                    case AccessibilityRole::list:          return NSAccessibilityOutlineRole;
+
+                    case AccessibilityRole::listItem:
+                    case AccessibilityRole::treeItem:      return NSAccessibilityRowRole;
+
+                    case AccessibilityRole::button:        return NSAccessibilityButtonRole;
+                    case AccessibilityRole::toggleButton:  return NSAccessibilityCheckBoxRole;
+                    case AccessibilityRole::radioButton:   return NSAccessibilityRadioButtonRole;
+                    case AccessibilityRole::comboBox:      return NSAccessibilityPopUpButtonRole;
+                    case AccessibilityRole::image:         return NSAccessibilityImageRole;
+                    case AccessibilityRole::slider:        return NSAccessibilitySliderRole;
+                    case AccessibilityRole::editableText:  return NSAccessibilityTextAreaRole;
+                    case AccessibilityRole::menuItem:      return NSAccessibilityMenuItemRole;
+                    case AccessibilityRole::menuBar:       return NSAccessibilityMenuRole;
+                    case AccessibilityRole::table:         return NSAccessibilityListRole;
+                    case AccessibilityRole::column:        return NSAccessibilityColumnRole;
+                    case AccessibilityRole::row:           return NSAccessibilityRowRole;
+                    case AccessibilityRole::cell:          return NSAccessibilityCellRole;
+                    case AccessibilityRole::hyperlink:     return NSAccessibilityLinkRole;
+                    case AccessibilityRole::progressBar:   return NSAccessibilityProgressIndicatorRole;
+                    case AccessibilityRole::scrollBar:     return NSAccessibilityScrollBarRole;
+
+                    case AccessibilityRole::ignored:       break;
                 }
 
                 return NSAccessibilityUnknownRole;
@@ -637,7 +642,7 @@ private:
             {
                 if (auto* textInterface = handler->getTextInterface())
                 {
-                    auto screenPoint = convertToIntPoint (flippedScreenPoint (position));
+                    auto screenPoint = roundToIntPoint (flippedScreenPoint (position));
 
                     if (handler->getComponent().getScreenBounds().contains (screenPoint))
                     {
@@ -1139,16 +1144,6 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
                                 @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
                                    NSAccessibilityPriorityKey:     @(nsPriority) });
      }
-}
-
-AccessibilityHandler::AccessibilityNativeImpl* AccessibilityHandler::createNativeImpl (AccessibilityHandler& handler)
-{
-    return new AccessibilityHandler::AccessibilityNativeImpl (handler);
-}
-
-void AccessibilityHandler::DestroyNativeImpl::operator() (AccessibilityHandler::AccessibilityNativeImpl* impl) const noexcept
-{
-    delete impl;
 }
 
 #endif

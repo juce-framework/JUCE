@@ -351,8 +351,6 @@ private:
                         VariantHelpers::setInt (caretPos, pRetVal);
                         break;
                     }
-                    default:
-                        break;
                 }
 
                 return S_OK;

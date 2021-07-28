@@ -65,6 +65,12 @@ namespace
         return CGPointMake ((CGFloat) p.x, (CGFloat) p.y);
     }
 
+    template <class PointType>
+    Point<int> roundToIntPoint (PointType p) noexcept
+    {
+        return { roundToInt (p.x), roundToInt (p.y) };
+    }
+
    #if JUCE_MAC
     inline CGFloat getMainScreenHeight() noexcept
     {
@@ -84,12 +90,6 @@ namespace
     {
         p.y = getMainScreenHeight() - p.y;
         return p;
-    }
-
-    template <class PointType>
-    Point<int> convertToIntPoint (PointType p) noexcept
-    {
-        return Point<int> (roundToInt (p.x), roundToInt (p.y));
     }
    #endif
 }

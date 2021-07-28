@@ -28,8 +28,6 @@ namespace juce
 
 AccessibilityHandler* AccessibilityHandler::currentlyFocusedHandler = nullptr;
 
-bool areAnyAccessibilityClientsActive();
-
 enum class InternalAccessibilityEvent
 {
     elementCreated,
