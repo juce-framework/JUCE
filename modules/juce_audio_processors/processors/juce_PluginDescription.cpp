@@ -72,6 +72,7 @@ std::unique_ptr<XmlElement> PluginDescription::createXml() const
     e->setAttribute ("numInputs", numInputChannels);
     e->setAttribute ("numOutputs", numOutputChannels);
     e->setAttribute ("isShell", hasSharedContainer);
+    e->setAttribute ("hasARAExtension", hasARAExtension);
 
     e->setAttribute ("uid", String::toHexString (deprecatedUid));
 
@@ -95,6 +96,7 @@ bool PluginDescription::loadFromXml (const XmlElement& xml)
         numInputChannels    = xml.getIntAttribute ("numInputs");
         numOutputChannels   = xml.getIntAttribute ("numOutputs");
         hasSharedContainer  = xml.getBoolAttribute ("isShell", false);
+        hasARAExtension     = xml.getBoolAttribute ("hasARAExtension", false);
 
         deprecatedUid       = xml.getStringAttribute ("uid").getHexValue32();
         uniqueId            = xml.getStringAttribute ("uniqueId", "0").getHexValue32();

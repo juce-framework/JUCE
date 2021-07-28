@@ -1969,6 +1969,22 @@ function(juce_set_vst3_sdk_path path)
     target_include_directories(juce_vst3_sdk INTERFACE "${path}")
 endfunction()
 
+function(juce_set_ara_sdk_path path)
+    if(TARGET juce_ara_sdk)
+        message(FATAL_ERROR "juce_set_ara_sdk_path should only be called once")
+    endif()
+
+    _juce_make_absolute(path)
+
+    if(NOT EXISTS "${path}")
+        message(FATAL_ERROR "Could not find ARA SDK at the specified path: ${path}")
+    endif()
+
+    add_library(juce_ara_sdk INTERFACE IMPORTED GLOBAL)
+
+    target_include_directories(juce_ara_sdk INTERFACE "${path}")
+endfunction()
+
 # ==================================================================================================
 
 function(juce_disable_default_flags)

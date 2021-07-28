@@ -94,6 +94,17 @@
  #define JUCE_PLUGINHOST_LV2 0
 #endif
 
+/** Config: JUCE_PLUGINHOST_ARA
+    Enables the ARA plugin extension hosting classes. You will need to download the ARA SDK and specify the
+    path to it either in the Projucer, using juce_set_ara_sdk_path() in your CMake project file.
+
+    The directory can be obtained by recursively cloning https://github.com/Celemony/ARA_SDK and checking out
+    the tag releases/2.1.0.
+*/
+#ifndef JUCE_PLUGINHOST_ARA
+ #define JUCE_PLUGINHOST_ARA 0
+#endif
+
 /** Config: JUCE_CUSTOM_VST3_SDK
     If enabled, the embedded VST3 SDK in JUCE will not be added to the project and instead you should
     add the path to your custom VST3 SDK to the project's header search paths. Most users shouldn't
@@ -115,6 +126,7 @@
 #include "utilities/juce_VSTCallbackHandler.h"
 #include "utilities/juce_VST3ClientExtensions.h"
 #include "utilities/juce_NativeScaleFactorNotifier.h"
+#include "format_types/juce_ARACommon.h"
 #include "utilities/juce_ExtensionsVisitor.h"
 #include "processors/juce_AudioProcessorParameter.h"
 #include "processors/juce_HostedAudioProcessorParameter.h"
@@ -136,6 +148,7 @@
 #include "format_types/juce_VST3PluginFormat.h"
 #include "format_types/juce_VSTMidiEventList.h"
 #include "format_types/juce_VSTPluginFormat.h"
+#include "format_types/juce_ARAHosting.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
 #include "utilities/juce_AudioProcessorParameterWithID.h"

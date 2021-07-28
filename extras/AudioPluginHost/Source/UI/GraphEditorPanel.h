@@ -31,10 +31,11 @@ class GraphEditorPanel   : public Component,
                            private Timer
 {
 public:
+    //==============================================================================
     GraphEditorPanel (PluginGraph& graph);
     ~GraphEditorPanel() override;
 
-    void createNewPlugin (const PluginDescription&, Point<int> position);
+    void createNewPlugin (const PluginDescriptionAndPreference&, Point<int> position);
 
     void paint (Graphics&) override;
     void resized() override;
@@ -103,7 +104,7 @@ public:
     ~GraphDocumentComponent() override;
 
     //==============================================================================
-    void createNewPlugin (const PluginDescription&, Point<int> position);
+    void createNewPlugin (const PluginDescriptionAndPreference&, Point<int> position);
     void setDoublePrecision (bool doublePrecision);
     bool closeAnyOpenPluginWindows();
 

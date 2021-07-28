@@ -576,7 +576,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuItemID) >= 0)
+        if (getIndexChosenByMenu (menuItemID) >= 0)
             createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
                                                         proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
@@ -588,10 +588,62 @@ void MainHostWindow::menuBarActivated (bool isActivated)
         graphHolder->unfocusKeyboardComponent();
 }
 
-void MainHostWindow::createPlugin (const PluginDescription& desc, Point<int> pos)
+void MainHostWindow::createPlugin (const PluginDescriptionAndPreference& desc, Point<int> pos)
 {
     if (graphHolder != nullptr)
         graphHolder->createNewPlugin (desc, pos);
+}
+
+static bool containsDuplicateNames (const Array<PluginDescription>& plugins, const String& name)
+{
+    int matches = 0;
+
+    for (auto& p : plugins)
+        if (p.name == name && ++matches > 1)
+            return true;
+
+    return false;
+}
+
+static constexpr int menuIDBase = 0x324503f4;
+
+static void addToMenu (const KnownPluginList::PluginTree& tree,
+                       PopupMenu& m,
+                       const Array<PluginDescription>& allPlugins,
+                       Array<PluginDescriptionAndPreference>& addedPlugins)
+{
+    for (auto* sub : tree.subFolders)
+    {
+        PopupMenu subMenu;
+        addToMenu (*sub, subMenu, allPlugins, addedPlugins);
+
+        m.addSubMenu (sub->folder, subMenu, true, nullptr, false, 0);
+    }
+
+    auto addPlugin = [&] (const auto& descriptionAndPreference, const auto& pluginName)
+    {
+        addedPlugins.add (descriptionAndPreference);
+        const auto menuID = addedPlugins.size() - 1 + menuIDBase;
+        m.addItem (menuID, pluginName, true, false);
+    };
+
+    for (auto& plugin : tree.plugins)
+    {
+        auto name = plugin.name;
+
+        if (containsDuplicateNames (tree.plugins, name))
+            name << " (" << plugin.pluginFormatName << ')';
+
+        addPlugin (PluginDescriptionAndPreference { plugin, PluginDescriptionAndPreference::UseARA::no }, name);
+
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+        if (plugin.hasARAExtension)
+        {
+            name << " (ARA)";
+            addPlugin (PluginDescriptionAndPreference { plugin }, name);
+        }
+       #endif
+    }
 }
 
 void MainHostWindow::addPluginsToMenu (PopupMenu& m)
@@ -606,7 +658,7 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
 
     m.addSeparator();
 
-    pluginDescriptions = knownPluginList.getTypes();
+    auto pluginDescriptions = knownPluginList.getTypes();
 
     // This avoids showing the internal types again later on in the list
     pluginDescriptions.removeIf ([] (PluginDescription& desc)
@@ -614,15 +666,23 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
         return desc.pluginFormatName == InternalPluginFormat::getIdentifier();
     });
 
-    KnownPluginList::addToMenu (m, pluginDescriptions, pluginSortMethod);
+    auto tree = KnownPluginList::createTree (pluginDescriptions, pluginSortMethod);
+    pluginDescriptionsAndPreference = {};
+    addToMenu (*tree, m, pluginDescriptions, pluginDescriptionsAndPreference);
 }
 
-PluginDescription MainHostWindow::getChosenType (const int menuID) const
+int MainHostWindow::getIndexChosenByMenu (int menuID) const
+{
+    const auto i = menuID - menuIDBase;
+    return isPositiveAndBelow (i, pluginDescriptionsAndPreference.size()) ? i : -1;
+}
+
+PluginDescriptionAndPreference MainHostWindow::getChosenType (const int menuID) const
 {
     if (menuID >= 1 && menuID < (int) (1 + internalTypes.size()))
-        return internalTypes[(size_t) (menuID - 1)];
+        return PluginDescriptionAndPreference { internalTypes[(size_t) (menuID - 1)] };
 
-    return pluginDescriptions[KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuID)];
+    return pluginDescriptionsAndPreference[getIndexChosenByMenu (menuID)];
 }
 
 //==============================================================================
@@ -905,7 +965,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
                 if (auto* desc = typesFound.getUnchecked(i))
-                    createPlugin (*desc, pos);
+                    createPlugin (PluginDescriptionAndPreference { *desc }, pos);
         }
     }
 }

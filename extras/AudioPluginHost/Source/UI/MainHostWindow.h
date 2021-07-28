@@ -100,10 +100,10 @@ public:
 
     void tryToQuitApplication();
 
-    void createPlugin (const PluginDescription&, Point<int> pos);
+    void createPlugin (const PluginDescriptionAndPreference&, Point<int> pos);
 
     void addPluginsToMenu (PopupMenu&);
-    PluginDescription getChosenType (int menuID) const;
+    PluginDescriptionAndPreference getChosenType (int menuID) const;
 
     std::unique_ptr<GraphDocumentComponent> graphHolder;
 
@@ -117,6 +117,8 @@ private:
 
     void showAudioSettings();
 
+    int getIndexChosenByMenu (int menuID) const;
+
     //==============================================================================
     AudioDeviceManager deviceManager;
     AudioPluginFormatManager formatManager;
@@ -124,7 +126,7 @@ private:
     std::vector<PluginDescription> internalTypes;
     KnownPluginList knownPluginList;
     KnownPluginList::SortMethod pluginSortMethod;
-    Array<PluginDescription> pluginDescriptions;
+    Array<PluginDescriptionAndPreference> pluginDescriptionsAndPreference;
 
     class PluginListWindow;
     std::unique_ptr<PluginListWindow> pluginListWindow;

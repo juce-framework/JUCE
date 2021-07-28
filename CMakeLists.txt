@@ -69,10 +69,11 @@ juce_disable_default_flags()
 
 add_subdirectory(extras/Build)
 
-# If you want to build the JUCE examples with VST2/AAX support, you'll need to make the VST2/AAX
-# headers visible to the juce_audio_processors module. You can either set the paths on the command
-# line, (e.g. -DJUCE_GLOBAL_AAX_SDK_PATH=/path/to/sdk) if you're just building the JUCE examples, or
-# you can call the `juce_set_*_sdk_path` functions in your own CMakeLists after importing JUCE.
+# If you want to build the JUCE examples with VST2/AAX/ARA support, you'll need to make the
+# VST2/AAX/ARA headers visible to the juce_audio_processors module. You can either set the paths on
+# the command line, (e.g. -DJUCE_GLOBAL_AAX_SDK_PATH=/path/to/sdk) if you're just building the JUCE
+# examples, or you can call the `juce_set_*_sdk_path` functions in your own CMakeLists after
+# importing JUCE.
 
 if(JUCE_GLOBAL_AAX_SDK_PATH)
     juce_set_aax_sdk_path("${JUCE_GLOBAL_AAX_SDK_PATH}")
@@ -80,6 +81,13 @@ endif()
 
 if(JUCE_GLOBAL_VST2_SDK_PATH)
     juce_set_vst2_sdk_path("${JUCE_GLOBAL_VST2_SDK_PATH}")
+endif()
+
+# The ARA_SDK path should point to the "Umbrella installer" ARA_SDK directory.
+# The directory can be obtained by recursively cloning https://github.com/Celemony/ARA_SDK and
+# checking out the tag releases/2.1.0.
+if(JUCE_GLOBAL_ARA_SDK_PATH)
+    juce_set_ara_sdk_path("${JUCE_GLOBAL_ARA_SDK_PATH}")
 endif()
 
 # We don't build anything other than the juceaide by default, because we want to keep configuration

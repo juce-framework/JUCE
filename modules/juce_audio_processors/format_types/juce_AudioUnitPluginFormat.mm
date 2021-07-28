@@ -24,6 +24,11 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 #include <AudioUnit/AUCocoaUIView.h>
 #include <CoreAudioKit/AUGenericView.h>
 #include <AudioToolbox/AudioUnitUtilities.h>
+
+#if JUCE_PLUGINHOST_ARA
+ #include <ARA_API/ARAAudioUnit.h>
+#endif
+
 #endif
 
 #include <CoreMIDI/MIDIServices.h>
@@ -420,6 +425,197 @@ namespace AudioUnitFormatHelpers
 
         return false;
     }
+}
+
+static bool hasARAExtension (AudioUnit audioUnit)
+{
+   #if JUCE_PLUGINHOST_ARA
+    UInt32 propertySize = sizeof (ARA::ARAAudioUnitFactory);
+    Boolean isWriteable = FALSE;
+
+    OSStatus status = AudioUnitGetPropertyInfo (audioUnit,
+                                                ARA::kAudioUnitProperty_ARAFactory,
+                                                kAudioUnitScope_Global,
+                                                0,
+                                                &propertySize,
+                                                &isWriteable);
+
+    if ((status == noErr) && (propertySize == sizeof (ARA::ARAAudioUnitFactory)) && ! isWriteable)
+        return true;
+   #else
+    ignoreUnused (audioUnit);
+   #endif
+
+    return false;
+}
+
+struct AudioUnitDeleter
+{
+    void operator() (AudioUnit au) const { AudioComponentInstanceDispose (au); }
+};
+
+using AudioUnitUniquePtr = std::unique_ptr<std::remove_pointer_t<AudioUnit>, AudioUnitDeleter>;
+using AudioUnitSharedPtr = std::shared_ptr<std::remove_pointer_t<AudioUnit>>;
+using AudioUnitWeakPtr = std::weak_ptr<std::remove_pointer_t<AudioUnit>>;
+
+static std::shared_ptr<const ARA::ARAFactory> getARAFactory (AudioUnitSharedPtr audioUnit)
+{
+   #if JUCE_PLUGINHOST_ARA
+    jassert (audioUnit != nullptr);
+
+    UInt32 propertySize = sizeof (ARA::ARAAudioUnitFactory);
+    ARA::ARAAudioUnitFactory audioUnitFactory { ARA::kARAAudioUnitMagic, nullptr };
+
+    if (hasARAExtension (audioUnit.get()))
+    {
+        OSStatus status = AudioUnitGetProperty (audioUnit.get(),
+                                                ARA::kAudioUnitProperty_ARAFactory,
+                                                kAudioUnitScope_Global,
+                                                0,
+                                                &audioUnitFactory,
+                                                &propertySize);
+
+        if ((status == noErr)
+            && (propertySize == sizeof (ARA::ARAAudioUnitFactory))
+            && (audioUnitFactory.inOutMagicNumber == ARA::kARAAudioUnitMagic))
+        {
+            jassert (audioUnitFactory.outFactory != nullptr);
+            return getOrCreateARAFactory (audioUnitFactory.outFactory,
+                                          [owningAuPtr = std::move (audioUnit)] (const ARA::ARAFactory*) {});
+        }
+    }
+   #else
+    ignoreUnused (audioUnit);
+   #endif
+
+    return {};
+}
+
+struct VersionedAudioComponent
+{
+    AudioComponent audioComponent = nullptr;
+    bool isAUv3 = false;
+
+    bool operator< (const VersionedAudioComponent& other) const { return audioComponent < other.audioComponent; }
+};
+
+using AudioUnitCreationCallback = std::function<void (AudioUnit, OSStatus)>;
+
+static void createAudioUnit (VersionedAudioComponent versionedComponent, AudioUnitCreationCallback callback)
+{
+    struct AUAsyncInitializationCallback
+    {
+        typedef void (^AUCompletionCallbackBlock)(AudioComponentInstance, OSStatus);
+
+        explicit AUAsyncInitializationCallback (AudioUnitCreationCallback inOriginalCallback)
+            : originalCallback (std::move (inOriginalCallback))
+        {
+            block = CreateObjCBlock (this, &AUAsyncInitializationCallback::completion);
+        }
+
+        AUCompletionCallbackBlock getBlock() noexcept       { return block; }
+
+        void completion (AudioComponentInstance audioUnit, OSStatus err)
+        {
+            originalCallback (audioUnit, err);
+
+            delete this;
+        }
+
+        double sampleRate;
+        int framesPerBuffer;
+        AudioUnitCreationCallback originalCallback;
+
+        ObjCBlock<AUCompletionCallbackBlock> block;
+    };
+
+    auto callbackBlock = new AUAsyncInitializationCallback (std::move (callback));
+
+    if (versionedComponent.isAUv3)
+    {
+        if (@available (macOS 10.11, *))
+        {
+            AudioComponentInstantiate (versionedComponent.audioComponent, kAudioComponentInstantiation_LoadOutOfProcess,
+                                       callbackBlock->getBlock());
+
+            return;
+        }
+    }
+
+    AudioComponentInstance audioUnit;
+    auto err = AudioComponentInstanceNew (versionedComponent.audioComponent, &audioUnit);
+    callbackBlock->completion (err != noErr ? nullptr : audioUnit, err);
+}
+
+struct AudioComponentResult
+{
+    explicit AudioComponentResult (String error) : errorMessage (std::move (error)) {}
+
+    explicit AudioComponentResult (VersionedAudioComponent auComponent) : component (std::move (auComponent)) {}
+
+    bool isValid() const { return component.audioComponent != nullptr; }
+
+    VersionedAudioComponent component;
+    String errorMessage;
+};
+
+static AudioComponentResult getAudioComponent (AudioUnitPluginFormat& format, const PluginDescription& desc)
+{
+    using namespace AudioUnitFormatHelpers;
+
+    AudioUnitPluginFormat audioUnitPluginFormat;
+
+    if (! format.fileMightContainThisPluginType (desc.fileOrIdentifier))
+        return AudioComponentResult { NEEDS_TRANS ("Plug-in description is not an AudioUnit plug-in") };
+
+    String pluginName, version, manufacturer;
+    AudioComponentDescription componentDesc;
+    AudioComponent auComponent;
+    String errMessage = NEEDS_TRANS ("Cannot find AudioUnit from description");
+
+    if (! getComponentDescFromIdentifier (desc.fileOrIdentifier, componentDesc, pluginName, version, manufacturer)
+        && ! getComponentDescFromFile (desc.fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
+    {
+        return AudioComponentResult { errMessage };
+    }
+
+    if ((auComponent = AudioComponentFindNext (nullptr, &componentDesc)) == nullptr)
+    {
+        return AudioComponentResult { errMessage };
+    }
+
+    if (AudioComponentGetDescription (auComponent, &componentDesc) != noErr)
+    {
+        return AudioComponentResult { errMessage };
+    }
+
+    const bool isAUv3 = AudioUnitFormatHelpers::isPluginAUv3 (componentDesc);
+
+    return AudioComponentResult { { auComponent, isAUv3 } };
+}
+
+static void getOrCreateARAAudioUnit (VersionedAudioComponent auComponent, std::function<void (AudioUnitSharedPtr)> callback)
+{
+    static std::map<VersionedAudioComponent, AudioUnitWeakPtr> audioUnitARACache;
+
+    if (auto audioUnit = audioUnitARACache[auComponent].lock())
+    {
+        callback (std::move (audioUnit));
+        return;
+    }
+
+    createAudioUnit (auComponent, [auComponent, cb = std::move (callback)] (AudioUnit audioUnit, OSStatus err)
+    {
+        cb ([auComponent, audioUnit, err]() -> AudioUnitSharedPtr
+            {
+                if (err != noErr)
+                    return nullptr;
+
+                AudioUnitSharedPtr auPtr { AudioUnitUniquePtr { audioUnit } };
+                audioUnitARACache[auComponent] = auPtr;
+                return auPtr;
+            }());
+    });
 }
 
 //==============================================================================
@@ -974,6 +1170,23 @@ public:
         desc.numInputChannels = getTotalNumInputChannels();
         desc.numOutputChannels = getTotalNumOutputChannels();
         desc.isInstrument = (componentDesc.componentType == kAudioUnitType_MusicDevice);
+
+       #if JUCE_PLUGINHOST_ARA
+        desc.hasARAExtension = [&]
+        {
+            UInt32 propertySize = sizeof (ARA::ARAAudioUnitFactory);
+            Boolean isWriteable = FALSE;
+
+            OSStatus status = AudioUnitGetPropertyInfo (audioUnit,
+                                                        ARA::kAudioUnitProperty_ARAFactory,
+                                                        kAudioUnitScope_Global,
+                                                        0,
+                                                        &propertySize,
+                                                        &isWriteable);
+
+            return (status == noErr) && (propertySize == sizeof (ARA::ARAAudioUnitFactory)) && ! isWriteable;
+        }();
+       #endif
     }
 
     void getExtensions (ExtensionsVisitor& visitor) const override
@@ -988,6 +1201,33 @@ public:
         };
 
         visitor.visitAudioUnitClient (Extensions { this });
+
+       #ifdef JUCE_PLUGINHOST_ARA
+        struct ARAExtensions  : public ExtensionsVisitor::ARAClient
+        {
+            explicit ARAExtensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
+
+            void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)> cb) const override
+            {
+                getOrCreateARAAudioUnit ({ instance->auComponent, instance->isAUv3 },
+                                         [origCb = std::move (cb)] (auto dylibKeepAliveAudioUnit)
+                                         {
+                                             origCb ([&]() -> ARAFactoryWrapper
+                                                     {
+                                                         if (dylibKeepAliveAudioUnit != nullptr)
+                                                             return ARAFactoryWrapper { ::juce::getARAFactory (std::move (dylibKeepAliveAudioUnit)) };
+
+                                                         return ARAFactoryWrapper { nullptr };
+                                                     }());
+                                         });
+            }
+
+            const AudioUnitPluginInstance* instance = nullptr;
+        };
+
+        if (hasARAExtension (audioUnit))
+            visitor.visitARAClient (ARAExtensions (this));
+       #endif
     }
 
     void* getPlatformSpecificData() override             { return audioUnit; }
@@ -2639,95 +2879,54 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
                                                   double rate, int blockSize,
                                                   PluginCreationCallback callback)
 {
-    using namespace AudioUnitFormatHelpers;
+    auto auComponentResult = getAudioComponent (*this, desc);
 
-    if (fileMightContainThisPluginType (desc.fileOrIdentifier))
+    if (! auComponentResult.isValid())
     {
-        String pluginName, version, manufacturer;
-        AudioComponentDescription componentDesc;
-        AudioComponent auComponent;
-        String errMessage = NEEDS_TRANS ("Cannot find AudioUnit from description");
-
-        if ((! getComponentDescFromIdentifier (desc.fileOrIdentifier, componentDesc, pluginName, version, manufacturer))
-              && (! getComponentDescFromFile (desc.fileOrIdentifier, componentDesc, pluginName, version, manufacturer)))
-        {
-            callback (nullptr, errMessage);
-            return;
-        }
-
-        if ((auComponent = AudioComponentFindNext (nullptr, &componentDesc)) == nullptr)
-        {
-            callback (nullptr, errMessage);
-            return;
-        }
-
-        if (AudioComponentGetDescription (auComponent, &componentDesc) != noErr)
-        {
-            callback (nullptr, errMessage);
-            return;
-        }
-
-        struct AUAsyncInitializationCallback
-        {
-            typedef void (^AUCompletionCallbackBlock)(AudioComponentInstance, OSStatus);
-
-            AUAsyncInitializationCallback (double inSampleRate, int inFramesPerBuffer,
-                                           PluginCreationCallback inOriginalCallback)
-                : sampleRate (inSampleRate), framesPerBuffer (inFramesPerBuffer),
-                  originalCallback (std::move (inOriginalCallback))
-            {
-                block = CreateObjCBlock (this, &AUAsyncInitializationCallback::completion);
-            }
-
-            AUCompletionCallbackBlock getBlock() noexcept  { return block; }
-
-            void completion (AudioComponentInstance audioUnit, OSStatus err)
-            {
-                if (err == noErr)
-                {
-                    std::unique_ptr<AudioUnitPluginInstance> instance (new AudioUnitPluginInstance (audioUnit));
-
-                    if (instance->initialise (sampleRate, framesPerBuffer))
-                        originalCallback (std::move (instance), {});
-                    else
-                        originalCallback (nullptr, NEEDS_TRANS ("Unable to initialise the AudioUnit plug-in"));
-                }
-                else
-                {
-                    auto errMsg = TRANS ("An OS error occurred during initialisation of the plug-in (XXX)");
-                    originalCallback (nullptr, errMsg.replace ("XXX", String (err)));
-                }
-
-                delete this;
-            }
-
-            double sampleRate;
-            int framesPerBuffer;
-            PluginCreationCallback originalCallback;
-            ObjCBlock<AUCompletionCallbackBlock> block;
-        };
-
-        auto callbackBlock = new AUAsyncInitializationCallback (rate, blockSize, std::move (callback));
-
-        if (AudioUnitFormatHelpers::isPluginAUv3 (componentDesc))
-        {
-            if (@available (macOS 10.11, *))
-            {
-                AudioComponentInstantiate (auComponent, kAudioComponentInstantiation_LoadOutOfProcess,
-                                           callbackBlock->getBlock());
-
-                return;
-            }
-        }
-
-        AudioComponentInstance audioUnit;
-        auto err = AudioComponentInstanceNew(auComponent, &audioUnit);
-        callbackBlock->completion (err != noErr ? nullptr : audioUnit, err);
+        callback (nullptr, std::move (auComponentResult.errorMessage));
+        return;
     }
-    else
+
+    createAudioUnit (auComponentResult.component,
+                     [rate, blockSize, origCallback = std::move (callback)] (AudioUnit audioUnit, OSStatus err)
+                     {
+                        if (err == noErr)
+                        {
+                            auto instance = std::make_unique<AudioUnitPluginInstance> (audioUnit);
+
+                            if (instance->initialise (rate, blockSize))
+                                origCallback (std::move (instance), {});
+                            else
+                                origCallback (nullptr, NEEDS_TRANS ("Unable to initialise the AudioUnit plug-in"));
+                        }
+                        else
+                        {
+                            auto errMsg = TRANS ("An OS error occurred during initialisation of the plug-in (XXX)");
+                            origCallback (nullptr, errMsg.replace ("XXX", String (err)));
+                        }
+                    });
+}
+
+void AudioUnitPluginFormat::createARAFactoryAsync (const PluginDescription& desc, ARAFactoryCreationCallback callback)
+{
+    auto auComponentResult = getAudioComponent (*this, desc);
+
+    if (! auComponentResult.isValid())
     {
-        callback (nullptr, NEEDS_TRANS ("Plug-in description is not an AudioUnit plug-in"));
+        callback ({ {}, "Failed to create AudioComponent for " + desc.descriptiveName });
+        return;
     }
+
+    getOrCreateARAAudioUnit (auComponentResult.component, [cb = std::move (callback)] (auto dylibKeepAliveAudioUnit)
+    {
+        cb ([&]() -> ARAFactoryResult
+            {
+                if (dylibKeepAliveAudioUnit != nullptr)
+                    return { ARAFactoryWrapper { ::juce::getARAFactory (std::move (dylibKeepAliveAudioUnit)) }, "" };
+
+                return { {}, "Failed to create ARAFactory from the provided AudioUnit" };
+            }());
+    });
 }
 
 bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription& desc) const

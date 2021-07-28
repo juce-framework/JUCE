@@ -133,6 +133,18 @@ public:
     /** Returns true if instantiation of this plugin type must be done from a non-message thread. */
     virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const = 0;
 
+    /** A callback lambda that is passed to getARAFactory() */
+    using ARAFactoryCreationCallback = std::function<void (ARAFactoryResult)>;
+
+    /** Tries to create an ::ARAFactoryWrapper for this description.
+
+        The result of the operation will be wrapped into an ARAFactoryResult,
+        which will be passed to a callback object supplied by the caller.
+
+        @see AudioPluginFormatManager::createARAFactoryAsync
+    */
+    virtual void createARAFactoryAsync (const PluginDescription&, ARAFactoryCreationCallback callback) { callback ({}); }
+
 protected:
     //==============================================================================
     friend class AudioPluginFormatManager;

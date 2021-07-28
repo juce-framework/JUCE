@@ -106,6 +106,13 @@ struct ExtensionsVisitor
         virtual AEffect* getAEffectPtr() const noexcept = 0;
     };
 
+    /** Can be used to retrieve information about a plugin that provides ARA extensions. */
+    struct ARAClient
+    {
+        virtual ~ARAClient() = default;
+        virtual void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)>) const = 0;
+    };
+
     virtual ~ExtensionsVisitor() = default;
 
     /** Will be called if there is no platform specific information available. */
@@ -119,6 +126,9 @@ struct ExtensionsVisitor
 
     /** Called with AU-specific information. */
     virtual void visitAudioUnitClient   (const AudioUnitClient&) {}
+
+    /** Called with ARA-specific information. */
+    virtual void visitARAClient         (const ARAClient&)       {}
 };
 
 } // namespace juce

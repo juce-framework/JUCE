@@ -24,6 +24,7 @@ juce_generate_juce_header(AudioPluginHost)
 
 target_sources(AudioPluginHost PRIVATE
     Source/HostStartup.cpp
+    Source/Plugins/ARAPlugin.cpp
     Source/Plugins/IOConfigurationWindow.cpp
     Source/Plugins/InternalPlugins.cpp
     Source/Plugins/PluginGraph.cpp
@@ -46,6 +47,7 @@ target_compile_definitions(AudioPluginHost PRIVATE
     JUCE_PLUGINHOST_LV2=1
     JUCE_PLUGINHOST_VST3=1
     JUCE_PLUGINHOST_VST=0
+    JUCE_PLUGINHOST_ARA=0
     JUCE_USE_CAMERA=0
     JUCE_USE_CDBURNER=0
     JUCE_USE_CDREADER=0

@@ -20,6 +20,18 @@
 
 #include "juce_VST3Headers.h"
 #include "juce_VST3Common.h"
+#include "juce_ARACommon.h"
+
+#if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+#include <ARA_API/ARAVST3.h>
+
+namespace ARA
+{
+DEF_CLASS_IID (IMainFactory)
+DEF_CLASS_IID (IPlugInEntryPoint)
+DEF_CLASS_IID (IPlugInEntryPoint2)
+}
+#endif
 
 namespace juce
 {
@@ -804,6 +816,20 @@ struct DescriptionFactory
 
         auto numClasses = factory->countClasses();
 
+        // Every ARA::IMainFactory must have a matching Steinberg::IComponent.
+        // The match is determined by the two classes having the same name.
+        std::unordered_set<String> araMainFactoryClassNames;
+
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+        for (Steinberg::int32 i = 0; i < numClasses; ++i)
+        {
+            PClassInfo info;
+            factory->getClassInfo (i, &info);
+            if (std::strcmp (info.category, kARAMainFactoryClass) == 0)
+                araMainFactoryClassNames.insert (info.name);
+        }
+       #endif
+
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
         {
             PClassInfo info;
@@ -866,6 +892,9 @@ struct DescriptionFactory
                     jassertfalse;
                 }
             }
+
+            if (araMainFactoryClassNames.find (name) != araMainFactoryClassNames.end())
+                desc.hasARAExtension = true;
 
             if (desc.uniqueId != 0)
                 result = performOnDescription (desc);
@@ -1330,6 +1359,72 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VST3ModuleHandle)
 };
 
+template <typename Type, size_t N>
+static int compareWithString (Type (&charArray)[N], const String& str)
+{
+    return std::strncmp (str.toRawUTF8(),
+                         charArray,
+                         std::min (str.getNumBytesAsUTF8(), (size_t) numElementsInArray (charArray)));
+}
+
+template <typename Callback>
+static void forEachARAFactory (IPluginFactory* pluginFactory, Callback&& cb)
+{
+   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+    const auto numClasses = pluginFactory->countClasses();
+    for (Steinberg::int32 i = 0; i < numClasses; ++i)
+    {
+        PClassInfo info;
+        pluginFactory->getClassInfo (i, &info);
+
+        if (std::strcmp (info.category, kARAMainFactoryClass) == 0)
+        {
+            const bool keepGoing = cb (info);
+            if (! keepGoing)
+                break;
+        }
+    }
+   #else
+    ignoreUnused (pluginFactory, cb);
+   #endif
+}
+
+static std::shared_ptr<const ARA::ARAFactory> getARAFactory (Steinberg::IPluginFactory* pluginFactory, const String& pluginName)
+{
+    std::shared_ptr<const ARA::ARAFactory> factory;
+
+   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+    forEachARAFactory (pluginFactory,
+                       [&pluginFactory, &pluginName, &factory] (const auto& pcClassInfo)
+                       {
+                           if (compareWithString (pcClassInfo.name, pluginName) == 0)
+                           {
+                               ARA::IMainFactory* source;
+                               if (pluginFactory->createInstance (pcClassInfo.cid, ARA::IMainFactory::iid, (void**) &source)
+                                   == Steinberg::kResultOk)
+                               {
+                                   factory = getOrCreateARAFactory (source->getFactory(),
+                                                                    [source] (const ARA::ARAFactory*) { source->release(); });
+                                   return false;
+                               }
+                               jassert (source == nullptr);
+                           }
+
+                           return true;
+                       });
+   #else
+    ignoreUnused (pluginFactory, pluginName);
+   #endif
+
+    return factory;
+}
+
+static std::shared_ptr<const ARA::ARAFactory> getARAFactory (VST3ModuleHandle& module)
+{
+    auto* pluginFactory = module.getPluginFactory();
+    return getARAFactory (pluginFactory, module.getName());
+}
+
 //==============================================================================
 struct VST3PluginWindow : public AudioProcessorEditor,
                           private ComponentMovementWatcher,
@@ -1678,6 +1773,27 @@ private:
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996) // warning about overriding deprecated methods
 
 //==============================================================================
+static bool hasARAExtension (IPluginFactory* pluginFactory, const String& pluginClassName)
+{
+    bool result = false;
+
+    forEachARAFactory (pluginFactory,
+                       [&pluginClassName, &result] (const auto& pcClassInfo)
+                       {
+                           if (compareWithString (pcClassInfo.name, pluginClassName) == 0)
+                           {
+                               result = true;
+
+                               return false;
+                           }
+
+                           return true;
+                       });
+
+    return result;
+}
+
+//==============================================================================
 struct VST3ComponentHolder
 {
     VST3ComponentHolder (const VST3ModuleHandle::Ptr& m)  : module (m)
@@ -1801,6 +1917,8 @@ struct VST3ComponentHolder
                                      info, info2.get(), infoW.get(),
                                      totalNumInputChannels,
                                      totalNumOutputChannels);
+
+            description.hasARAExtension = hasARAExtension (factory, description.name);
 
             return;
         }
@@ -2280,7 +2398,8 @@ public:
 
     void getExtensions (ExtensionsVisitor& visitor) const override
     {
-        struct Extensions : public ExtensionsVisitor::VST3Client
+        struct Extensions :  public ExtensionsVisitor::VST3Client,
+                             public ExtensionsVisitor::ARAClient
         {
             explicit Extensions (const VST3PluginInstance* instanceIn) : instance (instanceIn) {}
 
@@ -2293,10 +2412,21 @@ public:
                 return instance->setStateFromPresetFile (rawData);
             }
 
+            void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)> cb) const noexcept override
+            {
+                cb (ARAFactoryWrapper { ::juce::getARAFactory (*(instance->holder->module)) });
+            }
+
             const VST3PluginInstance* instance = nullptr;
         };
 
-        visitor.visitVST3Client (Extensions { this });
+        Extensions extensions { this };
+        visitor.visitVST3Client (extensions);
+
+        if (::juce::getARAFactory (*(holder->module)))
+        {
+            visitor.visitARAClient (extensions);
+        }
     }
 
     void* getPlatformSpecificData() override   { return holder->component; }
@@ -3107,7 +3237,7 @@ private:
             if ((paramInfo.flags & Vst::ParameterInfo::kIsBypass) != 0)
                 bypassParam = param;
 
-            std::function<AudioProcessorParameterGroup*(Vst::UnitID)> findOrCreateGroup;
+            std::function<AudioProcessorParameterGroup* (Vst::UnitID)> findOrCreateGroup;
             findOrCreateGroup = [&groupMap, &infoMap, &findOrCreateGroup] (Vst::UnitID groupID)
             {
                 auto existingGroup = groupMap.find (groupID);
@@ -3667,6 +3797,22 @@ void VST3PluginFormat::findAllTypesForFile (OwnedArray<PluginDescription>& resul
             jassertfalse;
         }
     }
+}
+
+void VST3PluginFormat::createARAFactoryAsync (const PluginDescription& description, ARAFactoryCreationCallback callback)
+{
+    if (! description.hasARAExtension)
+    {
+        jassertfalse;
+        callback ({ {}, "The provided plugin does not support ARA features" });
+    }
+
+    File file (description.fileOrIdentifier);
+    VSTComSmartPtr<IPluginFactory> pluginFactory (
+        DLLHandleCache::getInstance()->findOrCreateHandle (file.getFullPathName()).getPluginFactory());
+    const auto* pluginName = description.name.toRawUTF8();
+
+    callback ({ ARAFactoryWrapper { ::juce::getARAFactory (pluginFactory, pluginName) }, {} });
 }
 
 void VST3PluginFormat::createPluginInstance (const PluginDescription& description,

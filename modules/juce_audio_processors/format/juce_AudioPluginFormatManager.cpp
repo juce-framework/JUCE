@@ -129,6 +129,22 @@ std::unique_ptr<AudioPluginInstance> AudioPluginFormatManager::createPluginInsta
     return {};
 }
 
+void AudioPluginFormatManager::createARAFactoryAsync (const PluginDescription& description,
+                                                      AudioPluginFormat::ARAFactoryCreationCallback callback) const
+{
+    String errorMessage;
+
+    if (auto* format = findFormatForDescription (description, errorMessage))
+    {
+        format->createARAFactoryAsync (description, callback);
+    }
+    else
+    {
+        errorMessage = NEEDS_TRANS ("Couldn't find format for the provided description");
+        callback ({ {}, std::move (errorMessage) });
+    }
+}
+
 void AudioPluginFormatManager::createPluginInstanceAsync (const PluginDescription& description,
                                                           double initialSampleRate, int initialBufferSize,
                                                           AudioPluginFormat::PluginCreationCallback callback)

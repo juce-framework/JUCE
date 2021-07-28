@@ -19,6 +19,7 @@
 #pragma once
 
 #include "../Plugins/IOConfigurationWindow.h"
+#include "../Plugins/ARAPlugin.h"
 
 inline String getFormatSuffix (const AudioProcessor* plugin)
 {
@@ -148,6 +149,7 @@ public:
         programs,
         audioIO,
         debug,
+        araHost,
         numTypes
     };
 
@@ -234,6 +236,16 @@ private:
             type = PluginWindow::Type::generic;
         }
 
+        if (type == PluginWindow::Type::araHost)
+        {
+           #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+            if (auto* araPluginInstanceWrapper = dynamic_cast<ARAPluginInstanceWrapper*> (&processor))
+                if (auto* ui = araPluginInstanceWrapper->createARAHostEditor())
+                    return ui;
+           #endif
+            return {};
+        }
+
         if (type == PluginWindow::Type::generic)  return new GenericAudioProcessorEditor (processor);
         if (type == PluginWindow::Type::programs) return new ProgramAudioProcessorEditor (processor);
         if (type == PluginWindow::Type::audioIO)  return new IOConfigurationWindow (processor);
@@ -252,6 +264,7 @@ private:
             case Type::programs:   return "Programs";
             case Type::audioIO:    return "IO";
             case Type::debug:      return "Debug";
+            case Type::araHost:    return "ARAHost";
             case Type::numTypes:
             default:               return {};
         }

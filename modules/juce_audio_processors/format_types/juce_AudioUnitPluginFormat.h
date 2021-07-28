@@ -47,6 +47,7 @@ public:
     StringArray searchPathsForPlugins (const FileSearchPath&, bool recursive, bool) override;
     bool doesPluginStillExist (const PluginDescription&) override;
     FileSearchPath getDefaultLocationsToSearch() override;
+    void createARAFactoryAsync (const PluginDescription&, ARAFactoryCreationCallback callback) override;
 
 private:
     //==============================================================================
