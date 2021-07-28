@@ -1505,12 +1505,12 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
     void nativeScaleFactorChanged (double newScaleFactor) override
     {
-        if (pluginHandle == HandleFormat{} || approximatelyEqual ((float) newScaleFactor, nativeScaleFactor))
+        if (approximatelyEqual ((float) newScaleFactor, nativeScaleFactor))
             return;
 
         nativeScaleFactor = (float) newScaleFactor;
 
-        if (scaleInterface != nullptr)
+        if (pluginHandle != HandleFormat{} && scaleInterface != nullptr)
             scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
     }
 
@@ -1529,6 +1529,13 @@ struct VST3PluginWindow : public AudioProcessorEditor,
         {
             resizeWithRect (embeddedComponent, *newSize, nativeScaleFactor);
             setSize (embeddedComponent.getWidth(), embeddedComponent.getHeight());
+
+            // According to the VST3 Workflow Diagrams, a resizeView from the plugin should
+            // always trigger a response from the host which confirms the new size.
+            ViewRect rect;
+            rect.right  = (Steinberg::int32) roundToInt ((float) getWidth()  * nativeScaleFactor);
+            rect.bottom = (Steinberg::int32) roundToInt ((float) getHeight() * nativeScaleFactor);
+            view->onSize (&rect);
 
             return kResultTrue;
         }
@@ -1597,7 +1604,7 @@ private:
    #if JUCE_WINDOWS
     struct ChildComponent  : public Component
     {
-        ChildComponent() {}
+        ChildComponent() { setOpaque (true); }
         void paint (Graphics& g) override  { g.fillAll (Colours::cornflowerblue); }
         using Component::createNewPeer;
 
