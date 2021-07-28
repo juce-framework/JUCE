@@ -65,8 +65,29 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioSampleBuffer.h"
     "../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.cpp"
     "../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMP.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPacket.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPackets.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConverters.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDispatcher.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToBytestreamTranslator.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToMidi2DefaultTranslator.cpp"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToMidi2DefaultTranslator.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPProtocols.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPReceiver.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.cpp"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPTests.cpp"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.cpp"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPView.cpp"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPView.h"
     "../../../../../modules/juce_audio_basics/midi/juce_MidiBuffer.cpp"
     "../../../../../modules/juce_audio_basics/midi/juce_MidiBuffer.h"
+    "../../../../../modules/juce_audio_basics/midi/juce_MidiDataConcatenator.h"
     "../../../../../modules/juce_audio_basics/midi/juce_MidiFile.cpp"
     "../../../../../modules/juce_audio_basics/midi/juce_MidiFile.h"
     "../../../../../modules/juce_audio_basics/midi/juce_MidiKeyboardState.cpp"
@@ -139,27 +160,9 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.cpp"
     "../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h"
     "../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPacket.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPackets.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBytestreamInputHandler.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPConversion.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPConverters.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPDispatcher.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPFactory.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPIterator.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPMidi1ToBytestreamTranslator.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPMidi1ToMidi2DefaultTranslator.cpp"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPMidi1ToMidi2DefaultTranslator.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPProtocols.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPReceiver.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPSysEx7.cpp"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPSysEx7.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPTests.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPU32InputHandler.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPUtils.cpp"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPUtils.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPView.cpp"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPView.h"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.h"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.cpp"
@@ -292,7 +295,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/native/juce_linux_Midi.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_mac_CoreAudio.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_mac_CoreMidi.mm"
-    "../../../../../modules/juce_audio_devices/native/juce_MidiDataConcatenator.h"
     "../../../../../modules/juce_audio_devices/native/juce_win32_ASIO.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_win32_DirectSound.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_win32_Midi.cpp"
@@ -1162,6 +1164,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_events/native/juce_linux_Messaging.cpp"
     "../../../../../modules/juce_events/native/juce_mac_MessageManager.mm"
     "../../../../../modules/juce_events/native/juce_osx_MessageQueue.h"
+    "../../../../../modules/juce_events/native/juce_ScopedLowPowerModeDisabler.cpp"
+    "../../../../../modules/juce_events/native/juce_ScopedLowPowerModeDisabler.h"
     "../../../../../modules/juce_events/native/juce_win32_HiddenMessageWindow.h"
     "../../../../../modules/juce_events/native/juce_win32_Messaging.cpp"
     "../../../../../modules/juce_events/native/juce_win32_WinRTWrapper.cpp"
@@ -1852,8 +1856,29 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/ju
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioSampleBuffer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMP.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPacket.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPackets.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConverters.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPDispatcher.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPFactory.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPIterator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToBytestreamTranslator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToMidi2DefaultTranslator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPMidi1ToMidi2DefaultTranslator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPProtocols.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPReceiver.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPTests.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPView.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPView.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/juce_MidiBuffer.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/juce_MidiBuffer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/juce_MidiDataConcatenator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/juce_MidiFile.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/juce_MidiFile.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/juce_MidiKeyboardState.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1926,27 +1951,9 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPacket.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPackets.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBytestreamInputHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPConversion.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPConverters.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPDispatcher.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPFactory.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPIterator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPMidi1ToBytestreamTranslator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPMidi1ToMidi2DefaultTranslator.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPMidi1ToMidi2DefaultTranslator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPProtocols.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPReceiver.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPSysEx7.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPSysEx7.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPTests.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPU32InputHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPUtils.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPUtils.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPView.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPView.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiMessageCollector.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2079,7 +2086,6 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/native/ju
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_linux_Midi.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_mac_CoreAudio.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_mac_CoreMidi.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_MidiDataConcatenator.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_win32_ASIO.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_win32_DirectSound.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_win32_Midi.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2949,6 +2955,8 @@ set_source_files_properties("../../../../../modules/juce_events/native/juce_linu
 set_source_files_properties("../../../../../modules/juce_events/native/juce_linux_Messaging.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/native/juce_mac_MessageManager.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/native/juce_osx_MessageQueue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_events/native/juce_ScopedLowPowerModeDisabler.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_events/native/juce_ScopedLowPowerModeDisabler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/native/juce_win32_HiddenMessageWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/native/juce_win32_Messaging.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_events/native/juce_win32_WinRTWrapper.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

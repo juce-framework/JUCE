@@ -663,6 +663,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_linux_Messaging.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_ScopedLowPowerModeDisabler.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1848,6 +1851,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_linux_EventLoop.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_ScopedLowPowerModeDisabler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.h"/>

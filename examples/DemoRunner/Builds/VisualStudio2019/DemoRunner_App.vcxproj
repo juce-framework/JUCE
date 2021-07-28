@@ -171,6 +171,21 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPMidi1ToMidi2DefaultTranslator.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPSysEx7.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPTests.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPUtils.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPView.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -273,19 +288,7 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPMidi1ToMidi2DefaultTranslator.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPSysEx7.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPTests.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPUtils.cpp">
-      <ExcludedFromBuild>true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPView.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiDevices.cpp">
@@ -1512,6 +1515,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_linux_Messaging.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_ScopedLowPowerModeDisabler.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\native\juce_win32_Messaging.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -2469,7 +2475,23 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioProcessLoadMeasurer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioSampleBuffer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_FloatVectorOperations.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMP.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPacket.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPackets.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPConversion.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPConverters.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPDispatcher.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPFactory.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPIterator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPMidi1ToBytestreamTranslator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPMidi1ToMidi2DefaultTranslator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPProtocols.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPReceiver.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPSysEx7.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPUtils.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\ump\juce_UMPView.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiBuffer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiDataConcatenator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiFile.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiKeyboardState.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\midi\juce_MidiMessage.h"/>
@@ -2508,22 +2530,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODevice.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_AudioIODeviceType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\audio_io\juce_SystemAudioVolume.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPacket.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPackets.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPBytestreamInputHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPConversion.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPConverters.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPDispatcher.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPFactory.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPIterator.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPMidi1ToBytestreamTranslator.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPMidi1ToMidi2DefaultTranslator.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPProtocols.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPReceiver.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPSysEx7.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPU32InputHandler.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPUtils.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\ump\juce_UMPView.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiDevices.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\midi_io\juce_MidiMessageCollector.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\include\oboe\AudioStream.h"/>
@@ -2590,7 +2598,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\opensles\OutputMixerOpenSLES.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\juce_android_HighPerformanceAudioHelpers.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\juce_ios_Audio.h"/>
-    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\juce_MidiDataConcatenator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\sources\juce_AudioSourcePlayer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\sources\juce_AudioTransportSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\juce_audio_devices.h"/>
@@ -3081,6 +3088,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_events\messages\juce_NotificationType.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_linux_EventLoop.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_ScopedLowPowerModeDisabler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_win32_HiddenMessageWindow.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_win32_WinRTWrapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\timers\juce_MultiTimer.h"/>
