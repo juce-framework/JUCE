@@ -75,10 +75,11 @@ AccessibilityHandler::~AccessibilityHandler()
 //==============================================================================
 AccessibleState AccessibilityHandler::getCurrentState() const
 {
-    AccessibleState state;
+    if (component.isCurrentlyBlockedByAnotherModalComponent()
+        && Component::getCurrentlyModalComponent()->isVisible())
+        return {};
 
-    if (! component.isCurrentlyBlockedByAnotherModalComponent())
-        state = state.withFocusable();
+    auto state = AccessibleState().withFocusable();
 
     return hasFocus (false) ? state.withFocused() : state;
 }
