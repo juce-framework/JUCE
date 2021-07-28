@@ -1272,11 +1272,7 @@ private:
 
     String getAppPlatform() const
     {
-        auto ndkVersion = static_cast<int> (androidMinimumSDK.get());
-        if (ndkVersion == 9)
-            ndkVersion = 10; // (doesn't seem to be a version '9')
-
-        return "android-" + String (ndkVersion);
+        return "android-" + androidMinimumSDK.get().toString();
     }
 
     //==============================================================================
@@ -1713,15 +1709,8 @@ private:
                 app->setAttribute ("android:icon", "@drawable/icon");
         }
 
-        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
-        {
-            if (! app->hasAttribute ("android:hardwareAccelerated"))
-                app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
-        }
-        else
-        {
-            app->removeAttribute ("android:hardwareAccelerated");
-        }
+        if (! app->hasAttribute ("android:hardwareAccelerated"))
+            app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
 
         return app;
     }
@@ -1734,34 +1723,12 @@ private:
         setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
         if (! act->hasAttribute ("android:configChanges"))
-        {
-            String configChanges ("keyboardHidden|orientation");
-            if (static_cast<int> (androidMinimumSDK.get()) >= 13)
-                configChanges += "|screenSize";
-
-            act->setAttribute ("android:configChanges", configChanges);
-        }
-        else
-        {
-            auto configChanges = act->getStringAttribute ("android:configChanges");
-
-            if (static_cast<int> (androidMinimumSDK.get()) < 13 && configChanges.contains ("screenSize"))
-            {
-                configChanges = configChanges.replace ("|screenSize", "")
-                                             .replace ("screenSize|", "")
-                                             .replace ("screenSize", "");
-
-                act->setAttribute ("android:configChanges", configChanges);
-            }
-        }
+            act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
 
         if (androidScreenOrientation.get() == "landscape")
         {
-            String landscapeString = static_cast<int> (androidMinimumSDK.get()) < 9
-                                   ? "landscape"
-                                   : (static_cast<int> (androidMinimumSDK.get()) < 18 ? "sensorLandscape" : "userLandscape");
-
-            setAttributeIfNotPresent (*act, "android:screenOrientation", landscapeString);
+            setAttributeIfNotPresent (*act, "android:screenOrientation",
+                                      static_cast<int> (androidMinimumSDK.get()) < 18 ? "sensorLandscape" : "userLandscape");
         }
         else
         {
@@ -1773,15 +1740,8 @@ private:
         // Using the 2D acceleration slows down OpenGL. We *do* enable it here for the activity though, and we disable it
         // in each ComponentPeerView instead. This way any embedded native views, which are not children of ComponentPeerView,
         // can still use hardware acceleration if needed (e.g. web view).
-        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
-        {
-            if (! act->hasAttribute ("android:hardwareAccelerated"))
-                act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
-        }
-        else
-        {
-            act->removeAttribute ("android:hardwareAccelerated");
-        }
+        if (! act->hasAttribute ("android:hardwareAccelerated"))
+            act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
 
         return act;
     }
