@@ -2898,23 +2898,24 @@ public:
         {
             const ScopedValueSetter<bool> recursiveResizeSetter (recursiveResize, true);
 
-            const auto editorSize = plugin.getEditorSize();
             const auto pos = (peer->getAreaCoveredBy (*this).toFloat() * nativeScaleFactor).toNearestInt();
 
            #if JUCE_WINDOWS
             if (pluginHWND != 0)
             {
                 ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHWND };
-                MoveWindow (pluginHWND,
-                            pos.getX(),
-                            pos.getY(),
-                            editorSize.getWidth(),
-                            editorSize.getHeight(),
-                            TRUE);
+                SetWindowPos (pluginHWND,
+                              HWND_BOTTOM,
+                              pos.getX(),
+                              pos.getY(),
+                              0,
+                              0,
+                              SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
             }
            #elif JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
             {
+                const auto editorSize = plugin.getEditorSize();
                 auto* symbols = X11Symbols::getInstance();
                 symbols->xMoveResizeWindow (display,
                                             pluginWindow,
