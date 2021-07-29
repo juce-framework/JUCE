@@ -1997,8 +1997,6 @@ private:
        #if ! JUCE_MAC
         if (editorComp != nullptr)
             editorComp->setContentScaleFactor (scale);
-
-        lastScaleFactorReceived = scale;
        #else
         ignoreUnused (scale);
        #endif
@@ -2072,10 +2070,6 @@ private:
     Vst2::ERect editorRect;
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
-
-   #if ! JUCE_MAC
-    float lastScaleFactorReceived = 1.0f;
-   #endif
 
     LegacyAudioParametersWrapper juceParameters;
 
