@@ -55,7 +55,7 @@ void AudioStream::checkScheduler() {
 DataCallbackResult AudioStream::fireDataCallback(void *audioData, int32_t numFrames) {
     if (!isDataCallbackEnabled()) {
         LOGW("AudioStream::%s() called with data callback disabled!", __func__);
-        return DataCallbackResult::Stop; // We should not be getting called any more.
+        return DataCallbackResult::Stop; // Should not be getting called
     }
 
     DataCallbackResult result;
@@ -194,18 +194,6 @@ ResultWithValue<FrameTimestamp> AudioStream::getTimestamp(clockid_t clockId) {
     } else {
         return ResultWithValue<FrameTimestamp>(static_cast<Result>(result));
     }
-}
-
-static void oboe_stop_thread_proc(AudioStream *oboeStream) {
-    if (oboeStream != nullptr) {
-        oboeStream->requestStop();
-    }
-}
-
-void AudioStream::launchStopThread() {
-    // Stop this stream on a separate thread
-    std::thread t(oboe_stop_thread_proc, this);
-    t.detach();
 }
 
 } // namespace oboe

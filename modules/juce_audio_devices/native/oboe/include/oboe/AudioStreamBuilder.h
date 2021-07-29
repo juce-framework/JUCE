@@ -391,11 +391,11 @@ public:
     }
 
     /**
-     * If true then  Oboe might convert data formats to achieve optimal results.
+     * If true then Oboe might convert data formats to achieve optimal results.
      * On some versions of Android, for example, a float stream could not get a
      * low latency data path. So an I16 stream might be opened and converted to float.
      *
-     * Default is true.
+     * Default is false.
      */
     AudioStreamBuilder *setFormatConversionAllowed(bool allowed) {
         mFormatConversionAllowed = allowed;
@@ -415,6 +415,38 @@ public:
      */
     AudioStreamBuilder *setSampleRateConversionQuality(SampleRateConversionQuality quality) {
         mSampleRateConversionQuality = quality;
+        return this;
+    }
+
+    /**
+     * Declare the name of the package creating the stream.
+     *
+     * This is usually Context#getPackageName()
+     *
+     * The default, if you do not call this function, is a random package in the calling uid.
+     *
+     * Added in API level 31.
+     *
+     * @param packageName packageName of the calling app.
+     */
+    AudioStreamBuilder *setPackageName(std::string packageName) {
+        mPackageName = packageName;
+        return this;
+    }
+
+    /**
+     * Declare the attribution tag of the context creating the stream.
+     *
+     * This is usually Context#getAttributionTag()
+     *
+     * The default, if you do not call this function, is the default attribution tag.
+     *
+     * Added in API level 31.
+     *
+     * @param attributionTag attributionTag of the calling context.
+     */
+    AudioStreamBuilder *setAttributionTag(std::string attributionTag) {
+        mAttributionTag = attributionTag;
         return this;
     }
 

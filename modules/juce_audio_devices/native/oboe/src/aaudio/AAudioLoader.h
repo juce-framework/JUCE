@@ -60,11 +60,14 @@ typedef int32_t aaudio_session_id_t;
 #define AAUDIO_STREAM_STATE_STARTED    static_cast<aaudio_stream_state_t>(StreamState::Started)
 #else
 #include <aaudio/AAudio.h>
-#include <android/ndk-version.h>
 #endif
 
 #ifndef __NDK_MAJOR__
 #define __NDK_MAJOR__ 0
+#endif
+
+#ifndef __ANDROID_API_S__
+#define __ANDROID_API_S__ 31
 #endif
 
 namespace oboe {
@@ -97,6 +100,8 @@ class AAudioLoader {
     typedef int32_t (*signature_I_PB)(AAudioStreamBuilder *);  // AAudioStreamBuilder_delete()
     // AAudioStreamBuilder_setSampleRate()
     typedef void    (*signature_V_PBI)(AAudioStreamBuilder *, int32_t);
+
+    typedef void    (*signature_V_PBCPH)(AAudioStreamBuilder *, const char *);
 
     typedef int32_t (*signature_I_PS)(AAudioStream *);  // AAudioStream_getSampleRate()
     typedef int64_t (*signature_L_PS)(AAudioStream *);  // AAudioStream_getFramesRead()
@@ -160,6 +165,9 @@ class AAudioLoader {
     signature_V_PBI builder_setInputPreset = nullptr;
     signature_V_PBI builder_setSessionId = nullptr;
 
+    signature_V_PBCPH builder_setPackageName = nullptr;
+    signature_V_PBCPH builder_setAttributionTag = nullptr;
+
     signature_V_PBPDPV  builder_setDataCallback = nullptr;
     signature_V_PBPEPV  builder_setErrorCallback = nullptr;
 
@@ -212,6 +220,7 @@ class AAudioLoader {
     signature_I_PPB     load_I_PPB(const char *name);
     signature_CPH_I     load_CPH_I(const char *name);
     signature_V_PBI     load_V_PBI(const char *name);
+    signature_V_PBCPH   load_V_PBCPH(const char *name);
     signature_V_PBPDPV  load_V_PBPDPV(const char *name);
     signature_V_PBPEPV  load_V_PBPEPV(const char *name);
     signature_I_PB      load_I_PB(const char *name);

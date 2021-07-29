@@ -18,6 +18,7 @@
 #define OBOE_STREAM_BASE_H_
 
 #include <memory>
+#include <string>
 #include "oboe/AudioStreamCallback.h"
 #include "oboe/Definitions.h"
 
@@ -196,11 +197,6 @@ protected:
     int32_t                         mBufferCapacityInFrames = kUnspecified;
     /** Stream buffer size specified as a number of audio frames */
     int32_t                         mBufferSizeInFrames = kUnspecified;
-    /**
-     * Number of frames which will be copied to/from the audio device in a single read/write
-     * operation
-     */
-    int32_t                         mFramesPerBurst = kUnspecified;
 
     /** Stream sharing mode */
     SharingMode                     mSharingMode = SharingMode::Shared;
@@ -222,6 +218,11 @@ protected:
     /** Stream session ID allocation strategy. Only active on Android 28+ */
     SessionId                       mSessionId = SessionId::None;
 
+    /** Control the name of the package creating the stream. Only active on Android 31+ */
+    std::string                     mPackageName;
+    /** Control the attribution tag of the context creating the stream. Only active on Android 31+ */
+    std::string                     mAttributionTag;
+
     // Control whether Oboe can convert channel counts to achieve optimal results.
     bool                            mChannelConversionAllowed = false;
     // Control whether Oboe can convert data formats to achieve optimal results.
@@ -235,9 +236,12 @@ protected:
             case AudioFormat::Unspecified:
             case AudioFormat::I16:
             case AudioFormat::Float:
+            case AudioFormat::I24:
+            case AudioFormat::I32:
                 break;
-
+            // JUCE CHANGE STARTS HERE
             case AudioFormat::Invalid:
+            // JUCE CHANGE ENDS HERE
             default:
                 return Result::ErrorInvalidFormat;
         }

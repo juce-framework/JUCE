@@ -14,42 +14,31 @@
  * limitations under the License.
  */
 
-#ifndef FLOWGRAPH_MANY_TO_MULTI_CONVERTER_H
-#define FLOWGRAPH_MANY_TO_MULTI_CONVERTER_H
+#ifndef FLOWGRAPH_SOURCE_I32_H
+#define FLOWGRAPH_SOURCE_I32_H
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <vector>
+#include <stdint.h>
 
 #include "FlowGraphNode.h"
 
 namespace FLOWGRAPH_OUTER_NAMESPACE {
 namespace flowgraph {
 
-/**
- * Combine multiple mono inputs into one interleaved multi-channel output.
- */
-class ManyToMultiConverter : public flowgraph::FlowGraphNode {
+class SourceI32 : public FlowGraphSourceBuffered {
 public:
-    explicit ManyToMultiConverter(int32_t channelCount);
+    explicit SourceI32(int32_t channelCount);
+    ~SourceI32() override = default;
 
-    virtual ~ManyToMultiConverter() = default;
-
-    int32_t onProcess(int numFrames) override;
-
-    void setEnabled(bool /*enabled*/) {}
-
-    std::vector<std::unique_ptr<flowgraph::FlowGraphPortFloatInput>> inputs;
-    flowgraph::FlowGraphPortFloatOutput output;
+    int32_t onProcess(int32_t numFrames) override;
 
     const char *getName() override {
-        return "ManyToMultiConverter";
+        return "SourceI32";
     }
-
 private:
+    static constexpr float kScale = 1.0 / (1UL << 31);
 };
 
 } /* namespace flowgraph */
 } /* namespace FLOWGRAPH_OUTER_NAMESPACE */
 
-#endif //FLOWGRAPH_MANY_TO_MULTI_CONVERTER_H
+#endif //FLOWGRAPH_SOURCE_I32_H
