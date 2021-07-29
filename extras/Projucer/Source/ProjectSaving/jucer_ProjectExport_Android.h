@@ -90,12 +90,15 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
-                     androidScreenOrientation, androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
-                     androidMinimumSDK, androidTargetSDK, androidTheme, androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
-                     androidPushNotifications, androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore, androidKeyStorePass,
-                     androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
+                     androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
+                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
+                     androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
+                     androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
+                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
+                     androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
+                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
+                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -135,9 +138,9 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "6.7.1"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.0.2"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "4.2.1"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.0.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
