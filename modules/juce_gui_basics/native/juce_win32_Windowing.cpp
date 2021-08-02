@@ -1510,7 +1510,7 @@ public:
         if (! hasMoved)    flags |= SWP_NOMOVE;
         if (! hasResized)  flags |= SWP_NOSIZE;
 
-        setWindowPos (hwnd, newBounds, flags, ! isInDPIChange);
+        setWindowPos (hwnd, newBounds, flags, numInDpiChange == 0);
 
         if (hasResized && isValidPeer (this))
         {
@@ -2027,7 +2027,7 @@ private:
    #endif
 
     double scaleFactor = 1.0;
-    bool isInDPIChange = false;
+    int numInDpiChange = 0;
 
     bool isAccessibilityActive = false;
 
@@ -3371,28 +3371,33 @@ private:
 
     LRESULT handleDPIChanging (int newDPI, RECT newRect)
     {
-        auto newScale = (double) newDPI / USER_DEFAULT_SCREEN_DPI;
+        const auto newScale = (double) newDPI / USER_DEFAULT_SCREEN_DPI;
 
-        if (! approximatelyEqual (scaleFactor, newScale))
+        if (approximatelyEqual (scaleFactor, newScale))
+            return 0;
+
+        const auto oldScale = std::exchange (scaleFactor, newScale);
+
         {
-            auto oldScale = scaleFactor;
-            scaleFactor = newScale;
-
-            {
-                const ScopedValueSetter<bool> setter (isInDPIChange, true);
-                setBounds (windowBorder.subtractedFrom (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (newRect), hwnd)), fullScreen);
-            }
-
-            updateShadower();
-            InvalidateRect (hwnd, nullptr, FALSE);
-
-            ChildWindowCallbackData callbackData;
-            callbackData.scaleRatio = (float) (scaleFactor / oldScale);
-
-            EnumChildWindows (hwnd, getChildWindowRectCallback, (LPARAM) &callbackData);
-            scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
-            EnumChildWindows (hwnd, scaleChildWindowCallback, (LPARAM) &callbackData);
+            const ScopedValueSetter<int> setter (numInDpiChange, numInDpiChange + 1);
+            setBounds (windowBorder.subtractedFrom (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (newRect), hwnd)), fullScreen);
         }
+
+        // This is to handle reentrancy. If responding to a DPI change triggers further DPI changes,
+        // we should only notify listeners and resize windows once all of the DPI changes have
+        // resolved.
+        if (numInDpiChange != 0)
+            return 0;
+
+        updateShadower();
+        InvalidateRect (hwnd, nullptr, FALSE);
+
+        ChildWindowCallbackData callbackData;
+        callbackData.scaleRatio = (float) (scaleFactor / oldScale);
+
+        EnumChildWindows (hwnd, getChildWindowRectCallback, (LPARAM) &callbackData);
+        scaleFactorListeners.call ([this] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
+        EnumChildWindows (hwnd, scaleChildWindowCallback, (LPARAM) &callbackData);
 
         return 0;
     }
@@ -4916,12 +4921,14 @@ void Desktop::allowedOrientationsChanged() {}
 static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
 {
     Array<const Displays::Display*> candidateDisplays;
-    double scaleToLookFor = -1.0;
 
-    if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
-        scaleToLookFor = peer->getPlatformScaleFactor();
-    else
-        scaleToLookFor = getScaleFactorForWindow (hwnd);
+    const auto scaleToLookFor = [&]
+    {
+        if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
+            return peer->getPlatformScaleFactor();
+
+        return getScaleFactorForWindow (hwnd);
+    }();
 
     auto globalScale = Desktop::getInstance().getGlobalScaleFactor();
 
@@ -4934,12 +4941,13 @@ static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd)
         if (candidateDisplays.size() == 1)
             return candidateDisplays[0];
 
-        Rectangle<int> bounds;
+        const auto bounds = [&]
+        {
+            if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
+                return peer->getComponent().getTopLevelComponent()->getBounds();
 
-        if (auto* peer = HWNDComponentPeer::getOwnerOfWindow (hwnd))
-            bounds = peer->getComponent().getTopLevelComponent()->getBounds();
-        else
-            bounds = Desktop::getInstance().getDisplays().physicalToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)));
+            return Desktop::getInstance().getDisplays().physicalToLogical (rectangleFromRECT (getWindowScreenRect (hwnd)));
+        }();
 
         const Displays::Display* retVal = nullptr;
         int maxArea = -1;
