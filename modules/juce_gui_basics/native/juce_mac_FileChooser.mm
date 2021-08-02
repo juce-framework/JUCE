@@ -82,7 +82,9 @@ public:
         filters.trim();
         filters.removeEmptyStrings();
 
-        [panel setTitle: juceStringToNS (owner.title)];
+        NSString* nsTitle = juceStringToNS (owner.title);
+        [panel setTitle: nsTitle];
+
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         [panel setAllowedFileTypes: createAllowedTypesArray (filters)];
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
@@ -95,6 +97,7 @@ public:
             [openPanel setCanChooseFiles: selectsFiles];
             [openPanel setAllowsMultipleSelection: selectMultiple];
             [openPanel setResolvesAliases: YES];
+            [openPanel setMessage: nsTitle]; // equivalent to the title bar since 10.11
 
             if (owner.treatFilePackagesAsDirs)
                 [openPanel setTreatsFilePackagesAsDirectories: YES];
@@ -118,7 +121,7 @@ public:
         if (isSave || selectsDirectories)
             [panel setCanCreateDirectories: YES];
 
-        [panel setLevel:NSModalPanelWindowLevel];
+        [panel setLevel: NSModalPanelWindowLevel];
 
         if (owner.startingFile.isDirectory())
         {

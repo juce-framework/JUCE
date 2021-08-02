@@ -51,13 +51,6 @@ public:
             {
             }
 
-            AccessibleState getCurrentState() const override
-            {
-                auto state = AccessibilityHandler::getCurrentState().withSelectable();
-
-                return state.isFocused() ? state.withSelected() : state;
-            }
-
             String getTitle() const override  { return itemComponent.name; }
 
         private:

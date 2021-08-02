@@ -314,15 +314,9 @@ private:
 
     //==============================================================================
     class AccessibilityNativeImpl;
+    std::unique_ptr<AccessibilityNativeImpl> nativeImpl;
 
-    struct DestroyNativeImpl
-    {
-        void operator() (AccessibilityNativeImpl*) const noexcept;
-    };
-
-    static AccessibilityNativeImpl* createNativeImpl (AccessibilityHandler&);
-
-    std::unique_ptr<AccessibilityNativeImpl, DestroyNativeImpl> nativeImpl;
+    static std::unique_ptr<AccessibilityNativeImpl> createNativeImpl (AccessibilityHandler&);
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibilityHandler)

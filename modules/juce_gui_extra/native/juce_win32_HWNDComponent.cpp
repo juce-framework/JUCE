@@ -120,8 +120,10 @@ private:
         {
             auto windowFlags = GetWindowLongPtr (hwnd, -16);
 
-            windowFlags &= ~WS_POPUP;
-            windowFlags |= WS_CHILD;
+            using FlagType = decltype (windowFlags);
+
+            windowFlags &= ~(FlagType) WS_POPUP;
+            windowFlags |= (FlagType) WS_CHILD;
 
             SetWindowLongPtr (hwnd, -16, windowFlags);
             SetParent (hwnd, (HWND) currentPeer->getNativeHandle());

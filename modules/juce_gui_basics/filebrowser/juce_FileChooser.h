@@ -190,7 +190,7 @@ public:
         @see FileBrowserComponent::FileChooserFlags
     */
     bool showDialog (int flags, FilePreviewComponent* previewComponent);
-#endif
+   #endif
 
     /** Use this method to launch the file browser window asynchronously.
 

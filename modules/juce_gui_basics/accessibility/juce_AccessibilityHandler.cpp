@@ -28,8 +28,6 @@ namespace juce
 
 AccessibilityHandler* AccessibilityHandler::currentlyFocusedHandler = nullptr;
 
-bool areAnyAccessibilityClientsActive();
-
 enum class InternalAccessibilityEvent
 {
     elementCreated,
@@ -77,10 +75,11 @@ AccessibilityHandler::~AccessibilityHandler()
 //==============================================================================
 AccessibleState AccessibilityHandler::getCurrentState() const
 {
-    AccessibleState state;
+    if (component.isCurrentlyBlockedByAnotherModalComponent()
+        && Component::getCurrentlyModalComponent()->isVisible())
+        return {};
 
-    if (! component.isCurrentlyBlockedByAnotherModalComponent())
-        state = state.withFocusable();
+    auto state = AccessibleState().withFocusable();
 
     return hasFocus (false) ? state.withFocused() : state;
 }
@@ -319,10 +318,7 @@ void AccessibilityHandler::grabFocusInternal (bool canTryParent)
 void AccessibilityHandler::giveAwayFocusInternal() const
 {
     currentlyFocusedHandler = nullptr;
-
-    if (auto* focusedComponent = Component::getCurrentlyFocusedComponent())
-        if (auto* handler = focusedComponent->getAccessibilityHandler())
-            handler->grabFocus();
+    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::focusChanged);
 }
 
 void AccessibilityHandler::takeFocus()

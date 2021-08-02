@@ -92,9 +92,9 @@ private:
 
     Threading: It is not safe to interleave calls to the methods of this
     class. If you need to load new impulse responses during processing the
-    `load` calls must be synchronised with `process` calls, which in practice
-    means making the `load` call from the audio thread. The
-    `loadImpulseResponse` functions *are* wait-free and are therefore
+    load() calls must be synchronised with process() calls, which in practice
+    means making the load() call from the audio thread. The
+    loadImpulseResponse() functions *are* wait-free and are therefore
     suitable for use in a realtime context.
 
     @see FIRFilter, FIRFilter::Coefficients, FFT
@@ -166,14 +166,14 @@ public:
     //==============================================================================
     /** Must be called before first calling process.
 
-        In general, calls to `loadImpulseResponse` load the impulse response (IR)
+        In general, calls to loadImpulseResponse() load the impulse response (IR)
         asynchronously. The IR will become active once it has been completely loaded
         and processed, which may take some time.
 
-        Calling process will ensure that the IR supplied to the most recent call to
-        `loadImpulseResponse` is fully initialised. This IR will then be active during
-        the next call to `process`. It is recommended to call `loadImpulseResponse` *before*
-        `process` if a specific IR must be active during the first process call.
+        Calling prepare() will ensure that the IR supplied to the most recent call to
+        loadImpulseResponse() is fully initialised. This IR will then be active during
+        the next call to process(). It is recommended to call loadImpulseResponse() *before*
+        prepare() if a specific IR must be active during the first process() call.
     */
     void prepare (const ProcessSpec&);
 

@@ -90,6 +90,7 @@
 #include "interprocess/juce_InterprocessConnectionServer.h"
 #include "interprocess/juce_ConnectedChildProcess.h"
 #include "interprocess/juce_NetworkServiceDiscovery.h"
+#include "native/juce_ScopedLowPowerModeDisabler.h"
 
 #if JUCE_LINUX || JUCE_BSD
  #include "native/juce_linux_EventLoop.h"

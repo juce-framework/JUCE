@@ -136,6 +136,11 @@ using namespace juce;
 - (BOOL) canBecomeFirstResponder;
 
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text;
+
+- (BOOL) isAccessibilityElement;
+- (id) accessibilityElementAtIndex: (NSInteger) index;
+- (NSInteger) accessibilityElementCount;
+- (NSInteger) indexOfAccessibilityElement: (id) element;
 @end
 
 //==============================================================================
@@ -538,6 +543,30 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     ignoreUnused (textView);
     return owner->textViewReplaceCharacters (Range<int> ((int) range.location, (int) (range.location + range.length)),
                                              nsStringToJuce (text));
+}
+
+- (BOOL) isAccessibilityElement
+{
+    return NO;
+}
+
+- (id) accessibilityElementAtIndex: (NSInteger) index
+{
+    if (owner != nullptr)
+        if (auto* handler = owner->getComponent().getAccessibilityHandler())
+            return (id) handler->getNativeImplementation();
+
+    return nil;
+}
+
+- (NSInteger) accessibilityElementCount
+{
+    return owner != nullptr ? 1 : 0;
+}
+
+- (NSInteger) indexOfAccessibilityElement: (id) element
+{
+    return 0;
 }
 
 @end

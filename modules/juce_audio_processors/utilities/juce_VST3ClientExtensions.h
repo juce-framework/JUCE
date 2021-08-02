@@ -82,6 +82,14 @@ struct VST3ClientExtensions
         called - this function may not be called at all!
     */
     virtual void setIHostApplication  (Steinberg::FUnknown*) {}
+
+    /** This function will be called to check whether the first input bus
+        should be designated as "kMain" or "kAux". Return true if the
+        first bus should be kMain, or false if the bus should be kAux.
+
+        All other input buses will always be designated kAux.
+    */
+    virtual bool getPluginHasMainInput() const  { return true; }
 };
 
 } // namespace juce

@@ -249,43 +249,19 @@ private:
 
             if (auto* textInterface = owner->getHandler().getTextInterface())
             {
-                auto numCharacters = textInterface->getTotalNumCharacters();
+                const auto boundaryType = getBoundaryType (unit);
 
-                if (numCharacters == 0)
-                {
-                    selectionRange = {};
-                    return S_OK;
-                }
+                const auto start = AccessibilityTextHelpers::findTextBoundary (*textInterface,
+                                                                               selectionRange.getStart(),
+                                                                               boundaryType,
+                                                                               AccessibilityTextHelpers::Direction::backwards);
 
-                if (unit == TextUnit_Character)
-                {
-                    selectionRange.setStart (jlimit (0, numCharacters - 1, selectionRange.getStart()));
-                    selectionRange.setEnd (selectionRange.getStart() + 1);
-                }
-                else if (unit == TextUnit_Paragraph
-                      || unit == TextUnit_Page
-                      || unit == TextUnit_Document)
-                {
-                    selectionRange = { 0, numCharacters };
-                }
-                else if (unit == TextUnit_Word
-                      || unit == TextUnit_Format
-                      || unit == TextUnit_Line)
-                {
-                    const auto boundaryType = (unit == TextUnit_Line ? BoundaryType::line : BoundaryType::word);
+                const auto end = AccessibilityTextHelpers::findTextBoundary (*textInterface,
+                                                                             start,
+                                                                             boundaryType,
+                                                                             AccessibilityTextHelpers::Direction::forwards);
 
-                    auto start = findBoundary (*textInterface,
-                                               selectionRange.getStart(),
-                                               boundaryType,
-                                               NextEndpointDirection::backwards);
-
-                    auto end = findBoundary (*textInterface,
-                                             start,
-                                             boundaryType,
-                                             NextEndpointDirection::forwards);
-
-                    selectionRange = Range<int> (start, end);
-                }
+                selectionRange = Range<int> (start, end);
 
                 return S_OK;
             }
@@ -351,8 +327,6 @@ private:
                         VariantHelpers::setInt (caretPos, pRetVal);
                         break;
                     }
-                    default:
-                        break;
                 }
 
                 return S_OK;
@@ -487,60 +461,37 @@ private:
         {
             return owner->withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
             {
-                auto numCharacters = textInterface.getTotalNumCharacters();
-
-                if (count == 0 || numCharacters == 0)
+                if (count == 0 || textInterface.getTotalNumCharacters() == 0)
                     return S_OK;
 
-                const auto isStart = (endpoint == TextPatternRangeEndpoint_Start);
-                auto endpointToMove = (isStart ? selectionRange.getStart() : selectionRange.getEnd());
+                auto endpointToMove = (endpoint == TextPatternRangeEndpoint_Start ? selectionRange.getStart()
+                                                                                  : selectionRange.getEnd());
 
-                if (unit == TextUnit_Character)
+                const auto direction = (count > 0 ? AccessibilityTextHelpers::Direction::forwards
+                                                  : AccessibilityTextHelpers::Direction::backwards);
+
+                const auto boundaryType = getBoundaryType (unit);
+
+                // handle case where endpoint is on a boundary
+                if (AccessibilityTextHelpers::findTextBoundary (textInterface, endpointToMove, boundaryType, direction) == endpointToMove)
+                    endpointToMove += (direction == AccessibilityTextHelpers::Direction::forwards ? 1 : -1);
+
+                int numMoved;
+                for (numMoved = 0; numMoved < std::abs (count); ++numMoved)
                 {
-                    const auto targetPoint = jlimit (0, numCharacters, endpointToMove + count);
+                    auto nextEndpoint = AccessibilityTextHelpers::findTextBoundary (textInterface,
+                                                                                    endpointToMove,
+                                                                                    boundaryType,
+                                                                                    direction);
 
-                    *pRetVal = targetPoint - endpointToMove;
-                    setEndpointChecked (endpoint, targetPoint);
+                    if (nextEndpoint == endpointToMove)
+                        break;
 
-                    return S_OK;
+                    endpointToMove = nextEndpoint;
                 }
 
-                auto direction = (count > 0 ? NextEndpointDirection::forwards
-                                            : NextEndpointDirection::backwards);
-
-                if (unit == TextUnit_Paragraph
-                    || unit == TextUnit_Page
-                    || unit == TextUnit_Document)
-                {
-                    *pRetVal = (direction == NextEndpointDirection::forwards ? 1 : -1);
-                    setEndpointChecked (endpoint, numCharacters);
-                    return S_OK;
-                }
-
-                if (unit == TextUnit_Word
-                    || unit == TextUnit_Format
-                    || unit == TextUnit_Line)
-                {
-                    const auto boundaryType = unit == TextUnit_Line ? BoundaryType::line : BoundaryType::word;
-
-                    // handle case where endpoint is on a boundary
-                    if (findBoundary (textInterface, endpointToMove, boundaryType, direction) == endpointToMove)
-                        endpointToMove += (direction == NextEndpointDirection::forwards ? 1 : -1);
-
-                    int numMoved;
-                    for (numMoved = 0; numMoved < std::abs (count); ++numMoved)
-                    {
-                        auto nextEndpoint = findBoundary (textInterface, endpointToMove, boundaryType, direction);
-
-                        if (nextEndpoint == endpointToMove)
-                            break;
-
-                        endpointToMove = nextEndpoint;
-                    }
-
-                    *pRetVal = numMoved;
-                    setEndpointChecked (endpoint, endpointToMove);
-                }
+                *pRetVal = numMoved;
+                setEndpointChecked (endpoint, endpointToMove);
 
                 return S_OK;
             });
@@ -585,28 +536,28 @@ private:
         }
 
     private:
-        enum class NextEndpointDirection { forwards, backwards };
-        enum class BoundaryType { word, line };
-
-        static int findBoundary (const AccessibilityTextInterface& textInterface,
-                                 int currentPosition,
-                                 BoundaryType boundary,
-                                 NextEndpointDirection direction)
+        static AccessibilityTextHelpers::BoundaryType getBoundaryType (TextUnit unit)
         {
-            const auto text = [&]() -> String
+            switch (unit)
             {
-                if (direction == NextEndpointDirection::forwards)
-                    return textInterface.getText ({ currentPosition, textInterface.getTotalNumCharacters() });
+                case TextUnit_Character:
+                    return AccessibilityTextHelpers::BoundaryType::character;
 
-                auto stdString = textInterface.getText ({ 0, currentPosition }).toStdString();
-                std::reverse (stdString.begin(), stdString.end());
-                return stdString;
-            }();
+                case TextUnit_Format:
+                case TextUnit_Word:
+                    return AccessibilityTextHelpers::BoundaryType::word;
 
-            auto tokens = (boundary == BoundaryType::line ? StringArray::fromLines (text)
-                                                          : StringArray::fromTokens (text, false));
+                case TextUnit_Line:
+                    return AccessibilityTextHelpers::BoundaryType::line;
 
-            return currentPosition + (direction == NextEndpointDirection::forwards ? tokens[0].length() : -(tokens[0].length()));
+                case TextUnit_Paragraph:
+                case TextUnit_Page:
+                case TextUnit_Document:
+                    return AccessibilityTextHelpers::BoundaryType::document;
+            };
+
+            jassertfalse;
+            return AccessibilityTextHelpers::BoundaryType::character;
         }
 
         void setEndpointChecked (TextPatternRangeEndpoint endpoint, int newEndpoint)
