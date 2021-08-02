@@ -33,7 +33,6 @@ public:
     MSVCProjectExporterBase (Project& p, const ValueTree& t, String folderName)
         : ProjectExporter (p, t),
           IPPLibraryValue       (settings, Ids::IPPLibrary,                   getUndoManager()),
-          IPP1ALibraryValue     (settings, Ids::IPP1ALibrary,                 getUndoManager()),
           platformToolsetValue  (settings, Ids::toolset,                      getUndoManager()),
           targetPlatformVersion (settings, Ids::windowsTargetPlatformVersion, getUndoManager()),
           manifestFileValue     (settings, Ids::msvcManifestFile,             getUndoManager())
@@ -50,7 +49,6 @@ public:
 
     //==============================================================================
     String getIPPLibrary() const                      { return IPPLibraryValue.get(); }
-    String getIPP1ALibrary() const                    { return IPP1ALibraryValue.get(); }
     String getPlatformToolset() const                 { return platformToolsetValue.get(); }
     String getWindowsTargetPlatformVersion() const    { return targetPlatformVersion.get(); }
 
@@ -442,13 +440,9 @@ public:
                 addWindowsTargetPlatformToConfig (*e);
 
                 auto ippLibrary = owner.getIPPLibrary();
-                auto ipp1aLibrary = owner.getIPP1ALibrary();
 
                 if (ippLibrary.isNotEmpty())
                     e->createNewChildElement ("UseIntelIPP")->addTextElement (ippLibrary);
-
-                if (ipp1aLibrary.isNotEmpty())
-                    e->createNewChildElement ("UseIntelIPP1A")->addTextElement (ipp1aLibrary);
             }
 
             {
@@ -1485,10 +1479,6 @@ public:
                                                 { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
                                                 { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
                    "Enable this to use Intel's Integrated Performance Primitives library.");
-        props.add (new ChoicePropertyComponent (IPP1ALibraryValue, "Use OneAPI IPP Library",
-                                                { "No",  "Yes (Default Linking)", "Static Library", "Dynamic Library" },
-                                                { var(), "true",                  "Static_Library", "Dynamic_Library" }),
-                   "Enable this to use Intel's OneAPI Integrated Performance Primitives library.");
 
         {
             auto isWindows10SDK = getVisualStudioVersion() > 14;
@@ -1573,7 +1563,7 @@ protected:
     mutable File rcFile, iconFile, packagesConfigFile;
     OwnedArray<MSVCTargetBase> targets;
 
-    ValueWithDefault IPPLibraryValue, IPP1ALibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
+    ValueWithDefault IPPLibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
 
     File getProjectFile (const String& extension, const String& target) const
     {
