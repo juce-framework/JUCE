@@ -858,6 +858,45 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIDeviceBase)
 };
 
+class SimpleAbstractQueue
+{
+public:
+    SimpleAbstractQueue() = default;
+
+    explicit SimpleAbstractQueue (int sizeIn)
+        : size (nextPowerOfTwo (sizeIn)) {}
+
+    int getRemainingSpace() const { return size - numReadable; }
+    int getNumReadable() const { return numReadable; }
+    int getSize() const { return size; }
+
+    std::array<Range<int>, 2> write (int num)
+    {
+        const auto startPos = (readPos + numReadable) & (size - 1);
+        const auto maxToWrite = jmin (getRemainingSpace(), num);
+        const auto firstBlockSize = jmin (maxToWrite, size - startPos);
+
+        numReadable += maxToWrite;
+
+        return { { { startPos, startPos + firstBlockSize }, { 0, maxToWrite - firstBlockSize } } };
+    }
+
+    std::array<Range<int>, 2> read (int num)
+    {
+        const auto startPos = readPos;
+        const auto maxToRead = jmin (numReadable, num);
+        const auto firstBlockSize = jmin (maxToRead, size - startPos);
+
+        readPos = (startPos + maxToRead) & (size - 1);
+        numReadable -= maxToRead;
+
+        return { { { startPos, startPos + firstBlockSize }, { 0, maxToRead - firstBlockSize } } };
+    }
+
+private:
+    int size = 0, readPos = 0, numReadable = 0;
+};
+
 //==============================================================================
 class WASAPIInputDevice  : public WASAPIDeviceBase
 {
@@ -884,8 +923,7 @@ public:
         closeClient();
         captureClient = nullptr;
         reservoir.reset();
-        reservoirReadPos = 0;
-        reservoirWritePos = 0;
+        queue = SimpleAbstractQueue();
     }
 
     template <class SourceType>
@@ -903,13 +941,12 @@ public:
         else                            updateFormatWithType ((AudioData::Int16*)   nullptr);
     }
 
-    bool start (int userBufferSize)
+    bool start (int userBufferSizeIn)
     {
-        reservoirSize = (int) (actualBufferSize + (UINT32) userBufferSize);
-        reservoirMask = nextPowerOfTwo (reservoirSize) - 1;
-        reservoir.setSize ((size_t) ((reservoirMask + 1) * bytesPerFrame), true);
-        reservoirReadPos = 0;
-        reservoirWritePos = 0;
+        const auto reservoirSize = nextPowerOfTwo ((int) (actualBufferSize + (UINT32) userBufferSizeIn));
+
+        queue = SimpleAbstractQueue (reservoirSize);
+        reservoir.setSize ((size_t) (queue.getSize() * bytesPerFrame), true);
         xruns = 0;
 
         if (! check (client->Start()))
@@ -927,93 +964,80 @@ public:
         UINT32 numSamplesAvailable;
         DWORD flags;
 
-        while (captureClient->GetBuffer (&inputData, &numSamplesAvailable, &flags, nullptr, nullptr)
-                  != MAKE_HRESULT (0, 0x889, 0x1) /* AUDCLNT_S_BUFFER_EMPTY */)
+        while (captureClient->GetBuffer (&inputData, &numSamplesAvailable, &flags, nullptr, nullptr) != MAKE_HRESULT (0, 0x889, 0x1) /* AUDCLNT_S_BUFFER_EMPTY */)
             captureClient->ReleaseBuffer (numSamplesAvailable);
     }
 
-    int getNumSamplesInReservoir() const noexcept    { return reservoirWritePos.load() - reservoirReadPos.load(); }
+    int getNumSamplesInReservoir() const noexcept    { return queue.getNumReadable(); }
 
     void handleDeviceBuffer()
     {
         if (numChannels <= 0)
             return;
 
-        uint8* inputData;
-        UINT32 numSamplesAvailable;
-        DWORD flags;
+        uint8* inputData = nullptr;
+        UINT32 numSamplesAvailable = 0;
+        DWORD flags = 0;
 
         while (check (captureClient->GetBuffer (&inputData, &numSamplesAvailable, &flags, nullptr, nullptr)) && numSamplesAvailable > 0)
         {
             if ((flags & AUDCLNT_BUFFERFLAGS_DATA_DISCONTINUITY) != 0)
                 xruns++;
 
-            int samplesLeft = (int) numSamplesAvailable;
-
-            while (samplesLeft > 0)
+            if (numSamplesAvailable > (UINT32) queue.getRemainingSpace())
             {
-                auto localWrite = reservoirWritePos.load() & reservoirMask;
-                auto samplesToDo = jmin (samplesLeft, reservoirMask + 1 - localWrite);
-                auto samplesToDoBytes = samplesToDo * bytesPerFrame;
+                captureClient->ReleaseBuffer (0);
+                return;
+            }
 
-                void* reservoirPtr = addBytesToPointer (reservoir.getData(), localWrite * bytesPerFrame);
+            auto offset = 0;
+
+            for (const auto& block : queue.write ((int) numSamplesAvailable))
+            {
+                const auto samplesToDoBytes = block.getLength() * bytesPerFrame;
+
+                auto* reservoirPtr = addBytesToPointer (reservoir.getData(), block.getStart() * bytesPerFrame);
 
                 if ((flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0)
                     zeromem (reservoirPtr, (size_t) samplesToDoBytes);
                 else
-                    memcpy (reservoirPtr, inputData, (size_t) samplesToDoBytes);
+                    memcpy (reservoirPtr, inputData + offset * bytesPerFrame, (size_t) samplesToDoBytes);
 
-                reservoirWritePos += samplesToDo;
-                inputData += samplesToDoBytes;
-                samplesLeft -= samplesToDo;
+                offset += block.getLength();
             }
-
-            if (getNumSamplesInReservoir() > reservoirSize)
-                reservoirReadPos = reservoirWritePos.load() - reservoirSize;
 
             captureClient->ReleaseBuffer (numSamplesAvailable);
         }
     }
 
-    void copyBuffersFromReservoir (float** destBuffers, int numDestBuffers, int bufferSize)
+    void copyBuffersFromReservoir (float* const* destBuffers, const int numDestBuffers, const int bufferSize)
     {
         if ((numChannels <= 0 && bufferSize == 0) || reservoir.isEmpty())
             return;
 
-        int offset = jmax (0, bufferSize - getNumSamplesInReservoir());
+        auto offset = jmax (0, bufferSize - queue.getNumReadable());
 
         if (offset > 0)
-        {
             for (int i = 0; i < numDestBuffers; ++i)
                 zeromem (destBuffers[i], (size_t) offset * sizeof (float));
 
-            bufferSize -= offset;
-            reservoirReadPos -= offset / 2;
-        }
-
-        while (bufferSize > 0)
+        for (const auto& block : queue.read (jmin (queue.getNumReadable(), bufferSize)))
         {
-            auto localRead = reservoirReadPos.load() & reservoirMask;
-            auto samplesToDo = jmin (bufferSize, getNumSamplesInReservoir(), reservoirMask + 1 - localRead);
+            for (auto i = 0; i < numDestBuffers; ++i)
+                converter->convertSamples (destBuffers[i] + offset,
+                                           0,
+                                           addBytesToPointer (reservoir.getData(), block.getStart() * bytesPerFrame),
+                                           channelMaps.getUnchecked (i),
+                                           block.getLength());
 
-            if (samplesToDo <= 0)
-                break;
-
-            auto reservoirOffset = localRead * bytesPerFrame;
-
-            for (int i = 0; i < numDestBuffers; ++i)
-                converter->convertSamples (destBuffers[i] + offset, 0, addBytesToPointer (reservoir.getData(), reservoirOffset), channelMaps.getUnchecked(i), samplesToDo);
-
-            bufferSize -= samplesToDo;
-            offset += samplesToDo;
-            reservoirReadPos += samplesToDo;
+            offset += block.getLength();
         }
     }
 
     ComSmartPtr<IAudioCaptureClient> captureClient;
     MemoryBlock reservoir;
-    int reservoirSize, reservoirMask, xruns;
-    std::atomic<int> reservoirReadPos, reservoirWritePos;
+    SimpleAbstractQueue queue;
+    int xruns = 0;
 
     std::unique_ptr<AudioData::Converter> converter;
 
@@ -1095,7 +1119,7 @@ public:
         return (int) actualBufferSize;
     }
 
-    void copyBuffers (const float** srcBuffers, int numSrcBuffers, int bufferSize,
+    void copyBuffers (const float* const* srcBuffers, int numSrcBuffers, int bufferSize,
                       WASAPIInputDevice* inputDevice, Thread& thread)
     {
         if (numChannels <= 0)
