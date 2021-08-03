@@ -1194,7 +1194,11 @@ public:
             outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
         }
 
+#if JucePlugin_Enable_ARA
+        if (getHostType().isLogic() && ! dynamic_cast<AudioProcessorARAExtension*>(juceFilter.get())->isBoundToARA())
+#else
         if (getHostType().isLogic())
+#endif
         {
             // Use the sample time from lastTimeStamp to work around bug in Logic Pro 10.1
             outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
