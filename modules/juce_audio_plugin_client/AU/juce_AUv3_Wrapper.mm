@@ -934,14 +934,39 @@ public:
     }
    #endif
 
+    struct ScopedKeyChange
+    {
+        ScopedKeyChange (AUAudioUnit* a, NSString* k)
+            : au (a), key (k)
+        {
+            [au willChangeValueForKey: key];
+        }
+
+        ~ScopedKeyChange()
+        {
+            [au didChangeValueForKey: key];
+        }
+
+        AUAudioUnit* au;
+        NSString* key;
+    };
+
     //==============================================================================
-    void audioProcessorChanged (AudioProcessor* processor, const ChangeDetails&) override
+    void audioProcessorChanged (AudioProcessor* processor, const ChangeDetails& details) override
     {
         ignoreUnused (processor);
 
-        [au willChangeValueForKey: @"allParameterValues"];
-        addPresets();
-        [au didChangeValueForKey: @"allParameterValues"];
+        if (! details.programChanged)
+            return;
+
+        {
+            ScopedKeyChange scope (au, @"allParameterValues");
+            addPresets();
+        }
+
+        {
+            ScopedKeyChange scope (au, @"currentPreset");
+        }
     }
 
     void audioProcessorParameterChanged (AudioProcessor*, int idx, float newValue) override
