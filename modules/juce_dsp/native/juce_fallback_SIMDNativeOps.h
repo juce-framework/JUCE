@@ -124,10 +124,7 @@ struct SIMDFallbackOps
         UnionType a {av};
 
         for (size_t i = 0; i < n; ++i)
-        {
-            jassert (a.s[i] >= ScalarType (0));
-            a.s[i] = static_cast <ScalarType> (static_cast<int> (a.s[i]));
-        }
+            a.s[i] = static_cast<ScalarType> (static_cast<int> (a.s[i]));
 
         return a.v;
     }
