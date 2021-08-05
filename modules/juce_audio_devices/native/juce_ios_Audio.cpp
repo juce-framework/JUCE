@@ -25,7 +25,13 @@ namespace juce
 
 class iOSAudioIODevice;
 
-static const char* const iOSAudioDeviceName = "iOS Audio";
+constexpr const char* const iOSAudioDeviceName = "iOS Audio";
+
+#ifndef JUCE_IOS_AUDIO_EXPLICIT_SAMPLERATES
+ #define JUCE_IOS_AUDIO_EXPLICIT_SAMPLERATES
+#endif
+
+constexpr std::initializer_list<double> iOSExplicitSampleRates { JUCE_IOS_AUDIO_EXPLICIT_SAMPLERATES };
 
 //==============================================================================
 struct AudioSessionHolder
@@ -356,6 +362,12 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
     // depending on whether the headphones are plugged in or not!
     void updateAvailableSampleRates()
     {
+        if (iOSExplicitSampleRates.size() != 0)
+        {
+            availableSampleRates = Array<double> (iOSExplicitSampleRates);
+            return;
+        }
+
         availableSampleRates.clear();
 
         AudioUnitRemovePropertyListenerWithUserData (audioUnit,
