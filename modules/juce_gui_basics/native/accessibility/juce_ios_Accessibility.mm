@@ -84,9 +84,6 @@ private:
         {
             addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement,     "c@:");
             addMethod (@selector (accessibilityContainer),     getAccessibilityContainer,     "@@:");
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (accessibilityHitTest:),      accessibilityHitTest,          "@@:", @encode (CGPoint));
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
             addMethod (@selector (accessibilityFrame),         getAccessibilityFrame,         @encode (CGRect), "@:");
             addMethod (@selector (accessibilityTraits),        getAccessibilityTraits,        "i@:");
             addMethod (@selector (accessibilityLabel),         getAccessibilityTitle,         "@@:");
@@ -131,19 +128,6 @@ private:
                     return (id) parent->getNativeImplementation();
 
                 return (id) handler->getComponent().getWindowHandle();
-            }
-
-            return nil;
-        }
-
-        static id accessibilityHitTest (id self, SEL, CGPoint point)
-        {
-            if (auto* handler = getHandler (self))
-            {
-                if (auto* child = handler->getChildAt (roundToIntPoint (point)))
-                    return (id) child->getNativeImplementation();
-
-                return self;
             }
 
             return nil;
