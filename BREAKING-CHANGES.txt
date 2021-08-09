@@ -6,6 +6,28 @@ Develop
 
 Change
 ------
+juce::gl::loadFunctions() no longer loads extension functions.
+
+Possible Issues
+---------------
+Code that depended on extension functions being loaded automatically may cease
+to function correctly.
+
+Workaround
+----------
+Extension functions can now be loaded using juce::gl::loadExtensions().
+
+Rationale
+---------
+There are a great number of extension functions, and on some systems these can
+be slow to load (i.e. a second or so). Projects that do not require these
+extension functions should not have to pay for this unnecessary overhead. Now,
+only core functions will be loaded by default, and extensions can be loaded
+explicitly in projects that require such functionality.
+
+
+Change
+------
 Thread::setPriority() will no longer set a realtime scheduling policy for all
 threads with non-zero priorities on POSIX systems.
 
