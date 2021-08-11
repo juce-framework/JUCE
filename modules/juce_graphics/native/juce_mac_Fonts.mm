@@ -748,7 +748,9 @@ private:
 
 CTFontRef getCTFontFromTypeface (const Font& f)
 {
-    if (auto* tf = dynamic_cast<OSXTypeface*> (f.getTypeface()))
+    const auto typeface = f.getTypefacePtr();
+
+    if (auto* tf = dynamic_cast<OSXTypeface*> (typeface.get()))
         return tf->ctFontRef.get();
 
     return {};
@@ -848,7 +850,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     static DefaultFontNames defaultNames;
 
     auto newFont = font;
-    auto& faceName = font.getTypefaceName();
+    auto faceName = font.getTypefaceName();
 
     if (faceName == getDefaultSansSerifFontName())       newFont.setTypefaceName (defaultNames.defaultSans);
     else if (faceName == getDefaultSerifFontName())      newFont.setTypefaceName (defaultNames.defaultSerif);
@@ -866,7 +868,9 @@ static bool canAllTypefacesBeUsedInLayout (const AttributedString& text)
 
     for (int i = 0; i < numCharacterAttributes; ++i)
     {
-        if (auto tf = dynamic_cast<OSXTypeface*> (text.getAttribute (i).font.getTypeface()))
+        auto typeface = text.getAttribute (i).font.getTypefacePtr();
+
+        if (auto tf = dynamic_cast<OSXTypeface*> (typeface.get()))
             if (tf->canBeUsedForLayout)
                 continue;
 

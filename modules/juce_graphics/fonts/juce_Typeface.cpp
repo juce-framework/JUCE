@@ -110,14 +110,12 @@ Typeface::Typeface (const String& faceName, const String& styleName) noexcept
 {
 }
 
-Typeface::~Typeface()
-{
-}
+Typeface::~Typeface() = default;
 
 Typeface::Ptr Typeface::getFallbackTypeface()
 {
     const Font fallbackFont (Font::getFallbackFontName(), Font::getFallbackFontStyle(), 10.0f);
-    return Typeface::Ptr (fallbackFont.getTypeface());
+    return fallbackFont.getTypefacePtr();
 }
 
 EdgeTable* Typeface::getEdgeTableForGlyph (int glyphNumber, const AffineTransform& transform, float fontHeight)
