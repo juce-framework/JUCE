@@ -300,7 +300,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     static DefaultFontNames defaultNames;
 
     Font newFont (font);
-    auto& faceName = font.getTypefaceName();
+    auto faceName = font.getTypefaceName();
 
     if (faceName == getDefaultSansSerifFontName())       newFont.setTypefaceName (defaultNames.defaultSans);
     else if (faceName == getDefaultSerifFontName())      newFont.setTypefaceName (defaultNames.defaultSerif);

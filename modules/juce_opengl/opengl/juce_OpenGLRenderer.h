@@ -62,6 +62,13 @@ public:
 
         For information about how to trigger a render callback, see
         OpenGLContext::triggerRepaint() and OpenGLContext::setContinuousRepainting().
+
+        IMPORTANT: Never take a MessageManagerLock inside this function! On
+        macOS, the OpenGL context will be locked for the duration of this call.
+        The main thread may also attempt to interact with the OpenGL context at
+        any time, which will also require locking the OpenGL context. As a
+        result, taking a MessageManagerLock inside renderOpenGL() may cause a
+        hierarchical deadlock.
     */
     virtual void renderOpenGL() = 0;
 

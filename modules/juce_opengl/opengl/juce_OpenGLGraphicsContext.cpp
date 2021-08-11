@@ -1664,7 +1664,7 @@ struct SavedState  : public RenderingHelpers::SavedStateBase<SavedState>
                 auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                      .followedBy (trans));
 
-                const std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
+                const std::unique_ptr<EdgeTable> et (font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
                     fillShape (*new EdgeTableRegionType (*et), false);
