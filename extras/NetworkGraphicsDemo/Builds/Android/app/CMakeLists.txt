@@ -192,6 +192,10 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceFloatCaller.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI16Caller.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI16Caller.h"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI24Caller.cpp"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI24Caller.h"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI32Caller.cpp"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI32Caller.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/common/StabilizedCallback.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/common/Trace.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/common/Trace.h"
@@ -229,6 +233,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/ClipToRange.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/FlowGraphNode.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/FlowGraphNode.h"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/FlowgraphUtilities.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/ManyToMultiConverter.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/ManyToMultiConverter.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/MonoToMultiConverter.cpp"
@@ -245,12 +250,16 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI16.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI24.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI24.h"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI32.cpp"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI32.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceFloat.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceFloat.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI16.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI16.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI24.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI24.h"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI32.cpp"
+    "../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI32.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/opensles/AudioInputStreamOpenSLES.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/opensles/AudioInputStreamOpenSLES.h"
     "../../../../../modules/juce_audio_devices/native/oboe/src/opensles/AudioOutputStreamOpenSLES.cpp"
@@ -266,7 +275,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/native/oboe/src/opensles/OutputMixerOpenSLES.cpp"
     "../../../../../modules/juce_audio_devices/native/oboe/src/opensles/OutputMixerOpenSLES.h"
     "../../../../../modules/juce_audio_devices/native/oboe/CMakeLists.txt"
-    "../../../../../modules/juce_audio_devices/native/oboe/readme.md"
+    "../../../../../modules/juce_audio_devices/native/oboe/README.md"
     "../../../../../modules/juce_audio_devices/native/juce_android_Audio.cpp"
     "../../../../../modules/juce_audio_devices/native/juce_android_HighPerformanceAudioHelpers.h"
     "../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp"
@@ -1766,6 +1775,10 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/native/ob
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceFloatCaller.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI16Caller.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI16Caller.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI24Caller.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI24Caller.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI32Caller.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/SourceI32Caller.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/StabilizedCallback.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/Trace.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/common/Trace.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1803,6 +1816,7 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/native/ob
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/ClipToRange.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/FlowGraphNode.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/FlowGraphNode.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/FlowgraphUtilities.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/ManyToMultiConverter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/ManyToMultiConverter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/MonoToMultiConverter.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1819,12 +1833,16 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/native/ob
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI16.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI24.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI24.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI32.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SinkI32.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceFloat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceFloat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI16.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI16.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI24.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI24.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI32.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/flowgraph/SourceI32.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/opensles/AudioInputStreamOpenSLES.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/opensles/AudioInputStreamOpenSLES.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/opensles/AudioOutputStreamOpenSLES.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1840,7 +1858,7 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/native/ob
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/opensles/OutputMixerOpenSLES.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/src/opensles/OutputMixerOpenSLES.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/CMakeLists.txt" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/readme.md" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_devices/native/oboe/README.md" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Audio.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_HighPerformanceAudioHelpers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/native/juce_android_Midi.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
