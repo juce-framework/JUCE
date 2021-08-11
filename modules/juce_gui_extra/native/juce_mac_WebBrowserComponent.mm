@@ -40,6 +40,38 @@ namespace juce
 
 #endif
 
+static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
+{
+   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
+    const auto parameterNames = url.getParameterNames();
+    const auto parameterValues = url.getParameterValues();
+
+    jassert (parameterNames.size() == parameterValues.size());
+
+    if (parameterNames.isEmpty())
+        return fileUrl;
+
+    NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
+    NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
+
+    for (int i = 0; i < parameterNames.size(); ++i)
+        [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
+                                                                 value: juceStringToNS (parameterValues[i])]];
+
+    [components.get() setQueryItems: queryItems.get()];
+
+    return [components.get() URL];
+   #else
+    const auto queryString = url.getQueryString();
+
+    if (queryString.isNotEmpty())
+        if (NSString* fileUrlString = [fileUrl absoluteString])
+            return [NSURL URLWithString: [fileUrlString stringByAppendingString: juceStringToNS (queryString)]];
+
+    return fileUrl;
+   #endif
+}
+
 static NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
 {
     NSString* urlString = juceStringToNS (url);
@@ -340,7 +372,7 @@ public:
             auto file = URL (url).getLocalFile();
 
             if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
-                [webView loadFileURL: nsUrl allowingReadAccessToURL: nsUrl];
+                [webView loadFileURL: appendParametersToFileURL (url, nsUrl) allowingReadAccessToURL: nsUrl];
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
@@ -586,7 +618,7 @@ public:
                 auto file = URL (url).getLocalFile();
 
                 if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
-                    return [NSMutableURLRequest requestWithURL: nsUrl
+                    return [NSMutableURLRequest requestWithURL: appendParametersToFileURL (url, nsUrl)
                                                    cachePolicy: NSURLRequestUseProtocolCachePolicy
                                                timeoutInterval: 30.0];
 
