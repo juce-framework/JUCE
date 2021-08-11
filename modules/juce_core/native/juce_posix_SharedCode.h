@@ -578,6 +578,7 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
         }
 
         close (fileHandle);
+        fileHandle = 0;
     }
 }
 
