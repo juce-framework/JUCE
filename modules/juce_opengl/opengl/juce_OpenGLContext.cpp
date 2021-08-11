@@ -562,7 +562,7 @@ public:
             bindVertexArray();
         }
 
-        glViewport (0, 0, component.getWidth(), component.getHeight());
+        glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
 
         nativeContext->setSwapInterval (1);
 
