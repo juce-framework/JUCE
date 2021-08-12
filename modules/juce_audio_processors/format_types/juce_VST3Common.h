@@ -957,6 +957,12 @@ private:
             return true;
         }
 
+        if (msg.isAftertouch())
+        {
+            result = { Steinberg::Vst::kCtrlPolyPressure, msg.getAfterTouchValue() / 127.0};
+            return true;
+        }
+
         result.controllerNumber = -1;
         return false;
     }
