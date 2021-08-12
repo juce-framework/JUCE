@@ -858,45 +858,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WASAPIDeviceBase)
 };
 
-class SimpleAbstractQueue
-{
-public:
-    SimpleAbstractQueue() = default;
-
-    explicit SimpleAbstractQueue (int sizeIn)
-        : size (nextPowerOfTwo (sizeIn)) {}
-
-    int getRemainingSpace() const { return size - numReadable; }
-    int getNumReadable() const { return numReadable; }
-    int getSize() const { return size; }
-
-    std::array<Range<int>, 2> write (int num)
-    {
-        const auto startPos = (readPos + numReadable) & (size - 1);
-        const auto maxToWrite = jmin (getRemainingSpace(), num);
-        const auto firstBlockSize = jmin (maxToWrite, size - startPos);
-
-        numReadable += maxToWrite;
-
-        return { { { startPos, startPos + firstBlockSize }, { 0, maxToWrite - firstBlockSize } } };
-    }
-
-    std::array<Range<int>, 2> read (int num)
-    {
-        const auto startPos = readPos;
-        const auto maxToRead = jmin (numReadable, num);
-        const auto firstBlockSize = jmin (maxToRead, size - startPos);
-
-        readPos = (startPos + maxToRead) & (size - 1);
-        numReadable -= maxToRead;
-
-        return { { { startPos, startPos + firstBlockSize }, { 0, maxToRead - firstBlockSize } } };
-    }
-
-private:
-    int size = 0, readPos = 0, numReadable = 0;
-};
-
 //==============================================================================
 class WASAPIInputDevice  : public WASAPIDeviceBase
 {
@@ -923,7 +884,7 @@ public:
         closeClient();
         captureClient = nullptr;
         reservoir.reset();
-        queue = SimpleAbstractQueue();
+        queue = SingleThreadedAbstractFifo();
     }
 
     template <class SourceType>
@@ -945,7 +906,7 @@ public:
     {
         const auto reservoirSize = nextPowerOfTwo ((int) (actualBufferSize + (UINT32) userBufferSizeIn));
 
-        queue = SimpleAbstractQueue (reservoirSize);
+        queue = SingleThreadedAbstractFifo (reservoirSize);
         reservoir.setSize ((size_t) (queue.getSize() * bytesPerFrame), true);
         xruns = 0;
 
@@ -1036,7 +997,7 @@ public:
 
     ComSmartPtr<IAudioCaptureClient> captureClient;
     MemoryBlock reservoir;
-    SimpleAbstractQueue queue;
+    SingleThreadedAbstractFifo queue;
     int xruns = 0;
 
     std::unique_ptr<AudioData::Converter> converter;
