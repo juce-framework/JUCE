@@ -1615,7 +1615,10 @@ public:
                    codeSigningIdentity.quoted());
 
             if (codeSigningIdentity.isNotEmpty())
+            {
+                s.set ("CODE_SIGN_STYLE", "Manual");
                 s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
+            }
 
             if (owner.getDevelopmentTeamIDString().isNotEmpty())
                 s.set ("DEVELOPMENT_TEAM", owner.getDevelopmentTeamIDString());
