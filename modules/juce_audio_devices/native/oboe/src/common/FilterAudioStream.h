@@ -56,6 +56,8 @@ public:
         mBufferCapacityInFrames = mChildStream->getBufferCapacityInFrames();
         mPerformanceMode = mChildStream->getPerformanceMode();
         mInputPreset = mChildStream->getInputPreset();
+        mFramesPerBurst = mChildStream->getFramesPerBurst();
+        mDeviceId = mChildStream->getDeviceId();
     }
 
     virtual ~FilterAudioStream() = default;
@@ -113,7 +115,7 @@ public:
             int32_t numFrames,
             int64_t timeoutNanoseconds) override;
 
-    StreamState getState() const override {
+    StreamState getState() override {
         return mChildStream->getState();
     }
 
@@ -126,10 +128,6 @@ public:
 
     bool isXRunCountSupported() const override {
         return mChildStream->isXRunCountSupported();
-    }
-
-    int32_t getFramesPerBurst() override {
-        return mChildStream->getFramesPerBurst();
     }
 
     AudioApi getAudioApi() const override {
@@ -159,7 +157,7 @@ public:
         return mBufferSizeInFrames;
     }
 
-    ResultWithValue<int32_t> getXRunCount() const override {
+    ResultWithValue<int32_t> getXRunCount() override {
         return mChildStream->getXRunCount();
     }
 
@@ -184,20 +182,20 @@ public:
             void *audioData,
             int32_t numFrames) override;
 
-    bool onError(AudioStream * audioStream, Result error) override {
+    bool onError(AudioStream * /*audioStream*/, Result error) override {
         if (mErrorCallback != nullptr) {
             return mErrorCallback->onError(this, error);
         }
         return false;
     }
 
-    void onErrorBeforeClose(AudioStream *oboeStream, Result error) override {
+    void onErrorBeforeClose(AudioStream * /*oboeStream*/, Result error) override {
         if (mErrorCallback != nullptr) {
             mErrorCallback->onErrorBeforeClose(this, error);
         }
     }
 
-    void onErrorAfterClose(AudioStream *oboeStream, Result error) override {
+    void onErrorAfterClose(AudioStream * /*oboeStream*/, Result error) override {
         // Close this parent stream because the callback will only close the child.
         AudioStream::close();
         if (mErrorCallback != nullptr) {

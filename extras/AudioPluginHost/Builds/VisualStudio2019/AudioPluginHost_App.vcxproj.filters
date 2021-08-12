@@ -694,6 +694,12 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\SourceI16Caller.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\SourceI24Caller.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\SourceI32Caller.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\StabilizedCallback.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
     </ClCompile>
@@ -775,6 +781,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SinkI24.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SinkI32.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SourceFloat.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClCompile>
@@ -782,6 +791,9 @@
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SourceI24.cpp">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SourceI32.cpp">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\opensles\AudioInputStreamOpenSLES.cpp">
@@ -3060,6 +3072,12 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\SourceI16Caller.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\SourceI24Caller.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\SourceI32Caller.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\common\Trace.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\common</Filter>
     </ClInclude>
@@ -3114,6 +3132,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\FlowGraphNode.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\FlowgraphUtilities.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\ManyToMultiConverter.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
@@ -3138,6 +3159,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SinkI24.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SinkI32.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SourceFloat.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
@@ -3145,6 +3169,9 @@
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SourceI24.h">
+      <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\flowgraph\SourceI32.h">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe\src\flowgraph</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_audio_devices\native\oboe\src\opensles\AudioInputStreamOpenSLES.h">
@@ -5381,7 +5408,7 @@
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\CMakeLists.txt">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>
-    <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\readme.md">
+    <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\README.md">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt">

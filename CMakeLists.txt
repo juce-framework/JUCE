@@ -50,7 +50,7 @@ include(extras/Build/CMake/JUCEModuleSupport.cmake)
 
 cmake_dependent_option(JUCE_ENABLE_MODULE_SOURCE_GROUPS
     "Show all module sources in IDE projects" OFF
-    "JUCE_MODULES_ONLY" OFF)
+    "NOT JUCE_MODULES_ONLY" OFF)
 
 add_subdirectory(modules)
 

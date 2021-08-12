@@ -5252,7 +5252,19 @@ enum : GLenum
 #endif
 
 
+/** Load all available functions from the OpenGL core API.
+
+    This will not load extensions!
+*/
 void loadFunctions();
+
+/** Load all available OpenGL extension functions.
+
+    It's probably a good idea to stick to the core API as much as possible.
+    Extensions are not as portable, and it can be a little time-consuming to
+    load all of the extension entry-points.
+*/
+void loadExtensions();
 
 }
 }

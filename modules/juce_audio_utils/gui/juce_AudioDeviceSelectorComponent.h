@@ -89,11 +89,10 @@ public:
     //==============================================================================
     /** @internal */
     void resized() override;
-    /** @internal */
-    void timerCallback() override;
 
 private:
     //==============================================================================
+    void timerCallback() override;
     void handleBluetoothButton();
     void updateDeviceType();
     void updateMidiOutput();
@@ -104,7 +103,7 @@ private:
     std::unique_ptr<Label> deviceTypeDropDownLabel;
     std::unique_ptr<Component> audioDeviceSettingsComp;
     String audioDeviceSettingsCompType;
-    int itemHeight;
+    int itemHeight = 0;
     const int minOutputChannels, maxOutputChannels, minInputChannels, maxInputChannels;
     const bool showChannelsAsStereoPairs;
     const bool hideAdvancedOptionsWithButton;

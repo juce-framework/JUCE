@@ -71,6 +71,7 @@ public:
         std::string chipname = getPropertyString("ro.hardware.chipname");
         isExynos9810 = (chipname == "exynos9810");
         isExynos990 = (chipname == "exynos990");
+        isExynos850 = (chipname == "exynos850");
 
         mBuildChangelist = getPropertyInteger("ro.build.changelist", 0);
     }
@@ -86,9 +87,9 @@ public:
         return kTopMargin;
     }
 
-    // See Oboe issue #824 for more information.
+    // See Oboe issues #824 and #1247 for more information.
     bool isMonoMMapActuallyStereo() const override {
-        return isExynos9810; // TODO We can make this version specific if it gets fixed.
+        return isExynos9810 || isExynos850; // TODO We can make this version specific if it gets fixed.
     }
 
     bool isAAudioMMapPossible(const AudioStreamBuilder &builder) const override {
@@ -102,10 +103,24 @@ public:
         // This detects b/159066712 , S20 LSI has corrupt low latency audio recording
         // and turns off MMAP.
         // See also https://github.com/google/oboe/issues/892
-        bool mRecordingCorrupted = isInput
+        bool isRecordingCorrupted = isInput
             && isExynos990
             && mBuildChangelist < 19350896;
-        return !mRecordingCorrupted;
+
+        // Certain S9+ builds record silence when using MMAP and not using the VoiceCommunication
+        // preset.
+        // See https://github.com/google/oboe/issues/1110
+        bool wouldRecordSilence = isInput
+            && isExynos9810
+            && mBuildChangelist <= 18847185
+            && (builder.getInputPreset() != InputPreset::VoiceCommunication);
+
+        if (wouldRecordSilence){
+            LOGI("QuirksManager::%s() Requested stream configuration would result in silence on "
+                 "this device. Switching off MMAP.", __func__);
+        }
+
+        return !isRecordingCorrupted && !wouldRecordSilence;
     }
 
 private:
@@ -116,6 +131,7 @@ private:
     bool isExynos = false;
     bool isExynos9810 = false;
     bool isExynos990 = false;
+    bool isExynos850 = false;
     int mBuildChangelist = 0;
 };
 
@@ -180,6 +196,19 @@ bool QuirksManager::isConversionNeeded(
         childBuilder.setFormat(AudioFormat::I16); // needed for FAST track
         conversionNeeded = true;
         LOGI("QuirksManager::%s() forcing internal format to I16 for low latency", __func__);
+    }
+
+    // Add quirk for float output on API <21
+    if (isFloat
+            && !isInput
+            && getSdkVersion() < __ANDROID_API_L__
+            && builder.isFormatConversionAllowed()
+            ) {
+        childBuilder.setFormat(AudioFormat::I16);
+        conversionNeeded = true;
+        LOGI("QuirksManager::%s() float was requested but not supported on pre-L devices, "
+             "creating an underlying I16 stream and using format conversion to provide a float "
+             "stream", __func__);
     }
 
     // Channel Count conversions

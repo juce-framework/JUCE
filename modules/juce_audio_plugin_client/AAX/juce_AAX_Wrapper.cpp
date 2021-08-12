@@ -2702,7 +2702,6 @@ namespace AAXClasses
 
         auto pluginNames = plugin->getAlternateDisplayNames();
 
-        pluginNames.insert (0, JucePlugin_Desc);
         pluginNames.insert (0, JucePlugin_Name);
 
         pluginNames.removeDuplicates (false);

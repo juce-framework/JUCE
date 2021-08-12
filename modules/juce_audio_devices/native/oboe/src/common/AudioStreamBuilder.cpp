@@ -91,6 +91,7 @@ bool AudioStreamBuilder::isCompatible(AudioStreamBase &other) {
 Result AudioStreamBuilder::openStream(AudioStream **streamPP) {
     auto result = isValidConfig();
     if (result != Result::OK) {
+        LOGW("%s() invalid config %d", __func__, result);
         return result;
     }
 
@@ -202,24 +203,16 @@ Result AudioStreamBuilder::openStream(AudioStream **streamPP) {
 
 Result AudioStreamBuilder::openManagedStream(oboe::ManagedStream &stream) {
     stream.reset();
-    auto result = isValidConfig();
-    if (result != Result::OK) {
-        return result;
-    }
     AudioStream *streamptr;
-    result = openStream(&streamptr);
+    auto result = openStream(&streamptr);
     stream.reset(streamptr);
     return result;
 }
 
 Result AudioStreamBuilder::openStream(std::shared_ptr<AudioStream> &sharedStream) {
     sharedStream.reset();
-    auto result = isValidConfig();
-    if (result != Result::OK) {
-        return result;
-    }
     AudioStream *streamptr;
-    result = openStream(&streamptr);
+    auto result = openStream(&streamptr);
     if (result == Result::OK) {
         sharedStream.reset(streamptr);
         // Save a weak_ptr in the stream for use with callbacks.

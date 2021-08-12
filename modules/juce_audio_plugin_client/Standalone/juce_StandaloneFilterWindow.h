@@ -283,8 +283,11 @@ public:
         if (auto* bus = processor->getBus (false, 0))
             maxNumOutputs = jmax (0, bus->getDefaultLayout().size());
 
-        o.content.setOwned (new SettingsComponent (*this, deviceManager, maxNumInputs, maxNumOutputs));
-        o.content->setSize (500, 550);
+        auto content = std::make_unique<SettingsComponent> (*this, deviceManager, maxNumInputs, maxNumOutputs);
+        content->setSize (500, 550);
+        content->setToRecommendedSize();
+
+        o.content.setOwned (content.release());
 
         o.dialogTitle                   = TRANS("Audio/MIDI Settings");
         o.dialogBackgroundColour        = o.content->getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
@@ -542,6 +545,8 @@ private:
 
         void resized() override
         {
+            const ScopedValueSetter<bool> scope (isResizing, true);
+
             auto r = getLocalBounds();
 
             if (owner.getProcessorHasPotentialFeedbackLoop())
@@ -561,9 +566,12 @@ private:
 
         void childBoundsChanged (Component* childComp) override
         {
-            if (childComp != &deviceSelector)
-                return;
+            if (! isResizing && childComp == &deviceSelector)
+                setToRecommendedSize();
+        }
 
+        void setToRecommendedSize()
+        {
             const auto extraHeight = [&]
             {
                 if (! owner.getProcessorHasPotentialFeedbackLoop())
@@ -583,6 +591,7 @@ private:
         AudioDeviceSelectorComponent deviceSelector;
         Label shouldMuteLabel;
         ToggleButton shouldMuteButton;
+        bool isResizing = false;
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsComponent)

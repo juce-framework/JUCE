@@ -82,14 +82,18 @@ public:
 
     var getValue() const override
     {
-        if (valueWithDefault != nullptr
-            && ! valueWithDefault->isUsingDefault())
+        if (valueWithDefault != nullptr && ! valueWithDefault->isUsingDefault())
         {
-            auto targetValue = sourceValue.getValue();
+            const auto target = sourceValue.getValue();
+            const auto equalsWithSameType = [&target] (const var& map) { return map.equalsWithSameType (target); };
 
-            for (auto map : mappings)
-                if (map.equalsWithSameType (targetValue))
-                    return mappings.indexOf (map) + 1;
+            auto iter = std::find_if (mappings.begin(), mappings.end(), equalsWithSameType);
+
+            if (iter == mappings.end())
+                iter = std::find (mappings.begin(), mappings.end(), target);
+
+            if (iter != mappings.end())
+                return 1 + (int) std::distance (mappings.begin(), iter);
         }
 
         return -1;

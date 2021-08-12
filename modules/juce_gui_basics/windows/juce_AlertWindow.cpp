@@ -669,6 +669,17 @@ int AlertWindow::show (const MessageBoxOptions& options)
     AlertWindowInfo info (options, nullptr, Async::no);
     return info.invoke();
 }
+
+bool AlertWindow::showNativeDialogBox (const String& title,
+                                       const String& bodyText,
+                                       bool isOkCancel)
+{
+    if (isOkCancel)
+        return NativeMessageBox::showOkCancelBox (AlertWindow::NoIcon, title, bodyText);
+
+    NativeMessageBox::showMessageBox (AlertWindow::NoIcon, title, bodyText);
+    return true;
+}
 #endif
 
 void AlertWindow::showAsync (const MessageBoxOptions& options, ModalComponentManager::Callback* callback)
