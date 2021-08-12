@@ -199,27 +199,31 @@ static bool isFileExecutable (const String& filename)
 
 bool Process::openDocument (const String& fileName, const String& parameters)
 {
-    auto cmdString = fileName.replace (" ", "\\ ", false);
-    cmdString << " " << parameters;
-
-    if (cmdString.startsWithIgnoreCase ("file:")
-         || File::createFileWithoutCheckingPath (fileName).isDirectory()
-         || ! isFileExecutable (fileName))
+    const auto cmdString = [&]
     {
-        StringArray cmdLines;
-
-        for (auto browserName : { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla",
-                                  "google-chrome", "chromium-browser", "opera", "konqueror" })
+        if (fileName.startsWithIgnoreCase ("file:")
+            || File::createFileWithoutCheckingPath (fileName).isDirectory()
+            || ! isFileExecutable (fileName))
         {
-            cmdLines.add (String (browserName) + " " + cmdString.trim().quoted());
+            const auto singleCommand = fileName.trim().quoted();
+
+            StringArray cmdLines;
+
+            for (auto browserName : { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla",
+                                      "google-chrome", "chromium-browser", "opera", "konqueror" })
+            {
+                cmdLines.add (String (browserName) + " " + singleCommand);
+            }
+
+            return cmdLines.joinIntoString (" || ");
         }
 
-        cmdString = cmdLines.joinIntoString (" || ");
-    }
+        return (fileName.replace (" ", "\\ ", false) + " " + parameters).trim();
+    }();
 
-    const char* const argv[4] = { "/bin/sh", "-c", cmdString.toUTF8(), nullptr };
+    const char* const argv[] = { "/bin/sh", "-c", cmdString.toUTF8(), nullptr };
 
-    auto cpid = fork();
+    const auto cpid = fork();
 
     if (cpid == 0)
     {
