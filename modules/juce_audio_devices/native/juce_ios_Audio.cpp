@@ -64,6 +64,8 @@ static const char* getRoutingChangeReason (AVAudioSessionRouteChangeReason reaso
     }
 }
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
 bool getNotificationValueForKey (NSNotification* notification, NSString* key, NSUInteger& value) noexcept
 {
     if (notification != nil)
@@ -81,6 +83,8 @@ bool getNotificationValueForKey (NSNotification* notification, NSString* key, NS
     jassertfalse;
     return false;
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce
 
