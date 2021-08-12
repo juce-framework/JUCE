@@ -263,6 +263,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "containers/juce_SortedSet.h"
 #include "containers/juce_SparseSet.h"
 #include "containers/juce_AbstractFifo.h"
+#include "containers/juce_SingleThreadedAbstractFifo.h"
 #include "text/juce_NewLine.h"
 #include "text/juce_StringPool.h"
 #include "text/juce_Identifier.h"
