@@ -241,8 +241,8 @@ private:
 
         //==============================================================================
         RadioButtonsGroupComponent radioButtons;
-        TextButton textButton { "TextButton" };
-        ShapeButton shapeButton { "ShapeButton",
+        TextButton textButton { "Press me!" };
+        ShapeButton shapeButton { "Pressable JUCE Logo",
                                   Colours::darkorange,
                                   Colours::darkorange.brighter (0.5f),
                                   Colours::darkorange.brighter (0.75f) };
@@ -386,8 +386,8 @@ private:
 
     //==============================================================================
     Label descriptionLabel { {}, "This is a demo of a few of the accessible built-in JUCE widgets.\n\n"
-                                 "To navigate this demo with a screen reader, either enable VoiceOver on macOS "
-                                 "or Narrator on Windows and follow the navigational prompts." };
+                                 "To navigate this demo with a screen reader, either enable VoiceOver on macOS and iOS, "
+                                 "TalkBack on Android, or Narrator on Windows and follow the navigational prompts." };
 
     ButtonsComponent buttonsComponent;
     SlidersComponent slidersComponent;
