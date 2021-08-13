@@ -834,7 +834,7 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
 }
 
-bool areAnyAccessibilityClientsActive()
+static bool areAnyAccessibilityClientsActive()
 {
     const String voiceOverKeyString ("voiceOverOnOffKey");
     const String applicationIDString ("com.apple.universalaccess");

@@ -459,7 +459,7 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
 }
 
-bool areAnyAccessibilityClientsActive()
+static bool areAnyAccessibilityClientsActive()
 {
     return UIAccessibilityIsVoiceOverRunning();
 }
