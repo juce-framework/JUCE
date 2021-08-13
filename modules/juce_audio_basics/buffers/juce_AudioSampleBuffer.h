@@ -227,7 +227,7 @@ public:
           size (other.size),
           allocatedBytes (other.allocatedBytes),
           allocatedData (std::move (other.allocatedData)),
-          isClear (other.isClear.load())
+          isClear (other.isClear)
     {
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
         {
@@ -253,7 +253,7 @@ public:
         size = other.size;
         allocatedBytes = other.allocatedBytes;
         allocatedData = std::move (other.allocatedData);
-        isClear = other.isClear.load();
+        isClear = other.isClear;
 
         if (numChannels < (int) numElementsInArray (preallocatedChannelSpace))
         {
@@ -1124,7 +1124,7 @@ private:
     Type** channels;
     HeapBlock<char, true> allocatedData;
     Type* preallocatedChannelSpace[32];
-    std::atomic<bool> isClear { false };
+    bool isClear = false;
 
     void allocateData()
     {
