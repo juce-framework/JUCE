@@ -193,8 +193,10 @@ protected:
 
             NSString* nsString = juceStringToNS (title);
 
+           #if ! JUCE_IOS
             if (nsString != nil && [[self accessibilityValue] isEqual: nsString])
                 return @"";
+           #endif
 
             return nsString;
         }
@@ -216,23 +218,6 @@ protected:
             return handler->getComponent().isCurrentlyModal();
 
         return NO;
-    }
-
-    static NSArray* getAccessibilityChildren (id self, SEL)
-    {
-        if (auto* handler = getHandler (self))
-        {
-            auto children = handler->getChildren();
-
-            NSMutableArray* accessibleChildren = [NSMutableArray arrayWithCapacity: (NSUInteger) children.size()];
-
-            for (auto* childHandler : children)
-                [accessibleChildren addObject: (id) childHandler->getNativeImplementation()];
-
-            return accessibleChildren;
-        }
-
-        return nil;
     }
 
     static NSInteger getAccessibilityRowCount (id self, SEL)

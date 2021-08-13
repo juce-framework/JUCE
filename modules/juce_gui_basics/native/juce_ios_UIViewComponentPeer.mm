@@ -138,9 +138,8 @@ using namespace juce;
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text;
 
 - (BOOL) isAccessibilityElement;
-- (id) accessibilityElementAtIndex: (NSInteger) index;
-- (NSInteger) accessibilityElementCount;
-- (NSInteger) indexOfAccessibilityElement: (id) element;
+- (CGRect) accessibilityFrame;
+- (NSArray*) accessibilityElements;
 @end
 
 //==============================================================================
@@ -550,23 +549,22 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     return NO;
 }
 
-- (id) accessibilityElementAtIndex: (NSInteger) index
+- (CGRect) accessibilityFrame
 {
     if (owner != nullptr)
         if (auto* handler = owner->getComponent().getAccessibilityHandler())
-            return (id) handler->getNativeImplementation();
+            return convertToCGRect (handler->getComponent().getScreenBounds());
+
+    return CGRectZero;
+}
+
+- (NSArray*) accessibilityElements
+{
+    if (owner != nullptr)
+        if (auto* handler = owner->getComponent().getAccessibilityHandler())
+            return getContainerAccessibilityElements (*handler);
 
     return nil;
-}
-
-- (NSInteger) accessibilityElementCount
-{
-    return owner != nullptr ? 1 : 0;
-}
-
-- (NSInteger) indexOfAccessibilityElement: (id) element
-{
-    return 0;
 }
 
 @end
@@ -618,9 +616,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
    #if JUCE_COREGRAPHICS_DRAW_ASYNC
     if (! getComponentAsyncLayerBackedViewDisabled (component))
-    {
         [[view layer] setDrawsAsynchronously: YES];
-    }
    #endif
 
     if (isSharedWindow)
