@@ -99,20 +99,25 @@ public:
 
 private:
     //==============================================================================
-    OptionalScopedPointer<PositionableAudioSource> source;
-    TimeSliceThread& backgroundThread;
-    int numberOfSamplesToBuffer, numberOfChannels;
-    AudioBuffer<float> buffer;
-    CriticalSection bufferStartPosLock;
-    WaitableEvent bufferReadyEvent;
-    std::atomic<int64> bufferValidStart { 0 }, bufferValidEnd { 0 }, nextPlayPos { 0 };
-    double sampleRate = 0;
-    bool wasSourceLooping = false, isPrepared = false, prefillBuffer;
-
+    Range<int> getValidBufferRange (int numSamples) const;
     bool readNextBufferChunk();
     void readBufferSection (int64 start, int length, int bufferOffset);
     int useTimeSlice() override;
 
+    //==============================================================================
+    OptionalScopedPointer<PositionableAudioSource> source;
+    TimeSliceThread& backgroundThread;
+    int numberOfSamplesToBuffer, numberOfChannels;
+    AudioBuffer<float> buffer;
+    CriticalSection callbackLock, bufferRangeLock;
+    WaitableEvent bufferReadyEvent;
+    int64 bufferValidStart = 0, bufferValidEnd = 0;
+    std::atomic<int64> nextPlayPos { 0 };
+    double sampleRate = 0;
+    bool wasSourceLooping = false, isPrepared = false;
+    const bool prefillBuffer;
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BufferingAudioSource)
 };
 
