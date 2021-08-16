@@ -1705,7 +1705,7 @@ public:
                 auto def = defines.getAllKeys()[i];
                 auto value = defines.getAllValues()[i];
                 if (value.isNotEmpty())
-                    def << "=" << value.replace ("\"", "\\\\\\\"").replace (" ", "\\\\ ");
+                    def << "=" << value.replace ("\"", "\\\\\\\"").replace (" ", "\\\\ ").replace ("\'", "\\\\'");
 
                 defsList.add ("\"" + def + "\"");
             }
