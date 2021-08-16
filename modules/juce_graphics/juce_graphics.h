@@ -145,6 +145,7 @@ namespace juce
 #include "contexts/juce_LowLevelGraphicsPostScriptRenderer.h"
 #include "effects/juce_ImageEffectFilter.h"
 #include "effects/juce_DropShadowEffect.h"
+#include "effects/juce_StackShadowEffect.h"
 #include "effects/juce_GlowEffect.h"
 
 #if JUCE_GRAPHICS_INCLUDE_COREGRAPHICS_HELPERS && (JUCE_MAC || JUCE_IOS)
