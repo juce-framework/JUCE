@@ -1747,7 +1747,7 @@ protected:
     }
 
     static String getWebView2PackageName()     { return "Microsoft.Web.WebView2"; }
-    static String getWebView2PackageVersion()  { return "0.9.488"; }
+    static String getWebView2PackageVersion()  { return "1.0.902.49"; }
 
     void createPackagesConfigFile() const
     {
