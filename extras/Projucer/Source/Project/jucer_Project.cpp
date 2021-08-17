@@ -2631,7 +2631,7 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_AAXDisableMultiMono",         boolToString (isPluginAAXMultiMonoDisabled()));
     flags.set ("JucePlugin_IAAType",                     toCharLiteral (getIAATypeCode()));
     flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
-    flags.set ("JucePlugin_IAAName",                     getIAAPluginName().quoted());
+    flags.set ("JucePlugin_IAAName",                     toStringLiteral (getIAAPluginName()));
     flags.set ("JucePlugin_VSTNumMidiInputs",            getVSTNumMIDIInputsString());
     flags.set ("JucePlugin_VSTNumMidiOutputs",           getVSTNumMIDIOutputsString());
 
