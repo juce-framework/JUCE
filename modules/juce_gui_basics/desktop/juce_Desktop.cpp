@@ -28,7 +28,8 @@ namespace juce
 
 Desktop::Desktop()
     : mouseSources (new MouseInputSource::SourceList()),
-      masterScaleFactor ((float) getDefaultMasterScale())
+      masterScaleFactor ((float) getDefaultMasterScale()),
+      nativeDarkModeChangeDetectorImpl (createNativeDarkModeChangeDetectorImpl())
 {
     displays.reset (new Displays (*this));
 }
@@ -197,6 +198,12 @@ void Desktop::handleAsyncUpdate()
         l.globalFocusChanged (currentFocus.get());
     });
 }
+
+//==============================================================================
+void Desktop::addDarkModeSettingListener    (DarkModeSettingListener* l)  { darkModeSettingListeners.add (l); }
+void Desktop::removeDarkModeSettingListener (DarkModeSettingListener* l)  { darkModeSettingListeners.remove (l); }
+
+void Desktop::darkModeChanged()  { darkModeSettingListeners.call ([] (DarkModeSettingListener& l) { l.darkModeSettingChanged(); }); }
 
 //==============================================================================
 void Desktop::resetTimer()
