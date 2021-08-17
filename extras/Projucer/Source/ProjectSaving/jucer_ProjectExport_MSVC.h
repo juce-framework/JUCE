@@ -25,6 +25,14 @@
 
 #pragma once
 
+inline String msBuildEscape (String str)
+{
+    // see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-special-characters?view=vs-2019
+    for (const auto& special : { "%", "$", "@", "'", ";", "?", "\""})
+        str = str.replace (special, "%" + String::toHexString (*special));
+
+    return str;
+}
 
 //==============================================================================
 class MSVCProjectExporterBase   : public ProjectExporter
@@ -502,7 +510,7 @@ public:
                     {
                         auto* targetName = props->createNewChildElement ("TargetName");
                         setConditionAttribute (*targetName, config);
-                        targetName->addTextElement (config.getOutputFilename ("", false, type == UnityPlugIn));
+                        targetName->addTextElement (msBuildEscape (config.getOutputFilename ("", false, type == UnityPlugIn)));
                     }
 
                     {
@@ -597,7 +605,7 @@ public:
 
                 auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesString());
                 auto additionalDependencies = type != SharedCodeTarget && externalLibraries.isNotEmpty()
-                                                        ? getOwner().replacePreprocessorTokens (config, externalLibraries).trim() + ";%(AdditionalDependencies)"
+                                                        ? msBuildEscape (getOwner().replacePreprocessorTokens (config, externalLibraries).trim()) + ";%(AdditionalDependencies)"
                                                         : String();
 
                 auto librarySearchPaths = config.getLibrarySearchPaths();
