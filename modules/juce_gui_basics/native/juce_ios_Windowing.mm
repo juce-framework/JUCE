@@ -678,6 +678,77 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
+bool Desktop::isDarkModeActive() const
+{
+   #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
+    if (@available (iOS 12.0, *))
+        return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
+   #endif
+
+    return false;
+}
+
+class Desktop::NativeDarkModeChangeDetectorImpl
+{
+public:
+    NativeDarkModeChangeDetectorImpl()
+    {
+        static DelegateClass delegateClass;
+
+        delegate = [delegateClass.createInstance() init];
+        object_setInstanceVariable (delegate, "owner", this);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        [[NSNotificationCenter defaultCenter] addObserver: delegate
+                                                 selector: @selector (darkModeChanged:)
+                                                     name: UIViewComponentPeer::getDarkModeNotificationName()
+                                                   object: nil];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }
+
+    ~NativeDarkModeChangeDetectorImpl()
+    {
+        object_setInstanceVariable (delegate, "owner", nullptr);
+        [[NSNotificationCenter defaultCenter] removeObserver: delegate];
+        [delegate release];
+    }
+
+    void darkModeChanged()
+    {
+        Desktop::getInstance().darkModeChanged();
+    }
+
+private:
+    struct DelegateClass  : public ObjCClass<NSObject>
+    {
+        DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
+        {
+            addIvar<NativeDarkModeChangeDetectorImpl*> ("owner");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (darkModeChanged:), darkModeChanged, "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            registerClass();
+        }
+
+        static void darkModeChanged (id self, SEL, NSNotification*)
+        {
+            if (auto* owner = getIvar<NativeDarkModeChangeDetectorImpl*> (self, "owner"))
+                owner->darkModeChanged();
+        }
+    };
+
+    id delegate = nil;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
+};
+
+std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
+{
+    return std::make_unique<NativeDarkModeChangeDetectorImpl>();
+}
+
 Point<float> MouseInputSource::getCurrentRawMousePosition()
 {
     return juce_lastMousePos;

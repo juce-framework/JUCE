@@ -503,9 +503,16 @@ DECLARE_JNI_CLASS (AndroidRect, "android/graphics/Rect")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (getIdentifier,     "getIdentifier",     "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)I") \
-  METHOD (openRawResourceFd, "openRawResourceFd", "(I)Landroid/content/res/AssetFileDescriptor;")
+  METHOD (openRawResourceFd, "openRawResourceFd", "(I)Landroid/content/res/AssetFileDescriptor;") \
+  METHOD (getConfiguration,  "getConfiguration",  "()Landroid/content/res/Configuration;")
 
 DECLARE_JNI_CLASS (AndroidResources, "android/content/res/Resources")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  FIELD  (uiMode, "uiMode", "I") \
+
+DECLARE_JNI_CLASS (AndroidConfiguration, "android/content/res/Configuration")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \

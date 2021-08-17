@@ -430,6 +430,73 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return upright;
 }
 
+bool Desktop::isDarkModeActive() const
+{
+    return [[[NSUserDefaults standardUserDefaults] stringForKey: nsStringLiteral ("AppleInterfaceStyle")]
+                isEqualToString: nsStringLiteral ("Dark")];
+}
+
+class Desktop::NativeDarkModeChangeDetectorImpl
+{
+public:
+    NativeDarkModeChangeDetectorImpl()
+    {
+        static DelegateClass delegateClass;
+
+        delegate = [delegateClass.createInstance() init];
+        object_setInstanceVariable (delegate, "owner", this);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        [[NSDistributedNotificationCenter defaultCenter] addObserver: delegate
+                                                            selector: @selector (darkModeChanged:)
+                                                                name: @"AppleInterfaceThemeChangedNotification"
+                                                              object: nil];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }
+
+    ~NativeDarkModeChangeDetectorImpl()
+    {
+        object_setInstanceVariable (delegate, "owner", nullptr);
+        [[NSDistributedNotificationCenter defaultCenter] removeObserver: delegate];
+        [delegate release];
+    }
+
+    void darkModeChanged()
+    {
+        Desktop::getInstance().darkModeChanged();
+    }
+
+private:
+    struct DelegateClass  : public ObjCClass<NSObject>
+    {
+        DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
+        {
+            addIvar<NativeDarkModeChangeDetectorImpl*> ("owner");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (darkModeChanged:), darkModeChanged, "v@:@");
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            registerClass();
+        }
+
+        static void darkModeChanged (id self, SEL, NSNotification*)
+        {
+            if (auto* owner = getIvar<NativeDarkModeChangeDetectorImpl*> (self, "owner"))
+                owner->darkModeChanged();
+        }
+    };
+
+    id delegate = nil;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
+};
+
+std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
+{
+    return std::make_unique<NativeDarkModeChangeDetectorImpl>();
+}
+
 //==============================================================================
 class ScreenSaverDefeater   : public Timer
 {
@@ -672,12 +739,6 @@ void Process::setDockIconVisible (bool isVisible)
                                                          : kProcessTransformToUIElementApplication);
     jassert (err == 0);
     ignoreUnused (err);
-}
-
-bool Desktop::isOSXDarkModeActive()
-{
-    return [[[NSUserDefaults standardUserDefaults] stringForKey: nsStringLiteral ("AppleInterfaceStyle")]
-                isEqualToString: nsStringLiteral ("Dark")];
 }
 
 } // namespace juce

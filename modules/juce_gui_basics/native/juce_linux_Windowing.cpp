@@ -534,6 +534,18 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return XWindowSystem::getInstance()->canUseSemiTransparentWindows();
 }
 
+bool Desktop::isDarkModeActive() const
+{
+    return false;
+}
+
+class Desktop::NativeDarkModeChangeDetectorImpl { public: NativeDarkModeChangeDetectorImpl() = default; };
+
+std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
+{
+    return nullptr;
+}
+
 static bool screenSaverAllowed = true;
 
 void Desktop::setScreenSaverEnabled (bool isEnabled)

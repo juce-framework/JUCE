@@ -712,6 +712,8 @@ static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 }
 
 //==============================================================================
+extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
+
 double Desktop::getDefaultMasterScale()
 {
     if (! JUCEApplicationBase::isStandaloneApp() || isPerMonitorDPIAwareProcess())
@@ -720,7 +722,95 @@ double Desktop::getDefaultMasterScale()
     return getGlobalDPI() / USER_DEFAULT_SCREEN_DPI;
 }
 
-bool Desktop::canUseSemiTransparentWindows() noexcept { return true; }
+bool Desktop::canUseSemiTransparentWindows() noexcept
+{
+    return true;
+}
+
+class Desktop::NativeDarkModeChangeDetectorImpl
+{
+public:
+    NativeDarkModeChangeDetectorImpl()
+    {
+        const auto winVer = getWindowsVersionInfo();
+
+        if (winVer.dwMajorVersion >= 10 && winVer.dwBuildNumber >= 17763)
+        {
+            const auto uxtheme = "uxtheme.dll";
+            LoadLibraryA (uxtheme);
+            const auto uxthemeModule = GetModuleHandleA (uxtheme);
+
+            if (uxthemeModule != nullptr)
+            {
+                shouldAppsUseDarkMode = (ShouldAppsUseDarkModeFunc) GetProcAddress (uxthemeModule, MAKEINTRESOURCEA (132));
+
+                if (shouldAppsUseDarkMode != nullptr)
+                    darkModeEnabled = shouldAppsUseDarkMode() && ! isHighContrast();
+            }
+        }
+    }
+
+    bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
+
+private:
+    static bool isHighContrast()
+    {
+        HIGHCONTRASTW highContrast { 0 };
+
+        if (SystemParametersInfoW (SPI_GETHIGHCONTRAST, sizeof (highContrast), &highContrast, false))
+            return highContrast.dwFlags & HCF_HIGHCONTRASTON;
+
+        return false;
+    }
+
+    static LRESULT CALLBACK callWndProc (int nCode, WPARAM wParam, LPARAM lParam)
+    {
+        auto* params = reinterpret_cast<CWPSTRUCT*> (lParam);
+
+        if (nCode >= 0
+            && params != nullptr
+            && params->message == WM_SETTINGCHANGE
+            && params->lParam != 0
+            && CompareStringOrdinal (reinterpret_cast<LPWCH> (params->lParam), -1, L"ImmersiveColorSet", -1, true) == CSTR_EQUAL)
+        {
+            Desktop::getInstance().nativeDarkModeChangeDetectorImpl->colourSetChanged();
+        }
+
+        return CallNextHookEx ({}, nCode, wParam, lParam);
+    }
+
+    void colourSetChanged()
+    {
+        if (shouldAppsUseDarkMode != nullptr)
+        {
+            const auto wasDarkModeEnabled = std::exchange (darkModeEnabled, shouldAppsUseDarkMode() && ! isHighContrast());
+
+            if (darkModeEnabled != wasDarkModeEnabled)
+                Desktop::getInstance().darkModeChanged();
+        }
+    }
+
+    using ShouldAppsUseDarkModeFunc = bool (WINAPI*)();
+    ShouldAppsUseDarkModeFunc shouldAppsUseDarkMode = nullptr;
+
+    bool darkModeEnabled = false;
+    HHOOK hook { SetWindowsHookEx (WH_CALLWNDPROC,
+                                   callWndProc,
+                                   (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                   GetCurrentThreadId()) };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
+};
+
+std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
+{
+    return std::make_unique<NativeDarkModeChangeDetectorImpl>();
+}
+
+bool Desktop::isDarkModeActive() const
+{
+    return nativeDarkModeChangeDetectorImpl->isDarkModeEnabled();
+}
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {

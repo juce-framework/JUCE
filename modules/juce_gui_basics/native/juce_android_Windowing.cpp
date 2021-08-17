@@ -1236,6 +1236,86 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return true;
 }
 
+class Desktop::NativeDarkModeChangeDetectorImpl  : public ActivityLifecycleCallbacks
+{
+public:
+    NativeDarkModeChangeDetectorImpl()
+    {
+        LocalRef<jobject> appContext (getAppContext());
+
+        if (appContext != nullptr)
+        {
+            auto* env = getEnv();
+
+            myself = GlobalRef (CreateJavaInterface (this, "android/app/Application$ActivityLifecycleCallbacks"));
+            env->CallVoidMethod (appContext.get(), AndroidApplication.registerActivityLifecycleCallbacks, myself.get());
+        }
+    }
+
+    ~NativeDarkModeChangeDetectorImpl() override
+    {
+        LocalRef<jobject> appContext (getAppContext());
+
+        if (appContext != nullptr && myself != nullptr)
+        {
+            auto* env = getEnv();
+
+            env->CallVoidMethod (appContext.get(),
+                                 AndroidApplication.unregisterActivityLifecycleCallbacks,
+                                 myself.get());
+            clear();
+            myself.clear();
+        }
+    }
+
+    bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
+
+    void onActivityStarted (jobject /*activity*/) override
+    {
+        const auto isEnabled = getDarkModeSetting();
+
+        if (darkModeEnabled != isEnabled)
+        {
+            darkModeEnabled = isEnabled;
+            Desktop::getInstance().darkModeChanged();
+        }
+    }
+
+private:
+    static bool getDarkModeSetting()
+    {
+        auto* env = getEnv();
+
+        const LocalRef<jobject> resources (env->CallObjectMethod (getAppContext().get(), AndroidContext.getResources));
+        const LocalRef<jobject> configuration (env->CallObjectMethod (resources, AndroidResources.getConfiguration));
+
+        const auto uiMode = env->GetIntField (configuration, AndroidConfiguration.uiMode);
+
+        return ((uiMode & UI_MODE_NIGHT_MASK) == UI_MODE_NIGHT_YES);
+    }
+
+    static constexpr int UI_MODE_NIGHT_MASK      = 0x00000030,
+                         UI_MODE_NIGHT_NO        = 0x00000010,
+                         UI_MODE_NIGHT_UNDEFINED = 0x00000000,
+                         UI_MODE_NIGHT_YES       = 0x00000020;
+
+    GlobalRef myself;
+    bool darkModeEnabled = getDarkModeSetting();
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
+};
+
+std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
+{
+    return std::make_unique<NativeDarkModeChangeDetectorImpl>();
+}
+
+bool Desktop::isDarkModeActive() const
+{
+    return nativeDarkModeChangeDetectorImpl->isDarkModeEnabled();
+}
+
 double Desktop::getDefaultMasterScale()
 {
     return 1.0;
