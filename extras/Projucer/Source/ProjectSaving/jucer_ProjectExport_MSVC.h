@@ -1656,6 +1656,13 @@ protected:
 
     void writeSolutionFile (OutputStream& out, const String& versionString, String commentString) const
     {
+        const unsigned char bomBytes[] { CharPointer_UTF8::byteOrderMark1,
+                                         CharPointer_UTF8::byteOrderMark2,
+                                         CharPointer_UTF8::byteOrderMark3 };
+
+        for (const auto& byte : bomBytes)
+            out.writeByte ((char) byte);
+
         if (commentString.isNotEmpty())
             commentString += newLine;
 
