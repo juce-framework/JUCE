@@ -1,6 +1,36 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+Functions on AudioPluginInstance that can add parameters have been made
+private.
+
+Possible Issues
+---------------
+Code implementing custom plugin formats may stop building if it calls these
+functions.
+
+Workaround
+----------
+When implementing custom plugin formats, ensure that the plugin parameters
+derive from AudioPluginInstance::HostedParameter and then use
+addHostedParameter, addHostedParameterGroup or setHostedParameterTree to add
+the parameters to the plugin instance.
+
+Rationale
+---------
+In a plugin host, it is very important to be able to uniquely identify
+parameters across different versions of the same plugin. To make this possible,
+we needed to introduce a way of retrieving a unique ID for each parameter,
+which is now possible using the HostedParameter class. However, we also needed
+to enforce that all AudioPluginInstances can only have parameters which are of
+the type HostedParameter, which required hiding the old functions.
+
+
 Version 6.1.0
 =============
 

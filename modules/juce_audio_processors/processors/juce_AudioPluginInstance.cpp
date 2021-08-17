@@ -221,7 +221,7 @@ AudioPluginInstance::Parameter::Parameter()
     offStrings.add (TRANS("false"));
 }
 
-AudioPluginInstance::Parameter::~Parameter() {}
+AudioPluginInstance::Parameter::~Parameter() = default;
 
 String AudioPluginInstance::Parameter::getText (float value, int maximumStringLength) const
 {
@@ -247,6 +247,46 @@ float AudioPluginInstance::Parameter::getValueForText (const String& text) const
     }
 
     return floatValue;
+}
+
+void AudioPluginInstance::addHostedParameter (std::unique_ptr<HostedParameter> param)
+{
+    addParameter (param.release());
+}
+
+void AudioPluginInstance::addHostedParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
+{
+   #if JUCE_DEBUG
+    // All parameters *must* be HostedParameters, otherwise getHostedParameter will return
+    // garbage and your host will crash and burn
+    for (auto* param : group->getParameters (true))
+    {
+        jassert (dynamic_cast<HostedParameter*> (param) != nullptr);
+    }
+   #endif
+
+    addParameterGroup (std::move (group));
+}
+
+void AudioPluginInstance::setHostedParameterTree (AudioProcessorParameterGroup group)
+{
+   #if JUCE_DEBUG
+    // All parameters *must* be HostedParameters, otherwise getHostedParameter will return
+    // garbage and your host will crash and burn
+    for (auto* param : group.getParameters (true))
+    {
+        jassert (dynamic_cast<HostedParameter*> (param) != nullptr);
+    }
+   #endif
+
+    setParameterTree (std::move (group));
+}
+
+AudioPluginInstance::HostedParameter* AudioPluginInstance::getHostedParameter (int index) const
+{
+    // It's important that all AudioPluginInstance implementations
+    // only ever own HostedParameters!
+    return static_cast<HostedParameter*> (getParameters()[index]);
 }
 
 } // namespace juce

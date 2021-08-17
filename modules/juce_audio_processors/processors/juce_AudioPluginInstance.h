@@ -76,6 +76,55 @@ public:
     */
     virtual void getExtensions (ExtensionsVisitor&) const;
 
+    /**
+        A parameter with functions which are useful for plugin hosts.
+    */
+    struct HostedParameter : public AudioProcessorParameter
+    {
+        /** Returns an ID which is unique to this parameter.
+
+            Parameter indices are unstable across plugin versions, which means that the
+            parameter found at a particular index in one version of a plugin might move
+            to a different index in the subsequent version.
+
+            Unlike the parameter index, the ID returned by this function should be
+            somewhat stable (depending on the format of the plugin), so it is more
+            suitable for storing/recalling automation data.
+        */
+        virtual String getParameterID() const = 0;
+    };
+
+    /** Adds a parameter to this instance.
+
+        @see AudioProcessor::addParameter()
+    */
+    void addHostedParameter (std::unique_ptr<HostedParameter>);
+
+    /** Adds multiple parameters to this instance.
+
+        In debug mode, this will also check that all added parameters derive from
+        HostedParameter.
+
+        @see AudioProcessor::addParameterGroup()
+    */
+    void addHostedParameterGroup (std::unique_ptr<AudioProcessorParameterGroup>);
+
+    /** Adds multiple parameters to this instance.
+
+        In debug mode, this will also check that all added parameters derive from
+        HostedParameter.
+
+        @see AudioProcessor::setParameterTree()
+    */
+    void setHostedParameterTree (AudioProcessorParameterGroup);
+
+    /** Gets the parameter at a particular index.
+
+        If you want to find lots of parameters by their IDs, you should probably build and
+        use a map<String, HostedParameter*> by looping through all parameters.
+    */
+    HostedParameter* getHostedParameter (int index) const;
+
     /** Use the new typesafe visitor-based interface rather than this function.
 
         Returns a pointer to some kind of platform-specific data about the plugin.
@@ -110,14 +159,16 @@ public:
 protected:
     //==============================================================================
     /** Structure used to describe plugin parameters */
-    struct Parameter   : public AudioProcessorParameter
+    struct Parameter   : public HostedParameter
     {
+    public:
         Parameter();
         ~Parameter() override;
 
         String getText (float value, int maximumStringLength) const override;
         float getValueForText (const String& text) const override;
 
+    private:
         StringArray onStrings, offStrings;
     };
 
@@ -127,6 +178,12 @@ protected:
     AudioPluginInstance (const short channelLayoutList[numLayouts][2]) : AudioProcessor (channelLayoutList) {}
 
 private:
+    // It's not safe to add a plain AudioProcessorParameter to an AudioPluginInstance.
+    // Instead, all parameters must be HostedParameters.
+    using AudioProcessor::addParameter;
+    using AudioProcessor::addParameterGroup;
+    using AudioProcessor::setParameterTree;
+
     void assertOnceOnDeprecatedMethodUse() const noexcept;
 
     static bool deprecationAssertiontriggered;

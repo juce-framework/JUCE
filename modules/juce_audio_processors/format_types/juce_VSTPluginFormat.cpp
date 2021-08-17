@@ -828,9 +828,9 @@ static const int defaultVSTBlockSizeValue = 512;
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 //==============================================================================
-struct VSTPluginInstance     : public AudioPluginInstance,
-                               private Timer,
-                               private AsyncUpdater
+struct VSTPluginInstance final   : public AudioPluginInstance,
+                                   private Timer,
+                                   private AsyncUpdater
 {
     struct VSTParameter final   : public Parameter
     {
@@ -972,6 +972,11 @@ struct VSTPluginInstance     : public AudioPluginInstance,
             return vstValueStrings;
         }
 
+        String getParameterID() const override
+        {
+            return String (getParameterIndex());
+        }
+
         VSTPluginInstance& pluginInstance;
 
         const String name;
@@ -1077,7 +1082,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
                                                                        isBoolSwitch, parameterValueStrings, valueType));
         }
 
-        setParameterTree (std::move (newParameterTree));
+        setHostedParameterTree (std::move (newParameterTree));
     }
 
     ~VSTPluginInstance() override
@@ -2005,7 +2010,7 @@ struct VSTPluginInstance     : public AudioPluginInstance,
 
 private:
     //==============================================================================
-    struct VST2BypassParameter    : Parameter
+    struct VST2BypassParameter final : public Parameter
     {
         VST2BypassParameter (VSTPluginInstance& effectToUse)
             : parent (effectToUse),
@@ -2048,6 +2053,7 @@ private:
         int getNumSteps() const override                                    { return 2; }
         StringArray getAllValueStrings() const override                     { return values; }
         String getLabel() const override                                    { return {}; }
+        String getParameterID() const override                              { return {}; }
 
         VSTPluginInstance& parent;
         bool currentValue = false;
