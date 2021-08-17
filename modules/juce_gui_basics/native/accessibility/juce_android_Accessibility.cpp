@@ -757,7 +757,7 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return nativeImpl.get();
 }
 
-bool areAnyAccessibilityClientsActive()
+static bool areAnyAccessibilityClientsActive()
 {
     auto* env = getEnv();
 

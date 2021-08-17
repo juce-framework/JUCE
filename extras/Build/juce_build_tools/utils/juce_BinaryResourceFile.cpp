@@ -183,7 +183,8 @@ namespace build_tools
 
             cpp << newLine
                 << newLine
-                << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)" << newLine
+                << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes);" << newLine
+                << "const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)"  << newLine
                 << "{" << newLine;
 
             StringArray returnCodes;
@@ -216,7 +217,8 @@ namespace build_tools
 
             cpp << "};" << newLine << newLine;
 
-            cpp << "const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)"                         << newLine
+            cpp << "const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8);"                        << newLine
+                << "const char* getNamedResourceOriginalFilename (const char* resourceNameUTF8)"                         << newLine
                 << "{"                                                                                                   << newLine
                 << "    for (unsigned int i = 0; i < (sizeof (namedResourceList) / sizeof (namedResourceList[0])); ++i)" << newLine
                 << "    {"                                                                                               << newLine

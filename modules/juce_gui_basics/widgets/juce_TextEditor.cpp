@@ -415,8 +415,6 @@ struct TextEditor::Iterator
 
     void beginNewLine()
     {
-        ++currentLineIndex;
-
         lineY += lineHeight * lineSpacing;
         float lineWidth = 0;
 
@@ -480,6 +478,9 @@ struct TextEditor::Iterator
     //==============================================================================
     void draw (Graphics& g, const UniformTextSection*& lastSection, AffineTransform transform) const
     {
+        if (atom == nullptr)
+            return;
+
         if (passwordCharacter != 0 || (underlineWhitespace || ! atom->isWhitespace()))
         {
             if (lastSection != currentSection)
@@ -513,6 +514,9 @@ struct TextEditor::Iterator
 
     void drawSelectedText (Graphics& g, Range<int> selected, Colour selectedTextColour, AffineTransform transform) const
     {
+        if (atom == nullptr)
+            return;
+
         if (passwordCharacter != 0 || ! atom->isWhitespace())
         {
             GlyphArrangement ga;
@@ -548,7 +552,7 @@ struct TextEditor::Iterator
     //==============================================================================
     float indexToX (int indexToFind) const
     {
-        if (indexToFind <= indexInText)
+        if (indexToFind <= indexInText || atom == nullptr)
             return atomX;
 
         if (indexToFind >= indexInText + atom->numChars)
@@ -567,7 +571,7 @@ struct TextEditor::Iterator
 
     int xToIndex (float xToFind) const
     {
-        if (xToFind <= atomX || atom->isNewLine())
+        if (xToFind <= atomX || atom == nullptr || atom->isNewLine())
             return indexInText;
 
         if (xToFind >= atomRight)
@@ -651,36 +655,16 @@ struct TextEditor::Iterator
         return roundToInt (maxWidth);
     }
 
-    std::vector<Range<int>> getLineRanges()
+    Rectangle<int> getTextBounds (Range<int> range) const
     {
-        std::vector<Range<int>> ranges;
+        auto startX = indexToX (range.getStart());
+        auto endX   = indexToX (range.getEnd());
 
-        int index = currentLineIndex;
-        Range<int> currentLineRange;
-
-        while (next())
-        {
-            if (index < currentLineIndex)
-            {
-                currentLineRange.setEnd (indexInText - 1);
-                ranges.push_back (currentLineRange);
-
-                currentLineRange = { indexInText, indexInText };
-                index = currentLineIndex;
-            }
-        }
-
-        currentLineRange.setEnd (atom != nullptr ? indexInText + atom->numChars
-                                                 : indexInText);
-
-        if (! currentLineRange.isEmpty())
-            ranges.push_back (currentLineRange);
-
-        return ranges;
+        return Rectangle<float> (startX, lineY, endX - startX, lineHeight * lineSpacing).toNearestInt();
     }
 
     //==============================================================================
-    int indexInText = 0, currentLineIndex = 0;
+    int indexInText = 0;
     float lineY = 0, lineHeight = 0, maxDescent = 0;
     float atomX = 0, atomRight = 0;
     const TextAtom* atom = nullptr;
@@ -724,14 +708,9 @@ private:
         if (shouldStartNewLine)
         {
             if (split == numRemaining)
-            {
                 beginNewLine();
-            }
             else
-            {
-                ++currentLineIndex;
                 lineY += lineHeight * lineSpacing;
-            }
         }
 
         atomRight = atomX + longAtom.width;
@@ -1484,23 +1463,14 @@ Point<int> TextEditor::getTextOffset() const noexcept
 RectangleList<int> TextEditor::getTextBounds (Range<int> textRange)
 {
     RectangleList<int> boundingBox;
+    Iterator i (*this);
 
-    for (auto lineRange : Iterator { *this }.getLineRanges())
+    while (i.next())
     {
-        auto intersection = lineRange.getIntersectionWith (textRange);
-
-        if (! intersection.isEmpty())
+        if (textRange.intersects ({ i.indexInText,
+                                    i.indexInText + i.atom->numChars }))
         {
-            Point<float> anchorStart, anchorEnd;
-            float lineHeight = 0.0f;
-
-            getCharPosition (intersection.getStart(), anchorStart, lineHeight);
-            getCharPosition (intersection.getEnd(),   anchorEnd,   lineHeight);
-
-            boundingBox.add (Rectangle<float> (anchorStart.x, anchorStart.y, anchorEnd.x - anchorStart.x, lineHeight).toNearestInt());
-
-            if (intersection == textRange)
-                break;
+            boundingBox.add (i.getTextBounds (textRange));
         }
     }
 

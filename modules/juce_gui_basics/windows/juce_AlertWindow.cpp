@@ -627,13 +627,17 @@ private:
 
 namespace AlertWindowMappings
 {
+    using MapFn = int (*) (int);
+
+    static int noMapping (int buttonIndex)    { return buttonIndex; }
     static int messageBox (int)               { return 0; }
     static int okCancel (int buttonIndex)     { return buttonIndex == 0 ? 1 : 0; }
     static int yesNoCancel (int buttonIndex)  { return buttonIndex == 2 ? 0 : buttonIndex + 1; }
 
-    ModalComponentManager::Callback* getWrappedCallback (ModalComponentManager::Callback* callbackIn,
-                                                         std::function<int (int)> mapFn)
+    static ModalComponentManager::Callback* getWrappedCallback (ModalComponentManager::Callback* callbackIn, MapFn mapFn)
     {
+        jassert (mapFn != nullptr);
+
         if (callbackIn == nullptr)
             return nullptr;
 
@@ -720,16 +724,21 @@ void AlertWindow::showMessageBoxAsync (MessageBoxIconType iconType,
 }
 
 static int showMaybeAsync (const MessageBoxOptions& options,
-                           std::unique_ptr<ModalComponentManager::Callback> callback)
+                           ModalComponentManager::Callback* callbackIn,
+                           AlertWindowMappings::MapFn mapFn)
 {
-    const auto showAsync = (callback != nullptr ? Async::yes
-                                                : Async::no);
+    jassert (mapFn != nullptr);
+
+    const auto showAsync = (callbackIn != nullptr ? Async::yes
+                                                  : Async::no);
+
+    auto callback = rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
 
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
     {
        #if JUCE_MODAL_LOOPS_PERMITTED
         if (showAsync == Async::no)
-            return NativeMessageBox::show (options);
+            return mapFn (NativeMessageBox::show (options));
        #endif
 
         NativeMessageBox::showAsync (options, callback.release());
@@ -748,9 +757,6 @@ bool AlertWindow::showOkCancelBox (MessageBoxIconType iconType,
                                    Component* associatedComponent,
                                    ModalComponentManager::Callback* callback)
 {
-    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        callback = AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel);
-
     return showMaybeAsync (MessageBoxOptions()
                              .withIconType (iconType)
                              .withTitle (title)
@@ -758,7 +764,10 @@ bool AlertWindow::showOkCancelBox (MessageBoxIconType iconType,
                              .withButton (button1Text.isEmpty() ? TRANS("OK")     : button1Text)
                              .withButton (button2Text.isEmpty() ? TRANS("Cancel") : button2Text)
                              .withAssociatedComponent (associatedComponent),
-                           rawToUniquePtr (callback)) == 1;
+                           callback,
+                           LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows()
+                               ? AlertWindowMappings::okCancel
+                               : AlertWindowMappings::noMapping) == 1;
 }
 
 int AlertWindow::showYesNoCancelBox (MessageBoxIconType iconType,
@@ -770,9 +779,6 @@ int AlertWindow::showYesNoCancelBox (MessageBoxIconType iconType,
                                      Component* associatedComponent,
                                      ModalComponentManager::Callback* callback)
 {
-    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        callback = AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::yesNoCancel);
-
     return showMaybeAsync (MessageBoxOptions()
                              .withIconType (iconType)
                              .withTitle (title)
@@ -781,7 +787,10 @@ int AlertWindow::showYesNoCancelBox (MessageBoxIconType iconType,
                              .withButton (button2Text.isEmpty() ? TRANS("No")     : button2Text)
                              .withButton (button3Text.isEmpty() ? TRANS("Cancel") : button3Text)
                              .withAssociatedComponent (associatedComponent),
-                           rawToUniquePtr (callback));
+                           callback,
+                           LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows()
+                               ? AlertWindowMappings::yesNoCancel
+                               : AlertWindowMappings::noMapping);
 }
 
 //==============================================================================

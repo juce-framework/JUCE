@@ -118,7 +118,7 @@ namespace juce
     /*  Returns true if this process is in the foreground, or if the viewComponent
         is embedded into a window owned by the foreground process.
     */
-    bool isForegroundOrEmbeddedProcess (Component* viewComponent)
+    static bool isForegroundOrEmbeddedProcess (Component* viewComponent)
     {
         return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
     }
@@ -261,6 +261,8 @@ namespace juce
 
 static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
 /** Used by the macOS and iOS peers. */
 void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
 {
@@ -272,6 +274,8 @@ bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
 {
     return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce
 

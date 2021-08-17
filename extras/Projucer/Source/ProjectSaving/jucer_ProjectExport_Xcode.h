@@ -1620,7 +1620,12 @@ public:
                    codeSigningIdentity.quoted());
 
             if (codeSigningIdentity.isNotEmpty())
+            {
                 s.set ("PROVISIONING_PROFILE_SPECIFIER", "\"\"");
+
+                if (! owner.isUsingDefaultSigningIdentity (config))
+                    s.set ("CODE_SIGN_STYLE", "Manual");
+            }
 
             if (owner.getDevelopmentTeamIDString().isNotEmpty())
                 s.set ("DEVELOPMENT_TEAM", owner.getDevelopmentTeamIDString());
@@ -2451,14 +2456,17 @@ private:
         return expandPath (searchPath);
     }
 
+    bool isUsingDefaultSigningIdentity (const XcodeBuildConfiguration& config) const
+    {
+        return config.getCodeSignIdentityString().isEmpty() && getDevelopmentTeamIDString().isNotEmpty();
+    }
+
     String getCodeSigningIdentity (const XcodeBuildConfiguration& config) const
     {
-        auto identity = config.getCodeSignIdentityString();
-
-        if (identity.isEmpty() && getDevelopmentTeamIDString().isNotEmpty())
+        if (isUsingDefaultSigningIdentity (config))
             return iOS ? "iPhone Developer" : "Mac Developer";
 
-        return identity;
+        return config.getCodeSignIdentityString();
     }
 
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const

@@ -343,7 +343,7 @@ private:
                                                        object: captureSession.get()];
 
             [[NSNotificationCenter defaultCenter] addObserver: delegate.get()
-                                                     selector: @selector (sessionRuntimeError:)
+                                                     selector: @selector (runtimeError:)
                                                          name: AVCaptureSessionRuntimeErrorNotification
                                                        object: captureSession.get()];
 
@@ -516,7 +516,7 @@ private:
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
                 addMethod (@selector (sessionDidStartRunning:),   started,           "v@:@");
                 addMethod (@selector (sessionDidStopRunning:),    stopped,           "v@:@");
-                addMethod (@selector (sessionRuntimeError:),      runtimeError,      "v@:@");
+                addMethod (@selector (runtimeError:),             runtimeError,      "v@:@");
                 addMethod (@selector (sessionWasInterrupted:),    interrupted,       "v@:@");
                 addMethod (@selector (sessionInterruptionEnded:), interruptionEnded, "v@:@");
                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE

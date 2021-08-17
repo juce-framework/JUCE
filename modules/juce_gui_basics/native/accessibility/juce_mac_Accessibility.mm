@@ -262,6 +262,23 @@ private:
             return nil;
         }
 
+        static NSArray* getAccessibilityChildren (id self, SEL)
+        {
+            if (auto* handler = getHandler (self))
+            {
+                auto children = handler->getChildren();
+
+                auto* accessibleChildren = [NSMutableArray arrayWithCapacity: (NSUInteger) children.size()];
+
+                for (auto* childHandler : children)
+                    [accessibleChildren addObject: (id) childHandler->getNativeImplementation()];
+
+                return accessibleChildren;
+            }
+
+            return nil;
+        }
+
         static NSArray* getAccessibilitySelectedChildren (id self, SEL)
         {
             return getSelectedChildren ([self accessibilityChildren]);
@@ -817,7 +834,7 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
     return (AccessibilityNativeHandle*) nativeImpl->getAccessibilityElement();
 }
 
-bool areAnyAccessibilityClientsActive()
+static bool areAnyAccessibilityClientsActive()
 {
     const String voiceOverKeyString ("voiceOverOnOffKey");
     const String applicationIDString ("com.apple.universalaccess");
