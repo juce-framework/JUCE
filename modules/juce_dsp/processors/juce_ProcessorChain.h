@@ -156,3 +156,20 @@ inline bool isBypassed (const ProcessorChain<Processors...>& chain) noexcept
 
 } // namespace dsp
 } // namespace juce
+
+namespace std
+{
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmismatched-tags")
+
+/** Adds support for C++17 structured bindings. */
+template <typename... Processors>
+struct tuple_size<::juce::dsp::ProcessorChain<Processors...>> : integral_constant<size_t, sizeof... (Processors)> {};
+
+/** Adds support for C++17 structured bindings. */
+template <size_t I, typename... Processors>
+struct tuple_element<I, ::juce::dsp::ProcessorChain<Processors...>> : tuple_element<I, tuple<Processors...>> {};
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+} // namespace std
