@@ -449,6 +449,10 @@ public:
                                          (char**, int, XTextProperty*),
                                          Status)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (Xutf8TextListToTextProperty, xutf8TextListToTextProperty,
+                                         (::Display*, char**, int, XICCEncodingStyle, XTextProperty*),
+                                         int)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSync, xSync,
                                          (::Display*, Bool),
                                          void)

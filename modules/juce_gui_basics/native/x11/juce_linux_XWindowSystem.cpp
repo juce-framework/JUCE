@@ -1606,12 +1606,16 @@ void XWindowSystem::setTitle (::Window windowH, const String& title) const
 {
     jassert (windowH != 0);
 
-    XTextProperty nameProperty;
+    XTextProperty nameProperty{};
     char* strings[] = { const_cast<char*> (title.toRawUTF8()) };
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
-    if (X11Symbols::getInstance()->xStringListToTextProperty (strings, 1, &nameProperty))
+    if (X11Symbols::getInstance()->xutf8TextListToTextProperty (display,
+                                                                strings,
+                                                                numElementsInArray (strings),
+                                                                XUTF8StringStyle,
+                                                                &nameProperty) >= 0)
     {
         X11Symbols::getInstance()->xSetWMName (display, windowH, &nameProperty);
         X11Symbols::getInstance()->xSetWMIconName (display, windowH, &nameProperty);
