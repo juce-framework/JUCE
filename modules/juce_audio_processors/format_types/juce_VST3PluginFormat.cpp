@@ -2037,7 +2037,7 @@ private:
 };
 
 //==============================================================================
-class VST3PluginInstance : public AudioPluginInstance
+class VST3PluginInstance final  : public AudioPluginInstance
 {
 public:
     //==============================================================================
@@ -2151,6 +2151,11 @@ public:
         StringArray getAllValueStrings() const override
         {
             return {};
+        }
+
+        String getParameterID() const override
+        {
+            return String (paramID);
         }
 
         Steinberg::Vst::ParamID getParamID() const noexcept { return paramID; }
@@ -3141,7 +3146,7 @@ private:
             group->addChild (std::unique_ptr<AudioProcessorParameter> (param));
         }
 
-        setParameterTree (std::move (newParameterTree));
+        setHostedParameterTree (std::move (newParameterTree));
 
         idToParamMap = [this]
         {

@@ -330,7 +330,7 @@ class AudioUnitPluginWindowCarbon;
 class AudioUnitPluginWindowCocoa;
 
 //==============================================================================
-class AudioUnitPluginInstance     : public AudioPluginInstance
+class AudioUnitPluginInstance final    : public AudioPluginInstance
 {
 public:
     struct AUInstanceParameter final  : public Parameter
@@ -488,6 +488,11 @@ public:
             return auValueStrings;
         }
 
+        String getParameterID() const override
+        {
+            return String (paramID);
+        }
+
         void sendParameterChangeEvent()
         {
            #if JUCE_MAC
@@ -514,6 +519,9 @@ public:
             return minValue + (range * normalisedValue);
         }
 
+        UInt32 getRawParamID() const { return paramID; }
+
+    private:
         AudioUnitPluginInstance& pluginInstance;
         const UInt32 paramID;
         const String name;
@@ -1488,7 +1496,7 @@ public:
             }
         }
 
-        setParameterTree (std::move (newParameterTree));
+        setHostedParameterTree (std::move (newParameterTree));
 
         UInt32 propertySize = 0;
         Boolean writable = false;
@@ -1554,7 +1562,7 @@ private:
     };
 
     //==============================================================================
-    struct AUBypassParameter    : Parameter
+    struct AUBypassParameter final : public Parameter
     {
         AUBypassParameter (AudioUnitPluginInstance& effectToUse)
              : parent (effectToUse), currentValue (getCurrentHostValue())
@@ -1637,6 +1645,8 @@ private:
         int getNumSteps() const override                                    { return 2; }
         StringArray getAllValueStrings() const override                     { return values; }
         String getLabel() const override                                    { return {}; }
+
+        String getParameterID() const override                              { return {}; }
 
         AudioUnitPluginInstance& parent;
         const StringArray auOnStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
@@ -1725,7 +1735,7 @@ private:
 
             AudioUnitEvent event;
             event.mArgument.mParameter.mAudioUnit = audioUnit;
-            event.mArgument.mParameter.mParameterID = static_cast<AUInstanceParameter*> (param)->paramID;
+            event.mArgument.mParameter.mParameterID = static_cast<AUInstanceParameter*> (param)->getRawParamID();
             event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
             event.mArgument.mParameter.mElement = 0;
 
