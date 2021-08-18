@@ -405,7 +405,9 @@ struct GraphEditorPanel::PluginComponent   : public Component,
         menu->addItem (3, "Toggle Bypass");
 
         menu->addSeparator();
-        menu->addItem (10, "Show plugin GUI");
+        if (getProcessor()->hasEditor())
+            menu->addItem (10, "Show plugin GUI");
+
         menu->addItem (11, "Show all programs");
         menu->addItem (12, "Show all parameters");
         menu->addItem (13, "Show debug log");
