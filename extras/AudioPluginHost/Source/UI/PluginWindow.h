@@ -146,11 +146,13 @@ public:
          activeWindowList (windowList),
          node (n), type (t)
     {
-        setResizable (true, false);
         setSize (400, 300);
 
         if (auto* ui = createProcessorEditor (*node->getProcessor(), type))
+        {
             setContentOwned (ui, true);
+            setResizable (ui->isResizable(), false);
+        }
 
        #if JUCE_IOS || JUCE_ANDROID
         auto screenBounds = Desktop::getInstance().getDisplays().getTotalBounds (true).toFloat();
