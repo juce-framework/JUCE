@@ -134,14 +134,12 @@ public:
     //==============================================================================
     /** A handy static method that parses a file.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
-        An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement, or nullptr if there was an error.
     */
     static std::unique_ptr<XmlElement> parse (const File& file);
 
     /** A handy static method that parses some XML data.
         This is a shortcut for creating an XmlDocument object and calling getDocumentElement() on it.
-        An even better shortcut is the juce::parseXML() function, which returns a std::unique_ptr<XmlElement>!
         @returns    a new XmlElement, or nullptr if there was an error.
     */
     static std::unique_ptr<XmlElement> parse (const String& xmlData);
