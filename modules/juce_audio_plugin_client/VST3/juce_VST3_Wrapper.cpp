@@ -530,13 +530,13 @@ private:
 
         // if the bypass parameter is not part of the exported parameters that the plug-in supports
         // then add it to the end of the list as VST3 requires the bypass parameter to be exported!
-        bypassIsRegularParameter = juceParameters.params.contains (audioProcessor->getBypassParameter());
+        bypassIsRegularParameter = juceParameters.contains (audioProcessor->getBypassParameter());
 
         if (! bypassIsRegularParameter)
-            juceParameters.params.add (bypassParameter);
+            juceParameters.addNonOwning (bypassParameter);
 
         int i = 0;
-        for (auto* juceParam : juceParameters.params)
+        for (auto* juceParam : juceParameters)
         {
             bool isBypassParameter = (juceParam == bypassParameter);
 
@@ -568,7 +568,7 @@ private:
                                                                          0, numPrograms - 1,
                                                                          audioProcessor->getCurrentProgram());
 
-            juceParameters.params.add (ownedProgramParameter.get());
+            juceParameters.addNonOwning (ownedProgramParameter.get());
 
             if (forceLegacyParamIDs)
                 programParamID = static_cast<Vst::ParamID> (i++);

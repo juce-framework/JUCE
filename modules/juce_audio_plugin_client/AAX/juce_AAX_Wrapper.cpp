@@ -1548,11 +1548,11 @@ namespace AAXClasses
             }
 
             if (! bypassPartOfRegularParams)
-                juceParameters.params.add (bypassParameter);
+                juceParameters.addNonOwning (bypassParameter);
 
             int parameterIndex = 0;
 
-            for (auto* juceParam : juceParameters.params)
+            for (auto* juceParam : juceParameters)
             {
                 auto isBypassParameter = (juceParam == bypassParameter);
 
@@ -2102,7 +2102,7 @@ namespace AAXClasses
 
         int meterIdx = 0;
 
-        for (auto* param : params.params)
+        for (auto* param : params)
         {
             auto category = param->getCategory();
 
