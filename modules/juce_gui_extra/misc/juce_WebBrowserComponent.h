@@ -141,14 +141,17 @@ public:
     /** @internal */
     class Pimpl;
 
-private:
-    //==============================================================================
+protected:
     friend class WindowsWebView2WebBrowserComponent;
 
-    explicit WebBrowserComponent (bool unloadPageWhenBrowserIsHidden,
-                                  const File& dllLocation,
-                                  const File& userDataFolder);
+    struct ConstructWithoutPimpl
+    {
+        explicit ConstructWithoutPimpl (bool unloadOnHide) : unloadWhenHidden (unloadOnHide) {}
+        const bool unloadWhenHidden;
+    };
+    explicit WebBrowserComponent (ConstructWithoutPimpl);
 
+private:
     //==============================================================================
     std::unique_ptr<Pimpl> browser;
     bool blankPageShown = false, unloadPageWhenHidden;
@@ -163,6 +166,72 @@ private:
 };
 
 //==============================================================================
+/** Class used to create a set of preferences to pass to the WindowsWebView2WebBrowserComponent
+    wrapper constructor to modify aspects of its behaviour and settings.
+
+    You can chain together a series of calls to this class's methods to create a set of whatever
+    preferences you want to specify.
+
+    @tags{GUI}
+*/
+class JUCE_API  WebView2Preferences
+{
+public:
+    //==============================================================================
+    /** Sets a custom location for the WebView2Loader.dll that is not a part of the
+        standard system DLL search paths.
+    */
+    WebView2Preferences withDLLLocation (const File& location) const   { return with (&WebView2Preferences::dllLocation, location); }
+
+    /** Sets a non-default location for storing user data for the browser instance. */
+    WebView2Preferences withUserDataFolder (const File& folder) const  { return with (&WebView2Preferences::userDataFolder, folder); }
+
+    /** If this is set, the status bar usually displayed in the lower-left of the webview
+        will be disabled.
+    */
+    WebView2Preferences withStatusBarDisabled() const                  { return with (&WebView2Preferences::disableStatusBar, true); }
+
+    /** If this is set, a blank page will be displayed on error instead of the default
+        built-in error page.
+    */
+    WebView2Preferences withBuiltInErrorPageDisabled() const           { return with (&WebView2Preferences::disableBuiltInErrorPage, true); }
+
+    /** Sets the background colour that WebView2 renders underneath all web content.
+
+        This colour must either be fully opaque or transparent. On Windows 7 this
+        colour must be opaque.
+    */
+    WebView2Preferences withBackgroundColour (const Colour& colour) const
+    {
+        // the background colour must be either fully opaque or transparent!
+        jassert (colour.isOpaque() || colour.isTransparent());
+
+        return with (&WebView2Preferences::backgroundColour, colour);
+    }
+
+    //==============================================================================
+    File getDLLLocation() const                          { return dllLocation; }
+    File getUserDataFolder() const                       { return userDataFolder; }
+    bool getIsStatusBarDisabled() const noexcept         { return disableStatusBar; }
+    bool getIsBuiltInErrorPageDisabled() const noexcept  { return disableBuiltInErrorPage; }
+    Colour getBackgroundColour() const                   { return backgroundColour; }
+
+private:
+    //==============================================================================
+    template <typename Member, typename Item>
+    WebView2Preferences with (Member&& member, Item&& item) const
+    {
+        auto options = *this;
+        options.*member = std::forward<Item> (item);
+
+        return options;
+    }
+
+    File dllLocation, userDataFolder;
+    bool disableStatusBar = false, disableBuiltInErrorPage = false;
+    Colour backgroundColour = Colours::white;
+};
+
 /**
     If you have enabled the JUCE_USE_WIN_WEBVIEW2 flag then this wrapper will attempt to
     use the Microsoft Edge (Chromium) WebView2 control instead of IE on Windows. It will
@@ -176,34 +245,38 @@ private:
     system DLL, we can't rely on it being found via the normal system DLL search paths.
     Therefore in order to use WebView2 you need to ensure that WebView2Loader.dll is
     installed either to a location covered by the Windows DLL system search paths or
-    to the folder specified in the constructor of this class.
+    to the folder specified in the WebView2Preferences.
 
     @tags{GUI}
 */
 class WindowsWebView2WebBrowserComponent  : public WebBrowserComponent
 {
 public:
+    //==============================================================================
     /** Creates a WebBrowserComponent that is compatible with the WebView2 control
         on Windows.
-
-        This allows you to specify a custom location for the WebView2Loader.dll as
-        well as a non-default location for storing user data for the browser instance.
 
         @param unloadPageWhenBrowserIsHidden  if this is true, then when the browser
                                component is taken offscreen, it'll clear the current page
                                and replace it with a blank page - this can be handy to stop
                                the browser using resources in the background when it's not
                                actually being used.
-        @param dllLocation     the path to WebView2Loader.dll, if this is empty then the default
-                               system DLL search paths will be used
-        @param userDataFolder  a directory in which the WebView2 user data will be stored, if
-                               this is empty then a directory will be created next to the
-                               executable
+        @param preferences     a set of preferences used to control aspects of the webview's
+                               behaviour.
+
+        @see WebView2Preferences
     */
+    WindowsWebView2WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true,
+                                        const WebView2Preferences& preferences = {});
+
+    // This constructor has been deprecated. Use the new constructor that takes a
+    // WebView2Preferences instead.
     explicit WindowsWebView2WebBrowserComponent (bool unloadPageWhenBrowserIsHidden = true,
                                                  const File& dllLocation = {},
                                                  const File& userDataFolder = {})
-        : WebBrowserComponent (unloadPageWhenBrowserIsHidden, dllLocation, userDataFolder)
+                                  : WindowsWebView2WebBrowserComponent (unloadPageWhenBrowserIsHidden,
+                                                                        WebView2Preferences().withDLLLocation (dllLocation)
+                                                                                             .withUserDataFolder (userDataFolder))
     {
     }
 };
