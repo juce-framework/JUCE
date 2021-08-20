@@ -1215,6 +1215,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_graphics/effects/juce_GlowEffect.cpp"
     "../../../../../modules/juce_graphics/effects/juce_GlowEffect.h"
     "../../../../../modules/juce_graphics/effects/juce_ImageEffectFilter.h"
+    "../../../../../modules/juce_graphics/effects/juce_StackBlurEffect.cpp"
+    "../../../../../modules/juce_graphics/effects/juce_StackBlurEffect.h"
     "../../../../../modules/juce_graphics/fonts/juce_AttributedString.cpp"
     "../../../../../modules/juce_graphics/fonts/juce_AttributedString.h"
     "../../../../../modules/juce_graphics/fonts/juce_CustomTypeface.cpp"
@@ -3034,6 +3036,8 @@ set_source_files_properties("../../../../../modules/juce_graphics/effects/juce_D
 set_source_files_properties("../../../../../modules/juce_graphics/effects/juce_GlowEffect.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/effects/juce_GlowEffect.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/effects/juce_ImageEffectFilter.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/effects/juce_StackBlurEffect.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_graphics/effects/juce_StackBlurEffect.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/fonts/juce_AttributedString.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/fonts/juce_AttributedString.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_graphics/fonts/juce_CustomTypeface.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)

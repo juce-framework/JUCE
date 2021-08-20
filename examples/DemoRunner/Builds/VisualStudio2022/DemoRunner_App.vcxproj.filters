@@ -2080,6 +2080,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_graphics\effects\juce_GlowEffect.cpp">
       <Filter>JUCE Modules\juce_graphics\effects</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_graphics\effects\juce_StackBlurEffect.cpp">
+      <Filter>JUCE Modules\juce_graphics\effects</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.cpp">
       <Filter>JUCE Modules\juce_graphics\fonts</Filter>
     </ClCompile>
@@ -5062,6 +5065,9 @@
       <Filter>JUCE Modules\juce_graphics\effects</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_ImageEffectFilter.h">
+      <Filter>JUCE Modules\juce_graphics\effects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_graphics\effects\juce_StackBlurEffect.h">
       <Filter>JUCE Modules\juce_graphics\effects</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_graphics\fonts\juce_AttributedString.h">

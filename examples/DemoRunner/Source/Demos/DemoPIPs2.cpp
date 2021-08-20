@@ -35,6 +35,7 @@
 #endif
 #include "../../../GUI/AnimationAppDemo.h"
 #include "../../../GUI/AnimationDemo.h"
+#include "../../../GUI/BlurDemo.h"
 #include "../../../GUI/BouncingBallWavetableDemo.h"
 #if JUCE_USE_CAMERA && ! (JUCE_LINUX || JUCE_BSD)
  #include "../../../GUI/CameraDemo.h"
@@ -75,6 +76,7 @@ void registerDemos_Two() noexcept
    #endif
     REGISTER_DEMO (AnimationAppDemo,          GUI, false)
     REGISTER_DEMO (AnimationDemo,             GUI, false)
+    REGISTER_DEMO (BlurDemo,                  GUI, false)
     REGISTER_DEMO (BouncingBallWavetableDemo, GUI, false)
    #if JUCE_USE_CAMERA && ! (JUCE_LINUX || JUCE_BSD)
     REGISTER_DEMO (CameraDemo,                GUI, true)
