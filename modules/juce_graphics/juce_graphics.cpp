@@ -133,6 +133,7 @@
 #include "fonts/juce_TextLayout.cpp"
 #include "effects/juce_DropShadowEffect.cpp"
 #include "effects/juce_GlowEffect.cpp"
+#include "effects/juce_StackBlurEffect.cpp"
 
 #if JUCE_UNIT_TESTS
  #include "geometry/juce_Rectangle_test.cpp"
