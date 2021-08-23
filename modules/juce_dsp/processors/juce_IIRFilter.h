@@ -33,6 +33,10 @@ namespace dsp
 */
 namespace IIR
 {
+    /** A set of coefficients for use in an Filter object.
+
+        @tags{DSP}
+    */
     template <typename NumericType>
     struct ArrayCoefficients
     {
