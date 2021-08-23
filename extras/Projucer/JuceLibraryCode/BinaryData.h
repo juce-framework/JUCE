@@ -39,7 +39,7 @@ namespace BinaryData
     const int            LICENSESize = 11325;
 
     extern const char*   background_logo_svg;
-    const int            background_logo_svgSize = 3117;
+    const int            background_logo_svgSize = 3249;
 
     extern const char*   export_android_svg;
     const int            export_android_svgSize = 3586;
@@ -63,7 +63,7 @@ namespace BinaryData
     const int            gpl_logo_svgSize = 27030;
 
     extern const char*   juce_icon_png;
-    const int            juce_icon_pngSize = 45854;
+    const int            juce_icon_pngSize = 105697;
 
     extern const char*   wizard_AnimatedApp_svg;
     const int            wizard_AnimatedApp_svgSize = 5978;

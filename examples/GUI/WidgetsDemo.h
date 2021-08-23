@@ -435,7 +435,7 @@ struct ButtonsPage   : public Component
                            juceImage, 1.0f, getRandomBrightColour().withAlpha (0.8f),
                            0.5f);
 
-            ib->setBounds (260, 350, 100, 100);
+            ib->setBounds (45, 380, 100, 100);
             ib->setTooltip ("ImageButton - showing alpha-channel hit-testing and colour overlay when clicked");
         }
     }

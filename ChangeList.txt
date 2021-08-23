@@ -1,7 +1,24 @@
 == Major JUCE features and updates ==
 
 This file just lists the more notable headline features. For more detailed info
-about minor changes and bugfixes, please see the git log!
+about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
+
+Version 6.1.0
+  - Added accessibility support
+  - Enabled use of VST3 plug-in extensions
+  - Improved OpenGL function loading
+  - Updated to C++14
+  - Added support for macOS Monterey and iOS 15
+  - Added async versions of all modal functions
+  - Fixed some VST3 threading issues
+  - Added cross-platform-compatible VST3 UID hash
+  - Improved MinGW compatibility
+  - Fixed some issues with BufferingAudioReader
+  - Improved TextEditor repainting
+  - Added support for larger ASIO buffers
+  - Updated Android Oboe to 1.6.1
+  - Improved modal dismissing
+  - Improved assertion handling on macOS ARM
 
 Version 6.0.8
   - Fixed a macOS graphics invalidation region issue

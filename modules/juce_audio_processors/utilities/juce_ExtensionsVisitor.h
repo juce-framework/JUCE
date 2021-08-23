@@ -41,6 +41,7 @@ namespace juce
 */
 struct ExtensionsVisitor
 {
+    /** Indicates that there is no platform specific information available. */
     struct Unknown {};
 
     /** Can be used to retrieve information about a VST3 that is wrapped by an AudioProcessor. */

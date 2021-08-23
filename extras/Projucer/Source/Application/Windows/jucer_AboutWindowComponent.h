@@ -64,8 +64,6 @@ public:
         juceLogoBounds.setWidth (juceLogoBounds.getWidth() + 100);
         juceLogoBounds.setHeight (juceLogoBounds.getHeight() + 100);
 
-        copyrightLabel.setBounds (leftSlice.removeFromBottom (20));
-
         auto titleHeight = 40;
 
         centreSlice.removeFromTop ((centreSlice.getHeight() / 2) - (titleHeight / 2));
@@ -76,7 +74,9 @@ public:
         versionLabel.setBounds (centreSlice.removeFromTop (40));
 
         centreSlice.removeFromTop (10);
-        aboutButton.setBounds (centreSlice.removeFromBottom (20));
+        aboutButton.setBounds (centreSlice.removeFromTop (20));
+
+        copyrightLabel.setBounds (getLocalBounds().removeFromBottom (50));
     }
 
     void paint (Graphics& g) override
