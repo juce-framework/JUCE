@@ -197,6 +197,7 @@ public:
 
     bool canUseSemiTransparentWindows() const;
     bool canUseARGBImages() const;
+    bool isDarkModeActive() const;
 
     int getNumPaintsPendingForWindow (::Window);
     void processPendingPaintsForWindow (::Window);
@@ -238,6 +239,7 @@ public:
     bool isX11Available() const noexcept  { return xIsAvailable; }
 
     static String getWindowScalingFactorSettingName()  { return "Gdk/WindowScalingFactor"; }
+    static String getThemeNameSettingName()            { return "Net/ThemeName"; }
 
     //==============================================================================
     void handleWindowMessage (LinuxComponentPeer*, XEvent&) const;

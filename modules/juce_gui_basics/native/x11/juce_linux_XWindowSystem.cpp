@@ -2018,6 +2018,37 @@ bool XWindowSystem::canUseARGBImages() const
     return canUseARGB;
 }
 
+bool XWindowSystem::isDarkModeActive() const
+{
+    const auto themeName = [this]() -> String
+    {
+        if (xSettings != nullptr)
+        {
+            const auto themeNameSetting = xSettings->getSetting (getThemeNameSettingName());
+
+            if (themeNameSetting.isValid()
+                && themeNameSetting.stringValue.isNotEmpty())
+            {
+                return themeNameSetting.stringValue;
+            }
+        }
+
+        ChildProcess gsettings;
+
+        if (File ("/usr/bin/gsettings").existsAsFile()
+            && gsettings.start ("/usr/bin/gsettings get org.gnome.desktop.interface gtk-theme", ChildProcess::wantStdOut))
+        {
+            if (gsettings.waitForProcessToFinish (200))
+                return gsettings.readAllProcessOutput();
+        }
+
+        return {};
+    }();
+
+    return (themeName.isNotEmpty()
+          && (themeName.containsIgnoreCase ("dark") || themeName.containsIgnoreCase ("black")));
+}
+
 Image XWindowSystem::createImage (bool isSemiTransparent, int width, int height, bool argb) const
 {
     auto visualAndDepth = displayVisuals->getBestVisualForWindow (isSemiTransparent);
