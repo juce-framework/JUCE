@@ -90,6 +90,77 @@ namespace XWindowSystemUtilities
              XdndTypeList, XdndActionList, XdndActionDescription, XdndActionCopy, XdndActionPrivate,
              XembedMsgType, XembedInfo, allowedActions[5], allowedMimeTypes[4], utf8String, clipboard, targets;
     };
+
+    //==============================================================================
+    /** Represents a setting according to the XSETTINGS specification.
+
+        @tags{GUI}
+    */
+    struct XSetting
+    {
+        enum class Type
+        {
+            integer,
+            string,
+            colour,
+            invalid
+        };
+
+        XSetting() = default;
+
+        XSetting (const String& n, int v)            : name (n), type (Type::integer), integerValue (v)  {}
+        XSetting (const String& n, const String& v)  : name (n), type (Type::string),  stringValue (v)   {}
+        XSetting (const String& n, const Colour& v)  : name (n), type (Type::colour),  colourValue (v)   {}
+
+        bool isValid() const noexcept  { return type != Type::invalid; }
+
+        String name;
+        Type type = Type::invalid;
+
+        int integerValue = -1;
+        String stringValue;
+        Colour colourValue;
+    };
+
+    /** Parses and stores the X11 settings for a display according to the XSETTINGS
+        specification.
+
+        @tags{GUI}
+    */
+    class XSettings
+    {
+    public:
+        explicit XSettings (::Display*);
+
+        //==============================================================================
+        void update();
+        ::Window getSettingsWindow() const noexcept  { return settingsWindow; }
+
+        XSetting getSetting (const String& settingName) const;
+
+        //==============================================================================
+        struct Listener
+        {
+            virtual ~Listener() = default;
+            virtual void settingChanged (const XSetting& settingThatHasChanged) = 0;
+        };
+
+        void addListener (Listener* listenerToAdd)        { listeners.add (listenerToAdd); }
+        void removeListener (Listener* listenerToRemove)  { listeners.remove (listenerToRemove); }
+
+    private:
+        ::Display* display = nullptr;
+        ::Window settingsWindow = None;
+        Atom settingsAtom;
+
+        int lastUpdateSerial = -1;
+
+        std::unordered_map<String, XSetting> settings;
+        ListenerList<Listener> listeners;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XSettings)
+    };
 }
 
 //==============================================================================
