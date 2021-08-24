@@ -231,10 +231,13 @@ public:
     String getTextFromClipboard() const;
     String getLocalClipboardContent() const noexcept  { return localClipboardContent; }
 
-    ::Display* getDisplay() const noexcept                          { return display; }
-    const XWindowSystemUtilities::Atoms& getAtoms() const noexcept  { return atoms; }
+    ::Display* getDisplay() const noexcept                            { return display; }
+    const XWindowSystemUtilities::Atoms& getAtoms() const noexcept    { return atoms; }
+    XWindowSystemUtilities::XSettings* getXSettings() const noexcept  { return xSettings.get(); }
 
     bool isX11Available() const noexcept  { return xIsAvailable; }
+
+    static String getWindowScalingFactorSettingName()  { return "Gdk/WindowScalingFactor"; }
 
     //==============================================================================
     void handleWindowMessage (LinuxComponentPeer*, XEvent&) const;
@@ -287,6 +290,8 @@ private:
 
     long getUserTime (::Window) const;
 
+    void initialiseXSettings();
+
     //==============================================================================
     void handleKeyPressEvent        (LinuxComponentPeer*, XKeyEvent&) const;
     void handleKeyReleaseEvent      (LinuxComponentPeer*, const XKeyEvent&) const;
@@ -320,6 +325,7 @@ private:
     XWindowSystemUtilities::Atoms atoms;
     ::Display* display = nullptr;
     std::unique_ptr<DisplayVisuals> displayVisuals;
+    std::unique_ptr<XWindowSystemUtilities::XSettings> xSettings;
 
    #if JUCE_USE_XSHM
     std::map<::Window, int> shmPaintsPendingMap;
