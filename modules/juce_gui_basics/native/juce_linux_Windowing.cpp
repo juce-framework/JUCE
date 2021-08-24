@@ -534,16 +534,53 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
     return XWindowSystem::getInstance()->canUseSemiTransparentWindows();
 }
 
-bool Desktop::isDarkModeActive() const
+class Desktop::NativeDarkModeChangeDetectorImpl  : private XWindowSystemUtilities::XSettings::Listener
 {
-    return false;
-}
+public:
+    NativeDarkModeChangeDetectorImpl()
+    {
+        const auto* windowSystem = XWindowSystem::getInstance();
 
-class Desktop::NativeDarkModeChangeDetectorImpl { public: NativeDarkModeChangeDetectorImpl() = default; };
+        if (auto* xSettings = windowSystem->getXSettings())
+            xSettings->addListener (this);
+
+        darkModeEnabled = windowSystem->isDarkModeActive();
+    }
+
+    ~NativeDarkModeChangeDetectorImpl() override
+    {
+        if (auto* windowSystem = XWindowSystem::getInstanceWithoutCreating())
+            if (auto* xSettings = windowSystem->getXSettings())
+                xSettings->removeListener (this);
+    }
+
+    bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
+
+private:
+    void settingChanged (const XWindowSystemUtilities::XSetting& settingThatHasChanged) override
+    {
+        if (settingThatHasChanged.name == XWindowSystem::getThemeNameSettingName())
+        {
+            const auto wasDarkModeEnabled = std::exchange (darkModeEnabled, XWindowSystem::getInstance()->isDarkModeActive());
+
+            if (darkModeEnabled != wasDarkModeEnabled)
+                Desktop::getInstance().darkModeChanged();
+        }
+    }
+
+    bool darkModeEnabled = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
+};
 
 std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
 {
-    return nullptr;
+    return std::make_unique<NativeDarkModeChangeDetectorImpl>();
+}
+
+bool Desktop::isDarkModeActive() const
+{
+    return nativeDarkModeChangeDetectorImpl->isDarkModeEnabled();
 }
 
 static bool screenSaverAllowed = true;
