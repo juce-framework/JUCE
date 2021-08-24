@@ -179,6 +179,148 @@ XWindowSystemUtilities::GetXProperty::~GetXProperty()
 }
 
 //==============================================================================
+XWindowSystemUtilities::XSettings::XSettings (::Display* d)
+    : display (d)
+{
+    settingsAtom = Atoms::getCreating (display, "_XSETTINGS_SETTINGS");
+
+    settingsWindow = X11Symbols::getInstance()->xGetSelectionOwner (display,
+                                                                    Atoms::getCreating (display, "_XSETTINGS_S0"));
+
+    jassert (settingsWindow != None);
+    update();
+}
+
+XWindowSystemUtilities::XSetting XWindowSystemUtilities::XSettings::getSetting (const String& name) const
+{
+    const auto iter = settings.find (name);
+
+    if (iter != settings.end())
+        return iter->second;
+
+    return {};
+}
+
+void XWindowSystemUtilities::XSettings::update()
+{
+    const GetXProperty prop { display,
+                              settingsWindow,
+                              settingsAtom,
+                              0L,
+                              std::numeric_limits<long>::max(),
+                              false,
+                              settingsAtom };
+
+    if (prop.success
+        && prop.actualType == settingsAtom
+        && prop.actualFormat == 8
+        && prop.numItems > 0)
+    {
+        const auto bytes = (size_t) prop.numItems;
+        auto* data = prop.data;
+        size_t byteNum = 0;
+
+        const auto increment = [&] (size_t amount)
+        {
+            data    += amount;
+            byteNum += amount;
+        };
+
+        struct Header
+        {
+            CARD8 byteOrder;
+            CARD8 padding[3];
+            CARD32 serial;
+            CARD32 nSettings;
+        };
+
+        const auto* header = reinterpret_cast<const Header*> (data);
+        const auto headerSerial = (int) header->serial;
+        increment (sizeof (Header));
+
+        const auto readCARD16 = [&]() -> CARD16
+        {
+            if (byteNum + sizeof (CARD16) > bytes)
+                return {};
+
+            const auto value = header->byteOrder == MSBFirst ? ByteOrder::bigEndianShort (data)
+                                                             : ByteOrder::littleEndianShort (data);
+            increment (sizeof (CARD16));
+            return value;
+        };
+
+        const auto readCARD32 = [&]() -> CARD32
+        {
+            if (byteNum + sizeof (CARD32) > bytes)
+                return {};
+
+            const auto value = header->byteOrder == MSBFirst ? ByteOrder::bigEndianInt (data)
+                                                             : ByteOrder::littleEndianInt (data);
+            increment (sizeof (CARD32));
+            return value;
+        };
+
+        const auto readString = [&] (size_t nameLen) -> String
+        {
+            const auto padded = (nameLen + 3) & (~(size_t) 3);
+
+            if (byteNum + padded > bytes)
+                return {};
+
+            auto* ptr = reinterpret_cast<const char*> (data);
+            const String result (ptr, nameLen);
+            increment (padded);
+            return result;
+        };
+
+        CARD16 setting = 0;
+
+        while (byteNum < bytes && setting < header->nSettings)
+        {
+            const auto type = *reinterpret_cast<const char*> (data);
+            increment (2);
+
+            const auto name   = readString (readCARD16());
+            const auto serial = (int) readCARD32();
+
+            enum { XSettingsTypeInteger, XSettingsTypeString, XSettingsTypeColor };
+
+            const auto parsedSetting = [&]() -> XSetting
+            {
+                switch (type)
+                {
+                    case XSettingsTypeInteger:
+                        return { name, (int) readCARD32() };
+
+                    case XSettingsTypeString:
+                        return { name, readString (readCARD32()) };
+
+                    case XSettingsTypeColor:
+                        // Order is important, these should be kept as separate statements!
+                        const auto r = (uint8) readCARD16();
+                        const auto g = (uint8) readCARD16();
+                        const auto b = (uint8) readCARD16();
+                        const auto a = (uint8) readCARD16();
+                        return { name, Colour { r, g, b, a } };
+                }
+
+                return {};
+            }();
+
+            if (serial > lastUpdateSerial)
+            {
+                settings[parsedSetting.name] = parsedSetting;
+                listeners.call ([&parsedSetting] (Listener& l) { l.settingChanged (parsedSetting); });
+            }
+
+            setting += 1;
+        }
+
+        lastUpdateSerial = headerSerial;
+    }
+}
+
+//==============================================================================
 ::Window juce_messageWindowHandle;
 XContext windowHandleXContext;
 
