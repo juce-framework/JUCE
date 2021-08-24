@@ -163,11 +163,10 @@ bool XWindowSystemUtilities::Atoms::isMimeTypeFile (::Display* display, Atom ato
 }
 
 //==============================================================================
-XWindowSystemUtilities::GetXProperty::GetXProperty (Window window, Atom atom, long offset,
-                                                    long length, bool shouldDelete, Atom requestedType)
+XWindowSystemUtilities::GetXProperty::GetXProperty (::Display* display, Window window, Atom atom,
+                                                    long offset, long length, bool shouldDelete, Atom requestedType)
 {
-    success = (X11Symbols::getInstance()->xGetWindowProperty (XWindowSystem::getInstance()->getDisplay(),
-                                                              window, atom, offset, length,
+    success = (X11Symbols::getInstance()->xGetWindowProperty (display, window, atom, offset, length,
                                                               (Bool) shouldDelete, requestedType, &actualType,
                                                               &actualFormat, &numItems, &bytesLeft, &data) == Success)
                 && data != nullptr;
@@ -1062,7 +1061,8 @@ namespace DisplayHelpers
             {
                 const auto xsettingsSettingsAtom = Atoms::getCreating (display, "_XSETTINGS_SETTINGS");
 
-                const GetXProperty prop { selectionWindow,
+                const GetXProperty prop { display,
+                                          selectionWindow,
                                           xsettingsSettingsAtom,
                                           0L,
                                           std::numeric_limits<long>::max(),
@@ -1270,7 +1270,7 @@ namespace ClipboardHelpers
     {
         if (display != nullptr)
         {
-            XWindowSystemUtilities::GetXProperty prop (window, atom, 0L, 100000, false, AnyPropertyType);
+            XWindowSystemUtilities::GetXProperty prop (display, window, atom, 0L, 100000, false, AnyPropertyType);
 
             if (prop.success)
             {
@@ -1777,7 +1777,7 @@ BorderSize<int> XWindowSystem::getBorderSize (::Window windowH) const
 
     if (hints != None)
     {
-        XWindowSystemUtilities::GetXProperty prop (windowH, hints, 0, 4, false, XA_CARDINAL);
+        XWindowSystemUtilities::GetXProperty prop (display, windowH, hints, 0, 4, false, XA_CARDINAL);
 
         if (prop.success && prop.actualFormat == 32)
         {
@@ -1859,7 +1859,7 @@ bool XWindowSystem::isMinimised (::Window windowH) const
     jassert (windowH != 0);
 
     XWindowSystemUtilities::ScopedXLock xLock;
-    XWindowSystemUtilities::GetXProperty prop (windowH, atoms.state, 0, 64, false, atoms.state);
+    XWindowSystemUtilities::GetXProperty prop (display, windowH, atoms.state, 0, 64, false, atoms.state);
 
     if (prop.success && prop.actualType == atoms.state
         && prop.actualFormat == 32 && prop.numItems > 0)
@@ -2413,7 +2413,7 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
             for (int i = 0; i < numMonitors; ++i)
             {
                 auto rootWindow = X11Symbols::getInstance()->xRootWindow (display, i);
-                XWindowSystemUtilities::GetXProperty prop (rootWindow, workAreaHints, 0, 4, false, XA_CARDINAL);
+                XWindowSystemUtilities::GetXProperty prop (display, rootWindow, workAreaHints, 0, 4, false, XA_CARDINAL);
 
                 if (! hasWorkAreaData (prop))
                     continue;
@@ -2505,7 +2505,8 @@ Array<Displays::Display> XWindowSystem::findDisplays (float masterScale) const
 
             for (int i = 0; i < numMonitors; ++i)
             {
-                XWindowSystemUtilities::GetXProperty prop (X11Symbols::getInstance()->xRootWindow (display, i),
+                XWindowSystemUtilities::GetXProperty prop (display,
+                                                           X11Symbols::getInstance()->xRootWindow (display, i),
                                                            workAreaHints, 0, 4, false, XA_CARDINAL);
 
                 auto workArea = getWorkArea (prop);
@@ -2959,7 +2960,7 @@ long XWindowSystem::getUserTime (::Window windowH) const
 {
     jassert (windowH != 0);
 
-    XWindowSystemUtilities::GetXProperty prop (windowH, atoms.userTime, 0, 65536, false, XA_CARDINAL);
+    XWindowSystemUtilities::GetXProperty prop (display, windowH, atoms.userTime, 0, 65536, false, XA_CARDINAL);
 
     if (! prop.success)
         return 0;
@@ -3588,7 +3589,7 @@ void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XProper
             return false;
 
         XWindowSystemUtilities::ScopedXLock xLock;
-        XWindowSystemUtilities::GetXProperty prop (event.window, atoms.windowState, 0, 128, false, XA_ATOM);
+        XWindowSystemUtilities::GetXProperty prop (display, event.window, atoms.windowState, 0, 128, false, XA_ATOM);
 
         if (! (prop.success && prop.actualFormat == 32 && prop.actualType == XA_ATOM))
             return false;

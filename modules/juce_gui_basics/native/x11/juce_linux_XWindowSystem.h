@@ -49,8 +49,8 @@ namespace XWindowSystemUtilities
     */
     struct GetXProperty
     {
-        GetXProperty (::Window windowH, Atom property, long offset,
-                      long length, bool shouldDelete, Atom requestedType);
+        GetXProperty (::Display* display, ::Window windowH, Atom property,
+                      long offset, long length, bool shouldDelete, Atom requestedType);
         ~GetXProperty();
 
         bool success = false;
@@ -160,7 +160,7 @@ public:
     String getTextFromClipboard() const;
     String getLocalClipboardContent() const noexcept  { return localClipboardContent; }
 
-    ::Display* getDisplay() noexcept                                { return display; }
+    ::Display* getDisplay() const noexcept                          { return display; }
     const XWindowSystemUtilities::Atoms& getAtoms() const noexcept  { return atoms; }
 
     bool isX11Available() const noexcept  { return xIsAvailable; }
