@@ -222,7 +222,14 @@ public:
         if ((clientMsg.data.l[1] & 1) != 0)
         {
             XWindowSystemUtilities::ScopedXLock xLock;
-            XWindowSystemUtilities::GetXProperty prop (dragAndDropSourceWindow, atoms.XdndTypeList, 0, 0x8000000L, false, XA_ATOM);
+
+            XWindowSystemUtilities::GetXProperty prop (getDisplay(),
+                                                       dragAndDropSourceWindow,
+                                                       atoms.XdndTypeList,
+                                                       0,
+                                                       0x8000000L,
+                                                       false,
+                                                       XA_ATOM);
 
             if (prop.success && prop.actualType == XA_ATOM && prop.actualFormat == 32 && prop.numItems != 0)
             {
@@ -281,8 +288,13 @@ public:
 
                 for (;;)
                 {
-                    XWindowSystemUtilities::GetXProperty prop (evt.xany.window, evt.xselection.property,
-                                       (long) (dropData.getSize() / 4), 65536, false, AnyPropertyType);
+                    XWindowSystemUtilities::GetXProperty prop (getDisplay(),
+                                                               evt.xany.window,
+                                                               evt.xselection.property,
+                                                               (long) (dropData.getSize() / 4),
+                                                               65536,
+                                                               false,
+                                                               AnyPropertyType);
 
                     if (! prop.success)
                         break;
@@ -518,7 +530,13 @@ private:
 
     int getDnDVersionForWindow (::Window target)
     {
-        XWindowSystemUtilities::GetXProperty prop (target, getAtoms().XdndAware, 0, 2, false, AnyPropertyType);
+        XWindowSystemUtilities::GetXProperty prop (getDisplay(),
+                                                   target,
+                                                   getAtoms().XdndAware,
+                                                   0,
+                                                   2,
+                                                   false,
+                                                   AnyPropertyType);
 
         if (prop.success && prop.data != None && prop.actualFormat == 32 && prop.numItems == 1)
             return jmin ((int) prop.data[0], (int) XWindowSystemUtilities::Atoms::DndVersion);
