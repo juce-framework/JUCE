@@ -517,7 +517,8 @@ public:
     std::unique_ptr<DownloadTask> downloadToFile (const File& targetLocation,
                                                   String extraHeaders = String(),
                                                   DownloadTask::Listener* listener = nullptr,
-                                                  bool usePostCommand = false);
+                                                  bool usePostCommand = false,
+                                                  String iosSharedContainerIdentifier = {});
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
