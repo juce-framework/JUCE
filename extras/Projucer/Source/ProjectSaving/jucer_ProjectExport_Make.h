@@ -604,7 +604,7 @@ private:
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");
 
-        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags().common)
             result.add (recommended);
 
         auto extra = replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim();
@@ -615,18 +615,19 @@ private:
         return result;
     }
 
-    StringArray getCXXFlags() const
+    StringArray getCXXFlags (const BuildConfiguration& config) const
     {
         StringArray result;
+
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags().cpp)
+            result.add (recommended);
 
         auto cppStandard = project.getCppStandardString();
 
         if (cppStandard == "latest")
             cppStandard = "17";
 
-        cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
-
-        result.add (cppStandard);
+        result.add ("-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard);
 
         return result;
     }
@@ -835,7 +836,7 @@ private:
 
         out << "  JUCE_CXXFLAGS += $(JUCE_CFLAGS)";
 
-        auto cxxflags = getCXXFlags().joinIntoString (" ");
+        auto cxxflags = getCXXFlags (config).joinIntoString (" ");
 
         if (cxxflags.isNotEmpty())
             out << " " << cxxflags;
