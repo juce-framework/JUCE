@@ -608,7 +608,7 @@ private:
 
             String cxxFlags;
 
-            for (auto& flag : exporter.getCXXFlags())
+            for (auto& flag : exporter.getCXXFlags (config))
                 if (! flag.startsWith ("-std="))
                     cxxFlags += " " + flag;
 

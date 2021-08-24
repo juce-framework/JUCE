@@ -1532,12 +1532,25 @@ public:
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
 
-            auto flags = (config.getRecommendedCompilerWarningFlags().joinIntoString (" ")
-                             + " " + owner.getExtraCompilerFlagsString()).trim();
-            flags = owner.replacePreprocessorTokens (config, flags);
+            auto recommendedWarnings = config.getRecommendedCompilerWarningFlags();
+            recommendedWarnings.cpp.addArray (recommendedWarnings.common);
 
-            if (flags.isNotEmpty())
-                s.set ("OTHER_CPLUSPLUSFLAGS", flags.quoted());
+            struct XcodeWarningFlags
+            {
+                const StringArray& flags;
+                const String variable;
+            };
+
+            for (const auto& xcodeFlags : { XcodeWarningFlags { recommendedWarnings.common, "OTHER_CFLAGS" },
+                                            XcodeWarningFlags { recommendedWarnings.cpp,    "OTHER_CPLUSPLUSFLAGS" } })
+            {
+                auto flags = (xcodeFlags.flags.joinIntoString (" ")
+                                 + " " + owner.getExtraCompilerFlagsString()).trim();
+                flags = owner.replacePreprocessorTokens (config, flags);
+
+                if (flags.isNotEmpty())
+                    s.set (xcodeFlags.variable, flags.quoted());
+            }
 
             auto installPath = getInstallPathForConfiguration (config);
 

@@ -545,8 +545,11 @@ private:
                 mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine;
                 mo << "    target_compile_options( ${BINARY_NAME} PRIVATE";
 
-                for (auto& flag : cfg.getRecommendedCompilerWarningFlags())
-                    mo << " " << flag;
+                auto recommendedFlags = cfg.getRecommendedCompilerWarningFlags();
+
+                for (auto& recommendedFlagsType : { recommendedFlags.common, recommendedFlags.cpp })
+                    for (auto& flag : recommendedFlagsType)
+                        mo << " " << flag;
 
                 mo << ")" << newLine;
                 mo << "endif()" << newLine << newLine;

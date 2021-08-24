@@ -5,27 +5,26 @@ if((CMAKE_CXX_COMPILER_ID STREQUAL "MSVC") OR (CMAKE_CXX_COMPILER_FRONTEND_VARIA
     target_compile_options(juce_recommended_warning_flags INTERFACE "/W4")
 elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
     target_compile_options(juce_recommended_warning_flags INTERFACE
-        -Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing -Wuninitialized
-        -Wunused-parameter -Wconversion -Wsign-compare -Wint-conversion
-        -Wconditional-uninitialized -Woverloaded-virtual -Wreorder
-        -Wconstant-conversion -Wsign-conversion -Wunused-private-field
-        -Wbool-conversion -Wextra-semi -Wunreachable-code
-        -Wzero-as-null-pointer-constant -Wcast-align
-        -Winconsistent-missing-destructor-override -Wshift-sign-overflow
-        -Wnullable-to-nonnull-conversion -Wno-missing-field-initializers
-        -Wno-ignored-qualifiers -Wswitch-enum -Wpedantic)
+        -Wall -Wshadow-all -Wshorten-64-to-32 -Wstrict-aliasing
+        -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare
+        -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion
+        -Wsign-conversion -Wbool-conversion -Wextra-semi -Wunreachable-code
+        -Wcast-align -Wshift-sign-overflow -Wno-missing-field-initializers
+        -Wnullable-to-nonnull-conversion -Wno-ignored-qualifiers -Wswitch-enum
+        -Wpedantic
+        $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>:
+            -Wzero-as-null-pointer-constant -Wunused-private-field
+            -Woverloaded-virtual -Wreorder
+            -Winconsistent-missing-destructor-override>)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(juce_recommended_warning_flags INTERFACE
-        -Wall -Wextra -Wstrict-aliasing -Wuninitialized -Wunused-parameter
-        -Wsign-compare -Woverloaded-virtual -Wreorder -Wsign-conversion
-        -Wunreachable-code -Wzero-as-null-pointer-constant -Wcast-align
-        -Wno-implicit-fallthrough -Wno-maybe-uninitialized
+        -Wall -Wextra -Wpedantic -Wstrict-aliasing -Wuninitialized
+        -Wunused-parameter -Wsign-compare -Wsign-conversion -Wunreachable-code
+        -Wcast-align -Wno-implicit-fallthrough -Wno-maybe-uninitialized
         -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum
-        -Wredundant-decls -Wpedantic)
-
-    if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER "7.0.0")
-        target_compile_options(juce_recommended_warning_flags INTERFACE "-Wno-strict-overflow")
-    endif()
+        -Wredundant-decls -Wno-strict-overflow -Wshadow
+        $<$<COMPILE_LANGUAGE:CXX>:
+            -Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant>)
 endif()
 
 # ==================================================================================================

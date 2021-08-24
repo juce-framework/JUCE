@@ -861,22 +861,23 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
      usePrecompiledHeaderFileValue (config, Ids::usePrecompiledHeaderFile, getUndoManager(), false),
      precompiledHeaderFileValue    (config, Ids::precompiledHeaderFile,    getUndoManager())
 {
-    recommendedCompilerWarningFlags["LLVM"] = { "-Wall", "-Wshadow-all", "-Wshorten-64-to-32", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter",
-        "-Wconversion", "-Wsign-compare", "-Wint-conversion", "-Wconditional-uninitialized", "-Woverloaded-virtual",
-        "-Wreorder", "-Wconstant-conversion", "-Wsign-conversion", "-Wunused-private-field", "-Wbool-conversion",
-        "-Wextra-semi", "-Wunreachable-code", "-Wzero-as-null-pointer-constant", "-Wcast-align",
-        "-Winconsistent-missing-destructor-override", "-Wshift-sign-overflow", "-Wnullable-to-nonnull-conversion",
-        "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
-        "-Wswitch-enum"
-    };
-    recommendedCompilerWarningFlags["GCC"] = { "-Wall", "-Wextra", "-Wshadow", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wsign-compare",
-        "-Woverloaded-virtual", "-Wreorder", "-Wsign-conversion", "-Wunreachable-code",
-        "-Wzero-as-null-pointer-constant", "-Wcast-align", "-Wno-implicit-fallthrough",
-        "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
-        "-Wswitch-enum", "-Wredundant-decls"
-    };
-    recommendedCompilerWarningFlags["GCC-7"] = recommendedCompilerWarningFlags["GCC"];
-    recommendedCompilerWarningFlags["GCC-7"].add ("-Wno-strict-overflow");
+    auto& llvmFlags = recommendedCompilerWarningFlags[CompilerNames::llvm] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
+    llvmFlags.common.addArray ({
+        "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
+        "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
+        "-Wextra-semi", "-Wshift-sign-overflow", "-Wno-missing-field-initializers",
+        "-Wshadow-all", "-Wnullable-to-nonnull-conversion"
+    });
+    llvmFlags.cpp.addArray ({
+        "-Wunused-private-field", "-Winconsistent-missing-destructor-override"
+    });
+
+    auto& gccFlags = recommendedCompilerWarningFlags[CompilerNames::gcc] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
+    gccFlags.common.addArray ({
+        "-Wextra", "-Wsign-compare", "-Wno-implicit-fallthrough", "-Wno-maybe-uninitialized",
+        "-Wno-missing-field-initializers", "-Wredundant-decls", "-Wno-strict-overflow",
+        "-Wshadow"
+    });
 }
 
 ProjectExporter::BuildConfiguration::~BuildConfiguration()
@@ -911,8 +912,8 @@ void ProjectExporter::BuildConfiguration::addGCCOptimisationProperty (PropertyLi
 void ProjectExporter::BuildConfiguration::addRecommendedLinuxCompilerWarningsProperty (PropertyListBuilder& props)
 {
     props.add (new ChoicePropertyComponent (recommendedWarningsValue, "Add Recommended Compiler Warning Flags",
-                                            { "GCC", "GCC 7 and below", "LLVM", "Disabled" },
-                                            { "GCC", "GCC-7", "LLVM", "" }),
+                                            { CompilerNames::gcc, CompilerNames::llvm, "Disabled" },
+                                            { CompilerNames::gcc, CompilerNames::llvm, "" }),
                "Enable this to add a set of recommended compiler warning flags.");
     recommendedWarningsValue.setDefault ("");
 }
@@ -920,15 +921,19 @@ void ProjectExporter::BuildConfiguration::addRecommendedLinuxCompilerWarningsPro
 void ProjectExporter::BuildConfiguration::addRecommendedLLVMCompilerWarningsProperty (PropertyListBuilder& props)
 {
     props.add (new ChoicePropertyComponent (recommendedWarningsValue, "Add Recommended Compiler Warning Flags",
-                                            { "Enabled", "Disabled" },
-                                            { "LLVM", "" }),
+                                            { "Enabled",           "Disabled" },
+                                            { CompilerNames::llvm, "" }),
                "Enable this to add a set of recommended compiler warning flags.");
     recommendedWarningsValue.setDefault ("");
 }
 
-StringArray ProjectExporter::BuildConfiguration::getRecommendedCompilerWarningFlags() const
+ProjectExporter::BuildConfiguration::CompilerWarningFlags ProjectExporter::BuildConfiguration::getRecommendedCompilerWarningFlags() const
 {
     auto label = recommendedWarningsValue.get().toString();
+
+    if (label == "GCC-7")
+        label = CompilerNames::gcc;
+
     auto it = recommendedCompilerWarningFlags.find (label);
 
     if (it != recommendedCompilerWarningFlags.end())
