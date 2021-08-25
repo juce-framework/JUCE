@@ -109,9 +109,27 @@ void AudioDeviceManager::createDeviceTypesIfNeeded()
 
         types.clear (false);
 
-        if (auto* first = availableDeviceTypes.getFirst())
-            currentDeviceType = first->getTypeName();
+        for (auto* type : availableDeviceTypes)
+            type->scanForDevices();
+
+        pickCurrentDeviceTypeWithDevices();
     }
+}
+
+void AudioDeviceManager::pickCurrentDeviceTypeWithDevices()
+{
+    const auto deviceTypeHasDevices = [] (const AudioIODeviceType* ptr)
+    {
+        return ! ptr->getDeviceNames (true) .isEmpty()
+            || ! ptr->getDeviceNames (false).isEmpty();
+    };
+
+    const auto iter = std::find_if (availableDeviceTypes.begin(),
+                                    availableDeviceTypes.end(),
+                                    deviceTypeHasDevices);
+
+    if (iter != availableDeviceTypes.end())
+        currentDeviceType = (*iter)->getTypeName();
 }
 
 const OwnedArray<AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceTypes()
@@ -244,6 +262,7 @@ String AudioDeviceManager::initialise (const int numInputChannelsNeeded,
                                        const AudioDeviceSetup* preferredSetupOptions)
 {
     scanDevicesIfNeeded();
+    pickCurrentDeviceTypeWithDevices();
 
     numInputChansNeeded = numInputChannelsNeeded;
     numOutputChansNeeded = numOutputChannelsNeeded;
@@ -1181,5 +1200,376 @@ void AudioDeviceManager::setDefaultMidiOutput (const String& name)
         }
     }
 }
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class AudioDeviceManagerTests : public UnitTest
+{
+public:
+    AudioDeviceManagerTests() : UnitTest ("AudioDeviceManager", UnitTestCategories::audio) {}
+
+    void runTest() override
+    {
+        beginTest ("When the AudioDeviceSetup has non-empty device names, initialise uses the requested devices");
+        {
+            AudioDeviceManager manager;
+            initialiseManager (manager);
+
+            expectEquals (manager.getAvailableDeviceTypes().size(), 2);
+
+            AudioDeviceManager::AudioDeviceSetup setup;
+            setup.outputDeviceName = "z";
+            setup.inputDeviceName = "c";
+
+            expect (manager.initialise (2, 2, nullptr, true, String{}, &setup).isEmpty());
+
+            const auto& newSetup = manager.getAudioDeviceSetup();
+
+            expectEquals (newSetup.outputDeviceName, setup.outputDeviceName);
+            expectEquals (newSetup.inputDeviceName, setup.inputDeviceName);
+
+            expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+            expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+        }
+
+        beginTest ("When the AudioDeviceSetup has empty device names, initialise picks suitable default devices");
+        {
+            AudioDeviceManager manager;
+            initialiseManager (manager);
+
+            AudioDeviceManager::AudioDeviceSetup setup;
+
+            expect (manager.initialise (2, 2, nullptr, true, String{}, &setup).isEmpty());
+
+            const auto& newSetup = manager.getAudioDeviceSetup();
+
+            expectEquals (newSetup.outputDeviceName, String ("x"));
+            expectEquals (newSetup.inputDeviceName, String ("a"));
+
+            expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+            expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+        }
+
+        beginTest ("When a default device name is used, a suitable device is chosen");
+        {
+            AudioDeviceManager manager;
+            initialiseManager (manager);
+
+            expect (manager.initialise (2, 2, nullptr, true, "y").isEmpty());
+
+            const auto& newSetup = manager.getAudioDeviceSetup();
+
+            expectEquals (newSetup.outputDeviceName, String ("y"));
+            expectEquals (newSetup.inputDeviceName, String ("a"));
+
+            expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+            expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+        }
+
+        beginTest ("When first device type has no devices, a device type with devices is used instead");
+        {
+            AudioDeviceManager manager;
+            initialiseManagerWithEmptyDeviceType (manager);
+
+            AudioDeviceManager::AudioDeviceSetup setup;
+
+            expect (manager.initialise (2, 2, nullptr, true, {}, &setup).isEmpty());
+
+            const auto& newSetup = manager.getAudioDeviceSetup();
+
+            expectEquals (newSetup.outputDeviceName, String ("x"));
+            expectEquals (newSetup.inputDeviceName, String ("a"));
+
+            expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+            expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+        }
+
+        beginTest ("Carry out a long sequence of configuration changes");
+        {
+            AudioDeviceManager manager;
+            initialiseManagerWithEmptyDeviceType    (manager);
+            initialiseWithDefaultDevices            (manager);
+            disableInputChannelsButLeaveDeviceOpen  (manager);
+            selectANewInputDevice                   (manager);
+            disableInputDevice                      (manager);
+            reenableInputDeviceWithNoChannels       (manager);
+            enableInputChannels                     (manager);
+            disableInputChannelsButLeaveDeviceOpen  (manager);
+            switchDeviceType                        (manager);
+            enableInputChannels                     (manager);
+            closeDeviceByRequestingEmptyNames       (manager);
+        }
+    }
+
+private:
+    void initialiseWithDefaultDevices (AudioDeviceManager& manager)
+    {
+        manager.initialiseWithDefaultDevices (2, 2);
+        const auto& setup = manager.getAudioDeviceSetup();
+
+        expectEquals (setup.inputChannels.countNumberOfSetBits(), 2);
+        expectEquals (setup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (setup.useDefaultInputChannels);
+        expect (setup.useDefaultOutputChannels);
+
+        expect (manager.getCurrentAudioDevice() != nullptr);
+    }
+
+    void disableInputChannelsButLeaveDeviceOpen (AudioDeviceManager& manager)
+    {
+        auto setup = manager.getAudioDeviceSetup();
+        setup.inputChannels.clear();
+        setup.useDefaultInputChannels = false;
+
+        expect (manager.setAudioDeviceSetup (setup, true).isEmpty());
+
+        const auto newSetup = manager.getAudioDeviceSetup();
+        expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 0);
+        expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (! newSetup.useDefaultInputChannels);
+        expect (newSetup.useDefaultOutputChannels);
+
+        expectEquals (newSetup.inputDeviceName, setup.inputDeviceName);
+        expectEquals (newSetup.outputDeviceName, setup.outputDeviceName);
+
+        expect (manager.getCurrentAudioDevice() != nullptr);
+    }
+
+    void selectANewInputDevice (AudioDeviceManager& manager)
+    {
+        auto setup = manager.getAudioDeviceSetup();
+        setup.inputDeviceName = "b";
+
+        expect (manager.setAudioDeviceSetup (setup, true).isEmpty());
+
+        const auto newSetup = manager.getAudioDeviceSetup();
+        expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 0);
+        expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (! newSetup.useDefaultInputChannels);
+        expect (newSetup.useDefaultOutputChannels);
+
+        expectEquals (newSetup.inputDeviceName, setup.inputDeviceName);
+        expectEquals (newSetup.outputDeviceName, setup.outputDeviceName);
+
+        expect (manager.getCurrentAudioDevice() != nullptr);
+    }
+
+    void disableInputDevice (AudioDeviceManager& manager)
+    {
+        auto setup = manager.getAudioDeviceSetup();
+        setup.inputDeviceName = "";
+
+        expect (manager.setAudioDeviceSetup (setup, true).isEmpty());
+
+        const auto newSetup = manager.getAudioDeviceSetup();
+        expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 0);
+        expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (! newSetup.useDefaultInputChannels);
+        expect (newSetup.useDefaultOutputChannels);
+
+        expectEquals (newSetup.inputDeviceName, setup.inputDeviceName);
+        expectEquals (newSetup.outputDeviceName, setup.outputDeviceName);
+
+        expect (manager.getCurrentAudioDevice() != nullptr);
+    }
+
+    void reenableInputDeviceWithNoChannels (AudioDeviceManager& manager)
+    {
+        auto setup = manager.getAudioDeviceSetup();
+        setup.inputDeviceName = "a";
+
+        expect (manager.setAudioDeviceSetup (setup, true).isEmpty());
+
+        const auto newSetup = manager.getAudioDeviceSetup();
+        expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 0);
+        expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (! newSetup.useDefaultInputChannels);
+        expect (newSetup.useDefaultOutputChannels);
+
+        expectEquals (newSetup.inputDeviceName, setup.inputDeviceName);
+        expectEquals (newSetup.outputDeviceName, setup.outputDeviceName);
+
+        expect (manager.getCurrentAudioDevice() != nullptr);
+    }
+
+    void enableInputChannels (AudioDeviceManager& manager)
+    {
+        auto setup = manager.getAudioDeviceSetup();
+        setup.inputDeviceName = manager.getCurrentDeviceTypeObject()->getDeviceNames (true)[0];
+        setup.inputChannels = 3;
+        setup.useDefaultInputChannels = false;
+
+        expect (manager.setAudioDeviceSetup (setup, true).isEmpty());
+
+        const auto newSetup = manager.getAudioDeviceSetup();
+        expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+        expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (! newSetup.useDefaultInputChannels);
+        expect (newSetup.useDefaultOutputChannels);
+
+        expectEquals (newSetup.inputDeviceName, setup.inputDeviceName);
+        expectEquals (newSetup.outputDeviceName, setup.outputDeviceName);
+
+        expect (manager.getCurrentAudioDevice() != nullptr);
+    }
+
+    void switchDeviceType (AudioDeviceManager& manager)
+    {
+        const auto oldSetup = manager.getAudioDeviceSetup();
+
+        expectEquals (manager.getCurrentAudioDeviceType(), String (mockAName));
+
+        manager.setCurrentAudioDeviceType (mockBName, true);
+
+        expectEquals (manager.getCurrentAudioDeviceType(), String (mockBName));
+
+        const auto newSetup = manager.getAudioDeviceSetup();
+
+        expect (newSetup.outputDeviceName.isNotEmpty());
+        // We had no channels enabled, which means we don't need to open a new input device
+        expect (newSetup.inputDeviceName.isEmpty());
+
+        expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 0);
+        expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (manager.getCurrentAudioDevice() != nullptr);
+    }
+
+    void closeDeviceByRequestingEmptyNames (AudioDeviceManager& manager)
+    {
+        auto setup = manager.getAudioDeviceSetup();
+        setup.inputDeviceName = "";
+        setup.outputDeviceName = "";
+
+        expect (manager.setAudioDeviceSetup (setup, true).isEmpty());
+
+        const auto newSetup = manager.getAudioDeviceSetup();
+        expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+        expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+
+        expect (newSetup.inputDeviceName.isEmpty());
+        expect (newSetup.outputDeviceName.isEmpty());
+
+        expect (manager.getCurrentAudioDevice() == nullptr);
+    }
+
+    const String mockAName = "mockA";
+    const String mockBName = "mockB";
+    const String emptyName = "empty";
+
+    class MockDevice : public AudioIODevice
+    {
+    public:
+        MockDevice (String typeNameIn, String outNameIn, String inNameIn)
+            : AudioIODevice ("mock", typeNameIn), outName (outNameIn), inName (inNameIn) {}
+
+        StringArray getOutputChannelNames() override { return { "o1", "o2", "o3" }; }
+        StringArray getInputChannelNames()  override { return { "i1", "i2", "i3" }; }
+
+        Array<double> getAvailableSampleRates() override { return { 44100.0, 48000.0 }; }
+        Array<int> getAvailableBufferSizes() override { return { 128, 256 }; }
+        int getDefaultBufferSize() override { return 128; }
+
+        String open (const BigInteger& inputs, const BigInteger& outputs, double sr, int bs) override
+        {
+            inChannels = inputs;
+            outChannels = outputs;
+            sampleRate = sr;
+            blockSize = bs;
+            on = true;
+            return {};
+        }
+
+        void close() override { on = false; }
+        bool isOpen() override { return on; }
+
+        void start (AudioIODeviceCallback*) override { playing = true; }
+        void stop() override { playing = false; }
+        bool isPlaying() override { return playing; }
+
+        String getLastError() override { return {}; }
+        int getCurrentBufferSizeSamples() override { return blockSize; }
+        double getCurrentSampleRate() override { return sampleRate; }
+        int getCurrentBitDepth() override { return 16; }
+
+        BigInteger getActiveOutputChannels() const override { return outChannels; }
+        BigInteger getActiveInputChannels()  const override { return inChannels; }
+
+        int getOutputLatencyInSamples() override { return 0; }
+        int getInputLatencyInSamples() override { return 0; }
+
+    private:
+        String outName, inName;
+        BigInteger outChannels, inChannels;
+        double sampleRate = 0.0;
+        int blockSize = 0;
+        bool on = false, playing = false;
+    };
+
+    class MockDeviceType : public AudioIODeviceType
+    {
+    public:
+        explicit MockDeviceType (String kind)
+            : MockDeviceType (std::move (kind), { "a", "b", "c" }, { "x", "y", "z" }) {}
+
+        MockDeviceType (String kind, StringArray inputNames, StringArray outputNames)
+            : AudioIODeviceType (std::move (kind)),
+              inNames (std::move (inputNames)),
+              outNames (std::move (outputNames)) {}
+
+        void scanForDevices() override {}
+
+        StringArray getDeviceNames (bool isInput) const override
+        {
+            return getNames (isInput);
+        }
+
+        int getDefaultDeviceIndex (bool) const override { return 0; }
+
+        int getIndexOfDevice (AudioIODevice* device, bool isInput) const override
+        {
+            return getNames (isInput).indexOf (device->getName());
+        }
+
+        bool hasSeparateInputsAndOutputs() const override { return true; }
+
+        AudioIODevice* createDevice (const String& outputName, const String& inputName) override
+        {
+            if (inNames.contains (inputName) || outNames.contains (outputName))
+                return new MockDevice (getTypeName(), outputName, inputName);
+
+            return nullptr;
+        }
+
+    private:
+        const StringArray& getNames (bool isInput) const { return isInput ? inNames : outNames; }
+
+        const StringArray inNames, outNames;
+    };
+
+    void initialiseManager (AudioDeviceManager& manager)
+    {
+        manager.addAudioDeviceType (std::make_unique<MockDeviceType> (mockAName));
+        manager.addAudioDeviceType (std::make_unique<MockDeviceType> (mockBName));
+    }
+
+    void initialiseManagerWithEmptyDeviceType (AudioDeviceManager& manager)
+    {
+        manager.addAudioDeviceType (std::make_unique<MockDeviceType> (emptyName, StringArray{}, StringArray{}));
+        initialiseManager (manager);
+    }
+};
+
+static AudioDeviceManagerTests audioDeviceManagerTests;
+
+#endif
 
 } // namespace juce
