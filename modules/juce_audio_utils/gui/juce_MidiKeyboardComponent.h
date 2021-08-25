@@ -433,13 +433,6 @@ private:
     void repaintNote (int midiNoteNumber);
     void setLowestVisibleKeyFloat (float noteNumber);
 
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // Note that the parameters for these method have changed
-    virtual int getKeyPosition (int, float, int&, int&) const { return 0; }
-    virtual int drawWhiteNote (int, Graphics&, int, int, int, int, bool, bool, const Colour&, const Colour&) { return 0; }
-    virtual int drawBlackNote (int, Graphics&, int, int, int, int, bool, bool, const Colour&) { return 0; }
-   #endif
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent)
 };
 

@@ -395,14 +395,15 @@ public:
     void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) const;
 
     //==============================================================================
-    /** This is unsafe, use getTypefacePtr() instead.
-
-        Returns the typeface used by this font.
+   #ifndef DOXYGEN
+    /** Returns the typeface used by this font.
 
         Note that the object returned may go out of scope if this font is deleted
         or has its style changed.
     */
-    JUCE_DEPRECATED (Typeface* getTypeface() const);
+    [[deprecated ("This method is unsafe, use getTypefacePtr() instead.")]]
+    Typeface* getTypeface() const;
+   #endif
 
     /** Returns the typeface used by this font. */
     Typeface::Ptr getTypefacePtr() const;

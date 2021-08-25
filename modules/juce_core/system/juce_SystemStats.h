@@ -234,8 +234,10 @@ public:
 
 
     //==============================================================================
-    // This method was spelt wrong! Please change your code to use getCpuSpeedInMegahertz() instead
-    JUCE_DEPRECATED_WITH_BODY (static int getCpuSpeedInMegaherz(), { return getCpuSpeedInMegahertz(); })
+   #ifndef DOXYGEN
+    [[deprecated ("This method was spelt wrong! Please change your code to use getCpuSpeedInMegahertz instead.")]]
+    static int getCpuSpeedInMegaherz() { return getCpuSpeedInMegahertz(); }
+   #endif
 
 private:
     SystemStats() = delete; // uses only static methods

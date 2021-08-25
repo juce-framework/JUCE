@@ -121,11 +121,6 @@ public:
         /** returns the bounds for a tooltip at the given screen coordinate, constrained within the given desktop area. */
         virtual Rectangle<int> getTooltipBounds (const String& tipText, Point<int> screenPos, Rectangle<int> parentArea) = 0;
         virtual void drawTooltip (Graphics&, const String& text, int width, int height) = 0;
-
-       #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-        // This method has been replaced by getTooltipBounds()
-        virtual int getTooltipSize (const String&, int&, int&) { return 0; }
-       #endif
     };
 
     //==============================================================================

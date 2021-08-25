@@ -344,7 +344,7 @@ public:
         return CharacterFunctions::compareIgnoreCaseUpTo (*this, other, maxChars);
     }
 
-   #if JUCE_MSVC && ! DOXYGEN
+   #if JUCE_MSVC && ! defined (DOXYGEN)
     int compareIgnoreCase (CharPointer_UTF16 other) const noexcept
     {
         return _wcsicmp (data, other.data);

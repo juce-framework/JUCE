@@ -256,20 +256,22 @@ public:
     void cancelDownloads (const Array<Download*>& downloads);
 
     //==============================================================================
-    // On Android, it is no longer necessary to specify whether the product being purchased is a subscription
-    // and only a single subscription can be upgraded/downgraded. Use the updated purchaseProduct() method
-    // which takes a single String argument.
-    JUCE_DEPRECATED_WITH_BODY (void purchaseProduct (const String& productIdentifier,
-                                                     bool isSubscription,
-                                                     const StringArray& upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers = {},
-                                                     bool creditForUnusedSubscription = true),
-                               {
+   #ifndef DOXYGEN
+    [[deprecated ("On Android, it is no longer necessary to specify whether the product being purchased is a subscription "
+                 "and only a single subscription can be upgraded/downgraded. Use the updated purchaseProduct method "
+                 "which takes a single String argument.")]]
+    void purchaseProduct (const String& productIdentifier,
+                          bool isSubscription,
+                          const StringArray& upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers = {},
+                          bool creditForUnusedSubscription = true)
+    {
 
-                                   ignoreUnused (isSubscription);
-                                   purchaseProduct (productIdentifier,
-                                                    upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers[0],
-                                                    creditForUnusedSubscription);
-                               })
+        ignoreUnused (isSubscription);
+        purchaseProduct (productIdentifier,
+                         upgradeOrDowngradeFromSubscriptionsWithProductIdentifiers[0],
+                         creditForUnusedSubscription);
+    }
+   #endif
 
 private:
     //==============================================================================

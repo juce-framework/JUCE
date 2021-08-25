@@ -313,10 +313,13 @@ public:
     };
 
     //==============================================================================
-    // Deprecated: use setContentOwned() and setContentNonOwned() instead.
-    JUCE_DEPRECATED (void setContentComponent (Component* newContentComponent,
-                                               bool deleteOldOne = true,
-                                               bool resizeToFit = false));
+   #ifndef DOXYGEN
+    [[deprecated ("use setContentOwned and setContentNonOwned instead.")]]
+    void setContentComponent (Component* newContentComponent,
+                              bool deleteOldOne = true,
+                              bool resizeToFit = false);
+   #endif
+
     using TopLevelWindow::addToDesktop;
 
     //==============================================================================
@@ -381,6 +384,11 @@ protected:
     std::unique_ptr<ResizableCornerComponent> resizableCorner;
     std::unique_ptr<ResizableBorderComponent> resizableBorder;
 
+    //==============================================================================
+    // The parameters for these methods have changed - please update your code!
+    void getBorderThickness (int& left, int& top, int& right, int& bottom);
+    void getContentComponentBorder (int& left, int& top, int& right, int& bottom);
+
 private:
     //==============================================================================
     Component::SafePointer<Component> contentComponent, splashScreen;
@@ -398,12 +406,6 @@ private:
     void updateLastPosIfShowing();
     void setContent (Component*, bool takeOwnership, bool resizeToFit);
     void updatePeerConstrainer();
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // The parameters for these methods have changed - please update your code!
-    JUCE_DEPRECATED (void getBorderThickness (int& left, int& top, int& right, int& bottom));
-    JUCE_DEPRECATED (void getContentComponentBorder (int& left, int& top, int& right, int& bottom));
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ResizableWindow)
 };

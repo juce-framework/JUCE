@@ -338,7 +338,7 @@ public:
     */
     static void JUCE_CALLTYPE setCurrentThreadName (const String& newThreadName);
 
-   #if JUCE_ANDROID || defined (DOXYGEN)
+   #if JUCE_ANDROID || DOXYGEN
     //==============================================================================
     /** Initialises the JUCE subsystem for projects not created by the Projucer
 

@@ -92,7 +92,7 @@
 #endif
 
 //==============================================================================
-#if ! DOXYGEN
+#ifndef DOXYGEN
  // These are old flags that are now supported on all compatible build targets
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1

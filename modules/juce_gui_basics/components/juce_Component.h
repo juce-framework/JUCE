@@ -2442,13 +2442,15 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    // This method has been deprecated in favour of the setFocusContainerType() method
-    // that takes a more descriptive enum.
-    JUCE_DEPRECATED_WITH_BODY (void setFocusContainer (bool shouldBeFocusContainer) noexcept,
+    [[deprecated ("Use the setFocusContainerType that takes a more descriptive enum.")]]
+    void setFocusContainer (bool shouldBeFocusContainer) noexcept
     {
         setFocusContainerType (shouldBeFocusContainer ? FocusContainerType::keyboardFocusContainer
                                                       : FocusContainerType::none);
-    })
+    }
+
+    [[deprecated ("Use the contains that takes a Point<int>.")]]
+    void contains (int, int) = delete;
    #endif
 
 private:
@@ -2583,19 +2585,6 @@ private:
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.
     */
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Component)
-
-    //==============================================================================
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This is included here just to cause a compile error if your code is still handling
-    // drag-and-drop with this method. If so, just update it to use the new FileDragAndDropTarget
-    // class, which is easy (just make your class inherit from FileDragAndDropTarget, and
-    // implement its methods instead of this Component method).
-    virtual void filesDropped (const StringArray&, int, int) {}
-
-    // This is included here to cause an error if you use or overload it - it has been deprecated in
-    // favour of contains (Point<int>)
-    void contains (int, int) = delete;
-   #endif
 
 protected:
     //==============================================================================

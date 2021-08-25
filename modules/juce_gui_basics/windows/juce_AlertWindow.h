@@ -414,9 +414,7 @@ public:
                                                 #endif
 
     //==============================================================================
-   #if JUCE_MODAL_LOOPS_PERMITTED
-    // This has been deprecated, use the NativeMessageBox methods instead for more options.
-
+   #if JUCE_MODAL_LOOPS_PERMITTED && ! defined (DOXYGEN)
     /** Shows an operating-system native dialog box.
 
         @param title        the title to use at the top
@@ -425,9 +423,10 @@ public:
                             it'll show a box with just an ok button
         @returns true if the ok button was pressed, false if they pressed cancel.
     */
-    JUCE_DEPRECATED (static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
-                                                                    const String& bodyText,
-                                                                    bool isOkCancel));
+    [[deprecated ("Use the NativeMessageBox methods instead for more options")]]
+    static bool JUCE_CALLTYPE showNativeDialogBox (const String& title,
+                                                   const String& bodyText,
+                                                   bool isOkCancel);
    #endif
 
 

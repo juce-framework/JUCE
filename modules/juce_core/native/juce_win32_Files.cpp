@@ -162,8 +162,16 @@ namespace WindowsFileHelpers
 }
 
 //==============================================================================
-JUCE_DECLARE_DEPRECATED_STATIC (const juce_wchar File::separator = '\\';)
-JUCE_DECLARE_DEPRECATED_STATIC (const StringRef File::separatorString ("\\");)
+#if JUCE_ALLOW_STATIC_NULL_VARIABLES
+
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+
+const juce_wchar File::separator = '\\';
+const StringRef File::separatorString ("\\");
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+
+#endif
 
 juce_wchar File::getSeparatorChar()    { return '\\'; }
 StringRef File::getSeparatorString()   { return "\\"; }

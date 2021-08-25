@@ -241,13 +241,15 @@ public:
     */
     static const Point<float> offscreenMousePos;
 
-   #if ! DOXYGEN
-    // This method has been deprecated and replaced with the isLongPressOrDrag() and hasMovedSignificantlySincePressed()
-    // methods. If you want the same behaviour you should use isLongPressOrDrag() which accounts for the amount of time
-    // that the input source has been held down for, but if you only want to know whether it has been moved use
-    // hasMovedSignificantlySincePressed() instead.
-    JUCE_DEPRECATED (bool hasMouseMovedSignificantlySincePressed() const noexcept);
+    //==============================================================================
+   #ifndef DOXYGEN
+    [[deprecated ("This method has been replaced with the isLongPressOrDrag and hasMovedSignificantlySincePressed "
+                 "methods. If you want the same behaviour you should use isLongPressOrDrag which accounts for the "
+                 "amount of time that the input source has been held down for, but if you only want to know whether "
+                 "it has been moved use hasMovedSignificantlySincePressed instead.")]]
+    bool hasMouseMovedSignificantlySincePressed() const noexcept;
    #endif
+
 private:
     //==============================================================================
     friend class ComponentPeer;

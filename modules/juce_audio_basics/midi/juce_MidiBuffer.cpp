@@ -209,12 +209,13 @@ MidiBufferIterator MidiBuffer::findNextSamplePosition (int samplePosition) const
 }
 
 //==============================================================================
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+
 MidiBuffer::Iterator::Iterator (const MidiBuffer& b) noexcept
     : buffer (b), iterator (b.data.begin())
 {
 }
-
-MidiBuffer::Iterator::~Iterator() noexcept {}
 
 void MidiBuffer::Iterator::setNextSamplePosition (int samplePosition) noexcept
 {
@@ -243,6 +244,9 @@ bool MidiBuffer::Iterator::getNextEvent (MidiMessage& result, int& samplePositio
     samplePosition = metadata.samplePosition;
     return true;
 }
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
 //==============================================================================

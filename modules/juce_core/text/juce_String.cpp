@@ -237,8 +237,6 @@ private:
     }
 };
 
-JUCE_DECLARE_DEPRECATED_STATIC (const String String::empty;)
-
 //==============================================================================
 String::String() noexcept  : text (&(emptyString.text))
 {
@@ -2195,7 +2193,6 @@ StringRef::StringRef (const String& string) noexcept   : text (string.getCharPoi
 StringRef::StringRef (const std::string& string)       : StringRef (string.c_str()) {}
 
 //==============================================================================
-
 static String reduceLengthOfFloatString (const String& input)
 {
     const auto start = input.getCharPointer();
@@ -2309,6 +2306,18 @@ static String serialiseDouble (double input)
     return reduceLengthOfFloatString (String (input, numberOfDecimalPlaces));
 }
 
+//==============================================================================
+#if JUCE_ALLOW_STATIC_NULL_VARIABLES
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+
+const String String::empty;
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
+
+#endif
 
 //==============================================================================
 //==============================================================================

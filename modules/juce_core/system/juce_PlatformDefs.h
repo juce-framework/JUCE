@@ -117,7 +117,7 @@ namespace juce
 #endif
 
 //==============================================================================
-#if JUCE_MSVC && ! DOXYGEN
+#if JUCE_MSVC && ! defined (DOXYGEN)
  #define JUCE_BLOCK_WITH_FORCED_SEMICOLON(x) \
    __pragma(warning(push)) \
    __pragma(warning(disable:4127)) \
@@ -187,7 +187,7 @@ namespace juce
 #endif
 
 //==============================================================================
-#if ! DOXYGEN
+#ifndef DOXYGEN
  #define JUCE_JOIN_MACRO_HELPER(a, b) a ## b
  #define JUCE_STRINGIFY_MACRO_HELPER(a) #a
 #endif
@@ -298,49 +298,7 @@ namespace juce
 #endif
 
 //==============================================================================
-// Cross-compiler deprecation macros..
-#ifdef DOXYGEN
- /** This macro can be used to wrap a function which has been deprecated. */
- #define JUCE_DEPRECATED(functionDef)
- #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)
-#elif JUCE_MSVC && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED_ATTRIBUTE                      __declspec(deprecated)
- #define JUCE_DEPRECATED(functionDef)                   JUCE_DEPRECATED_ATTRIBUTE functionDef
- #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   JUCE_DEPRECATED_ATTRIBUTE functionDef body
-#elif (JUCE_GCC || JUCE_CLANG) && ! JUCE_NO_DEPRECATION_WARNINGS
- #define JUCE_DEPRECATED_ATTRIBUTE                      __attribute__ ((deprecated))
- #define JUCE_DEPRECATED(functionDef)                   functionDef JUCE_DEPRECATED_ATTRIBUTE
- #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef JUCE_DEPRECATED_ATTRIBUTE body
-#else
- #define JUCE_DEPRECATED_ATTRIBUTE
- #define JUCE_DEPRECATED(functionDef)                   functionDef
- #define JUCE_DEPRECATED_WITH_BODY(functionDef, body)   functionDef body
-#endif
-
-#if JUCE_ALLOW_STATIC_NULL_VARIABLES
- #if ! (defined (DOXYGEN) || defined (JUCE_GCC) || (JUCE_MSVC && _MSC_VER <= 1900))
-  #define JUCE_DEPRECATED_STATIC(valueDef)       JUCE_DEPRECATED_ATTRIBUTE valueDef
-
-  #if JUCE_MSVC
-   #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef) \
-        __pragma(warning(push)) \
-        __pragma(warning(disable:4996)) \
-         valueDef \
-        __pragma(warning(pop))
-  #else
-   #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef)   valueDef
-  #endif
- #else
-  #define JUCE_DEPRECATED_STATIC(valueDef)           valueDef
-  #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef)   valueDef
- #endif
-#else
- #define JUCE_DEPRECATED_STATIC(valueDef)
- #define JUCE_DECLARE_DEPRECATED_STATIC(valueDef)
-#endif
-
-//==============================================================================
-#if JUCE_ANDROID && ! DOXYGEN
+#if JUCE_ANDROID && ! defined (DOXYGEN)
  #define JUCE_MODAL_LOOPS_PERMITTED 0
 #elif ! defined (JUCE_MODAL_LOOPS_PERMITTED)
  /** Some operating environments don't provide a modal loop mechanism, so this flag can be
@@ -351,7 +309,7 @@ namespace juce
 //==============================================================================
 #if JUCE_GCC || JUCE_CLANG
  #define JUCE_PACKED __attribute__((packed))
-#elif ! DOXYGEN
+#elif ! defined (DOXYGEN)
  #define JUCE_PACKED
 #endif
 

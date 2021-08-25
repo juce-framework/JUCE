@@ -23,6 +23,8 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
+
 //==============================================================================
 /**
     This class is now deprecated in favour of RangedDirectoryIterator.
@@ -50,9 +52,7 @@ class JUCE_API  DirectoryIterator  final
 {
 public:
     //==============================================================================
-    /** This class is now deprecated in favour of RangedDirectoryIterator.
-
-        Creates a DirectoryIterator for a given directory.
+    /** Creates a DirectoryIterator for a given directory.
 
         After creating one of these, call its next() method to get the
         first file - e.g. @code
@@ -69,13 +69,22 @@ public:
 
         @see RangedDirectoryIterator
     */
-    JUCE_DEPRECATED (DirectoryIterator (const File& directory,
-                                        bool isRecursive,
-                                        const String& wildCard = "*",
-                                        int whatToLookFor = File::findFiles));
-
-    /** Destructor. */
-    ~DirectoryIterator();
+    [[deprecated ("This class is now deprecated in favour of RangedDirectoryIterator.")]]
+    DirectoryIterator (const File& directory,
+                       bool recursive,
+                       const String& pattern = "*",
+                       int type = File::findFiles)
+        : wildCards (parseWildcards (pattern)),
+          fileFinder (directory, (recursive || wildCards.size() > 1) ? "*" : pattern),
+          wildCard (pattern),
+          path (File::addTrailingSeparator (directory.getFullPathName())),
+          whatToLookFor (type),
+          isRecursive (recursive)
+    {
+        // you have to specify the type of files you're looking for!
+        jassert ((whatToLookFor & (File::findFiles | File::findDirectories)) != 0);
+        jassert (whatToLookFor > 0 && whatToLookFor <= 7);
+    }
 
     /** Moves the iterator along to the next file.
 
@@ -149,5 +158,7 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DirectoryIterator)
 };
+
+#endif
 
 } // namespace juce

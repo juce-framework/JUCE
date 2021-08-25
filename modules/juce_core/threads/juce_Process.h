@@ -106,8 +106,8 @@ public:
                                                         const String& bodyText,
                                                         const StringArray& filesToAttach);
 
-   #if JUCE_WINDOWS || DOXYGEN
     //==============================================================================
+   #if JUCE_WINDOWS || DOXYGEN
     /** WINDOWS ONLY - This returns the HINSTANCE of the current module.
 
         The return type is a void* to avoid being dependent on windows.h - just cast
@@ -133,14 +133,14 @@ public:
     static void JUCE_CALLTYPE setCurrentModuleInstanceHandle (void* newHandle) noexcept;
    #endif
 
-   #if (JUCE_MAC && JUCE_MODULE_AVAILABLE_juce_gui_basics) || DOXYGEN
     //==============================================================================
+   #if (JUCE_MAC && JUCE_MODULE_AVAILABLE_juce_gui_basics) || DOXYGEN
     /** OSX ONLY - Shows or hides the OSX dock icon for this app. */
     static void setDockIconVisible (bool isVisible);
    #endif
 
-   #if JUCE_MAC || JUCE_LINUX || JUCE_BSD || DOXYGEN
     //==============================================================================
+   #if JUCE_MAC || JUCE_LINUX || JUCE_BSD || DOXYGEN
     /** UNIX ONLY - Attempts to use setrlimit to change the maximum number of file
         handles that the app can open. Pass 0 or less as the parameter to mean
         'infinite'. Returns true if it succeeds.

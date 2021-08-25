@@ -80,26 +80,26 @@ struct SIMDRegisterDemoDSP
 
         auto& input  = context.getInputBlock();
         auto& output = context.getOutputBlock();
-        auto n = input.getNumSamples();
+        auto n = (int) input.getNumSamples();
         auto* inout = channelPointers.getData();
-
 
         for (size_t ch = 0; ch < SIMDRegister<float>::size(); ++ch)
             inout[ch] = (ch < input.getNumChannels() ? const_cast<float*> (input.getChannelPointer (ch)) : zero.getChannelPointer (ch));
 
-        AudioDataConverters::interleaveSamples (inout, reinterpret_cast<float*> (interleaved.getChannelPointer (0)),
-                                                static_cast<int> (n), static_cast<int> (SIMDRegister<float>::size()));
+        using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::Interleaved,    AudioData::NonConst>;
+        using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
 
+        DstSampleType dstData (interleaved.getChannelPointer (0), (int) interleaved.getNumChannels());
+        SrcSampleType srcData (inout);
+
+        dstData.convertSamples (srcData, n);
 
         iir->process (ProcessContextReplacing<SIMDRegister<float>> (interleaved));
-
 
         for (size_t ch = 0; ch < input.getNumChannels(); ++ch)
             inout[ch] = output.getChannelPointer (ch);
 
-        AudioDataConverters::deinterleaveSamples (reinterpret_cast<float*> (interleaved.getChannelPointer (0)),
-                                                  const_cast<float**> (inout),
-                                                  static_cast<int> (n), static_cast<int> (SIMDRegister<float>::size()));
+        srcData.convertSamples (dstData, n);
     }
 
     void reset()

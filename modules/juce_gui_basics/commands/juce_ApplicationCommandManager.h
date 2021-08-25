@@ -312,12 +312,6 @@ private:
     void globalFocusChanged (Component*) override;
     ApplicationCommandInfo* getMutableCommandForID (CommandID) const noexcept;
 
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This is just here to cause a compile error in old code that hasn't been changed to use the new
-    // version of this method.
-    virtual short getFirstCommandTarget() { return 0; }
-   #endif
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ApplicationCommandManager)
 };
 
