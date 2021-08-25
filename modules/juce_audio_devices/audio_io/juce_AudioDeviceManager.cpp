@@ -306,26 +306,67 @@ String AudioDeviceManager::initialiseDefault (const String& preferredDefaultDevi
     }
     else if (preferredDefaultDeviceName.isNotEmpty())
     {
-        for (auto* type : availableDeviceTypes)
+        const auto nameMatches = [&preferredDefaultDeviceName] (const String& name)
         {
-            for (auto& out : type->getDeviceNames (false))
+            return name.matchesWildcard (preferredDefaultDeviceName, true);
+        };
+
+        struct WildcardMatch
+        {
+            String value;
+            bool successful;
+        };
+
+        const auto getWildcardMatch = [&nameMatches] (const StringArray& names)
+        {
+            const auto iter = std::find_if (names.begin(), names.end(), nameMatches);
+            return WildcardMatch { iter != names.end() ? *iter : String(), iter != names.end() };
+        };
+
+        struct WildcardMatches
+        {
+            WildcardMatch input, output;
+        };
+
+        const auto getMatchesForType = [&getWildcardMatch] (const AudioIODeviceType* type)
+        {
+            return WildcardMatches { getWildcardMatch (type->getDeviceNames (true)),
+                                     getWildcardMatch (type->getDeviceNames (false)) };
+        };
+
+        struct SearchResult
+        {
+            String type, input, output;
+        };
+
+        const auto result = [&]
+        {
+            // First, look for a device type with an input and output which matches the preferred name
+            for (auto* type : availableDeviceTypes)
             {
-                if (out.matchesWildcard (preferredDefaultDeviceName, true))
-                {
-                    setup.outputDeviceName = out;
-                    break;
-                }
+                const auto matches = getMatchesForType (type);
+
+                if (matches.input.successful && matches.output.successful)
+                    return SearchResult { type->getTypeName(), matches.input.value, matches.output.value };
             }
 
-            for (auto& in : type->getDeviceNames (true))
+            // No device type has matching ins and outs, so fall back to a device where either the
+            // input or output match
+            for (auto* type : availableDeviceTypes)
             {
-                if (in.matchesWildcard (preferredDefaultDeviceName, true))
-                {
-                    setup.inputDeviceName = in;
-                    break;
-                }
+                const auto matches = getMatchesForType (type);
+
+                if (matches.input.successful || matches.output.successful)
+                    return SearchResult { type->getTypeName(), matches.input.value, matches.output.value };
             }
-        }
+
+            // No devices match the query, so just use the default devices from the current type
+            return SearchResult { currentDeviceType, {}, {} };
+        }();
+
+        currentDeviceType = result.type;
+        setup.inputDeviceName = result.input;
+        setup.outputDeviceName = result.output;
     }
 
     insertDefaultDeviceNames (setup);
@@ -1279,20 +1320,64 @@ public:
             expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
         }
 
-        beginTest ("When a default device name is used, a suitable device is chosen");
+        beginTest ("When the preferred device name matches an input and an output on the same type, that type is used");
         {
             AudioDeviceManager manager;
-            initialiseManager (manager);
+            initialiseManagerWithDifferentDeviceNames (manager);
 
-            expect (manager.initialise (2, 2, nullptr, true, "y").isEmpty());
+            expect (manager.initialise (2, 2, nullptr, true, "bar *").isEmpty());
+
+            expectEquals (manager.getCurrentAudioDeviceType(), String ("bar"));
 
             const auto& newSetup = manager.getAudioDeviceSetup();
 
-            expectEquals (newSetup.outputDeviceName, String ("y"));
-            expectEquals (newSetup.inputDeviceName, String ("a"));
+            expectEquals (newSetup.outputDeviceName, String ("bar out a"));
+            expectEquals (newSetup.inputDeviceName, String ("bar in a"));
 
             expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
             expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+
+            expect (manager.getCurrentAudioDevice() != nullptr);
+        }
+
+        beginTest ("When the preferred device name matches either an input and an output, but not both, that type is used");
+        {
+            AudioDeviceManager manager;
+            initialiseManagerWithDifferentDeviceNames (manager);
+
+            expect (manager.initialise (2, 2, nullptr, true, "bar out b").isEmpty());
+
+            expectEquals (manager.getCurrentAudioDeviceType(), String ("bar"));
+
+            const auto& newSetup = manager.getAudioDeviceSetup();
+
+            expectEquals (newSetup.outputDeviceName, String ("bar out b"));
+            expectEquals (newSetup.inputDeviceName, String ("bar in a"));
+
+            expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+            expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+
+            expect (manager.getCurrentAudioDevice() != nullptr);
+        }
+
+        beginTest ("When the preferred device name does not match any inputs or outputs, defaults are used");
+        {
+            AudioDeviceManager manager;
+            initialiseManagerWithDifferentDeviceNames (manager);
+
+            expect (manager.initialise (2, 2, nullptr, true, "unmatchable").isEmpty());
+
+            expectEquals (manager.getCurrentAudioDeviceType(), String ("foo"));
+
+            const auto& newSetup = manager.getAudioDeviceSetup();
+
+            expectEquals (newSetup.outputDeviceName, String ("foo out a"));
+            expectEquals (newSetup.inputDeviceName, String ("foo in a"));
+
+            expectEquals (newSetup.outputChannels.countNumberOfSetBits(), 2);
+            expectEquals (newSetup.inputChannels.countNumberOfSetBits(), 2);
+
+            expect (manager.getCurrentAudioDevice() != nullptr);
         }
 
         beginTest ("When first device type has no devices, a device type with devices is used instead");
@@ -1592,6 +1677,17 @@ private:
     {
         manager.addAudioDeviceType (std::make_unique<MockDeviceType> (emptyName, StringArray{}, StringArray{}));
         initialiseManager (manager);
+    }
+
+    void initialiseManagerWithDifferentDeviceNames (AudioDeviceManager& manager)
+    {
+        manager.addAudioDeviceType (std::make_unique<MockDeviceType> ("foo",
+                                                                      StringArray { "foo in a", "foo in b" },
+                                                                      StringArray { "foo out a", "foo out b" }));
+
+        manager.addAudioDeviceType (std::make_unique<MockDeviceType> ("bar",
+                                                                      StringArray { "bar in a", "bar in b" },
+                                                                      StringArray { "bar out a", "bar out b" }));
     }
 };
 
