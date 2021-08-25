@@ -1074,6 +1074,17 @@ public:
     void addToDock() const;
    #endif
 
+   #if JUCE_MAC || JUCE_IOS
+    /** Returns the path to the container shared by all apps with the provided app group ID.
+
+        You *must* pass one of the app group IDs listed in your app's entitlements file.
+
+        On failure, this function may return a non-existent file, so you should check
+        that the path exists and is writable before trying to use it.
+    */
+    static File getContainerForSecurityApplicationGroupIdentifier (const String& appGroup);
+   #endif
+
     //==============================================================================
     /** Comparator for files */
     struct NaturalFileComparator

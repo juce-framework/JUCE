@@ -518,7 +518,7 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
 
     void didFinishDownloadingToURL (NSURL* location)
     {
-        NSFileManager* fileManager = [[NSFileManager alloc] init];
+        auto* fileManager = [NSFileManager defaultManager];
         error = ([fileManager moveItemAtURL: location
                                       toURL: createNSURLFromFile (targetLocation)
                                       error: nil] == NO);
