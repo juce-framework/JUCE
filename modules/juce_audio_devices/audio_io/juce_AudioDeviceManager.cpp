@@ -23,21 +23,41 @@
 namespace juce
 {
 
+template <typename Setup>
+static auto getSetupInfo (Setup& s, bool isInput)
+{
+    struct SetupInfo
+    {
+        // double brackets so that we get the expression type, i.e. a (possibly const) reference
+        decltype ((s.inputDeviceName)) name;
+        decltype ((s.inputChannels)) channels;
+        decltype ((s.useDefaultInputChannels)) useDefault;
+    };
+
+    return isInput ? SetupInfo { s.inputDeviceName,  s.inputChannels,  s.useDefaultInputChannels }
+                   : SetupInfo { s.outputDeviceName, s.outputChannels, s.useDefaultOutputChannels };
+}
+
+static auto tie (const AudioDeviceManager::AudioDeviceSetup& s)
+{
+    return std::tie (s.outputDeviceName,
+                     s.inputDeviceName,
+                     s.sampleRate,
+                     s.bufferSize,
+                     s.inputChannels,
+                     s.useDefaultInputChannels,
+                     s.outputChannels,
+                     s.useDefaultOutputChannels);
+}
+
 bool AudioDeviceManager::AudioDeviceSetup::operator== (const AudioDeviceManager::AudioDeviceSetup& other) const
 {
-    return outputDeviceName == other.outputDeviceName
-            && inputDeviceName == other.inputDeviceName
-            && sampleRate == other.sampleRate
-            && bufferSize == other.bufferSize
-            && inputChannels == other.inputChannels
-            && useDefaultInputChannels == other.useDefaultInputChannels
-            && outputChannels == other.outputChannels
-            && useDefaultOutputChannels == other.useDefaultOutputChannels;
+    return tie (*this) == tie (other);
 }
 
 bool AudioDeviceManager::AudioDeviceSetup::operator!= (const AudioDeviceManager::AudioDeviceSetup& other) const
 {
-    return ! operator== (other);
+    return tie (*this) != tie (other);
 }
 
 //==============================================================================
@@ -434,11 +454,14 @@ void AudioDeviceManager::insertDefaultDeviceNames (AudioDeviceSetup& setup) cons
 {
     if (auto* type = getCurrentDeviceTypeObject())
     {
-        if (numOutputChansNeeded > 0 && setup.outputDeviceName.isEmpty())
-            setup.outputDeviceName = type->getDeviceNames (false) [type->getDefaultDeviceIndex (false)];
+        for (const auto isInput : { false, true })
+        {
+            const auto numChannelsNeeded = isInput ? numInputChansNeeded : numOutputChansNeeded;
+            const auto info = getSetupInfo (setup, isInput);
 
-        if (numInputChansNeeded > 0 && setup.inputDeviceName.isEmpty())
-            setup.inputDeviceName = type->getDeviceNames (true) [type->getDefaultDeviceIndex (true)];
+            if (numChannelsNeeded > 0 && info.name.isEmpty())
+                info.name = type->getDeviceNames (isInput) [type->getDefaultDeviceIndex (isInput)];
+        }
     }
 }
 
@@ -584,20 +607,24 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
 
     String error;
 
-    if (currentSetup.inputDeviceName  != newSetup.inputDeviceName
-     || currentSetup.outputDeviceName != newSetup.outputDeviceName
-     || currentAudioDevice == nullptr)
+    const auto needsNewDevice = currentSetup.inputDeviceName  != newSetup.inputDeviceName
+                             || currentSetup.outputDeviceName != newSetup.outputDeviceName
+                             || currentAudioDevice == nullptr;
+
+    if (needsNewDevice)
     {
         deleteCurrentDevice();
         scanDevicesIfNeeded();
 
         auto* type = getCurrentDeviceTypeObject();
 
-        if (newSetup.outputDeviceName.isNotEmpty() && ! deviceListContains (type, false, newSetup.outputDeviceName))
-            return "No such device: " + newSetup.outputDeviceName;
+        for (const auto isInput : { false, true })
+        {
+            const auto name = getSetupInfo (newSetup, isInput).name;
 
-        if (newSetup.inputDeviceName.isNotEmpty() && ! deviceListContains (type, true, newSetup.inputDeviceName))
-            return "No such device: " + newSetup.inputDeviceName;
+            if (name.isNotEmpty() && ! deviceListContains (type, isInput, name))
+                return "No such device: " + name;
+        }
 
         currentAudioDevice.reset (type->createDevice (newSetup.outputDeviceName, newSetup.inputDeviceName));
 
