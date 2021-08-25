@@ -506,4 +506,12 @@ void File::addToDock() const
 }
 #endif
 
+File File::getContainerForSecurityApplicationGroupIdentifier (const String& appGroup)
+{
+    if (auto* url = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: juceStringToNS (appGroup)])
+        return File (nsStringToJuce ([url path]));
+
+    return File();
+}
+
 } // namespace juce
