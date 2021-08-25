@@ -330,9 +330,8 @@ public:
     }
 
     //==============================================================================
-    /** THIS FUNCTION IS DEPRECATED.
-
-        Use `setTargetValue (float)` and `setCurrentAndTargetValue()` instead:
+   #ifndef DOXYGEN
+    /** Using the new methods:
 
         lsv.setValue (x, false); -> lsv.setTargetValue (x);
         lsv.setValue (x, true);  -> lsv.setCurrentAndTargetValue (x);
@@ -340,7 +339,8 @@ public:
         @param newValue     The new target value
         @param force        If true, the value will be set immediately, bypassing the ramp
     */
-    JUCE_DEPRECATED_WITH_BODY (void setValue (FloatType newValue, bool force = false) noexcept,
+    [[deprecated ("Use setTargetValue and setCurrentAndTargetValue instead.")]]
+    void setValue (FloatType newValue, bool force = false) noexcept
     {
         if (force)
         {
@@ -349,7 +349,8 @@ public:
         }
 
         setTargetValue (newValue);
-    })
+    }
+   #endif
 
 private:
     //==============================================================================

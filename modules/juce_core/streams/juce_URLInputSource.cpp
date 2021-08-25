@@ -39,7 +39,7 @@ URLInputSource::~URLInputSource()
 
 InputStream* URLInputSource::createInputStream()
 {
-    return u.createInputStream (false).release();
+    return u.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)).release();
 }
 
 InputStream* URLInputSource::createInputStreamFor (const String& relatedItemPath)
@@ -48,7 +48,10 @@ InputStream* URLInputSource::createInputStreamFor (const String& relatedItemPath
     auto parent = sub.containsChar (L'/') ? sub.upToLastOccurrenceOf ("/", false, false)
                                           : String ();
 
-    return u.withNewSubPath (parent).getChildURL (relatedItemPath).createInputStream (false).release();
+    return u.withNewSubPath (parent)
+            .getChildURL (relatedItemPath)
+            .createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress))
+            .release();
 }
 
 int64 URLInputSource::hashCode() const

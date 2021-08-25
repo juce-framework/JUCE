@@ -23,7 +23,7 @@
 namespace juce
 {
 
-#if ! (defined (DOXYGEN) || JUCE_EXCEPTIONS_DISABLED)
+#if ! (DOXYGEN || JUCE_EXCEPTIONS_DISABLED)
 namespace HeapBlockHelper
 {
     template <bool shouldThrow>

@@ -92,11 +92,6 @@ private:
     class GZIPDecompressHelper;
     std::unique_ptr<GZIPDecompressHelper> helper;
 
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // The arguments to this method have changed! Please pass a Format enum instead of the old dontWrap bool.
-    GZIPDecompressorInputStream (InputStream*, bool, bool, int64 x = -1);
-   #endif
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GZIPDecompressorInputStream)
 };
 

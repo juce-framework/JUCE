@@ -644,6 +644,8 @@ public:
 
 
 //==============================================================================
+#ifndef DOXYGEN
+
 /**
     A set of routines to convert buffers of 32-bit floating point data to and from
     various integer formats.
@@ -653,7 +655,7 @@ public:
 
     @tags{Audio}
 */
-class JUCE_API  AudioDataConverters
+class [[deprecated]] JUCE_API  AudioDataConverters
 {
 public:
     //==============================================================================
@@ -710,7 +712,8 @@ public:
 
 private:
     AudioDataConverters();
-    JUCE_DECLARE_NON_COPYABLE (AudioDataConverters)
 };
+
+#endif
 
 } // namespace juce

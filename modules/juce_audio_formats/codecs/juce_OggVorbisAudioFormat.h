@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if JUCE_USE_OGGVORBIS || defined (DOXYGEN)
+#if JUCE_USE_OGGVORBIS || DOXYGEN
 
 //==============================================================================
 /**

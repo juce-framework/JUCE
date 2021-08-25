@@ -20,7 +20,7 @@
   ==============================================================================
 */
 
-#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
+#if ! defined (DOXYGEN) && (JUCE_MAC || JUCE_IOS)
  #include <libkern/OSByteOrder.h>
 #endif
 

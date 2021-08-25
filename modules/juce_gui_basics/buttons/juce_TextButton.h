@@ -102,12 +102,7 @@ public:
     /** @internal */
     void colourChanged() override;
 
-private:
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // Note that this method has been removed - instead, see LookAndFeel::getTextButtonFont()
-    virtual int getFont() { return 0; }
-   #endif
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextButton)
 };
 

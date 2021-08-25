@@ -24,7 +24,7 @@ namespace juce
 {
 
 //==============================================================================
-#if JUCE_WINDOWS && ! DOXYGEN
+#if JUCE_WINDOWS && ! defined (DOXYGEN)
  #define JUCE_NATIVE_WCHAR_IS_UTF8      0
  #define JUCE_NATIVE_WCHAR_IS_UTF16     1
  #define JUCE_NATIVE_WCHAR_IS_UTF32     0
@@ -60,7 +60,7 @@ namespace juce
  #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
 
-#if ! DOXYGEN
+#ifndef DOXYGEN
 
 //==============================================================================
 // GNU libstdc++ does not have std::make_unsigned

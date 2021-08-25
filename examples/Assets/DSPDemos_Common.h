@@ -418,7 +418,7 @@ public:
        #endif
         {
             if (newReader == nullptr)
-                newReader = formatManager.createReaderFor (fileToPlay.createInputStream (false));
+                newReader = formatManager.createReaderFor (fileToPlay.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)));
         }
 
         reader.reset (newReader);

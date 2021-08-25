@@ -1006,6 +1006,12 @@ public:
         virtual int getPopupMenuColumnSeparatorWidthWithOptions (const Options&) = 0;
     };
 
+    //==============================================================================
+   #ifndef DOXYGEN
+    [[deprecated ("Use the new method.")]]
+    int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
+   #endif
+
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (struct HelperClasses)
@@ -1020,11 +1026,6 @@ private:
     int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
 
     static void setItem (CustomComponent&, const Item*);
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // These methods have new implementations now - see its new definition
-    int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
-   #endif
 
     JUCE_LEAK_DETECTOR (PopupMenu)
 };

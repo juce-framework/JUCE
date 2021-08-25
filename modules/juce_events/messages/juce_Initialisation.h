@@ -84,7 +84,7 @@ public:
 
     See the JUCEApplication and JUCEApplicationBase class documentation for more details.
 */
-#ifdef DOXYGEN
+#if DOXYGEN
  #define START_JUCE_APPLICATION(AppClass)
 #else
  #if JUCE_WINDOWS && ! defined (_CONSOLE)

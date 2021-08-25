@@ -309,7 +309,7 @@ private:
 
 
 //==============================================================================
-#if JUCE_CATCH_UNHANDLED_EXCEPTIONS || defined (DOXYGEN)
+#if JUCE_CATCH_UNHANDLED_EXCEPTIONS || DOXYGEN
 
  /** The JUCE_TRY/JUCE_CATCH_EXCEPTION wrappers can be used to pass any uncaught exceptions to
      the JUCEApplicationBase::sendUnhandledException() method.

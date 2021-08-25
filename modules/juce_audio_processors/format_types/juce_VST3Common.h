@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if ! DOXYGEN
+#ifndef DOXYGEN
 
 namespace juce
 {
@@ -1225,4 +1225,4 @@ JUCE_END_NO_SANITIZE
 
 } // namespace juce
 
-#endif // ! DOXYGEN
+#endif

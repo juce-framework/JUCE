@@ -273,7 +273,9 @@ public:
     MidiBufferIterator findNextSamplePosition (int samplePosition) const noexcept;
 
     //==============================================================================
-    /**
+   #ifndef DOXYGEN
+    /** This class is now deprecated in favour of MidiBufferIterator.
+
         Used to iterate through the events in a MidiBuffer.
 
         Note that altering the buffer while an iterator is using it will produce
@@ -281,20 +283,12 @@ public:
 
         @see MidiBuffer
     */
-    class JUCE_API  Iterator
+    class [[deprecated]] JUCE_API  Iterator
     {
     public:
         //==============================================================================
-        /** Creates an Iterator for this MidiBuffer.
-            This class has been deprecated in favour of MidiBufferIterator.
-        */
-        JUCE_DEPRECATED (Iterator (const MidiBuffer&) noexcept);
-
-        /** Creates a copy of an iterator. */
-        Iterator (const Iterator&) = default;
-
-        /** Destructor. */
-        ~Iterator() noexcept;
+        /** Creates an Iterator for this MidiBuffer. */
+        Iterator (const MidiBuffer& b) noexcept;
 
         //==============================================================================
         /** Repositions the iterator so that the next event retrieved will be the first
@@ -336,6 +330,7 @@ public:
         const MidiBuffer& buffer;
         MidiBufferIterator iterator;
     };
+   #endif
 
     /** The raw data holding this buffer.
         Obviously access to this data is provided at your own risk. Its internal format could

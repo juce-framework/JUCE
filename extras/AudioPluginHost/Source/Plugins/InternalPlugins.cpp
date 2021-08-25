@@ -232,7 +232,7 @@ private:
             double cyclesPerSecond = MidiMessage::getMidiNoteInHertz (midiNoteNumber);
             double cyclesPerSample = cyclesPerSecond / getSampleRate();
 
-            angleDelta = cyclesPerSample * 2.0 * double_Pi;
+            angleDelta = cyclesPerSample * 2.0 * MathConstants<double>::pi;
         }
 
         void stopNote (float /*velocity*/, bool allowTailOff) override
