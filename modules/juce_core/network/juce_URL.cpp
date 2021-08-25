@@ -106,29 +106,26 @@ struct FallbackDownloadTask  : public URL::DownloadTask,
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FallbackDownloadTask)
 };
 
-void URL::DownloadTask::Listener::progress (DownloadTask*, int64, int64) {}
-URL::DownloadTask::Listener::~Listener() {}
+void URL::DownloadTaskListener::progress (DownloadTask*, int64, int64) {}
 
 //==============================================================================
 std::unique_ptr<URL::DownloadTask> URL::DownloadTask::createFallbackDownloader (const URL& urlToUse,
                                                                                 const File& targetFileToUse,
-                                                                                const String& extraHeadersToUse,
-                                                                                Listener* listenerToUse,
-                                                                                bool usePostRequest)
+                                                                                const DownloadTaskOptions& options)
 {
     const size_t bufferSize = 0x8000;
     targetFileToUse.deleteFile();
 
     if (auto outputStream = targetFileToUse.createOutputStream (bufferSize))
     {
-        auto stream = std::make_unique<WebInputStream> (urlToUse, usePostRequest);
-        stream->withExtraHeaders (extraHeadersToUse);
+        auto stream = std::make_unique<WebInputStream> (urlToUse, options.usePost);
+        stream->withExtraHeaders (options.extraHeaders);
 
         if (stream->connect (nullptr))
             return std::make_unique<FallbackDownloadTask> (std::move (outputStream),
                                                            bufferSize,
                                                            std::move (stream),
-                                                           listenerToUse);
+                                                           options.listener);
     }
 
     return nullptr;
@@ -1003,6 +1000,17 @@ std::unique_ptr<InputStream> URL::createInputStream (bool usePostCommand,
                                 .withStatusCode (statusCode)
                                 .withNumRedirectsToFollow(numRedirectsToFollow)
                                 .withHttpRequestCmd (httpRequestCmd));
+}
+
+std::unique_ptr<URL::DownloadTask> URL::downloadToFile (const File& targetLocation,
+                                                        String extraHeaders,
+                                                        DownloadTask::Listener* listener,
+                                                        bool usePostCommand)
+{
+    auto options = DownloadTaskOptions().withExtraHeaders (std::move (extraHeaders))
+                                        .withListener (listener)
+                                        .withUsePost (usePostCommand);
+    return downloadToFile (targetLocation, std::move (options));
 }
 
 } // namespace juce
