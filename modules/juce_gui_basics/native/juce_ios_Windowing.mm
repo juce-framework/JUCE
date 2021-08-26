@@ -716,19 +716,22 @@ static Rectangle<int> getRecommendedWindowBounds()
 
 static BorderSize<int> getSafeAreaInsets (float masterScale)
 {
-   #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0
-    UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
+   #if defined (__IPHONE_11_0)
+    if (@available (iOS 11.0, *))
+    {
+        UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
 
-    auto getInset = [&] (CGFloat original) { return roundToInt (original / masterScale); };
+        auto getInset = [&] (CGFloat original) { return roundToInt (original / masterScale); };
 
-    return { getInset (safeInsets.top),    getInset (safeInsets.left),
-             getInset (safeInsets.bottom), getInset (safeInsets.right) };
-   #else
+        return { getInset (safeInsets.top),    getInset (safeInsets.left),
+                 getInset (safeInsets.bottom), getInset (safeInsets.right) };
+    }
+   #endif
+
     auto statusBarSize = [UIApplication sharedApplication].statusBarFrame.size;
     auto statusBarHeight = jmin (statusBarSize.width, statusBarSize.height);
 
     return { roundToInt (statusBarHeight / masterScale), 0, 0, 0 };
-   #endif
 }
 
 void Displays::findDisplays (float masterScale)
