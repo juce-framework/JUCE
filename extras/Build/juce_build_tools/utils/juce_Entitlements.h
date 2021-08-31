@@ -42,6 +42,7 @@ namespace build_tools
         bool isHardenedRuntimeEnabled       = false;
         bool isAppSandboxEnabled            = false;
         bool isAppSandboxInhertianceEnabled = false;
+        bool isNetworkingMulticastEnabled   = false;
 
         String appGroupIdString;
 
