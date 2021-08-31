@@ -477,10 +477,13 @@ public:
 
     void buttonClicked (int buttonIndex) noexcept
     {
-        if (callback != nullptr)
-            callback->modalStateFinished (buttonIndex);
+        result = buttonIndex;
 
-        delete this;
+        if (callback != nullptr)
+        {
+            callback->modalStateFinished (result);
+            delete this;
+        }
     }
 
 private:
