@@ -1352,6 +1352,80 @@ public:
     Component* parentForPopupDisplay = nullptr;
 
     //==============================================================================
+    class SliderAccessibilityHandler  : public AccessibilityHandler
+    {
+    public:
+        explicit SliderAccessibilityHandler (Slider& sliderToWrap)
+            : AccessibilityHandler (sliderToWrap,
+                                    AccessibilityRole::slider,
+                                    AccessibilityActions{},
+                                    AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (sliderToWrap) }),
+              slider (sliderToWrap)
+        {
+        }
+
+        String getHelp() const override   { return slider.getTooltip(); }
+
+    private:
+        class ValueInterface  : public AccessibilityValueInterface
+        {
+        public:
+            explicit ValueInterface (Slider& sliderToWrap)
+                : slider (sliderToWrap),
+                  useMaxValue (slider.isTwoValue())
+            {
+            }
+
+            bool isReadOnly() const override  { return false; }
+
+            double getCurrentValue() const override
+            {
+                return useMaxValue ? slider.getMaximum()
+                                   : slider.getValue();
+            }
+
+            void setValue (double newValue) override
+            {
+                DragInProgress drag (*slider.pimpl);
+
+                if (useMaxValue)
+                    slider.setMaxValue (newValue, sendNotificationSync);
+                else
+                    slider.setValue (newValue, sendNotificationSync);
+            }
+
+            String getCurrentValueAsString() const override          { return slider.getTextFromValue (getCurrentValue()); }
+            void setValueAsString (const String& newValue) override  { setValue (slider.getValueFromText (newValue)); }
+
+            AccessibleValueRange getRange() const override
+            {
+                return { { slider.getMinimum(), slider.getMaximum() },
+                         getStepSize() };
+            }
+
+        private:
+            double getStepSize() const
+            {
+                auto interval = slider.getInterval();
+
+                return interval != 0.0 ? interval
+                                       : slider.getRange().getLength() * 0.01;
+            }
+
+            Slider& slider;
+            const bool useMaxValue;
+
+            //==============================================================================
+            JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
+        };
+
+        Slider& slider;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAccessibilityHandler)
+    };
+
+    //==============================================================================
     static double smallestAngleBetween (double a1, double a2) noexcept
     {
         return jmin (std::abs (a1 - a2),
@@ -1680,69 +1754,9 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
 }
 
 //==============================================================================
-class SliderAccessibilityHandler  : public AccessibilityHandler
-{
-public:
-    explicit SliderAccessibilityHandler (Slider& sliderToWrap)
-        : AccessibilityHandler (sliderToWrap,
-                                AccessibilityRole::slider,
-                                AccessibilityActions{},
-                                AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (sliderToWrap) }),
-          slider (sliderToWrap)
-    {
-    }
-
-    String getHelp() const override   { return slider.getTooltip(); }
-
-private:
-    class ValueInterface  : public AccessibilityValueInterface
-    {
-    public:
-        explicit ValueInterface (Slider& sliderToWrap)
-            : slider (sliderToWrap),
-              valueToControl (slider.isTwoValue() ? slider.getMaxValueObject() : slider.getValueObject())
-        {
-        }
-
-        bool isReadOnly() const override                         { return false; }
-
-        double getCurrentValue() const override                  { return valueToControl.getValue(); }
-        void setValue (double newValue) override                 { valueToControl = newValue; }
-
-        String getCurrentValueAsString() const override          { return slider.getTextFromValue (getCurrentValue()); }
-        void setValueAsString (const String& newValue) override  { setValue (slider.getValueFromText (newValue)); }
-
-        AccessibleValueRange getRange() const override
-        {
-            return { { slider.getMinimum(), slider.getMaximum() },
-                     getStepSize() };
-        }
-
-    private:
-        double getStepSize() const
-        {
-            auto interval = slider.getInterval();
-
-            return interval != 0.0 ? interval
-                                   : slider.getRange().getLength() * 0.01;
-        }
-
-        Slider& slider;
-        Value valueToControl;
-
-        //==============================================================================
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
-    };
-
-    Slider& slider;
-
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAccessibilityHandler)
-};
-
 std::unique_ptr<AccessibilityHandler> Slider::createAccessibilityHandler()
 {
-    return std::make_unique<SliderAccessibilityHandler> (*this);
+    return std::make_unique<Pimpl::SliderAccessibilityHandler> (*this);
 }
 
 } // namespace juce
