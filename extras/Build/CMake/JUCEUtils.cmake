@@ -300,6 +300,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content BACKGROUND_AUDIO_ENABLED             ${target} JUCE_BACKGROUND_AUDIO_ENABLED)
     _juce_append_target_property(file_content BACKGROUND_BLE_ENABLED               ${target} JUCE_BACKGROUND_BLE_ENABLED)
     _juce_append_target_property(file_content PUSH_NOTIFICATIONS_ENABLED           ${target} JUCE_PUSH_NOTIFICATIONS_ENABLED)
+    _juce_append_target_property(file_content NETWORK_MULTICAST_ENABLED            ${target} JUCE_NETWORK_MULTICAST_ENABLED)
     _juce_append_target_property(file_content PLUGIN_MANUFACTURER_CODE             ${target} JUCE_PLUGIN_MANUFACTURER_CODE)
     _juce_append_target_property(file_content PLUGIN_CODE                          ${target} JUCE_PLUGIN_CODE)
     _juce_append_target_property(file_content IPHONE_SCREEN_ORIENTATIONS           ${target} JUCE_IPHONE_SCREEN_ORIENTATIONS)
@@ -1497,6 +1498,7 @@ function(_juce_initialise_target target)
         NEEDS_WEB_BROWSER               # Set this true if you want to link webkit on Linux
         NEEDS_STORE_KIT                 # Set this true if you want in-app-purchases on Mac
         PUSH_NOTIFICATIONS_ENABLED
+        NETWORK_MULTICAST_ENABLED
         HARDENED_RUNTIME_ENABLED
         APP_SANDBOX_ENABLED
         APP_SANDBOX_INHERIT
