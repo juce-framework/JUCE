@@ -341,6 +341,7 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
     updateField ("APP_SANDBOX_ENABLED",             result.isAppSandboxEnabled);
     updateField ("APP_SANDBOX_INHERIT",             result.isAppSandboxInhertianceEnabled);
     updateField ("APP_SANDBOX_OPTIONS",             result.appSandboxOptions);
+    updateField ("NETWORK_MULTICAST_ENABLED",       result.isNetworkingMulticastEnabled);
 
     result.type = type;
 
