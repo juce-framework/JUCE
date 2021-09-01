@@ -350,7 +350,7 @@ public:
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
 
-        Note that native macOS menus do support custom components.
+        Note that native macOS menus do not support custom components.
     */
     void addCustomItem (int itemResultID,
                         Component& customComponent,
