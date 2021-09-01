@@ -1400,7 +1400,8 @@ private:
 
 //==============================================================================
 static void createAndroidDialog (const MessageBoxOptions& opts,
-                                 std::unique_ptr<ModalComponentManager::Callback> callback)
+                                 ModalComponentManager::Callback* callbackIn,
+                                 AlertWindowMappings::MapFn mapFn)
 {
     auto* env = getEnv();
 
@@ -1410,7 +1411,7 @@ static void createAndroidDialog (const MessageBoxOptions& opts,
     builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setMessage, javaString (opts.getMessage()).get()));
     builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setCancelable, true));
 
-    std::shared_ptr<ModalComponentManager::Callback> sharedCallback (std::move (callback));
+    std::shared_ptr<ModalComponentManager::Callback> sharedCallback (AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
 
     builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(), AndroidAlertDialogBuilder.setOnCancelListener,
                                                         CreateJavaInterface (new DialogListener (sharedCallback, 0),
@@ -1455,11 +1456,11 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (MessageBoxIconType /*i
                                                           Component* /*associatedComponent*/,
                                                           ModalComponentManager::Callback* callback)
 {
-    showAsync (MessageBoxOptions()
-                 .withTitle (title)
-                 .withMessage (message)
-                 .withButton (TRANS("OK")),
-               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::messageBox));
+    createAndroidDialog (MessageBoxOptions()
+                           .withTitle (title)
+                           .withMessage (message)
+                           .withButton (TRANS("OK")),
+                         callback, AlertWindowMappings::messageBox);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType /*iconType*/,
@@ -1467,12 +1468,12 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType /*iconT
                                                       Component* /*associatedComponent*/,
                                                       ModalComponentManager::Callback* callback)
 {
-    showAsync (MessageBoxOptions()
-                 .withTitle (title)
-                 .withMessage (message)
-                 .withButton (TRANS("OK"))
-                 .withButton (TRANS("Cancel")),
-               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel));
+    createAndroidDialog (MessageBoxOptions()
+                           .withTitle (title)
+                           .withMessage (message)
+                           .withButton (TRANS("OK"))
+                           .withButton (TRANS("Cancel")),
+                         callback, AlertWindowMappings::okCancel);
 
     return false;
 }
@@ -1482,13 +1483,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType /*ico
                                                         Component* /*associatedComponent*/,
                                                         ModalComponentManager::Callback* callback)
 {
-    showAsync (MessageBoxOptions()
-                 .withTitle (title)
-                 .withMessage (message)
-                 .withButton (TRANS("Yes"))
-                 .withButton (TRANS("No"))
-                 .withButton (TRANS("Cancel")),
-               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::yesNoCancel));
+    createAndroidDialog (MessageBoxOptions()
+                           .withTitle (title)
+                           .withMessage (message)
+                           .withButton (TRANS("Yes"))
+                           .withButton (TRANS("No"))
+                           .withButton (TRANS("Cancel")),
+                         callback, AlertWindowMappings::yesNoCancel);
 
     return 0;
 }
@@ -1498,12 +1499,12 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType /*iconType*
                                                   Component* /*associatedComponent*/,
                                                   ModalComponentManager::Callback* callback)
 {
-    showAsync (MessageBoxOptions()
-                 .withTitle (title)
-                 .withMessage (message)
-                 .withButton (TRANS("Yes"))
-                 .withButton (TRANS("No")),
-               AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel));
+    createAndroidDialog (MessageBoxOptions()
+                           .withTitle (title)
+                           .withMessage (message)
+                           .withButton (TRANS("Yes"))
+                           .withButton (TRANS("No")),
+                         callback, AlertWindowMappings::okCancel);
 
     return 0;
 }
@@ -1511,7 +1512,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType /*iconType*
 void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
                                                 ModalComponentManager::Callback* callback)
 {
-    createAndroidDialog (options, std::unique_ptr<ModalComponentManager::Callback> (callback));
+    createAndroidDialog (options, callback, AlertWindowMappings::noMapping);
 }
 
 void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
