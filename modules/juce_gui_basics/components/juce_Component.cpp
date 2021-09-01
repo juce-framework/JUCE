@@ -3152,6 +3152,12 @@ void Component::setAccessible (bool shouldBeAccessible)
         invalidateAccessibilityHandler();
 }
 
+bool Component::isAccessible() const noexcept
+{
+    return (! flags.accessibilityIgnoredFlag
+            && (parentComponent == nullptr || parentComponent->isAccessible()));
+}
+
 std::unique_ptr<AccessibilityHandler> Component::createAccessibilityHandler()
 {
     return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::unspecified);
@@ -3164,7 +3170,7 @@ void Component::invalidateAccessibilityHandler()
 
 AccessibilityHandler* Component::getAccessibilityHandler()
 {
-    if (flags.accessibilityIgnoredFlag || getWindowHandle() == nullptr)
+    if (! isAccessible() || getWindowHandle() == nullptr)
         return nullptr;
 
     if (accessibilityHandler == nullptr
