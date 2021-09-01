@@ -195,7 +195,7 @@ void MidiKeyboardComponent::setMidiChannel (int midiChannelNumber)
 void MidiKeyboardComponent::setMidiChannelsToDisplay (int midiChannelMask)
 {
     midiInChannelMask = midiChannelMask;
-    shouldCheckState = true;
+    noPendingUpdates.store (false);
 }
 
 void MidiKeyboardComponent::setVelocity (float v, bool useMousePosition)
@@ -668,12 +668,12 @@ void MidiKeyboardComponent::resized()
 //==============================================================================
 void MidiKeyboardComponent::handleNoteOn (MidiKeyboardState*, int /*midiChannel*/, int /*midiNoteNumber*/, float /*velocity*/)
 {
-    shouldCheckState = true; // (probably being called from the audio thread, so avoid blocking in here)
+    noPendingUpdates.store (false);
 }
 
 void MidiKeyboardComponent::handleNoteOff (MidiKeyboardState*, int /*midiChannel*/, int /*midiNoteNumber*/, float /*velocity*/)
 {
-    shouldCheckState = true; // (probably being called from the audio thread, so avoid blocking in here)
+    noPendingUpdates.store (false);
 }
 
 //==============================================================================
@@ -809,19 +809,17 @@ void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, const MouseWheelD
 
 void MidiKeyboardComponent::timerCallback()
 {
-    if (shouldCheckState)
+    if (noPendingUpdates.exchange (true))
+        return;
+
+    for (int i = rangeStart; i <= rangeEnd; ++i)
     {
-        shouldCheckState = false;
+        bool isOn = state.isNoteOnForChannels (midiInChannelMask, i);
 
-        for (int i = rangeStart; i <= rangeEnd; ++i)
+        if (keysCurrentlyDrawnDown[i] != isOn)
         {
-            bool isOn = state.isNoteOnForChannels (midiInChannelMask, i);
-
-            if (keysCurrentlyDrawnDown[i] != isOn)
-            {
-                keysCurrentlyDrawnDown.setBit (i, isOn);
-                repaintNote (i);
-            }
+            keysCurrentlyDrawnDown.setBit (i, isOn);
+            repaintNote (i);
         }
     }
 }

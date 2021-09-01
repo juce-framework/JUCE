@@ -413,7 +413,7 @@ private:
 
     Array<int> mouseOverNotes, mouseDownNotes;
     BigInteger keysPressed, keysCurrentlyDrawnDown;
-    bool shouldCheckState = false;
+    std::atomic<bool> noPendingUpdates { true };
 
     int rangeStart = 0, rangeEnd = 127;
     float firstKey = 12 * 4.0f;
