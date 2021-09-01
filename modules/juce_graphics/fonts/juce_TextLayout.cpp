@@ -352,7 +352,11 @@ namespace TextLayoutHelpers
                 if (currentRun == nullptr)  currentRun  = std::make_unique<TextLayout::Run>();
                 if (currentLine == nullptr) currentLine = std::make_unique<TextLayout::Line>();
 
-                if (newGlyphs.size() > 0)
+                const auto numGlyphs = newGlyphs.size();
+                charPosition += numGlyphs;
+
+                if (numGlyphs > 0
+                    && (! (t.isWhitespace || t.isNewLine) || needToSetLineOrigin))
                 {
                     currentRun->glyphs.ensureStorageAllocated (currentRun->glyphs.size() + newGlyphs.size());
                     auto tokenOrigin = t.area.getPosition().translated (0, t.font.getAscent());
@@ -372,8 +376,6 @@ namespace TextLayoutHelpers
                                                                    glyphOffset.translated (x, 0),
                                                                    xOffsets.getUnchecked (j + 1) - x));
                     }
-
-                    charPosition += newGlyphs.size();
                 }
 
                 if (auto* nextToken = tokens[i + 1])
