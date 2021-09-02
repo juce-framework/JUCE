@@ -4621,33 +4621,31 @@ private:
 static std::unique_ptr<WindowsMessageBoxBase> createMessageBox (const MessageBoxOptions& options,
                                                                 std::unique_ptr<ModalComponentManager::Callback> callback)
 {
-    std::unique_ptr<WindowsMessageBoxBase> messageBox;
+    const auto useTaskDialog =
+       #if JUCE_MODAL_LOOPS_PERMITTED
+        callback != nullptr &&
+       #endif
+        SystemStats::getOperatingSystemType() >= SystemStats::WinVista
+          && WindowsTaskDialog::loadTaskDialog();
 
-    if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista
-        && WindowsTaskDialog::loadTaskDialog())
+    if (useTaskDialog)
+        return std::make_unique<WindowsTaskDialog> (options, std::move (callback));
+
+    const auto extraFlags = [&options]
     {
-        messageBox.reset (new WindowsTaskDialog (options, std::move (callback)));
-    }
-    else
-    {
-        const auto extraFlags = [&options]
-        {
-            const auto numButtons = options.getNumButtons();
+        const auto numButtons = options.getNumButtons();
 
-            if (numButtons == 3)
-                return MB_YESNOCANCEL;
+        if (numButtons == 3)
+            return MB_YESNOCANCEL;
 
-            if (numButtons == 2)
-                return options.getButtonText (0) == "OK" ? MB_OKCANCEL
-                                                         : MB_YESNO;
+        if (numButtons == 2)
+            return options.getButtonText (0) == "OK" ? MB_OKCANCEL
+                                                     : MB_YESNO;
 
-            return MB_OK;
-        }();
+        return MB_OK;
+    }();
 
-        messageBox.reset (new PreVistaMessageBox (options, (UINT) extraFlags, std::move (callback)));
-    }
-
-    return messageBox;
+    return std::make_unique<PreVistaMessageBox> (options, (UINT) extraFlags, std::move (callback));
 }
 
 static int showDialog (const MessageBoxOptions& options,
