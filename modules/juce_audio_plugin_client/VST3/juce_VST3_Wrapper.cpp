@@ -622,6 +622,15 @@ class JuceVST3Component;
 
 static thread_local bool inParameterChangedCallback = false;
 
+static void setValueAndNotifyIfChanged (AudioProcessorParameter& param, float newValue)
+{
+    if (param.getValue() == newValue)
+        return;
+
+    const InParameterChangedCallbackSetter scopedSetter { inParameterChangedCallback };
+    param.setValueNotifyingHost (newValue);
+}
+
 //==============================================================================
 class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
@@ -745,14 +754,7 @@ public:
                 // otherwise we get parallel streams of parameter value updates
                 // during playback
                 if (! owner.vst3IsPlaying)
-                {
-                    auto value = static_cast<float> (v);
-
-                    param.setValue (value);
-
-                    const InParameterChangedCallbackSetter scopedSetter { inParameterChangedCallback };
-                    param.sendValueChangedMessageToListeners (value);
-                }
+                    setValueAndNotifyIfChanged (param, (float) v);
 
                 changed();
                 return true;
@@ -2363,13 +2365,7 @@ public:
     void setBypassed (bool shouldBeBypassed)
     {
         if (auto* bypassParam = comPluginInstance->getBypassParameter())
-        {
-            auto floatValue = (shouldBeBypassed ? 1.0f : 0.0f);
-            bypassParam->setValue (floatValue);
-
-            const InParameterChangedCallbackSetter scopedSetter { inParameterChangedCallback };
-            bypassParam->sendValueChangedMessageToListeners (floatValue);
-        }
+            setValueAndNotifyIfChanged (*bypassParam, shouldBeBypassed ? 1.0f : 0.0f);
     }
 
     //==============================================================================
@@ -3109,15 +3105,8 @@ public:
                     else
                    #endif
                     {
-                        auto floatValue = static_cast<float> (value);
-
                         if (auto* param = comPluginInstance->getParamForVSTParamID (vstParamID))
-                        {
-                            param->setValue (floatValue);
-
-                            const InParameterChangedCallbackSetter scopedSetter { inParameterChangedCallback };
-                            param->sendValueChangedMessageToListeners (floatValue);
-                        }
+                            setValueAndNotifyIfChanged (*param, (float) value);
                     }
                 }
             }

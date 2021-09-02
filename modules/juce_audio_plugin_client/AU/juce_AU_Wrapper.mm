@@ -1029,10 +1029,11 @@ public:
             {
                 auto value = inValue / getMaximumParameterValue (param);
 
-                param->setValue (value);
-
-                inParameterChangedCallback = true;
-                param->sendValueChangedMessageToListeners (value);
+                if (value != param->getValue())
+                {
+                    inParameterChangedCallback = true;
+                    param->setValueNotifyingHost (value);
+                }
 
                 return noErr;
             }
