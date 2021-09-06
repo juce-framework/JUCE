@@ -244,7 +244,6 @@ class TreeView::ContentComponent  : public Component,
 public:
     ContentComponent (TreeView& tree)  : owner (tree)
     {
-        setAccessible (false);
     }
 
     //==============================================================================
@@ -267,6 +266,11 @@ public:
     void mouseDrag (const MouseEvent& e) override         { mouseDragInternal        (e.getEventRelativeTo (this));}
     void mouseMove (const MouseEvent& e) override         { mouseMoveInternal        (e.getEventRelativeTo (this)); }
     void mouseExit (const MouseEvent& e) override         { mouseExitInternal        (e.getEventRelativeTo (this)); }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
 
     //==============================================================================
     ItemComponent* getItemComponentAt (Point<int> p)
@@ -670,6 +674,11 @@ public:
         return Viewport::keyPressed (key);
     }
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
 private:
     void timerCallback() override
     {
@@ -689,7 +698,6 @@ private:
 TreeView::TreeView (const String& name)  : Component (name)
 {
     viewport = std::make_unique<TreeViewport>();
-    viewport->setAccessible (false);
     addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (new ContentComponent (*this));
 

@@ -150,7 +150,6 @@ public:
     {
         ProxyComponent (Component& c)
         {
-            setAccessible (false);
             setWantsKeyboardFocus (false);
             setBounds (c.getBounds());
             setTransform (c.getTransform());
@@ -178,6 +177,11 @@ public:
             g.setOpacity (1.0f);
             g.drawImageTransformed (image, AffineTransform::scale ((float) getWidth()  / (float) jmax (1, image.getWidth()),
                                                                    (float) getHeight() / (float) jmax (1, image.getHeight())), false);
+        }
+
+        std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+        {
+            return createIgnoredAccessibilityHandler (*this);
         }
 
     private:

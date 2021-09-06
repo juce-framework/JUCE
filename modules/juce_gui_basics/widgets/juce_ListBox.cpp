@@ -292,11 +292,9 @@ public:
     ListViewport (ListBox& lb)  : owner (lb)
     {
         setWantsKeyboardFocus (false);
-        setAccessible (false);
 
         auto content = std::make_unique<Component>();
         content->setWantsKeyboardFocus (false);
-        content->setAccessible (false);
 
         setViewedComponent (content.release());
     }
@@ -464,6 +462,11 @@ public:
         }
 
         return Viewport::keyPressed (key);
+    }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
     }
 
 private:

@@ -2597,6 +2597,8 @@ protected:
     //==============================================================================
     /** @internal */
     virtual ComponentPeer* createNewPeer (int styleFlags, void* nativeWindowToAttachTo);
+    /** @internal */
+    static std::unique_ptr<AccessibilityHandler> createIgnoredAccessibilityHandler (Component&);
    #endif
 };
 
