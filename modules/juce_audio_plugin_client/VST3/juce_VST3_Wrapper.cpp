@@ -467,6 +467,8 @@ public:
     Vst::ParamID getProgramParamID()         const noexcept { return programParamID; }
     bool isBypassRegularParameter()          const noexcept { return bypassIsRegularParameter; }
 
+    int findCacheIndexForParamID (Vst::ParamID paramID) const noexcept { return vstParamIDs.indexOf (paramID); }
+
     void setParameterValue (Steinberg::int32 paramIndex, float value)
     {
         cachedParamValues.set (paramIndex, value);
@@ -488,18 +490,6 @@ public:
 
 private:
     //==============================================================================
-    bool isBypassPartOfRegularParemeters() const
-    {
-        int n = juceParameters.getNumParameters();
-
-        if (auto* bypassParam = audioProcessor->getBypassParameter())
-            for (int i = 0; i < n; ++i)
-                if (juceParameters.getParamForIndex (i) == bypassParam)
-                    return true;
-
-        return false;
-    }
-
     void setupParameters()
     {
         parameterGroups = audioProcessor->getParameterTree().getSubgroups (true);
@@ -540,7 +530,7 @@ private:
 
         // if the bypass parameter is not part of the exported parameters that the plug-in supports
         // then add it to the end of the list as VST3 requires the bypass parameter to be exported!
-        bypassIsRegularParameter = isBypassPartOfRegularParemeters();
+        bypassIsRegularParameter = juceParameters.params.contains (audioProcessor->getBypassParameter());
 
         if (! bypassIsRegularParameter)
             juceParameters.params.add (bypassParameter);
@@ -1237,10 +1227,10 @@ public:
         {
             if (details.programChanged)
             {
-                if (auto* programParameter = audioProcessor->getProgramParameter())
+                const auto programParameterId = audioProcessor->getProgramParamID();
+
+                if (audioProcessor->getParamForVSTParamID (programParameterId) != nullptr)
                 {
-                    const auto programParameterIndex = programParameter->getParameterIndex();
-                    const auto programParameterId = audioProcessor->getProgramParamID();
                     const auto currentProgram = pluginInstance->getCurrentProgram();
                     const auto paramValue = roundToInt (EditController::normalizedParamToPlain (programParameterId,
                                                                                                 EditController::getParamNormalized (programParameterId)));
@@ -1248,7 +1238,7 @@ public:
                     if (currentProgram != paramValue)
                     {
                         beginGesture (programParameterId);
-                        paramChanged (programParameterIndex,
+                        paramChanged (audioProcessor->findCacheIndexForParamID (programParameterId),
                                       programParameterId,
                                       EditController::plainParamToNormalized (programParameterId, currentProgram));
                         endGesture (programParameterId);
@@ -1309,17 +1299,25 @@ private:
     struct OwnedParameterListener  : public AudioProcessorParameter::Listener
     {
         OwnedParameterListener (JuceVST3EditController& editController,
-                                AudioProcessorParameter& juceParameter,
-                                Vst::ParamID paramID)
+                                AudioProcessorParameter& parameter,
+                                Vst::ParamID paramID,
+                                int cacheIndex)
             : owner (editController),
-              vstParamID (paramID)
+              vstParamID (paramID),
+              parameterIndex (cacheIndex)
         {
-            juceParameter.addListener (this);
+            // We shouldn't be using an OwnedParameterListener for parameters that have
+            // been added directly to the AudioProcessor. We observe those via the
+            // normal audioProcessorParameterChanged mechanism.
+            jassert (parameter.getParameterIndex() == -1);
+            // The parameter must have a non-negative index in the parameter cache.
+            jassert (parameterIndex >= 0);
+            parameter.addListener (this);
         }
 
-        void parameterValueChanged (int index, float newValue) override
+        void parameterValueChanged (int, float newValue) override
         {
-            owner.paramChanged (index, vstParamID, newValue);
+            owner.paramChanged (parameterIndex, vstParamID, newValue);
         }
 
         void parameterGestureChanged (int, bool gestureIsStarting) override
@@ -1331,7 +1329,8 @@ private:
         }
 
         JuceVST3EditController& owner;
-        Vst::ParamID vstParamID;
+        const Vst::ParamID vstParamID = Vst::kNoParamId;
+        const int parameterIndex = -1;
     };
 
     std::vector<std::unique_ptr<OwnedParameterListener>> ownedParameterListeners;
@@ -1389,9 +1388,13 @@ private:
 
             // as the bypass is not part of the regular parameters we need to listen for it explicitly
             if (! audioProcessor->isBypassRegularParameter())
+            {
+                const auto paramID = audioProcessor->getBypassParamID();
                 ownedParameterListeners.push_back (std::make_unique<OwnedParameterListener> (*this,
-                                                                                             *audioProcessor->getBypassParameter(),
-                                                                                             audioProcessor->getBypassParamID()));
+                                                                                             *audioProcessor->getParamForVSTParamID (paramID),
+                                                                                             paramID,
+                                                                                             audioProcessor->findCacheIndexForParamID (paramID)));
+            }
 
             if (parameters.getParameterCount() <= 0)
             {
@@ -1412,11 +1415,14 @@ private:
                                                         (vstParamID == audioProcessor->getBypassParamID())));
                 }
 
-                if (auto* programParam = audioProcessor->getProgramParameter())
+                const auto programParamId = audioProcessor->getProgramParamID();
+
+                if (auto* programParam = audioProcessor->getParamForVSTParamID (programParamId))
                 {
                     ownedParameterListeners.push_back (std::make_unique<OwnedParameterListener> (*this,
                                                                                                  *programParam,
-                                                                                                 audioProcessor->getProgramParamID()));
+                                                                                                 programParamId,
+                                                                                                 audioProcessor->findCacheIndexForParamID (programParamId)));
 
                     parameters.addParameter (new ProgramChangeParameter (*pluginInstance, audioProcessor->getProgramParamID()));
                 }
