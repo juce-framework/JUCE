@@ -2802,7 +2802,7 @@ public:
             auto value = static_cast<Vst::ParamValue> (program) / static_cast<Vst::ParamValue> (jmax (1, programNames.size() - 1));
 
             if (auto* param = getParameterForID (programParameterID))
-                param->setValue ((float) value);
+                param->setValueNotifyingHost ((float) value);
         }
     }
 
