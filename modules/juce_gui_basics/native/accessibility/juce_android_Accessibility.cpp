@@ -250,6 +250,10 @@ public:
             return;
 
         auto* env = getEnv();
+        auto appContext = getAppContext();
+
+        if (appContext.get() == nullptr)
+            return;
 
         {
             for (auto* child : accessibilityHandler.getChildren())
@@ -293,7 +297,7 @@ public:
                              true);
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setPackageName,
-                             env->CallObjectMethod (getAppContext().get(),
+                             env->CallObjectMethod (appContext.get(),
                                                     AndroidContext.getPackageName));
         env->CallVoidMethod (info,
                              AndroidAccessibilityNodeInfo.setSource,
@@ -760,12 +764,16 @@ AccessibilityNativeHandle* AccessibilityHandler::getNativeImplementation() const
 static bool areAnyAccessibilityClientsActive()
 {
     auto* env = getEnv();
+    auto appContext = getAppContext();
 
-    LocalRef<jobject> accessibilityManager (env->CallObjectMethod (getAppContext().get(), AndroidContext.getSystemService,
-                                                                   javaString ("accessibility").get()));
+    if (appContext.get() != nullptr)
+    {
+        LocalRef<jobject> accessibilityManager (env->CallObjectMethod (appContext.get(), AndroidContext.getSystemService,
+                                                                       javaString ("accessibility").get()));
 
-    if (accessibilityManager != nullptr)
-        return env->CallBooleanMethod (accessibilityManager.get(), AndroidAccessibilityManager.isEnabled);
+        if (accessibilityManager != nullptr)
+            return env->CallBooleanMethod (accessibilityManager.get(), AndroidAccessibilityManager.isEnabled);
+    }
 
     return false;
 }
@@ -778,6 +786,10 @@ void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventT
     if (const auto sourceView = getSourceView (handler))
     {
         auto* env = getEnv();
+        auto appContext = getAppContext();
+
+        if (appContext.get() == nullptr)
+            return;
 
         LocalRef<jobject> event (env->CallStaticObjectMethod (AndroidAccessibilityEvent,
                                                               AndroidAccessibilityEvent.obtain,
@@ -785,7 +797,8 @@ void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventT
 
         env->CallVoidMethod (event,
                              AndroidAccessibilityEvent.setPackageName,
-                             env->CallObjectMethod (getAppContext().get(), AndroidContext.getPackageName));
+                             env->CallObjectMethod (appContext.get(),
+                                                    AndroidContext.getPackageName));
 
         env->CallVoidMethod (event,
                              AndroidAccessibilityEvent.setSource,
