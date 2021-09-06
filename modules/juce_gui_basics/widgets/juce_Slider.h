@@ -887,6 +887,27 @@ public:
     };
 
     //==============================================================================
+    /** An RAII class for sending slider listener drag messages.
+
+        This is useful if you are programatically updating the slider's value and want
+        to imitate a mouse event, for example in a custom AccessibilityHandler.
+
+        @see Slider::Listener
+    */
+    class JUCE_API  ScopedDragNotification
+    {
+    public:
+        explicit ScopedDragNotification (Slider&);
+        ~ScopedDragNotification();
+
+    private:
+        Slider& sliderBeingDragged;
+
+        JUCE_DECLARE_NON_MOVEABLE (ScopedDragNotification)
+        JUCE_DECLARE_NON_COPYABLE (ScopedDragNotification)
+    };
+
+    //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
         slider drawing functionality.
     */
