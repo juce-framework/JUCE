@@ -464,12 +464,12 @@ public:
         return Viewport::keyPressed (key);
     }
 
+private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
         return createIgnoredAccessibilityHandler (*this);
     }
 
-private:
     void timerCallback() override
     {
         stopTimer();

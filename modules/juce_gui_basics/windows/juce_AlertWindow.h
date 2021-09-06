@@ -500,8 +500,6 @@ protected:
     int getDesktopWindowStyleFlags() const override;
     /** @internal */
     float getDesktopScaleFactor() const override { return desktopScale; }
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -524,6 +522,7 @@ private:
     bool escapeKeyCancels = true;
     float desktopScale = 1.0f;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void exitAlert (Button* button);
     void updateLayout (bool onlyIncreaseSize);
 

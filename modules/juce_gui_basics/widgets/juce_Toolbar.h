@@ -309,8 +309,6 @@ public:
     /** @internal */
     static ToolbarItemComponent* createItem (ToolbarItemFactory&, int itemId);
     /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
-    /** @internal */
     static const char* const toolbarDragDescriptor;
 
 private:
@@ -324,6 +322,7 @@ private:
     class Spacer;
     class CustomisationDialog;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void showMissingItems();
     void addItemInternal (ToolbarItemFactory& factory, int itemId, int insertIndex);
 

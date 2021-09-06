@@ -991,14 +991,13 @@ public:
     void mouseExit (const MouseEvent&) override;
     /** @internal */
     void mouseEnter (const MouseEvent&) override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
     std::unique_ptr<Pimpl> pimpl;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void init (SliderStyle, TextEntryBoxPosition);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE

@@ -67,14 +67,6 @@ public:
         }
     }
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
-    {
-        if (hasCustomComponent() && customComponent->getAccessibilityHandler() != nullptr)
-            return nullptr;
-
-        return std::make_unique<ItemAccessibilityHandler> (*this);
-    }
-
     void setMouseIsOverButton (bool isOver)            { mouseIsOverButton = isOver; }
     TreeViewItem& getRepresentedItem() const noexcept  { return item; }
 
@@ -224,7 +216,14 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemAccessibilityHandler)
     };
 
-    //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        if (hasCustomComponent() && customComponent->getAccessibilityHandler() != nullptr)
+            return nullptr;
+
+        return std::make_unique<ItemAccessibilityHandler> (*this);
+    }
+
     bool hasCustomComponent() const noexcept  { return customComponent.get() != nullptr; }
 
     TreeViewItem& item;
@@ -266,11 +265,6 @@ public:
     void mouseDrag (const MouseEvent& e) override         { mouseDragInternal        (e.getEventRelativeTo (this));}
     void mouseMove (const MouseEvent& e) override         { mouseMoveInternal        (e.getEventRelativeTo (this)); }
     void mouseExit (const MouseEvent& e) override         { mouseExitInternal        (e.getEventRelativeTo (this)); }
-
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
-    {
-        return createIgnoredAccessibilityHandler (*this);
-    }
 
     //==============================================================================
     ItemComponent* getItemComponentAt (Point<int> p)
@@ -359,6 +353,11 @@ public:
 
 private:
     //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     void mouseDownInternal (const MouseEvent& e)
     {
         updateItemUnderMouse (e);
@@ -674,12 +673,12 @@ public:
         return Viewport::keyPressed (key);
     }
 
+private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
         return createIgnoredAccessibilityHandler (*this);
     }
 
-private:
     void timerCallback() override
     {
         stopTimer();

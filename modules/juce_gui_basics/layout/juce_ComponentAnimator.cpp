@@ -179,12 +179,12 @@ public:
                                                                    (float) getHeight() / (float) jmax (1, image.getHeight())), false);
         }
 
+    private:
         std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
         {
             return createIgnoredAccessibilityHandler (*this);
         }
 
-    private:
         Image image;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProxyComponent)

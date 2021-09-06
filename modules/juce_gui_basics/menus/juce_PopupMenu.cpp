@@ -164,11 +164,6 @@ struct ItemComponent  : public Component
         }
     }
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
-    {
-        return item.isSeparator ? nullptr : std::make_unique<ItemAccessibilityHandler> (*this);
-    }
-
     PopupMenu::Item item;
 
 private:
@@ -251,6 +246,11 @@ private:
 
         ItemComponent& itemComponent;
     };
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return item.isSeparator ? nullptr : std::make_unique<ItemAccessibilityHandler> (*this);
+    }
 
     //==============================================================================
     MenuWindow& parentWindow;

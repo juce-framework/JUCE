@@ -571,8 +571,6 @@ public:
     /** @internal */
     void startDragAndDrop (const MouseEvent&, const SparseSet<int>& rowsToDrag,
                            const var& dragDescription, bool allowDraggingToOtherWindows);
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -590,9 +588,10 @@ private:
     int lastRowSelected = -1;
     bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+    bool hasAccessibleHeaderComponent() const;
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
-    bool hasAccessibleHeaderComponent() const;
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
     // This method's bool parameter has changed: see the new method signature.
