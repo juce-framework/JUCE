@@ -102,7 +102,8 @@ public:
                  double timeStamp = 0,
                  bool sysexHasEmbeddedLength = true);
 
-    /** Creates an active-sense message.
+    /** Creates an empty sysex message.
+
         Since the MidiMessage has to contain a valid message, this default constructor
         just initialises it with an empty sysex message.
     */
