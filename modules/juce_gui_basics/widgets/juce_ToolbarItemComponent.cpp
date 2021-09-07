@@ -246,8 +246,10 @@ std::unique_ptr<AccessibilityHandler> ToolbarItemComponent::createAccessibilityH
                                       && itemId != ToolbarItemFactory::spacerId
                                       && itemId != ToolbarItemFactory::flexibleSpacerId);
 
-    return shouldItemBeAccessible ? std::make_unique<ButtonAccessibilityHandler> (*this)
-                                  : nullptr;
+    if (! shouldItemBeAccessible)
+        return nullptr;
+
+    return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
 }
 
 } // namespace juce
