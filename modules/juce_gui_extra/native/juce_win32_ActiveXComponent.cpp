@@ -237,10 +237,8 @@ namespace ActiveXHelpers
 }
 
 //==============================================================================
-class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
-                                     #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                                      , public ComponentPeer::ScaleFactorListener
-                                     #endif
+class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher,
+                                        public ComponentPeer::ScaleFactorListener
 {
 public:
     Pimpl (HWND hwnd, ActiveXControlComponent& activeXComp)
@@ -262,25 +260,19 @@ public:
         clientSite->Release();
         storage->Release();
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-            if (auto* peer = ComponentPeer::getPeer (i))
-                peer->removeScaleFactorListener (this);
-        #endif
+        if (currentPeer != nullptr)
+            currentPeer->removeScaleFactorListener (this);
     }
 
     void setControlBounds (Rectangle<int> newBounds) const
     {
         if (controlHWND != nullptr)
         {
-           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (auto* peer = owner.getTopLevelComponent()->getPeer())
                 newBounds = (newBounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
-           #endif
 
             MoveWindow (controlHWND, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
         }
-
     }
 
     void setControlVisible (bool shouldBeVisible) const
@@ -300,12 +292,15 @@ public:
 
     void componentPeerChanged() override
     {
+        if (currentPeer != nullptr)
+            currentPeer->removeScaleFactorListener (this);
+
         componentMovedOrResized (true, true);
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (auto* peer = owner.getTopLevelComponent()->getPeer())
-            peer->addScaleFactorListener (this);
-       #endif
+        currentPeer = owner.getTopLevelComponent()->getPeer();
+
+        if (currentPeer != nullptr)
+            currentPeer->addScaleFactorListener (this);
     }
 
     using ComponentMovementWatcher::componentVisibilityChanged;
@@ -316,12 +311,10 @@ public:
         componentPeerChanged();
     }
 
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     void nativeScaleFactorChanged (double /*newScaleFactor*/) override
     {
         componentMovedOrResized (true, true);
     }
-   #endif
 
     // intercepts events going to an activeX control, so we can sneakily use the mouse events
     static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -366,6 +359,7 @@ public:
     }
 
     ActiveXControlComponent& owner;
+    ComponentPeer* currentPeer = nullptr;
     HWND controlHWND = {};
     IStorage* storage = nullptr;
     ActiveXHelpers::JuceIOleClientSite* clientSite = nullptr;

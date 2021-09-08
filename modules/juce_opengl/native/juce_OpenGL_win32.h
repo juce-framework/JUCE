@@ -29,10 +29,7 @@ namespace juce
 extern ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component&, void* parent);
 
 //==============================================================================
-class OpenGLContext::NativeContext
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    : private Timer
-   #endif
+class OpenGLContext::NativeContext  : private ComponentPeer::ScaleFactorListener
 {
 public:
     NativeContext (Component& component,
@@ -89,6 +86,10 @@ public:
     {
         deleteRenderContext();
         releaseDC();
+
+        if (safeComponent != nullptr)
+            if (auto* peer = safeComponent->getTopLevelComponent()->getPeer())
+                peer->removeScaleFactorListener (this);
     }
 
     bool initialiseOnRenderThread (OpenGLContext& c)
@@ -173,11 +174,8 @@ private:
     HDC dc;
     OpenGLContext* context = {};
 
-    double nativeScaleFactor = 1.0;
-
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     Component::SafePointer<Component> safeComponent;
-   #endif
+    double nativeScaleFactor = 1.0;
 
     #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
         typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
@@ -187,24 +185,18 @@ private:
     JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,    int, ())
     #undef JUCE_DECLARE_WGL_EXTENSION_FUNCTION
 
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    void timerCallback() override
+    void nativeScaleFactorChanged (double newScaleFactor) override
     {
-        if (safeComponent != nullptr)
-        {
-            if (auto* peer = safeComponent->getTopLevelComponent()->getPeer())
-            {
-                auto newScale = peer->getPlatformScaleFactor();
+        if (approximatelyEqual (newScaleFactor, nativeScaleFactor)
+            || safeComponent == nullptr)
+            return;
 
-                if (! approximatelyEqual (newScale, nativeScaleFactor))
-                {
-                    nativeScaleFactor = newScale;
-                    updateWindowPosition (peer->getAreaCoveredBy (*safeComponent));
-                }
-            }
+        if (auto* peer = safeComponent->getTopLevelComponent()->getPeer())
+        {
+            nativeScaleFactor = newScaleFactor;
+            updateWindowPosition (peer->getAreaCoveredBy (*safeComponent));
         }
     }
-   #endif
 
     void initialiseGLExtensions()
     {
@@ -228,14 +220,11 @@ private:
 
         if (auto* peer = topComp->getPeer())
         {
-           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             safeComponent = Component::SafePointer<Component> (&component);
+
             nativeScaleFactor = peer->getPlatformScaleFactor();
-
-            startTimer (50);
-           #endif
-
             updateWindowPosition (peer->getAreaCoveredBy (component));
+            peer->addScaleFactorListener (this);
         }
 
         nativeWindow->setVisible (true);
