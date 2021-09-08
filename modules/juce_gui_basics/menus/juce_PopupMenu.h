@@ -480,14 +480,27 @@ public:
 
         /** Sets the region of the screen next to which the menu should be displayed.
 
-            To display the menu next to the mouse cursor, pass
-            Rectangle<int>{}.withPosition (Desktop::getMousePosition()).
+            To display the menu next to the mouse cursor use withMousePosition(),
+            which is equivalent to passing the following to this function:
+            @code
+            Rectangle<int>{}.withPosition (Desktop::getMousePosition())
+            @endcode
 
             withTargetComponent() will also set the target screen area. If you need
             a target component and a target screen area, make sure to call
             withTargetScreenArea() after withTargetComponent().
+
+            @see withMousePosition
         */
         Options withTargetScreenArea (Rectangle<int> targetArea) const;
+
+        /** Sets the target screen area to match the current mouse position.
+
+            Make sure to call this after withTargetComponent().
+
+            @see withTargetScreenArea
+        */
+        Options withMousePosition() const;
 
         /** If the passed component has been deleted when the popup menu exits,
             the selected item's action will not be called.

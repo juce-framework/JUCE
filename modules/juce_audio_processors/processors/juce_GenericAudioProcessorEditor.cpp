@@ -450,16 +450,11 @@ public:
         if (e.mods.isRightButtonDown())
             if (auto* context = editor.getHostContext())
                 if (auto menu = context->getContextMenuForParameterIndex (&parameter))
-                    menu->getEquivalentPopupMenu().showMenuAsync (getMenuOptions());
+                    menu->getEquivalentPopupMenu().showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                                                                      .withMousePosition());
     }
 
 private:
-    PopupMenu::Options getMenuOptions()
-    {
-        return PopupMenu::Options().withTargetComponent (this)
-                                   .withTargetScreenArea ({ Desktop::getMousePosition(), Desktop::getMousePosition() });
-    }
-
     AudioProcessorEditor& editor;
     AudioProcessorParameter& parameter;
     Label parameterName, parameterLabel;
