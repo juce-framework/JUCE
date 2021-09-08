@@ -4541,7 +4541,7 @@ public:
 
     int getResult() override
     {
-        TASKDIALOGCONFIG config = { 0 };
+        TASKDIALOGCONFIG config{};
 
         config.cbSize         = sizeof (config);
         config.pszWindowTitle = title.toWideCharPointer();
