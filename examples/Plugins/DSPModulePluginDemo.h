@@ -1713,7 +1713,8 @@ private:
             if (e.mods.isRightButtonDown())
                 if (auto* c = editor.getHostContext())
                     if (auto menuInfo = c->getContextMenuForParameterIndex (&param))
-                        menuInfo->getEquivalentPopupMenu().showMenuAsync ({});
+                        menuInfo->getEquivalentPopupMenu().showMenuAsync (PopupMenu::Options{}.withTargetComponent (this)
+                                                                                              .withMousePosition());
         }
 
     private:

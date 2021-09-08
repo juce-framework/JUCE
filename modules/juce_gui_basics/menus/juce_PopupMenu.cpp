@@ -1927,6 +1927,11 @@ PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area
     return with (*this, &Options::targetArea, area);
 }
 
+PopupMenu::Options PopupMenu::Options::withMousePosition() const
+{
+    return withTargetScreenArea (Rectangle<int>{}.withPosition (Desktop::getMousePosition()));
+}
+
 PopupMenu::Options PopupMenu::Options::withDeletionCheck (Component& comp) const
 {
     return with (with (*this, &Options::isWatchingForDeletion, true),
