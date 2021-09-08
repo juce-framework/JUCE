@@ -370,3 +370,4 @@ namespace juce
 
 #include "layout/juce_GridItem.h"
 #include "layout/juce_Grid.h"
+#include "native/juce_ScopedDPIAwarenessDisabler.h"

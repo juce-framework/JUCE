@@ -189,14 +189,9 @@
 #endif
 
 //==============================================================================
-#if ! JUCE_WINDOWS
- juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }
- juce::ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler() {}
-
- #if JUCE_WEB_BROWSER
-  juce::WebBrowserComponent::WebBrowserComponent (ConstructWithoutPimpl) {}
-  juce::WindowsWebView2WebBrowserComponent::WindowsWebView2WebBrowserComponent (bool unloadWhenHidden,
-                                                                                const WebView2Preferences&)
-      : juce::WebBrowserComponent (unloadWhenHidden) {}
- #endif
+#if ! JUCE_WINDOWS && JUCE_WEB_BROWSER
+ juce::WebBrowserComponent::WebBrowserComponent (ConstructWithoutPimpl) {}
+ juce::WindowsWebView2WebBrowserComponent::WindowsWebView2WebBrowserComponent (bool unloadWhenHidden,
+                                                                               const WebView2Preferences&)
+     : WebBrowserComponent (unloadWhenHidden) {}
 #endif

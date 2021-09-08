@@ -27,10 +27,6 @@
  #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
 #endif
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
- #include <juce_gui_extra/embedding/juce_ScopedDPIAwarenessDisabler.h>
-#endif
-
 namespace juce
 {
 
@@ -572,38 +568,34 @@ ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWind
     pimpl = std::make_unique<NativeImpl> ((HWND) nativeWindow);
 }
 
-ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter()
+ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
+
+ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
+    if (! isPerMonitorDPIAwareThread())
+        return;
+
+    if (setThreadDPIAwarenessContext != nullptr)
+    {
+        previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+
+       #if JUCE_DEBUG
+        ++numActiveScopedDpiAwarenessDisablers;
+       #endif
+    }
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
- ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
- {
-     if (! isPerMonitorDPIAwareThread())
-         return;
+ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
+{
+    if (previousContext != nullptr)
+    {
+        setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
 
-     if (setThreadDPIAwarenessContext != nullptr)
-     {
-         previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
-
-        #if JUCE_DEBUG
-         ++numActiveScopedDpiAwarenessDisablers;
-        #endif
-     }
- }
-
- ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
- {
-     if (previousContext != nullptr)
-     {
-         setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
-
-        #if JUCE_DEBUG
-         --numActiveScopedDpiAwarenessDisablers;
-        #endif
-     }
- }
-#endif
+       #if JUCE_DEBUG
+        --numActiveScopedDpiAwarenessDisablers;
+       #endif
+    }
+}
 
 //==============================================================================
 using SettingChangeCallbackFunc = void (*)(void);
@@ -3358,7 +3350,7 @@ private:
 
         handleMovedOrResized();
 
-        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly..
+        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly.
     }
 
     //==============================================================================
