@@ -1512,6 +1512,8 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         if (pluginHandle != HandleFormat{} && scaleInterface != nullptr)
             scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
+        else
+            resizeToFit();
     }
 
     void resizeToFit()
@@ -1599,6 +1601,8 @@ private:
 
             if (scaleInterface != nullptr)
                 scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
+            else
+                resizeToFit();
         }
     }
 
