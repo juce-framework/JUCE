@@ -3437,53 +3437,49 @@ AudioPluginInstance* VST3ComponentHolder::createPluginInstance()
 //==============================================================================
 tresult VST3HostContext::beginEdit (Vst::ParamID paramID)
 {
-    if (plugin != nullptr)
-    {
-        if (auto* param = plugin->getParameterForID (paramID))
-        {
-            param->beginChangeGesture();
-            return kResultTrue;
-        }
+    if (plugin == nullptr)
+        return kResultTrue;
 
-        jassertfalse; // Invalid parameter index!
-        return kResultFalse;
+    if (auto* param = plugin->getParameterForID (paramID))
+    {
+        param->beginChangeGesture();
+        return kResultTrue;
     }
 
-    return kResultTrue;
+    return kResultFalse;
 }
 
 tresult VST3HostContext::performEdit (Vst::ParamID paramID, Vst::ParamValue valueNormalised)
 {
-    if (plugin != nullptr)
+    if (plugin == nullptr)
+        return kResultTrue;
+
+    if (auto* param = plugin->getParameterForID (paramID))
     {
-        if (auto* param = plugin->getParameterForID (paramID))
-            param->setValueFromEditor ((float) valueNormalised);
-        else
-            jassertfalse; // Invalid parameter index!
+        param->setValueFromEditor ((float) valueNormalised);
 
         // did the plug-in already update the parameter internally
         if (plugin->editController->getParamNormalized (paramID) != (float) valueNormalised)
             return plugin->editController->setParamNormalized (paramID, valueNormalised);
+
+        return kResultTrue;
     }
 
-    return kResultTrue;
+    return kResultFalse;
 }
 
 tresult VST3HostContext::endEdit (Vst::ParamID paramID)
 {
-    if (plugin != nullptr)
-    {
-        if (auto* param = plugin->getParameterForID (paramID))
-        {
-            param->endChangeGesture();
-            return kResultTrue;
-        }
+    if (plugin == nullptr)
+        return kResultTrue;
 
-        jassertfalse; // Invalid parameter index!
-        return kResultFalse;
+    if (auto* param = plugin->getParameterForID (paramID))
+    {
+        param->endChangeGesture();
+        return kResultTrue;
     }
 
-    return kResultTrue;
+    return kResultFalse;
 }
 
 tresult VST3HostContext::restartComponent (Steinberg::int32 flags)
