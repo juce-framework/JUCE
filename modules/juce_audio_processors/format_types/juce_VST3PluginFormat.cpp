@@ -2248,7 +2248,6 @@ public:
         editController->setComponentHandler (holder->host);
         grabInformationObjects();
         interconnectComponentAndController();
-        updateMidiMappings();
 
         auto configureParameters = [this]
         {
@@ -2264,6 +2263,8 @@ public:
         // configured, so we need to jump though all these hoops again
         if (getParameters().isEmpty() && editController->getParameterCount() > 0)
             configureParameters();
+
+        updateMidiMappings();
 
         parameterDispatcher.start (*editController);
 
