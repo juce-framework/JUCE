@@ -1527,15 +1527,30 @@ struct VST3PluginWindow : public AudioProcessorEditor,
     {
         if (incomingView != nullptr && newSize != nullptr && incomingView == view)
         {
+            auto scaleToViewRect = [this] (int dimension)
+            {
+                return (Steinberg::int32) roundToInt ((float) dimension * nativeScaleFactor);
+            };
+
+            auto oldWidth  = scaleToViewRect (getWidth());
+            auto oldHeight = scaleToViewRect (getHeight());
+
             resizeWithRect (embeddedComponent, *newSize, nativeScaleFactor);
             setSize (embeddedComponent.getWidth(), embeddedComponent.getHeight());
 
             // According to the VST3 Workflow Diagrams, a resizeView from the plugin should
             // always trigger a response from the host which confirms the new size.
-            ViewRect rect;
-            rect.right  = (Steinberg::int32) roundToInt ((float) getWidth()  * nativeScaleFactor);
-            rect.bottom = (Steinberg::int32) roundToInt ((float) getHeight() * nativeScaleFactor);
-            view->onSize (&rect);
+            ViewRect rect { 0, 0,
+                            scaleToViewRect (getWidth()),
+                            scaleToViewRect (getHeight()) };
+
+            if (rect.right != oldWidth || rect.bottom != oldHeight
+                || ! isInOnSize)
+            {
+                // Guard against plug-ins immediately calling resizeView() with the same size
+                const ScopedValueSetter<bool> inOnSizeSetter (isInOnSize, true);
+                view->onSize (&rect);
+            }
 
             return kResultTrue;
         }
@@ -1642,7 +1657,7 @@ private:
    #endif
 
     HandleFormat pluginHandle = {};
-    bool recursiveResize = false, hasDoneInitialResize = false;
+    bool recursiveResize = false, hasDoneInitialResize = false, isInOnSize = false;
 
     ComponentPeer* currentPeer = nullptr;
     Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
