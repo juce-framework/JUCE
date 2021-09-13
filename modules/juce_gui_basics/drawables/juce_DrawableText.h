@@ -98,8 +98,6 @@ public:
     Path getOutlineAsPath() const override;
     /** @internal */
     bool replaceColour (Colour originalColour, Colour replacementColour) override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -110,6 +108,7 @@ private:
     Colour colour;
     Justification justification;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void refreshBounds();
     Rectangle<int> getTextArea (float width, float height) const;
     AffineTransform getTextTransform (float width, float height) const;

@@ -174,7 +174,8 @@ struct GraphEditorPanel::PinComponent   : public Component,
 //==============================================================================
 struct GraphEditorPanel::PluginComponent   : public Component,
                                              public Timer,
-                                             private AudioProcessorParameter::Listener
+                                             private AudioProcessorParameter::Listener,
+                                             private AsyncUpdater
 {
     PluginComponent (GraphEditorPanel& p, AudioProcessorGraph::NodeID id)  : panel (p), graph (p.graph), pluginID (id)
     {
@@ -471,10 +472,14 @@ struct GraphEditorPanel::PluginComponent   : public Component,
 
     void parameterValueChanged (int, float) override
     {
-        repaint();
+        // Parameter changes might come from the audio thread or elsewhere, but
+        // we can only call repaint from the message thread.
+        triggerAsyncUpdate();
     }
 
     void parameterGestureChanged (int, bool) override  {}
+
+    void handleAsyncUpdate() override { repaint(); }
 
     GraphEditorPanel& panel;
     PluginGraph& graph;

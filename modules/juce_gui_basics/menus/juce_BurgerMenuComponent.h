@@ -71,8 +71,6 @@ public:
 
     /** @internal */
     void lookAndFeelChanged() override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -83,6 +81,7 @@ private:
         PopupMenu::Item item;
     };
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void refresh();
     void paint (Graphics&) override;
     int getNumRows() override;

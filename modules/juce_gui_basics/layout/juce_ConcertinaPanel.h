@@ -119,11 +119,8 @@ public:
                                                 ConcertinaPanel&, Component&) = 0;
     };
 
-    //==============================================================================
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
-
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void resized() override;
 
     class PanelHolder;

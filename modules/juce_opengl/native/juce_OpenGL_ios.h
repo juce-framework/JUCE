@@ -165,7 +165,7 @@ public:
             }
             else
             {
-                glResolveMultisampleFramebufferAPPLE();
+                ::glResolveMultisampleFramebufferAPPLE();
             }
         }
 

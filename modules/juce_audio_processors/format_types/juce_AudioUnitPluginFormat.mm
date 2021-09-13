@@ -1732,7 +1732,6 @@ private:
    #if JUCE_MAC
     void addPropertyChangeListener (AudioUnitPropertyID type) const
     {
-
         AudioUnitEvent event;
         event.mEventType = kAudioUnitEvent_PropertyChange;
         event.mArgument.mProperty.mPropertyID = type;

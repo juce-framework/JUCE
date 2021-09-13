@@ -101,7 +101,7 @@ public:
             if (@available (macOS 10.10, *))
            #endif
             {
-                [window setAccessibilityElement: component.getAccessibilityHandler() != nullptr];
+                [window setAccessibilityElement: YES];
             }
           #endif
 

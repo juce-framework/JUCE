@@ -629,12 +629,13 @@ namespace AlertWindowMappings
 {
     using MapFn = int (*) (int);
 
-    static int noMapping (int buttonIndex)    { return buttonIndex; }
-    static int messageBox (int)               { return 0; }
-    static int okCancel (int buttonIndex)     { return buttonIndex == 0 ? 1 : 0; }
-    static int yesNoCancel (int buttonIndex)  { return buttonIndex == 2 ? 0 : buttonIndex + 1; }
+    static inline int noMapping (int buttonIndex)    { return buttonIndex; }
+    static inline int messageBox (int)               { return 0; }
+    static inline int okCancel (int buttonIndex)     { return buttonIndex == 0 ? 1 : 0; }
+    static inline int yesNoCancel (int buttonIndex)  { return buttonIndex == 2 ? 0 : buttonIndex + 1; }
 
-    static ModalComponentManager::Callback* getWrappedCallback (ModalComponentManager::Callback* callbackIn, MapFn mapFn)
+    static std::unique_ptr<ModalComponentManager::Callback> getWrappedCallback (ModalComponentManager::Callback* callbackIn,
+                                                                                MapFn mapFn)
     {
         jassert (mapFn != nullptr);
 
@@ -646,7 +647,7 @@ namespace AlertWindowMappings
             innerCallback->modalStateFinished (mapFn (buttonIndex));
         };
 
-        return ModalCallbackFunction::create (std::move (wrappedCallback));
+        return rawToUniquePtr (ModalCallbackFunction::create (std::move (wrappedCallback)));
     }
 }
 
@@ -711,9 +712,6 @@ void AlertWindow::showMessageBoxAsync (MessageBoxIconType iconType,
                                        Component* associatedComponent,
                                        ModalComponentManager::Callback* callback)
 {
-    if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
-        callback = AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::messageBox);
-
     showAsync (MessageBoxOptions()
                  .withIconType (iconType)
                  .withTitle (title)
@@ -727,12 +725,10 @@ static int showMaybeAsync (const MessageBoxOptions& options,
                            ModalComponentManager::Callback* callbackIn,
                            AlertWindowMappings::MapFn mapFn)
 {
-    jassert (mapFn != nullptr);
-
     const auto showAsync = (callbackIn != nullptr ? Async::yes
                                                   : Async::no);
 
-    auto callback = rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
+    auto callback = AlertWindowMappings::getWrappedCallback (callbackIn, mapFn);
 
     if (LookAndFeel::getDefaultLookAndFeel().isUsingNativeAlertWindows())
     {

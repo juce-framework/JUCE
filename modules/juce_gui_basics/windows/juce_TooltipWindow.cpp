@@ -158,6 +158,11 @@ float TooltipWindow::getDesktopScaleFactor() const
     return Component::getDesktopScaleFactor();
 }
 
+std::unique_ptr<AccessibilityHandler> TooltipWindow::createAccessibilityHandler()
+{
+    return createIgnoredAccessibilityHandler (*this);
+}
+
 void TooltipWindow::timerCallback()
 {
     auto& desktop = Desktop::getInstance();

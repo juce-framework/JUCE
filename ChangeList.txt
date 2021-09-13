@@ -3,6 +3,14 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 6.1.1
+  - Fixed a CMake installation issue
+  - Improved parameter value loading after plug-in restarts
+  - Fixed some problems with multi-line text layouts
+  - Added a fallback for modal native message boxes on Windows
+  - Fixed an issue setting OpenGL repaint events
+  - Improved accessibility support
+
 Version 6.1.0
   - Added accessibility support
   - Enabled use of VST3 plug-in extensions

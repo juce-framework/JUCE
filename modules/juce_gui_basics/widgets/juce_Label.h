@@ -338,8 +338,6 @@ protected:
     void valueChanged (Value&) override;
     /** @internal */
     void callChangeListeners();
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
@@ -358,6 +356,7 @@ private:
     bool lossOfFocusDiscardsChanges = false;
     bool leftOfOwnerComp = false;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool updateFromTextEditorContents (TextEditor&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label)

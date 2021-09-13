@@ -31,6 +31,7 @@ check_required_components("@PROJECT_NAME@")
 set(JUCE_MODULES_DIR "@PACKAGE_JUCE_MODULE_PATH@" CACHE INTERNAL
     "The path to JUCE modules")
 
+include("@PACKAGE_UTILS_INSTALL_DIR@/JUCEModuleSupport.cmake")
 include("@PACKAGE_UTILS_INSTALL_DIR@/JUCEUtils.cmake")
 
 set(_juce_modules

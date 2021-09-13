@@ -887,6 +887,27 @@ public:
     };
 
     //==============================================================================
+    /** An RAII class for sending slider listener drag messages.
+
+        This is useful if you are programatically updating the slider's value and want
+        to imitate a mouse event, for example in a custom AccessibilityHandler.
+
+        @see Slider::Listener
+    */
+    class JUCE_API  ScopedDragNotification
+    {
+    public:
+        explicit ScopedDragNotification (Slider&);
+        ~ScopedDragNotification();
+
+    private:
+        Slider& sliderBeingDragged;
+
+        JUCE_DECLARE_NON_MOVEABLE (ScopedDragNotification)
+        JUCE_DECLARE_NON_COPYABLE (ScopedDragNotification)
+    };
+
+    //==============================================================================
     /** This abstract base class is implemented by LookAndFeel classes to provide
         slider drawing functionality.
     */
@@ -970,14 +991,13 @@ public:
     void mouseExit (const MouseEvent&) override;
     /** @internal */
     void mouseEnter (const MouseEvent&) override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
     std::unique_ptr<Pimpl> pimpl;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void init (SliderStyle, TextEntryBoxPosition);
 
    #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
