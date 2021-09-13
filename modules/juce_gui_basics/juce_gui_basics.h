@@ -161,6 +161,10 @@ namespace juce
 
     class FlexBox;
     class Grid;
+
+   #if JUCE_MAC || JUCE_WINDOWS
+    Image createSnapshotOfNativeWindow (void* nativeWindowHandle);
+   #endif
 }
 
 #include "mouse/juce_MouseCursor.h"
