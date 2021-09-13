@@ -907,10 +907,10 @@ private:
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
     : browser (new Pimpl (*this)),
-      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+      unloadPageWhenHidden (unloadWhenHidden)
 {
     ignoreUnused (blankPageShown);
-    ignoreUnused (unloadPageWhenBrowserIsHidden);
+    ignoreUnused (unloadPageWhenHidden);
 
     setOpaque (true);
 

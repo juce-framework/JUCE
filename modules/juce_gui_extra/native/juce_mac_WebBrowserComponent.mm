@@ -677,7 +677,7 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
-    : unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+    : unloadPageWhenHidden (unloadWhenHidden)
 {
     setOpaque (true);
     browser.reset (new Pimpl (this));
@@ -756,7 +756,7 @@ void WebBrowserComponent::checkWindowAssociation()
     }
     else
     {
-        if (unloadPageWhenBrowserIsHidden && ! blankPageShown)
+        if (unloadPageWhenHidden && ! blankPageShown)
         {
             // when the component becomes invisible, some stuff like flash
             // carries on playing audio, so we need to force it onto a blank

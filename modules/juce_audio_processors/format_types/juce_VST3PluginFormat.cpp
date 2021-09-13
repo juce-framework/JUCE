@@ -1396,9 +1396,9 @@ struct VST3PluginWindow : public AudioProcessorEditor,
     }
 
    #if JUCE_LINUX || JUCE_BSD
-    Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID iid, void** obj) override
+    Steinberg::tresult PLUGIN_API queryInterface (const Steinberg::TUID queryIid, void** obj) override
     {
-        if (doUIDsMatch (iid, Steinberg::Linux::IRunLoop::iid))
+        if (doUIDsMatch (queryIid, Steinberg::Linux::IRunLoop::iid))
         {
             *obj = &runLoop.get();
             return kResultTrue;

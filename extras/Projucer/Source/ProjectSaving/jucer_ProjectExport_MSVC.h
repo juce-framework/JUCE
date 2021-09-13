@@ -1161,9 +1161,9 @@ public:
                 auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
                 auto bundleContents = bundleDir + "\\Contents";
                 auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
-                auto executable     = archDir + String ("\\") + outputFilename;
+                auto executablePath = archDir + String ("\\") + outputFilename;
 
-                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config, false).quoted() + String (" ") + executable.quoted() + String ("\r\ncall ")
+                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config, false).quoted() + String (" ") + executablePath.quoted() + String ("\r\ncall ")
                                      + createRebasedPath (bundleScript) + String (" ") + archDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
                 if (config.isPluginBinaryCopyStepEnabled())

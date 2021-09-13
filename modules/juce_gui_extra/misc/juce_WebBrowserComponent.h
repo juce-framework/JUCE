@@ -151,7 +151,7 @@ private:
 
     //==============================================================================
     std::unique_ptr<Pimpl> browser;
-    bool blankPageShown = false, unloadPageWhenBrowserIsHidden;
+    bool blankPageShown = false, unloadPageWhenHidden;
     String lastURL;
     StringArray lastHeaders;
     MemoryBlock lastPostData;

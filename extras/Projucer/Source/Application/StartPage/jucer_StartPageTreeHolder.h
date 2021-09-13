@@ -85,10 +85,10 @@ private:
     class TreeSubItem  : public TreeViewItem
     {
     public:
-        TreeSubItem (StartPageTreeHolder& o, const String& n, const StringArray& subItems)
-            : owner (o), name (n), isHeader (subItems.size() > 0)
+        TreeSubItem (StartPageTreeHolder& o, const String& n, const StringArray& subItemsIn)
+            : owner (o), name (n), isHeader (subItemsIn.size() > 0)
         {
-            for (auto& s : subItems)
+            for (auto& s : subItemsIn)
                 addSubItem (new TreeSubItem (owner, s, {}));
         }
 
