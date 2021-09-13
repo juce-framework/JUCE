@@ -869,7 +869,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
         "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
         "-Wswitch-enum"
     };
-    recommendedCompilerWarningFlags["GCC"] = { "-Wall", "-Wextra", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wsign-compare",
+    recommendedCompilerWarningFlags["GCC"] = { "-Wall", "-Wextra", "-Wshadow", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter", "-Wsign-compare",
         "-Woverloaded-virtual", "-Wreorder", "-Wsign-conversion", "-Wunreachable-code",
         "-Wzero-as-null-pointer-constant", "-Wcast-align", "-Wno-implicit-fallthrough",
         "-Wno-maybe-uninitialized", "-Wno-missing-field-initializers", "-Wno-ignored-qualifiers",
