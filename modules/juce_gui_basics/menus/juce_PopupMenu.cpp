@@ -374,7 +374,6 @@ struct MenuWindow  : public Component
 
         calculateWindowPos (targetArea, alignToRectangle);
         setTopLeftPosition (windowPos.getPosition());
-        updateYPositions();
 
         if (auto visibleID = options.getItemThatMustBeVisible())
         {
