@@ -26,7 +26,7 @@ public:
     // TODO JUCE_ARA if adding 64 bit support, we need to add bool doublePrecisionProcessing here.
     virtual void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels, bool alwaysNonRealtime = false) { ignoreUnused (sampleRate, maximumSamplesPerBlock, numChannels, alwaysNonRealtime); }
 
-    /** Frees render ressources allocated in prepareToPlay(). */
+    /** Frees render resources allocated in prepareToPlay(). */
     virtual void releaseResources() {}
 
     /** Resets the internal state variables of the renderer. */

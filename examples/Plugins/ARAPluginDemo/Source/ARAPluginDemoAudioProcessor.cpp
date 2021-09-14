@@ -90,7 +90,7 @@ void ARAPluginDemoAudioProcessor::prepareToPlay (double sampleRate, int samplesP
     if (prepareToPlayForARA (sampleRate, samplesPerBlock, getMainBusNumOutputChannels()))
         return;
 
-    // since we're always bypassing without ARA, we do not need to handle additional ressources here
+    // since we're always bypassing without ARA, we do not need to handle additional resources here
 }
 
 void ARAPluginDemoAudioProcessor::releaseResources()
@@ -98,7 +98,7 @@ void ARAPluginDemoAudioProcessor::releaseResources()
     if (releaseResourcesForARA())
         return;
 
-    // since we're always bypassing without ARA, we do not need to handle additional ressources here
+    // since we're always bypassing without ARA, we do not need to handle additional resources here
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
