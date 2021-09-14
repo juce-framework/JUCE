@@ -162,7 +162,7 @@ namespace juce
     class FlexBox;
     class Grid;
 
-   #if JUCE_MAC || JUCE_WINDOWS
+   #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
     Image createSnapshotOfNativeWindow (void* nativeWindowHandle);
    #endif
 }

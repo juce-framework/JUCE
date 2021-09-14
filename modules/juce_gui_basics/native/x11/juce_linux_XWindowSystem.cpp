@@ -676,6 +676,16 @@ namespace Visuals
 class XBitmapImage  : public ImagePixelData
 {
 public:
+    explicit XBitmapImage (XImage* image)
+        : ImagePixelData (image->depth == 24 ? Image::RGB : Image::ARGB, image->width, image->height),
+          xImage (image),
+          imageDepth ((unsigned int) xImage->depth)
+    {
+        pixelStride = xImage->bits_per_pixel / 8;
+        lineStride = xImage->bytes_per_line;
+        imageData = reinterpret_cast<uint8*> (xImage->data);
+    }
+
     XBitmapImage (Image::PixelFormat format, int w, int h,
                   bool clearImage, unsigned int imageDepth_, Visual* visual)
         : ImagePixelData (format, w, h),
@@ -699,8 +709,8 @@ public:
             segmentInfo.shmaddr = (char *) -1;
             segmentInfo.readOnly = False;
 
-            xImage = X11Symbols::getInstance()->xShmCreateImage (display, visual, imageDepth, ZPixmap, nullptr,
-                                                                 &segmentInfo, (unsigned int) w, (unsigned int) h);
+            xImage.reset (X11Symbols::getInstance()->xShmCreateImage (display, visual, imageDepth, ZPixmap, nullptr,
+                                                                      &segmentInfo, (unsigned int) w, (unsigned int) h));
 
             if (xImage != nullptr)
             {
@@ -739,7 +749,7 @@ public:
             imageDataAllocated.allocate ((size_t) (lineStride * h), format == Image::ARGB && clearImage);
             imageData = imageDataAllocated;
 
-            xImage = (XImage*) ::calloc (1, sizeof (XImage));
+            xImage.reset ((XImage*) ::calloc (1, sizeof (XImage)));
 
             xImage->width = w;
             xImage->height = h;
@@ -773,7 +783,7 @@ public:
                 xImage->blue_mask  = visual->blue_mask;
             }
 
-            if (! X11Symbols::getInstance()->xInitImage (xImage))
+            if (! X11Symbols::getInstance()->xInitImage (xImage.get()))
                 jassertfalse;
         }
     }
@@ -791,7 +801,6 @@ public:
             X11Symbols::getInstance()->xShmDetach (display, &segmentInfo);
 
             X11Symbols::getInstance()->xFlush (display);
-            X11Symbols::getInstance()->xDestroyImage (xImage);
 
             shmdt (segmentInfo.shmaddr);
             shmctl (segmentInfo.shmid, IPC_RMID, nullptr);
@@ -800,7 +809,6 @@ public:
        #endif
         {
             xImage->data = nullptr;
-            X11Symbols::getInstance()->xDestroyImage (xImage);
         }
     }
 
@@ -877,7 +885,7 @@ public:
                     auto* pixel = (PixelRGB*) p;
                     p += srcData.pixelStride;
 
-                    X11Symbols::getInstance()->xPutPixel (xImage, x, y,
+                    X11Symbols::getInstance()->xPutPixel (xImage.get(), x, y,
                                                               (((((uint32) pixel->getRed())   << rShiftL) >> rShiftR) & rMask)
                                                             | (((((uint32) pixel->getGreen()) << gShiftL) >> gShiftR) & gMask)
                                                             | (((((uint32) pixel->getBlue())  << bShiftL) >> bShiftR) & bMask));
@@ -888,10 +896,10 @@ public:
         // blit results to screen.
        #if JUCE_USE_XSHM
         if (isUsingXShm())
-            X11Symbols::getInstance()->xShmPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh, True);
+            X11Symbols::getInstance()->xShmPutImage (display, (::Drawable) window, gc, xImage.get(), sx, sy, dx, dy, dw, dh, True);
         else
        #endif
-            X11Symbols::getInstance()->xPutImage (display, (::Drawable) window, gc, xImage, sx, sy, dx, dy, dw, dh);
+            X11Symbols::getInstance()->xPutImage (display, (::Drawable) window, gc, xImage.get(), sx, sy, dx, dy, dw, dh);
     }
 
     #if JUCE_USE_XSHM
@@ -900,7 +908,15 @@ public:
 
 private:
     //==============================================================================
-    XImage* xImage = nullptr;
+    struct Deleter
+    {
+        void operator() (XImage* img) const noexcept
+        {
+            X11Symbols::getInstance()->xDestroyImage (img);
+        }
+    };
+
+    std::unique_ptr<XImage, Deleter> xImage;
     const unsigned int imageDepth;
     HeapBlock<uint8> imageDataAllocated;
     HeapBlock<char> imageData16Bit;
@@ -3708,5 +3724,37 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
 
 //==============================================================================
 JUCE_IMPLEMENT_SINGLETON (XWindowSystem)
+
+Image createSnapshotOfNativeWindow (void* window)
+{
+    ::Window root;
+    int wx, wy;
+    unsigned int ww, wh, bw, bitDepth;
+
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    const auto display = XWindowSystem::getInstance()->getDisplay();
+
+    if (! X11Symbols::getInstance()->xGetGeometry (display, (::Drawable) window, &root, &wx, &wy, &ww, &wh, &bw, &bitDepth))
+        return {};
+
+    const auto scale = []
+    {
+        if (auto* d = Desktop::getInstance().getDisplays().getPrimaryDisplay())
+            return d->scale;
+
+        return 1.0;
+    }();
+
+    auto image = Image { new XBitmapImage { X11Symbols::getInstance()->xGetImage (display,
+                                                                                  (::Drawable) window,
+                                                                                  0,
+                                                                                  0,
+                                                                                  ww,
+                                                                                  wh,
+                                                                                  AllPlanes,
+                                                                                  ZPixmap) } };
+    return image.rescaled ((int) ((double) ww / scale), (int) ((double) wh / scale));
+}
 
 } // namespace juce

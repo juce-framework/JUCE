@@ -127,6 +127,7 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xGetErrorDatabaseText,       "XGetErrorDatabaseText"),
                        makeSymbolBinding (xGetErrorText,               "XGetErrorText"),
                        makeSymbolBinding (xGetGeometry,                "XGetGeometry"),
+                       makeSymbolBinding (xGetImage,                   "XGetImage"),
                        makeSymbolBinding (xGetInputFocus,              "XGetInputFocus"),
                        makeSymbolBinding (xGetModifierMapping,         "XGetModifierMapping"),
                        makeSymbolBinding (xGetPointerMapping,          "XGetPointerMapping"),

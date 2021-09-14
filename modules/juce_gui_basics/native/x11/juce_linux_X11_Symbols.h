@@ -237,6 +237,10 @@ public:
                                          (::Display*, ::Drawable, ::Window*, int*, int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*),
                                          Status)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetImage, xGetImage,
+                                         (::Display*, ::Drawable, int, int, unsigned int, unsigned int, unsigned long, int),
+                                         XImage*)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetInputFocus, xGetInputFocus,
                                          (::Display*, ::Window*, int*),
                                          void)
