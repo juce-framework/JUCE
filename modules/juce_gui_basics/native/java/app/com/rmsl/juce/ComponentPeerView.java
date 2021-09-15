@@ -563,6 +563,9 @@ public final class ComponentPeerView extends ViewGroup
         @Override
         public AccessibilityNodeInfo createAccessibilityNodeInfo (int virtualViewId)
         {
+            if (host == 0)
+                return null;
+
             final AccessibilityNodeInfo nodeInfo = AccessibilityNodeInfo.obtain (view, virtualViewId);
 
             if (! populateAccessibilityNodeInfo (host, virtualViewId, nodeInfo))
@@ -583,6 +586,9 @@ public final class ComponentPeerView extends ViewGroup
         @Override
         public AccessibilityNodeInfo findFocus (int focus)
         {
+            if (host == 0)
+                return null;
+
             Integer focusViewId = (focus == AccessibilityNodeInfo.FOCUS_INPUT ? getInputFocusViewId (host)
                                                                               : getAccessibilityFocusViewId (host));
 
@@ -595,6 +601,9 @@ public final class ComponentPeerView extends ViewGroup
         @Override
         public boolean performAction (int virtualViewId, int action, Bundle arguments)
         {
+            if (host == 0)
+                return false;
+
             return handlePerformAction (host, virtualViewId, action, arguments);
         }
 
