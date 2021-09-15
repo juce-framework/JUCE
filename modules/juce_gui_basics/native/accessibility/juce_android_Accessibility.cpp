@@ -190,23 +190,6 @@ static constexpr auto getClassName (AccessibilityRole role)
     return "android.view.View";
 }
 
-static auto getRootView()
-{
-    LocalRef<jobject> activity (getMainActivity());
-
-    if (activity != nullptr)
-    {
-        auto* env = getEnv();
-
-        LocalRef<jobject> mainWindow (env->CallObjectMethod (activity.get(), AndroidActivity.getWindow));
-        LocalRef<jobject> decorView (env->CallObjectMethod (mainWindow.get(), AndroidWindow.getDecorView));
-
-        return LocalRef<jobject> (env->CallObjectMethod (decorView.get(), AndroidView.getRootView));
-    }
-
-    return LocalRef<jobject>();
-}
-
 static jobject getSourceView (const AccessibilityHandler& handler)
 {
     if (auto* peer = handler.getComponent().getPeer())
@@ -251,6 +234,8 @@ public:
 
     void populateNodeInfo (jobject info)
     {
+        const ScopedValueSetter<bool> svs (inPopulateNodeInfo, true);
+
         const auto sourceView = getSourceView (accessibilityHandler);
 
         if (sourceView == nullptr)
@@ -647,6 +632,8 @@ public:
         return false;
     }
 
+    bool isInPopulateNodeInfo() const noexcept  { return inPopulateNodeInfo; }
+
 private:
     static std::unordered_map<int, AccessibilityHandler*> virtualViewIdMap;
 
@@ -749,6 +736,7 @@ private:
 
     AccessibilityHandler& accessibilityHandler;
     const int virtualViewId;
+    bool inPopulateNodeInfo = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibilityNativeHandle)
@@ -792,6 +780,11 @@ void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventT
 
     if (const auto sourceView = getSourceView (handler))
     {
+        const auto* nativeImpl = handler.getNativeImplementation();
+
+        if (nativeImpl == nullptr || nativeImpl->isInPopulateNodeInfo())
+            return;
+
         auto* env = getEnv();
         auto appContext = getAppContext();
 
@@ -810,7 +803,7 @@ void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventT
         env->CallVoidMethod (event,
                              AndroidAccessibilityEvent.setSource,
                              sourceView,
-                             handler.getNativeImplementation()->getVirtualViewId());
+                             nativeImpl->getVirtualViewId());
 
         if (contentChangeTypes != 0 && accessibilityEventSetContentChangeTypes != nullptr)
             env->CallVoidMethod (event,
@@ -899,7 +892,22 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString,
     if (! areAnyAccessibilityClientsActive())
         return;
 
-    const auto rootView = getRootView();
+    const auto rootView = []
+    {
+        LocalRef<jobject> activity (getMainActivity());
+
+        if (activity != nullptr)
+        {
+            auto* env = getEnv();
+
+            LocalRef<jobject> mainWindow (env->CallObjectMethod (activity.get(), AndroidActivity.getWindow));
+            LocalRef<jobject> decorView (env->CallObjectMethod (mainWindow.get(), AndroidWindow.getDecorView));
+
+            return LocalRef<jobject> (env->CallObjectMethod (decorView.get(), AndroidView.getRootView));
+        }
+
+        return LocalRef<jobject>();
+    }();
 
     if (rootView != nullptr)
         getEnv()->CallVoidMethod (rootView.get(),
