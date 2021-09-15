@@ -82,6 +82,9 @@ namespace
                   TYPE_VIEW_TEXT_SELECTION_CHANGED      = 0x00002000,
                   TYPE_VIEW_TEXT_CHANGED                = 0x00000010;
 
+    constexpr int CONTENT_CHANGE_TYPE_SUBTREE             = 0x00000001,
+                  CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION = 0x00000004;
+
     constexpr int ACTION_ACCESSIBILITY_FOCUS              = 0x00000040,
                   ACTION_CLEAR_ACCESSIBILITY_FOCUS        = 0x00000080,
                   ACTION_CLEAR_FOCUS                      = 0x00000002,
@@ -112,9 +115,10 @@ namespace
     constexpr int ACCESSIBILITY_LIVE_REGION_POLITE = 0x00000001;
 }
 
-static jmethodID nodeInfoSetEditable      = nullptr;
-static jmethodID nodeInfoSetTextSelection = nullptr;
-static jmethodID nodeInfoSetLiveRegion    = nullptr;
+static jmethodID nodeInfoSetEditable                     = nullptr;
+static jmethodID nodeInfoSetTextSelection                = nullptr;
+static jmethodID nodeInfoSetLiveRegion                   = nullptr;
+static jmethodID accessibilityEventSetContentChangeTypes = nullptr;
 
 static void loadSDKDependentMethods()
 {
@@ -134,7 +138,10 @@ static void loadSDKDependentMethods()
         }
 
         if (sdkVersion >= 19)
-            nodeInfoSetLiveRegion = env->GetMethodID (AndroidAccessibilityNodeInfo, "setLiveRegion", "(I)V");
+        {
+            nodeInfoSetLiveRegion                   = env->GetMethodID (AndroidAccessibilityNodeInfo, "setLiveRegion",         "(I)V");
+            accessibilityEventSetContentChangeTypes = env->GetMethodID (AndroidAccessibilityEvent,    "setContentChangeTypes", "(I)V");
+        }
     }
 }
 
@@ -208,7 +215,7 @@ static jobject getSourceView (const AccessibilityHandler& handler)
     return nullptr;
 }
 
-void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventType);
+void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventType, int contentChangeTypes);
 
 //==============================================================================
 class AccessibilityNativeHandle
@@ -490,7 +497,7 @@ public:
             {
                 if (accessibilityHandler.getActions().invoke (AccessibilityActionType::press))
                 {
-                    sendAccessibilityEventImpl (accessibilityHandler, TYPE_VIEW_CLICKED);
+                    sendAccessibilityEventImpl (accessibilityHandler, TYPE_VIEW_CLICKED, 0);
                     return true;
                 }
 
@@ -627,7 +634,7 @@ public:
                                                               valueInterface->getCurrentValue() + interval));
 
                             // required for Android to announce the new value
-                            sendAccessibilityEventImpl (accessibilityHandler, TYPE_VIEW_SELECTED);
+                            sendAccessibilityEventImpl (accessibilityHandler, TYPE_VIEW_SELECTED, 0);
                             return true;
                         }
                     }
@@ -778,7 +785,7 @@ static bool areAnyAccessibilityClientsActive()
     return false;
 }
 
-void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventType)
+void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventType, int contentChangeTypes)
 {
     if (! areAnyAccessibilityClientsActive())
         return;
@@ -805,6 +812,11 @@ void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventT
                              sourceView,
                              handler.getNativeImplementation()->getVirtualViewId());
 
+        if (contentChangeTypes != 0 && accessibilityEventSetContentChangeTypes != nullptr)
+            env->CallVoidMethod (event,
+                                 accessibilityEventSetContentChangeTypes,
+                                 contentChangeTypes);
+
         env->CallBooleanMethod (sourceView,
                                 AndroidViewGroup.requestSendAccessibilityEvent,
                                 sourceView,
@@ -815,6 +827,16 @@ void sendAccessibilityEventImpl (const AccessibilityHandler& handler, int eventT
 void notifyAccessibilityEventInternal (const AccessibilityHandler& handler,
                                        InternalAccessibilityEvent eventType)
 {
+    if (eventType == InternalAccessibilityEvent::elementCreated
+        || eventType == InternalAccessibilityEvent::elementDestroyed
+        || eventType == InternalAccessibilityEvent::elementMovedOrResized)
+    {
+        if (auto* parent = handler.getParent())
+            sendAccessibilityEventImpl (*parent, TYPE_WINDOW_CONTENT_CHANGED, CONTENT_CHANGE_TYPE_SUBTREE);
+
+        return;
+    }
+
     auto notification = [&handler, eventType]
     {
         switch (eventType)
@@ -826,9 +848,6 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler,
             case InternalAccessibilityEvent::elementCreated:
             case InternalAccessibilityEvent::elementDestroyed:
             case InternalAccessibilityEvent::elementMovedOrResized:
-                return handler.getComponent().isOnDesktop() ? 0
-                                                            : TYPE_WINDOW_CONTENT_CHANGED;
-
             case InternalAccessibilityEvent::windowOpened:
             case InternalAccessibilityEvent::windowClosed:
                 break;
@@ -838,7 +857,7 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler,
     }();
 
     if (notification != 0)
-        sendAccessibilityEventImpl (handler, notification);
+        sendAccessibilityEventImpl (handler, notification, 0);
 }
 
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventType) const
@@ -849,18 +868,29 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
         {
             case AccessibilityEvent::textSelectionChanged:  return TYPE_VIEW_TEXT_SELECTION_CHANGED;
             case AccessibilityEvent::textChanged:           return TYPE_VIEW_TEXT_CHANGED;
+
+            case AccessibilityEvent::titleChanged:
             case AccessibilityEvent::structureChanged:      return TYPE_WINDOW_CONTENT_CHANGED;
 
             case AccessibilityEvent::rowSelectionChanged:
-            case AccessibilityEvent::valueChanged:
-            case AccessibilityEvent::titleChanged:          break;
+            case AccessibilityEvent::valueChanged:          break;
         }
 
         return 0;
     }();
 
-    if (notification != 0)
-        sendAccessibilityEventImpl (*this, notification);
+    if (notification == 0)
+        return;
+
+    const auto contentChangeTypes = [eventType]
+    {
+        if (eventType == AccessibilityEvent::titleChanged)      return CONTENT_CHANGE_TYPE_CONTENT_DESCRIPTION;
+        if (eventType == AccessibilityEvent::structureChanged)  return CONTENT_CHANGE_TYPE_SUBTREE;
+
+        return 0;
+    }();
+
+    sendAccessibilityEventImpl (*this, notification, contentChangeTypes);
 }
 
 void AccessibilityHandler::postAnnouncement (const String& announcementString,
