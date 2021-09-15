@@ -2415,9 +2415,15 @@ public:
 
         By default this is set to true.
 
-        @see getAccessibilityHandler
+        @see isAccessible, getAccessibilityHandler
     */
     void setAccessible (bool shouldBeAccessible);
+
+    /** Returns true if this component and its children are visible to accessibility clients.
+
+        @see setAccessible
+    */
+    bool isAccessible() const noexcept;
 
     /** Returns the accessibility handler for this component, or nullptr if this component is not
         accessible.
@@ -2569,8 +2575,6 @@ private:
     bool containsInternal (Point<float>);
     bool reallyContainsInternal (Point<float>, bool);
     Component* getComponentAtInternal (Point<float>);
-
-    bool isAccessible() const noexcept;
 
     struct ComponentHelpers;
     friend struct ComponentHelpers;

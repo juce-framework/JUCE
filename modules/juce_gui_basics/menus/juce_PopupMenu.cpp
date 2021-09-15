@@ -330,6 +330,17 @@ struct MenuWindow  : public Component
         }
         else
         {
+            const auto shouldDisableAccessibility = [this]
+            {
+                const auto* compToCheck = parent != nullptr ? parent
+                                                            : options.getTargetComponent();
+
+                return compToCheck != nullptr && ! compToCheck->isAccessible();
+            }();
+
+            if (shouldDisableAccessibility)
+                setAccessible (false);
+
             addToDesktop (ComponentPeer::windowIsTemporary
                           | ComponentPeer::windowIgnoresKeyPresses
                           | lf.getMenuWindowFlags());
