@@ -406,12 +406,16 @@ private:
 };
 
 //==============================================================================
-class ParameterDisplayComponent   : public Component
+class ParameterDisplayComponent   : public Component,
+                                    private AudioProcessorListener,
+                                    private AsyncUpdater
 {
 public:
     ParameterDisplayComponent (AudioProcessorEditor& editorIn, AudioProcessorParameter& param)
         : editor (editorIn), parameter (param)
     {
+        editor.processor.addListener (this);
+
         parameterName.setText (parameter.getName (128), dontSendNotification);
         parameterName.setJustificationType (Justification::centredRight);
         parameterName.setInterceptsMouseClicks (false, false);
@@ -424,6 +428,12 @@ public:
         addAndMakeVisible (*(parameterComp = createParameterComp (editor.processor)));
 
         setSize (400, 40);
+    }
+
+    ~ParameterDisplayComponent() override
+    {
+        cancelPendingUpdate();
+        editor.processor.removeListener (this);
     }
 
     void resized() override
@@ -477,6 +487,25 @@ private:
 
         // Everything else can be represented as a slider.
         return std::make_unique<SliderParameterComponent> (processor, parameter);
+    }
+
+    void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
+
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails& details) override
+    {
+        if (! details.parameterInfoChanged)
+            return;
+
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            handleAsyncUpdate();
+        else
+            triggerAsyncUpdate();
+    }
+
+    void handleAsyncUpdate() override
+    {
+        parameterName .setText (parameter.getName (128), dontSendNotification);
+        parameterLabel.setText (parameter.getLabel(),    dontSendNotification);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterDisplayComponent)
