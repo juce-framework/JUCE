@@ -2579,7 +2579,7 @@ StringPairArray Project::getAudioPluginFlags() const
 
         for (int i = 0; i < 4; ++i)
             hexRepresentation = (hexRepresentation << 8u)
-                                |  (static_cast<unsigned int> (fourCharCode[i]) & 0xffu);
+                                | (static_cast<unsigned int> (fourCharCode[i]) & 0xffu);
 
         return "0x" + String::toHexString (static_cast<int> (hexRepresentation));
     };

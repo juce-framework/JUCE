@@ -446,8 +446,12 @@ function(_juce_version_code version_in out_var)
     set(${out_var} "${hex}" PARENT_SCOPE)
 endfunction()
 
-function(_juce_to_char_literal str out_var)
-    string(APPEND str "    ") # Make sure there are at least 4 characters in the string.
+function(_juce_to_char_literal str out_var help_text)
+    string(LENGTH "${str}" string_length)
+
+    if(NOT "${string_length}" EQUAL "4")
+        message(FATAL_ERROR "The ${help_text} code must contain exactly four characters, but it was set to '${str}'")
+    endif()
 
     # Round-tripping through a file is the simplest way to convert a string to hex...
     string(SUBSTRING "${str}" 0 4 four_chars)
@@ -1137,11 +1141,11 @@ function(_juce_configure_plugin_targets target)
     get_target_property(use_legacy_compatibility_plugin_code ${target} JUCE_USE_LEGACY_COMPATIBILITY_PLUGIN_CODE)
 
     if(use_legacy_compatibility_plugin_code)
-        set(project_manufacturer_code "project_manufacturer_code-NOTFOUND")
+        set(project_manufacturer_code "proj")
     endif()
 
-    _juce_to_char_literal(${project_manufacturer_code} project_manufacturer_code)
-    _juce_to_char_literal(${project_plugin_code} project_plugin_code)
+    _juce_to_char_literal(${project_manufacturer_code} project_manufacturer_code "plugin manufacturer")
+    _juce_to_char_literal(${project_plugin_code} project_plugin_code "plugin")
 
     _juce_get_vst3_category_string(${target} vst3_category_string)
 
