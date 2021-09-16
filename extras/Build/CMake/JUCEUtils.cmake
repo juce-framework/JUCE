@@ -1048,6 +1048,15 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
         C_VISIBILITY_PRESET hidden
         CXX_VISIBILITY_PRESET hidden
         JUCE_TARGET_KIND_STRING "${juce_kind_string}")
+
+    # Under the Xcode generator, POST_BUILD commands (including the plugin copy step) run before
+    # signing, but M1 macs will only load signed binaries. Setting "adhoc_codesign" forces the
+    # linker to sign bundles, so that they can be loaded even if they are copied before the "real"
+    # signing step. See issue 21854 on the CMake Gitlab repo.
+    if("${CMAKE_GENERATOR};${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Xcode;Darwin;arm64")
+        target_link_options(${target_name} PRIVATE LINKER:-adhoc_codesign)
+    endif()
+
     add_dependencies(${shared_code_target}_All ${target_name})
 
     _juce_configure_bundle(${shared_code_target} ${target_name})
