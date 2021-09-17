@@ -362,6 +362,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.AudioPerformanceTest;
 				PRODUCT_NAME = "AudioPerformanceTest";
 				USE_HEADERMAP = NO;
@@ -425,6 +426,7 @@
 				LLVM_LTO = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.AudioPerformanceTest;
 				PRODUCT_NAME = "AudioPerformanceTest";
 				USE_HEADERMAP = NO;

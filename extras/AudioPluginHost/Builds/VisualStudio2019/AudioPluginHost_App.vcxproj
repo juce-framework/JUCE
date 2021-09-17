@@ -3056,6 +3056,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_win32_WindowsUIAWrapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_X11_Symbols.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_XWindowSystem.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_mac_CGMetalLayerRenderer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_ScopedDPIAwarenessDisabler.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_win32_ScopedThreadDPIAwarenessSetter.h"/>

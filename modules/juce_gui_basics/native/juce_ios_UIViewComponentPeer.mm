@@ -16,6 +16,13 @@
   ==============================================================================
 */
 
+#include "juce_mac_CGMetalLayerRenderer.h"
+
+#if TARGET_OS_SIMULATOR && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+ #warning JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS uses parts of the Metal API that are currently unsupported in the simulator - falling back to JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS=0
+ #undef JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+#endif
+
 #if defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
  #define JUCE_HAS_IOS_POINTER_SUPPORT 1
 #else
@@ -125,6 +132,8 @@ struct CADisplayLinkDeleter
 - (JuceUIView*) initWithOwner: (UIViewComponentPeer*) owner withFrame: (CGRect) frame;
 - (void) dealloc;
 
++ (Class) layerClass;
+
 - (void) displayLinkCallback: (CADisplayLink*) dl;
 
 - (void) drawRect: (CGRect) r;
@@ -197,8 +206,8 @@ struct UIViewPeerControllerReceiver
 };
 
 class UIViewComponentPeer  : public ComponentPeer,
-                             public FocusChangeListener,
-                             public UIViewPeerControllerReceiver
+                             private FocusChangeListener,
+                             private UIViewPeerControllerReceiver
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
@@ -239,6 +248,7 @@ public:
     void displayLinkCallback();
 
     void drawRect (CGRect);
+    void drawRectWithContext (CGContextRef, CGRect);
     bool canBecomeKeyWindow();
 
     //==============================================================================
@@ -315,6 +325,7 @@ private:
         }
     };
 
+    std::unique_ptr<CoreGraphicsMetalLayerRenderer> metalRenderer;
     RectangleList<float> deferredRepaints;
 
     //==============================================================================
@@ -514,6 +525,16 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 }
 
 //==============================================================================
++ (Class) layerClass
+{
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    if (@available (iOS 12, *))
+        return [CAMetalLayer class];
+   #endif
+
+    return [CALayer class];
+}
+
 - (void) displayLinkCallback: (CADisplayLink*) dl
 {
     if (owner != nullptr)
@@ -688,6 +709,11 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     view.hidden = true;
     view.opaque = component.isOpaque();
     view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
+
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    if (@available (iOS 12, *))
+        metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer> ((CAMetalLayer*) view.layer, comp);
+   #endif
 
     if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         [[view layer] setDrawsAsynchronously: YES];
@@ -1170,10 +1196,40 @@ void UIViewComponentPeer::globalFocusChanged (Component*)
 //==============================================================================
 void UIViewComponentPeer::displayLinkCallback()
 {
-    for (const auto& r : deferredRepaints)
-        [view setNeedsDisplayInRect: convertToCGRect (r)];
+    if (deferredRepaints.isEmpty())
+        return;
 
-    deferredRepaints.clear();
+    auto dispatchRectangles = [this] ()
+    {
+        // We shouldn't need this preprocessor guard, but when running in the simulator
+        // CAMetalLayer is flagged as requiring iOS 13
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        if (metalRenderer != nullptr)
+        {
+            if (@available (iOS 12, *))
+            {
+                return metalRenderer->drawRectangleList ((CAMetalLayer*) view.layer,
+                                                         (float) view.contentScaleFactor,
+                                                         view.frame,
+                                                         component,
+                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
+                                                         deferredRepaints);
+            }
+
+            // The creation of metalRenderer should already be guarded with @available (iOS 12, *).
+            jassertfalse;
+            return false;
+        }
+       #endif
+
+        for (const auto& r : deferredRepaints)
+            [view setNeedsDisplayInRect: convertToCGRect (r)];
+
+        return true;
+    };
+
+    if (dispatchRectangles())
+        deferredRepaints.clear();
 }
 
 //==============================================================================
@@ -1182,8 +1238,11 @@ void UIViewComponentPeer::drawRect (CGRect r)
     if (r.size.width < 1.0f || r.size.height < 1.0f)
         return;
 
-    CGContextRef cg = UIGraphicsGetCurrentContext();
+    drawRectWithContext (UIGraphicsGetCurrentContext(), r);
+}
 
+void UIViewComponentPeer::drawRectWithContext (CGContextRef cg, CGRect)
+{
     if (! component.isOpaque())
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 

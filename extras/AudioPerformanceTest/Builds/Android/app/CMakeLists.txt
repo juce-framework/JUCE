@@ -1383,6 +1383,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/native/juce_ios_Windowing.mm"
     "../../../../../modules/juce_gui_basics/native/juce_linux_FileChooser.cpp"
     "../../../../../modules/juce_gui_basics/native/juce_linux_Windowing.cpp"
+    "../../../../../modules/juce_gui_basics/native/juce_mac_CGMetalLayerRenderer.h"
     "../../../../../modules/juce_gui_basics/native/juce_mac_FileChooser.mm"
     "../../../../../modules/juce_gui_basics/native/juce_mac_MainMenu.mm"
     "../../../../../modules/juce_gui_basics/native/juce_mac_MouseCursor.mm"
@@ -2900,6 +2901,7 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_ios_Windowing.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_linux_FileChooser.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_linux_Windowing.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_mac_CGMetalLayerRenderer.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_mac_FileChooser.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_mac_MainMenu.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/juce_mac_MouseCursor.mm" PROPERTIES HEADER_FILE_ONLY TRUE)

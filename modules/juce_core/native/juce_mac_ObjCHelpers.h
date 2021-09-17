@@ -306,6 +306,9 @@ public:
     bool operator== (const ObjCObjectHandle& other) const { return item == other.item; }
     bool operator!= (const ObjCObjectHandle& other) const { return ! (*this == other); }
 
+    bool operator== (std::nullptr_t) const { return item == nullptr; }
+    bool operator!= (std::nullptr_t) const { return ! (*this == nullptr); }
+
 private:
     void swap (ObjCObjectHandle& other) noexcept { std::swap (other.item, item); }
 

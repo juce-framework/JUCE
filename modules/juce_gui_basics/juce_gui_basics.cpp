@@ -42,6 +42,7 @@
 #if JUCE_MAC
  #import <WebKit/WebKit.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
+ #import <MetalKit/MetalKit.h>
 
  #if JUCE_SUPPORT_CARBON
   #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
@@ -52,6 +53,7 @@
   #import <UserNotifications/UserNotifications.h>
  #endif
 
+ #import <MetalKit/MetalKit.h>
  #import <UIKit/UIActivityViewController.h>
 
 //==============================================================================

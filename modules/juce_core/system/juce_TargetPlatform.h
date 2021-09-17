@@ -144,8 +144,8 @@
   #endif
 
   #if JUCE_MAC
-    #if ! defined (MAC_OS_X_VERSION_10_11)
-      #error "The 10.11 SDK (Xcode 7.3.1+) is required to build JUCE apps. You can create apps that run on macOS 10.7+ by changing the deployment target."
+    #if ! defined (MAC_OS_X_VERSION_10_14)
+      #error "The 10.14 SDK (Xcode 10.1+) is required to build JUCE apps. You can create apps that run on macOS 10.7+ by changing the deployment target."
     #elif MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_7
       #error "Building for OSX 10.6 is no longer supported!"
     #endif

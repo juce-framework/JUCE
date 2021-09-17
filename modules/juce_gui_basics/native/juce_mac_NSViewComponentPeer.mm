@@ -16,6 +16,8 @@
   ==============================================================================
 */
 
+#include "juce_mac_CGMetalLayerRenderer.h"
+
 @interface NSEvent (DeviceDelta)
 - (float)deviceDeltaX;
 - (float)deviceDeltaY;
@@ -24,14 +26,11 @@
 //==============================================================================
 namespace juce
 {
-    typedef void (*AppFocusChangeCallback)();
-    extern AppFocusChangeCallback appFocusChangeCallback;
-    typedef bool (*CheckEventBlockedByModalComps) (NSEvent*);
-    extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
-}
 
-namespace juce
-{
+using AppFocusChangeCallback = void (*)();
+extern AppFocusChangeCallback appFocusChangeCallback;
+using CheckEventBlockedByModalComps = bool (*) (NSEvent*);
+extern CheckEventBlockedByModalComps isEventBlockedByModalComps;
 
 //==============================================================================
 static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
@@ -918,6 +917,11 @@ public:
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }();
 
+        drawRectWithContext (cg, r);
+    }
+
+    void drawRectWithContext (CGContextRef cg, NSRect r)
+    {
         if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
@@ -936,10 +940,12 @@ public:
         };
 
        #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
-        // This option invokes a separate paint call for each rectangle of the clip region.
-        // It's a long story, but this is a basically a workaround for a CGContext not having
-        // a way of finding whether a rectangle falls within its clip region
-        if (usingCoreGraphics)
+        // This was a workaround for a CGContext not having a way of finding whether a rectangle
+        // falls within its clip region. However Apple removed the capability of
+        // [view getRectsBeingDrawn: ...] sometime around 10.13, so on later versions of macOS
+        // numRects will always be 1 and you'll need to use a CoreGraphicsMetalLayerRenderer
+        // to avoid CoreGraphics consolidating disparate rects.
+        if (usingCoreGraphics && metalRenderer == nullptr)
         {
             const NSRect* rects = nullptr;
             NSInteger numRects = 0;
@@ -952,7 +958,7 @@ public:
                     NSRect rect = rects[i];
                     CGContextSaveGState (cg);
                     CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
-                    drawRectWithContext (cg, rect, displayScale);
+                    renderRect (cg, rect, displayScale);
                     CGContextRestoreGState (cg);
                 }
 
@@ -962,11 +968,11 @@ public:
         }
        #endif
 
-        drawRectWithContext (cg, r, displayScale);
+        renderRect (cg, r, displayScale);
         invalidateTransparentWindowShadow();
     }
 
-    void drawRectWithContext (CGContextRef cg, NSRect r, float displayScale)
+    void renderRect (CGContextRef cg, NSRect r, float displayScale)
     {
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
@@ -1049,11 +1055,61 @@ public:
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
             return;
 
-        for (auto& i : deferredRepaints)
-            [view setNeedsDisplayInRect: makeNSRect (i)];
+       #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        // We require macOS 10.14 to use the Metal layer renderer
+        if (@available (macOS 10.14, *))
+        {
+            const auto& comp = getComponent();
 
-        lastRepaintTime = Time::getMillisecondCounter();
-        deferredRepaints.clear();
+            // If we are resizing we need to fall back to synchronous drawing to avoid artefacts
+            if (areAnyWindowsInLiveResize())
+            {
+                if (metalRenderer != nullptr)
+                {
+                    metalRenderer.reset();
+                    view.wantsLayer = NO;
+                    view.layer = nil;
+                    deferredRepaints = comp.getLocalBounds().toFloat();
+                }
+            }
+            else
+            {
+                if (metalRenderer == nullptr)
+                {
+                    view.wantsLayer = YES;
+                    view.layerContentsRedrawPolicy = NSViewLayerContentsRedrawDuringViewResize;
+                    view.layerContentsPlacement = NSViewLayerContentsPlacementTopLeft;
+                    view.layer = [CAMetalLayer layer];
+                    metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer> ((CAMetalLayer*) view.layer, getComponent());
+                    deferredRepaints = comp.getLocalBounds().toFloat();
+                }
+            }
+        }
+       #endif
+
+        auto dispatchRectangles = [this] ()
+        {
+            if (metalRenderer != nullptr)
+            {
+                return metalRenderer->drawRectangleList ((CAMetalLayer*) view.layer,
+                                                         (float) [[view window] backingScaleFactor],
+                                                         view.frame,
+                                                         getComponent(),
+                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
+                                                         deferredRepaints);
+            }
+
+            for (auto& i : deferredRepaints)
+                [view setNeedsDisplayInRect: makeNSRect (i)];
+
+            return true;
+        };
+
+        if (dispatchRectangles())
+        {
+            lastRepaintTime = Time::getMillisecondCounter();
+            deferredRepaints.clear();
+        }
     }
 
     void performAnyPendingRepaintsNow() override
@@ -1157,6 +1213,7 @@ public:
     void redirectMovedOrResized()
     {
         handleMovedOrResized();
+        setNeedsDisplayRectangles();
     }
 
     void windowDidChangeScreen()
@@ -1794,6 +1851,7 @@ private:
         [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
     }
 
+    //==============================================================================
     void onDisplaySourceCallback()
     {
         setNeedsDisplayRectangles();
@@ -1835,6 +1893,8 @@ private:
 
     CVDisplayLinkRef displayLink = nullptr;
     dispatch_source_t displaySource = nullptr;
+
+    std::unique_ptr<CoreGraphicsMetalLayerRenderer> metalRenderer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
