@@ -1089,14 +1089,17 @@ public:
 
         auto dispatchRectangles = [this] ()
         {
-            if (metalRenderer != nullptr)
+            if (@available (macOS 10.14, *))
             {
-                return metalRenderer->drawRectangleList ((CAMetalLayer*) view.layer,
-                                                         (float) [[view window] backingScaleFactor],
-                                                         view.frame,
-                                                         getComponent(),
-                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
-                                                         deferredRepaints);
+                if (metalRenderer != nullptr)
+                {
+                    return metalRenderer->drawRectangleList ((CAMetalLayer*) view.layer,
+                                                             (float) [[view window] backingScaleFactor],
+                                                             view.frame,
+                                                             getComponent(),
+                                                             [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
+                                                             deferredRepaints);
+                }
             }
 
             for (auto& i : deferredRepaints)
