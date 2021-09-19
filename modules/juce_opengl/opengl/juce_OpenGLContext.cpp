@@ -684,9 +684,7 @@ public:
     OpenGLFrameBuffer cachedImageFrameBuffer;
     RectangleList<int> validArea;
     Rectangle<int> viewportArea, lastScreenBounds;
-#if JUCE_MAC
     const Displays::Display* lastDisplay = nullptr;
-#endif
     double scale = 1.0;
     AffineTransform transform;
     GLuint vertexArrayObject = 0;
