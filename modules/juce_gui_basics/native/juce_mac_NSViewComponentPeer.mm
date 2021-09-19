@@ -2146,9 +2146,9 @@ private:
         return [getAccessibleChild (self) accessibilityFocusedUIElement];
     }
 
-    static BOOL getAccessibilityIsIgnored (id self, SEL)
+    static BOOL getAccessibilityIsIgnored (id, SEL)
     {
-        return ! [self isAccessibilityElement];
+        return YES;
     }
 
     static id getAccessibilityAttributeValue (id self, SEL, NSString* attribute)
@@ -2386,7 +2386,10 @@ private:
 
     static NSAccessibilityRole getAccessibilitySubrole (id self, SEL)
     {
-        return [getAccessibleChild (self) accessibilitySubrole];
+        if (@available (macOS 10.10, *))
+            return [getAccessibleChild (self) accessibilitySubrole];
+
+        return nil;
     }
 };
 

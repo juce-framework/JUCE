@@ -253,8 +253,11 @@ bool AccessibilityHandler::isParentOf (const AccessibilityHandler* possibleChild
 AccessibilityHandler* AccessibilityHandler::getChildAt (Point<int> screenPoint)
 {
     if (auto* comp = Desktop::getInstance().findComponentAt (screenPoint))
-        if (isParentOf (comp->getAccessibilityHandler()))
-            return getUnignoredAncestor (findEnclosingHandler (comp));
+    {
+        if (auto* handler = getUnignoredAncestor (findEnclosingHandler (comp)))
+            if (isParentOf (handler))
+                return handler;
+    }
 
     return nullptr;
 }

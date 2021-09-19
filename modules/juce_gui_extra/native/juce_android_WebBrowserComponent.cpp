@@ -584,7 +584,7 @@ private:
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (const bool unloadWhenHidden)
     : blankPageShown (false),
-      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+      unloadPageWhenHidden (unloadWhenHidden)
 {
     setOpaque (true);
 
@@ -665,7 +665,7 @@ void WebBrowserComponent::checkWindowAssociation()
     }
     else
     {
-        if (unloadPageWhenBrowserIsHidden && ! blankPageShown)
+        if (unloadPageWhenHidden && ! blankPageShown)
         {
             // when the component becomes invisible, some stuff like flash
             // carries on playing audio, so we need to force it onto a blank

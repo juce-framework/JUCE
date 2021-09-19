@@ -706,10 +706,10 @@ void Button::repeatTimerCallback()
 class ButtonAccessibilityHandler  : public AccessibilityHandler
 {
 public:
-    explicit ButtonAccessibilityHandler (Button& buttonToWrap, AccessibilityRole role)
+    explicit ButtonAccessibilityHandler (Button& buttonToWrap, AccessibilityRole roleIn)
         : AccessibilityHandler (buttonToWrap,
-                                isRadioButton (buttonToWrap) ? AccessibilityRole::radioButton : role,
-                                getAccessibilityActions (buttonToWrap, role)),
+                                isRadioButton (buttonToWrap) ? AccessibilityRole::radioButton : roleIn,
+                                getAccessibilityActions (buttonToWrap, roleIn)),
           button (buttonToWrap)
     {
     }

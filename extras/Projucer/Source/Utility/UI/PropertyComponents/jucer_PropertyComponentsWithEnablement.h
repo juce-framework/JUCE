@@ -35,8 +35,8 @@ public:
                                          ValueWithDefault valueToListenTo,
                                          const String& propertyName,
                                          int maxNumChars,
-                                         bool isMultiLine)
-        : TextPropertyComponent (valueToControl, propertyName, maxNumChars, isMultiLine),
+                                         bool multiLine)
+        : TextPropertyComponent (valueToControl, propertyName, maxNumChars, multiLine),
           valueWithDefault (valueToListenTo),
           value (valueWithDefault.getPropertyAsValue())
     {

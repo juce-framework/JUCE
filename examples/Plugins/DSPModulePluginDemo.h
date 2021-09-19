@@ -1625,16 +1625,16 @@ private:
     class AttachedSlider  : public ComponentWithParamMenu
     {
     public:
-        AttachedSlider (AudioProcessorEditor& editorIn, RangedAudioParameter& param)
-            : ComponentWithParamMenu (editorIn, param),
-              label ("", param.name),
-              attachment (param, slider)
+        AttachedSlider (AudioProcessorEditor& editorIn, RangedAudioParameter& paramIn)
+            : ComponentWithParamMenu (editorIn, paramIn),
+              label ("", paramIn.name),
+              attachment (paramIn, slider)
         {
             slider.addMouseListener (this, true);
 
             addAllAndMakeVisible (*this, slider, label);
 
-            slider.setTextValueSuffix (" " + param.label);
+            slider.setTextValueSuffix (" " + paramIn.label);
 
             label.attachToComponent (&slider, false);
             label.setJustificationType (Justification::centred);
@@ -1651,10 +1651,10 @@ private:
     class AttachedToggle  : public ComponentWithParamMenu
     {
     public:
-        AttachedToggle (AudioProcessorEditor& editorIn, RangedAudioParameter& param)
-            : ComponentWithParamMenu (editorIn, param),
-              toggle (param.name),
-              attachment (param, toggle)
+        AttachedToggle (AudioProcessorEditor& editorIn, RangedAudioParameter& paramIn)
+            : ComponentWithParamMenu (editorIn, paramIn),
+              toggle (paramIn.name),
+              attachment (paramIn, toggle)
         {
             toggle.addMouseListener (this, true);
             addAndMakeVisible (toggle);
@@ -1670,11 +1670,11 @@ private:
     class AttachedCombo  : public ComponentWithParamMenu
     {
     public:
-        AttachedCombo (AudioProcessorEditor& editorIn, RangedAudioParameter& param)
-            : ComponentWithParamMenu (editorIn, param),
-              combo (param),
-              label ("", param.name),
-              attachment (param, combo)
+        AttachedCombo (AudioProcessorEditor& editorIn, RangedAudioParameter& paramIn)
+            : ComponentWithParamMenu (editorIn, paramIn),
+              combo (paramIn),
+              label ("", paramIn.name),
+              attachment (paramIn, combo)
         {
             combo.addMouseListener (this, true);
 

@@ -41,6 +41,8 @@ namespace juce
 
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
+
 //==============================================================================
 class AccessibilityHandler::AccessibilityNativeImpl
 {
@@ -943,6 +945,8 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
                                    NSAccessibilityPriorityKey:     @(nsPriority) });
      }
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #endif
 

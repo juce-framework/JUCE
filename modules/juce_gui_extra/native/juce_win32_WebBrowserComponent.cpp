@@ -780,7 +780,7 @@ private:
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
     : browser (new Pimpl (*this, {}, {}, false)),
-      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+      unloadPageWhenHidden (unloadWhenHidden)
 {
     setOpaque (true);
 }
@@ -789,7 +789,7 @@ WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden,
                                           const File& dllLocation,
                                           const File& userDataFolder)
     : browser (new Pimpl (*this, dllLocation, userDataFolder, true)),
-      unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+      unloadPageWhenHidden (unloadWhenHidden)
 {
     setOpaque (true);
 }
@@ -875,7 +875,7 @@ void WebBrowserComponent::checkWindowAssociation()
     }
     else
     {
-        if (browser != nullptr && unloadPageWhenBrowserIsHidden && ! blankPageShown)
+        if (browser != nullptr && unloadPageWhenHidden && ! blankPageShown)
         {
             // when the component becomes invisible, some stuff like flash
             // carries on playing audio, so we need to force it onto a blank

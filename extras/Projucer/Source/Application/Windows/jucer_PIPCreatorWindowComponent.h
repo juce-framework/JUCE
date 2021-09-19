@@ -76,11 +76,11 @@ public:
             chooser = std::make_unique<FileChooser> ("Save PIP File",
                                                      File::getSpecialLocation (File::SpecialLocationType::userDesktopDirectory)
                                                           .getChildFile (nameValue.get().toString() + ".h"));
-            auto flags = FileBrowserComponent::saveMode
-                       | FileBrowserComponent::canSelectFiles
-                       | FileBrowserComponent::warnAboutOverwriting;
+            auto browserFlags = FileBrowserComponent::saveMode
+                              | FileBrowserComponent::canSelectFiles
+                              | FileBrowserComponent::warnAboutOverwriting;
 
-            chooser->launchAsync (flags, [this] (const FileChooser& fc)
+            chooser->launchAsync (browserFlags, [this] (const FileChooser& fc)
             {
                 const auto result = fc.getResult();
 

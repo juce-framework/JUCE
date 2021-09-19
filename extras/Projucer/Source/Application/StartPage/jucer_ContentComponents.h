@@ -100,9 +100,9 @@ public:
         createProjectButton.onClick = [this]
         {
             chooser = std::make_unique<FileChooser> ("Save Project", NewProjectWizard::getLastWizardFolder());
-            auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
+            auto browserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-            chooser->launchAsync (flags, [this] (const FileChooser& fc)
+            chooser->launchAsync (browserFlags, [this] (const FileChooser& fc)
             {
                 auto dir = fc.getResult();
 

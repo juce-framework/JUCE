@@ -725,9 +725,9 @@ private:
                           warnAboutOverwritingExistingFiles,
                           [doSaveAs = std::forward<DoSaveAs> (doSaveAs),
                            doAskToOverwriteFile = std::forward<DoAskToOverwriteFile> (doAskToOverwriteFile),
-                           callback = std::move (callback)] (SafeParentPointer ptr, File chosen)
+                           callback = std::move (callback)] (SafeParentPointer parentPtr, File chosen)
         {
-            if (ptr.shouldExitAsyncCallback())
+            if (parentPtr.shouldExitAsyncCallback())
                 return;
 
             if (chosen == File{})
@@ -738,18 +738,18 @@ private:
                 return;
             }
 
-            auto updateAndSaveAs = [ptr, doSaveAs, callback] (const File& chosenFile)
+            auto updateAndSaveAs = [parentPtr, doSaveAs, callback] (const File& chosenFile)
             {
-                if (ptr.shouldExitAsyncCallback())
+                if (parentPtr.shouldExitAsyncCallback())
                     return;
 
-                ptr->document.setLastDocumentOpened (chosenFile);
-                doSaveAs (ptr, chosenFile, false, false, true, callback, false);
+                parentPtr->document.setLastDocumentOpened (chosenFile);
+                doSaveAs (parentPtr, chosenFile, false, false, true, callback, false);
             };
 
             if (chosen.getFileExtension().isEmpty())
             {
-                chosen = chosen.withFileExtension (ptr->fileExtension);
+                chosen = chosen.withFileExtension (parentPtr->fileExtension);
 
                 if (chosen.exists())
                 {
@@ -765,7 +765,7 @@ private:
                             callback (userCancelledSave);
                     };
 
-                    doAskToOverwriteFile (ptr, chosen, std::move (afterAsking));
+                    doAskToOverwriteFile (parentPtr, chosen, std::move (afterAsking));
                     return;
                 }
             }

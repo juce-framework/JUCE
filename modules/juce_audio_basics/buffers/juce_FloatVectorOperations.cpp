@@ -873,7 +873,7 @@ void FloatVectorOperations::abs (double* dest, const double* src, int num) noexc
 void JUCE_CALLTYPE FloatVectorOperations::convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept
 {
    #if JUCE_USE_ARM_NEON
-    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = src[i] * multiplier,
+    JUCE_PERFORM_VEC_OP_SRC_DEST (dest[i] = (float) src[i] * multiplier,
                                   vmulq_n_f32 (vcvtq_f32_s32 (vld1q_s32 (src)), multiplier),
                                   JUCE_LOAD_NONE, JUCE_INCREMENT_SRC_DEST, )
    #else

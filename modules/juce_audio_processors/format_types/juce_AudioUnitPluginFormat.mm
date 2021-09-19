@@ -1362,7 +1362,7 @@ public:
 
     void refreshParameterList() override
     {
-        paramIDToIndex.clear();
+        paramIDToParameter.clear();
         AudioProcessorParameterGroup newParameterTree;
 
         if (audioUnit != nullptr)
@@ -1380,11 +1380,10 @@ public:
             {
                 const size_t numParams = paramListSize / sizeof (int);
 
-                HeapBlock<UInt32> ids;
-                ids.calloc (numParams);
+                std::vector<UInt32> ids (numParams, 0);
 
                 AudioUnitGetProperty (audioUnit, kAudioUnitProperty_ParameterList, kAudioUnitScope_Global,
-                                      0, ids, &paramListSize);
+                                      0, ids.data(), &paramListSize);
 
                 std::map<UInt32, AudioProcessorParameterGroup*> groupIDMap;
 
@@ -1398,7 +1397,6 @@ public:
                                               kAudioUnitScope_Global,
                                               ids[i], &info, &sz) == noErr)
                     {
-                        paramIDToIndex.getReference (ids[i]) = i;
                         String paramName;
 
                         if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
@@ -1428,18 +1426,20 @@ public:
                             return {};
                         }();
 
-                        auto* parameter = new AUInstanceParameter (*this,
-                                                                   ids[i],
-                                                                   paramName,
-                                                                   info.minValue,
-                                                                   info.maxValue,
-                                                                   info.defaultValue,
-                                                                   (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0,
-                                                                   isDiscrete,
-                                                                   isDiscrete ? (int) (info.maxValue - info.minValue + 1.0f) : AudioProcessor::getDefaultNumParameterSteps(),
-                                                                   isBoolean,
-                                                                   label,
-                                                                   (info.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
+                        auto parameter = std::make_unique<AUInstanceParameter> (*this,
+                                                                                ids[i],
+                                                                                paramName,
+                                                                                info.minValue,
+                                                                                info.maxValue,
+                                                                                info.defaultValue,
+                                                                                (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0,
+                                                                                isDiscrete,
+                                                                                isDiscrete ? (int) (info.maxValue - info.minValue + 1.0f) : AudioProcessor::getDefaultNumParameterSteps(),
+                                                                                isBoolean,
+                                                                                label,
+                                                                                (info.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
+
+                        paramIDToParameter.emplace (ids[i], parameter.get());
 
                         if (info.flags & kAudioUnitParameterFlag_HasClump)
                         {
@@ -1468,18 +1468,18 @@ public:
 
                                 auto group = std::make_unique<AudioProcessorParameterGroup> (String (info.clumpID),
                                                                                              getClumpName(), String());
-                                group->addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
+                                group->addChild (std::move (parameter));
                                 groupIDMap[info.clumpID] = group.get();
                                 newParameterTree.addChild (std::move (group));
                             }
                             else
                             {
-                                groupInfo->second->addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
+                                groupInfo->second->addChild (std::move (parameter));
                             }
                         }
                         else
                         {
-                            newParameterTree.addChild (std::unique_ptr<AudioProcessorParameter> (parameter));
+                            newParameterTree.addChild (std::move (parameter));
                         }
                     }
                 }
@@ -1657,7 +1657,7 @@ private:
     AUEventListenerRef eventListenerRef;
    #endif
 
-    HashMap<uint32, size_t> paramIDToIndex;
+    std::map<UInt32, AUInstanceParameter*> paramIDToParameter;
 
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
@@ -1743,71 +1743,47 @@ private:
 
     void eventCallback (const AudioUnitEvent& event, AudioUnitParameterValue newValue)
     {
-        int paramIndex = -1;
-
-        if (event.mEventType == kAudioUnitEvent_ParameterValueChange
-         || event.mEventType == kAudioUnitEvent_BeginParameterChangeGesture
-         || event.mEventType == kAudioUnitEvent_EndParameterChangeGesture)
+        if (event.mEventType == kAudioUnitEvent_PropertyChange)
         {
-            auto paramID = event.mArgument.mParameter.mParameterID;
-
-            if (! paramIDToIndex.contains (paramID))
-                return;
-
-            paramIndex = static_cast<int> (paramIDToIndex [paramID]);
-
-            if (! isPositiveAndBelow (paramIndex, getParameters().size()))
-                return;
+            respondToPropertyChange (event.mArgument.mProperty);
+            return;
         }
 
-        switch (event.mEventType)
+        const auto iter = paramIDToParameter.find (event.mArgument.mParameter.mParameterID);
+        auto* param = iter != paramIDToParameter.end() ? iter->second : nullptr;
+        jassert (param != nullptr); // Invalid parameter index
+
+        if (param == nullptr)
+            return;
+
+        if (event.mEventType == kAudioUnitEvent_ParameterValueChange)
+            param->sendValueChangedMessageToListeners (param->normaliseParamValue (newValue));
+        else if (event.mEventType == kAudioUnitEvent_BeginParameterChangeGesture)
+            param->beginChangeGesture();
+        else if (event.mEventType == kAudioUnitEvent_EndParameterChangeGesture)
+            param->endChangeGesture();
+    }
+
+    void respondToPropertyChange (const AudioUnitProperty& prop)
+    {
+        switch (prop.mPropertyID)
         {
-            case kAudioUnitEvent_ParameterValueChange:
-                if (auto* param = getParameters().getUnchecked (paramIndex))
-                {
-                    jassert (dynamic_cast<AUInstanceParameter*> (param) != nullptr);
-                    auto* auparam = static_cast<AUInstanceParameter*> (param);
-                    param->sendValueChangedMessageToListeners (auparam->normaliseParamValue (newValue));
-                }
-
+            case kAudioUnitProperty_ParameterList:
+                updateHostDisplay (AudioProcessorListener::ChangeDetails().withParameterInfoChanged (true));
                 break;
 
-            case kAudioUnitEvent_BeginParameterChangeGesture:
-                if (auto* param = getParameters()[paramIndex])
-                    param->beginChangeGesture();
-                else
-                    jassertfalse; // Invalid parameter index
-
+            case kAudioUnitProperty_PresentPreset:
+                sendAllParametersChangedEvents();
+                updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true));
                 break;
 
-            case kAudioUnitEvent_EndParameterChangeGesture:
-                if (auto* param = getParameters()[paramIndex])
-                    param->endChangeGesture();
-                else
-                    jassertfalse; // Invalid parameter index
-
+            case kAudioUnitProperty_Latency:
+                updateLatency();
                 break;
 
-            case kAudioUnitEvent_PropertyChange:
-            default:
-                if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_ParameterList)
-                {
-                    updateHostDisplay (AudioProcessorListener::ChangeDetails().withParameterInfoChanged (true));
-                }
-                else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_PresentPreset)
-                {
-                    sendAllParametersChangedEvents();
-                    updateHostDisplay (AudioProcessorListener::ChangeDetails().withProgramChanged (true));
-                }
-                else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency)
-                {
-                    updateLatency();
-                }
-                else if (event.mArgument.mProperty.mPropertyID == kAudioUnitProperty_BypassEffect)
-                {
-                    if (bypassParam != nullptr)
-                        bypassParam->setValueNotifyingHost (bypassParam->getValue());
-                }
+            case kAudioUnitProperty_BypassEffect:
+                if (bypassParam != nullptr)
+                    bypassParam->setValueNotifyingHost (bypassParam->getValue());
 
                 break;
         }

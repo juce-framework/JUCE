@@ -1067,8 +1067,8 @@ private:
 
             if (rotation == rotation90 || rotation == rotation270)
             {
-                env->CallBooleanMethod (matrix, AndroidMatrix.postScale, jfloat (height / (float) width), jfloat (width / (float) height), (jfloat) 0, (jfloat) 0);
-                env->CallBooleanMethod (matrix, AndroidMatrix.postRotate, (jfloat) 90 * (rotation - 2), (jfloat) 0, (jfloat) 0);
+                env->CallBooleanMethod (matrix, AndroidMatrix.postScale, jfloat ((float) height / (float) width), jfloat ((float) width / (float) height), (jfloat) 0, (jfloat) 0);
+                env->CallBooleanMethod (matrix, AndroidMatrix.postRotate, (jfloat) 90 * ((float) rotation - 2), (jfloat) 0, (jfloat) 0);
                 env->CallBooleanMethod (matrix, AndroidMatrix.postTranslate, (jfloat) (rotation == 3 ? width : 0), (jfloat) (rotation == 1 ? height : 0));
             }
 
@@ -3216,7 +3216,7 @@ struct CameraDevice::ViewerComponent  : public Component,
     {
         auto previewSize = device.pimpl->streamConfigurationMap.getDefaultPreviewSize();
 
-        targetAspectRatio = previewSize.getWidth() / (float) previewSize.getHeight();
+        targetAspectRatio = (float) previewSize.getWidth() / (float) previewSize.getHeight();
 
         if (isOrientationLandscape())
             setBounds (previewSize);
@@ -3234,31 +3234,31 @@ private:
 
     void componentMovedOrResized (bool, bool) override
     {
-        auto b = getLocalBounds();
+        auto b = getLocalBounds().toFloat();
 
         auto targetWidth  = b.getWidth();
         auto targetHeight = b.getHeight();
 
         if (isOrientationLandscape())
         {
-            auto currentAspectRatio = b.getWidth() / (float) b.getHeight();
+            auto currentAspectRatio = b.getWidth() / b.getHeight();
 
             if (currentAspectRatio > targetAspectRatio)
-                targetWidth = static_cast<int> (targetWidth * targetAspectRatio / currentAspectRatio);
+                targetWidth = targetWidth * targetAspectRatio / currentAspectRatio;
             else
-                targetHeight = static_cast<int> (targetHeight * currentAspectRatio / targetAspectRatio);
+                targetHeight = targetHeight * currentAspectRatio / targetAspectRatio;
         }
         else
         {
-            auto currentAspectRatio = b.getHeight() / (float) b.getWidth();
+            auto currentAspectRatio = b.getHeight() / b.getWidth();
 
             if (currentAspectRatio > targetAspectRatio)
-                targetHeight = static_cast<int> (targetHeight * targetAspectRatio / currentAspectRatio);
+                targetHeight = targetHeight * targetAspectRatio / currentAspectRatio;
             else
-                targetWidth = static_cast<int> (targetWidth * currentAspectRatio / targetAspectRatio);
+                targetWidth = targetWidth * currentAspectRatio / targetAspectRatio;
         }
 
-        viewerComponent.setBounds (Rectangle<int> (0, 0, targetWidth, targetHeight).withCentre (b.getCentre()));
+        viewerComponent.setBounds (Rectangle<float> (targetWidth, targetHeight).withCentre (b.getCentre()).toNearestInt());
     }
 
     bool isOrientationLandscape() const
