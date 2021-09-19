@@ -489,6 +489,7 @@ public:
             if (backgroundProcessCheck.isBackgroundProcess())
             {
                 repaintEvent.wait (300);
+                repaintEvent.reset();
                 continue;
             }
            #endif
@@ -501,7 +502,6 @@ public:
             {
                 repaintEvent.wait (-1);
                 renderFrame();
-                repaintEvent.reset();
             }
             else
            #endif
@@ -509,6 +509,8 @@ public:
                 repaintEvent.wait (5); // failed to render, so avoid a tight fail-loop.
             else if (! context.continuousRepaint && ! shouldExit())
                 repaintEvent.wait (-1);
+
+            repaintEvent.reset();
         }
 
         hasInitialised = false;

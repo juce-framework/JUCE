@@ -130,8 +130,6 @@ public:
     //==============================================================================
     /** @internal */
     void addToDesktop (int windowStyleFlags, void* nativeWindowToAttachTo = nullptr) override;
-    /** @internal */
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
 
 protected:
     //==============================================================================
@@ -159,6 +157,7 @@ private:
     bool useDropShadow = true, useNativeTitleBar = false, isCurrentlyActive = false;
     std::unique_ptr<DropShadower> shadower;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void setWindowActive (bool);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TopLevelWindow)

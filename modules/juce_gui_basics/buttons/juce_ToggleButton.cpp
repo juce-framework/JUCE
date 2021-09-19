@@ -57,4 +57,9 @@ void ToggleButton::colourChanged()
     repaint();
 }
 
+std::unique_ptr<AccessibilityHandler> ToggleButton::createAccessibilityHandler()
+{
+    return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::toggleButton);
+}
+
 } // namespace juce

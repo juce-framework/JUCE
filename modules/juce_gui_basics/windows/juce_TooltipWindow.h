@@ -142,6 +142,7 @@ private:
     unsigned int lastCompChangeTime = 0, lastHideTime = 0;
     bool reentrant = false;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void paint (Graphics&) override;
     void mouseEnter (const MouseEvent&) override;
     void timerCallback() override;

@@ -38,6 +38,7 @@ public:
 
     const String& getName() const noexcept    { return name; }
 
+private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
         class ComponentHandler  : public AccessibilityHandler
@@ -70,7 +71,6 @@ public:
         return std::make_unique<ComponentHandler> (*this);
     }
 
-private:
     MenuBarComponent& owner;
     const String name;
 };

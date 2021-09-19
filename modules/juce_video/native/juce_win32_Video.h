@@ -158,14 +158,11 @@ namespace VideoRenderers
 }
 
 //==============================================================================
-struct VideoComponent::Pimpl  : public Component
-                             #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                              , public ComponentPeer::ScaleFactorListener
-                             #endif
+struct VideoComponent::Pimpl  : public Component,
+                                private ComponentPeer::ScaleFactorListener
 {
     Pimpl (VideoComponent& ownerToUse, bool)
-        : owner (ownerToUse),
-          videoLoaded (false)
+        : owner (ownerToUse)
     {
         setOpaque (true);
         context.reset (new DirectShowContext (*this));
@@ -178,11 +175,8 @@ struct VideoComponent::Pimpl  : public Component
         context = nullptr;
         componentWatcher = nullptr;
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-            if (auto* peer = ComponentPeer::getPeer (i))
-                peer->removeScaleFactorListener (this);
-       #endif
+        if (currentPeer != nullptr)
+            currentPeer->removeScaleFactorListener (this);
     }
 
     Result loadFromString (const String& fileOrURLPath)
@@ -309,7 +303,8 @@ struct VideoComponent::Pimpl  : public Component
 
         if (getWidth() > 0 && getHeight() > 0)
             if (auto* peer = getTopLevelComponent()->getPeer())
-                context->updateWindowPosition ((peer->getAreaCoveredBy (*this).toDouble() * peer->getPlatformScaleFactor()).toNearestInt());
+                context->updateWindowPosition ((peer->getAreaCoveredBy (*this).toDouble()
+                                                * peer->getPlatformScaleFactor()).toNearestInt());
     }
 
     void updateContextVisibility()
@@ -341,21 +336,20 @@ struct VideoComponent::Pimpl  : public Component
             owner.onErrorOccurred (errorMessage);
     }
 
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
-    {
-        if (videoLoaded)
-            updateContextPosition();
-    }
-   #endif
-
     File currentFile;
     URL currentURL;
 
 private:
     VideoComponent& owner;
+    ComponentPeer* currentPeer = nullptr;
+    bool videoLoaded = false;
 
-    bool videoLoaded;
+    //==============================================================================
+    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
+    {
+        if (videoLoaded)
+            updateContextPosition();
+    }
 
     //==============================================================================
     struct ComponentWatcher   : public ComponentMovementWatcher
@@ -372,6 +366,9 @@ private:
 
         void componentPeerChanged() override
         {
+            if (owner.currentPeer != nullptr)
+                owner.currentPeer->removeScaleFactorListener (&owner);
+
             if (owner.videoLoaded)
                 owner.recreateNativeWindowAsync();
         }
@@ -771,10 +768,8 @@ private:
                 nativeWindow.reset (new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this));
 
                 hwnd = nativeWindow->hwnd;
-
-               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                topLevelPeer->addScaleFactorListener (&component);
-               #endif
+                component.currentPeer = topLevelPeer;
+                component.currentPeer->addScaleFactorListener (&component);
 
                 if (hwnd != nullptr)
                 {

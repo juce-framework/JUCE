@@ -262,12 +262,12 @@ public:
         }
     }
 
+private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
-        return nullptr;
+        return createIgnoredAccessibilityHandler (*this);
     }
 
-private:
     KeyMappingEditorComponent& owner;
     OwnedArray<ChangeKeyButton> keyChangeButtons;
     const CommandID commandID;

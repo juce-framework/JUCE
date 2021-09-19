@@ -67,14 +67,6 @@ public:
         }
     }
 
-    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
-    {
-        if (hasCustomComponent() && customComponent->getAccessibilityHandler() != nullptr)
-            return nullptr;
-
-        return std::make_unique<ItemAccessibilityHandler> (*this);
-    }
-
     void setMouseIsOverButton (bool isOver)            { mouseIsOverButton = isOver; }
     TreeViewItem& getRepresentedItem() const noexcept  { return item; }
 
@@ -224,7 +216,14 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ItemAccessibilityHandler)
     };
 
-    //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        if (hasCustomComponent() && customComponent->getAccessibilityHandler() != nullptr)
+            return nullptr;
+
+        return std::make_unique<ItemAccessibilityHandler> (*this);
+    }
+
     bool hasCustomComponent() const noexcept  { return customComponent.get() != nullptr; }
 
     TreeViewItem& item;
@@ -244,7 +243,6 @@ class TreeView::ContentComponent  : public Component,
 public:
     ContentComponent (TreeView& tree)  : owner (tree)
     {
-        setAccessible (false);
     }
 
     //==============================================================================
@@ -355,6 +353,11 @@ public:
 
 private:
     //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     void mouseDownInternal (const MouseEvent& e)
     {
         updateItemUnderMouse (e);
@@ -671,6 +674,11 @@ public:
     }
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     void timerCallback() override
     {
         stopTimer();
@@ -689,7 +697,6 @@ private:
 TreeView::TreeView (const String& name)  : Component (name)
 {
     viewport = std::make_unique<TreeViewport>();
-    viewport->setAccessible (false);
     addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (new ContentComponent (*this));
 

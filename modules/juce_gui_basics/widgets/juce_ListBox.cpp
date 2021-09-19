@@ -240,7 +240,16 @@ public:
             int getColumnIndex() const override      { return 0; }
             int getColumnSpan() const override       { return 1; }
 
-            int getRowIndex() const override         { return handler.rowComponent.row; }
+            int getRowIndex() const override
+            {
+                const auto index = handler.rowComponent.row;
+
+                if (handler.rowComponent.owner.hasAccessibleHeaderComponent())
+                    return index + 1;
+
+                return index;
+            }
+
             int getRowSpan() const override          { return 1; }
 
             int getDisclosureLevel() const override  { return 0; }
@@ -283,11 +292,9 @@ public:
     ListViewport (ListBox& lb)  : owner (lb)
     {
         setWantsKeyboardFocus (false);
-        setAccessible (false);
 
         auto content = std::make_unique<Component>();
         content->setWantsKeyboardFocus (false);
-        content->setAccessible (false);
 
         setViewedComponent (content.release());
     }
@@ -458,6 +465,11 @@ public:
     }
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     void timerCallback() override
     {
         stopTimer();
@@ -1010,6 +1022,13 @@ void ListBox::setHeaderComponent (std::unique_ptr<Component> newHeaderComponent)
     headerComponent = std::move (newHeaderComponent);
     addAndMakeVisible (headerComponent.get());
     ListBox::resized();
+    invalidateAccessibilityHandler();
+}
+
+bool ListBox::hasAccessibleHeaderComponent() const
+{
+    return headerComponent != nullptr
+            && headerComponent->getAccessibilityHandler() != nullptr;
 }
 
 void ListBox::repaintRow (const int rowNumber) noexcept
@@ -1100,11 +1119,15 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
 
         int getNumRows() const override
         {
-            if (listBox.model != nullptr)
-                return getHeaderHandler() != nullptr ? listBox.model->getNumRows() + 1
-                                                     : listBox.model->getNumRows();
+            if (listBox.model == nullptr)
+                return 0;
 
-            return 0;
+            const auto numRows = listBox.model->getNumRows();
+
+            if (listBox.hasAccessibleHeaderComponent())
+                return numRows + 1;
+
+            return numRows;
         }
 
         int getNumColumns() const override
@@ -1131,7 +1154,7 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
     private:
         const AccessibilityHandler* getHeaderHandler() const
         {
-            if (listBox.headerComponent != nullptr)
+            if (listBox.hasAccessibleHeaderComponent())
                 return listBox.headerComponent->getAccessibilityHandler();
 
             return nullptr;

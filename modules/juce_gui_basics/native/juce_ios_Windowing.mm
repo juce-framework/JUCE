@@ -477,10 +477,13 @@ public:
 
     void buttonClicked (int buttonIndex) noexcept
     {
-        if (callback != nullptr)
-            callback->modalStateFinished (buttonIndex);
+        result = buttonIndex;
 
-        delete this;
+        if (callback != nullptr)
+        {
+            callback->modalStateFinished (result);
+            delete this;
+        }
     }
 
 private:
@@ -504,23 +507,23 @@ private:
 
 //==============================================================================
 static int showDialog (const MessageBoxOptions& options,
-                       std::unique_ptr<ModalComponentManager::Callback> callback,
-                       Async async)
+                       ModalComponentManager::Callback* callbackIn,
+                       AlertWindowMappings::MapFn mapFn)
 {
    #if JUCE_MODAL_LOOPS_PERMITTED
-    if (async == Async::no)
+    if (callbackIn == nullptr)
     {
         JUCE_AUTORELEASEPOOL
         {
-            iOSMessageBox messageBox (options, std::move (callback));
-            return messageBox.getResult();
+            jassert (mapFn != nullptr);
+
+            iOSMessageBox messageBox (options, nullptr);
+            return mapFn (messageBox.getResult());
         }
     }
    #endif
 
-    ignoreUnused (async);
-
-    new iOSMessageBox (options, std::move (callback));
+    new iOSMessageBox (options, AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
     return 0;
 }
 
@@ -533,12 +536,12 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBox (MessageBoxIconType /*iconTy
                   .withTitle (title)
                   .withMessage (message)
                   .withButton (TRANS("OK")),
-                nullptr, Async::no);
+                nullptr, AlertWindowMappings::messageBox);
 }
 
 int JUCE_CALLTYPE NativeMessageBox::show (const MessageBoxOptions& options)
 {
-    return showDialog (options, nullptr, Async::no);
+    return showDialog (options, nullptr, AlertWindowMappings::noMapping);
 }
 #endif
 
@@ -551,8 +554,7 @@ void JUCE_CALLTYPE NativeMessageBox::showMessageBoxAsync (MessageBoxIconType /*i
                   .withTitle (title)
                   .withMessage (message)
                   .withButton (TRANS("OK")),
-                rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::messageBox)),
-                Async::yes);
+                callback, AlertWindowMappings::messageBox);
 }
 
 bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType /*iconType*/,
@@ -565,8 +567,7 @@ bool JUCE_CALLTYPE NativeMessageBox::showOkCancelBox (MessageBoxIconType /*iconT
                          .withMessage (message)
                          .withButton (TRANS("OK"))
                          .withButton (TRANS("Cancel")),
-                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel)),
-                       callback != nullptr ? Async::yes : Async::no) == 1;
+                       callback, AlertWindowMappings::okCancel) != 0;
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType /*iconType*/,
@@ -580,8 +581,7 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoCancelBox (MessageBoxIconType /*ico
                          .withButton (TRANS("Yes"))
                          .withButton (TRANS("No"))
                          .withButton (TRANS("Cancel")),
-                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::yesNoCancel)),
-                       callback != nullptr ? Async::yes : Async::no);
+                       callback, AlertWindowMappings::yesNoCancel);
 }
 
 int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType /*iconType*/,
@@ -594,14 +594,13 @@ int JUCE_CALLTYPE NativeMessageBox::showYesNoBox (MessageBoxIconType /*iconType*
                          .withMessage (message)
                          .withButton (TRANS("Yes"))
                          .withButton (TRANS("No")),
-                       rawToUniquePtr (AlertWindowMappings::getWrappedCallback (callback, AlertWindowMappings::okCancel)),
-                       callback != nullptr ? Async::yes : Async::no);
+                       callback, AlertWindowMappings::okCancel);
 }
 
 void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,
                                                 ModalComponentManager::Callback* callback)
 {
-    showDialog (options, rawToUniquePtr (callback), Async::yes);
+    showDialog (options, callback, AlertWindowMappings::noMapping);
 }
 
 void JUCE_CALLTYPE NativeMessageBox::showAsync (const MessageBoxOptions& options,

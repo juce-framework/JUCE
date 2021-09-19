@@ -225,7 +225,6 @@ private:
             g.drawFittedText ("<", getLocalBounds().reduced (20, 0), Justification::centredLeft, 1);
         }
 
-
         void clicked() override
         {
             owner.showCategory ({});

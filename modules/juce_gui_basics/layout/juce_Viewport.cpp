@@ -31,7 +31,6 @@ Viewport::Viewport (const String& name)  : Component (name)
     // content holder is used to clip the contents so they don't overlap the scrollbars
     addAndMakeVisible (contentHolder);
     contentHolder.setInterceptsMouseClicks (false, true);
-    contentHolder.setAccessible (false);
 
     scrollBarThickness = getLookAndFeel().getDefaultScrollbarWidth();
 

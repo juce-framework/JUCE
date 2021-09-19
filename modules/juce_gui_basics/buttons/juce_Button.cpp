@@ -208,8 +208,6 @@ void Button::setClickingTogglesState (bool shouldToggle) noexcept
     // it is that this button represents, and the button will update its state to reflect this
     // in the applicationCommandListChanged() method.
     jassert (commandManagerToUse == nullptr || ! clickTogglesState);
-
-    invalidateAccessibilityHandler();
 }
 
 bool Button::getClickingTogglesState() const noexcept
@@ -708,10 +706,10 @@ void Button::repeatTimerCallback()
 class ButtonAccessibilityHandler  : public AccessibilityHandler
 {
 public:
-    explicit ButtonAccessibilityHandler (Button& buttonToWrap)
+    explicit ButtonAccessibilityHandler (Button& buttonToWrap, AccessibilityRole role)
         : AccessibilityHandler (buttonToWrap,
-                                getButtonRole (buttonToWrap),
-                                getAccessibilityActions (buttonToWrap)),
+                                isRadioButton (buttonToWrap) ? AccessibilityRole::radioButton : role,
+                                getAccessibilityActions (buttonToWrap, role)),
           button (buttonToWrap)
     {
     }
@@ -720,7 +718,7 @@ public:
     {
         auto state = AccessibilityHandler::getCurrentState();
 
-        if (button.getClickingTogglesState() || button.getRadioGroupId() != 0)
+        if (isToggleButton (getRole()) || isRadioButton (button))
         {
             state = state.withCheckable();
 
@@ -744,20 +742,22 @@ public:
     String getHelp() const override  { return button.getTooltip(); }
 
 private:
-    static AccessibilityRole getButtonRole (const Button& b)
+    static bool isToggleButton (AccessibilityRole role) noexcept
     {
-        if (b.getRadioGroupId() != 0)     return AccessibilityRole::radioButton;
-        if (b.getClickingTogglesState())  return AccessibilityRole::toggleButton;
-
-        return AccessibilityRole::button;
+        return role == AccessibilityRole::toggleButton;
     }
 
-    static AccessibilityActions getAccessibilityActions (Button& button)
+    static bool isRadioButton (const Button& button) noexcept
+    {
+        return button.getRadioGroupId() != 0;
+    }
+
+    static AccessibilityActions getAccessibilityActions (Button& button, AccessibilityRole role)
     {
         auto actions = AccessibilityActions().addAction (AccessibilityActionType::press,
                                                          [&button] { button.triggerClick(); });
 
-        if (button.getClickingTogglesState())
+        if (isToggleButton (role))
             actions = actions.addAction (AccessibilityActionType::toggle,
                                          [&button] { button.setToggleState (! button.getToggleState(), sendNotification); });
 
@@ -772,7 +772,7 @@ private:
 
 std::unique_ptr<AccessibilityHandler> Button::createAccessibilityHandler()
 {
-    return std::make_unique<ButtonAccessibilityHandler> (*this);
+    return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
 }
 
 } // namespace juce
