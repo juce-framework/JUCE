@@ -309,7 +309,21 @@ public:
         if (auto* peer = component.getPeer())
         {
             auto localBounds = component.getLocalBounds();
-            auto displayScale = Desktop::getInstance().getDisplays().getDisplayForRect (component.getTopLevelComponent()->getScreenBounds())->scale;
+            const auto currentDisplay = Desktop::getInstance().getDisplays().getDisplayForRect (component.getTopLevelComponent()->getScreenBounds());
+
+            if (currentDisplay != lastDisplay)
+            {
+               #if JUCE_MAC
+                if (cvDisplayLinkWrapper != nullptr)
+                {
+                    cvDisplayLinkWrapper->updateActiveDisplay (currentDisplay->totalArea.getTopLeft());
+                    nativeContext->setNominalVideoRefreshPeriodS (cvDisplayLinkWrapper->getNominalVideoRefreshPeriodS());
+                }
+               #endif
+                lastDisplay = currentDisplay;
+            }
+
+            const auto displayScale = currentDisplay->scale;
 
             auto newArea = peer->getComponent().getLocalArea (&component, localBounds).withZeroOrigin() * displayScale;
 
@@ -350,7 +364,10 @@ public:
         auto screenBounds = component.getTopLevelComponent()->getScreenBounds();
 
         if (lastScreenBounds != screenBounds)
+        {
             updateViewportSize (true);
+            lastScreenBounds = screenBounds;
+        }
     }
 
     void paintComponent()
@@ -498,7 +515,7 @@ public:
                 break;
 
            #if JUCE_MAC
-            if (cvDisplayLinkWrapper != nullptr)
+            if (context.continuousRepaint)
             {
                 repaintEvent.wait (-1);
                 renderFrame();
@@ -565,8 +582,8 @@ public:
             context.renderer->newOpenGLContextCreated();
 
        #if JUCE_MAC
-        if (context.continuousRepaint)
-            cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (this);
+        cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (*this);
+        nativeContext->setNominalVideoRefreshPeriodS (cvDisplayLinkWrapper->getNominalVideoRefreshPeriodS());
        #endif
 
         return true;
@@ -705,11 +722,40 @@ public:
    #if JUCE_MAC
     struct CVDisplayLinkWrapper
     {
-        CVDisplayLinkWrapper (CachedImage* im)
+        CVDisplayLinkWrapper (CachedImage& cachedImageIn)  : cachedImage (cachedImageIn),
+                                                             continuousRepaint (cachedImageIn.context.continuousRepaint.load())
         {
             CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
-            CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, im);
+            CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
             CVDisplayLinkStart (displayLink);
+
+            const auto topLeftOfCurrentScreen = Desktop::getInstance()
+                                                    .getDisplays()
+                                                    .getDisplayForRect (cachedImage.component.getTopLevelComponent()->getScreenBounds())
+                                                    ->totalArea.getTopLeft();
+            updateActiveDisplay (topLeftOfCurrentScreen);
+        }
+
+        double getNominalVideoRefreshPeriodS() const
+        {
+            const auto nominalVideoRefreshPeriod = CVDisplayLinkGetNominalOutputVideoRefreshPeriod (displayLink);
+
+            if ((nominalVideoRefreshPeriod.flags & kCVTimeIsIndefinite) == 0)
+                return (double) nominalVideoRefreshPeriod.timeValue / (double) nominalVideoRefreshPeriod.timeScale;
+
+            return 0.0;
+        }
+
+        void updateActiveDisplay (Point<int> topLeftOfDisplay)
+        {
+            CGPoint point { (CGFloat) topLeftOfDisplay.getX(), (CGFloat) topLeftOfDisplay.getY() };
+            CGDirectDisplayID displayID;
+            uint32_t numDisplays = 0;
+            constexpr uint32_t maxNumDisplays = 1;
+            CGGetDisplaysWithPoint (point, maxNumDisplays, &displayID, &numDisplays);
+
+            if (numDisplays == 1)
+                CVDisplayLinkSetCurrentCGDisplay (displayLink, displayID);
         }
 
         ~CVDisplayLinkWrapper()
@@ -721,11 +767,16 @@ public:
         static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
                                              CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
         {
-            auto* self = (CachedImage*) displayLinkContext;
-            self->repaintEvent.signal();
+            auto* self = reinterpret_cast<CVDisplayLinkWrapper*> (displayLinkContext);
+
+            if (self->continuousRepaint)
+                self->cachedImage.repaintEvent.signal();
+
             return kCVReturnSuccess;
         }
 
+        CachedImage& cachedImage;
+        const bool continuousRepaint;
         CVDisplayLinkRef displayLink;
     };
 
