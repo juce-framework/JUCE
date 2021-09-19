@@ -70,7 +70,7 @@ void ARADocumentController::internalNotifyAudioSourceAnalysisProgressCompleted (
 void ARADocumentController::internalDidUpdateAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARAAudioSource::ARAAnalysisProgressState state, float progress)
 {
     // helper to forward listener callbacks from our ModelUpdateControllerProgressAdapter
-    didUpdateAudioSourceAnalyisProgress (audioSource, state, progress);
+    didUpdateAudioSourceAnalysisProgress (audioSource, state, progress);
 }
 
 //==============================================================================
@@ -311,7 +311,7 @@ namespace ModelUpdateControllerProgressAdapter
     {
         auto audioSource = reinterpret_cast<ARAAudioSource*> (audioSourceHostRef);
         audioSource->getDocumentController<ARADocumentController>()->internalDidUpdateAudioSourceAnalysisProgress (audioSource, state, value);
-        audioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceAnalyisProgress (audioSource, state, value); });
+        audioSource->notifyListeners ([&] (ARAAudioSource::Listener& l) { l.didUpdateAudioSourceAnalysisProgress (audioSource, state, value); });
     }
 
     static void ARA_CALL notifyAudioSourceContentChanged (ARAModelUpdateControllerHostRef, ARAAudioSourceHostRef,

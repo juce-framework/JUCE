@@ -382,7 +382,7 @@ public:
             @param state Indicates start, intermediate update or completion of the analysis.
             @param progress Progress normalized to the 0..1 range.
         */
-        virtual void didUpdateAudioSourceAnalyisProgress (ARAAudioSource* audioSource, ARAAnalysisProgressState state, float progress) {}
+        virtual void didUpdateAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARAAnalysisProgressState state, float progress) {}
 
         /** Called before access to an audio source's samples is enabled or disabled.
             @param audioSource The audio source whose sample access state will be changed.
