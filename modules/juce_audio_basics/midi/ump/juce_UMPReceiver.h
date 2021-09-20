@@ -27,6 +27,8 @@ namespace universal_midi_packets
 
 /**
     A base class for classes which receive Universal MIDI Packets from an input.
+
+    @tags{Audio}
 */
 struct Receiver
 {

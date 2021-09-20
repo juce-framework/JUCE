@@ -56,6 +56,8 @@ enum class MessageBoxIconType
                               .withAssociatedComponent (myComp),
                             myCallback);
     @endcode
+
+    @tags{GUI}
 */
 class JUCE_API  MessageBoxOptions
 {

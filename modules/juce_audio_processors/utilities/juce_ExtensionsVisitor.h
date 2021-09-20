@@ -38,6 +38,8 @@ namespace juce
     of the function calls that you care about. For example, you should
     store the result of VST::getAEffectPtr() rather than storing a pointer
     to the VST instance.
+
+    @tags{Audio}
 */
 struct ExtensionsVisitor
 {
