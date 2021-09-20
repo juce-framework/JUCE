@@ -3,6 +3,11 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 6.1.2
+  - Fixed an OpenGL display refresh rate issue on macOS
+  - Improved the scaling behaviour of hosted VST3 plug-ins
+  - Improved accessibility support
+
 Version 6.1.1
   - Fixed a CMake installation issue
   - Improved parameter value loading after plug-in restarts
