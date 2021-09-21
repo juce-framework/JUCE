@@ -50,6 +50,7 @@ namespace OggVorbisNamespace
                                       "-Wmisleading-indentation",
                                       "-Wmissing-prototypes",
                                       "-Wcast-align")
+ JUCE_BEGIN_NO_SANITIZE ("undefined")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
@@ -79,6 +80,7 @@ namespace OggVorbisNamespace
  #include "oggvorbis/libvorbis-1.3.7/lib/vorbisfile.c"
  #include "oggvorbis/libvorbis-1.3.7/lib/window.c"
 
+ JUCE_END_NO_SANITIZE
  JUCE_END_IGNORE_WARNINGS_MSVC
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #else

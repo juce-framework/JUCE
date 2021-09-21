@@ -28,6 +28,8 @@
 namespace juce
 {
 
+JUCE_BEGIN_NO_SANITIZE ("vptr")
+
 //==============================================================================
 #define JUCE_DECLARE_VST3_COM_REF_METHODS \
     Steinberg::uint32 PLUGIN_API addRef() override   { return (Steinberg::uint32) ++refCount; } \
@@ -1218,6 +1220,8 @@ private:
     Listener& listener;
     std::atomic<int32> flags { 0 };
 };
+
+JUCE_END_NO_SANITIZE
 
 } // namespace juce
 
