@@ -3544,7 +3544,9 @@ void XWindowSystem::dismissBlockingModals (LinuxComponentPeer* peer) const
 {
     if (peer->getComponent().isCurrentlyBlockedByAnotherModalComponent())
         if (auto* currentModalComp = Component::getCurrentlyModalComponent())
-            currentModalComp->inputAttemptWhenModal();
+            if (auto* otherPeer = currentModalComp->getPeer())
+                if ((otherPeer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
+                    currentModalComp->inputAttemptWhenModal();
 }
 
 void XWindowSystem::handleConfigureNotifyEvent (LinuxComponentPeer* peer, XConfigureEvent& confEvent) const
