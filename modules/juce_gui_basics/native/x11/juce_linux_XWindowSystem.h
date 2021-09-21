@@ -239,6 +239,8 @@ private:
     void dismissBlockingModals      (LinuxComponentPeer*) const;
     void dismissBlockingModals      (LinuxComponentPeer*, const XConfigureEvent&) const;
 
+    ::Window findTopLevelWindowOf (::Window) const;
+
     static void windowMessageReceive (XEvent&);
 
     //==============================================================================
