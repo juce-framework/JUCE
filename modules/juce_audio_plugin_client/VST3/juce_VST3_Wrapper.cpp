@@ -29,6 +29,8 @@
 //==============================================================================
 #if JucePlugin_Build_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
 
+JUCE_BEGIN_NO_SANITIZE ("vptr")
+
 #if JUCE_PLUGINHOST_VST3
  #if JUCE_MAC
   #include <CoreFoundation/CoreFoundation.h>
@@ -3988,5 +3990,7 @@ extern "C" SMTG_EXPORT_SYMBOL IPluginFactory* PLUGIN_API GetPluginFactory()
 #if JUCE_WINDOWS
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
 #endif
+
+JUCE_END_NO_SANITIZE
 
 #endif //JucePlugin_Build_VST3

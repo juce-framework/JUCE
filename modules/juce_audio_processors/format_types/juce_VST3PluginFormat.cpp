@@ -31,6 +31,10 @@
 namespace juce
 {
 
+// UB Sanitizer doesn't necessarily have instrumentation for loaded plugins, so
+// it won't recognize the dynamic types of pointers to the plugin's interfaces.
+JUCE_BEGIN_NO_SANITIZE ("vptr")
+
 using namespace Steinberg;
 
 //==============================================================================
@@ -3766,6 +3770,8 @@ FileSearchPath VST3PluginFormat::getDefaultLocationsToSearch()
     return FileSearchPath ("/usr/lib/vst3/;/usr/local/lib/vst3/;~/.vst3/");
    #endif
 }
+
+JUCE_END_NO_SANITIZE
 
 } // namespace juce
 

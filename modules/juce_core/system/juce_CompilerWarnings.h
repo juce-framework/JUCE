@@ -189,7 +189,7 @@
     #define JUCE_IGNORE_MSVC(warnings) __pragma(warning(disable:warnings))
     #define JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC(level, warnings)              \
         __pragma(warning(push, level)) JUCE_IGNORE_MSVC(warnings)
-    #define JUCE_BEGIN_IGNORE_WARNINGS_MSVC(warnings)                          \
+    #define JUCE_BEGIN_IGNORE_WARNINGS_MSVC(warnings)                           \
         __pragma(warning(push)) JUCE_IGNORE_MSVC(warnings)
     #define JUCE_END_IGNORE_WARNINGS_MSVC __pragma(warning(pop))
 #else
@@ -198,3 +198,24 @@
     #define JUCE_BEGIN_IGNORE_WARNINGS_MSVC(warnings)
     #define JUCE_END_IGNORE_WARNINGS_MSVC
 #endif
+
+#if JUCE_MAC || JUCE_IOS
+    #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 10
+#else
+    #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 5
+#endif
+
+/** Disable sanitizers for a range of functions.
+
+    This functionality doesn't seem to exist on GCC yet, so at the moment this only works for clang.
+*/
+#if JUCE_CLANG && __clang_major__ >= JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION
+    #define JUCE_BEGIN_NO_SANITIZE(warnings)                                    \
+        _Pragma(JUCE_TO_STRING(clang attribute push(__attribute__((no_sanitize(warnings))), apply_to=function)))
+    #define JUCE_END_NO_SANITIZE _Pragma(JUCE_TO_STRING(clang attribute pop))
+#else
+    #define JUCE_BEGIN_NO_SANITIZE(warnings)
+    #define JUCE_END_NO_SANITIZE
+#endif
+
+#undef JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION
