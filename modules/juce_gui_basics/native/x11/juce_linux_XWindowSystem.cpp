@@ -1920,10 +1920,13 @@ void XWindowSystem::toBehind (::Window windowH, ::Window otherWindow) const
 {
     jassert (windowH != 0 && otherWindow != 0);
 
-    Window newStack[] = { otherWindow, windowH };
+    const auto topLevelA = findTopLevelWindowOf (windowH);
+    const auto topLevelB = findTopLevelWindowOf (otherWindow);
+
+    Window newStack[] = { topLevelA, topLevelB };
 
     XWindowSystemUtilities::ScopedXLock xLock;
-    X11Symbols::getInstance()->xRestackWindows (display, newStack, 2);
+    X11Symbols::getInstance()->xRestackWindows (display, newStack, numElementsInArray (newStack));
 }
 
 bool XWindowSystem::isFocused (::Window windowH) const
@@ -2653,6 +2656,28 @@ String XWindowSystem::getTextFromClipboard() const
 }
 
 //==============================================================================
+::Window XWindowSystem::findTopLevelWindowOf (::Window w) const
+{
+    if (w == 0)
+        return 0;
+
+    Window* windowList = nullptr;
+    uint32 windowListSize = 0;
+    Window parent, root;
+
+    XWindowSystemUtilities::ScopedXLock xLock;
+    const auto result = X11Symbols::getInstance()->xQueryTree (display, w, &root, &parent, &windowList, &windowListSize);
+    const auto deleter = makeXFreePtr (windowList);
+
+    if (result == 0)
+        return 0;
+
+    if (parent == root)
+        return w;
+
+    return findTopLevelWindowOf (parent);
+}
+
 bool XWindowSystem::isParentWindowOf (::Window windowH, ::Window possibleChild) const
 {
     if (windowH == 0 || possibleChild == 0)
