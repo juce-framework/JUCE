@@ -1049,12 +1049,14 @@ public:
     {
         if (isBlockedByModalComponent())
             if (auto* modal = Component::getCurrentlyModalComponent())
-                modal->inputAttemptWhenModal();
+                if (auto* otherPeer = modal->getPeer())
+                    if ((otherPeer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
+                        modal->inputAttemptWhenModal();
     }
 
     bool canBecomeKeyWindow()
     {
-        return component.isVisible() && (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
+        return component.isVisible() && (getStyleFlags() & ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
 
     bool canBecomeMainWindow()
