@@ -283,6 +283,19 @@ private:
             return nil;
         }
 
+        static id getAccessibilityValue (id self, SEL)
+        {
+            if (auto* handler = getHandler (self))
+            {
+                if (handler->getCurrentState().isCheckable())
+                    return handler->getCurrentState().isChecked() ? @(1) : @(0);
+
+                return getAccessibilityValueFromInterfaces (*handler);
+            }
+
+            return nil;
+        }
+
         static NSArray* getAccessibilitySelectedChildren (id self, SEL)
         {
             return getSelectedChildren ([self accessibilityChildren]);

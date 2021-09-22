@@ -78,6 +78,17 @@ protected:
             && ! handler.getTextInterface()->isReadOnly();
     }
 
+    static id getAccessibilityValueFromInterfaces (const AccessibilityHandler& handler)
+    {
+        if (auto* textInterface = handler.getTextInterface())
+            return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
+
+        if (auto* valueInterface = handler.getValueInterface())
+            return juceStringToNS (valueInterface->getCurrentValueAsString());
+
+        return nil;
+    }
+
     //==============================================================================
     static BOOL getIsAccessibilityElement (id self, SEL)
     {
@@ -86,30 +97,6 @@ protected:
                   && handler->getRole() != AccessibilityRole::window;
 
         return NO;
-    }
-
-    static id getAccessibilityValue (id self, SEL)
-    {
-        if (auto* handler = getHandler (self))
-        {
-            if (auto* textInterface = handler->getTextInterface())
-                return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
-
-            if (handler->getCurrentState().isCheckable())
-            {
-                return handler->getCurrentState().isChecked()
-                          #if JUCE_IOS
-                           ? @"1" : @"0";
-                          #else
-                           ? @(1) : @(0);
-                          #endif
-            }
-
-            if (auto* valueInterface = handler->getValueInterface())
-                return juceStringToNS (valueInterface->getCurrentValueAsString());
-        }
-
-        return nil;
     }
 
     static void setAccessibilityValue (id self, SEL, NSString* value)

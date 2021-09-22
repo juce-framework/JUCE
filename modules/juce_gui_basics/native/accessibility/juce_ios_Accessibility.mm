@@ -341,6 +341,19 @@ private:
             return traits | sendSuperclassMessage<UIAccessibilityTraits> (self, @selector (accessibilityTraits));
         }
 
+        static NSString* getAccessibilityValue (id self, SEL)
+        {
+            if (auto* handler = getHandler (self))
+            {
+                if (handler->getCurrentState().isCheckable())
+                    return handler->getCurrentState().isChecked() ? @"1" : @"0";
+
+                return (NSString*) getAccessibilityValueFromInterfaces (*handler);
+            }
+
+            return nil;
+        }
+
         static void onFocusGain (id self, SEL)
         {
             if (auto* handler = getHandler (self))
