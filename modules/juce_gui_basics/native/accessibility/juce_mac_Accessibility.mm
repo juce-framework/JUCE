@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+static void juceFreeAccessibilityPlatformSpecificData (NSAccessibilityElement<NSAccessibility>*)  {}
+
 namespace juce
 {
 

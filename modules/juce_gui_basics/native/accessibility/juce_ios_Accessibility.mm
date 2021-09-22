@@ -23,6 +23,17 @@
   ==============================================================================
 */
 
+static void juceFreeAccessibilityPlatformSpecificData (UIAccessibilityElement* element)
+{
+    if (auto* container = juce::getIvar<UIAccessibilityElement*> (element, "container"))
+    {
+        object_setInstanceVariable (element, "container", nullptr);
+        object_setInstanceVariable (container, "handler", nullptr);
+
+        [container release];
+    }
+}
+
 namespace juce
 {
 
@@ -176,8 +187,6 @@ private:
     private:
         AccessibilityElement()
         {
-            addMethod (@selector (dealloc), dealloc, "v@:");
-
             addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement,     "c@:");
             addMethod (@selector (accessibilityContainer),     getAccessibilityContainer,     "@@:");
             addMethod (@selector (accessibilityFrame),         getAccessibilityFrame,         @encode (CGRect), "@:");
@@ -221,17 +230,6 @@ private:
         }
 
         //==============================================================================
-        static void dealloc (id self, SEL)
-        {
-            if (UIAccessibilityElement* container = getContainer (self))
-            {
-                [container release];
-                object_setInstanceVariable (self, "container", nullptr);
-            }
-
-            sendSuperclassMessage<void> (self, @selector (dealloc));
-        }
-
         static id getAccessibilityContainer (id self, SEL)
         {
             if (auto* handler = getHandler (self))
@@ -245,14 +243,16 @@ private:
                         return container;
 
                     static AccessibilityContainer cls;
+
                     id windowHandle = (id) handler->getComponent().getWindowHandle();
                     UIAccessibilityElement* container = [cls.createInstance() initWithAccessibilityContainer: windowHandle];
-                    object_setInstanceVariable (container, "handler", handler);
+
                     [container retain];
 
+                    object_setInstanceVariable (container, "handler", handler);
                     object_setInstanceVariable (self, "container", container);
 
-                    return (id) getContainer (self);
+                    return container;
                 }
 
                 if (auto* parent = handler->getParent())
