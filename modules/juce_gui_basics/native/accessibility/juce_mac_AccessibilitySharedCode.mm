@@ -27,21 +27,23 @@ namespace juce
 {
 
 //==============================================================================
+struct AccessibleObjCClassDeleter
+{
+    template <typename ElementType>
+    void operator() (ElementType* element) const
+    {
+        juceFreeAccessibilityPlatformSpecificData (element);
+
+        object_setInstanceVariable (element, "handler", nullptr);
+        [element release];
+    }
+};
+
 template <typename Base>
 class AccessibleObjCClass  : public ObjCClass<Base>
 {
-private:
-    struct Deleter
-    {
-        void operator() (Base* element) const
-        {
-            object_setInstanceVariable (element, "handler", nullptr);
-            [element release];
-        }
-    };
-
 public:
-    using Holder = std::unique_ptr<Base, Deleter>;
+    using Holder = std::unique_ptr<Base, AccessibleObjCClassDeleter>;
 
 protected:
     AccessibleObjCClass()  : ObjCClass<Base> ("JUCEAccessibilityElement_")
