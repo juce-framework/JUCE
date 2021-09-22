@@ -288,9 +288,15 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
        #endif
 
         if (category == AVAudioSessionCategoryPlayAndRecord)
+        {
             options |= (AVAudioSessionCategoryOptionDefaultToSpeaker
-                      | AVAudioSessionCategoryOptionAllowBluetooth
-                      | AVAudioSessionCategoryOptionAllowBluetoothA2DP);
+                      | AVAudioSessionCategoryOptionAllowBluetooth);
+
+           #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+            if (@available (iOS 10.0, *))
+                options |= AVAudioSessionCategoryOptionAllowBluetoothA2DP;
+           #endif
+        }
 
         JUCE_NSERROR_CHECK ([[AVAudioSession sharedInstance] setCategory: category
                                                              withOptions: options
