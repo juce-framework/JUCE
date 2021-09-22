@@ -39,8 +39,6 @@ namespace juce
  const NSAccessibilityNotificationName NSAccessibilityLayoutChangedNotificationJuce = NSAccessibilityLayoutChangedNotification;
 #endif
 
-#if JUCE_OBJC_HAS_AVAILABLE_FEATURE || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
-
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
@@ -65,9 +63,7 @@ private:
     public:
         static Holder create (AccessibilityHandler& handler)
         {
-           #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
             if (@available (macOS 10.10, *))
-           #endif
             {
                 static AccessibilityElement cls;
                 Holder element ([cls.createInstance() init]);
@@ -937,9 +933,7 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
     if (! areAnyAccessibilityClientsActive())
         return;
 
-    #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
      if (@available (macOS 10.10, *))
-    #endif
      {
         auto nsPriority = [priority]
         {
@@ -962,7 +956,5 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
 }
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-#endif
 
 } // namespace juce
