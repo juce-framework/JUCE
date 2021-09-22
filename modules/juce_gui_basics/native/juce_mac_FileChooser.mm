@@ -219,12 +219,15 @@ private:
 
         exitModalState (0);
 
-        if (panel != nil && result ==
-                             #if defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_9
-                               NSModalResponseOK)
-                             #else
-                               NSFileHandlingPanelOKButton)
-                             #endif
+        const auto okResult = []() -> NSInteger
+        {
+            if (@available (macOS 10.9, *))
+                return NSModalResponseOK;
+
+            return NSFileHandlingPanelOKButton;
+        }();
+
+        if (panel != nil && result == okResult)
         {
             auto addURLResult = [&chooserResults] (NSURL* urlToAdd)
             {
