@@ -130,11 +130,10 @@ public:
             if ((windowStyleFlags & (windowHasMaximiseButton | windowHasTitleBar)) == (windowHasMaximiseButton | windowHasTitleBar))
                 [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
-            if ([window respondsToSelector: @selector (setRestorable:)])
-                [window setRestorable: NO];
+            [window setRestorable: NO];
 
-           #if defined (MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13)
-            if ([window respondsToSelector: @selector (setTabbingMode:)])
+           #if defined (MAC_OS_X_VERSION_10_12) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12)
+            if (@available (macOS 10.12, *))
                 [window setTabbingMode: NSWindowTabbingModeDisallowed];
            #endif
 
@@ -1864,7 +1863,7 @@ private:
         // Without setting contentsFormat macOS Big Sur will always set the invalid area
         // to be the entire frame.
        #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
-        if (NSFoundationVersionNumber > (double) NSFoundationVersionNumber10_11_Max)
+        if (@available (macOS 10.12, *))
         {
             CALayer* layer = ((NSView*) self).layer;
             layer.contentsFormat = kCAContentsFormatRGBA8Uint;
