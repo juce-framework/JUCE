@@ -159,20 +159,30 @@ namespace CoreTextTypeLayout
     //==============================================================================
     static CTTextAlignment getTextAlignment (const AttributedString& text)
     {
-        switch (text.getJustification().getOnlyHorizontalFlags())
+        const auto flags = text.getJustification().getOnlyHorizontalFlags();
+
+        if (@available (macOS 10.8, *))
         {
-           #if defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_8
-            case Justification::right:                  return kCTTextAlignmentRight;
-            case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
-            case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
-            default:                                    return kCTTextAlignmentLeft;
-           #else
+            switch (flags)
+            {
+                case Justification::right:                  return kCTTextAlignmentRight;
+                case Justification::horizontallyCentred:    return kCTTextAlignmentCenter;
+                case Justification::horizontallyJustified:  return kCTTextAlignmentJustified;
+                default:                                    return kCTTextAlignmentLeft;
+            }
+        }
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+        switch (flags)
+        {
             case Justification::right:                  return kCTRightTextAlignment;
             case Justification::horizontallyCentred:    return kCTCenterTextAlignment;
             case Justification::horizontallyJustified:  return kCTJustifiedTextAlignment;
             default:                                    return kCTLeftTextAlignment;
-           #endif
         }
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     static CTLineBreakMode getLineBreakMode (const AttributedString& text)
@@ -572,10 +582,8 @@ public:
 
         if (fontRef != nullptr)
         {
-           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-            if (SystemStats::getOperatingSystemType() >= SystemStats::OperatingSystemType::MacOSX_10_11)
+            if (@available (macOS 10.11, *))
                 canBeUsedForLayout = CTFontManagerRegisterGraphicsFont (fontRef, nullptr);
-           #endif
 
             ctFontRef.reset (CTFontCreateWithGraphicsFont (fontRef, referenceFontSize, nullptr, nullptr));
 
@@ -618,10 +626,9 @@ public:
     {
         if (fontRef != nullptr)
         {
-           #if JUCE_MAC && defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8
-            if (dataCopy.getSize() != 0)
-                CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
-           #endif
+            if (@available (macOS 10.8, *))
+                if (dataCopy.getSize() != 0)
+                    CTFontManagerUnregisterGraphicsFont (fontRef, nullptr);
 
             CGFontRelease (fontRef);
         }

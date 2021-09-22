@@ -27,41 +27,37 @@ namespace juce
 {
 
 #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
-
  #define JUCE_USE_WKWEBVIEW 1
+#endif
 
- #if (defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)
-  #define WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED 1
- #endif
-
- #if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
-  #define WKWEBVIEW_OPENPANEL_SUPPORTED 1
- #endif
-
+#if (defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12)
+ #define WKWEBVIEW_OPENPANEL_SUPPORTED 1
 #endif
 
 static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
 {
-   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-    const auto parameterNames = url.getParameterNames();
-    const auto parameterValues = url.getParameterValues();
+    if (@available (macOS 10.9, *))
+    {
+        const auto parameterNames = url.getParameterNames();
+        const auto parameterValues = url.getParameterValues();
 
-    jassert (parameterNames.size() == parameterValues.size());
+        jassert (parameterNames.size() == parameterValues.size());
 
-    if (parameterNames.isEmpty())
-        return fileUrl;
+        if (parameterNames.isEmpty())
+            return fileUrl;
 
-    NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
-    NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
+        NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
+        NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
 
-    for (int i = 0; i < parameterNames.size(); ++i)
-        [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
-                                                                 value: juceStringToNS (parameterValues[i])]];
+        for (int i = 0; i < parameterNames.size(); ++i)
+            [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
+                                                                     value: juceStringToNS (parameterValues[i])]];
 
-    [components.get() setQueryItems: queryItems.get()];
+        [components.get() setQueryItems: queryItems.get()];
 
-    return [components.get() URL];
-   #else
+        return [components.get() URL];
+    }
+
     const auto queryString = url.getQueryString();
 
     if (queryString.isNotEmpty())
@@ -69,18 +65,22 @@ static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
             return [NSURL URLWithString: [fileUrlString stringByAppendingString: juceStringToNS (queryString)]];
 
     return fileUrl;
-   #endif
 }
 
 static NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
 {
     NSString* urlString = juceStringToNS (url);
 
-    #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
-    #else
-     urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
-    #endif
+     if (@available (macOS 10.9, *))
+     {
+         urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
+     }
+     else
+     {
+         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+         urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
+         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+     }
 
      if (NSURL* nsURL = [NSURL URLWithString: urlString])
      {
@@ -177,11 +177,7 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
         addMethod (@selector (webView:didFinishNavigation:),                              didFinishNavigation,             "v@:@@");
         addMethod (@selector (webView:didFailNavigation:withError:),                      didFailNavigation,               "v@:@@@");
         addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation,    "v@:@@@");
-
-       #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
         addMethod (@selector (webViewDidClose:),                                          webViewDidClose,                 "v@:@");
-       #endif
-
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
                               windowFeatures:),                                           createWebView,                   "@@:@@@@");
 
@@ -233,12 +229,10 @@ private:
         displayError (getOwner (self), error);
     }
 
-   #if WKWEBVIEW_WEBVIEWDIDCLOSE_SUPPORTED
     static void webViewDidClose (id self, SEL, WKWebView*)
     {
         getOwner (self)->windowCloseRequest();
     }
-   #endif
 
     static WKWebView* createWebView (id self, SEL, WKWebView*, WKWebViewConfiguration*,
                                      WKNavigationAction* navigationAction, WKWindowFeatures*)

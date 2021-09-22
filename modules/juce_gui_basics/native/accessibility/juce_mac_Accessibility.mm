@@ -33,12 +33,6 @@ namespace juce
  using NSAccessibilityNotificationName = NSString*;
 #endif
 
-#if (! defined MAC_OS_X_VERSION_10_9) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_9
- const NSAccessibilityNotificationName NSAccessibilityLayoutChangedNotificationJuce = @"AXLayoutChanged";
-#else
- const NSAccessibilityNotificationName NSAccessibilityLayoutChangedNotificationJuce = NSAccessibilityLayoutChangedNotification;
-#endif
-
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
@@ -887,6 +881,15 @@ static void sendHandlerNotification (const AccessibilityHandler& handler,
     }
 }
 
+static NSAccessibilityNotificationName layoutChangedNotification()
+{
+    if (@available (macOS 10.9, *))
+        return NSAccessibilityLayoutChangedNotification;
+
+    static NSString* layoutChangedString = @"AXLayoutChanged";
+    return layoutChangedString;
+}
+
 void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent eventType)
 {
     auto notification = [eventType]
@@ -895,7 +898,7 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
         {
             case InternalAccessibilityEvent::elementCreated:         return NSAccessibilityCreatedNotification;
             case InternalAccessibilityEvent::elementDestroyed:       return NSAccessibilityUIElementDestroyedNotification;
-            case InternalAccessibilityEvent::elementMovedOrResized:  return NSAccessibilityLayoutChangedNotificationJuce;
+            case InternalAccessibilityEvent::elementMovedOrResized:  return layoutChangedNotification();
             case InternalAccessibilityEvent::focusChanged:           return NSAccessibilityFocusedUIElementChangedNotification;
             case InternalAccessibilityEvent::windowOpened:           return NSAccessibilityWindowCreatedNotification;
             case InternalAccessibilityEvent::windowClosed:           break;
@@ -919,7 +922,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
             case AccessibilityEvent::textChanged:
             case AccessibilityEvent::valueChanged:          return NSAccessibilityValueChangedNotification;
             case AccessibilityEvent::titleChanged:          return NSAccessibilityTitleChangedNotification;
-            case AccessibilityEvent::structureChanged:      return NSAccessibilityLayoutChangedNotificationJuce;
+            case AccessibilityEvent::structureChanged:      return layoutChangedNotification();
         }
 
         return NSAccessibilityNotificationName{};
