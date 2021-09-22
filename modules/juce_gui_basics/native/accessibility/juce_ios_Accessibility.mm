@@ -176,16 +176,21 @@ private:
     class AccessibilityElement  : public AccessibleObjCClass<UIAccessibilityElement>
     {
     public:
+        enum class Type  { defaultElement, textElement };
+
         static Holder create (AccessibilityHandler& handler)
         {
-            static AccessibilityElement cls;
-            Holder element ([cls.createInstance() initWithAccessibilityContainer: (id) handler.getComponent().getWindowHandle()]);
+            static AccessibilityElement cls     { Type::defaultElement };
+            static AccessibilityElement textCls { Type::textElement };
+
+            id instance = (hasEditableText (handler) ? textCls : cls).createInstance();
+
+            Holder element ([instance initWithAccessibilityContainer: (id) handler.getComponent().getWindowHandle()]);
             object_setInstanceVariable (element.get(), "handler", &handler);
             return element;
         }
 
-    private:
-        AccessibilityElement()
+        AccessibilityElement (Type elementType)
         {
             addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement,     "c@:");
             addMethod (@selector (accessibilityContainer),     getAccessibilityContainer,     "@@:");
@@ -205,24 +210,28 @@ private:
             addMethod (@selector (accessibilityIncrement), accessibilityPerformIncrement, "c@:");
             addMethod (@selector (accessibilityDecrement), accessibilityPerformDecrement, "c@:");
 
-            addMethod (@selector (accessibilityLineNumberForPoint:),   getAccessibilityLineNumberForPoint,   "i@:", @encode (CGPoint));
-            addMethod (@selector (accessibilityContentForLineNumber:), getAccessibilityContentForLineNumber, "@@:i");
-            addMethod (@selector (accessibilityFrameForLineNumber:),   getAccessibilityFrameForLineNumber,   @encode (CGRect), "@:i");
-            addMethod (@selector (accessibilityPageContent),           getAccessibilityPageContent,          "@@:");
-
             addMethod (@selector (accessibilityDataTableCellElementForRow:column:), getAccessibilityDataTableCellElementForRowColumn, "@@:ii");
             addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount,                         "i@:");
             addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount,                      "i@:");
             addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange,                    @encode (NSRange), "@:");
             addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange,                 @encode (NSRange), "@:");
 
-            addProtocol (@protocol (UIAccessibilityReadingContent));
+            if (elementType == Type::textElement)
+            {
+                addMethod (@selector (accessibilityLineNumberForPoint:),   getAccessibilityLineNumberForPoint,   "i@:", @encode (CGPoint));
+                addMethod (@selector (accessibilityContentForLineNumber:), getAccessibilityContentForLineNumber, "@@:i");
+                addMethod (@selector (accessibilityFrameForLineNumber:),   getAccessibilityFrameForLineNumber,   @encode (CGRect), "@:i");
+                addMethod (@selector (accessibilityPageContent),           getAccessibilityPageContent,          "@@:");
+
+                addProtocol (@protocol (UIAccessibilityReadingContent));
+            }
 
             addIvar<UIAccessibilityElement*> ("container");
 
             registerClass();
         }
 
+    private:
         //==============================================================================
         static UIAccessibilityElement* getContainer (id self)
         {
@@ -377,6 +386,15 @@ private:
             return NO;
         }
 
+        static id getAccessibilityDataTableCellElementForRowColumn (id self, SEL, NSUInteger row, NSUInteger column)
+        {
+            if (auto* tableInterface = getTableInterface (self))
+                if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
+                    return (id) cellHandler->getNativeImplementation();
+
+            return nil;
+        }
+
         static NSInteger getAccessibilityLineNumberForPoint (id self, SEL, CGPoint point)
         {
             if (auto* handler = getHandler (self))
@@ -429,15 +447,6 @@ private:
         {
             if (auto* textInterface = getTextInterface (self))
                 return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
-
-            return nil;
-        }
-
-        static id getAccessibilityDataTableCellElementForRowColumn (id self, SEL, NSUInteger row, NSUInteger column)
-        {
-            if (auto* tableInterface = getTableInterface (self))
-                if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
-                    return (id) cellHandler->getNativeImplementation();
 
             return nil;
         }
