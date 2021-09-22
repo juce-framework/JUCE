@@ -27,6 +27,8 @@ namespace universal_midi_packets
 
 /**
     Holds a single Universal MIDI Packet.
+
+    @tags{Audio}
 */
 template <size_t numWords>
 class Packet

@@ -31,6 +31,8 @@ namespace juce
     You can choose to create a standard PopupMenu to display the host-provided
     options. Alternatively, you can ask the host to display a native menu at
     a specific location.
+
+    @tags{Audio}
 */
 struct HostProvidedContextMenu
 {
@@ -54,6 +56,8 @@ struct HostProvidedContextMenu
 
     At the moment, this can be used to retrieve context menus for parameters in
     compatible VST3 hosts. Additional extensions may be added here in the future.
+
+    @tags{Audio}
 */
 struct AudioProcessorEditorHostContext
 {
