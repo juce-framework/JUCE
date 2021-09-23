@@ -12,7 +12,7 @@ add_subdirectory (${OBOE_DIR} ./oboe)
 add_library("cpufeatures" STATIC "${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c")
 set_source_files_properties("${ANDROID_NDK}/sources/android/cpufeatures/cpu-features.c" PROPERTIES COMPILE_FLAGS "-Wno-sign-conversion -Wno-gnu-statement-expression")
 
-add_definitions("-DJUCE_ANDROID=1" "-DJUCE_ANDROID_API_VERSION=23" "-DJUCE_PUSH_NOTIFICATIONS=1" "-DJUCE_PUSH_NOTIFICATIONS_ACTIVITY=\"com/rmsl/juce/JuceActivity\"" "-DJUCE_ANDROID_GL_ES_VERSION_3_0=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=1.0.0" "-DJUCE_APP_VERSION_HEX=0x10000")
+add_definitions([[-DJUCE_ANDROID=1]] [[-DJUCE_ANDROID_API_VERSION=23]] [[-DJUCE_PUSH_NOTIFICATIONS=1]] [[-DJUCE_PUSH_NOTIFICATIONS_ACTIVITY="com/rmsl/juce/JuceActivity"]] [[-DJUCE_ANDROID_GL_ES_VERSION_3_0=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]])
 
 include_directories( AFTER
     "../../../JuceLibraryCode"
@@ -23,9 +23,9 @@ include_directories( AFTER
 enable_language(ASM)
 
 if(JUCE_BUILD_CONFIGURATION MATCHES "DEBUG")
-    add_definitions("-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60102" "-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_STANDALONE_APPLICATION=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=1.0.0" "-DJUCE_APP_VERSION_HEX=0x10000" "-DDEBUG=1" "-D_DEBUG=1")
+    add_definitions([[-DJUCE_DISPLAY_SPLASH_SCREEN=0]] [[-DJUCE_USE_DARK_SPLASH_SCREEN=1]] [[-DJUCE_PROJUCER_VERSION=0x60102]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DDEBUG=1]] [[-D_DEBUG=1]])
 elseif(JUCE_BUILD_CONFIGURATION MATCHES "RELEASE")
-    add_definitions("-DJUCE_DISPLAY_SPLASH_SCREEN=0" "-DJUCE_USE_DARK_SPLASH_SCREEN=1" "-DJUCE_PROJUCER_VERSION=0x60102" "-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1" "-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1" "-DJUCE_MODULE_AVAILABLE_juce_core=1" "-DJUCE_MODULE_AVAILABLE_juce_data_structures=1" "-DJUCE_MODULE_AVAILABLE_juce_events=1" "-DJUCE_MODULE_AVAILABLE_juce_graphics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1" "-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1" "-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1" "-DJUCE_STANDALONE_APPLICATION=1" "-DJUCER_ANDROIDSTUDIO_7F0E4A25=1" "-DJUCE_APP_VERSION=1.0.0" "-DJUCE_APP_VERSION_HEX=0x10000" "-DNDEBUG=1")
+    add_definitions([[-DJUCE_DISPLAY_SPLASH_SCREEN=0]] [[-DJUCE_USE_DARK_SPLASH_SCREEN=1]] [[-DJUCE_PROJUCER_VERSION=0x60102]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_devices=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_formats=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_processors=1]] [[-DJUCE_MODULE_AVAILABLE_juce_audio_utils=1]] [[-DJUCE_MODULE_AVAILABLE_juce_core=1]] [[-DJUCE_MODULE_AVAILABLE_juce_data_structures=1]] [[-DJUCE_MODULE_AVAILABLE_juce_events=1]] [[-DJUCE_MODULE_AVAILABLE_juce_graphics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_basics=1]] [[-DJUCE_MODULE_AVAILABLE_juce_gui_extra=1]] [[-DJUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1]] [[-DJUCE_STANDALONE_APPLICATION=1]] [[-DJUCER_ANDROIDSTUDIO_7F0E4A25=1]] [[-DJUCE_APP_VERSION=1.0.0]] [[-DJUCE_APP_VERSION_HEX=0x10000]] [[-DNDEBUG=1]])
 else()
     message( FATAL_ERROR "No matching build-configuration found." )
 endif()
@@ -3029,7 +3029,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/juce_gui_extr
 set_source_files_properties("../../../../../modules/juce_gui_extra/juce_gui_extra.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../JuceLibraryCode/JuceHeader.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 
-target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" "-mfpu=neon" "-mfloat-abi=hard" "-ffast-math" "-funroll-loops" "--param" "max-unroll-times=8" "-mhard-float" "-D_NDK_MATH_NO_SOFTFP=1" "-DJUCE_DISABLE_ASSERTIONS=1" )
+target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" [[-mfpu=neon]] [[-mfloat-abi=hard]] [[-ffast-math]] [[-funroll-loops]] [[--param]] [[max-unroll-times=8]] [[-mhard-float]] [[-D_NDK_MATH_NO_SOFTFP=1]] [[-DJUCE_DISABLE_ASSERTIONS=1]] )
 
 if( JUCE_BUILD_CONFIGURATION MATCHES "DEBUG" )
     target_compile_options( ${BINARY_NAME} PRIVATE)
