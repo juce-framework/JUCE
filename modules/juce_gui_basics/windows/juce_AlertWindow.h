@@ -499,7 +499,7 @@ protected:
     /** @internal */
     int getDesktopWindowStyleFlags() const override;
     /** @internal */
-    float getDesktopScaleFactor() const override { return desktopScale; }
+    float getDesktopScaleFactor() const override { return desktopScale * Desktop::getInstance().getGlobalScaleFactor(); }
 
 private:
     //==============================================================================

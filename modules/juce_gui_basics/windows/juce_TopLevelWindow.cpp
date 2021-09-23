@@ -298,7 +298,9 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
     }
     else
     {
-        auto targetCentre = c->localPointToGlobal (c->getLocalBounds().getCentre()) / getDesktopScaleFactor();
+        const auto scale = getDesktopScaleFactor() / Desktop::getInstance().getGlobalScaleFactor();
+
+        auto targetCentre = c->localPointToGlobal (c->getLocalBounds().getCentre()) / scale;
         auto parentArea = c->getParentMonitorArea();
 
         if (auto* parent = getParentComponent())
