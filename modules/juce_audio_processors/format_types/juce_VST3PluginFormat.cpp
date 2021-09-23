@@ -1373,7 +1373,6 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         warnOnFailure (view->setFrame (this));
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
-        resizeToFit();
     }
 
     ~VST3PluginWindow() override
@@ -1451,9 +1450,22 @@ struct VST3PluginWindow : public AudioProcessorEditor,
         }
     }
 
-    void componentMovedOrResized (bool, bool wasResized) override
+    void componentMovedOrResized (bool wasMoved, bool wasResized) override
     {
-        if (recursiveResize || ! wasResized || getTopLevelComponent()->getPeer() == nullptr)
+        if (recursiveResize || getTopLevelComponent()->getPeer() == nullptr)
+            return;
+
+        ignoreUnused (wasMoved);
+
+       #if JUCE_WINDOWS
+        if (wasMoved)
+        {
+            const auto pos = getPluginWindowTopLeft();
+            setPluginWindowPos ({ pos.x, pos.y, 0, 0 }, SWP_NOSIZE);
+        }
+       #endif
+
+        if (! wasResized)
             return;
 
         ViewRect rect;
@@ -1473,7 +1485,8 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             }
 
            #if JUCE_WINDOWS
-            setPluginWindowPos (rect);
+            setPluginWindowPos (Rectangle<int> (rect.getWidth(), rect.getHeight())
+                                  .withPosition (getPluginWindowTopLeft()), 0);
            #else
             embeddedComponent.setBounds (getLocalBounds());
            #endif
@@ -1485,7 +1498,8 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             warnOnFailure (view->getSize (&rect));
 
            #if JUCE_WINDOWS
-            setPluginWindowPos (rect);
+            setPluginWindowPos (Rectangle<int> (rect.getWidth(), rect.getHeight())
+                                  .withPosition (getPluginWindowTopLeft()), 0);
            #else
             resizeWithRect (embeddedComponent, rect, nativeScaleFactor);
            #endif
@@ -1514,10 +1528,13 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         nativeScaleFactor = (float) newScaleFactor;
 
-        if (pluginHandle != HandleFormat{} && scaleInterface != nullptr)
+        if (pluginHandle == HandleFormat{})
+            return;
+
+        if (scaleInterface != nullptr)
             scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
-        else
-            resizeToFit();
+
+        componentMovedOrResized (true, true);
     }
 
     void resizeToFit()
@@ -1605,8 +1622,8 @@ private:
 
             if (scaleInterface != nullptr)
                 scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
-            else
-                resizeToFit();
+
+            componentMovedOrResized (true, true);
         }
     }
 
@@ -1634,19 +1651,22 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildComponent)
     };
 
-    void setPluginWindowPos (ViewRect rect)
+    Point<int> getPluginWindowTopLeft()
     {
         if (auto* topComp = getTopLevelComponent())
-        {
-            auto pos = (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
+            return (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
 
-            ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
+        return {};
+    }
 
-            SetWindowPos (pluginHandle, nullptr,
-                          pos.x, pos.y,
-                          rect.getWidth(), rect.getHeight(),
-                          isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
-        }
+    void setPluginWindowPos (Rectangle<int> rect, int extraFlags)
+    {
+        ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
+
+        SetWindowPos (pluginHandle, nullptr,
+                      rect.getX(), rect.getY(),
+                      rect.getWidth(), rect.getHeight(),
+                      extraFlags | (isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW));
     }
 
     ChildComponent embeddedComponent;
