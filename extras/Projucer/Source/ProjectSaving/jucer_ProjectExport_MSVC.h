@@ -1935,3 +1935,48 @@ public:
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2019)
 };
+
+//==============================================================================
+class MSVCProjectExporterVC2022  : public MSVCProjectExporterBase
+{
+public:
+    MSVCProjectExporterVC2022 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
+    {
+        name = getDisplayName();
+
+        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
+        platformToolsetValue.setDefault (getDefaultToolset());
+    }
+
+    static String getDisplayName()        { return "Visual Studio 2022"; }
+    static String getValueTreeTypeName()  { return "VS2022"; }
+    static String getTargetFolderName()   { return "VisualStudio2022"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
+    int getVisualStudioVersion() const override                      { return 17; }
+    String getSolutionComment() const override                       { return "# Visual Studio 2022"; }
+    String getToolsVersion() const override                          { return "17.0"; }
+    String getDefaultToolset() const override                        { return "v143"; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
+
+    static MSVCProjectExporterVC2022* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
+    {
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2022 (projectToUse, settingsToUse);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143" };
+        const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143" };
+        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
+
+        MSVCProjectExporterBase::createExporterProperties (props);
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2022)
+};
