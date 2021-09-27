@@ -144,7 +144,8 @@ public:
     String getExtraCompilerFlagsString() const            { return extraCompilerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
     String getExtraLinkerFlagsString() const              { return extraLinkerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
 
-    String getExternalLibrariesString() const             { return getSearchPathsFromString (externalLibrariesValue.get().toString()).joinIntoString (";"); }
+    StringArray getExternalLibrariesStringArray() const   { return getSearchPathsFromString (externalLibrariesValue.get().toString()); }
+    String getExternalLibrariesString() const             { return getExternalLibrariesStringArray().joinIntoString (";"); }
 
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 

@@ -606,9 +606,9 @@ public:
                                                                                                     : "NDEBUG;%(PreprocessorDefinitions)");
                 }
 
-                auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesString());
-                auto additionalDependencies = type != SharedCodeTarget && externalLibraries.isNotEmpty()
-                                                        ? msBuildEscape (getOwner().replacePreprocessorTokens (config, externalLibraries).trim()) + ";%(AdditionalDependencies)"
+                auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesStringArray());
+                auto additionalDependencies = type != SharedCodeTarget && ! externalLibraries.isEmpty()
+                                                        ? externalLibraries.joinIntoString (";") + ";%(AdditionalDependencies)"
                                                         : String();
 
                 auto librarySearchPaths = config.getLibrarySearchPaths();
@@ -1332,22 +1332,25 @@ public:
             return librarySearchPaths;
         }
 
-        String getExternalLibraries (const MSVCBuildConfiguration& config, const String& otherLibs) const
+        StringArray getExternalLibraries (const MSVCBuildConfiguration& config, const StringArray& otherLibs) const
         {
-            StringArray libraries;
+            const auto sharedCodeLib = [&]() -> StringArray
+            {
+                if (type != SharedCodeTarget)
+                    if (auto* shared = getOwner().getSharedCodeTarget())
+                        return { shared->getBinaryNameWithSuffix (config, false) };
 
-            if (otherLibs.isNotEmpty())
-                libraries.add (otherLibs);
+                return {};
+            }();
 
-            auto moduleLibs = getOwner().getModuleLibs();
-            if (! moduleLibs.isEmpty())
-                libraries.addArray (moduleLibs);
+            auto result = otherLibs;
+            result.addArray (getOwner().getModuleLibs());
+            result.addArray (sharedCodeLib);
 
-            if (type != SharedCodeTarget)
-                if (auto* shared = getOwner().getSharedCodeTarget())
-                    libraries.add (shared->getBinaryNameWithSuffix (config, false));
+            for (auto& i : result)
+                i = msBuildEscape (getOwner().replacePreprocessorTokens (config, i).trim());
 
-            return libraries.joinIntoString (";");
+            return result;
         }
 
         String getDelayLoadedDLLs() const
