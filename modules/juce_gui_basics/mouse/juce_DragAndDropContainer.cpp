@@ -44,7 +44,7 @@ public:
         : sourceDetails (desc, sourceComponent, Point<int>()),
           image (im), owner (ddc),
           mouseDragSource (draggingSource->getComponentUnderMouse()),
-          imageOffset (offset),
+          imageOffset (transformOffsetCoordinates (sourceComponent, offset)),
           originalInputSourceIndex (draggingSource->getIndex()),
           originalInputSourceType (draggingSource->getType())
     {
@@ -261,6 +261,11 @@ private:
         }
 
         return nullptr;
+    }
+
+    Point<int> transformOffsetCoordinates (const Component* const sourceComponent, Point<int> offsetInSource) const
+    {
+        return getLocalPoint (sourceComponent, offsetInSource) - getLocalPoint (sourceComponent, Point<int>());
     }
 
     DragAndDropTarget* findTarget (Point<int> screenPos, Point<int>& relativePos,
