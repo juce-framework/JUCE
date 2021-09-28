@@ -43,6 +43,7 @@ template <typename CFType>
 struct CFObjectHolder
 {
     CFObjectHolder() = default;
+    explicit CFObjectHolder (CFType obj)  : object (obj) {}
 
     CFObjectHolder (const CFObjectHolder&) = delete;
     CFObjectHolder (CFObjectHolder&&) = delete;
