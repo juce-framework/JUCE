@@ -49,7 +49,7 @@ DelayLine<SampleType, InterpolationType>::DelayLine (int maximumDelayInSamples)
 template <typename SampleType, typename InterpolationType>
 void DelayLine<SampleType, InterpolationType>::setDelay (SampleType newDelayInSamples)
 {
-    auto upperLimit = (SampleType) (totalSize - 1);
+    auto upperLimit = (SampleType) getMaximumDelayInSamples();
     jassert (isPositiveAndNotGreaterThan (newDelayInSamples, upperLimit));
 
     delay     = jlimit ((SampleType) 0, upperLimit, newDelayInSamples);
