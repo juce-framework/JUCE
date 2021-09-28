@@ -3447,12 +3447,6 @@ private:
     }
 
     //==============================================================================
-    struct ChildWindowCallbackData
-    {
-        std::map<HWND, RECT> windowRectsMap;
-        float scaleRatio;
-    };
-
     LRESULT handleDPIChanging (int newDPI, RECT newRect)
     {
         // Sometimes, windows that should not be automatically scaled (secondary windows in plugins)
@@ -3466,7 +3460,7 @@ private:
         if (approximatelyEqual (scaleFactor, newScale))
             return 0;
 
-        const auto oldScale = std::exchange (scaleFactor, newScale);
+        scaleFactor = newScale;
 
         {
             const ScopedValueSetter<int> setter (numInDpiChange, numInDpiChange + 1);
@@ -3482,56 +3476,9 @@ private:
         updateShadower();
         InvalidateRect (hwnd, nullptr, FALSE);
 
-        ChildWindowCallbackData callbackData;
-        callbackData.scaleRatio = (float) (scaleFactor / oldScale);
-
-        EnumChildWindows (hwnd, getChildWindowRectCallback, (LPARAM) &callbackData);
         scaleFactorListeners.call ([this] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
-        EnumChildWindows (hwnd, scaleChildWindowCallback, (LPARAM) &callbackData);
 
         return 0;
-    }
-
-    static BOOL CALLBACK getChildWindowRectCallback (HWND hwnd, LPARAM data)
-    {
-        auto& callbackData = *(reinterpret_cast<ChildWindowCallbackData*> (data));
-
-        callbackData.windowRectsMap[hwnd] = getWindowClientRect (hwnd);
-        return TRUE;
-    }
-
-    static BOOL CALLBACK scaleChildWindowCallback (HWND hwnd, LPARAM data)
-    {
-        auto& callbackData = *(reinterpret_cast<ChildWindowCallbackData*> (data));
-
-        auto originalBounds = rectangleFromRECT (callbackData.windowRectsMap[hwnd]);
-        auto scaledBounds = (originalBounds.toFloat() * callbackData.scaleRatio).toNearestInt();
-        auto currentBounds = rectangleFromRECT (getWindowClientRect (hwnd));
-
-        if (scaledBounds != currentBounds)
-        {
-            SetWindowPos (hwnd,
-                          nullptr,
-                          scaledBounds.getX(),
-                          scaledBounds.getY(),
-                          scaledBounds.getWidth(),
-                          scaledBounds.getHeight(),
-                          SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-        }
-
-        if (auto* peer = getOwnerOfWindow (hwnd))
-            peer->handleChildDPIChanging();
-
-        return TRUE;
-    }
-
-    void handleChildDPIChanging()
-    {
-        scaleFactor = getScaleFactorForWindow (parentToAddTo);
-        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
-
-        updateShadower();
-        InvalidateRect (hwnd, nullptr, FALSE);
     }
 
     //==============================================================================
