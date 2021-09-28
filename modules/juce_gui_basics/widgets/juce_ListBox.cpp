@@ -90,14 +90,13 @@ public:
                 addAndMakeVisible (customComponent.get());
                 customComponent->setBounds (getLocalBounds());
 
-                if (customComponent->getAccessibilityHandler() != nullptr)
-                    invalidateAccessibilityHandler();
+                setFocusContainerType (FocusContainerType::focusContainer);
+            }
+            else
+            {
+                setFocusContainerType (FocusContainerType::none);
             }
         }
-
-        if (selectionHasChanged)
-            if (auto* handler = getAccessibilityHandler())
-                isSelected ? handler->grabFocus() : handler->giveAwayFocus();
     }
 
     void performSelection (const MouseEvent& e, bool isMouseUp)
@@ -268,9 +267,6 @@ public:
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
-        if (customComponent != nullptr && customComponent->getAccessibilityHandler() != nullptr)
-            return nullptr;
-
         return std::make_unique<RowAccessibilityHandler> (*this);
     }
 
