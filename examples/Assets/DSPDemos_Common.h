@@ -308,7 +308,11 @@ struct DSPDemo  : public AudioSource,
 
     void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override
     {
-        jassert (bufferToFill.buffer != nullptr);
+        if (bufferToFill.buffer == nullptr)
+        {
+            jassertfalse;
+            return;
+        }
 
         inputSource->getNextAudioBlock (bufferToFill);
 
