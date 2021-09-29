@@ -1450,22 +1450,9 @@ struct VST3PluginWindow : public AudioProcessorEditor,
         }
     }
 
-    void componentMovedOrResized (bool wasMoved, bool wasResized) override
+    void componentMovedOrResized (bool, bool wasResized) override
     {
-        if (recursiveResize || getTopLevelComponent()->getPeer() == nullptr)
-            return;
-
-        ignoreUnused (wasMoved);
-
-       #if JUCE_WINDOWS
-        if (wasMoved)
-        {
-            const auto pos = getPluginWindowTopLeft();
-            setPluginWindowPos ({ pos.x, pos.y, 0, 0 }, SWP_NOSIZE);
-        }
-       #endif
-
-        if (! wasResized)
+        if (recursiveResize || ! wasResized || getTopLevelComponent()->getPeer() == nullptr)
             return;
 
         ViewRect rect;
@@ -1485,8 +1472,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             }
 
            #if JUCE_WINDOWS
-            setPluginWindowPos (Rectangle<int> (rect.getWidth(), rect.getHeight())
-                                  .withPosition (getPluginWindowTopLeft()), 0);
+            setPluginWindowPos (rect);
            #else
             embeddedComponent.setBounds (getLocalBounds());
            #endif
@@ -1498,8 +1484,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             warnOnFailure (view->getSize (&rect));
 
            #if JUCE_WINDOWS
-            setPluginWindowPos (Rectangle<int> (rect.getWidth(), rect.getHeight())
-                                  .withPosition (getPluginWindowTopLeft()), 0);
+            setPluginWindowPos (rect);
            #else
             resizeWithRect (embeddedComponent, rect, nativeScaleFactor);
            #endif
@@ -1528,13 +1513,10 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         nativeScaleFactor = (float) newScaleFactor;
 
-        if (pluginHandle == HandleFormat{})
-            return;
-
-        if (scaleInterface != nullptr)
+        if (pluginHandle != HandleFormat{} && scaleInterface != nullptr)
             scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
-
-        componentMovedOrResized (true, true);
+        else
+            resizeToFit();
     }
 
     void resizeToFit()
@@ -1586,10 +1568,8 @@ private:
     //==============================================================================
     static void resizeWithRect (Component& comp, const ViewRect& rect, float scaleFactor)
     {
-        comp.setBounds (roundToInt ((float) rect.left / scaleFactor),
-                        roundToInt ((float) rect.top  / scaleFactor),
-                        jmax (10, std::abs (roundToInt ((float) rect.getWidth()  / scaleFactor))),
-                        jmax (10, std::abs (roundToInt ((float) rect.getHeight() / scaleFactor))));
+        comp.setSize (jmax (10, std::abs (roundToInt ((float) rect.getWidth()  / scaleFactor))),
+                      jmax (10, std::abs (roundToInt ((float) rect.getHeight() / scaleFactor))));
     }
 
     void attachPluginWindow()
@@ -1622,8 +1602,8 @@ private:
 
             if (scaleInterface != nullptr)
                 scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
-
-            componentMovedOrResized (true, true);
+            else
+                resizeToFit();
         }
     }
 
@@ -1651,22 +1631,19 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChildComponent)
     };
 
-    Point<int> getPluginWindowTopLeft()
+    void setPluginWindowPos (ViewRect rect)
     {
         if (auto* topComp = getTopLevelComponent())
-            return (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
+        {
+            auto pos = (topComp->getLocalPoint (this, Point<int>()) * nativeScaleFactor).roundToInt();
 
-        return {};
-    }
+            ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
 
-    void setPluginWindowPos (Rectangle<int> rect, int extraFlags)
-    {
-        ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { pluginHandle };
-
-        SetWindowPos (pluginHandle, nullptr,
-                      rect.getX(), rect.getY(),
-                      rect.getWidth(), rect.getHeight(),
-                      extraFlags | (isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW));
+            SetWindowPos (pluginHandle, nullptr,
+                          pos.x, pos.y,
+                          rect.getWidth(), rect.getHeight(),
+                          isVisible() ? SWP_SHOWWINDOW : SWP_HIDEWINDOW);
+        }
     }
 
     ChildComponent embeddedComponent;
