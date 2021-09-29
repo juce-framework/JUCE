@@ -1525,6 +1525,8 @@ private:
 
     tresult PLUGIN_API resizeView (IPlugView* incomingView, ViewRect* newSize) override
     {
+        const ScopedValueSetter<bool> recursiveResizeSetter (recursiveResize, true);
+
         if (incomingView != nullptr && newSize != nullptr && incomingView == view)
         {
             auto scaleToViewRect = [this] (int dimension)
@@ -1536,6 +1538,11 @@ private:
             auto oldHeight = scaleToViewRect (getHeight());
 
             resizeWithRect (embeddedComponent, *newSize, nativeScaleFactor);
+
+           #if JUCE_WINDOWS
+            setPluginWindowPos (*newSize);
+           #endif
+
             setSize (embeddedComponent.getWidth(), embeddedComponent.getHeight());
 
             // According to the VST3 Workflow Diagrams, a resizeView from the plugin should
