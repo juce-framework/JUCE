@@ -461,7 +461,11 @@ private:
     //==============================================================================
     void settingChanged (const XWindowSystemUtilities::XSetting& settingThatHasChanged) override
     {
-        if (settingThatHasChanged.name == XWindowSystem::getWindowScalingFactorSettingName())
+        static StringArray possibleSettings { XWindowSystem::getWindowScalingFactorSettingName(),
+                                              "Gdk/UnscaledDPI",
+                                              "Xft/DPI" };
+
+        if (possibleSettings.contains (settingThatHasChanged.name))
             forceDisplayUpdate();
     }
 
