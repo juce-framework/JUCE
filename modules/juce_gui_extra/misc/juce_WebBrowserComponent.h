@@ -144,6 +144,7 @@ public:
 protected:
     friend class WindowsWebView2WebBrowserComponent;
 
+    /** @internal */
     struct ConstructWithoutPimpl
     {
         explicit ConstructWithoutPimpl (bool unloadOnHide) : unloadWhenHidden (unloadOnHide) {}
