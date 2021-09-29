@@ -27,6 +27,19 @@
 
 #include "../Plugins/IOConfigurationWindow.h"
 
+inline String getFormatSuffix (const AudioProcessor* plugin)
+{
+    const auto format = [plugin]()
+    {
+        if (auto* instance = dynamic_cast<const AudioPluginInstance*> (plugin))
+            return instance->getPluginDescription().pluginFormatName;
+
+        return String();
+    }();
+
+    return format.isNotEmpty() ? (" (" + format + ")") : format;
+}
+
 class PluginGraph;
 
 /**
@@ -140,7 +153,7 @@ public:
     };
 
     PluginWindow (AudioProcessorGraph::Node* n, Type t, OwnedArray<PluginWindow>& windowList)
-       : DocumentWindow (n->getProcessor()->getName(),
+       : DocumentWindow (n->getProcessor()->getName() + getFormatSuffix (n->getProcessor()),
                          LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
                          DocumentWindow::minimiseButton | DocumentWindow::closeButton),
          activeWindowList (windowList),
