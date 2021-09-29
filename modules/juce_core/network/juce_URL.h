@@ -447,7 +447,7 @@ public:
         virtual void progress (DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
     };
 
-    /** Holds options that will can be specified when starting a new download
+    /** Holds options that can be specified when starting a new download
         with downloadToFile().
     */
     class DownloadTaskOptions
