@@ -1373,6 +1373,11 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         warnOnFailure (view->setFrame (this));
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
+
+        if (scaleInterface != nullptr)
+            warnOnFailure (scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor));
+
+        resizeToFit();
     }
 
     ~VST3PluginWindow() override
@@ -1499,10 +1504,7 @@ private:
     void componentVisibilityChanged() override
     {
         attachPluginWindow();
-
-        if (! hasDoneInitialResize)
-            resizeToFit();
-
+        resizeToFit();
         componentMovedOrResized (true, true);
     }
     using ComponentMovementWatcher::componentVisibilityChanged;
@@ -1519,8 +1521,6 @@ private:
         ViewRect rect;
         warnOnFailure (view->getSize (&rect));
         resizeWithRect (*this, rect, nativeScaleFactor);
-
-        hasDoneInitialResize = true;
     }
 
     tresult PLUGIN_API resizeView (IPlugView* incomingView, ViewRect* newSize) override
@@ -1667,7 +1667,7 @@ private:
    #endif
 
     HandleFormat pluginHandle = {};
-    bool recursiveResize = false, hasDoneInitialResize = false, isInOnSize = false;
+    bool recursiveResize = false, isInOnSize = false;
 
     ComponentPeer* currentPeer = nullptr;
     Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
