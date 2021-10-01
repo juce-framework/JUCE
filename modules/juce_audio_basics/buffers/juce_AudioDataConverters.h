@@ -639,9 +639,68 @@ public:
 
         const int sourceChannels, destChannels;
     };
+
+    //==============================================================================
+    template <typename T>
+    using SourceDataPointerType = const typename std::remove_pointer<decltype (T::data)>::type*;
+
+    /** A helper function for converting a sequence of samples from a non-interleaved source
+        to an interleaved destination.
+    */
+    template <typename SourceSampleFormat, typename SourceEndianness,
+              typename DestSampleFormat,   typename DestEndianness>
+    static void interleaveSamples (SourceDataPointerType<SourceSampleFormat>* sourceData, int numSourceChannels,
+                                   decltype (DestSampleFormat::data) destData, int numDestChannels,
+                                   int numSamples)
+    {
+        using SourceType = Pointer <SourceSampleFormat, SourceEndianness, NonInterleaved, Const>;
+        using DestType   = Pointer <DestSampleFormat,   DestEndianness,   Interleaved,    NonConst>;
+
+        for (int i = 0; i < numDestChannels; ++i)
+        {
+            const DestType dest (addBytesToPointer (destData, i * DestType::getBytesPerSample()), numDestChannels);
+
+            if (i < numSourceChannels)
+            {
+                if (*sourceData != nullptr)
+                {
+                    dest.convertSamples (SourceType (*sourceData), numSamples);
+                    ++sourceData;
+                }
+            }
+            else
+            {
+                dest.clearSamples (numSamples);
+            }
+        }
+    }
+
+    /** A helper function for converting a sequence of samples from an interleaved source
+        to a non-interleaved destination.
+    */
+    template <typename SourceSampleFormat, typename SourceEndianness,
+              typename DestSampleFormat,   typename DestEndianness>
+    static void deinterleaveSamples (SourceDataPointerType<SourceSampleFormat> sourceData, int numSourceChannels,
+                                     decltype (DestSampleFormat::data)* destData, int numDestChannels,
+                                     int numSamples)
+    {
+        using SourceType = Pointer <SourceSampleFormat, SourceEndianness, Interleaved,    Const>;
+        using DestType   = Pointer <DestSampleFormat,   DestEndianness,   NonInterleaved, NonConst>;
+
+        for (int i = 0; i < numDestChannels; ++i)
+        {
+            if (auto* targetChan = destData[i])
+            {
+                const DestType dest (targetChan);
+
+                if (i < numSourceChannels)
+                    dest.convertSamples (SourceType (addBytesToPointer (sourceData, i * SourceType::getBytesPerSample()), numSourceChannels), numSamples);
+                else
+                    dest.clearSamples (numSamples);
+            }
+        }
+    }
 };
-
-
 
 //==============================================================================
 #ifndef DOXYGEN

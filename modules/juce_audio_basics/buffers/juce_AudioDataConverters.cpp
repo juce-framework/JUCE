@@ -434,32 +434,14 @@ void AudioDataConverters::convertFormatToFloat (DataFormat sourceFormat, const v
 //==============================================================================
 void AudioDataConverters::interleaveSamples (const float** source, float* dest, int numSamples, int numChannels)
 {
-    for (int chan = 0; chan < numChannels; ++chan)
-    {
-        auto i = chan;
-        auto src = source [chan];
-
-        for (int j = 0; j < numSamples; ++j)
-        {
-            dest [i] = src [j];
-            i += numChannels;
-        }
-    }
+    AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
+                                 AudioData::Float32, AudioData::NativeEndian> (source, numChannels, dest, numChannels, numSamples);
 }
 
 void AudioDataConverters::deinterleaveSamples (const float* source, float** dest, int numSamples, int numChannels)
 {
-    for (int chan = 0; chan < numChannels; ++chan)
-    {
-        auto i = chan;
-        auto dst = dest [chan];
-
-        for (int j = 0; j < numSamples; ++j)
-        {
-            dst [j] = source [i];
-            i += numChannels;
-        }
-    }
+    AudioData::deinterleaveSamples<AudioData::Float32, AudioData::NativeEndian,
+                                   AudioData::Float32, AudioData::NativeEndian> (source, numChannels, dest, numChannels, numSamples);
 }
 
 
@@ -591,6 +573,50 @@ public:
         Test1 <AudioData::Int32>::test (*this, r);
         beginTest ("Round-trip conversion: Float32");
         Test1 <AudioData::Float32>::test (*this, r);
+
+        beginTest ("Interleaving");
+        {
+            constexpr auto numChannels = 4;
+            constexpr auto numSamples = 512;
+
+            AudioBuffer<float> sourceBuffer { numChannels, numSamples },
+                               destBuffer   { 1, numChannels * numSamples };
+
+            for (int ch = 0; ch < numChannels; ++ch)
+                for (int i = 0; i < numSamples; ++i)
+                    sourceBuffer.setSample (ch, i, r.nextFloat());
+
+            AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
+                                         AudioData::Float32, AudioData::NativeEndian> (sourceBuffer.getArrayOfReadPointers(), numChannels,
+                                                                                       destBuffer.getWritePointer (0), numChannels,
+                                                                                       numSamples);
+
+            for (int ch = 0; ch < numChannels; ++ch)
+                for (int i = 0; i < numSamples; ++i)
+                    expect (destBuffer.getSample (0, ch + (i * numChannels)) == sourceBuffer.getSample (ch, i));
+        }
+
+        beginTest ("Deinterleaving");
+        {
+            constexpr auto numChannels = 4;
+            constexpr auto numSamples = 512;
+
+            AudioBuffer<float> sourceBuffer { 1, numChannels * numSamples },
+                               destBuffer   { numChannels, numSamples };
+
+            for (int ch = 0; ch < numChannels; ++ch)
+                for (int i = 0; i < numSamples; ++i)
+                    sourceBuffer.setSample (0, ch + (i * numChannels), r.nextFloat());
+
+            AudioData::deinterleaveSamples<AudioData::Float32, AudioData::NativeEndian,
+                                           AudioData::Float32, AudioData::NativeEndian> (sourceBuffer.getReadPointer (0), numChannels,
+                                                                                         destBuffer.getArrayOfWritePointers(), numChannels,
+                                                                                         numSamples);
+
+            for (int ch = 0; ch < numChannels; ++ch)
+                for (int i = 0; i < numSamples; ++i)
+                    expect (sourceBuffer.getSample (0, ch + (i * numChannels)) == destBuffer.getSample (ch, i));
+        }
     }
 };
 
