@@ -225,10 +225,7 @@ String ProjectExporter::getUniqueName() const
         return defaultBuildsRootFolder + info.targetFolder == targetLocationString;
     };
 
-    auto iter = std::find_if (typeInfos.begin(), typeInfos.end(),
-                              std::move (predicate));
-
-    if (iter == typeInfos.end())
+    if (std::none_of (typeInfos.begin(), typeInfos.end(), std::move (predicate)))
         return name + " - " + targetLocationString;
 
     return name;
