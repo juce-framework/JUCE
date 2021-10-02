@@ -26,6 +26,10 @@
 namespace juce
 {
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+const auto menuItemInvokedSelector = @selector (menuItemInvoked:);
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
 //==============================================================================
 struct JuceMainMenuBarHolder : private DeletedAtShutdown
 {
@@ -283,11 +287,9 @@ public:
         }
         else
         {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
             auto item = [[NSMenuItem alloc] initWithTitle: text
-                                                   action: @selector (menuItemInvoked:)
+                                                   action: menuItemInvokedSelector
                                             keyEquivalent: nsEmptyString()];
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             [item setTag: topLevelIndex];
             [item setEnabled: i.isEnabled];
@@ -445,9 +447,35 @@ private:
         NSString* f35String = [NSString stringWithCharacters: &f35Key length: 1];
 
         NSMenuItem* item = [[NSMenuItem alloc] initWithTitle: nsStringLiteral ("x")
-                                                      action: nil
+                                                      action: menuItemInvokedSelector
                                                keyEquivalent: f35String];
-        [item setTarget: nil];
+
+        // When the f35Event is invoked, the item's enablement is checked and a
+        // NSBeep is triggered if the item appears to be disabled.
+        // This ValidatorClass exists solely to return YES from validateMenuItem.
+        struct ValidatorClass   : public ObjCClass<NSObject>
+        {
+            ValidatorClass()  : ObjCClass ("JUCEMenuValidator_")
+            {
+                addMethod (menuItemInvokedSelector,       menuItemInvoked,  "c@:@");
+                addMethod (@selector (validateMenuItem:), validateMenuItem, "c@:@");
+
+               #if defined (MAC_OS_X_VERSION_10_14)
+                addProtocol (@protocol (NSMenuItemValidation));
+               #endif
+
+                registerClass();
+            }
+
+        private:
+            static BOOL validateMenuItem (id, SEL, NSMenuItem*)      { return YES; }
+            static void menuItemInvoked  (id, SEL, NSMenuItem*)      {}
+        };
+
+        static ValidatorClass validatorClass;
+        static auto* instance = validatorClass.createInstance();
+
+        [item setTarget: instance];
         [menu insertItem: item atIndex: [menu numberOfItems]];
         [item release];
 
@@ -523,10 +551,7 @@ private:
         {
             addIvar<JuceMainMenuHandler*> ("owner");
 
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (menuItemInvoked:),  menuItemInvoked, "v@:@");
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
+            addMethod (menuItemInvokedSelector,       menuItemInvoked,  "v@:@");
             addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate,  "v@:@");
             addMethod (@selector (validateMenuItem:), validateMenuItem, "c@:@");
 
