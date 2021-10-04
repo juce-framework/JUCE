@@ -340,7 +340,10 @@ struct CoreAudioFormatMetatdata
 class CoreAudioReader : public AudioFormatReader
 {
 public:
-    CoreAudioReader (InputStream* inp)  : AudioFormatReader (inp, coreAudioFormatName)
+    using StreamKind = CoreAudioFormat::StreamKind;
+
+    CoreAudioReader (InputStream* inp, StreamKind streamKind)
+        : AudioFormatReader (inp, coreAudioFormatName)
     {
         usesFloatingPointData = true;
         bitsPerSample = 32;
@@ -353,7 +356,7 @@ public:
                                                   nullptr,  // write needs to be null to avoid permissions errors
                                                   &getSizeCallback,
                                                   nullptr,  // setSize needs to be null to avoid permissions errors
-                                                  0,        // AudioFileTypeID inFileTypeHint
+                                                  toAudioFileTypeID (streamKind),
                                                   &audioFileID);
         if (status == noErr)
         {
@@ -556,16 +559,50 @@ private:
         return noErr;
     }
 
+    static AudioFileTypeID toAudioFileTypeID (StreamKind kind)
+    {
+        switch (kind)
+        {
+            case StreamKind::kAiff:                 return kAudioFileAIFFType;
+            case StreamKind::kAifc:                 return kAudioFileAIFCType;
+            case StreamKind::kWave:                 return kAudioFileWAVEType;
+            case StreamKind::kSoundDesigner2:       return kAudioFileSoundDesigner2Type;
+            case StreamKind::kNext:                 return kAudioFileNextType;
+            case StreamKind::kMp3:                  return kAudioFileMP3Type;
+            case StreamKind::kMp2:                  return kAudioFileMP2Type;
+            case StreamKind::kMp1:                  return kAudioFileMP1Type;
+            case StreamKind::kAc3:                  return kAudioFileAC3Type;
+            case StreamKind::kAacAdts:              return kAudioFileAAC_ADTSType;
+            case StreamKind::kMpeg4:                return kAudioFileMPEG4Type;
+            case StreamKind::kM4a:                  return kAudioFileM4AType;
+            case StreamKind::kM4b:                  return kAudioFileM4BType;
+            case StreamKind::kCaf:                  return kAudioFileCAFType;
+            case StreamKind::k3gp:                  return kAudioFile3GPType;
+            case StreamKind::k3gp2:                 return kAudioFile3GP2Type;
+            case StreamKind::kAmr:                  return kAudioFileAMRType;
+
+            case StreamKind::kNone:                 break;
+        }
+
+        return {};
+    }
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioReader)
 };
 
 //==============================================================================
 CoreAudioFormat::CoreAudioFormat()
-    : AudioFormat (coreAudioFormatName, findFileExtensionsForCoreAudioCodecs())
+    : CoreAudioFormat (StreamKind::kNone)
 {
 }
 
-CoreAudioFormat::~CoreAudioFormat() {}
+CoreAudioFormat::CoreAudioFormat (StreamKind kind)
+    : AudioFormat (coreAudioFormatName, findFileExtensionsForCoreAudioCodecs()),
+      streamKind (kind)
+{
+}
+
+CoreAudioFormat::~CoreAudioFormat() = default;
 
 Array<int> CoreAudioFormat::getPossibleSampleRates()    { return {}; }
 Array<int> CoreAudioFormat::getPossibleBitDepths()      { return {}; }
@@ -577,7 +614,7 @@ bool CoreAudioFormat::canDoMono()       { return true; }
 AudioFormatReader* CoreAudioFormat::createReaderFor (InputStream* sourceStream,
                                                      bool deleteStreamIfOpeningFails)
 {
-    std::unique_ptr<CoreAudioReader> r (new CoreAudioReader (sourceStream));
+    std::unique_ptr<CoreAudioReader> r (new CoreAudioReader (sourceStream, streamKind));
 
     if (r->ok)
         return r.release();

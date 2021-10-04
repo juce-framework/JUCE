@@ -42,9 +42,37 @@ namespace juce
 class JUCE_API  CoreAudioFormat     : public AudioFormat
 {
 public:
+    /** File type hints. */
+    enum class StreamKind
+    {
+        kNone,
+        kAiff,
+        kAifc,
+        kWave,
+        kSoundDesigner2,
+        kNext,
+        kMp3,
+        kMp2,
+        kMp1,
+        kAc3,
+        kAacAdts,
+        kMpeg4,
+        kM4a,
+        kM4b,
+        kCaf,
+        k3gp,
+        k3gp2,
+        kAmr,
+    };
+
     //==============================================================================
     /** Creates a format object. */
     CoreAudioFormat();
+
+    /** Creates a format object and provides a hint as to the format of data
+        to be read or written.
+    */
+    explicit CoreAudioFormat (StreamKind);
 
     /** Destructor. */
     ~CoreAudioFormat() override;
@@ -78,6 +106,8 @@ public:
     using AudioFormat::createWriterFor;
 
 private:
+    StreamKind streamKind = StreamKind::kNone;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreAudioFormat)
 };
 
