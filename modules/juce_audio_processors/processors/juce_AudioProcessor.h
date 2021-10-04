@@ -993,7 +993,7 @@ public:
         It sends a hint to the host that something like the program, number of parameters,
         etc, has changed, and that it should update itself.
     */
-    void updateHostDisplay (const ChangeDetails& details = ChangeDetails::getAllChanged());
+    void updateHostDisplay (const ChangeDetails& details = ChangeDetails::getDefaultFlags());
 
     //==============================================================================
     /** Adds a parameter to the AudioProcessor.
