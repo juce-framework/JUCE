@@ -2466,7 +2466,8 @@ private:
         if (isUsingDefaultSigningIdentity (config))
             return iOS ? "iPhone Developer" : "Mac Developer";
 
-        return config.getCodeSignIdentityString();
+        const auto identity = config.getCodeSignIdentityString();
+        return identity.isNotEmpty() ? identity : "-";
     }
 
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
