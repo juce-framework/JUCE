@@ -102,7 +102,7 @@ public:
     double getLengthInSeconds() const;
 
     /** Returns true if the player has stopped because its input stream ran out of data. */
-    bool hasStreamFinished() const noexcept             { return inputStreamEOF; }
+    bool hasStreamFinished() const noexcept;
 
     //==============================================================================
     /** Starts playing (if a source has been selected).
@@ -170,7 +170,7 @@ private:
     std::atomic<bool> playing { false }, stopped { true };
     double sampleRate = 44100.0, sourceSampleRate = 0;
     int blockSize = 128, readAheadBufferSize = 0;
-    bool isPrepared = false, inputStreamEOF = false;
+    bool isPrepared = false;
 
     void releaseMasterResources();
 
