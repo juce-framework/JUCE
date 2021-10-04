@@ -400,7 +400,7 @@ struct MathConstants
 const constexpr double  double_Pi  = MathConstants<double>::pi;
 
 /** A single-precision constant for pi. */
-[[deprecated ("This is deprecated in favour of MathConstants<double>::pi.")]]
+[[deprecated ("This is deprecated in favour of MathConstants<float>::pi.")]]
 const constexpr float   float_Pi   = MathConstants<float>::pi;
 #endif
 
