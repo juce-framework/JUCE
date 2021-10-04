@@ -157,6 +157,7 @@ inline bool isBypassed (const ProcessorChain<Processors...>& chain) noexcept
 } // namespace dsp
 } // namespace juce
 
+#ifndef DOXYGEN
 namespace std
 {
 
@@ -173,3 +174,4 @@ struct tuple_element<I, ::juce::dsp::ProcessorChain<Processors...>> : tuple_elem
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace std
+#endif
