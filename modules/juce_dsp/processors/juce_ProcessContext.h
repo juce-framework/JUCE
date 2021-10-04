@@ -46,6 +46,15 @@ struct ProcessSpec
     uint32 numChannels;
 };
 
+constexpr bool operator== (const ProcessSpec& a, const ProcessSpec& b)
+{
+    return a.sampleRate         == b.sampleRate
+        && a.maximumBlockSize   == b.maximumBlockSize
+        && a.numChannels        == b.numChannels;
+}
+
+constexpr bool operator!= (const ProcessSpec& a, const ProcessSpec& b) { return ! (a == b); }
+
 //==============================================================================
 /**
     This is a handy base class for the state of a processor (such as parameter values)
