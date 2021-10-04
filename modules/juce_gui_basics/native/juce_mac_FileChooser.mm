@@ -224,7 +224,9 @@ private:
             if (@available (macOS 10.9, *))
                 return NSModalResponseOK;
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             return NSFileHandlingPanelOKButton;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }();
 
         if (panel != nil && result == okResult)
