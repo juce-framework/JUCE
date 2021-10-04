@@ -857,7 +857,9 @@ public:
             if (@available (macOS 10.10, *))
                 return (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             return (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }();
 
         if (! component.isOpaque())
