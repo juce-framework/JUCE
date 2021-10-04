@@ -227,3 +227,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #undef DEF_CLASS2
 #undef DEF_CLASS_W
 #undef END_FACTORY
+
+#ifdef atomic_thread_fence
+ #undef atomic_thread_fence
+#endif
