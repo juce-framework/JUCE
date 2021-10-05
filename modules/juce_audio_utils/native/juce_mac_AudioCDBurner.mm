@@ -132,13 +132,10 @@ private:
 
                 source->source->getNextAudioBlock (info);
 
-                typedef AudioData::Pointer <AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved,    AudioData::NonConst> CDSampleFormat;
-                typedef AudioData::Pointer <AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const> SourceSampleFormat;
-
-                CDSampleFormat left (buffer, 2);
-                left.convertSamples (SourceSampleFormat (tempBuffer.getReadPointer (0)), numSamples);
-                CDSampleFormat right (buffer + 2, 2);
-                right.convertSamples (SourceSampleFormat (tempBuffer.getReadPointer (1)), numSamples);
+                AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
+                                             AudioData::Int16,   AudioData::LittleEndian> (tempBuffer.getArrayOfReadPointers(), 2,
+                                                                                           reinterpret_cast<uint16*> (buffer), 2,
+                                                                                           numSamples);
 
                 source->readPosition += numSamples;
             }
