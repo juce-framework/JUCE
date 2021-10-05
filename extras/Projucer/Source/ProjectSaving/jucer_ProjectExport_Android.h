@@ -1747,6 +1747,8 @@ private:
         if (! act->hasAttribute ("android:hardwareAccelerated"))
             act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
 
+        act->setAttribute ("android:exported", "true");
+
         return act;
     }
 
@@ -1831,6 +1833,7 @@ private:
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
             s.add ("android.permission.ACCESS_FINE_LOCATION");
+            s.add ("android.permission.ACCESS_COARSE_LOCATION");
         }
 
         if (androidExternalReadPermission.get())
