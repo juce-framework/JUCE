@@ -3894,6 +3894,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ScopedValueSetter.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SingleThreadedAbstractFifo.h">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SortedSet.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
@@ -3997,6 +4000,9 @@
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ReferenceCountedObject.h">
+      <Filter>JUCE Modules\juce_core\memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_Reservoir.h">
       <Filter>JUCE Modules\juce_core\memory</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\memory\juce_ScopedPointer.h">
@@ -5109,6 +5115,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_ScopedDPIAwarenessDisabler.h">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_win32_ScopedThreadDPIAwarenessSetter.h">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClInclude>
@@ -5269,9 +5278,6 @@
       <Filter>JUCE Modules\juce_gui_extra\embedding</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_NSViewComponent.h">
-      <Filter>JUCE Modules\juce_gui_extra\embedding</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_ScopedDPIAwarenessDisabler.h">
       <Filter>JUCE Modules\juce_gui_extra\embedding</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\embedding\juce_UIViewComponent.h">
