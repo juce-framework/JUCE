@@ -1444,16 +1444,24 @@ public:
 
             if (! owner.isiOS())
             {
-                auto validArchs = owner.getValidArchs();
+                const auto validArchs = owner.getValidArchs();
 
                 if (! validArchs.isEmpty())
                 {
-                    const auto joined = std::accumulate (validArchs.begin(),
-                                                         validArchs.end(),
-                                                         String(),
-                                                         [] (String str, const var& v) { return str + v.toString() + " "; });
+                    const auto join = [] (const Array<var>& range)
+                    {
+                        return std::accumulate (range.begin(),
+                                                range.end(),
+                                                String(),
+                                                [] (String str, const var& v) { return str + v.toString() + " "; }).trim().quoted();
+                    };
 
-                    s.set ("VALID_ARCHS", joined.trim().quoted());
+                    s.set ("VALID_ARCHS", join (validArchs));
+
+                    auto excludedArchs = owner.getAllArchs();
+                    excludedArchs.removeIf ([&validArchs] (const auto& a) { return validArchs.contains (a); });
+
+                    s.set ("EXCLUDED_ARCHS", join (excludedArchs));
                 }
             }
 
