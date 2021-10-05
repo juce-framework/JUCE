@@ -75,6 +75,84 @@ private:
     JUCE_DECLARE_NON_COPYABLE (ShadowWindow)
 };
 
+class ParentVisibilityChangedListener  : public ComponentListener
+{
+public:
+    ParentVisibilityChangedListener (Component& r, ComponentListener& l)
+        : root (&r), listener (&l)
+    {
+        if (auto* firstParent = root->getParentComponent())
+            updateParentHierarchy (firstParent);
+    }
+
+    ~ParentVisibilityChangedListener() override
+    {
+        for (auto& compEntry : observedComponents)
+            if (auto* comp = compEntry.get())
+                comp->removeComponentListener (this);
+    }
+
+    void componentVisibilityChanged (Component&) override
+    {
+        listener->componentVisibilityChanged (*root);
+    }
+
+    void componentParentHierarchyChanged (Component& component) override
+    {
+        if (root == &component)
+            if (auto* firstParent = root->getParentComponent())
+                updateParentHierarchy (firstParent);
+    }
+
+private:
+    class ComponentWithWeakReference
+    {
+    public:
+        explicit ComponentWithWeakReference (Component& c)
+            : ptr (&c), ref (&c) {}
+
+        Component* get() const { return ref.get(); }
+
+        bool operator< (const ComponentWithWeakReference& other) const { return ptr < other.ptr; }
+
+    private:
+        Component* ptr;
+        WeakReference<Component> ref;
+    };
+
+    void updateParentHierarchy (Component* rootComponent)
+    {
+        const auto lastSeenComponents = std::exchange (observedComponents, [&]
+        {
+            std::set<ComponentWithWeakReference> result;
+
+            for (auto node = rootComponent; node != nullptr; node = node->getParentComponent())
+                result.emplace (*node);
+
+            return result;
+        }());
+
+        const auto withDifference = [] (const auto& rangeA, const auto& rangeB, auto&& callback)
+        {
+            std::vector<ComponentWithWeakReference> result;
+            std::set_difference (rangeA.begin(), rangeA.end(), rangeB.begin(), rangeB.end(), std::back_inserter (result));
+
+            for (const auto& item : result)
+                if (auto* c = item.get())
+                    callback (*c);
+        };
+
+        withDifference (lastSeenComponents, observedComponents, [this] (auto& comp) { comp.removeComponentListener (this); });
+        withDifference (observedComponents, lastSeenComponents, [this] (auto& comp) { comp.addComponentListener (this); });
+    }
+
+    Component* root = nullptr;
+    ComponentListener* listener = nullptr;
+    std::set<ComponentWithWeakReference> observedComponents;
+
+    JUCE_DECLARE_NON_COPYABLE (ParentVisibilityChangedListener)
+    JUCE_DECLARE_NON_MOVEABLE (ParentVisibilityChangedListener)
+};
 
 //==============================================================================
 DropShadower::DropShadower (const DropShadow& ds)  : shadow (ds)  {}
@@ -108,6 +186,11 @@ void DropShadower::setOwner (Component* componentToFollow)
 
         updateParent();
         owner->addComponentListener (this);
+
+        // The visibility of `owner` is transitively affected by the visibility of its parents. Thus we need to trigger the
+        // componentVisibilityChanged() event in case it changes for any of the parents.
+        visibilityChangedListener = std::make_unique<ParentVisibilityChangedListener> (*owner,
+                                                                                       static_cast<ComponentListener&> (*this));
 
         updateShadows();
     }
