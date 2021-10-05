@@ -196,29 +196,26 @@ struct BufferHelpers<int16>
 
     static void convertFromOpenSL (const int16* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
-        for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
-        {
-            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
-            using SrcSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>;
+        const auto numChannels = audioBuffer.getNumChannels();
 
-            DstSampleType dstData (audioBuffer.getWritePointer (i));
-            SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
-            dstData.convertSamples (srcData, audioBuffer.getNumSamples());
-        }
+        AudioData::deinterleaveSamples<AudioData::Int16,   AudioData::LittleEndian,
+                                       AudioData::Float32, AudioData::NativeEndian> (reinterpret_cast<const uint16*> (srcInterleaved),
+                                                                                     numChannels,
+                                                                                     audioBuffer.getArrayOfWritePointers(),
+                                                                                     numChannels,
+                                                                                     audioBuffer.getNumSamples());
     }
 
     static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, int16* dstInterleaved)
     {
-        for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
-        {
-            using DstSampleType = AudioData::Pointer<AudioData::Int16,   AudioData::LittleEndian, AudioData::Interleaved, AudioData::NonConst>;
-            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
+        const auto numChannels = audioBuffer.getNumChannels();
 
-            DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
-            SrcSampleType srcData (audioBuffer.getReadPointer (i));
-
-            dstData.convertSamples (srcData, audioBuffer.getNumSamples());
-        }
+        AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
+                                     AudioData::Int16,   AudioData::LittleEndian> (audioBuffer.getArrayOfReadPointers(),
+                                                                                   numChannels,
+                                                                                   reinterpret_cast<uint16*> (dstInterleaved),
+                                                                                   numChannels,
+                                                                                   audioBuffer.getNumSamples());
     }
 
 };
@@ -249,41 +246,38 @@ struct BufferHelpers<float>
 
     static void convertFromOpenSL (const float* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
-        if (audioBuffer.getNumChannels() == 1)
+        const auto numChannels = audioBuffer.getNumChannels();
+
+        if (numChannels == 1)
         {
             jassert (srcInterleaved == audioBuffer.getWritePointer (0));
             return;
         }
 
-        for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
-        {
-            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
-            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::Const>;
-
-            DstSampleType dstData (audioBuffer.getWritePointer (i));
-            SrcSampleType srcData (srcInterleaved + i, audioBuffer.getNumChannels());
-            dstData.convertSamples (srcData, audioBuffer.getNumSamples());
-        }
+        AudioData::deinterleaveSamples<AudioData::Float32, AudioData::LittleEndian,
+                                       AudioData::Float32, AudioData::NativeEndian> (srcInterleaved,
+                                                                                     numChannels,
+                                                                                     audioBuffer.getArrayOfWritePointers(),
+                                                                                     numChannels,
+                                                                                     audioBuffer.getNumSamples());
     }
 
     static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, float* dstInterleaved)
     {
-        if (audioBuffer.getNumChannels() == 1)
+        const auto numChannels = audioBuffer.getNumChannels();
+
+        if (numChannels == 1)
         {
             jassert (dstInterleaved == audioBuffer.getReadPointer (0));
             return;
         }
 
-        for (int i = 0; i < audioBuffer.getNumChannels(); ++i)
-        {
-            using DstSampleType = AudioData::Pointer<AudioData::Float32, AudioData::LittleEndian, AudioData::Interleaved,    AudioData::NonConst>;
-            using SrcSampleType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
-
-            DstSampleType dstData (dstInterleaved + i, audioBuffer.getNumChannels());
-            SrcSampleType srcData (audioBuffer.getReadPointer (i));
-
-            dstData.convertSamples (srcData, audioBuffer.getNumSamples());
-        }
+        AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
+                                     AudioData::Float32, AudioData::LittleEndian> (audioBuffer.getArrayOfReadPointers(),
+                                                                                   numChannels,
+                                                                                   dstInterleaved,
+                                                                                   numChannels,
+                                                                                   audioBuffer.getNumSamples());
     }
 };
 
