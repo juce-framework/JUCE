@@ -387,10 +387,14 @@ public:
     Scanner (PluginListComponent& plc, AudioPluginFormat& format, const StringArray& filesOrIdentifiers,
              PropertiesFile* properties, bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
              const String& title, const String& text)
-        : owner (plc), formatToScan (format), filesOrIdentifiersToScan (filesOrIdentifiers), propertiesToUse (properties),
+        : owner (plc),
+          formatToScan (format),
+          filesOrIdentifiersToScan (filesOrIdentifiers),
+          propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String(), MessageBoxIconType::NoIcon),
           progressWindow (title, text, MessageBoxIconType::NoIcon),
-          numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
+          numThreads (format.canScanOnBackgroundThread() ? threads : 0),
+          allowAsync (format.canScanOnBackgroundThread() && allowPluginsWhichRequireAsynchronousInstantiation)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
 
@@ -443,7 +447,7 @@ private:
     FileSearchPathListComponent pathList;
     String pluginBeingScanned;
     double progress = 0;
-    int numThreads;
+    const int numThreads;
     bool allowAsync, finished = false, timerReentrancyCheck = false;
     std::unique_ptr<ThreadPool> pool;
 
