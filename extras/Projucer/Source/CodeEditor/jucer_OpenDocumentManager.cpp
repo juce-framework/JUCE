@@ -254,15 +254,19 @@ void OpenDocumentManager::closeDocumentAsync (Document* doc, SaveIfNeeded saveIf
                 return;
             }
 
+            auto closed = parent->closeDocumentWithoutSaving (doc);
+
             if (callback != nullptr)
-                callback (parent->closeDocumentWithoutSaving (doc));
+                callback (closed);
         });
 
         return;
     }
 
+    auto closed = closeDocumentWithoutSaving (doc);
+
     if (callback != nullptr)
-        callback (closeDocumentWithoutSaving (doc));
+        callback (closed);
 }
 
 void OpenDocumentManager::closeFileWithoutSaving (const File& f)
