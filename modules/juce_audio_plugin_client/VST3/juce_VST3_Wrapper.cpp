@@ -1264,8 +1264,10 @@ public:
         if (details.nonParameterStateChanged)
             flags |= pluginShouldBeMarkedDirtyFlag;
 
-        if (! inSetupProcessing)
-            componentRestarter.restart (flags);
+        if (inSetupProcessing)
+            flags &= Vst::kLatencyChanged;
+
+        componentRestarter.restart (flags);
     }
 
     //==============================================================================
