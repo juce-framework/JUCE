@@ -44,28 +44,25 @@ struct OboeAudioIODeviceBufferHelpers<int16>
 
     static bool referAudioBufferDirectlyToOboeIfPossible (int16*, AudioBuffer<float>&, int)  { return false; }
 
+    using NativeInt16   = AudioData::Format<AudioData::Int16, AudioData::NativeEndian>;
+    using NativeFloat32 = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
     static void convertFromOboe (const int16* srcInterleaved, AudioBuffer<float>& audioBuffer, int numSamples)
     {
         const auto numChannels = audioBuffer.getNumChannels();
 
-        AudioData::deinterleaveSamples<AudioData::Int16,   AudioData::NativeEndian,
-                                       AudioData::Float32, AudioData::NativeEndian> (reinterpret_cast<const uint16*> (srcInterleaved),
-                                                                                     numChannels,
-                                                                                     audioBuffer.getArrayOfWritePointers(),
-                                                                                     numChannels,
-                                                                                     numSamples);
+        AudioData::deinterleaveSamples (AudioData::InterleavedSource<NativeInt16>    { reinterpret_cast<const uint16*> (srcInterleaved), numChannels },
+                                        AudioData::NonInterleavedDest<NativeFloat32> { audioBuffer.getArrayOfWritePointers(),            numChannels },
+                                        numSamples);
     }
 
     static void convertToOboe (const AudioBuffer<float>& audioBuffer, int16* dstInterleaved, int numSamples)
     {
         const auto numChannels = audioBuffer.getNumChannels();
 
-        AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                     AudioData::Int16,   AudioData::NativeEndian> (audioBuffer.getArrayOfReadPointers(),
-                                                                                   numChannels,
-                                                                                   reinterpret_cast<uint16*> (dstInterleaved),
-                                                                                   numChannels,
-                                                                                   numSamples);
+        AudioData::interleaveSamples (AudioData::NonInterleavedSource<NativeFloat32> { audioBuffer.getArrayOfReadPointers(),       numChannels },
+                                      AudioData::InterleavedDest<NativeInt16>        { reinterpret_cast<uint16*> (dstInterleaved), numChannels },
+                                      numSamples);
     }
 };
 
@@ -87,6 +84,8 @@ struct OboeAudioIODeviceBufferHelpers<float>
         return false;
     }
 
+    using Format = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
     static void convertFromOboe (const float* srcInterleaved, AudioBuffer<float>& audioBuffer, int numSamples)
     {
         auto numChannels = audioBuffer.getNumChannels();
@@ -96,12 +95,9 @@ struct OboeAudioIODeviceBufferHelpers<float>
             // No need to convert, we instructed the buffer to point to the src data directly already
             jassert (audioBuffer.getWritePointer (0) != srcInterleaved);
 
-            AudioData::deinterleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                           AudioData::Float32, AudioData::NativeEndian> (srcInterleaved,
-                                                                                         numChannels,
-                                                                                         audioBuffer.getArrayOfWritePointers(),
-                                                                                         numChannels,
-                                                                                         numSamples);
+            AudioData::deinterleaveSamples (AudioData::InterleavedSource<Format>  { srcInterleaved,                        numChannels },
+                                            AudioData::NonInterleavedDest<Format> { audioBuffer.getArrayOfWritePointers(), numChannels },
+                                            numSamples);
         }
     }
 
@@ -114,12 +110,9 @@ struct OboeAudioIODeviceBufferHelpers<float>
             // No need to convert, we instructed the buffer to point to the src data directly already
             jassert (audioBuffer.getReadPointer (0) != dstInterleaved);
 
-            AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                         AudioData::Float32, AudioData::NativeEndian> (audioBuffer.getArrayOfReadPointers(),
-                                                                                       numChannels,
-                                                                                       dstInterleaved,
-                                                                                       numChannels,
-                                                                                       numSamples);
+            AudioData::interleaveSamples (AudioData::NonInterleavedSource<Format> { audioBuffer.getArrayOfReadPointers(), numChannels },
+                                          AudioData::InterleavedDest<Format>      { dstInterleaved,                       numChannels },
+                                          numSamples);
         }
     }
 };

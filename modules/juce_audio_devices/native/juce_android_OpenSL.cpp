@@ -194,28 +194,25 @@ struct BufferHelpers<int16>
 
     static void prepareCallbackBuffer (AudioBuffer<float>&, int16*) {}
 
+    using LittleEndianInt16 = AudioData::Format<AudioData::Int16,   AudioData::LittleEndian>;
+    using NativeFloat32     = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
     static void convertFromOpenSL (const int16* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
         const auto numChannels = audioBuffer.getNumChannels();
 
-        AudioData::deinterleaveSamples<AudioData::Int16,   AudioData::LittleEndian,
-                                       AudioData::Float32, AudioData::NativeEndian> (reinterpret_cast<const uint16*> (srcInterleaved),
-                                                                                     numChannels,
-                                                                                     audioBuffer.getArrayOfWritePointers(),
-                                                                                     numChannels,
-                                                                                     audioBuffer.getNumSamples());
+        AudioData::deinterleaveSamples (AudioData::InterleavedSource<LittleEndianInt16> { reinterpret_cast<const uint16*> (srcInterleaved), numChannels },
+                                        AudioData::NonInterleavedDest<NativeFloat32>    { audioBuffer.getArrayOfWritePointers(),            numChannels },
+                                        audioBuffer.getNumSamples());
     }
 
     static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, int16* dstInterleaved)
     {
         const auto numChannels = audioBuffer.getNumChannels();
 
-        AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                     AudioData::Int16,   AudioData::LittleEndian> (audioBuffer.getArrayOfReadPointers(),
-                                                                                   numChannels,
-                                                                                   reinterpret_cast<uint16*> (dstInterleaved),
-                                                                                   numChannels,
-                                                                                   audioBuffer.getNumSamples());
+        AudioData::interleaveSamples (AudioData::NonInterleavedSource<NativeFloat32> { audioBuffer.getArrayOfReadPointers(),       numChannels },
+                                      AudioData::InterleavedDest<LittleEndianInt16>  { reinterpret_cast<uint16*> (dstInterleaved), numChannels },
+                                      audioBuffer.getNumSamples());
     }
 
 };
@@ -244,6 +241,9 @@ struct BufferHelpers<float>
             audioBuffer.setDataToReferTo (&native, 1, audioBuffer.getNumSamples());
     }
 
+    using LittleEndianFloat32 = AudioData::Format<AudioData::Float32, AudioData::LittleEndian>;
+    using NativeFloat32       = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
     static void convertFromOpenSL (const float* srcInterleaved, AudioBuffer<float>& audioBuffer)
     {
         const auto numChannels = audioBuffer.getNumChannels();
@@ -254,12 +254,9 @@ struct BufferHelpers<float>
             return;
         }
 
-        AudioData::deinterleaveSamples<AudioData::Float32, AudioData::LittleEndian,
-                                       AudioData::Float32, AudioData::NativeEndian> (srcInterleaved,
-                                                                                     numChannels,
-                                                                                     audioBuffer.getArrayOfWritePointers(),
-                                                                                     numChannels,
-                                                                                     audioBuffer.getNumSamples());
+        AudioData::deinterleaveSamples (AudioData::InterleavedSource<LittleEndianFloat32> { srcInterleaved,                        numChannels },
+                                        AudioData::nonInterleavedDest<NativeFloat32>      { audioBuffer.getArrayOfWritePointers(), numChannels },
+                                        audioBuffer.getNumSamples());
     }
 
     static void convertToOpenSL (const AudioBuffer<float>& audioBuffer, float* dstInterleaved)
@@ -272,12 +269,9 @@ struct BufferHelpers<float>
             return;
         }
 
-        AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                     AudioData::Float32, AudioData::LittleEndian> (audioBuffer.getArrayOfReadPointers(),
-                                                                                   numChannels,
-                                                                                   dstInterleaved,
-                                                                                   numChannels,
-                                                                                   audioBuffer.getNumSamples());
+        AudioData::interleaveSamples (AudioData::NonInterleavedSource<NativeFloat32>  { audioBuffer.getArrayOfReadPointers(), numChannels },
+                                      AudioData::InterleavedDest<LittleEndianFloat32> { dstInterleaved,                       numChannels },
+                                      audioBuffer.getNumSamples());
     }
 };
 

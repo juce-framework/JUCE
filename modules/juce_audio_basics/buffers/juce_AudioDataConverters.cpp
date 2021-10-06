@@ -434,16 +434,21 @@ void AudioDataConverters::convertFormatToFloat (DataFormat sourceFormat, const v
 //==============================================================================
 void AudioDataConverters::interleaveSamples (const float** source, float* dest, int numSamples, int numChannels)
 {
-    AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                 AudioData::Float32, AudioData::NativeEndian> (source, numChannels, dest, numChannels, numSamples);
+    using Format = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
+    AudioData::interleaveSamples (AudioData::NonInterleavedSource<Format> { source, numChannels },
+                                  AudioData::InterleavedDest<Format>      { dest,   numChannels },
+                                  numSamples);
 }
 
 void AudioDataConverters::deinterleaveSamples (const float* source, float** dest, int numSamples, int numChannels)
 {
-    AudioData::deinterleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                   AudioData::Float32, AudioData::NativeEndian> (source, numChannels, dest, numChannels, numSamples);
-}
+    using Format = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
 
+    AudioData::deinterleaveSamples (AudioData::InterleavedSource<Format>  { source, numChannels },
+                                    AudioData::NonInterleavedDest<Format> { dest,   numChannels },
+                                    numSamples);
+}
 
 //==============================================================================
 //==============================================================================
@@ -574,6 +579,8 @@ public:
         beginTest ("Round-trip conversion: Float32");
         Test1 <AudioData::Float32>::test (*this, r);
 
+        using Format = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
         beginTest ("Interleaving");
         {
             constexpr auto numChannels = 4;
@@ -586,10 +593,9 @@ public:
                 for (int i = 0; i < numSamples; ++i)
                     sourceBuffer.setSample (ch, i, r.nextFloat());
 
-            AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                         AudioData::Float32, AudioData::NativeEndian> (sourceBuffer.getArrayOfReadPointers(), numChannels,
-                                                                                       destBuffer.getWritePointer (0), numChannels,
-                                                                                       numSamples);
+            AudioData::interleaveSamples (AudioData::NonInterleavedSource<Format> { sourceBuffer.getArrayOfReadPointers(), numChannels },
+                                          AudioData::InterleavedDest<Format>      { destBuffer.getWritePointer (0),        numChannels },
+                                          numSamples);
 
             for (int ch = 0; ch < numChannels; ++ch)
                 for (int i = 0; i < numSamples; ++i)
@@ -608,10 +614,9 @@ public:
                 for (int i = 0; i < numSamples; ++i)
                     sourceBuffer.setSample (0, ch + (i * numChannels), r.nextFloat());
 
-            AudioData::deinterleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                           AudioData::Float32, AudioData::NativeEndian> (sourceBuffer.getReadPointer (0), numChannels,
-                                                                                         destBuffer.getArrayOfWritePointers(), numChannels,
-                                                                                         numSamples);
+            AudioData::deinterleaveSamples (AudioData::InterleavedSource<Format>  { sourceBuffer.getReadPointer (0),      numChannels },
+                                            AudioData::NonInterleavedDest<Format> { destBuffer.getArrayOfWritePointers(), numChannels },
+                                            numSamples);
 
             for (int ch = 0; ch < numChannels; ++ch)
                 for (int i = 0; i < numSamples; ++i)

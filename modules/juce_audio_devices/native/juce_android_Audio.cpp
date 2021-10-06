@@ -326,6 +326,9 @@ public:
         JNIEnv* env = getEnv();
         jshortArray audioBuffer = env->NewShortArray (actualBufferSize * jmax (numDeviceOutputChannels, numDeviceInputChannels));
 
+        using NativeInt16   = AudioData::Format<AudioData::Int16,   AudioData::NativeEndian>;
+        using NativeFloat32 = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
         while (! threadShouldExit())
         {
             if (inputDevice != nullptr)
@@ -339,12 +342,9 @@ public:
 
                 jshort* const src = env->GetShortArrayElements (audioBuffer, nullptr);
 
-                AudioData::deinterleaveSamples<AudioData::Int16,   AudioData::NativeEndian,
-                                               AudioData::Float32, AudioData::NativeEndian> (reinterpret_cast<const uint16*> (src),
-                                                                                             numDeviceInputChannels,
-                                                                                             inputChannelBuffer.getArrayOfWritePointers(),
-                                                                                             inputChannelBuffer.getNumChannels(),
-                                                                                             actualBufferSize);
+                AudioData::deinterleaveSamples (AudioData::InterleavedSource<NativeInt16>    { reinterpret_cast<const uint16*> (src),        numDeviceInputChannels },
+                                                AudioData::NonInterleavedDest<NativeFloat32> { inputChannelBuffer.getArrayOfWritePointers(), inputChannelBuffer.getNumChannels() },
+                                                actualBufferSize);
 
                 env->ReleaseShortArrayElements (audioBuffer, src, 0);
             }
@@ -374,12 +374,9 @@ public:
 
                 jshort* const dest = env->GetShortArrayElements (audioBuffer, nullptr);
 
-                AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                             AudioData::Int16,   AudioData::NativeEndian> (outputChannelBuffer.getArrayOfReadPointers(),
-                                                                                           outputChannelBuffer.getNumChannels(),
-                                                                                           reinterpret_cast<uint16*> (dest),
-                                                                                           numDeviceOutputChannels,
-                                                                                           actualBufferSize);
+                AudioData::interleaveSamples (AudioData::NonInterleavedSource<NativeFloat32> { outputChannelBuffer.getArrayOfReadPointers(), outputChannelBuffer.getNumChannels() },
+                                              AudioData::InterleavedDest<NativeInt16>        { reinterpret_cast<uint16*> (dest),             numDeviceOutputChannels },
+                                              actualBufferSize);
 
                 env->ReleaseShortArrayElements (audioBuffer, dest, 0);
                 jint numWritten = env->CallIntMethod (outputDevice, AudioTrack.write, audioBuffer, 0, actualBufferSize * numDeviceOutputChannels);
