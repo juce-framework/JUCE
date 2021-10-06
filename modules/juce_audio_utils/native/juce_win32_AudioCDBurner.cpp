@@ -388,10 +388,9 @@ bool AudioCDBurner::addAudioTrack (AudioSource* audioSource, int numSamples)
 
         buffer.clear (bytesPerBlock);
 
-        AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                     AudioData::Int16,   AudioData::LittleEndian> (sourceBuffer.getArrayOfReadPointers(), 2,
-                                                                                   reinterpret_cast<uint16*> (buffer), 2,
-                                                                                   samplesPerBlock);
+        AudioData::interleaveSamples (AudioData::NonInterleavedSource<AudioData::Float32, AudioData::NativeEndian> { sourceBuffer.getArrayOfReadPointers(), 2 },
+                                      AudioData::InterleavedDest<AudioData::Int16, Audiodata::LittleEndian>        { reinterpret_cast<uint16*> (buffer),    2 },
+                                      samplesPerBlock);
 
         hr = pimpl->redbook->AddAudioTrackBlocks (buffer, bytesPerBlock);
 

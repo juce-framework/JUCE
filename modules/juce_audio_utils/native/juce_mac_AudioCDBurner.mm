@@ -132,10 +132,9 @@ private:
 
                 source->source->getNextAudioBlock (info);
 
-                AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                             AudioData::Int16,   AudioData::LittleEndian> (tempBuffer.getArrayOfReadPointers(), 2,
-                                                                                           reinterpret_cast<uint16*> (buffer), 2,
-                                                                                           numSamples);
+                AudioData::interleaveSamples (AudioData::NonInterleavedSource<AudioData::Float32, AudioData::NativeEndian> { tempBuffer.getArrayOfReadPointers(), 2 },
+                                              AudioData::InterleavedDest<AudioData::Int16, AudioData::LittleEndian>        { reinterpret_cast<uint16*> (buffer),  2 },
+                                              numSamples);
 
                 source->readPosition += numSamples;
             }
