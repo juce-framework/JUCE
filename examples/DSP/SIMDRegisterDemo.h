@@ -102,23 +102,19 @@ struct SIMDRegisterDemoDSP
 
         auto inChannels = prepareChannelPointers (input);
 
-        AudioData::interleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                     AudioData::Float32, AudioData::NativeEndian> (inChannels.data(),
-                                                                                   registerSize,
-                                                                                   toBasePointer (interleaved.getChannelPointer (0)),
-                                                                                   registerSize,
-                                                                                   numSamples);
+        using Format = AudioData::Format<AudioData::Float32, AudioData::NativeEndian>;
+
+        AudioData::interleaveSamples (AudioData::NonInterleavedSource<Format> { inChannels.data(),                                 registerSize, },
+                                      AudioData::InterleavedDest<Format>      { toBasePointer (interleaved.getChannelPointer (0)), registerSize },
+                                      numSamples);
 
         iir->process (ProcessContextReplacing<SIMDRegister<float>> (interleaved));
 
         auto outChannels = prepareChannelPointers (context.getOutputBlock());
 
-        AudioData::deinterleaveSamples<AudioData::Float32, AudioData::NativeEndian,
-                                       AudioData::Float32, AudioData::NativeEndian> (toBasePointer (interleaved.getChannelPointer (0)),
-                                                                                     registerSize,
-                                                                                     outChannels.data(),
-                                                                                     registerSize,
-                                                                                     numSamples);
+        AudioData::deinterleaveSamples (AudioData::InterleavedSource<Format>  { toBasePointer (interleaved.getChannelPointer (0)), registerSize },
+                                        AudioData::NonInterleavedDest<Format> { outChannels.data(),                                registerSize },
+                                        numSamples);
     }
 
     void reset()
