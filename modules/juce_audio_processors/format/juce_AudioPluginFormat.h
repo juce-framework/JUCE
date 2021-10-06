@@ -115,6 +115,9 @@ public:
     */
     virtual bool isTrivialToScan() const = 0;
 
+    /** Should return true if plugins in this format can be scanned on a background thread. */
+    virtual bool canScanOnBackgroundThread() const { return true; }
+
     /** Searches a suggested set of directories for any plugins in this format.
         The path might be ignored, e.g. by AUs, which are found by the OS rather
         than manually.
