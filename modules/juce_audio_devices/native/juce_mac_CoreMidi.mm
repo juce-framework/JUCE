@@ -52,16 +52,10 @@ namespace CoreMidiHelpers
         onlyOld
     };
 
-    #if (defined (MAC_OS_VERSION_11_0) || defined (__IPHONE_14_0))
-     #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_11_0 || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_14_0)
-      #define JUCE_HAS_NEW_COREMIDI_API 1
-      #define JUCE_HAS_OLD_COREMIDI_API 0
-      constexpr auto implementationStrategy = ImplementationStrategy::onlyNew;
-     #else
-      #define JUCE_HAS_NEW_COREMIDI_API 1
-      #define JUCE_HAS_OLD_COREMIDI_API 1
-      constexpr auto implementationStrategy = ImplementationStrategy::both;
-     #endif
+    #if (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_11_0 || __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_14_0)
+     #define JUCE_HAS_NEW_COREMIDI_API 1
+     #define JUCE_HAS_OLD_COREMIDI_API 0
+     constexpr auto implementationStrategy = ImplementationStrategy::onlyNew;
     #else
      #define JUCE_HAS_NEW_COREMIDI_API 0
      #define JUCE_HAS_OLD_COREMIDI_API 1
