@@ -265,7 +265,7 @@ void CallOutBox::timerCallback()
 //==============================================================================
 std::unique_ptr<AccessibilityHandler> CallOutBox::createAccessibilityHandler()
 {
-    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::window);
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::dialogWindow);
 }
 
 } // namespace juce
