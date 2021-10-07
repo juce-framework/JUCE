@@ -722,7 +722,8 @@ public:
     explicit ButtonAccessibilityHandler (Button& buttonToWrap, AccessibilityRole roleIn)
         : AccessibilityHandler (buttonToWrap,
                                 isRadioButton (buttonToWrap) ? AccessibilityRole::radioButton : roleIn,
-                                getAccessibilityActions (buttonToWrap)),
+                                getAccessibilityActions (buttonToWrap),
+                                getAccessibilityInterfaces (buttonToWrap)),
           button (buttonToWrap)
     {
     }
@@ -755,6 +756,25 @@ public:
     String getHelp() const override  { return button.getTooltip(); }
 
 private:
+    class ButtonValueInterface  : public AccessibilityTextValueInterface
+    {
+    public:
+        explicit ButtonValueInterface (Button& buttonToWrap)
+            : button (buttonToWrap)
+        {
+        }
+
+        bool isReadOnly() const override                 { return true; }
+        String getCurrentValueAsString() const override  { return button.getToggleState() ? "On" : "Off"; }
+        void setValueAsString (const String&) override   {}
+
+    private:
+        Button& button;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonValueInterface)
+    };
+
     static bool isRadioButton (const Button& button) noexcept
     {
         return button.getRadioGroupId() != 0;
@@ -770,6 +790,14 @@ private:
                                          [&button] { button.setToggleState (! button.getToggleState(), sendNotification); });
 
         return actions;
+    }
+
+    static Interfaces getAccessibilityInterfaces (Button& button)
+    {
+        if (button.isToggleable())
+            return { std::make_unique<ButtonValueInterface> (button) };
+
+        return {};
     }
 
     Button& button;
