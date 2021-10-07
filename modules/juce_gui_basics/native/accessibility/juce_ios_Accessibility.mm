@@ -210,9 +210,10 @@ private:
             addMethod (@selector (accessibilityElementIsFocused),        isFocused,   "c@:");
             addMethod (@selector (accessibilityViewIsModal),             getIsAccessibilityModal, "c@:");
 
-            addMethod (@selector (accessibilityActivate),  accessibilityPerformActivate,  "c@:");
-            addMethod (@selector (accessibilityIncrement), accessibilityPerformIncrement, "c@:");
-            addMethod (@selector (accessibilityDecrement), accessibilityPerformDecrement, "c@:");
+            addMethod (@selector (accessibilityActivate),      accessibilityPerformActivate,  "c@:");
+            addMethod (@selector (accessibilityIncrement),     accessibilityPerformIncrement, "c@:");
+            addMethod (@selector (accessibilityDecrement),     accessibilityPerformDecrement, "c@:");
+            addMethod (@selector (accessibilityPerformEscape), accessibilityPerformEscape,    "c@:");
 
            #if JUCE_IOS_CONTAINER_API_AVAILABLE
             if (@available (iOS 11.0, *))
@@ -403,6 +404,26 @@ private:
 
                 if (handler->hasFocus (false))
                     return accessibilityPerformPress (self, {});
+            }
+
+            return NO;
+        }
+
+        static BOOL accessibilityPerformEscape (id self, SEL)
+        {
+            if (auto* handler = getHandler (self))
+            {
+                if (auto* modal = Component::getCurrentlyModalComponent())
+                {
+                    if (auto* modalHandler = modal->getAccessibilityHandler())
+                    {
+                        if (modalHandler == handler || modalHandler->isParentOf (handler))
+                        {
+                            modal->exitModalState (0);
+                            return YES;
+                        }
+                    }
+                }
             }
 
             return NO;
