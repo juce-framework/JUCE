@@ -590,3 +590,18 @@ function(juce_add_modules)
     endforeach()
 endfunction()
 
+# When source groups are enabled, this function sets the HEADER_FILE_ONLY property on any module
+# source files that should not be built. This is called automatically by the juce_add_* functions.
+function(_juce_fixup_module_source_groups)
+    if(JUCE_ENABLE_MODULE_SOURCE_GROUPS)
+        get_property(all_modules GLOBAL PROPERTY _juce_module_names)
+
+        foreach(module_name IN LISTS all_modules)
+            get_target_property(path ${module_name} INTERFACE_JUCE_MODULE_PATH)
+            get_target_property(header_files ${module_name} INTERFACE_JUCE_MODULE_HEADERS)
+            get_target_property(source_files ${module_name} INTERFACE_JUCE_MODULE_SOURCES)
+            source_group(TREE ${path} PREFIX "JUCE Modules" FILES ${header_files} ${source_files})
+            set_source_files_properties(${header_files} PROPERTIES HEADER_FILE_ONLY TRUE)
+        endforeach()
+    endif()
+endfunction()
