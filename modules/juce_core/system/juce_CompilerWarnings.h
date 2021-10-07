@@ -202,7 +202,7 @@
 #if JUCE_MAC || JUCE_IOS
     #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 10
 #else
-    #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 5
+    #define JUCE_SANITIZER_ATTRIBUTE_MINIMUM_CLANG_VERSION 9
 #endif
 
 /** Disable sanitizers for a range of functions.
