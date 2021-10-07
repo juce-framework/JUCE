@@ -1051,6 +1051,8 @@ intptr_t JUCE_CALLTYPE FloatVectorOperations::getFpStatusRegister() noexcept
 void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) noexcept
 {
   #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
+    // the volatile keyword here is needed to workaround a bug in AppleClang 13.0
+    // which aggressively optimises away the variable otherwise
     volatile auto fpsr_w = static_cast<uint32_t> (fpsr);
     _mm_setcsr (fpsr_w);
   #elif defined (__arm64__) || defined (__aarch64__) || JUCE_USE_ARM_NEON
