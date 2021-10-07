@@ -213,6 +213,10 @@ that the call to `juce_add_module` which adds a specific module happens *before*
 The modules will be placed in a group named "JUCE Modules" within the group for each target,
 alongside the "Source Files" and "Header Files" groups.
 
+Note: Source groups will only work when all JUCE-dependent targets are created using the
+`juce_add_*` functions. The standard `add_executable` and `add_library` commands are likely to
+result in broken builds when source groups are enabled!
+
 #### `JUCE_COPY_PLUGIN_AFTER_BUILD`
 
 Controls whether plugin targets should be installed to the system after building. Note that the
