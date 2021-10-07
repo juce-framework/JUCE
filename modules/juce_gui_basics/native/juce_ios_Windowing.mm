@@ -658,7 +658,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
 String SystemClipboard::getTextFromClipboard()
 {
-    return nsStringToJuce ([[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"]);
+    return nsStringToJuce ([[UIPasteboard generalPasteboard] string]);
 }
 
 //==============================================================================
