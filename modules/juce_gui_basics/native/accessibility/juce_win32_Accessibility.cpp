@@ -191,6 +191,20 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
         VariantHelpers::setString (getTitle(), &newValue);
 
         sendAccessibilityPropertyChangedEvent (*this, UIA_NamePropertyId, newValue);
+        return;
+    }
+
+    if (eventType == AccessibilityEvent::valueChanged)
+    {
+        if (auto* valueInterface = getValueInterface())
+        {
+            VARIANT newValue;
+            VariantHelpers::setString (valueInterface->getCurrentValueAsString(), &newValue);
+
+            sendAccessibilityPropertyChangedEvent (*this, UIA_ValueValuePropertyId, newValue);
+        }
+
+        return;
     }
 
     auto event = [eventType]() -> EVENTID
