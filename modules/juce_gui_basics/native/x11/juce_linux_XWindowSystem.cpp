@@ -234,7 +234,7 @@ void XWindowSystemUtilities::XSettings::update()
             CARD32 nSettings;
         };
 
-        const auto* header = reinterpret_cast<const Header*> (data);
+        const auto* header = unalignedPointerCast<const Header*> (data);
         const auto headerSerial = (int) header->serial;
         increment (sizeof (Header));
 
@@ -3630,7 +3630,7 @@ void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XProper
         if (! (prop.success && prop.actualFormat == 32 && prop.actualType == XA_ATOM))
             return false;
 
-        const auto data = reinterpret_cast<const long*> (prop.data);
+        const auto* data = unalignedPointerCast<const long*> (prop.data);
         const auto end = data + prop.numItems;
 
         return std::find (data, end, atoms.windowStateHidden) != end;
