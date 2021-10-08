@@ -3007,6 +3007,15 @@ void Component::setEnabled (bool shouldBeEnabled)
 
         BailOutChecker checker (this);
         componentListeners.callChecked (checker, [this] (ComponentListener& l) { l.componentEnablementChanged (*this); });
+
+        if (! shouldBeEnabled && hasKeyboardFocus (true))
+        {
+            if (parentComponent != nullptr)
+                parentComponent->grabKeyboardFocus();
+
+            // ensure that keyboard focus is given away if it wasn't taken by parent
+            giveAwayKeyboardFocus();
+        }
     }
 }
 
