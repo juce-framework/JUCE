@@ -1363,7 +1363,8 @@ Slider::ScopedDragNotification::ScopedDragNotification (Slider& s)
 
 Slider::ScopedDragNotification::~ScopedDragNotification()
 {
-    sliderBeingDragged.pimpl->sendDragEnd();
+    if (sliderBeingDragged.pimpl != nullptr)
+        sliderBeingDragged.pimpl->sendDragEnd();
 }
 
 //==============================================================================
