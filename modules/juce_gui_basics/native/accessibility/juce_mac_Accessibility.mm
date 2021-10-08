@@ -28,7 +28,7 @@ static void juceFreeAccessibilityPlatformSpecificData (NSAccessibilityElement<NS
 namespace juce
 {
 
-#if (! defined MAC_OS_X_VERSION_10_13) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_13
+#if ! defined (MAC_OS_X_VERSION_10_13) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_13
  using NSAccessibilityRole = NSString*;
  using NSAccessibilityNotificationName = NSString*;
 #endif
