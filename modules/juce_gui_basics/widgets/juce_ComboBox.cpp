@@ -380,6 +380,9 @@ void ComboBox::resized()
 
 void ComboBox::enablementChanged()
 {
+    if (! isEnabled())
+        hidePopup();
+
     repaint();
 }
 
