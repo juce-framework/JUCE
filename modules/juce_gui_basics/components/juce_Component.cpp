@@ -2247,14 +2247,14 @@ void Component::mouseDoubleClick (const MouseEvent&)    {}
 void Component::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
     // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr)
+    if (parentComponent != nullptr && parentComponent->isEnabled())
         parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent), wheel);
 }
 
 void Component::mouseMagnify (const MouseEvent& e, float magnifyAmount)
 {
     // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr)
+    if (parentComponent != nullptr && parentComponent->isEnabled())
         parentComponent->mouseMagnify (e.getEventRelativeTo (parentComponent), magnifyAmount);
 }
 
