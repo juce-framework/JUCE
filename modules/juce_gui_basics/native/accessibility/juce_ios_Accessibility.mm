@@ -117,7 +117,11 @@ private:
             addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement,     "c@:");
             addMethod (@selector (accessibilityFrame),         getAccessibilityFrame,         @encode (CGRect), "@:");
             addMethod (@selector (accessibilityElements),      getAccessibilityElements,      "@@:");
-            addMethod (@selector (accessibilityContainerType), getAccessibilityContainerType, "i@:");
+
+           #if JUCE_IOS_CONTAINER_API_AVAILABLE
+            if (@available (iOS 11.0, *))
+                addMethod (@selector (accessibilityContainerType), getAccessibilityContainerType, "i@:");
+           #endif
 
             addIvar<AccessibilityHandler*> ("handler");
 
@@ -210,11 +214,16 @@ private:
             addMethod (@selector (accessibilityIncrement), accessibilityPerformIncrement, "c@:");
             addMethod (@selector (accessibilityDecrement), accessibilityPerformDecrement, "c@:");
 
-            addMethod (@selector (accessibilityDataTableCellElementForRow:column:), getAccessibilityDataTableCellElementForRowColumn, "@@:ii");
-            addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount,                         "i@:");
-            addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount,                      "i@:");
-            addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange,                    @encode (NSRange), "@:");
-            addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange,                 @encode (NSRange), "@:");
+           #if JUCE_IOS_CONTAINER_API_AVAILABLE
+            if (@available (iOS 11.0, *))
+            {
+                addMethod (@selector (accessibilityDataTableCellElementForRow:column:), getAccessibilityDataTableCellElementForRowColumn, "@@:ii");
+                addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount,                         "i@:");
+                addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount,                      "i@:");
+                addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange,                    @encode (NSRange), "@:");
+                addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange,                 @encode (NSRange), "@:");
+            }
+           #endif
 
             if (elementType == Type::textElement)
             {
