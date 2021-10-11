@@ -131,26 +131,45 @@ void BinaryResources::browseForResource (const String& title,
     chooser = std::make_unique<FileChooser> (title, fileToStartFrom, wildcard);
     auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
 
-    chooser->launchAsync (flags, [this, resourceToReplace, callback] (const FileChooser& fc)
+    chooser->launchAsync (flags, [safeThis = WeakReference<BinaryResources> { this },
+                                  resourceToReplace,
+                                  callback] (const FileChooser& fc)
     {
-        if (fc.getResult() == File{})
-            callback ({});
-
-        String name (resourceToReplace);
-
-        if (name.isEmpty())
-            name = findUniqueName (fc.getResult().getFileName());
-
-        if (! add (name, fc.getResult()))
+        if (safeThis == nullptr)
         {
-            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                              TRANS("Adding Resource"),
-                                              TRANS("Failed to load the file!"));
+            if (callback != nullptr)
+                callback ({});
 
-            name.clear();
+            return;
         }
 
-        callback (name);
+        const auto result = fc.getResult();
+
+        auto resourceName = [safeThis, result, resourceToReplace]() -> String
+        {
+            if (result == File())
+                return {};
+
+            if (resourceToReplace.isEmpty())
+                return safeThis->findUniqueName (result.getFileName());
+
+            return resourceToReplace;
+        }();
+
+        if (resourceName.isNotEmpty())
+        {
+            if (! safeThis->add (resourceName, result))
+            {
+                AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
+                                                  TRANS("Adding Resource"),
+                                                  TRANS("Failed to load the file!"));
+
+                resourceName.clear();
+            }
+        }
+
+        if (callback != nullptr)
+            callback (resourceName);
     });
 }
 
