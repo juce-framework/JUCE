@@ -34,9 +34,7 @@ StringPairArray::StringPairArray (const StringPairArray& other)
 {
 }
 
-StringPairArray::~StringPairArray()
-{
-}
+StringPairArray::~StringPairArray() = default;
 
 StringPairArray& StringPairArray::operator= (const StringPairArray& other)
 {

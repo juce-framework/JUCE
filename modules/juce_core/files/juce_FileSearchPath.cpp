@@ -23,8 +23,8 @@
 namespace juce
 {
 
-FileSearchPath::FileSearchPath() {}
-FileSearchPath::~FileSearchPath() {}
+FileSearchPath::FileSearchPath() = default;
+FileSearchPath::~FileSearchPath() = default;
 
 FileSearchPath::FileSearchPath (const String& path)
 {

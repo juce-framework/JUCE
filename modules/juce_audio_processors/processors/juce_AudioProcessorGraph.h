@@ -59,7 +59,7 @@ public:
     /** Each node in the graph has a UID of this type. */
     struct NodeID
     {
-        NodeID() {}
+        NodeID() = default;
         explicit NodeID (uint32 i) : uid (i) {}
 
         uint32 uid = 0;

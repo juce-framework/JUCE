@@ -89,9 +89,7 @@ StringArray& StringArray::operator= (StringArray&& other) noexcept
     return *this;
 }
 
-StringArray::~StringArray()
-{
-}
+StringArray::~StringArray() = default;
 
 bool StringArray::operator== (const StringArray& other) const noexcept
 {

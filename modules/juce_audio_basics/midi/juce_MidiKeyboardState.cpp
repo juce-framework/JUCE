@@ -28,9 +28,7 @@ MidiKeyboardState::MidiKeyboardState()
     zerostruct (noteStates);
 }
 
-MidiKeyboardState::~MidiKeyboardState()
-{
-}
+MidiKeyboardState::~MidiKeyboardState() = default;
 
 //==============================================================================
 void MidiKeyboardState::reset()

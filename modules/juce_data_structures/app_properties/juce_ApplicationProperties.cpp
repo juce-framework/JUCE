@@ -26,9 +26,7 @@
 namespace juce
 {
 
-ApplicationProperties::ApplicationProperties()
-{
-}
+ApplicationProperties::ApplicationProperties() = default;
 
 ApplicationProperties::~ApplicationProperties()
 {

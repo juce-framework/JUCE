@@ -1248,7 +1248,7 @@ private:
                 attributes.reset();
                 uniforms  .reset();
 
-                shader.reset (newShader.release());
+                shader = std::move(newShader);
                 shader->use();
 
                 shape     .reset (new OpenGLUtils::Shape      ());

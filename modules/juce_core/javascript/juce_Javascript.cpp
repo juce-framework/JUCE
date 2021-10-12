@@ -1829,7 +1829,7 @@ JavascriptEngine::JavascriptEngine()  : maximumExecutionTime (15.0), root (new R
     registerNativeObject (RootObject::IntegerClass ::getClassName(),  new RootObject::IntegerClass());
 }
 
-JavascriptEngine::~JavascriptEngine() {}
+JavascriptEngine::~JavascriptEngine() = default;
 
 void JavascriptEngine::prepareTimeout() const noexcept   { root->timeout = Time::getCurrentTime() + maximumExecutionTime; }
 void JavascriptEngine::stop() noexcept                   { root->timeout = {}; }

@@ -37,9 +37,7 @@ DirectoryIterator::DirectoryIterator (const File& directory, bool recursive,
     jassert (type > 0 && type <= 7);
 }
 
-DirectoryIterator::~DirectoryIterator()
-{
-}
+DirectoryIterator::~DirectoryIterator() = default;
 
 StringArray DirectoryIterator::parseWildcards (const String& pattern)
 {

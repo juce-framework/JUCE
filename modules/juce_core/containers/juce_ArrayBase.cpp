@@ -480,6 +480,7 @@ public:
             addData (referenceContainer, copyableContainer, noncopyableContainer, 6);
 
             std::vector<std::pair<int, int>> testValues;
+            testValues.reserve(4);
             testValues.emplace_back (2, 4);
             testValues.emplace_back (0, 5);
             testValues.emplace_back (4, 1);

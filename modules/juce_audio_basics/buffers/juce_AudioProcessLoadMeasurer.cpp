@@ -23,8 +23,8 @@
 namespace juce
 {
 
-AudioProcessLoadMeasurer::AudioProcessLoadMeasurer() {}
-AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer() {}
+AudioProcessLoadMeasurer::AudioProcessLoadMeasurer() = default;
+AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer() = default;
 
 void AudioProcessLoadMeasurer::reset()
 {
