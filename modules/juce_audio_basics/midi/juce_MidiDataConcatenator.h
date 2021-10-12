@@ -110,7 +110,7 @@ private:
             pendingSysexTime = time;
         }
 
-        pendingSysexData.ensureSize ((size_t) (pendingSysexSize + numBytes), false);
+        pendingSysexData.ensureSize ((size_t) pendingSysexSize + numBytes, false);
         auto totalMessage = static_cast<uint8*> (pendingSysexData.getData());
         auto dest = totalMessage + pendingSysexSize;
 

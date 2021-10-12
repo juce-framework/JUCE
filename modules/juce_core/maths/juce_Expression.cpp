@@ -929,9 +929,7 @@ Expression::Expression()
 {
 }
 
-Expression::~Expression()
-{
-}
+Expression::~Expression() = default;
 
 Expression::Expression (Term* t) : term (t)
 {

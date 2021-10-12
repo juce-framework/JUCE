@@ -911,7 +911,7 @@ namespace EdgeTableFillers
                  && srcData.pixelFormat  == Image::RGB
                  && destData.pixelFormat == Image::RGB)
             {
-                memcpy ((void*) dest, src, (size_t) (width * srcStride));
+                memcpy ((void*) dest, src, (size_t) width * srcStride);
             }
             else
             {

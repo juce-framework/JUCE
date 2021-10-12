@@ -25,7 +25,7 @@ namespace juce
 
 #if ! JUCE_WASM
 
-NamedPipe::NamedPipe() {}
+NamedPipe::NamedPipe() = default;
 
 NamedPipe::~NamedPipe()
 {

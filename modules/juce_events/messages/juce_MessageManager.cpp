@@ -301,7 +301,7 @@ struct MessageManager::Lock::BlockingMessage   : public MessageManager::MessageB
 };
 
 //==============================================================================
-MessageManager::Lock::Lock()                            {}
+MessageManager::Lock::Lock()                            = default;
 MessageManager::Lock::~Lock()                           { exit(); }
 void MessageManager::Lock::enter()    const noexcept    {        tryAcquire (true); }
 bool MessageManager::Lock::tryEnter() const noexcept    { return tryAcquire (false); }

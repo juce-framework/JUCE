@@ -907,7 +907,7 @@ public:
     {
         reservoirSize = (int) (actualBufferSize + (UINT32) userBufferSize);
         reservoirMask = nextPowerOfTwo (reservoirSize) - 1;
-        reservoir.setSize ((size_t) ((reservoirMask + 1) * bytesPerFrame), true);
+        reservoir.setSize (((size_t)reservoirMask + 1) * bytesPerFrame, true);
         reservoirReadPos = 0;
         reservoirWritePos = 0;
         xruns = 0;

@@ -130,9 +130,7 @@ BigInteger& BigInteger::operator= (BigInteger&& other) noexcept
     return *this;
 }
 
-BigInteger::~BigInteger()
-{
-}
+BigInteger::~BigInteger() = default;
 
 void BigInteger::swapWith (BigInteger& other) noexcept
 {

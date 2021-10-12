@@ -48,9 +48,7 @@ LocalisedStrings& LocalisedStrings::operator= (const LocalisedStrings& other)
     return *this;
 }
 
-LocalisedStrings::~LocalisedStrings()
-{
-}
+LocalisedStrings::~LocalisedStrings() = default;
 
 //==============================================================================
 String LocalisedStrings::translate (const String& text) const
