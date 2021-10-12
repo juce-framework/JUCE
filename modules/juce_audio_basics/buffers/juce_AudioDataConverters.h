@@ -111,7 +111,7 @@ public:
         inline void setAsInt32LE (int newValue) noexcept        { *data = (int8) (newValue >> 24); }
         inline void setAsInt32BE (int newValue) noexcept        { setAsInt32LE (newValue); }
         inline void clear() noexcept                            { *data = 0; }
-        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) (num * bytesPerSample)) ;}
+        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) num * bytesPerSample) ;}
         template <class SourceType> inline void copyFromLE (SourceType& source) noexcept    { setAsInt32LE (source.getAsInt32()); }
         template <class SourceType> inline void copyFromBE (SourceType& source) noexcept    { setAsInt32BE (source.getAsInt32()); }
         inline void copyFromSameType (Int8& source) noexcept    { *data = *source.data; }
@@ -161,7 +161,7 @@ public:
         inline void setAsInt32LE (int32 newValue) noexcept      { *data = ByteOrder::swapIfBigEndian    ((uint16) (newValue >> 16)); }
         inline void setAsInt32BE (int32 newValue) noexcept      { *data = ByteOrder::swapIfLittleEndian ((uint16) (newValue >> 16)); }
         inline void clear() noexcept                            { *data = 0; }
-        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) (num * bytesPerSample)) ;}
+        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) num * bytesPerSample) ;}
         template <class SourceType> inline void copyFromLE (SourceType& source) noexcept    { setAsInt32LE (source.getAsInt32()); }
         template <class SourceType> inline void copyFromBE (SourceType& source) noexcept    { setAsInt32BE (source.getAsInt32()); }
         inline void copyFromSameType (Int16& source) noexcept   { *data = *source.data; }
@@ -186,7 +186,7 @@ public:
         inline void setAsInt32LE (int32 newValue) noexcept      { ByteOrder::littleEndian24BitToChars (newValue >> 8, data); }
         inline void setAsInt32BE (int32 newValue) noexcept      { ByteOrder::bigEndian24BitToChars    (newValue >> 8, data); }
         inline void clear() noexcept                            { data[0] = 0; data[1] = 0; data[2] = 0; }
-        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) (num * bytesPerSample)) ;}
+        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) num * bytesPerSample) ;}
         template <class SourceType> inline void copyFromLE (SourceType& source) noexcept    { setAsInt32LE (source.getAsInt32()); }
         template <class SourceType> inline void copyFromBE (SourceType& source) noexcept    { setAsInt32BE (source.getAsInt32()); }
         inline void copyFromSameType (Int24& source) noexcept   { data[0] = source.data[0]; data[1] = source.data[1]; data[2] = source.data[2]; }
@@ -211,7 +211,7 @@ public:
         inline void setAsInt32LE (int32 newValue) noexcept      { *data = ByteOrder::swapIfBigEndian    ((uint32) newValue); }
         inline void setAsInt32BE (int32 newValue) noexcept      { *data = ByteOrder::swapIfLittleEndian ((uint32) newValue); }
         inline void clear() noexcept                            { *data = 0; }
-        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) (num * bytesPerSample)) ;}
+        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) num * bytesPerSample) ;}
         template <class SourceType> inline void copyFromLE (SourceType& source) noexcept    { setAsInt32LE (source.getAsInt32()); }
         template <class SourceType> inline void copyFromBE (SourceType& source) noexcept    { setAsInt32BE (source.getAsInt32()); }
         inline void copyFromSameType (Int32& source) noexcept   { *data = *source.data; }
@@ -264,7 +264,7 @@ public:
         inline void setAsInt32LE (int32 newValue) noexcept      { setAsFloatLE ((float) (newValue * (1.0 / (1.0 + (double) maxValue)))); }
         inline void setAsInt32BE (int32 newValue) noexcept      { setAsFloatBE ((float) (newValue * (1.0 / (1.0 + (double) maxValue)))); }
         inline void clear() noexcept                            { *data = 0; }
-        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) (num * bytesPerSample)) ;}
+        inline void clearMultiple (int num) noexcept            { zeromem (data, (size_t) num * bytesPerSample) ;}
         template <class SourceType> inline void copyFromLE (SourceType& source) noexcept    { setAsFloatLE (source.getAsFloat()); }
         template <class SourceType> inline void copyFromBE (SourceType& source) noexcept    { setAsFloatBE (source.getAsFloat()); }
         inline void copyFromSameType (Float32& source) noexcept { *data = *source.data; }

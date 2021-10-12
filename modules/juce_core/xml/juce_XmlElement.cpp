@@ -266,7 +266,7 @@ void XmlElement::writeElementAsText (OutputStream& outputStream,
         outputStream << tagName;
 
         {
-            auto attIndent = (size_t) (indentationLevel + tagName.length() + 1);
+            auto attIndent = (size_t) indentationLevel + tagName.length() + 1;
             int lineLen = 0;
 
             for (auto* att = attributes.get(); att != nullptr; att = att->nextListItem)

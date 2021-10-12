@@ -584,7 +584,7 @@ String CodeDocument::getTextBetween (const Position& start, const Position& end)
     }
 
     MemoryOutputStream mo;
-    mo.preallocate ((size_t) (end.getPosition() - start.getPosition() + 4));
+    mo.preallocate ((size_t) end.getPosition() - start.getPosition() + 4);
 
     auto maxLine = jmin (lines.size() - 1, endLine);
 

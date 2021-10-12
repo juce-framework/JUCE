@@ -296,7 +296,7 @@ EdgeTable::~EdgeTable()
 static size_t getEdgeTableAllocationSize (int lineStride, int height) noexcept
 {
     // (leave an extra line at the end for use as scratch space)
-    return (size_t) (lineStride * (2 + jmax (0, height)));
+    return (size_t) lineStride * (2 + jmax (0, height));
 }
 
 void EdgeTable::allocate()

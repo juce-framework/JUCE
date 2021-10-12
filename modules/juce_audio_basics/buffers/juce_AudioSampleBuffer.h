@@ -423,7 +423,7 @@ public:
         if (newNumSamples != size || newNumChannels != numChannels)
         {
             auto allocatedSamplesPerChannel = ((size_t) newNumSamples + 3) & ~3u;
-            auto channelListSize = ((static_cast<size_t> (1 + newNumChannels) * sizeof (Type*)) + 15) & ~15u;
+            auto channelListSize = (((static_cast<size_t>(newNumChannels) + 1) * sizeof (Type*)) + 15) & ~15u;
             auto newTotalBytes = ((size_t) newNumChannels * (size_t) allocatedSamplesPerChannel * sizeof (Type))
                                     + channelListSize + 32;
 
@@ -1230,7 +1230,7 @@ private:
        #endif
         jassert (size >= 0);
 
-        auto channelListSize = (size_t) (numChannels + 1) * sizeof (Type*);
+        auto channelListSize = (static_cast<size_t>(numChannels) + 1) * sizeof (Type*);
         auto requiredSampleAlignment = std::alignment_of<Type>::value;
         size_t alignmentOverflow = channelListSize % requiredSampleAlignment;
 
