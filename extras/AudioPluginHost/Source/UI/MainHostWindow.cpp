@@ -27,6 +27,201 @@
 #include "MainHostWindow.h"
 #include "../Plugins/InternalPlugins.h"
 
+constexpr const char* scanModeKey = "pluginScanMode";
+
+class CustomPluginScanner  : public KnownPluginList::CustomScanner,
+                             private ChangeListener
+{
+public:
+    CustomPluginScanner()
+    {
+        if (auto* file = getAppProperties().getUserSettings())
+            file->addChangeListener (this);
+
+        changeListenerCallback (nullptr);
+    }
+
+    ~CustomPluginScanner() override
+    {
+        if (auto* file = getAppProperties().getUserSettings())
+            file->removeChangeListener (this);
+    }
+
+    bool findPluginTypesFor (AudioPluginFormat& format,
+                             OwnedArray<PluginDescription>& result,
+                             const String& fileOrIdentifier) override
+    {
+        if (scanInProcess)
+        {
+            superprocess = nullptr;
+            format.findAllTypesForFile (result, fileOrIdentifier);
+            return true;
+        }
+
+        if (superprocess == nullptr)
+        {
+            superprocess = std::make_unique<Superprocess> (*this);
+
+            std::unique_lock<std::mutex> lock (mutex);
+            connectionLost = false;
+        }
+
+        MemoryBlock block;
+        MemoryOutputStream stream { block, true };
+        stream.writeString (format.getName());
+        stream.writeString (fileOrIdentifier);
+
+        if (superprocess->sendMessageToSlave (block))
+        {
+            std::unique_lock<std::mutex> lock (mutex);
+            gotResponse = false;
+            pluginDescription = nullptr;
+
+            for (;;)
+            {
+                if (condvar.wait_for (lock,
+                                      std::chrono::milliseconds (50),
+                                      [this] { return gotResponse || shouldExit(); }))
+                {
+                    break;
+                }
+            }
+
+            if (shouldExit())
+            {
+                superprocess = nullptr;
+                return true;
+            }
+
+            if (connectionLost)
+            {
+                superprocess = nullptr;
+                return false;
+            }
+
+            if (pluginDescription != nullptr)
+            {
+                for (const auto* item : pluginDescription->getChildIterator())
+                {
+                    auto desc = std::make_unique<PluginDescription>();
+
+                    if (desc->loadFromXml (*item))
+                        result.add (std::move (desc));
+                }
+            }
+
+            return true;
+        }
+
+        superprocess = nullptr;
+        return false;
+    }
+
+    void scanFinished() override
+    {
+        superprocess = nullptr;
+    }
+
+private:
+    class Superprocess  : public ChildProcessMaster
+    {
+    public:
+        explicit Superprocess (CustomPluginScanner& o)
+            : owner (o)
+        {
+            launchSlaveProcess (File::getSpecialLocation (File::currentExecutableFile), processUID, 0, 0);
+        }
+
+    private:
+        void handleMessageFromSlave (const MemoryBlock& mb) override
+        {
+            auto xml = parseXML (mb.toString());
+
+            const std::lock_guard<std::mutex> lock (owner.mutex);
+            owner.pluginDescription = std::move (xml);
+            owner.gotResponse = true;
+            owner.condvar.notify_one();
+        }
+
+        void handleConnectionLost() override
+        {
+            const std::lock_guard<std::mutex> lock (owner.mutex);
+            owner.pluginDescription = nullptr;
+            owner.gotResponse = true;
+            owner.connectionLost = true;
+            owner.condvar.notify_one();
+        }
+
+        CustomPluginScanner& owner;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Superprocess)
+    };
+
+    void changeListenerCallback (ChangeBroadcaster*) override
+    {
+        if (auto* file = getAppProperties().getUserSettings())
+            scanInProcess = (file->getIntValue (scanModeKey) == 0);
+    }
+
+    std::unique_ptr<Superprocess> superprocess;
+    std::mutex mutex;
+    std::condition_variable condvar;
+    std::unique_ptr<XmlElement> pluginDescription;
+    bool gotResponse = false;
+    bool connectionLost = false;
+
+    std::atomic<bool> scanInProcess { true };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomPluginScanner)
+};
+
+//==============================================================================
+class CustomPluginListComponent  : public PluginListComponent
+{
+public:
+    CustomPluginListComponent (AudioPluginFormatManager& manager,
+                               KnownPluginList& listToRepresent,
+                               const File& pedal,
+                               PropertiesFile* props,
+                               bool async)
+        : PluginListComponent (manager, listToRepresent, pedal, props, async)
+    {
+        addAndMakeVisible (validationModeLabel);
+        addAndMakeVisible (validationModeBox);
+
+        validationModeLabel.attachToComponent (&validationModeBox, true);
+        validationModeLabel.setJustificationType (Justification::right);
+        validationModeLabel.setSize (100, 30);
+
+        auto unusedId = 1;
+
+        for (const auto mode : { "In-process", "Out-of-process" })
+            validationModeBox.addItem (mode, unusedId++);
+
+        validationModeBox.setSelectedItemIndex (getAppProperties().getUserSettings()->getIntValue (scanModeKey));
+
+        validationModeBox.onChange = [this]
+        {
+            getAppProperties().getUserSettings()->setValue (scanModeKey, validationModeBox.getSelectedItemIndex());
+        };
+
+        resized();
+    }
+
+    void resized() override
+    {
+        PluginListComponent::resized();
+
+        const auto& buttonBounds = getOptionsButton().getBounds();
+        validationModeBox.setBounds (buttonBounds.withWidth (130).withRightX (getWidth() - buttonBounds.getX()));
+    }
+
+private:
+    Label validationModeLabel { {}, "Scan mode" };
+    ComboBox validationModeBox;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CustomPluginListComponent)
+};
 
 //==============================================================================
 class MainHostWindow::PluginListWindow  : public DocumentWindow
@@ -41,10 +236,11 @@ public:
         auto deadMansPedalFile = getAppProperties().getUserSettings()
                                    ->getFile().getSiblingFile ("RecentlyCrashedPluginsList");
 
-        setContentOwned (new PluginListComponent (pluginFormatManager,
-                                                  owner.knownPluginList,
-                                                  deadMansPedalFile,
-                                                  getAppProperties().getUserSettings(), true), true);
+        setContentOwned (new CustomPluginListComponent (pluginFormatManager,
+                                                        owner.knownPluginList,
+                                                        deadMansPedalFile,
+                                                        getAppProperties().getUserSettings(),
+                                                        true), true);
 
         setResizable (true, false);
         setResizeLimits (300, 400, 800, 1500);
@@ -95,6 +291,8 @@ MainHostWindow::MainHostWindow()
     setResizeLimits (500, 400, 10000, 10000);
     centreWithSize (800, 600);
    #endif
+
+    knownPluginList.setCustomScanner (std::make_unique<CustomPluginScanner>());
 
     graphHolder.reset (new GraphDocumentComponent (formatManager, deviceManager, knownPluginList));
 

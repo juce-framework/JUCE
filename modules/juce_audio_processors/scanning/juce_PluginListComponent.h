@@ -109,6 +109,9 @@ public:
     */
     TextButton& getOptionsButton()                      { return optionsButton; }
 
+    /** @internal */
+    void resized() override;
+
 private:
     //==============================================================================
     AudioPluginFormatManager& formatManager;
@@ -127,12 +130,11 @@ private:
     class Scanner;
     std::unique_ptr<Scanner> currentScanner;
 
-    void scanFinished (const StringArray&);
+    void scanFinished (const StringArray&, const std::vector<String>&);
     void updateList();
     void removeMissingPlugins();
     void removePluginItem (int index);
 
-    void resized() override;
     bool isInterestedInFileDrag (const StringArray&) override;
     void filesDropped (const StringArray&, int, int) override;
     void changeListenerCallback (ChangeBroadcaster*) override;
