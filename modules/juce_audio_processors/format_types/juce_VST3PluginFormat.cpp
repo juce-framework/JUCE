@@ -2303,7 +2303,7 @@ public:
         {
             explicit Extensions (const VST3PluginInstance* instanceIn) : instance (instanceIn) {}
 
-            void* getIComponentPtr() const noexcept override   { return instance->holder->component; }
+            Steinberg::Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component; }
 
             MemoryBlock getPreset() const override             { return instance->getStateForPresetFile(); }
 
