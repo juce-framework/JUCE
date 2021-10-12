@@ -393,8 +393,8 @@ public:
           propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String(), MessageBoxIconType::NoIcon),
           progressWindow (title, text, MessageBoxIconType::NoIcon),
-          numThreads (format.canScanOnBackgroundThread() ? threads : 0),
-          allowAsync (format.canScanOnBackgroundThread() && allowPluginsWhichRequireAsynchronousInstantiation)
+          numThreads (threads),
+          allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
     {
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
 
