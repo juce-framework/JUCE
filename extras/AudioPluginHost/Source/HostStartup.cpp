@@ -31,16 +31,96 @@
  #error "If you're building the audio plugin host, you probably want to enable VST and/or AU support"
 #endif
 
+class PluginScannerSubprocess : private ChildProcessSlave,
+                                private AsyncUpdater
+{
+public:
+    PluginScannerSubprocess()
+    {
+        formatManager.addDefaultFormats();
+    }
+
+    using ChildProcessSlave::initialiseFromCommandLine;
+
+private:
+    void handleMessageFromMaster (const MemoryBlock& mb) override
+    {
+        {
+            const std::lock_guard<std::mutex> lock (mutex);
+            pendingBlocks.emplace (mb);
+        }
+
+        triggerAsyncUpdate();
+    }
+
+    void handleConnectionLost() override
+    {
+        JUCEApplicationBase::quit();
+    }
+
+    // It's important to run the plugin scan on the main thread!
+    void handleAsyncUpdate() override
+    {
+        for (;;)
+        {
+            const auto block = [&]() -> MemoryBlock
+            {
+                const std::lock_guard<std::mutex> lock (mutex);
+
+                if (pendingBlocks.empty())
+                    return {};
+
+                auto out = std::move (pendingBlocks.front());
+                pendingBlocks.pop();
+                return out;
+            }();
+
+            if (block.isEmpty())
+                return;
+
+            MemoryInputStream stream { block, false };
+            const auto formatName = stream.readString();
+            const auto identifier = stream.readString();
+
+            OwnedArray<PluginDescription> results;
+
+            for (auto* format : formatManager.getFormats())
+                if (format->getName() == formatName)
+                    format->findAllTypesForFile (results, identifier);
+
+            XmlElement xml ("LIST");
+
+            for (const auto& desc : results)
+                xml.addChildElement (desc->createXml().release());
+
+            const auto str = xml.toString();
+            sendMessageToMaster ({ str.toRawUTF8(), str.getNumBytesAsUTF8() });
+        }
+    }
+
+    AudioPluginFormatManager formatManager;
+
+    std::mutex mutex;
+    std::queue<MemoryBlock> pendingBlocks;
+};
 
 //==============================================================================
 class PluginHostApp  : public JUCEApplication,
                        private AsyncUpdater
 {
 public:
-    PluginHostApp() {}
+    PluginHostApp() = default;
 
-    void initialise (const String&) override
+    void initialise (const String& commandLine) override
     {
+        auto scannerSubprocess = std::make_unique<PluginScannerSubprocess>();
+
+        if (scannerSubprocess->initialiseFromCommandLine (commandLine, processUID))
+        {
+            storedScannerSubprocess = std::move (scannerSubprocess);
+            return;
+        }
+
         // initialise our settings file..
 
         PropertiesFile::Options options;
@@ -142,6 +222,7 @@ public:
 
 private:
     std::unique_ptr<MainHostWindow> mainWindow;
+    std::unique_ptr<PluginScannerSubprocess> storedScannerSubprocess;
 };
 
 static PluginHostApp& getApp()                    { return *dynamic_cast<PluginHostApp*>(JUCEApplication::getInstance()); }
