@@ -758,7 +758,7 @@ public:
 private:
     static bool isHighContrast()
     {
-        HIGHCONTRASTW highContrast { 0 };
+        HIGHCONTRASTW highContrast {};
 
         if (SystemParametersInfoW (SPI_GETHIGHCONTRAST, sizeof (highContrast), &highContrast, false))
             return highContrast.dwFlags & HCF_HIGHCONTRASTON;
