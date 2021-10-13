@@ -1368,7 +1368,7 @@ private:
         mach_timebase_info (&timebase);
 
         const auto ticksPerMs = ((double) timebase.denom * 1000000.0) / (double) timebase.numer;
-        const auto periodTicks = (uint32_t) (ticksPerMs * periodMs);
+        const auto periodTicks = (uint32_t) jmin ((double) std::numeric_limits<uint32_t>::max(), periodMs * ticksPerMs);
 
         thread_time_constraint_policy_data_t policy;
         policy.period      = periodTicks;
