@@ -120,6 +120,7 @@
 #include "utilities/juce_VST3ClientExtensions.h"
 #include "utilities/juce_ExtensionsVisitor.h"
 #include "processors/juce_AudioProcessorParameter.h"
+#include "processors/juce_HostedAudioProcessorParameter.h"
 #include "processors/juce_AudioProcessorEditorHostContext.h"
 #include "processors/juce_AudioProcessorEditor.h"
 #include "processors/juce_AudioProcessorListener.h"
