@@ -76,23 +76,7 @@ public:
     */
     virtual void getExtensions (ExtensionsVisitor&) const;
 
-    /**
-        A parameter with functions which are useful for plugin hosts.
-    */
-    struct HostedParameter : public AudioProcessorParameter
-    {
-        /** Returns an ID which is unique to this parameter.
-
-            Parameter indices are unstable across plugin versions, which means that the
-            parameter found at a particular index in one version of a plugin might move
-            to a different index in the subsequent version.
-
-            Unlike the parameter index, the ID returned by this function should be
-            somewhat stable (depending on the format of the plugin), so it is more
-            suitable for storing/recalling automation data.
-        */
-        virtual String getParameterID() const = 0;
-    };
+    using HostedParameter = HostedAudioProcessorParameter;
 
     /** Adds a parameter to this instance.
 
