@@ -50,7 +50,11 @@ void ComboBox::setEditableText (const bool isEditable)
         label->setEditable (isEditable, isEditable, false);
         labelEditableState = (isEditable ? labelIsEditable : labelIsNotEditable);
 
-        setWantsKeyboardFocus (labelEditableState == labelIsNotEditable);
+        const auto isLabelEditable = (labelEditableState == labelIsEditable);
+
+        setWantsKeyboardFocus (! isLabelEditable);
+        label->setAccessible (isLabelEditable);
+
         resized();
     }
 }
