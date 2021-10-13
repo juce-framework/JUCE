@@ -107,7 +107,7 @@ public:
         If you want an array of zero values, you can use the calloc() method or the
         other constructor that takes an InitialisationState parameter.
     */
-    template <typename SizeType, std::enable_if_t<std::is_integral<SizeType>::value, int> = 0>
+    template <typename SizeType, std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
     explicit HeapBlock (SizeType numElements)
         : data (static_cast<ElementType*> (std::malloc (static_cast<size_t> (numElements) * sizeof (ElementType))))
     {
@@ -119,7 +119,7 @@ public:
         The initialiseToZero parameter determines whether the new memory should be cleared,
         or left uninitialised.
     */
-    template <typename SizeType, std::enable_if_t<std::is_integral<SizeType>::value, int> = 0>
+    template <typename SizeType, std::enable_if_t<std::is_convertible<SizeType, int>::value, int> = 0>
     HeapBlock (SizeType numElements, bool initialiseToZero)
         : data (static_cast<ElementType*> (initialiseToZero
                                                ? std::calloc (static_cast<size_t> (numElements), sizeof (ElementType))
