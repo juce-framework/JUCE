@@ -410,12 +410,20 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
       #if JUCE_IOS
         ignoreUnused (parameters);
 
-       #if (! defined __IPHONE_OS_VERSION_MIN_REQUIRED) || (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
-        return [[UIApplication sharedApplication] openURL: filenameAsURL];
-       #else
-        [[UIApplication sharedApplication] openURL: filenameAsURL options: @{} completionHandler: nil];
-        return true;
+       #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+        if (@available (iOS 10.0, *))
+        {
+            [[UIApplication sharedApplication] openURL: filenameAsURL
+                                               options: @{}
+                                     completionHandler: nil];
+
+            return true;
+        }
        #endif
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+        return [[UIApplication sharedApplication] openURL: filenameAsURL];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
       #else
         NSWorkspace* workspace = [NSWorkspace sharedWorkspace];
 
@@ -434,16 +442,21 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
             for (int i = 0; i < params.size(); ++i)
                 [paramArray addObject: juceStringToNS (params[i])];
 
-           #if (defined MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_15
-            auto config = [NSWorkspaceOpenConfiguration configuration];
-            [config setCreatesNewApplicationInstance: YES];
-            config.arguments = paramArray;
+           #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_15
+            if (@available (macOS 10.15, *))
+            {
+                auto config = [NSWorkspaceOpenConfiguration configuration];
+                [config setCreatesNewApplicationInstance: YES];
+                config.arguments = paramArray;
 
-            [workspace openApplicationAtURL: filenameAsURL
-                              configuration: config
-                          completionHandler: nil];
-            return true;
-           #else
+                [workspace openApplicationAtURL: filenameAsURL
+                                  configuration: config
+                              completionHandler: nil];
+
+                return true;
+            }
+           #endif
+
             NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
 
             [dict setObject: paramArray
@@ -453,7 +466,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
                                              options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
                                        configuration: dict
                                                error: nil];
-           #endif
         }
 
         if (file.exists())

@@ -722,11 +722,20 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                                             &dataSize);
         if (err == noErr)
         {
-           #if (! defined __IPHONE_10_0) || (__IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_10_0)
-            [[UIApplication sharedApplication] openURL: (NSURL*)hostUrl];
-           #else
-            [[UIApplication sharedApplication] openURL: (NSURL*)hostUrl options: @{} completionHandler: nil];
+           #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+            if (@available (iOS 10.0, *))
+            {
+                [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl
+                                                   options: @{}
+                                         completionHandler: nil];
+
+                return;
+            }
            #endif
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            [[UIApplication sharedApplication] openURL: (NSURL*) hostUrl];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
     }
 

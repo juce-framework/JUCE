@@ -26,7 +26,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new", "-Wdeprecated-declarations")
 
 extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelMenuId,
                              int topLevelIndex, bool addDelegate);

@@ -26,8 +26,6 @@
 namespace juce
 {
 
-#if defined (MAC_OS_X_VERSION_10_11) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11
-
 //==============================================================================
 class BluetoothMidiPairingWindowClass   : public ObjCClass<NSObject>
 {
@@ -159,20 +157,12 @@ private:
 bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback,
                                                Rectangle<int>* bounds)
 {
-    new BluetoothMidiSelectorWindowHelper (exitCallback, bounds);
-    return true;
-}
+    if (@available (macOS 10.11, *))
+    {
+        new BluetoothMidiSelectorWindowHelper (exitCallback, bounds);
+        return true;
+    }
 
-bool BluetoothMidiDevicePairingDialogue::isAvailable()
-{
-    return true;
-}
-
-#else
-
-bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* exitCallback,
-                                               Rectangle<int>*)
-{
     std::unique_ptr<ModalComponentManager::Callback> cb (exitCallback);
     // This functionality is unavailable when targetting OSX < 10.11. Instead,
     // you should pair Bluetooth MIDI devices using the "Audio MIDI Setup" app
@@ -183,9 +173,10 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
 
 bool BluetoothMidiDevicePairingDialogue::isAvailable()
 {
+    if (@available (macOS 10.11, *))
+        return true;
+
     return false;
 }
-
-#endif
 
 } // namespace juce
