@@ -833,6 +833,9 @@ struct Grid::AutoPlacement
     template <typename Accessor>
     static PlacementHelpers::LineRange findFullLineRange (const ItemPlacementArray& items, Accessor&& accessor)
     {
+        if (items.isEmpty())
+            return { 1, 1 };
+
         const auto combine = [&accessor] (const auto& acc, const auto& item)
         {
             const auto newRange = accessor (item);
@@ -1051,6 +1054,13 @@ struct GridTests  : public UnitTest
         using Fr = Grid::Fr;
         using Tr = Grid::TrackInfo;
         using Rect = Rectangle<float>;
+
+        beginTest ("Layout calculation of an empty grid is a no-op");
+        {
+            const Rectangle<int> bounds { 100, 200 };
+            Grid grid;
+            grid.performLayout (bounds);
+        }
 
         {
             Grid grid;
