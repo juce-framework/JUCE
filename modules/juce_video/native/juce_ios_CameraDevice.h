@@ -23,9 +23,9 @@
   ==============================================================================
 */
 
-#if (defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_10_0)
+#if (defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0)
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
- #define JUCE_DEPRECATION_IGNORED 1
+ #define JUCE_USE_NEW_CAMERA_API 1
 #endif
 
 struct CameraDevice::Pimpl
@@ -141,7 +141,7 @@ struct CameraDevice::Pimpl
 private:
     static NSArray<AVCaptureDevice*>* getDevices()
     {
-       #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+       #if JUCE_USE_NEW_CAMERA_API
         if (@available (iOS 10.0, *))
         {
             std::unique_ptr<NSMutableArray<AVCaptureDeviceType>, NSObjectDeleter> deviceTypes ([[NSMutableArray alloc] initWithCapacity: 2]);
@@ -207,7 +207,7 @@ private:
         JUCE_CAMERA_LOG ("Supports custom exposure: " + String ((int)[device isExposureModeSupported: AVCaptureExposureModeCustom]));
         JUCE_CAMERA_LOG ("Supports point of interest exposure: " + String ((int)device.exposurePointOfInterestSupported));
 
-       #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+       #if JUCE_USE_NEW_CAMERA_API
         if (@available (iOS 10.0, *))
         {
             JUCE_CAMERA_LOG ("Device type: " + nsStringToJuce (device.deviceType));
@@ -238,7 +238,7 @@ private:
     {
         JUCE_CAMERA_LOG ("Media type: " + nsStringToJuce (format.mediaType));
 
-       #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+       #if JUCE_USE_NEW_CAMERA_API
         if (@available (iOS 10.0, *))
         {
             String colourSpaces;
@@ -592,12 +592,14 @@ private:
                   captureOutput (createCaptureOutput()),
                   photoOutputDelegate (nullptr)
             {
+               #if JUCE_USE_NEW_CAMERA_API
                 if (@available (iOS 10.0, *))
                 {
                     static PhotoOutputDelegateClass cls;
                     photoOutputDelegate.reset ([cls.createInstance() init]);
                     PhotoOutputDelegateClass::setOwner (photoOutputDelegate.get(), this);
                 }
+               #endif
 
                 captureSession.addOutputIfPossible (captureOutput);
             }
@@ -617,9 +619,9 @@ private:
 
                 if (auto* connection = findVideoConnection (captureOutput))
                 {
-                   #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+                   #if JUCE_USE_NEW_CAMERA_API
                     if (@available (iOS 10.0, *))
-                        {
+                    {
                         if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
                         {
                             auto* photoOutput = (AVCapturePhotoOutput*) captureOutput;
@@ -669,7 +671,7 @@ private:
         private:
             static AVCaptureOutput* createCaptureOutput()
             {
-               #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+               #if JUCE_USE_NEW_CAMERA_API
                 if (@available (iOS 10.0, *))
                     return [AVCapturePhotoOutput new];
                #endif
@@ -679,7 +681,7 @@ private:
 
             static void printImageOutputDebugInfo (AVCaptureOutput* captureOutput)
             {
-               #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+               #if JUCE_USE_NEW_CAMERA_API
                 if (@available (iOS 10.0, *))
                 {
                     if ([captureOutput isKindOfClass: [AVCapturePhotoOutput class]])
@@ -688,7 +690,7 @@ private:
 
                         String typesString;
 
-                        for (AVVideoCodecType type in photoOutput.availablePhotoCodecTypes)
+                        for (id type in photoOutput.availablePhotoCodecTypes)
                             typesString << nsStringToJuce (type) << " ";
 
                         JUCE_CAMERA_LOG ("Available image codec types: " + typesString);
@@ -741,7 +743,7 @@ private:
 
                 String typesString;
 
-                for (AVVideoCodecType type in stillImageOutput.availableImageDataCodecTypes)
+                for (id type in stillImageOutput.availableImageDataCodecTypes)
                     typesString << nsStringToJuce (type) << " ";
 
                 JUCE_CAMERA_LOG ("Available image codec types: " + typesString);
@@ -763,8 +765,7 @@ private:
             }
 
             //==============================================================================
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
-
+           #if JUCE_USE_NEW_CAMERA_API
             class PhotoOutputDelegateClass : public ObjCClass<NSObject>
             {
             public:
@@ -974,8 +975,7 @@ private:
                     }
                 }
             };
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+           #endif
 
             //==============================================================================
             void callListeners (const Image& image)
@@ -1026,7 +1026,7 @@ private:
 
             void startRecording (const File& file, AVCaptureVideoOrientation orientationToUse)
             {
-               #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+               #if JUCE_USE_NEW_CAMERA_API
                 if (@available (iOS 10.0, *))
                     printVideoOutputDebugInfo (movieFileOutput);
                #endif
@@ -1058,7 +1058,7 @@ private:
                 JUCE_CAMERA_LOG ("Available video codec types:");
 
                #if JUCE_CAMERA_LOG_ENABLED
-                for (AVVideoCodecType type in output.availableVideoCodecTypes)
+                for (id type in output.availableVideoCodecTypes)
                     JUCE_CAMERA_LOG (nsStringToJuce (type));
                #endif
 
@@ -1335,6 +1335,6 @@ String CameraDevice::getFileExtension()
     return ".mov";
 }
 
-#if JUCE_DEPRECATION_IGNORED
+#if JUCE_USE_NEW_CAMERA_API
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif

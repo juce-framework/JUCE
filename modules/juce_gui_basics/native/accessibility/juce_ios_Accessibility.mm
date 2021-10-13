@@ -37,9 +37,11 @@ static void juceFreeAccessibilityPlatformSpecificData (UIAccessibilityElement* e
 namespace juce
 {
 
-#if (defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0)
+#if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
  #define JUCE_IOS_CONTAINER_API_AVAILABLE 1
 #endif
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
 
 constexpr auto juceUIAccessibilityContainerTypeNone =
                    #if JUCE_IOS_CONTAINER_API_AVAILABLE
@@ -61,6 +63,8 @@ constexpr auto juceUIAccessibilityContainerTypeList =
                    #else
                     2;
                    #endif
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
