@@ -74,9 +74,15 @@ struct Reservoir
     {
         while (! rangeToRead.isEmpty())
         {
-            const auto rangeToReadInBuffer = rangeToRead.getIntersectionWith (getBufferedRange());
+            const auto bufferedRange = getBufferedRange();
 
-            if (rangeToReadInBuffer.isEmpty())
+            if (bufferedRange.contains (rangeToRead.getStart()))
+            {
+                const auto rangeToReadInBuffer = rangeToRead.getIntersectionWith (getBufferedRange());
+                readFromReservoir (rangeToReadInBuffer);
+                rangeToRead.setStart (rangeToReadInBuffer.getEnd());
+            }
+            else
             {
                 fillReservoir (rangeToRead.getStart());
 
@@ -84,12 +90,6 @@ struct Reservoir
 
                 if (newRange.isEmpty() || ! newRange.contains (rangeToRead.getStart()))
                     break;
-            }
-            else
-            {
-                readFromReservoir (rangeToReadInBuffer);
-
-                rangeToRead.setStart (rangeToReadInBuffer.getEnd());
             }
         }
 
