@@ -523,7 +523,13 @@ static int showDialog (const MessageBoxOptions& options,
     }
    #endif
 
-    new iOSMessageBox (options, AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
+    const auto showBox = [options, callbackIn, mapFn] { new iOSMessageBox (options, AlertWindowMappings::getWrappedCallback (callbackIn, mapFn)); };
+
+    if (MessageManager::getInstance()->isThisTheMessageThread())
+        showBox();
+    else
+        MessageManager::callAsync (showBox);
+
     return 0;
 }
 
