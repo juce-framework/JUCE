@@ -1278,7 +1278,7 @@ String String::replaceSection (int index, int numCharsToReplace, StringRef strin
     dest += newStringBytes;
     memcpy (dest, startOfRemainder.getAddress(), remainderBytes);
     dest += remainderBytes;
-    CharPointerType ((CharPointerType::CharType*) dest).writeNull();
+    CharPointerType (unalignedPointerCast<CharPointerType::CharType*> (dest)).writeNull();
 
     return result;
 }
@@ -2149,7 +2149,7 @@ String String::fromUTF8 (const char* const buffer, int bufferSizeBytes)
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
-StringRef::StringRef() noexcept  : text ((const String::CharPointerType::CharType*) "\0\0\0")
+StringRef::StringRef() noexcept  : text (unalignedPointerCast<const String::CharPointerType::CharType*> ("\0\0\0"))
 {
 }
 
