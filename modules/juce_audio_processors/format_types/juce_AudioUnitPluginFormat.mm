@@ -1123,12 +1123,16 @@ public:
 
     bool hasEditor() const override
     {
+       #if JUCE_MAC
+        return true;
+       #else
         UInt32 dataSize;
         Boolean isWritable;
 
         return (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_RequestViewController,
                                           kAudioUnitScope_Global, 0, &dataSize, &isWritable) == noErr
                 && dataSize == sizeof (uintptr_t) && isWritable != 0);
+       #endif
     }
 
     AudioProcessorEditor* createEditor() override;
