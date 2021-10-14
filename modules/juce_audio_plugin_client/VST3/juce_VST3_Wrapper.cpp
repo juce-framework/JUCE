@@ -65,6 +65,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 
  namespace Vst2
  {
+ struct AEffect;
  #include "pluginterfaces/vst2.x/vstfxstore.h"
  }
 
