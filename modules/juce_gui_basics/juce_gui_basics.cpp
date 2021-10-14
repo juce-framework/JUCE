@@ -122,6 +122,8 @@ namespace juce
     {
         return Process::isForegroundProcess() || isEmbeddedInForegroundProcess (viewComponent);
     }
+
+    bool isWindowOnCurrentVirtualDesktop (void*);
 }
 
 #include "accessibility/juce_AccessibilityHandler.cpp"
@@ -373,7 +375,56 @@ namespace juce
 }
 
 //==============================================================================
-#if ! JUCE_WINDOWS
+#if JUCE_WINDOWS
+bool juce::isWindowOnCurrentVirtualDesktop (void* x)
+{
+    if (x == nullptr)
+        return false;
+
+    static auto* desktopManager = []
+    {
+        // IVirtualDesktopManager Copied from ShObjdl_core.h, because it may not be defined
+        MIDL_INTERFACE ("a5cd92ff-29be-454c-8d04-d82879fb3f1b")
+        juce_IVirtualDesktopManager : public IUnknown
+        {
+        public:
+            virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
+                 __RPC__in HWND topLevelWindow,
+                 __RPC__out BOOL * onCurrentDesktop) = 0;
+
+            virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(
+                 __RPC__in HWND topLevelWindow,
+                 __RPC__out GUID * desktopId) = 0;
+
+            virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(
+                 __RPC__in HWND topLevelWindow,
+                 __RPC__in REFGUID desktopId) = 0;
+        };
+
+        juce_IVirtualDesktopManager* result = nullptr;
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
+        class DECLSPEC_UUID("aa509086-5ca9-4c25-8f95-589d3c07b48a") juce_VirtualDesktopManager;
+
+        if (SUCCEEDED (CoCreateInstance (__uuidof (juce_VirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
+            return result;
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+        return static_cast<juce_IVirtualDesktopManager*> (nullptr);
+    }();
+
+    BOOL current = false;
+
+    if (auto* dm = desktopManager)
+        if (SUCCEEDED (dm->IsWindowOnCurrentVirtualDesktop (static_cast<HWND> (x), &current)))
+            return current != false;
+
+    return true;
+}
+#else
+ bool juce::isWindowOnCurrentVirtualDesktop (void*) { return true; }
  juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }
  juce::ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler() {}
 #endif
