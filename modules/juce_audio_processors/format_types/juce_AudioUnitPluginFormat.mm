@@ -1119,9 +1119,9 @@ public:
     {
         if (prepared)
         {
-            AudioUnitUninitialize (audioUnit);
             resetBuses();
             AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
+            AudioUnitUninitialize (audioUnit);
 
             outputBufferList.clear();
             prepared = false;
