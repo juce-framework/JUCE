@@ -26,7 +26,7 @@
 namespace juce
 {
 
-template<typename RowComponentType>
+template <typename RowComponentType>
 static AccessibilityActions getListRowAccessibilityActions (RowComponentType& rowComponent)
 {
     auto onFocus = [&rowComponent]

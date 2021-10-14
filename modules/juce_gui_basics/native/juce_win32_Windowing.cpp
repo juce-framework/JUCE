@@ -614,7 +614,7 @@ static POINT POINTFromPoint (Point<int> p) noexcept          { return { p.x, p.y
 //==============================================================================
 static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd);
 
-template<typename ValueType>
+template <typename ValueType>
 static Rectangle<ValueType> convertPhysicalScreenRectangleToLogical (Rectangle<ValueType> r, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
@@ -623,7 +623,7 @@ static Rectangle<ValueType> convertPhysicalScreenRectangleToLogical (Rectangle<V
     return r;
 }
 
-template<typename ValueType>
+template <typename ValueType>
 static Rectangle<ValueType> convertLogicalScreenRectangleToPhysical (Rectangle<ValueType> r, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
