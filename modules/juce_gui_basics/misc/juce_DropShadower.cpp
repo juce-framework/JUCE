@@ -75,7 +75,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE (ShadowWindow)
 };
 
-class ParentVisibilityChangedListener  : public ComponentListener
+class ParentVisibilityChangedListener  : public ComponentListener,
+                                         private Timer
 {
 public:
     ParentVisibilityChangedListener (Component& r, ComponentListener& l)
@@ -83,6 +84,9 @@ public:
     {
         if (auto* firstParent = root->getParentComponent())
             updateParentHierarchy (firstParent);
+
+        if ((SystemStats::getOperatingSystemType() & SystemStats::Windows) != 0)
+            startTimerHz (20);
     }
 
     ~ParentVisibilityChangedListener() override
@@ -144,6 +148,11 @@ private:
 
         withDifference (lastSeenComponents, observedComponents, [this] (auto& comp) { comp.removeComponentListener (this); });
         withDifference (observedComponents, lastSeenComponents, [this] (auto& comp) { comp.addComponentListener (this); });
+    }
+
+    void timerCallback() override
+    {
+        listener->componentVisibilityChanged (*root);
     }
 
     Component* root = nullptr;
@@ -246,15 +255,11 @@ void DropShadower::updateShadows()
 
     const ScopedValueSetter<bool> setter (reentrant, true);
 
-    if (owner == nullptr)
-    {
-        shadowWindows.clear();
-        return;
-    }
-
-    if (owner->isShowing()
-         && owner->getWidth() > 0 && owner->getHeight() > 0
-         && (Desktop::canUseSemiTransparentWindows() || owner->getParentComponent() != nullptr))
+    if (owner != nullptr
+        && owner->isShowing()
+        && owner->getWidth() > 0 && owner->getHeight() > 0
+        && (Desktop::canUseSemiTransparentWindows() || owner->getParentComponent() != nullptr)
+        && isWindowOnCurrentVirtualDesktop (owner->getWindowHandle()))
     {
         while (shadowWindows.size() < 4)
             shadowWindows.add (new ShadowWindow (owner, shadow));
