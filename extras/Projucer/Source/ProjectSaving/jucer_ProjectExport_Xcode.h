@@ -2398,16 +2398,16 @@ private:
             {
                 mo.setNewLineString (getNewLineString());
 
-                mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"              << newLine
+                mo << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"                 << newLine
                    << "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">" << newLine
-                   << "<plist version=\"1.0\">"                                 << newLine
-                   << "<dict>"                                                  << newLine
-                   << "\t" << "<key>BuildSystemType</key>"                      << newLine
-                   << "\t" << "<string>Original</string>"                       << newLine
-                   << "\t" << "<key>DisableBuildSystemDeprecationWarning</key>" << newLine
-                   << "\t" << "<true/>"                                         << newLine
-                   << "</dict>"                                                 << newLine
-                   << "</plist>"                                                << newLine;
+                   << "<plist version=\"1.0\">"                                    << newLine
+                   << "<dict>"                                                     << newLine
+                   << "\t" << "<key>BuildSystemType</key>"                         << newLine
+                   << "\t" << "<string>Original</string>"                          << newLine
+                   << "\t" << "<key>DisableBuildSystemDeprecationDiagnostic</key>" << newLine
+                   << "\t" << "<true/>"                                            << newLine
+                   << "</dict>"                                                    << newLine
+                   << "</plist>"                                                   << newLine;
             });
         }
         else
