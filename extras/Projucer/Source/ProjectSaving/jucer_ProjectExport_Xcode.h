@@ -2404,6 +2404,8 @@ private:
                    << "<dict>"                                                     << newLine
                    << "\t" << "<key>BuildSystemType</key>"                         << newLine
                    << "\t" << "<string>Original</string>"                          << newLine
+                   << "\t" << "<key>DisableBuildSystemDeprecationWarning</key>"    << newLine
+                   << "\t" << "<true/>"                                            << newLine
                    << "\t" << "<key>DisableBuildSystemDeprecationDiagnostic</key>" << newLine
                    << "\t" << "<true/>"                                            << newLine
                    << "</dict>"                                                    << newLine
