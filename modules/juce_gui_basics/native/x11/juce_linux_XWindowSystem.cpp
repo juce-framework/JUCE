@@ -1720,6 +1720,8 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
             }
         }
 
+        updateConstraints (windowH, *peer);
+
         XWindowSystemUtilities::ScopedXLock xLock;
 
         if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
@@ -1729,14 +1731,6 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
             hints->y      = newBounds.getY();
             hints->width  = newBounds.getWidth();
             hints->height = newBounds.getHeight();
-
-            if ((peer->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
-            {
-                hints->min_width  = hints->max_width  = hints->width;
-                hints->min_height = hints->max_height = hints->height;
-                hints->flags |= PMinSize | PMaxSize;
-            }
-
             X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
         }
 
@@ -1747,6 +1741,40 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
                                                       newBounds.getY() - windowBorder.getTop(),
                                                       (unsigned int) newBounds.getWidth(),
                                                       (unsigned int) newBounds.getHeight());
+    }
+}
+
+void XWindowSystem::updateConstraints (::Window windowH) const
+{
+    if (auto* peer = getPeerFor (windowH))
+        updateConstraints (windowH, *peer);
+}
+
+void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) const
+{
+    XWindowSystemUtilities::ScopedXLock xLock;
+
+    if (auto hints = makeXFreePtr (X11Symbols::getInstance()->xAllocSizeHints()))
+    {
+        if ((peer.getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
+        {
+            hints->min_width  = hints->max_width  = peer.getBounds().getWidth();
+            hints->min_height = hints->max_height = peer.getBounds().getHeight();
+            hints->flags = PMinSize | PMaxSize;
+        }
+        else if (auto* c = peer.getConstrainer())
+        {
+            const auto windowBorder = peer.getFrameSize();
+            const auto leftAndRight = windowBorder.getLeftAndRight();
+            const auto topAndBottom = windowBorder.getTopAndBottom();
+            hints->min_width  = jmax (1, c->getMinimumWidth()  - leftAndRight);
+            hints->max_width  = jmax (1, c->getMaximumWidth()  - leftAndRight);
+            hints->min_height = jmax (1, c->getMinimumHeight() - topAndBottom);
+            hints->max_height = jmax (1, c->getMaximumHeight() - topAndBottom);
+            hints->flags = PMinSize | PMaxSize;
+        }
+
+        X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
     }
 }
 

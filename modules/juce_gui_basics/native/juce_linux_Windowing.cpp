@@ -333,18 +333,30 @@ public:
     void setParentWindow (::Window newParent)          { parentWindow = newParent; }
 
     //==============================================================================
+    bool isConstrainedNativeWindow() const
+    {
+        return constrainer != nullptr
+            && (styleFlags & (windowHasTitleBar | windowIsResizable)) == (windowHasTitleBar | windowIsResizable)
+            && ! isKioskMode();
+    }
+
     void updateWindowBounds()
     {
-        jassert (windowH != 0);
-        if (windowH != 0)
+        if (windowH == 0)
         {
-            auto physicalBounds = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
-
-            updateScaleFactorFromNewBounds (physicalBounds, true);
-
-            bounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
-                                       : physicalBounds / currentScaleFactor;
+            jassertfalse;
+            return;
         }
+
+        if (isConstrainedNativeWindow())
+            XWindowSystem::getInstance()->updateConstraints (windowH);
+
+        auto physicalBounds = XWindowSystem::getInstance()->getWindowBounds (windowH, parentWindow);
+
+        updateScaleFactorFromNewBounds (physicalBounds, true);
+
+        bounds = parentWindow == 0 ? Desktop::getInstance().getDisplays().physicalToLogical (physicalBounds)
+                                   : physicalBounds / currentScaleFactor;
     }
 
     void updateBorderSize()
