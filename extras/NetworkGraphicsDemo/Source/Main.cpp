@@ -41,7 +41,7 @@ namespace
 }
 
 #include "SharedCanvas.h"
-#include "SlaveComponent.h"
+#include "ClientComponent.h"
 #include "Demos.h"
 #include "MasterComponent.h"
 
@@ -107,7 +107,7 @@ public:
             : DocumentWindow ("JUCE Networked Graphics Demo", Colours::black, DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
-            setContentOwned (new SlaveCanvasComponent (props, windowIndex), true);
+            setContentOwned (new ClientCanvasComponent (props, windowIndex), true);
             setBounds (500, 100, getWidth(), getHeight());
             setResizable (true, false);
             setVisible (true);

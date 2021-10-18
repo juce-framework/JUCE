@@ -67,7 +67,6 @@
 		7BE6330821794919A88ED8ED /* include_juce_gui_extra.mm */ /* include_juce_gui_extra.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_gui_extra.mm; path = ../../JuceLibraryCode/include_juce_gui_extra.mm; sourceTree = SOURCE_ROOT; };
 		84B287BB2AD252B7D69AC47E /* include_juce_gui_basics.mm */ /* include_juce_gui_basics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_gui_basics.mm; path = ../../JuceLibraryCode/include_juce_gui_basics.mm; sourceTree = SOURCE_ROOT; };
 		89583CD42AD218E9753DF11C /* juce_audio_devices */ /* juce_audio_devices */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_devices; path = ../../../../modules/juce_audio_devices; sourceTree = SOURCE_ROOT; };
-		8E2F72AFA0CDA64F0C07F105 /* SlaveComponent.h */ /* SlaveComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SlaveComponent.h; path = ../../Source/SlaveComponent.h; sourceTree = SOURCE_ROOT; };
 		8EACAADD3A23DED3E252C92F /* juce_core */ /* juce_core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_core; path = ../../../../modules/juce_core; sourceTree = SOURCE_ROOT; };
 		92800676AF753D1A60108F11 /* BinaryData.h */ /* BinaryData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryData.h; path = ../../JuceLibraryCode/BinaryData.h; sourceTree = SOURCE_ROOT; };
 		935CA85EF98714D3A17AE737 /* QuartzCore.framework */ /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -83,6 +82,7 @@
 		AFF729977947528F3E4AAA96 /* include_juce_cryptography.mm */ /* include_juce_cryptography.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_cryptography.mm; path = ../../JuceLibraryCode/include_juce_cryptography.mm; sourceTree = SOURCE_ROOT; };
 		B5433B00F012AD87AADBFCD6 /* juce_cryptography */ /* juce_cryptography */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_cryptography; path = ../../../../modules/juce_cryptography; sourceTree = SOURCE_ROOT; };
 		B76F10A7778664E164A01934 /* juce_audio_basics */ /* juce_audio_basics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_basics; path = ../../../../modules/juce_audio_basics; sourceTree = SOURCE_ROOT; };
+		B9B80E3572715F63FFC3678B /* ClientComponent.h */ /* ClientComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ClientComponent.h; path = ../../Source/ClientComponent.h; sourceTree = SOURCE_ROOT; };
 		BA2E40409255F1B078406221 /* juce_data_structures */ /* juce_data_structures */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_data_structures; path = ../../../../modules/juce_data_structures; sourceTree = SOURCE_ROOT; };
 		C6E2284D86D93F1D9D5C7666 /* include_juce_audio_formats.mm */ /* include_juce_audio_formats.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_formats.mm; path = ../../JuceLibraryCode/include_juce_audio_formats.mm; sourceTree = SOURCE_ROOT; };
 		C78806A6727F44EACFDED4A5 /* Cocoa.framework */ /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
@@ -138,7 +138,7 @@
 				4FF648D72D6F1A78956CDA1B,
 				77C0AC21C1028911123844FC,
 				9982F39121710EFFD5FEEAEF,
-				8E2F72AFA0CDA64F0C07F105,
+				B9B80E3572715F63FFC3678B,
 				25DEDA8C9F94A6C8DFC8E53E,
 			);
 			name = Source;

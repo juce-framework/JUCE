@@ -25,19 +25,19 @@
 
 
 /**
-    This component runs in a slave process, draws the part of the canvas that this
+    This component runs in a client process, draws the part of the canvas that this
     particular client covers, and updates itself when messages arrive from the master
     containing new canvas states.
 */
-class SlaveCanvasComponent  : public Component,
-                              private OSCSender,
-                              private OSCReceiver,
-                              private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>,
-                              private AsyncUpdater,
-                              private Timer
+class ClientCanvasComponent  : public Component,
+                               private OSCSender,
+                               private OSCReceiver,
+                               private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>,
+                               private AsyncUpdater,
+                               private Timer
 {
 public:
-    SlaveCanvasComponent (PropertiesFile& p, int windowIndex)  : properties (p)
+    ClientCanvasComponent (PropertiesFile& p, int windowIndex)  : properties (p)
     {
         {
             String uuidPropName ("UUID" + String (windowIndex));
@@ -65,7 +65,7 @@ public:
         startTimer (2000);
     }
 
-    ~SlaveCanvasComponent() override
+    ~ClientCanvasComponent() override
     {
         OSCReceiver::removeListener (this);
     }
@@ -220,5 +220,5 @@ private:
     CriticalSection canvasLock;
     BlockPacketiser packetiser;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SlaveCanvasComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClientCanvasComponent)
 };

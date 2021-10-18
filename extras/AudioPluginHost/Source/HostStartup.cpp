@@ -31,7 +31,7 @@
  #error "If you're building the audio plugin host, you probably want to enable VST and/or AU support"
 #endif
 
-class PluginScannerSubprocess : private ChildProcessSlave,
+class PluginScannerSubprocess : private ChildProcessWorker,
                                 private AsyncUpdater
 {
 public:
@@ -40,10 +40,10 @@ public:
         formatManager.addDefaultFormats();
     }
 
-    using ChildProcessSlave::initialiseFromCommandLine;
+    using ChildProcessWorker::initialiseFromCommandLine;
 
 private:
-    void handleMessageFromMaster (const MemoryBlock& mb) override
+    void handleMessageFromCoordinator (const MemoryBlock& mb) override
     {
         {
             const std::lock_guard<std::mutex> lock (mutex);
@@ -94,7 +94,7 @@ private:
                 xml.addChildElement (desc->createXml().release());
 
             const auto str = xml.toString();
-            sendMessageToMaster ({ str.toRawUTF8(), str.getNumBytesAsUTF8() });
+            sendMessageToCoordinator ({ str.toRawUTF8(), str.getNumBytesAsUTF8() });
         }
     }
 

@@ -71,7 +71,7 @@ public:
         stream.writeString (format.getName());
         stream.writeString (fileOrIdentifier);
 
-        if (superprocess->sendMessageToSlave (block))
+        if (superprocess->sendMessageToWorker (block))
         {
             std::unique_lock<std::mutex> lock (mutex);
             gotResponse = false;
@@ -123,17 +123,19 @@ public:
     }
 
 private:
-    class Superprocess  : public ChildProcessMaster
+    class Superprocess  : private ChildProcessCoordinator
     {
     public:
         explicit Superprocess (CustomPluginScanner& o)
             : owner (o)
         {
-            launchSlaveProcess (File::getSpecialLocation (File::currentExecutableFile), processUID, 0, 0);
+            launchWorkerProcess (File::getSpecialLocation (File::currentExecutableFile), processUID, 0, 0);
         }
 
+        using ChildProcessCoordinator::sendMessageToWorker;
+
     private:
-        void handleMessageFromSlave (const MemoryBlock& mb) override
+        void handleMessageFromWorker (const MemoryBlock& mb) override
         {
             auto xml = parseXML (mb.toString());
 
