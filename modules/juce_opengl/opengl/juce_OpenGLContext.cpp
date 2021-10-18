@@ -95,7 +95,8 @@ public:
     CachedImage (OpenGLContext& c, Component& comp,
                  const OpenGLPixelFormat& pixFormat, void* contextToShare)
         : ThreadPoolJob ("OpenGL Rendering"),
-          context (c), component (comp)
+          context (c),
+          component (comp)
     {
         nativeContext.reset (new NativeContext (component, pixFormat, contextToShare,
                                                 c.useMultisampling, c.versionRequired));
@@ -159,6 +160,13 @@ public:
 
     void resume()
     {
+       #if JUCE_MAC
+        initialDisplayTopLeft = Desktop::getInstance().getDisplays()
+                                                      .getDisplayForRect (component.getTopLevelComponent()->getScreenBounds())
+                                                      ->totalArea
+                                                      .getTopLeft();
+       #endif
+
         if (renderThread != nullptr)
             renderThread->addJob (this, false);
     }
@@ -301,6 +309,8 @@ public:
 
     void updateViewportSize (bool canTriggerUpdate)
     {
+        JUCE_ASSERT_MESSAGE_THREAD
+
         if (auto* peer = component.getPeer())
         {
             auto localBounds = component.getLocalBounds();
@@ -476,7 +486,7 @@ public:
     JobStatus runJob() override
     {
         {
-            // Allow the message thread to finish setting-up the context before using it..
+            // Allow the message thread to finish setting-up the context before using it.
             MessageManager::Lock::ScopedTryLockType mmLock (messageManagerLock, false);
 
             do
@@ -536,7 +546,7 @@ public:
 
     bool initialiseOnThread()
     {
-        // On android, this can get called twice, so drop any previous state..
+        // On android, this can get called twice, so drop any previous state.
         associatedObjectNames.clear();
         associatedObjects.clear();
         cachedImageFrameBuffer.release();
@@ -579,6 +589,7 @@ public:
 
        #if JUCE_MAC
         cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (*this);
+        cvDisplayLinkWrapper->updateActiveDisplay (initialDisplayTopLeft);
         nativeContext->setNominalVideoRefreshPeriodS (cvDisplayLinkWrapper->getNominalVideoRefreshPeriodS());
        #endif
 
@@ -676,7 +687,7 @@ public:
         }
         else
         {
-            jassertfalse; // you called execute AFTER you detached your openglcontext
+            jassertfalse; // you called execute AFTER you detached your OpenGLContext
         }
     }
 
@@ -701,6 +712,9 @@ public:
     double scale = 1.0;
     AffineTransform transform;
     GLuint vertexArrayObject = 0;
+   #if JUCE_MAC
+    Point<int> initialDisplayTopLeft;
+   #endif
 
     StringArray associatedObjectNames;
     ReferenceCountedArray<ReferenceCountedObject> associatedObjects;
@@ -718,18 +732,13 @@ public:
    #if JUCE_MAC
     struct CVDisplayLinkWrapper
     {
-        CVDisplayLinkWrapper (CachedImage& cachedImageIn)  : cachedImage (cachedImageIn),
-                                                             continuousRepaint (cachedImageIn.context.continuousRepaint.load())
+        explicit CVDisplayLinkWrapper (CachedImage& cachedImageIn)
+            : cachedImage (cachedImageIn),
+              continuousRepaint (cachedImageIn.context.continuousRepaint.load())
         {
             CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
             CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
             CVDisplayLinkStart (displayLink);
-
-            const auto topLeftOfCurrentScreen = Desktop::getInstance()
-                                                    .getDisplays()
-                                                    .getDisplayForRect (cachedImage.component.getTopLevelComponent()->getScreenBounds())
-                                                    ->totalArea.getTopLeft();
-            updateActiveDisplay (topLeftOfCurrentScreen);
         }
 
         double getNominalVideoRefreshPeriodS() const
@@ -744,11 +753,10 @@ public:
 
         void updateActiveDisplay (Point<int> topLeftOfDisplay)
         {
-            CGPoint point { (CGFloat) topLeftOfDisplay.getX(), (CGFloat) topLeftOfDisplay.getY() };
             CGDirectDisplayID displayID;
             uint32_t numDisplays = 0;
             constexpr uint32_t maxNumDisplays = 1;
-            CGGetDisplaysWithPoint (point, maxNumDisplays, &displayID, &numDisplays);
+            CGGetDisplaysWithPoint (convertToCGPoint (topLeftOfDisplay), maxNumDisplays, &displayID, &numDisplays);
 
             if (numDisplays == 1)
                 CVDisplayLinkSetCurrentCGDisplay (displayLink, displayID);
