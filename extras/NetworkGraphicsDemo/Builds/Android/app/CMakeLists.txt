@@ -37,7 +37,7 @@ add_library( ${BINARY_NAME}
     "../../../Source/Demos.h"
     "../../../Source/Main.cpp"
     "../../../Source/MasterComponent.h"
-    "../../../Source/SlaveComponent.h"
+    "../../../Source/ClientComponent.h"
     "../../../Source/SharedCanvas.h"
     "../../../Source/juce_icon.png"
     "../../../../../modules/juce_audio_basics/audio_play_head/juce_AudioPlayHead.h"
@@ -1623,7 +1623,7 @@ add_library( ${BINARY_NAME}
 
 set_source_files_properties("../../../Source/Demos.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/MasterComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../Source/SlaveComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../Source/ClientComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/SharedCanvas.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/juce_icon.png" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/audio_play_head/juce_AudioPlayHead.h" PROPERTIES HEADER_FILE_ONLY TRUE)

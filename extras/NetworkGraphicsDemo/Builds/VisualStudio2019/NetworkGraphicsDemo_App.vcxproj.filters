@@ -2667,7 +2667,7 @@
     <ClInclude Include="..\..\Source\MasterComponent.h">
       <Filter>NetworkGraphicsDemo\Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\SlaveComponent.h">
+    <ClInclude Include="..\..\Source\ClientComponent.h">
       <Filter>NetworkGraphicsDemo\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\SharedCanvas.h">

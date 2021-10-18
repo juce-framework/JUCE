@@ -97,7 +97,7 @@ public:
         testResultsBox.setMultiLine (true);
         testResultsBox.setFont ({ Font::getDefaultMonospacedFontName(), 12.0f, Font::plain });
 
-        logMessage (String ("This demo uses the ChildProcessMaster and ChildProcessSlave classes to launch and communicate "
+        logMessage (String ("This demo uses the ChildProcessCoordinator and ChildProcessWorker classes to launch and communicate "
                             "with a child process, sending messages in the form of serialised ValueTree objects.") + newLine);
 
         setSize (500, 500);
@@ -105,7 +105,7 @@ public:
 
     ~ChildProcessDemo() override
     {
-        masterProcess.reset();
+        coordinatorProcess.reset();
     }
 
     void paint (Graphics& g) override
@@ -134,11 +134,11 @@ public:
     // invoked by the 'launch' button.
     void launchChildProcess()
     {
-        if (masterProcess.get() == nullptr)
+        if (coordinatorProcess.get() == nullptr)
         {
-            masterProcess.reset (new DemoMasterProcess (*this));
+            coordinatorProcess.reset (new DemoCoordinatorProcess (*this));
 
-            if (masterProcess->launchSlaveProcess (File::getSpecialLocation (File::currentExecutableFile), demoCommandLineUID))
+            if (coordinatorProcess->launchWorkerProcess (File::getSpecialLocation (File::currentExecutableFile), demoCommandLineUID))
                 logMessage ("Child process started");
         }
     }
@@ -146,8 +146,8 @@ public:
     // invoked by the 'ping' button.
     void pingChildProcess()
     {
-        if (masterProcess.get() != nullptr)
-            masterProcess->sendPingMessageToSlave();
+        if (coordinatorProcess.get() != nullptr)
+            coordinatorProcess->sendPingMessageToWorker();
         else
             logMessage ("Child process is not running!");
     }
@@ -155,45 +155,45 @@ public:
     // invoked by the 'kill' button.
     void killChildProcess()
     {
-        if (masterProcess.get() != nullptr)
+        if (coordinatorProcess.get() != nullptr)
         {
-            masterProcess.reset();
+            coordinatorProcess.reset();
             logMessage ("Child process killed");
         }
     }
 
     //==============================================================================
-    // This class is used by the main process, acting as the master and receiving messages
-    // from the slave process.
-    class DemoMasterProcess  : public ChildProcessMaster,
-                               private DeletedAtShutdown
+    // This class is used by the main process, acting as the coordinator and receiving messages
+    // from the worker process.
+    class DemoCoordinatorProcess  : public ChildProcessCoordinator,
+                                    private DeletedAtShutdown
     {
     public:
-        DemoMasterProcess (ChildProcessDemo& d) : demo (d) {}
+        DemoCoordinatorProcess (ChildProcessDemo& d) : demo (d) {}
 
-        // This gets called when a message arrives from the slave process..
-        void handleMessageFromSlave (const MemoryBlock& mb) override
+        // This gets called when a message arrives from the worker process..
+        void handleMessageFromWorker (const MemoryBlock& mb) override
         {
             auto incomingMessage = memoryBlockToValueTree (mb);
 
             demo.logMessage ("Received: " + valueTreeToString (incomingMessage));
         }
 
-        // This gets called if the slave process dies.
+        // This gets called if the worker process dies.
         void handleConnectionLost() override
         {
             demo.logMessage ("Connection lost to child process!");
             demo.killChildProcess();
         }
 
-        void sendPingMessageToSlave()
+        void sendPingMessageToWorker()
         {
             ValueTree message ("MESSAGE");
             message.setProperty ("count", count++, nullptr);
 
             demo.logMessage ("Sending: " + valueTreeToString (message));
 
-            sendMessageToSlave (valueTreeToMemoryBlock (message));
+            sendMessageToWorker (valueTreeToMemoryBlock (message));
         }
 
         ChildProcessDemo& demo;
@@ -201,7 +201,7 @@ public:
     };
 
     //==============================================================================
-    std::unique_ptr<DemoMasterProcess> masterProcess;
+    std::unique_ptr<DemoCoordinatorProcess> coordinatorProcess;
 
 private:
     TextButton launchButton  { "Launch Child Process" };
@@ -234,15 +234,15 @@ private:
 
 //==============================================================================
 /*  This class gets instantiated in the child process, and receives messages from
-    the master process.
+    the coordinator process.
 */
-class DemoSlaveProcess  : public ChildProcessSlave,
-                          private DeletedAtShutdown
+class DemoWorkerProcess  : public ChildProcessWorker,
+                           private DeletedAtShutdown
 {
 public:
-    DemoSlaveProcess() {}
+    DemoWorkerProcess() = default;
 
-    void handleMessageFromMaster (const MemoryBlock& mb) override
+    void handleMessageFromCoordinator (const MemoryBlock& mb) override
     {
         ValueTree incomingMessage (memoryBlockToValueTree (mb));
 
@@ -256,7 +256,7 @@ public:
         ValueTree reply ("REPLY");
         reply.setProperty ("countPlusOne", static_cast<int> (incomingMessage["count"]) + 1, nullptr);
 
-        sendMessageToMaster (valueTreeToMemoryBlock (reply));
+        sendMessageToCoordinator (valueTreeToMemoryBlock (reply));
     }
 
     void handleConnectionMade() override
@@ -264,10 +264,10 @@ public:
         // This method is called when the connection is established, and in response, we'll just
         // send off a message to say hello.
         ValueTree reply ("HelloWorld");
-        sendMessageToMaster (valueTreeToMemoryBlock (reply));
+        sendMessageToCoordinator (valueTreeToMemoryBlock (reply));
     }
 
-    /* If no pings are received from the master process for a number of seconds, then this will get invoked.
+    /* If no pings are received from the coordinator process for a number of seconds, then this will get invoked.
        Typically you'll want to use this as a signal to kill the process as quickly as possible, as you
        don't want to leave it hanging around as a zombie..
     */
@@ -284,11 +284,11 @@ public:
 */
 bool invokeChildProcessDemo (const String& commandLine)
 {
-    std::unique_ptr<DemoSlaveProcess> slave (new DemoSlaveProcess());
+    std::unique_ptr<DemoWorkerProcess> worker (new DemoWorkerProcess());
 
-    if (slave->initialiseFromCommandLine (commandLine, demoCommandLineUID))
+    if (worker->initialiseFromCommandLine (commandLine, demoCommandLineUID))
     {
-        slave.release(); // allow the slave object to stay alive - it'll handle its own deletion.
+        worker.release(); // allow the worker object to stay alive - it'll handle its own deletion.
         return true;
     }
 
