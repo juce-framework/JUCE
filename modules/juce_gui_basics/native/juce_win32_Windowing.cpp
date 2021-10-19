@@ -3812,6 +3812,12 @@ private:
                 }
 
                 handleFocusLoss();
+
+                if (auto* modal = Component::getCurrentlyModalComponent())
+                    if (auto* peer = modal->getPeer())
+                        if ((peer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
+                            sendInputAttemptWhenModalMessage();
+
                 break;
 
             case WM_ACTIVATEAPP:
