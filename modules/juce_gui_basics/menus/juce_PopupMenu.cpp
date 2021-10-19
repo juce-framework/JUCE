@@ -2013,38 +2013,29 @@ struct PopupMenuCompletionCallback  : public ModalComponentManager::Callback
         if (PopupMenuSettings::menuWasHiddenBecauseOfAppChange)
             return;
 
-        auto* focusComponent = getComponentToPassFocusTo();
-
-        const auto focusedIsNotMinimised = [focusComponent]
+        if (auto* focusComponent = Component::getCurrentlyFocusedComponent())
         {
-            if (focusComponent != nullptr)
+            const auto focusedIsNotMinimised = [focusComponent]
+            {
                 if (auto* peer = focusComponent->getPeer())
                     return ! peer->isMinimised();
 
-            return false;
-        }();
+                return false;
+            }();
 
-        if (focusedIsNotMinimised)
-        {
-            if (auto* topLevel = focusComponent->getTopLevelComponent())
-                topLevel->toFront (true);
+            if (focusedIsNotMinimised)
+            {
+                if (auto* topLevel = focusComponent->getTopLevelComponent())
+                    topLevel->toFront (true);
 
-            if (focusComponent->isShowing() && ! focusComponent->hasKeyboardFocus (true))
-                focusComponent->grabKeyboardFocus();
+                if (focusComponent->isShowing() && ! focusComponent->hasKeyboardFocus (true))
+                    focusComponent->grabKeyboardFocus();
+            }
         }
-    }
-
-    Component* getComponentToPassFocusTo() const
-    {
-        if (auto* current = Component::getCurrentlyFocusedComponent())
-            return current;
-
-        return prevFocused.get();
     }
 
     ApplicationCommandManager* managerOfChosenCommand = nullptr;
     std::unique_ptr<Component> component;
-    WeakReference<Component> prevFocused { Component::getCurrentlyFocusedComponent() };
 
     JUCE_DECLARE_NON_COPYABLE (PopupMenuCompletionCallback)
 };
