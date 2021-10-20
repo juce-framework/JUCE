@@ -38,6 +38,7 @@ public:
 
     ~TimerThread() override
     {
+        cancelPendingUpdate();
         signalThreadShouldExit();
         callbackArrived.signal();
         stopThread (4000);
