@@ -1,0 +1,144 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/port-groups>
+	a doap:Project ;
+	doap:license <http://opensource.org/licenses/isc> ;
+	doap:name "LV2 Port Groups" ;
+	doap:shortdesc "Multi-channel groups of LV2 ports." ;
+	doap:created "2008-00-00" ;
+	doap:developer <http://lv2plug.in/ns/meta#larsl> ,
+		<http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "1.4" ;
+		doap:created "2020-04-26" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.18.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Replace broken links with detailed Ambisonic channel descriptions."
+			] , [
+				rdfs:label "Remove incorrect type of pg:letterCode."
+			]
+		]
+	] , [
+		doap:revision "1.2" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Use consistent label style."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] .
+
+pg:Group
+	lv2:documentation """
+
+A group logically combines ports which should be considered part of the same
+stream.  For example, two audio ports in a group may form a stereo stream.
+
+Like ports, groups have a lv2:symbol that is unique within the context of the
+plugin, where group symbols and port symbols reside in the same namespace.  In
+other words, a group on a plugin MUST NOT have the same symbol as any other
+group or port on that plugin.  This makes it possible to uniquely reference a
+port or group on a plugin with a single identifier and no context.
+
+Group definitions may be shared across plugins for brevity.  For example, a
+plugin collection may define a single URI for a pg:StereoGroup with the symbol
+"input" and use it in many plugins.
+
+"""^^lv2:Markdown .
+
+pg:sideChainOf
+	lv2:documentation """
+
+Indicates that this port or group should be considered a "side chain" of some
+other port or group.  The precise definition of "side chain" depends on the
+plugin, but in general this group should be considered a modifier to some other
+group, rather than an independent input itself.
+
+"""^^lv2:Markdown .
+
+pg:subGroupOf
+	lv2:documentation """
+
+Indicates that this group is a child of another group.  This property has no
+meaning with respect to plugin execution, but the host may find this
+information useful to provide a better user interface.  Note that being a
+sub-group does not relax the restriction that the group MUST have a unique
+symbol with respect to the plugin.
+
+"""^^lv2:Markdown .
+
+pg:source
+	lv2:documentation """
+
+Indicates that this port or group should be considered the "result" of some
+other port or group.  This property only makes sense on groups with outputs
+when the source is a group with inputs.  This can be used to convey a
+relationship between corresponding input and output groups with different
+types, for example in a mono to stereo plugin.
+
+"""^^lv2:Markdown .
+
+pg:mainInput
+	lv2:documentation """
+
+Indicates that this group should be considered the "main" input, i.e. the
+primary task is processing the signal in this group.  A plugin MUST NOT have
+more than one pg:mainInput property.
+
+"""^^lv2:Markdown .
+
+pg:mainOutput
+	lv2:documentation """
+
+Indicates that this group should be considered the "main" output.  The main
+output group SHOULD have the main input group as a pg:source.
+
+"""^^lv2:Markdown .
+
+pg:group
+	lv2:documentation """
+
+Indicates that this port is a part of a group of ports on the plugin.  The port
+should also have an lv2:designation property to define its designation within
+that group.
+
+"""^^lv2:Markdown .
+
+pg:DiscreteGroup
+	lv2:documentation """
+
+These groups are divided into channels where each represents a particular
+speaker location.  The position of sound in one of these groups depends on a
+particular speaker configuration.
+
+"""^^lv2:Markdown .
+
+pg:AmbisonicGroup
+	lv2:documentation """
+
+These groups are divided into channels which together represent a position in
+an abstract n-dimensional space. The position of sound in one of these groups
+does not depend on a particular speaker configuration; a decoder can be used to
+convert an ambisonic stream for any speaker configuration.
+
+"""^^lv2:Markdown .
+

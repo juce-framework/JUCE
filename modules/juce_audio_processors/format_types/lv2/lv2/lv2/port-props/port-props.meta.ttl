@@ -1,0 +1,202 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/port-props>
+	a doap:Project ;
+	doap:name "LV2 Port Properties" ;
+	doap:created "2009-01-01" ;
+	doap:shortdesc "Various properties for LV2 plugin ports." ;
+	doap:maintainer <http://drobilla.net/drobilla#me> ;
+	doap:developer <http://lv2plug.in/ns/meta#kfoltman> ;
+	doap:release [
+		doap:revision "1.2" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Use consistent label style."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This vocabulary defines various properties for plugin ports, which can be used
+to better describe how a plugin can be controlled.  Using this metadata, hosts
+can build better UIs for plugins, and provide more advanced automatic
+functionality.
+
+"""^^lv2:Markdown .
+
+pprops:trigger
+	lv2:documentation """
+
+Indicates that the data item corresponds to a momentary event that has been
+detected (control output ports) or is to be triggered (control input ports).
+For input ports, the port needs to be reset to lv2:default value after run()
+function of the plugin has returned.  If the control port is assigned a GUI
+widget by the host, the widget should be of auto-off (momentary, one-shot) type
+- for example, a push button if the port is also declared as lv2:toggled, or a
+series of push button or auto-clear input box with a "Send" button if the port
+is also lv2:integer.
+
+"""^^lv2:Markdown .
+
+pprops:supportsStrictBounds
+	lv2:documentation """
+
+Indicates use of host support for pprops:hasStrictBounds port property.  A
+plugin that specifies it as optional feature can omit value clamping for
+hasStrictBounds ports, if the feature is supported by the host.  When specified
+as required feature, it indicates that the plugin does not do any clamping for
+input ports that have a pprops:hasStrictBounds property.
+
+"""^^lv2:Markdown .
+
+pprops:hasStrictBounds
+	lv2:documentation """
+
+For hosts that support pprops:supportsStrictBounds, this indicates that the
+value of the port should never exceed the port's minimum and maximum control
+points.  For input ports, it moves the responsibility for limiting the range of
+values to host, if it supports pprops:supportsStrictBounds.  For output ports,
+it indicates that values within specified range are to be expected, and
+breaking that should be considered by the host as error in plugin
+implementation.
+
+"""^^lv2:Markdown .
+
+pprops:expensive
+	lv2:documentation """
+
+Input ports only.  Indicates that any changes to the port value may trigger
+expensive background calculation (for example, regeneration of lookup tables in
+a background thread).  Any value changes may have not have immediate effect, or
+may cause silence or diminished-quality version of the output until background
+processing is finished.  Ports having this property are typically not well
+suited for connection to outputs of other plugins, and should not be offered as
+connection targets or for automation by default.
+
+"""^^lv2:Markdown .
+
+pprops:causesArtifacts
+	lv2:documentation """
+
+Input ports only.  Indicates that any changes to the port value may produce
+slight artifacts to produced audio signals (zipper noise and other results of
+signal discontinuities).  Connecting ports of this type to continuous signals
+is not recommended, and when presenting a list of automation targets, those
+ports may be marked as artifact-producing.
+
+"""^^lv2:Markdown .
+
+pprops:continuousCV
+	lv2:documentation """
+
+Indicates that the port carries a "smooth" modulation signal.  Control input
+ports of this type are well-suited for being connected to sources of smooth
+signals (knobs with smoothing, modulation rate oscillators, output ports with
+continuousCV type, etc.).  Typically, the plugin with ports which have this
+property will implement appropriate smoothing to avoid audio artifacts.  For
+output ports, this property suggests the value of the port is likely to change
+frequently, and describes a smooth signal (so successive values may be
+considered points along a curve).
+
+"""^^lv2:Markdown .
+
+pprops:discreteCV
+	lv2:documentation """
+
+Indicates that the port carries a "discrete" modulation signal.  Input ports of
+this type are well-suited for being connected to sources of discrete signals
+(switches, buttons, classifiers, event detectors, etc.).  May be combined with
+pprops:trigger property.  For output ports, this property suggests the value of
+the port describe discrete values that should be interpreted as steps (and not
+points along a curve).
+
+"""^^lv2:Markdown .
+
+pprops:logarithmic
+	lv2:documentation """
+
+Indicates that port value behaviour within specified range (bounds) is a value
+using logarithmic scale.  The lower and upper bounds must be specified, and
+must be of the same sign.
+
+"""^^lv2:Markdown .
+
+pprops:notAutomatic
+	lv2:documentation """
+
+Indicates that the port is not primarily intended to be fed with modulation
+signals from external sources (other plugins, etc.).  It is merely a UI hint
+and hosts may allow the user to override it.
+
+"""^^lv2:Markdown .
+
+pprops:notOnGUI
+	lv2:documentation """
+
+Indicates that the port is not primarily intended to be represented by a
+separate control in the user interface window (or any similar mechanism used
+for direct, immediate control of control ports).  It is merely a UI hint and
+hosts may allow the user to override it.
+
+"""^^lv2:Markdown .
+
+pprops:displayPriority
+	lv2:documentation """
+
+Indicates how important a port is to controlling the plugin.  If a host can
+only display some ports of a plugin, it should prefer ports with a higher
+display priority.  Priorities do not need to be unique, and are only meaningful
+when compared to each other.
+
+"""^^lv2:Markdown .
+
+pprops:rangeSteps
+	lv2:documentation """
+
+This value indicates into how many evenly-divided points the (control) port
+range should be divided for step-wise control.  This may be used for changing
+the value with step-based controllers like arrow keys, mouse wheel, rotary
+encoders, and so on.
+
+Note that when used with a pprops:logarithmic port, the steps are logarithmic
+too, and port value can be calculated as:
+
+    :::c
+    value = lower * pow(upper / lower, step / (steps - 1))
+
+and the step from value is:
+
+    :::c
+    step = (steps - 1) * log(value / lower) / log(upper / lower)
+
+where:
+
+  * `value` is the port value.
+
+  * `step` is the step number (0..steps).
+
+  * `steps` is the number of steps (= value of :rangeSteps property).
+
+  * `lower` and <code>upper</code> are the bounds.
+
+"""^^lv2:Markdown .
+

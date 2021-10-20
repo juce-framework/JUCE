@@ -1,0 +1,11 @@
+@prefix da: <http://lv2plug.in/ns/ext/data-access#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/data-access>
+	a lv2:Feature ;
+	rdfs:label "data access" ;
+	rdfs:comment "A feature that provides access to plugin extension data." ;
+	rdfs:seeAlso <data-access.h> ,
+		<data-access.meta.ttl> .
+

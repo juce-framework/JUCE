@@ -1,0 +1,22 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix urid: <http://lv2plug.in/ns/ext/urid#> .
+
+<http://lv2plug.in/ns/ext/urid>
+	a owl:Ontology ;
+	rdfs:label "LV2 URID" ;
+	rdfs:comment "Features for mapping URIs to and from integers." ;
+	rdfs:seeAlso <urid.h> ,
+		<urid.meta.ttl> .
+
+urid:map
+	a lv2:Feature ;
+	rdfs:label "map" ;
+	rdfs:comment "A feature to map URI strings to integer URIDs." .
+
+urid:unmap
+	a lv2:Feature ;
+	rdfs:label "unmap" ;
+	rdfs:comment "A feature to unmap URIDs back to strings." .
+
