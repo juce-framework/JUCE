@@ -14,28 +14,9 @@
 #
 # ==============================================================================
 
-juce_add_modules(
-    INSTALL_PATH "include/JUCE-${JUCE_VERSION}/modules"
-    ALIAS_NAMESPACE juce
-    juce_analytics
-    juce_audio_basics
-    juce_audio_devices
-    juce_audio_formats
-    juce_audio_plugin_client
-    juce_audio_processors
-    juce_audio_utils
-    juce_box2d
-    juce_core
-    juce_cryptography
-    juce_data_structures
-    juce_dsp
-    juce_events
-    juce_graphics
-    juce_gui_basics
-    juce_gui_extra
-    juce_opengl
-    juce_osc
-    juce_product_unlocking
-    juce_video)
-
-add_subdirectory(juce_audio_plugin_client)
+add_executable(juce_lv2_helper LV2/juce_LV2TurtleDumpProgram.cpp)
+add_executable(juce::juce_lv2_helper ALIAS juce_lv2_helper)
+target_compile_features(juce_lv2_helper PRIVATE cxx_std_14)
+set_target_properties(juce_lv2_helper PROPERTIES BUILD_WITH_INSTALL_RPATH ON)
+target_link_libraries(juce_lv2_helper PRIVATE ${CMAKE_DL_LIBS})
+install(TARGETS juce_lv2_helper EXPORT LV2_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
