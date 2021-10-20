@@ -582,7 +582,7 @@ private:
         cachedParamValues = CachedParamValues { { vstParamIDs.begin(), vstParamIDs.end() } };
     }
 
-    Vst::ParamID generateVSTParamIDForParam (AudioProcessorParameter* param)
+    Vst::ParamID generateVSTParamIDForParam (const AudioProcessorParameter* param)
     {
         auto juceParamID = LegacyAudioParameter::getParamID (param, false);
 
@@ -1579,7 +1579,7 @@ private:
                            Steinberg::IPlugView* viewIn)
             : processor (processorIn), editor (editorIn), componentHandler (handler), view (viewIn) {}
 
-        std::unique_ptr<HostProvidedContextMenu> getContextMenuForParameterIndex (const AudioProcessorParameter* parameter) const override
+        std::unique_ptr<HostProvidedContextMenu> getContextMenuForParameter (const AudioProcessorParameter* parameter) const override
         {
             if (componentHandler == nullptr || view == nullptr)
                 return {};
@@ -2214,7 +2214,7 @@ public:
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-        const int numConfigs = sizeof (configs) / sizeof (short[2]);
+        const int numConfigs = numElementsInArray (configs);
 
         ignoreUnused (numConfigs);
         jassert (numConfigs > 0 && (configs[0][0] > 0 || configs[0][1] > 0));
@@ -2763,7 +2763,7 @@ public:
 
       #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
-        const int numConfigs = sizeof (configs) / sizeof (short[2]);
+        const int numConfigs = numElementsInArray (configs);
 
         bool hasOnlyZeroChannels = true;
 
