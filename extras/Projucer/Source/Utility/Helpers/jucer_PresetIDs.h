@@ -332,6 +332,7 @@ namespace Ids
     DECLARE_ID (buildAAX);
     DECLARE_ID (buildStandalone);
     DECLARE_ID (buildUnity);
+    DECLARE_ID (buildLV2);
     DECLARE_ID (enableIAA);
     DECLARE_ID (pluginName);
     DECLARE_ID (pluginDesc);
@@ -376,6 +377,9 @@ namespace Ids
     DECLARE_ID (guiEditorEnabled);
     DECLARE_ID (jucerFormatVersion);
     DECLARE_ID (buildNumber);
+    DECLARE_ID (lv2Uri);
+    DECLARE_ID (lv2UriUi);
+    DECLARE_ID (lv2BinaryLocation);
 
     DECLARE_ID (osxSDK);
     DECLARE_ID (osxCompatibility);

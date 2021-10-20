@@ -55,7 +55,7 @@ include(extras/Build/CMake/JUCEUtils.cmake)
 
 set_directory_properties(PROPERTIES
     JUCE_COMPANY_NAME       "JUCE"
-    JUCE_COMPANY_WEBSITE    "juce.com"
+    JUCE_COMPANY_WEBSITE    "https://juce.com"
     JUCE_COMPANY_EMAIL      "info@juce.com"
     JUCE_COMPANY_COPYRIGHT  "Copyright (c) 2020 - Raw Material Software Limited")
 
@@ -138,6 +138,7 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEModuleSupport.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEUtils.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/JuceLV2Defines.h.in"
               "${JUCE_CMAKE_UTILS_DIR}/LaunchScreen.storyboard"
               "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in"
               "${JUCE_CMAKE_UTILS_DIR}/PIPComponent.cpp.in"

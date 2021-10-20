@@ -96,6 +96,7 @@ private:
     void writePluginDefines (MemoryOutputStream& outStream) const;
     void writePluginDefines();
     void writeAppConfigFile (const OwnedArray<LibraryModule>& modules, const String& userContent);
+    void writeLV2Defines (MemoryOutputStream&);
 
     void writeProjectFile();
     void writeAppConfig (MemoryOutputStream& outStream, const OwnedArray<LibraryModule>& modules, const String& userContent);
@@ -107,6 +108,7 @@ private:
     void writePluginCharacteristicsFile();
     void writeUnityScriptFile();
     void writeProjects (const OwnedArray<LibraryModule>&, ProjectExporter*);
+    void writeLV2DefinesFile();
     void runPostExportScript();
     void saveExporter (ProjectExporter& exporter, const OwnedArray<LibraryModule>& modules);
 

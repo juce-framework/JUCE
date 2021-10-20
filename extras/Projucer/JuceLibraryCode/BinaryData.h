@@ -8,6 +8,9 @@
 
 namespace BinaryData
 {
+    extern const char*   JuceLV2Defines_h_in;
+    const int            JuceLV2Defines_h_inSize = 91;
+
     extern const char*   LaunchScreen_storyboard;
     const int            LaunchScreen_storyboardSize = 1042;
 
@@ -192,7 +195,7 @@ namespace BinaryData
     const int            juce_runtime_arch_detection_cppSize = 2760;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 61;
+    const int namedResourceListSize = 62;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

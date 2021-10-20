@@ -246,6 +246,7 @@
 		8FEF6F5EA676B824C021EB6F /* wizard_AnimatedApp.svg */ /* wizard_AnimatedApp.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = wizard_AnimatedApp.svg; path = ../../Source/BinaryData/Icons/wizard_AnimatedApp.svg; sourceTree = SOURCE_ROOT; };
 		8FF26BF72A522FBEAAFDDF54 /* wizard_AudioApp.svg */ /* wizard_AudioApp.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = wizard_AudioApp.svg; path = ../../Source/BinaryData/Icons/wizard_AudioApp.svg; sourceTree = SOURCE_ROOT; };
 		9069981E414A631B036CC9AC /* jucer_MainWindow.cpp */ /* jucer_MainWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_MainWindow.cpp; path = ../../Source/Application/jucer_MainWindow.cpp; sourceTree = SOURCE_ROOT; };
+		921D263A2EAFD96C8D389693 /* JuceLV2Defines.h.in */ /* JuceLV2Defines.h.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = JuceLV2Defines.h.in; path = ../../../Build/CMake/JuceLV2Defines.h.in; sourceTree = SOURCE_ROOT; };
 		92926A4D3CC4BB2A9D35EB0B /* jucer_UTF8WindowComponent.h */ /* jucer_UTF8WindowComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_UTF8WindowComponent.h; path = ../../Source/Application/Windows/jucer_UTF8WindowComponent.h; sourceTree = SOURCE_ROOT; };
 		92A66A8BD87F98EB6B4FB6D0 /* jucer_ProjectContentComponent.h */ /* jucer_ProjectContentComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectContentComponent.h; path = ../../Source/Project/UI/jucer_ProjectContentComponent.h; sourceTree = SOURCE_ROOT; };
 		94146B40B41BF0AACF4359DD /* jucer_LicenseState.h */ /* jucer_LicenseState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_LicenseState.h; path = ../../Source/Application/UserAccount/jucer_LicenseState.h; sourceTree = SOURCE_ROOT; };
@@ -846,6 +847,7 @@
 		DC3A4B0AD79334BA8A7E0661 /* BinaryData */ = {
 			isa = PBXGroup;
 			children = (
+				921D263A2EAFD96C8D389693,
 				50F89D3827B83B48855B3564,
 				A0ECDAF137029C445910D3ED,
 				463C8CF42FAA00014198B71B,
@@ -1157,6 +1159,7 @@
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
@@ -1227,6 +1230,7 @@
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (

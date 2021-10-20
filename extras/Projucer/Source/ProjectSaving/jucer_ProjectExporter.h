@@ -181,6 +181,13 @@ public:
     void createPropertyEditors (PropertyListBuilder&);
     void addSettingsForProjectType (const build_tools::ProjectType&);
 
+    build_tools::RelativePath getLV2TurtleDumpProgramSource() const
+    {
+        return getModuleFolderRelativeToProject ("juce_audio_plugin_client")
+               .getChildFile ("LV2")
+               .getChildFile ("juce_LV2TurtleDumpProgram.cpp");
+    }
+
     //==============================================================================
     void copyMainGroupFromProject();
     Array<Project::Item>& getAllGroups() noexcept               { jassert (itemGroups.size() > 0); return itemGroups; }
@@ -460,7 +467,6 @@ private:
                                                 : name + suffix;
     }
 
-    void createDependencyPathProperties (PropertyListBuilder&);
     void createIconProperties (PropertyListBuilder&);
     void addExtraIncludePathsIfPluginOrHost();
     void addCommonAudioPluginSettings();

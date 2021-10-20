@@ -260,25 +260,29 @@ public:
 
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
+        using Target = build_tools::ProjectType::Target;
+
         switch (type)
         {
-            case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
-            case build_tools::ProjectType::Target::StandalonePlugIn:
-            case build_tools::ProjectType::Target::GUIApp:
-            case build_tools::ProjectType::Target::StaticLibrary:
-            case build_tools::ProjectType::Target::DynamicLibrary:
-            case build_tools::ProjectType::Target::SharedCodeTarget:
-            case build_tools::ProjectType::Target::AggregateTarget:
+            case Target::AudioUnitv3PlugIn:
+            case Target::StandalonePlugIn:
+            case Target::GUIApp:
+            case Target::StaticLibrary:
+            case Target::DynamicLibrary:
+            case Target::SharedCodeTarget:
+            case Target::AggregateTarget:
                 return true;
-            case build_tools::ProjectType::Target::ConsoleApp:
-            case build_tools::ProjectType::Target::VSTPlugIn:
-            case build_tools::ProjectType::Target::VST3PlugIn:
-            case build_tools::ProjectType::Target::AAXPlugIn:
-            case build_tools::ProjectType::Target::RTASPlugIn:
-            case build_tools::ProjectType::Target::AudioUnitPlugIn:
-            case build_tools::ProjectType::Target::UnityPlugIn:
+            case Target::ConsoleApp:
+            case Target::VSTPlugIn:
+            case Target::VST3PlugIn:
+            case Target::AAXPlugIn:
+            case Target::RTASPlugIn:
+            case Target::AudioUnitPlugIn:
+            case Target::UnityPlugIn:
+            case Target::LV2PlugIn:
+            case Target::LV2TurtleProgram:
                 return ! iOS;
-            case build_tools::ProjectType::Target::unspecified:
+            case Target::unspecified:
             default:
                 break;
         }
@@ -800,7 +804,8 @@ protected:
               auBinaryLocation             (config, Ids::auBinaryLocation,             getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/Components/"),
               rtasBinaryLocation           (config, Ids::rtasBinaryLocation,           getUndoManager(), "/Library/Application Support/Digidesign/Plug-Ins/"),
               aaxBinaryLocation            (config, Ids::aaxBinaryLocation,            getUndoManager(), "/Library/Application Support/Avid/Audio/Plug-Ins/"),
-              unityPluginBinaryLocation    (config, Ids::unityPluginBinaryLocation,    getUndoManager())
+              unityPluginBinaryLocation    (config, Ids::unityPluginBinaryLocation,    getUndoManager()),
+              lv2BinaryLocation            (config, Ids::lv2BinaryLocation,            getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/LV2/")
         {
             updateOldPluginBinaryLocations();
             updateOldSDKDefaults();
@@ -896,6 +901,7 @@ protected:
         String getRTASBinaryLocationString() const              { return rtasBinaryLocation.get();}
         String getAAXBinaryLocationString() const               { return aaxBinaryLocation.get();}
         String getUnityPluginBinaryLocationString() const       { return unityPluginBinaryLocation.get(); }
+        String getLV2PluginBinaryLocationString() const         { return lv2BinaryLocation.get(); }
 
     private:
         //==============================================================================
@@ -905,7 +911,7 @@ protected:
                                      customXcodeFlags, plistPreprocessorDefinitions, codeSignIdentity,
                                      fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled,
                                      vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
-                                     aaxBinaryLocation, unityPluginBinaryLocation;
+                                     aaxBinaryLocation, unityPluginBinaryLocation, lv2BinaryLocation;
 
         //==============================================================================
         void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
@@ -956,6 +962,11 @@ protected:
                 props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepEnabled, "AAX Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled AAX binary should be placed.");
+
+            if (project.shouldBuildLV2())
+                props.add (new TextPropertyComponentWithEnablement (lv2BinaryLocation, pluginBinaryCopyStepEnabled, "LV2 Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled LV2 binary should be placed.");
 
             if (project.shouldBuildUnityPlugin())
                 props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepEnabled, "Unity Binary Location",
@@ -1041,6 +1052,7 @@ public:
                     break;
 
                 case ConsoleApp:
+                case LV2TurtleProgram:
                     xcodeFileType = "compiled.mach-o.executable";
                     xcodeBundleExtension = String();
                     xcodeProductType = "com.apple.product-type.tool";
@@ -1122,6 +1134,13 @@ public:
                     xcodeCopyToProductInstallPathAfterBuild = true;
                     break;
 
+                case LV2PlugIn:
+                    xcodeFileType = "compiled.mach-o.executable";
+                    xcodeProductType = "com.apple.product-type.tool";
+                    xcodeBundleExtension = ".so";
+                    xcodeCopyToProductInstallPathAfterBuild = true;
+                    break;
+
                 case SharedCodeTarget:
                     xcodeFileType = "archive.ar";
                     xcodeBundleExtension = ".a";
@@ -1173,43 +1192,6 @@ public:
         String mainBuildProductID;
         File infoPlistFile;
 
-        struct SourceFileInfo
-        {
-            build_tools::RelativePath path;
-            bool shouldBeCompiled = false;
-        };
-
-        Array<SourceFileInfo> getSourceFilesInfo (const Project::Item& projectItem) const
-        {
-            Array<SourceFileInfo> result;
-
-            auto targetType = (owner.getProject().isAudioPluginProject() ? type : SharedCodeTarget);
-
-            if (projectItem.isGroup())
-            {
-                for (int i = 0; i < projectItem.getNumChildren(); ++i)
-                    result.addArray (getSourceFilesInfo (projectItem.getChild (i)));
-            }
-            else if (projectItem.shouldBeAddedToTargetProject() && projectItem.shouldBeAddedToTargetExporter (owner)
-                     && owner.getProject().getTargetTypeFromFilePath (projectItem.getFile(), true) == targetType)
-            {
-                SourceFileInfo info;
-
-                info.path = build_tools::RelativePath (projectItem.getFile(),
-                                                       owner.getTargetFolder(),
-                                                       build_tools::RelativePath::buildTargetFolder);
-
-                jassert (info.path.getRoot() == build_tools::RelativePath::buildTargetFolder);
-
-                if (targetType == SharedCodeTarget || projectItem.shouldBeCompiled())
-                    info.shouldBeCompiled = projectItem.shouldBeCompiled();
-
-                result.add (info);
-            }
-
-            return result;
-        }
-
         //==============================================================================
         void addMainBuildProduct() const
         {
@@ -1218,12 +1200,18 @@ public:
 
             if (ProjectExporter::BuildConfiguration::Ptr config = owner.getConfiguration (0))
             {
-                auto productName = owner.replacePreprocessorTokens (*config, config->getTargetBinaryNameString (type == UnityPlugIn));
+                const auto productName = [&]() -> String
+                {
+                    const auto binaryName = owner.replacePreprocessorTokens (*config, config->getTargetBinaryNameString (type == UnityPlugIn));
 
-                if (xcodeFileType == "archive.ar")
-                    productName = getStaticLibbedFilename (productName);
-                else
-                    productName += xcodeBundleExtension;
+                    if (xcodeFileType == "archive.ar")
+                        return getStaticLibbedFilename (binaryName);
+
+                    if (type == LV2TurtleProgram)
+                        return Project::getLV2FileWriterName();
+
+                    return binaryName + xcodeBundleExtension;
+                }();
 
                 addBuildProduct (xcodeFileType, productName);
             }
@@ -1273,6 +1261,18 @@ public:
                 for (auto* target : owner.targets)
                     if (target->type != XcodeTarget::AggregateTarget)
                         dependencyIDs.add (target->addDependencyFor (*this));
+            }
+            else if (type == XcodeTarget::LV2PlugIn)
+            {
+                if (auto* helperTarget = owner.getTargetOfType (XcodeTarget::LV2TurtleProgram))
+                    dependencyIDs.add (helperTarget->addDependencyFor (*this));
+
+                if (auto* sharedCodeTarget = owner.getTargetOfType (XcodeTarget::SharedCodeTarget))
+                    dependencyIDs.add (sharedCodeTarget->addDependencyFor (*this));
+            }
+            else if (type == XcodeTarget::LV2TurtleProgram)
+            {
+                // No thanks
             }
             else if (type != XcodeTarget::SharedCodeTarget) // shared code doesn't depend on anything; all other targets depend only on the shared code
             {
@@ -1429,6 +1429,27 @@ public:
             return mergePreprocessorDefs (defines, owner.getAllPreprocessorDefs (config, type));
         }
 
+        String getConfigurationBuildDir (const XcodeBuildConfiguration& config) const
+        {
+            const String configurationBuildDir ("$(PROJECT_DIR)/build/$(CONFIGURATION)");
+
+            if (config.getTargetBinaryRelativePathString().isEmpty())
+                return configurationBuildDir;
+
+            // a target's position can either be defined via installPath + xcodeCopyToProductInstallPathAfterBuild
+            // (= for audio plug-ins) or using a custom binary path (for everything else), but not both (= conflict!)
+            jassert (! xcodeCopyToProductInstallPathAfterBuild);
+
+            build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
+                                                  build_tools::RelativePath::projectFolder);
+
+            return expandPath (binaryPath.rebased (owner.projectFolder,
+                                                   owner.getTargetFolder(),
+                                                   build_tools::RelativePath::buildTargetFolder).toUnixStyle());
+        }
+
+        String getLV2BundleName() const { return owner.project.getPluginNameString() + ".lv2"; }
+
         //==============================================================================
         StringPairArray getTargetSettings (const XcodeBuildConfiguration& config) const
         {
@@ -1444,7 +1465,15 @@ public:
                 return s;
             }
 
-            s.set ("PRODUCT_NAME", owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString (type == UnityPlugIn)).quoted());
+            const auto productName = [&]
+            {
+                if (type == LV2TurtleProgram)
+                    return Project::getLV2FileWriterName().quoted();
+
+                return owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString (type == UnityPlugIn)).quoted();
+            }();
+
+            s.set ("PRODUCT_NAME", productName);
             s.set ("PRODUCT_BUNDLE_IDENTIFIER", getBundleIdentifier());
 
             auto arch = (! owner.isiOS() && type == Target::AudioUnitv3PlugIn) ? macOSArch_64Bit
@@ -1598,7 +1627,7 @@ public:
             {
                 s.set ("INSTALL_PATH", installPath.quoted());
 
-                if (type == Target::SharedCodeTarget)
+                if (type == Target::SharedCodeTarget || type == Target::LV2PlugIn)
                     s.set ("SKIP_INSTALL", "YES");
 
                 if (! owner.embeddedFrameworkIDs.isEmpty())
@@ -1621,24 +1650,11 @@ public:
             if (xcodeOtherRezFlags.isNotEmpty())
                 s.set ("OTHER_REZFLAGS", "\"" + xcodeOtherRezFlags + "\"");
 
-            String configurationBuildDir ("$(PROJECT_DIR)/build/$(CONFIGURATION)");
+            const auto configurationBuildDir = getConfigurationBuildDir (config);
+            const auto adjustedConfigBuildDir = type == LV2PlugIn ? configurationBuildDir + "/" + getLV2BundleName()
+                                                                  : configurationBuildDir;
 
-            if (config.getTargetBinaryRelativePathString().isNotEmpty())
-            {
-                // a target's position can either be defined via installPath + xcodeCopyToProductInstallPathAfterBuild
-                // (= for audio plug-ins) or using a custom binary path (for everything else), but not both (= conflict!)
-                jassert (! xcodeCopyToProductInstallPathAfterBuild);
-
-                build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
-                                                      build_tools::RelativePath::projectFolder);
-
-                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
-                                                                        owner.getTargetFolder(),
-                                                                        build_tools::RelativePath::buildTargetFolder)
-                                                              .toUnixStyle());
-            }
-
-            s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
+            s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (adjustedConfigBuildDir));
 
             if (owner.isHardenedRuntimeEnabled())
                 s.set ("ENABLE_HARDENED_RUNTIME", "YES");
@@ -1703,6 +1719,10 @@ public:
                     s.set ("OTHER_LDFLAGS", linkerFlags.joinIntoString (" ").quoted());
 
                 librarySearchPaths.addArray (config.getLibrarySearchPaths());
+
+                if (type == LV2PlugIn)
+                    librarySearchPaths.add (configurationBuildDir);
+
                 librarySearchPaths = getCleanedStringArray (librarySearchPaths);
 
                 if (librarySearchPaths.size() > 0)
@@ -1777,8 +1797,10 @@ public:
                 case RTASPlugIn:        return config.isPluginBinaryCopyStepEnabled() ? config.getRTASBinaryLocationString() : String();
                 case AAXPlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getAAXBinaryLocationString() : String();
                 case UnityPlugIn:       return config.isPluginBinaryCopyStepEnabled() ? config.getUnityPluginBinaryLocationString() : String();
+                case LV2PlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getLV2PluginBinaryLocationString() : String();
                 case SharedCodeTarget:  return owner.isiOS() ? "@executable_path/Frameworks" : "@executable_path/../Frameworks";
                 case StaticLibrary:
+                case LV2TurtleProgram:
                 case DynamicLibrary:
                 case AudioUnitv3PlugIn:
                 case StandalonePlugIn:
@@ -1794,7 +1816,7 @@ public:
             if (getTargetFileType() == pluginBundle)
                 flags.add (owner.isiOS() ? "-bitcode_bundle" : "-bundle");
 
-            if (type != Target::SharedCodeTarget)
+            if (type != Target::SharedCodeTarget && type != Target::LV2TurtleProgram)
             {
                 Array<build_tools::RelativePath> extraLibs;
 
@@ -2141,6 +2163,18 @@ private:
 
             target->addMainBuildProduct();
 
+            if (target->type == XcodeTarget::LV2TurtleProgram
+                && project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
+            {
+                const auto path = getLV2TurtleDumpProgramSource();
+                addFile (FileOptions().withRelativePath ({ expandPath (path.toUnixStyle()), path.getRoot() })
+                                      .withSkipPCHEnabled (true)
+                                      .withCompilationEnabled (true)
+                                      .withInhibitWarningsEnabled (true)
+                                      .withCompilerFlags ("-std=c++11")
+                                      .withXcodeTarget (target));
+            }
+
             auto targetName = String (target->getName());
             auto fileID = createID (targetName + "__targetbuildref");
             auto fileRefID = createID ("__productFileID" + targetName);
@@ -2289,7 +2323,10 @@ private:
             {
                 auto skipAUv3 = (target->type == XcodeTarget::AudioUnitv3PlugIn && ! shouldDuplicateAppExResourcesFolder());
 
-                if (! projectType.isStaticLibrary() && target->type != XcodeTarget::SharedCodeTarget && ! skipAUv3)
+                if (! projectType.isStaticLibrary()
+                    && target->type != XcodeTarget::SharedCodeTarget
+                    && target->type != XcodeTarget::LV2TurtleProgram
+                    && ! skipAUv3)
                     target->addBuildPhase ("PBXResourcesBuildPhase", resourceIDs);
 
                 auto rezFiles = rezFileIDs;
@@ -2306,8 +2343,33 @@ private:
 
                 target->addBuildPhase ("PBXSourcesBuildPhase", sourceFiles);
 
-                if (! projectType.isStaticLibrary() && target->type != XcodeTarget::SharedCodeTarget)
+                if (! projectType.isStaticLibrary()
+                    && target->type != XcodeTarget::SharedCodeTarget
+                    && target->type != XcodeTarget::LV2TurtleProgram)
                     target->addBuildPhase ("PBXFrameworksBuildPhase", target->frameworkIDs);
+            }
+
+            if (target->type == XcodeTarget::LV2PlugIn)
+            {
+                auto script = "set -e\n\"$CONFIGURATION_BUILD_DIR/../"
+                            + Project::getLV2FileWriterName()
+                            + "\" \"$CONFIGURATION_BUILD_DIR/$PRODUCT_NAME\"\n";
+
+                for (ConstConfigIterator config (*this); config.next();)
+                {
+                    auto& xcodeConfig = dynamic_cast<const XcodeBuildConfiguration&> (*config);
+                    const auto installPath = target->getInstallPathForConfiguration (xcodeConfig);
+
+                    if (installPath.isNotEmpty())
+                    {
+                        script << "if [ \"$CONFIGURATION\" = \"" << config->getName()
+                               << "\" ]; then\n   /bin/ln -sfh \"$CONFIGURATION_BUILD_DIR\" \""
+                               << installPath.replace ("$(HOME)", "$HOME") << '/' << target->getLV2BundleName()
+                               << "\"\nfi\n";
+                    }
+                }
+
+                target->addShellScriptBuildPhase ("Generate manifest", script);
             }
 
             target->addShellScriptBuildPhase ("Post-build script", getPostBuildScript());

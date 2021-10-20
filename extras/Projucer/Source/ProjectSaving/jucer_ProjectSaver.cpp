@@ -74,6 +74,7 @@ Result ProjectSaver::saveResourcesOnly()
 
 void ProjectSaver::saveBasicProjectItems (const OwnedArray<LibraryModule>& modules, const String& appConfigUserContent)
 {
+    writeLV2DefinesFile();
     writePluginDefines();
     writeAppConfigFile (modules, appConfigUserContent);
     writeBinaryDataFiles();
@@ -495,6 +496,17 @@ void ProjectSaver::writeAppConfigFile (const OwnedArray<LibraryModule>& modules,
     });
 }
 
+void ProjectSaver::writeLV2DefinesFile()
+{
+    if (! project.shouldBuildLV2())
+        return;
+
+    writeOrRemoveGeneratedFile (Project::getJuceLV2DefinesFilename(), [&] (MemoryOutputStream& mem)
+    {
+        writeLV2Defines (mem);
+    });
+}
+
 void ProjectSaver::writeAppHeader (MemoryOutputStream& out, const OwnedArray<LibraryModule>& modules)
 {
     writeAutoGenWarningComment (out);
@@ -636,6 +648,21 @@ void ProjectSaver::writeBinaryDataFiles()
 
         binaryDataH.deleteFile();
     }
+}
+
+void ProjectSaver::writeLV2Defines (MemoryOutputStream& mem)
+{
+    String templateFile { BinaryData::JuceLV2Defines_h_in };
+
+    const auto isValidUri = [&] (const String& text) { return URL (text).isWellFormed(); };
+
+    if (! isValidUri (project.getLV2URI()))
+    {
+        addError ("LV2 URI is malformed.");
+        return;
+    }
+
+    mem << templateFile.replace ("${JUCE_LV2URI}",    project.getLV2URI());
 }
 
 void ProjectSaver::writeReadmeFile()

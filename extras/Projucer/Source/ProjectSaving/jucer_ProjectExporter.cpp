@@ -364,7 +364,7 @@ void ProjectExporter::addExtraIncludePathsIfPluginOrHost()
     const auto lv2BasePath = getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
                                                                                        .getChildFile ("LV2_SDK");
 
-    if (project.isLV2PluginHost())
+    if ((shouldBuildTargetType (Target::LV2PlugIn) && project.shouldBuildLV2()) || project.isLV2PluginHost())
     {
         const std::vector<const char*> paths[] { { "" },
                                                  { "lv2" },
@@ -455,16 +455,16 @@ StringPairArray ProjectExporter::getAllPreprocessorDefs() const
 
 void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, const build_tools::ProjectType::Target::Type targetType) const
 {
-    std::pair<String, build_tools::ProjectType::Target::Type> targetFlags[] = {
-        {"JucePlugin_Build_VST",        build_tools::ProjectType::Target::VSTPlugIn},
-        {"JucePlugin_Build_VST3",       build_tools::ProjectType::Target::VST3PlugIn},
-        {"JucePlugin_Build_AU",         build_tools::ProjectType::Target::AudioUnitPlugIn},
-        {"JucePlugin_Build_AUv3",       build_tools::ProjectType::Target::AudioUnitv3PlugIn},
-        {"JucePlugin_Build_RTAS",       build_tools::ProjectType::Target::RTASPlugIn},
-        {"JucePlugin_Build_AAX",        build_tools::ProjectType::Target::AAXPlugIn},
-        {"JucePlugin_Build_Standalone", build_tools::ProjectType::Target::StandalonePlugIn},
-        {"JucePlugin_Build_Unity",      build_tools::ProjectType::Target::UnityPlugIn}
-    };
+    using Target = build_tools::ProjectType::Target::Type;
+    const std::pair<const char*, Target> targetFlags[] { { "JucePlugin_Build_VST",        Target::VSTPlugIn },
+                                                         { "JucePlugin_Build_VST3",       Target::VST3PlugIn },
+                                                         { "JucePlugin_Build_AU",         Target::AudioUnitPlugIn },
+                                                         { "JucePlugin_Build_AUv3",       Target::AudioUnitv3PlugIn },
+                                                         { "JucePlugin_Build_RTAS",       Target::RTASPlugIn },
+                                                         { "JucePlugin_Build_AAX",        Target::AAXPlugIn },
+                                                         { "JucePlugin_Build_Standalone", Target::StandalonePlugIn },
+                                                         { "JucePlugin_Build_Unity",      Target::UnityPlugIn },
+                                                         { "JucePlugin_Build_LV2",        Target::LV2PlugIn } };
 
     if (targetType == build_tools::ProjectType::Target::SharedCodeTarget)
     {

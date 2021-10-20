@@ -68,6 +68,10 @@ define_property(TARGET PROPERTY JUCE_UNITY_COPY_DIR INHERITED
     BRIEF_DOCS "Install location for Unity plugins"
     FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
 
+define_property(TARGET PROPERTY JUCE_LV2_COPY_DIR INHERITED
+    BRIEF_DOCS "Install location for LV2 plugins"
+    FULL_DOCS "This is where the plugin will be copied if plugin copying is enabled")
+
 define_property(TARGET PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD INHERITED
     BRIEF_DOCS "Whether or not plugins should be copied after building"
     FULL_DOCS "Whether or not plugins should be copied after building")
@@ -90,10 +94,12 @@ endif()
 
 function(_juce_set_default_properties)
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR  "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
-        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
-        set_property(GLOBAL PROPERTY JUCE_AU_COPY_DIR   "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
-        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "/Library/Application Support/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR    "$ENV{HOME}/Library/Audio/Plug-Ins/LV2")
+        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR    "$ENV{HOME}/Library/Audio/Plug-Ins/VST")
+        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR   "$ENV{HOME}/Library/Audio/Plug-Ins/VST3")
+        set_property(GLOBAL PROPERTY JUCE_AU_COPY_DIR     "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR  "$ENV{HOME}/Library/Audio/Plug-Ins/Unity")
+        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR    "/Library/Application Support/Avid/Audio/Plug-Ins")
     elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
             set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR "$ENV{ProgramW6432}/Steinberg/Vstplugins")
@@ -103,11 +109,15 @@ function(_juce_set_default_properties)
             set(prefix "$ENV{CommonProgramFiles\(x86\)}")
         endif()
 
-        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "${prefix}/VST3")
-        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR  "${prefix}/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR   "${prefix}/VST3")
+        set_property(GLOBAL PROPERTY JUCE_AAX_COPY_DIR    "${prefix}/Avid/Audio/Plug-Ins")
+        set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR    "$ENV{APPDATA}/LV2")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR  "$ENV{APPDATA}/Unity")
     elseif((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
-        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR  "$ENV{HOME}/.vst")
-        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR "$ENV{HOME}/.vst3")
+        set_property(GLOBAL PROPERTY JUCE_LV2_COPY_DIR   "$ENV{HOME}/.lv2")
+        set_property(GLOBAL PROPERTY JUCE_VST_COPY_DIR   "$ENV{HOME}/.vst")
+        set_property(GLOBAL PROPERTY JUCE_VST3_COPY_DIR  "$ENV{HOME}/.vst3")
+        set_property(GLOBAL PROPERTY JUCE_UNITY_COPY_DIR "$ENV{HOME}/.unity")
     endif()
 endfunction()
 
@@ -499,10 +509,13 @@ function(_juce_execute_juceaide)
         message(FATAL_ERROR "juceaide was imported, but it doesn't exist!")
     endif()
 
-    execute_process(COMMAND "${juceaide_location}" ${ARGN} RESULT_VARIABLE result_variable)
+    execute_process(COMMAND "${juceaide_location}" ${ARGN}
+        RESULT_VARIABLE result_variable
+        OUTPUT_VARIABLE output
+        ERROR_VARIABLE output)
 
     if(result_variable)
-        message(FATAL_ERROR "Running juceaide failed")
+        message(FATAL_ERROR "Running juceaide failed:\n${output}")
     endif()
 endfunction()
 
@@ -985,6 +998,29 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
                 "${script_file}"
                 JUCE_UNITY_COPY_DIR)
         endif()
+    elseif(kind STREQUAL "LV2")
+        set_target_properties(${target_name} PROPERTIES BUNDLE FALSE)
+
+        get_target_property(JUCE_LV2URI "${shared_code_target}" JUCE_LV2URI)
+
+        if(NOT JUCE_LV2URI MATCHES "https?://.*")
+            message(WARNING
+                "LV2URI should be well-formed with an 'http' prefix. "
+                "Check the LV2URI argument to juce_add_plugin.")
+        endif()
+
+        set(source_header "${JUCE_CMAKE_UTILS_DIR}/JuceLV2Defines.h.in")
+        get_target_property(juce_library_code "${shared_code_target}" JUCE_GENERATED_SOURCES_DIRECTORY)
+        configure_file("${source_header}" "${juce_library_code}/JuceLV2Defines.h")
+
+        set(output_path "${products_folder}/${product_name}.lv2")
+        set_target_properties(${target_name} PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${output_path}")
+
+        add_custom_command(TARGET ${target_name} POST_BUILD
+            COMMAND juce::juce_lv2_helper "$<TARGET_FILE:${target_name}>"
+            VERBATIM)
+
+        _juce_set_copy_properties(${shared_code_target} ${target_name} "${output_path}" JUCE_LV2_COPY_DIR)
     endif()
 endfunction()
 
@@ -1010,6 +1046,8 @@ function(_juce_get_plugin_kind_name kind out_var)
         set(${out_var} "AUv3 AppExtension" PARENT_SCOPE)
     elseif(kind STREQUAL "AAX")
         set(${out_var} "AAX" PARENT_SCOPE)
+    elseif(kind STREQUAL "LV2")
+        set(${out_var} "LV2" PARENT_SCOPE)
     elseif(kind STREQUAL "Standalone")
         set(${out_var} "Standalone Plugin" PARENT_SCOPE)
     elseif(kind STREQUAL "Unity")
@@ -1070,7 +1108,10 @@ function(_juce_link_plugin_wrapper shared_code_target kind)
 
     add_dependencies(${shared_code_target}_All ${target_name})
 
-    _juce_configure_bundle(${shared_code_target} ${target_name})
+    if(NOT kind STREQUAL "LV2")
+        _juce_configure_bundle(${shared_code_target} ${target_name})
+    endif()
+
     _juce_set_plugin_target_properties(${shared_code_target} ${kind})
 endfunction()
 
@@ -1464,6 +1505,12 @@ function(_juce_set_fallback_properties target)
     if(NOT aax_category_int STREQUAL "")
         set_target_properties(${target} PROPERTIES JUCE_AAX_CATEGORY ${aax_category_int})
     endif()
+
+    # Ensure this matches the Projucer implementation
+    get_target_property(company_website ${target} JUCE_COMPANY_WEBSITE)
+    get_target_property(plugin_name ${target} JUCE_PLUGIN_NAME)
+    string(MAKE_C_IDENTIFIER "${plugin_name}" plugin_name_sanitised)
+    _juce_set_property_if_not_set(${target} LV2URI "${company_website}/plugins/${plugin_name_sanitised}")
 endfunction()
 
 # ==================================================================================================
@@ -1530,6 +1577,7 @@ function(_juce_initialise_target target)
         SUPPRESS_AU_PLIST_RESOURCE_USAGE
         PLUGINHOST_AU                   # Set this true if you want to host AU plugins
         USE_LEGACY_COMPATIBILITY_PLUGIN_CODE
+        LV2URI
 
         VST_COPY_DIR
         VST3_COPY_DIR
@@ -1768,7 +1816,7 @@ function(juce_add_pip header)
         list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
 
         juce_add_plugin(${JUCE_PIP_NAME}
-            FORMATS AU AUv3 VST3 Unity Standalone ${extra_formats}
+            FORMATS AU AUv3 LV2 Standalone Unity VST3 ${extra_formats}
             ${extra_target_args})
     elseif(pip_kind STREQUAL "Component")
         set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPComponent.cpp.in")

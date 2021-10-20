@@ -155,6 +155,7 @@ void Project::updateTitleDependencies()
     bundleIdentifierValue.    setDefault (getDefaultBundleIdentifierString());
     pluginAUExportPrefixValue.setDefault (build_tools::makeValidIdentifier (projectName, false, true, false) + "AU");
     pluginAAXIdentifierValue. setDefault (getDefaultAAXIdentifierString());
+    pluginLV2URIValue.        setDefault (getDefaultLV2URI());
 }
 
 String Project::getDocumentTitle()
@@ -169,6 +170,11 @@ void Project::updateCompanyNameDependencies()
     pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
 
     updateLicenseWarning();
+}
+
+void Project::updateWebsiteDependencies()
+{
+    pluginLV2URIValue.setDefault (getDefaultLV2URI());
 }
 
 void Project::updateProjectSettings()
@@ -335,6 +341,8 @@ void Project::initialiseAudioPluginValues()
 
     pluginVSTNumMidiInputsValue.referTo      (projectRoot, Ids::pluginVSTNumMidiInputs,     getUndoManager(), 16);
     pluginVSTNumMidiOutputsValue.referTo     (projectRoot, Ids::pluginVSTNumMidiOutputs,    getUndoManager(), 16);
+
+    pluginLV2URIValue.referTo                (projectRoot, Ids::lv2Uri,                     getUndoManager(), getDefaultLV2URI());
 }
 
 void Project::updateOldStyleConfigList()
@@ -1064,6 +1072,10 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         {
             updateCompanyNameDependencies();
         }
+        else if (property == Ids::companyWebsite)
+        {
+            updateWebsiteDependencies();
+        }
         else if (property == Ids::defines)
         {
             parsedPreprocessorDefs = parsePreprocessorDefs (preprocessorDefsValue.get());
@@ -1224,33 +1236,38 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
     if (! projectType.supportsTargetType (targetType))
         return false;
 
+    using Target = build_tools::ProjectType::Target;
+
     switch (targetType)
     {
-        case build_tools::ProjectType::Target::VSTPlugIn:
+        case Target::VSTPlugIn:
             return shouldBuildVST();
-        case build_tools::ProjectType::Target::VST3PlugIn:
+        case Target::VST3PlugIn:
             return shouldBuildVST3();
-        case build_tools::ProjectType::Target::AAXPlugIn:
+        case Target::AAXPlugIn:
             return shouldBuildAAX();
-        case build_tools::ProjectType::Target::RTASPlugIn:
+        case Target::RTASPlugIn:
             return shouldBuildRTAS();
-        case build_tools::ProjectType::Target::AudioUnitPlugIn:
+        case Target::AudioUnitPlugIn:
             return shouldBuildAU();
-        case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
+        case Target::AudioUnitv3PlugIn:
             return shouldBuildAUv3();
-        case build_tools::ProjectType::Target::StandalonePlugIn:
+        case Target::StandalonePlugIn:
             return shouldBuildStandalonePlugin();
-        case build_tools::ProjectType::Target::UnityPlugIn:
+        case Target::UnityPlugIn:
             return shouldBuildUnityPlugin();
-        case build_tools::ProjectType::Target::AggregateTarget:
-        case build_tools::ProjectType::Target::SharedCodeTarget:
+        case Target::LV2PlugIn:
+        case Target::LV2TurtleProgram:
+            return shouldBuildLV2();
+        case Target::AggregateTarget:
+        case Target::SharedCodeTarget:
             return projectType.isAudioPlugin();
-        case build_tools::ProjectType::Target::unspecified:
+        case Target::unspecified:
             return false;
-        case build_tools::ProjectType::Target::GUIApp:
-        case build_tools::ProjectType::Target::ConsoleApp:
-        case build_tools::ProjectType::Target::StaticLibrary:
-        case build_tools::ProjectType::Target::DynamicLibrary:
+        case Target::GUIApp:
+        case Target::ConsoleApp:
+        case Target::StaticLibrary:
+        case Target::DynamicLibrary:
         default:
             break;
     }
@@ -1277,14 +1294,28 @@ build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const
         return path.contains (prefix + ".") || path.contains (prefix + "_");
     };
 
-    if (isPluginClientSource ("AU")         || isInPluginClientSubdir ("AU"))          return build_tools::ProjectType::Target::AudioUnitPlugIn;
-    if (isPluginClientSource ("AUv3")       || isInPluginClientSubdir ("AU"))          return build_tools::ProjectType::Target::AudioUnitv3PlugIn;
-    if (isPluginClientSource ("AAX")        || isInPluginClientSubdir ("AAX"))         return build_tools::ProjectType::Target::AAXPlugIn;
-    if (isPluginClientSource ("RTAS")       || isInPluginClientSubdir ("RTAS"))        return build_tools::ProjectType::Target::RTASPlugIn;
-    if (isPluginClientSource ("VST2")       || isInPluginClientSubdir ("VST"))         return build_tools::ProjectType::Target::VSTPlugIn;
-    if (isPluginClientSource ("VST3")       || isInPluginClientSubdir ("VST3"))        return build_tools::ProjectType::Target::VST3PlugIn;
-    if (isPluginClientSource ("Standalone") || isInPluginClientSubdir ("Standalone"))  return build_tools::ProjectType::Target::StandalonePlugIn;
-    if (isPluginClientSource ("Unity")      || isInPluginClientSubdir ("Unity"))       return build_tools::ProjectType::Target::UnityPlugIn;
+    using Target = build_tools::ProjectType::Target::Type;
+
+    struct FormatInfo
+    {
+        const char* source;
+        const char* subdir;
+        Target target;
+    };
+
+    const FormatInfo formatInfo[] { { "AU",         "AU",         Target::AudioUnitPlugIn },
+                                    { "AUv3",       "AU",         Target::AudioUnitv3PlugIn },
+                                    { "AAX",        "AAX",        Target::AAXPlugIn },
+                                    { "RTAS",       "RTAS",       Target::RTASPlugIn },
+                                    { "VST2",       "VST",        Target::VSTPlugIn },
+                                    { "VST3",       "VST3",       Target::VST3PlugIn },
+                                    { "Standalone", "Standalone", Target::StandalonePlugIn },
+                                    { "Unity",      "Unity",      Target::UnityPlugIn },
+                                    { "LV2",        "LV2",        Target::LV2PlugIn } };
+
+    for (const auto& info : formatInfo)
+        if (isPluginClientSource (info.source) || isInPluginClientSubdir (info.subdir))
+            return info.target;
 
     return (returnSharedTargetIfNoValidSuffix ? build_tools::ProjectType::Target::SharedCodeTarget
                                               : build_tools::ProjectType::Target::unspecified);
@@ -1411,10 +1442,10 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
     props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats",
-                                                 { "VST3", "AU", "AUv3", "RTAS (deprecated)", "AAX", "Standalone", "Unity", "Enable IAA", "VST (Legacy)" },
+                                                 { "VST3", "AU", "AUv3", "RTAS (deprecated)", "AAX", "Standalone", "LV2", "Unity", "Enable IAA", "VST (Legacy)" },
                                                  { Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
-                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
-                                                   Ids::enableIAA.toString(), Ids::buildVST.toString() }),
+                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(),
+                                                   Ids::buildLV2.toString(), Ids::buildUnity.toString(), Ids::enableIAA.toString(), Ids::buildVST.toString() }),
                "Plugin formats to build. If you have selected \"VST (Legacy)\" then you will need to ensure that you have a VST2 SDK "
                "in your header search paths. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK "
                "or JUCE version 5.3.2. You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
@@ -1495,6 +1526,11 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
         props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST (Legacy) Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
                    "VST category.");
     }
+
+    props.add (new TextPropertyComponent (pluginLV2URIValue, "LV2 URI", 128, false),
+               "This acts as a unique identifier for this plugin. "
+               "If you make any incompatible changes to your plugin (remove parameters, reorder parameters, change preset format etc.) "
+               "you MUST change this value. LV2 hosts will assume that any plugins with the same URI are interchangeable.");
 }
 
 //==============================================================================
@@ -2609,6 +2645,7 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_Build_AAX",                   boolToString (shouldBuildAAX()));
     flags.set ("JucePlugin_Build_Standalone",            boolToString (shouldBuildStandalonePlugin()));
     flags.set ("JucePlugin_Build_Unity",                 boolToString (shouldBuildUnityPlugin()));
+    flags.set ("JucePlugin_Build_LV2",                   boolToString (shouldBuildLV2()));
     flags.set ("JucePlugin_Enable_IAA",                  boolToString (shouldEnableIAA()));
     flags.set ("JucePlugin_Name",                        toStringLiteral (getPluginNameString()));
     flags.set ("JucePlugin_Desc",                        toStringLiteral (getPluginDescriptionString()));

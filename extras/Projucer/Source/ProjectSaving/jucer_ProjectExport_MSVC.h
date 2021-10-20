@@ -162,6 +162,7 @@ public:
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
               rtasBinaryLocation             (config, Ids::rtasBinaryLocation,         getUndoManager()),
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
+              lv2BinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
               unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
         {
             setPluginBinaryCopyLocationDefaults();
@@ -181,6 +182,7 @@ public:
         String getVST3BinaryLocationString() const        { return vst3BinaryLocation.get(); }
         String getRTASBinaryLocationString() const        { return rtasBinaryLocation.get();}
         String getAAXBinaryLocationString() const         { return aaxBinaryLocation.get();}
+        String getLV2BinaryLocationString() const         { return lv2BinaryLocation.get();}
         String getUnityPluginBinaryLocationString() const { return unityPluginBinaryLocation.get(); }
         String getIntermediatesPathString() const         { return intermediatesPathValue.get(); }
         String getCharacterSetString() const              { return characterSetValue.get(); }
@@ -204,8 +206,16 @@ public:
             return getName() + "|" + (is64Bit() ? "x64" : "Win32");
         }
 
-        String getOutputFilename (const String& suffix, bool forceSuffix, bool forceUnityPrefix) const
+        String getOutputFilename (const String& suffix,
+                                  bool forceSuffix,
+                                  build_tools::ProjectType::Target::Type type) const
         {
+            using Target = build_tools::ProjectType::Target::Type;
+
+            if (type == Target::LV2TurtleProgram)
+                return Project::getLV2FileWriterName() + suffix;
+
+            const auto forceUnityPrefix = type == Target::UnityPlugIn;
             auto target = File::createLegalFileName (getTargetBinaryNameString (forceUnityPrefix).trim());
 
             if (forceSuffix || ! target.containsChar ('.'))
@@ -316,7 +326,7 @@ public:
                                      intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
                                      pluginBinaryCopyStepValue;
 
-        ValueTreePropertyWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, unityPluginBinaryLocation;
+        ValueTreePropertyWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, lv2BinaryLocation, unityPluginBinaryLocation;
 
         Value architectureValueToListenTo;
 
@@ -345,6 +355,11 @@ public:
                                                                     1024, false),
                            "The folder in which the compiled AAX binary should be placed.");
 
+            if (project.shouldBuildLV2())
+                props.add (new TextPropertyComponentWithEnablement (lv2BinaryLocation, pluginBinaryCopyStepValue, "LV2 Binary Location",
+                                                                    1024, false),
+                           "The folder in which the compiled LV2 binary should be placed.");
+
             if (project.shouldBuildUnityPlugin())
                 props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
                                                                     1024, false),
@@ -367,6 +382,7 @@ public:
             vst3BinaryLocation.setDefault (prefix + String ("\\VST3"));
             rtasBinaryLocation.setDefault (prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
             aaxBinaryLocation.setDefault  (prefix + String ("\\Avid\\Audio\\Plug-Ins"));
+            lv2BinaryLocation.setDefault  ("%APPDATA%\\LV2");
         }
 
         void valueChanged (Value&) override
@@ -513,7 +529,7 @@ public:
                     {
                         auto* targetName = props->createNewChildElement ("TargetName");
                         setConditionAttribute (*targetName, config);
-                        targetName->addTextElement (msBuildEscape (config.getOutputFilename ("", false, type == UnityPlugIn)));
+                        targetName->addTextElement (msBuildEscape (config.getOutputFilename ("", false, type)));
                     }
 
                     {
@@ -555,7 +571,7 @@ public:
                 }
 
                 bool isUsingEditAndContinue = false;
-                const auto pdbFilename = getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true, type == UnityPlugIn));
+                const auto pdbFilename = getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true, type));
 
                 {
                     auto* cl = group->createNewChildElement ("ClCompile");
@@ -565,7 +581,7 @@ public:
                     if (isDebug || config.shouldGenerateDebugSymbols())
                     {
                         cl->createNewChildElement ("DebugInformationFormat")
-                            ->addTextElement (config.getDebugInformationFormatString());
+                          ->addTextElement (config.getDebugInformationFormatString());
                     }
 
                     auto includePaths = getOwner().getHeaderSearchPaths (config);
@@ -607,24 +623,24 @@ public:
                 }
 
                 auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesStringArray());
-                auto additionalDependencies = type != SharedCodeTarget && ! externalLibraries.isEmpty()
+                auto additionalDependencies = type != SharedCodeTarget && type != LV2TurtleProgram && ! externalLibraries.isEmpty()
                                                         ? externalLibraries.joinIntoString (";") + ";%(AdditionalDependencies)"
                                                         : String();
 
                 auto librarySearchPaths = config.getLibrarySearchPaths();
-                auto additionalLibraryDirs = type != SharedCodeTarget && librarySearchPaths.size() > 0
+                auto additionalLibraryDirs = type != SharedCodeTarget && type != LV2TurtleProgram && librarySearchPaths.size() > 0
                                                        ? getOwner().replacePreprocessorTokens (config, librarySearchPaths.joinIntoString (";")) + ";%(AdditionalLibraryDirectories)"
                                                        : String();
 
                 {
                     auto* link = group->createNewChildElement ("Link");
-                    link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config, type == UnityPlugIn));
+                    link->createNewChildElement ("OutputFile")->addTextElement (getOutputFilePath (config));
                     link->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                             : "%(IgnoreSpecificDefaultLibraries)");
                     link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
                     link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (pdbFilename);
-                    link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp ? "Console" : "Windows");
+                    link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp || type == LV2TurtleProgram ? "Console" : "Windows");
 
                     if (! config.is64Bit())
                         link->createNewChildElement ("TargetMachine")->addTextElement ("MachineX86");
@@ -667,10 +683,10 @@ public:
                 {
                     auto* bsc = group->createNewChildElement ("Bscmake");
                     bsc->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
-                    bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true, type == UnityPlugIn)));
+                    bsc->createNewChildElement ("OutputFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".bsc", true, type)));
                 }
 
-                if (type != SharedCodeTarget)
+                if (type != SharedCodeTarget && type != LV2TurtleProgram)
                 {
                     auto* lib = group->createNewChildElement ("Lib");
 
@@ -724,6 +740,12 @@ public:
 
                     if (group.getNumChildren() > 0)
                         addFilesToCompile (group, *cppFiles, *headerFiles, *otherFilesGroup);
+                }
+
+                if (type == LV2TurtleProgram)
+                {
+                    cppFiles->createNewChildElement ("ClCompile")
+                            ->setAttribute ("Include", owner.getLV2TurtleDumpProgramSource().toWindowsStyle());
                 }
             }
 
@@ -1055,8 +1077,12 @@ public:
 
         String getConfigTargetPath (const BuildConfiguration& config) const
         {
-            auto solutionTargetFolder = getSolutionTargetPath (config);
-            return solutionTargetFolder + "\\" + getName();
+            const auto result = getSolutionTargetPath (config) + "\\" + getName();
+
+            if (type == LV2PlugIn)
+                return result + "\\" + config.getTargetBinaryNameString() + ".lv2";
+
+            return result;
         }
 
         String getIntermediatesPath (const MSVCBuildConfiguration& config) const
@@ -1099,13 +1125,6 @@ public:
             }
 
             return {};
-        }
-
-        XmlElement* createToolElement (XmlElement& parent, const String& toolName) const
-        {
-            auto* e = parent.createNewChildElement ("Tool");
-            e->setAttribute ("Name", toolName);
-            return e;
         }
 
         String getPreprocessorDefs (const BuildConfiguration& config, const String& joinString) const
@@ -1168,13 +1187,13 @@ public:
                 build_tools::RelativePath bundleScript  = aaxSDK.getChildFile ("Utilities").getChildFile ("CreatePackage.bat");
                 build_tools::RelativePath iconFilePath  = getAAXIconFile();
 
-                auto outputFilename = config.getOutputFilename (".aaxplugin", true, false);
+                auto outputFilename = config.getOutputFilename (".aaxplugin", true, type);
                 auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
                 auto bundleContents = bundleDir + "\\Contents";
                 auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
                 auto executablePath = archDir + String ("\\") + outputFilename;
 
-                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config, false).quoted() + String (" ") + executablePath.quoted() + String ("\r\ncall ")
+                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config).quoted() + String (" ") + executablePath.quoted() + String ("\r\ncall ")
                                      + createRebasedPath (bundleScript) + String (" ") + archDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
                 if (config.isPluginBinaryCopyStepEnabled())
@@ -1183,11 +1202,12 @@ public:
 
                 return pkgScript;
             }
-            else if (type == UnityPlugIn)
+
+            if (type == UnityPlugIn)
             {
                 build_tools::RelativePath scriptPath (config.project.getGeneratedCodeFolder().getChildFile (config.project.getUnityScriptName()),
-                                                    getOwner().getTargetFolder(),
-                                                    build_tools::RelativePath::projectFolder);
+                                                      getOwner().getTargetFolder(),
+                                                      build_tools::RelativePath::projectFolder);
 
                 auto pkgScript = String ("copy /Y ") + scriptPath.toWindowsStyle().quoted() + " \"$(OutDir)\"";
 
@@ -1201,7 +1221,35 @@ public:
 
                 return pkgScript;
             }
-            else if (config.isPluginBinaryCopyStepEnabled())
+
+            if (type == LV2PlugIn)
+            {
+                const auto* writerTarget = [&]() -> MSVCTargetBase*
+                {
+                    for (auto* target : owner.targets)
+                        if (target->type == LV2TurtleProgram)
+                            return target;
+
+                    return nullptr;
+                }();
+
+                const auto writer = writerTarget->getConfigTargetPath (config)
+                                  + "\\"
+                                  + writerTarget->getBinaryNameWithSuffix (config);
+
+                const auto copyScript = [&]() -> String
+                {
+                    if (! config.isPluginBinaryCopyStepEnabled())
+                        return "";
+
+                    return "xcopy /E /H /I /K /R /Y \"$(OutDir)\" \"" + config.getLV2BinaryLocationString()
+                         + '\\' + config.getTargetBinaryNameString() + ".lv2\"\r\n";
+                }();
+
+                return writer.quoted() + " \"$(OutDir)$(TargetFileName)\"\r\n" + copyScript;
+            }
+
+            if (config.isPluginBinaryCopyStepEnabled())
             {
                 auto copyScript = String ("copy /Y \"$(OutDir)$(TargetFileName)\"") + String (" \"$COPYDIR$\\$(TargetFileName)\"");
 
@@ -1219,7 +1267,7 @@ public:
             {
                 String script;
 
-                auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false, false));
+                auto bundleDir      = getOwner().getOutDirFile (config, config.getOutputFilename (".aaxplugin", false, type));
                 auto bundleContents = bundleDir + "\\Contents";
                 auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
 
@@ -1311,21 +1359,21 @@ public:
             return searchPaths;
         }
 
-        String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config, bool forceUnityPrefix) const
+        String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config) const
         {
-            return config.getOutputFilename (getTargetSuffix(), true, forceUnityPrefix);
+            return config.getOutputFilename (getTargetSuffix(), true, type);
         }
 
-        String getOutputFilePath (const MSVCBuildConfiguration& config, bool forceUnityPrefix) const
+        String getOutputFilePath (const MSVCBuildConfiguration& config) const
         {
-            return getOwner().getOutDirFile (config, getBinaryNameWithSuffix (config, forceUnityPrefix));
+            return getOwner().getOutDirFile (config, getBinaryNameWithSuffix (config));
         }
 
         StringArray getLibrarySearchPaths (const BuildConfiguration& config) const
         {
             auto librarySearchPaths = config.getLibrarySearchPaths();
 
-            if (type != SharedCodeTarget)
+            if (type != SharedCodeTarget && type != LV2TurtleProgram)
                 if (auto* shared = getOwner().getSharedCodeTarget())
                     librarySearchPaths.add (shared->getConfigTargetPath (config));
 
@@ -1348,9 +1396,9 @@ public:
 
             result.addArray (msBuildEscape (getOwner().getModuleLibs()));
 
-            if (type != SharedCodeTarget)
+            if (type != SharedCodeTarget && type != LV2TurtleProgram)
                 if (auto* shared = getOwner().getSharedCodeTarget())
-                    result.add (msBuildEscape (shared->getBinaryNameWithSuffix (config, false)));
+                    result.add (msBuildEscape (shared->getBinaryNameWithSuffix (config)));
 
             return result;
         }
@@ -1440,24 +1488,28 @@ public:
 
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
+        using Target = build_tools::ProjectType::Target;
+
         switch (type)
         {
-        case build_tools::ProjectType::Target::StandalonePlugIn:
-        case build_tools::ProjectType::Target::GUIApp:
-        case build_tools::ProjectType::Target::ConsoleApp:
-        case build_tools::ProjectType::Target::StaticLibrary:
-        case build_tools::ProjectType::Target::SharedCodeTarget:
-        case build_tools::ProjectType::Target::AggregateTarget:
-        case build_tools::ProjectType::Target::VSTPlugIn:
-        case build_tools::ProjectType::Target::VST3PlugIn:
-        case build_tools::ProjectType::Target::AAXPlugIn:
-        case build_tools::ProjectType::Target::RTASPlugIn:
-        case build_tools::ProjectType::Target::UnityPlugIn:
-        case build_tools::ProjectType::Target::DynamicLibrary:
+        case Target::StandalonePlugIn:
+        case Target::GUIApp:
+        case Target::ConsoleApp:
+        case Target::StaticLibrary:
+        case Target::SharedCodeTarget:
+        case Target::AggregateTarget:
+        case Target::VSTPlugIn:
+        case Target::VST3PlugIn:
+        case Target::AAXPlugIn:
+        case Target::RTASPlugIn:
+        case Target::UnityPlugIn:
+        case Target::LV2PlugIn:
+        case Target::LV2TurtleProgram:
+        case Target::DynamicLibrary:
             return true;
-        case build_tools::ProjectType::Target::AudioUnitPlugIn:
-        case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
-        case build_tools::ProjectType::Target::unspecified:
+        case Target::AudioUnitPlugIn:
+        case Target::AudioUnitv3PlugIn:
+        case Target::unspecified:
         default:
             break;
         }
@@ -1639,14 +1691,11 @@ protected:
         return getCleanedStringArray (searchPaths);
     }
 
-    String getSharedCodeGuid() const
+    String getTargetGuid (MSVCTargetBase::Type type) const
     {
-        String sharedCodeGuid;
-
-        for (int i = 0; i < targets.size(); ++i)
-            if (auto* target = targets[i])
-                if (target->type == build_tools::ProjectType::Target::SharedCodeTarget)
-                    return target->getProjectGuid();
+        for (auto* target : targets)
+            if (target != nullptr && target->type == type)
+                return target->getProjectGuid();
 
         return {};
     }
@@ -1654,7 +1703,8 @@ protected:
     //==============================================================================
     void writeProjectDependencies (OutputStream& out) const
     {
-        auto sharedCodeGuid = getSharedCodeGuid();
+        const auto sharedCodeGuid = getTargetGuid (MSVCTargetBase::SharedCodeTarget);
+        const auto turtleGuid     = getTargetGuid (MSVCTargetBase::LV2TurtleProgram);
 
         for (int addingOtherTargets = 0; addingOtherTargets < (sharedCodeGuid.isNotEmpty() ? 2 : 1); ++addingOtherTargets)
         {
@@ -1662,16 +1712,24 @@ protected:
             {
                 if (auto* target = targets[i])
                 {
-                    if (sharedCodeGuid.isEmpty() || (addingOtherTargets != 0) == (target->type != build_tools::ProjectType::Target::StandalonePlugIn))
+                    if (sharedCodeGuid.isEmpty() || (addingOtherTargets != 0) == (target->type != MSVCTargetBase::StandalonePlugIn))
                     {
                         out << "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"" << projectName << " - "
                             << target->getName() << "\", \""
                             << target->getVCProjFile().getFileName() << "\", \"" << target->getProjectGuid() << '"' << newLine;
 
-                        if (sharedCodeGuid.isNotEmpty() && target->type != build_tools::ProjectType::Target::SharedCodeTarget)
+                        if (sharedCodeGuid.isNotEmpty()
+                            && target->type != MSVCTargetBase::SharedCodeTarget
+                            && target->type != MSVCTargetBase::LV2TurtleProgram)
+                        {
                             out << "\tProjectSection(ProjectDependencies) = postProject" << newLine
-                                << "\t\t" << sharedCodeGuid << " = " << sharedCodeGuid << newLine
-                                << "\tEndProjectSection" << newLine;
+                                << "\t\t" << sharedCodeGuid << " = " << sharedCodeGuid << newLine;
+
+                            if (target->type == MSVCTargetBase::LV2PlugIn && turtleGuid.isNotEmpty())
+                                out << "\t\t" << turtleGuid << " = " << turtleGuid << newLine;
+
+                            out << "\tEndProjectSection" << newLine;
+                        }
 
                         out << "EndProject" << newLine;
                     }

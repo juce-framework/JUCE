@@ -187,6 +187,8 @@
             file="Source/Application/jucer_MainWindow.h"/>
     </GROUP>
     <GROUP id="{BFDB3102-5EB6-41E0-043A-05C0DFF7A34D}" name="BinaryData">
+      <FILE id="wkLB4B" name="JuceLV2Defines.h.in" compile="0" resource="1"
+            file="../Build/CMake/JuceLV2Defines.h.in"/>
       <FILE id="QRvesq" name="LaunchScreen.storyboard" compile="0" resource="1"
             file="../Build/CMake/LaunchScreen.storyboard"/>
       <FILE id="QCgjY8" name="PIPAudioProcessor.cpp.in" compile="0" resource="1"

@@ -142,6 +142,7 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/gradle/gradlew
     Source/BinaryData/gradle/gradlew.bat
 
+    ../Build/CMake/JuceLV2Defines.h.in
     ../Build/CMake/LaunchScreen.storyboard
     ../Build/CMake/PIPAudioProcessor.cpp.in
     ../Build/CMake/PIPComponent.cpp.in

@@ -71,6 +71,8 @@ namespace build_tools
             case Type::ConsoleApp:
             case Type::StaticLibrary:
             case Type::DynamicLibrary:
+            case Type::LV2PlugIn:
+            case Type::LV2TurtleProgram:
             case Type::SharedCodeTarget:
             case Type::AggregateTarget:
             case Type::unspecified:
@@ -101,6 +103,8 @@ namespace build_tools
             case Type::ConsoleApp:
             case Type::StaticLibrary:
             case Type::DynamicLibrary:
+            case Type::LV2PlugIn:
+            case Type::LV2TurtleProgram:
             case Type::SharedCodeTarget:
             case Type::AggregateTarget:
             case Type::unspecified:

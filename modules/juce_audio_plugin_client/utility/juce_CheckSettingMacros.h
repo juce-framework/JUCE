@@ -67,10 +67,6 @@
 #endif
 
 //==============================================================================
-#if JucePlugin_Build_LV2 && ! defined (JucePlugin_LV2URI)
- #error "You need to define the JucePlugin_LV2URI value!"
-#endif
-
 #if JucePlugin_Build_AAX && ! defined (JucePlugin_AAXIdentifier)
  #error "You need to define the JucePlugin_AAXIdentifier value!"
 #endif

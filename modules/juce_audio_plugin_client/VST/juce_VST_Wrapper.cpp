@@ -184,35 +184,6 @@ namespace
 
 #endif
 
-#if JUCE_LINUX || JUCE_BSD
-class HostDrivenEventLoop
-{
-public:
-    HostDrivenEventLoop()
-    {
-        messageThread->stop();
-        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
-    }
-
-    void processPendingEvents()
-    {
-        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
-
-        for (;;)
-            if (! dispatchNextMessageOnSystemQueue (true))
-                return;
-    }
-
-    ~HostDrivenEventLoop()
-    {
-        messageThread->start();
-    }
-
-private:
-    SharedResourcePointer<MessageThread> messageThread;
-};
-#endif
-
 //==============================================================================
 // Ableton Live host specific commands
 struct AbletonLiveHostSpecific

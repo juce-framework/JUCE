@@ -3776,6 +3776,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\Build\CMake\JuceLV2Defines.h.in">
+      <Filter>Projucer\BinaryData</Filter>
+    </None>
     <None Include="..\..\..\Build\CMake\LaunchScreen.storyboard">
       <Filter>Projucer\BinaryData</Filter>
     </None>

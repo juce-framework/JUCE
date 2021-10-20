@@ -153,6 +153,8 @@ public:
     static String getAppConfigFilename()                        { return "AppConfig.h"; }
     static String getPluginDefinesFilename()                    { return "JucePluginDefines.h"; }
     static String getJuceSourceHFilename()                      { return "JuceHeader.h"; }
+    static String getJuceLV2DefinesFilename()                   { return "JuceLV2Defines.h"; }
+    static String getLV2FileWriterName()                        { return "juce_lv2_helper"; }
 
     //==============================================================================
     template <class FileType>
@@ -192,6 +194,7 @@ public:
     String getDefaultBundleIdentifierString() const;
     String getDefaultAAXIdentifierString() const         { return getDefaultBundleIdentifierString(); }
     String getDefaultPluginManufacturerString() const;
+    String getDefaultLV2URI() const                      { return getCompanyWebsiteString() + "/plugins/" + build_tools::makeValidIdentifier (getProjectNameString(), false, true, false); }
 
     String getCompanyNameString() const                  { return companyNameValue.get(); }
     String getCompanyCopyrightString() const             { return companyCopyrightValue.get(); }
@@ -265,6 +268,7 @@ public:
     bool shouldBuildAAX() const                       { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildAAX); }
     bool shouldBuildStandalonePlugin() const          { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildStandalone); }
     bool shouldBuildUnityPlugin() const               { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildUnity); }
+    bool shouldBuildLV2() const                       { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildLV2); }
     bool shouldEnableIAA() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::enableIAA); }
 
     bool isPluginSynth() const                        { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginIsSynth); }
@@ -313,6 +317,8 @@ public:
 
         return name;
     }
+
+    String getLV2URI() const        { return pluginLV2URIValue.get(); }
 
     //==============================================================================
     bool isAUPluginHost();
@@ -550,7 +556,7 @@ private:
     ValueTreePropertyWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                                  pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
                                  pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
-                                 pluginVSTNumMidiInputsValue, pluginVSTNumMidiOutputsValue;
+                                 pluginVSTNumMidiInputsValue, pluginVSTNumMidiOutputsValue, pluginLV2URIValue;
 
     //==============================================================================
     std::unique_ptr<EnabledModulesList> enabledModulesList;
@@ -595,6 +601,7 @@ private:
     void updateTitleDependencies();
     void updateCompanyNameDependencies();
     void updateProjectSettings();
+    void updateWebsiteDependencies();
     ValueTree getConfigurations() const;
     ValueTree getConfigNode();
 

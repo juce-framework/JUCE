@@ -92,6 +92,35 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MessageThread)
 };
 
+//==============================================================================
+/** @internal */
+class HostDrivenEventLoop
+{
+public:
+    HostDrivenEventLoop()
+    {
+        messageThread->stop();
+        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+    }
+
+    void processPendingEvents()
+    {
+        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+
+        for (;;)
+            if (! dispatchNextMessageOnSystemQueue (true))
+                return;
+    }
+
+    ~HostDrivenEventLoop()
+    {
+        messageThread->start();
+    }
+
+private:
+    SharedResourcePointer<MessageThread> messageThread;
+};
+
 } // namespace juce
 
 #endif

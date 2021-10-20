@@ -100,24 +100,28 @@ public:
 
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
+        using Target = build_tools::ProjectType::Target;
+
         switch (type)
         {
-            case build_tools::ProjectType::Target::StandalonePlugIn:
-            case build_tools::ProjectType::Target::GUIApp:
-            case build_tools::ProjectType::Target::ConsoleApp:
-            case build_tools::ProjectType::Target::StaticLibrary:
-            case build_tools::ProjectType::Target::SharedCodeTarget:
-            case build_tools::ProjectType::Target::AggregateTarget:
-            case build_tools::ProjectType::Target::VSTPlugIn:
-            case build_tools::ProjectType::Target::DynamicLibrary:
+            case Target::StandalonePlugIn:
+            case Target::GUIApp:
+            case Target::ConsoleApp:
+            case Target::StaticLibrary:
+            case Target::SharedCodeTarget:
+            case Target::AggregateTarget:
+            case Target::VSTPlugIn:
+            case Target::DynamicLibrary:
                 return true;
-            case build_tools::ProjectType::Target::AAXPlugIn:
-            case build_tools::ProjectType::Target::RTASPlugIn:
-            case build_tools::ProjectType::Target::UnityPlugIn:
-            case build_tools::ProjectType::Target::VST3PlugIn:
-            case build_tools::ProjectType::Target::AudioUnitPlugIn:
-            case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
-            case build_tools::ProjectType::Target::unspecified:
+            case Target::AAXPlugIn:
+            case Target::RTASPlugIn:
+            case Target::UnityPlugIn:
+            case Target::LV2PlugIn:
+            case Target::LV2TurtleProgram:
+            case Target::VST3PlugIn:
+            case Target::AudioUnitPlugIn:
+            case Target::AudioUnitv3PlugIn:
+            case Target::unspecified:
             default:
                 break;
         }
