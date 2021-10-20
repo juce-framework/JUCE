@@ -3198,17 +3198,22 @@ void XWindowSystem::destroyXDisplay()
     {
         jassert (display != nullptr);
 
-        XWindowSystemUtilities::ScopedXLock xLock;
+        {
+            XWindowSystemUtilities::ScopedXLock xLock;
 
-        X11Symbols::getInstance()->xDestroyWindow (display, juce_messageWindowHandle);
-        juce_messageWindowHandle = 0;
-        X11Symbols::getInstance()->xSync (display, True);
+            X11Symbols::getInstance()->xDestroyWindow (display, juce_messageWindowHandle);
+            juce_messageWindowHandle = 0;
+            X11Symbols::getInstance()->xSync (display, True);
+        }
 
         LinuxEventLoop::unregisterFdCallback (X11Symbols::getInstance()->xConnectionNumber (display));
 
-        X11Symbols::getInstance()->xCloseDisplay (display);
-        display = nullptr;
-        displayVisuals = nullptr;
+        {
+            XWindowSystemUtilities::ScopedXLock xLock;
+            X11Symbols::getInstance()->xCloseDisplay (display);
+            display = nullptr;
+            displayVisuals = nullptr;
+        }
     }
 }
 
