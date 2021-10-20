@@ -25,44 +25,82 @@ AudioPluginFormatManager::~AudioPluginFormatManager() {}
 //==============================================================================
 void AudioPluginFormatManager::addDefaultFormats()
 {
+   #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_IOS)
+    #define HAS_VST 1
+   #else
+    #define HAS_VST 0
+   #endif
+
+   #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
+    #define HAS_VST3 1
+   #else
+    #define HAS_VST3 0
+   #endif
+
+   #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+    #define HAS_AU 1
+   #else
+    #define HAS_AU 0
+   #endif
+
+   #if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
+    #define HAS_LADSPA 1
+   #else
+    #define HAS_LADSPA 0
+   #endif
+
+   #if JUCE_PLUGINHOST_LV2 && (JUCE_MAC || JUCE_LINUX || JUCE_BSD || JUCE_WINDOWS)
+    #define HAS_LV2 1
+   #else
+    #define HAS_LV2 0
+   #endif
+
    #if JUCE_DEBUG
     // you should only call this method once!
     for (auto* format : formats)
     {
         ignoreUnused (format);
 
-       #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_IOS)
+       #if HAS_VST
         jassert (dynamic_cast<VSTPluginFormat*> (format) == nullptr);
        #endif
 
-       #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
+       #if HAS_VST3
         jassert (dynamic_cast<VST3PluginFormat*> (format) == nullptr);
        #endif
 
-       #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+       #if HAS_AU
         jassert (dynamic_cast<AudioUnitPluginFormat*> (format) == nullptr);
        #endif
 
-       #if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
+       #if HAS_LADSPA
         jassert (dynamic_cast<LADSPAPluginFormat*> (format) == nullptr);
+       #endif
+
+       #if HAS_LV2
+        jassert (dynamic_cast<LV2PluginFormat*> (format) == nullptr);
        #endif
     }
    #endif
 
-   #if JUCE_PLUGINHOST_AU && (JUCE_MAC || JUCE_IOS)
+   #if HAS_AU
     formats.add (new AudioUnitPluginFormat());
    #endif
 
-   #if JUCE_PLUGINHOST_VST && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD || JUCE_IOS)
+   #if HAS_VST
     formats.add (new VSTPluginFormat());
    #endif
 
-   #if JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)
+   #if HAS_VST3
     formats.add (new VST3PluginFormat());
    #endif
 
-   #if JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)
+   #if HAS_LADSPA
     formats.add (new LADSPAPluginFormat());
+   #endif
+
+   #if HAS_LV2
+    formats.add (new LV2PluginFormat());
    #endif
 }
 

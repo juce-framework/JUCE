@@ -2233,6 +2233,11 @@ bool Project::isVST3PluginHost()
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
 }
 
+bool Project::isLV2PluginHost()
+{
+    return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_LV2", false);
+}
+
 //==============================================================================
 StringArray Project::getAllAUMainTypeStrings() noexcept
 {

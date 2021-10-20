@@ -143,13 +143,12 @@ protected:
     {
     public:
         Parameter();
-        ~Parameter() override;
 
         String getText (float value, int maximumStringLength) const override;
         float getValueForText (const String& text) const override;
 
     private:
-        StringArray onStrings, offStrings;
+        const StringArray onStrings, offStrings;
     };
 
     AudioPluginInstance() = default;

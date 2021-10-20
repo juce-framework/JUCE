@@ -493,12 +493,12 @@ public:
     /** Returns the audio bus with a given index and direction.
         If busIndex is invalid then this method will return a nullptr.
     */
-    Bus* getBus (bool isInput, int busIndex) noexcept               { return (isInput ? inputBuses : outputBuses)[busIndex]; }
+    Bus* getBus (bool isInput, int busIndex) noexcept               { return getBusImpl (*this, isInput, busIndex); }
 
     /** Returns the audio bus with a given index and direction.
         If busIndex is invalid then this method will return a nullptr.
     */
-    const Bus* getBus (bool isInput, int busIndex) const noexcept   { return const_cast<AudioProcessor*> (this)->getBus (isInput, busIndex); }
+    const Bus* getBus (bool isInput, int busIndex) const noexcept   { return getBusImpl (*this, isInput, busIndex); }
 
     //==============================================================================
     /**  Callback to query if a bus can currently be added.
@@ -897,7 +897,7 @@ public:
         processBlockBypassed but use the returned parameter to control the bypass
         state instead.
 
-        A plug-in can override this function to return a parameter which control's your
+        A plug-in can override this function to return a parameter which controls your
         plug-in's bypass. You should always check the value of this parameter in your
         processBlock callback and bypass any effects if it is non-zero.
     */
@@ -1241,7 +1241,8 @@ public:
         wrapperType_RTAS,
         wrapperType_AAX,
         wrapperType_Standalone,
-        wrapperType_Unity
+        wrapperType_Unity,
+        wrapperType_LV2
     };
 
     /** When loaded by a plugin wrapper, this flag will be set to indicate the type
@@ -1488,6 +1489,12 @@ private:
             layouts.add (InOutChannelPair (i));
 
         return layouts;
+    }
+
+    template <typename This>
+    static auto getBusImpl (This& t, bool isInput, int busIndex) -> decltype (t.getBus (isInput, busIndex))
+    {
+        return (isInput ? t.inputBuses : t.outputBuses)[busIndex];
     }
 
     //==============================================================================

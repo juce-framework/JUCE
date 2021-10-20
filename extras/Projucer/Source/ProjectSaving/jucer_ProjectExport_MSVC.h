@@ -1788,7 +1788,10 @@ protected:
 
     static bool shouldAddBigobjFlag (const build_tools::RelativePath& path)
     {
-        return path.getFileNameWithoutExtension().equalsIgnoreCase ("include_juce_gui_basics");
+        const auto name = path.getFileNameWithoutExtension();
+
+        return name.equalsIgnoreCase ("include_juce_gui_basics")
+            || name.equalsIgnoreCase ("include_juce_audio_processors");
     }
 
     StringArray getModuleLibs() const

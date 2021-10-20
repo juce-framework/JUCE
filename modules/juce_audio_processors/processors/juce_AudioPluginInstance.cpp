@@ -204,17 +204,10 @@ void AudioPluginInstance::assertOnceOnDeprecatedMethodUse() const noexcept
 bool AudioPluginInstance::deprecationAssertiontriggered = false;
 
 AudioPluginInstance::Parameter::Parameter()
+    : onStrings  { TRANS ("on"),  TRANS ("yes"), TRANS ("true") },
+      offStrings { TRANS ("off"), TRANS ("no"),  TRANS ("false") }
 {
-    onStrings.add (TRANS("on"));
-    onStrings.add (TRANS("yes"));
-    onStrings.add (TRANS("true"));
-
-    offStrings.add (TRANS("off"));
-    offStrings.add (TRANS("no"));
-    offStrings.add (TRANS("false"));
 }
-
-AudioPluginInstance::Parameter::~Parameter() = default;
 
 String AudioPluginInstance::Parameter::getText (float value, int maximumStringLength) const
 {

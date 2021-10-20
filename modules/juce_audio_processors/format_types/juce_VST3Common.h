@@ -1389,76 +1389,6 @@ private:
 };
 
 //==============================================================================
-class FloatCache
-{
-    using FlagType = uint32_t;
-
-public:
-    FloatCache() = default;
-
-    explicit FloatCache (size_t sizeIn)
-        : values (sizeIn),
-          flags (divCeil (sizeIn, numFlagBits))
-    {
-        std::fill (values.begin(), values.end(), 0.0f);
-        std::fill (flags.begin(), flags.end(), 0);
-    }
-
-    size_t size() const noexcept { return values.size(); }
-
-    void setWithoutNotifying (size_t index, float value)
-    {
-        jassert (index < size());
-        values[index].store (value, std::memory_order_relaxed);
-    }
-
-    void set (size_t index, float value)
-    {
-        jassert (index < size());
-        const auto previous = values[index].exchange (value, std::memory_order_relaxed);
-        const auto bit = previous == value ? ((FlagType) 0) : ((FlagType) 1 << (index % numFlagBits));
-        flags[index / numFlagBits].fetch_or (bit, std::memory_order_acq_rel);
-    }
-
-    float get (size_t index) const noexcept
-    {
-        jassert (index < size());
-        return values[index].load (std::memory_order_relaxed);
-    }
-
-    /*  Calls the supplied callback for any entries which have been modified
-        since the last call to this function.
-    */
-    template <typename Callback>
-    void ifSet (Callback&& callback)
-    {
-        for (size_t flagIndex = 0; flagIndex < flags.size(); ++flagIndex)
-        {
-            const auto prevFlags = flags[flagIndex].exchange (0, std::memory_order_acq_rel);
-
-            for (size_t bit = 0; bit < numFlagBits; ++bit)
-            {
-                if (prevFlags & ((FlagType) 1 << bit))
-                {
-                    const auto itemIndex = (flagIndex * numFlagBits) + bit;
-                    callback (itemIndex, values[itemIndex].load (std::memory_order_relaxed));
-                }
-            }
-        }
-    }
-
-private:
-    static constexpr size_t numFlagBits = 8 * sizeof (FlagType);
-
-    static constexpr size_t divCeil (size_t a, size_t b)
-    {
-        return (a / b) + ((a % b) != 0);
-    }
-
-    std::vector<std::atomic<float>> values;
-    std::vector<std::atomic<FlagType>> flags;
-};
-
 /*  Provides very quick polling of all parameter states.
 
     We must iterate all parameters on each processBlock call to check whether any
@@ -1482,15 +1412,15 @@ public:
 
     Steinberg::Vst::ParamID getParamID (Steinberg::int32 index) const noexcept { return paramIds[(size_t) index]; }
 
-    void set                 (Steinberg::int32 index, float value)   { floatCache.set                 ((size_t) index, value); }
-    void setWithoutNotifying (Steinberg::int32 index, float value)   { floatCache.setWithoutNotifying ((size_t) index, value); }
+    void set                 (Steinberg::int32 index, float value)   { floatCache.setValueAndBits ((size_t) index, value, 1); }
+    void setWithoutNotifying (Steinberg::int32 index, float value)   { floatCache.setValue        ((size_t) index, value); }
 
     float get (Steinberg::int32 index) const noexcept { return floatCache.get ((size_t) index); }
 
     template <typename Callback>
     void ifSet (Callback&& callback)
     {
-        floatCache.ifSet ([&] (size_t index, float value)
+        floatCache.ifSet ([&] (size_t index, float value, uint32_t)
         {
             callback ((Steinberg::int32) index, value);
         });
@@ -1498,9 +1428,10 @@ public:
 
 private:
     std::vector<Steinberg::Vst::ParamID> paramIds;
-    FloatCache floatCache;
+    FlaggedFloatCache<1> floatCache;
 };
 
+//==============================================================================
 /*  Ensures that a 'restart' call only ever happens on the main thread. */
 class ComponentRestarter : private AsyncUpdater
 {

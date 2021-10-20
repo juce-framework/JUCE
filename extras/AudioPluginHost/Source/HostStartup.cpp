@@ -333,7 +333,8 @@ void setAutoScaleValueForPlugin (const String& identifier, AutoScale s)
 static bool isAutoScaleAvailableForPlugin (const PluginDescription& description)
 {
     return autoScaleOptionAvailable
-          && description.pluginFormatName.containsIgnoreCase ("VST");
+          && (description.pluginFormatName.containsIgnoreCase ("VST")
+              || description.pluginFormatName.containsIgnoreCase ("LV2"));
 }
 
 bool shouldAutoScalePlugin (const PluginDescription& description)

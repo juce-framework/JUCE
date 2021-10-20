@@ -87,6 +87,13 @@
  #define JUCE_PLUGINHOST_LADSPA 0
 #endif
 
+/** Config: JUCE_PLUGINHOST_LV2
+    Enables the LV2 plugin hosting classes.
+ */
+#ifndef JUCE_PLUGINHOST_LV2
+ #define JUCE_PLUGINHOST_LV2 0
+#endif
+
 /** Config: JUCE_CUSTOM_VST3_SDK
     If enabled, the embedded VST3 SDK in JUCE will not be added to the project and instead you should
     add the path to your custom VST3 SDK to the project's header search paths. Most users shouldn't
@@ -129,9 +136,10 @@
 #include "scanning/juce_KnownPluginList.h"
 #include "format_types/juce_AudioUnitPluginFormat.h"
 #include "format_types/juce_LADSPAPluginFormat.h"
+#include "format_types/juce_LV2PluginFormat.h"
+#include "format_types/juce_VST3PluginFormat.h"
 #include "format_types/juce_VSTMidiEventList.h"
 #include "format_types/juce_VSTPluginFormat.h"
-#include "format_types/juce_VST3PluginFormat.h"
 #include "scanning/juce_PluginDirectoryScanner.h"
 #include "scanning/juce_PluginListComponent.h"
 #include "utilities/juce_AudioProcessorParameterWithID.h"

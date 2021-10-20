@@ -39,10 +39,11 @@ juce_add_binary_data(AudioPluginHostData SOURCES
     ../../examples/Assets/singing.ogg)
 
 target_compile_definitions(AudioPluginHost PRIVATE
-    PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples"
     JUCE_ALSA=1
     JUCE_DIRECTSOUND=1
+    JUCE_DISABLE_CAUTIOUS_PARAMETER_ID_CHECKING=1
     JUCE_PLUGINHOST_LADSPA=1
+    JUCE_PLUGINHOST_LV2=1
     JUCE_PLUGINHOST_VST3=1
     JUCE_PLUGINHOST_VST=0
     JUCE_USE_CAMERA=0
@@ -53,7 +54,8 @@ target_compile_definitions(AudioPluginHost PRIVATE
     JUCE_USE_OGGVORBIS=1
     JUCE_VST3_HOST_CROSS_PLATFORM_UID=1
     JUCE_WASAPI=1
-    JUCE_WEB_BROWSER=0)
+    JUCE_WEB_BROWSER=0
+    PIP_JUCE_EXAMPLES_DIRECTORY_STRING="${JUCE_SOURCE_DIR}/examples")
 
 target_link_libraries(AudioPluginHost PRIVATE
     AudioPluginHostData

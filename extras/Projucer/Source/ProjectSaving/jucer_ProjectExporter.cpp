@@ -340,7 +340,7 @@ void ProjectExporter::createIconProperties (PropertyListBuilder& props)
 //==============================================================================
 void ProjectExporter::addSettingsForProjectType (const build_tools::ProjectType& type)
 {
-    addVSTPathsIfPluginOrHost();
+    addExtraIncludePathsIfPluginOrHost();
 
     if (type.isAudioPlugin())
         addCommonAudioPluginSettings();
@@ -348,15 +348,47 @@ void ProjectExporter::addSettingsForProjectType (const build_tools::ProjectType&
     addPlatformSpecificSettingsForProjectType (type);
 }
 
-void ProjectExporter::addVSTPathsIfPluginOrHost()
+void ProjectExporter::addExtraIncludePathsIfPluginOrHost()
 {
-    if (((shouldBuildTargetType (build_tools::ProjectType::Target::VSTPlugIn) && project.shouldBuildVST()) || project.isVSTPluginHost())
-         || ((shouldBuildTargetType (build_tools::ProjectType::Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost()))
+    using Target = build_tools::ProjectType::Target;
+
+    if (((shouldBuildTargetType (Target::VSTPlugIn) && project.shouldBuildVST()) || project.isVSTPluginHost())
+         || ((shouldBuildTargetType (Target::VST3PlugIn) && project.shouldBuildVST3()) || project.isVST3PluginHost()))
     {
         addLegacyVSTFolderToPathIfSpecified();
 
         if (! project.isConfigFlagEnabled ("JUCE_CUSTOM_VST3_SDK"))
             addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
+    }
+
+    const auto lv2BasePath = getModuleFolderRelativeToProject ("juce_audio_processors").getChildFile ("format_types")
+                                                                                       .getChildFile ("LV2_SDK");
+
+    if (project.isLV2PluginHost())
+    {
+        const std::vector<const char*> paths[] { { "" },
+                                                 { "lv2" },
+                                                 { "serd" },
+                                                 { "sord" },
+                                                 { "sord", "src" },
+                                                 { "sratom" },
+                                                 { "lilv" },
+                                                 { "lilv", "src" } };
+
+        for (const auto& components : paths)
+        {
+            const auto appendComponent = [] (const build_tools::RelativePath& f, const char* component)
+            {
+                return f.getChildFile (component);
+            };
+
+            const auto includePath = std::accumulate (components.begin(),
+                                                      components.end(),
+                                                      lv2BasePath,
+                                                      appendComponent);
+
+            addToExtraSearchPaths (includePath, 0);
+        }
     }
 }
 

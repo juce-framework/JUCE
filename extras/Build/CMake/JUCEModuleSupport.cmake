@@ -227,7 +227,7 @@ endfunction()
 # ==================================================================================================
 
 function(_juce_get_all_plugin_kinds out)
-    set(${out} AU AUv3 AAX Standalone Unity VST VST3 PARENT_SCOPE)
+    set(${out} AU AUv3 AAX LV2 Standalone Unity VST VST3 PARENT_SCOPE)
 endfunction()
 
 function(_juce_get_platform_plugin_kinds out)
@@ -242,7 +242,7 @@ function(_juce_get_platform_plugin_kinds out)
     endif()
 
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-        list(APPEND result AAX Unity VST VST3)
+        list(APPEND result AAX Unity VST VST3 LV2)
     endif()
 
     set(${out} ${result} PARENT_SCOPE)
@@ -489,8 +489,22 @@ function(juce_add_module module_path)
 
         target_link_libraries(juce_audio_processors INTERFACE juce_vst3_headers)
 
+        add_library(juce_lilv_headers INTERFACE)
+        set(lv2_base_path "${base_path}/juce_audio_processors/format_types/LV2_SDK")
+        target_include_directories(juce_lilv_headers INTERFACE
+            "${lv2_base_path}"
+            "${lv2_base_path}/lv2"
+            "${lv2_base_path}/serd"
+            "${lv2_base_path}/sord"
+            "${lv2_base_path}/sord/src"
+            "${lv2_base_path}/sratom"
+            "${lv2_base_path}/lilv"
+            "${lv2_base_path}/lilv/src")
+        target_link_libraries(juce_audio_processors INTERFACE juce_lilv_headers)
+
         if(JUCE_ARG_ALIAS_NAMESPACE)
             add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_vst3_headers ALIAS juce_vst3_headers)
+            add_library(${JUCE_ARG_ALIAS_NAMESPACE}::juce_lilv_headers ALIAS juce_lilv_headers)
         endif()
     endif()
 

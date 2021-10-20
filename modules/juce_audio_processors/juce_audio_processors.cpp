@@ -50,7 +50,7 @@
  #undef KeyPress
 #endif
 
-#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX && ! JUCE_BSD
+#if ! JUCE_WINDOWS && ! JUCE_MAC && ! JUCE_LINUX
  #undef JUCE_PLUGINHOST_VST3
  #define JUCE_PLUGINHOST_VST3 0
 #endif
@@ -59,11 +59,10 @@
  #include <AudioUnit/AudioUnit.h>
 #endif
 
-//==============================================================================
 namespace juce
 {
 
-#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD))
+#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX)
 
 static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                  const PluginDescription& desc)
@@ -197,6 +196,7 @@ private:
 
 } // namespace juce
 
+#include "utilities/juce_FlagCache.h"
 #include "format/juce_AudioPluginFormat.cpp"
 #include "format/juce_AudioPluginFormatManager.cpp"
 #include "format_types/juce_LegacyAudioParameter.cpp"
@@ -225,6 +225,9 @@ private:
 #include "utilities/juce_PluginHostType.cpp"
 #include "utilities/juce_NativeScaleFactorNotifier.cpp"
 
+#include "format_types/juce_LV2PluginFormat.cpp"
+
 #if JUCE_UNIT_TESTS
  #include "format_types/juce_VST3PluginFormat_test.cpp"
+ #include "format_types/juce_LV2PluginFormat_test.cpp"
 #endif
