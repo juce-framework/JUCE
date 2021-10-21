@@ -6,6 +6,29 @@ develop
 
 Change
 ------
+FlexItem::alignSelf now defaults to "autoAlign" rather than "stretch".
+
+Possible Issues
+---------------
+FlexBox layouts will be different in cases where FlexBox::alignItems is set to
+a value other than "stretch". This is because each FlexItem will now default
+to using the FlexBox's alignItems value. Layouts that explicitly set
+FlexItem::alignSelf on each item will not be affected.
+
+Workaround
+----------
+To restore the previous layout behaviour, set FlexItem::alignSelf to "stretch"
+on all FlexItems that would otherwise use the default value for alignSelf.
+
+Rationale
+---------
+The new behaviour more closely matches the behaviour of CSS FlexBox
+implementations. In CSS, "align-self" has an initial value of "auto", which
+computes to the parent's "align-items" value.
+
+
+Change
+------
 Functions on AudioPluginInstance that can add parameters have been made
 private.
 
