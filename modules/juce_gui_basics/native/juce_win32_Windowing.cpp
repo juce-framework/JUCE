@@ -353,6 +353,7 @@ using SetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*)
 using SetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (DPI_AWARENESS_CONTEXT);
 using GetDPIForWindowFunc                      = UINT                  (WINAPI*) (HWND);
 using GetDPIForMonitorFunc                     = HRESULT               (WINAPI*) (HMONITOR, Monitor_DPI_Type, UINT*, UINT*);
+using GetSystemMetricsForDpiFunc               = int                   (WINAPI*) (int, UINT);
 using GetProcessDPIAwarenessFunc               = HRESULT               (WINAPI*) (HANDLE, DPI_Awareness*);
 using GetWindowDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) (HWND);
 using GetThreadDPIAwarenessContextFunc         = DPI_AWARENESS_CONTEXT (WINAPI*) ();
@@ -5134,85 +5135,178 @@ Image juce_createIconForFile (const File& file)
 }
 
 //==============================================================================
-void* CustomMouseCursorInfo::create() const
+class MouseCursor::PlatformSpecificHandle
 {
-    const int maxW = GetSystemMetrics (SM_CXCURSOR);
-    const int maxH = GetSystemMetrics (SM_CYCURSOR);
+public:
+    explicit PlatformSpecificHandle (const MouseCursor::StandardCursorType type)
+        : impl (makeHandle (type)) {}
 
-    Image im (image);
-    int hotspotX = hotspot.x;
-    int hotspotY = hotspot.y;
+    explicit PlatformSpecificHandle (const CustomMouseCursorInfo& info)
+        : impl (makeHandle (info)) {}
 
-    if (im.getWidth() > maxW || im.getHeight() > maxH)
+    static void showInWindow (PlatformSpecificHandle* handle, ComponentPeer* peer)
     {
-        im = im.rescaled (maxW, maxH);
+        SetCursor ([&]
+        {
+            if (handle != nullptr && handle->impl != nullptr && peer != nullptr)
+                return handle->impl->getCursor (*peer);
 
-        hotspotX = (hotspotX * maxW) / juce::jmax (1, image.getWidth());
-        hotspotY = (hotspotY * maxH) / juce::jmax (1, image.getHeight());
+            return LoadCursor (nullptr, IDC_ARROW);
+        }());
     }
 
-    return IconConverters::createHICONFromImage (im, FALSE, hotspotX, hotspotY);
-}
-
-void MouseCursor::deleteMouseCursor (void* cursorHandle, bool isStandard)
-{
-    if (cursorHandle != nullptr && ! isStandard)
-        DestroyCursor ((HCURSOR) cursorHandle);
-}
-
-enum
-{
-    hiddenMouseCursorHandle = 32500 // (arbitrary non-zero value to mark this type of cursor)
-};
-
-void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorType type)
-{
-    LPCTSTR cursorName = IDC_ARROW;
-
-    switch (type)
+private:
+    struct Impl
     {
-        case NormalCursor:
-        case ParentCursor:                  break;
-        case NoCursor:                      return (void*) hiddenMouseCursorHandle;
-        case WaitCursor:                    cursorName = IDC_WAIT; break;
-        case IBeamCursor:                   cursorName = IDC_IBEAM; break;
-        case PointingHandCursor:            cursorName = MAKEINTRESOURCE(32649); break;
-        case CrosshairCursor:               cursorName = IDC_CROSS; break;
+        virtual ~Impl() = default;
+        virtual HCURSOR getCursor (ComponentPeer&) = 0;
+    };
 
-        case LeftRightResizeCursor:
-        case LeftEdgeResizeCursor:
-        case RightEdgeResizeCursor:         cursorName = IDC_SIZEWE; break;
+    class BuiltinImpl : public Impl
+    {
+    public:
+        explicit BuiltinImpl (HCURSOR cursorIn)
+            : cursor (cursorIn) {}
 
-        case UpDownResizeCursor:
-        case TopEdgeResizeCursor:
-        case BottomEdgeResizeCursor:        cursorName = IDC_SIZENS; break;
+        HCURSOR getCursor (ComponentPeer&) override { return cursor; }
 
-        case TopLeftCornerResizeCursor:
-        case BottomRightCornerResizeCursor: cursorName = IDC_SIZENWSE; break;
+    private:
+        HCURSOR cursor;
+    };
 
-        case TopRightCornerResizeCursor:
-        case BottomLeftCornerResizeCursor:  cursorName = IDC_SIZENESW; break;
+    class ImageImpl : public Impl
+    {
+    public:
+        ImageImpl (Image imageIn, Point<int> hotspotIn)
+            : image (std::move (imageIn)), hotspot (hotspotIn) {}
 
-        case UpDownLeftRightResizeCursor:   cursorName = IDC_SIZEALL; break;
-
-        case DraggingHandCursor:
+        ~ImageImpl() override
         {
-            static void* dragHandCursor = []
+            for (auto& pair : cursorsBySize)
+                DestroyCursor (pair.second);
+        }
+
+        HCURSOR getCursor (ComponentPeer& peer) override
+        {
+            JUCE_ASSERT_MESSAGE_THREAD;
+
+            static auto getCursorSize = getCursorSizeForPeerFunction();
+
+            const auto size = getCursorSize (peer);
+            const auto iter = cursorsBySize.find (size);
+
+            if (iter != cursorsBySize.end())
+                return iter->second;
+
+            const auto imgW = jmax (1, image.getWidth());
+            const auto imgH = jmax (1, image.getHeight());
+
+            const auto scale = (float) size / (float) unityCursorSize;
+            const auto scaleToUse = scale * jmin (1.0f, jmin ((float) unityCursorSize / (float) imgW,
+                                                              (float) unityCursorSize / (float) imgH));
+            const auto rescaled = image.rescaled (roundToInt (scaleToUse * (float) imgW),
+                                                  roundToInt (scaleToUse * (float) imgH));
+            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) hotspot.x));
+            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) hotspot.y));
+
+            return cursorsBySize.emplace (size, IconConverters::createHICONFromImage (rescaled, false, hx, hy)).first->second;
+        }
+
+    private:
+        Image image;
+        Point<int> hotspot;
+        std::map<int, HCURSOR> cursorsBySize;
+    };
+
+    static auto getCursorSizeForPeerFunction() -> int (*) (ComponentPeer&)
+    {
+        static const auto getDpiForMonitor = []() -> GetDPIForMonitorFunc
+        {
+            constexpr auto library = "SHCore.dll";
+            LoadLibraryA (library);
+
+            if (auto* handle = GetModuleHandleA (library))
+                return (GetDPIForMonitorFunc) GetProcAddress (handle, "GetDpiForMonitor");
+
+            return nullptr;
+        }();
+
+        static const auto getSystemMetricsForDpi = []() -> GetSystemMetricsForDpiFunc
+        {
+            constexpr auto library = "User32.dll";
+            LoadLibraryA (library);
+
+            if (auto* handle = GetModuleHandleA (library))
+                return (GetSystemMetricsForDpiFunc) GetProcAddress (handle, "GetSystemMetricsForDpi");
+
+            return nullptr;
+        }();
+
+        if (getDpiForMonitor == nullptr || getSystemMetricsForDpi == nullptr)
+            return [] (ComponentPeer&) { return unityCursorSize; };
+
+        return [] (ComponentPeer& p)
+        {
+            const ScopedThreadDPIAwarenessSetter threadDpiAwarenessSetter { p.getNativeHandle() };
+
+            UINT dpiX = 0, dpiY = 0;
+
+            if (auto* monitor = MonitorFromWindow ((HWND) p.getNativeHandle(), MONITOR_DEFAULTTONULL))
+                if (SUCCEEDED (getDpiForMonitor (monitor, MDT_Default, &dpiX, &dpiY)))
+                    return getSystemMetricsForDpi (SM_CXCURSOR, dpiX);
+
+            return unityCursorSize;
+        };
+    }
+
+    static constexpr auto unityCursorSize = 32;
+
+    static std::unique_ptr<Impl> makeHandle (const CustomMouseCursorInfo& info)
+    {
+        return std::make_unique<ImageImpl> (info.image, info.hotspot);
+    }
+
+    static std::unique_ptr<Impl> makeHandle (const MouseCursor::StandardCursorType type)
+    {
+        LPCTSTR cursorName = IDC_ARROW;
+
+        switch (type)
+        {
+            case NormalCursor:
+            case ParentCursor:                  break;
+            case NoCursor:                      return std::make_unique<BuiltinImpl> (nullptr);
+            case WaitCursor:                    cursorName = IDC_WAIT; break;
+            case IBeamCursor:                   cursorName = IDC_IBEAM; break;
+            case PointingHandCursor:            cursorName = MAKEINTRESOURCE(32649); break;
+            case CrosshairCursor:               cursorName = IDC_CROSS; break;
+
+            case LeftRightResizeCursor:
+            case LeftEdgeResizeCursor:
+            case RightEdgeResizeCursor:         cursorName = IDC_SIZEWE; break;
+
+            case UpDownResizeCursor:
+            case TopEdgeResizeCursor:
+            case BottomEdgeResizeCursor:        cursorName = IDC_SIZENS; break;
+
+            case TopLeftCornerResizeCursor:
+            case BottomRightCornerResizeCursor: cursorName = IDC_SIZENWSE; break;
+
+            case TopRightCornerResizeCursor:
+            case BottomLeftCornerResizeCursor:  cursorName = IDC_SIZENESW; break;
+
+            case UpDownLeftRightResizeCursor:   cursorName = IDC_SIZEALL; break;
+
+            case DraggingHandCursor:
             {
                 static const unsigned char dragHandData[]
                     { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
                       16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-                return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 }).create();
-            }();
+                return makeHandle ({ ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 } });
+            }
 
-            return dragHandCursor;
-        }
-
-        case CopyingCursor:
-        {
-            static void* copyCursor = []
+            case CopyingCursor:
             {
                 static const unsigned char copyCursorData[]
                     { 71,73,70,56,57,97,21,0,21,0,145,0,0,0,0,0,255,255,255,0,128,128,255,255,255,33,249,4,1,0,0,3,0,44,0,0,0,0,21,0,
@@ -5220,36 +5314,27 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
                       12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,252,114,147,74,83,
                       5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
 
-                return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData)), { 1, 3 }).create();
-            }();
+                return makeHandle ({ ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData)), { 1, 3 } });
+            }
 
-            return copyCursor;
+            case NumStandardCursorTypes: JUCE_FALLTHROUGH
+            default:
+                jassertfalse; break;
         }
 
-        case NumStandardCursorTypes: JUCE_FALLTHROUGH
-        default:
-            jassertfalse; break;
+        return std::make_unique<BuiltinImpl> ([&]
+        {
+            if (auto* c = LoadCursor (nullptr, cursorName))
+                return c;
+
+            return LoadCursor (nullptr, IDC_ARROW);
+        }());
     }
 
-    if (auto cursorH = LoadCursor (nullptr, cursorName))
-        return cursorH;
-
-    return LoadCursor (nullptr, IDC_ARROW);
-}
+    std::unique_ptr<Impl> impl;
+};
 
 //==============================================================================
-void MouseCursor::showInWindow (ComponentPeer*) const
-{
-    auto c = (HCURSOR) getHandle();
-
-    if (c == nullptr)
-        c = LoadCursor (nullptr, IDC_ARROW);
-    else if (c == (HCURSOR) hiddenMouseCursorHandle)
-        c = nullptr;
-
-    SetCursor (c);
-}
-
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

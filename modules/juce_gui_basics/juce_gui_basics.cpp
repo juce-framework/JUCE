@@ -124,7 +124,20 @@ namespace juce
     }
 
     bool isWindowOnCurrentVirtualDesktop (void*);
-}
+
+    struct CustomMouseCursorInfo
+    {
+        CustomMouseCursorInfo() = default;
+
+        CustomMouseCursorInfo (const Image& im, Point<int> hs, float scale = 1.0f) noexcept
+            : image (im), hotspot (hs), scaleFactor (scale)
+        {}
+
+        Image image;
+        Point<int> hotspot;
+        float scaleFactor = 1.0f;
+    };
+} // namespace juce
 
 #include "accessibility/juce_AccessibilityHandler.cpp"
 #include "components/juce_Component.cpp"
@@ -136,7 +149,6 @@ namespace juce
 #include "components/juce_ModalComponentManager.cpp"
 #include "mouse/juce_ComponentDragger.cpp"
 #include "mouse/juce_DragAndDropContainer.cpp"
-#include "mouse/juce_MouseCursor.cpp"
 #include "mouse/juce_MouseEvent.cpp"
 #include "mouse/juce_MouseInactivityDetector.cpp"
 #include "mouse/juce_MouseListener.cpp"
@@ -428,3 +440,6 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
  juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }
  juce::ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler() {}
 #endif
+
+// Depends on types defined in platform-specific windowing files
+#include "mouse/juce_MouseCursor.cpp"

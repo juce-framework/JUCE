@@ -1873,12 +1873,14 @@ Image juce_createIconForFile (const File& /*file*/)
 }
 
 //==============================================================================
-void* CustomMouseCursorInfo::create() const                                         { return nullptr; }
-void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType)      { return nullptr; }
-void MouseCursor::deleteMouseCursor (void* /*cursorHandle*/, bool /*isStandard*/)   {}
+class MouseCursor::PlatformSpecificHandle
+{
+public:
+    PlatformSpecificHandle (const MouseCursor::StandardCursorType)      {}
+    PlatformSpecificHandle (const CustomMouseCursorInfo&)               {}
 
-//==============================================================================
-void MouseCursor::showInWindow (ComponentPeer*) const   {}
+    static void showInWindow (PlatformSpecificHandle*, ComponentPeer*)  {}
+};
 
 //==============================================================================
 bool DragAndDropContainer::performExternalDragDropOfFiles (const StringArray& /*files*/, bool /*canMove*/,
