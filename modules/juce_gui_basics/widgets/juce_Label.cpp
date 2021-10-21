@@ -409,22 +409,22 @@ public:
 
     Component* getDefaultComponent (Component* parent) override
     {
-        auto getContainer = [&]
-        {
-            if (owner.getCurrentTextEditor() != nullptr && parent == &owner)
-                return owner.findKeyboardFocusContainer();
-
-            return parent;
-        };
-
-        if (auto* container = getContainer())
-            KeyboardFocusTraverser::getDefaultComponent (container);
+        if (auto* container = getKeyboardFocusContainer (parent))
+            return KeyboardFocusTraverser::getDefaultComponent (container);
 
         return nullptr;
     }
 
     Component* getNextComponent     (Component* c) override  { return KeyboardFocusTraverser::getNextComponent     (getComp (c)); }
     Component* getPreviousComponent (Component* c) override  { return KeyboardFocusTraverser::getPreviousComponent (getComp (c)); }
+
+    std::vector<Component*> getAllComponents (Component* parent) override
+    {
+        if (auto* container = getKeyboardFocusContainer (parent))
+            return KeyboardFocusTraverser::getAllComponents (container);
+
+        return {};
+    }
 
 private:
     Component* getComp (Component* current) const
@@ -434,6 +434,14 @@ private:
                 return current->getParentComponent();
 
         return current;
+    }
+
+    Component* getKeyboardFocusContainer (Component* parent) const
+    {
+        if (owner.getCurrentTextEditor() != nullptr && parent == &owner)
+            return owner.findKeyboardFocusContainer();
+
+        return parent;
     }
 
     Label& owner;
