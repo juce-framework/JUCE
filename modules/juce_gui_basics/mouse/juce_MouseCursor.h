@@ -166,8 +166,7 @@ public:
 private:
     //==============================================================================
     class SharedCursorHandle;
-    friend class SharedCursorHandle;
-    SharedCursorHandle* cursorHandle = nullptr;
+    std::shared_ptr<SharedCursorHandle> cursorHandle;
 
     friend class MouseInputSourceInternal;
     void showInWindow (ComponentPeer*) const;
