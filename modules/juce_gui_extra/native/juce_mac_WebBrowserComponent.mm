@@ -239,16 +239,11 @@ private:
             DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, id<WebOpenPanelResultListener> rl)
                 : chooser (std::move (fc)), listener (rl)
             {
-                [listener retain];
-            }
-
-            ~DeletedFileChooserWrapper()
-            {
-                [listener release];
+                [listener.get() retain];
             }
 
             std::unique_ptr<FileChooser> chooser;
-            id<WebOpenPanelResultListener> listener;
+            ObjCObjectHandle<id<WebOpenPanelResultListener>> listener;
         };
 
         auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
@@ -261,7 +256,7 @@ private:
         wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
         {
             for (auto& f : wrapper->chooser->getResults())
-                [wrapper->listener chooseFilename: juceStringToNS (f.getFullPathName())];
+                [wrapper->listener.get() chooseFilename: juceStringToNS (f.getFullPathName())];
 
             delete wrapper;
         });
@@ -358,13 +353,12 @@ private:
             DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, CompletionHandlerType h)
                 : chooser (std::move (fc)), handler (h)
             {
-                [handler retain];
+                [handler.get() retain];
             }
 
             ~DeletedFileChooserWrapper()
             {
                 callHandler (nullptr);
-                [handler release];
             }
 
             void callHandler (NSArray<NSURL*>* urls)
@@ -372,14 +366,14 @@ private:
                 if (handlerCalled)
                     return;
 
-                handler (urls);
+                handler.get() (urls);
                 handlerCalled = true;
             }
 
             std::unique_ptr<FileChooser> chooser;
 
         private:
-            CompletionHandlerType handler;
+            ObjCObjectHandle<CompletionHandlerType> handler;
             bool handlerCalled = false;
         };
 
@@ -436,28 +430,25 @@ public:
     WebViewImpl (WebBrowserComponent* owner)
     {
         static WebViewKeyEquivalentResponder<WebView> webviewClass;
-        webView = (WebView*) webviewClass.createInstance();
 
-        webView = [webView initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
-                               frameName: nsEmptyString()
-                               groupName: nsEmptyString()];
+        webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)
+                                                          frameName: nsEmptyString()
+                                                          groupName: nsEmptyString()]);
 
         static DownloadClickDetectorClass cls;
-        clickListener = [cls.createInstance() init];
-        DownloadClickDetectorClass::setOwner (clickListener, owner);
+        clickListener.reset ([cls.createInstance() init]);
+        DownloadClickDetectorClass::setOwner (clickListener.get(), owner);
 
-        [webView setPolicyDelegate:    clickListener];
-        [webView setFrameLoadDelegate: clickListener];
-        [webView setUIDelegate:        clickListener];
+        [webView.get() setPolicyDelegate:    clickListener.get()];
+        [webView.get() setFrameLoadDelegate: clickListener.get()];
+        [webView.get() setUIDelegate:        clickListener.get()];
     }
 
     ~WebViewImpl() override
     {
-        [webView setPolicyDelegate:    nil];
-        [webView setFrameLoadDelegate: nil];
-        [webView setUIDelegate:        nil];
-
-        [clickListener release];
+        [webView.get() setPolicyDelegate:    nil];
+        [webView.get() setFrameLoadDelegate: nil];
+        [webView.get() setUIDelegate:        nil];
     }
 
     void goToURL (const String& url,
@@ -466,7 +457,7 @@ public:
     {
         if (url.trimStart().startsWithIgnoreCase ("javascript:"))
         {
-            [webView stringByEvaluatingJavaScriptFromString: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            [webView.get() stringByEvaluatingJavaScriptFromString: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
             return;
         }
 
@@ -490,30 +481,30 @@ public:
         };
 
         if (NSMutableURLRequest* request = getRequest())
-            [[webView mainFrame] loadRequest: request];
+            [[webView.get() mainFrame] loadRequest: request];
     }
 
-    void goBack() override       { [webView goBack]; }
-    void goForward() override   { [webView goForward]; }
+    void goBack() override      { [webView.get() goBack]; }
+    void goForward() override   { [webView.get() goForward]; }
 
-    void stop() override        { [webView stopLoading: nil]; }
-    void refresh() override     { [webView reload: nil]; }
+    void stop() override        { [webView.get() stopLoading: nil]; }
+    void refresh() override     { [webView.get() reload: nil]; }
 
-    id getWebView() override    { return webView; }
+    id getWebView() override    { return webView.get(); }
 
     void mouseMove (const MouseEvent&)
     {
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         // WebKit doesn't capture mouse-moves itself, so it seems the only way to make
         // them work is to push them via this non-public method..
-        if ([webView respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
-            [webView performSelector:    @selector (_updateMouseoverWithFakeEvent)];
+        if ([webView.get() respondsToSelector: @selector (_updateMouseoverWithFakeEvent)])
+            [webView.get() performSelector:    @selector (_updateMouseoverWithFakeEvent)];
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
 private:
-    WebView* webView = nil;
-    id clickListener;
+    ObjCObjectHandle<WebView*> webView;
+    ObjCObjectHandle<id> clickListener;
 };
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
@@ -525,27 +516,24 @@ public:
     {
         #if JUCE_MAC
          static WebViewKeyEquivalentResponder<WKWebView> webviewClass;
-         webView = (WKWebView*) webviewClass.createInstance();
 
-         webView = [webView initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
+         webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)]);
         #else
-         webView = [[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)];
+         webView.reset ([[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)]);
         #endif
 
          static WebViewDelegateClass cls;
-         webViewDelegate = [cls.createInstance() init];
-         WebViewDelegateClass::setOwner (webViewDelegate, owner);
+         webViewDelegate.reset ([cls.createInstance() init]);
+         WebViewDelegateClass::setOwner (webViewDelegate.get(), owner);
 
-         [webView setNavigationDelegate: webViewDelegate];
-         [webView setUIDelegate:         webViewDelegate];
+         [webView.get() setNavigationDelegate: webViewDelegate.get()];
+         [webView.get() setUIDelegate:         webViewDelegate.get()];
     }
 
     ~WKWebViewImpl() override
     {
-        [webView setNavigationDelegate: nil];
-        [webView setUIDelegate:         nil];
-
-        [webViewDelegate release];
+        [webView.get() setNavigationDelegate: nil];
+        [webView.get() setUIDelegate:         nil];
     }
 
     void goToURL (const String& url,
@@ -556,8 +544,8 @@ public:
 
         if (trimmed.startsWithIgnoreCase ("javascript:"))
         {
-            [webView evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
-                     completionHandler: nil];
+            [webView.get() evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
+                            completionHandler: nil];
 
             return;
         }
@@ -569,25 +557,25 @@ public:
             auto file = URL (url).getLocalFile();
 
             if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
-                [webView loadFileURL: appendParametersToFileURL (url, nsUrl) allowingReadAccessToURL: nsUrl];
+                [webView.get() loadFileURL: appendParametersToFileURL (url, nsUrl) allowingReadAccessToURL: nsUrl];
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
-            [webView loadRequest: request];
+            [webView.get() loadRequest: request];
         }
     }
 
-    void goBack() override      { [webView goBack]; }
-    void goForward() override   { [webView goForward]; }
+    void goBack() override      { [webView.get() goBack]; }
+    void goForward() override   { [webView.get() goForward]; }
 
-    void stop() override        { [webView stopLoading]; }
-    void refresh() override     { [webView reload]; }
+    void stop() override        { [webView.get() stopLoading]; }
+    void refresh() override     { [webView.get() reload]; }
 
-    id getWebView() override    { return webView; }
+    id getWebView() override    { return webView.get(); }
 
 private:
-    WKWebView* webView = nil;
-    id webViewDelegate;
+    ObjCObjectHandle<WKWebView*> webView;
+    ObjCObjectHandle<id> webViewDelegate;
 };
 
 //==============================================================================
@@ -643,9 +631,7 @@ WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
     addAndMakeVisible (browser.get());
 }
 
-WebBrowserComponent::~WebBrowserComponent()
-{
-}
+WebBrowserComponent::~WebBrowserComponent() = default;
 
 //==============================================================================
 void WebBrowserComponent::goToURL (const String& url,
