@@ -2306,6 +2306,8 @@ public:
         return extractResult (userProvidedInterface, juceProvidedInterface, obj);
     }
 
+    enum class CallPrepareToPlay { no, yes };
+
     //==============================================================================
     tresult PLUGIN_API initialize (FUnknown* hostContext) override
     {
@@ -2313,7 +2315,7 @@ public:
             host.loadFrom (hostContext);
 
         processContext.sampleRate = processSetup.sampleRate;
-        preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock);
+        preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock, CallPrepareToPlay::no);
 
         return kResultTrue;
     }
@@ -2390,7 +2392,7 @@ public:
                             ? (int) processSetup.maxSamplesPerBlock
                             : bufferSize;
 
-            preparePlugin (sampleRate, bufferSize);
+            preparePlugin (sampleRate, bufferSize, CallPrepareToPlay::yes);
         }
 
         return kResultOk;
@@ -3091,7 +3093,7 @@ public:
                                                         : AudioProcessor::singlePrecision);
         getPluginInstance().setNonRealtime (newSetup.processMode == Vst::kOffline);
 
-        preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock);
+        preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock, CallPrepareToPlay::no);
 
         return kResultTrue;
     }
@@ -3368,12 +3370,14 @@ private:
              | kNeedTransportState;
     }
 
-    void preparePlugin (double sampleRate, int bufferSize)
+    void preparePlugin (double sampleRate, int bufferSize, CallPrepareToPlay callPrepareToPlay)
     {
         auto& p = getPluginInstance();
 
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
-        p.prepareToPlay (sampleRate, bufferSize);
+
+        if (callPrepareToPlay == CallPrepareToPlay::yes)
+            p.prepareToPlay (sampleRate, bufferSize);
 
         midiBuffer.ensureSize (2048);
         midiBuffer.clear();
