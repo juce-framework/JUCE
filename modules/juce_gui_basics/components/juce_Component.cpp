@@ -301,11 +301,11 @@ struct Component::ComponentHelpers
     }
 
     //==============================================================================
-    static bool hitTest (Component& comp, Point<int> localPoint)
+    static bool hitTest (Component& comp, Point<float> localPoint)
     {
-        return isPositiveAndBelow (localPoint.x, comp.getWidth())
-            && isPositiveAndBelow (localPoint.y, comp.getHeight())
-            && comp.hitTest (localPoint.x, localPoint.y);
+        const auto intPoint = localPoint.roundToInt();
+        return Rectangle<int> { comp.getWidth(), comp.getHeight() }.toFloat().contains (localPoint)
+               && comp.hitTest (intPoint.x, intPoint.y);
     }
 
     // converts an unscaled position within a peer to the local position within that peer's component
@@ -1376,7 +1376,7 @@ bool Component::hitTest (int x, int y)
             auto& child = *childComponentList.getUnchecked (i);
 
             if (child.isVisible()
-                 && ComponentHelpers::hitTest (child, ComponentHelpers::convertFromParentSpace (child, Point<int> (x, y))))
+                 && ComponentHelpers::hitTest (child, ComponentHelpers::convertFromParentSpace (child, Point<int> (x, y).toFloat())))
                 return true;
         }
     }
@@ -1405,7 +1405,7 @@ bool Component::contains (Point<int> point)
 
 bool Component::containsInternal (Point<float> point)
 {
-    if (ComponentHelpers::hitTest (*this, point.roundToInt()))
+    if (ComponentHelpers::hitTest (*this, point))
     {
         if (parentComponent != nullptr)
             return parentComponent->containsInternal (ComponentHelpers::convertToParentSpace (*this, point));
@@ -1441,7 +1441,7 @@ Component* Component::getComponentAt (Point<int> position)
 
 Component* Component::getComponentAtInternal (Point<float> position)
 {
-    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position.roundToInt()))
+    if (flags.visibleFlag && ComponentHelpers::hitTest (*this, position))
     {
         for (int i = childComponentList.size(); --i >= 0;)
         {
