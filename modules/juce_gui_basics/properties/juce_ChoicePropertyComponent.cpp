@@ -209,11 +209,9 @@ ChoicePropertyComponent::~ChoicePropertyComponent()
 void ChoicePropertyComponent::initialiseComboBox (const Value& v)
 {
     if (v != Value())
-    {
         comboBox.setSelectedId (v.getValue(), dontSendNotification);
-        comboBox.getSelectedIdAsValue().referTo (v);
-    }
 
+    comboBox.getSelectedIdAsValue().referTo (v);
     comboBox.setEditableText (false);
     addAndMakeVisible (comboBox);
 }
@@ -222,10 +220,12 @@ void ChoicePropertyComponent::refreshChoices()
 {
     comboBox.clear();
 
-    for (auto choice : choices)
+    for (int i = 0; i < choices.size(); ++i)
     {
+        const auto& choice = choices[i];
+
         if (choice.isNotEmpty())
-            comboBox.addItem (choice, choices.indexOf (choice) + 1);
+            comboBox.addItem (choice, i + 1);
         else
             comboBox.addSeparator();
     }
