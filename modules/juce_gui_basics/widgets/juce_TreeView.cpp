@@ -342,12 +342,16 @@ public:
             }
         }
 
-        if (scopedScrollDisabler.item != nullptr)
-            componentsToKeep.insert (scopedScrollDisabler.item);
+        auto removePredicate = [&] (auto& item)
+        {
+            if (item == nullptr)
+                return true;
 
-        const auto iter = std::remove_if (itemComponents.begin(), itemComponents.end(),
-                                          [&] (auto& item) { return componentsToKeep.find (item.get()) == componentsToKeep.end(); });
+            return componentsToKeep.find (item.get()) == componentsToKeep.end()
+                    && ! isMouseDraggingInChildComp (*item);
+        };
 
+        const auto iter = std::remove_if (itemComponents.begin(), itemComponents.end(), std::move (removePredicate));
         itemComponents.erase (iter, itemComponents.end());
 
         for (auto& comp : itemComponents)
@@ -361,8 +365,6 @@ private:
     //==============================================================================
     struct ScopedDisableViewportScroll
     {
-        ScopedDisableViewportScroll() = default;
-
         explicit ScopedDisableViewportScroll (ItemComponent& c)
             : item (&c)
         {
@@ -376,6 +378,8 @@ private:
         }
 
         SafePointer<ItemComponent> item;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ScopedDisableViewportScroll)
     };
 
     //==============================================================================
@@ -389,7 +393,7 @@ private:
         updateItemUnderMouse (e);
 
         isDragging = false;
-        scopedScrollDisabler = {};
+        scopedScrollDisabler = nullptr;
         needSelectionOnMouseUp = false;
 
         if (! isEnabled())
@@ -481,7 +485,7 @@ private:
                             auto imageOffset = pos.getPosition() - e.getPosition();
                             dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset, &e.source);
 
-                            scopedScrollDisabler = ScopedDisableViewportScroll { *itemComponent };
+                            scopedScrollDisabler = std::make_unique<ScopedDisableViewportScroll> (*itemComponent);
                         }
                         else
                         {
@@ -651,7 +655,7 @@ private:
 
     std::vector<std::unique_ptr<ItemComponent>> itemComponents;
     ItemComponent* itemUnderMouse = nullptr;
-    ScopedDisableViewportScroll scopedScrollDisabler;
+    std::unique_ptr<ScopedDisableViewportScroll> scopedScrollDisabler;
     bool isDragging = false, needSelectionOnMouseUp = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentComponent)
