@@ -3668,6 +3668,9 @@ void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XProper
 
     if (isStateChangeEvent() || isHidden())
         dismissBlockingModals (peer);
+
+    if (event.atom == XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_FRAME_EXTENTS"))
+        peer->updateBorderSize();
 }
 
 void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const
