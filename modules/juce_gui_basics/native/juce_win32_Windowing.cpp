@@ -1671,7 +1671,7 @@ public:
         const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
 
         if (shouldBeMinimised != isMinimised())
-            ShowWindow (hwnd, shouldBeMinimised ? SW_MINIMIZE : SW_SHOWNORMAL);
+            ShowWindow (hwnd, shouldBeMinimised ? SW_MINIMIZE : SW_RESTORE);
     }
 
     bool isMinimised() const override
@@ -2410,7 +2410,7 @@ private:
 
     static void* toFrontCallback1 (void* h)
     {
-        SetForegroundWindow ((HWND) h);
+        BringWindowToTop ((HWND) h);
         return nullptr;
     }
 
