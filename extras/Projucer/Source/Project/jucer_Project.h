@@ -131,6 +131,7 @@ public:
     void saveDocumentAsync (const File& file, std::function<void (Result)> callback) override;
 
     void saveProject (Async, ProjectExporter* exporterToSave, std::function<void (Result)> onCompletion);
+    void saveAndMoveTemporaryProject (bool openInIDE);
     Result saveResourcesOnly();
     void openProjectInIDE (ProjectExporter& exporterToOpen);
 
@@ -576,8 +577,6 @@ private:
     //==============================================================================
     File tempDirectory;
     std::pair<Time, String> cachedFileState;
-
-    void saveAndMoveTemporaryProject (bool openInIDE);
 
     //==============================================================================
     friend class Item;

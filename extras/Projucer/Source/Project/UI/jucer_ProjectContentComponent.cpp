@@ -400,7 +400,12 @@ bool ProjectContentComponent::goToCounterpart()
 
 void ProjectContentComponent::saveProjectAsync()
 {
-    if (project != nullptr)
+    if (project == nullptr)
+        return;
+
+    if (project->isTemporaryProject())
+        project->saveAndMoveTemporaryProject (false);
+    else
         project->saveAsync (true, true, nullptr);
 }
 
@@ -501,6 +506,12 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
     {
         if (saveFirst)
         {
+            if (project->isTemporaryProject())
+            {
+                project->saveAndMoveTemporaryProject (true);
+                return;
+            }
+
             SafePointer<ProjectContentComponent> safeThis { this };
             project->saveAsync (true, true, [safeThis] (Project::SaveResult r)
                                 {
