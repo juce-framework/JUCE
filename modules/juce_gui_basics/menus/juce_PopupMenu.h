@@ -555,13 +555,13 @@ public:
         Options withInitiallySelectedItem (int idOfItemToBeSelected) const;
 
         //==============================================================================
-        /** Gets the parent component.
+        /** Gets the parent component. This may be nullptr if the Component has been deleted.
 
             @see withParentComponent
         */
         Component* getParentComponent() const noexcept               { return parentComponent; }
 
-        /** Gets the target component.
+        /** Gets the target component. This may be nullptr if the Component has been deleted.
 
             @see withTargetComponent
         */
@@ -624,9 +624,7 @@ public:
     private:
         //==============================================================================
         Rectangle<int> targetArea;
-        Component* targetComponent = nullptr;
-        Component* parentComponent = nullptr;
-        WeakReference<Component> componentToWatchForDeletion;
+        WeakReference<Component> targetComponent, parentComponent, componentToWatchForDeletion;
         int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0, initiallySelectedItemId = 0;
         bool isWatchingForDeletion = false;
         PopupDirection preferredPopupDirection = PopupDirection::downwards;
