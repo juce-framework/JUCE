@@ -11,6 +11,9 @@
     <Filter Include="AudioPluginHost\Source">
       <UniqueIdentifier>{57E59C1B-8971-243F-9A1A-8EABFD456232}</UniqueIdentifier>
     </Filter>
+    <Filter Include="AudioPluginHost\BinaryData">
+      <UniqueIdentifier>{7FF9F684-A465-C086-BEFF-C3EF408A7A84}</UniqueIdentifier>
+    </Filter>
     <Filter Include="AudioPluginHost">
       <UniqueIdentifier>{297DEAC9-184C-CA1D-D75C-DAA34116691C}</UniqueIdentifier>
     </Filter>
@@ -2737,6 +2740,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_opengl\juce_opengl.mm">
       <Filter>JUCE Modules\juce_opengl</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -5406,6 +5412,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_opengl\juce_opengl.h">
       <Filter>JUCE Modules\juce_opengl</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
+      <Filter>JUCE Library Code</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
@@ -5413,6 +5422,24 @@
   <ItemGroup>
     <None Include="..\..\Source\JUCEAppIcon.png">
       <Filter>AudioPluginHost\Source</Filter>
+    </None>
+    <None Include="..\..\..\..\examples\Assets\cassette_recorder.wav">
+      <Filter>AudioPluginHost\BinaryData</Filter>
+    </None>
+    <None Include="..\..\..\..\examples\Assets\cello.wav">
+      <Filter>AudioPluginHost\BinaryData</Filter>
+    </None>
+    <None Include="..\..\..\..\examples\Assets\guitar_amp.wav">
+      <Filter>AudioPluginHost\BinaryData</Filter>
+    </None>
+    <None Include="..\..\..\..\examples\Assets\proaudio.path">
+      <Filter>AudioPluginHost\BinaryData</Filter>
+    </None>
+    <None Include="..\..\..\..\examples\Assets\reverb_ir.wav">
+      <Filter>AudioPluginHost\BinaryData</Filter>
+    </None>
+    <None Include="..\..\..\..\examples\Assets\singing.ogg">
+      <Filter>AudioPluginHost\BinaryData</Filter>
     </None>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\CMakeLists.txt">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>

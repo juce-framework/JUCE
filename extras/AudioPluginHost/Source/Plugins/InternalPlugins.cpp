@@ -30,6 +30,25 @@
 #include "InternalPlugins.h"
 #include "PluginGraph.h"
 
+#define PIP_DEMO_UTILITIES_INCLUDED 1
+
+// An alternative version of createAssetInputStream from the demo utilities header
+// that fetches resources from embedded binary data instead of files
+static std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
+{
+    for (int i = 0; i < BinaryData::namedResourceListSize; ++i)
+    {
+        if (BinaryData::originalFilenames[i] == resourcePath)
+        {
+            int dataSizeInBytes;
+            auto* resource = BinaryData::getNamedResource (BinaryData::namedResourceList[i], dataSizeInBytes);
+            return std::make_unique<MemoryInputStream> (resource, dataSizeInBytes, false);
+        }
+    }
+
+    return {};
+}
+
 #include "../../../../examples/Plugins/AUv3SynthPluginDemo.h"
 #include "../../../../examples/Plugins/ArpeggiatorPluginDemo.h"
 #include "../../../../examples/Plugins/AudioPluginDemo.h"
