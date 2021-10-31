@@ -1335,8 +1335,13 @@ public:
             }
         }
 
-        if (! inSetupProcessing)
-            componentRestarter.restart (flags);
+        if (details.nonParameterStateChanged)
+            flags |= pluginShouldBeMarkedDirtyFlag;
+
+        if (inSetupProcessing)
+            flags &= Vst::kLatencyChanged;
+
+        componentRestarter.restart (flags);
     }
 
     //==============================================================================
@@ -1347,6 +1352,8 @@ public:
 
         return nullptr;
     }
+
+    static constexpr auto pluginShouldBeMarkedDirtyFlag = 1 << 16;
 
 private:
     friend class JuceVST3Component;
@@ -1369,6 +1376,11 @@ private:
 
     void restartComponentOnMessageThread (int32 flags) override
     {
+        if ((flags & pluginShouldBeMarkedDirtyFlag) != 0)
+            setDirty (true);
+
+        flags &= ~pluginShouldBeMarkedDirtyFlag;
+
         if (auto* handler = componentHandler)
             handler->restartComponent (flags);
     }

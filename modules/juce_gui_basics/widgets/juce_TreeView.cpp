@@ -632,36 +632,20 @@ private:
 
 //==============================================================================
 class TreeView::TreeViewport  : public Viewport,
-                                private Timer
+                                private AsyncUpdater
 {
 public:
-    TreeViewport() = default;
-
-    void updateComponents (bool triggerResize)
-    {
-        if (auto* tvc = getContentComp())
-        {
-            if (triggerResize)
-                tvc->resized();
-            else
-                tvc->updateComponents();
-        }
-
-        repaint();
-    }
+    explicit TreeViewport (TreeView& treeView)  : owner (treeView)  {}
 
     void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override
     {
         const auto hasScrolledSideways = (newVisibleArea.getX() != lastX);
+
         lastX = newVisibleArea.getX();
         updateComponents (hasScrolledSideways);
 
-        startTimer (50);
-    }
-
-    ContentComponent* getContentComp() const noexcept
-    {
-        return static_cast<ContentComponent*> (getViewedComponent());
+        structureChanged = true;
+        triggerAsyncUpdate();
     }
 
     bool keyPressed (const KeyPress& key) override
@@ -673,22 +657,76 @@ public:
         return Viewport::keyPressed (key);
     }
 
+    ContentComponent* getContentComp() const noexcept
+    {
+        return static_cast<ContentComponent*> (getViewedComponent());
+    }
+
+    enum class Async { yes, no };
+
+    void recalculatePositions (Async useAsyncUpdate)
+    {
+        needsRecalculating = true;
+
+        if (useAsyncUpdate == Async::yes)
+            triggerAsyncUpdate();
+        else
+            handleAsyncUpdate();
+    }
+
 private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
         return createIgnoredAccessibilityHandler (*this);
     }
 
-    void timerCallback() override
+    void handleAsyncUpdate() override
     {
-        stopTimer();
-
-        if (auto* tree = getParentComponent())
-            if (auto* handler = tree->getAccessibilityHandler())
+        if (structureChanged)
+        {
+            if (auto* handler = owner.getAccessibilityHandler())
                 handler->notifyAccessibilityEvent (AccessibilityEvent::structureChanged);
+
+            structureChanged = false;
+        }
+
+        if (needsRecalculating)
+        {
+            if (auto* root = owner.rootItem)
+            {
+                const auto startY = owner.rootItemVisible ? 0 : -root->itemHeight;
+
+                root->updatePositions (startY);
+                getViewedComponent()->setSize (jmax (getMaximumVisibleWidth(), root->totalWidth + 50),
+                                               root->totalHeight + startY);
+            }
+            else
+            {
+                getViewedComponent()->setSize (0, 0);
+            }
+
+            updateComponents (false);
+
+            needsRecalculating = false;
+        }
     }
 
+    void updateComponents (bool triggerResize)
+    {
+        if (auto* content = getContentComp())
+        {
+            if (triggerResize)
+                content->resized();
+            else
+                content->updateComponents();
+        }
+
+        repaint();
+    }
+
+    TreeView& owner;
     int lastX = -1;
+    bool structureChanged = false, needsRecalculating = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TreeViewport)
 };
@@ -696,7 +734,7 @@ private:
 //==============================================================================
 TreeView::TreeView (const String& name)  : Component (name)
 {
-    viewport = std::make_unique<TreeViewport>();
+    viewport = std::make_unique<TreeViewport> (*this);
     addAndMakeVisible (viewport.get());
     viewport->setViewedComponent (new ContentComponent (*this));
 
@@ -737,7 +775,7 @@ void TreeView::setRootItem (TreeViewItem* const newRootItem)
             rootItem->setOpen (true);
         }
 
-        updateVisibleItems();
+        viewport->recalculatePositions (TreeViewport::Async::no);
     }
 }
 
@@ -1097,20 +1135,7 @@ bool TreeView::keyPressed (const KeyPress& key)
 
 void TreeView::updateVisibleItems()
 {
-    if (rootItem != nullptr)
-    {
-        rootItem->updatePositions (rootItemVisible ? 0 : -rootItem->itemHeight);
-
-        viewport->getViewedComponent()
-            ->setSize (jmax (viewport->getMaximumVisibleWidth(), rootItem->totalWidth + 50),
-                       rootItem->totalHeight - (rootItemVisible ? 0 : rootItem->itemHeight));
-    }
-    else
-    {
-        viewport->getViewedComponent()->setSize (0, 0);
-    }
-
-    viewport->updateComponents (false);
+    viewport->recalculatePositions (TreeViewport::Async::yes);
 }
 
 //==============================================================================
@@ -1774,6 +1799,9 @@ void TreeViewItem::setOwnerView (TreeView* const newOwner) noexcept
 
 int TreeViewItem::getIndentX() const noexcept
 {
+    if (ownerView == nullptr)
+        return 0;
+
     int x = ownerView->rootItemVisible ? 1 : 0;
 
     if (! ownerView->openCloseButtonsVisible)
@@ -2053,6 +2081,9 @@ TreeViewItem::OpennessRestorer::~OpennessRestorer()
 
 void TreeViewItem::draw (Graphics& g, int width, bool isMouseOverButton)
 {
+    if (ownerView == nullptr)
+        return;
+
     const auto indent = getIndentX();
     const auto itemW = (itemWidth < 0 || drawsInRightMargin) ? width - indent : itemWidth;
 

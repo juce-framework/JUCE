@@ -23,6 +23,30 @@
   ==============================================================================
 */
 
+// Forward declarations to avoid leaking implementation details.
+namespace Steinberg
+{
+    namespace Vst
+    {
+        class IComponent;
+    }
+}
+
+//==============================================================================
+#if (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) || (defined(AUDIOCOMPONENT_NOCARBONINSTANCES) && AUDIOCOMPONENT_NOCARBONINSTANCES)
+struct OpaqueAudioComponentInstance;
+typedef struct OpaqueAudioComponentInstance* AudioComponentInstance;
+#else
+struct ComponentInstanceRecord;
+typedef struct ComponentInstanceRecord* AudioComponentInstance;
+#endif
+
+typedef AudioComponentInstance AudioUnit;
+
+//==============================================================================
+struct AEffect;
+
+//==============================================================================
 namespace juce
 {
 
@@ -50,7 +74,7 @@ struct ExtensionsVisitor
     struct VST3Client
     {
         virtual ~VST3Client() = default;
-        virtual void* getIComponentPtr() const noexcept = 0;
+        virtual Steinberg::Vst::IComponent* getIComponentPtr() const noexcept = 0;
 
         virtual MemoryBlock getPreset() const = 0;
         virtual bool setPreset (const MemoryBlock&) const = 0;
@@ -60,14 +84,14 @@ struct ExtensionsVisitor
     struct AudioUnitClient
     {
         virtual ~AudioUnitClient() = default;
-        virtual void* getAudioUnitHandle() const noexcept = 0;
+        virtual AudioUnit getAudioUnitHandle() const noexcept = 0;
     };
 
     /** Can be used to retrieve information about a VST that is wrapped by an AudioProcessor. */
     struct VSTClient
     {
         virtual ~VSTClient() = default;
-        virtual void* getAEffectPtr() const noexcept = 0;
+        virtual AEffect* getAEffectPtr() const noexcept = 0;
     };
 
     virtual ~ExtensionsVisitor() = default;

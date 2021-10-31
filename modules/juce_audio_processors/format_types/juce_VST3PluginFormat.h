@@ -61,6 +61,13 @@ public:
     bool canScanForPlugins() const override         { return true; }
     bool isTrivialToScan() const override           { return false; }
 
+    /** Although there doesn't seem to be any official documentation on the matter,
+        Native Instruments Kontakt VST3 crashes on macOS when its bundleEntry is called on a
+        background thread. To allow this plugin (and other ones with similar problems) to be
+        discovered, it's a good idea to scan VST3 plugins on the main thread.
+    */
+    bool canScanOnBackgroundThread() const override { return false; }
+
     void findAllTypesForFile (OwnedArray<PluginDescription>&, const String& fileOrIdentifier) override;
     bool fileMightContainThisPluginType (const String& fileOrIdentifier) override;
     String getNameOfPluginFromIdentifier (const String& fileOrIdentifier) override;

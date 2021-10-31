@@ -95,7 +95,12 @@ MultiDocumentPanel::MultiDocumentPanel()
     setOpaque (true);
 }
 
-MultiDocumentPanel::~MultiDocumentPanel() = default;
+MultiDocumentPanel::~MultiDocumentPanel()
+{
+    for (int i = components.size(); --i >= 0;)
+        if (auto* component = components[i])
+            closeDocumentInternal (component);
+}
 
 //==============================================================================
 namespace MultiDocHelpers
@@ -407,6 +412,8 @@ void MultiDocumentPanel::closeDocumentAsync (Component* component,
 
             return;
         }
+
+        closeDocumentInternal (component);
     }
     else
     {

@@ -41,6 +41,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
 
 namespace Vst2
 {
+struct AEffect;
+
 // If the following files cannot be found then you are probably trying to host
 // VST2 plug-ins. To do this you must have a VST2 SDK in your header search
 // paths or use the "VST (Legacy) SDK Folder" field in the Projucer. The VST2
@@ -1265,7 +1267,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
         {
             explicit Extensions (const VSTPluginInstance* instanceIn) : instance (instanceIn) {}
 
-            void* getAEffectPtr() const noexcept override   { return instance->vstEffect; }
+            AEffect* getAEffectPtr() const noexcept override   { return reinterpret_cast<AEffect*> (instance->vstEffect); }
 
             const VSTPluginInstance* instance = nullptr;
         };
@@ -2855,7 +2857,7 @@ public:
     {
         if (cocoaWrapper != nullptr)
         {
-            if (isVisible())
+            if (isShowing())
                 openPluginWindow ((NSView*) cocoaWrapper->getView());
             else
                 closePluginWindow();
@@ -2873,6 +2875,8 @@ public:
                 setSize (w, h);
         }
     }
+
+    void parentHierarchyChanged() override { visibilityChanged(); }
    #else
     void paint (Graphics& g) override
     {

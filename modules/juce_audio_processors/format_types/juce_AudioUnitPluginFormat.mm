@@ -892,7 +892,7 @@ public:
         {
             explicit Extensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
 
-            void* getAudioUnitHandle() const noexcept override   { return instance->audioUnit; }
+            AudioUnit getAudioUnitHandle() const noexcept override   { return instance->audioUnit; }
 
             const AudioUnitPluginInstance* instance = nullptr;
         };

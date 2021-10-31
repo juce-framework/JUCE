@@ -100,10 +100,11 @@ public:
 
     /** Destructor.
 
-        When deleted, this will call closeAllDocuments (false) to make sure all its
+        When deleted, this will call close all open documents to make sure all its
         components are deleted. If you need to make sure all documents are saved
-        before closing, then you should call closeAllDocuments (true) and check that
-        it returns true before deleting the panel.
+        before closing, then you should call closeAllDocumentsAsync() with
+        checkItsOkToCloseFirst == true and check the provided callback result is true
+        before deleting the panel.
     */
     ~MultiDocumentPanel() override;
 
@@ -133,7 +134,7 @@ public:
         If checkItsOkToCloseFirst is false, then all documents will be closed
         unconditionally.
 
-        @see closeDocument
+        @see closeDocumentAsync
     */
     void closeAllDocumentsAsync (bool checkItsOkToCloseFirst,
                                  std::function<void (bool)> callback);
@@ -151,8 +152,8 @@ public:
         @param component            the component to add
         @param backgroundColour     the background colour to use to fill the component's
                                     window or tab
-        @param deleteWhenRemoved    if true, then when the component is removed by closeDocument()
-                                    or closeAllDocuments(), then it will be deleted. If false, then
+        @param deleteWhenRemoved    if true, then when the component is removed by closeDocumentAsync()
+                                    or closeAllDocumentsAsync(), then it will be deleted. If false, then
                                     the caller must handle the component's deletion
     */
     bool addDocument (Component* component,
@@ -190,7 +191,7 @@ public:
         The component will be deleted if the deleteWhenRemoved parameter was set to
         true when it was added with addDocument.
 
-        @see addDocument, closeAllDocuments
+        @see addDocument, closeAllDocumentsAsync
     */
     void closeDocumentAsync (Component* component,
                              bool checkItsOkToCloseFirst,
