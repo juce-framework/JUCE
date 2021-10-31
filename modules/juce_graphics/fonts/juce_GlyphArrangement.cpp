@@ -63,7 +63,7 @@ void PositionedGlyph::createPath (Path& path) const
 {
     if (! isWhitespace())
     {
-        if (auto* t = font.getTypeface())
+        if (auto t = font.getTypefacePtr())
         {
             Path p;
             t->getOutlineForGlyph (glyph, p);
@@ -78,7 +78,7 @@ bool PositionedGlyph::hitTest (float px, float py) const
 {
     if (getBounds().contains (px, py) && ! isWhitespace())
     {
-        if (auto* t = font.getTypeface())
+        if (auto t = font.getTypefacePtr())
         {
             Path p;
             t->getOutlineForGlyph (glyph, p);

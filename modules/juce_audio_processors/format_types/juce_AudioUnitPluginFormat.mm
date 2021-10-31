@@ -330,7 +330,7 @@ class AudioUnitPluginWindowCarbon;
 class AudioUnitPluginWindowCocoa;
 
 //==============================================================================
-class AudioUnitPluginInstance     : public AudioPluginInstance
+class AudioUnitPluginInstance final    : public AudioPluginInstance
 {
 public:
     struct AUInstanceParameter final  : public Parameter
@@ -488,6 +488,11 @@ public:
             return auValueStrings;
         }
 
+        String getParameterID() const override
+        {
+            return String (paramID);
+        }
+
         void sendParameterChangeEvent()
         {
            #if JUCE_MAC
@@ -514,6 +519,9 @@ public:
             return minValue + (range * normalisedValue);
         }
 
+        UInt32 getRawParamID() const { return paramID; }
+
+    private:
         AudioUnitPluginInstance& pluginInstance;
         const UInt32 paramID;
         const String name;
@@ -598,11 +606,7 @@ public:
     void cleanup()
     {
        #if JUCE_MAC
-        if (eventListenerRef != nullptr)
-        {
-            AUListenerDispose (eventListenerRef);
-            eventListenerRef = nullptr;
-        }
+        disposeEventListener();
        #endif
 
         if (prepared)
@@ -618,7 +622,11 @@ public:
         setRateAndBufferSizeDetails (rate, blockSize);
         setLatencySamples (0);
         refreshParameterList();
-        createPluginCallbacks();
+        setPluginCallbacks();
+
+       #if JUCE_MAC
+        createEventListener();
+       #endif
 
         return true;
     }
@@ -1000,6 +1008,8 @@ public:
             {
                 if (! haveParameterList)
                     refreshParameterList();
+
+                setPluginCallbacks();
 
                 if (! syncBusLayouts (getBusesLayout(), true, ignore))
                 {
@@ -1486,7 +1496,7 @@ public:
             }
         }
 
-        setParameterTree (std::move (newParameterTree));
+        setHostedParameterTree (std::move (newParameterTree));
 
         UInt32 propertySize = 0;
         Boolean writable = false;
@@ -1552,7 +1562,7 @@ private:
     };
 
     //==============================================================================
-    struct AUBypassParameter    : Parameter
+    struct AUBypassParameter final : public Parameter
     {
         AUBypassParameter (AudioUnitPluginInstance& effectToUse)
              : parent (effectToUse), currentValue (getCurrentHostValue())
@@ -1636,6 +1646,8 @@ private:
         StringArray getAllValueStrings() const override                     { return values; }
         String getLabel() const override                                    { return {}; }
 
+        String getParameterID() const override                              { return {}; }
+
         AudioUnitPluginInstance& parent;
         const StringArray auOnStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
         const StringArray auOffStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
@@ -1666,7 +1678,7 @@ private:
     bool lastProcessBlockCallWasBypass = false, auSupportsBypass = false;
     bool haveParameterList = false;
 
-    void createPluginCallbacks()
+    void setPluginCallbacks()
     {
         if (audioUnit != nullptr)
         {
@@ -1684,52 +1696,65 @@ private:
             }
            #endif
 
-            {
-                HostCallbackInfo info;
-                zerostruct (info);
+            HostCallbackInfo info;
+            zerostruct (info);
 
-                info.hostUserData = this;
-                info.beatAndTempoProc = getBeatAndTempoCallback;
-                info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
-                info.transportStateProc = getTransportStateCallback;
+            info.hostUserData = this;
+            info.beatAndTempoProc = getBeatAndTempoCallback;
+            info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
+            info.transportStateProc = getTransportStateCallback;
 
-                AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks,
-                                      kAudioUnitScope_Global, 0, &info, sizeof (info));
-            }
-           #if JUCE_MAC
-            AUEventListenerCreate (eventListenerCallback, this, CFRunLoopGetMain(),
-                                   kCFRunLoopDefaultMode, 0, 0, &eventListenerRef);
-
-            for (auto* param : getParameters())
-            {
-                if (auto* auParam = dynamic_cast<AUInstanceParameter*> (param))
-                {
-                    AudioUnitEvent event;
-                    event.mArgument.mParameter.mAudioUnit = audioUnit;
-                    event.mArgument.mParameter.mParameterID = auParam->paramID;
-                    event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
-                    event.mArgument.mParameter.mElement = 0;
-
-                    event.mEventType = kAudioUnitEvent_ParameterValueChange;
-                    AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
-
-                    event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
-                    AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
-
-                    event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
-                    AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
-                }
-            }
-
-            addPropertyChangeListener (kAudioUnitProperty_PresentPreset);
-            addPropertyChangeListener (kAudioUnitProperty_ParameterList);
-            addPropertyChangeListener (kAudioUnitProperty_Latency);
-            addPropertyChangeListener (kAudioUnitProperty_BypassEffect);
-           #endif
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks,
+                                  kAudioUnitScope_Global, 0, &info, sizeof (info));
         }
     }
 
    #if JUCE_MAC
+    void disposeEventListener()
+    {
+        if (eventListenerRef != nullptr)
+        {
+            AUListenerDispose (eventListenerRef);
+            eventListenerRef = nullptr;
+        }
+    }
+
+    void createEventListener()
+    {
+        if (audioUnit == nullptr)
+            return;
+
+        disposeEventListener();
+
+        AUEventListenerCreate (eventListenerCallback, this, CFRunLoopGetMain(),
+                               kCFRunLoopDefaultMode, 0, 0, &eventListenerRef);
+
+        for (auto* param : getParameters())
+        {
+            jassert (dynamic_cast<AUInstanceParameter*> (param) != nullptr);
+
+            AudioUnitEvent event;
+            event.mArgument.mParameter.mAudioUnit = audioUnit;
+            event.mArgument.mParameter.mParameterID = static_cast<AUInstanceParameter*> (param)->getRawParamID();
+            event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
+            event.mArgument.mParameter.mElement = 0;
+
+            event.mEventType = kAudioUnitEvent_ParameterValueChange;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+
+            event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+
+            event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+        }
+
+        addPropertyChangeListener (kAudioUnitProperty_PresentPreset);
+        addPropertyChangeListener (kAudioUnitProperty_ParameterList);
+        addPropertyChangeListener (kAudioUnitProperty_Latency);
+        addPropertyChangeListener (kAudioUnitProperty_BypassEffect);
+    }
+
     void addPropertyChangeListener (AudioUnitPropertyID type) const
     {
         AudioUnitEvent event;
@@ -2396,8 +2421,16 @@ private:
    #if JUCE_SUPPORTS_AUv3
     void requestViewControllerCallback (AUViewControllerBase* controller)
     {
-        auto nsSize = [controller preferredContentSize];
-        auto viewSize = CGSizeMake (nsSize.width, nsSize.height);
+        const auto viewSize = [&controller]
+        {
+            auto size = [controller preferredContentSize];
+
+            if (size.width == 0 || size.height == 0)
+                size = controller.view.frame.size;
+
+            return CGSizeMake (jmax ((CGFloat) 20.0f, size.width),
+                               jmax ((CGFloat) 20.0f, size.height));
+        }();
 
         if (! MessageManager::getInstance()->isThisTheMessageThread())
         {

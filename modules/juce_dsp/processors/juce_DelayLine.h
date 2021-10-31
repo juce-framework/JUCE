@@ -116,6 +116,21 @@ public:
     /** Initialises the processor. */
     void prepare (const ProcessSpec& spec);
 
+    /** Sets a new maximum delay in samples.
+
+        Also clears the delay line.
+
+        This may allocate internally, so you should never call it from the audio thread.
+    */
+    void setMaximumDelayInSamples (int maxDelayInSamples);
+
+    /** Gets the maximum possible delay in samples.
+
+        For very short delay times, the result of getMaximumDelayInSamples() may
+        differ from the last value passed to setMaximumDelayInSamples().
+    */
+    int getMaximumDelayInSamples() const noexcept       { return totalSize - 1; }
+
     /** Resets the internal state variables of the processor. */
     void reset();
 

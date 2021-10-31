@@ -168,15 +168,16 @@ public:
     void refresh();
     /** @internal */
     ~Displays() = default;
-    // This method has been deprecated - use the getDisplayForPoint() or getDisplayForRect() methods instead
-    // as they can deal with converting between logical and physical pixels
-    JUCE_DEPRECATED (const Display& getDisplayContaining (Point<int> position) const noexcept);
+
+    [[deprecated ("Use the getDisplayForPoint or getDisplayForRect methods instead "
+                 "as they can deal with converting between logical and physical pixels.")]]
+    const Display& getDisplayContaining (Point<int> position) const noexcept;
 
     // These methods have been deprecated - use the methods which return a Display* instead as they will return
     // nullptr on headless systems with no connected displays
-    JUCE_DEPRECATED (const Display& findDisplayForRect (Rectangle<int>, bool isPhysical = false) const noexcept);
-    JUCE_DEPRECATED (const Display& findDisplayForPoint (Point<int>, bool isPhysical = false) const noexcept);
-    JUCE_DEPRECATED (const Display& getMainDisplay() const noexcept);
+    [[deprecated]] const Display& findDisplayForRect (Rectangle<int>, bool isPhysical = false) const noexcept;
+    [[deprecated]] const Display& findDisplayForPoint (Point<int>, bool isPhysical = false) const noexcept;
+    [[deprecated]] const Display& getMainDisplay() const noexcept;
    #endif
 
 private:

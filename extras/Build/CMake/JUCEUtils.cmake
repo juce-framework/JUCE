@@ -294,6 +294,7 @@ function(_juce_write_configure_time_info target)
     _juce_append_target_property(file_content BACKGROUND_AUDIO_ENABLED             ${target} JUCE_BACKGROUND_AUDIO_ENABLED)
     _juce_append_target_property(file_content BACKGROUND_BLE_ENABLED               ${target} JUCE_BACKGROUND_BLE_ENABLED)
     _juce_append_target_property(file_content PUSH_NOTIFICATIONS_ENABLED           ${target} JUCE_PUSH_NOTIFICATIONS_ENABLED)
+    _juce_append_target_property(file_content NETWORK_MULTICAST_ENABLED            ${target} JUCE_NETWORK_MULTICAST_ENABLED)
     _juce_append_target_property(file_content PLUGIN_MANUFACTURER_CODE             ${target} JUCE_PLUGIN_MANUFACTURER_CODE)
     _juce_append_target_property(file_content PLUGIN_CODE                          ${target} JUCE_PLUGIN_CODE)
     _juce_append_target_property(file_content IPHONE_SCREEN_ORIENTATIONS           ${target} JUCE_IPHONE_SCREEN_ORIENTATIONS)
@@ -441,8 +442,12 @@ function(_juce_version_code version_in out_var)
     set(${out_var} "${hex}" PARENT_SCOPE)
 endfunction()
 
-function(_juce_to_char_literal str out_var)
-    string(APPEND str "    ") # Make sure there are at least 4 characters in the string.
+function(_juce_to_char_literal str out_var help_text)
+    string(LENGTH "${str}" string_length)
+
+    if(NOT "${string_length}" EQUAL "4")
+        message(FATAL_ERROR "The ${help_text} code must contain exactly four characters, but it was set to '${str}'")
+    endif()
 
     # Round-tripping through a file is the simplest way to convert a string to hex...
     string(SUBSTRING "${str}" 0 4 four_chars)
@@ -1132,11 +1137,11 @@ function(_juce_configure_plugin_targets target)
     get_target_property(use_legacy_compatibility_plugin_code ${target} JUCE_USE_LEGACY_COMPATIBILITY_PLUGIN_CODE)
 
     if(use_legacy_compatibility_plugin_code)
-        set(project_manufacturer_code "project_manufacturer_code-NOTFOUND")
+        set(project_manufacturer_code "proj")
     endif()
 
-    _juce_to_char_literal(${project_manufacturer_code} project_manufacturer_code)
-    _juce_to_char_literal(${project_plugin_code} project_plugin_code)
+    _juce_to_char_literal(${project_manufacturer_code} project_manufacturer_code "plugin manufacturer")
+    _juce_to_char_literal(${project_plugin_code} project_plugin_code "plugin")
 
     _juce_get_vst3_category_string(${target} vst3_category_string)
 
@@ -1503,6 +1508,7 @@ function(_juce_initialise_target target)
         NEEDS_WEB_BROWSER               # Set this true if you want to link webkit on Linux
         NEEDS_STORE_KIT                 # Set this true if you want in-app-purchases on Mac
         PUSH_NOTIFICATIONS_ENABLED
+        NETWORK_MULTICAST_ENABLED
         HARDENED_RUNTIME_ENABLED
         APP_SANDBOX_ENABLED
         APP_SANDBOX_INHERIT

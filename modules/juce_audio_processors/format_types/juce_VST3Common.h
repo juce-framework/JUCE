@@ -23,10 +23,12 @@
   ==============================================================================
 */
 
-#if ! DOXYGEN
+#ifndef DOXYGEN
 
 namespace juce
 {
+
+JUCE_BEGIN_NO_SANITIZE ("vptr")
 
 //==============================================================================
 #define JUCE_DECLARE_VST3_COM_REF_METHODS \
@@ -1219,6 +1221,8 @@ private:
     std::atomic<int32> flags { 0 };
 };
 
+JUCE_END_NO_SANITIZE
+
 } // namespace juce
 
-#endif // ! DOXYGEN
+#endif

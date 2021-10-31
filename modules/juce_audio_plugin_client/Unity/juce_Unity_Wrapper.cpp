@@ -365,7 +365,7 @@ public:
 
         if (parametersPtr == nullptr)
         {
-            numParams = juceParameters.params.size();
+            numParams = (int) juceParameters.size();
 
             parametersPtr.reset (static_cast<UnityAudioParameterDefinition*> (std::calloc (static_cast<size_t> (numParams),
                                                                               sizeof (UnityAudioParameterDefinition))));
@@ -374,7 +374,7 @@ public:
 
             for (int i = 0; i < numParams; ++i)
             {
-                auto* parameter = juceParameters.params[i];
+                auto* parameter = juceParameters.getParamForIndex (i);
                 auto& paramDef = parametersPtr.get()[i];
 
                 const auto nameLength = (size_t) numElementsInArray (paramDef.name);

@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if JUCE_ENABLE_LIVE_CONSTANT_EDITOR && ! DOXYGEN
+#if JUCE_ENABLE_LIVE_CONSTANT_EDITOR && ! defined (DOXYGEN)
 
 //==============================================================================
 /** You can safely ignore all the stuff in this namespace - it's a bunch of boilerplate

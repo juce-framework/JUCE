@@ -131,8 +131,8 @@ private:
             ModuleDescription m (path);
 
             if (m.isValid()
-                && std::find_if (list.begin(), list.end(),
-                                 [&m] (const ModuleIDAndFolder& element) { return element.first == m.getID(); }) == std::end (list))
+                && std::none_of (list.begin(), list.end(),
+                                 [&m] (const ModuleIDAndFolder& element) { return element.first == m.getID(); }))
             {
                 list.push_back ({ m.getID(), path });
                 return true;

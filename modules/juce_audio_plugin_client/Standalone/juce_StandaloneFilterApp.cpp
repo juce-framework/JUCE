@@ -67,7 +67,7 @@ public:
         appProperties.setStorageParameters (options);
     }
 
-    const String getApplicationName() override              { return JucePlugin_Name; }
+    const String getApplicationName() override              { return CharPointer_UTF8 (JucePlugin_Name); }
     const String getApplicationVersion() override           { return JucePlugin_VersionString; }
     bool moreThanOneInstanceAllowed() override              { return true; }
     void anotherInstanceStarted (const String&) override    {}

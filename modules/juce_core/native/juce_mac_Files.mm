@@ -285,13 +285,17 @@ bool File::moveToTrash() const
 
     JUCE_AUTORELEASEPOOL
     {
-       #if (defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0) \
-         || (defined (MAC_OS_X_VERSION_10_8) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8)
-        NSError* error = nil;
-        return [[NSFileManager defaultManager] trashItemAtURL: createNSURLFromFile (*this)
-                                             resultingItemURL: nil
-                                                        error: &error];
-       #elif JUCE_IOS
+       #if JUCE_MAC || (JUCE_IOS && (defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0))
+        if (@available (macOS 10.8, iOS 11.0, *))
+        {
+            NSError* error = nil;
+            return [[NSFileManager defaultManager] trashItemAtURL: createNSURLFromFile (*this)
+                                                 resultingItemURL: nil
+                                                            error: &error];
+        }
+       #endif
+
+       #if JUCE_IOS
         return deleteFile();
        #else
         [[NSWorkspace sharedWorkspace] recycleURLs: [NSArray arrayWithObject: createNSURLFromFile (*this)]
@@ -505,5 +509,13 @@ void File::addToDock() const
     }
 }
 #endif
+
+File File::getContainerForSecurityApplicationGroupIdentifier (const String& appGroup)
+{
+    if (auto* url = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier: juceStringToNS (appGroup)])
+        return File (nsStringToJuce ([url path]));
+
+    return File();
+}
 
 } // namespace juce

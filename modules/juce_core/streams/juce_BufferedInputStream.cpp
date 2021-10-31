@@ -39,22 +39,20 @@ static int calcBufferStreamBufferSize (int requestedSize, InputStream* source) n
 
 //==============================================================================
 BufferedInputStream::BufferedInputStream (InputStream* sourceStream, int size, bool takeOwnership)
-   : source (sourceStream, takeOwnership),
-     bufferSize (calcBufferStreamBufferSize (size, sourceStream)),
-     position (sourceStream->getPosition()),
-     bufferStart (position)
+    : source (sourceStream, takeOwnership),
+      bufferedRange (sourceStream->getPosition(), sourceStream->getPosition()),
+      position (bufferedRange.getStart()),
+      bufferLength (calcBufferStreamBufferSize (size, sourceStream))
 {
-    buffer.malloc (bufferSize);
+    buffer.malloc (bufferLength);
 }
 
 BufferedInputStream::BufferedInputStream (InputStream& sourceStream, int size)
-   : BufferedInputStream (&sourceStream, size, false)
+    : BufferedInputStream (&sourceStream, size, false)
 {
 }
 
-BufferedInputStream::~BufferedInputStream()
-{
-}
+BufferedInputStream::~BufferedInputStream() = default;
 
 //==============================================================================
 char BufferedInputStream::peekByte()
@@ -62,7 +60,7 @@ char BufferedInputStream::peekByte()
     if (! ensureBuffered())
         return 0;
 
-    return position < lastReadPos ? buffer[(int) (position - bufferStart)] : 0;
+    return position < lastReadPos ? buffer[(int) (position - bufferedRange.getStart())] : 0;
 }
 
 int64 BufferedInputStream::getTotalLength()
@@ -90,20 +88,19 @@ bool BufferedInputStream::ensureBuffered()
 {
     auto bufferEndOverlap = lastReadPos - bufferOverlap;
 
-    if (position < bufferStart || position >= bufferEndOverlap)
+    if (position < bufferedRange.getStart() || position >= bufferEndOverlap)
     {
-        int bytesRead;
+        int bytesRead = 0;
 
         if (position < lastReadPos
              && position >= bufferEndOverlap
-             && position >= bufferStart)
+             && position >= bufferedRange.getStart())
         {
             auto bytesToKeep = (int) (lastReadPos - position);
-            memmove (buffer, buffer + (int) (position - bufferStart), (size_t) bytesToKeep);
+            memmove (buffer, buffer + (int) (position - bufferedRange.getStart()), (size_t) bytesToKeep);
 
-            bufferStart = position;
             bytesRead = source->read (buffer + bytesToKeep,
-                                      (int) (bufferSize - bytesToKeep));
+                                      (int) (bufferLength - bytesToKeep));
 
             if (bytesRead < 0)
                 return false;
@@ -113,75 +110,62 @@ bool BufferedInputStream::ensureBuffered()
         }
         else
         {
-            bufferStart = position;
-
-            if (! source->setPosition (bufferStart))
+            if (! source->setPosition (position))
                 return false;
 
-            bytesRead = source->read (buffer, bufferSize);
+            bytesRead = (int) source->read (buffer, (size_t) bufferLength);
 
             if (bytesRead < 0)
                 return false;
 
-            lastReadPos = bufferStart + bytesRead;
+            lastReadPos = position + bytesRead;
         }
 
-        while (bytesRead < bufferSize)
+        bufferedRange = Range<int64> (position, lastReadPos);
+
+        while (bytesRead < bufferLength)
             buffer[bytesRead++] = 0;
     }
 
     return true;
 }
 
-int BufferedInputStream::read (void* destBuffer, int maxBytesToRead)
+int BufferedInputStream::read (void* destBuffer, const int maxBytesToRead)
 {
-    jassert (destBuffer != nullptr && maxBytesToRead >= 0);
+    const auto initialPosition = position;
 
-    if (position >= bufferStart
-         && position + maxBytesToRead <= lastReadPos)
+    const auto getBufferedRange = [this] { return bufferedRange; };
+
+    const auto readFromReservoir = [this, &destBuffer, &initialPosition] (const Range<int64> rangeToRead)
     {
-        memcpy (destBuffer, buffer + (int) (position - bufferStart), (size_t) maxBytesToRead);
-        position += maxBytesToRead;
-        return maxBytesToRead;
-    }
+        memcpy (static_cast<char*> (destBuffer) + (rangeToRead.getStart() - initialPosition),
+                buffer + (rangeToRead.getStart() - bufferedRange.getStart()),
+                (size_t) rangeToRead.getLength());
+    };
 
-    if (position < bufferStart || position >= lastReadPos)
-        if (! ensureBuffered())
-            return 0;
-
-    int bytesRead = 0;
-
-    while (maxBytesToRead > 0)
+    const auto fillReservoir = [this] (int64 requestedStart)
     {
-        auto numToRead = jmin (maxBytesToRead, (int) (lastReadPos - position));
+        position = requestedStart;
+        ensureBuffered();
+    };
 
-        if (numToRead > 0)
-        {
-            memcpy (destBuffer, buffer + (int) (position - bufferStart), (size_t) numToRead);
-            maxBytesToRead -= numToRead;
-            bytesRead += numToRead;
-            position += numToRead;
-            destBuffer = static_cast<char*> (destBuffer) + numToRead;
-        }
+    const auto remaining = Reservoir::doBufferedRead (Range<int64> (position, position + maxBytesToRead),
+                                                      getBufferedRange,
+                                                      readFromReservoir,
+                                                      fillReservoir);
 
-        auto oldLastReadPos = lastReadPos;
-
-        if (! ensureBuffered()
-             || oldLastReadPos == lastReadPos
-             || isExhausted())
-            break;
-    }
-
-    return bytesRead;
+    const auto bytesRead = maxBytesToRead - remaining.getLength();
+    position = remaining.getStart();
+    return (int) bytesRead;
 }
 
 String BufferedInputStream::readString()
 {
-    if (position >= bufferStart
+    if (position >= bufferedRange.getStart()
          && position < lastReadPos)
     {
         auto maxChars = (int) (lastReadPos - position);
-        auto* src = buffer + (int) (position - bufferStart);
+        auto* src = buffer + (int) (position - bufferedRange.getStart());
 
         for (int i = 0; i < maxChars; ++i)
         {
@@ -203,71 +187,131 @@ String BufferedInputStream::readString()
 
 struct BufferedInputStreamTests   : public UnitTest
 {
+    template <typename Fn, size_t... Ix, typename Values>
+    static void applyImpl (Fn&& fn, std::index_sequence<Ix...>, Values&& values)
+    {
+        fn (std::get<Ix> (values)...);
+    }
+
+    template <typename Fn, typename... Values>
+    static void apply (Fn&& fn, std::tuple<Values...> values)
+    {
+        applyImpl (fn, std::make_index_sequence<sizeof... (Values)>(), values);
+    }
+
+    template <typename Fn, typename Values>
+    static void allCombinationsImpl (Fn&& fn, Values&& values)
+    {
+        apply (fn, values);
+    }
+
+    template <typename Fn, typename Values, typename Range, typename... Ranges>
+    static void allCombinationsImpl (Fn&& fn, Values&& values, Range&& range, Ranges&&... ranges)
+    {
+        for (auto& item : range)
+            allCombinationsImpl (fn, std::tuple_cat (values, std::tie (item)), ranges...);
+    }
+
+    template <typename Fn, typename... Ranges>
+    static void allCombinations (Fn&& fn, Ranges&&... ranges)
+    {
+        allCombinationsImpl (fn, std::tie(), ranges...);
+    }
+
     BufferedInputStreamTests()
         : UnitTest ("BufferedInputStream", UnitTestCategories::streams)
     {}
 
     void runTest() override
     {
-        const MemoryBlock data ("abcdefghijklmnopqrstuvwxyz", 26);
-        MemoryInputStream mi (data, true);
+        const MemoryBlock testBufferA ("abcdefghijklmnopqrstuvwxyz", 26);
 
-        BufferedInputStream stream (mi, (int) data.getSize());
-
-        beginTest ("Read");
-
-        expectEquals (stream.getPosition(), (int64) 0);
-        expectEquals (stream.getTotalLength(), (int64) data.getSize());
-        expectEquals (stream.getNumBytesRemaining(), stream.getTotalLength());
-        expect (! stream.isExhausted());
-
-        size_t numBytesRead = 0;
-        MemoryBlock readBuffer (data.getSize());
-
-        while (numBytesRead < data.getSize())
+        const auto testBufferB = [&]
         {
-            expectEquals (stream.peekByte(), *(char*) (data.begin() + numBytesRead));
+            MemoryBlock mb { 8192 };
+            auto r = getRandom();
 
-            numBytesRead += (size_t) stream.read (&readBuffer[numBytesRead], 3);
+            std::for_each (mb.begin(), mb.end(), [&] (char& item)
+            {
+                item = (char) r.nextInt (std::numeric_limits<char>::max());
+            });
 
-            expectEquals (stream.getPosition(), (int64) numBytesRead);
-            expectEquals (stream.getNumBytesRemaining(), (int64) (data.getSize() - numBytesRead));
-            expect (stream.isExhausted() == (numBytesRead == data.getSize()));
-        }
+            return mb;
+        }();
 
-        expectEquals (stream.getPosition(), (int64) data.getSize());
-        expectEquals (stream.getNumBytesRemaining(), (int64) 0);
-        expect (stream.isExhausted());
+        const MemoryBlock buffers[] { testBufferA, testBufferB };
+        const int readSizes[] { 3, 10, 50 };
+        const bool shouldPeek[] { false, true };
 
-        expect (readBuffer == data);
-
-        beginTest ("Skip");
-
-        stream.setPosition (0);
-        expectEquals (stream.getPosition(), (int64) 0);
-        expectEquals (stream.getTotalLength(), (int64) data.getSize());
-        expectEquals (stream.getNumBytesRemaining(), stream.getTotalLength());
-        expect (! stream.isExhausted());
-
-        numBytesRead = 0;
-        const int numBytesToSkip = 5;
-
-        while (numBytesRead < data.getSize())
+        const auto runTest = [this] (const MemoryBlock& data, const int readSize, const bool peek)
         {
-            expectEquals (stream.peekByte(), *(char*) (data.begin() + numBytesRead));
+            MemoryInputStream mi (data, true);
 
-            stream.skipNextBytes (numBytesToSkip);
-            numBytesRead += numBytesToSkip;
-            numBytesRead = std::min (numBytesRead, data.getSize());
+            BufferedInputStream stream (mi, jmin (200, (int) data.getSize()));
 
-            expectEquals (stream.getPosition(), (int64) numBytesRead);
-            expectEquals (stream.getNumBytesRemaining(), (int64) (data.getSize() - numBytesRead));
-            expect (stream.isExhausted() == (numBytesRead == data.getSize()));
-        }
+            beginTest ("Read");
 
-        expectEquals (stream.getPosition(), (int64) data.getSize());
-        expectEquals (stream.getNumBytesRemaining(), (int64) 0);
-        expect (stream.isExhausted());
+            expectEquals (stream.getPosition(), (int64) 0);
+            expectEquals (stream.getTotalLength(), (int64) data.getSize());
+            expectEquals (stream.getNumBytesRemaining(), stream.getTotalLength());
+            expect (! stream.isExhausted());
+
+            size_t numBytesRead = 0;
+            MemoryBlock readBuffer (data.getSize());
+
+            while (numBytesRead < data.getSize())
+            {
+                if (peek)
+                    expectEquals (stream.peekByte(), *(char*) (data.begin() + numBytesRead));
+
+                const auto startingPos = numBytesRead;
+                numBytesRead += (size_t) stream.read (readBuffer.begin() + numBytesRead, readSize);
+
+                expect (std::equal (readBuffer.begin() + startingPos,
+                                    readBuffer.begin() + numBytesRead,
+                                    data.begin() + startingPos,
+                                    data.begin() + numBytesRead));
+                expectEquals (stream.getPosition(), (int64) numBytesRead);
+                expectEquals (stream.getNumBytesRemaining(), (int64) (data.getSize() - numBytesRead));
+                expect (stream.isExhausted() == (numBytesRead == data.getSize()));
+            }
+
+            expectEquals (stream.getPosition(), (int64) data.getSize());
+            expectEquals (stream.getNumBytesRemaining(), (int64) 0);
+            expect (stream.isExhausted());
+
+            expect (readBuffer == data);
+
+            beginTest ("Skip");
+
+            stream.setPosition (0);
+            expectEquals (stream.getPosition(), (int64) 0);
+            expectEquals (stream.getTotalLength(), (int64) data.getSize());
+            expectEquals (stream.getNumBytesRemaining(), stream.getTotalLength());
+            expect (! stream.isExhausted());
+
+            numBytesRead = 0;
+            const int numBytesToSkip = 5;
+
+            while (numBytesRead < data.getSize())
+            {
+                expectEquals (stream.peekByte(), *(char*) (data.begin() + numBytesRead));
+
+                stream.skipNextBytes (numBytesToSkip);
+                numBytesRead += numBytesToSkip;
+                numBytesRead = std::min (numBytesRead, data.getSize());
+
+                expectEquals (stream.getPosition(), (int64) numBytesRead);
+                expectEquals (stream.getNumBytesRemaining(), (int64) (data.getSize() - numBytesRead));
+                expect (stream.isExhausted() == (numBytesRead == data.getSize()));
+            }
+
+            expectEquals (stream.getPosition(), (int64) data.getSize());
+            expectEquals (stream.getNumBytesRemaining(), (int64) 0);
+            expect (stream.isExhausted());
+        };
+
+        allCombinations (runTest, buffers, readSizes, shouldPeek);
     }
 };
 

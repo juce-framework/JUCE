@@ -300,16 +300,16 @@ struct MenuWindow  : public Component
     MenuWindow (const PopupMenu& menu, MenuWindow* parentWindow,
                 Options opts, bool alignToRectangle, bool shouldDismissOnMouseUp,
                 ApplicationCommandManager** manager, float parentScaleFactor = 1.0f)
-       : Component ("menu"),
-         parent (parentWindow),
-         options (std::move (opts)),
-         managerOfChosenCommand (manager),
-         componentAttachedTo (options.getTargetComponent()),
-         dismissOnMouseUp (shouldDismissOnMouseUp),
-         windowCreationTime (Time::getMillisecondCounter()),
-         lastFocusedTime (windowCreationTime),
-         timeEnteredCurrentChildComp (windowCreationTime),
-         scaleFactor (parentWindow != nullptr ? parentScaleFactor : 1.0f)
+        : Component ("menu"),
+          parent (parentWindow),
+          options (opts.withParentComponent (getLookAndFeel().getParentComponentForMenuOptions (opts))),
+          managerOfChosenCommand (manager),
+          componentAttachedTo (options.getTargetComponent()),
+          dismissOnMouseUp (shouldDismissOnMouseUp),
+          windowCreationTime (Time::getMillisecondCounter()),
+          lastFocusedTime (windowCreationTime),
+          timeEnteredCurrentChildComp (windowCreationTime),
+          scaleFactor (parentWindow != nullptr ? parentScaleFactor : 1.0f)
     {
         setWantsKeyboardFocus (false);
         setMouseClickGrabsKeyboardFocus (false);
@@ -321,12 +321,9 @@ struct MenuWindow  : public Component
 
         auto& lf = getLookAndFeel();
 
-        parentComponent = lf.getParentComponentForMenuOptions (options);
-        const_cast<Options&>(options) = options.withParentComponent (parentComponent);
-
-        if (parentComponent != nullptr)
+        if (auto* pc = options.getParentComponent())
         {
-            parentComponent->addChildComponent (this);
+            pc->addChildComponent (this);
         }
         else
         {
@@ -348,7 +345,7 @@ struct MenuWindow  : public Component
             Desktop::getInstance().addGlobalMouseListener (this);
         }
 
-        if (parentComponent == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
+        if (options.getParentComponent() == nullptr && parentWindow == nullptr && lf.shouldPopupMenuScaleWithTargetComponent (options))
             if (auto* targetComponent = options.getTargetComponent())
                 scaleFactor = Component::getApproximateScaleFactorForComponent (targetComponent);
 
@@ -374,7 +371,6 @@ struct MenuWindow  : public Component
 
         calculateWindowPos (targetArea, alignToRectangle);
         setTopLeftPosition (windowPos.getPosition());
-        updateYPositions();
 
         if (auto visibleID = options.getItemThatMustBeVisible())
         {
@@ -382,8 +378,13 @@ struct MenuWindow  : public Component
             {
                 if (item->item.itemID == visibleID)
                 {
-                    auto targetPosition = parentComponent != nullptr ? parentComponent->getLocalPoint (nullptr, targetArea.getTopLeft())
-                                                                     : targetArea.getTopLeft();
+                    const auto targetPosition = [&]
+                    {
+                        if (auto* pc = options.getParentComponent())
+                            return pc->getLocalPoint (nullptr, targetArea.getTopLeft());
+
+                        return targetArea.getTopLeft();
+                    }();
 
                     auto y = targetPosition.getY() - windowPos.getY();
                     ensureItemComponentIsVisible (*item, isPositiveAndBelow (y, windowPos.getHeight()) ? y : -1);
@@ -441,7 +442,7 @@ struct MenuWindow  : public Component
     {
         auto& lf = getLookAndFeel();
 
-        if (parentComponent != nullptr)
+        if (options.getParentComponent())
             lf.drawResizableFrame (g, getWidth(), getHeight(),
                                    BorderSize<int> (getLookAndFeel().getPopupMenuBorderSizeWithOptions (options)));
 
@@ -781,28 +782,26 @@ struct MenuWindow  : public Component
         if (relativeTo != nullptr)
             targetPoint = relativeTo->localPointToGlobal (targetPoint);
 
-        auto parentArea = Desktop::getInstance().getDisplays().getDisplayForPoint (targetPoint * scaleFactor)
-                              #if JUCE_MAC || JUCE_ANDROID
-                               ->userArea;
-                              #else
-                               ->totalArea; // on windows, don't stop the menu overlapping the taskbar
-                              #endif
+        auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (targetPoint * scaleFactor);
+        auto parentArea = display->safeAreaInsets.subtractedFrom (display->totalArea);
 
-        if (parentComponent == nullptr)
-            return parentArea;
+        if (auto* pc = options.getParentComponent())
+        {
+            return pc->getLocalArea (nullptr,
+                                     pc->getScreenBounds()
+                                           .reduced (getLookAndFeel().getPopupMenuBorderSizeWithOptions (options))
+                                           .getIntersection (parentArea));
+        }
 
-        return parentComponent->getLocalArea (nullptr,
-                                              parentComponent->getScreenBounds()
-                                                    .reduced (getLookAndFeel().getPopupMenuBorderSizeWithOptions (options))
-                                                    .getIntersection (parentArea));
+        return parentArea;
     }
 
     void calculateWindowPos (Rectangle<int> target, const bool alignToRectangle)
     {
         auto parentArea = getParentArea (target.getCentre()) / scaleFactor;
 
-        if (parentComponent != nullptr)
-            target = parentComponent->getLocalArea (nullptr, target).getIntersection (parentArea);
+        if (auto* pc = options.getParentComponent())
+            target = pc->getLocalArea (nullptr, target).getIntersection (parentArea);
 
         auto maxMenuHeight = parentArea.getHeight() - 24;
 
@@ -1032,7 +1031,7 @@ struct MenuWindow  : public Component
                                             windowPos.getHeight() - (PopupMenuSettings::scrollZone + itemComp.getHeight())),
                                       currentY);
 
-                auto parentArea = getParentArea (windowPos.getPosition(), parentComponent) / scaleFactor;
+                auto parentArea = getParentArea (windowPos.getPosition(), options.getParentComponent()) / scaleFactor;
                 auto deltaY = wantedY - currentY;
 
                 windowPos.setSize (jmin (windowPos.getWidth(), parentArea.getWidth()),
@@ -1163,8 +1162,7 @@ struct MenuWindow  : public Component
             activeSubMenu.reset (new HelperClasses::MenuWindow (*(childComp->item.subMenu), this,
                                                                 options.withTargetScreenArea (childComp->getScreenBounds())
                                                                        .withMinimumWidth (0)
-                                                                       .withTargetComponent (nullptr)
-                                                                       .withParentComponent (parentComponent),
+                                                                       .withTargetComponent (nullptr),
                                                                 false, dismissOnMouseUp, managerOfChosenCommand, scaleFactor));
 
             activeSubMenu->setVisible (true); // (must be called before enterModalState on Windows to avoid DropShadower confusion)
@@ -1267,7 +1265,6 @@ struct MenuWindow  : public Component
     OwnedArray<ItemComponent> items;
     ApplicationCommandManager** managerOfChosenCommand;
     WeakReference<Component> componentAttachedTo;
-    Component* parentComponent = nullptr;
     Rectangle<int> windowPos;
     bool hasBeenOver = false, needsToScroll = false;
     bool dismissOnMouseUp, hideOnExit = false, disableMouseMoves = false, hasAnyJuceCompHadFocus = false;
@@ -1930,6 +1927,11 @@ PopupMenu::Options PopupMenu::Options::withTargetComponent (Component& comp) con
 PopupMenu::Options PopupMenu::Options::withTargetScreenArea (Rectangle<int> area) const
 {
     return with (*this, &Options::targetArea, area);
+}
+
+PopupMenu::Options PopupMenu::Options::withMousePosition() const
+{
+    return withTargetScreenArea (Rectangle<int>{}.withPosition (Desktop::getMousePosition()));
 }
 
 PopupMenu::Options PopupMenu::Options::withDeletionCheck (Component& comp) const

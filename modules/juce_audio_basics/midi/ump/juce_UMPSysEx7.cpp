@@ -39,12 +39,12 @@ SysEx7::PacketBytes SysEx7::getDataBytes (const PacketX2& packet)
 
     return
     {
-        { packet.getU8<2>(),
-          packet.getU8<3>(),
-          packet.getU8<4>(),
-          packet.getU8<5>(),
-          packet.getU8<6>(),
-          packet.getU8<7>() },
+        { { packet.getU8<2>(),
+            packet.getU8<3>(),
+            packet.getU8<4>(),
+            packet.getU8<5>(),
+            packet.getU8<6>(),
+            packet.getU8<7>() } },
         jmin (numBytes, maxBytes)
     };
 }

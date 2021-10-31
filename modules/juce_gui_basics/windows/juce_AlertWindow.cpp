@@ -649,6 +649,7 @@ namespace AlertWindowMappings
 
         return rawToUniquePtr (ModalCallbackFunction::create (std::move (wrappedCallback)));
     }
+
 }
 
 #if JUCE_MODAL_LOOPS_PERMITTED

@@ -186,12 +186,6 @@ public:
         @see getDragSourceCustomData, DragAndDropContainer::startDragging
     */
     virtual var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
-
-private:
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This method's signature has changed to take a MouseEvent parameter - please update your code!
-    JUCE_DEPRECATED_WITH_BODY (virtual int backgroundClicked(), { return 0; })
-   #endif
 };
 
 

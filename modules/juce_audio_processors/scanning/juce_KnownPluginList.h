@@ -209,21 +209,23 @@ public:
     void setCustomScanner (std::unique_ptr<CustomScanner> newScanner);
 
     //==============================================================================
+   #ifndef DOXYGEN
     // These methods have been deprecated! When getting the list of plugin types you should instead use
     // the getTypes() method which returns a copy of the internal PluginDescription array and can be accessed
     // in a thread-safe way.
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription* getType (int index)  noexcept,            { return &types.getReference (index); })
-    JUCE_DEPRECATED_WITH_BODY (const PluginDescription* getType (int index) const noexcept, { return &types.getReference (index); })
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription** begin() noexcept,                        { jassertfalse; return nullptr; })
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* begin() const noexcept,            { jassertfalse; return nullptr; })
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription** end() noexcept,                          { jassertfalse; return nullptr; })
-    JUCE_DEPRECATED_WITH_BODY (PluginDescription* const* end() const noexcept,              { jassertfalse; return nullptr; })
+    [[deprecated]] PluginDescription* getType (int index)  noexcept            { return &types.getReference (index); }
+    [[deprecated]] const PluginDescription* getType (int index) const noexcept { return &types.getReference (index); }
+    [[deprecated]] PluginDescription** begin() noexcept                        { jassertfalse; return nullptr; }
+    [[deprecated]] PluginDescription* const* begin() const noexcept            { jassertfalse; return nullptr; }
+    [[deprecated]] PluginDescription** end() noexcept                          { jassertfalse; return nullptr; }
+    [[deprecated]] PluginDescription* const* end() const noexcept              { jassertfalse; return nullptr; }
 
     // These methods have been deprecated in favour of their static counterparts. You should call getTypes()
     // to store the plug-in list at a point in time and use it when calling these methods.
-    JUCE_DEPRECATED (void addToMenu (PopupMenu& menu, SortMethod sortMethod, const String& currentlyTickedPluginID = {}) const);
-    JUCE_DEPRECATED (int getIndexChosenByMenu (int menuResultCode) const);
-    JUCE_DEPRECATED (std::unique_ptr<PluginTree> createTree (const SortMethod sortMethod) const);
+    [[deprecated]] void addToMenu (PopupMenu& menu, SortMethod sortMethod, const String& currentlyTickedPluginID = {}) const;
+    [[deprecated]] int getIndexChosenByMenu (int menuResultCode) const;
+    [[deprecated]] std::unique_ptr<PluginTree> createTree (const SortMethod sortMethod) const;
+   #endif
 
 private:
     //==============================================================================

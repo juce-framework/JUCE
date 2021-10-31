@@ -101,6 +101,7 @@ public:
           iosPushNotificationsValue                    (settings, Ids::iosPushNotifications,                    getUndoManager()),
           iosAppGroupsValue                            (settings, Ids::iosAppGroups,                            getUndoManager()),
           iCloudPermissionsValue                       (settings, Ids::iCloudPermissions,                       getUndoManager()),
+          networkingMulticastValue                     (settings, Ids::networkingMulticast,                     getUndoManager()),
           iosDevelopmentTeamIDValue                    (settings, Ids::iosDevelopmentTeamID,                    getUndoManager()),
           iosAppGroupsIDValue                          (settings, Ids::iosAppGroupsId,                          getUndoManager()),
           keepCustomXcodeSchemesValue                  (settings, Ids::keepCustomXcodeSchemes,                  getUndoManager()),
@@ -194,6 +195,7 @@ public:
     bool isPushNotificationsEnabled() const                 { return iosPushNotificationsValue.get(); }
     bool isAppGroupsEnabled() const                         { return iosAppGroupsValue.get(); }
     bool isiCloudPermissionsEnabled() const                 { return iCloudPermissionsValue.get(); }
+    bool isNetworkingMulticastEnabled() const               { return networkingMulticastValue.get(); }
     bool isFileSharingEnabled() const                       { return uiFileSharingEnabledValue.get(); }
     bool isDocumentBrowserEnabled() const                   { return uiSupportsDocumentBrowserValue.get(); }
     bool isStatusBarHidden() const                          { return uiStatusBarHiddenValue.get(); }
@@ -573,7 +575,12 @@ public:
 
             props.add (new ChoicePropertyComponent (iCloudPermissionsValue, "iCloud Permissions"),
                        "Enable this to grant your app the capability to use native file load/save browser windows on iOS.");
+
         }
+
+        props.add (new ChoicePropertyComponent (networkingMulticastValue, "Networking Multicast Capability"),
+                   "Your app must have this entitlement to send or receive IP multicast or broadcast. "
+                   "You will also need permission from Apple to use this entitlement.");
 
         props.add (new ChoicePropertyComponent (iosPushNotificationsValue, "Push Notifications Capability"),
                    "Enable this to grant your app the capability to receive push notifications.");
@@ -1349,6 +1356,7 @@ public:
              || owner.isAppGroupsEnabled()
              || owner.isAppSandboxEnabled()
              || owner.isHardenedRuntimeEnabled()
+             || owner.isNetworkingMulticastEnabled()
              || (owner.isiOS() && owner.isiCloudPermissionsEnabled()))
                 return true;
 
@@ -1556,12 +1564,25 @@ public:
             if (config.isFastMathEnabled())
                 s.set ("GCC_FAST_MATH", "YES");
 
-            auto flags = (config.getRecommendedCompilerWarningFlags().joinIntoString (" ")
-                             + " " + owner.getExtraCompilerFlagsString()).trim();
-            flags = owner.replacePreprocessorTokens (config, flags);
+            auto recommendedWarnings = config.getRecommendedCompilerWarningFlags();
+            recommendedWarnings.cpp.addArray (recommendedWarnings.common);
 
-            if (flags.isNotEmpty())
-                s.set ("OTHER_CPLUSPLUSFLAGS", flags.quoted());
+            struct XcodeWarningFlags
+            {
+                const StringArray& flags;
+                const String variable;
+            };
+
+            for (const auto& xcodeFlags : { XcodeWarningFlags { recommendedWarnings.common, "OTHER_CFLAGS" },
+                                            XcodeWarningFlags { recommendedWarnings.cpp,    "OTHER_CPLUSPLUSFLAGS" } })
+            {
+                auto flags = (xcodeFlags.flags.joinIntoString (" ")
+                                 + " " + owner.getExtraCompilerFlagsString()).trim();
+                flags = owner.replacePreprocessorTokens (config, flags);
+
+                if (flags.isNotEmpty())
+                    s.set (xcodeFlags.variable, flags.quoted());
+            }
 
             auto installPath = getInstallPathForConfiguration (config);
 
@@ -1637,7 +1658,7 @@ public:
                 auto cppStandard = owner.project.getCppStandardString();
 
                 if (cppStandard == "latest")
-                    cppStandard = "17";
+                    cppStandard = owner.project.getLatestNumberedCppStandardString();
 
                 s.set ("CLANG_CXX_LANGUAGE_STANDARD", (String (owner.shouldUseGNUExtensions() ? "gnu++"
                                                                                               : "c++") + cppStandard).quoted());
@@ -1697,7 +1718,7 @@ public:
                 auto def = defines.getAllKeys()[i];
                 auto value = defines.getAllValues()[i];
                 if (value.isNotEmpty())
-                    def << "=" << value.replace ("\"", "\\\\\\\"").replace (" ", "\\\\ ");
+                    def << "=" << value.replace ("\"", "\\\\\\\"").replace (" ", "\\\\ ").replace ("\'", "\\\\'");
 
                 defsList.add ("\"" + def + "\"");
             }
@@ -2466,7 +2487,8 @@ private:
         if (isUsingDefaultSigningIdentity (config))
             return iOS ? "iPhone Developer" : "Mac Developer";
 
-        return config.getCodeSignIdentityString();
+        const auto identity = config.getCodeSignIdentityString();
+        return identity.isNotEmpty() ? identity : "-";
     }
 
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
@@ -3069,6 +3091,7 @@ private:
         options.isHardenedRuntimeEnabled        = isHardenedRuntimeEnabled();
         options.isAppSandboxEnabled             = isAppSandboxEnabled();
         options.isAppSandboxInhertianceEnabled  = isAppSandboxInhertianceEnabled();
+        options.isNetworkingMulticastEnabled    = isNetworkingMulticastEnabled();
         options.appGroupIdString                = getAppGroupIdString();
         options.hardenedRuntimeOptions          = getHardenedRuntimeOptions();
         options.appSandboxOptions               = getAppSandboxOptions();
@@ -3560,7 +3583,7 @@ private:
                      sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
                      uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, uiRequiresFullScreenValue, documentExtensionsValue, iosInAppPurchasesValue,
                      iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
-                     iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
+                     networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                      exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)

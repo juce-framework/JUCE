@@ -395,18 +395,12 @@ struct MathConstants
 };
 
 #ifndef DOXYGEN
-/** A double-precision constant for pi.
-    @deprecated This is deprecated in favour of MathConstants<double>::pi.
-    The reason is that "double_Pi" was a confusing name, and many people misused it,
-    wrongly thinking it meant 2 * pi !
-*/
+/** A double-precision constant for pi. */
+[[deprecated ("This is deprecated in favour of MathConstants<double>::pi.")]]
 const constexpr double  double_Pi  = MathConstants<double>::pi;
 
-/** A single-precision constant for pi.
-    @deprecated This is deprecated in favour of MathConstants<float>::pi.
-    The reason is that "double_Pi" was a confusing name, and many people misused it,
-    wrongly thinking it meant 2 * pi !
-*/
+/** A single-precision constant for pi. */
+[[deprecated ("This is deprecated in favour of MathConstants<float>::pi.")]]
 const constexpr float   float_Pi   = MathConstants<float>::pi;
 #endif
 
@@ -609,7 +603,7 @@ uint32 readLittleEndianBitsInBuffer (const void* sourceBuffer, uint32 startBit, 
 
 
 //==============================================================================
-#if JUCE_INTEL || defined (DOXYGEN)
+#if JUCE_INTEL || DOXYGEN
  /** This macro can be applied to a float variable to check whether it contains a denormalised
      value, and to normalise it if necessary.
      On CPUs that aren't vulnerable to denormalisation problems, this will have no effect.
@@ -637,7 +631,7 @@ namespace TypeHelpers
     */
     template <typename Type> struct ParameterType                   { using type = const Type&; };
 
-   #if ! DOXYGEN
+   #ifndef DOXYGEN
     template <typename Type> struct ParameterType <Type&>           { using type = Type&; };
     template <typename Type> struct ParameterType <Type*>           { using type = Type*; };
     template <>              struct ParameterType <char>            { using type = char; };
@@ -662,7 +656,7 @@ namespace TypeHelpers
     */
     template <typename Type> struct SmallestFloatType               { using type = float; };
 
-   #if ! DOXYGEN
+   #ifndef DOXYGEN
     template <>              struct SmallestFloatType <double>      { using type = double; };
    #endif
 
@@ -673,7 +667,7 @@ namespace TypeHelpers
     */
     template <int bytes>     struct UnsignedTypeWithSize            {};
 
-   #if ! DOXYGEN
+   #ifndef DOXYGEN
     template <>              struct UnsignedTypeWithSize<1>         { using type = uint8; };
     template <>              struct UnsignedTypeWithSize<2>         { using type = uint16; };
     template <>              struct UnsignedTypeWithSize<4>         { using type = uint32; };
@@ -682,13 +676,10 @@ namespace TypeHelpers
 }
 
 //==============================================================================
-#if ! DOXYGEN
- // These old functions are deprecated: Just use roundToInt instead.
- JUCE_DEPRECATED_ATTRIBUTE inline int roundDoubleToInt (double value) noexcept  { return roundToInt (value); }
- JUCE_DEPRECATED_ATTRIBUTE inline int roundFloatToInt  (float  value) noexcept  { return roundToInt (value); }
-
- // This old function isn't needed - just use std::abs() instead
- JUCE_DEPRECATED_ATTRIBUTE inline int64 abs64 (int64 n) noexcept                { return std::abs (n); }
+#ifndef DOXYGEN
+ [[deprecated ("Use roundToInt instead.")]] inline int roundDoubleToInt (double value) noexcept  { return roundToInt (value); }
+ [[deprecated ("Use roundToInt instead.")]] inline int roundFloatToInt  (float  value) noexcept  { return roundToInt (value); }
+ [[deprecated ("Use std::abs() instead.")]] inline int64 abs64 (int64 n) noexcept                { return std::abs (n); }
 #endif
 
 } // namespace juce

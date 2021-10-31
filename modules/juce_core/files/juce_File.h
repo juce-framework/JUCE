@@ -20,7 +20,7 @@
   ==============================================================================
 */
 
-#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
+#if ! defined (DOXYGEN) && (JUCE_MAC || JUCE_IOS)
  #if __LP64__
   using OSType = unsigned int;
  #else
@@ -1074,6 +1074,17 @@ public:
     void addToDock() const;
    #endif
 
+   #if JUCE_MAC || JUCE_IOS
+    /** Returns the path to the container shared by all apps with the provided app group ID.
+
+        You *must* pass one of the app group IDs listed in your app's entitlements file.
+
+        On failure, this function may return a non-existent file, so you should check
+        that the path exists and is writable before trying to use it.
+    */
+    static File getContainerForSecurityApplicationGroupIdentifier (const String& appGroup);
+   #endif
+
     //==============================================================================
     /** Comparator for files */
     struct NaturalFileComparator
@@ -1095,14 +1106,16 @@ public:
         bool foldersFirst;
     };
 
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
     /* These static objects are deprecated because it's too easy to accidentally use them indirectly
        during a static constructor, which leads to very obscure order-of-initialisation bugs.
        Use File::getSeparatorChar() and File::getSeparatorString(), and instead of File::nonexistent,
        just use File() or {}.
     */
-    JUCE_DEPRECATED_STATIC (static const juce_wchar separator;)
-    JUCE_DEPRECATED_STATIC (static const StringRef separatorString;)
-    JUCE_DEPRECATED_STATIC (static const File nonexistent;)
+    [[deprecated]] static const juce_wchar separator;
+    [[deprecated]] static const StringRef separatorString;
+    [[deprecated]] static const File nonexistent;
+   #endif
 
 private:
     //==============================================================================

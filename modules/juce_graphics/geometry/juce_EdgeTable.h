@@ -122,7 +122,7 @@ public:
             if (--numPoints > 0)
             {
                 int x = *++line;
-                jassert ((x >> 8) >= bounds.getX() && (x >> 8) < bounds.getRight());
+                jassert ((x / scale) >= bounds.getX() && (x / scale) < bounds.getRight());
                 int levelAccumulator = 0;
 
                 iterationCallback.setEdgeTableYPos (bounds.getY() + y);
@@ -130,12 +130,12 @@ public:
                 while (--numPoints >= 0)
                 {
                     const int level = *++line;
-                    jassert (isPositiveAndBelow (level, 256));
+                    jassert (isPositiveAndBelow (level, scale));
                     const int endX = *++line;
                     jassert (endX >= x);
-                    const int endOfRun = (endX >> 8);
+                    const int endOfRun = (endX / scale);
 
-                    if (endOfRun == (x >> 8))
+                    if (endOfRun == (x / scale))
                     {
                         // small segment within the same pixel, so just save it for the next
                         // time round..
@@ -146,8 +146,8 @@ public:
                         // plot the fist pixel of this segment, including any accumulated
                         // levels from smaller segments that haven't been drawn yet
                         levelAccumulator += (0x100 - (x & 0xff)) * level;
-                        levelAccumulator >>= 8;
-                        x >>= 8;
+                        levelAccumulator /= scale;
+                        x /= scale;
 
                         if (levelAccumulator > 0)
                         {
@@ -174,11 +174,11 @@ public:
                     x = endX;
                 }
 
-                levelAccumulator >>= 8;
+                levelAccumulator /= scale;
 
                 if (levelAccumulator > 0)
                 {
-                    x >>= 8;
+                    x /= scale;
                     jassert (x >= bounds.getX() && x < bounds.getRight());
 
                     if (levelAccumulator >= 255)
@@ -191,6 +191,10 @@ public:
     }
 
 private:
+    //==============================================================================
+    static constexpr auto defaultEdgesPerLine = 32;
+    static constexpr auto scale = 256;
+
     //==============================================================================
     // table line format: number of points; point0 x, point0 levelDelta, point1 x, point1 levelDelta, etc
     struct LineItem

@@ -121,7 +121,7 @@ public:
         or Font::getDefaultMonospacedFontName(), which are not actual platform-specific font family names,
         but are generic font family names that are used to represent the various default fonts.
         If you need to know the exact typeface font family being used, you can call
-        Font::getTypeface()->getName(), which will give you the platform-specific font family.
+        Font::getTypefacePtr()->getName(), which will give you the platform-specific font family.
 
         If a suitable font isn't found on the machine, it'll just use a default instead.
     */
@@ -136,15 +136,15 @@ public:
         but are generic font family names that are used to represent the various default fonts.
 
         If you need to know the exact typeface font family being used, you can call
-        Font::getTypeface()->getName(), which will give you the platform-specific font family.
+        Font::getTypefacePtr()->getName(), which will give you the platform-specific font family.
     */
-    const String& getTypefaceName() const noexcept;
+    String getTypefaceName() const noexcept;
 
     //==============================================================================
     /** Returns the font style of the typeface that this font uses.
         @see withTypefaceStyle, getAvailableStyles()
     */
-    const String& getTypefaceStyle() const noexcept;
+    String getTypefaceStyle() const noexcept;
 
     /** Changes the font style of the typeface.
         @see getAvailableStyles()
@@ -395,12 +395,18 @@ public:
     void getGlyphPositions (const String& text, Array<int>& glyphs, Array<float>& xOffsets) const;
 
     //==============================================================================
+   #ifndef DOXYGEN
     /** Returns the typeface used by this font.
 
         Note that the object returned may go out of scope if this font is deleted
         or has its style changed.
     */
+    [[deprecated ("This method is unsafe, use getTypefacePtr() instead.")]]
     Typeface* getTypeface() const;
+   #endif
+
+    /** Returns the typeface used by this font. */
+    Typeface::Ptr getTypefacePtr() const;
 
     /** Creates an array of Font objects to represent all the fonts on the system.
 

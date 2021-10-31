@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if JUCE_USE_FLAC || defined (DOXYGEN)
+#if JUCE_USE_FLAC || DOXYGEN
 
 //==============================================================================
 /**

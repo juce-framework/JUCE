@@ -289,7 +289,7 @@ public:
     void generate (const Font& newFont, int glyphNumber)
     {
         font = newFont;
-        auto* typeface = newFont.getTypeface();
+        auto typeface = newFont.getTypefacePtr();
         snapToIntegerCoordinate = typeface->isHinted();
         glyph = glyphNumber;
 
@@ -2567,7 +2567,7 @@ public:
                 auto t = transform.getTransformWith (AffineTransform::scale (fontHeight * font.getHorizontalScale(), fontHeight)
                                                                      .followedBy (trans));
 
-                std::unique_ptr<EdgeTable> et (font.getTypeface()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
+                std::unique_ptr<EdgeTable> et (font.getTypefacePtr()->getEdgeTableForGlyph (glyphNumber, t, fontHeight));
 
                 if (et != nullptr)
                     fillShape (*new EdgeTableRegionType (*et), false);

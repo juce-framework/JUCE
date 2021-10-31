@@ -992,6 +992,21 @@ public:
     /** @internal */
     void mouseEnter (const MouseEvent&) override;
 
+    //==============================================================================
+   #ifndef DOXYGEN
+    // These methods' bool parameters have changed: see the new method signature.
+    [[deprecated]] void setValue (double, bool);
+    [[deprecated]] void setValue (double, bool, bool);
+    [[deprecated]] void setMinValue (double, bool, bool, bool);
+    [[deprecated]] void setMinValue (double, bool, bool);
+    [[deprecated]] void setMinValue (double, bool);
+    [[deprecated]] void setMaxValue (double, bool, bool, bool);
+    [[deprecated]] void setMaxValue (double, bool, bool);
+    [[deprecated]] void setMaxValue (double, bool);
+    [[deprecated]] void setMinAndMaxValues (double, double, bool, bool);
+    [[deprecated]] void setMinAndMaxValues (double, double, bool);
+   #endif
+
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class Pimpl)
@@ -999,20 +1014,6 @@ private:
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void init (SliderStyle, TextEntryBoxPosition);
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // These methods' bool parameters have changed: see the new method signature.
-    JUCE_DEPRECATED (void setValue (double, bool));
-    JUCE_DEPRECATED (void setValue (double, bool, bool));
-    JUCE_DEPRECATED (void setMinValue (double, bool, bool, bool));
-    JUCE_DEPRECATED (void setMinValue (double, bool, bool));
-    JUCE_DEPRECATED (void setMinValue (double, bool));
-    JUCE_DEPRECATED (void setMaxValue (double, bool, bool, bool));
-    JUCE_DEPRECATED (void setMaxValue (double, bool, bool));
-    JUCE_DEPRECATED (void setMaxValue (double, bool));
-    JUCE_DEPRECATED (void setMinAndMaxValues (double, double, bool, bool));
-    JUCE_DEPRECATED (void setMinAndMaxValues (double, double, bool));
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Slider)
 };

@@ -27,10 +27,6 @@
  #include <juce_audio_plugin_client/AAX/juce_AAX_Modifier_Injector.h>
 #endif
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
- #include <juce_gui_extra/embedding/juce_ScopedDPIAwarenessDisabler.h>
-#endif
-
 namespace juce
 {
 
@@ -377,6 +373,32 @@ static EnableNonClientDPIScalingFunc           enableNonClientDPIScaling        
 
 static bool hasCheckedForDPIAwareness = false;
 
+static void loadDPIAwarenessFunctions()
+{
+    setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
+
+    constexpr auto shcore = "SHCore.dll";
+    LoadLibraryA (shcore);
+    const auto shcoreModule = GetModuleHandleA (shcore);
+
+    if (shcoreModule == nullptr)
+        return;
+
+    getDPIForMonitor                    = (GetDPIForMonitorFunc) GetProcAddress (shcoreModule, "GetDpiForMonitor");
+    setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
+
+   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
+    getDPIForWindow                     = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
+    getProcessDPIAwareness              = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
+    getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
+    setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+    getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
+    getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+    setProcessDPIAwarenessContext       = (SetProcessDPIAwarenessContextFunc) getUser32Function ("SetProcessDpiAwarenessContext");
+    enableNonClientDPIScaling           = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
+   #endif
+}
+
 static void setDPIAwareness()
 {
     if (hasCheckedForDPIAwareness)
@@ -387,45 +409,19 @@ static void setDPIAwareness()
     if (! JUCEApplicationBase::isStandaloneApp())
         return;
 
-    const auto shcore = "SHCore.dll";
-    LoadLibraryA (shcore);
-    const auto shcoreModule = GetModuleHandleA (shcore);
+    loadDPIAwarenessFunctions();
 
-    if (shcoreModule != nullptr)
-    {
-        getDPIForMonitor = (GetDPIForMonitorFunc) GetProcAddress (shcoreModule, "GetDpiForMonitor");
+    if (setProcessDPIAwarenessContext != nullptr
+        && setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
+        return;
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        getDPIForWindow                     = (GetDPIForWindowFunc) getUser32Function ("GetDpiForWindow");
-        getProcessDPIAwareness              = (GetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "GetProcessDpiAwareness");
-        getWindowDPIAwarenessContext        = (GetWindowDPIAwarenessContextFunc) getUser32Function ("GetWindowDpiAwarenessContext");
-        setThreadDPIAwarenessContext        = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
-        getThreadDPIAwarenessContext        = (GetThreadDPIAwarenessContextFunc) getUser32Function ("GetThreadDpiAwarenessContext");
-        getAwarenessFromDPIAwarenessContext = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
-        setProcessDPIAwareness              = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
-        setProcessDPIAwarenessContext       = (SetProcessDPIAwarenessContextFunc) getUser32Function ("SetProcessDpiAwarenessContext");
+    if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
+        && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware)))
+        return;
 
-        if (setProcessDPIAwarenessContext != nullptr
-            && setProcessDPIAwarenessContext (DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
-            return;
-
-        enableNonClientDPIScaling = (EnableNonClientDPIScalingFunc) getUser32Function ("EnableNonClientDpiScaling");
-
-        if (setProcessDPIAwareness != nullptr && enableNonClientDPIScaling != nullptr
-            && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_Per_Monitor_Aware)))
-            return;
-       #endif
-
-        if (setProcessDPIAwareness == nullptr)
-            setProcessDPIAwareness = (SetProcessDPIAwarenessFunc) GetProcAddress (shcoreModule, "SetProcessDpiAwareness");
-
-        if (setProcessDPIAwareness != nullptr && getDPIForMonitor != nullptr
-             && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
-            return;
-    }
-
-    // fallback for pre Windows 8.1 - equivalent to Process_System_DPI_Aware
-    setProcessDPIAware = (SetProcessDPIAwareFunc) getUser32Function ("SetProcessDPIAware");
+    if (setProcessDPIAwareness != nullptr && getDPIForMonitor != nullptr
+        && SUCCEEDED (setProcessDPIAwareness (DPI_Awareness::DPI_Awareness_System_Aware)))
+        return;
 
     if (setProcessDPIAware != nullptr)
         setProcessDPIAware();
@@ -439,6 +435,9 @@ static bool isPerMonitorDPIAwareProcess()
     static bool dpiAware = []() -> bool
     {
         setDPIAwareness();
+
+        if (! JUCEApplication::isStandaloneApp())
+            return false;
 
         if (getProcessDPIAwareness == nullptr)
             return false;
@@ -572,38 +571,34 @@ ScopedThreadDPIAwarenessSetter::ScopedThreadDPIAwarenessSetter (void* nativeWind
     pimpl = std::make_unique<NativeImpl> ((HWND) nativeWindow);
 }
 
-ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter()
+ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
+
+ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
+    if (! isPerMonitorDPIAwareThread())
+        return;
+
+    if (setThreadDPIAwarenessContext != nullptr)
+    {
+        previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+
+       #if JUCE_DEBUG
+        ++numActiveScopedDpiAwarenessDisablers;
+       #endif
+    }
 }
 
-#if JUCE_MODULE_AVAILABLE_juce_gui_extra
- ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
- {
-     if (! isPerMonitorDPIAwareThread())
-         return;
+ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
+{
+    if (previousContext != nullptr)
+    {
+        setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
 
-     if (setThreadDPIAwarenessContext != nullptr)
-     {
-         previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
-
-        #if JUCE_DEBUG
-         ++numActiveScopedDpiAwarenessDisablers;
-        #endif
-     }
- }
-
- ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
- {
-     if (previousContext != nullptr)
-     {
-         setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
-
-        #if JUCE_DEBUG
-         --numActiveScopedDpiAwarenessDisablers;
-        #endif
-     }
- }
-#endif
+       #if JUCE_DEBUG
+        --numActiveScopedDpiAwarenessDisablers;
+       #endif
+    }
+}
 
 //==============================================================================
 using SettingChangeCallbackFunc = void (*)(void);
@@ -720,6 +715,8 @@ static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 }
 
 //==============================================================================
+extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
+
 double Desktop::getDefaultMasterScale()
 {
     if (! JUCEApplicationBase::isStandaloneApp() || isPerMonitorDPIAwareProcess())
@@ -728,7 +725,95 @@ double Desktop::getDefaultMasterScale()
     return getGlobalDPI() / USER_DEFAULT_SCREEN_DPI;
 }
 
-bool Desktop::canUseSemiTransparentWindows() noexcept { return true; }
+bool Desktop::canUseSemiTransparentWindows() noexcept
+{
+    return true;
+}
+
+class Desktop::NativeDarkModeChangeDetectorImpl
+{
+public:
+    NativeDarkModeChangeDetectorImpl()
+    {
+        const auto winVer = getWindowsVersionInfo();
+
+        if (winVer.dwMajorVersion >= 10 && winVer.dwBuildNumber >= 17763)
+        {
+            const auto uxtheme = "uxtheme.dll";
+            LoadLibraryA (uxtheme);
+            const auto uxthemeModule = GetModuleHandleA (uxtheme);
+
+            if (uxthemeModule != nullptr)
+            {
+                shouldAppsUseDarkMode = (ShouldAppsUseDarkModeFunc) GetProcAddress (uxthemeModule, MAKEINTRESOURCEA (132));
+
+                if (shouldAppsUseDarkMode != nullptr)
+                    darkModeEnabled = shouldAppsUseDarkMode() && ! isHighContrast();
+            }
+        }
+    }
+
+    bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
+
+private:
+    static bool isHighContrast()
+    {
+        HIGHCONTRASTW highContrast { 0 };
+
+        if (SystemParametersInfoW (SPI_GETHIGHCONTRAST, sizeof (highContrast), &highContrast, false))
+            return highContrast.dwFlags & HCF_HIGHCONTRASTON;
+
+        return false;
+    }
+
+    static LRESULT CALLBACK callWndProc (int nCode, WPARAM wParam, LPARAM lParam)
+    {
+        auto* params = reinterpret_cast<CWPSTRUCT*> (lParam);
+
+        if (nCode >= 0
+            && params != nullptr
+            && params->message == WM_SETTINGCHANGE
+            && params->lParam != 0
+            && CompareStringOrdinal (reinterpret_cast<LPWCH> (params->lParam), -1, L"ImmersiveColorSet", -1, true) == CSTR_EQUAL)
+        {
+            Desktop::getInstance().nativeDarkModeChangeDetectorImpl->colourSetChanged();
+        }
+
+        return CallNextHookEx ({}, nCode, wParam, lParam);
+    }
+
+    void colourSetChanged()
+    {
+        if (shouldAppsUseDarkMode != nullptr)
+        {
+            const auto wasDarkModeEnabled = std::exchange (darkModeEnabled, shouldAppsUseDarkMode() && ! isHighContrast());
+
+            if (darkModeEnabled != wasDarkModeEnabled)
+                Desktop::getInstance().darkModeChanged();
+        }
+    }
+
+    using ShouldAppsUseDarkModeFunc = bool (WINAPI*)();
+    ShouldAppsUseDarkModeFunc shouldAppsUseDarkMode = nullptr;
+
+    bool darkModeEnabled = false;
+    HHOOK hook { SetWindowsHookEx (WH_CALLWNDPROC,
+                                   callWndProc,
+                                   (HINSTANCE) juce::Process::getCurrentModuleInstanceHandle(),
+                                   GetCurrentThreadId()) };
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
+};
+
+std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
+{
+    return std::make_unique<NativeDarkModeChangeDetectorImpl>();
+}
+
+bool Desktop::isDarkModeActive() const
+{
+    return nativeDarkModeChangeDetectorImpl->isDarkModeEnabled();
+}
 
 Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
 {
@@ -969,7 +1054,6 @@ private:
 };
 
 //==============================================================================
-Image createSnapshotOfNativeWindow (void*);
 Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 {
     auto hwnd = (HWND) nativeWindowHandle;
@@ -3359,24 +3443,24 @@ private:
 
         handleMovedOrResized();
 
-        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly..
+        return ! dontRepaint; // to allow non-accelerated openGL windows to draw themselves correctly.
     }
 
     //==============================================================================
-    struct ChildWindowCallbackData
-    {
-        std::map<HWND, RECT> windowRectsMap;
-        float scaleRatio;
-    };
-
     LRESULT handleDPIChanging (int newDPI, RECT newRect)
     {
+        // Sometimes, windows that should not be automatically scaled (secondary windows in plugins)
+        // are sent WM_DPICHANGED. The size suggested by the OS is incorrect for our unscaled
+        // window, so we should ignore it.
+        if (! isPerMonitorDPIAwareWindow (hwnd))
+            return 0;
+
         const auto newScale = (double) newDPI / USER_DEFAULT_SCREEN_DPI;
 
         if (approximatelyEqual (scaleFactor, newScale))
             return 0;
 
-        const auto oldScale = std::exchange (scaleFactor, newScale);
+        scaleFactor = newScale;
 
         {
             const ScopedValueSetter<int> setter (numInDpiChange, numInDpiChange + 1);
@@ -3392,56 +3476,9 @@ private:
         updateShadower();
         InvalidateRect (hwnd, nullptr, FALSE);
 
-        ChildWindowCallbackData callbackData;
-        callbackData.scaleRatio = (float) (scaleFactor / oldScale);
-
-        EnumChildWindows (hwnd, getChildWindowRectCallback, (LPARAM) &callbackData);
         scaleFactorListeners.call ([this] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
-        EnumChildWindows (hwnd, scaleChildWindowCallback, (LPARAM) &callbackData);
 
         return 0;
-    }
-
-    static BOOL CALLBACK getChildWindowRectCallback (HWND hwnd, LPARAM data)
-    {
-        auto& callbackData = *(reinterpret_cast<ChildWindowCallbackData*> (data));
-
-        callbackData.windowRectsMap[hwnd] = getWindowClientRect (hwnd);
-        return TRUE;
-    }
-
-    static BOOL CALLBACK scaleChildWindowCallback (HWND hwnd, LPARAM data)
-    {
-        auto& callbackData = *(reinterpret_cast<ChildWindowCallbackData*> (data));
-
-        auto originalBounds = rectangleFromRECT (callbackData.windowRectsMap[hwnd]);
-        auto scaledBounds = (originalBounds.toFloat() * callbackData.scaleRatio).toNearestInt();
-        auto currentBounds = rectangleFromRECT (getWindowClientRect (hwnd));
-
-        if (scaledBounds != currentBounds)
-        {
-            SetWindowPos (hwnd,
-                          nullptr,
-                          scaledBounds.getX(),
-                          scaledBounds.getY(),
-                          scaledBounds.getWidth(),
-                          scaledBounds.getHeight(),
-                          SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
-        }
-
-        if (auto* peer = getOwnerOfWindow (hwnd))
-            peer->handleChildDPIChanging();
-
-        return TRUE;
-    }
-
-    void handleChildDPIChanging()
-    {
-        scaleFactor = getScaleFactorForWindow (parentToAddTo);
-        scaleFactorListeners.call ([&] (ScaleFactorListener& l) { l.nativeScaleFactorChanged (scaleFactor); });
-
-        updateShadower();
-        InvalidateRect (hwnd, nullptr, FALSE);
     }
 
     //==============================================================================
@@ -4541,7 +4578,7 @@ public:
 
     int getResult() override
     {
-        TASKDIALOGCONFIG config = { 0 };
+        TASKDIALOGCONFIG config{};
 
         config.cbSize         = sizeof (config);
         config.pszWindowTitle = title.toWideCharPointer();

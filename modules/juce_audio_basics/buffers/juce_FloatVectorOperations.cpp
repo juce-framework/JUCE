@@ -1051,7 +1051,7 @@ intptr_t JUCE_CALLTYPE FloatVectorOperations::getFpStatusRegister() noexcept
 void JUCE_CALLTYPE FloatVectorOperations::setFpStatusRegister (intptr_t fpsr) noexcept
 {
   #if JUCE_INTEL && JUCE_USE_SSE_INTRINSICS
-    auto fpsr_w = static_cast<uint32_t> (fpsr);
+    volatile auto fpsr_w = static_cast<uint32_t> (fpsr);
     _mm_setcsr (fpsr_w);
   #elif defined (__arm64__) || defined (__aarch64__) || JUCE_USE_ARM_NEON
    #if defined (__arm64__) || defined (__aarch64__)

@@ -400,6 +400,9 @@ attributes directly to these creation functions, rather than adding them later.
 - `PUSH_NOTIFICATIONS_ENABLED`
   - Sets app entitlements to allow push notifications. False by default.
 
+- `NETWORK_MULTICAST_ENABLED`
+  - Sets app entitlements to allow IP multicast or broadcast on macOS/iOS. False by default.
+
 - `HARDENED_RUNTIME_ENABLED`
   - Enables macOS' hardened runtime for this target. Required for notarisation. False by default.
 

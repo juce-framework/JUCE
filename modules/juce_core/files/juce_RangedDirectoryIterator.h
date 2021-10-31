@@ -24,6 +24,9 @@ namespace juce
 {
 
 //==============================================================================
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+
 /**
     Describes the attributes of a file or folder.
 
@@ -177,5 +180,9 @@ inline RangedDirectoryIterator begin (const RangedDirectoryIterator& it) { retur
     Provided for range-for compatibility.
 */
 inline RangedDirectoryIterator end   (const RangedDirectoryIterator&)    { return {}; }
+
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

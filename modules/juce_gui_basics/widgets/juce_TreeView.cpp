@@ -327,7 +327,7 @@ public:
                 auto newComp = std::make_unique<ItemComponent> (*treeItem);
 
                 addAndMakeVisible (*newComp);
-                newComp->addMouseListener (this, true);
+                newComp->addMouseListener (this, false);
                 componentsToKeep.push_back (newComp.get());
 
                 itemComponents.push_back (std::move (newComp));

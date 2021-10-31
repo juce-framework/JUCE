@@ -428,6 +428,64 @@ public:
     std::unique_ptr<OutputStream> createOutputStream() const;
 
     //==============================================================================
+    class DownloadTask;
+
+    /** Used to receive callbacks for download progress. */
+    struct JUCE_API  DownloadTaskListener
+    {
+        virtual ~DownloadTaskListener() = default;
+
+        /** Called when the download has finished. Be aware that this callback may
+            come on an arbitrary thread.
+        */
+        virtual void finished (DownloadTask* task, bool success) = 0;
+
+        /** Called periodically by the OS to indicate download progress.
+
+            Beware that this callback may come on an arbitrary thread.
+        */
+        virtual void progress (DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
+    };
+
+    /** Holds options that can be specified when starting a new download
+        with downloadToFile().
+    */
+    class DownloadTaskOptions
+    {
+    public:
+        String extraHeaders;
+        String sharedContainer;
+        DownloadTaskListener* listener = nullptr;
+        bool usePost = false;
+
+        /** Specifies headers to add to the request. */
+        auto withExtraHeaders (String value) const            { return with (&DownloadTaskOptions::extraHeaders, std::move (value)); }
+
+        /** On iOS, specifies the container where the downloaded file will be stored.
+
+            If you initiate a download task from inside an app extension on iOS,
+            you must supply this option.
+
+            This is currently unused on other platforms.
+        */
+        auto withSharedContainer (String value) const         { return with (&DownloadTaskOptions::sharedContainer, std::move (value)); }
+
+        /** Specifies an observer for the download task. */
+        auto withListener (DownloadTaskListener* value) const { return with (&DownloadTaskOptions::listener, std::move (value)); }
+
+        /** Specifies whether a post command should be used. */
+        auto withUsePost (bool value) const                   { return with (&DownloadTaskOptions::usePost, value); }
+
+    private:
+        template <typename Member, typename Value>
+        DownloadTaskOptions with (Member&& member, Value&& value) const
+        {
+            auto copy = *this;
+            copy.*member = std::forward<Value> (value);
+            return copy;
+        }
+    };
+
     /** Represents a download task.
 
         Returned by downloadToFile() to allow querying and controlling the download task.
@@ -435,22 +493,7 @@ public:
     class JUCE_API  DownloadTask
     {
     public:
-        /** Used to receive callbacks for download progress. */
-        struct JUCE_API  Listener
-        {
-            virtual ~Listener();
-
-            /** Called when the download has finished. Be aware that this callback may
-                come on an arbitrary thread.
-            */
-            virtual void finished (URL::DownloadTask* task, bool success) = 0;
-
-            /** Called periodically by the OS to indicate download progress.
-
-                Beware that this callback may come on an arbitrary thread.
-            */
-            virtual void progress (URL::DownloadTask* task, int64 bytesDownloaded, int64 totalLength);
-        };
+        using Listener = DownloadTaskListener;
 
         /** Releases the resources of the download task, unregisters the listener
             and cancels the download if necessary.
@@ -493,7 +536,7 @@ public:
 
     private:
         friend class URL;
-        static std::unique_ptr<DownloadTask> createFallbackDownloader (const URL&, const File&, const String&, Listener*, bool);
+        static std::unique_ptr<DownloadTask> createFallbackDownloader (const URL&, const File&, const DownloadTaskOptions&);
 
     public:
        #if JUCE_IOS
@@ -505,6 +548,13 @@ public:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DownloadTask)
     };
 
+    /** This function is replaced by a new overload accepting a DownloadTaskOptions argument. */
+    [[deprecated ("Use the overload with a DownloadTaskOptions argument instead")]]
+    std::unique_ptr<DownloadTask> downloadToFile (const File& targetLocation,
+                                                  String extraHeaders = String(),
+                                                  DownloadTaskListener* listener = nullptr,
+                                                  bool usePostCommand = false);
+
     /** Download the URL to a file.
 
         This method attempts to download the URL to a given file location.
@@ -515,9 +565,7 @@ public:
         network re-connections and continuing your download while your app is suspended.
     */
     std::unique_ptr<DownloadTask> downloadToFile (const File& targetLocation,
-                                                  String extraHeaders = String(),
-                                                  DownloadTask::Listener* listener = nullptr,
-                                                  bool usePostCommand = false);
+                                                  const DownloadTaskOptions& options);
 
     //==============================================================================
     /** Tries to download the entire contents of this URL into a binary data block.
@@ -611,14 +659,14 @@ public:
     static URL createWithoutParsing (const String& url);
 
     //==============================================================================
+   #ifndef DOXYGEN
     using OpenStreamProgressCallback = bool (void* context, int bytesSent, int totalBytes);
 
     /** This method has been deprecated.
 
-        New code should use the method which takes an InputStreamOptions argument instead.
-
         @see InputStreamOptions
     */
+    [[deprecated ("New code should use the method which takes an InputStreamOptions argument instead.")]]
     std::unique_ptr<InputStream> createInputStream (bool doPostLikeRequest,
                                                     OpenStreamProgressCallback* progressCallback = nullptr,
                                                     void* progressCallbackContext = nullptr,
@@ -628,6 +676,7 @@ public:
                                                     int* statusCode = nullptr,
                                                     int numRedirectsToFollow = 5,
                                                     String httpRequestCmd = {}) const;
+   #endif
 
 private:
     //==============================================================================

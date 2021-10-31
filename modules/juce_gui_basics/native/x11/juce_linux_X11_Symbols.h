@@ -237,6 +237,10 @@ public:
                                          (::Display*, ::Drawable, ::Window*, int*, int*, unsigned int*, unsigned int*, unsigned int*, unsigned int*),
                                          Status)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetImage, xGetImage,
+                                         (::Display*, ::Drawable, int, int, unsigned int, unsigned int, unsigned long, int),
+                                         XImage*)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XGetInputFocus, xGetInputFocus,
                                          (::Display*, ::Window*, int*),
                                          void)
@@ -448,6 +452,10 @@ public:
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XStringListToTextProperty, xStringListToTextProperty,
                                          (char**, int, XTextProperty*),
                                          Status)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (Xutf8TextListToTextProperty, xutf8TextListToTextProperty,
+                                         (::Display*, char**, int, XICCEncodingStyle, XTextProperty*),
+                                         int)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSync, xSync,
                                          (::Display*, Bool),

@@ -957,8 +957,8 @@ public:
     }
 
    #ifndef DOXYGEN
-    // This has been renamed by transformedBy, in order to match the method names used in the Point class.
-    JUCE_DEPRECATED_WITH_BODY (Rectangle transformed (const AffineTransform& t) const noexcept, { return transformedBy (t); })
+    [[deprecated ("This has been renamed to transformedBy in order to match the method names used in the Point class.")]]
+    Rectangle transformed (const AffineTransform& t) const noexcept { return transformedBy (t); }
    #endif
 
 private:

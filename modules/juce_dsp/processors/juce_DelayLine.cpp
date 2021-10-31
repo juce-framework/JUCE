@@ -40,15 +40,16 @@ DelayLine<SampleType, InterpolationType>::DelayLine (int maximumDelayInSamples)
 {
     jassert (maximumDelayInSamples >= 0);
 
-    totalSize = jmax (4, maximumDelayInSamples + 1);
     sampleRate = 44100.0;
+
+    setMaximumDelayInSamples (maximumDelayInSamples);
 }
 
 //==============================================================================
 template <typename SampleType, typename InterpolationType>
 void DelayLine<SampleType, InterpolationType>::setDelay (SampleType newDelayInSamples)
 {
-    auto upperLimit = (SampleType) (totalSize - 1);
+    auto upperLimit = (SampleType) getMaximumDelayInSamples();
     jassert (isPositiveAndNotGreaterThan (newDelayInSamples, upperLimit));
 
     delay     = jlimit ((SampleType) 0, upperLimit, newDelayInSamples);
@@ -78,6 +79,15 @@ void DelayLine<SampleType, InterpolationType>::prepare (const ProcessSpec& spec)
     v.resize (spec.numChannels);
     sampleRate = spec.sampleRate;
 
+    reset();
+}
+
+template <typename SampleType, typename InterpolationType>
+void DelayLine<SampleType, InterpolationType>::setMaximumDelayInSamples (int maxDelayInSamples)
+{
+    jassert (maxDelayInSamples >= 0);
+    totalSize = jmax (4, maxDelayInSamples + 1);
+    bufferData.setSize ((int) bufferData.getNumChannels(), totalSize, false, false, true);
     reset();
 }
 
