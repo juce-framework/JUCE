@@ -31,7 +31,7 @@ namespace juce
 #elif JUCE_WINDOWS
  #include "../native/juce_win32_CameraDevice.h"
 #elif JUCE_IOS
- JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
 
  #include "../native/juce_ios_CameraDevice.h"
 

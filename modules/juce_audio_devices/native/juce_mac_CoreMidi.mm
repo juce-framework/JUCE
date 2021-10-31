@@ -82,7 +82,7 @@ namespace CoreMidiHelpers
     struct Sender;
 
    #if JUCE_HAS_NEW_COREMIDI_API
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
 
     template <>
     struct Sender<ImplementationStrategy::onlyNew> : public SenderBase
@@ -829,7 +829,7 @@ namespace CoreMidiHelpers
     struct CreatorFunctions;
 
    #if JUCE_HAS_NEW_COREMIDI_API
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability-new")
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
 
     template <>
     struct CreatorFunctions<ImplementationStrategy::onlyNew>

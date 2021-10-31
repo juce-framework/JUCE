@@ -47,12 +47,15 @@ namespace
         io_iterator_t iter = 0;
         io_object_t iod = 0;
 
-        const auto defaultPort =
-               #if defined (MAC_OS_VERSION_12_0) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_12_0
-                kIOMainPortDefault;
-               #else
-                kIOMasterPortDefault;
-               #endif
+        const auto defaultPort = []
+        {
+           #if defined (MAC_OS_VERSION_12_0) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_VERSION_12_0
+            if (@available (macOS 12.0, *))
+                return kIOMainPortDefault;
+           #endif
+
+            return kIOMasterPortDefault;
+        }();
 
         if (IOServiceGetMatchingServices (defaultPort, dict, &iter) == kIOReturnSuccess
              && iter != 0)

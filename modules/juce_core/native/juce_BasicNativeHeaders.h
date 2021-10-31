@@ -28,7 +28,7 @@
 #if JUCE_MAC || JUCE_IOS
 
  #if JUCE_IOS
-  #if JUCE_MODULE_AVAILABLE_juce_opengl && defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_12_0
+  #if JUCE_MODULE_AVAILABLE_juce_opengl && defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
    #define GLES_SILENCE_DEPRECATION 1
   #endif
 
