@@ -336,11 +336,43 @@ struct CoreAudioFormatMetatdata
     }
 };
 
+static AudioFileTypeID toAudioFileTypeID (CoreAudioFormat::StreamKind kind)
+{
+    using StreamKind = CoreAudioFormat::StreamKind;
+    switch (kind)
+    {
+        case StreamKind::kAiff:                 return kAudioFileAIFFType;
+        case StreamKind::kAifc:                 return kAudioFileAIFCType;
+        case StreamKind::kWave:                 return kAudioFileWAVEType;
+        case StreamKind::kSoundDesigner2:       return kAudioFileSoundDesigner2Type;
+        case StreamKind::kNext:                 return kAudioFileNextType;
+        case StreamKind::kMp3:                  return kAudioFileMP3Type;
+        case StreamKind::kMp2:                  return kAudioFileMP2Type;
+        case StreamKind::kMp1:                  return kAudioFileMP1Type;
+        case StreamKind::kAc3:                  return kAudioFileAC3Type;
+        case StreamKind::kAacAdts:              return kAudioFileAAC_ADTSType;
+        case StreamKind::kMpeg4:                return kAudioFileMPEG4Type;
+        case StreamKind::kM4a:                  return kAudioFileM4AType;
+        case StreamKind::kM4b:                  return kAudioFileM4BType;
+        case StreamKind::kCaf:                  return kAudioFileCAFType;
+        case StreamKind::k3gp:                  return kAudioFile3GPType;
+        case StreamKind::k3gp2:                 return kAudioFile3GP2Type;
+        case StreamKind::kAmr:                  return kAudioFileAMRType;
+
+        case StreamKind::kNone:                 break;
+    }
+
+    return {};
+}
+
 //==============================================================================
 class CoreAudioReader : public AudioFormatReader
 {
 public:
-    CoreAudioReader (InputStream* inp)  : AudioFormatReader (inp, coreAudioFormatName)
+    using StreamKind = CoreAudioFormat::StreamKind;
+
+    CoreAudioReader (InputStream* inp, StreamKind streamKind)
+        : AudioFormatReader (inp, coreAudioFormatName)
     {
         usesFloatingPointData = true;
         bitsPerSample = 32;
@@ -353,7 +385,7 @@ public:
                                                   nullptr,  // write needs to be null to avoid permissions errors
                                                   &getSizeCallback,
                                                   nullptr,  // setSize needs to be null to avoid permissions errors
-                                                  0,        // AudioFileTypeID inFileTypeHint
+                                                  toAudioFileTypeID (streamKind),
                                                   &audioFileID);
         if (status == noErr)
         {
@@ -730,12 +762,13 @@ private:
 };
 
 //==============================================================================
-CoreAudioFormat::CoreAudioFormat (uint32 fileType, StringArray exts)
-: AudioFormat (coreAudioFormatName + String (" for ") + exts[0], exts), fileTypeID (fileType)
+CoreAudioFormat::CoreAudioFormat (StreamKind kind, StringArray exts)
+    : AudioFormat (coreAudioFormatName + String (" for ") + exts[0], exts),
+      streamKind (kind)
 {
 }
 
-CoreAudioFormat::~CoreAudioFormat() {}
+CoreAudioFormat::~CoreAudioFormat() = default;
 
 Array<int> CoreAudioFormat::getPossibleSampleRates()    { return {}; }
 Array<int> CoreAudioFormat::getPossibleBitDepths()      { return {}; }
@@ -747,7 +780,7 @@ bool CoreAudioFormat::canDoMono()       { return true; }
 AudioFormatReader* CoreAudioFormat::createReaderFor (InputStream* sourceStream,
                                                      bool deleteStreamIfOpeningFails)
 {
-    std::unique_ptr<CoreAudioReader> r (new CoreAudioReader (sourceStream));
+    std::unique_ptr<CoreAudioReader> r (new CoreAudioReader (sourceStream, streamKind));
 
     if (r->ok)
         return r.release();
@@ -766,7 +799,7 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (
     const StringPairArray& /*metadataValues*/,
     int /*qualityOptionIndex*/)
 {
-    return new CoreAudioWriter (output, fileTypeID, sampleRateToUse, numberOfChannels, (unsigned int) bitsPerSample);
+    return new CoreAudioWriter (output, toAudioFileTypeID (streamKind), sampleRateToUse, numberOfChannels, (unsigned int) bitsPerSample);
 }
 
 static AudioFileTypeID audioFileTypeForExtension (String extension)
@@ -789,8 +822,14 @@ void CoreAudioFormat::registerFormats (AudioFormatManager& formats)
     std::map<AudioFileTypeID, StringArray> extensions;
     for (auto ext : findFileExtensionsForCoreAudioCodecs())
         extensions[audioFileTypeForExtension (ext)].add (ext);
-    for (const auto& i : extensions)
-        formats.registerFormat (new CoreAudioFormat (i.first, i.second), false);
+    for (int k = (int) StreamKind::kAiff; k <= (int) StreamKind::kAmr; ++k)
+    {
+        auto kind = (StreamKind) k;
+        auto i = extensions.find (toAudioFileTypeID (kind));
+        if (i == extensions.end())
+            continue;
+        formats.registerFormat (new CoreAudioFormat (kind, i->second), false);
+    }
 }
 
 //==============================================================================
