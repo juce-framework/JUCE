@@ -10,8 +10,8 @@
       <FILE id="xdUc9q" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Vjuvqu" name="MasterComponent.h" compile="0" resource="0"
             file="Source/MasterComponent.h"/>
-      <FILE id="KbZNxO" name="SlaveComponent.h" compile="0" resource="0"
-            file="Source/SlaveComponent.h"/>
+      <FILE id="KbZNxO" name="ClientComponent.h" compile="0" resource="0"
+            file="Source/ClientComponent.h"/>
       <FILE id="F7A4kl" name="SharedCanvas.h" compile="0" resource="0" file="Source/SharedCanvas.h"/>
     </GROUP>
     <FILE id="Ww6bQw" name="juce_icon.png" compile="0" resource="1" file="Source/juce_icon.png"/>

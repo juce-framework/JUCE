@@ -139,7 +139,7 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
         case invokedExecutableFile:
             if (juce_argv != nullptr && juce_argc > 0)
-                return File (CharPointer_UTF8 (juce_argv[0]));
+                return File (String (CharPointer_UTF8 (juce_argv[0])));
             // Falls through
             JUCE_FALLTHROUGH
 

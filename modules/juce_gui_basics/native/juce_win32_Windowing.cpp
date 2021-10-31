@@ -614,7 +614,7 @@ static POINT POINTFromPoint (Point<int> p) noexcept          { return { p.x, p.y
 //==============================================================================
 static const Displays::Display* getCurrentDisplayFromScaleFactor (HWND hwnd);
 
-template<typename ValueType>
+template <typename ValueType>
 static Rectangle<ValueType> convertPhysicalScreenRectangleToLogical (Rectangle<ValueType> r, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
@@ -623,7 +623,7 @@ static Rectangle<ValueType> convertPhysicalScreenRectangleToLogical (Rectangle<V
     return r;
 }
 
-template<typename ValueType>
+template <typename ValueType>
 static Rectangle<ValueType> convertLogicalScreenRectangleToPhysical (Rectangle<ValueType> r, HWND h) noexcept
 {
     if (isPerMonitorDPIAwareWindow (h))
@@ -715,7 +715,9 @@ static void setWindowZOrder (HWND hwnd, HWND insertAfter)
 }
 
 //==============================================================================
+#if ! JUCE_MINGW
 extern RTL_OSVERSIONINFOW getWindowsVersionInfo();
+#endif
 
 double Desktop::getDefaultMasterScale()
 {
@@ -735,6 +737,7 @@ class Desktop::NativeDarkModeChangeDetectorImpl
 public:
     NativeDarkModeChangeDetectorImpl()
     {
+       #if ! JUCE_MINGW
         const auto winVer = getWindowsVersionInfo();
 
         if (winVer.dwMajorVersion >= 10 && winVer.dwBuildNumber >= 17763)
@@ -751,6 +754,7 @@ public:
                     darkModeEnabled = shouldAppsUseDarkMode() && ! isHighContrast();
             }
         }
+       #endif
     }
 
     bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
@@ -758,7 +762,7 @@ public:
 private:
     static bool isHighContrast()
     {
-        HIGHCONTRASTW highContrast { 0 };
+        HIGHCONTRASTW highContrast {};
 
         if (SystemParametersInfoW (SPI_GETHIGHCONTRAST, sizeof (highContrast), &highContrast, false))
             return highContrast.dwFlags & HCF_HIGHCONTRASTON;
@@ -3808,6 +3812,12 @@ private:
                 }
 
                 handleFocusLoss();
+
+                if (auto* modal = Component::getCurrentlyModalComponent())
+                    if (auto* peer = modal->getPeer())
+                        if ((peer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
+                            sendInputAttemptWhenModalMessage();
+
                 break;
 
             case WM_ACTIVATEAPP:
@@ -5187,37 +5197,31 @@ void* MouseCursor::createStandardMouseCursor (const MouseCursor::StandardCursorT
 
         case DraggingHandCursor:
         {
-            static void* dragHandCursor = nullptr;
-
-            if (dragHandCursor == nullptr)
+            static void* dragHandCursor = []
             {
-                static const unsigned char dragHandData[] =
+                static const unsigned char dragHandData[]
                     { 71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,
                       16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-                dragHandCursor = CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 }).create();
-            }
+                return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 }).create();
+            }();
 
             return dragHandCursor;
         }
 
         case CopyingCursor:
         {
-            static void* copyCursor = nullptr;
-
-            if (copyCursor == nullptr)
+            static void* copyCursor = []
             {
-                static unsigned char copyCursorData[] = {
-                    71,73,70,56,57,97,21,0,21,0,145,0,0,0,0,0,255,255,255,0,128,128,255,255,255,33,249,4,1,0,0,3,0,44,0,0,0,0,21,0,
-                    21,0,0,2,72,4,134,169,171,16,199,98,11,79,90,71,161,93,56,111,78,133,218,215,137,31,82,154,100,200,86,91,202,142,
-                    12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,252,114,147,74,83,
-                    5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0
-                };
-                const int copyCursorSize = 119;
+                static const unsigned char copyCursorData[]
+                    { 71,73,70,56,57,97,21,0,21,0,145,0,0,0,0,0,255,255,255,0,128,128,255,255,255,33,249,4,1,0,0,3,0,44,0,0,0,0,21,0,
+                      21,0,0,2,72,4,134,169,171,16,199,98,11,79,90,71,161,93,56,111,78,133,218,215,137,31,82,154,100,200,86,91,202,142,
+                      12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,252,114,147,74,83,
+                      5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
 
-                copyCursor = CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, copyCursorSize), { 1, 3 }).create();
-            }
+                return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData)), { 1, 3 }).create();
+            }();
 
             return copyCursor;
         }

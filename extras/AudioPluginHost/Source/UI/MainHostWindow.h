@@ -71,6 +71,8 @@ void setAutoScaleValueForPlugin (const String&, AutoScale);
 bool shouldAutoScalePlugin (const PluginDescription&);
 void addPluginAutoScaleOptionsSubMenu (AudioPluginInstance*, PopupMenu&);
 
+constexpr const char* processUID = "juceaudiopluginhost";
+
 //==============================================================================
 class MainHostWindow    : public DocumentWindow,
                           public MenuBarModel,

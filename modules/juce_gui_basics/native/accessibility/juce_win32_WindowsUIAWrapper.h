@@ -124,8 +124,8 @@ private:
     }
 
     //==============================================================================
-    template<typename FuncType>
-    static FuncType getUiaFunction (HMODULE module, StringRef funcName)
+    template <typename FuncType>
+    static FuncType getUiaFunction (HMODULE module, LPCSTR funcName)
     {
         return (FuncType) GetProcAddress (module, funcName);
     }

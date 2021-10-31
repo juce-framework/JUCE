@@ -426,8 +426,8 @@ public:
             NSRect v = [view convertRect: [view frame] toView: nil];
             NSRect w = [window frame];
 
-            b.setTop ((int) v.origin.y);
-            b.setBottom ((int) (w.size.height - (v.origin.y + v.size.height)));
+            b.setTop ((int) (w.size.height - (v.origin.y + v.size.height)));
+            b.setBottom ((int) v.origin.y);
             b.setLeft ((int) v.origin.x);
             b.setRight ((int) (w.size.width - (v.origin.x + v.size.width)));
         }
@@ -1120,12 +1120,15 @@ public:
                                        name: NSWindowWillMiniaturizeNotification
                                      object: currentWindow];
 
-           #if JUCE_COREGRAPHICS_DRAW_ASYNC
             [notificationCenter addObserver: view
                                    selector: becomeKeySelector
                                        name: NSWindowDidBecomeKeyNotification
                                      object: currentWindow];
-           #endif
+
+            [notificationCenter addObserver: view
+                                   selector: resignKeySelector
+                                       name: NSWindowDidResignKeyNotification
+                                     object: currentWindow];
         }
     }
 
@@ -1138,6 +1141,12 @@ public:
     void becomeKey()
     {
         component.repaint();
+    }
+
+    void resignKey()
+    {
+        viewFocusLoss();
+        sendModalInputAttemptIfBlocked();
     }
 
     void liveResizingStart()
@@ -1516,6 +1525,7 @@ public:
     static const SEL asyncMouseDownSelector;
     static const SEL asyncMouseUpSelector;
     static const SEL becomeKeySelector;
+    static const SEL resignKeySelector;
 
 private:
     static NSView* createViewInstance();
@@ -1691,6 +1701,7 @@ const SEL NSViewComponentPeer::frameChangedSelector   = @selector (frameChanged:
 const SEL NSViewComponentPeer::asyncMouseDownSelector = @selector (asyncMouseDown:);
 const SEL NSViewComponentPeer::asyncMouseUpSelector   = @selector (asyncMouseUp:);
 const SEL NSViewComponentPeer::becomeKeySelector      = @selector (becomeKey:);
+const SEL NSViewComponentPeer::resignKeySelector      = @selector (resignKey:);
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
@@ -1796,6 +1807,7 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
         addMethod (NSViewComponentPeer::asyncMouseUpSelector,   asyncMouseUp,             "v@:@");
         addMethod (NSViewComponentPeer::frameChangedSelector,   frameChanged,             "v@:@");
         addMethod (NSViewComponentPeer::becomeKeySelector,      becomeKey,                "v@:@");
+        addMethod (NSViewComponentPeer::resignKeySelector,      resignKey,                "v@:@");
 
         addMethod (@selector (performKeyEquivalent:),           performKeyEquivalent,     "c@:@");
 
@@ -1862,6 +1874,7 @@ private:
     static void viewDidMoveToWindow (id self, SEL)             { if (auto* p = getOwner (self)) p->viewMovedToWindow(); }
     static void dismissModals (id self, SEL)                   { if (auto* p = getOwner (self)) p->dismissModals(); }
     static void becomeKey (id self, SEL)                       { if (auto* p = getOwner (self)) p->becomeKey(); }
+    static void resignKey (id self, SEL)                       { if (auto* p = getOwner (self)) p->resignKey(); }
 
     static BOOL isFlipped (id, SEL)                            { return true; }
 

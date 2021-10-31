@@ -177,6 +177,7 @@ public:
     void setIcon (::Window , const Image&) const;
     void setVisible (::Window, bool shouldBeVisible) const;
     void setBounds (::Window, Rectangle<int>, bool fullScreen) const;
+    void updateConstraints (::Window) const;
 
     BorderSize<int> getBorderSize   (::Window) const;
     Rectangle<int>  getWindowBounds (::Window, ::Window parentWindow);
@@ -316,6 +317,7 @@ private:
 
     void dismissBlockingModals      (LinuxComponentPeer*) const;
     void dismissBlockingModals      (LinuxComponentPeer*, const XConfigureEvent&) const;
+    void updateConstraints          (::Window, ComponentPeer&) const;
 
     ::Window findTopLevelWindowOf (::Window) const;
 

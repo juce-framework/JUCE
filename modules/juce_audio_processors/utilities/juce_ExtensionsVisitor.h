@@ -44,6 +44,21 @@ typedef struct ComponentInstanceRecord* AudioComponentInstance;
 typedef AudioComponentInstance AudioUnit;
 
 //==============================================================================
+/*  If you are including the VST headers inside a namespace this forward
+    declaration may cause a collision with the contents of `aeffect.h`.
+
+    If that is the case you can avoid the collision by placing a `struct AEffect;`
+    forward declaration inside the namespace and before the inclusion of the VST
+    headers, e.g. @code
+
+    namespace Vst2
+    {
+    struct AEffect;
+    #include <pluginterfaces/vst2.x/aeffect.h>
+    #include <pluginterfaces/vst2.x/aeffectx.h>
+    }
+    @endcode
+*/
 struct AEffect;
 
 //==============================================================================

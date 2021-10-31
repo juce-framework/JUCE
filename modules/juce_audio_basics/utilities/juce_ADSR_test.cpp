@@ -152,6 +152,20 @@ struct ADSRTests  : public UnitTest
             expect (isSustained (buffer, parameters.sustain));
         }
 
+        beginTest ("Zero-length attack and decay releases correctly");
+        {
+            adsr.reset();
+            adsr.setParameters ({ 0.0f, 0.0f, parameters.sustain, parameters.release });
+
+            adsr.noteOn();
+            adsr.noteOff();
+
+            auto buffer = getTestBuffer (sampleRate, parameters.release);
+            adsr.applyEnvelopeToBuffer (buffer, 0, buffer.getNumSamples());
+
+            expect (isDecreasing (buffer));
+        }
+
         beginTest ("Zero-length release resets to idle");
         {
             adsr.reset();

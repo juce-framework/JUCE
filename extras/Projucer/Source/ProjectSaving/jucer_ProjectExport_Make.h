@@ -186,7 +186,7 @@ public:
             if (! ldflags.isEmpty())
                 s.add ("JUCE_LDFLAGS_" + getTargetVarName() + " := " + ldflags.joinIntoString (" "));
 
-            auto targetName = owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString());
+            auto targetName = owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString (type == UnityPlugIn));
 
             if (owner.projectType.isStaticLibrary())
                 targetName = getStaticLibbedFilename (targetName);
