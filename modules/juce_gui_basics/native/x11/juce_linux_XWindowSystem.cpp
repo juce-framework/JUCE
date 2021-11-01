@@ -30,7 +30,7 @@ namespace juce
  #define JUCE_DEBUG_XERRORS 1
 
  #if ! defined (JUCE_DEBUG_XERRORS_SYNCHRONOUSLY)
-  #define JUCE_DEBUG_XERRORS_SYNCHRONOUSLY 1
+  #define JUCE_DEBUG_XERRORS_SYNCHRONOUSLY 0
  #endif
 #endif
 
