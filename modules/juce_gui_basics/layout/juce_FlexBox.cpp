@@ -30,11 +30,13 @@ struct FlexBoxLayoutCalculation
 {
     using Coord = double;
 
+    enum class Axis { main, cross };
+
     FlexBoxLayoutCalculation (FlexBox& fb, Coord w, Coord h)
-       : owner (fb), parentWidth (w), parentHeight (h), numItems (owner.items.size()),
-         isRowDirection (fb.flexDirection == FlexBox::Direction::row
-                      || fb.flexDirection == FlexBox::Direction::rowReverse),
-         containerLineLength (isRowDirection ? parentWidth : parentHeight)
+        : owner (fb), parentWidth (w), parentHeight (h), numItems (owner.items.size()),
+          isRowDirection (fb.flexDirection == FlexBox::Direction::row
+                       || fb.flexDirection == FlexBox::Direction::rowReverse),
+          containerLineLength (getContainerSize (Axis::main))
     {
         lineItems.calloc (numItems * numItems);
         lineInfo.calloc (numItems);
@@ -58,22 +60,6 @@ struct FlexBoxLayoutCalculation
             lockedMarginRight  = getValueOrZeroIfAuto (item->margin.right);
             lockedMarginTop    = getValueOrZeroIfAuto (item->margin.top);
             lockedMarginBottom = getValueOrZeroIfAuto (item->margin.bottom);
-        }
-
-        void setWidthChecked (Coord newWidth) noexcept
-        {
-            if (isAssigned (item->maxWidth))  newWidth = jmin (newWidth, static_cast<Coord> (item->maxWidth));
-            if (isAssigned (item->minWidth))  newWidth = jmax (newWidth, static_cast<Coord> (item->minWidth));
-
-            lockedWidth = newWidth;
-        }
-
-        void setHeightChecked (Coord newHeight) noexcept
-        {
-            if (isAssigned (item->maxHeight))  newHeight = jmin (newHeight, (Coord) item->maxHeight);
-            if (isAssigned (item->minHeight))  newHeight = jmax (newHeight, (Coord) item->minHeight);
-
-            lockedHeight = newHeight;
         }
     };
 
@@ -103,6 +89,65 @@ struct FlexBoxLayoutCalculation
     static Coord getValueOrZeroIfAuto (Coord value) noexcept { return isAuto (value) ? Coord() : value; }
 
     //==============================================================================
+    bool isSingleLine() const { return owner.flexWrap == FlexBox::Wrap::noWrap; }
+
+    template <typename Value>
+    Value& pickForAxis (Axis axis, Value& x, Value& y) const
+    {
+        return (isRowDirection ? axis == Axis::main : axis == Axis::cross) ? x : y;
+    }
+
+    auto& getStartMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->margin.left, item.item->margin.top);
+    }
+
+    auto& getEndMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->margin.right, item.item->margin.bottom);
+    }
+
+    auto& getStartLockedMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.lockedMarginLeft, item.lockedMarginTop);
+    }
+
+    auto& getEndLockedMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.lockedMarginRight, item.lockedMarginBottom);
+    }
+
+    auto& getLockedSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.lockedWidth, item.lockedHeight);
+    }
+
+    auto& getPreferredSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.preferredWidth, item.preferredHeight);
+    }
+
+    Coord getContainerSize (Axis axis) const
+    {
+        return pickForAxis (axis, parentWidth, parentHeight);
+    }
+
+    auto& getItemSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->width, item.item->height);
+    }
+
+    auto& getMinSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->minWidth, item.item->minHeight);
+    }
+
+    auto& getMaxSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->maxWidth, item.item->maxHeight);
+    }
+
+    //==============================================================================
     void createStates()
     {
         itemStates.ensureStorageAllocated (numItems);
@@ -115,14 +160,14 @@ struct FlexBoxLayoutCalculation
 
         for (auto& item : itemStates)
         {
-            item.preferredWidth  = getPreferredWidth  (item);
-            item.preferredHeight = getPreferredHeight (item);
+            for (auto& axis : { Axis::main, Axis::cross })
+                getPreferredSize (axis, item) = computePreferredSize (axis, item);
         }
     }
 
     void initialiseItems() noexcept
     {
-        if (owner.flexWrap == FlexBox::Wrap::noWrap)  // for single-line, all items go in line 1
+        if (isSingleLine())  // for single-line, all items go in line 1
         {
             lineInfo[0].numItems = numItems;
             int i = 0;
@@ -143,7 +188,7 @@ struct FlexBoxLayoutCalculation
             {
                 item.resetItemLockedSize();
 
-                const auto flexitemLength = getItemLength (item);
+                const auto flexitemLength = getItemMainSize (item);
 
                 if (flexitemLength > currentLength)
                 {
@@ -195,16 +240,8 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (isRowDirection)
-                {
-                    if (isAuto (item.item->margin.left))    ++allFlexGrow;
-                    if (isAuto (item.item->margin.right))   ++allFlexGrow;
-                }
-                else
-                {
-                    if (isAuto (item.item->margin.top))     ++allFlexGrow;
-                    if (isAuto (item.item->margin.bottom))  ++allFlexGrow;
-                }
+                if (isAuto (getStartMargin (Axis::main, item))) ++allFlexGrow;
+                if (isAuto (getEndMargin   (Axis::main, item))) ++allFlexGrow;
             }
 
             const auto changeUnitWidth = remainingLength / allFlexGrow;
@@ -215,16 +252,11 @@ struct FlexBoxLayoutCalculation
                 {
                     auto& item = getItem (column, row);
 
-                    if (isRowDirection)
-                    {
-                        if (isAuto (item.item->margin.left))    item.lockedMarginLeft  = changeUnitWidth;
-                        if (isAuto (item.item->margin.right))   item.lockedMarginRight = changeUnitWidth;
-                    }
-                    else
-                    {
-                        if (isAuto (item.item->margin.top))     item.lockedMarginTop    = changeUnitWidth;
-                        if (isAuto (item.item->margin.bottom))  item.lockedMarginBottom = changeUnitWidth;
-                    }
+                    if (isAuto (getStartMargin (Axis::main, item)))
+                        getStartLockedMargin (Axis::main, item) = changeUnitWidth;
+
+                    if (isAuto (getEndMargin (Axis::main, item)))
+                        getEndLockedMargin   (Axis::main, item) = changeUnitWidth;
                 }
             }
         }
@@ -235,9 +267,9 @@ struct FlexBoxLayoutCalculation
         // https://www.w3.org/TR/css-flexbox-1/#algo-cross-line
         // If the flex container is single-line and has a definite cross size, the cross size of the
         // flex line is the flex container’s inner cross size.
-        if (owner.flexWrap == FlexBox::Wrap::noWrap)
+        if (isSingleLine())
         {
-            lineInfo[0].crossSize = isRowDirection ? parentHeight : parentWidth;
+            lineInfo[0].crossSize = getContainerSize (Axis::cross);
         }
         else
         {
@@ -247,12 +279,7 @@ struct FlexBoxLayoutCalculation
                 const auto numColumns = lineInfo[row].numItems;
 
                 for (int column = 0; column < numColumns; ++column)
-                {
-                    auto& item = getItem (column, row);
-
-                    maxSize = jmax (maxSize, isRowDirection ? item.lockedHeight + item.lockedMarginTop  + item.lockedMarginBottom
-                                                            : item.lockedWidth  + item.lockedMarginLeft + item.lockedMarginRight);
-                }
+                    maxSize = jmax (maxSize, getItemCrossSize (getItem (column, row)));
 
                 lineInfo[row].crossSize = maxSize;
             }
@@ -280,7 +307,7 @@ struct FlexBoxLayoutCalculation
 
     void alignLinesPerAlignContent() noexcept
     {
-        containerCrossLength = isRowDirection ? parentHeight : parentWidth;
+        containerCrossLength = getContainerSize (Axis::cross);
 
         if (owner.alignContent == FlexBox::AlignContent::flexStart)
         {
@@ -357,32 +384,16 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (isRowDirection)
+                getStartLockedMargin (Axis::cross, item) = [&]
                 {
-                    item.lockedMarginTop = [&]
-                    {
-                        if (isAuto (item.item->margin.top) && isAuto (item.item->margin.bottom))
-                            return (crossSizeForLine - item.lockedHeight) / 2;
+                    if (isAuto (getStartMargin (Axis::cross, item)) && isAuto (getEndMargin (Axis::cross, item)))
+                        return (crossSizeForLine - getLockedSize (Axis::cross, item)) / 2;
 
-                        if (isAuto (item.item->margin.top))
-                            return crossSizeForLine - item.lockedHeight - item.item->margin.bottom;
+                    if (isAuto (getStartMargin (Axis::cross, item)))
+                        return crossSizeForLine - getLockedSize (Axis::cross, item) - getEndMargin (Axis::cross, item);
 
-                        return item.lockedMarginTop;
-                    }();
-                }
-                else
-                {
-                    item.lockedMarginLeft = [&]
-                    {
-                        if (isAuto (item.item->margin.left) && isAuto (item.item->margin.right))
-                            return (crossSizeForLine - item.lockedWidth) / 2;
-
-                        if (isAuto (item.item->margin.left))
-                            return crossSizeForLine - item.lockedWidth - item.item->margin.right;
-
-                        return item.lockedMarginLeft;
-                    }();
-                }
+                    return getStartLockedMargin (Axis::cross, item);
+                }();
             }
         }
     }
@@ -399,8 +410,7 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (isAuto (isRowDirection ? item.item->margin.top    : item.item->margin.left)
-                 || isAuto (isRowDirection ? item.item->margin.bottom : item.item->margin.right))
+                if (isAuto (getStartMargin (Axis::cross, item)) || isAuto (getEndMargin (Axis::cross, item)))
                     continue;
 
                 const auto alignment = [&]
@@ -417,60 +427,48 @@ struct FlexBoxLayoutCalculation
                     return owner.alignItems;
                 }();
 
-                switch (alignment)
+                getStartLockedMargin (Axis::cross, item) = [&]
                 {
-                    // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-flex-start
-                    // The cross-start margin edge of the flex item is placed flush with the
-                    // cross-start edge of the line.
-                    case FlexBox::AlignItems::flexStart:
+                    switch (alignment)
                     {
-                        if (isRowDirection)
-                            item.lockedMarginTop = item.item->margin.top;
-                        else
-                            item.lockedMarginLeft = item.item->margin.left;
-                        break;
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-flex-start
+                        // The cross-start margin edge of the flex item is placed flush with the
+                        // cross-start edge of the line.
+                        case FlexBox::AlignItems::flexStart:
+                            return (Coord) getStartMargin (Axis::cross, item);
+
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-flex-end
+                        // The cross-end margin edge of the flex item is placed flush with the cross-end
+                        // edge of the line.
+                        case FlexBox::AlignItems::flexEnd:
+                            return lineSize - getLockedSize (Axis::cross, item) - getEndMargin (Axis::cross, item);
+
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-center
+                        // The flex item’s margin box is centered in the cross axis within the line.
+                        case FlexBox::AlignItems::center:
+                            return getStartMargin (Axis::cross, item) + (lineSize - getLockedSize (Axis::cross, item) - getStartMargin (Axis::cross, item) - getEndMargin (Axis::cross, item)) / 2;
+
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-stretch
+                        case FlexBox::AlignItems::stretch:
+                            return (Coord) getStartMargin (Axis::cross, item);
                     }
 
-                    // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-flex-end
-                    // The cross-end margin edge of the flex item is placed flush with the cross-end
-                    // edge of the line.
-                    case FlexBox::AlignItems::flexEnd:
-                    {
-                        if (isRowDirection)
-                            item.lockedMarginTop = lineSize - item.lockedHeight - item.item->margin.bottom;
-                        else
-                            item.lockedMarginLeft = lineSize - item.lockedWidth - item.item->margin.right;
-                        break;
-                    }
+                    jassertfalse;
+                    return 0.0;
+                }();
 
-                    // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-center
-                    // The flex item’s margin box is centered in the cross axis within the line.
-                    case FlexBox::AlignItems::center:
-                    {
-                        if (isRowDirection)
-                            item.lockedMarginTop = item.item->margin.top + (lineSize - item.lockedHeight - item.item->margin.top - item.item->margin.bottom) / 2;
-                        else
-                            item.lockedMarginLeft = item.item->margin.left + (lineSize - item.lockedWidth - item.item->margin.left - item.item->margin.right) / 2;
-                        break;
-                    }
+                if (alignment == FlexBox::AlignItems::stretch)
+                {
+                    auto newSize = isAssigned (getItemSize (Axis::cross, item)) ? computePreferredSize (Axis::cross, item)
+                                                                                : lineSize - getStartMargin (Axis::cross, item) - getEndMargin (Axis::cross, item);
 
-                    // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-stretch
-                    case FlexBox::AlignItems::stretch:
-                    {
-                        if (isRowDirection)
-                        {
-                            item.lockedMarginTop  = item.item->margin.top;
-                            item.setHeightChecked (isAssigned (item.item->height) ? getPreferredHeight (item)
-                                                                                  : lineSize - item.item->margin.top - item.item->margin.bottom);
-                        }
-                        else
-                        {
-                            item.lockedMarginLeft = item.item->margin.left;
-                            item.setWidthChecked (isAssigned (item.item->width) ? getPreferredWidth (item)
-                                                                                : lineSize - item.item->margin.left - item.item->margin.right);
-                        }
-                        break;
-                    }
+                    if (isAssigned (getMaxSize (Axis::cross, item)))
+                        newSize = jmin (newSize, (Coord) getMaxSize (Axis::cross, item));
+
+                    if (isAssigned (getMinSize (Axis::cross, item)))
+                        newSize = jmax (newSize, (Coord) getMinSize (Axis::cross, item));
+
+                    getLockedSize (Axis::cross, item) = newSize;
                 }
             }
         }
@@ -510,20 +508,15 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (isRowDirection)
-                {
-                    item.lockedMarginLeft  += additionalMarginLeft;
-                    item.lockedMarginRight += additionalMarginRight;
-                    item.item->currentBounds.setPosition ((float) (x + item.lockedMarginLeft), (float) item.lockedMarginTop);
-                    x += item.lockedWidth + item.lockedMarginLeft + item.lockedMarginRight;
-                }
-                else
-                {
-                    item.lockedMarginTop    += additionalMarginLeft;
-                    item.lockedMarginBottom += additionalMarginRight;
-                    item.item->currentBounds.setPosition ((float) item.lockedMarginLeft, (float) (x + item.lockedMarginTop));
-                    x += item.lockedHeight + item.lockedMarginTop + item.lockedMarginBottom;
-                }
+                getStartLockedMargin (Axis::main, item) += additionalMarginLeft;
+                getEndLockedMargin   (Axis::main, item) += additionalMarginRight;
+
+                item.item->currentBounds.setPosition (isRowDirection ? (float) (x + item.lockedMarginLeft)
+                                                                     : (float) item.lockedMarginLeft,
+                                                      isRowDirection ? (float) item.lockedMarginTop
+                                                                     : (float) (x + item.lockedMarginTop));
+
+                x += getItemMainSize (item);
             }
         }
     }
@@ -578,8 +571,9 @@ private:
     void resetItem (ItemWithState& item) noexcept
     {
         item.locked = false;
-        item.lockedWidth  = getPreferredWidth (item);
-        item.lockedHeight = getPreferredHeight (item);
+
+        for (auto& axis : { Axis::main, Axis::cross })
+            getLockedSize (axis, item) = computePreferredSize (axis, item);
     }
 
     bool layoutRowItems (const int row) noexcept
@@ -594,11 +588,11 @@ private:
 
             if (item.locked)
             {
-                flexContainerLength -= getItemLength (item);
+                flexContainerLength -= getItemMainSize (item);
             }
             else
             {
-                totalItemsLength += getItemLength (item);
+                totalItemsLength += getItemMainSize (item);
                 totalFlexGrow   += item.item->flexGrow;
                 totalFlexShrink += item.item->flexShrink;
             }
@@ -642,12 +636,7 @@ private:
             const auto numColumns = lineInfo[row].numItems;
 
             for (int column = 0; column < numColumns; ++column)
-            {
-                const auto& item = getItem (column, row);
-
-                lineInfo[row].totalLength += isRowDirection ? item.lockedWidth + item.lockedMarginLeft + item.lockedMarginRight
-                                                            : item.lockedHeight + item.lockedMarginTop + item.lockedMarginBottom;
-            }
+                lineInfo[row].totalLength += getItemMainSize (getItem (column, row));
         }
     }
 
@@ -682,7 +671,7 @@ private:
         }
     }
 
-    Coord getItemLength (const ItemWithState& item) const noexcept
+    Coord getItemMainSize (const ItemWithState& item) const noexcept
     {
         return isRowDirection ? item.lockedWidth  + item.lockedMarginLeft + item.lockedMarginRight
                               : item.lockedHeight + item.lockedMarginTop  + item.lockedMarginBottom;
@@ -698,84 +687,59 @@ private:
     {
         bool ok = false;
 
-        if (isRowDirection)
+        const auto prefSize = computePreferredSize (Axis::main, item);
+
+        const auto pickForMainAxis = [this] (auto& a, auto& b) -> auto& { return pickForAxis (Axis::main, a, b); };
+
+        if (isAssigned (pickForMainAxis (item.item->maxWidth, item.item->maxHeight))
+            && pickForMainAxis (item.item->maxWidth, item.item->maxHeight) < prefSize + length)
         {
-            const auto prefWidth = getPreferredWidth (item);
-
-            if (isAssigned (item.item->maxWidth) && item.item->maxWidth < prefWidth + length)
-            {
-                item.lockedWidth = item.item->maxWidth;
-                item.locked = true;
-            }
-            else if (isAssigned (prefWidth) && item.item->minWidth > prefWidth + length)
-            {
-                item.lockedWidth = item.item->minWidth;
-                item.locked = true;
-            }
-            else
-            {
-                ok = true;
-                item.lockedWidth = prefWidth + length;
-            }
-
-            lineInfo[row].totalLength += item.lockedWidth + item.lockedMarginLeft + item.lockedMarginRight;
+            pickForMainAxis (item.lockedWidth, item.lockedHeight) = pickForMainAxis (item.item->maxWidth, item.item->maxHeight);
+            item.locked = true;
+        }
+        else if (isAssigned (prefSize) && pickForMainAxis (item.item->minWidth, item.item->minHeight) > prefSize + length)
+        {
+            pickForMainAxis (item.lockedWidth, item.lockedHeight) = pickForMainAxis (item.item->minWidth, item.item->minHeight);
+            item.locked = true;
         }
         else
         {
-            const auto prefHeight = getPreferredHeight (item);
-
-            if (isAssigned (item.item->maxHeight) && item.item->maxHeight < prefHeight + length)
-            {
-                item.lockedHeight = item.item->maxHeight;
-                item.locked = true;
-            }
-            else if (isAssigned (prefHeight) && item.item->minHeight > prefHeight + length)
-            {
-                item.lockedHeight = item.item->minHeight;
-                item.locked = true;
-            }
-            else
-            {
-                ok = true;
-                item.lockedHeight = prefHeight + length;
-            }
-
-            lineInfo[row].totalLength += item.lockedHeight + item.lockedMarginTop + item.lockedMarginBottom;
+            ok = true;
+            pickForMainAxis (item.lockedWidth, item.lockedHeight) = prefSize + length;
         }
+
+        lineInfo[row].totalLength += pickForMainAxis (item.lockedWidth, item.lockedHeight)
+                                     + pickForMainAxis (item.lockedMarginLeft, item.lockedMarginTop)
+                                     + pickForMainAxis (item.lockedMarginRight, item.lockedMarginBottom);
 
         return ok;
     }
 
-    Coord getPreferredWidth (const ItemWithState& itemWithState) const noexcept
+    Coord computePreferredSize (Axis axis, ItemWithState& itemWithState) const noexcept
     {
         const auto& item = *itemWithState.item;
-        auto preferredWidth = (item.flexBasis > 0 && isRowDirection)
-                                 ? item.flexBasis
-                                 : (isAssigned (item.width) ? item.width : item.minWidth);
 
-        if (isAssigned (item.minWidth) && preferredWidth < item.minWidth)  return item.minWidth;
-        if (isAssigned (item.maxWidth) && preferredWidth > item.maxWidth)  return item.maxWidth;
+        auto preferredSize = (item.flexBasis > 0 && axis == Axis::main) ? item.flexBasis
+                                                                        : (isAssigned (getItemSize (axis, itemWithState)) ? getItemSize (axis, itemWithState)
+                                                                                                                          : getMinSize (axis, itemWithState));
 
-        return preferredWidth;
-    }
+        const auto minSize = getMinSize (axis, itemWithState);
 
-    Coord getPreferredHeight (const ItemWithState& itemWithState) const noexcept
-    {
-        const auto& item = *itemWithState.item;
-        auto preferredHeight = (item.flexBasis > 0 && ! isRowDirection)
-                                 ? item.flexBasis
-                                 : (isAssigned (item.height) ? item.height : item.minHeight);
+        if (isAssigned (minSize) && preferredSize < minSize)
+            return minSize;
 
-        if (isAssigned (item.minHeight) && preferredHeight < item.minHeight)  return item.minHeight;
-        if (isAssigned (item.maxHeight) && preferredHeight > item.maxHeight)  return item.maxHeight;
+        const auto maxSize = getMaxSize (axis, itemWithState);
 
-        return preferredHeight;
+        if (isAssigned (maxSize) && maxSize < preferredSize)
+            return maxSize;
+
+        return preferredSize;
     }
 };
 
 //==============================================================================
-FlexBox::FlexBox() noexcept {}
-FlexBox::~FlexBox() noexcept {}
+FlexBox::FlexBox() noexcept = default;
+FlexBox::~FlexBox() noexcept = default;
 
 FlexBox::FlexBox (JustifyContent jc) noexcept  : justifyContent (jc) {}
 
