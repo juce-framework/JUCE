@@ -2237,10 +2237,26 @@ private:
  class JuceARAFactory : public ARA::IMainFactory
  {
  public:
-    JuceARAFactory()    FUNKNOWN_CTOR
+    JuceARAFactory() {}
     virtual ~JuceARAFactory() {}
 
-    DECLARE_FUNKNOWN_METHODS
+    JUCE_DECLARE_VST3_COM_REF_METHODS
+
+    tresult PLUGIN_API queryInterface (const ::Steinberg::TUID targetIID, void** obj) override
+    {
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
+
+        if (doUIDsMatch (targetIID, JuceARAFactory::iid))
+        {
+            addRef();
+            *obj = this;
+            return kResultOk;
+        }
+
+        *obj = nullptr;
+        return kNoInterface;
+    }
 
     //---from ARA::IMainFactory-------
     const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
@@ -2248,26 +2264,11 @@ private:
         return ARA::PlugIn::DocumentController::getARAFactory();
     }
     static const FUID iid;
- protected:
+
+ private:
+     //==============================================================================
+     std::atomic<int> refCount { 1 };
  };
-
- IMPLEMENT_REFCOUNT(JuceARAFactory)
-
- ::Steinberg::tresult PLUGIN_API JuceARAFactory::queryInterface (const ::Steinberg::TUID targetIID, void** obj)
- {
-    TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
-    TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
-
-    if (doUIDsMatch (targetIID, JuceARAFactory::iid))
-    {
-        addRef();
-        *obj = this;
-        return kResultOk;
-    }
-
-    *obj = nullptr;
-    return kNoInterface;
- }
 
 #endif
 

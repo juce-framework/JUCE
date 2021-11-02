@@ -1,6 +1,5 @@
 #pragma once
 
-#include "JuceHeader.h"
 #include "ARAPluginDemoAudioProcessor.h"
 #include "DocumentView.h"
 
@@ -8,14 +7,15 @@
 /**
     Editor class for ARAPluginDemo
 */
-class ARAPluginDemoAudioProcessorEditor   : public AudioProcessorEditor,
-                                            public AudioProcessorEditorARAExtension,
+class ARAPluginDemoAudioProcessorEditor   : public juce::AudioProcessorEditor,
+                                            public juce::AudioProcessorEditorARAExtension,
                                             private juce::Timer
 {
 public:
     ARAPluginDemoAudioProcessorEditor (ARAPluginDemoAudioProcessor&);
 
-    void paint (Graphics&) override;
+    //==============================================================================
+    void paint (juce::Graphics&) override;
     void resized() override;
 
     // juce::Timer
@@ -24,10 +24,11 @@ public:
 private:
     std::unique_ptr<DocumentView> documentView;
 
-    TextButton followPlayHeadButton;
-    TextButton onlySelectedTracksButton;
-    Label playheadLinearPositionLabel, playheadMusicalPositionLabel;
-    TextButton horizontalZoomInButton, horizontalZoomOutButton;
+    juce::TooltipWindow tooltip;
+    juce::TextButton onlySelectedTracksButton;
+    juce::TextButton followPlayHeadButton;
+    juce::Label playheadLinearPositionLabel, playheadMusicalPositionLabel;
+    juce::TextButton horizontalZoomInButton, horizontalZoomOutButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPluginDemoAudioProcessorEditor)
 };

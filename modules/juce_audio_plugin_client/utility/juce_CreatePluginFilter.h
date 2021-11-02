@@ -43,7 +43,7 @@ inline AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioPro
     jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
 
    #if JucePlugin_Enable_ARA
-    jassert (dynamic_cast<AudioProcessorARAExtension*> (pluginInstance) != nullptr);
+    jassert (dynamic_cast<juce::AudioProcessorARAExtension*> (pluginInstance) != nullptr);
    #endif
 
     return pluginInstance;

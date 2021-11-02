@@ -1,6 +1,8 @@
 #include "ARAPluginDemoDocumentController.h"
 #include "ARAPluginDemoAudioModification.h"
 
+using namespace juce;
+
 ARA::PlugIn::AudioModification* ARAPluginDemoDocumentController::doCreateAudioModification (ARA::PlugIn::AudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARA::PlugIn::AudioModification* optionalModificationToClone) noexcept
 {
     return new ARAPluginDemoAudioModification (static_cast<ARAAudioSource*> (audioSource), hostRef, static_cast<const ARAAudioModification*> (optionalModificationToClone));

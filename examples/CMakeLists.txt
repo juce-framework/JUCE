@@ -50,6 +50,7 @@ function(_juce_add_pips)
     endforeach()
 endfunction()
 
+add_subdirectory(ARA/ARAPluginDemo)
 add_subdirectory(Audio)
 add_subdirectory(DSP)
 add_subdirectory(GUI)

@@ -3,10 +3,10 @@
 <JUCERPROJECT id="v5FTSA" name="ARAPluginDemo" projectType="audioplug" pluginCode="AraD"
               pluginFormats="buildAU,buildVST3,enableARA" userNotes="Special thanks to SoundRadix for coming up with this example!"
               companyName="ARA Demo Company" companyWebsite="https://www.arademocompany.com"
-              companyCopyright="Copyright (c) 2012-2020, ARA Demo Company, All Rights Reserved."
+              companyCopyright="Copyright (c) 2012-2021, ARA Demo Company, All Rights Reserved."
               companyEmail="info@arademocompany.com" pluginVST3Category="Tools"
               pluginAUIsSandboxSafe="1" pluginManufacturerCode="ADeC" displaySplashScreen="1"
-              jucerFormatVersion="1">
+              jucerFormatVersion="1" addUsingNamespaceToJuceHeader="0" useAppConfig="0">
   <MAINGROUP id="aCHzDP" name="ARAPluginDemo">
     <GROUP id="{38BAE513-FAF5-0AD7-A598-7A51E0C50CB5}" name="Source">
       <GROUP id="{CDA2CA2E-5333-DEA8-40AE-535794378ABD}" name="Views">

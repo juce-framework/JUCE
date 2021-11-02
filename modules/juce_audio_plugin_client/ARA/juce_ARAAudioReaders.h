@@ -1,5 +1,6 @@
 #pragma once
 
+#include <juce_audio_formats/juce_audio_formats.h>
 #include "juce_ARAModelObjects.h"
 
 namespace juce
@@ -58,7 +59,7 @@ public:
         either 32 or 64 bit samples from the given \p audioSource.
     */
     ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples = false);
-    virtual ~ARAAudioSourceReader();
+    virtual ~ARAAudioSourceReader() override;
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
@@ -121,7 +122,7 @@ public:
     */
     ARAPlaybackRegionReader (std::unique_ptr<AudioProcessor> audioProcessor, std::vector<ARAPlaybackRegion*> const& playbackRegions);
 
-    virtual ~ARAPlaybackRegionReader();
+    virtual ~ARAPlaybackRegionReader() override;
 
     /** Returns true as long as any of the reader's underlying playback region's haven't changed. */
     bool isValid() const { return (audioProcessor != nullptr); }

@@ -26,11 +26,11 @@ Range<double> ARARegionSequence::getTimeRange (bool includeHeadAndTail) const
     if (getPlaybackRegions().empty())
         return {};
 
-    double startTime = std::numeric_limits<double>::max();
-    double endTime = std::numeric_limits<double>::lowest();
+    auto startTime = std::numeric_limits<double>::max();
+    auto endTime = std::numeric_limits<double>::lowest();
     for (auto playbackRegion : getPlaybackRegions<ARAPlaybackRegion>())
     {
-        auto regionTimeRange = playbackRegion->getTimeRange (includeHeadAndTail);
+        const auto regionTimeRange = playbackRegion->getTimeRange (includeHeadAndTail);
         startTime = jmin (startTime, regionTimeRange.getStart());
         endTime = jmax (endTime, regionTimeRange.getEnd());
     }
@@ -39,10 +39,10 @@ Range<double> ARARegionSequence::getTimeRange (bool includeHeadAndTail) const
 
 double ARARegionSequence::getCommonSampleRate() const
 {
-    double commonSampleRate = 0.0;
+    auto commonSampleRate = 0.0;
     for (auto playbackRegion : getPlaybackRegions())
     {
-        double sampleRate = playbackRegion->getAudioModification()->getAudioSource()->getSampleRate();
+        const auto sampleRate = playbackRegion->getAudioModification()->getAudioSource()->getSampleRate();
         if (commonSampleRate == 0.0)
             commonSampleRate = sampleRate;
         if (commonSampleRate != sampleRate)

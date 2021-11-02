@@ -1,6 +1,5 @@
 #pragma once
 
-#include "JuceHeader.h"
 #include "RegionSequenceHeaderView.h"
 
 class DocumentView;
@@ -13,37 +12,37 @@ class PlaybackRegionView;
     This includes a header view containing ARA region sequence data
     and views for all ARA playback regions in the given region sequence.
 */
-class RegionSequenceViewContainer : private ARARegionSequence::Listener
+class RegionSequenceViewContainer : private juce::ARARegionSequence::Listener
 {
 public:
-    RegionSequenceViewContainer (DocumentView& documentView, ARARegionSequence* sequence);
-    ~RegionSequenceViewContainer();
+    RegionSequenceViewContainer (DocumentView& documentView, juce::ARARegionSequence* sequence);
+    ~RegionSequenceViewContainer() override;
 
-    ARARegionSequence* getRegionSequence() const { return regionSequence; }     // careful: may return nullptr!
-    Range<double> getTimeRange() const { return (regionSequence != nullptr) ? regionSequence->getTimeRange() : Range<double>(); }
+    juce::ARARegionSequence* getRegionSequence() const { return regionSequence; }     // careful: may return nullptr!
+    juce::Range<double> getTimeRange() const { return (regionSequence != nullptr) ? regionSequence->getTimeRange() : juce::Range<double>(); }
     bool isEmpty() const { return (regionSequence == nullptr) || regionSequence->getPlaybackRegions().empty(); }
 
     void setRegionsViewBoundsByYRange (int y, int height);
 
     // ARARegionSequence::Listener overrides
-    void willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
-    void didAddPlaybackRegionToRegionSequence (ARARegionSequence* regionSequence, ARAPlaybackRegion* playbackRegion) override;
-    void willDestroyRegionSequence (ARARegionSequence* regionSequence) override;
-    void willUpdateRegionSequenceProperties (ARARegionSequence* regionSequence, ARARegionSequence::PropertiesPtr newProperties) override;
+    void willRemovePlaybackRegionFromRegionSequence (juce::ARARegionSequence* regionSequence, juce::ARAPlaybackRegion* playbackRegion) override;
+    void didAddPlaybackRegionToRegionSequence (juce::ARARegionSequence* regionSequence, juce::ARAPlaybackRegion* playbackRegion) override;
+    void willDestroyRegionSequence (juce::ARARegionSequence* regionSequence) override;
+    void willUpdateRegionSequenceProperties (juce::ARARegionSequence* regionSequence, juce::ARARegionSequence::PropertiesPtr newProperties) override;
 
     DocumentView& getDocumentView() const { return documentView; }
     const RegionSequenceHeaderView& getRegionSequenceHeaderView() const { return regionSequenceHeaderView; }
 
 private:
-    void addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion);
+    void addRegionSequenceViewAndMakeVisible (juce::ARAPlaybackRegion* playbackRegion);
     void detachFromRegionSequence();
 
 private:
     DocumentView& documentView;
-    ARARegionSequence* regionSequence;
+    juce::ARARegionSequence* regionSequence;
 
     RegionSequenceHeaderView regionSequenceHeaderView;
-    OwnedArray<PlaybackRegionView> playbackRegionViews;
+    juce::OwnedArray<PlaybackRegionView> playbackRegionViews;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RegionSequenceViewContainer)
 };

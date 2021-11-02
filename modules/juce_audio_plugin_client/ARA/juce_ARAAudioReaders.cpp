@@ -12,7 +12,7 @@ ARAAudioSourceReader::ARAAudioSourceReader (ARAAudioSource* audioSource, bool us
     bitsPerSample = use64BitSamples ? 64 : 32;
     usesFloatingPointData = true;
     sampleRate = audioSourceBeingRead->getSampleRate();
-    numChannels = audioSourceBeingRead->getChannelCount();
+    numChannels = (unsigned int) audioSourceBeingRead->getChannelCount();
     lengthInSamples = audioSourceBeingRead->getSampleCount();
     tmpPtrs.resize (numChannels);
 
@@ -92,8 +92,8 @@ void ARAAudioSourceReader::willDestroyAudioSource (ARAAudioSource* audioSource)
 bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                                         int64 startSampleInFile, int numSamples)
 {
-    int destSize = (bitsPerSample / 8) * numSamples;
-    int bufferOffset = (bitsPerSample / 8) * startOffsetInDestBuffer;
+    const auto destSize = (bitsPerSample / 8) * (size_t) numSamples;
+    const auto bufferOffset = (int) (bitsPerSample / 8) * startOffsetInDestBuffer;
 
     // If we're invalid or can't enter the lock or audio source access is currently disabled, zero samples and return false
     bool gotReadlock = isValid() ? lock.tryEnterRead() : false;
@@ -109,9 +109,9 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
         return false;
     }
 
-    for (int chan_i = 0; chan_i < (int) tmpPtrs.size(); ++chan_i)
+    for (size_t chan_i = 0; chan_i < tmpPtrs.size(); ++chan_i)
     {
-        if ((chan_i < numDestChannels) && (destSamples[chan_i] != nullptr))
+        if ((chan_i < (size_t) numDestChannels) && (destSamples[chan_i] != nullptr))
         {
             tmpPtrs[chan_i] = ((uint8_t*) destSamples[chan_i]) + bufferOffset;
         }
@@ -121,7 +121,7 @@ bool ARAAudioSourceReader::readSamples (int** destSamples, int numDestChannels, 
             // we still need to provide pointers to all channels to the ARA read call.
             // So we'll read the other channels into this dummy buffer.
             static ThreadLocalValue<std::vector<uint8_t>> dummyBuffer;
-            if (destSize > (int) dummyBuffer.get().size())
+            if (destSize > dummyBuffer.get().size())
                 dummyBuffer.get().resize (destSize);
 
             tmpPtrs[chan_i] = dummyBuffer.get().data();

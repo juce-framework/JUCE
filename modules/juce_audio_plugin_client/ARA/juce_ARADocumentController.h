@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 
 namespace juce
 {
@@ -91,6 +91,9 @@ protected:
     using ARAMusicalContext::Listener::willUpdateMusicalContextProperties;
     using ARAMusicalContext::Listener::didUpdateMusicalContextProperties;
     using ARAMusicalContext::Listener::doUpdateMusicalContextContent;
+    using ARAMusicalContext::Listener::didAddRegionSequenceToMusicalContext;
+    using ARAMusicalContext::Listener::willRemoveRegionSequenceFromMusicalContext;
+    using ARAMusicalContext::Listener::didReorderRegionSequencesInMusicalContext;
     using ARAMusicalContext::Listener::willDestroyMusicalContext;
 
     // ARARegionSequence::Listener callbacks
@@ -178,6 +181,9 @@ protected:
     void willUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext, ARAMusicalContext::PropertiesPtr newProperties) noexcept override;
     void didUpdateMusicalContextProperties (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
     void doUpdateMusicalContextContent (ARA::PlugIn::MusicalContext* musicalContext, const ARA::ARAContentTimeRange* range, ARA::ContentUpdateScopes flags) noexcept override;
+    void didAddRegionSequenceToMusicalContext (ARA::PlugIn::MusicalContext* musicalContext, ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
+    void willRemoveRegionSequenceFromMusicalContext (ARA::PlugIn::MusicalContext* musicalContext, ARA::PlugIn::RegionSequence* regionSequence) noexcept override;
+    void didReorderRegionSequencesInMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
     void willDestroyMusicalContext (ARA::PlugIn::MusicalContext* musicalContext) noexcept override;
 
     // RegionSequence notifications, typically not overridden further - instead, override the ARARegionSequence::Listener callbacks below
@@ -261,8 +267,8 @@ class ARAInputStream  : public InputStream
 public:
     ARAInputStream (ARA::PlugIn::HostArchiveReader*);
 
-    int64 getPosition() override { return (int64) position; }
-    int64 getTotalLength() override { return (int64) size; }
+    int64 getPosition() override { return position; }
+    int64 getTotalLength() override { return size; }
 
     int read (void*, int) override;
     bool setPosition (int64) override;
@@ -272,8 +278,8 @@ public:
 
 private:
     ARA::PlugIn::HostArchiveReader* archiveReader;
-    size_t position { 0 };
-    size_t size;
+    int64 position { 0 };
+    int64 size;
     bool failure { false };
 };
 
@@ -289,7 +295,7 @@ class ARAOutputStream     : public OutputStream
 public:
     ARAOutputStream (ARA::PlugIn::HostArchiveWriter*);
 
-    int64 getPosition() override { return (int64) position; }
+    int64 getPosition() override { return position; }
     void flush() override {}
 
     bool write (const void*, size_t) override;
@@ -297,6 +303,6 @@ public:
 
 private:
     ARA::PlugIn::HostArchiveWriter* archiveWriter;
-    size_t position { 0 };
+    int64 position { 0 };
 };
 } // namespace juce

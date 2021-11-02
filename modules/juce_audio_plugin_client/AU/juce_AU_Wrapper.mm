@@ -541,7 +541,7 @@ public:
 
                     AudioProcessorARAExtension* araAudioProcessorExtension = dynamic_cast<AudioProcessorARAExtension*> (juceFilter.get());
                     binding->outPlugInExtension = araAudioProcessorExtension->bindToARA (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
-                    if (binding->outPlugInExtension == NULL)
+                    if (binding->outPlugInExtension == nullptr)
                         return kAudioUnitErr_CannotDoInCurrentContext;  // bindToARA() returns null if binding is already established
 
                     return noErr;

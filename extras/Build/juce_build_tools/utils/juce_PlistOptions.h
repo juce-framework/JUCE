@@ -93,7 +93,6 @@ namespace build_tools
         bool isAuSandboxSafe                    = false;
         bool isPluginSynth                      = false;
         bool suppressResourceUsage              = false;
-        
         bool isPluginARAEffect                  = false;
 
     private:

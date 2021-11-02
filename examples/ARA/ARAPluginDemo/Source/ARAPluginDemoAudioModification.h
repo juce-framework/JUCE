@@ -1,12 +1,12 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 
-class ARAPluginDemoAudioModification  : public ARAAudioModification
+class ARAPluginDemoAudioModification  : public juce::ARAAudioModification
 {
 public:
-    ARAPluginDemoAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef,
-                                       const ARAAudioModification* optionalModificationToClone)
+    ARAPluginDemoAudioModification (juce::ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef,
+                                       const juce::ARAAudioModification* optionalModificationToClone)
         : ARAAudioModification (audioSource, hostRef, optionalModificationToClone)
     {
         if (auto toClone = static_cast<const ARAPluginDemoAudioModification*> (optionalModificationToClone))

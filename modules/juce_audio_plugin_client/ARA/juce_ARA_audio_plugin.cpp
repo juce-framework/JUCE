@@ -4,6 +4,9 @@
 
 #define ARA_DEBUG_MESSAGE_PREFIX JucePlugin_Name
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter", "-Wgnu-zero-variadic-macro-arguments")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
+
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Debug/ARADebug.c>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
@@ -15,6 +18,9 @@
 #include "juce_ARAAudioReaders.cpp"
 #include "juce_ARAPlugInInstanceRoles.cpp"
 #include "juce_AudioProcessor_ARAExtensions.cpp"
+
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 namespace juce
 {
