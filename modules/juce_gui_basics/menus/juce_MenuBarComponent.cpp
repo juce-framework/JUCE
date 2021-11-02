@@ -241,10 +241,16 @@ void MenuBarComponent::showMenu (int index)
 
             auto itemBounds = itemComponent->getBounds();
 
+            const auto callback = [ref = SafePointer<MenuBarComponent> (this), index] (int result)
+            {
+                if (ref != nullptr)
+                    ref->menuDismissed (index, result);
+            };
+
             m.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
                                                  .withTargetScreenArea (localAreaToGlobal (itemBounds))
                                                  .withMinimumWidth (itemBounds.getWidth()),
-                             [this, index] (int result) { menuDismissed (index, result); });
+                             callback);
         }
     }
 }
