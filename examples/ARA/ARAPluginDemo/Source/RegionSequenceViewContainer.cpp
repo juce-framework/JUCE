@@ -2,10 +2,8 @@
 #include "DocumentView.h"
 #include "PlaybackRegionView.h"
 
-using namespace juce;
-
 //==============================================================================
-RegionSequenceViewContainer::RegionSequenceViewContainer (DocumentView& docView, ARARegionSequence* sequence)
+RegionSequenceViewContainer::RegionSequenceViewContainer (DocumentView& docView, juce::ARARegionSequence* sequence)
     : documentView (docView),
       regionSequence (sequence),
       regionSequenceHeaderView (docView.getARAEditorView(), regionSequence)
@@ -14,7 +12,7 @@ RegionSequenceViewContainer::RegionSequenceViewContainer (DocumentView& docView,
 
     documentView.getRegionSequenceHeadersView().addAndMakeVisible (regionSequenceHeaderView);
 
-    for (auto playbackRegion : regionSequence->getPlaybackRegions<ARAPlaybackRegion>())
+    for (auto playbackRegion : regionSequence->getPlaybackRegions<juce::ARAPlaybackRegion>())
         addRegionSequenceViewAndMakeVisible (playbackRegion);
 }
 
@@ -23,7 +21,7 @@ RegionSequenceViewContainer::~RegionSequenceViewContainer()
     detachFromRegionSequence();
 }
 
-void RegionSequenceViewContainer::addRegionSequenceViewAndMakeVisible (ARAPlaybackRegion* playbackRegion)
+void RegionSequenceViewContainer::addRegionSequenceViewAndMakeVisible (juce::ARAPlaybackRegion* playbackRegion)
 {
     auto view = new PlaybackRegionView (*this, playbackRegion);
     playbackRegionViews.add (view);
@@ -50,7 +48,7 @@ void RegionSequenceViewContainer::setRegionsViewBoundsByYRange (int y, int heigh
 }
 
 //==============================================================================
-void RegionSequenceViewContainer::willRemovePlaybackRegionFromRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
+void RegionSequenceViewContainer::willRemovePlaybackRegionFromRegionSequence (juce::ARARegionSequence* /*regionSequence*/, juce::ARAPlaybackRegion* playbackRegion)
 {
     for (int i = 0; i < playbackRegionViews.size(); ++i)
     {
@@ -64,19 +62,19 @@ void RegionSequenceViewContainer::willRemovePlaybackRegionFromRegionSequence (AR
     documentView.invalidateTimeRange();
 }
 
-void RegionSequenceViewContainer::didAddPlaybackRegionToRegionSequence (ARARegionSequence* /*regionSequence*/, ARAPlaybackRegion* playbackRegion)
+void RegionSequenceViewContainer::didAddPlaybackRegionToRegionSequence (juce::ARARegionSequence* /*regionSequence*/, juce::ARAPlaybackRegion* playbackRegion)
 {
     addRegionSequenceViewAndMakeVisible (playbackRegion);
 
     documentView.invalidateTimeRange();
 }
 
-void RegionSequenceViewContainer::willDestroyRegionSequence (ARARegionSequence* /*regionSequence*/)
+void RegionSequenceViewContainer::willDestroyRegionSequence (juce::ARARegionSequence* /*regionSequence*/)
 {
     detachFromRegionSequence();
 }
 
-void RegionSequenceViewContainer::willUpdateRegionSequenceProperties (ARARegionSequence* /*regionSequence*/, ARARegionSequence::PropertiesPtr newProperties)
+void RegionSequenceViewContainer::willUpdateRegionSequenceProperties (juce::ARARegionSequence* /*regionSequence*/, juce::ARARegionSequence::PropertiesPtr newProperties)
 {
     if (newProperties->color != regionSequence->getColor())
     {
