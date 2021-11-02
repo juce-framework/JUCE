@@ -1,8 +1,7 @@
 ## ARAPluginDemo
 
-In addition to the sample ARATestPlugIn provided in the ARA SDK, we've worked with SoundRadix to create 
-a sample project showcasing the ARA additions to the JUCE API. The sample project can be found at 
-[JUCE_ARA/examples/ARA/ARAPluginDemo](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo). 
+In addition to the sample ARATestPlugIn provided in the ARA SDK, we've worked with SoundRadix to create  a demo project showcasing the experimental [JUCE_ARA](https://github.com/Celemony/JUCE_ARA) additions to the JUCE API as well as ARA's gerenal UI integration features.
+This project can be found at [JUCE_ARA/examples/ARA/ARAPluginDemo](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo). 
 
 Below is an example of the plugin being hosted by Studio One. 
 
