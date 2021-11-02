@@ -50,13 +50,13 @@ void MusicalContextView::findMusicalContext()
     juce::ARAMusicalContext* newMusicalContext = nullptr;
     auto viewSelection = documentView.getARAEditorView()->getViewSelection();
     if (! viewSelection.getRegionSequences().empty())
-        newMusicalContext = viewSelection.getRegionSequences().front()->getMusicalContext<juce::ARAMusicalContext>();
+        newMusicalContext = viewSelection.getRegionSequences<juce::ARARegionSequence>().front()->getMusicalContext();
     else if (! viewSelection.getPlaybackRegions().empty())
-        newMusicalContext = viewSelection.getPlaybackRegions().front()->getRegionSequence()->getMusicalContext<juce::ARAMusicalContext>();
+        newMusicalContext = viewSelection.getPlaybackRegions<juce::ARAPlaybackRegion>().front()->getRegionSequence()->getMusicalContext();
 
     // if no context used yet and selection does not yield a new one, use the first musical context in the docment
     if (musicalContext == nullptr && newMusicalContext == nullptr && ! document->getMusicalContexts().empty())
-        newMusicalContext = document->getMusicalContexts<juce::ARAMusicalContext>().front();
+        newMusicalContext = document->getMusicalContexts().front();
 
     if (newMusicalContext != nullptr && newMusicalContext != musicalContext)
     {

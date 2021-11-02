@@ -942,8 +942,7 @@ public:
     Steinberg::TBool PLUGIN_API isViewEmbeddingSupported() override
     {
         if (auto* pluginInstance = getPluginInstance())
-            if (auto* araExtension = dynamic_cast<AudioProcessorARAExtension*> (pluginInstance))
-                return (Steinberg::TBool) araExtension->isARAEditorView();
+            return (Steinberg::TBool) dynamic_cast<AudioProcessorARAExtension*> (pluginInstance)->isEditorView();
         return (Steinberg::TBool) false;
     }
 
@@ -1294,6 +1293,9 @@ public:
             }
 
             auto latencySamples = pluginInstance->getLatencySamples();
+           #if JucePlugin_Enable_ARA
+            jassert (latencySamples == 0 || ! dynamic_cast<AudioProcessorARAExtension*> (pluginInstance)->isBoundToARA());
+           #endif
 
             if (details.latencyChanged && latencySamples != lastLatencySamples)
             {
@@ -2244,8 +2246,8 @@ private:
 
     tresult PLUGIN_API queryInterface (const ::Steinberg::TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FObject)
         TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
+        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FUnknown)
 
         if (doUIDsMatch (targetIID, JuceARAFactory::iid))
         {
@@ -2261,7 +2263,7 @@ private:
     //---from ARA::IMainFactory-------
     const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
     {
-        return ARA::PlugIn::DocumentController::getARAFactory();
+        return createARAFactory();
     }
     static const FUID iid;
 
@@ -2372,7 +2374,7 @@ public:
             host.loadFrom (hostContext);
 
         processContext.sampleRate = processSetup.sampleRate;
-        preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock);
+        preparePlugin (processSetup.sampleRate, (int) processSetup.maxSamplesPerBlock, false);
 
         return kResultTrue;
     }
@@ -2453,7 +2455,7 @@ public:
             allocateChannelListAndBuffers (channelListFloat,  emptyBufferFloat);
             allocateChannelListAndBuffers (channelListDouble, emptyBufferDouble);
 
-            preparePlugin (sampleRate, bufferSize);
+            preparePlugin (sampleRate, bufferSize, true);
         }
 
         return kResultOk;
@@ -3162,7 +3164,7 @@ public:
                                                         : AudioProcessor::singlePrecision);
         getPluginInstance().setNonRealtime (newSetup.processMode == Vst::kOffline);
 
-        preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock);
+        preparePlugin (processSetup.sampleRate, processSetup.maxSamplesPerBlock, false);
 
         return kResultTrue;
     }
@@ -3586,12 +3588,20 @@ private:
              | kNeedTransportState;
     }
 
-    void preparePlugin (double sampleRate, int bufferSize)
+    // TODO JUCE_ARA preparePlugin() is called several times, not just from setActive() -
+    //               Calling setRateAndBufferSizeDetails() is ok at any of these times,
+    //               but actually calling prepareToPlay() shall only be done from setActive(),
+    //               otherwise it is not balanced properly and moreover some ARA configuration
+    //               will change while the plug-in already is prepared to play...!
+    //               As a temporary workaround, we've added a bool argument to track that.
+    //               Note that the AU_Wrapper has similar issues, albeit in less likely edge-cases...
+    void preparePlugin (double sampleRate, int bufferSize, bool callPrepareToPlay)
     {
         auto& p = getPluginInstance();
 
         p.setRateAndBufferSizeDetails (sampleRate, bufferSize);
-        p.prepareToPlay (sampleRate, bufferSize);
+        if (callPrepareToPlay)
+            p.prepareToPlay (sampleRate, bufferSize);
 
         midiBuffer.ensureSize (2048);
         midiBuffer.clear();
@@ -3602,7 +3612,7 @@ private:
 
     const ARA::ARAFactory* PLUGIN_API getFactory() SMTG_OVERRIDE
     {
-        return ARA::PlugIn::DocumentController::getARAFactory();
+        return createARAFactory();
     }
 
     const ARA::ARAPlugInExtensionInstance* PLUGIN_API bindToDocumentController (ARA::ARADocumentControllerRef /*controllerRef*/) SMTG_OVERRIDE

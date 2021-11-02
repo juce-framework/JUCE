@@ -12,7 +12,7 @@ RegionSequenceViewContainer::RegionSequenceViewContainer (DocumentView& docView,
 
     documentView.getRegionSequenceHeadersView().addAndMakeVisible (regionSequenceHeaderView);
 
-    for (auto playbackRegion : regionSequence->getPlaybackRegions<juce::ARAPlaybackRegion>())
+    for (auto playbackRegion : regionSequence->getPlaybackRegions())
         addRegionSequenceViewAndMakeVisible (playbackRegion);
 }
 

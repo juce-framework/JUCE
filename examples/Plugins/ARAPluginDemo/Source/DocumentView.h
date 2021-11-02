@@ -30,8 +30,8 @@ public:
 
     // ARA getters
     juce::ARAEditorView* getARAEditorView() const noexcept { return editorView; }
-    juce::ARADocumentController* getDocumentController() const noexcept { return getARAEditorView()->getDocumentController<juce::ARADocumentController>(); }
-    juce::ARADocument* getDocument() const noexcept { return getDocumentController()->getDocument<juce::ARADocument>(); }
+    juce::ARADocumentController* getDocumentController() const noexcept { return getARAEditorView()->getDocumentController(); }
+    juce::ARADocument* getDocument() const noexcept { return getDocumentController()->getDocument(); }
 
     // total time range
     juce::Range<double> getTimeRange() const { return timeRange; }

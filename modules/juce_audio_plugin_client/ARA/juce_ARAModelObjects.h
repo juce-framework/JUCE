@@ -65,6 +65,16 @@ public:
 
     ARADocument (ARADocumentController* documentController);
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::Document::getDocumentController<DocumentController_t>(); }
+    template <typename AudioSource_t = ARAAudioSource>
+    std::vector<AudioSource_t*> const& getAudioSources() const noexcept { return ARA::PlugIn::Document::getAudioSources<AudioSource_t>(); }
+    template <typename MusicalContext_t = ARAMusicalContext>
+    std::vector<MusicalContext_t*> const& getMusicalContexts() const noexcept { return ARA::PlugIn::Document::getMusicalContexts<MusicalContext_t>(); }
+    template <typename RegionSequence_t = ARARegionSequence>
+    std::vector<RegionSequence_t*> const& getRegionSequences() const noexcept { return ARA::PlugIn::Document::getRegionSequences<RegionSequence_t>(); }
+
     class JUCE_API  Listener  : public ARAListenableModelClass<ARADocument>::Listener
     {
     public:
@@ -179,6 +189,14 @@ public:
 
     ARAMusicalContext (ARADocument* document, ARA::ARAMusicalContextHostRef hostRef);
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::MusicalContext::getDocumentController<DocumentController_t>(); }
+    template <typename Document_t = ARADocument>
+    Document_t* getDocument() const noexcept { return ARA::PlugIn::MusicalContext::getDocument<Document_t>(); }
+    template <typename RegionSequence_t = ARARegionSequence>
+    std::vector<RegionSequence_t*> const& getRegionSequences() const noexcept { return ARA::PlugIn::MusicalContext::getRegionSequences<RegionSequence_t>(); }
+
     class JUCE_API  Listener  : public ARAListenableModelClass<ARAMusicalContext>::Listener
     {
     public:
@@ -250,6 +268,16 @@ public:
 
     ARARegionSequence (ARADocument* document, ARA::ARARegionSequenceHostRef hostRef);
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::RegionSequence::getDocumentController<DocumentController_t>(); }
+    template <typename Document_t = ARADocument>
+    Document_t* getDocument() const noexcept { return ARA::PlugIn::RegionSequence::getDocument<Document_t>(); }
+    template <typename MusicalContext_t = ARAMusicalContext>
+    MusicalContext_t* getMusicalContext() const noexcept { return ARA::PlugIn::RegionSequence::getMusicalContext<MusicalContext_t>(); }
+    template <typename PlaybackRegion_t = ARAPlaybackRegion>
+    std::vector<PlaybackRegion_t*> const& getPlaybackRegions() const noexcept { return ARA::PlugIn::RegionSequence::getPlaybackRegions<PlaybackRegion_t>(); }
+
     class JUCE_API  Listener  : public ARAListenableModelClass<ARARegionSequence>::Listener
     {
     public:
@@ -316,6 +344,14 @@ public:
 
     ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef);
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::AudioSource::getDocumentController<DocumentController_t>(); }
+    template <typename Document_t = ARADocument>
+    Document_t* getDocument() const noexcept { return ARA::PlugIn::AudioSource::getDocument<Document_t>(); }
+    template <typename AudioModification_t = ARAAudioModification>
+    std::vector<AudioModification_t*> const& getAudioModifications() const noexcept { return ARA::PlugIn::AudioSource::getAudioModifications<AudioModification_t>(); }
+
     class JUCE_API  Listener  : public ARAListenableModelClass<ARAAudioSource>::Listener
     {
     public:
@@ -346,7 +382,7 @@ public:
             @param state Indicates start, intermediate update or completion of the analysis.
             @param progress Progress normalized to the 0..1 range.
         */
-        virtual void didUpdateAudioSourceAnalyisProgress (ARAAudioSource* audioSource, ARAAnalysisProgressState state, float progress) {}
+        virtual void didUpdateAudioSourceAnalysisProgress (ARAAudioSource* audioSource, ARAAnalysisProgressState state, float progress) {}
 
         /** Called before access to an audio source's samples is enabled or disabled.
             @param audioSource The audio source whose sample access state will be changed.
@@ -440,6 +476,14 @@ public:
 
     ARAAudioModification (ARAAudioSource* audioSource, ARA::ARAAudioModificationHostRef hostRef, const ARAAudioModification* optionalModificationToClone);
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::AudioModification::getDocumentController<DocumentController_t>(); }
+    template <typename AudioSource_t = ARAAudioSource>
+    AudioSource_t* getAudioSource() const noexcept { return ARA::PlugIn::AudioModification::getAudioSource<AudioSource_t>(); }
+    template <typename PlaybackRegion_t = ARAPlaybackRegion>
+    std::vector<PlaybackRegion_t*> const& getPlaybackRegions() const noexcept { return ARA::PlugIn::AudioModification::getPlaybackRegions<PlaybackRegion_t>(); }
+
     class JUCE_API  Listener  : public ARAListenableModelClass<ARAAudioModification>::Listener
     {
     public:
@@ -525,6 +569,14 @@ public:
 
     ARAPlaybackRegion (ARAAudioModification* audioModification, ARA::ARAPlaybackRegionHostRef hostRef);
 
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename DocumentController_t = ARADocumentController>
+    DocumentController_t* getDocumentController() const noexcept { return ARA::PlugIn::PlaybackRegion::getDocumentController<DocumentController_t>(); }
+    template <typename AudioModification_t = ARAAudioModification>
+    AudioModification_t* getAudioModification() const noexcept { return ARA::PlugIn::PlaybackRegion::getAudioModification<AudioModification_t>(); }
+    template <typename RegionSequence_t = ARARegionSequence>
+    RegionSequence_t* getRegionSequence() const noexcept { return ARA::PlugIn::PlaybackRegion::getRegionSequence<RegionSequence_t>(); }
+
     class JUCE_API  Listener  : public ARAListenableModelClass<ARAPlaybackRegion>::Listener
     {
     public:
@@ -563,6 +615,12 @@ public:
                                   time of all playback regions in the sequence. 
     */
     Range<double> getTimeRange (bool includeHeadAndTail = false) const;
+
+    /** Returns the playback sample range of this playback region.
+        @param includeHeadAndTail Whether or not the range includes the head and tail
+                                  time of all playback regions in the sequence.
+    */
+    Range<int64> getSampleRange (double sampleRate, bool includeHeadAndTail = false) const;
 
     /** Get the head length in seconds before the start of the region's playback time. */
     double getHeadTime() const;

@@ -5,6 +5,9 @@
 namespace juce
 {
 
+class ARAPlaybackRenderer;
+class ARAEditorRenderer;
+class ARAEditorView;
 class ARAInputStream;
 class ARAOutputStream;
 
@@ -13,9 +16,9 @@ class ARAOutputStream;
     Base class for implementing an ARA DocumentController in JUCE - refer to the 
     ARA SDK documentation for more details. 
 
-    Your ARA plug-in must subclass ARADocumentController and declare a valid
-    ARA::PlugIn::DocumentController::doCreateDocumentController implementation
-    that returns an instance of your ARADocumentController subclass.
+    Your ARA plug-in must subclass ARADocumentController and define a global
+    function called createARAFactory() which calls
+    ARADocumentController::createARAFactory().
 
     Any `do` functions (i.e doRestoreObjectsFromStream(), doCreateAudioSource())
     can be overridden to implement custom document controller behavior. The 
@@ -33,8 +36,59 @@ class JUCE_API  ARADocumentController     : public ARA::PlugIn::DocumentControll
                                             private ARAPlaybackRegion::Listener,
                                             private juce::Timer
 {
+private:
+    class FactoryConfig   : public ARA::PlugIn::FactoryConfig
+    {
+    public:
+        FactoryConfig() noexcept;
+
+        const char* getFactoryID() const noexcept override { return JucePlugin_ARAFactoryID; }
+        const char* getPlugInName() const noexcept override { return JucePlugin_Name; }
+        const char* getManufacturerName() const noexcept override { return JucePlugin_Manufacturer; }
+        const char* getInformationURL() const noexcept override { return JucePlugin_ManufacturerWebsite; }
+        const char* getVersion() const noexcept override { return JucePlugin_VersionString; }
+
+        const char* getDocumentArchiveID() const noexcept override { return JucePlugin_ARADocumentArchiveID; }
+        ARA::ARASize getCompatibleDocumentArchiveIDsCount() const noexcept override { return compatibleDocumentArchiveIDs.size(); }
+        const ARA::ARAPersistentID* getCompatibleDocumentArchiveIDs() const noexcept override { return compatibleDocumentArchiveIDs.empty() ? nullptr : compatibleDocumentArchiveIDs.data(); }
+
+        ARA::ARASize getAnalyzeableContentTypesCount() const noexcept override { return analyzeableContentTypes.size(); }
+        const ARA::ARAContentType* getAnalyzeableContentTypes() const noexcept override { return analyzeableContentTypes.empty() ? nullptr : analyzeableContentTypes.data(); }
+
+        ARA::ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return supportedPlaybackTransformationFlags; }
+
+    private:
+        juce::StringArray compatibleDocumentArchiveIDStrings;
+        std::vector<ARA::ARAPersistentID> compatibleDocumentArchiveIDs;
+        std::vector<ARA::ARAContentType> analyzeableContentTypes;
+        ARA::ARAPlaybackTransformationFlags supportedPlaybackTransformationFlags;
+    };
+
 public:
-    explicit ARADocumentController (const ARA::ARADocumentControllerHostInstance* instance);
+    //==============================================================================
+    /** Entry point for your customization:
+        Similar to createPluginFilter() for your audio processor class, you should
+        implement a global function called createARAFactory() which simply calls this
+        function with your custom subclass of ARADocumentController as template argument.
+     */
+    template<typename CustomSubclass>
+    static inline const ARA::ARAFactory* createARAFactory()
+    {
+        static_assert (std::is_base_of<ARADocumentController, CustomSubclass>::value, "Must provide subclass of ARADocumentController");
+        return ARA::PlugIn::PlugInEntry::getPlugInEntry<FactoryConfig, CustomSubclass> ()->getFactory ();
+    }
+
+    using ARA::PlugIn::DocumentController::DocumentController;
+
+    // overloading inherited templated getters to default to juce versions of the returned classes
+    template <typename Document_t = ARADocument>
+    Document_t* getDocument() const noexcept { return ARA::PlugIn::DocumentController::getDocument<Document_t>(); }
+    template <typename PlaybackRenderer_t = ARAPlaybackRenderer>
+    std::vector<PlaybackRenderer_t*> const& getPlaybackRenderers () const noexcept { return ARA::PlugIn::DocumentController::getPlaybackRenderers<PlaybackRenderer_t>(); }
+    template <typename EditorRenderer_t = ARAEditorRenderer>
+    std::vector<EditorRenderer_t*> const& getEditorRenderers () const noexcept { return ARA::PlugIn::DocumentController::getEditorRenderers<EditorRenderer_t>(); }
+    template <typename EditorView_t = ARAEditorView>
+    std::vector<EditorView_t*> const& getEditorViews () const noexcept { return ARA::PlugIn::DocumentController::getEditorViews<EditorView_t>(); }
 
 protected:
     //==============================================================================
@@ -66,7 +120,8 @@ protected:
     ARA::PlugIn::PlaybackRegion* doCreatePlaybackRegion (ARA::PlugIn::AudioModification* modification, ARA::ARAPlaybackRegionHostRef hostRef) noexcept override;
 
     // PlugIn instance role creation - override as needed to return custom subclasses of the base ARA plug-in instance roles.
-    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
+    friend class ARAPlaybackRegionReader;
+    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override = 0;
     ARA::PlugIn::EditorRenderer* doCreateEditorRenderer() noexcept override;
     ARA::PlugIn::EditorView* doCreateEditorView() noexcept override;
 

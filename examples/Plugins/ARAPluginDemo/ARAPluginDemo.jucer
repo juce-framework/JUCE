@@ -44,6 +44,10 @@
             resource="0" file="Source/ARAPluginDemoDocumentController.cpp"/>
       <FILE id="fmxPsc" name="ARAPluginDemoDocumentController.h" compile="0"
             resource="0" file="Source/ARAPluginDemoDocumentController.h"/>
+      <FILE id="uxN1gc" name="ARAPluginDemoPlaybackRenderer.cpp" compile="1"
+            resource="0" file="Source/ARAPluginDemoPlaybackRenderer.cpp"/>
+      <FILE id="xqIZnH" name="ARAPluginDemoPlaybackRenderer.h" compile="0"
+            resource="0" file="Source/ARAPluginDemoPlaybackRenderer.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>

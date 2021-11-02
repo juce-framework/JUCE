@@ -55,11 +55,9 @@ class JUCE_API  ARAAudioSourceReader  : public AudioFormatReader,
                                         private ARAAudioSource::Listener
 {
 public:
-    /** Use an ARAAudioSource to construct an audio source reader that reads
-        either 32 or 64 bit samples from the given \p audioSource.
-    */
-    ARAAudioSourceReader (ARAAudioSource* audioSource, bool use64BitSamples = false);
-    virtual ~ARAAudioSourceReader() override;
+    /** Use an ARAAudioSource to construct an audio source reader for the given \p audioSource. */
+    ARAAudioSourceReader (ARAAudioSource* audioSource);
+    ~ARAAudioSourceReader() override;
 
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override;
@@ -77,7 +75,7 @@ public:
 
 private:
     ARAAudioSource* audioSourceBeingRead;
-    std::unique_ptr<ARA::PlugIn::HostAudioReader> araHostReader;
+    std::unique_ptr<ARA::PlugIn::HostAudioReader> hostReader;
     ReadWriteLock lock;
     std::vector<void*> tmpPtrs;
 
@@ -105,27 +103,29 @@ private:
     @tags{ARA}
 */
 class JUCE_API  ARAPlaybackRegionReader   : public AudioFormatReader,
-                                            private AudioPlayHead,
                                             private ARAPlaybackRegion::Listener
 {
-protected:
-    ARAPlaybackRegionReader (ARADocumentController* documentController, std::unique_ptr<AudioProcessor> audioProcessor,
-                             std::vector<ARAPlaybackRegion*> const& playbackRegions);
-
 public:
-    /** Create an ARAPlaybackRegionReader instance to read the given \p playbackRegions
-        @param audioProcessor A custom ARA-compatible audio processor used for rendering the \p playbackRegions,
-                              pre-configured appropriately for the intended use case (sample rate, output format, realtime, etc.)
-                              The reader takes ownership and binds it to the document controller of the \p playbackRegions.
+    /** Create an ARAPlaybackRegionReader instance to read the given \p playbackRegion,
+        using the sample rate and channel count of the underlying ARAAudioSource.
         @param playbackRegions The vector of playback regions that shall be read - must not be empty!
                                All regions must be part of the same ARADocument.
     */
-    ARAPlaybackRegionReader (std::unique_ptr<AudioProcessor> audioProcessor, std::vector<ARAPlaybackRegion*> const& playbackRegions);
+    ARAPlaybackRegionReader (ARAPlaybackRegion* playbackRegion);
 
-    virtual ~ARAPlaybackRegionReader() override;
+    /** Create an ARAPlaybackRegionReader instance to read the given \p playbackRegions
+        @param sampleRate The sample rate that should be used for reading.
+        @param numChannels The channel count that should be used for reading.
+        @param playbackRegions The vector of playback regions that shall be read - must not be empty!
+                               All regions must be part of the same ARADocument.
+    */
+    ARAPlaybackRegionReader (double sampleRate, int numChannels,
+                             std::vector<ARAPlaybackRegion*> const& playbackRegions);
+
+    ~ARAPlaybackRegionReader() override;
 
     /** Returns true as long as any of the reader's underlying playback region's haven't changed. */
-    bool isValid() const { return (audioProcessor != nullptr); }
+    bool isValid() const { return (playbackRenderer != nullptr); }
     /** Invalidate the reader - this should be called if the sample content of any of the reader's ARAPlaybackRegions changes. */
     void invalidate();
 
@@ -139,15 +139,12 @@ public:
     /** The starting point of the reader in playback samples */
     int64 startInSamples { 0 };
 
-protected:
-    bool getCurrentPosition (CurrentPositionInfo& result) override;
-
 private:
-    std::unique_ptr<AudioProcessor> audioProcessor;
-    AudioProcessorARAExtension* audioProcessorAraExtension; // cache of dynamic_cast<AudioProcessorARAExtension*> (audioProcessor)
-    int64 renderPosition { 0 };
-    static MidiBuffer dummyMidiBuffer;
+    std::unique_ptr<ARAPlaybackRenderer> playbackRenderer;
+    AudioPlayHead::CurrentPositionInfo positionInfo;
     ReadWriteLock lock;
+    
+    static constexpr int maximumBlockSize = 4*1024;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAPlaybackRegionReader)
 };

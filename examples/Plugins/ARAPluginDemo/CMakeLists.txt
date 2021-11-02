@@ -63,20 +63,16 @@ juce_add_plugin(ARAPluginDemo
     VST3_CATEGORIES "Tools"
     AU_SANDBOX_SAFE TRUE
     APP_SANDBOX_ENABLED TRUE
-    HARDENED_RUNTIME_ENABLED TRUE)
-
-# TODO update juce_add_plugin() for ARA, these should be parameters there (with proper defaults)
-get_target_property(tmp_bundle_id ARAPluginDemo JUCE_BUNDLE_ID)
-target_compile_definitions(ARAPluginDemo
-    PUBLIC
-        JucePlugin_Enable_ARA=1
-        JucePlugin_ARAFactoryID="${tmp_bundle_id}.factory"
-        # Note that if changing JucePlugin_ARADocumentArchiveID, you'll also have to deal with JucePlugin_ARACompatibleArchiveIDs!
-        JucePlugin_ARADocumentArchiveID="${tmp_bundle_id}.aradocumentarchive.1"
-        JucePlugin_ARACompatibleArchiveIDs=""
-        JucePlugin_ARAContentTypes=0
-        JucePlugin_ARATransformationFlags=0)
-unset(tmp_bundle_id)
+    HARDENED_RUNTIME_ENABLED TRUE
+    IS_ARA_EFFECT TRUE                          # Are we using ARA?
+    # ARA_FACTORY_ID "..."                      # Optional custom ARA factory ID (otherwise generated from bundle ID and version)
+    # ARA_DOCUMENT_ARCHIVE_ID "..."             # Optional custom ARA document archive ID (otherwise generated from bundle ID)
+                                                # This must be manually updated whenever changing the archive in non-backwards compatible ways!
+                                                # Note that if changing the document archive ID, you'll also have to add the previous ID to JucePlugin_ARACompatibleArchiveIDs!
+    # ARA_COMPATIBLE_ARCHIVE_IDS "...", "..."   # Initially empty, but will indicate upwards compatibility when changing ARA_DOCUMENT_ARCHIVE_ID.
+    # ARA_ANALYSIS_TYPES                        # If providing analyzable ARA content types to the host, define them as OR'd values here - defaults to 0.
+    # ARA_TRANSFORMATION_FLAGS                  # If supporting time-stretching or other ARA playback transformations, define them as OR'd values here - otherwise 0.
+)
 
 # TODO path to the ARA SDK - create a git submodule and use the proper path there once ARA is open-sourced
 if(NOT JUCE_GLOBAL_ARA_SDK_PATH)
@@ -112,6 +108,8 @@ target_sources(ARAPluginDemo
         Source/ARAPluginDemoAudioProcessorEditor.h
         Source/ARAPluginDemoDocumentController.cpp
         Source/ARAPluginDemoDocumentController.h
+        Source/ARAPluginDemoPlaybackRenderer.cpp
+        Source/ARAPluginDemoPlaybackRenderer.h
         Source/DocumentView.cpp
         Source/DocumentView.h
         Source/MusicalContextView.cpp

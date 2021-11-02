@@ -9,15 +9,12 @@
 */
 
 %%aradocumentcontroller_headers%%
+%%araplaybackrenderer_headers%%
 
 //==============================================================================
-%%aradocumentcontroller_class_name%%::%%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance)
-    : juce::ARADocumentController (instance)
+ARA::PlugIn::PlaybackRenderer* %%aradocumentcontroller_class_name%%::doCreatePlaybackRenderer() noexcept
 {
-}
-
-%%aradocumentcontroller_class_name%%::~%%aradocumentcontroller_class_name%%()
-{
+    return new %%araplaybackrenderer_class_name%% (this);
 }
 
 //==============================================================================
@@ -38,8 +35,8 @@ bool %%aradocumentcontroller_class_name%%::doStoreObjectsToStream (juce::ARAOutp
 }
 
 //==============================================================================
-// This creates new instances of the document controller..
-ARA::PlugIn::DocumentController* ARA::PlugIn::DocumentController::doCreateDocumentController (const ARADocumentControllerHostInstance* instance) noexcept
+// This creates the static ARAFactory instances for the plugin.
+const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory()
 {
-    return new %%aradocumentcontroller_class_name%% (instance);
-};
+    return juce::ARADocumentController::createARAFactory<%%aradocumentcontroller_class_name%%>();
+}

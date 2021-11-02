@@ -10,12 +10,12 @@ public:
         : ARAAudioModification (audioSource, hostRef, optionalModificationToClone)
     {
         if (auto toClone = static_cast<const ARAPluginDemoAudioModification*> (optionalModificationToClone))
-            reversePlayback = toClone->reversePlayback;
+            dimmed = toClone->dimmed;
     }
 
-    bool getReversePlayback() const { return reversePlayback; }
-    void setReversePlayback (bool reverse) { reversePlayback = reverse; }
+    bool isDimmed() const { return dimmed; }
+    void setDimmed (bool shouldDim) { dimmed = shouldDim; }
 
 private:
-    bool reversePlayback { false };
+    bool dimmed { false };
 };

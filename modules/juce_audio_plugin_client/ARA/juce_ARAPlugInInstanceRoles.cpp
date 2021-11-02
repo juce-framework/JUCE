@@ -5,21 +5,21 @@ namespace juce
 
 //==============================================================================
 
-// TODO JUCE_ARA while there is prepareToPlay()/releaseRessources() in AudioProcessor,
-//       this state is not tracked and there is no getter for it.
-//#if ARA_VALIDATE_API_CALLS
-//void ARAPlaybackRenderer::addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept
-//{
-//    ARA_VALIDATE_API_STATE (! getAudioProcessor->isPrepared());
-//    ARA::PlugIn::PlaybackRenderer::addPlaybackRegion (playbackRegionRef);
-//}
-//
-//void ARAPlaybackRenderer::removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept
-//{
-//    ARA_VALIDATE_API_STATE (! getAudioProcessor->isPrepared());
-//    ARA::PlugIn::PlaybackRenderer::removePlaybackRegion (playbackRegionRef);
-//}
-//#endif
+#if ARA_VALIDATE_API_CALLS
+void ARAPlaybackRenderer::addPlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept
+{
+    if (araExtension)
+        ARA_VALIDATE_API_STATE (! araExtension->isPrepared);
+    ARA::PlugIn::PlaybackRenderer::addPlaybackRegion (playbackRegionRef);
+}
+
+void ARAPlaybackRenderer::removePlaybackRegion (ARA::ARAPlaybackRegionRef playbackRegionRef) noexcept
+{
+    if (araExtension)
+        ARA_VALIDATE_API_STATE (! araExtension->isPrepared);
+    ARA::PlugIn::PlaybackRenderer::removePlaybackRegion (playbackRegionRef);
+}
+#endif
 
 //==============================================================================
 

@@ -20,9 +20,6 @@
     <Filter Include="Projucer\BinaryData\Icons">
       <UniqueIdentifier>{3A77FAA0-7E92-6D59-9C5F-BAAA2BF82833}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Projucer\BinaryData\Templates\ARA">
-      <UniqueIdentifier>{4E847701-4B59-D6BE-DA04-04B24877C930}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Projucer\BinaryData\Templates">
       <UniqueIdentifier>{D8DD148A-AB2B-B485-520B-8924DA606099}</UniqueIdentifier>
     </Filter>
@@ -346,13 +343,16 @@
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp">
       <Filter>Projucer\Application</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Source\BinaryData\Templates\ARA\jucer_AudioPluginARADocumentControllerTemplate.cpp">
-      <Filter>Projucer\BinaryData\Templates\ARA</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARADocumentControllerTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAPlaybackRendererTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginEditorTemplate.cpp">
@@ -1974,9 +1974,6 @@
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h">
       <Filter>Projucer\Application</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\BinaryData\Templates\ARA\jucer_AudioPluginARADocumentControllerTemplate.h">
-      <Filter>Projucer\BinaryData\Templates\ARA</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentSimpleTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
@@ -1987,6 +1984,12 @@
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARADocumentControllerTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAPlaybackRendererTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginEditorTemplate.h">

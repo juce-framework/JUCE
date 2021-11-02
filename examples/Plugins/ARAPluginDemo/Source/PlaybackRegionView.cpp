@@ -1,7 +1,7 @@
 #include "PlaybackRegionView.h"
 #include "DocumentView.h"
-#include "ARAPluginDemoAudioProcessor.h"
 #include "ARAPluginDemoAudioModification.h"
+#include "ARAPluginDemoPlaybackRenderer.h"
 
 //==============================================================================
 PlaybackRegionView::PlaybackRegionView (RegionSequenceViewContainer& viewContainer, juce::ARAPlaybackRegion* region)
@@ -15,9 +15,9 @@ PlaybackRegionView::PlaybackRegionView (RegionSequenceViewContainer& viewContain
     documentView.getARAEditorView()->addListener (this);
     onNewSelection (documentView.getARAEditorView()->getViewSelection());
 
-    playbackRegion->getRegionSequence()->getDocument<juce::ARADocument>()->addListener (this);
-    playbackRegion->getAudioModification<juce::ARAAudioModification>()->addListener (this);
-    playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>()->addListener (this);
+    playbackRegion->getRegionSequence()->getDocument()->addListener (this);
+    playbackRegion->getAudioModification()->addListener (this);
+    playbackRegion->getAudioModification()->getAudioSource()->addListener (this);
     playbackRegion->addListener (this);
 
     recreatePlaybackRegionReader();
@@ -28,9 +28,9 @@ PlaybackRegionView::~PlaybackRegionView()
     documentView.getARAEditorView()->removeListener (this);
 
     playbackRegion->removeListener (this);
-    playbackRegion->getAudioModification<juce::ARAAudioModification>()->removeListener (this);
-    playbackRegion->getAudioModification()->getAudioSource<juce::ARAAudioSource>()->removeListener (this);
-    playbackRegion->getRegionSequence()->getDocument<juce::ARADocument>()->removeListener (this);
+    playbackRegion->getAudioModification()->removeListener (this);
+    playbackRegion->getAudioModification()->getAudioSource()->removeListener (this);
+    playbackRegion->getRegionSequence()->getDocument()->removeListener (this);
 
     destroyPlaybackRegionReader();
     audioThumb.removeChangeListener (this);
@@ -38,14 +38,14 @@ PlaybackRegionView::~PlaybackRegionView()
 
 void PlaybackRegionView::mouseDoubleClick (const juce::MouseEvent& /*event*/)
 {
-    // set the reverse flag on our region's audio modification when double clicked
+    // set the dim flag on our region's audio modification when double clicked
     auto audioModification = playbackRegion->getAudioModification<ARAPluginDemoAudioModification>();
-    audioModification->setReversePlayback (! audioModification->getReversePlayback());
+    audioModification->setDimmed (! audioModification->isDimmed());
 
     // send a content change notification for the modification and all associated playback regions
     audioModification->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
-    for (auto araPlaybackRegion : audioModification->getPlaybackRegions<juce::ARAPlaybackRegion>())
-        araPlaybackRegion->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
+    for (auto region : audioModification->getPlaybackRegions())
+        region->notifyContentChanged (juce::ARAContentUpdateScopes::samplesAreAffected(), true);
 }
 
 void PlaybackRegionView::updateBounds()
@@ -70,7 +70,7 @@ void PlaybackRegionView::paint (juce::Graphics& g)
         rect.reduce (1, 1);
     }
 
-    const juce::Colour regionColour = juce::convertOptionalARAColour (playbackRegion->getEffectiveColor());
+    const juce::Colour regionColour = juce::convertOptionalARAColour (playbackRegion->getEffectiveColor(), juce::Colours::black);
     g.setColour (regionColour);
     g.fillRect (rect);
 
@@ -88,7 +88,7 @@ void PlaybackRegionView::paint (juce::Graphics& g)
 
             auto drawBounds = getBounds() - getPosition();
             drawBounds.setHorizontalRange (clipBounds.getHorizontalRange());
-            g.setColour (regionColour.contrasting (0.7f));
+            g.setColour (regionColour.contrasting (audioModification->isDimmed() ? 0.55f : 0.7f));
             audioThumb.drawChannels (g, drawBounds, startTime - regionTimeRange.getStart(), endTime - regionTimeRange.getStart(), 1.0f);
         }
     }
@@ -103,7 +103,8 @@ void PlaybackRegionView::paint (juce::Graphics& g)
     g.setFont (juce::Font (12.0f));
     g.drawText (juce::convertOptionalARAString (playbackRegion->getEffectiveName()), rect, juce::Justification::topLeft);
 
-    g.drawText ((audioModification->getReversePlayback() ? "<==" : "==>"), rect, juce::Justification::bottomLeft);
+    if (audioModification->isDimmed())
+        g.drawText ("DIMMED", rect, juce::Justification::bottomLeft);
 }
 
 //==============================================================================
@@ -200,20 +201,8 @@ void PlaybackRegionView::recreatePlaybackRegionReader()
 {
     destroyPlaybackRegionReader();
 
-    // Create an audio processor for rendering our region
-    // We're disabling buffered audio source reading because the thumb nail cache will do buffering.
-    auto audioProcessor = std::make_unique<ARAPluginDemoAudioProcessor> (false);
-    const auto sampleRate = playbackRegion->getAudioModification()->getAudioSource()->getSampleRate();
-    const auto numChannels = playbackRegion->getAudioModification()->getAudioSource()->getChannelCount();
-    const auto channelSet = juce::AudioChannelSet::canonicalChannelSet (numChannels);
-    for (int i = 0; i < audioProcessor->getBusCount (false); i++)
-        audioProcessor->setChannelLayoutOfBus (false, i, channelSet);
-    audioProcessor->setProcessingPrecision (juce::AudioProcessor::singlePrecision);
-    audioProcessor->setRateAndBufferSizeDetails (sampleRate, 4*1024);
-    audioProcessor->setNonRealtime (true);
-
-    // Create a playback region reader using this processor for our audio thumb
-    playbackRegionReader = new juce::ARAPlaybackRegionReader (std::move (audioProcessor), { playbackRegion });
+    // Create a playback region reader for our region for our audio thumb
+    playbackRegionReader = new juce::ARAPlaybackRegionReader (playbackRegion);
     audioThumb.setReader (playbackRegionReader, reinterpret_cast<intptr_t> (playbackRegionReader));
 
     // TODO JUCE_ARA see juce_AudioThumbnail.cpp, line 122: AudioThumbnail handles zero-length sources

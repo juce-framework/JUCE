@@ -529,7 +529,7 @@ public:
                     if (auFactory->inOutMagicNumber != ARA::kARAAudioUnitMagic)
                         return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
 
-                    auFactory->outFactory = ARA::PlugIn::DocumentController::getARAFactory();
+                    auFactory->outFactory = createARAFactory();
                     return noErr;
                 }
 
@@ -715,7 +715,10 @@ public:
                             const ScopedLock sl (juceFilter->getCallbackLock());
 
                             juceFilter->setNonRealtime (shouldBeOffline);
-                            juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
+                            // TODO JUCE_ARA added test if prepared since otherwise this may lead to
+                            //               premature preparation (similar issues in VST3_Wrapper)
+                            if (prepared)
+                                juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
                         }
                     }
 
@@ -1108,6 +1111,9 @@ public:
     {
         const double rate = getSampleRate();
         jassert (rate > 0);
+       #if JucePlugin_Enable_ARA
+        jassert (juceFilter->getLatencySamples() == 0 || ! dynamic_cast<AudioProcessorARAExtension*> (juceFilter.get())->isBoundToARA());
+       #endif
         return rate > 0 ? juceFilter->getLatencySamples() / rate : 0;
     }
 

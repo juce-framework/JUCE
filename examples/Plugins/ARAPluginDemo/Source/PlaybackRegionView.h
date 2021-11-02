@@ -58,7 +58,7 @@ private:
 
 private:
 
-    // We're subclassing here only to provide a proper default c'tor for our shared ressource
+    // We're subclassing here only to provide a proper default c'tor for our shared resource
     class SharedAudioThumbnailCache   : public juce::AudioThumbnailCache
     {
         public:

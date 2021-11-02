@@ -9,8 +9,6 @@
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-parameter", "-Wgnu-zero-variadic-macro-arguments")
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 
-#define ARA_DEBUG_MESSAGE_PREFIX JucePlugin_Name
-
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Debug/ARADebug.c>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
@@ -45,6 +43,8 @@ JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line
    #endif
   }
 #endif
+
+ARA_SETUP_DEBUG_MESSAGE_PREFIX(JucePlugin_Name);
 
  } // namespace juce
 

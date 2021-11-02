@@ -10,7 +10,7 @@
 
 #pragma once
 
-%%app_headers%%
+#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 
 //==============================================================================
 /**
@@ -19,17 +19,16 @@ class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentController
 {
 public:
     //==============================================================================
-    %%aradocumentcontroller_class_name%%(const ARA::ARADocumentControllerHostInstance* instance);
-    ~%%aradocumentcontroller_class_name%%();
+    using juce::ARADocumentController::ARADocumentController;
 
+protected:
     //==============================================================================
+    // Override document controller customization methods here
+
+    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
+
     bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;
     bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;
-
-//==============================================================================
-// Override document controller methods here
-protected:
-
 
 private:
     //==============================================================================
