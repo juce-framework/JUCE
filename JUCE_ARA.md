@@ -22,8 +22,8 @@ your plugin - by default the `juce::ARADocumentController` will create the ARA m
 but your plugin should override the `doCreate` functions in order to create model objects that suit your purpose. 
 
 For example, in the 
-[`ARAPluginDemoDocumentController`](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/ARAPluginDemoDocumentController.h)
-we override `doCreateAudioModification` in order to return a [custom `juce::ARAAudioModification` subclass](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/ARAPluginDemoAudioModification.h). 
+[`ARAPluginDemoDocumentController`](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/ARAPluginDemoDocumentController.h)
+we override `doCreateAudioModification` in order to return a [custom `juce::ARAAudioModification` subclass](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/ARAPluginDemoAudioModification.h). 
 
 ### ARA Model Objects
 
@@ -97,7 +97,7 @@ private:
 };
 ```
 
-See the [ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/PlaybackRegionView.h)
+See the [ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/PlaybackRegionView.h)
 for an example of several `Listener` implementations in action. 
 
 ### ARA PlugIn Instance Roles
@@ -226,7 +226,7 @@ std::vector<float> readPlaybackRegionSamples (ARAPlaybackRegion* playbackRegion)
 ```
 
 Once created, the our readers can be treated like any other `AudioFormatReader` - the 
-[ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo/Source/PlaybackRegionView.h)
+[ARA Plugin Demo PlaybackRegionView class](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo/Source/PlaybackRegionView.h)
 takes advantage of this by giving a `juce::AudioThubnail` instance an `ARAPlaybackRegionReader` to draw a
 visualization of playback region waveform. 
 
@@ -273,7 +273,7 @@ With ARA enabled we can edit various `ARAFactory` properties such as available c
 <img src="https://i.imgur.com/mJoXIxG.png"/>
 
 This should be enough to generate an empty ARA plugin that will appear in an ARA host, such as Studio One or SONAR. 
-For a more complete example of an ARA plugin see the [ARA Plugin Demo](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/ARA/ARAPluginDemo) checked in to this repository. 
+For a more complete example of an ARA plugin see the [ARA Plugin Demo](https://github.com/Celemony/JUCE_ARA/tree/develop/examples/Plugins/ARAPluginDemo) checked in to this repository. 
 
 ## Further Additions
 
