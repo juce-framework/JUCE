@@ -715,9 +715,8 @@ namespace
 
     static bool isValidPathIdentifier (const String& id, const String& os)
     {
-        return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux")
-            || id == "androidSDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath"
-            || id == "araPath";
+        return id == "vstLegacyPath" || (id == "aaxPath" && os != "linux") || (id == "rtasPath" && os != "linux") || id == "araPath"
+            || id == "androidSDKPath" || id == "defaultJuceModulePath" || id == "defaultUserModulePath";
     }
 
     static void setGlobalPath (const ArgumentList& args)

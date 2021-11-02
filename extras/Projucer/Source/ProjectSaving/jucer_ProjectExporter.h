@@ -408,8 +408,7 @@ protected:
     const File projectFolder;
 
     //==============================================================================
-    ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper,
-                            araPathValueWrapper;
+    ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper, araPathValueWrapper;
 
     ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                      userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
