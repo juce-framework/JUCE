@@ -47,7 +47,9 @@ AlertWindow::AlertWindow (const String& title,
 {
     setAlwaysOnTop (juce_areThereAnyAlwaysOnTopWindows());
 
-    accessibleMessageLabel.setColour (Label::textColourId, Colours::transparentBlack);
+    accessibleMessageLabel.setColour (Label::textColourId,       Colours::transparentBlack);
+    accessibleMessageLabel.setColour (Label::backgroundColourId, Colours::transparentBlack);
+    accessibleMessageLabel.setColour (Label::outlineColourId,    Colours::transparentBlack);
     addAndMakeVisible (accessibleMessageLabel);
 
     if (message.isEmpty())
