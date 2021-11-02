@@ -50,6 +50,7 @@ AlertWindow::AlertWindow (const String& title,
     accessibleMessageLabel.setColour (Label::textColourId,       Colours::transparentBlack);
     accessibleMessageLabel.setColour (Label::backgroundColourId, Colours::transparentBlack);
     accessibleMessageLabel.setColour (Label::outlineColourId,    Colours::transparentBlack);
+    accessibleMessageLabel.setInterceptsMouseClicks (false, false);
     addAndMakeVisible (accessibleMessageLabel);
 
     if (message.isEmpty())
