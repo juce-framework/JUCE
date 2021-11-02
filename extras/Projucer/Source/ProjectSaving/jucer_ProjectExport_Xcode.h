@@ -1413,6 +1413,27 @@ public:
         {
             StringPairArray s;
 
+            String configurationBuildDir ("$(PROJECT_DIR)/build/$(CONFIGURATION)");
+
+            if (config.getTargetBinaryRelativePathString().isNotEmpty())
+            {
+                // a target's position can either be defined via installPath + xcodeCopyToProductInstallPathAfterBuild
+                // (= for audio plug-ins) or using a custom binary path (for everything else), but not both (= conflict!)
+                jassert (! xcodeCopyToProductInstallPathAfterBuild);
+
+                build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
+                                                      build_tools::RelativePath::projectFolder);
+
+                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
+                                                                        owner.getTargetFolder(),
+                                                                        build_tools::RelativePath::buildTargetFolder)
+                                                              .toUnixStyle());
+            }
+
+            // TODO JUCE_ARA there is no CONFIGURATION_BUILD_DIR setting in Xcode, SYMROOT seems to be intended here?
+            //s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
+            s.set ("SYMROOT", addQuotesIfRequired (configurationBuildDir));
+
             if (type == AggregateTarget && ! owner.isiOS())
             {
                 // the aggregate target needs to have the deployment target set for
@@ -1599,27 +1620,6 @@ public:
 
             if (xcodeOtherRezFlags.isNotEmpty())
                 s.set ("OTHER_REZFLAGS", "\"" + xcodeOtherRezFlags + "\"");
-
-            String configurationBuildDir ("$(PROJECT_DIR)/build/$(CONFIGURATION)");
-
-            if (config.getTargetBinaryRelativePathString().isNotEmpty())
-            {
-                // a target's position can either be defined via installPath + xcodeCopyToProductInstallPathAfterBuild
-                // (= for audio plug-ins) or using a custom binary path (for everything else), but not both (= conflict!)
-                jassert (! xcodeCopyToProductInstallPathAfterBuild);
-
-                build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
-                                                      build_tools::RelativePath::projectFolder);
-
-                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
-                                                                        owner.getTargetFolder(),
-                                                                        build_tools::RelativePath::buildTargetFolder)
-                                                              .toUnixStyle());
-            }
-
-            // TODO JUCE_ARA there is no CONFIGURATION_BUILD_DIR setting in Xcode, SYMROOT seems to be intended here?
-            //s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
-            s.set ("SYMROOT", addQuotesIfRequired (configurationBuildDir));
 
             if (owner.isHardenedRuntimeEnabled())
                 s.set ("ENABLE_HARDENED_RUNTIME", "YES");
