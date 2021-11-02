@@ -166,15 +166,13 @@ public:
 private:
     //==============================================================================
     class SharedCursorHandle;
-    friend class SharedCursorHandle;
-    SharedCursorHandle* cursorHandle = nullptr;
+    std::shared_ptr<SharedCursorHandle> cursorHandle;
+
+    class PlatformSpecificHandle;
 
     friend class MouseInputSourceInternal;
     void showInWindow (ComponentPeer*) const;
-    void* getHandle() const noexcept;
-
-    static void* createStandardMouseCursor (MouseCursor::StandardCursorType);
-    static void deleteMouseCursor (void* cursorHandle, bool isStandard);
+    PlatformSpecificHandle* getHandle() const noexcept;
 
     JUCE_LEAK_DETECTOR (MouseCursor)
 };

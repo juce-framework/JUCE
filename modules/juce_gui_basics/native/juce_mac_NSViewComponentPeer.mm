@@ -61,6 +61,16 @@ public:
 
         [view registerForDraggedTypes: getSupportedDragTypes()];
 
+        const auto options = NSTrackingMouseEnteredAndExited
+                           | NSTrackingMouseMoved
+                           | NSTrackingEnabledDuringMouseDrag
+                           | NSTrackingActiveAlways
+                           | NSTrackingInVisibleRect;
+        [view addTrackingArea: [[NSTrackingArea alloc] initWithRect: r
+                                                            options: options
+                                                              owner: view
+                                                           userInfo: nil]];
+
         notificationCenter = [NSNotificationCenter defaultCenter];
 
         [notificationCenter  addObserver: view
@@ -118,7 +128,6 @@ public:
                 setAlwaysOnTop (true);
 
             [window setContentView: view];
-            [window setAcceptsMouseMovedEvents: YES];
 
             // We'll both retain and also release this on closing because plugin hosts can unexpectedly
             // close the window for us, and also tend to get cause trouble if setReleasedWhenClosed is NO.
@@ -392,7 +401,7 @@ public:
         NSRect viewFrame = [view frame];
 
         if (! (isPositiveAndBelow (localPos.getX(), viewFrame.size.width)
-             && isPositiveAndBelow (localPos.getY(), viewFrame.size.height)))
+            && isPositiveAndBelow (localPos.getY(), viewFrame.size.height)))
             return false;
 
         if (! SystemStats::isRunningInAppExtensionSandbox())
@@ -630,21 +639,12 @@ public:
 
     void redirectMouseEnter (NSEvent* ev)
     {
-        if (shouldIgnoreMouseEnterExit (ev))
-            return;
-
-        Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
-        sendMouseEvent (ev);
+        sendMouseEnterExit (ev);
     }
 
     void redirectMouseExit (NSEvent* ev)
     {
-        if (shouldIgnoreMouseEnterExit (ev))
-            return;
-
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
-        sendMouseEvent (ev);
+        sendMouseEnterExit (ev);
     }
 
     static float checkDeviceDeltaReturnValue (float v) noexcept
@@ -896,7 +896,7 @@ public:
                     auto rect = rects[i];
                     CGContextSaveGState (cg);
                     CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
-                    drawRect (cg, rect, displayScale);
+                    drawRectWithContext (cg, rect, displayScale);
                     CGContextRestoreGState (cg);
                 }
 
@@ -906,11 +906,11 @@ public:
         }
        #endif
 
-        drawRect (cg, r, displayScale);
+        drawRectWithContext (cg, r, displayScale);
         invalidateTransparentWindowShadow();
     }
 
-    void drawRect (CGContextRef cg, NSRect r, float displayScale)
+    void drawRectWithContext (CGContextRef cg, NSRect r, float displayScale)
     {
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
@@ -1360,7 +1360,9 @@ public:
                 return NSPasteboardTypeFileURL;
            #endif
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             return (NSString*) kUTTypeFileURL;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }();
 
         return [NSArray arrayWithObjects: type, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
@@ -1531,10 +1533,13 @@ private:
     static NSView* createViewInstance();
     static NSWindow* createWindowInstance();
 
-    bool shouldIgnoreMouseEnterExit (NSEvent* ev) const
+    void sendMouseEnterExit (NSEvent* ev)
     {
-        auto* eventTrackingArea = [ev trackingArea];
-        return eventTrackingArea != nil && ! [[view trackingAreas] containsObject: eventTrackingArea];
+        if (auto* area = [ev trackingArea])
+            if (! [[view trackingAreas] containsObject: area])
+                return;
+
+        sendMouseEvent (ev);
     }
 
     static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
@@ -1851,30 +1856,30 @@ private:
         }
     }
 
-    static void asyncMouseDown   (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseDown  (ev); }
-    static void asyncMouseUp     (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseUp    (ev); }
-    static void mouseDragged     (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseDrag  (ev); }
-    static void mouseMoved       (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseMove  (ev); }
-    static void mouseEntered     (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseEnter (ev); }
-    static void mouseExited      (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseExit  (ev); }
-    static void scrollWheel      (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseWheel (ev); }
-    static void magnify          (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMagnify    (ev); }
-    static void copy             (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectCopy       (s);  }
-    static void paste            (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectPaste      (s);  }
-    static void cut              (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectCut        (s);  }
-    static void selectAll        (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectSelectAll  (s);  }
-    static void willMoveToWindow (id self, SEL, NSWindow* w)   { if (auto* p = getOwner (self)) p->redirectWillMoveToWindow (w); }
+    static void asyncMouseDown   (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseDown,        ev); }
+    static void asyncMouseUp     (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseUp,          ev); }
+    static void mouseDragged     (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseDrag,        ev); }
+    static void mouseMoved       (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseMove,        ev); }
+    static void mouseEntered     (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseEnter,       ev); }
+    static void mouseExited      (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseExit,        ev); }
+    static void scrollWheel      (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseWheel,       ev); }
+    static void magnify          (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMagnify,          ev); }
+    static void copy             (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectCopy,             s);  }
+    static void paste            (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectPaste,            s);  }
+    static void cut              (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectCut,              s);  }
+    static void selectAll        (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectSelectAll,        s);  }
+    static void willMoveToWindow (id self, SEL, NSWindow* w)   { callOnOwner (self, &NSViewComponentPeer::redirectWillMoveToWindow, w);  }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)          { return YES; }
     static BOOL wantsDefaultClipping (id, SEL)                 { return YES; } // (this is the default, but may want to customise it in future)
     static BOOL worksWhenModal (id self, SEL)                  { if (auto* p = getOwner (self)) return p->worksWhenModal(); return NO; }
 
-    static void drawRect (id self, SEL, NSRect r)              { if (auto* p = getOwner (self)) p->drawRect (r); }
-    static void frameChanged (id self, SEL, NSNotification*)   { if (auto* p = getOwner (self)) p->redirectMovedOrResized(); }
-    static void viewDidMoveToWindow (id self, SEL)             { if (auto* p = getOwner (self)) p->viewMovedToWindow(); }
-    static void dismissModals (id self, SEL)                   { if (auto* p = getOwner (self)) p->dismissModals(); }
-    static void becomeKey (id self, SEL)                       { if (auto* p = getOwner (self)) p->becomeKey(); }
-    static void resignKey (id self, SEL)                       { if (auto* p = getOwner (self)) p->resignKey(); }
+    static void drawRect (id self, SEL, NSRect r)              { callOnOwner (self, &NSViewComponentPeer::drawRect, r); }
+    static void frameChanged (id self, SEL, NSNotification*)   { callOnOwner (self, &NSViewComponentPeer::redirectMovedOrResized); }
+    static void viewDidMoveToWindow (id self, SEL)             { callOnOwner (self, &NSViewComponentPeer::viewMovedToWindow); }
+    static void dismissModals (id self, SEL)                   { callOnOwner (self, &NSViewComponentPeer::dismissModals); }
+    static void becomeKey (id self, SEL)                       { callOnOwner (self, &NSViewComponentPeer::becomeKey); }
+    static void resignKey (id self, SEL)                       { callOnOwner (self, &NSViewComponentPeer::resignKey); }
 
     static BOOL isFlipped (id, SEL)                            { return true; }
 
@@ -2075,23 +2080,18 @@ private:
     //==============================================================================
     static void flagsChanged (id self, SEL, NSEvent* ev)
     {
-        if (auto* owner = getOwner (self))
-            owner->redirectModKeyChange (ev);
+        callOnOwner (self, &NSViewComponentPeer::redirectModKeyChange, ev);
     }
 
     static BOOL becomeFirstResponder (id self, SEL)
     {
-        if (auto* owner = getOwner (self))
-            owner->viewFocusGain();
-
+        callOnOwner (self, &NSViewComponentPeer::viewFocusGain);
         return YES;
     }
 
     static BOOL resignFirstResponder (id self, SEL)
     {
-        if (auto* owner = getOwner (self))
-            owner->viewFocusLoss();
-
+        callOnOwner (self, &NSViewComponentPeer::viewFocusLoss);
         return YES;
     }
 
@@ -2123,8 +2123,7 @@ private:
 
     static void draggingExited (id self, SEL, id<NSDraggingInfo> sender)
     {
-        if (auto* owner = getOwner (self))
-            owner->sendDragCallback (1, sender);
+        callOnOwner (self, &NSViewComponentPeer::sendDragCallback, 1, sender);
     }
 
     static BOOL prepareForDragOperation (id, SEL, id<NSDraggingInfo>)
@@ -2200,6 +2199,13 @@ private:
             return YES;
 
         return sendSuperclassMessage<BOOL> (self, s, event);
+    }
+
+    template <typename Func, typename... Args>
+    static void callOnOwner (id self, Func&& func, Args&&... args)
+    {
+        if (auto* owner = getOwner (self))
+            (owner->*func) (std::forward<Args> (args)...);
     }
 };
 

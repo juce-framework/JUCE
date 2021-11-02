@@ -213,10 +213,10 @@ public:
     Point<float> getCurrentMousePosition() const;
     void setMousePosition (Point<float> pos) const;
 
-    void* createCustomMouseCursorInfo (const Image&, Point<int> hotspot) const;
-    void deleteMouseCursor (void* cursorHandle) const;
-    void* createStandardMouseCursor (MouseCursor::StandardCursorType) const;
-    void showCursor (::Window, void* cursorHandle) const;
+    Cursor createCustomMouseCursorInfo (const Image&, Point<int> hotspot) const;
+    void deleteMouseCursor (Cursor cursorHandle) const;
+    Cursor createStandardMouseCursor (MouseCursor::StandardCursorType) const;
+    void showCursor (::Window, Cursor cursorHandle) const;
 
     bool isKeyCurrentlyDown (int keyCode) const;
     ModifierKeys getNativeRealtimeModifiers() const;

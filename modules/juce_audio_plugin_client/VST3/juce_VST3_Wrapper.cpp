@@ -52,7 +52,6 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_LinuxMessageThread.h"
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_VST3Common.h>
@@ -2012,8 +2011,6 @@ private:
             {
                 setOpaque (true);
                 setBroughtToFrontOnMouseClick (true);
-
-                ignoreUnused (fakeMouseGenerator);
             }
 
             ~ContentWrapperComponent() override
@@ -2189,7 +2186,6 @@ private:
         private:
             JuceVST3Editor& owner;
             std::unique_ptr<EditorHostContext> editorHostContext;
-            FakeMouseMoveGenerator fakeMouseGenerator;
             Rectangle<int> lastBounds;
             bool resizingChild = false, resizingParent = false;
 

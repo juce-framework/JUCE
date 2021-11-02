@@ -78,8 +78,8 @@ public:
             auto& comp = peer->getComponent();
 
             // (the contains() call is needed to test for overlapping desktop windows)
-            if (comp.containsInternal (relativePos))
-                return comp.getComponentAtInternal (relativePos);
+            if (comp.contains (relativePos))
+                return comp.getComponentAt (relativePos);
         }
 
         return nullptr;

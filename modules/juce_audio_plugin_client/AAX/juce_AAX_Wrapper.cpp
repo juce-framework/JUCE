@@ -31,7 +31,6 @@
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_FakeMouseMoveGenerator.h"
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
@@ -638,8 +637,6 @@ namespace AAXClasses
                     setBounds (lastValidSize);
                     pluginEditor->addMouseListener (this, true);
                 }
-
-                ignoreUnused (fakeMouseGenerator);
             }
 
             ~ContentWrapperComponent() override
@@ -719,7 +716,6 @@ namespace AAXClasses
            #if JUCE_WINDOWS
             WindowsHooks hooks;
            #endif
-            FakeMouseMoveGenerator fakeMouseGenerator;
             juce::Rectangle<int> lastValidSize;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
@@ -1145,11 +1141,15 @@ namespace AAXClasses
             // * The preset is loaded in PT 10 using the AAX version.
             // * The session is then saved, and closed.
             // * The saved session is loaded, but acting as if the preset was never loaded.
+            // IMPORTANT! If the plugin doesn't manage its own bypass parameter, don't try
+            // to overwrite the bypass parameter value.
             auto numParameters = juceParameters.getNumParameters();
 
             for (int i = 0; i < numParameters; ++i)
-                if (auto paramID = getAAXParamIDFromJuceIndex(i))
-                    SetParameterNormalizedValue (paramID, juceParameters.getParamForIndex (i)->getValue());
+                if (auto* juceParam = juceParameters.getParamForIndex (i))
+                    if (juceParam != ownedBypassParameter.get())
+                        if (auto paramID = getAAXParamIDFromJuceIndex (i))
+                            SetParameterNormalizedValue (paramID, juceParam->getValue());
 
             return AAX_SUCCESS;
         }

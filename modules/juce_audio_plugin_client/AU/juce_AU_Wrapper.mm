@@ -81,7 +81,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
@@ -1545,7 +1544,6 @@ public:
             setWantsKeyboardFocus (true);
            #endif
 
-            ignoreUnused (fakeMouseGenerator);
             setBounds (getSizeToContainChild());
 
             lastBounds = getBounds();
@@ -1657,7 +1655,6 @@ public:
         }
 
     private:
-        FakeMouseMoveGenerator fakeMouseGenerator;
         Rectangle<int> lastBounds;
 
         JUCE_DECLARE_NON_COPYABLE (EditorCompHolder)
@@ -2502,7 +2499,6 @@ private:
     //==============================================================================
     AudioProcessor* juceFilter;
     std::unique_ptr<Component> windowComp;
-    FakeMouseMoveGenerator fakeMouseGenerator;
 
     void deleteUI()
     {

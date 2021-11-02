@@ -30,7 +30,7 @@ namespace juce
  #define JUCE_DEBUG_XERRORS 1
 
  #if ! defined (JUCE_DEBUG_XERRORS_SYNCHRONOUSLY)
-  #define JUCE_DEBUG_XERRORS_SYNCHRONOUSLY 1
+  #define JUCE_DEBUG_XERRORS_SYNCHRONOUSLY 0
  #endif
 #endif
 
@@ -2193,10 +2193,10 @@ void XWindowSystem::setMousePosition (Point<float> pos) const
                                              roundToInt (pos.getX()), roundToInt (pos.getY()));
 }
 
-void* XWindowSystem::createCustomMouseCursorInfo (const Image& image, Point<int> hotspot) const
+Cursor XWindowSystem::createCustomMouseCursorInfo (const Image& image, Point<int> hotspot) const
 {
     if (display == nullptr)
-        return nullptr;
+        return {};
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
@@ -2217,9 +2217,9 @@ void* XWindowSystem::createCustomMouseCursorInfo (const Image& image, Point<int>
             for (int x = 0; x < (int) imageW; ++x)
                 *dest++ = image.getPixelAt (x, y).getARGB();
 
-        auto* result = (void*) X11Symbols::getInstance()->xcursorImageLoadCursor (display, xcImage.get());
+        auto result = X11Symbols::getInstance()->xcursorImageLoadCursor (display, xcImage.get());
 
-        if (result != nullptr)
+        if (result != Cursor{})
             return result;
     }
    #endif
@@ -2229,7 +2229,7 @@ void* XWindowSystem::createCustomMouseCursorInfo (const Image& image, Point<int>
 
     unsigned int cursorW, cursorH;
     if (! X11Symbols::getInstance()->xQueryBestCursor (display, root, imageW, imageH, &cursorW, &cursorH))
-        return nullptr;
+        return {};
 
     Image im (Image::ARGB, (int) cursorW, (int) cursorH, true);
 
@@ -2279,20 +2279,20 @@ void* XWindowSystem::createCustomMouseCursorInfo (const Image& image, Point<int>
     black.red = black.green = black.blue = 0;
     white.red = white.green = white.blue = 0xffff;
 
-    return (void*) X11Symbols::getInstance()->xCreatePixmapCursor (display, sourcePixmap.value, maskPixmap.value, &white, &black,
-                                                                   (unsigned int) hotspotX, (unsigned int) hotspotY);
+    return X11Symbols::getInstance()->xCreatePixmapCursor (display, sourcePixmap.value, maskPixmap.value, &white, &black,
+                                                           (unsigned int) hotspotX, (unsigned int) hotspotY);
 }
 
-void XWindowSystem::deleteMouseCursor (void* cursorHandle) const
+void XWindowSystem::deleteMouseCursor (Cursor cursorHandle) const
 {
-    if (cursorHandle != nullptr && display != nullptr)
+    if (cursorHandle != Cursor{} && display != nullptr)
     {
         XWindowSystemUtilities::ScopedXLock xLock;
         X11Symbols::getInstance()->xFreeCursor (display, (Cursor) cursorHandle);
     }
 }
 
-void* createDraggingHandCursor()
+static Cursor createDraggingHandCursor()
 {
     constexpr unsigned char dragHandData[] = {
         71,73,70,56,57,97,16,0,16,0,145,2,0,0,0,0,255,255,255,0,0,0,0,0,0,33,249,4,1,0,0,2,0,44,0,0,0,0,16,0,16,0,
@@ -2300,10 +2300,11 @@ void* createDraggingHandCursor()
         114,34,236,37,52,77,217, 247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59
     };
 
-    return CustomMouseCursorInfo (ImageFileFormat::loadFrom (dragHandData, (size_t) numElementsInArray (dragHandData)), { 8, 7 }).create();
+    auto image = ImageFileFormat::loadFrom (dragHandData, (size_t) numElementsInArray (dragHandData));
+    return XWindowSystem::getInstance()->createCustomMouseCursorInfo (std::move (image), { 8, 7 });
 }
 
-void* XWindowSystem::createStandardMouseCursor (MouseCursor::StandardCursorType type) const
+Cursor XWindowSystem::createStandardMouseCursor (MouseCursor::StandardCursorType type) const
 {
     if (display == nullptr)
         return None;
@@ -2314,7 +2315,7 @@ void* XWindowSystem::createStandardMouseCursor (MouseCursor::StandardCursorType 
     {
         case MouseCursor::NormalCursor:
         case MouseCursor::ParentCursor:                  return None; // Use parent cursor
-        case MouseCursor::NoCursor:                      return CustomMouseCursorInfo (Image (Image::ARGB, 16, 16, true), {}).create();
+        case MouseCursor::NoCursor:                      return XWindowSystem::createCustomMouseCursorInfo (Image (Image::ARGB, 16, 16, true), {});
 
         case MouseCursor::WaitCursor:                    shape = XC_watch; break;
         case MouseCursor::IBeamCursor:                   shape = XC_xterm; break;
@@ -2342,7 +2343,8 @@ void* XWindowSystem::createStandardMouseCursor (MouseCursor::StandardCursorType 
                 252,114,147,74,83,5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0
             };
 
-            return CustomMouseCursorInfo (ImageFileFormat::loadFrom (copyCursorData, (size_t) numElementsInArray (copyCursorData)), { 1, 3 }).create();
+            auto image = ImageFileFormat::loadFrom (copyCursorData, (size_t) numElementsInArray (copyCursorData));
+            return createCustomMouseCursorInfo (std::move (image), { 1, 3 });
         }
 
         case MouseCursor::NumStandardCursorTypes:
@@ -2355,10 +2357,10 @@ void* XWindowSystem::createStandardMouseCursor (MouseCursor::StandardCursorType 
 
     XWindowSystemUtilities::ScopedXLock xLock;
 
-    return (void*) X11Symbols::getInstance()->xCreateFontCursor (display, shape);
+    return X11Symbols::getInstance()->xCreateFontCursor (display, shape);
 }
 
-void XWindowSystem::showCursor (::Window windowH, void* cursorHandle) const
+void XWindowSystem::showCursor (::Window windowH, Cursor cursorHandle) const
 {
     jassert (windowH != 0);
 
@@ -3666,6 +3668,9 @@ void XWindowSystem::propertyNotifyEvent (LinuxComponentPeer* peer, const XProper
 
     if (isStateChangeEvent() || isHidden())
         dismissBlockingModals (peer);
+
+    if (event.atom == XWindowSystemUtilities::Atoms::getIfExists (display, "_NET_FRAME_EXTENTS"))
+        peer->updateBorderSize();
 }
 
 void XWindowSystem::handleMappingNotify (XMappingEvent& mappingEvent) const

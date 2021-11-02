@@ -457,6 +457,8 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
             }
            #endif
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
             NSMutableDictionary* dict = [[NSMutableDictionary new] autorelease];
 
             [dict setObject: paramArray
@@ -466,6 +468,8 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
                                              options: NSWorkspaceLaunchDefault | NSWorkspaceLaunchNewInstance
                                        configuration: dict
                                                error: nil];
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         if (file.exists())
