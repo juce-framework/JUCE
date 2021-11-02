@@ -287,6 +287,10 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
     {
         fileToCheckFor = "Interfaces/AAX_Exports.cpp";
     }
+    else if (key == Ids::araPath)
+    {
+        fileToCheckFor = "ARA_API/ARAInterface.h";
+    }
     else if (key == Ids::androidSDKPath)
     {
        #if JUCE_WINDOWS
@@ -383,6 +387,12 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
         if      (os == TargetOS::windows)  return "C:\\SDKs\\AAX";
         else if (os == TargetOS::osx)      return "~/SDKs/AAX";
         else                               return {}; // no AAX on this OS!
+    }
+    else if (key == Ids::araPath)
+    {
+        if      (os == TargetOS::windows)  return "C:\\SDKs\\ARA";
+        else if (os == TargetOS::osx)      return "~/SDKs/ARA";
+        else                               return {}; // no ARA on this OS!
     }
     else if (key == Ids::androidSDKPath)
     {

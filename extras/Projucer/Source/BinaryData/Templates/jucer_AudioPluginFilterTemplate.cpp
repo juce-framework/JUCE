@@ -157,6 +157,15 @@ void %%filter_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce
     }
 }
 
+#if JucePlugin_Enable_ARA
+bool %%filter_class_name%%::didProcessBlockSucceed()
+{
+    // You can use this function to inform the calling code that the 
+    // most recent processBlock call didn't output samples as expected. 
+    return true;
+}
+#endif
+
 //==============================================================================
 bool %%filter_class_name%%::hasEditor() const
 {

@@ -754,6 +754,9 @@ public:
 
         rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
                                    getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::osx), TargetOS::osx);
+
+        araPathValueWrapper.init ({ settings, Ids::araFolder, nullptr },
+                                  getAppSettings().getStoredPath (Ids::araPath, TargetOS::osx), TargetOS::osx);
     }
 
 protected:

@@ -121,11 +121,21 @@ static std::map<String, String> getPluginFileTokenReplacements (const String& na
     processorClassName = processorClassName.substring (0, 1).toUpperCase() + processorClassName.substring (1);
     auto editorClassName = processorClassName + "Editor";
 
+    auto araDocumentControllerCppFile = sourceFolder.getChildFile ("PluginARADocumentController.cpp");
+    auto araDocumentControllerHFile   = araDocumentControllerCppFile.withFileExtension (".h");
+    
+    auto araDocumentControllerHInclude = CodeHelpers::createIncludeStatement (araDocumentControllerHFile, araDocumentControllerCppFile);
+
+    auto araDocumentControllerClassName = build_tools::makeValidIdentifier (name, true, true, false) + "DocumentController";
+    araDocumentControllerClassName = araDocumentControllerClassName.substring (0, 1).toUpperCase() + araDocumentControllerClassName.substring (1);
+
     tokenReplacements.insert ({"%%filter_headers%%",     processorHInclude + newLine + editorHInclude });
     tokenReplacements.insert ({"%%filter_class_name%%",  processorClassName });
     tokenReplacements.insert ({"%%editor_class_name%%",  editorClassName });
     tokenReplacements.insert ({"%%editor_cpp_headers%%", processorHInclude + newLine + editorHInclude });
     tokenReplacements.insert ({"%%editor_headers%%",     getJuceHeaderInclude() + newLine + processorHInclude });
+    tokenReplacements.insert ({"%%aradocumentcontroller_headers%%",     araDocumentControllerHInclude });
+    tokenReplacements.insert ({"%%aradocumentcontroller_class_name%%",  araDocumentControllerClassName });
 
     return tokenReplacements;
 }

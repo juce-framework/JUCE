@@ -149,6 +149,9 @@
     <ClCompile Include="..\..\Source\Application\jucer_CommandLine.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_Main.cpp"/>
     <ClCompile Include="..\..\Source\Application\jucer_MainWindow.cpp"/>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\ARA\jucer_AudioPluginARADocumentControllerTemplate.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1531,6 +1534,7 @@
     <ClInclude Include="..\..\Source\Application\jucer_CommonHeaders.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_Headers.h"/>
     <ClInclude Include="..\..\Source\Application\jucer_MainWindow.h"/>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\ARA\jucer_AudioPluginARADocumentControllerTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentSimpleTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AnimatedComponentTemplate.h"/>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentSimpleTemplate.h"/>
