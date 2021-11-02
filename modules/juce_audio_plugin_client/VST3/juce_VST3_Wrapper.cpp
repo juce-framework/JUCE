@@ -2741,51 +2741,14 @@ public:
         info.frameRate = [&]
         {
             if ((processContext.state & Vst::ProcessContext::kSmpteValid) == 0)
-                return fpsUnknown;
+                return FrameRate();
 
-            const auto interpretFlags = [&] (FrameRateType basicRate,
-                                             FrameRateType pullDownRate,
-                                             FrameRateType dropRate,
-                                             FrameRateType pullDownDropRate)
-            {
-                switch (processContext.frameRate.flags & (Vst::FrameRate::kPullDownRate | Vst::FrameRate::kDropRate))
-                {
-                    case Vst::FrameRate::kPullDownRate | Vst::FrameRate::kDropRate:
-                        return pullDownDropRate;
-
-                    case Vst::FrameRate::kPullDownRate:
-                        return pullDownRate;
-
-                    case Vst::FrameRate::kDropRate:
-                        return dropRate;
-                }
-
-                return basicRate;
-            };
-
-            switch (processContext.frameRate.framesPerSecond)
-            {
-                case 24:
-                    return interpretFlags (fps24, fps23976, fps24, fps23976);
-
-                case 25:
-                    return interpretFlags (fps25, fps25, fps25, fps25);
-
-                case 30:
-                    return interpretFlags (fps30, fps2997, fps30drop, fps2997drop);
-
-                case 60:
-                    return interpretFlags (fps60, fps60, fps60drop, fps60drop);
-            }
-
-            return fpsUnknown;
+            return FrameRate().withBaseRate ((int) processContext.frameRate.framesPerSecond)
+                              .withDrop ((processContext.frameRate.flags & Vst::FrameRate::kDropRate) != 0)
+                              .withPullDown ((processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0);
         }();
 
-        const auto baseFps = (double) processContext.frameRate.framesPerSecond;
-        const auto effectiveFps = (processContext.frameRate.flags & Vst::FrameRate::kPullDownRate) != 0
-                                ? baseFps * 1000.0 / 1001.0
-                                : baseFps;
-        info.editOriginTime = (double) processContext.smpteOffsetSubframes / (80.0 * effectiveFps);
+        info.editOriginTime = (double) processContext.smpteOffsetSubframes / (80.0 * info.frameRate.getEffectiveRate());
 
         return true;
     }
