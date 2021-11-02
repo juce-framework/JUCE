@@ -58,7 +58,7 @@ const ARA::PlugIn::FactoryConfig* ARA::PlugIn::DocumentController::doCreateFacto
         virtual ARASize getAnalyzeableContentTypesCount() const noexcept override { return analyzeableContentTypes.size(); }
         virtual const ARAContentType* getAnalyzeableContentTypes() const noexcept override { return analyzeableContentTypes.empty() ? nullptr : analyzeableContentTypes.data(); }
 
-        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return kARAPlaybackTransformationNoChanges; }
+        virtual ARAPlaybackTransformationFlags getSupportedPlaybackTransformationFlags() const noexcept override { return supportedPlaybackTransformationFlags; }
 
     private:
         juce::StringArray compatibleDocumentArchiveIDStrings;

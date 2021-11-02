@@ -1,4 +1,4 @@
-This repository is an experimental fork of the [JUCE 5 develop branch](https://github.com/WeAreROLI/JUCE)
+This repository is an experimental fork of the [JUCE develop branch](https://github.com/WeAreROLI/JUCE)
 with additions that enable it to generate [ARA plugins](https://www.celemony.com/en/service1/about-celemony/technologies)
 in the VST3 or AudioUnit format.
 It is currently being maintained by [Celemony](https://www.celemony.com) and [SoundRadix](https://www.soundradix.com),
