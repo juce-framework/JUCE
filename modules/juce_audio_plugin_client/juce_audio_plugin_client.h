@@ -128,11 +128,7 @@
 #endif
 
 #if JucePlugin_Enable_ARA
- #include "ARA/juce_ARAModelObjects.h"
- #include "ARA/juce_ARADocumentController.h"
- #include "ARA/juce_AudioProcessor_ARAExtensions.h"
- #include "ARA/juce_ARAAudioReaders.h"
- #include "ARA/juce_ARAPlugInInstanceRoles.h"
+ #include "ARA/juce_ARA_Wrapper.h"
 #endif
 
 #include "utility/juce_CreatePluginFilter.h"

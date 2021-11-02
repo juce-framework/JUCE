@@ -31,10 +31,6 @@
 #include "../utility/juce_CheckSettingMacros.h"
 #include "juce_IncludeModuleHeaders.h"
 
-#if JucePlugin_Enable_ARA
- #include "../ARA/juce_ARA_audio_plugin.cpp"
-#endif
-
 namespace juce
 {
 
