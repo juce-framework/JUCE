@@ -1193,31 +1193,35 @@ int32 AudioProcessor::getAAXPluginIDForMainBusConfig (const AudioChannelSet& mai
         auto& set = (isInput ? mainInputLayout : mainOutputLayout);
         int aaxFormatIndex = 0;
 
-        if      (set == AudioChannelSet::disabled())             aaxFormatIndex = 0;
-        else if (set == AudioChannelSet::mono())                 aaxFormatIndex = 1;
-        else if (set == AudioChannelSet::stereo())               aaxFormatIndex = 2;
-        else if (set == AudioChannelSet::createLCR())            aaxFormatIndex = 3;
-        else if (set == AudioChannelSet::createLCRS())           aaxFormatIndex = 4;
-        else if (set == AudioChannelSet::quadraphonic())         aaxFormatIndex = 5;
-        else if (set == AudioChannelSet::create5point0())        aaxFormatIndex = 6;
-        else if (set == AudioChannelSet::create5point1())        aaxFormatIndex = 7;
-        else if (set == AudioChannelSet::create6point0())        aaxFormatIndex = 8;
-        else if (set == AudioChannelSet::create6point1())        aaxFormatIndex = 9;
-        else if (set == AudioChannelSet::create7point0())        aaxFormatIndex = 10;
-        else if (set == AudioChannelSet::create7point1())        aaxFormatIndex = 11;
-        else if (set == AudioChannelSet::create7point0SDDS())    aaxFormatIndex = 12;
-        else if (set == AudioChannelSet::create7point1SDDS())    aaxFormatIndex = 13;
-        else if (set == AudioChannelSet::create7point0point2())  aaxFormatIndex = 14;
-        else if (set == AudioChannelSet::create7point1point2())  aaxFormatIndex = 15;
-        else if (set == AudioChannelSet::ambisonic (1))          aaxFormatIndex = 16;
-        else if (set == AudioChannelSet::ambisonic (2))          aaxFormatIndex = 17;
-        else if (set == AudioChannelSet::ambisonic (3))          aaxFormatIndex = 18;
-        else
+        const AudioChannelSet sets[]
         {
-            // AAX does not support this format and the wrapper should not have
-            // called this method with this layout
+            AudioChannelSet::disabled(),
+            AudioChannelSet::mono(),
+            AudioChannelSet::stereo(),
+            AudioChannelSet::createLCR(),
+            AudioChannelSet::createLCRS(),
+            AudioChannelSet::quadraphonic(),
+            AudioChannelSet::create5point0(),
+            AudioChannelSet::create5point1(),
+            AudioChannelSet::create6point0(),
+            AudioChannelSet::create6point1(),
+            AudioChannelSet::create7point0(),
+            AudioChannelSet::create7point1(),
+            AudioChannelSet::create7point0SDDS(),
+            AudioChannelSet::create7point1SDDS(),
+            AudioChannelSet::create7point0point2(),
+            AudioChannelSet::create7point1point2(),
+            AudioChannelSet::ambisonic (1),
+            AudioChannelSet::ambisonic (2),
+            AudioChannelSet::ambisonic (3)
+        };
+
+        const auto index = (int) std::distance (std::begin (sets), std::find (std::begin (sets), std::end (sets), set));
+
+        if (index != numElementsInArray (sets))
+            aaxFormatIndex = index;
+        else
             jassertfalse;
-        }
 
         uniqueFormatId = (uniqueFormatId << 8) | aaxFormatIndex;
     }
