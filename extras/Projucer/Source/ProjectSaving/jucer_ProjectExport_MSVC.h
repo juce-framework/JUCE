@@ -1690,7 +1690,8 @@ protected:
         if (commentString.isNotEmpty())
             commentString += newLine;
 
-        out << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
+        out << newLine
+            << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
             << commentString << newLine;
 
         writeProjectDependencies (out);
@@ -1821,7 +1822,7 @@ public:
     Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 14; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2015"; }
+    String getSolutionComment() const override                       { return "# Visual Studio 14"; }
     String getToolsVersion() const override                          { return "14.0"; }
     String getDefaultToolset() const override                        { return "v140"; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return "8.1"; }
@@ -1866,7 +1867,7 @@ public:
     Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 15; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
+    String getSolutionComment() const override                       { return "# Visual Studio 15"; }
     String getToolsVersion() const override                          { return "15.0"; }
     String getDefaultToolset() const override                        { return "v141"; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return "Latest"; }
@@ -1911,7 +1912,7 @@ public:
     Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 16; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2019"; }
+    String getSolutionComment() const override                       { return "# Visual Studio Version 16"; }
     String getToolsVersion() const override                          { return "16.0"; }
     String getDefaultToolset() const override                        { return "v142"; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
@@ -1956,7 +1957,7 @@ public:
     Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 17; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2022"; }
+    String getSolutionComment() const override                       { return "# Visual Studio Version 17"; }
     String getToolsVersion() const override                          { return "17.0"; }
     String getDefaultToolset() const override                        { return "v143"; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
