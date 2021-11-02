@@ -271,20 +271,9 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
         context.cycleStartMusic     = position.ppqLoopStart;
         context.cycleEndMusic       = position.ppqLoopEnd;
 
-        switch (position.frameRate)
-        {
-            case AudioPlayHead::fps23976:    fr.framesPerSecond = 24; fr.flags = FrameRate::kPullDownRate; break;
-            case AudioPlayHead::fps24:       fr.framesPerSecond = 24; fr.flags = 0; break;
-            case AudioPlayHead::fps25:       fr.framesPerSecond = 25; fr.flags = 0; break;
-            case AudioPlayHead::fps2997:     fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate; break;
-            case AudioPlayHead::fps2997drop: fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate | FrameRate::kDropRate; break;
-            case AudioPlayHead::fps30:       fr.framesPerSecond = 30; fr.flags = 0; break;
-            case AudioPlayHead::fps30drop:   fr.framesPerSecond = 30; fr.flags = FrameRate::kDropRate; break;
-            case AudioPlayHead::fps60:       fr.framesPerSecond = 60; fr.flags = 0; break;
-            case AudioPlayHead::fps60drop:   fr.framesPerSecond = 60; fr.flags = FrameRate::kDropRate; break;
-            case AudioPlayHead::fpsUnknown:  break;
-            default:                         jassertfalse; break; // New frame rate?
-        }
+        context.frameRate.framesPerSecond = (Steinberg::uint32) position.frameRate.getBaseRate();
+        context.frameRate.flags = (Steinberg::uint32) ((position.frameRate.isDrop()     ? FrameRate::kDropRate     : 0)
+                                                     | (position.frameRate.isPullDown() ? FrameRate::kPullDownRate : 0));
 
         if (position.isPlaying)     context.state |= ProcessContext::kPlaying;
         if (position.isRecording)   context.state |= ProcessContext::kRecording;
