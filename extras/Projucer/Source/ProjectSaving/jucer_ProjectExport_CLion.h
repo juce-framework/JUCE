@@ -773,12 +773,6 @@ private:
                 || target->type == build_tools::ProjectType::Target::Type::AudioUnitv3PlugIn)
                 continue;
 
-            if (target->type == build_tools::ProjectType::Target::Type::AudioUnitPlugIn)
-                out << "find_program (RC_COMPILER Rez NO_DEFAULT_PATHS PATHS \"/Applications/Xcode.app/Contents/Developer/usr/bin\")" << newLine
-                    << "if (NOT RC_COMPILER)" << newLine
-                    << "    message (WARNING \"failed to find Rez; older resource-based AU plug-ins may not work correctly\")" << newLine
-                    << "endif (NOT RC_COMPILER)" << newLine  << newLine;
-
             if (target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::staticLibrary
                 || target->getTargetFileType() == build_tools::ProjectType::Target::TargetFileType::sharedLibraryOrDLL)
                 out << "set_target_properties (" << getTargetVarName (*target) << " PROPERTIES SUFFIX \"" << target->xcodeBundleExtension << "\")" << newLine
@@ -966,66 +960,6 @@ private:
                         flag = flag.replace ("^^%%^^", " ");
 
                     targetAttributeKeys.removeString ("OTHER_LDFLAGS");
-                }
-
-                if (target->type == build_tools::ProjectType::Target::Type::AudioUnitPlugIn)
-                {
-                    String rezFlags;
-
-                    if (targetAttributeKeys.contains ("OTHER_REZFLAGS"))
-                    {
-                        rezFlags = targetAttributes["OTHER_REZFLAGS"];
-                        targetAttributeKeys.removeString ("OTHER_REZFLAGS");
-                    }
-
-                    for (auto& item : exporter.getAllGroups())
-                    {
-                        if (item.getName() == ProjectSaver::getJuceCodeGroupName())
-                        {
-                            auto resSourcesVar = targetVarName + "_REZ_SOURCES";
-                            auto resOutputVar = targetVarName + "_REZ_OUTPUT";
-
-                            auto sdkVersion = config.getMacOSBaseSDKString().upToFirstOccurrenceOf (" ", false, false);
-                            auto sysroot = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX" + sdkVersion + ".sdk";
-
-                            build_tools::RelativePath rFile ("JuceLibraryCode/include_juce_audio_plugin_client_AU.r", build_tools::RelativePath::projectFolder);
-                            rFile = rebaseFromProjectFolderToBuildTarget (rFile);
-
-                            out << "if (RC_COMPILER)" << newLine
-                                << "    set (" << resSourcesVar << newLine
-                                << "        " << ("${CMAKE_CURRENT_SOURCE_DIR}/" + rFile.toUnixStyle()).quoted() << newLine
-                                << "    )" << newLine
-                                << "    set (" << resOutputVar << " " << ("${CMAKE_CURRENT_BINARY_DIR}/" + binaryName + ".rsrc").quoted() << ")" << newLine
-                                << "    target_sources (" << targetVarName << " PRIVATE" << newLine
-                                << "        ${" << resSourcesVar << "}" << newLine
-                                << "        ${" << resOutputVar << "}" << newLine
-                                << "    )" << newLine
-                                << "    execute_process (COMMAND" << newLine
-                                << "        ${RC_COMPILER}" << newLine
-                                << "        " << rezFlags.unquoted().removeCharacters ("\\") << newLine
-                                << "        -isysroot " << sysroot.quoted() << newLine;
-
-                            for (auto& path : headerSearchPaths)
-                            {
-                                out << "        -I \"";
-
-                                if (! isUnixAbsolutePath (path))
-                                    out << "${PROJECT_SOURCE_DIR}/";
-
-                                out << path << "\"" << newLine;
-                            }
-
-                            out << "        ${" << resSourcesVar << "}" << newLine
-                                << "        -o ${" << resOutputVar << "}" << newLine
-                                << "    )" << newLine
-                                << "    set_source_files_properties (${" << resOutputVar << "} PROPERTIES" << newLine
-                                << "        GENERATED TRUE" << newLine
-                                << "        MACOSX_PACKAGE_LOCATION Resources" << newLine
-                                << "    )" << newLine
-                                << "endif (RC_COMPILER)" << newLine  << newLine;
-                            break;
-                        }
-                    }
                 }
 
                 if (targetAttributeKeys.contains ("INFOPLIST_FILE"))
