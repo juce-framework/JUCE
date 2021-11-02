@@ -1875,6 +1875,7 @@ public:
             options.isAuSandboxSafe                 = owner.project.isAUSandBoxSafe();
             options.isPluginSynth                   = owner.project.isPluginSynth();
             options.suppressResourceUsage           = owner.getSuppressPlistResourceUsage();
+            options.isPluginARAEffect               = owner.project.shouldEnableARA();
 
             options.write (infoPlistFile);
         }
