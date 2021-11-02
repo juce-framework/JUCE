@@ -2441,7 +2441,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
     const auto curModifiers = ModifierKeys::getCurrentModifiers();
     wasProToolsModifiersDownState = curModifiers.isCommandDown() && curModifiers.isCtrlDown();
 #endif
-    
+
     auto& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
 

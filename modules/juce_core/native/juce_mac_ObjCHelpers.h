@@ -97,17 +97,17 @@ inline NSDictionary* varObjectToNSDictionary (const var& varToParse)
 
             const var& valueVar = properties.getValueAt (i);
 
-            if (valueVar.isArray())
-            {
-                auto* valueArray = varArrayToNSArray (valueVar);
-
-                [dictionary setObject: valueArray forKey: keyString];
-            }
-            else if (valueVar.isObject())
+            if (valueVar.isObject())
             {
                 auto* valueDictionary = varObjectToNSDictionary (valueVar);
 
                 [dictionary setObject: valueDictionary forKey: keyString];
+            }
+            else if (valueVar.isArray())
+            {
+                auto* valueArray = varArrayToNSArray (valueVar);
+
+                [dictionary setObject: valueArray forKey: keyString];
             }
             else
             {
@@ -134,17 +134,17 @@ inline NSArray* varArrayToNSArray (const var& varToParse)
 
     for (const auto& aVar : *varArray)
     {
-        if (aVar.isArray())
-        {
-            auto* valueArray = varArrayToNSArray (aVar);
-
-            [array addObject: valueArray];
-        }
-        else if (aVar.isObject())
+        if (aVar.isObject())
         {
             auto* valueDictionary = varObjectToNSDictionary (aVar);
 
             [array addObject: valueDictionary];
+        }
+        else if (aVar.isArray())
+        {
+            auto* valueArray = varArrayToNSArray (aVar);
+
+            [array addObject: valueArray];
         }
         else
         {

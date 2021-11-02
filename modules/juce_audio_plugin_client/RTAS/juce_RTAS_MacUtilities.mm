@@ -37,8 +37,9 @@
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_CarbonVisibility.h"
 
-//==============================================================================
 using namespace juce;
+
+//==============================================================================
 void initialiseMacRTAS();
 void initialiseMacRTAS()
 {

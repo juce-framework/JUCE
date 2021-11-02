@@ -748,16 +748,16 @@ public:
     void initialiseDependencyPathValues() override
     {
         vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
-                                        getAppSettings ().getStoredPath (Ids::vstLegacyPath, TargetOS::osx), TargetOS::osx);
+                                        getAppSettings().getStoredPath (Ids::vstLegacyPath, TargetOS::osx), TargetOS::osx);
 
         aaxPathValueWrapper.init ({ settings, Ids::aaxFolder, nullptr },
-                                  getAppSettings ().getStoredPath (Ids::aaxPath, TargetOS::osx), TargetOS::osx);
+                                  getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::osx), TargetOS::osx);
 
         rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
                                    getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::osx), TargetOS::osx);
 
         araPathValueWrapper.init ({ settings, Ids::araFolder, nullptr },
-                                  getAppSettings().getStoredPath (Ids::araFolder, TargetOS::osx), TargetOS::osx);
+                                  getAppSettings().getStoredPath (Ids::araPath, TargetOS::osx), TargetOS::osx);
     }
 
 protected:
@@ -1430,7 +1430,7 @@ public:
                 configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
                                                                         owner.getTargetFolder(),
                                                                         build_tools::RelativePath::buildTargetFolder)
-                                                                .toUnixStyle());
+                                                              .toUnixStyle());
             }
 
             s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
@@ -1732,8 +1732,6 @@ public:
             }
 
             s.set ("GCC_PREPROCESSOR_DEFINITIONS", indentParenthesisedList (defsList, 1));
-            if (type == Target::RTASPlugIn && ! config.isDebug())
-                s.set ("VALID_ARCHS", "\"i386\"");
             if (type == Target::AudioUnitv3PlugIn && ! owner.isiOS() && ! config.isDebug())
                 s.set ("VALID_ARCHS", "\"x86_64\"");
 
@@ -1988,14 +1986,10 @@ public:
             }
             else if (type == RTASPlugIn)
             {
-                auto rtasFolder
-                    = build_tools::RelativePath (owner.getRTASPathString(), build_tools::RelativePath::projectFolder)
-                        .getChildFile ("MacBag").getChildFile ("Libs");
+                build_tools::RelativePath rtasFolder (owner.getRTASPathString(), build_tools::RelativePath::projectFolder);
 
-                String libraryPath (config.isDebug() ? "Debug/libPluginLibrary" : "Release/libPluginLibrary");
-                libraryPath += "_libcpp.a";
-
-                extraLibs.add (rtasFolder.getChildFile (libraryPath));
+                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
+                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
             }
         }
 

@@ -126,16 +126,16 @@ public:
     void initialiseDependencyPathValues() override
     {
         vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
-                                        getAppSettings ().getStoredPath (Ids::vstLegacyPath, TargetOS::windows), TargetOS::windows);
+                                        getAppSettings().getStoredPath (Ids::vstLegacyPath, TargetOS::windows), TargetOS::windows);
 
         aaxPathValueWrapper.init ({ settings, Ids::aaxFolder, nullptr },
-                                  getAppSettings ().getStoredPath (Ids::aaxPath, TargetOS::windows), TargetOS::windows);
+                                  getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::windows), TargetOS::windows);
 
         rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
                                    getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::windows), TargetOS::windows);
 
         araPathValueWrapper.init ({ settings, Ids::araFolder, nullptr },
-                                  getAppSettings().getStoredPath (Ids::araFolder, TargetOS::windows), TargetOS::windows);
+                                  getAppSettings().getStoredPath (Ids::araPath, TargetOS::windows), TargetOS::windows);
     }
 
     //==============================================================================

@@ -187,7 +187,7 @@ static void fillDescriptionWith (PluginDescription& description, ObjectType& obj
 static void createPluginDescription (PluginDescription& description,
                                      const File& pluginFile, const String& company, const String& name,
                                      const PClassInfo& info, PClassInfo2* info2, PClassInfoW* infoW,
-                                     int numInputs, int numOutputs, 
+                                     int numInputs, int numOutputs,
                                      bool isARAEnabled)
 {
     description.fileOrIdentifier    = pluginFile.getFullPathName();
@@ -1824,7 +1824,7 @@ struct VST3ComponentHolder
                                      factoryInfo.vendor, module->getName(),
                                      info, info2.get(), infoW.get(),
                                      totalNumInputChannels,
-                                     totalNumOutputChannels, 
+                                     totalNumOutputChannels,
                                      doesComponentHaveARAEntryPoint (component));
 
             return;

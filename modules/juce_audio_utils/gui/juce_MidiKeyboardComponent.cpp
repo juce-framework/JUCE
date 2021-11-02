@@ -702,16 +702,6 @@ void MidiKeyboardComponent::updateNoteUnderMouse (const MouseEvent& e, bool isDo
     updateNoteUnderMouse (e.getEventRelativeTo (this).position, isDown, e.source.getIndex());
 }
 
-void MidiKeyboardComponent::mouseDownStartedOnKey (int midiNoteNumber, float eventVelocity)
-{
-    state.noteOn (midiChannel, midiNoteNumber, eventVelocity);
-}
-
-void MidiKeyboardComponent::mouseDownFinishedOnKey (int midiNoteNumber, float eventVelocity)
-{
-    state.noteOff (midiChannel, midiNoteNumber, eventVelocity);
-}
-
 void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown, int fingerNum)
 {
     const auto noteInfo = xyToNote (pos);
@@ -736,12 +726,12 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown,
                 mouseDownNotes.set (fingerNum, -1);
 
                 if (! mouseDownNotes.contains (oldNoteDown))
-                    mouseDownFinishedOnKey(oldNoteDown, eventVelocity);
+                    state.noteOff (midiChannel, oldNoteDown, eventVelocity);
             }
 
             if (newNote >= 0 && ! mouseDownNotes.contains (newNote))
             {
-                mouseDownStartedOnKey(newNote, eventVelocity);
+                state.noteOn (midiChannel, newNote, eventVelocity);
                 mouseDownNotes.set (fingerNum, newNote);
             }
         }
@@ -751,7 +741,7 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown,
         mouseDownNotes.set (fingerNum, -1);
 
         if (! mouseDownNotes.contains (oldNoteDown))
-            mouseDownFinishedOnKey(oldNoteDown, eventVelocity);
+            state.noteOff (midiChannel, oldNoteDown, eventVelocity);
     }
 }
 
@@ -782,13 +772,12 @@ void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
 
 void MidiKeyboardComponent::mouseUp (const MouseEvent& e)
 {
+    updateNoteUnderMouse (e, false);
 
     auto note = xyToNote (e.position).note;
 
     if (note >= 0)
         mouseUpOnKey (note, e);
-
-    updateNoteUnderMouse (e, false);
 }
 
 void MidiKeyboardComponent::mouseEnter (const MouseEvent& e)
@@ -825,11 +814,6 @@ void MidiKeyboardComponent::timerCallback()
             repaintNote (i);
         }
     }
-}
-
-const Array<int>& MidiKeyboardComponent::getMouseDownNotes()
-{
-    return mouseDownNotes;
 }
 
 //==============================================================================
@@ -894,6 +878,7 @@ bool MidiKeyboardComponent::keyStateChanged (bool /*isKeyDown*/)
             }
         }
     }
+
     return keyPressUsed;
 }
 
@@ -904,72 +889,7 @@ bool MidiKeyboardComponent::keyPressed (const KeyPress& key)
 
 void MidiKeyboardComponent::focusLost (FocusChangeType)
 {
-    // TODO: Restore
-    //    resetAnyKeysInUse();
-}
-
-//==============================================================================
-StickyMidiKeyboardComponent::StickyMidiKeyboardComponent (MidiKeyboardState& s,
-                                                          const Orientation o)
-: MidiKeyboardComponent(s, o)
-{
-    // restores current state to stucked keys
-    for (int i = 128; --i >= 0;)
-        if (s.isNoteOn(1, i))
-            stuckKeys.setBit(i);
-        else
-            stuckKeys.clearBit(i);
-}
-
-StickyMidiKeyboardComponent::~StickyMidiKeyboardComponent()
-{
-    /* Empty */
-}
-
-void StickyMidiKeyboardComponent::mouseUpOnKey (int /**midiNoteNumber*/, const MouseEvent& e)
-{
-    /** Note: We don't use the midiNoteNumber figured out by the caller by examining
-     the mouse event location. Instead, we are interested in what note was under
-     the released finger according to the maintained mouseDownNotes array. On iOS
-     these will usually be the same, but might not be in case of a finger being
-     very quickly dragged from the edge of one note to the adjacent note and then
-     released, resulting in a mouseDown followed by a mouseUp event with no
-     intervening drag event to update the mouseDownNotes model.
-     */
-    const Array<int>& mouseDownNotes = getMouseDownNotes();
-    int oldNoteDown = mouseDownNotes.getUnchecked (e.source.getIndex());
-    jassert(oldNoteDown != -1);
-
-    long keyDownCount = std::count (mouseDownNotes.begin(), mouseDownNotes.end(), oldNoteDown);
-    jassert(keyDownCount > 0);
-    
-    /* Stick or unstick the key in case the last mouse button on the key is about to 
-       be released. Note: on iOS, keyDownCount may be zero, because the touchesEnded which
-       triggers mouseUp may have a location which is different than the last 
-       touchesBegan/touchesMoved event. */
-    if (keyDownCount == 1)
-    {
-        if (stuckKeys.getBitRangeAsInt(oldNoteDown,1) != 0) {
-            stuckKeys.clearBit(oldNoteDown);
-        } else {
-            stuckKeys.setBit(oldNoteDown);
-        }
-    }
-}
-
-void StickyMidiKeyboardComponent::mouseDownStartedOnKey (int midiNoteNumber, float velocity)
-{
-    /* No need to set the key state if key is already stuck from before */
-    if (stuckKeys.getBitRangeAsInt(midiNoteNumber,1) == 0)
-        MidiKeyboardComponent::mouseDownStartedOnKey (midiNoteNumber, velocity);
-}
-
-void StickyMidiKeyboardComponent::mouseDownFinishedOnKey (int midiNoteNumber, float velocity)
-{
-    /* Only release the key if it isn't stuck. Note the logic assumes we get here after
-       mouseUpOnKey has been called to correctly set or remove stuck keys. */
-    if (stuckKeys.getBitRangeAsInt(midiNoteNumber,1) == 0)
-        MidiKeyboardComponent::mouseDownFinishedOnKey(midiNoteNumber, velocity);
+    resetAnyKeysInUse();
 }
 
 } // namespace juce

@@ -106,7 +106,7 @@
      Enables the ARA support in the VST3 audio plugin hosting classes.
 
      @see VSTPluginFormat, VST3PluginFormat, AudioPluginFormat, AudioPluginFormatManager, JUCE_PLUGINHOST_VST, JUCE_PLUGINHOST_AU
-    
+
     AudioUnit support coming soon!
  */
 #ifndef JUCE_PLUGINHOST_ARA

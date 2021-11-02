@@ -406,6 +406,7 @@ protected:
     const build_tools::ProjectType& projectType;
     const String projectName;
     const File projectFolder;
+
     //==============================================================================
     ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper, araPathValueWrapper;
 
