@@ -732,7 +732,7 @@ void AudioThumbnail::setLevels (const MinMaxValue* const* values, int thumbIndex
     const ScopedLock sl (lock);
 
     for (int i = jmin (numChans, channels.size()); --i >= 0;)
-        channels.getUnchecked(i)->write (values[i], thumbIndex, numValues);
+        channels.getUnchecked (i)->write (values[i], thumbIndex, numValues);
 
     auto start = thumbIndex * (int64) samplesPerThumbSample;
     auto end   = (thumbIndex + numValues) * (int64) samplesPerThumbSample;
@@ -740,7 +740,7 @@ void AudioThumbnail::setLevels (const MinMaxValue* const* values, int thumbIndex
     if (numSamplesFinished >= start && end > numSamplesFinished)
         numSamplesFinished = end;
 
-    totalSamples = jmax (numSamplesFinished, totalSamples.load());
+    totalSamples = jmax (numSamplesFinished, totalSamples);
     window->invalidate();
     sendChangeMessage();
 }
@@ -748,26 +748,31 @@ void AudioThumbnail::setLevels (const MinMaxValue* const* values, int thumbIndex
 //==============================================================================
 int AudioThumbnail::getNumChannels() const noexcept
 {
+    const ScopedLock sl (lock);
     return numChannels;
 }
 
 double AudioThumbnail::getTotalLength() const noexcept
 {
+    const ScopedLock sl (lock);
     return sampleRate > 0 ? ((double) totalSamples / sampleRate) : 0.0;
 }
 
 bool AudioThumbnail::isFullyLoaded() const noexcept
 {
+    const ScopedLock sl (lock);
     return numSamplesFinished >= totalSamples - samplesPerThumbSample;
 }
 
 double AudioThumbnail::getProportionComplete() const noexcept
 {
-    return jlimit (0.0, 1.0, (double) numSamplesFinished / (double) jmax ((int64) 1, totalSamples.load()));
+    const ScopedLock sl (lock);
+    return jlimit (0.0, 1.0, (double) numSamplesFinished / (double) jmax ((int64) 1, totalSamples));
 }
 
 int64 AudioThumbnail::getNumSamplesFinished() const noexcept
 {
+    const ScopedLock sl (lock);
     return numSamplesFinished;
 }
 
