@@ -46,7 +46,7 @@ namespace DelayLineInterpolationTypes
 
     /**
         Successive samples in the delay line will be linearly interpolated. This
-        type of interpolation has a low compuational cost where the delay can be
+        type of interpolation has a low computational cost where the delay can be
         modulated in real time, but it also introduces a low-pass filtering effect
         into your audio signal.
 
