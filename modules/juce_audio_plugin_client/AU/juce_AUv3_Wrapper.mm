@@ -269,7 +269,7 @@ private:
 
             //==============================================================================
             addMethod (@selector (contextName),                     getContextName);
-            addMethod (@selector (setContextName:),                  setContextName);
+            addMethod (@selector (setContextName:),                 setContextName);
 
             //==============================================================================
            #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
@@ -846,7 +846,7 @@ public:
 
         mapper.alloc();
 
-        audioBuffer.prepare (totalInChannels, totalOutChannels, static_cast<int> (maxFrames));
+        audioBuffer.prepare (AudioUnitHelpers::getBusesLayout (&processor), static_cast<int> (maxFrames));
 
         auto sampleRate = [&]
         {
@@ -1501,18 +1501,21 @@ private:
         auto& processor = getAudioProcessor();
         jassert (static_cast<int> (frameCount) <= getAudioProcessor().getBlockSize());
 
-        // process params
-        const int numParams = juceParameters.getNumParameters();
-        processEvents (realtimeEventListHead, numParams, static_cast<AUEventSampleTime> (timestamp->mSampleTime));
+        const auto numProcessorBusesOut = AudioUnitHelpers::getBusCount (processor, false);
 
         if (lastTimeStamp.mSampleTime != timestamp->mSampleTime)
         {
+            // process params and incoming midi (only once for a given timestamp)
+            midiMessages.clear();
+
+            const int numParams = juceParameters.getNumParameters();
+            processEvents (realtimeEventListHead, numParams, static_cast<AUEventSampleTime> (timestamp->mSampleTime));
+
             lastTimeStamp = *timestamp;
 
             const auto numWrapperBusesIn    = AudioUnitHelpers::getBusCountForWrapper (processor, true);
             const auto numWrapperBusesOut   = AudioUnitHelpers::getBusCountForWrapper (processor, false);
             const auto numProcessorBusesIn  = AudioUnitHelpers::getBusCount (processor, true);
-            const auto numProcessorBusesOut = AudioUnitHelpers::getBusCount (processor, false);
 
             // prepare buffers
             {
@@ -1580,18 +1583,16 @@ private:
                     AudioBufferList* buffer = busBuffer.get();
 
                     const int* inLayoutMap = mapper.get (true, busIdx);
-                    audioBuffer.setBuffer (chIdx++,  busBuffer.interleaved() ? nullptr : static_cast<float*> (buffer->mBuffers[inLayoutMap[channelOffset]].mData));
+                    audioBuffer.setBuffer (chIdx++, busBuffer.interleaved() ? nullptr : static_cast<float*> (buffer->mBuffers[inLayoutMap[channelOffset]].mData));
                 }
             }
 
             // copy input
             {
                 for (int busIdx = 0; busIdx < numProcessorBusesIn; ++busIdx)
-                    audioBuffer.push (*inBusBuffers[busIdx]->get(), mapper.get (true, busIdx));
+                    audioBuffer.set (busIdx, *inBusBuffers[busIdx]->get(), mapper.get (true, busIdx));
 
-                // clear remaining channels
-                for (int i = totalInChannels; i < totalOutChannels; ++i)
-                    zeromem (audioBuffer.push(), sizeof (float) * frameCount);
+                audioBuffer.clearUnusedChannels();
             }
 
             // process audio
@@ -1606,14 +1607,11 @@ private:
                         midiOut (metadata.samplePosition, 0, metadata.numBytes, metadata.data);
             }
            #endif
-
-            midiMessages.clear();
-
-            // copy back
-            if (outputBusNumber < numProcessorBusesOut)
-                audioBuffer.pop (*outBusBuffers[(int) outputBusNumber]->get(),
-                                 mapper.get (false, (int) outputBusNumber));
         }
+
+        // copy back
+        if (outputBusNumber < numProcessorBusesOut && outputData != nullptr)
+            audioBuffer.get ((int) outputBusNumber, *outputData, mapper.get (false, (int) outputBusNumber));
 
         return noErr;
     }
