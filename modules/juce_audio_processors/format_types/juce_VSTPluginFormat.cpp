@@ -2921,14 +2921,13 @@ public:
            #elif JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
             {
-                const auto editorSize = plugin.getEditorSize();
                 auto* symbols = X11Symbols::getInstance();
                 symbols->xMoveResizeWindow (display,
                                             pluginWindow,
                                             pos.getX(),
                                             pos.getY(),
-                                            (unsigned int) editorSize.getWidth(),
-                                            (unsigned int) editorSize.getHeight());
+                                            (unsigned int) pos.getWidth(),
+                                            (unsigned int) pos.getHeight());
                 symbols->xMapRaised (display, pluginWindow);
                 symbols->xFlush (display);
             }
