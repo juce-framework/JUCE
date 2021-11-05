@@ -5177,8 +5177,7 @@ private:
     class ImageImpl : public Impl
     {
     public:
-        ImageImpl (Image imageIn, Point<int> hotspotIn)
-            : image (std::move (imageIn)), hotspot (hotspotIn) {}
+        explicit ImageImpl (const CustomMouseCursorInfo& infoIn) : info (infoIn) {}
 
         ~ImageImpl() override
         {
@@ -5198,23 +5197,22 @@ private:
             if (iter != cursorsBySize.end())
                 return iter->second;
 
-            const auto imgW = jmax (1, image.getWidth());
-            const auto imgH = jmax (1, image.getHeight());
+            const auto imgW = jmax (1, info.image.getWidth());
+            const auto imgH = jmax (1, info.image.getHeight());
 
             const auto scale = (float) size / (float) unityCursorSize;
             const auto scaleToUse = scale * jmin (1.0f, jmin ((float) unityCursorSize / (float) imgW,
-                                                              (float) unityCursorSize / (float) imgH));
-            const auto rescaled = image.rescaled (roundToInt (scaleToUse * (float) imgW),
-                                                  roundToInt (scaleToUse * (float) imgH));
-            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) hotspot.x));
-            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) hotspot.y));
+                                                              (float) unityCursorSize / (float) imgH)) / info.scaleFactor;
+            const auto rescaled = info.image.rescaled (roundToInt (scaleToUse * (float) imgW),
+                                                       roundToInt (scaleToUse * (float) imgH));
+            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) info.hotspot.x));
+            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) info.hotspot.y));
 
             return cursorsBySize.emplace (size, IconConverters::createHICONFromImage (rescaled, false, hx, hy)).first->second;
         }
 
     private:
-        Image image;
-        Point<int> hotspot;
+        const CustomMouseCursorInfo info;
         std::map<int, HCURSOR> cursorsBySize;
     };
 
@@ -5263,7 +5261,7 @@ private:
 
     static std::unique_ptr<Impl> makeHandle (const CustomMouseCursorInfo& info)
     {
-        return std::make_unique<ImageImpl> (info.image, info.hotspot);
+        return std::make_unique<ImageImpl> (info);
     }
 
     static std::unique_ptr<Impl> makeHandle (const MouseCursor::StandardCursorType type)
