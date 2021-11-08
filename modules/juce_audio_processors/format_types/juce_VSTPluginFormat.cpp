@@ -2917,6 +2917,17 @@ public:
                               0,
                               0,
                               SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+
+                MessageManager::callAsync ([ref = SafePointer<Component> (this)]
+                {
+                    // Clean up after the editor window, in case it tried to move itself
+                    // into the wrong location over this component.
+                    if (ref == nullptr)
+                        return;
+
+                    if (auto* p = ref->getPeer())
+                        p->repaint (p->getBounds().withPosition ({}));
+                });
             }
            #elif JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
