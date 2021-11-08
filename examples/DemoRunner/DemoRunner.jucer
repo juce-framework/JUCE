@@ -33,7 +33,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" smallIcon="YyqWd2" bigIcon="YyqWd2"
                customXcodeResourceFolders="../Assets&#10;../Audio &#10;../DSP &#10;../GUI &#10;../Utilities"
-               microphonePermissionNeeded="1" cameraPermissionNeeded="1" applicationCategory="public.app-category.developer-tools">
+               microphonePermissionNeeded="1" cameraPermissionNeeded="1" applicationCategory="public.app-category.developer-tools"
+               iosBluetoothPermissionNeeded="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" recommendedWarnings="LLVM"/>
         <CONFIGURATION isDebug="0" name="Release" recommendedWarnings="LLVM"/>
