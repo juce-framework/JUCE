@@ -38,7 +38,7 @@ static std::unique_ptr<InputStream> createAssetInputStream (const char* resource
 {
     for (int i = 0; i < BinaryData::namedResourceListSize; ++i)
     {
-        if (BinaryData::originalFilenames[i] == resourcePath)
+        if (String (BinaryData::originalFilenames[i]) == String (resourcePath))
         {
             int dataSizeInBytes;
             auto* resource = BinaryData::getNamedResource (BinaryData::namedResourceList[i], dataSizeInBytes);
