@@ -46,7 +46,9 @@
 
 #pragma once
 
+#ifndef PIP_DEMO_UTILITIES_INCLUDED
 #include "../Assets/DemoUtilities.h"
+#endif
 
 //==============================================================================
 static void showBubbleMessage (Component& targetComponent, const String& textToShow,
