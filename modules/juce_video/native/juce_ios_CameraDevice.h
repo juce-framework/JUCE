@@ -519,11 +519,11 @@ private:
             SessionDelegateClass()  : ObjCClass<NSObject> ("SessionDelegateClass_")
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-                addMethod (@selector (sessionDidStartRunning:),   started,           "v@:@");
-                addMethod (@selector (sessionDidStopRunning:),    stopped,           "v@:@");
-                addMethod (@selector (runtimeError:),             runtimeError,      "v@:@");
-                addMethod (@selector (sessionWasInterrupted:),    interrupted,       "v@:@");
-                addMethod (@selector (sessionInterruptionEnded:), interruptionEnded, "v@:@");
+                addMethod (@selector (sessionDidStartRunning:),   started);
+                addMethod (@selector (sessionDidStopRunning:),    stopped);
+                addMethod (@selector (runtimeError:),             runtimeError);
+                addMethod (@selector (sessionWasInterrupted:),    interrupted);
+                addMethod (@selector (sessionInterruptionEnded:), interruptionEnded);
                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<CaptureSession*> ("owner");
@@ -771,24 +771,20 @@ private:
             public:
                 PhotoOutputDelegateClass() : ObjCClass<NSObject> ("PhotoOutputDelegateClass_")
                 {
-                    addMethod (@selector (captureOutput:willBeginCaptureForResolvedSettings:),       willBeginCaptureForSettings, "v@:@@");
-                    addMethod (@selector (captureOutput:willCapturePhotoForResolvedSettings:),       willCaptureForSettings,      "v@:@@");
-                    addMethod (@selector (captureOutput:didCapturePhotoForResolvedSettings:),        didCaptureForSettings,       "v@:@@");
-                    addMethod (@selector (captureOutput:didFinishCaptureForResolvedSettings:error:), didFinishCaptureForSettings, "v@:@@@");
+                    addMethod (@selector (captureOutput:willBeginCaptureForResolvedSettings:),       willBeginCaptureForSettings);
+                    addMethod (@selector (captureOutput:willCapturePhotoForResolvedSettings:),       willCaptureForSettings);
+                    addMethod (@selector (captureOutput:didCapturePhotoForResolvedSettings:),        didCaptureForSettings);
+                    addMethod (@selector (captureOutput:didFinishCaptureForResolvedSettings:error:), didFinishCaptureForSettings);
 
                    #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
                     if (@available (iOS 11.0, *))
                     {
-                        addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:),
-                                   didFinishProcessingPhoto,
-                                   "v@:@@@");
+                        addMethod (@selector (captureOutput:didFinishProcessingPhoto:error:), didFinishProcessingPhoto);
                     }
                     else
                    #endif
                     {
-                        addMethod (@selector (captureOutput:didFinishProcessingPhotoSampleBuffer:previewPhotoSampleBuffer:resolvedSettings:bracketSettings:error:),
-                                   didFinishProcessingPhotoSampleBuffer,
-                                   "v@:@@@@@@");
+                        addMethod (@selector (captureOutput:didFinishProcessingPhotoSampleBuffer:previewPhotoSampleBuffer:resolvedSettings:bracketSettings:error:), didFinishProcessingPhotoSampleBuffer);
                     }
 
                     addIvar<StillPictureTaker*> ("owner");
@@ -1075,8 +1071,8 @@ private:
             {
                 FileOutputRecordingDelegateClass()  : ObjCClass<NSObject<AVCaptureFileOutputRecordingDelegate>> ("FileOutputRecordingDelegateClass_")
                 {
-                    addMethod (@selector (captureOutput:didStartRecordingToOutputFileAtURL:fromConnections:),        started, "v@:@@@");
-                    addMethod (@selector (captureOutput:didFinishRecordingToOutputFileAtURL:fromConnections:error:), stopped, "v@:@@@@");
+                    addMethod (@selector (captureOutput:didStartRecordingToOutputFileAtURL:fromConnections:),        started);
+                    addMethod (@selector (captureOutput:didFinishRecordingToOutputFileAtURL:fromConnections:error:), stopped);
 
                     addIvar<VideoRecorder*> ("owner");
 
@@ -1261,7 +1257,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
     {
         JuceCameraDeviceViewerClass()  : ObjCClass<UIView> ("JuceCameraDeviceViewerClass_")
         {
-            addMethod (@selector (layoutSubviews), layoutSubviews, "v@:");
+            addMethod (@selector (layoutSubviews), layoutSubviews);
 
             registerClass();
         }

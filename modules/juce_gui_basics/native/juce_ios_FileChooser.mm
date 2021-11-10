@@ -301,8 +301,8 @@ private:
         {
             addIvar<Native*> ("owner");
 
-            addMethod (@selector (documentPicker:didPickDocumentAtURL:), didPickDocumentAtURL,       "v@:@@");
-            addMethod (@selector (documentPickerWasCancelled:),          documentPickerWasCancelled, "v@:@");
+            addMethod (@selector (documentPicker:didPickDocumentAtURL:), didPickDocumentAtURL);
+            addMethod (@selector (documentPickerWasCancelled:),          documentPickerWasCancelled);
 
             addProtocol (@protocol (UIDocumentPickerDelegate));
 
@@ -331,7 +331,7 @@ private:
         FileChooserControllerClass()  : ObjCClass<UIDocumentPickerViewController> ("FileChooserController_")
         {
             addIvar<Native*> ("owner");
-            addMethod (@selector (viewDidDisappear:), viewDidDisappear, "v@:@c");
+            addMethod (@selector (viewDidDisappear:), viewDidDisappear);
 
             registerClass();
         }

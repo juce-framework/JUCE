@@ -336,8 +336,7 @@ private:
         explicit SafeModalPanel (const char* name) : ObjCClass<Base> (name)
         {
             this->addMethod (@selector (preventsApplicationTerminationWhenModal),
-                             preventsApplicationTerminationWhenModal,
-                             "c@:");
+                             preventsApplicationTerminationWhenModal);
 
             this->registerClass();
         }
@@ -360,8 +359,8 @@ private:
         {
             addIvar<Native*> ("cppObject");
 
-            addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename,      "c@:@@");
-            addMethod (@selector (panelSelectionDidChange:),  panelSelectionDidChange, "c@");
+            addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename);
+            addMethod (@selector (panelSelectionDidChange:),  panelSelectionDidChange);
 
             addProtocol (@protocol (NSOpenSavePanelDelegate));
 

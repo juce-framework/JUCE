@@ -216,73 +216,67 @@ private:
             addIvar<JuceAudioUnitv3Base*> ("cppObject");
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (initWithComponentDescription:options:error:juceClass:),
-                       initWithComponentDescriptionAndJuceClass, "@@:",
-                       @encode (AudioComponentDescription),
-                       @encode (AudioComponentInstantiationOptions), "^@@");
+            addMethod (@selector (initWithComponentDescription:options:error:juceClass:), initWithComponentDescriptionAndJuceClass);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-            addMethod (@selector (initWithComponentDescription:options:error:),
-                       initWithComponentDescription, "@@:",
-                       @encode (AudioComponentDescription),
-                       @encode (AudioComponentInstantiationOptions), "^@");
+            addMethod (@selector (initWithComponentDescription:options:error:), initWithComponentDescription);
 
-            addMethod (@selector (dealloc),                         dealloc,                        "v@:");
+            addMethod (@selector (dealloc),                         dealloc);
 
             //==============================================================================
-            addMethod (@selector (reset),                           reset,                          "v@:");
+            addMethod (@selector (reset),                           reset);
 
             //==============================================================================
-            addMethod (@selector (currentPreset),                   getCurrentPreset,               "@@:");
-            addMethod (@selector (setCurrentPreset:),               setCurrentPreset,               "v@:@");
-            addMethod (@selector (factoryPresets),                  getFactoryPresets,              "@@:");
-            addMethod (@selector (fullState),                       getFullState,                   "@@:");
-            addMethod (@selector (setFullState:),                   setFullState,                   "v@:@");
-            addMethod (@selector (parameterTree),                   getParameterTree,               "@@:");
-            addMethod (@selector (parametersForOverviewWithCount:), parametersForOverviewWithCount, "@@:", @encode (NSInteger));
+            addMethod (@selector (currentPreset),                   getCurrentPreset);
+            addMethod (@selector (setCurrentPreset:),               setCurrentPreset);
+            addMethod (@selector (factoryPresets),                  getFactoryPresets);
+            addMethod (@selector (fullState),                       getFullState);
+            addMethod (@selector (setFullState:),                   setFullState);
+            addMethod (@selector (parameterTree),                   getParameterTree);
+            addMethod (@selector (parametersForOverviewWithCount:), parametersForOverviewWithCount);
 
             //==============================================================================
-            addMethod (@selector (latency),                         getLatency,                     @encode (NSTimeInterval), "@:");
-            addMethod (@selector (tailTime),                        getTailTime,                    @encode (NSTimeInterval),  "@:");
+            addMethod (@selector (latency),                         getLatency);
+            addMethod (@selector (tailTime),                        getTailTime);
 
             //==============================================================================
-            addMethod (@selector (inputBusses),                     getInputBusses,                 "@@:");
-            addMethod (@selector (outputBusses),                    getOutputBusses,                "@@:");
-            addMethod (@selector (channelCapabilities),             getChannelCapabilities,         "@@:");
-            addMethod (@selector (shouldChangeToFormat:forBus:),    shouldChangeToFormat,           "c@:@@");
+            addMethod (@selector (inputBusses),                     getInputBusses);
+            addMethod (@selector (outputBusses),                    getOutputBusses);
+            addMethod (@selector (channelCapabilities),             getChannelCapabilities);
+            addMethod (@selector (shouldChangeToFormat:forBus:),    shouldChangeToFormat);
 
             //==============================================================================
-            addMethod (@selector (virtualMIDICableCount),           getVirtualMIDICableCount,       @encode (NSInteger), "@:");
+            addMethod (@selector (virtualMIDICableCount),           getVirtualMIDICableCount);
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (supportsMPE),                     getSupportsMPE,                 @encode (BOOL),      "@:");
+            addMethod (@selector (supportsMPE),                     getSupportsMPE);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
            #if JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
             if (@available (macOS 10.13, iOS 11.0, *))
-                addMethod (@selector (MIDIOutputNames), getMIDIOutputNames, "@@:");
+                addMethod (@selector (MIDIOutputNames), getMIDIOutputNames);
            #endif
 
             //==============================================================================
-            addMethod (@selector (internalRenderBlock),             getInternalRenderBlock,         @encode (AUInternalRenderBlock), "@:");
-            addMethod (@selector (canProcessInPlace),               getCanProcessInPlace,           @encode (BOOL), "@:");
-            addMethod (@selector (isRenderingOffline),              getRenderingOffline,            @encode (BOOL),  "@:");
-            addMethod (@selector (setRenderingOffline:),            setRenderingOffline,            "v@:", @encode (BOOL));
-            addMethod (@selector (shouldBypassEffect),              getShouldBypassEffect,          @encode (BOOL),  "@:");
-            addMethod (@selector (setShouldBypassEffect:),          setShouldBypassEffect,          "v@:", @encode (BOOL));
-            addMethod (@selector (allocateRenderResourcesAndReturnError:),  allocateRenderResourcesAndReturnError, "c@:^@");
-            addMethod (@selector (deallocateRenderResources),       deallocateRenderResources,      "v@:");
+            addMethod (@selector (internalRenderBlock),             getInternalRenderBlock);
+            addMethod (@selector (canProcessInPlace),               getCanProcessInPlace);
+            addMethod (@selector (isRenderingOffline),              getRenderingOffline);
+            addMethod (@selector (setRenderingOffline:),            setRenderingOffline);
+            addMethod (@selector (shouldBypassEffect),              getShouldBypassEffect);
+            addMethod (@selector (setShouldBypassEffect:),          setShouldBypassEffect);
+            addMethod (@selector (allocateRenderResourcesAndReturnError:),  allocateRenderResourcesAndReturnError);
+            addMethod (@selector (deallocateRenderResources),       deallocateRenderResources);
 
             //==============================================================================
-            addMethod (@selector (contextName),                     getContextName,                 "@@:");
-            addMethod (@selector (setContextName:),                  setContextName,                 "v@:@");
+            addMethod (@selector (contextName),                     getContextName);
+            addMethod (@selector (setContextName:),                  setContextName);
 
             //==============================================================================
            #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
             if (@available (macOS 10.13, iOS 11.0, *))
             {
-                addMethod (@selector (supportedViewConfigurations:),    getSupportedViewConfigurations, "@@:@");
-                addMethod (@selector (selectViewConfiguration:),        selectViewConfiguration,        "v@:@");
+                addMethod (@selector (supportedViewConfigurations:),    getSupportedViewConfigurations);
+                addMethod (@selector (selectViewConfiguration:),        selectViewConfiguration);
             }
            #endif
 

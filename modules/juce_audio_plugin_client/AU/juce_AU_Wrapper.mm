@@ -1622,10 +1622,10 @@ public:
             addIvar<JuceAU*> ("au");
             addIvar<EditorCompHolder*> ("editor");
 
-            addMethod (@selector (dealloc),                     dealloc,                    "v@:");
-            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate,   "v@:@");
-            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow,        "v@:");
-            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow,     "c@:");
+            addMethod (@selector (dealloc),                     dealloc);
+            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate);
+            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow);
+            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow);
 
             registerClass();
         }
@@ -1709,9 +1709,9 @@ public:
     {
         JuceUICreationClass()  : ObjCClass<NSObject> ("JUCE_AUCocoaViewClass_")
         {
-            addMethod (@selector (interfaceVersion),             interfaceVersion,    @encode (unsigned int), "@:");
-            addMethod (@selector (description),                  description,         @encode (NSString*),    "@:");
-            addMethod (@selector (uiViewForAudioUnit:withSize:), uiViewForAudioUnit,  @encode (NSView*),      "@:", @encode (AudioUnit), @encode (NSSize));
+            addMethod (@selector (interfaceVersion),             interfaceVersion);
+            addMethod (@selector (description),                  description);
+            addMethod (@selector (uiViewForAudioUnit:withSize:), uiViewForAudioUnit);
 
             addProtocol (@protocol (AUCocoaUIBase));
 

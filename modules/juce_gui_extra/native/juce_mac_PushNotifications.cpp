@@ -307,12 +307,12 @@ private:
         {
             addIvar<PushNotificationsDelegate*> ("self");
 
-            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), registeredForRemoteNotifications,       "v@:@@");
-            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), failedToRegisterForRemoteNotifications, "v@:@@");
-            addMethod (@selector (application:didReceiveRemoteNotification:),                     didReceiveRemoteNotification,           "v@:@@");
-            addMethod (@selector (userNotificationCenter:didDeliverNotification:),                didDeliverNotification,                 "v@:@@");
-            addMethod (@selector (userNotificationCenter:didActivateNotification:),               didActivateNotification,                "v@:@@");
-            addMethod (@selector (userNotificationCenter:shouldPresentNotification:),             shouldPresentNotification,              "c@:@@");
+            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), registeredForRemoteNotifications);
+            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), failedToRegisterForRemoteNotifications);
+            addMethod (@selector (application:didReceiveRemoteNotification:),                     didReceiveRemoteNotification);
+            addMethod (@selector (userNotificationCenter:didDeliverNotification:),                didDeliverNotification);
+            addMethod (@selector (userNotificationCenter:didActivateNotification:),               didActivateNotification);
+            addMethod (@selector (userNotificationCenter:shouldPresentNotification:),             shouldPresentNotification);
 
             registerClass();
         }

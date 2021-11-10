@@ -732,7 +732,7 @@ private:
             addIvar<NativeDarkModeChangeDetectorImpl*> ("owner");
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (darkModeChanged:), darkModeChanged, "v@:@");
+            addMethod (@selector (darkModeChanged:), darkModeChanged);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();

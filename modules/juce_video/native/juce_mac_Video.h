@@ -206,7 +206,7 @@ private:
             JucePlayerStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerStatusObserverClass_")
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-                addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged, "v@:@@@?");
+                addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged);
                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<PlayerAsyncInitialiser*> ("owner");
@@ -250,7 +250,7 @@ private:
             JucePlayerItemPlaybackStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemPlaybackStatusObserverClass_")
             {
                 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-                addMethod (@selector (processNotification:), notificationReceived, "v@:@");
+                addMethod (@selector (processNotification:), notificationReceived);
                 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                 addIvar<PlayerControllerBase*> ("owner");
@@ -305,7 +305,7 @@ private:
                 JucePlayerItemPreparationStatusObserverClass()    : ObjCClass<NSObject> ("JucePlayerItemStatusObserverClass_")
                 {
                     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-                    addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged, "v@:@@@?");
+                    addMethod (@selector (observeValueForKeyPath:ofObject:change:context:), valueChanged);
                     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
                     addIvar<PlayerAsyncInitialiser*> ("owner");
@@ -733,7 +733,7 @@ private:
         {
             JuceVideoViewerClass()  : ObjCClass<UIView> ("JuceVideoViewerClass_")
             {
-                addMethod (@selector (layoutSubviews), layoutSubviews, "v@:");
+                addMethod (@selector (layoutSubviews), layoutSubviews);
 
                 registerClass();
             }
