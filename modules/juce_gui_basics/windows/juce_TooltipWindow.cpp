@@ -68,8 +68,17 @@ void TooltipWindow::mouseEnter (const MouseEvent& e)
         hideTip();
 }
 
-void TooltipWindow::mouseDown (const MouseEvent&)                                 { dismissalMouseEventOccured = true; }
-void TooltipWindow::mouseWheelMove (const MouseEvent&, const MouseWheelDetails&)  { dismissalMouseEventOccured = true; }
+void TooltipWindow::mouseDown (const MouseEvent&)
+{
+    if (isVisible())
+        dismissalMouseEventOccured = true;
+}
+
+void TooltipWindow::mouseWheelMove (const MouseEvent&, const MouseWheelDetails&)
+{
+    if (isVisible())
+        dismissalMouseEventOccured = true;
+}
 
 void TooltipWindow::updatePosition (const String& tip, Point<int> pos, Rectangle<int> parentArea)
 {
