@@ -137,7 +137,7 @@ public:
             [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
-            if ((windowStyleFlags & (windowHasMaximiseButton | windowHasTitleBar)) == (windowHasMaximiseButton | windowHasTitleBar))
+            if ((windowStyleFlags & windowHasMaximiseButton) == windowHasMaximiseButton)
                 [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
             [window setRestorable: NO];
@@ -264,10 +264,8 @@ public:
         }
     }
 
-    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
+    void setBounds (const Rectangle<int>& newBounds, bool) override
     {
-        fullScreen = isNowFullScreen;
-
         auto r = makeNSRect (newBounds);
         auto oldViewSize = [view frame].size;
 
@@ -353,39 +351,29 @@ public:
     {
         if (! isSharedWindow)
         {
-            auto r = lastNonFullscreenBounds;
-
             if (isMinimised())
                 setMinimised (false);
 
-            if (fullScreen != shouldBeFullScreen)
+            if (hasNativeTitleBar())
             {
-                if (shouldBeFullScreen && hasNativeTitleBar())
-                {
-                    fullScreen = true;
-                    [window performZoom: nil];
-                }
-                else
-                {
-                    if (shouldBeFullScreen)
-                        r = component.getParentMonitorArea();
-
-                    // (can't call the component's setBounds method because that'll reset our fullscreen flag)
-                    if (r != component.getBounds() && ! r.isEmpty())
-                        setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
-                }
+                if (shouldBeFullScreen != isFullScreen())
+                    [window toggleFullScreen: nil];
+            }
+            else
+            {
+                [window zoom: nil];
             }
         }
     }
 
     bool isFullScreen() const override
     {
-        return fullScreen;
+        return ([window styleMask] & NSWindowStyleMaskFullScreen) != 0;
     }
 
     bool isKioskMode() const override
     {
-        return isWindowInKioskMode || ComponentPeer::isKioskMode();
+        return isFullScreen() && ComponentPeer::isKioskMode();
     }
 
     static bool isWindowAtPoint (NSWindow* w, NSPoint screenPoint)
@@ -442,22 +430,6 @@ public:
         }
 
         return b;
-    }
-
-    void updateFullscreenStatus()
-    {
-        if (hasNativeTitleBar())
-        {
-            isWindowInKioskMode = (([window styleMask] & NSWindowStyleMaskFullScreen) != 0);
-
-            auto screen = getFrameSize().subtractedFrom (component.getParentMonitorArea());
-
-            fullScreen = component.getScreenBounds().expanded (2, 2).contains (screen);
-        }
-        else
-        {
-            isWindowInKioskMode = false;
-        }
     }
 
     bool hasNativeTitleBar() const
@@ -1091,7 +1063,6 @@ public:
 
     void redirectMovedOrResized()
     {
-        updateFullscreenStatus();
         handleMovedOrResized();
     }
 
@@ -1168,7 +1139,7 @@ public:
 
     NSRect constrainRect (const NSRect r)
     {
-        if (constrainer == nullptr || isKioskMode())
+        if (constrainer == nullptr || isKioskMode() || isFullScreen())
             return r;
 
         const auto scale = getComponent().getDesktopScaleFactor();
@@ -1501,8 +1472,7 @@ public:
     NSWindow* window = nil;
     NSView* view = nil;
     WeakReference<Component> safeComponent;
-    bool isSharedWindow = false, fullScreen = false;
-    bool isWindowInKioskMode = false;
+    bool isSharedWindow = false;
    #if USE_COREGRAPHICS_RENDERING
     bool usingCoreGraphics = true;
    #else
@@ -1693,6 +1663,7 @@ private:
         const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
                                          0.0f);
         [window setMinFullScreenContentSize: minSize];
+        [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
@@ -2223,11 +2194,12 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
         addMethod (@selector (windowWillResize:toSize:),            windowWillResize);
         addMethod (@selector (windowDidExitFullScreen:),            windowDidExitFullScreen);
         addMethod (@selector (windowWillEnterFullScreen:),          windowWillEnterFullScreen);
-        addMethod (@selector (zoom:),                               zoom);
         addMethod (@selector (windowWillStartLiveResize:),          windowWillStartLiveResize);
         addMethod (@selector (windowDidEndLiveResize:),             windowDidEndLiveResize);
         addMethod (@selector (window:shouldPopUpDocumentPathMenu:), shouldPopUpPathMenu);
         addMethod (@selector (isFlipped),                           isFlipped);
+        addMethod (@selector (windowWillUseStandardFrame:defaultFrame:), windowWillUseStandardFrame);
+        addMethod (@selector (windowShouldZoom:toFrame:),                windowShouldZoomToFrame);
 
         addMethod (@selector (accessibilityTitle),                  getAccessibilityTitle);
         addMethod (@selector (accessibilityLabel),                  getAccessibilityLabel);
@@ -2238,7 +2210,6 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
 
         addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:), shouldAllowIconDrag);
 
-
         addProtocol (@protocol (NSWindowDelegate));
 
         registerClass();
@@ -2247,6 +2218,26 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
 private:
     //==============================================================================
     static BOOL isFlipped (id, SEL) { return true; }
+
+    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow*, NSRect)
+    {
+        if (auto* owner = getOwner (self))
+        {
+            if (auto* constrainer = owner->getConstrainer())
+            {
+                return flippedScreenRect (makeNSRect (owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()
+                                                                                                          .withWidth (constrainer->getMaximumWidth())
+                                                                                                          .withHeight (constrainer->getMaximumHeight()))));
+            }
+        }
+
+        return makeNSRect (Rectangle<int> (10000, 10000));
+    }
+
+    static BOOL windowShouldZoomToFrame (id, SEL, NSWindow* window, NSRect frame)
+    {
+        return convertToRectFloat ([window frame]).withZeroOrigin() != convertToRectFloat (frame).withZeroOrigin();
+    }
 
     static BOOL canBecomeKeyWindow (id self, SEL)
     {
@@ -2342,19 +2333,6 @@ private:
         if (auto* owner = getOwner (self))
             if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
                 [owner->window setStyleMask: NSWindowStyleMaskBorderless];
-    }
-
-    static void zoom (id self, SEL, id sender)
-    {
-        if (auto* owner = getOwner (self))
-        {
-            {
-                const ScopedValueSetter<bool> svs (owner->isZooming, true);
-                sendSuperclassMessage<void> (self, @selector (zoom:), sender);
-            }
-
-            owner->redirectMovedOrResized();
-        }
     }
 
     static void windowWillStartLiveResize (id self, SEL, NSNotification*)
@@ -2471,23 +2449,19 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
     auto* peer = dynamic_cast<NSViewComponentPeer*> (kioskComp->getPeer());
     jassert (peer != nullptr); // (this should have been checked by the caller)
 
-    if (peer->hasNativeTitleBar()
-          && [peer->window respondsToSelector: @selector (toggleFullScreen:)])
+    if (peer->hasNativeTitleBar())
     {
         if (shouldBeEnabled && ! allowMenusAndBars)
             [NSApp setPresentationOptions: NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar];
         else if (! shouldBeEnabled)
             [NSApp setPresentationOptions: NSApplicationPresentationDefault];
 
-        [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
+        [peer->window toggleFullScreen: nil];
     }
     else
     {
         if (shouldBeEnabled)
         {
-            if (peer->hasNativeTitleBar())
-                [peer->window setStyleMask: NSWindowStyleMaskBorderless];
-
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
 
