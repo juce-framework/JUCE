@@ -202,6 +202,7 @@ private:
                 { kAudioChannelLayoutTag_AudioUnit_7_0_Front, { left, right, leftSurround, rightSurround, centre, leftCentre, rightCentre } },
                 { kAudioChannelLayoutTag_MPEG_7_1_C, { left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear } },
                 { kAudioChannelLayoutTag_MPEG_7_1_A, { left, right, centre, LFE, leftSurround, rightSurround, leftCentre, rightCentre } },
+                { kAudioChannelLayoutTag_Atmos_7_1_4, { left, right, leftSurroundSide, rightSurroundSide, topFrontLeft, topFrontRight, centre, LFE, topRearLeft, topRearRight, leftSurroundRear, rightSurroundRear } },
                 { kAudioChannelLayoutTag_Ambisonic_B_Format, { ambisonicW, ambisonicX, ambisonicY, ambisonicZ } },
                 { kAudioChannelLayoutTag_Quadraphonic, { left, right, leftSurround, rightSurround } },
                 { kAudioChannelLayoutTag_Pentagonal, { left, right, leftSurroundRear, rightSurroundRear, centre } },

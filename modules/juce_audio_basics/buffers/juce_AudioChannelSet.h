@@ -216,7 +216,7 @@ public:
 
     /** Creates a set for Dolby Atmos 7.1.4 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, LFE, topFrontLeft, topFrontRight, topRearLeft, topRearRight).
 
-        Is equivalent to: k71_4 (VST), n/a (AAX), n/a (CoreAudio)
+        Is equivalent to: k71_4 (VST), n/a (AAX), kAudioChannelLayoutTag_Atmos_7_1_4 (CoreAudio)
     */
     static AudioChannelSet JUCE_CALLTYPE create7point1point4();
 
