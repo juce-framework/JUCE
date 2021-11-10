@@ -3393,7 +3393,7 @@ private:
 
     LRESULT handlePositionChanging (WINDOWPOS& wp)
     {
-        if (isConstrainedNativeWindow())
+        if (isConstrainedNativeWindow() && ! isFullScreen())
         {
             if ((wp.flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
                  && (wp.x > -32000 && wp.y > -32000)
