@@ -83,6 +83,12 @@ set_property(GLOBAL PROPERTY JUCE_COPY_PLUGIN_AFTER_BUILD FALSE)
 if((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD"))
     _juce_create_pkgconfig_target(JUCE_CURL_LINUX_DEPS libcurl)
     _juce_create_pkgconfig_target(JUCE_BROWSER_LINUX_DEPS webkit2gtk-4.0 gtk+-x11-3.0)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    find_program(JUCE_RC_COMPILER Rez NO_DEFAULT_PATHS PATHS "/Applications/Xcode.app/Contents/Developer/usr/bin")
+
+    if(NOT JUCE_RC_COMPILER)
+        message(WARNING "failed to find Rez; older resource-based AU plug-ins may not work correctly")
+    endif()
 endif()
 
 # We set up default/fallback copy dirs here. If you need different copy dirs, use
