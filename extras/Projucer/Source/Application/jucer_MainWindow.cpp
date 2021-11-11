@@ -304,7 +304,7 @@ void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
                 return;
 
             if (openedSuccessfully && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes)
-                ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::openInIDE, false);
+                ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveAndOpenInIDE, false);
         });
     });
 }

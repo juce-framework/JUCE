@@ -131,15 +131,19 @@ private:
     //==============================================================================
     Point<float> lastMousePos;
     Component* lastComponentUnderMouse = nullptr;
-    String tipShowing, lastTipUnderMouse;
+    String tipShowing, lastTipUnderMouse, manuallyShownTip;
     int millisecondsBeforeTipAppears;
-    int mouseClicks = 0, mouseWheelMoves = 0;
     unsigned int lastCompChangeTime = 0, lastHideTime = 0;
-    bool reentrant = false;
+    bool reentrant = false, dismissalMouseEventOccured = false;
+
+    enum ShownManually { yes, no };
+    void displayTipInternal (Point<int>, const String&, ShownManually);
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void paint (Graphics&) override;
     void mouseEnter (const MouseEvent&) override;
+    void mouseDown (const MouseEvent&) override;
+    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     void timerCallback() override;
     void updatePosition (const String&, Point<int>, Rectangle<int>);
 

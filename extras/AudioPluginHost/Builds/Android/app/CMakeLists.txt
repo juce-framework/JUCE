@@ -53,6 +53,12 @@ add_library( ${BINARY_NAME}
     "../../../Source/UI/PluginWindow.h"
     "../../../Source/HostStartup.cpp"
     "../../../Source/JUCEAppIcon.png"
+    "../../../../../examples/Assets/cassette_recorder.wav"
+    "../../../../../examples/Assets/cello.wav"
+    "../../../../../examples/Assets/guitar_amp.wav"
+    "../../../../../examples/Assets/proaudio.path"
+    "../../../../../examples/Assets/reverb_ir.wav"
+    "../../../../../examples/Assets/singing.ogg"
     "../../../../../modules/juce_audio_basics/audio_play_head/juce_AudioPlayHead.h"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.cpp"
     "../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.h"
@@ -1681,6 +1687,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_opengl/juce_opengl.cpp"
     "../../../../../modules/juce_opengl/juce_opengl.mm"
     "../../../../../modules/juce_opengl/juce_opengl.h"
+    "../../../JuceLibraryCode/BinaryData.cpp"
+    "../../../JuceLibraryCode/BinaryData.h"
     "../../../JuceLibraryCode/include_juce_audio_basics.cpp"
     "../../../JuceLibraryCode/include_juce_audio_devices.cpp"
     "../../../JuceLibraryCode/include_juce_audio_formats.cpp"
@@ -1705,6 +1713,12 @@ set_source_files_properties("../../../Source/UI/GraphEditorPanel.h" PROPERTIES H
 set_source_files_properties("../../../Source/UI/MainHostWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/UI/PluginWindow.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../Source/JUCEAppIcon.png" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../examples/Assets/cassette_recorder.wav" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../examples/Assets/cello.wav" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../examples/Assets/guitar_amp.wav" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../examples/Assets/proaudio.path" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../examples/Assets/reverb_ir.wav" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../examples/Assets/singing.ogg" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/audio_play_head/juce_AudioPlayHead.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_AudioChannelSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -3333,6 +3347,7 @@ set_source_files_properties("../../../../../modules/juce_opengl/utils/juce_OpenG
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_opengl/juce_opengl.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../JuceLibraryCode/BinaryData.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../JuceLibraryCode/JuceHeader.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 
 target_compile_options( ${BINARY_NAME} PRIVATE "-fsigned-char" )

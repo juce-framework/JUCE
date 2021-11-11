@@ -47,7 +47,7 @@
 #pragma once
 
 #ifndef PIP_DEMO_UTILITIES_INCLUDED
- #include "../Assets/DemoUtilities.h"
+#include "../Assets/DemoUtilities.h"
 #endif
 
 //==============================================================================
