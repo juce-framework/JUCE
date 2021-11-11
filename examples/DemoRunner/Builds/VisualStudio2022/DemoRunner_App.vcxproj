@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <Project DefaultTargets="Build"
-         ToolsVersion="16.0"
+         ToolsVersion="17.0"
          xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -14,7 +14,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{2F8ABED0-7428-13A5-07CD-EF1F3B43B926}</ProjectGuid>
+    <ProjectGuid>{882FE2E3-F4EF-9825-1908-F6FEE5366B5C}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props"/>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'"
@@ -22,7 +22,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>false</WholeProgramOptimization>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'"
@@ -30,7 +30,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props"/>
@@ -45,11 +45,11 @@
     <TargetExt>.exe</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Platform)\$(Configuration)\App\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\App\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">JUCE Network Graphics Demo</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">DemoRunner</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\App\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\App\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">JUCE Network Graphics Demo</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">DemoRunner</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -64,33 +64,34 @@
       <Optimization>Disabled</Optimization>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60102;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_STANDALONE_APPLICATION=1;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;DEBUG;_DEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60102;JUCE_MODULE_AVAILABLE_juce_analytics=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_box2d=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_MODULE_AVAILABLE_juce_product_unlocking=1;JUCE_MODULE_AVAILABLE_juce_video=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_USE_MP3AUDIOFORMAT=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_USE_CAMERA=1;JUCE_STANDALONE_APPLICATION=1;JUCE_DEMO_RUNNER=1;JUCE_UNIT_TESTS=1;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=6.1.2;JUCE_APP_VERSION_HEX=0x60102;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)\</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)\JUCE Network Graphics Demo.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)\DemoRunner.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/w44265 /w45038 /w44062 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\JUCE Network Graphics Demo.exe</OutputFile>
+      <OutputFile>$(OutDir)\DemoRunner.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\JUCE Network Graphics Demo.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\DemoRunner.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <LargeAddressAware>true</LargeAddressAware>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\JUCE Network Graphics Demo.bsc</OutputFile>
+      <OutputFile>$(IntDir)\DemoRunner.bsc</OutputFile>
     </Bscmake>
     <Lib/>
   </ItemDefinitionGroup>
@@ -105,27 +106,28 @@
     <ClCompile>
       <Optimization>Full</Optimization>
       <AdditionalIncludeDirectories>..\..\JuceLibraryCode;..\..\..\..\modules;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60102;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_STANDALONE_APPLICATION=1;JUCER_VS2019_78A5026=1;JUCE_APP_VERSION=1.0.0;JUCE_APP_VERSION_HEX=0x10000;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;WIN32;_WINDOWS;NDEBUG;JUCE_DISPLAY_SPLASH_SCREEN=0;JUCE_USE_DARK_SPLASH_SCREEN=1;JUCE_PROJUCER_VERSION=0x60102;JUCE_MODULE_AVAILABLE_juce_analytics=1;JUCE_MODULE_AVAILABLE_juce_audio_basics=1;JUCE_MODULE_AVAILABLE_juce_audio_devices=1;JUCE_MODULE_AVAILABLE_juce_audio_formats=1;JUCE_MODULE_AVAILABLE_juce_audio_processors=1;JUCE_MODULE_AVAILABLE_juce_audio_utils=1;JUCE_MODULE_AVAILABLE_juce_box2d=1;JUCE_MODULE_AVAILABLE_juce_core=1;JUCE_MODULE_AVAILABLE_juce_cryptography=1;JUCE_MODULE_AVAILABLE_juce_data_structures=1;JUCE_MODULE_AVAILABLE_juce_dsp=1;JUCE_MODULE_AVAILABLE_juce_events=1;JUCE_MODULE_AVAILABLE_juce_graphics=1;JUCE_MODULE_AVAILABLE_juce_gui_basics=1;JUCE_MODULE_AVAILABLE_juce_gui_extra=1;JUCE_MODULE_AVAILABLE_juce_opengl=1;JUCE_MODULE_AVAILABLE_juce_osc=1;JUCE_MODULE_AVAILABLE_juce_product_unlocking=1;JUCE_MODULE_AVAILABLE_juce_video=1;JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1;JUCE_USE_MP3AUDIOFORMAT=1;JUCE_ALLOW_STATIC_NULL_VARIABLES=0;JUCE_STRICT_REFCOUNTEDPOINTER=1;JUCE_USE_CAMERA=1;JUCE_STANDALONE_APPLICATION=1;JUCE_DEMO_RUNNER=1;JUCE_UNIT_TESTS=1;JUCER_VS2022_78A503E=1;JUCE_APP_VERSION=6.1.2;JUCE_APP_VERSION_HEX=0x60102;JucePlugin_Build_VST=0;JucePlugin_Build_VST3=0;JucePlugin_Build_AU=0;JucePlugin_Build_AUv3=0;JucePlugin_Build_RTAS=0;JucePlugin_Build_AAX=0;JucePlugin_Build_Standalone=0;JucePlugin_Build_Unity=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <AssemblerListingLocation>$(IntDir)\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)\</ObjectFileName>
-      <ProgramDataBaseFileName>$(IntDir)\JUCE Network Graphics Demo.pdb</ProgramDataBaseFileName>
+      <ProgramDataBaseFileName>$(IntDir)\DemoRunner.pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AdditionalOptions>/w44265 /w45038 /w44062 %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>stdcpp14</LanguageStandard>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\JUCE Network Graphics Demo.exe</OutputFile>
+      <OutputFile>$(OutDir)\DemoRunner.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\JUCE Network Graphics Demo.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\DemoRunner.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -134,12 +136,29 @@
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\JUCE Network Graphics Demo.bsc</OutputFile>
+      <OutputFile>$(IntDir)\DemoRunner.bsc</OutputFile>
     </Bscmake>
     <Lib/>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Demos\DemoPIPs1.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\DemoPIPs2.cpp"/>
+    <ClCompile Include="..\..\Source\Demos\JUCEDemos.cpp"/>
+    <ClCompile Include="..\..\Source\UI\DemoContentComponent.cpp"/>
+    <ClCompile Include="..\..\Source\UI\MainComponent.cpp"/>
     <ClCompile Include="..\..\Source\Main.cpp"/>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_analytics\juce_analytics.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -860,6 +879,147 @@
     <ClCompile Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2ChainShape.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2CircleShape.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2EdgeShape.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2PolygonShape.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2BroadPhase.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2CollideCircle.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2CollideEdge.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2CollidePolygon.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Collision.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Distance.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2DynamicTree.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2TimeOfImpact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2BlockAllocator.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Draw.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Math.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Settings.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2StackAllocator.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Timer.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndCircleContact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndPolygonContact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2CircleContact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2Contact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ContactSolver.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndCircleContact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndPolygonContact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonAndCircleContact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonContact.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2DistanceJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2FrictionJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2GearJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2Joint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2MouseJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PrismaticJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PulleyJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RevoluteJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RopeJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WeldJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WheelJoint.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Body.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2ContactManager.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Fixture.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Island.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2World.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2WorldCallbacks.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\box2d\Rope\b2Rope.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\utils\juce_Box2DRenderer.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_box2d\juce_box2d.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -1218,6 +1378,114 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_AudioBlock_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_FixedSizeFunction_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\filter_design\juce_FilterDesign.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_Convolution.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_Convolution_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_FFT.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_FFT_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\frequency\juce_Windowing.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LogRampedValue_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\maths\juce_SpecialFunctions.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\native\juce_avx_SIMDNativeOps.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\native\juce_neon_SIMDNativeOps.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\native\juce_sse_SIMDNativeOps.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_BallisticsFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_DelayLine.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_DryWetMixer.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_FIRFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_FIRFilter_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_FirstOrderTPTFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_LinkwitzRileyFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_Panner.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorChain_test.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\processors\juce_StateVariableTPTFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\widgets\juce_Chorus.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\widgets\juce_Compressor.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\widgets\juce_LadderFilter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\widgets\juce_Limiter.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\widgets\juce_NoiseGate.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\widgets\juce_Phaser.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_dsp\juce_dsp.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionBroadcaster.cpp">
@@ -2153,15 +2421,47 @@
     <ClCompile Include="..\..\..\..\modules\juce_osc\juce_osc.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp"/>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\in_app_purchases\juce_InAppPurchases.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockForm.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockStatus.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_TracktionMarketplaceStatus.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\native\juce_android_InAppPurchases.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\native\juce_ios_InAppPurchases.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_video\playback\juce_VideoComponent.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_video\juce_video.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_analytics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_devices.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_formats.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_processors.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_utils.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_box2d.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_core.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_cryptography.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_data_structures.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_dsp.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_events.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_graphics.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_basics.cpp">
@@ -2170,12 +2470,20 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_opengl.cpp"/>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_osc.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_product_unlocking.cpp"/>
+    <ClCompile Include="..\..\JuceLibraryCode\include_juce_video.cpp"/>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\Source\Demos.h"/>
-    <ClInclude Include="..\..\Source\MasterComponent.h"/>
-    <ClInclude Include="..\..\Source\ClientComponent.h"/>
-    <ClInclude Include="..\..\Source\SharedCanvas.h"/>
+    <ClInclude Include="..\..\Source\Demos\IntroScreen.h"/>
+    <ClInclude Include="..\..\Source\Demos\JUCEDemos.h"/>
+    <ClInclude Include="..\..\Source\UI\DemoContentComponent.h"/>
+    <ClInclude Include="..\..\Source\UI\MainComponent.h"/>
+    <ClInclude Include="..\..\Source\UI\SettingsContent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_Analytics.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\analytics\juce_ButtonTracker.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_AnalyticsDestination.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\destinations\juce_ThreadedAnalyticsDestination.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_analytics\juce_analytics.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\audio_play_head\juce_AudioPlayHead.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioChannelSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_basics\buffers\juce_AudioDataConverters.h"/>
@@ -2528,6 +2836,54 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\players\juce_AudioProcessorPlayer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\players\juce_SoundPlayer.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_utils\juce_audio_utils.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2ChainShape.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2CircleShape.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2EdgeShape.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2PolygonShape.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\Shapes\b2Shape.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2BroadPhase.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Collision.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2Distance.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2DynamicTree.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Collision\b2TimeOfImpact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2BlockAllocator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Draw.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2GrowableStack.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Math.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Settings.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2StackAllocator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Common\b2Timer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndCircleContact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ChainAndPolygonContact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2CircleContact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2Contact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2ContactSolver.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndCircleContact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2EdgeAndPolygonContact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonAndCircleContact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Contacts\b2PolygonContact.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2DistanceJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2FrictionJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2GearJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2Joint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2MouseJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PrismaticJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2PulleyJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RevoluteJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2RopeJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WeldJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\Joints\b2WheelJoint.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Body.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2ContactManager.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Fixture.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2Island.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2TimeStep.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2World.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Dynamics\b2WorldCallbacks.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Rope\b2Rope.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\box2d\Box2D.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\utils\juce_Box2DRenderer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_box2d\juce_box2d.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_AbstractFifo.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Array.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_ArrayAllocationBase.h"/>
@@ -2688,6 +3044,53 @@
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueTreeSynchroniser.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\values\juce_ValueWithDefault.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_data_structures\juce_data_structures.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_AudioBlock.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_FixedSizeFunction.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\containers\juce_SIMDRegister_Impl.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\filter_design\juce_FilterDesign.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_Convolution.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_FFT.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\frequency\juce_Windowing.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_FastMathApproximations.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_LogRampedValue.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_LookupTable.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Matrix.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Phase.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_Polynomial.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\maths\juce_SpecialFunctions.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_avx_SIMDNativeOps.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_fallback_SIMDNativeOps.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_neon_SIMDNativeOps.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\native\juce_sse_SIMDNativeOps.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_BallisticsFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_DelayLine.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_DryWetMixer.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_FIRFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_FirstOrderTPTFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_IIRFilter_Impl.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_LinkwitzRileyFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Oversampling.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_Panner.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessContext.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorChain.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorDuplicator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_ProcessorWrapper.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_StateVariableFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\processors\juce_StateVariableTPTFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Bias.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Chorus.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Compressor.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Gain.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_LadderFilter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Limiter.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_NoiseGate.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Oscillator.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Phaser.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_Reverb.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\widgets\juce_WaveShaper.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_dsp\juce_dsp.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionBroadcaster.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_ActionListener.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_events\broadcasters\juce_AsyncUpdater.h"/>
@@ -3007,11 +3410,26 @@
     <ClInclude Include="..\..\..\..\modules\juce_osc\osc\juce_OSCTimeTag.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_osc\osc\juce_OSCTypes.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_osc\juce_osc.h"/>
-    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\in_app_purchases\juce_InAppPurchases.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_KeyFileGeneration.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockForm.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_OnlineUnlockStatus.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\marketplace\juce_TracktionMarketplaceStatus.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_product_unlocking\juce_product_unlocking.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\capture\juce_CameraDevice.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_CameraDevice.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_android_Video.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_ios_CameraDevice.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_CameraDevice.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_mac_Video.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_CameraDevice.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\native\juce_win32_Video.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\playback\juce_VideoComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_video\juce_video.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\..\Source\juce_icon.png"/>
+    <None Include="..\..\Source\JUCEAppIcon.png"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\CMakeLists.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_devices\native\oboe\README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_formats\codecs\flac\Flac Licence.txt"/>
@@ -3026,9 +3444,11 @@
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\JUCE_README.md"/>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\LICENSE.txt"/>
     <None Include="..\..\..\..\modules\juce_audio_processors\format_types\VST3_SDK\README.md"/>
+    <None Include="..\..\..\..\modules\juce_box2d\box2d\README.txt"/>
     <None Include="..\..\..\..\modules\juce_core\native\java\README.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\jpglib\changes to libjpeg for JUCE.txt"/>
     <None Include="..\..\..\..\modules\juce_graphics\image_formats\pnglib\libpng_readme.txt"/>
+    <None Include=".\icon.ico"/>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include=".\resources.rc"/>

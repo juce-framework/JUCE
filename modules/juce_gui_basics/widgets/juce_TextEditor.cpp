@@ -660,7 +660,7 @@ struct TextEditor::Iterator
         auto startX = indexToX (range.getStart());
         auto endX   = indexToX (range.getEnd());
 
-        return Rectangle<float> (startX, lineY, endX - startX, lineHeight * lineSpacing).toNearestInt();
+        return Rectangle<float> (startX, lineY, endX - startX, lineHeight * lineSpacing).getSmallestIntegerContainer();
     }
 
     //==============================================================================

@@ -1,5 +1,5 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2019
+# Visual Studio 2022
 
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WindowsDLL - Static Library", "WindowsDLL_StaticLibrary.vcxproj", "{B636B53B-C44B-1E04-8668-D61B3900BAA4}"
 EndProject

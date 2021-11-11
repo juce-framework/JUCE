@@ -273,6 +273,8 @@ public:
     {
         if (auto* peer = getPeerFor (windowH))
             peer->handleDragExit (dragInfo);
+
+        resetDragAndDrop();
     }
 
     void handleDragAndDropSelection (const XEvent& evt)
@@ -339,6 +341,8 @@ public:
 
         if (completionCallback != nullptr)
             completionCallback();
+
+        dragging = false;
     }
 
     bool externalDragInit (::Window window, bool text, const String& str, std::function<void()>&& cb)
@@ -566,10 +570,21 @@ private:
         ComponentPeer::DragInfo dragInfoCopy (dragInfo);
 
         sendDragAndDropFinish();
+        resetDragAndDrop();
 
         if (! dragInfoCopy.isEmpty())
             if (auto* peer = getPeerFor (windowH))
                 peer->handleDragDrop (dragInfoCopy);
+    }
+
+    void resetDragAndDrop()
+    {
+        dragInfo.clear();
+        dragInfo.position = Point<int> (-1, -1);
+        dragAndDropCurrentMimeType = 0;
+        dragAndDropSourceWindow = 0;
+        srcMimeTypeAtomList.clear();
+        finishAfterDropDataReceived = false;
     }
 
     //==============================================================================
