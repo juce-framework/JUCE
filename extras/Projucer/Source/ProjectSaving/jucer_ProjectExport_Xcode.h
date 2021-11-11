@@ -1427,6 +1427,7 @@ public:
 
                 build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
                                                       build_tools::RelativePath::projectFolder);
+
                 configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
                                                                         owner.getTargetFolder(),
                                                                         build_tools::RelativePath::buildTargetFolder)
