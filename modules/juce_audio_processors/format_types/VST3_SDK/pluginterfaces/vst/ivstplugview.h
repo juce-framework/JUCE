@@ -17,7 +17,7 @@
 #pragma once
 
 #include "pluginterfaces/base/funknown.h"
-#include "vsttypes.h"
+#include "pluginterfaces/vst/vsttypes.h"
 
 //------------------------------------------------------------------------
 #include "pluginterfaces/base/falignpush.h"
@@ -29,7 +29,7 @@ namespace Vst {
 //------------------------------------------------------------------------
 // IParameterFinder Interface
 //------------------------------------------------------------------------
-/** Extension for IPlugView to find view parameters (lookup value under mouse support)
+/** Extension for IPlugView to find view parameters (lookup value under mouse support): Vst::IParameterFinder
 \ingroup pluginGUI vst302
 - [plug imp]
 - [extends IPlugView]
@@ -45,7 +45,7 @@ class IParameterFinder: public FUnknown
 {
 public:
 	//------------------------------------------------------------------------
-	/** Find out which parameter in Plug-in view is at given position (relative to Plug-in view). */
+	/** Find out which parameter in plug-in view is at given position (relative to plug-in view). */
 	virtual tresult PLUGIN_API findParameter (int32 xPos, int32 yPos, ParamID& resultTag /*out*/) = 0;
 	//------------------------------------------------------------------------
 	static const FUID iid;

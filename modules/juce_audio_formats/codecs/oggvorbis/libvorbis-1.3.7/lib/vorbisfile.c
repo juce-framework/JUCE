@@ -334,6 +334,9 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
         /* vorbis header; continue setup */
         vf->ready_state=STREAMSET;
         if((ret=vorbis_synthesis_headerin(vi,vc,&op))){
+          // JUCE CHANGE STARTS HERE
+          (void) ret;
+          // JUCE CHANGE ENDS HERE
           ret=OV_EBADHEADER;
           goto bail_header;
         }
@@ -784,6 +787,9 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 
         if(!readp)return(0);
         if((ret=_get_next_page(vf,&og,-1))<0){
+          // JUCE CHANGE STARTS HERE
+          (void) ret;
+          // JUCE CHANGE ENDS HERE
           return(OV_EOF); /* eof. leave unitialized */
         }
 
@@ -865,6 +871,9 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
           vf->current_serialno=vf->os.serialno;
           vf->current_link++;
           link=0;
+          // JUCE CHANGE STARTS HERE
+          (void) link;
+          // JUCE CHANGE ENDS HERE
         }
       }
     }
@@ -1667,6 +1676,9 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
           break;
         }else
           result=ogg_stream_packetout(&vf->os,NULL);
+          // JUCE CHANGE STARTS HERE
+          (void) result;
+          // JUCE CHANGE ENDS HERE
       }
     }
   }
@@ -2267,6 +2279,9 @@ static void _ov_getlap(OggVorbis_File *vf,vorbis_info *vi,vorbis_dsp_state *vd,
         memcpy(lappcm[i]+lapcount,pcm[i],sizeof(**pcm)*samples);
       lapcount+=samples;
     }
+    // JUCE CHANGE STARTS HERE
+    (void) lapcount;
+    // JUCE CHANGE ENDS HERE
   }
 }
 

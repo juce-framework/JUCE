@@ -36,42 +36,12 @@ TextLayout::Glyph::Glyph (int glyph, Point<float> anch, float w) noexcept
 {
 }
 
-TextLayout::Glyph::Glyph (const Glyph& other) noexcept
-    : glyphCode (other.glyphCode), anchor (other.anchor), width (other.width)
-{
-}
-
-TextLayout::Glyph& TextLayout::Glyph::operator= (const Glyph& other) noexcept
-{
-    glyphCode = other.glyphCode;
-    anchor = other.anchor;
-    width = other.width;
-    return *this;
-}
-
-TextLayout::Glyph::~Glyph() noexcept {}
-
 //==============================================================================
-TextLayout::Run::Run() noexcept
-    : colour (0xff000000)
-{
-}
-
 TextLayout::Run::Run (Range<int> range, int numGlyphsToPreallocate)
-    : colour (0xff000000), stringRange (range)
+    : stringRange (range)
 {
     glyphs.ensureStorageAllocated (numGlyphsToPreallocate);
 }
-
-TextLayout::Run::Run (const Run& other)
-    : font (other.font),
-      colour (other.colour),
-      glyphs (other.glyphs),
-      stringRange (other.stringRange)
-{
-}
-
-TextLayout::Run::~Run() noexcept {}
 
 Range<float> TextLayout::Run::getRunBoundsX() const noexcept
 {
@@ -97,11 +67,6 @@ Range<float> TextLayout::Run::getRunBoundsX() const noexcept
 }
 
 //==============================================================================
-TextLayout::Line::Line() noexcept
-    : ascent (0.0f), descent (0.0f), leading (0.0f)
-{
-}
-
 TextLayout::Line::Line (Range<int> range, Point<float> o, float asc, float desc,
                         float lead, int numRunsToPreallocate)
     : stringRange (range), lineOrigin (o),
@@ -117,8 +82,11 @@ TextLayout::Line::Line (const Line& other)
     runs.addCopiesOf (other.runs);
 }
 
-TextLayout::Line::~Line() noexcept
+TextLayout::Line& TextLayout::Line::operator= (const Line& other)
 {
+    auto copy = other;
+    swap (copy);
+    return *this;
 }
 
 Range<float> TextLayout::Line::getLineBoundsX() const noexcept
@@ -156,6 +124,16 @@ Rectangle<float> TextLayout::Line::getLineBounds() const noexcept
     auto y = getLineBoundsY();
 
     return { x.getStart(), y.getStart(), x.getLength(), y.getLength() };
+}
+
+void TextLayout::Line::swap (Line& other) noexcept
+{
+    std::swap (other.runs,          runs);
+    std::swap (other.stringRange,   stringRange);
+    std::swap (other.lineOrigin,    lineOrigin);
+    std::swap (other.ascent,        ascent);
+    std::swap (other.descent,       descent);
+    std::swap (other.leading,       leading);
 }
 
 //==============================================================================
@@ -374,7 +352,11 @@ namespace TextLayoutHelpers
                 if (currentRun == nullptr)  currentRun  = std::make_unique<TextLayout::Run>();
                 if (currentLine == nullptr) currentLine = std::make_unique<TextLayout::Line>();
 
-                if (newGlyphs.size() > 0)
+                const auto numGlyphs = newGlyphs.size();
+                charPosition += numGlyphs;
+
+                if (numGlyphs > 0
+                    && (! (t.isWhitespace || t.isNewLine) || needToSetLineOrigin))
                 {
                     currentRun->glyphs.ensureStorageAllocated (currentRun->glyphs.size() + newGlyphs.size());
                     auto tokenOrigin = t.area.getPosition().translated (0, t.font.getAscent());
@@ -390,16 +372,10 @@ namespace TextLayoutHelpers
                     for (int j = 0; j < newGlyphs.size(); ++j)
                     {
                         auto x = xOffsets.getUnchecked (j);
-                        currentRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked(j),
+                        currentRun->glyphs.add (TextLayout::Glyph (newGlyphs.getUnchecked (j),
                                                                    glyphOffset.translated (x, 0),
                                                                    xOffsets.getUnchecked (j + 1) - x));
                     }
-
-                    charPosition += newGlyphs.size();
-                }
-                else if (t.isWhitespace || t.isNewLine)
-                {
-                    ++charPosition;
                 }
 
                 if (auto* nextToken = tokens[i + 1])
@@ -520,7 +496,7 @@ namespace TextLayoutHelpers
 
             for (i = 0; i < tokens.size(); ++i)
             {
-                auto& t = *tokens.getUnchecked(i);
+                auto& t = *tokens.getUnchecked (i);
                 t.area.setPosition (x, y);
                 t.line = totalLines;
                 x += t.area.getWidth();

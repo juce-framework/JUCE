@@ -33,29 +33,34 @@ namespace juce
     This is a Juce-based file dialog box; to use a native file chooser, see the
     FileChooser class.
 
-    To use one of these, create it and call its show() method. e.g.
-
     @code
     {
-        WildcardFileFilter wildcardFilter ("*.foo", String(), "Foo files");
+        wildcardFilter = std::make_unique<WildcardFileFilter> ("*.foo", String(), "Foo files");
 
-        FileBrowserComponent browser (FileBrowserComponent::canSelectFiles,
-                                      File(),
-                                      &wildcardFilter,
-                                      nullptr);
+        browser = std::make_unique<FileBrowserComponent> (FileBrowserComponent::canSelectFiles,
+                                                          File(),
+                                                          wildcardFilter.get(),
+                                                          nullptr);
 
-        FileChooserDialogBox dialogBox ("Open some kind of file",
-                                        "Please choose some kind of file that you want to open...",
-                                        browser,
-                                        false,
-                                        Colours::lightgrey);
+        dialogBox = std::make_unique<FileChooserDialogBox> ("Open some kind of file",
+                                                            "Please choose some kind of file that you want to open...",
+                                                            *browser,
+                                                            false,
+                                                            Colours::lightgrey);
 
-        if (dialogBox.show())
+        auto onFileSelected = [this] (int r)
         {
-            File selectedFile = browser.getSelectedFile (0);
+            modalStateFinished (r);
 
-            ...etc..
-        }
+            auto selectedFile = browser->getSelectedFile (0);
+
+            ...etc...
+        };
+
+        dialogBox->centreWithDefaultSize (nullptr);
+        dialogBox->enterModalState (true,
+                                    ModalCallbackFunction::create (onFileSelected),
+                                    true);
     }
     @endcode
 

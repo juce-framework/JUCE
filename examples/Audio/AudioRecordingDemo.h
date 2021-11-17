@@ -359,11 +359,11 @@ private:
                                                           fileToShare.deleteFile();
 
                                                       if (! success && error.isNotEmpty())
-                                                      {
-                                                          NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                                                                 "Sharing Error",
-                                                                                                 error);
-                                                      }
+                                                          NativeMessageBox::showAsync (MessageBoxOptions()
+                                                                                         .withIconType (MessageBoxIconType::WarningIcon)
+                                                                                         .withTitle ("Sharing Error")
+                                                                                         .withMessage (error),
+                                                                                       nullptr);
                                                   });
        #endif
 

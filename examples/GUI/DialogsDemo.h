@@ -89,19 +89,14 @@ public:
     // This method gets called on the message thread once our thread has finished..
     void threadComplete (bool userPressedCancel) override
     {
-        if (userPressedCancel)
-        {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              "Progress window",
-                                              "You pressed cancel!");
-        }
-        else
-        {
-            // thread finished normally..
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                              "Progress window",
-                                              "Thread finished ok!");
-        }
+        const String messageString (userPressedCancel ? "You pressed cancel!" : "Thread finished ok!");
+
+        AlertWindow::showAsync (MessageBoxOptions()
+                                  .withIconType (MessageBoxIconType::InfoIcon)
+                                  .withTitle ("Progress window")
+                                  .withMessage (messageString)
+                                  .withButton ("OK"),
+                                nullptr);
 
         // ..and clean up by deleting our thread object..
         delete this;
@@ -141,10 +136,21 @@ public:
         nativeButton.setButtonText ("Use Native Windows");
         nativeButton.onClick = [this] { getLookAndFeel().setUsingNativeAlertWindows (nativeButton.getToggleState()); };
 
-        StringArray windowNames { "Plain Alert Window", "Alert Window With Warning Icon", "Alert Window With Info Icon", "Alert Window With Question Icon",
-                                  "OK Cancel Alert Window", "Alert Window With Extra Components", "CalloutBox", "Thread With Progress Window",
-                                  "'Load' File Browser", "'Load' File Browser With Image Preview", "'Choose Directory' File Browser", "'Save' File Browser",
-                                  "Share Text", "Share Files", "Share Images" };
+        StringArray windowNames { "Plain Alert Window",
+                                  "Alert Window With Warning Icon",
+                                  "Alert Window With Info Icon",
+                                  "Alert Window With Question Icon",
+                                  "OK Cancel Alert Window",
+                                  "Alert Window With Extra Components",
+                                  "CalloutBox",
+                                  "Thread With Progress Window",
+                                  "'Load' File Browser",
+                                  "'Load' File Browser With Image Preview",
+                                  "'Choose Directory' File Browser",
+                                  "'Save' File Browser",
+                                  "Share Text",
+                                  "Share Files",
+                                  "Share Images" };
 
         // warn in case we add any windows
         jassert (windowNames.size() == numDialogs);
@@ -166,12 +172,13 @@ public:
                                      [] (bool granted)
                                      {
                                          if (! granted)
-                                         {
-                                             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                                                                               "Permissions warning",
-                                                                               "External storage access permission not granted, some files"
-                                                                               " may be inaccessible.");
-                                         }
+                                             AlertWindow::showAsync (MessageBoxOptions()
+                                                                       .withIconType (MessageBoxIconType::WarningIcon)
+                                                                       .withTitle ("Permissions warning")
+                                                                       .withMessage ("External storage access permission not granted, some files"
+                                                                                     " may be inaccessible.")
+                                                                       .withButton ("OK"),
+                                                                     nullptr);
                                      });
     }
 
@@ -207,21 +214,59 @@ private:
     OwnedArray<TextButton> windowButtons;
     ToggleButton nativeButton;
 
-    static void alertBoxResultChosen (int result, DialogsDemo*)
+    struct AlertBoxResultChosen
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "Alert Box",
-                                          "Result code: " + String (result));
-    }
+        void operator() (int result) const noexcept
+        {
+            AlertWindow::showAsync (MessageBoxOptions()
+                                      .withIconType (MessageBoxIconType::InfoIcon)
+                                      .withTitle ("Alert Box")
+                                      .withMessage ("Result code: " + String (result))
+                                      .withButton ("OK"),
+                                    nullptr);
+        }
+    };
+
+    struct AsyncAlertBoxResultChosen
+    {
+        void operator() (int result) const noexcept
+        {
+            auto& aw = *demo.asyncAlertWindow;
+
+            aw.exitModalState (result);
+            aw.setVisible (false);
+
+            if (result == 0)
+            {
+                AlertBoxResultChosen{} (result);
+                return;
+            }
+
+            auto optionIndexChosen = aw.getComboBoxComponent ("option")->getSelectedItemIndex();
+            auto text = aw.getTextEditorContents ("text");
+
+            AlertWindow::showAsync (MessageBoxOptions()
+                                      .withIconType (MessageBoxIconType::InfoIcon)
+                                      .withTitle ("Alert Box")
+                                      .withMessage ("Result code: " + String (result) + newLine
+                                                    + "Option index chosen: " + String (optionIndexChosen) + newLine
+                                                    + "Text: " + text)
+                                      .withButton ("OK"),
+                                    nullptr);
+        }
+
+        DialogsDemo& demo;
+    };
 
     void showWindow (Component& button, DialogType type)
     {
         if (type >= plainAlertWindow && type <= questionAlertWindow)
         {
-            AlertWindow::AlertIconType icon = AlertWindow::NoIcon;
+            MessageBoxIconType icon = MessageBoxIconType::NoIcon;
 
-            if (type == warningAlertWindow)   icon = AlertWindow::WarningIcon;
-            if (type == infoAlertWindow)      icon = AlertWindow::InfoIcon;
-            if (type == questionAlertWindow)  icon = AlertWindow::QuestionIcon;
+            if (type == warningAlertWindow)   icon = MessageBoxIconType::WarningIcon;
+            if (type == infoAlertWindow)      icon = MessageBoxIconType::InfoIcon;
+            if (type == questionAlertWindow)  icon = MessageBoxIconType::QuestionIcon;
 
             AlertWindow::showMessageBoxAsync (icon, "This is an AlertWindow",
                                               "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
@@ -229,10 +274,10 @@ private:
         }
         else if (type == okCancelAlertWindow)
         {
-            AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon, "This is an ok/cancel AlertWindow",
+            AlertWindow::showOkCancelBox (MessageBoxIconType::QuestionIcon, "This is an ok/cancel AlertWindow",
                                           "And this is the AlertWindow's message. Blah blah blah blah blah blah blah blah blah blah blah blah blah.",
                                           {}, {}, {},
-                                          ModalCallbackFunction::forComponent (alertBoxResultChosen, this));
+                                          ModalCallbackFunction::create (AlertBoxResultChosen{}));
         }
         else if (type == calloutBoxWindow)
         {
@@ -247,26 +292,16 @@ private:
         }
         else if (type == extraComponentsAlertWindow)
         {
-           #if JUCE_MODAL_LOOPS_PERMITTED
-            AlertWindow w ("AlertWindow demo..",
-                           "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
-                           AlertWindow::QuestionIcon);
+            asyncAlertWindow = std::make_unique<AlertWindow> ("AlertWindow demo..",
+                                                              "This AlertWindow has a couple of extra components added to show how to add drop-down lists and text entry boxes.",
+                                                              MessageBoxIconType::QuestionIcon);
 
-            w.addTextEditor ("text", "enter some text here", "text field:");
-            w.addComboBox ("option", { "option 1", "option 2", "option 3", "option 4" }, "some options");
-            w.addButton ("OK",     1, KeyPress (KeyPress::returnKey, 0, 0));
-            w.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
+            asyncAlertWindow->addTextEditor ("text", "enter some text here", "text field:");
+            asyncAlertWindow->addComboBox ("option", { "option 1", "option 2", "option 3", "option 4" }, "some options");
+            asyncAlertWindow->addButton ("OK",     1, KeyPress (KeyPress::returnKey, 0, 0));
+            asyncAlertWindow->addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey, 0, 0));
 
-            if (w.runModalLoop() != 0) // is they picked 'ok'
-            {
-                // this is the item they chose in the drop-down list..
-                auto optionIndexChosen = w.getComboBoxComponent ("option")->getSelectedItemIndex();
-                ignoreUnused (optionIndexChosen);
-
-                // this is the text they entered..
-                auto text = w.getTextEditorContents ("text");
-            }
-           #endif
+            asyncAlertWindow->enterModalState (true, ModalCallbackFunction::create (AsyncAlertBoxResultChosen { *this }));
         }
         else if (type == progressWindow)
         {
@@ -294,9 +329,12 @@ private:
                                          chosen << (result.isLocalFile() ? result.getLocalFile().getFullPathName()
                                                                          : result.toString (false)) << "\n";
 
-                                     AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                                                       "File Chooser...",
-                                                                       "You picked: " + chosen);
+                                     AlertWindow::showAsync (MessageBoxOptions()
+                                                               .withIconType (MessageBoxIconType::InfoIcon)
+                                                               .withTitle ("File Chooser...")
+                                                               .withMessage ("You picked: " + chosen)
+                                                               .withButton ("OK"),
+                                                             nullptr);
                                  });
             }
             else if (type == loadWithPreviewChooser)
@@ -317,9 +355,12 @@ private:
                                          chosen << (result.isLocalFile() ? result.getLocalFile().getFullPathName()
                                                                          : result.toString (false)) << "\n";
 
-                                     AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                                                       "File Chooser...",
-                                                                       "You picked: " + chosen);
+                                     AlertWindow::showAsync (MessageBoxOptions()
+                                                               .withIconType (MessageBoxIconType::InfoIcon)
+                                                               .withTitle ("File Chooser...")
+                                                               .withMessage ("You picked: " + chosen)
+                                                               .withButton ("OK"),
+                                                             nullptr);
                                  },
                                  &imagePreview);
             }
@@ -362,16 +403,18 @@ private:
                                          if (wi.get() != nullptr && wo.get() != nullptr)
                                          {
                                              auto numWritten = wo->writeFromInputStream (*wi, -1);
-                                             jassert (numWritten > 0);
-                                             ignoreUnused (numWritten);
+                                             jassertquiet (numWritten > 0);
                                              wo->flush();
                                          }
                                      }
                                    #endif
 
-                                     AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                                                       "File Chooser...",
-                                                                       "You picked: " + name);
+                                     AlertWindow::showAsync (MessageBoxOptions()
+                                                               .withIconType (MessageBoxIconType::InfoIcon)
+                                                               .withTitle ("File Chooser...")
+                                                               .withMessage ("You picked: " + name)
+                                                               .withButton ("OK"),
+                                                             nullptr);
                                  });
             }
             else if (type == directoryChooser)
@@ -388,9 +431,12 @@ private:
                                      auto name = result.isLocalFile() ? result.getLocalFile().getFullPathName()
                                                                       : result.toString (true);
 
-                                     AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                                                       "File Chooser...",
-                                                                       "You picked: " + name);
+                                     AlertWindow::showAsync (MessageBoxOptions()
+                                                               .withIconType (MessageBoxIconType::InfoIcon)
+                                                               .withTitle ("File Chooser...")
+                                                               .withMessage ("You picked: " + name)
+                                                               .withButton ("OK"),
+                                                             nullptr);
                                  });
             }
         }
@@ -401,8 +447,12 @@ private:
                 {
                     auto resultString = success ? String ("success") : ("failure\n (error: " + error + ")");
 
-                    AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "Sharing Text Result",
-                                                      "Sharing text finished\nwith " + resultString);
+                    AlertWindow::showAsync (MessageBoxOptions()
+                                              .withIconType (MessageBoxIconType::InfoIcon)
+                                              .withTitle ("Sharing Text Result")
+                                              .withMessage ("Sharing text finished\nwith " + resultString)
+                                              .withButton ("OK"),
+                                            nullptr);
                 });
         }
         else if (type == shareFile)
@@ -422,9 +472,12 @@ private:
                     {
                         auto resultString = success ? String ("success") : ("failure\n (error: " + error + ")");
 
-                        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
-                                                          "Sharing Files Result",
-                                                          "Sharing files finished\nwith " + resultString);
+                        AlertWindow::showAsync (MessageBoxOptions()
+                                                  .withIconType (MessageBoxIconType::InfoIcon)
+                                                  .withTitle ("Sharing Files Result")
+                                                  .withMessage ("Sharing files finished\nwith " + resultString)
+                                                  .withButton ("OK"),
+                                                nullptr);
                     });
 
             }
@@ -448,14 +501,19 @@ private:
                                                            String resultString = success ? String ("success")
                                                                                          : ("failure\n (error: " + error + ")");
 
-                                                           AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "Sharing Images Result",
-                                                                                             "Sharing images finished\nwith " + resultString);
+                                                           AlertWindow::showAsync (MessageBoxOptions()
+                                                                                     .withIconType (MessageBoxIconType::InfoIcon)
+                                                                                     .withTitle ("Sharing Images Result")
+                                                                                     .withMessage ("Sharing images finished\nwith " + resultString)
+                                                                                     .withButton ("OK"),
+                                                                                   nullptr);
                                                        });
         }
     }
 
     ImagePreviewComponent imagePreview;
     std::unique_ptr<FileChooser> fc;
+    std::unique_ptr<AlertWindow> asyncAlertWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DialogsDemo)
 };

@@ -177,6 +177,7 @@ private:
 
     Time creationTime;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void refreshPath();
     void timerCallback() override;
 

@@ -35,11 +35,12 @@
 
   ID:                 juce_osc
   vendor:             juce
-  version:            6.0.7
+  version:            6.1.2
   name:               JUCE OSC classes
   description:        Open Sound Control implementation.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_events
 

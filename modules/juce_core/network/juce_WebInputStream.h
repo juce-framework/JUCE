@@ -25,35 +25,28 @@ namespace juce
 
 //==============================================================================
 /**
-    An InputStream which can be used to read from a given url.
+    An InputStream which can be used to read from a given URL.
 
     @tags{Core}
 */
-class JUCE_API WebInputStream : public InputStream
+class JUCE_API WebInputStream  : public InputStream
 {
  public:
-    /** Used to receive callbacks for data send progress */
-    class JUCE_API Listener
-    {
-    public:
-        virtual ~Listener() = default;
+    /** Creates a new WebInputStream which can be used to read from a URL.
 
-        virtual bool postDataSendProgress (WebInputStream& /*request*/, int /*bytesSent*/, int /*totalBytes*/)    { return true; }
-    };
-
-    /** Creates a new WebInputstream which can be used to read from a url.
-
-        @param url      The url that should be retrieved. This parameter may also contain
-                        post data and/or parameters.
-        @param usePost  Specifies whether a GET or a POST command should be used. This
-                        parameter will also influence the way parameters are encoded.
+        @param url      the URL that should be retrieved. This parameter may also contain
+                        POST data and/or parameters.
+        @param addParametersToRequestBody  specifies whether any URL parameters that have
+                        been set will be transferred via the request body data or added
+                        to the URL address. This will also determine whether a POST or GET
+                        command will be used if a custom command is not set.
     */
-    WebInputStream (const URL& url, const bool usePost);
+    WebInputStream (const URL& url, bool addParametersToRequestBody);
 
+    /** Destructor. */
     ~WebInputStream() override;
 
-
-    /** Add extra headers to http request
+    /** Add extra headers to the HTTP request.
 
         Returns a reference to itself so that several methods can be chained.
 
@@ -63,76 +56,78 @@ class JUCE_API WebInputStream : public InputStream
     */
     WebInputStream& withExtraHeaders (const String& extraHeaders);
 
-    /** Override the http command that is sent
+    /** Override the HTTP command that is sent.
 
         Returns a reference to itself so that several methods can be chained.
 
         Note that this command will not change the way parameters are sent. This
         must be specified in the constructor.
 
-        @param customRequestCommand this string is the custom http request command such
-                                    as POST or GET.
+        @param customRequestCommand  this string is the custom HTTP request command such
+                                     as POST or GET.
     */
     WebInputStream& withCustomRequestCommand (const String& customRequestCommand);
 
-    /** Specify the connection time-out
+    /** Specify the connection time-out.
 
         Returns a reference to itself so that several methods can be chained.
 
-        @param timeoutInMs    the number of milliseconds to wait until the connection
-                              request is aborted.
+        @param timeoutInMs  the number of milliseconds to wait until the connection
+                            request is aborted.
     */
     WebInputStream& withConnectionTimeout (int timeoutInMs);
 
-    /** Specify the number of redirects to be followed
+    /** Specify the number of redirects to be followed.
 
         Returns a reference to itself so that several methods can be chained.
 
-        @param numRedirects specifies the number of redirects that will be followed
-                            before returning a response (ignored for Android which
-                            follows up to 5 redirects)
+        @param numRedirects  specifies the number of redirects that will be followed
+                             before returning a response (ignored for Android which
+                             follows up to 5 redirects)
     */
     WebInputStream& withNumRedirectsToFollow (int numRedirects);
 
-    /** Returns a string array pair of the request headers */
-    StringPairArray getRequestHeaders() const;
+    //==============================================================================
+    /** Used to receive callbacks for POST data send progress.
 
-    /** Returns a string array pair of response headers
-
-        If getResponseHeaders is called without an established connection, then
-        getResponseHeaders will call connect internally and block until connect
-        returns - either due to a successful connection or a connection
-        error.
-
-        @see connect
+        Pass one of these into the connect() method and its postDataSendProgress()
+        method will be called periodically with updates on POST data upload progress.
     */
-    StringPairArray getResponseHeaders();
+    class JUCE_API Listener
+    {
+    public:
+        /** Destructor. */
+        virtual ~Listener() = default;
 
-    /** Returns the status code returned by the http server
+        /** This method will be called periodically with updates on POST data upload progress.
 
-        If getStatusCode is called without an established connection, then
-        getStatusCode will call connect internally and block until connect
-        returns - either due to a successful connection or a connection
-        error.
+            @param request     the original request
+            @param bytesSent   the number of bytes sent so far
+            @param totalBytes  the total number of bytes to send
 
-        @see connect
-    */
-    int getStatusCode();
+            @returns true to continue or false to cancel the upload
+        */
+        virtual bool postDataSendProgress (WebInputStream& request, int bytesSent, int totalBytes)
+        {
+            ignoreUnused (request, bytesSent, totalBytes);
+            return true;
+        }
+    };
 
-    /** Wait until the first byte is ready for reading
+    /** Wait until the first byte is ready for reading.
 
-        This method will attempt to connect to the url given in the constructor
+        This method will attempt to connect to the URL given in the constructor
         and block until the status code and all response headers have been received or
         an error has occurred.
 
-        Note that most methods will call connect internally if they are called without
+        Note that most methods will call connect() internally if they are called without
         an established connection. Therefore, it is not necessary to explicitly
         call connect unless you would like to use a custom listener.
 
-        After a successful call to connect, getResponseHeaders, getTotalLength and
-        getStatusCode will all be non-blocking.
+        After a successful call to connect(), getResponseHeaders(), getTotalLength()
+        and getStatusCode() will all be non-blocking.
 
-        @param listener    A listener to receive progress callbacks on the status
+        @param listener    a listener to receive progress callbacks on the status
                            of a POST data upload.
 
         @see getResponseHeaders, getTotalLength, getStatusCode
@@ -145,14 +140,39 @@ class JUCE_API WebInputStream : public InputStream
     /** Will cancel a blocking read and prevent any subsequent connection attempts. */
     void cancel();
 
+    /** Returns a StringPairArray of the request headers. */
+    StringPairArray getRequestHeaders() const;
+
+    /** Returns a StringPairArray of response headers.
+
+        If getResponseHeaders() is called without an established connection, then
+        getResponseHeaders() will call connect internally and block until connect
+        returns - either due to a successful connection or a connection
+        error.
+
+        @see connect
+    */
+    StringPairArray getResponseHeaders();
+
+    /** Returns the status code returned by the HTTP server
+
+        If getStatusCode() is called without an established connection, then
+        getStatusCode() will call connect internally and block until connect
+        returns - either due to a successful connection or a connection
+        error.
+
+        @see connect
+    */
+    int getStatusCode();
+
     //==============================================================================
     /** Returns the total number of bytes available for reading in this stream.
 
         Note that this is the number of bytes available from the start of the
         stream, not from the current position.
 
-        If getTotalLength is called without an established connection, then
-        getTotalLength will call connect internally and block until connect
+        If getTotalLength() is called without an established connection, then
+        getTotalLength() will call connect internally and block until connect
         returns - either due to a successful connection or a connection
         error.
 
@@ -162,9 +182,9 @@ class JUCE_API WebInputStream : public InputStream
 
     /** Reads some data from the stream into a memory buffer.
 
-        This method will block until the bytesToRead bytes are available.
+        This method will block until the maxBytesToRead bytes are available.
 
-        This method calls connect internally if the connection hasn't already
+        This method calls connect() internally if the connection hasn't already
         been established.
 
         @param destBuffer       the destination buffer for the data. This must not be null.
@@ -181,6 +201,7 @@ class JUCE_API WebInputStream : public InputStream
     bool isExhausted() override;
 
     /** Returns the offset of the next byte that will be read from the stream.
+
         @see setPosition
     */
     int64 getPosition() override;
@@ -191,7 +212,7 @@ class JUCE_API WebInputStream : public InputStream
 
         For a WebInputStream, this method will fail if wantedPos is smaller
         than the current position. If wantedPos is greater than the current
-        position, then calling setPosition is the same as calling read, i.e.
+        position, then calling setPosition() is the same as calling read(), i.e.
         the skipped data will still be downloaded, although skipped bytes will
         be discarded immediately.
 
@@ -201,14 +222,14 @@ class JUCE_API WebInputStream : public InputStream
     bool setPosition (int64 wantedPos) override;
 
  private:
-    static void createHeadersAndPostData (const URL&, String&, MemoryBlock&);
-    static StringPairArray parseHttpHeaders (const String& headerData);
+    static void createHeadersAndPostData (const URL&, String&, MemoryBlock&, bool);
+    static StringPairArray parseHttpHeaders (const String&);
 
     class Pimpl;
     friend class Pimpl;
 
-    Pimpl* const pimpl;
-    bool hasCalledConnect;
+    std::unique_ptr<Pimpl> pimpl;
+    bool hasCalledConnect = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WebInputStream)
 };

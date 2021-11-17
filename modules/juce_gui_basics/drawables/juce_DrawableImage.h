@@ -41,6 +41,9 @@ public:
     DrawableImage();
     DrawableImage (const DrawableImage&);
 
+    /** Sets the image that this drawable will render. */
+    explicit DrawableImage (const Image& imageToUse);
+
     /** Destructor. */
     ~DrawableImage() override;
 
@@ -96,6 +99,10 @@ public:
     Path getOutlineAsPath() const override;
 
 private:
+    //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+    bool setImageInternal (const Image&);
+
     //==============================================================================
     Image image;
     float opacity = 1.0f;

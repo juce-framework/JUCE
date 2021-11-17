@@ -35,11 +35,12 @@
 
   ID:                 juce_box2d
   vendor:             juce
-  version:            6.0.7
+  version:            6.1.2
   name:               JUCE wrapper for the Box2D physics engine
   description:        The Box2D physics engine and some utility classes.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_graphics
 

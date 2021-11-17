@@ -33,17 +33,21 @@ template <class ElementType>
 class PaintElementUndoableAction    : public UndoableAction
 {
 public:
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6011)
+
     PaintElementUndoableAction (ElementType* const element)
         : routine (*element->getOwner()),
           elementIndex (element->getOwner()->indexOfElement (element))
     {
         jassert (element != nullptr);
 
-        if (elementIndex < 0)
+        if (element != nullptr && elementIndex < 0)
             findGroupIndices (element->getOwner(), element);
 
         jassert (elementIndex >= 0);
     }
+
+    JUCE_END_IGNORE_WARNINGS_MSVC
 
     ElementType* getElement() const
     {

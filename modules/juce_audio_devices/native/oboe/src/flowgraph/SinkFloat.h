@@ -32,6 +32,7 @@ namespace flowgraph {
 class SinkFloat : public FlowGraphSink {
 public:
     explicit SinkFloat(int32_t channelCount);
+    ~SinkFloat() override = default;
 
     int32_t read(void *data, int32_t numFrames) override;
 

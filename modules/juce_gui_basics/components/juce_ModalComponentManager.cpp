@@ -117,7 +117,7 @@ void ModalComponentManager::attachCallback (Component* component, Callback* call
 
         for (int i = stack.size(); --i >= 0;)
         {
-            auto* item = stack.getUnchecked(i);
+            auto* item = stack.getUnchecked (i);
 
             if (item->component == component)
             {
@@ -133,7 +133,7 @@ void ModalComponentManager::endModal (Component* component)
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (item->component == component)
             item->cancel();
@@ -144,7 +144,7 @@ void ModalComponentManager::endModal (Component* component, int returnValue)
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (item->component == component)
         {
@@ -171,7 +171,7 @@ Component* ModalComponentManager::getModalComponent (int index) const
 
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (item->isActive)
             if (n++ == index)
@@ -199,7 +199,7 @@ void ModalComponentManager::handleAsyncUpdate()
 {
     for (int i = stack.size(); --i >= 0;)
     {
-        auto* item = stack.getUnchecked(i);
+        auto* item = stack.getUnchecked (i);
 
         if (! item->isActive)
         {
@@ -207,7 +207,7 @@ void ModalComponentManager::handleAsyncUpdate()
             Component::SafePointer<Component> compToDelete (item->autoDelete ? item->component : nullptr);
 
             for (int j = item->callbacks.size(); --j >= 0;)
-                item->callbacks.getUnchecked(j)->modalStateFinished (item->returnValue);
+                item->callbacks.getUnchecked (j)->modalStateFinished (item->returnValue);
 
             compToDelete.deleteAndZero();
         }
@@ -252,7 +252,7 @@ bool ModalComponentManager::cancelAllModalComponents()
     auto numModal = getNumModalComponents();
 
     for (int i = numModal; --i >= 0;)
-        if (auto* c = getModalComponent(i))
+        if (auto* c = getModalComponent (i))
             c->exitModalState (0);
 
     return numModal > 0;
@@ -288,26 +288,5 @@ int ModalComponentManager::runEventLoopForCurrentComponent()
     return returnValue;
 }
 #endif
-
-//==============================================================================
-struct LambdaCallback  : public ModalComponentManager::Callback
-{
-    LambdaCallback (std::function<void (int)> fn) noexcept  : function (fn)  {}
-
-    void modalStateFinished (int result) override
-    {
-        if (function != nullptr)
-            function (result);
-    }
-
-    std::function<void (int)> function;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (LambdaCallback)
-};
-
-ModalComponentManager::Callback* ModalCallbackFunction::create (std::function<void (int)> f)
-{
-    return new LambdaCallback (f);
-}
 
 } // namespace juce

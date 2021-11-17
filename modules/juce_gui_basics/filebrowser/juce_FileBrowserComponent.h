@@ -283,6 +283,7 @@ private:
     TimeSliceThread thread;
     bool wasProcessActive;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void timerCallback() override;
     void sendListenerChangeMessage();
     bool isFileOrDirSuitable (const File&) const;

@@ -99,25 +99,34 @@ public:
     {
         createProjectButton.onClick = [this]
         {
-            FileChooser fc ("Save Project", NewProjectWizard::getLastWizardFolder());
+            chooser = std::make_unique<FileChooser> ("Save Project", NewProjectWizard::getLastWizardFolder());
+            auto browserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-            if (fc.browseForDirectory())
+            chooser->launchAsync (browserFlags, [this] (const FileChooser& fc)
             {
                 auto dir = fc.getResult();
 
-                if (auto project = NewProjectWizard::createNewProject (projectTemplate,
-                                                                       dir.getChildFile (projectNameValue.get().toString()),
-                                                                       projectNameValue.get(),
-                                                                       modulesValue.get(),
-                                                                       exportersValue.get(),
-                                                                       fileOptionsValue.get(),
-                                                                       modulePathValue.getCurrentValue(),
-                                                                       modulePathValue.getWrappedValueWithDefault().isUsingDefault()))
+                if (dir == File{})
+                    return;
+
+                SafePointer<TemplateComponent> safeThis { this };
+                NewProjectWizard::createNewProject (projectTemplate,
+                                                    dir.getChildFile (projectNameValue.get().toString()),
+                                                    projectNameValue.get(),
+                                                    modulesValue.get(),
+                                                    exportersValue.get(),
+                                                    fileOptionsValue.get(),
+                                                    modulePathValue.getCurrentValue(),
+                                                    modulePathValue.getWrappedValueWithDefault().isUsingDefault(),
+                                                    [safeThis, dir] (std::unique_ptr<Project> project)
                 {
-                    projectCreatedCallback (std::move (project));
+                    if (safeThis == nullptr)
+                        return;
+
+                    safeThis->projectCreatedCallback (std::move (project));
                     getAppSettings().lastWizardFolder = dir;
-                }
-            }
+                });
+            });
         };
 
         addAndMakeVisible (createProjectButton);
@@ -150,6 +159,7 @@ public:
 private:
     NewProjectTemplates::ProjectTemplate projectTemplate;
 
+    std::unique_ptr<FileChooser> chooser;
     std::function<void (std::unique_ptr<Project>)> projectCreatedCallback;
 
     ItemHeader header;
@@ -254,6 +264,9 @@ public:
           header (metadata[Ids::name].toString(), metadata[Ids::description].toString(), BinaryData::background_logo_svg),
           codeViewer (doc, &cppTokeniser)
     {
+        setTitle (exampleFile.getFileName());
+        setFocusContainerType (FocusContainerType::focusContainer);
+
         addAndMakeVisible (header);
 
         openExampleButton.onClick = [this] { exampleSelectedCallback (exampleFile); };
@@ -286,6 +299,7 @@ private:
 
         codeViewer.setScrollbarThickness (6);
         codeViewer.setReadOnly (true);
+        codeViewer.setTitle ("Code");
         getAppSettings().appearance.applyToCodeEditor (codeViewer);
 
         codeViewer.scrollToLine (findBestLineToScrollToForClass (StringArray::fromLines (fileString),

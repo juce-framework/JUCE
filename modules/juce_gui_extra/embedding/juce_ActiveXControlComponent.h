@@ -50,7 +50,7 @@ public:
     ActiveXControlComponent();
 
     /** Destructor. */
-    ~ActiveXControlComponent();
+    ~ActiveXControlComponent() override;
 
     /** Tries to create an ActiveX control and embed it in this peer.
 

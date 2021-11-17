@@ -69,4 +69,10 @@ void GroupComponent::paint (Graphics& g)
 void GroupComponent::enablementChanged()    { repaint(); }
 void GroupComponent::colourChanged()        { repaint(); }
 
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> GroupComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
+}
+
 } // namespace juce

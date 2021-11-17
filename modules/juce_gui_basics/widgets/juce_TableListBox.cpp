@@ -30,7 +30,11 @@ class TableListBox::RowComp   : public Component,
                                 public TooltipClient
 {
 public:
-    RowComp (TableListBox& tlb) noexcept  : owner (tlb) {}
+    RowComp (TableListBox& tlb) noexcept
+        : owner (tlb)
+    {
+        setFocusContainerType (FocusContainerType::focusContainer);
+    }
 
     void paint (Graphics& g) override
     {
@@ -46,7 +50,7 @@ public:
             {
                 if (columnComponents[i] == nullptr)
                 {
-                    auto columnRect = headerComp.getColumnPosition(i).withHeight (getHeight());
+                    auto columnRect = headerComp.getColumnPosition (i).withHeight (getHeight());
 
                     if (columnRect.getX() >= clipBounds.getRight())
                         break;
@@ -219,7 +223,80 @@ public:
         return columnComponents [owner.getHeader().getIndexOfColumnId (columnId, true)];
     }
 
-private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return std::make_unique<RowAccessibilityHandler> (*this);
+    }
+
+    //==============================================================================
+    class RowAccessibilityHandler  : public AccessibilityHandler
+    {
+    public:
+        RowAccessibilityHandler (RowComp& rowComp)
+            : AccessibilityHandler (rowComp,
+                                    AccessibilityRole::row,
+                                    getListRowAccessibilityActions (rowComp),
+                                    { std::make_unique<RowComponentCellInterface> (*this) }),
+              rowComponent (rowComp)
+        {
+        }
+
+        String getTitle() const override
+        {
+            if (auto* m = rowComponent.owner.ListBox::model)
+                return m->getNameForRow (rowComponent.row);
+
+            return {};
+        }
+
+        String getHelp() const override  { return rowComponent.getTooltip(); }
+
+        AccessibleState getCurrentState() const override
+        {
+            if (auto* m = rowComponent.owner.getModel())
+                if (rowComponent.row >= m->getNumRows())
+                    return AccessibleState().withIgnored();
+
+            auto state = AccessibilityHandler::getCurrentState();
+
+            if (rowComponent.owner.multipleSelection)
+                state = state.withMultiSelectable();
+            else
+                state = state.withSelectable();
+
+            if (rowComponent.isSelected)
+                return state.withSelected();
+
+            return state;
+        }
+
+        class RowComponentCellInterface  : public AccessibilityCellInterface
+        {
+        public:
+            RowComponentCellInterface (RowAccessibilityHandler& handler)
+                : owner (handler)
+            {
+            }
+
+            int getColumnIndex() const override      { return 0; }
+            int getColumnSpan() const override       { return 1; }
+
+            int getRowIndex() const override         { return owner.rowComponent.row; }
+            int getRowSpan() const override          { return 1; }
+
+            int getDisclosureLevel() const override  { return 0; }
+
+            const AccessibilityHandler* getTableHandler() const override  { return owner.rowComponent.owner.getAccessibilityHandler(); }
+
+        private:
+            RowAccessibilityHandler& owner;
+        };
+
+    private:
+        RowComp& rowComponent;
+    };
+
+    //==============================================================================
     TableListBox& owner;
     OwnedArray<Component> columnComponents;
     int row = -1;
@@ -465,6 +542,56 @@ void TableListBox::updateColumnComponents() const
     for (int i = firstRow + getNumRowsOnScreen() + 2; --i >= firstRow;)
         if (auto* rowComp = dynamic_cast<RowComp*> (getComponentForRowNumber (i)))
             rowComp->resized();
+}
+
+std::unique_ptr<AccessibilityHandler> TableListBox::createAccessibilityHandler()
+{
+    class TableInterface  : public AccessibilityTableInterface
+    {
+    public:
+        explicit TableInterface (TableListBox& tableListBoxToWrap)
+            : tableListBox (tableListBoxToWrap)
+        {
+        }
+
+        int getNumRows() const override
+        {
+            if (auto* tableModel = tableListBox.getModel())
+                return tableModel->getNumRows();
+
+            return 0;
+        }
+
+        int getNumColumns() const override
+        {
+            return tableListBox.getHeader().getNumColumns (false);
+        }
+
+        const AccessibilityHandler* getCellHandler (int row, int column) const override
+        {
+            if (isPositiveAndBelow (row, getNumRows()))
+            {
+                if (isPositiveAndBelow (column, getNumColumns()))
+                    if (auto* cellComponent = tableListBox.getCellComponent (tableListBox.getHeader().getColumnIdOfIndex (column, false), row))
+                        return cellComponent->getAccessibilityHandler();
+
+                if (auto* rowComp = tableListBox.getComponentForRowNumber (row))
+                    return rowComp->getAccessibilityHandler();
+            }
+
+            return nullptr;
+        }
+
+    private:
+        TableListBox& tableListBox;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableInterface)
+    };
+
+    return std::make_unique<AccessibilityHandler> (*this,
+                                                   AccessibilityRole::list,
+                                                   AccessibilityActions{},
+                                                   AccessibilityHandler::Interfaces { std::make_unique<TableInterface> (*this) });
 }
 
 //==============================================================================

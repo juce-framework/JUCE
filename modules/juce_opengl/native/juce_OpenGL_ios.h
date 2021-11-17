@@ -90,6 +90,7 @@ public:
                     // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
                     // so causes mysterious timing-related failures.
                     [EAGLContext setCurrentContext: context];
+                    gl::loadFunctions();
                     createGLBuffers();
                     deactivateCurrentContext();
                 }
@@ -164,7 +165,7 @@ public:
             }
             else
             {
-                glResolveMultisampleFramebufferAPPLE();
+                ::glResolveMultisampleFramebufferAPPLE();
             }
         }
 

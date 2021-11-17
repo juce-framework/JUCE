@@ -84,10 +84,8 @@ public:
 
             if (isDirectory)
             {
-                if (subContentsList == nullptr)
+                if (subContentsList == nullptr && parentContentsList != nullptr)
                 {
-                    jassert (parentContentsList != nullptr);
-
                     auto l = new DirectoryContentsList (parentContentsList->getFilter(), thread);
 
                     l->setDirectory (file,
@@ -188,6 +186,11 @@ public:
                                                    &icon, fileSize, modTime,
                                                    isDirectory, isSelected(),
                                                    indexInContentsList, owner);
+    }
+
+    String getAccessibilityName() override
+    {
+        return file.getFileName();
     }
 
     void itemClicked (const MouseEvent& e) override

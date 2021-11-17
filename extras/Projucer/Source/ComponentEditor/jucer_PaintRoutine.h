@@ -109,7 +109,7 @@ public:
 
     //==============================================================================
 private:
-    OwnedArray <PaintElement> elements;
+    OwnedArray<PaintElement> elements;
     SelectedItemSet <PaintElement*> selectedElements;
     SelectedItemSet <PathPoint*> selectedPoints;
     JucerDocument* document;

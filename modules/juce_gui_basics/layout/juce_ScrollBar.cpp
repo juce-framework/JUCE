@@ -61,7 +61,7 @@ private:
 ScrollBar::ScrollBar (bool shouldBeVertical)  : vertical (shouldBeVertical)
 {
     setRepaintsOnMouseActivity (true);
-    setFocusContainer (true);
+    setFocusContainerType (FocusContainerType::keyboardFocusContainer);
 }
 
 ScrollBar::~ScrollBar()
@@ -173,7 +173,7 @@ void ScrollBar::removeListener (Listener* listener)
 void ScrollBar::handleAsyncUpdate()
 {
     auto start = visibleRange.getStart(); // (need to use a temp variable for VC7 compatibility)
-    listeners.call ([=] (Listener& l) { l.scrollBarMoved (this, start); });
+    listeners.call ([this, start] (Listener& l) { l.scrollBarMoved (this, start); });
 }
 
 //==============================================================================
@@ -438,6 +438,40 @@ bool ScrollBar::getVisibility() const noexcept
 
     return (! autohides) || (totalRange.getLength() > visibleRange.getLength()
                                     && visibleRange.getLength() > 0.0);
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> ScrollBar::createAccessibilityHandler()
+{
+    class ValueInterface  : public AccessibilityRangedNumericValueInterface
+    {
+    public:
+        explicit ValueInterface (ScrollBar& scrollBarToWrap)  : scrollBar (scrollBarToWrap) {}
+
+        bool isReadOnly() const override          { return false; }
+
+        double getCurrentValue() const override   { return scrollBar.getCurrentRangeStart(); }
+        void setValue (double newValue) override  { scrollBar.setCurrentRangeStart (newValue); }
+
+        AccessibleValueRange getRange() const override
+        {
+            if (scrollBar.getRangeLimit().isEmpty())
+                return {};
+
+            return { { scrollBar.getMinimumRangeLimit(), scrollBar.getMaximumRangeLimit() },
+                     scrollBar.getSingleStepSize() };
+        }
+
+    private:
+        ScrollBar& scrollBar;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
+    };
+
+    return std::make_unique<AccessibilityHandler> (*this,
+                                                   AccessibilityRole::scrollBar,
+                                                   AccessibilityActions{},
+                                                   AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (*this) });
 }
 
 } // namespace juce

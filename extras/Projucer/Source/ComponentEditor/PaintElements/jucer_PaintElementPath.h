@@ -39,9 +39,11 @@ public:
     PathPoint& operator= (const PathPoint& other);
     ~PathPoint();
 
+    static constexpr auto maxRects = 3;
+
     PaintElementPath* owner;
     Path::Iterator::PathElementType type;
-    RelativePositionedRectangle pos [3];
+    RelativePositionedRectangle pos [maxRects];
 
     int getNumPoints() const;
 
@@ -125,7 +127,7 @@ public:
 private:
     friend class PathPoint;
     friend class PathPointComponent;
-    OwnedArray <PathPoint> points;
+    OwnedArray<PathPoint> points;
     bool nonZeroWinding;
     mutable Path path;
     mutable Rectangle<int> lastPathBounds;

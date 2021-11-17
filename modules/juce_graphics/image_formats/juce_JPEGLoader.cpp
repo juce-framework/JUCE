@@ -26,7 +26,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4365)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4365 6240 6326 6386 6385 28182 28183 6387 6011 6001)
 
 namespace jpeglibNamespace
 {
@@ -251,9 +251,9 @@ bool JPEGImageFormat::canUnderstand (InputStream& in)
 
 Image JPEGImageFormat::decodeImage (InputStream& in)
 {
-#if JUCE_USING_COREIMAGE_LOADER
+   #if JUCE_USING_COREIMAGE_LOADER
     return juce_loadWithCoreImage (in);
-#else
+   #else
     using namespace jpeglibNamespace;
     using namespace JPEGHelpers;
 
@@ -356,7 +356,7 @@ Image JPEGImageFormat::decodeImage (InputStream& in)
     }
 
     return image;
-#endif
+   #endif
 }
 
 bool JPEGImageFormat::writeImageToStream (const Image& image, OutputStream& out)

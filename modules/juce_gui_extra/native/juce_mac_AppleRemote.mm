@@ -47,7 +47,14 @@ namespace
         io_iterator_t iter = 0;
         io_object_t iod = 0;
 
-        if (IOServiceGetMatchingServices (kIOMasterPortDefault, dict, &iter) == kIOReturnSuccess
+        const auto defaultPort =
+               #if defined (MAC_OS_VERSION_12_0) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_VERSION_12_0
+                kIOMainPortDefault;
+               #else
+                kIOMasterPortDefault;
+               #endif
+
+        if (IOServiceGetMatchingServices (defaultPort, dict, &iter) == kIOReturnSuccess
              && iter != 0)
         {
             iod = IOIteratorNext (iter);
@@ -143,15 +150,15 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode)
 {
     Array<int> cookies;
 
-    CFArrayRef elements;
+    CFObjectHolder<CFArrayRef> elements;
     auto device122 = (IOHIDDeviceInterface122**) device;
 
-    if ((*device122)->copyMatchingElements (device122, nullptr, &elements) != kIOReturnSuccess)
+    if ((*device122)->copyMatchingElements (device122, nullptr, &elements.object) != kIOReturnSuccess)
         return false;
 
-    for (int i = 0; i < CFArrayGetCount (elements); ++i)
+    for (int i = 0; i < CFArrayGetCount (elements.object); ++i)
     {
-        auto element = (CFDictionaryRef) CFArrayGetValueAtIndex (elements, i);
+        auto element = (CFDictionaryRef) CFArrayGetValueAtIndex (elements.object, i);
 
         // get the cookie
         CFTypeRef object = CFDictionaryGetValue (element, CFSTR (kIOHIDElementCookieKey));
@@ -165,8 +172,6 @@ bool AppleRemoteDevice::open (const bool openInExclusiveMode)
 
         cookies.add ((int) number);
     }
-
-    CFRelease (elements);
 
     if ((*(IOHIDDeviceInterface**) device)
             ->open ((IOHIDDeviceInterface**) device,

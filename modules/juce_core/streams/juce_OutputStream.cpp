@@ -364,7 +364,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const cha
 
 JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, const MemoryBlock& data)
 {
-    if (data.getSize() > 0)
+    if (! data.isEmpty())
         stream.write (data.getData(), data.getSize());
 
     return stream;

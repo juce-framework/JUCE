@@ -66,6 +66,7 @@ public:
 
     void runModally() override
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         child.start (args, ChildProcess::wantStdOut);
 
         while (child.isRunning())
@@ -73,6 +74,9 @@ public:
                 break;
 
         finish (false);
+       #else
+        jassertfalse;
+       #endif
     }
 
     void launch() override
@@ -210,9 +214,12 @@ private:
         }
         else
         {
-            if (isDirectory)  args.add ("--directory");
-            if (isSave)       args.add ("--save");
+            if (isSave)
+                args.add ("--save");
         }
+
+        if (isDirectory)
+            args.add ("--directory");
 
         if (owner.filters.isNotEmpty() && owner.filters != "*" && owner.filters != "*.*")
         {
@@ -252,9 +259,9 @@ bool FileChooser::isPlatformDialogAvailable()
    #endif
 }
 
-FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags, FilePreviewComponent*)
+std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags, FilePreviewComponent*)
 {
-    return new Native (owner, flags);
+    return std::make_shared<Native> (owner, flags);
 }
 
 } // namespace juce

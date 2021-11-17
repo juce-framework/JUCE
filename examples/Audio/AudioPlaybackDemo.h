@@ -296,6 +296,7 @@ public:
 
         directoryList.setDirectory (File::getSpecialLocation (File::userHomeDirectory), true, true);
 
+        fileTreeComp.setTitle ("Files");
         fileTreeComp.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
         fileTreeComp.addListener (this);
 
@@ -497,14 +498,13 @@ private:
     {
         if (btn == &chooseFileButton && fileChooser.get() == nullptr)
         {
-            SafePointer<AudioPlaybackDemo> safeThis (this);
-
             if (! RuntimePermissions::isGranted (RuntimePermissions::readExternalStorage))
             {
+                SafePointer<AudioPlaybackDemo> safeThis (this);
                 RuntimePermissions::request (RuntimePermissions::readExternalStorage,
                                              [safeThis] (bool granted) mutable
                                              {
-                                                 if (granted)
+                                                 if (safeThis != nullptr && granted)
                                                      safeThis->buttonClicked (&safeThis->chooseFileButton);
                                              });
                 return;
@@ -515,24 +515,27 @@ private:
                 fileChooser.reset (new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif"));
 
                 fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
-                                          [safeThis] (const FileChooser& fc) mutable
+                                          [this] (const FileChooser& fc) mutable
                                           {
-                                              if (safeThis != nullptr && fc.getURLResults().size() > 0)
+                                              if (fc.getURLResults().size() > 0)
                                               {
                                                   auto u = fc.getURLResult();
 
-                                                  safeThis->showAudioResource (std::move (u));
+                                                  showAudioResource (std::move (u));
                                               }
 
-                                              safeThis->fileChooser = nullptr;
+                                              fileChooser = nullptr;
                                           }, nullptr);
             }
             else
             {
-                NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon, "Enable Code Signing",
-                                                       "You need to enable code-signing for your iOS project and enable \"iCloud Documents\" "
-                                                       "permissions to be able to open audio files on your iDevice. See: "
-                                                       "https://forum.juce.com/t/native-ios-android-file-choosers");
+                NativeMessageBox::showAsync (MessageBoxOptions()
+                                               .withIconType (MessageBoxIconType::WarningIcon)
+                                               .withTitle ("Enable Code Signing")
+                                               .withMessage ("You need to enable code-signing for your iOS project and enable \"iCloud Documents\" "
+                                                             "permissions to be able to open audio files on your iDevice. See: "
+                                                             "https://forum.juce.com/t/native-ios-android-file-choosers"),
+                                             nullptr);
             }
         }
     }

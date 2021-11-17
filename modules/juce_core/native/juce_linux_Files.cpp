@@ -20,6 +20,10 @@
   ==============================================================================
 */
 
+#if JUCE_BSD
+extern char** environ;
+#endif
+
 namespace juce
 {
 
@@ -36,7 +40,7 @@ bool File::isOnCDRomDrive() const
     struct statfs buf;
 
     return statfs (getFullPathName().toUTF8(), &buf) == 0
-             && buf.f_type == (short) U_ISOFS_SUPER_MAGIC;
+             && buf.f_type == (unsigned int) U_ISOFS_SUPER_MAGIC;
 }
 
 bool File::isOnHardDisk() const
@@ -149,8 +153,12 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
         case hostApplicationPath:
         {
+           #if JUCE_BSD
+            return juce_getExecutableFile();
+           #else
             const File f ("/proc/self/exe");
             return f.isSymbolicLink() ? f.getLinkedTarget() : juce_getExecutableFile();
+           #endif
         }
 
         default:
@@ -203,7 +211,7 @@ bool Process::openDocument (const String& fileName, const String& parameters)
         for (auto browserName : { "xdg-open", "/etc/alternatives/x-www-browser", "firefox", "mozilla",
                                   "google-chrome", "chromium-browser", "opera", "konqueror" })
         {
-            cmdLines.add (String (browserName) + " " + cmdString.trim());
+            cmdLines.add (String (browserName) + " " + cmdString.trim().quoted());
         }
 
         cmdString = cmdLines.joinIntoString (" || ");

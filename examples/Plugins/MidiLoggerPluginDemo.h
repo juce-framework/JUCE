@@ -42,7 +42,7 @@
 
  useLocalCopy:          1
 
- pluginCharacteristics: pluginWantsMidiIn, pluginProducesMidiOut
+ pluginCharacteristics: pluginWantsMidiIn, pluginProducesMidiOut, pluginIsMidiEffectPlugin
 
  END_JUCE_PIP_METADATA
 
@@ -243,7 +243,7 @@ public:
     int getNumPrograms() override                                             { return 0; }
     int getCurrentProgram() override                                          { return 0; }
     void setCurrentProgram (int) override                                     {}
-    const String getProgramName (int) override                                { return {}; }
+    const String getProgramName (int) override                                { return "None"; }
     void changeProgramName (int, const String&) override                      {}
 
     void prepareToPlay (double, int) override                                 {}

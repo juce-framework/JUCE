@@ -199,8 +199,6 @@ void LookAndFeel_V4::positionDocumentWindowButtons (DocumentWindow&,
                                                     Button* closeButton,
                                                     bool positionTitleBarButtonsOnLeft)
 {
-    titleBarH = jmin (titleBarH, titleBarH - titleBarY);
-
     auto buttonW = static_cast<int> (titleBarH * 1.2);
 
     auto x = positionTitleBarButtonsOnLeft ? titleBarX
@@ -387,7 +385,7 @@ void LookAndFeel_V4::changeToggleButtonWidthToFitText (ToggleButton& button)
 //==============================================================================
 AlertWindow* LookAndFeel_V4::createAlertWindow (const String& title, const String& message,
                                                 const String& button1, const String& button2, const String& button3,
-                                                AlertWindow::AlertIconType iconType,
+                                                MessageBoxIconType iconType,
                                                 int numButtons, Component* associatedComponent)
 {
     auto boundsOffset = 50;
@@ -431,13 +429,13 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
     Rectangle<int> iconRect (iconSize / -10, iconSize / -10,
                              iconSize, iconSize);
 
-    if (alert.getAlertType() != AlertWindow::NoIcon)
+    if (alert.getAlertType() != MessageBoxIconType::NoIcon)
     {
         Path icon;
         char character;
         uint32 colour;
 
-        if (alert.getAlertType() == AlertWindow::WarningIcon)
+        if (alert.getAlertType() == MessageBoxIconType::WarningIcon)
         {
             character = '!';
 
@@ -451,7 +449,7 @@ void LookAndFeel_V4::drawAlertBox (Graphics& g, AlertWindow& alert,
         else
         {
             colour = Colour (0xff00b0b9).withAlpha (0.4f).getARGB();
-            character = alert.getAlertType() == AlertWindow::InfoIcon ? 'i' : '?';
+            character = alert.getAlertType() == MessageBoxIconType::InfoIcon ? 'i' : '?';
 
             icon.addEllipse (iconRect.toFloat());
         }

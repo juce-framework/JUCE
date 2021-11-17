@@ -291,7 +291,7 @@ void XmlDocument::skipNextWhiteSpace()
 {
     for (;;)
     {
-        input = input.findEndOfWhitespace();
+        input.incrementToEndOfWhitespace();
 
         if (input.isEmpty())
         {
@@ -684,7 +684,7 @@ void XmlDocument::readEntity (String& result)
     }
     else if (*input == '#')
     {
-        int charCode = 0;
+        int64_t charCode = 0;
         ++input;
 
         if (*input == 'x' || *input == 'X')
@@ -712,15 +712,26 @@ void XmlDocument::readEntity (String& result)
         {
             int numChars = 0;
 
-            while (input[0] != ';')
+            for (;;)
             {
+                const auto firstChar = input[0];
+
+                if (firstChar == 0)
+                {
+                    setLastError ("unexpected end of input", true);
+                    return;
+                }
+
+                if (firstChar == ';')
+                    break;
+
                 if (++numChars > 12)
                 {
                     setLastError ("illegal escape sequence", true);
                     break;
                 }
 
-                charCode = charCode * 10 + ((int) input[0] - '0');
+                charCode = charCode * 10 + ((int) firstChar - '0');
                 ++input;
             }
 

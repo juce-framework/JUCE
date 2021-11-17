@@ -134,6 +134,8 @@ void juce_checkCurrentlyFocusedTopLevelWindow()
 TopLevelWindow::TopLevelWindow (const String& name, const bool shouldAddToDesktop)
     : Component (name)
 {
+    setTitle (name);
+
     setOpaque (true);
 
     if (shouldAddToDesktop)
@@ -279,6 +281,11 @@ void TopLevelWindow::addToDesktop (int windowStyleFlags, void* nativeWindowToAtt
         sendLookAndFeelChange();
 }
 
+std::unique_ptr<AccessibilityHandler> TopLevelWindow::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::window);
+}
+
 //==============================================================================
 void TopLevelWindow::centreAroundComponent (Component* c, const int width, const int height)
 {
@@ -291,7 +298,7 @@ void TopLevelWindow::centreAroundComponent (Component* c, const int width, const
     }
     else
     {
-        auto targetCentre = c->localPointToGlobal (c->getLocalBounds().getCentre());
+        auto targetCentre = c->localPointToGlobal (c->getLocalBounds().getCentre()) / getDesktopScaleFactor();
         auto parentArea = c->getParentMonitorArea();
 
         if (auto* parent = getParentComponent())

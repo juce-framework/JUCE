@@ -27,7 +27,15 @@
 namespace Steinberg {
 namespace Vst {
 
+// ------------------------------------------------------------------------
+/** \defgroup vst3typedef VST 3 Data Types */
+/*@{*/
+//------------------------------------------------------------------------
+/** Prefetchable Support Type */
 typedef uint32 PrefetchableSupport;
+/*@}*/
+
+/** Prefetchable Support Enum */
 enum ePrefetchableSupport
 {
 	kIsNeverPrefetchable = 0,	///< every instance of the plug does not support prefetch processing
@@ -39,19 +47,21 @@ enum ePrefetchableSupport
 //------------------------------------------------------------------------
 // IPrefetchableSupport Interface
 //------------------------------------------------------------------------
-/** Indicates that the Plug-in could or not support Prefetch (dynamically).
+/** Indicates that the plug-in could or not support Prefetch (dynamically): Vst::IPrefetchableSupport
 \ingroup vstIPlug vst365
 - [plug imp]
 - [extends IComponent]
 - [released: 3.6.5]
 - [optional]
 
-The Plug-in should implement this interface if it needs to dynamically change between Prefetchable or not.
-By default (without implementing this interface) the host will decide in which mode the Plug-in will be process.
-For more info about Prefetch processing mode check ProcessModes::kPrefetch documentation.
+The plug-in should implement this interface if it needs to dynamically change between prefetchable or not.
+By default (without implementing this interface) the host decides in which mode the plug-in is processed.
+For more info about the prefetch processing mode check the ProcessModes::kPrefetch documentation.
 
 \section IPrefetchableSupportExample Example
-\code
+
+\code{.cpp}
+//------------------------------------------------------------------------
 tresult PLUGIN_API myPlug::getPrefetchableSupport (PrefetchableSupport& prefetchable)
 {
 	prefetchable = kIsNeverPrefetchable;
@@ -64,21 +74,23 @@ tresult PLUGIN_API myPlug::getPrefetchableSupport (PrefetchableSupport& prefetch
 	}
 	return kResultOk;
 }
-\endcode */
+\endcode
+*/
 class IPrefetchableSupport : public FUnknown
 {
 public:
-	//------------------------------------------------------------------------
-	/** retrieve the current prefetch support. Use IComponentHandler::restartComponent (kPrefetchableSupportChanged)
-		to inform the host that this support has changed. */
+//------------------------------------------------------------------------
+	/** retrieve the current prefetch support. Use IComponentHandler::restartComponent
+	   (kPrefetchableSupportChanged) to inform the host that this support has changed. */
 	virtual tresult PLUGIN_API getPrefetchableSupport (PrefetchableSupport& prefetchable /*out*/) = 0;
 
-	//------------------------------------------------------------------------
+//------------------------------------------------------------------------
 	static const FUID iid;
 };
 
 DECLARE_CLASS_IID (IPrefetchableSupport, 0x8AE54FDA, 0xE93046B9, 0xA28555BC, 0xDC98E21E)
 
+//------------------------------------------------------------------------
 } // namespace Vst
 } // namespace Steinberg
 

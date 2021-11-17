@@ -122,7 +122,7 @@ public:
 
 private:
     JucerDocument* document;
-    OwnedArray <Component> components;
+    OwnedArray<Component> components;
     SelectedItemSet <Component*> selected;
     int nextCompUID;
 

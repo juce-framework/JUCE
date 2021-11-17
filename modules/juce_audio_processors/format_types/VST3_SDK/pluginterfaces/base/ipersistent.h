@@ -29,9 +29,9 @@ This interface is used to store/restore attributes of an object.
 An IPlugController can implement this interface to handle presets.
 The gui-xml for a preset control looks like this:
 \code
-	....
-	<view name="PresetView" data="Preset"/>
-	....
+....
+<view name="PresetView" data="Preset"/>
+....
 <template name="PresetView">
 	<view name="preset control" size="0, 0, 100, 20"/>
 	<switch name="store preset" size="125,0,80,20" style="push|immediate" title="Store"  />
@@ -41,7 +41,6 @@ The gui-xml for a preset control looks like this:
 The tag data="Preset" tells the host to create a preset controller that handles the 
 3 values named "preset control",  "store preset", and "remove preset".
 */
-//------------------------------------------------------------------------
 class IPersistent: public FUnknown
 {
 public:
@@ -63,7 +62,8 @@ DECLARE_CLASS_IID (IPersistent, 0xBA1A4637, 0x3C9F46D0, 0xA65DBA0E, 0xB85DA829)
 typedef FIDString IAttrID;
 //------------------------------------------------------------------------
 /**  Object Data Archive Interface. 
-[host imp] \n
+- [host imp]
+
 - store data/objects/binary/subattributes in the archive
 - read stored data from the archive
 
@@ -76,7 +76,6 @@ in namespace PAttributes (public.sdk/source/common/pattributes.h+cpp) !!
 
 \ingroup frameworkHostClasses
 */
-//------------------------------------------------------------------------
 class IAttributes: public FUnknown
 {
 public:
@@ -139,11 +138,11 @@ DECLARE_CLASS_IID (IAttributes, 0xFA1E32F9, 0xCA6D46F5, 0xA982F956, 0xB1191B58)
 
 //------------------------------------------------------------------------
 /**  Extended access to Attributes; supports Attribute retrieval via iteration. 
-[host imp] \n
-[released] C7/N6 \n
+- [host imp]
+- [released] C7/N6
+
 \ingroup frameworkHostClasses
 */
-//------------------------------------------------------------------------
 class IAttributes2 : public IAttributes
 {
 public:

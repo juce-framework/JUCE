@@ -29,10 +29,10 @@ namespace juce
 //==============================================================================
 namespace ReturnHelpers
 {
-    template<typename Type>
+    template <typename Type>
     Type returnDefaultConstructedAnyType()               { return {}; }
 
-    template<>
+    template <>
     inline void returnDefaultConstructedAnyType<void>()  {}
 }
 
@@ -579,7 +579,7 @@ public:
    #endif
 
     //==============================================================================
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED_MINIMAL (X11Symbols)
+    JUCE_DECLARE_SINGLETON (X11Symbols, false)
 
 private:
     X11Symbols() = default;

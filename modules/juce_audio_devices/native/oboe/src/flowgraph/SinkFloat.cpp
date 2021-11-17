@@ -28,7 +28,7 @@ SinkFloat::SinkFloat(int32_t channelCount)
 int32_t SinkFloat::read(void *data, int32_t numFrames) {
     // printf("SinkFloat::read(,,%d)\n", numFrames);
     float *floatData = (float *) data;
-    int32_t channelCount = input.getSamplesPerFrame();
+    const int32_t channelCount = input.getSamplesPerFrame();
 
     int32_t framesLeft = numFrames;
     while (framesLeft > 0) {

@@ -30,6 +30,8 @@ namespace juce
  Image juce_loadWithCoreImage (InputStream& input);
 #else
 
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6385)
+
 //==============================================================================
 class GIFLoader
 {
@@ -113,7 +115,8 @@ private:
 
     bool getSizeFromHeader (int& w, int& h)
     {
-        char b[6];
+        // Add an extra byte for the zero terminator
+        char b[7]{};
 
         if (input.read (b, 6) == 6
              && (strncmp ("GIF87a", b, 6) == 0
@@ -411,6 +414,8 @@ private:
 
     JUCE_DECLARE_NON_COPYABLE (GIFLoader)
 };
+
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 #endif
 

@@ -11,7 +11,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -39,9 +39,72 @@
 
 #include "base/source/fdebug.h"
 
+#if SMTG_OS_WINDOWS
+#include <windows.h>
+
+bool AmIBeingDebugged ()
+{
+	return IsDebuggerPresent ();
+}
+#endif
+
+#if SMTG_OS_LINUX
+#include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
+//--------------------------------------------------------------------------
+bool AmIBeingDebugged ()
+{
+	// TODO: check if GDB or LLDB is attached
+	return true;
+}
+#endif
+
+#if SMTG_OS_MACOS
+
+#include <stdbool.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+//------------------------------------------------------------------------
+// from Technical Q&A QA1361 (http://developer.apple.com/qa/qa2004/qa1361.html)
+//------------------------------------------------------------------------
+bool AmIBeingDebugged ()
+// Returns true if the current process is being debugged (either
+// running under the debugger or has a debugger attached post facto).
+{
+	int mib[4];
+	struct kinfo_proc info;
+	size_t size;
+
+	// Initialize the flags so that, if sysctl fails for some bizarre
+	// reason, we get a predictable result.
+
+	info.kp_proc.p_flag = 0;
+
+	// Initialize mib, which tells sysctl the info we want, in this case
+	// we're looking for information about a specific process ID.
+
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PID;
+	mib[3] = getpid ();
+
+	// Call sysctl.
+
+	size = sizeof (info);
+	sysctl (mib, sizeof (mib) / sizeof (*mib), &info, &size, NULL, 0);
+
+	// We're being debugged if the P_TRACED flag is set.
+	return ((info.kp_proc.p_flag & P_TRACED) != 0);
+}
+
+#endif // SMTG_OS_MACOS
+
 #if DEVELOPMENT
 
-#include <assert.h>
+#include <cassert>
 #include <cstdarg>
 #include <cstdio>
 
@@ -49,8 +112,9 @@
 #ifndef _WIN32_WINNT
 #define _WIN32_WINNT 0x0400
 #endif
+#if _MSC_VER
 #include <intrin.h>
-#include <windows.h>
+#endif
 #define vsnprintf _vsnprintf
 #define snprintf _snprintf
 
@@ -60,12 +124,6 @@
 #include <mach/mach_time.h>
 #include <new>
 #include <signal.h>
-#include <stdbool.h>
-#include <sys/sysctl.h>
-#include <sys/types.h>
-#include <unistd.h>
-
-static bool AmIBeingDebugged (void);
 
 #define THREAD_ALLOC_WATCH 0 // check allocations on specific threads
 
@@ -78,27 +136,6 @@ mach_port_t watchThreadID = 0;
 AssertionHandler gAssertionHandler = nullptr;
 AssertionHandler gPreAssertionHook = nullptr;
 DebugPrintLogger gDebugPrintLogger = nullptr;
-
-namespace boost {
-// Define the boost assertion handler to redirect to our assertion handler,
-// otherwise it just calls abort(). Note that we don't need to include any boost
-// headers for this, it just provides the handler.
-void assertion_failed (char const* expr, char const* function, char const* file, long line)
-{
-#if DEVELOPMENT
-	char message[512];
-	snprintf (message, 512, "%s at %s, %s:%ld", expr, function, file, line);
-	if (gAssertionHandler)
-	{
-		FDebugBreak (message);
-	}
-	else
-	{
-		assert (!(const char *)message);
-	}
-#endif
-}
-}
 
 //--------------------------------------------------------------------------
 static const int kDebugPrintfBufferSize = 10000;
@@ -116,7 +153,7 @@ static void printDebugString (const char* string)
 	}
 	else
 	{
-#if SMTG_OS_MACOS
+#if SMTG_OS_MACOS || defined(__MINGW32__)
 		fprintf (stderr, "%s", string);
 #elif SMTG_OS_WINDOWS
 		OutputDebugStringA (string);
@@ -136,22 +173,6 @@ void FDebugPrint (const char* format, ...)
 
 	printDebugString (string);
 }
-
-#if SMTG_OS_WINDOWS
-#define AmIBeingDebugged IsDebuggerPresent
-#endif
-
-#if SMTG_OS_LINUX
-#include <signal.h>
-#include <sys/types.h>
-#include <unistd.h>
-//--------------------------------------------------------------------------
-static inline bool AmIBeingDebugged ()
-{
-	// TODO: check if GDB or LLDB is attached
-	return true;
-}
-#endif
 
 //--------------------------------------------------------------------------
 //	printf style debugging output
@@ -187,8 +208,11 @@ void FDebugBreak (const char* format, ...)
 
 		if (breakIntoDebugger)
 		{
-#if SMTG_OS_WINDOWS
+#if SMTG_OS_WINDOWS	&& _MSC_VER
 			__debugbreak (); // intrinsic version of DebugBreak()
+#elif SMTG_OS_MACOS && __arm64__
+			raise (SIGSTOP);
+
 #elif __ppc64__ || __ppc__ || __arm__
 			kill (getpid (), SIGINT);
 #elif __i386__ || __x86_64__
@@ -205,9 +229,9 @@ void FPrintLastError (const char* file, int line)
 {
 #if SMTG_OS_WINDOWS
 	LPVOID lpMessageBuffer;
-	FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, NULL,
+	FormatMessageA (FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, nullptr,
 	                GetLastError (), MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
-	                (LPSTR)&lpMessageBuffer, 0, NULL);
+	                (LPSTR)&lpMessageBuffer, 0, nullptr);
 	FDebugPrint ("%s(%d) : %s\n", file, line, lpMessageBuffer);
 	LocalFree (lpMessageBuffer);
 #endif
@@ -276,39 +300,20 @@ void operator delete[] (void* p, int, const char* file, int line)
 	::operator delete[] (p);
 }
 
-//------------------------------------------------------------------------
-// from Technical Q&A QA1361 (http://developer.apple.com/qa/qa2004/qa1361.html)
-//------------------------------------------------------------------------
-bool AmIBeingDebugged (void)
-// Returns true if the current process is being debugged (either
-// running under the debugger or has a debugger attached post facto).
-{
-	int mib[4];
-	struct kinfo_proc info;
-	size_t size;
-
-	// Initialize the flags so that, if sysctl fails for some bizarre
-	// reason, we get a predictable result.
-
-	info.kp_proc.p_flag = 0;
-
-	// Initialize mib, which tells sysctl the info we want, in this case
-	// we're looking for information about a specific process ID.
-
-	mib[0] = CTL_KERN;
-	mib[1] = KERN_PROC;
-	mib[2] = KERN_PROC_PID;
-	mib[3] = getpid ();
-
-	// Call sysctl.
-
-	size = sizeof (info);
-	sysctl (mib, sizeof (mib) / sizeof (*mib), &info, &size, NULL, 0);
-
-	// We're being debugged if the P_TRACED flag is set.
-	return ((info.kp_proc.p_flag & P_TRACED) != 0);
-}
-
 #endif // SMTG_OS_MACOS
 
 #endif // DEVELOPMENT
+
+static bool smtg_unit_testing_active = false; // ugly hack to unit testing ...
+
+//------------------------------------------------------------------------
+bool isSmtgUnitTesting ()
+{
+	return smtg_unit_testing_active;
+}
+
+//------------------------------------------------------------------------
+void setSmtgUnitTesting ()
+{
+	smtg_unit_testing_active = true;
+}

@@ -188,6 +188,7 @@ public:
     {
         addAndMakeVisible (tree);
 
+        tree.setTitle ("ValueTree");
         tree.setDefaultOpenness (true);
         tree.setMultiSelectEnabled (true);
         rootItem.reset (new ValueTreeItem (createRootValueTree(), undoManager));

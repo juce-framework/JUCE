@@ -68,6 +68,7 @@ private:
     OwnedArray<ToolbarItemComponent> items;
 
     friend class Toolbar;
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void replaceComponent (ToolbarItemComponent&);
     void addComponent (int itemId, int index);
 

@@ -25,7 +25,7 @@ function(_juce_create_atomic_target target_name)
     add_library("${target_name}" INTERFACE)
     add_library("juce::${target_name}" ALIAS "${target_name}")
 
-    if(NOT (CMAKE_SYSTEM_NAME STREQUAL "Linux"))
+    if(NOT ((CMAKE_SYSTEM_NAME STREQUAL "Linux") OR (CMAKE_SYSTEM_NAME MATCHES ".*BSD")))
         return()
     endif()
 
@@ -51,7 +51,7 @@ function(_juce_create_atomic_target target_name)
 
     try_compile(compile_result "${test_bindir}" "${test_file_name}"
         OUTPUT_VARIABLE test_build_output_0
-        CXX_STANDARD 11
+        CXX_STANDARD 14
         CXX_STANDARD_REQUIRED TRUE
         CXX_EXTENSIONS FALSE)
 
@@ -59,7 +59,7 @@ function(_juce_create_atomic_target target_name)
         try_compile(compile_result "${test_bindir}" "${test_file_name}"
             OUTPUT_VARIABLE test_build_output_1
             LINK_LIBRARIES atomic
-            CXX_STANDARD 11
+            CXX_STANDARD 14
             CXX_STANDARD_REQUIRED TRUE
             CXX_EXTENSIONS FALSE)
 
@@ -81,3 +81,6 @@ function(_juce_create_atomic_target target_name)
     file(REMOVE "${test_file_name}")
     file(REMOVE_RECURSE "${test_bindir}")
 endfunction()
+
+_juce_create_atomic_target(juce_atomic_wrapper)
+

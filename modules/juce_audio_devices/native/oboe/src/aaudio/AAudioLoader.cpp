@@ -24,10 +24,17 @@
 namespace oboe {
 
 AAudioLoader::~AAudioLoader() {
-    if (mLibHandle != nullptr) {
-        dlclose(mLibHandle);
-        mLibHandle = nullptr;
-    }
+    // Issue 360: thread_local variables with non-trivial destructors
+    // will cause segfaults if the containing library is dlclose()ed on
+    // devices running M or newer, or devices before M when using a static STL.
+    // The simple workaround is to not call dlclose.
+    // https://github.com/android/ndk/wiki/Changelog-r22#known-issues
+    //
+    // The libaaudio and libaaudioclient do not use thread_local.
+    // But, to be safe, we should avoid dlclose() if possible.
+    // Because AAudioLoader is a static Singleton, we can safely skip
+    // calling dlclose() without causing a resource leak.
+    LOGI("%s() dlclose(%s) not called, OK", __func__, LIB_AAUDIO_NAME);
 }
 
 AAudioLoader* AAudioLoader::getInstance() {
@@ -76,6 +83,11 @@ int AAudioLoader::open() {
         builder_setSessionId   = load_V_PBI("AAudioStreamBuilder_setSessionId");
     }
 
+    if (getSdkVersion() >= __ANDROID_API_S__){
+        builder_setPackageName       = load_V_PBCPH("AAudioStreamBuilder_setPackageName");
+        builder_setAttributionTag    = load_V_PBCPH("AAudioStreamBuilder_setAttributionTag");
+    }
+
     builder_delete             = load_I_PB("AAudioStreamBuilder_delete");
 
 
@@ -89,8 +101,6 @@ int AAudioLoader::open() {
     stream_waitForStateChange  = load_I_PSTPTL("AAudioStream_waitForStateChange");
 
     stream_getTimestamp        = load_I_PSKPLPL("AAudioStream_getTimestamp");
-
-    stream_isMMapUsed          = load_B_PS("AAudioStream_isMMapUsed");
 
     stream_getChannelCount     = load_I_PS("AAudioStream_getChannelCount");
     if (stream_getChannelCount == nullptr) {
@@ -153,6 +163,12 @@ AAudioLoader::signature_V_PBI AAudioLoader::load_V_PBI(const char *functionName)
     void *proc = dlsym(mLibHandle, functionName);
     AAudioLoader_check(proc, functionName);
     return reinterpret_cast<signature_V_PBI>(proc);
+}
+
+AAudioLoader::signature_V_PBCPH AAudioLoader::load_V_PBCPH(const char *functionName) {
+    void *proc = dlsym(mLibHandle, functionName);
+    AAudioLoader_check(proc, functionName);
+    return reinterpret_cast<signature_V_PBCPH>(proc);
 }
 
 AAudioLoader::signature_V_PBPDPV AAudioLoader::load_V_PBPDPV(const char *functionName) {
@@ -304,7 +320,6 @@ AAudioLoader::signature_I_PSKPLPL AAudioLoader::load_I_PSKPLPL(const char *funct
             == AAUDIO_PERFORMANCE_MODE_POWER_SAVING, ERRMSG);
     static_assert((int32_t)PerformanceMode::LowLatency
             == AAUDIO_PERFORMANCE_MODE_LOW_LATENCY, ERRMSG);
-#endif
 
 // The aaudio_ usage, content and input_preset types were added in NDK 17,
 // which is the first version to support Android Pie (API 28).
@@ -343,6 +358,9 @@ AAudioLoader::signature_I_PSKPLPL AAudioLoader::load_I_PSKPLPL(const char *funct
 
     static_assert((int32_t)SessionId::None == AAUDIO_SESSION_ID_NONE, ERRMSG);
     static_assert((int32_t)SessionId::Allocate == AAUDIO_SESSION_ID_ALLOCATE, ERRMSG);
-#endif
+
+#endif // __NDK_MAJOR__ >= 17
+
+#endif // AAUDIO_AAUDIO_H
 
 } // namespace oboe

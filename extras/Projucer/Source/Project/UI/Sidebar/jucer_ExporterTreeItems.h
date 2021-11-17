@@ -78,13 +78,25 @@ public:
 
     void deleteItem() override
     {
-        if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Exporter",
-                                          "Are you sure you want to delete this export target?"))
+        auto resultCallback = [safeThis = WeakReference<ExporterItem> { this }] (int result)
         {
-            closeSettingsPage();
-            ValueTree parent (exporter->settings.getParent());
-            parent.removeChild (exporter->settings, project.getUndoManagerFor (parent));
-        }
+            if (safeThis == nullptr || result == 0)
+                return;
+
+            safeThis->closeSettingsPage();
+
+            auto parent = safeThis->exporter->settings.getParent();
+            parent.removeChild (safeThis->exporter->settings,
+                                safeThis->project.getUndoManagerFor (parent));
+        };
+
+        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
+                                      "Delete Exporter",
+                                      "Are you sure you want to delete this export target?",
+                                      "",
+                                      "",
+                                      nullptr,
+                                      ModalCallbackFunction::create (std::move (resultCallback)));
     }
 
     void addSubItems() override
@@ -93,7 +105,7 @@ public:
             addSubItem (new ConfigItem (config.config, *exporter));
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         PopupMenu menu;
         menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
@@ -101,15 +113,15 @@ public:
         menu.addSeparator();
         menu.addItem (3, "Delete this exporter");
 
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
-    void showAddMenu() override
+    void showAddMenu (Point<int> p) override
     {
         PopupMenu menu;
         menu.addItem (1, "Add a new configuration", exporter->supportsUserDefinedConfigurations());
 
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
     void handlePopupMenuResult (int resultCode) override
@@ -117,7 +129,7 @@ public:
         if (resultCode == 1)
             exporter->addNewConfiguration (false);
         else if (resultCode == 2)
-            project.saveProject (exporter.get());
+            project.saveProject (Async::yes, exporter.get(), nullptr);
         else if (resultCode == 3)
             deleteAllSelectedItems();
     }
@@ -200,6 +212,7 @@ private:
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ExporterItem)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ExporterItem)
 };
 
 
@@ -231,15 +244,26 @@ public:
 
     void deleteItem() override
     {
-        if (AlertWindow::showOkCancelBox (AlertWindow::WarningIcon, "Delete Configuration",
-                                          "Are you sure you want to delete this configuration?"))
+        AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
+                                      "Delete Configuration",
+                                      "Are you sure you want to delete this configuration?",
+                                      "",
+                                      "",
+                                      nullptr,
+                                      ModalCallbackFunction::create ([parent = WeakReference<ConfigItem> { this }] (int result)
         {
-            closeSettingsPage();
-            config->removeFromExporter();
-        }
+            if (parent == nullptr)
+                return;
+
+            if (result == 0)
+                return;
+
+            parent->closeSettingsPage();
+            parent->config->removeFromExporter();
+        }));
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         bool enabled = exporter.supportsUserDefinedConfigurations();
 
@@ -248,7 +272,7 @@ public:
         menu.addSeparator();
         menu.addItem (2, "Delete this configuration", enabled);
 
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
     void handlePopupMenuResult (int resultCode) override
@@ -297,6 +321,8 @@ private:
     };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ConfigItem)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ConfigItem)
+
 };
 
 //==============================================================================
@@ -320,7 +346,7 @@ public:
     void setName (const String&) override            {}
     Icon getIcon() const override                    { return project.getMainGroup().getIcon (isOpen()).withColour (getContentColour (true)); }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int>) override
     {
         if (auto* pcc = getProjectContentComponent())
             pcc->showNewExporterMenu();

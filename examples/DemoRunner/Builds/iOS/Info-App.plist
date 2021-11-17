@@ -14,7 +14,7 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>UIViewControllerBasedStatusBarAppearance</key>
-    <false/>
+    <true/>
     <key>UILaunchStoryboardName</key>
     <string>LaunchScreen</string>
     <key>CFBundleExecutable</key>
@@ -30,9 +30,9 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>6.0.7</string>
+    <string>6.1.2</string>
     <key>CFBundleVersion</key>
-    <string>6.0.7</string>
+    <string>6.1.2</string>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright (c) 2020 - Raw Material Software Limited</string>
     <key>NSHighResolutionCapable</key>
@@ -42,14 +42,13 @@
     <key>UISupportsDocumentBrowser</key>
     <true/>
     <key>UIRequiresFullScreen</key>
-    <true/>
-    <key>UIStatusBarHidden</key>
-    <true/>
+    <false/>
     <key>UISupportedInterfaceOrientations</key>
     <array>
-      <string>UIInterfaceOrientationPortrait</string>
       <string>UIInterfaceOrientationLandscapeLeft</string>
       <string>UIInterfaceOrientationLandscapeRight</string>
+      <string>UIInterfaceOrientationPortrait</string>
+      <string>UIInterfaceOrientationPortraitUpsideDown</string>
     </array>
     <key>UIBackgroundModes</key>
     <array/>

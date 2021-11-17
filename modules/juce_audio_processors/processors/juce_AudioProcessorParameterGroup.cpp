@@ -131,7 +131,7 @@ Array<const AudioProcessorParameterGroup*> AudioProcessorParameterGroup::getGrou
 
     if (auto* group = getGroupForParameter (parameter))
     {
-        while (group != this)
+        while (group != nullptr && group != this)
         {
             groups.insert (0, group);
             group = group->getParent();

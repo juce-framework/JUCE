@@ -35,10 +35,14 @@ namespace juce
 class WebInputStream::Pimpl
 {
 public:
-    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool shouldBePost)
-        : statusCode (0), owner (pimplOwner), url (urlToCopy), isPost (shouldBePost),
-          httpRequestCmd (isPost ? "POST" : "GET")
-    {}
+    Pimpl (WebInputStream& pimplOwner, const URL& urlToCopy, bool addParametersToBody)
+        : owner (pimplOwner),
+          url (urlToCopy),
+          addParametersToRequestBody (addParametersToBody),
+          hasBodyDataToSend (addParametersToRequestBody || url.hasBodyDataToSend()),
+          httpRequestCmd (hasBodyDataToSend ? "POST" : "GET")
+    {
+    }
 
     ~Pimpl()
     {
@@ -75,7 +79,7 @@ public:
                 return false;
         }
 
-        String address = url.toString (! isPost);
+        auto address = url.toString (! addParametersToRequestBody);
 
         while (numRedirectsToFollow-- >= 0)
         {
@@ -173,7 +177,14 @@ public:
 
     int read (void* buffer, int bytesToRead)
     {
-        jassert (buffer != nullptr && bytesToRead >= 0);
+        jassert (bytesToRead >= 0);
+
+        if (buffer == nullptr)
+        {
+            jassertfalse;
+            return 0;
+        }
+
         DWORD bytesRead = 0;
 
         if (! (finished || isError()))
@@ -226,7 +237,7 @@ public:
         return true;
     }
 
-    int statusCode;
+    int statusCode = 0;
 
 private:
     //==============================================================================
@@ -237,7 +248,7 @@ private:
     MemoryBlock postData;
     int64 position = 0;
     bool finished = false;
-    const bool isPost;
+    const bool addParametersToRequestBody, hasBodyDataToSend;
     int timeOutMs = 0;
     String httpRequestCmd;
     int numRedirectsToFollow = 5;
@@ -288,8 +299,11 @@ private:
             uc.lpszPassword = password;
             uc.dwPasswordLength = passwordNumChars;
 
-            if (isPost)
-                WebInputStream::createHeadersAndPostData (url, headers, postData);
+            if (hasBodyDataToSend)
+                WebInputStream::createHeadersAndPostData (url,
+                                                          headers,
+                                                          postData,
+                                                          addParametersToRequestBody);
 
             if (InternetCrackUrl (address.toWideCharPointer(), 0, 0, &uc))
                 openConnection (uc, sessionHandle, address, listener);
@@ -555,9 +569,9 @@ namespace MACAddressHelpers
         for (auto addr = start; addr != nullptr; addr = addr->Next)
         {
             if (addr->Address.lpSockaddr->sa_family == AF_INET)
-                result.addIfNotAlreadyThere (createAddress ((sockaddr_in*) addr->Address.lpSockaddr));
+                result.addIfNotAlreadyThere (createAddress (unalignedPointerCast<sockaddr_in*> (addr->Address.lpSockaddr)));
             else if (addr->Address.lpSockaddr->sa_family == AF_INET6 && includeIPv6)
-                result.addIfNotAlreadyThere (createAddress ((sockaddr_in6*) addr->Address.lpSockaddr));
+                result.addIfNotAlreadyThere (createAddress (unalignedPointerCast<sockaddr_in6*> (addr->Address.lpSockaddr)));
         }
     }
 }

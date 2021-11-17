@@ -183,18 +183,18 @@ inline const Type* addBytesToPointer (const Type* basePointer, IntegerType bytes
  #define juce_UseDebuggingNewOperator
 #endif
 
- /** Converts an owning raw pointer into a unique_ptr, deriving the
-     type of the unique_ptr automatically.
+/** Converts an owning raw pointer into a unique_ptr, deriving the
+    type of the unique_ptr automatically.
 
-     This should only be used with pointers to single objects.
-     Do NOT pass a pointer to an array to this function, as the
-     destructor of the unique_ptr will incorrectly call `delete`
-     instead of `delete[]` on the pointer.
- */
- template <typename T>
- std::unique_ptr<T> rawToUniquePtr (T* ptr)
- {
-     return std::unique_ptr<T> (ptr);
- }
+    This should only be used with pointers to single objects.
+    Do NOT pass a pointer to an array to this function, as the
+    destructor of the unique_ptr will incorrectly call `delete`
+    instead of `delete[]` on the pointer.
+*/
+template <typename T>
+std::unique_ptr<T> rawToUniquePtr (T* ptr)
+{
+    return std::unique_ptr<T> (ptr);
+}
 
 } // namespace juce

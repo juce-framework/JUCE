@@ -69,18 +69,26 @@ namespace ProjectInfo
 
 int writeBinaryData (juce::ArgumentList&& args)
 {
-    args.checkMinNumArguments (3);
+    args.checkMinNumArguments (4);
     const auto namespaceName = args.arguments.removeAndReturn (0);
     const auto headerName    = args.arguments.removeAndReturn (0);
     const auto outFolder     = args.arguments.removeAndReturn (0).resolveAsExistingFolder();
+    const auto inputFileList = args.arguments.removeAndReturn (0).resolveAsExistingFile();
 
     juce::build_tools::ResourceFile resourceFile;
 
     resourceFile.setClassName (namespaceName.text);
     const auto lineEndings = args.removeOptionIfFound ("--windows") ? "\r\n" : "\n";
 
-    for (const auto& arg : args.arguments)
-        resourceFile.addFile (arg.resolveAsExistingFile());
+    const auto allLines = [&]
+    {
+        auto lines = juce::StringArray::fromLines (inputFileList.loadFileAsString());
+        lines.removeEmptyStrings();
+        return lines;
+    }();
+
+    for (const auto& arg : allLines)
+        resourceFile.addFile (juce::File (arg));
 
     const auto result = resourceFile.write (0,
                                             lineEndings,
@@ -240,12 +248,14 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("SHOULD_ADD_STORYBOARD",                result.shouldAddStoryboardToProject);
     updateField ("LAUNCH_STORYBOARD_FILE",               result.storyboardName);
     updateField ("PROJECT_NAME",                         result.projectName);
-    updateField ("VERSION",                              result.version);
+    updateField ("VERSION",                              result.marketingVersion);
+    updateField ("BUILD_VERSION",                        result.currentProjectVersion);
     updateField ("COMPANY_COPYRIGHT",                    result.companyCopyright);
     updateField ("DOCUMENT_EXTENSIONS",                  result.documentExtensions);
     updateField ("FILE_SHARING_ENABLED",                 result.fileSharingEnabled);
     updateField ("DOCUMENT_BROWSER_ENABLED",             result.documentBrowserEnabled);
     updateField ("STATUS_BAR_HIDDEN",                    result.statusBarHidden);
+    updateField ("REQUIRES_FULL_SCREEN",                 result.requiresFullScreen);
     updateField ("BACKGROUND_AUDIO_ENABLED",             result.backgroundAudioEnabled);
     updateField ("BACKGROUND_BLE_ENABLED",               result.backgroundBleEnabled);
     updateField ("PUSH_NOTIFICATIONS_ENABLED",           result.pushNotificationsEnabled);
@@ -266,7 +276,6 @@ juce::build_tools::PlistOptions parsePlistOptions (const juce::File& file,
     updateField ("ICON_FILE",                            result.iconFile);
 
     result.type = type;
-    result.versionAsHex = juce::build_tools::getVersionAsHexInteger (result.version);
 
     if (result.storyboardName.isNotEmpty())
         result.storyboardName = result.storyboardName.fromLastOccurrenceOf ("/", false, false)
@@ -483,9 +492,21 @@ int main (int argc, char** argv)
 
     return juce::ConsoleApplication::invokeCatchingFailures ([argc, argv]
     {
-        juce::ArgumentList argumentList { argc, argv };
+        if (argc < 1)
+            juce::ConsoleApplication::fail ("No arguments passed", 1);
 
-        using Fn = typename std::add_lvalue_reference<decltype (writeBinaryData)>::type;
+        const auto getString = [&] (const char* text)
+        {
+            return juce::String (juce::CharPointer_UTF8 (text));
+        };
+
+        std::vector<juce::String> arguments;
+        std::transform (argv, argv + argc, std::back_inserter (arguments), getString);
+
+        juce::ArgumentList argumentList { arguments.front(),
+                                          juce::StringArray (arguments.data() + 1, (int) arguments.size() - 1) };
+
+        using Fn = std::add_lvalue_reference<decltype (writeBinaryData)>::type;
 
         const std::unordered_map<juce::String, Fn> commands
         {

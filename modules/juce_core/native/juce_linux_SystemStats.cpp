@@ -27,6 +27,22 @@ extern "C" int cobalt_thread_mode();
 namespace juce
 {
 
+#if ! JUCE_BSD
+static String getCpuInfo (const char* key)
+{
+    return readPosixConfigFileValue ("/proc/cpuinfo", key);
+}
+
+static String getLocaleValue (nl_item key)
+{
+    auto oldLocale = ::setlocale (LC_ALL, "");
+    auto result = String::fromUTF8 (nl_langinfo (key));
+    ::setlocale (LC_ALL, oldLocale);
+    return result;
+}
+#endif
+
+//==============================================================================
 void Logger::outputDebugString (const String& text)
 {
     std::cerr << text << std::endl;
@@ -54,14 +70,25 @@ bool SystemStats::isOperatingSystem64Bit()
 }
 
 //==============================================================================
-static String getCpuInfo (const char* key)
-{
-    return readPosixConfigFileValue ("/proc/cpuinfo", key);
-}
-
 String SystemStats::getDeviceDescription()
 {
+   #if JUCE_BSD
+    int mib[] = {
+        CTL_HW,
+        HW_MACHINE
+    };
+    size_t machineDescriptionLength = 0;
+    auto result = sysctl (mib, numElementsInArray (mib), nullptr, &machineDescriptionLength, nullptr, 0);
+
+    if (result != 0 || machineDescriptionLength == 0)
+        return {};
+
+    MemoryBlock machineDescription { machineDescriptionLength };
+    result = sysctl (mib, numElementsInArray (mib), machineDescription.getData(), &machineDescriptionLength, nullptr, 0);
+    return String::fromUTF8 (result == 0 ? (char*) machineDescription.getData() : "");
+   #else
     return getCpuInfo ("Hardware");
+   #endif
 }
 
 String SystemStats::getDeviceManufacturer()
@@ -71,32 +98,70 @@ String SystemStats::getDeviceManufacturer()
 
 String SystemStats::getCpuVendor()
 {
+   #if JUCE_BSD
+    return {};
+   #else
     auto v = getCpuInfo ("vendor_id");
 
     if (v.isEmpty())
         v = getCpuInfo ("model name");
 
     return v;
+   #endif
 }
 
 String SystemStats::getCpuModel()
 {
+   #if JUCE_BSD
+    int mib[] = {
+        CTL_HW,
+        HW_MODEL
+    };
+    size_t modelLength = 0;
+    auto result = sysctl (mib, numElementsInArray (mib), nullptr, &modelLength, nullptr, 0);
+
+    if (result != 0 || modelLength == 0)
+        return {};
+
+    MemoryBlock model { modelLength };
+    result = sysctl (mib, numElementsInArray (mib), model.getData(), &modelLength, nullptr, 0);
+    return String::fromUTF8 (result == 0 ? (char*) model.getData() : "");
+   #else
     return getCpuInfo ("model name");
+   #endif
 }
 
 int SystemStats::getCpuSpeedInMegahertz()
 {
+   #if JUCE_BSD
+    int32 clockRate = 0;
+    auto clockRateSize = sizeof (clockRate);
+    auto result = sysctlbyname ("hw.clockrate", &clockRate, &clockRateSize, nullptr, 0);
+    return result == 0 ? clockRate : 0;
+   #else
     return roundToInt (getCpuInfo ("cpu MHz").getFloatValue());
+   #endif
 }
 
 int SystemStats::getMemorySizeInMegabytes()
 {
+   #if JUCE_BSD
+    int mib[] = {
+        CTL_HW,
+        HW_PHYSMEM
+    };
+    int64 memory = 0;
+    auto memorySize = sizeof (memory);
+    auto result = sysctl (mib, numElementsInArray (mib), &memory, &memorySize, nullptr, 0);
+    return result == 0 ? (int) (memory / 1e6) : 0;
+   #else
     struct sysinfo sysi;
 
     if (sysinfo (&sysi) == 0)
         return (int) (sysi.totalram * sysi.mem_unit / (1024 * 1024));
 
     return 0;
+   #endif
 }
 
 int SystemStats::getPageSize()
@@ -131,21 +196,79 @@ String SystemStats::getComputerName()
     return {};
 }
 
-static String getLocaleValue (nl_item key)
+String SystemStats::getUserLanguage()
 {
-    auto oldLocale = ::setlocale (LC_ALL, "");
-    auto result = String::fromUTF8 (nl_langinfo (key));
-    ::setlocale (LC_ALL, oldLocale);
-    return result;
+   #if JUCE_BSD
+    if (auto langEnv = getenv ("LANG"))
+        return String::fromUTF8 (langEnv).upToLastOccurrenceOf (".UTF-8", false, true);
+
+    return {};
+   #else
+    return getLocaleValue (_NL_IDENTIFICATION_LANGUAGE);
+   #endif
 }
 
-String SystemStats::getUserLanguage()     { return getLocaleValue (_NL_IDENTIFICATION_LANGUAGE); }
-String SystemStats::getUserRegion()       { return getLocaleValue (_NL_IDENTIFICATION_TERRITORY); }
-String SystemStats::getDisplayLanguage()  { return getUserLanguage() + "-" + getUserRegion(); }
+String SystemStats::getUserRegion()
+{
+   #if JUCE_BSD
+    return {};
+   #else
+    return getLocaleValue (_NL_IDENTIFICATION_TERRITORY);
+   #endif
+}
+
+String SystemStats::getDisplayLanguage()
+{
+    auto result = getUserLanguage();
+    auto region = getUserRegion();
+
+    if (region.isNotEmpty())
+        result << "-" << region;
+
+    return result;
+}
 
 //==============================================================================
 void CPUInformation::initialise() noexcept
 {
+  #if JUCE_BSD
+   #if JUCE_INTEL && ! JUCE_NO_INLINE_ASM
+    SystemStatsHelpers::getCPUInfo (hasMMX,
+                                    hasSSE,
+                                    hasSSE2,
+                                    has3DNow,
+                                    hasSSE3,
+                                    hasSSSE3,
+                                    hasFMA3,
+                                    hasSSE41,
+                                    hasSSE42,
+                                    hasAVX,
+                                    hasFMA4,
+                                    hasAVX2,
+                                    hasAVX512F,
+                                    hasAVX512DQ,
+                                    hasAVX512IFMA,
+                                    hasAVX512PF,
+                                    hasAVX512ER,
+                                    hasAVX512CD,
+                                    hasAVX512BW,
+                                    hasAVX512VL,
+                                    hasAVX512VBMI,
+                                    hasAVX512VPOPCNTDQ);
+   #endif
+
+    numLogicalCPUs = numPhysicalCPUs = []
+    {
+        int mib[] = {
+            CTL_HW,
+            HW_NCPU
+        };
+        int32 numCPUs = 1;
+        auto numCPUsSize = sizeof (numCPUs);
+        auto result = sysctl (mib, numElementsInArray (mib), &numCPUs, &numCPUsSize, nullptr, 0);
+        return result == 0 ? numCPUs : 1;
+    }();
+  #else
     auto flags = getCpuInfo ("flags");
 
     hasMMX             = flags.contains ("mmx");
@@ -178,6 +301,7 @@ void CPUInformation::initialise() noexcept
 
     if (numPhysicalCPUs <= 0)
         numPhysicalCPUs = numLogicalCPUs;
+  #endif
 }
 
 //==============================================================================
@@ -224,7 +348,17 @@ bool Time::setSystemTimeToThisTime() const
 JUCE_API bool JUCE_CALLTYPE juce_isRunningUnderDebugger() noexcept
 {
    #if JUCE_BSD
-    return false;
+    int mib[] =
+    {
+        CTL_KERN,
+        KERN_PROC,
+        KERN_PROC_PID,
+        ::getpid()
+    };
+    struct kinfo_proc info;
+    auto infoSize = sizeof (info);
+    auto result = sysctl (mib, numElementsInArray (mib), &info, &infoSize, nullptr, 0);
+    return result == 0 ? ((info.ki_flag & P_TRACED) != 0) : false;
    #else
     return readPosixConfigFileValue ("/proc/self/status", "TracerPid").getIntValue() > 0;
    #endif

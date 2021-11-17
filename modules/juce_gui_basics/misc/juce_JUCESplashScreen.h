@@ -56,6 +56,7 @@ public:
     static std::unique_ptr<Drawable> getSplashScreenLogo();
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void paint (Graphics&) override;
     void timerCallback() override;
     void parentSizeChanged() override;

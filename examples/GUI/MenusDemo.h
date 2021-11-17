@@ -157,12 +157,18 @@ public:
         setApplicationCommandManagerToWatch (&commandManager);
         commandManager.registerAllCommandsForTarget (this);
 
+        // this ensures that commands invoked on the DemoRunner application are correctly
+        // forwarded to this demo
+        commandManager.setFirstCommandTarget (this);
+
         // this lets the command manager use keypresses that arrive in our window to send out commands
         addKeyListener (commandManager.getKeyMappings());
 
         addChildComponent (menuHeader);
         addAndMakeVisible (outerCommandTarget);
         addAndMakeVisible (sidePanel);
+
+        setWantsKeyboardFocus (true);
 
         setSize (500, 500);
     }
@@ -172,6 +178,8 @@ public:
        #if JUCE_MAC
         MenuBarModel::setMacMainMenu (nullptr);
        #endif
+
+        commandManager.setFirstCommandTarget (nullptr);
     }
 
     void resized() override
@@ -314,7 +322,11 @@ public:
     }
 
 private:
+   #if JUCE_DEMO_RUNNER
+    ApplicationCommandManager& commandManager = getGlobalCommandManager();
+   #else
     ApplicationCommandManager commandManager;
+   #endif
 
     std::unique_ptr<MenuBarComponent> menuBar;
     MenuBarPosition menuBarPosition = MenuBarPosition::window;

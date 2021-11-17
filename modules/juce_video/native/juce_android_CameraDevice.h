@@ -530,8 +530,8 @@ struct CameraDevice::Pimpl
         if (cameraOpenCallback == nullptr || scopedCameraDevice != nullptr)
             return;
 
-        WeakReference<Pimpl> safeThis (this);
-        RuntimePermissions::request (RuntimePermissions::camera, [safeThis] (bool granted) mutable
+        RuntimePermissions::request (RuntimePermissions::camera,
+                                     [safeThis = WeakReference<Pimpl> { this }] (bool granted) mutable
                                      {
                                          if (safeThis != nullptr)
                                              safeThis->continueOpenRequest (granted);
@@ -1067,8 +1067,8 @@ private:
 
             if (rotation == rotation90 || rotation == rotation270)
             {
-                env->CallBooleanMethod (matrix, AndroidMatrix.postScale, jfloat (height / (float) width), jfloat (width / (float) height), (jfloat) 0, (jfloat) 0);
-                env->CallBooleanMethod (matrix, AndroidMatrix.postRotate, (jfloat) 90 * (rotation - 2), (jfloat) 0, (jfloat) 0);
+                env->CallBooleanMethod (matrix, AndroidMatrix.postScale, jfloat ((float) height / (float) width), jfloat ((float) width / (float) height), (jfloat) 0, (jfloat) 0);
+                env->CallBooleanMethod (matrix, AndroidMatrix.postRotate, (jfloat) 90 * ((float) rotation - 2), (jfloat) 0, (jfloat) 0);
                 env->CallBooleanMethod (matrix, AndroidMatrix.postTranslate, (jfloat) (rotation == 3 ? width : 0), (jfloat) (rotation == 1 ? height : 0));
             }
 
@@ -1189,13 +1189,15 @@ private:
 
             env->CallVoidMethod (jImage, AndroidImage.close);
 
-            WeakReference<ImageReader> safeThis (this);
-
             owner.callListeners (image);
 
             // Android may take multiple pictures before it handles a request to stop.
             if (hasNotifiedListeners.compareAndSetBool (1, 0))
-                MessageManager::callAsync ([safeThis, image]() mutable { if (safeThis != nullptr) safeThis->owner.notifyPictureTaken (image); });
+                MessageManager::callAsync ([safeThis = WeakReference<ImageReader> { this }, image]() mutable
+                {
+                    if (safeThis != nullptr)
+                        safeThis->owner.notifyPictureTaken (image);
+                });
         }
 
         struct ImageBuffer
@@ -2183,14 +2185,10 @@ private:
                 JUCE_CAMERA_LOG ("cameraCaptureSessionConfigureFailed()");
                 ignoreUnused (session);
 
-                WeakReference<CaptureSession> weakRef (this);
-
-                MessageManager::callAsync ([this, weakRef]()
+                MessageManager::callAsync ([weakRef = WeakReference<CaptureSession> { this }]
                 {
-                    if (weakRef == nullptr)
-                        return;
-
-                    configuredCallback.captureSessionConfigured (nullptr);
+                    if (weakRef != nullptr)
+                        weakRef->configuredCallback.captureSessionConfigured (nullptr);
                 });
             }
 
@@ -2218,17 +2216,18 @@ private:
                     captureSession = GlobalRef (session);
                 }
 
-                WeakReference<CaptureSession> weakRef (this);
-
-                MessageManager::callAsync ([this, weakRef]()
+                MessageManager::callAsync ([weakRef = WeakReference<CaptureSession> { this }]
                 {
                     if (weakRef == nullptr)
                         return;
 
-                    stillPictureTaker.reset (new StillPictureTaker (captureSession, captureRequestBuilder,
-                                                                    previewCaptureRequest, handler, autoFocusMode));
+                    weakRef->stillPictureTaker.reset (new StillPictureTaker (weakRef->captureSession,
+                                                                             weakRef->captureRequestBuilder,
+                                                                             weakRef->previewCaptureRequest,
+                                                                             weakRef->handler,
+                                                                             weakRef->autoFocusMode));
 
-                    configuredCallback.captureSessionConfigured (this);
+                    weakRef->configuredCallback.captureSessionConfigured (weakRef.get());
                 });
             }
 
@@ -2542,18 +2541,11 @@ private:
               cameraLensFacing (cameraLensFacingToUse),
               streamConfigurationMap (streamConfigurationMapToUse)
         {
-            WeakReference<CaptureSessionMode<Mode>> weakRef (this);
-
-            if (weakRef == nullptr)
-                return;
-
             // async so that the object is fully constructed before the callback gets invoked
-            MessageManager::callAsync ([this, weakRef]()
+            MessageManager::callAsync ([weakRef = WeakReference<CaptureSessionMode<Mode>> { this }]
             {
-                if (weakRef == nullptr)
-                    return;
-
-                previewDisplay.addListener (this);
+                if (weakRef != nullptr)
+                    weakRef->previewDisplay.addListener (weakRef.get());
             });
         }
 
@@ -3224,7 +3216,7 @@ struct CameraDevice::ViewerComponent  : public Component,
     {
         auto previewSize = device.pimpl->streamConfigurationMap.getDefaultPreviewSize();
 
-        targetAspectRatio = previewSize.getWidth() / (float) previewSize.getHeight();
+        targetAspectRatio = (float) previewSize.getWidth() / (float) previewSize.getHeight();
 
         if (isOrientationLandscape())
             setBounds (previewSize);
@@ -3242,31 +3234,31 @@ private:
 
     void componentMovedOrResized (bool, bool) override
     {
-        auto b = getLocalBounds();
+        auto b = getLocalBounds().toFloat();
 
         auto targetWidth  = b.getWidth();
         auto targetHeight = b.getHeight();
 
         if (isOrientationLandscape())
         {
-            auto currentAspectRatio = b.getWidth() / (float) b.getHeight();
+            auto currentAspectRatio = b.getWidth() / b.getHeight();
 
             if (currentAspectRatio > targetAspectRatio)
-                targetWidth = static_cast<int> (targetWidth * targetAspectRatio / currentAspectRatio);
+                targetWidth = targetWidth * targetAspectRatio / currentAspectRatio;
             else
-                targetHeight = static_cast<int> (targetHeight * currentAspectRatio / targetAspectRatio);
+                targetHeight = targetHeight * currentAspectRatio / targetAspectRatio;
         }
         else
         {
-            auto currentAspectRatio = b.getHeight() / (float) b.getWidth();
+            auto currentAspectRatio = b.getHeight() / b.getWidth();
 
             if (currentAspectRatio > targetAspectRatio)
-                targetHeight = static_cast<int> (targetHeight * targetAspectRatio / currentAspectRatio);
+                targetHeight = targetHeight * targetAspectRatio / currentAspectRatio;
             else
-                targetWidth = static_cast<int> (targetWidth * currentAspectRatio / targetAspectRatio);
+                targetWidth = targetWidth * currentAspectRatio / targetAspectRatio;
         }
 
-        viewerComponent.setBounds (Rectangle<int> (0, 0, targetWidth, targetHeight).withCentre (b.getCentre()));
+        viewerComponent.setBounds (Rectangle<float> (targetWidth, targetHeight).withCentre (b.getCentre()).toNearestInt());
     }
 
     bool isOrientationLandscape() const

@@ -52,9 +52,10 @@ protected:
             addGCCOptimisationProperty (props);
 
             props.add (new ChoicePropertyComponent (architectureTypeValue, "Architecture",
-                                                    { "<None>",     "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7" },
-                                                    { { String() }, "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7" }),
-                       "Specifies the 32/64-bit architecture to use.");
+                                                    { "<None>",     "Native",        "32-bit (-m32)", "64-bit (-m64)", "ARM v6",       "ARM v7",       "ARM v8-a" },
+                                                    { { String() }, "-march=native", "-m32",          "-m64",          "-march=armv6", "-march=armv7", "-march=armv8-a" }),
+                       "Specifies the 32/64-bit architecture to use. If you don't see the required architecture in this list, you can also specify the desired "
+                       "flag on the command-line when invoking make by passing \"TARGET_ARCH=-march=<arch to use>\"");
 
             auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildUnityPlugin());
 
@@ -378,6 +379,8 @@ public:
     static String getDisplayName()        { return "Linux Makefile"; }
     static String getValueTreeTypeName()  { return "LINUX_MAKE"; }
     static String getTargetFolderName()   { return "LinuxMakefile"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     static MakefileProjectExporter* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
     {

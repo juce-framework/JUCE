@@ -110,7 +110,7 @@ public:
     /** Finds the character at a given on-screen position.
         The coordinates are relative to this component's top-left origin.
     */
-    CodeDocument::Position getPositionAt (int x, int y);
+    CodeDocument::Position getPositionAt (int x, int y) const;
 
     /** Returns the start of the selection as a position. */
     CodeDocument::Position getSelectionStart() const            { return selectionStart; }
@@ -404,6 +404,8 @@ private:
     class GutterComponent;
     std::unique_ptr<GutterComponent> gutter;
 
+    class CodeEditorAccessibilityHandler;
+
     enum DragType
     {
         notDragging,
@@ -432,6 +434,7 @@ private:
     int getGutterSize() const noexcept;
 
     //==============================================================================
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void insertText (const String&);
     virtual void updateCaretPosition();
     void updateScrollBars();
@@ -442,6 +445,7 @@ private:
     void indentSelectedLines (int spacesToAdd);
     bool skipBackwardsToPreviousTab();
     bool performCommand (CommandID);
+    void setSelection (CodeDocument::Position, CodeDocument::Position);
 
     int indexToColumn (int line, int index) const noexcept;
     int columnToIndex (int line, int column) const noexcept;

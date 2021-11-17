@@ -32,8 +32,6 @@
 #include "../CodeEditor/jucer_SourceCodeEditor.h"
 #include "../Utility/UI/jucer_ProjucerLookAndFeel.h"
 
-struct ChildProcessCache;
-
 //==============================================================================
 class ProjucerApplication   : public JUCEApplication,
                               private AsyncUpdater
@@ -65,11 +63,10 @@ public:
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const InvocationInfo&) override;
 
-    bool isLiveBuildEnabled() const;
     bool isGUIEditorEnabled() const;
 
     //==============================================================================
-    bool openFile (const File&);
+    void openFile (const File&, std::function<void (bool)>);
     void showPathsWindow (bool highlightJUCEPath = false);
     PropertiesFile::Options getPropertyFileOptionsFor (const String& filename, bool isProjectSettings);
     void selectEditorColourSchemeWithName (const String& schemeName);
@@ -107,7 +104,6 @@ public:
     std::unique_ptr<ApplicationCommandManager> commandManager;
 
     bool isRunningCommandLine = false;
-    std::unique_ptr<ChildProcessCache> childProcessCache;
 
 private:
     //==============================================================================
@@ -123,8 +119,8 @@ private:
     void createNewPIP();
     void askUserToOpenFile();
     void saveAllDocuments();
-    bool closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave);
-    bool closeAllMainWindows();
+    void closeAllDocuments (OpenDocumentManager::SaveIfNeeded askUserToSave);
+    void closeAllMainWindows (std::function<void (bool)>);
     void closeAllMainWindowsAndQuitIfNeeded();
     void clearRecentFiles();
 
@@ -133,7 +129,6 @@ private:
     PopupMenu createFileMenu();
     PopupMenu createEditMenu();
     PopupMenu createViewMenu();
-    PopupMenu createBuildMenu();
     void createColourSchemeItems (PopupMenu&);
     PopupMenu createWindowMenu();
     PopupMenu createDocumentMenu();
@@ -168,7 +163,6 @@ private:
     void doLoginOrLogout();
     void showLoginForm();
 
-    void enableOrDisableLiveBuild();
     void enableOrDisableGUIEditor();
 
     //==============================================================================
@@ -207,7 +201,6 @@ private:
     //==============================================================================
     std::unique_ptr<LicenseController> licenseController;
 
-    void* server = nullptr;
     std::unique_ptr<TooltipWindow> tooltipWindow;
     AvailableModulesList jucePathModulesList, userPathsModulesList;
 
@@ -220,12 +213,12 @@ private:
     std::unique_ptr<AlertWindow> demoRunnerAlert;
     bool hasScannedForDemoRunnerExecutable = false, hasScannedForDemoRunnerProject = false;
     File lastJUCEPath, lastDemoRunnerExectuableFile, lastDemoRunnerProjectFile;
-   #if JUCE_LINUX
-    ChildProcess makeProcess;
-   #endif
 
     int selectedColourSchemeIndex = 0, selectedEditorColourSchemeIndex = 0;
 
+    std::unique_ptr<FileChooser> chooser;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjucerApplication)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ProjucerApplication)
 };

@@ -514,6 +514,9 @@ public:
 
                     AudioBuffer<float> result (original.getNumChannels(), finalSize);
                     resamplingSource.getNextAudioBlock ({ &result, 0, result.getNumSamples() });
+
+                    result.applyGain ((float) resampleRatio);
+
                     return result;
                 }();
 
@@ -550,10 +553,10 @@ public:
             const auto ramp = makeRamp (static_cast<int> (spec.maximumBlockSize) * 8);
             using BlockSize = decltype (spec.maximumBlockSize);
 
-            for (auto latency : { /*static_cast<BlockSize> (0),
+            for (auto latency : { static_cast<BlockSize> (0),
                                   spec.maximumBlockSize / 3,
                                   spec.maximumBlockSize,
-                                  spec.maximumBlockSize * 2, */
+                                  spec.maximumBlockSize * 2,
                                   static_cast<BlockSize> (spec.maximumBlockSize * 2.5) })
             {
                 testConvolution (spec,

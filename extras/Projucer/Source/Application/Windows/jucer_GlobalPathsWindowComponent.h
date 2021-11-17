@@ -125,15 +125,18 @@ public:
         if (isTimerRunning() || ! isSelectedOSThisOS())
             return;
 
-        PropertyComponent* jucePathPropertyComponent = nullptr;
-
-        for (auto* prop : propertyGroup.properties)
-            if (prop->getName() == "Path to JUCE")
-                jucePathPropertyComponent = prop;
-
-        if (jucePathPropertyComponent != nullptr)
+        const auto findJucePathPropertyComponent = [this]() -> PropertyComponent*
         {
-            boundsToHighlight = getLocalArea (&propertyGroup, jucePathPropertyComponent->getBounds());
+            for (const auto& prop : propertyGroup.getProperties())
+                if (prop->getName() == "Path to JUCE")
+                    return prop.get();
+
+            return nullptr;
+        };
+
+        if (auto* propComponent = findJucePathPropertyComponent())
+        {
+            boundsToHighlight = getLocalArea (nullptr, propComponent->getScreenBounds());
             flashAlpha = 0.0f;
             hasFlashed = false;
 

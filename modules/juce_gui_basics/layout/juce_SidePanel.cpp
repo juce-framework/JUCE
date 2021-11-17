@@ -39,17 +39,25 @@ SidePanel::SidePanel (StringRef title, int width, bool positionOnLeft,
     dismissButton.onClick = [this] { showOrHide (false); };
     addAndMakeVisible (dismissButton);
 
-    Desktop::getInstance().addGlobalMouseListener (this);
+    auto& desktop = Desktop::getInstance();
+
+    desktop.addGlobalMouseListener (this);
+    desktop.getAnimator().addChangeListener (this);
 
     if (contentToDisplay != nullptr)
         setContent (contentToDisplay, deleteComponentWhenNoLongerNeeded);
 
     setOpaque (false);
+    setVisible (false);
+    setAlwaysOnTop (true);
 }
 
 SidePanel::~SidePanel()
 {
-    Desktop::getInstance().removeGlobalMouseListener (this);
+    auto& desktop = Desktop::getInstance();
+
+    desktop.removeGlobalMouseListener (this);
+    desktop.getAnimator().removeChangeListener (this);
 
     if (parent != nullptr)
         parent->removeComponentListener (this);
@@ -98,8 +106,8 @@ void SidePanel::showOrHide (bool show)
         Desktop::getInstance().getAnimator().animateComponent (this, calculateBoundsInParent (*parent),
                                                                1.0f, 250, true, 1.0, 0.0);
 
-        if (onPanelShowHide != nullptr)
-            onPanelShowHide (isShowing);
+        if (isShowing && ! isVisible())
+            setVisible (true);
     }
 }
 
@@ -242,6 +250,18 @@ void SidePanel::componentMovedOrResized (Component& component, bool wasMoved, bo
         setBounds (calculateBoundsInParent (component));
 }
 
+void SidePanel::changeListenerCallback (ChangeBroadcaster*)
+{
+    if (! Desktop::getInstance().getAnimator().isAnimating (this))
+    {
+        if (onPanelShowHide != nullptr)
+            onPanelShowHide (isShowing);
+
+        if (isVisible() && ! isShowing)
+            setVisible (false);
+    }
+}
+
 Rectangle<int> SidePanel::calculateBoundsInParent (Component& parentComp) const
 {
     auto parentBounds = parentComp.getLocalBounds();
@@ -272,6 +292,12 @@ bool SidePanel::isMouseEventInThisOrChildren (Component* eventComponent)
             return true;
 
     return false;
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> SidePanel::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
 }
 
 } // namespace juce

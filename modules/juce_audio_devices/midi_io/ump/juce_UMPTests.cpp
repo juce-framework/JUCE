@@ -697,7 +697,7 @@ public:
             for (const auto typecode : typecodesX1)
             {
                 Packets p;
-                p.add (PacketX1 { (uint32_t) (typecode << 0x1c | (random.nextInt64() & 0xffffff)) });
+                p.add (PacketX1 { (uint32_t) ((int64_t) typecode << 0x1c | (random.nextInt64() & 0xffffff)) });
 
                 checkMidi2ToMidi1Conversion (p, p);
             }
@@ -966,8 +966,10 @@ private:
     template <typename Fn>
     void forEachNonSysExTestMessage (Random& random, Fn&& fn)
     {
-        for (uint8_t firstByte = 0x80; firstByte != 0x00; ++firstByte)
+        for (uint16_t counter = 0x80; counter != 0x100; ++counter)
         {
+            const auto firstByte = (uint8_t) counter;
+
             if (firstByte == 0xf0 || firstByte == 0xf7)
                 continue; // sysEx is tested separately
 
@@ -990,9 +992,9 @@ private:
         }
     }
 
-   #if JUCE_WINDOWS
+   #if JUCE_WINDOWS && ! JUCE_MINGW
     #define JUCE_CHECKED_ITERATOR(msg, size) \
-        stdext::checked_array_iterator<typename std::remove_reference<decltype (msg)>::type> ((msg), (size))
+        stdext::checked_array_iterator<typename std::remove_reference<decltype (msg)>::type> ((msg), (size_t) (size))
    #else
     #define JUCE_CHECKED_ITERATOR(msg, size) (msg)
    #endif

@@ -39,7 +39,7 @@ namespace BinaryData
     const int            LICENSESize = 11325;
 
     extern const char*   background_logo_svg;
-    const int            background_logo_svgSize = 3117;
+    const int            background_logo_svgSize = 3249;
 
     extern const char*   export_android_svg;
     const int            export_android_svgSize = 3586;
@@ -62,11 +62,8 @@ namespace BinaryData
     extern const char*   gpl_logo_svg;
     const int            gpl_logo_svgSize = 27030;
 
-    extern const char*   jucelogowithtext_svg;
-    const int            jucelogowithtext_svgSize = 5312;
-
     extern const char*   juce_icon_png;
-    const int            juce_icon_pngSize = 45854;
+    const int            juce_icon_pngSize = 105697;
 
     extern const char*   wizard_AnimatedApp_svg;
     const int            wizard_AnimatedApp_svgSize = 5978;
@@ -204,10 +201,10 @@ namespace BinaryData
     const int            colourscheme_light_xmlSize = 1050;
 
     extern const char*   juce_runtime_arch_detection_cpp;
-    const int            juce_runtime_arch_detection_cppSize = 2127;
+    const int            juce_runtime_arch_detection_cppSize = 2129;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 66;
+    const int namedResourceListSize = 65;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

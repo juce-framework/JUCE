@@ -63,8 +63,15 @@ public:
         button.setConnectedEdges (TextButton::ConnectedOnLeft | TextButton::ConnectedOnRight);
         button.onClick = [this]
         {
-            if (showMenu (layout))
-                refresh(); // (to clear the text editor if it's got focus)
+            SafePointer<PositionPropertyBase> safeThis { this };
+            showMenu (layout, [safeThis] (bool shouldRefresh)
+            {
+                if (safeThis == nullptr)
+                    return;
+
+                if (shouldRefresh)
+                    safeThis->refresh(); // (to clear the text editor if it's got focus)
+            });
         };
 
         textEditor.reset (new PositionPropLabel (*this));
@@ -173,7 +180,7 @@ public:
         refresh();
     }
 
-    bool showMenu (ComponentLayout* compLayout)
+    void showMenu (ComponentLayout* compLayout, std::function<void (bool)> callback)
     {
         RelativePositionedRectangle rpr (getPosition());
         PositionedRectangle p (rpr.rect);
@@ -255,127 +262,134 @@ public:
             m.addSubMenu ("Relative to", compLayout->getRelativeTargetMenu (component, (int) dimension));
         }
 
-        WeakReference<Component> ref (this);
-
-        const int menuResult = m.showAt (&button);
-
-        if (menuResult == 0 || ref == nullptr)
-            return false;
-
-        switch (menuResult)
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (&button),
+                         [compLayout, callback, xAnchor, yAnchor, xMode, yMode, sizeW, sizeH, p, rpr,
+                          ref = SafePointer<PositionPropertyBase> { this }] (int menuResult) mutable
         {
-        case 10:
-            if (dimension == componentX)
-                xMode = PositionedRectangle::absoluteFromParentTopLeft;
-            else
-                yMode = PositionedRectangle::absoluteFromParentTopLeft;
-            break;
+            if (menuResult == 0 || ref == nullptr)
+            {
+                callback (false);
+                return;
+            }
 
-        case 11:
-            if (dimension == componentX)
-                xMode = PositionedRectangle::absoluteFromParentBottomRight;
-            else
-                yMode = PositionedRectangle::absoluteFromParentBottomRight;
-            break;
+            switch (menuResult)
+            {
+            case 10:
+                if (ref->dimension == componentX)
+                    xMode = PositionedRectangle::absoluteFromParentTopLeft;
+                else
+                    yMode = PositionedRectangle::absoluteFromParentTopLeft;
+                break;
 
-        case 12:
-            if (dimension == componentX)
-                xMode = PositionedRectangle::absoluteFromParentCentre;
-            else
-                yMode = PositionedRectangle::absoluteFromParentCentre;
-            break;
+            case 11:
+                if (ref->dimension == componentX)
+                    xMode = PositionedRectangle::absoluteFromParentBottomRight;
+                else
+                    yMode = PositionedRectangle::absoluteFromParentBottomRight;
+                break;
 
-        case 13:
-            if (dimension == componentX)
-                xMode = PositionedRectangle::proportionOfParentSize;
-            else
-                yMode = PositionedRectangle::proportionOfParentSize;
-            break;
+            case 12:
+                if (ref->dimension == componentX)
+                    xMode = PositionedRectangle::absoluteFromParentCentre;
+                else
+                    yMode = PositionedRectangle::absoluteFromParentCentre;
+                break;
 
-        case 14:
-            if (dimension == componentX)
-                xAnchor = PositionedRectangle::anchorAtLeftOrTop;
-            else
-                yAnchor = PositionedRectangle::anchorAtLeftOrTop;
-            break;
+            case 13:
+                if (ref->dimension == componentX)
+                    xMode = PositionedRectangle::proportionOfParentSize;
+                else
+                    yMode = PositionedRectangle::proportionOfParentSize;
+                break;
 
-        case 15:
-            if (dimension == componentX)
-                xAnchor = PositionedRectangle::anchorAtCentre;
-            else
-                yAnchor = PositionedRectangle::anchorAtCentre;
-            break;
+            case 14:
+                if (ref->dimension == componentX)
+                    xAnchor = PositionedRectangle::anchorAtLeftOrTop;
+                else
+                    yAnchor = PositionedRectangle::anchorAtLeftOrTop;
+                break;
 
-        case 16:
-            if (dimension == componentX)
-                xAnchor = PositionedRectangle::anchorAtRightOrBottom;
-            else
-                yAnchor = PositionedRectangle::anchorAtRightOrBottom;
-            break;
+            case 15:
+                if (ref->dimension == componentX)
+                    xAnchor = PositionedRectangle::anchorAtCentre;
+                else
+                    yAnchor = PositionedRectangle::anchorAtCentre;
+                break;
 
-        case 20:
-            if (dimension == componentWidth)
-                sizeW = PositionedRectangle::absoluteSize;
-            else
-                sizeH = PositionedRectangle::absoluteSize;
-            break;
+            case 16:
+                if (ref->dimension == componentX)
+                    xAnchor = PositionedRectangle::anchorAtRightOrBottom;
+                else
+                    yAnchor = PositionedRectangle::anchorAtRightOrBottom;
+                break;
 
-        case 21:
-            if (dimension == componentWidth)
-                sizeW = PositionedRectangle::proportionalSize;
-            else
-                sizeH = PositionedRectangle::proportionalSize;
-            break;
+            case 20:
+                if (ref->dimension == componentWidth)
+                    sizeW = PositionedRectangle::absoluteSize;
+                else
+                    sizeH = PositionedRectangle::absoluteSize;
+                break;
 
-        case 22:
-            if (dimension == componentWidth)
-                sizeW = PositionedRectangle::parentSizeMinusAbsolute;
-            else
-                sizeH = PositionedRectangle::parentSizeMinusAbsolute;
-            break;
+            case 21:
+                if (ref->dimension == componentWidth)
+                    sizeW = PositionedRectangle::proportionalSize;
+                else
+                    sizeH = PositionedRectangle::proportionalSize;
+                break;
 
-        default:
-            if (allowRelativeOptions && compLayout != nullptr)
-                compLayout->processRelativeTargetMenuResult (component, (int) dimension, menuResult);
-            break;
-        }
+            case 22:
+                if (ref->dimension == componentWidth)
+                    sizeW = PositionedRectangle::parentSizeMinusAbsolute;
+                else
+                    sizeH = PositionedRectangle::parentSizeMinusAbsolute;
+                break;
 
-        Rectangle<int> parentArea;
+            default:
+                if (ref->allowRelativeOptions && compLayout != nullptr)
+                    compLayout->processRelativeTargetMenuResult (ref->component, (int) ref->dimension, menuResult);
+                break;
+            }
 
-        if (component->findParentComponentOfClass<ComponentLayoutEditor>() != nullptr)
-            parentArea.setSize (component->getParentWidth(), component->getParentHeight());
-        else if (auto pre = dynamic_cast<PaintRoutineEditor*> (component->getParentComponent()))
-            parentArea = pre->getComponentArea();
-        else
-            jassertfalse;
+            const auto parentArea = [&]() -> Rectangle<int>
+            {
+                if (ref->component->findParentComponentOfClass<ComponentLayoutEditor>() != nullptr)
+                    return { ref->component->getParentWidth(), ref->component->getParentHeight() };
 
-        int x, xw, y, yh, w, h;
-        rpr.getRelativeTargetBounds (parentArea, compLayout, x, xw, y, yh, w, h);
+                if (auto pre = dynamic_cast<PaintRoutineEditor*> (ref->component->getParentComponent()))
+                    return pre->getComponentArea();
 
-        PositionedRectangle xyRect (p);
-        PositionedRectangle whRect (p);
+                jassertfalse;
+                return {};
+            }();
 
-        xyRect.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
-                         Rectangle<int> (x, y, xw, yh));
+            int x, xw, y, yh, w, h;
+            rpr.getRelativeTargetBounds (parentArea, compLayout, x, xw, y, yh, w, h);
 
-        whRect.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
-                         Rectangle<int> (x, y, w, h));
+            PositionedRectangle xyRect (p);
+            PositionedRectangle whRect (p);
 
-        p.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
-                    Rectangle<int> (x, y, xw, yh));
+            xyRect.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
+                             Rectangle<int> (x, y, xw, yh));
 
-        p.setX (xyRect.getX());
-        p.setY (xyRect.getY());
-        p.setWidth (whRect.getWidth());
-        p.setHeight (whRect.getHeight());
+            whRect.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
+                             Rectangle<int> (x, y, w, h));
 
-        if (p != rpr.rect)
-        {
-            rpr.rect = p;
-            setPosition (rpr);
-        }
+            p.setModes (xAnchor, xMode, yAnchor, yMode, sizeW, sizeH,
+                        Rectangle<int> (x, y, xw, yh));
 
-        return true;
+            p.setX (xyRect.getX());
+            p.setY (xyRect.getY());
+            p.setWidth (whRect.getWidth());
+            p.setHeight (whRect.getHeight());
+
+            if (p != rpr.rect)
+            {
+                rpr.rect = p;
+                ref->setPosition (rpr);
+            }
+
+            callback (true);
+        });
     }
 
     void resized()

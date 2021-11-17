@@ -163,7 +163,7 @@ public:
         {
             auto* tc = bar.items.getUnchecked(i);
 
-            if (dynamic_cast<Spacer*> (tc) == nullptr && ! tc->isVisible())
+            if (tc != nullptr && dynamic_cast<Spacer*> (tc) == nullptr && ! tc->isVisible())
             {
                 oldIndexes.insert (0, i);
                 addAndMakeVisible (tc, 0);
@@ -807,6 +807,12 @@ void Toolbar::showCustomisationDialog (ToolbarItemFactory& factory, const int op
 
     (new CustomisationDialog (factory, *this, optionFlags))
         ->enterModalState (true, nullptr, true);
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> Toolbar::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::group);
 }
 
 } // namespace juce

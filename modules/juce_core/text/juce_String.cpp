@@ -2577,6 +2577,8 @@ public:
             expect (String (std::numeric_limits<int64>::max()).getLargeIntValue() == std::numeric_limits<int64>::max());
             expect (String (std::numeric_limits<int64>::min()).getLargeIntValue() == std::numeric_limits<int64>::min());
             expect (("xyz" + s).getTrailingIntValue() == s.getIntValue());
+            expect (String ("xyz-5").getTrailingIntValue() == -5);
+            expect (String ("-12345").getTrailingIntValue() == -12345);
             expect (s.getHexValue32() == 0x12345678);
             expect (s.getHexValue64() == (int64) 0x12345678);
             expect (String::toHexString (0x1234abcd).equalsIgnoreCase ("1234abcd"));

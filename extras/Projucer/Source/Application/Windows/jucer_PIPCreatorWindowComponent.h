@@ -73,13 +73,20 @@ public:
         addAndMakeVisible (createButton);
         createButton.onClick = [this]
         {
-            FileChooser fc ("Save PIP File",
-                            File::getSpecialLocation (File::SpecialLocationType::userDesktopDirectory)
-                                 .getChildFile (nameValue.get().toString() + ".h"));
+            chooser = std::make_unique<FileChooser> ("Save PIP File",
+                                                     File::getSpecialLocation (File::SpecialLocationType::userDesktopDirectory)
+                                                          .getChildFile (nameValue.get().toString() + ".h"));
+            auto browserFlags = FileBrowserComponent::saveMode
+                              | FileBrowserComponent::canSelectFiles
+                              | FileBrowserComponent::warnAboutOverwriting;
 
-            fc.browseForFileToSave (true);
+            chooser->launchAsync (browserFlags, [this] (const FileChooser& fc)
+            {
+                const auto result = fc.getResult();
 
-            createPIPFile (fc.getResult());
+                if (result != File{})
+                    createPIPFile (result);
+            });
         };
 
         pipTree.addListener (this);
@@ -329,9 +336,11 @@ private:
     std::unique_ptr<PIPCreatorLookAndFeel> lf;
 
     Viewport propertyViewport;
-    PropertyGroupComponent propertyGroup  { "PIP Creator", { getIcons().juceLogo, Colours::transparentBlack } };
+    PropertyGroupComponent propertyGroup  { "PIP Creator", {} };
 
     TextButton createButton  { "Create PIP" };
+
+    std::unique_ptr<FileChooser> chooser;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PIPCreatorWindowComponent)

@@ -27,7 +27,7 @@ namespace juce
 {
 namespace build_tools
 {
-    StringArray getVersionSegments (juce::StringRef p)
+    StringArray getVersionSegments (StringRef p)
     {
         auto segments = StringArray::fromTokens (p, ",.", "");
         segments.trim();
@@ -35,13 +35,11 @@ namespace build_tools
         return segments;
     }
 
-    int getVersionAsHexInteger (juce::StringRef versionString)
+    int getVersionAsHexIntegerFromParts (const StringArray& segments)
     {
-        auto segments = getVersionSegments (versionString);
-
         auto value = (segments[0].getIntValue() << 16)
-                     + (segments[1].getIntValue() << 8)
-                     +  segments[2].getIntValue();
+                   + (segments[1].getIntValue() << 8)
+                   +  segments[2].getIntValue();
 
         if (segments.size() > 3)
             value = (value << 8) + segments[3].getIntValue();
@@ -49,7 +47,12 @@ namespace build_tools
         return value;
     }
 
-    String getVersionAsHex (juce::StringRef versionString)
+    int getVersionAsHexInteger (StringRef versionString)
+    {
+        return getVersionAsHexIntegerFromParts (getVersionSegments (versionString));
+    }
+
+    String getVersionAsHex (StringRef versionString)
     {
         return "0x" + String::toHexString (getVersionAsHexInteger (versionString));
     }

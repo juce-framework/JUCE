@@ -118,15 +118,6 @@ JUCE_IMPLEMENT_SINGLETON (AndroidMessageQueue)
 void MessageManager::doPlatformSpecificInitialisation() { AndroidMessageQueue::getInstance(); }
 void MessageManager::doPlatformSpecificShutdown()       { AndroidMessageQueue::deleteInstance(); }
 
-//==============================================================================
-bool MessageManager::dispatchNextMessageOnSystemQueue (const bool)
-{
-    Logger::outputDebugString ("*** Modal loops are not possible in Android!! Exiting...");
-    exit (1);
-
-    return true;
-}
-
 bool MessageManager::postMessageToSystemQueue (MessageManager::MessageBase* const message)
 {
     return AndroidMessageQueue::getInstance()->post (message);

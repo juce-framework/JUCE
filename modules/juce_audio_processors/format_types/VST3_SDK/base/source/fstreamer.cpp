@@ -9,7 +9,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -687,13 +687,13 @@ char8* FStreamer::readStr8 ()
 {
 	int32 length;
 	if (!readInt32 (length))
-		return 0;
+		return nullptr;
 	
 	// check corruption
 	if (length > 262144)
-		return 0;
+		return nullptr;
 
-	char8* s = (length > 0) ? NEWVEC char8[length] : 0;
+	char8* s = (length > 0) ? NEWVEC char8[length] : nullptr;
 	if (s)
 		readRaw (s, length * sizeof (char8));
 	return s;

@@ -27,14 +27,6 @@
 #include "jucer_JucerDocument.h"
 
 //==============================================================================
-BinaryResources::BinaryResources()
-{
-}
-
-BinaryResources::~BinaryResources()
-{
-}
-
 BinaryResources& BinaryResources::operator= (const BinaryResources& other)
 {
     for (auto* r : other.resources)
@@ -130,15 +122,20 @@ bool BinaryResources::reload (const int index)
                     File (resources [index]->originalFilename));
 }
 
-String BinaryResources::browseForResource (const String& title,
-                                           const String& wildcard,
-                                           const File& fileToStartFrom,
-                                           const String& resourceToReplace)
+void BinaryResources::browseForResource (const String& title,
+                                         const String& wildcard,
+                                         const File& fileToStartFrom,
+                                         const String& resourceToReplace,
+                                         std::function<void (String)> callback)
 {
-    FileChooser fc (title, fileToStartFrom, wildcard);
+    chooser = std::make_unique<FileChooser> (title, fileToStartFrom, wildcard);
+    auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
 
-    if (fc.browseForFileToOpen())
+    chooser->launchAsync (flags, [this, resourceToReplace, callback] (const FileChooser& fc)
     {
+        if (fc.getResult() == File{})
+            callback ({});
+
         String name (resourceToReplace);
 
         if (name.isEmpty())
@@ -146,17 +143,15 @@ String BinaryResources::browseForResource (const String& title,
 
         if (! add (name, fc.getResult()))
         {
-            AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                         TRANS("Adding Resource"),
-                                         TRANS("Failed to load the file!"));
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
+                                              TRANS("Adding Resource"),
+                                              TRANS("Failed to load the file!"));
 
             name.clear();
         }
 
-        return name;
-    }
-
-    return {};
+        callback (name);
+    });
 }
 
 String BinaryResources::findUniqueName (const String& rootName) const

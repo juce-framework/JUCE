@@ -204,7 +204,7 @@ void PropertyPanel::init()
 
     addAndMakeVisible (viewport);
     viewport.setViewedComponent (propertyHolderComponent = new PropertyHolderComponent());
-    viewport.setFocusContainer (true);
+    viewport.setFocusContainerType (FocusContainerType::keyboardFocusContainer);
 }
 
 PropertyPanel::~PropertyPanel()
@@ -367,7 +367,7 @@ void PropertyPanel::restoreOpennessState (const XmlElement& xml)
     {
         auto sections = getSectionNames();
 
-        forEachXmlChildElementWithTagName (xml, e, "SECTION")
+        for (auto* e : xml.getChildWithTagNameIterator ("SECTION"))
         {
             setSectionOpen (sections.indexOf (e->getStringAttribute ("name")),
                             e->getBoolAttribute ("open"));

@@ -48,7 +48,7 @@ struct TranslationHelpers
                 break;
 
             p += 5;
-            p = p.findEndOfWhitespace();
+            p.incrementToEndOfWhitespace();
 
             if (*p == '(')
             {
@@ -63,7 +63,7 @@ struct TranslationHelpers
 
     static void parseStringLiteral (String::CharPointerType& p, MemoryOutputStream& out) noexcept
     {
-        p = p.findEndOfWhitespace();
+        p.incrementToEndOfWhitespace();
 
         if (p.getAndAdvance() == '"')
         {

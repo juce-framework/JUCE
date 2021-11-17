@@ -162,7 +162,7 @@ private:
             return;
 
         unnormalisedValue = newValue;
-        listeners.call ([=] (Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
+        listeners.call ([this] (Listener& l) { l.parameterChanged (parameter.paramID, unnormalisedValue); });
         listenersNeedCalling = false;
         needsUpdate = true;
     }
@@ -668,6 +668,7 @@ public:
         : UnitTest ("Audio Processor Value Tree State", UnitTestCategories::audioProcessorParameters)
     {}
 
+    JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6262)
     void runTest() override
     {
         ScopedJuceInitialiser_GUI scopedJuceInitialiser_gui;
@@ -696,10 +697,10 @@ public:
         beginTest ("After construction, the value tree has the expected format");
         {
             TestAudioProcessor proc ({
-                std::make_unique<AudioProcessorParameterGroup> ("", "", "",
+                std::make_unique<AudioProcessorParameterGroup> ("A", "", "",
                     std::make_unique<AudioParameterBool> ("a", "", false),
                     std::make_unique<AudioParameterFloat> ("b", "", NormalisableRange<float>{}, 0.0f)),
-                std::make_unique<AudioProcessorParameterGroup> ("", "", "",
+                std::make_unique<AudioProcessorParameterGroup> ("B", "", "",
                     std::make_unique<AudioParameterInt> ("c", "", 0, 1, 0),
                     std::make_unique<AudioParameterChoice> ("d", "", StringArray { "foo", "bar" }, 0)) });
 
@@ -952,6 +953,7 @@ public:
             expectEquals (listener.id, String (key));
         }
     }
+    JUCE_END_IGNORE_WARNINGS_MSVC
 };
 
 static AudioProcessorValueTreeStateTests audioProcessorValueTreeStateTests;

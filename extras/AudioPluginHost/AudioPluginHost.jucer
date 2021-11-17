@@ -9,7 +9,7 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" rtasFolder="~/SDKs/PT_80_SDK" objCExtraSuffix="M73TRi"
                smallIcon="c97aUr" bigIcon="c97aUr" microphonePermissionNeeded="1"
                sendAppleEventsPermissionNeeded="1" sendAppleEventsPermissionText="This is required for some third-party plug-ins to function correctly."
-               customXcodeResourceFolders="../../examples/Assets">
+               customXcodeResourceFolders="../../examples/Assets" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="AudioPluginHost" recommendedWarnings="LLVM"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="AudioPluginHost"
@@ -151,7 +151,7 @@
     </XCODE_IPHONE>
     <ANDROIDSTUDIO targetFolder="Builds/Android" androidMinimumSDK="23" androidInternetNeeded="1"
                    microphonePermissionNeeded="1" androidBluetoothNeeded="1" smallIcon="c97aUr"
-                   bigIcon="c97aUr">
+                   bigIcon="c97aUr" androidExtraAssetsFolder="../../examples/Assets">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" androidArchitectures="armeabi-v7a x86" isDebug="1"
                        optimisation="1" linkTimeOptimisation="0" targetName="Plugin Host"
@@ -203,7 +203,7 @@
         <FILE id="ygZQZ1" name="PluginWindow.h" compile="0" resource="0" file="Source/UI/PluginWindow.h"/>
       </GROUP>
       <FILE id="OmIhwQ" name="HostStartup.cpp" compile="1" resource="0" file="Source/HostStartup.cpp"/>
-      <FILE id="c97aUr" name="JUCEAppIcon.png" compile="0" resource="1" file="Source/JUCEAppIcon.png"/>
+      <FILE id="c97aUr" name="JUCEAppIcon.png" compile="0" resource="0" file="Source/JUCEAppIcon.png"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_WASAPI="1" JUCE_DIRECTSOUND="1" JUCE_ALSA="1" JUCE_USE_FLAC="0"

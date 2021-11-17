@@ -78,17 +78,17 @@ public:
         return Icon (getIcons().singleModule, iconColour);
     }
 
-    void showAddMenu() override
+    void showAddMenu (Point<int> p) override
     {
         if (auto* parent = dynamic_cast<EnabledModulesItem*> (getParentItem()))
-            parent->showPopupMenu();
+            parent->showPopupMenu (p);
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         PopupMenu menu;
         menu.addItem (1, "Remove this module");
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
     void handlePopupMenuResult (int resultCode) override
@@ -149,7 +149,7 @@ private:
             if (modules.doesModuleHaveHigherCppStandardThanProject (moduleID))
                 props.add (new CppStandardWarningComponent());
 
-            group.properties.clear();
+            group.clearProperties();
             exporterModulePathDefaultValues.clear();
             exporterModulePathValues.clear();
             globalPathValues.clear();
@@ -270,7 +270,7 @@ private:
         Array<Value> exporterModulePathValues, globalPathValues;
         Value useGlobalPathValue;
 
-        OwnedArray <Project::ConfigFlag> configFlags;
+        OwnedArray<Project::ConfigFlag> configFlags;
 
         PropertyGroupComponent group;
         Project& project;
@@ -378,7 +378,7 @@ private:
                 {
                     missingDependencies = enabledModules.getExtraDependenciesNeeded (moduleID);
 
-                    AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                    AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                                       "Adding Missing Dependencies",
                                                       "Couldn't locate some of these modules - you'll need to find their "
                                                       "folders manually and add them to the list.");
@@ -471,7 +471,7 @@ public:
     void showDocument() override
     {
         if (auto* pcc = getProjectContentComponent())
-            pcc->setEditorComponent (new ModulesInformationComponent (project), nullptr);
+            pcc->setScrollableEditorComponent (std::make_unique<ModulesInformationComponent> (project));
     }
 
     static File getModuleFolder (const File& draggedFile)
@@ -515,7 +515,7 @@ public:
             addSubItem (new ModuleItem (project, project.getEnabledModules().getModuleID (i)));
     }
 
-    void showPopupMenu() override
+    void showPopupMenu (Point<int> p) override
     {
         auto& enabledModules = project.getEnabledModules();
         PopupMenu allModules;
@@ -563,7 +563,7 @@ public:
         menu.addSeparator();
         menu.addItem (1001, "Add a module from a specified folder...");
 
-        launchPopupMenu (menu);
+        launchPopupMenu (menu, p);
     }
 
     void handlePopupMenuResult (int resultCode) override

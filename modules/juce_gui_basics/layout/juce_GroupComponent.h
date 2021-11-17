@@ -100,6 +100,8 @@ public:
     void colourChanged() override;
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
     String text;
     Justification justification;
 

@@ -25,6 +25,9 @@ or
 - libasound2-dev
 - libjack-jackd2-dev (unless `JUCE_JACK=0`)
 
+#### juce_audio_processors
+- ladspa-sdk (unless `JUCE_PLUGINHOST_LADSPA=0`)
+
 #### juce_core
 - libcurl4-openssl-dev (unless `JUCE_USE_CURL=0`)
 
@@ -41,7 +44,7 @@ or
 - libxrender-dev (unless `JUCE_USE_XRENDER=0`)
 
 #### juce_gui_extra
-- webkit2gtk-4.0 (unless `JUCE_WEB_BROWSER=0`)
+- libwebkit2gtk-4.0-dev (unless `JUCE_WEB_BROWSER=0`)
 
 #### juce_opengl
 - libglu1-mesa-dev
@@ -51,6 +54,7 @@ The full command is as follows:
 
     sudo apt update
     sudo apt install libasound2-dev libjack-jackd2-dev \
+        ladspa-sdk \
         libcurl4-openssl-dev  \
         libfreetype6-dev \
         libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \

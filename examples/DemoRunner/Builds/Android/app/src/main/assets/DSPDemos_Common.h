@@ -590,14 +590,13 @@ private:
             if (fileChooser != nullptr)
                 return;
 
-            SafePointer<AudioPlayerHeader> safeThis (this);
-
             if (! RuntimePermissions::isGranted (RuntimePermissions::readExternalStorage))
             {
+                SafePointer<AudioPlayerHeader> safeThis (this);
                 RuntimePermissions::request (RuntimePermissions::readExternalStorage,
                                              [safeThis] (bool granted) mutable
                                              {
-                                                 if (granted)
+                                                 if (safeThis != nullptr && granted)
                                                      safeThis->openFile();
                                              });
                 return;
@@ -606,22 +605,23 @@ private:
             fileChooser.reset (new FileChooser ("Select an audio file...", File(), "*.wav;*.mp3;*.aif"));
 
             fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles,
-                                      [safeThis] (const FileChooser& fc) mutable
+                                      [this] (const FileChooser& fc) mutable
                                       {
-                                          if (safeThis == nullptr)
-                                              return;
-
                                           if (fc.getURLResults().size() > 0)
                                           {
                                               auto u = fc.getURLResult();
 
-                                              if (! safeThis->audioFileReader.loadURL (u))
-                                                  NativeMessageBox::showOkCancelBox (AlertWindow::WarningIcon, "Error loading file", "Unable to load audio file", nullptr, nullptr);
+                                              if (! audioFileReader.loadURL (u))
+                                                  NativeMessageBox::showAsync (MessageBoxOptions()
+                                                                                 .withIconType (MessageBoxIconType::WarningIcon)
+                                                                                 .withTitle ("Error loading file")
+                                                                                 .withMessage ("Unable to load audio file"),
+                                                                               nullptr);
                                               else
-                                                  safeThis->thumbnailComp.setCurrentURL (u);
+                                                  thumbnailComp.setCurrentURL (u);
                                           }
 
-                                          safeThis->fileChooser = nullptr;
+                                          fileChooser = nullptr;
                                       }, nullptr);
         }
 

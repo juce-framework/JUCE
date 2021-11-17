@@ -130,7 +130,7 @@ public:
                                     const String& button1,
                                     const String& button2,
                                     const String& button3,
-                                    AlertWindow::AlertIconType iconType,
+                                    MessageBoxIconType iconType,
                                     int numButtons, Component* associatedComponent) override;
     void drawAlertBox (Graphics&, AlertWindow&, const Rectangle<int>& textArea, TextLayout&) override;
 

@@ -43,8 +43,8 @@ struct AudioUnitHelpers
 
         void alloc()
         {
-            const int numInputBuses  = AudioUnitHelpers::getBusCount (&processor, true);
-            const int numOutputBuses = AudioUnitHelpers::getBusCount (&processor, false);
+            const int numInputBuses  = AudioUnitHelpers::getBusCount (processor, true);
+            const int numOutputBuses = AudioUnitHelpers::getBusCount (processor, false);
 
             initializeChannelMapArray (true, numInputBuses);
             initializeChannelMapArray (false, numOutputBuses);
@@ -334,8 +334,8 @@ struct AudioUnitHelpers
     {
         Array<AUChannelInfo> channelInfo;
 
-        auto hasMainInputBus  = (AudioUnitHelpers::getBusCount (&processor, true)  > 0);
-        auto hasMainOutputBus = (AudioUnitHelpers::getBusCount (&processor, false) > 0);
+        auto hasMainInputBus  = (AudioUnitHelpers::getBusCountForWrapper (processor, true)  > 0);
+        auto hasMainOutputBus = (AudioUnitHelpers::getBusCountForWrapper (processor, false) > 0);
 
         if ((! hasMainInputBus) && (! hasMainOutputBus))
         {
@@ -353,11 +353,22 @@ struct AudioUnitHelpers
         auto defaultInputs  = processor.getChannelCountOfBus (true,  0);
         auto defaultOutputs = processor.getChannelCountOfBus (false, 0);
 
-        SortedSet<int> supportedChannels;
+        struct Channels
+        {
+            SInt16 ins, outs;
+
+            std::pair<SInt16, SInt16> makePair() const noexcept { return std::make_pair (ins, outs); }
+
+            bool operator<  (const Channels& other) const noexcept { return makePair() <  other.makePair(); }
+            bool operator== (const Channels& other) const noexcept { return makePair() == other.makePair(); }
+        };
+
+        SortedSet<Channels> supportedChannels;
 
         // add the current configuration
         if (defaultInputs != 0 || defaultOutputs != 0)
-            supportedChannels.add ((defaultInputs << 16) | defaultOutputs);
+            supportedChannels.add ({ static_cast<SInt16> (defaultInputs),
+                                     static_cast<SInt16> (defaultOutputs) });
 
         for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
         {
@@ -375,19 +386,16 @@ struct AudioUnitHelpers
                     if (! isNumberOfChannelsSupported (outBus, outChanNum, outLayout))
                         continue;
 
-                supportedChannels.add (((hasMainInputBus  ? outLayout.getMainInputChannels()  : 0) << 16)
-                                      | (hasMainOutputBus ? outLayout.getMainOutputChannels() : 0));
+                supportedChannels.add ({ static_cast<SInt16> (hasMainInputBus  ? outLayout.getMainInputChannels()  : 0),
+                                         static_cast<SInt16> (hasMainOutputBus ? outLayout.getMainOutputChannels() : 0) });
             }
         }
 
         auto hasInOutMismatch = false;
 
-        for (auto supported : supportedChannels)
+        for (const auto& supported : supportedChannels)
         {
-            auto numInputs  = (supported >> 16) & 0xffff;
-            auto numOutputs = (supported >> 0)  & 0xffff;
-
-            if (numInputs != numOutputs)
+            if (supported.ins != supported.outs)
             {
                 hasInOutMismatch = true;
                 break;
@@ -398,7 +406,8 @@ struct AudioUnitHelpers
 
         for (auto inChanNum = hasMainInputBus ? 1 : 0; inChanNum <= (hasMainInputBus ? maxNumChanToCheckFor : 0); ++inChanNum)
         {
-            auto channelConfiguration = (inChanNum << 16) | (hasInOutMismatch ? defaultOutputs : inChanNum);
+            Channels channelConfiguration { static_cast<SInt16> (inChanNum),
+                                            static_cast<SInt16> (hasInOutMismatch ? defaultOutputs : inChanNum) };
 
             if (! supportedChannels.contains (channelConfiguration))
             {
@@ -409,7 +418,8 @@ struct AudioUnitHelpers
 
         for (auto outChanNum = hasMainOutputBus ? 1 : 0; outChanNum <= (hasMainOutputBus ? maxNumChanToCheckFor : 0); ++outChanNum)
         {
-            auto channelConfiguration = ((hasInOutMismatch ? defaultInputs : outChanNum) << 16) | outChanNum;
+            Channels channelConfiguration { static_cast<SInt16> (hasInOutMismatch ? defaultInputs : outChanNum),
+                                            static_cast<SInt16> (outChanNum) };
 
             if (! supportedChannels.contains (channelConfiguration))
             {
@@ -418,16 +428,13 @@ struct AudioUnitHelpers
             }
         }
 
-        for (auto supported : supportedChannels)
+        for (const auto& supported : supportedChannels)
         {
-            auto numInputs  = (supported >> 16) & 0xffff;
-            auto numOutputs = (supported >> 0)  & 0xffff;
-
             AUChannelInfo info;
 
             // see here: https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html
-            info.inChannels  = static_cast<SInt16> (hasMainInputBus  ? (hasUnsupportedInput  ? numInputs :  (hasInOutMismatch && (! hasUnsupportedOutput) ? -2 : -1)) : 0);
-            info.outChannels = static_cast<SInt16> (hasMainOutputBus ? (hasUnsupportedOutput ? numOutputs : (hasInOutMismatch && (! hasUnsupportedInput)  ? -2 : -1)) : 0);
+            info.inChannels  = static_cast<SInt16> (hasMainInputBus  ? (hasUnsupportedInput  ? supported.ins  : (hasInOutMismatch && (! hasUnsupportedOutput) ? -2 : -1)) : 0);
+            info.outChannels = static_cast<SInt16> (hasMainOutputBus ? (hasUnsupportedOutput ? supported.outs : (hasInOutMismatch && (! hasUnsupportedInput)  ? -2 : -1)) : 0);
 
             if (info.inChannels == -2 && info.outChannels == -2)
                 info.inChannels = -1;
@@ -464,9 +471,9 @@ struct AudioUnitHelpers
     }
 
     //==============================================================================
-    static int getBusCount (const AudioProcessor* juceFilter, bool isInput)
+    static int getBusCount (const AudioProcessor& juceFilter, bool isInput)
     {
-        int busCount = juceFilter->getBusCount (isInput);
+        int busCount = juceFilter.getBusCount (isInput);
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
@@ -484,6 +491,17 @@ struct AudioUnitHelpers
         return busCount;
     }
 
+    static int getBusCountForWrapper (const AudioProcessor& juceFilter, bool isInput)
+    {
+       #if JucePlugin_IsMidiEffect
+        const auto numRequiredBuses = isInput ? 0 : 1;
+       #else
+        const auto numRequiredBuses = 0;
+       #endif
+
+        return jmax (numRequiredBuses, getBusCount (juceFilter, isInput));
+    }
+
     static bool setBusesLayout (AudioProcessor* juceFilter, const AudioProcessor::BusesLayout& requestedLayouts)
     {
        #ifdef JucePlugin_PreferredChannelConfigurations
@@ -494,7 +512,7 @@ struct AudioUnitHelpers
             const bool isInput = (dir == 0);
 
             const int actualBuses = juceFilter->getBusCount (isInput);
-            const int auNumBuses  = getBusCount (juceFilter, isInput);
+            const int auNumBuses  = getBusCount (*juceFilter, isInput);
             Array<AudioChannelSet>& buses = (isInput ? copy.inputBuses : copy.outputBuses);
 
             for (int i = auNumBuses; i < actualBuses; ++i)
@@ -517,7 +535,7 @@ struct AudioUnitHelpers
             const bool isInput = (dir == 0);
 
             const int actualBuses = juceFilter->getBusCount (isInput);
-            const int auNumBuses  = getBusCount (juceFilter, isInput);
+            const int auNumBuses  = getBusCount (*juceFilter, isInput);
             auto& buses = (isInput ? layout.inputBuses : layout.outputBuses);
 
             for (int i = auNumBuses; i < actualBuses; ++i)

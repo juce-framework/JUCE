@@ -35,11 +35,12 @@
 
   ID:                 juce_data_structures
   vendor:             juce
-  version:            6.0.7
+  version:            6.1.2
   name:               JUCE data model helper classes
   description:        Classes for undo/redo management, and smart data structures.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
+  minimumCppStandard: 14
 
   dependencies:       juce_events
 

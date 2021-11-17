@@ -155,34 +155,28 @@ namespace VideoRenderers
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EVR)
     };
-};
+}
 
 //==============================================================================
-struct VideoComponent::Pimpl  : public Component
-                             #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                              , public ComponentPeer::ScaleFactorListener
-                             #endif
+struct VideoComponent::Pimpl  : public Component,
+                                private ComponentPeer::ScaleFactorListener
 {
     Pimpl (VideoComponent& ownerToUse, bool)
-        : owner (ownerToUse),
-          videoLoaded (false)
+        : owner (ownerToUse)
     {
         setOpaque (true);
         context.reset (new DirectShowContext (*this));
         componentWatcher.reset (new ComponentWatcher (*this));
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         close();
         context = nullptr;
         componentWatcher = nullptr;
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-            if (auto* peer = ComponentPeer::getPeer (i))
-                peer->removeScaleFactorListener (this);
-       #endif
+        if (currentPeer != nullptr)
+            currentPeer->removeScaleFactorListener (this);
     }
 
     Result loadFromString (const String& fileOrURLPath)
@@ -309,7 +303,8 @@ struct VideoComponent::Pimpl  : public Component
 
         if (getWidth() > 0 && getHeight() > 0)
             if (auto* peer = getTopLevelComponent()->getPeer())
-                context->updateWindowPosition ((peer->getAreaCoveredBy (*this).toDouble() * peer->getPlatformScaleFactor()).toNearestInt());
+                context->updateWindowPosition ((peer->getAreaCoveredBy (*this).toDouble()
+                                                * peer->getPlatformScaleFactor()).toNearestInt());
     }
 
     void updateContextVisibility()
@@ -341,21 +336,20 @@ struct VideoComponent::Pimpl  : public Component
             owner.onErrorOccurred (errorMessage);
     }
 
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
-    {
-        if (videoLoaded)
-            updateContextPosition();
-    }
-   #endif
-
     File currentFile;
     URL currentURL;
 
 private:
     VideoComponent& owner;
+    ComponentPeer* currentPeer = nullptr;
+    bool videoLoaded = false;
 
-    bool videoLoaded;
+    //==============================================================================
+    void nativeScaleFactorChanged (double /*newScaleFactor*/) override
+    {
+        if (videoLoaded)
+            updateContextPosition();
+    }
 
     //==============================================================================
     struct ComponentWatcher   : public ComponentMovementWatcher
@@ -372,6 +366,9 @@ private:
 
         void componentPeerChanged() override
         {
+            if (owner.currentPeer != nullptr)
+                owner.currentPeer->removeScaleFactorListener (&owner);
+
             if (owner.videoLoaded)
                 owner.recreateNativeWindowAsync();
         }
@@ -394,10 +391,10 @@ private:
     {
         DirectShowContext (Pimpl& c)  : component (c)
         {
-            CoInitialize (0);
+            ignoreUnused (CoInitialize (nullptr));
         }
 
-        ~DirectShowContext()
+        ~DirectShowContext() override
         {
             release();
             CoUninitialize();
@@ -454,7 +451,7 @@ private:
 
         void handleAsyncUpdate() override
         {
-            if (hwnd != 0)
+            if (hwnd != nullptr)
             {
                 if (needToRecreateNativeWindow)
                 {
@@ -606,7 +603,7 @@ private:
                 mediaEvent->SetNotifyWindow (0, 0, 0);
 
             if (videoRenderer != nullptr)
-                videoRenderer->setVideoWindow (0);
+                videoRenderer->setVideoWindow (nullptr);
 
             hasVideo = false;
             videoRenderer = nullptr;
@@ -736,7 +733,7 @@ private:
         {
             long volume;
             basicAudio->get_Volume (&volume);
-            return (volume + 10000) / 10000.0f;
+            return (float) (volume + 10000) / 10000.0f;
         }
 
         enum State { uninitializedState, runningState, pausedState, stoppedState };
@@ -771,12 +768,10 @@ private:
                 nativeWindow.reset (new NativeWindow ((HWND) topLevelPeer->getNativeHandle(), this));
 
                 hwnd = nativeWindow->hwnd;
+                component.currentPeer = topLevelPeer;
+                component.currentPeer->addScaleFactorListener (&component);
 
-               #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                topLevelPeer->addScaleFactorListener (&component);
-               #endif
-
-                if (hwnd != 0)
+                if (hwnd != nullptr)
                 {
                     hdc = GetDC (hwnd);
                     component.updateContextPosition();
@@ -911,22 +906,22 @@ private:
                     DWORD type = WS_CHILD;
 
                     hwnd = CreateWindowEx (exstyle, wc->getWindowClassName(),
-                                           L"", type, 0, 0, 0, 0, parentToAddTo, 0,
-                                           (HINSTANCE) Process::getCurrentModuleInstanceHandle(), 0);
+                                           L"", type, 0, 0, 0, 0, parentToAddTo, nullptr,
+                                           (HINSTANCE) Process::getCurrentModuleInstanceHandle(), nullptr);
 
-                    if (hwnd != 0)
+                    if (hwnd != nullptr)
                     {
                         hdc = GetDC (hwnd);
                         SetWindowLongPtr (hwnd, GWLP_USERDATA, (LONG_PTR) userData);
                     }
                 }
 
-                jassert (hwnd != 0);
+                jassert (hwnd != nullptr);
             }
 
             ~NativeWindow()
             {
-                if (hwnd != 0)
+                if (hwnd != nullptr)
                 {
                     SetWindowLongPtr (hwnd, GWLP_USERDATA, (LONG_PTR) 0);
                     DestroyWindow (hwnd);
@@ -935,7 +930,7 @@ private:
 
             void setWindowPosition (Rectangle<int> newBounds)
             {
-                SetWindowPos (hwnd, 0, newBounds.getX(), newBounds.getY(),
+                SetWindowPos (hwnd, nullptr, newBounds.getX(), newBounds.getY(),
                               newBounds.getWidth(), newBounds.getHeight(),
                               SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOOWNERZORDER);
             }

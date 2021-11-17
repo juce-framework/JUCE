@@ -175,11 +175,16 @@ private:
 
     static Vst2::VstEvent* allocateVSTEvent()
     {
-        auto e = (Vst2::VstEvent*) std::calloc (1, sizeof (Vst2::VstMidiEvent) > sizeof (Vst2::VstMidiSysexEvent) ? sizeof (Vst2::VstMidiEvent)
-                                                                                            : sizeof (Vst2::VstMidiSysexEvent));
-        e->type = Vst2::kVstMidiType;
-        e->byteSize = sizeof (Vst2::VstMidiEvent);
-        return e;
+        constexpr auto size = jmax (sizeof (Vst2::VstMidiEvent), sizeof (Vst2::VstMidiSysexEvent));
+
+        if (auto* e = static_cast<Vst2::VstEvent*> (std::calloc (1, size)))
+        {
+            e->type = Vst2::kVstMidiType;
+            e->byteSize = sizeof (Vst2::VstMidiEvent);
+            return e;
+        }
+
+        return nullptr;
     }
 
     static void freeVSTEvent (Vst2::VstEvent* e)

@@ -79,7 +79,6 @@ MidiMessage::VariableLengthValue MidiMessage::readVariableLengthValue (const uin
     // bytes of input to construct a full value, or no terminating byte was
     // found. This implementation only supports variable-length values of up
     // to four bytes.
-    jassertfalse;
     return {};
 }
 
@@ -288,11 +287,14 @@ MidiMessage& MidiMessage::operator= (const MidiMessage& other)
     {
         if (other.isHeapAllocated())
         {
-            if (isHeapAllocated())
-                packedData.allocatedData = static_cast<uint8*> (std::realloc (packedData.allocatedData, (size_t) other.size));
-            else
-                packedData.allocatedData = static_cast<uint8*> (std::malloc ((size_t) other.size));
+            auto* newStorage = static_cast<uint8*> (isHeapAllocated()
+              ? std::realloc (packedData.allocatedData, (size_t) other.size)
+              : std::malloc ((size_t) other.size));
 
+            if (newStorage == nullptr)
+                throw std::bad_alloc{}; // The midi message has not been adjusted at this point
+
+            packedData.allocatedData = newStorage;
             memcpy (packedData.allocatedData, other.packedData.allocatedData, (size_t) other.size);
         }
         else
@@ -1225,6 +1227,7 @@ struct MidiMessageTest  : public UnitTest
                 const auto result = MidiMessage::readVariableLengthValue (copy.data(),
                                                                           (int) copy.size());
 
+                expect (result.isValid());
                 expectEquals (result.value, outputs[index]);
                 expectEquals (result.bytesUsed, (int) inputs[index].size());
 
@@ -1252,6 +1255,7 @@ struct MidiMessageTest  : public UnitTest
                 const auto result = MidiMessage::readVariableLengthValue (input.data(),
                                                                           (int) input.size());
 
+                expect (! result.isValid());
                 expectEquals (result.value, 0);
                 expectEquals (result.bytesUsed, 0);
             }

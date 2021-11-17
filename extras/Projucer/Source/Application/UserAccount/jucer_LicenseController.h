@@ -179,7 +179,7 @@ private:
     //==============================================================================
     void checkLicense()
     {
-        if (state.isSignedIn() && ! state.isGPL())
+        if (state.authToken.isNotEmpty() && ! state.isGPL())
         {
             auto completionCallback = [this] (LicenseQueryThread::ErrorMessageAndType error,
                                               LicenseState updatedState)

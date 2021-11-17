@@ -61,7 +61,7 @@ public:
     void buttonClicked() override
     {
         ++counter;
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon, "Action Button Pressed",
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon, "Action Button Pressed",
                                           "Pressing this type of property component can trigger an action such as showing an alert window!");
         refresh();
     }

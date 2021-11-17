@@ -26,7 +26,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4390 4611 4365 4267 4616 2544 2545)
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4390 4611 4365 4267 4616 2544 2545 6297)
 
 namespace zlibNamespace
 {
@@ -62,7 +62,8 @@ namespace pnglibNamespace
                                         "-Wimplicit-fallthrough",
                                         "-Wtautological-constant-out-of-range-compare",
                                         "-Wzero-as-null-pointer-constant",
-                                        "-Wcomma")
+                                        "-Wcomma",
+                                        "-Wmaybe-uninitialized")
 
   #undef check
   using std::abs;
@@ -71,6 +72,10 @@ namespace pnglibNamespace
 
  #if JUCE_ANDROID
   #define PNG_ARM_NEON_SUPPORTED
+ #endif
+
+ #ifndef Byte
+  using Byte = uint8_t;
  #endif
 
   #define PNG_16BIT_SUPPORTED

@@ -188,6 +188,9 @@ void Button::setToggleState (bool shouldBeOn, NotificationType clickNotification
             sendStateMessage();
         else
             buttonStateChanged();
+
+        if (auto* handler = getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::valueChanged);
     }
 }
 
@@ -220,6 +223,8 @@ void Button::setRadioGroupId (int newGroupId, NotificationType notification)
 
         if (lastToggleState)
             turnOffOtherButtonsInGroup (notification, notification);
+
+        invalidateAccessibilityHandler();
     }
 }
 
@@ -458,8 +463,8 @@ void Button::mouseDown (const MouseEvent& e)
 
 void Button::mouseUp (const MouseEvent& e)
 {
-    const bool wasDown = isDown();
-    const bool wasOver = isOver();
+    const auto wasDown = isDown();
+    const auto wasOver = isOver();
     updateState (isMouseSourceOver (e), false);
 
     if (wasDown && wasOver && ! triggerOnMouseDown)
@@ -467,7 +472,12 @@ void Button::mouseUp (const MouseEvent& e)
         if (lastStatePainted != buttonDown)
             flashButtonState();
 
+        WeakReference<Component> deletionWatcher (this);
+
         internalClickCallback (e.mods);
+
+        if (deletionWatcher != nullptr)
+            updateState (isMouseSourceOver (e), false);
     }
 }
 
@@ -690,6 +700,79 @@ void Button::repeatTimerCallback()
     {
         callbackHelper->stopTimer();
     }
+}
+
+//==============================================================================
+class ButtonAccessibilityHandler  : public AccessibilityHandler
+{
+public:
+    explicit ButtonAccessibilityHandler (Button& buttonToWrap, AccessibilityRole roleIn)
+        : AccessibilityHandler (buttonToWrap,
+                                isRadioButton (buttonToWrap) ? AccessibilityRole::radioButton : roleIn,
+                                getAccessibilityActions (buttonToWrap, roleIn)),
+          button (buttonToWrap)
+    {
+    }
+
+    AccessibleState getCurrentState() const override
+    {
+        auto state = AccessibilityHandler::getCurrentState();
+
+        if (isToggleButton (getRole()) || isRadioButton (button))
+        {
+            state = state.withCheckable();
+
+            if (button.getToggleState())
+                state = state.withChecked();
+        }
+
+        return state;
+    }
+
+    String getTitle() const override
+    {
+        auto title = AccessibilityHandler::getTitle();
+
+        if (title.isEmpty())
+            return button.getButtonText();
+
+        return title;
+    }
+
+    String getHelp() const override  { return button.getTooltip(); }
+
+private:
+    static bool isToggleButton (AccessibilityRole role) noexcept
+    {
+        return role == AccessibilityRole::toggleButton;
+    }
+
+    static bool isRadioButton (const Button& button) noexcept
+    {
+        return button.getRadioGroupId() != 0;
+    }
+
+    static AccessibilityActions getAccessibilityActions (Button& button, AccessibilityRole role)
+    {
+        auto actions = AccessibilityActions().addAction (AccessibilityActionType::press,
+                                                         [&button] { button.triggerClick(); });
+
+        if (isToggleButton (role))
+            actions = actions.addAction (AccessibilityActionType::toggle,
+                                         [&button] { button.setToggleState (! button.getToggleState(), sendNotification); });
+
+        return actions;
+    }
+
+    Button& button;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ButtonAccessibilityHandler)
+};
+
+std::unique_ptr<AccessibilityHandler> Button::createAccessibilityHandler()
+{
+    return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
 }
 
 } // namespace juce

@@ -274,7 +274,7 @@ void ComponentLayout::paste()
     {
         selected.deselectAll();
 
-        forEachXmlChildElement (*doc, e)
+        for (auto* e : doc->getChildIterator())
             if (Component* newComp = addComponentFromXml (*e, true))
                 selected.addToSelection (newComp);
 
@@ -572,9 +572,9 @@ PopupMenu ComponentLayout::getRelativeTargetMenu (Component* comp, int whichDime
 
     for (int i = 0; i < components.size(); ++i)
     {
-        Component* const c = components.getUnchecked(i);
+        auto* const c = components.getUnchecked (i);
 
-        if (c != comp)
+        if (c != nullptr && c != comp)
             m.addItem (menuIdBase + i + 1,
                        "Relative to " + getComponentMemberVariableName (c)
                         + " (class: " + ComponentTypeHandler::getHandlerFor (*c)->getClassName (c) + ")",

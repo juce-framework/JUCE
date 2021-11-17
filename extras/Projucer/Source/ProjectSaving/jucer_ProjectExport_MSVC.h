@@ -33,6 +33,7 @@ public:
     MSVCProjectExporterBase (Project& p, const ValueTree& t, String folderName)
         : ProjectExporter (p, t),
           IPPLibraryValue       (settings, Ids::IPPLibrary,                   getUndoManager()),
+          IPP1ALibraryValue     (settings, Ids::IPP1ALibrary,                 getUndoManager()),
           platformToolsetValue  (settings, Ids::toolset,                      getUndoManager()),
           targetPlatformVersion (settings, Ids::windowsTargetPlatformVersion, getUndoManager()),
           manifestFileValue     (settings, Ids::msvcManifestFile,             getUndoManager())
@@ -49,6 +50,7 @@ public:
 
     //==============================================================================
     String getIPPLibrary() const                      { return IPPLibraryValue.get(); }
+    String getIPP1ALibrary() const                    { return IPP1ALibraryValue.get(); }
     String getPlatformToolset() const                 { return platformToolsetValue.get(); }
     String getWindowsTargetPlatformVersion() const    { return targetPlatformVersion.get(); }
 
@@ -439,10 +441,18 @@ public:
 
                 addWindowsTargetPlatformToConfig (*e);
 
-                auto ippLibrary = owner.getIPPLibrary();
+                struct IPPLibraryInfo
+                {
+                    String libraryKind;
+                    String configString;
+                };
 
-                if (ippLibrary.isNotEmpty())
-                    e->createNewChildElement ("UseIntelIPP")->addTextElement (ippLibrary);
+                for (const auto& info : { IPPLibraryInfo { owner.getIPPLibrary(),   "UseIntelIPP" },
+                                          IPPLibraryInfo { owner.getIPP1ALibrary(), "UseIntelIPP1A" }})
+                {
+                    if (info.libraryKind.isNotEmpty())
+                        e->createNewChildElement (info.configString)->addTextElement (info.libraryKind);
+                }
             }
 
             {
@@ -537,6 +547,7 @@ public:
                 }
 
                 bool isUsingEditAndContinue = false;
+                const auto pdbFilename = getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true, type == UnityPlugIn));
 
                 {
                     auto* cl = group->createNewChildElement ("ClCompile");
@@ -562,7 +573,7 @@ public:
                     cl->createNewChildElement ("PrecompiledHeader")->addTextElement ("NotUsing");
                     cl->createNewChildElement ("AssemblerListingLocation")->addTextElement ("$(IntDir)\\");
                     cl->createNewChildElement ("ObjectFileName")->addTextElement ("$(IntDir)\\");
-                    cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement ("$(IntDir)\\");
+                    cl->createNewChildElement ("ProgramDataBaseFileName")->addTextElement (pdbFilename);
                     cl->createNewChildElement ("WarningLevel")->addTextElement ("Level" + String (config.getWarningLevel()));
                     cl->createNewChildElement ("SuppressStartupBanner")->addTextElement ("true");
                     cl->createNewChildElement ("MultiProcessorCompilation")->addTextElement (config.shouldUseMultiProcessorCompilation() ? "true" : "false");
@@ -578,10 +589,6 @@ public:
                         cl->createNewChildElement ("TreatWarningAsError")->addTextElement ("true");
 
                     auto cppStandard = owner.project.getCppStandardString();
-
-                    if (cppStandard == "11") // VS doesn't support the C++11 flag so we have to bump it to C++14
-                        cppStandard = "14";
-
                     cl->createNewChildElement ("LanguageStandard")->addTextElement ("stdcpp" + cppStandard);
                 }
 
@@ -608,7 +615,7 @@ public:
                     link->createNewChildElement ("IgnoreSpecificDefaultLibraries")->addTextElement (isDebug ? "libcmt.lib; msvcrt.lib;;%(IgnoreSpecificDefaultLibraries)"
                                                                                                             : "%(IgnoreSpecificDefaultLibraries)");
                     link->createNewChildElement ("GenerateDebugInformation")->addTextElement ((isDebug || config.shouldGenerateDebugSymbols()) ? "true" : "false");
-                    link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (getOwner().getIntDirFile (config, config.getOutputFilename (".pdb", true, type == UnityPlugIn)));
+                    link->createNewChildElement ("ProgramDatabaseFile")->addTextElement (pdbFilename);
                     link->createNewChildElement ("SubSystem")->addTextElement (type == ConsoleApp ? "Console" : "Windows");
 
                     if (! config.is64Bit())
@@ -846,6 +853,17 @@ public:
                     if (projectItem.shouldBeCompiled())
                     {
                         auto extraCompilerFlags = owner.compilerFlagSchemesMap[projectItem.getCompilerFlagSchemeString()].get().toString();
+
+                        if (shouldAddBigobjFlag (path))
+                        {
+                            const String bigobjFlag ("/bigobj");
+
+                            if (! extraCompilerFlags.contains (bigobjFlag))
+                            {
+                                extraCompilerFlags << " " << bigobjFlag;
+                                extraCompilerFlags.trim();
+                            }
+                        }
 
                         if (extraCompilerFlags.isNotEmpty())
                             e->createNewChildElement ("AdditionalOptions")->addTextElement (extraCompilerFlags + " %(AdditionalOptions)");
@@ -1146,9 +1164,9 @@ public:
                 auto bundleDir      = getOwner().getOutDirFile (config, outputFilename);
                 auto bundleContents = bundleDir + "\\Contents";
                 auto archDir        = bundleContents + String ("\\") + (config.is64Bit() ? "x64" : "Win32");
-                auto executable     = archDir + String ("\\") + outputFilename;
+                auto executablePath = archDir + String ("\\") + outputFilename;
 
-                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config, false).quoted() + String (" ") + executable.quoted() + String ("\r\ncall ")
+                auto pkgScript = String ("copy /Y ") + getOutputFilePath (config, false).quoted() + String (" ") + executablePath.quoted() + String ("\r\ncall ")
                                      + createRebasedPath (bundleScript) + String (" ") + archDir.quoted() + String (" ") + createRebasedPath (iconFilePath);
 
                 if (config.isPluginBinaryCopyStepEnabled())
@@ -1467,10 +1485,16 @@ public:
         props.add (new TextPropertyComponent (manifestFileValue, "Manifest file", 8192, false),
             "Path to a manifest input file which should be linked into your binary (path is relative to jucer file).");
 
-        props.add (new ChoicePropertyComponent (IPPLibraryValue, "Use IPP Library",
+        props.add (new ChoicePropertyComponent (IPPLibraryValue, "(deprecated) Use IPP Library",
                                                 { "No",  "Yes (Default Linking)",  "Multi-Threaded Static Library", "Single-Threaded Static Library", "Multi-Threaded DLL", "Single-Threaded DLL" },
                                                 { var(), "true",                   "Parallel_Static",               "Sequential",                     "Parallel_Dynamic",   "Sequential_Dynamic" }),
-                   "Enable this to use Intel's Integrated Performance Primitives library.");
+                   "This option is deprecated, use the \"Use IPP Library (oneAPI)\" option instead. "
+                   "Enable this to use Intel's Integrated Performance Primitives library, if you have an older version that was not supplied in the oneAPI toolkit.");
+
+        props.add (new ChoicePropertyComponent (IPP1ALibraryValue, "Use IPP Library (oneAPI)",
+                                                { "No",  "Yes (Default Linking)",  "Static Library",     "Dynamic Library" },
+                                                { var(), "true",                   "Static_Library",     "Dynamic_Library" }),
+                   "Enable this to use Intel's Integrated Performance Primitives library, supplied as part of the oneAPI toolkit.");
 
         {
             auto isWindows10SDK = getVisualStudioVersion() > 14;
@@ -1555,7 +1579,7 @@ protected:
     mutable File rcFile, iconFile, packagesConfigFile;
     OwnedArray<MSVCTargetBase> targets;
 
-    ValueWithDefault IPPLibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
+    ValueWithDefault IPPLibraryValue, IPP1ALibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
 
     File getProjectFile (const String& extension, const String& target) const
     {
@@ -1731,6 +1755,11 @@ protected:
         return path.getFileNameWithoutExtension().startsWithIgnoreCase ("include_juce_audio_plugin_client_RTAS_");
     }
 
+    static bool shouldAddBigobjFlag (const build_tools::RelativePath& path)
+    {
+        return path.getFileNameWithoutExtension().equalsIgnoreCase ("include_juce_gui_basics");
+    }
+
     StringArray getModuleLibs() const
     {
         StringArray result;
@@ -1760,6 +1789,8 @@ public:
     static String getDisplayName()        { return "Visual Studio 2015"; }
     static String getValueTreeTypeName()  { return "VS2015"; }
     static String getTargetFolderName()   { return "VisualStudio2015"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 14; }
     String getSolutionComment() const override                       { return "# Visual Studio 2015"; }
@@ -1804,6 +1835,8 @@ public:
     static String getValueTreeTypeName()  { return "VS2017"; }
     static String getTargetFolderName()   { return "VisualStudio2017"; }
 
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
     int getVisualStudioVersion() const override                      { return 15; }
     String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
     String getToolsVersion() const override                          { return "15.0"; }
@@ -1846,6 +1879,8 @@ public:
     static String getDisplayName()        { return "Visual Studio 2019"; }
     static String getValueTreeTypeName()  { return "VS2019"; }
     static String getTargetFolderName()   { return "VisualStudio2019"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 16; }
     String getSolutionComment() const override                       { return "# Visual Studio 2019"; }

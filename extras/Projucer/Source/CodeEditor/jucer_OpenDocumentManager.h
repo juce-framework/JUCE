@@ -51,12 +51,13 @@ public:
         virtual String getType() const = 0;
         virtual File getFile() const = 0;
         virtual bool needsSaving() const = 0;
-        virtual bool save() = 0;
-        virtual bool saveAs() = 0;
+        virtual bool saveSyncWithoutAsking() = 0;
+        virtual void saveAsync (std::function<void (bool)>) = 0;
+        virtual void saveAsAsync (std::function<void (bool)>) = 0;
         virtual bool hasFileBeenModifiedExternally() = 0;
         virtual void reloadFromFile() = 0;
-        virtual Component* createEditor() = 0;
-        virtual Component* createViewer() = 0;
+        virtual std::unique_ptr<Component> createEditor() = 0;
+        virtual std::unique_ptr<Component> createViewer() = 0;
         virtual void fileHasBeenRenamed (const File& newFile) = 0;
         virtual String getState() const = 0;
         virtual void restoreState (const String& state) = 0;
@@ -72,14 +73,20 @@ public:
 
     bool canOpenFile (const File& file);
     Document* openFile (Project* project, const File& file);
-    bool closeDocument (int index, SaveIfNeeded saveIfNeeded);
-    bool closeDocument (Document* document, SaveIfNeeded saveIfNeeded);
-    bool closeAll (SaveIfNeeded askUserToSave);
-    bool closeAllDocumentsUsingProject (Project& project, SaveIfNeeded saveIfNeeded);
-    void closeFile (const File& f, SaveIfNeeded saveIfNeeded);
+
+    void closeDocumentAsync (Document* document, SaveIfNeeded saveIfNeeded, std::function<void (bool)> callback);
+    bool closeDocumentWithoutSaving (Document* document);
+
+    void closeAllAsync (SaveIfNeeded askUserToSave, std::function<void (bool)> callback);
+    void closeAllDocumentsUsingProjectAsync (Project& project, SaveIfNeeded askUserToSave, std::function<void (bool)> callback);
+    void closeAllDocumentsUsingProjectWithoutSaving (Project& project);
+
+    void closeFileWithoutSaving (const File& f);
     bool anyFilesNeedSaving() const;
-    bool saveAll();
-    FileBasedDocument::SaveResult saveIfNeededAndUserAgrees (Document* doc);
+
+    void saveAllSyncWithoutAsking();
+    void saveIfNeededAndUserAgrees (Document* doc, std::function<void (FileBasedDocument::SaveResult)>);
+
     void reloadModifiedFiles();
     void fileHasBeenRenamed (const File& oldFile, const File& newFile);
 
@@ -112,11 +119,19 @@ public:
 
 
 private:
+    //==============================================================================
+    void closeLastDocumentUsingProjectRecursive (WeakReference<OpenDocumentManager>,
+                                                 Project*,
+                                                 SaveIfNeeded,
+                                                 std::function<void (bool)>);
+
+    //==============================================================================
     OwnedArray<DocumentType> types;
     OwnedArray<Document> documents;
     Array<DocumentCloseListener*> listeners;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OpenDocumentManager)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (OpenDocumentManager)
 };
 
 //==============================================================================

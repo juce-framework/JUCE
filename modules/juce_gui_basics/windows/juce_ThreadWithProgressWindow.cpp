@@ -41,7 +41,7 @@ ThreadWithProgressWindow::ThreadWithProgressWindow (const String& title,
                            .createAlertWindow (title, {},
                                                cancelButtonText.isEmpty() ? TRANS("Cancel")
                                                                           : cancelButtonText,
-                                               {}, {}, AlertWindow::NoIcon, hasCancelButton ? 1 : 0,
+                                               {}, {}, MessageBoxIconType::NoIcon, hasCancelButton ? 1 : 0,
                                                componentToCentreAround));
 
     // if there are no buttons, we won't allow the user to interrupt the thread.

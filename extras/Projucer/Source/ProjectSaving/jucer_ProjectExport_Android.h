@@ -76,6 +76,8 @@ public:
     static String getValueTreeTypeName()  { return "ANDROIDSTUDIO"; }
     static String getTargetFolderName()   { return "Android"; }
 
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
     static const char* getDefaultActivityClass()     { return "com.rmsl.juce.JuceActivity"; }
     static const char* getDefaultApplicationClass()  { return "com.rmsl.juce.JuceApp"; }
 
@@ -88,12 +90,15 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories, androidRepositories, androidDependencies, androidCustomAppBuildGradleContent,
-                     androidScreenOrientation, androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements, androidGradleSettingsContent, androidVersionCode,
-                     androidMinimumSDK, androidTargetSDK, androidTheme, androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission, androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions,
-                     androidPushNotifications, androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore, androidKeyStorePass,
-                     androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
+                     androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
+                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
+                     androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
+                     androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
+                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
+                     androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
+                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
+                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -101,7 +106,7 @@ public:
           androidJavaLibs                      (settings, Ids::androidJavaLibs,                      getUndoManager()),
           androidAdditionalJavaFolders         (settings, Ids::androidAdditionalJavaFolders,         getUndoManager()),
           androidAdditionalResourceFolders     (settings, Ids::androidAdditionalResourceFolders,     getUndoManager()),
-          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\njcenter()"),
+          androidProjectRepositories           (settings, Ids::androidProjectRepositories,           getUndoManager(), "google()\nmavenCentral()"),
           androidRepositories                  (settings, Ids::androidRepositories,                  getUndoManager()),
           androidDependencies                  (settings, Ids::androidDependencies,                  getUndoManager()),
           androidCustomAppBuildGradleContent   (settings, Ids::androidCustomAppBuildGradleContent,   getUndoManager()),
@@ -133,9 +138,9 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "6.1.1"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.0.2"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "4.0.0"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.0.0"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -410,8 +415,7 @@ private:
 
             mo << "enable_language(ASM)" << newLine << newLine;
 
-            auto userLibraries = StringArray::fromTokens (getExternalLibrariesString(), ";", "");
-            userLibraries.addArray (androidLibs);
+            const auto userLibraries = getUserLibraries();
 
             if (getNumConfigurations() > 0)
             {
@@ -601,7 +605,7 @@ private:
         mo << "buildscript {"                                                                              << newLine;
         mo << "   repositories {"                                                                          << newLine;
         mo << "       google()"                                                                            << newLine;
-        mo << "       jcenter()"                                                                           << newLine;
+        mo << "       mavenCentral()"                                                                      << newLine;
         mo << "   }"                                                                                       << newLine;
         mo << "   dependencies {"                                                                          << newLine;
         mo << "       classpath 'com.android.tools.build:gradle:" << androidPluginVersion.get().toString() << "'" << newLine;
@@ -922,14 +926,13 @@ private:
                 addModuleJavaFolderToSourceSet (javaSourceSets, javaFolder.getChildFile ("app"));
         }
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_gui_basics")
-            && (getActivityClassString() == getDefaultActivityClass() || isContentSharingEnabled()))
+        if (isUsingDefaultActivityClass() || isContentSharingEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_basics");
 
         if (areRemoteNotificationsEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_gui_extra");
 
-        if (project.getEnabledModules().isModuleEnabled ("juce_product_unlocking") && isInAppBillingEnabled())
+        if (isInAppBillingEnabled())
             addOptJavaFolderToSourceSetsForModule (javaSourceSets, modules, "juce_product_unlocking");
 
         MemoryOutputStream mo;
@@ -1223,6 +1226,7 @@ private:
         }
     }
 
+    //==============================================================================
     String getActivityClassString() const
     {
         auto customActivityClass = androidCustomActivityClass.get().toString();
@@ -1234,17 +1238,33 @@ private:
     }
 
     String getApplicationClassString() const    { return androidCustomApplicationClass.get(); }
+    String getJNIActivityClassName() const      { return getActivityClassString().replaceCharacter ('.', '/'); }
 
-    bool arePushNotificationsEnabled() const    { return androidPushNotifications.get(); }
-    bool areRemoteNotificationsEnabled() const  { return arePushNotificationsEnabled() && androidEnableRemoteNotifications.get(); }
+    bool isUsingDefaultActivityClass() const    { return getActivityClassString() == getDefaultActivityClass(); }
 
-    bool isInAppBillingEnabled() const          { return androidInAppBillingPermission.get(); }
-
-    bool isContentSharingEnabled() const        { return androidEnableContentSharing.get(); }
-
-    String getJNIActivityClassName() const
+    //==============================================================================
+    bool arePushNotificationsEnabled() const
     {
-        return getActivityClassString().replaceCharacter ('.', '/');
+        return project.getEnabledModules().isModuleEnabled ("juce_gui_extra")
+              && androidPushNotifications.get();
+    }
+
+    bool areRemoteNotificationsEnabled() const
+    {
+        return arePushNotificationsEnabled()
+              && androidEnableRemoteNotifications.get();
+    }
+
+    bool isInAppBillingEnabled() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_product_unlocking")
+              && androidInAppBillingPermission.get();
+    }
+
+    bool isContentSharingEnabled() const
+    {
+        return project.getEnabledModules().isModuleEnabled ("juce_gui_basics")
+              && androidEnableContentSharing.get();
     }
 
     //==============================================================================
@@ -1255,11 +1275,7 @@ private:
 
     String getAppPlatform() const
     {
-        auto ndkVersion = static_cast<int> (androidMinimumSDK.get());
-        if (ndkVersion == 9)
-            ndkVersion = 10; // (doesn't seem to be a version '9')
-
-        return "android-" + String (ndkVersion);
+        return "android-" + androidMinimumSDK.get().toString();
     }
 
     //==============================================================================
@@ -1495,6 +1511,20 @@ private:
     }
 
     //==============================================================================
+    StringArray getUserLibraries() const
+    {
+        auto userLibraries = StringArray::fromTokens (getExternalLibrariesString(), ";", "");
+        userLibraries = getCleanedStringArray (userLibraries);
+
+        const auto ppDefs = getAllPreprocessorDefs();
+
+        for (auto& lib : userLibraries)
+            lib = build_tools::replacePreprocessorDefs (ppDefs, lib);
+
+        userLibraries.addArray (androidLibs);
+        return userLibraries;
+    }
+
     StringArray getAndroidLibraries() const
     {
         StringArray libraries;
@@ -1633,7 +1663,7 @@ private:
     {
         auto permissions = getPermissionsRequired();
 
-        forEachXmlChildElementWithTagName (manifest, child, "uses-permission")
+        for (auto* child : manifest.getChildWithTagNameIterator ("uses-permission"))
         {
             permissions.removeString (child->getStringAttribute ("android:name"), false);
         }
@@ -1648,7 +1678,7 @@ private:
         {
             XmlElement* glVersion = nullptr;
 
-            forEachXmlChildElementWithTagName (manifest, child, "uses-feature")
+            for (auto* child : manifest.getChildWithTagNameIterator ("uses-feature"))
             {
                 if (child->getStringAttribute ("android:glEsVersion").isNotEmpty())
                 {
@@ -1682,15 +1712,8 @@ private:
                 app->setAttribute ("android:icon", "@drawable/icon");
         }
 
-        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
-        {
-            if (! app->hasAttribute ("android:hardwareAccelerated"))
-                app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
-        }
-        else
-        {
-            app->removeAttribute ("android:hardwareAccelerated");
-        }
+        if (! app->hasAttribute ("android:hardwareAccelerated"))
+            app->setAttribute ("android:hardwareAccelerated", "false"); // (using the 2D acceleration slows down openGL)
 
         return app;
     }
@@ -1703,34 +1726,12 @@ private:
         setAttributeIfNotPresent (*act, "android:label", "@string/app_name");
 
         if (! act->hasAttribute ("android:configChanges"))
-        {
-            String configChanges ("keyboardHidden|orientation");
-            if (static_cast<int> (androidMinimumSDK.get()) >= 13)
-                configChanges += "|screenSize";
-
-            act->setAttribute ("android:configChanges", configChanges);
-        }
-        else
-        {
-            auto configChanges = act->getStringAttribute ("android:configChanges");
-
-            if (static_cast<int> (androidMinimumSDK.get()) < 13 && configChanges.contains ("screenSize"))
-            {
-                configChanges = configChanges.replace ("|screenSize", "")
-                                             .replace ("screenSize|", "")
-                                             .replace ("screenSize", "");
-
-                act->setAttribute ("android:configChanges", configChanges);
-            }
-        }
+            act->setAttribute ("android:configChanges", "keyboardHidden|orientation|screenSize");
 
         if (androidScreenOrientation.get() == "landscape")
         {
-            String landscapeString = static_cast<int> (androidMinimumSDK.get()) < 9
-                                   ? "landscape"
-                                   : (static_cast<int> (androidMinimumSDK.get()) < 18 ? "sensorLandscape" : "userLandscape");
-
-            setAttributeIfNotPresent (*act, "android:screenOrientation", landscapeString);
+            setAttributeIfNotPresent (*act, "android:screenOrientation",
+                                      static_cast<int> (androidMinimumSDK.get()) < 18 ? "sensorLandscape" : "userLandscape");
         }
         else
         {
@@ -1742,15 +1743,8 @@ private:
         // Using the 2D acceleration slows down OpenGL. We *do* enable it here for the activity though, and we disable it
         // in each ComponentPeerView instead. This way any embedded native views, which are not children of ComponentPeerView,
         // can still use hardware acceleration if needed (e.g. web view).
-        if (static_cast<int> (androidMinimumSDK.get()) >= 11)
-        {
-            if (! act->hasAttribute ("android:hardwareAccelerated"))
-                act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
-        }
-        else
-        {
-            act->removeAttribute ("android:hardwareAccelerated");
-        }
+        if (! act->hasAttribute ("android:hardwareAccelerated"))
+            act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
 
         return act;
     }

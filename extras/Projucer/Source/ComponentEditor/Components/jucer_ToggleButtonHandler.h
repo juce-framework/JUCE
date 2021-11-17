@@ -85,7 +85,7 @@ public:
         String s;
 
         if (tb->getToggleState())
-            s << memberVariableName << "->setToggleState (true, dontSendNotification);\n";
+            s << memberVariableName << "->setToggleState (true, juce::dontSendNotification);\n";
 
         s << getColourIntialisationCode (component, memberVariableName)
           << '\n';

@@ -35,7 +35,7 @@ namespace juce
 
 template <typename OboeDataFormat>  struct OboeAudioIODeviceBufferHelpers {};
 
-template<>
+template <>
 struct OboeAudioIODeviceBufferHelpers<int16>
 {
     static oboe::AudioFormat oboeAudioFormat() { return oboe::AudioFormat::I16; }
@@ -71,7 +71,7 @@ struct OboeAudioIODeviceBufferHelpers<int16>
     }
 };
 
-template<>
+template <>
 struct OboeAudioIODeviceBufferHelpers<float>
 {
     static oboe::AudioFormat oboeAudioFormat() { return oboe::AudioFormat::Float; }

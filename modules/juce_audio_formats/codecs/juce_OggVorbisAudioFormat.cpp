@@ -35,7 +35,7 @@ namespace juce
 namespace OggVorbisNamespace
 {
 #if JUCE_INCLUDE_OGGVORBIS_CODE || ! defined (JUCE_INCLUDE_OGGVORBIS_CODE)
- JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459)
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4305 4189 4706 4995 4365 4456 4457 4459 6297 6011 6001 6308 6255 6386 6385 6246 6387 6263 6262 28182)
 
  JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                       "-Wshadow",
@@ -160,13 +160,13 @@ public:
     {
         while (numSamples > 0)
         {
-            auto numAvailable = (int) (reservoirStart + samplesInReservoir - startSampleInFile);
+            auto numAvailable = (reservoirStart + samplesInReservoir - startSampleInFile);
 
             if (startSampleInFile >= reservoirStart && numAvailable > 0)
             {
                 // got a few samples overlapping, so use them before seeking..
 
-                auto numToUse = jmin (numSamples, numAvailable);
+                auto numToUse = jmin ((int64) numSamples, numAvailable);
 
                 for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
                     if (destSamples[i] != nullptr)
@@ -175,8 +175,8 @@ public:
                                 (size_t) numToUse * sizeof (float));
 
                 startSampleInFile += numToUse;
-                numSamples -= numToUse;
-                startOffsetInDestBuffer += numToUse;
+                numSamples -= (int) numToUse;
+                startOffsetInDestBuffer += (int) numToUse;
 
                 if (numSamples == 0)
                     break;
@@ -194,7 +194,7 @@ public:
 
                 int bitStream = 0;
                 int offset = 0;
-                int numToRead = samplesInReservoir;
+                int numToRead = (int) samplesInReservoir;
 
                 while (numToRead > 0)
                 {
@@ -261,7 +261,7 @@ private:
     OggVorbisNamespace::OggVorbis_File ovFile;
     OggVorbisNamespace::ov_callbacks callbacks;
     AudioBuffer<float> reservoir;
-    int reservoirStart = 0, samplesInReservoir = 0;
+    int64 reservoirStart = 0, samplesInReservoir = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader)
 };

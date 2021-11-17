@@ -36,10 +36,9 @@ class ProjectSaver
 public:
     ProjectSaver (Project& projectToSave);
 
-    Result save (ProjectExporter* exporterToSave = nullptr);
+    void save (Async async, ProjectExporter* exporterToSave, std::function<void (Result)> onCompletion);
     Result saveResourcesOnly();
     void saveBasicProjectItems (const OwnedArray<LibraryModule>& modules, const String& appConfigUserContent);
-    Result saveContentNeededForLiveBuild();
 
     Project& getProject()  { return project; }
 
@@ -53,21 +52,30 @@ private:
     struct SaveThreadWithProgressWindow  : public ThreadWithProgressWindow
     {
     public:
-        SaveThreadWithProgressWindow (ProjectSaver& ps, ProjectExporter* exporterToSave)
+        SaveThreadWithProgressWindow (ProjectSaver& ps,
+                                      ProjectExporter* exporterToSave,
+                                      std::function<void (Result)> onCompletionIn)
             : ThreadWithProgressWindow ("Saving...", true, false),
               saver (ps),
-              specifiedExporterToSave (exporterToSave)
-        {}
+              specifiedExporterToSave (exporterToSave),
+              onCompletion (std::move (onCompletionIn))
+        {
+            jassert (onCompletion != nullptr);
+        }
 
         void run() override
         {
             setProgress (-1);
-            result = saver.saveProject (specifiedExporterToSave);
+            const auto result = saver.saveProject (specifiedExporterToSave);
+            const auto callback = onCompletion;
+
+            MessageManager::callAsync ([callback, result] { callback (result); });
         }
 
+    private:
         ProjectSaver& saver;
-        Result result = Result::ok();
         ProjectExporter* specifiedExporterToSave;
+        std::function<void (Result)> onCompletion;
 
         JUCE_DECLARE_NON_COPYABLE (SaveThreadWithProgressWindow)
     };
@@ -87,6 +95,7 @@ private:
     OwnedArray<LibraryModule> getModules();
 
     Result saveProject (ProjectExporter* specifiedExporterToSave);
+    void saveProjectAsync (ProjectExporter* exporterToSave, std::function<void (Result)> onCompletion);
 
     template <typename WriterCallback>
     void writeOrRemoveGeneratedFile (const String& name, WriterCallback&& writerCallback);
@@ -119,8 +128,11 @@ private:
     CriticalSection errorLock;
     StringArray errors;
 
+    std::unique_ptr<SaveThreadWithProgressWindow> saveThread;
+
     bool hasBinaryData = false;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectSaver)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (ProjectSaver)
 };

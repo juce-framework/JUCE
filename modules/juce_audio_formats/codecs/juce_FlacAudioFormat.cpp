@@ -97,7 +97,7 @@ namespace FlacNamespace
 
  #define FLAC__NO_DLL 1
 
- JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 4005 4334 181 111)
+ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4267 4127 4244 4996 4100 4701 4702 4013 4133 4206 4312 4505 4365 4005 4334 181 111 6340 6308 6297 6001 6320)
  #if ! JUCE_MSVC
   #define HAVE_LROUND 1
  #endif
@@ -118,7 +118,8 @@ namespace FlacNamespace
                                       "-Wimplicit-fallthrough",
                                       "-Wzero-as-null-pointer-constant",
                                       "-Wsign-conversion",
-                                      "-Wredundant-decls")
+                                      "-Wredundant-decls",
+                                      "-Wlanguage-extension-token")
 
  #if JUCE_INTEL
   #if JUCE_32BIT
@@ -250,7 +251,7 @@ public:
                     samplesInReservoir = 0;
                 }
                 else if (startSampleInFile < reservoirStart
-                          || startSampleInFile > reservoirStart + jmax (samplesInReservoir, 511))
+                          || startSampleInFile > reservoirStart + jmax (samplesInReservoir, (int64) 511))
                 {
                     // had some problems with flac crashing if the read pos is aligned more
                     // accurately than this. Probably fixed in newer versions of the library, though.
@@ -367,7 +368,7 @@ public:
 private:
     FlacNamespace::FLAC__StreamDecoder* decoder;
     AudioBuffer<float> reservoir;
-    int reservoirStart = 0, samplesInReservoir = 0;
+    int64 reservoirStart = 0, samplesInReservoir = 0;
     bool ok = false, scanningForLength = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacReader)

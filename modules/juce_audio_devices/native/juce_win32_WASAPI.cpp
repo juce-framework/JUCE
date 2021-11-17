@@ -23,6 +23,8 @@
 namespace juce
 {
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
 #ifndef JUCE_WASAPI_LOGGING
  #define JUCE_WASAPI_LOGGING 0
 #endif
@@ -115,9 +117,6 @@ bool check (HRESULT hr)
  #define KSDATAFORMAT_SUBTYPE_PCM         uuidFromString ("00000001-0000-0010-8000-00aa00389b71")
  #define KSDATAFORMAT_SUBTYPE_IEEE_FLOAT  uuidFromString ("00000003-0000-0010-8000-00aa00389b71")
 #endif
-
-#define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown
-#define JUCE_COMCALL                     virtual HRESULT STDMETHODCALLTYPE
 
 enum EDataFlow
 {
@@ -336,10 +335,6 @@ JUCE_IUNKNOWNCLASS (IAudioSessionControl, "F4B1A599-7266-4319-A8CA-E70ACB11E8CD"
     JUCE_COMCALL RegisterAudioSessionNotification (IAudioSessionEvents*) = 0;
     JUCE_COMCALL UnregisterAudioSessionNotification (IAudioSessionEvents*) = 0;
 };
-
-#undef JUCE_COMCALL
-#undef JUCE_COMCLASS
-#undef JUCE_IUNKNOWNCLASS
 
 //==============================================================================
 namespace WasapiClasses
@@ -639,10 +634,10 @@ private:
                                                                     &minPeriod,
                                                                     &maxPeriod)))
                 {
-                    minBufferSize = minPeriod;
-                    defaultBufferSize = defaultPeriod;
-                    lowLatencyMaxBufferSize = maxPeriod;
-                    lowLatencyBufferSizeMultiple = fundamentalPeriod;
+                    minBufferSize = (int) minPeriod;
+                    defaultBufferSize = (int) defaultPeriod;
+                    lowLatencyMaxBufferSize = (int) maxPeriod;
+                    lowLatencyBufferSizeMultiple = (int) fundamentalPeriod;
                 }
             }
         }
@@ -679,7 +674,7 @@ private:
                                                                                         : &nearestFormat)))
             {
                 if (nearestFormat != nullptr)
-                    rate = nearestFormat->nSamplesPerSec;
+                    rate = (int) nearestFormat->nSamplesPerSec;
 
                 if (! rates.contains (rate))
                     rates.addUsingDefaultSort (rate);
@@ -787,7 +782,7 @@ private:
     {
         if (auto audioClient3 = client.getInterface<IAudioClient3>())
             return check (audioClient3->InitializeSharedAudioStream (getStreamFlags(),
-                                                                     bufferSizeSamples,
+                                                                     (UINT32) bufferSizeSamples,
                                                                      (WAVEFORMATEX*) &format,
                                                                      nullptr));
 
@@ -829,7 +824,7 @@ private:
             client = nullptr;
             client = createClient();
 
-            defaultPeriod = samplesToRefTime (numFrames, format.Format.nSamplesPerSec);
+            defaultPeriod = samplesToRefTime ((int) numFrames, format.Format.nSamplesPerSec);
         }
 
         return false;
@@ -872,7 +867,7 @@ public:
     {
     }
 
-    ~WASAPIInputDevice()
+    ~WASAPIInputDevice() override
     {
         close();
     }
@@ -893,7 +888,7 @@ public:
         reservoirWritePos = 0;
     }
 
-    template<class SourceType>
+    template <class SourceType>
     void updateFormatWithType (SourceType*) noexcept
     {
         using NativeType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::NonConst>;
@@ -910,9 +905,9 @@ public:
 
     bool start (int userBufferSize)
     {
-        reservoirSize = actualBufferSize + userBufferSize;
+        reservoirSize = (int) (actualBufferSize + (UINT32) userBufferSize);
         reservoirMask = nextPowerOfTwo (reservoirSize) - 1;
-        reservoir.setSize ((reservoirMask + 1) * bytesPerFrame, true);
+        reservoir.setSize ((size_t) ((reservoirMask + 1) * bytesPerFrame), true);
         reservoirReadPos = 0;
         reservoirWritePos = 0;
         xruns = 0;
@@ -964,9 +959,9 @@ public:
                 void* reservoirPtr = addBytesToPointer (reservoir.getData(), localWrite * bytesPerFrame);
 
                 if ((flags & AUDCLNT_BUFFERFLAGS_SILENT) != 0)
-                    zeromem (reservoirPtr, samplesToDoBytes);
+                    zeromem (reservoirPtr, (size_t) samplesToDoBytes);
                 else
-                    memcpy (reservoirPtr, inputData, samplesToDoBytes);
+                    memcpy (reservoirPtr, inputData, (size_t) samplesToDoBytes);
 
                 reservoirWritePos += samplesToDo;
                 inputData += samplesToDoBytes;
@@ -982,7 +977,7 @@ public:
 
     void copyBuffersFromReservoir (float** destBuffers, int numDestBuffers, int bufferSize)
     {
-        if ((numChannels <= 0 && bufferSize == 0) || reservoir.getSize() == 0)
+        if ((numChannels <= 0 && bufferSize == 0) || reservoir.isEmpty())
             return;
 
         int offset = jmax (0, bufferSize - getNumSamplesInReservoir());
@@ -990,7 +985,7 @@ public:
         if (offset > 0)
         {
             for (int i = 0; i < numDestBuffers; ++i)
-                zeromem (destBuffers[i], offset * sizeof (float));
+                zeromem (destBuffers[i], (size_t) offset * sizeof (float));
 
             bufferSize -= offset;
             reservoirReadPos -= offset / 2;
@@ -1035,7 +1030,7 @@ public:
     {
     }
 
-    ~WASAPIOutputDevice()
+    ~WASAPIOutputDevice() override
     {
         close();
     }
@@ -1053,7 +1048,7 @@ public:
         renderClient = nullptr;
     }
 
-    template<class DestType>
+    template <class DestType>
     void updateFormatWithType (DestType*)
     {
         using NativeType = AudioData::Pointer<AudioData::Float32, AudioData::NativeEndian, AudioData::NonInterleaved, AudioData::Const>;
@@ -1073,8 +1068,8 @@ public:
         auto samplesToDo = getNumSamplesAvailableToCopy();
         uint8* outputData;
 
-        if (check (renderClient->GetBuffer (samplesToDo, &outputData)))
-            renderClient->ReleaseBuffer (samplesToDo, AUDCLNT_BUFFERFLAGS_SILENT);
+        if (check (renderClient->GetBuffer ((UINT32) samplesToDo, &outputData)))
+            renderClient->ReleaseBuffer ((UINT32) samplesToDo, AUDCLNT_BUFFERFLAGS_SILENT);
 
         if (! check (client->Start()))
             return false;
@@ -1094,10 +1089,10 @@ public:
             UINT32 padding = 0;
 
             if (check (client->GetCurrentPadding (&padding)))
-                return actualBufferSize - (int) padding;
+                return (int) actualBufferSize - (int) padding;
         }
 
-        return actualBufferSize;
+        return (int) actualBufferSize;
     }
 
     void copyBuffers (const float** srcBuffers, int numSrcBuffers, int bufferSize,
@@ -1157,11 +1152,11 @@ class WASAPIAudioIODevice  : public AudioIODevice,
 {
 public:
     WASAPIAudioIODevice (const String& deviceName,
-                         const String& typeName,
+                         const String& typeNameIn,
                          const String& outputDeviceID,
                          const String& inputDeviceID,
                          WASAPIDeviceMode mode)
-        : AudioIODevice (deviceName, typeName),
+        : AudioIODevice (deviceName, typeNameIn),
           Thread ("JUCE WASAPI"),
           outputDeviceId (outputDeviceID),
           inputDeviceId (inputDeviceID),
@@ -1169,7 +1164,7 @@ public:
     {
     }
 
-    ~WASAPIAudioIODevice()
+    ~WASAPIAudioIODevice() override
     {
         cancelPendingUpdate();
         close();
@@ -1341,8 +1336,8 @@ public:
                 return lastError;
             }
 
-            currentBufferSizeSamples = outputDevice != nullptr ? outputDevice->actualBufferSize
-                                                               : inputDevice->actualBufferSize;
+            currentBufferSizeSamples = (int) (outputDevice != nullptr ? outputDevice->actualBufferSize
+                                                                      : inputDevice->actualBufferSize);
         }
 
         if (inputDevice != nullptr)   ResetEvent (inputDevice->clientEvent);
@@ -1442,7 +1437,7 @@ public:
         JUCE_LOAD_WINAPI_FUNCTION (dll, AvSetMmThreadCharacteristicsW, avSetMmThreadCharacteristics, HANDLE, (LPCWSTR, LPDWORD))
         JUCE_LOAD_WINAPI_FUNCTION (dll, AvSetMmThreadPriority, avSetMmThreadPriority, HANDLE, (HANDLE, AVRT_PRIORITY))
 
-        if (avSetMmThreadCharacteristics != 0 && avSetMmThreadPriority != 0)
+        if (avSetMmThreadCharacteristics != nullptr && avSetMmThreadPriority != nullptr)
         {
             DWORD dummy = 0;
 
@@ -1666,7 +1661,7 @@ public:
     {
     }
 
-    ~WASAPIAudioIODeviceType()
+    ~WASAPIAudioIODeviceType() override
     {
         if (notifyClient != nullptr)
             enumerator->UnregisterEndpointNotificationCallback (notifyClient);
@@ -1753,13 +1748,13 @@ private:
     {
     public:
         ChangeNotificationClient (WASAPIAudioIODeviceType* d)
-            : ComBaseClassHelper<IMMNotificationClient> (0), device (d) {}
+            : ComBaseClassHelper (0), device (d) {}
 
-        HRESULT STDMETHODCALLTYPE OnDeviceAdded (LPCWSTR)                             { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnDeviceRemoved (LPCWSTR)                           { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnDeviceStateChanged(LPCWSTR, DWORD)                { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnDefaultDeviceChanged (EDataFlow, ERole, LPCWSTR)  { return notify(); }
-        HRESULT STDMETHODCALLTYPE OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) { return notify(); }
+        JUCE_COMRESULT OnDeviceAdded (LPCWSTR)                             { return notify(); }
+        JUCE_COMRESULT OnDeviceRemoved (LPCWSTR)                           { return notify(); }
+        JUCE_COMRESULT OnDeviceStateChanged(LPCWSTR, DWORD)                { return notify(); }
+        JUCE_COMRESULT OnDefaultDeviceChanged (EDataFlow, ERole, LPCWSTR)  { return notify(); }
+        JUCE_COMRESULT OnPropertyValueChanged (LPCWSTR, const PROPERTYKEY) { return notify(); }
 
     private:
         WeakReference<WASAPIAudioIODeviceType> device;
@@ -1974,5 +1969,7 @@ float JUCE_CALLTYPE SystemAudioVolume::getGain()              { return WasapiCla
 bool  JUCE_CALLTYPE SystemAudioVolume::setGain (float gain)   { return WasapiClasses::MMDeviceMasterVolume().setGain (gain); }
 bool  JUCE_CALLTYPE SystemAudioVolume::isMuted()              { return WasapiClasses::MMDeviceMasterVolume().isMuted(); }
 bool  JUCE_CALLTYPE SystemAudioVolume::setMuted (bool mute)   { return WasapiClasses::MMDeviceMasterVolume().setMuted (mute); }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

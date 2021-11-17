@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if ! (JUCE_LINUX || JUCE_PROJUCER_LIVE_BUILD)
+#if ! (JUCE_LINUX || JUCE_BSD)
 
 #if JUCE_MAC || JUCE_IOS
  #include "../native/juce_mac_Video.h"
@@ -140,7 +140,7 @@ void VideoComponent::timerCallback()
     resized();
 }
 
-template<class FileOrURL>
+template <class FileOrURL>
 Result VideoComponent::loadInternal (const FileOrURL& fileOrUrl, bool loadAsync)
 {
    #if JUCE_ANDROID || JUCE_IOS

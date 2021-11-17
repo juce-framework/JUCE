@@ -32,13 +32,19 @@ namespace
     template <class RectType>
     Rectangle<int> convertToRectInt (RectType r) noexcept
     {
-        return Rectangle<int> ((int) r.origin.x, (int) r.origin.y, (int) r.size.width, (int) r.size.height);
+        return { (int) r.origin.x,
+                 (int) r.origin.y,
+                 (int) r.size.width,
+                 (int) r.size.height };
     }
 
     template <class RectType>
     Rectangle<float> convertToRectFloat (RectType r) noexcept
     {
-        return Rectangle<float> (r.origin.x, r.origin.y, r.size.width, r.size.height);
+        return { (float) r.origin.x,
+                 (float) r.origin.y,
+                 (float) r.size.width,
+                 (float) r.size.height };
     }
 
     template <class RectType>
@@ -47,11 +53,45 @@ namespace
         return CGRectMake ((CGFloat) r.getX(), (CGFloat) r.getY(), (CGFloat) r.getWidth(), (CGFloat) r.getHeight());
     }
 
+    template <class PointType>
+    Point<float> convertToPointFloat (PointType p) noexcept
+    {
+        return { (float) p.x, (float) p.y };
+    }
+
     template <typename PointType>
     CGPoint convertToCGPoint (PointType p) noexcept
     {
         return CGPointMake ((CGFloat) p.x, (CGFloat) p.y);
     }
+
+    template <class PointType>
+    Point<int> roundToIntPoint (PointType p) noexcept
+    {
+        return { roundToInt (p.x), roundToInt (p.y) };
+    }
+
+   #if JUCE_MAC
+    inline CGFloat getMainScreenHeight() noexcept
+    {
+        if ([[NSScreen screens] count] == 0)
+            return 0.0f;
+
+        return [[[NSScreen screens] objectAtIndex: 0] frame].size.height;
+    }
+
+    inline NSRect flippedScreenRect (NSRect r) noexcept
+    {
+        r.origin.y = getMainScreenHeight() - (r.origin.y + r.size.height);
+        return r;
+    }
+
+    inline NSPoint flippedScreenPoint (NSPoint p) noexcept
+    {
+        p.y = getMainScreenHeight() - p.y;
+        return p;
+    }
+   #endif
 }
 
 CGImageRef juce_createCoreGraphicsImage (const Image&, CGColorSpaceRef, bool mustOutliveSource);

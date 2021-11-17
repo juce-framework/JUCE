@@ -80,11 +80,12 @@ public:
     }
 
     void reloadFromFile() override;
-    bool save() override;
-    bool saveAs() override;
+    bool saveSyncWithoutAsking() override;
+    void saveAsync (std::function<void (bool)>) override;
+    void saveAsAsync (std::function<void (bool)>) override;
 
-    Component* createEditor() override;
-    Component* createViewer() override       { return createEditor(); }
+    std::unique_ptr<Component> createEditor() override;
+    std::unique_ptr<Component> createViewer() override  { return createEditor(); }
 
     void updateLastState (CodeEditorComponent&);
     void applyLastState (CodeEditorComponent&) const;
@@ -132,6 +133,9 @@ protected:
     std::unique_ptr<CodeEditorComponent::State> lastState;
 
     void reloadInternal();
+
+private:
+    std::unique_ptr<FileChooser> chooser;
 };
 
 class GenericCodeEditorComponent;
@@ -234,6 +238,8 @@ public:
 
 private:
     void insertComponentClass();
+
+    std::unique_ptr<AlertWindow> asyncAlertWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CppCodeEditorComponent)
 };

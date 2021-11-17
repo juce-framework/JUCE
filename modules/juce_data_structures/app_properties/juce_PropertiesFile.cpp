@@ -89,7 +89,7 @@ File PropertiesFile::Options::getDefaultFile() const
     if (folderName.isNotEmpty())
         dir = dir.getChildFile (folderName);
 
-   #elif JUCE_LINUX || JUCE_ANDROID
+   #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
     auto dir = File (commonToAllUsers ? "/var" : "~")
                       .getChildFile (folderName.isNotEmpty() ? folderName
                                                              : ("." + applicationName));
@@ -187,7 +187,7 @@ bool PropertiesFile::loadAsXml()
 {
     if (auto doc = parseXMLIfTagMatches (file, PropertyFileConstants::fileTag))
     {
-        forEachXmlChildElementWithTagName (*doc, e, PropertyFileConstants::valueTag)
+        for (auto* e : doc->getChildWithTagNameIterator (PropertyFileConstants::valueTag))
         {
             auto name = e->getStringAttribute (PropertyFileConstants::nameAttribute);
 

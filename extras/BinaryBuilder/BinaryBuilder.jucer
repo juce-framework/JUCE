@@ -7,7 +7,7 @@
               addUsingNamespaceToJuceHeader="1" jucerFormatVersion="1">
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX" vstFolder="~/SDKs/vstsdk2.4" rtasFolder="~/SDKs/PT_80_SDK"
-               objCExtraSuffix="OeJtJb">
+               objCExtraSuffix="OeJtJb" applicationCategory="public.app-category.developer-tools">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder"/>
         <CONFIGURATION name="Release" isDebug="0" optimisation="2" targetName="BinaryBuilder"/>

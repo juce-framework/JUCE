@@ -215,9 +215,16 @@ public:
     int getNumPrograms()    override { return 1; }
     int getCurrentProgram() override { return 0; }
     void setCurrentProgram (int) override {}
-    const String getProgramName (int) override { return {}; }
+    const String getProgramName (int) override { return "None"; }
 
     void changeProgramName (int, const String&) override {}
+
+    //==============================================================================
+    bool isBusesLayoutSupported (const BusesLayout& layout) const override
+    {
+        return layout == BusesLayout { { AudioChannelSet::stereo() },
+                                       { AudioChannelSet::stereo() } };
+    }
 
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override
@@ -1531,6 +1538,7 @@ public:
         updateVisibility();
 
         setSize (800, 430);
+        setResizable (false, false);
     }
 
     //==============================================================================
@@ -1595,16 +1603,38 @@ public:
     }
 
 private:
-    class AttachedSlider  : public Component
+    class ComponentWithParamMenu : public Component
     {
     public:
-        explicit AttachedSlider (RangedAudioParameter& param)
-            : label ("", param.name),
-              attachment (param, slider)
+        ComponentWithParamMenu (AudioProcessorEditor& editorIn, RangedAudioParameter& paramIn)
+            : editor (editorIn), param (paramIn) {}
+
+        void mouseUp (const MouseEvent& e) override
         {
+            if (e.mods.isRightButtonDown())
+                if (auto* c = editor.getHostContext())
+                    if (auto menuInfo = c->getContextMenuForParameterIndex (&param))
+                        menuInfo->getEquivalentPopupMenu().showMenuAsync ({});
+        }
+
+    private:
+        AudioProcessorEditor& editor;
+        RangedAudioParameter& param;
+    };
+
+    class AttachedSlider  : public ComponentWithParamMenu
+    {
+    public:
+        AttachedSlider (AudioProcessorEditor& editorIn, RangedAudioParameter& paramIn)
+            : ComponentWithParamMenu (editorIn, paramIn),
+              label ("", paramIn.name),
+              attachment (paramIn, slider)
+        {
+            slider.addMouseListener (this, true);
+
             addAllAndMakeVisible (*this, slider, label);
 
-            slider.setTextValueSuffix (" " + param.label);
+            slider.setTextValueSuffix (" " + paramIn.label);
 
             label.attachToComponent (&slider, false);
             label.setJustificationType (Justification::centred);
@@ -1618,13 +1648,15 @@ private:
         SliderParameterAttachment attachment;
     };
 
-    class AttachedToggle  : public Component
+    class AttachedToggle  : public ComponentWithParamMenu
     {
     public:
-        explicit AttachedToggle (RangedAudioParameter& param)
-            : toggle (param.name),
-              attachment (param, toggle)
+        AttachedToggle (AudioProcessorEditor& editorIn, RangedAudioParameter& paramIn)
+            : ComponentWithParamMenu (editorIn, paramIn),
+              toggle (paramIn.name),
+              attachment (paramIn, toggle)
         {
+            toggle.addMouseListener (this, true);
             addAndMakeVisible (toggle);
         }
 
@@ -1635,14 +1667,17 @@ private:
         ButtonParameterAttachment attachment;
     };
 
-    class AttachedCombo  : public Component
+    class AttachedCombo  : public ComponentWithParamMenu
     {
     public:
-        explicit AttachedCombo (RangedAudioParameter& param)
-            : combo (param),
-              label ("", param.name),
-              attachment (param, combo)
+        AttachedCombo (AudioProcessorEditor& editorIn, RangedAudioParameter& paramIn)
+            : ComponentWithParamMenu (editorIn, paramIn),
+              combo (paramIn),
+              label ("", paramIn.name),
+              attachment (paramIn, combo)
         {
+            combo.addMouseListener (this, true);
+
             addAllAndMakeVisible (*this, combo, label);
 
             label.attachToComponent (&combo, false);
@@ -1713,7 +1748,7 @@ private:
 
     //==============================================================================
     ComboBox comboEffect;
-    Label labelEffect { "Audio effect: " };
+    Label labelEffect { {}, "Audio effect: " };
 
     struct GetTrackInfo
     {
@@ -1747,10 +1782,10 @@ private:
 
     struct BasicControls : public Component
     {
-        explicit BasicControls (const DspModulePluginDemo::ParameterReferences& state)
-            : pan       (state.pan),
-              input     (state.inputGain),
-              output    (state.outputGain)
+        explicit BasicControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : pan       (editor, state.pan),
+              input     (editor, state.inputGain),
+              output    (editor, state.outputGain)
         {
             addAllAndMakeVisible (*this, pan, input, output);
         }
@@ -1765,15 +1800,15 @@ private:
 
     struct DistortionControls : public Component
     {
-        explicit DistortionControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle       (state.distortionEnabled),
-              lowpass      (state.distortionLowpass),
-              highpass     (state.distortionHighpass),
-              mix          (state.distortionMix),
-              gain         (state.distortionInGain),
-              compv        (state.distortionCompGain),
-              type         (state.distortionType),
-              oversampling (state.distortionOversampler)
+        explicit DistortionControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle       (editor, state.distortionEnabled),
+              lowpass      (editor, state.distortionLowpass),
+              highpass     (editor, state.distortionHighpass),
+              mix          (editor, state.distortionMix),
+              gain         (editor, state.distortionInGain),
+              compv        (editor, state.distortionCompGain),
+              type         (editor, state.distortionType),
+              oversampling (editor, state.distortionOversampler)
         {
             addAllAndMakeVisible (*this, toggle, type, lowpass, highpass, mix, gain, compv, oversampling);
         }
@@ -1790,10 +1825,10 @@ private:
 
     struct ConvolutionControls : public Component
     {
-        explicit ConvolutionControls (const DspModulePluginDemo::ParameterReferences& state)
-            : cab    (state.convolutionCabEnabled),
-              reverb (state.convolutionReverbEnabled),
-              mix    (state.convolutionReverbMix)
+        explicit ConvolutionControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : cab    (editor, state.convolutionCabEnabled),
+              reverb (editor, state.convolutionReverbEnabled),
+              mix    (editor, state.convolutionReverbMix)
         {
             addAllAndMakeVisible (*this, cab, reverb, mix);
         }
@@ -1809,11 +1844,11 @@ private:
 
     struct MultiBandControls : public Component
     {
-        explicit MultiBandControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle (state.multiBandEnabled),
-              low    (state.multiBandLowVolume),
-              high   (state.multiBandHighVolume),
-              lRFreq (state.multiBandFreq)
+        explicit MultiBandControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle (editor, state.multiBandEnabled),
+              low    (editor, state.multiBandLowVolume),
+              high   (editor, state.multiBandHighVolume),
+              lRFreq (editor, state.multiBandFreq)
         {
             addAllAndMakeVisible (*this, toggle, low, high, lRFreq);
         }
@@ -1829,12 +1864,12 @@ private:
 
     struct CompressorControls : public Component
     {
-        explicit CompressorControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle    (state.compressorEnabled),
-              threshold (state.compressorThreshold),
-              ratio     (state.compressorRatio),
-              attack    (state.compressorAttack),
-              release   (state.compressorRelease)
+        explicit CompressorControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (editor, state.compressorEnabled),
+              threshold (editor, state.compressorThreshold),
+              ratio     (editor, state.compressorRatio),
+              attack    (editor, state.compressorAttack),
+              release   (editor, state.compressorRelease)
         {
             addAllAndMakeVisible (*this, toggle, threshold, ratio, attack, release);
         }
@@ -1850,12 +1885,12 @@ private:
 
     struct NoiseGateControls : public Component
     {
-        explicit NoiseGateControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle    (state.noiseGateEnabled),
-              threshold (state.noiseGateThreshold),
-              ratio     (state.noiseGateRatio),
-              attack    (state.noiseGateAttack),
-              release   (state.noiseGateRelease)
+        explicit NoiseGateControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (editor, state.noiseGateEnabled),
+              threshold (editor, state.noiseGateThreshold),
+              ratio     (editor, state.noiseGateRatio),
+              attack    (editor, state.noiseGateAttack),
+              release   (editor, state.noiseGateRelease)
         {
             addAllAndMakeVisible (*this, toggle, threshold, ratio, attack, release);
         }
@@ -1871,10 +1906,10 @@ private:
 
     struct LimiterControls : public Component
     {
-        explicit LimiterControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle    (state.limiterEnabled),
-              threshold (state.limiterThreshold),
-              release   (state.limiterRelease)
+        explicit LimiterControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (editor, state.limiterEnabled),
+              threshold (editor, state.limiterThreshold),
+              release   (editor, state.limiterRelease)
         {
             addAllAndMakeVisible (*this, toggle, threshold, release);
         }
@@ -1890,12 +1925,12 @@ private:
 
     struct DirectDelayControls : public Component
     {
-        explicit DirectDelayControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle (state.directDelayEnabled),
-              type   (state.directDelayType),
-              delay  (state.directDelayValue),
-              smooth (state.directDelaySmoothing),
-              mix    (state.directDelayMix)
+        explicit DirectDelayControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle (editor, state.directDelayEnabled),
+              type   (editor, state.directDelayType),
+              delay  (editor, state.directDelayValue),
+              smooth (editor, state.directDelaySmoothing),
+              mix    (editor, state.directDelayMix)
         {
             addAllAndMakeVisible (*this, toggle, type, delay, smooth, mix);
         }
@@ -1912,14 +1947,14 @@ private:
 
     struct DelayEffectControls : public Component
     {
-        explicit DelayEffectControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle   (state.delayEffectEnabled),
-              type     (state.delayEffectType),
-              value    (state.delayEffectValue),
-              smooth   (state.delayEffectSmoothing),
-              lowpass  (state.delayEffectLowpass),
-              feedback (state.delayEffectFeedback),
-              mix      (state.delayEffectMix)
+        explicit DelayEffectControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle   (editor, state.delayEffectEnabled),
+              type     (editor, state.delayEffectType),
+              value    (editor, state.delayEffectValue),
+              smooth   (editor, state.delayEffectSmoothing),
+              lowpass  (editor, state.delayEffectLowpass),
+              feedback (editor, state.delayEffectFeedback),
+              mix      (editor, state.delayEffectMix)
         {
             addAllAndMakeVisible (*this, toggle, type, value, smooth, lowpass, feedback, mix);
         }
@@ -1936,13 +1971,13 @@ private:
 
     struct PhaserControls : public Component
     {
-        explicit PhaserControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle   (state.phaserEnabled),
-              rate     (state.phaserRate),
-              depth    (state.phaserDepth),
-              centre   (state.phaserCentreFrequency),
-              feedback (state.phaserFeedback),
-              mix      (state.phaserMix)
+        explicit PhaserControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle   (editor, state.phaserEnabled),
+              rate     (editor, state.phaserRate),
+              depth    (editor, state.phaserDepth),
+              centre   (editor, state.phaserCentreFrequency),
+              feedback (editor, state.phaserFeedback),
+              mix      (editor, state.phaserMix)
         {
             addAllAndMakeVisible (*this, toggle, rate, depth, centre, feedback, mix);
         }
@@ -1958,13 +1993,13 @@ private:
 
     struct ChorusControls : public Component
     {
-        explicit ChorusControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle   (state.chorusEnabled),
-              rate     (state.chorusRate),
-              depth    (state.chorusDepth),
-              centre   (state.chorusCentreDelay),
-              feedback (state.chorusFeedback),
-              mix      (state.chorusMix)
+        explicit ChorusControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle   (editor, state.chorusEnabled),
+              rate     (editor, state.chorusRate),
+              depth    (editor, state.chorusDepth),
+              centre   (editor, state.chorusCentreDelay),
+              feedback (editor, state.chorusFeedback),
+              mix      (editor, state.chorusMix)
         {
             addAllAndMakeVisible (*this, toggle, rate, depth, centre, feedback, mix);
         }
@@ -1980,12 +2015,12 @@ private:
 
     struct LadderControls : public Component
     {
-        explicit LadderControls (const DspModulePluginDemo::ParameterReferences& state)
-            : toggle    (state.ladderEnabled),
-              mode      (state.ladderMode),
-              freq      (state.ladderCutoff),
-              resonance (state.ladderResonance),
-              drive     (state.ladderDrive)
+        explicit LadderControls (AudioProcessorEditor& editor, const DspModulePluginDemo::ParameterReferences& state)
+            : toggle    (editor, state.ladderEnabled),
+              mode      (editor, state.ladderMode),
+              freq      (editor, state.ladderCutoff),
+              resonance (editor, state.ladderResonance),
+              drive     (editor, state.ladderDrive)
         {
             addAllAndMakeVisible (*this, toggle, mode, freq, resonance, drive);
         }
@@ -2009,18 +2044,18 @@ private:
     //==============================================================================
     DspModulePluginDemo& proc;
 
-    BasicControls       basicControls       { proc.getParameterValues() };
-    DistortionControls  distortionControls  { proc.getParameterValues() };
-    ConvolutionControls convolutionControls { proc.getParameterValues() };
-    MultiBandControls   multibandControls   { proc.getParameterValues() };
-    CompressorControls  compressorControls  { proc.getParameterValues() };
-    NoiseGateControls   noiseGateControls   { proc.getParameterValues() };
-    LimiterControls     limiterControls     { proc.getParameterValues() };
-    DirectDelayControls directDelayControls { proc.getParameterValues() };
-    DelayEffectControls delayEffectControls { proc.getParameterValues() };
-    PhaserControls      phaserControls      { proc.getParameterValues() };
-    ChorusControls      chorusControls      { proc.getParameterValues() };
-    LadderControls      ladderControls      { proc.getParameterValues() };
+    BasicControls       basicControls       { *this, proc.getParameterValues() };
+    DistortionControls  distortionControls  { *this, proc.getParameterValues() };
+    ConvolutionControls convolutionControls { *this, proc.getParameterValues() };
+    MultiBandControls   multibandControls   { *this, proc.getParameterValues() };
+    CompressorControls  compressorControls  { *this, proc.getParameterValues() };
+    NoiseGateControls   noiseGateControls   { *this, proc.getParameterValues() };
+    LimiterControls     limiterControls     { *this, proc.getParameterValues() };
+    DirectDelayControls directDelayControls { *this, proc.getParameterValues() };
+    DelayEffectControls delayEffectControls { *this, proc.getParameterValues() };
+    PhaserControls      phaserControls      { *this, proc.getParameterValues() };
+    ChorusControls      chorusControls      { *this, proc.getParameterValues() };
+    LadderControls      ladderControls      { *this, proc.getParameterValues() };
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DspModulePluginDemoEditor)

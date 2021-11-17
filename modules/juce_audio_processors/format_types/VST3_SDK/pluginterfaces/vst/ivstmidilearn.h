@@ -24,7 +24,7 @@ namespace Steinberg {
 namespace Vst {
 
 //------------------------------------------------------------------------
-/** MIDI Learn Interface.
+/** MIDI Learn interface: Vst::IMidiLearn
 \ingroup vstIPlug vst3612
 - [plug imp]
 - [extends IEditController]
@@ -32,12 +32,61 @@ namespace Vst {
 - [optional]
 
 If this interface is implemented by the edit controller, the host will call this method whenever
-there is live MIDI-CC input for the plug-in. This way the plug-in can change it's MIDI-CC parameter
+there is live MIDI-CC input for the plug-in. This way, the plug-in can change its MIDI-CC parameter
 mapping and inform the host via the IComponentHandler::restartComponent with the
 kMidiCCAssignmentChanged flag.
 Use this if you want to implement custom MIDI-Learn functionality in your plug-in.
-*/
+
+\code{.cpp}
+//------------------------------------------------
+// in MyController class declaration
+class MyController : public Vst::EditController, public Vst::IMidiLearn
+{
+	// ...
+	//--- IMidiLearn ---------------------------------
+	tresult PLUGIN_API onLiveMIDIControllerInput (int32 busIndex, int16 channel,
+												  CtrlNumber midiCC) SMTG_OVERRIDE;
+	// ...
+
+	OBJ_METHODS (MyController, Vst::EditController)
+	DEFINE_INTERFACES
+		// ...
+		DEF_INTERFACE (Vst::IMidiLearn)
+	END_DEFINE_INTERFACES (Vst::EditController)
+	//...
+}
+
+//------------------------------------------------
+// in mycontroller.cpp
+#include "pluginterfaces/vst/ivstmidilearn.h
+
+namespace Steinberg {
+	namespace Vst {
+		DEF_CLASS_IID (IMidiLearn)
+	}
+}
+
 //------------------------------------------------------------------------
+tresult PLUGIN_API MyController::onLiveMIDIControllerInput (int32 busIndex, 
+							int16 channel, CtrlNumber midiCC)
+{
+	// if we are not in doMIDILearn (triggered by a UI button for example) 
+	// or wrong channel then return
+	if (!doMIDILearn || busIndex != 0 || channel != 0 || midiLearnParamID == InvalidParamID)
+		return kResultFalse;
+
+	// adapt our internal MIDICC -> parameterID mapping
+	midiCCMapping[midiCC] = midiLearnParamID;
+
+	// new mapping then inform the host that our MIDI assignment has changed
+	if (auto componentHandler = getComponentHandler ())
+	{
+		componentHandler->restartComponent (kMidiCCAssignmentChanged);
+	}
+	return kResultTrue;
+}
+\endcode
+*/
 class IMidiLearn : public FUnknown
 {
 public:

@@ -98,7 +98,7 @@ public:
         KeyEntryWindow (KeyMappingEditorComponent& kec)
             : AlertWindow (TRANS("New key-mapping"),
                            TRANS("Please press a key combination now..."),
-                           AlertWindow::NoIcon),
+                           MessageBoxIconType::NoIcon),
               owner (kec)
         {
             addButton (TRANS("OK"), 1);
@@ -165,7 +165,7 @@ public:
             }
             else
             {
-                AlertWindow::showOkCancelBox (AlertWindow::WarningIcon,
+                AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
                                               TRANS("Change key-mapping"),
                                               TRANS("This key is already assigned to the command \"CMDN\"")
                                                   .replace ("CMDN", owner.getCommandManager().getNameOfCommand (previousCommand))
@@ -225,7 +225,7 @@ public:
         for (int i = 0; i < jmin ((int) maxNumAssignments, keyPresses.size()); ++i)
             addKeyPressButton (owner.getDescriptionForKeyPress (keyPresses.getReference (i)), i, isReadOnly);
 
-        addKeyPressButton (String(), -1, isReadOnly);
+        addKeyPressButton ("Change Key Mapping", -1, isReadOnly);
     }
 
     void addKeyPressButton (const String& desc, const int index, const bool isReadOnly)
@@ -263,6 +263,11 @@ public:
     }
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     KeyMappingEditorComponent& owner;
     OwnedArray<ChangeKeyButton> keyChangeButtons;
     const CommandID commandID;
@@ -280,10 +285,11 @@ public:
         : owner (kec), commandID (command)
     {}
 
-    String getUniqueName() const override         { return String ((int) commandID) + "_id"; }
-    bool mightContainSubItems() override          { return false; }
-    int getItemHeight() const override            { return 20; }
-    Component* createItemComponent() override     { return new ItemComponent (owner, commandID); }
+    String getUniqueName() const override                      { return String ((int) commandID) + "_id"; }
+    bool mightContainSubItems() override                       { return false; }
+    int getItemHeight() const override                         { return 20; }
+    std::unique_ptr<Component> createItemComponent() override  { return std::make_unique<ItemComponent> (owner, commandID); }
+    String getAccessibilityName() override                     { return TRANS (owner.getCommandManager().getNameOfCommand (commandID)); }
 
 private:
     KeyMappingEditorComponent& owner;
@@ -304,6 +310,7 @@ public:
     String getUniqueName() const override       { return categoryName + "_cat"; }
     bool mightContainSubItems() override        { return true; }
     int getItemHeight() const override          { return 22; }
+    String getAccessibilityName() override      { return categoryName; }
 
     void paintItem (Graphics& g, int width, int height) override
     {
@@ -396,7 +403,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
 
         resetButton.onClick = [this]
         {
-            AlertWindow::showOkCancelBox (AlertWindow::QuestionIcon,
+            AlertWindow::showOkCancelBox (MessageBoxIconType::QuestionIcon,
                                           TRANS("Reset to defaults"),
                                           TRANS("Are you sure you want to reset all the key-mappings to their default state?"),
                                           TRANS("Reset"),
@@ -406,6 +413,7 @@ KeyMappingEditorComponent::KeyMappingEditorComponent (KeyPressMappingSet& mappin
     }
 
     addAndMakeVisible (tree);
+    tree.setTitle ("Key Mappings");
     tree.setColour (TreeView::backgroundColourId, findColour (backgroundColourId));
     tree.setRootItemVisible (false);
     tree.setDefaultOpenness (true);

@@ -35,6 +35,7 @@ FileListComponent::FileListComponent (DirectoryContentsList& listToShow)
       DirectoryContentsDisplayComponent (listToShow),
       lastDirectory (listToShow.getDirectory())
 {
+    setTitle ("Files");
     setModel (this);
     directoryContentsList.addChangeListener (this);
 }
@@ -68,7 +69,7 @@ void FileListComponent::setSelectedFile (const File& f)
 {
     for (int i = directoryContentsList.getNumFiles(); --i >= 0;)
     {
-        if (directoryContentsList.getFile(i) == f)
+        if (directoryContentsList.getFile (i) == f)
         {
             fileWaitingToBeSelected = File();
 
@@ -199,6 +200,11 @@ private:
     int index = 0;
     bool highlighted = false, isDirectory = false;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     void updateIcon (const bool onlyUpdateIfCached)
     {
         if (icon.isNull())
@@ -229,6 +235,11 @@ private:
 int FileListComponent::getNumRows()
 {
     return directoryContentsList.getNumFiles();
+}
+
+String FileListComponent::getNameForRow (int rowNumber)
+{
+    return directoryContentsList.getFile (rowNumber).getFileName();
 }
 
 void FileListComponent::paintListBoxItem (int, Graphics&, int, int, bool)

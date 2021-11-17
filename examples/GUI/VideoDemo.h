@@ -134,7 +134,7 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               "Couldn't load the file!",
                                               result.getErrorMessage());
         }
@@ -156,6 +156,7 @@ public:
         movieList.setDirectory (File::getSpecialLocation (File::userMoviesDirectory), true, true);
         directoryThread.startThread (1);
 
+        fileTree.setTitle ("Files");
         fileTree.addListener (this);
         fileTree.setColour (FileTreeComponent::backgroundColourId, Colours::lightgrey.withAlpha (0.6f));
         addAndMakeVisible (fileTree);
@@ -353,7 +354,7 @@ public:
                                      {
                                          if (! granted)
                                          {
-                                             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+                                             AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                                                                "Permissions warning",
                                                                                "External storage access permission not granted, some files"
                                                                                " may be inaccessible.");
@@ -502,7 +503,7 @@ private:
 
     void askIfUseNativeControls (const URL& url)
     {
-        auto* aw = new AlertWindow ("Choose viewer type", {}, AlertWindow::NoIcon);
+        auto* aw = new AlertWindow ("Choose viewer type", {}, MessageBoxIconType::NoIcon);
 
         aw->addButton ("Yes", 1, KeyPress (KeyPress::returnKey));
         aw->addButton ("No", 0, KeyPress (KeyPress::escapeKey));
@@ -558,7 +559,7 @@ private:
 
     void showVideoUrlPrompt()
     {
-        auto* aw = new AlertWindow ("Enter URL for video to load", {}, AlertWindow::NoIcon);
+        auto* aw = new AlertWindow ("Enter URL for video to load", {}, MessageBoxIconType::NoIcon);
 
         aw->addButton ("OK", 1, KeyPress (KeyPress::returnKey));
         aw->addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey));
@@ -595,7 +596,7 @@ private:
         }
         else
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               "Couldn't load the file!",
                                               result.getErrorMessage());
         }
@@ -676,7 +677,7 @@ private:
 
     void errorOccurred (const String& errorMessage)
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           "An error has occurred",
                                           errorMessage + ", video will be unloaded.");
 
@@ -702,6 +703,6 @@ private:
         updatePositionSliderAndLabel();
     }
 };
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #error "This demo is not supported on Linux!"
 #endif

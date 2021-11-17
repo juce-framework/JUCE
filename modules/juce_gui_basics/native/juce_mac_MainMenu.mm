@@ -516,7 +516,7 @@ private:
     //==============================================================================
     struct JuceMenuCallbackClass   : public ObjCClass<NSObject>
     {
-        JuceMenuCallbackClass()  : ObjCClass<NSObject> ("JUCEMainMenu_")
+        JuceMenuCallbackClass()  : ObjCClass ("JUCEMainMenu_")
         {
             addIvar<JuceMainMenuHandler*> ("owner");
 
@@ -539,10 +539,8 @@ private:
     private:
         static void menuItemInvoked (id self, SEL, NSMenuItem* item)
         {
-            auto owner = getIvar<JuceMainMenuHandler*> (self, "owner");
-
             if (auto* juceItem = getJuceClassFromNSObject<PopupMenu::Item> ([item representedObject]))
-                owner->invoke (*juceItem, static_cast<int> ([item tag]));
+                getIvar<JuceMainMenuHandler*> (self, "owner")->invoke (*juceItem, static_cast<int> ([item tag]));
         }
 
         static void menuNeedsUpdate (id self, SEL, NSMenu* menu)

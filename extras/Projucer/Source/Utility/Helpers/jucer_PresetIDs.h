@@ -104,12 +104,14 @@ namespace Ids
     DECLARE_ID (customLaunchStoryboard);
     DECLARE_ID (customXcodeResourceFolders);
     DECLARE_ID (plistPreprocessorDefinitions);
+    DECLARE_ID (applicationCategory);
     DECLARE_ID (customPList);
     DECLARE_ID (pListPrefixHeader);
     DECLARE_ID (pListPreprocess);
     DECLARE_ID (UIFileSharingEnabled);
     DECLARE_ID (UISupportsDocumentBrowser);
     DECLARE_ID (UIStatusBarHidden);
+    DECLARE_ID (UIRequiresFullScreen);
     DECLARE_ID (documentExtensions);
     DECLARE_ID (keepCustomXcodeSchemes);
     DECLARE_ID (useHeaderMap);
@@ -127,10 +129,11 @@ namespace Ids
     DECLARE_ID (unityPluginBinaryLocation);
     DECLARE_ID (enablePluginBinaryCopyStep);
     DECLARE_ID (stripLocalSymbols);
-    DECLARE_ID (osxSDK);
-    DECLARE_ID (osxCompatibility);
+    DECLARE_ID (macOSBaseSDK);
+    DECLARE_ID (macOSDeploymentTarget);
     DECLARE_ID (osxArchitecture);
-    DECLARE_ID (iosCompatibility);
+    DECLARE_ID (iosBaseSDK);
+    DECLARE_ID (iosDeploymentTarget);
     DECLARE_ID (xcodeSubprojects);
     DECLARE_ID (extraFrameworks);
     DECLARE_ID (frameworkSearchPaths);
@@ -149,6 +152,7 @@ namespace Ids
     DECLARE_ID (windowsTargetPlatformVersion);
     DECLARE_ID (debugInformationFormat);
     DECLARE_ID (IPPLibrary);
+    DECLARE_ID (IPP1ALibrary);
     DECLARE_ID (msvcModuleDefinitionFile);
     DECLARE_ID (bigIcon);
     DECLARE_ID (smallIcon);
@@ -371,9 +375,6 @@ namespace Ids
     DECLARE_ID (website);
     DECLARE_ID (mainClass);
     DECLARE_ID (moduleFlags);
-    DECLARE_ID (buildEnabled);
-    DECLARE_ID (continuousRebuildEnabled);
-    DECLARE_ID (warningsEnabled);
     DECLARE_ID (projectLineFeed);
     DECLARE_ID (compilerFlagSchemes);
     DECLARE_ID (compilerFlagScheme);
@@ -381,9 +382,13 @@ namespace Ids
     DECLARE_ID (dontAskAboutJUCEPath);
     DECLARE_ID (postExportShellCommandPosix);
     DECLARE_ID (postExportShellCommandWin);
-    DECLARE_ID (liveBuildEnabled);
     DECLARE_ID (guiEditorEnabled);
     DECLARE_ID (jucerFormatVersion);
+    DECLARE_ID (buildNumber);
+
+    DECLARE_ID (osxSDK);
+    DECLARE_ID (osxCompatibility);
+    DECLARE_ID (iosCompatibility);
 
     const Identifier ID ("id");
     const Identifier ID_uppercase ("ID");

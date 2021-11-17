@@ -166,7 +166,7 @@ private:
     AudioCDReader (void* handle);
     int getIndexAt (int samplePos);
 
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     AudioCDReader();
    #endif
 

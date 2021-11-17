@@ -135,6 +135,7 @@ private:
     String displayedMessage, currentMessage;
     uint32 lastCallbackTime;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void timerCallback() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProgressBar)

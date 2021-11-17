@@ -86,6 +86,12 @@ public:
     virtual Component* refreshComponentForRow (int rowNumber, bool isRowSelected,
                                                Component* existingComponentToUpdate);
 
+    /** This can be overridden to return a name for the specified row.
+
+        By default this will just return a string containing the row number.
+    */
+    virtual String getNameForRow (int rowNumber);
+
     /** This can be overridden to react to the user clicking on a row.
         @see listBoxItemDoubleClicked
     */
@@ -582,6 +588,8 @@ private:
     int lastRowSelected = -1;
     bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+    bool hasAccessibleHeaderComponent() const;
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
 

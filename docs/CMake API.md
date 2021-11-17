@@ -2,9 +2,7 @@
 
 ## System Requirements
 
-- Console and GUI projects require CMake 3.12 or higher.
-- Plugin projects require CMake 3.15 or higher.
-- All iOS targets require CMake 3.14 or higher (3.15 or higher for plugins targeting iOS).
+- All project types require CMake 3.15 or higher.
 - Android targets are not currently supported.
 - WebView2 on Windows via JUCE_USE_WIN_WEBVIEW2 flag in juce_gui_extra is not currently supported.
 
@@ -122,31 +120,36 @@ provisioning profiles, which is achieved by passing the `-allowProvisioningUpdat
 #### Archiving for iOS
 
 CMake's out-of-the-box archiving behaviour doesn't always work as expected, especially for targets
-that depend on static libraries (such as targets added with `juce_add_binary_data`). Xcode may
-generate these libraries into a 'DerivedData' directory, but then omit this directory from the
-library search paths later in the build.
+that depend on custom static libraries. Xcode may generate these libraries into a 'DerivedData'
+directory, but then omit this directory from the library search paths later in the build.
 
-If the "Product -> Archive" action isn't working, the following steps may help correct the issue:
+If the "Product -> Archive" action isn't working due to missing staticlibs, try setting the
+`ARCHIVE_OUTPUT_DIRECTORY` property explicitly:
 
-- On your static library, explicitly set the `ARCHIVE_OUTPUT_DIRECTORY` property.
-  ```
-  set_target_properties(my_static_lib_target PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "./")
-  ```
-- Now, the Archive build should complete without linker errors, but the archived product may still
-  be hidden in the Organizer window. To fix this issue, set the following properties on the target
-  representing the actual iOS app. If your target was added with `juce_add_gui_app`, pass the same
-  target name. Otherwise, if your target was added with `juce_add_plugin` you may need to append
-  `_Standalone` to the target name, to specify the standalone plugin target.
-  ```
-  set_target_properties(my_ios_app_target PROPERTIES
-      XCODE_ATTRIBUTE_INSTALL_PATH "$(LOCAL_APPS_DIR)"
-      XCODE_ATTRIBUTE_SKIP_INSTALL "NO")
-  ```
+    set_target_properties(my_static_lib_target PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "./")
+
+Note that the static library produced by `juce_add_binary_data` automatically sets this property.
 
 ### Building universal binaries for macOS
 
 Building universal binaries that will run on both arm64 and x86_64 can be achieved by
 configuring the CMake project with `"-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"`.
+
+### Building with Clang on Windows
+
+Clang-cl (Clang with MSVC-like command-line) should work by default. If you are generating a Visual
+Studio project, and have installed the LLVM package which is distributed with Visual Studio, then
+you can configure a Clang-cl build by passing "-T ClangCL" on your configuration commandline.
+
+If you wish to use Clang with GNU-like command-line instead, you can pass
+`-DCMAKE_CXX_COMPILER=clang++` and `-DCMAKE_C_COMPILER=clang` on your configuration commandline.
+clang++ and clang must be on your `PATH` for this to work. Only more recent versions of CMake
+support Clang's GNU-like command-line on Windows. CMake 3.12 is not supported, CMake 3.15 has
+support, CMake 3.20 or higher is recommended.  Note that CMake doesn't seem to automatically link a
+runtime library when building in this configuration, but this can be remedied by setting the
+`MSVC_RUNTIME_LIBRARY` property. See the [official
+documentation](https://cmake.org/cmake/help/v3.15/prop_tgt/MSVC_RUNTIME_LIBRARY.html) of this
+property for usage recommendations.
 
 ### A note about compile definitions
 
@@ -197,13 +200,18 @@ included JUCE in your own project.
 
 #### `JUCE_ENABLE_MODULE_SOURCE_GROUPS`
 
-This option controls whether dummy targets are added to the build, where these targets contain all
-of the source files for each module added with `juce_add_module(s)`. If you're planning to use an
-IDE and want to be able to browse all of JUCE's source files, this may be useful. However, it will
-increase the size of generated IDE projects and might slow down configuration a bit. If you enable
-this, you should probably also add `set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level
-CMakeLists, otherwise the module sources will be added directly to the top level of the project,
-instead of in a nice 'Modules' subfolder.
+This option will make module source files browsable in IDE projects. It has no effect in non-IDE
+projects. This option is off by default, as it will increase the size of generated IDE projects and
+might slow down configuration a bit. If you enable this, you should probably also add
+`set_property(GLOBAL PROPERTY USE_FOLDERS YES)` to your top level CMakeLists as this is required for
+source grouping to work.
+
+Source groupings are a little sensitive to the project layout. As such, you should always ensure
+that the call to `juce_add_module` which adds a specific module happens *before* calling
+`juce_add_*` to add any dependent targets.
+
+The modules will be placed in a group named "JUCE Modules" within the group for each target,
+alongside the "Source Files" and "Header Files" groups.
 
 #### `JUCE_COPY_PLUGIN_AFTER_BUILD`
 
@@ -241,7 +249,15 @@ attributes directly to these creation functions, rather than adding them later.
 
 - `VERSION`
   - A version number string in the format "major.minor.bugfix". If not specified, the `VERSION` of
-    the project containing the target will be used instead.
+    the project containing the target will be used instead. On Apple platforms, this is the
+    user-facing version string. This option corresponds to the `CFBundleShortVersionString` field in
+    the target's plist.
+
+- `BUILD_VERSION`
+  - A version number string in the format "major.minor.bugfix". If not specified, this will match
+    the `VERSION` of the target. On Apple platforms, this is the private version string used to
+    distinguish between App Store builds. This option corresponds to the `CFBundleVersion` field in
+    the target's plist.
 
 - `BUNDLE_ID`
   - An identifier string in the form "com.yourcompany.productname" which should uniquely identify
@@ -281,6 +297,9 @@ attributes directly to these creation functions, rather than adding them later.
 - `STATUS_BAR_HIDDEN`
   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
 
+ - `REQUIRES_FULL_SCREEN`
+   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+
 - `BACKGROUND_AUDIO_ENABLED`
   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
 
@@ -314,6 +333,12 @@ attributes directly to these creation functions, rather than adding them later.
   - A path to an xcassets directory, containing icons and/or launch images for this target. If this
     is specified, the ICON_BIG and ICON_SMALL arguments will not have an effect on iOS, and a launch
     storyboard will not be used.
+
+- `TARGETED_DEVICE_FAMILY`
+  - Specifies the device families on which the product must be capable of running. Allowed values
+    are "1", "2", and "1,2"; these correspond to "iPhone/iPod touch", "iPad", and "iPhone/iPod and
+    iPad" respectively. This will default to "1,2", meaning that the target will target iPhone,
+    iPod, and iPad.
 
 - `ICON_BIG`, `ICON_SMALL`
   - Paths to image files that will be used to generate app icons. If only one of these parameters
@@ -490,7 +515,7 @@ attributes directly to these creation functions, rather than adding them later.
     in GarageBand.
 
 - `AAX_CATEGORY`
-  - Should be one of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
+  - Should be one or more of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
     `AAX_ePlugInCategory_Dynamics`, `AAX_ePlugInCategory_PitchShift`, `AAX_ePlugInCategory_Reverb`,
     `AAX_ePlugInCategory_Delay`, `AAX_ePlugInCategory_Modulation`, `AAX_ePlugInCategory_Harmonic`,
     `AAX_ePlugInCategory_NoiseReduction`, `AAX_ePlugInCategory_Dither`,
@@ -593,14 +618,33 @@ disabled by setting the compile definitions `DONT_SET_USING_JUCE_NAMESPACE` and
 JuceHeader.h is optional. Instead, module headers can be included directly in source files that
 require them.
 
+#### `juce_enable_copy_plugin_step`
+
+    juce_enable_copy_plugin_step(<target>)
+
+As an alternative to the JUCE_COPY_PLUGIN_AFTER_BUILD property, you may call this function to
+manually enable post-build copy on a plugin. The argument to this function should be a target
+previously created with `juce_add_plugin`.
+
+JUCE_COPY_PLUGIN_AFTER_BUILD will cause plugins to be installed immediately after building. This is
+not always appropriate, if extra build steps (such as signing or modifying the plugin bundle) must
+be executed before the install. In such cases, you should leave JUCE_COPY_PLUGIN_AFTER_BUILD
+disabled, use `add_custom_command(TARGET POST_BUILD)` to add your own post-build steps, and then
+finally call `juce_enable_copy_plugin_step`.
+
+If your custom build steps need to use the location of the plugin artefact, you can extract this
+by querying the property `JUCE_PLUGIN_ARTEFACT_FILE` on a plugin target (*not* the shared code
+target!).
+
 #### `juce_set_<kind>_sdk_path`
 
     juce_set_aax_sdk_path(<absolute path>)
     juce_set_vst2_sdk_path(<absolute path>)
+    juce_set_vst3_sdk_path(<absolute path>)
 
-Call these functions from your CMakeLists to set up your local AAX and/or VST2 SDKs. These functions
-should be called *before* adding any targets that may depend on the AAX/VST2 SDKs (plugin
-hosts, VST2/AAX plugins etc.).
+Call these functions from your CMakeLists to set up your local AAX, VST2, and VST3 SDKs. These
+functions should be called *before* adding any targets that may depend on the AAX/VST2/VST3 SDKs
+(plugin hosts, AAX/VST2/VST3 plugins etc.).
 
 #### `juce_add_module`
 

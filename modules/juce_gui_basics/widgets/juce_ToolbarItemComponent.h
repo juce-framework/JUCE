@@ -192,6 +192,9 @@ private:
     friend class Toolbar;
     class ItemDragAndDropOverlayComponent;
     friend class ItemDragAndDropOverlayComponent;
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
     const int itemId;
     ToolbarEditingMode mode;
     Toolbar::ToolbarItemStyle toolbarStyle;

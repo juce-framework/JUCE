@@ -540,16 +540,26 @@ DECLARE_JNI_CLASS (AndroidUri, "android/net/Uri")
  METHOD (setSystemUiVisibility,     "setSystemUiVisibility",     "(I)V") \
  METHOD (findViewById,              "findViewById",              "(I)Landroid/view/View;") \
  METHOD (getRootView,               "getRootView",               "()Landroid/view/View;") \
- METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V")
+ METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V") \
+ METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V") \
 
 DECLARE_JNI_CLASS (AndroidView, "android/view/View")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (addView,    "addView",    "(Landroid/view/View;)V") \
- METHOD (removeView, "removeView", "(Landroid/view/View;)V")
+ METHOD (addView,                       "addView",                       "(Landroid/view/View;)V") \
+ METHOD (removeView,                    "removeView",                    "(Landroid/view/View;)V") \
+ METHOD (requestSendAccessibilityEvent, "requestSendAccessibilityEvent", "(Landroid/view/View;Landroid/view/accessibility/AccessibilityEvent;)Z") \
 
 DECLARE_JNI_CLASS (AndroidViewGroup, "android/view/ViewGroup")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getDecorView, "getDecorView",       "()Landroid/view/View;") \
+ METHOD (setFlags,     "setFlags",           "(II)V") \
+ METHOD (clearFlags,   "clearFlags",         "(I)V")
+
+DECLARE_JNI_CLASS (AndroidWindow, "android/view/Window")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -650,7 +660,8 @@ DECLARE_JNI_CLASS (JavaHashMap, "java/util/HashMap")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   STATICMETHOD (parseInt, "parseInt", "(Ljava/lang/String;I)I") \
   STATICMETHOD (valueOf,  "valueOf",  "(I)Ljava/lang/Integer;") \
-  METHOD (intValue, "intValue", "()I")
+  METHOD (constructor, "<init>",   "(I)V") \
+  METHOD (intValue,    "intValue", "()I")
 
 DECLARE_JNI_CLASS (JavaInteger, "java/lang/Integer")
 #undef JNI_CLASS_MEMBERS

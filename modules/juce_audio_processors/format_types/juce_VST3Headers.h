@@ -23,8 +23,12 @@
   ==============================================================================
 */
 
+#if JUCE_BSD && ! JUCE_CUSTOM_VST3_SDK
+ #error To build JUCE VST3 plug-ins on BSD you must use an external BSD-compatible VST3 SDK with JUCE_CUSTOM_VST3_SDK=1
+#endif
+
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
-JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702)
+JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702 6011 6031 6221 6386 6387 6330 6001 28199)
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wreorder",
@@ -57,7 +61,9 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wextra",
                                      "-Wclass-memaccess",
                                      "-Wmissing-prototypes",
-                                     "-Wtype-limits")
+                                     "-Wtype-limits",
+                                     "-Wcpp",
+                                     "-W#warnings")
 
 #undef DEVELOPMENT
 #define DEVELOPMENT 0  // This avoids a Clang warning in Steinberg code about unused values
@@ -110,6 +116,14 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
  #include <base/source/fstreamer.cpp>
  #include <base/source/fstring.cpp>
 
+ // The following shouldn't leak from fstring.cpp
+ #undef stricmp
+ #undef strnicmp
+ #undef snprintf
+ #undef vsnprintf
+ #undef snwprintf
+ #undef vsnwprintf
+
  #if VST_VERSION >= 0x030608
   #include <base/thread/source/flock.cpp>
   #include <pluginterfaces/base/coreiids.cpp>
@@ -160,8 +174,9 @@ namespace Steinberg
     DEF_CLASS_IID (IPlugFrame)
     DEF_CLASS_IID (IPlugViewContentScaleSupport)
 
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     DEF_CLASS_IID (Linux::IRunLoop)
+    DEF_CLASS_IID (Linux::IEventHandler)
    #endif
 }
 

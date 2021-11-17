@@ -40,14 +40,46 @@ namespace juce
 
 #endif
 
+static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
+{
+   #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
+    const auto parameterNames = url.getParameterNames();
+    const auto parameterValues = url.getParameterValues();
+
+    jassert (parameterNames.size() == parameterValues.size());
+
+    if (parameterNames.isEmpty())
+        return fileUrl;
+
+    NSUniquePtr<NSURLComponents> components ([[NSURLComponents alloc] initWithURL: fileUrl resolvingAgainstBaseURL: NO]);
+    NSUniquePtr<NSMutableArray> queryItems ([[NSMutableArray alloc] init]);
+
+    for (int i = 0; i < parameterNames.size(); ++i)
+        [queryItems.get() addObject: [NSURLQueryItem queryItemWithName: juceStringToNS (parameterNames[i])
+                                                                 value: juceStringToNS (parameterValues[i])]];
+
+    [components.get() setQueryItems: queryItems.get()];
+
+    return [components.get() URL];
+   #else
+    const auto queryString = url.getQueryString();
+
+    if (queryString.isNotEmpty())
+        if (NSString* fileUrlString = [fileUrl absoluteString])
+            return [NSURL URLWithString: [fileUrlString stringByAppendingString: juceStringToNS (queryString)]];
+
+    return fileUrl;
+   #endif
+}
+
 static NSMutableURLRequest* getRequestForURL (const String& url, const StringArray* headers, const MemoryBlock* postData)
 {
     NSString* urlString = juceStringToNS (url);
 
     #if JUCE_IOS || (defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
+     urlString = [urlString stringByAddingPercentEncodingWithAllowedCharacters: [NSCharacterSet URLQueryAllowedCharacterSet]];
     #else
-     urlString = [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+     urlString = [urlString stringByAddingPercentEscapesUsingEncoding: NSUTF8StringEncoding];
     #endif
 
      if (NSURL* nsURL = [NSURL URLWithString: urlString])
@@ -95,17 +127,11 @@ struct WebViewKeyEquivalentResponder : public WebViewBase
     WebViewKeyEquivalentResponder()
         : WebViewBase ("WebViewKeyEquivalentResponder_")
     {
-        addIvar<WebViewKeyEquivalentResponder*> ("owner");
         addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
         registerClass();
     }
 
 private:
-    static WebViewKeyEquivalentResponder* getOwner (id self)
-    {
-        return getIvar<WebViewKeyEquivalentResponder*> (self, "owner");
-    }
-
     static BOOL performKeyEquivalent (id self, SEL selector, NSEvent* event)
     {
         NSResponder* first = [[self window] firstResponder];
@@ -225,9 +251,42 @@ private:
     static void runOpenPanel (id, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*,
                               void (^completionHandler)(NSArray<NSURL*>*))
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser chooser (TRANS("Select the file you want to upload..."),
-                             File::getSpecialLocation (File::userHomeDirectory), "*");
+        using CompletionHandlerType = decltype (completionHandler);
+
+        class DeletedFileChooserWrapper   : private DeletedAtShutdown
+        {
+        public:
+            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, CompletionHandlerType h)
+                : chooser (std::move (fc)), handler (h)
+            {
+                [handler retain];
+            }
+
+            ~DeletedFileChooserWrapper()
+            {
+                callHandler (nullptr);
+                [handler release];
+            }
+
+            void callHandler (NSArray<NSURL*>* urls)
+            {
+                if (handlerCalled)
+                    return;
+
+                handler (urls);
+                handlerCalled = true;
+            }
+
+            std::unique_ptr<FileChooser> chooser;
+
+        private:
+            CompletionHandlerType handler;
+            bool handlerCalled = false;
+        };
+
+        auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
+                                                      File::getSpecialLocation (File::userHomeDirectory), "*");
+        auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), completionHandler);
 
         auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
                     | ([parameters allowsMultipleSelection] ? FileBrowserComponent::canSelectMultipleItems : 0);
@@ -237,24 +296,17 @@ private:
              flags |= FileBrowserComponent::canSelectDirectories;
         #endif
 
-        if (chooser.showDialog (flags, nullptr))
+        wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
         {
-            auto results = chooser.getResults();
+            auto results = wrapper->chooser->getResults();
             auto urls = [NSMutableArray arrayWithCapacity: (NSUInteger) results.size()];
 
             for (auto& f : results)
                 [urls addObject: [NSURL fileURLWithPath: juceStringToNS (f.getFullPathName())]];
 
-            completionHandler (urls);
-        }
-        else
-        {
-            completionHandler (nil);
-        }
-       #else
-        ignoreUnused (parameters, completionHandler);
-        jassertfalse; // Can't use this without modal loops being enabled!
-       #endif
+            wrapper->callHandler (urls);
+            delete wrapper;
+        });
     }
    #endif
 };
@@ -270,22 +322,13 @@ class WebBrowserComponent::Pimpl
 public:
     Pimpl (WebBrowserComponent* owner)
     {
-        ignoreUnused (owner);
-
-        WKWebViewConfiguration* config = [[WKWebViewConfiguration alloc] init];
-
        #if JUCE_MAC
-        auto frame = NSMakeRect (0, 0, 100.0f, 100.0f);
-
         static WebViewKeyEquivalentResponder webviewClass;
         webView = (WKWebView*) webviewClass.createInstance();
 
-        webView = [webView initWithFrame: frame
-                           configuration: config];
+        webView = [webView initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)];
        #else
-        auto frame = CGRectMake (0, 0, 100.0f, 100.0f);
-        webView = [[WKWebView alloc] initWithFrame: frame
-                                     configuration: config];
+        webView = [[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)];
        #endif
 
         static WebViewDelegateClass cls;
@@ -312,12 +355,24 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
+        auto trimmed = url.trimStart();
 
-        if (url.trimStart().startsWithIgnoreCase ("javascript:"))
+        if (trimmed.startsWithIgnoreCase ("javascript:"))
         {
             [webView evaluateJavaScript: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))
                      completionHandler: nil];
+
+            return;
+        }
+
+        stop();
+
+        if (trimmed.startsWithIgnoreCase ("file:"))
+        {
+            auto file = URL (url).getLocalFile();
+
+            if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
+                [webView loadFileURL: appendParametersToFileURL (url, nsUrl) allowingReadAccessToURL: nsUrl];
         }
         else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
         {
@@ -416,20 +471,37 @@ private:
 
     static void runOpenPanel (id, SEL, WebView*, id<WebOpenPanelResultListener> resultListener, BOOL allowMultipleFiles)
     {
-       #if JUCE_MODAL_LOOPS_PERMITTED
-        FileChooser chooser (TRANS("Select the file you want to upload..."),
-                             File::getSpecialLocation (File::userHomeDirectory), "*");
-
-        if (allowMultipleFiles ? chooser.browseForMultipleFilesToOpen()
-                               : chooser.browseForFileToOpen())
+        struct DeletedFileChooserWrapper   : private DeletedAtShutdown
         {
-            for (auto& f : chooser.getResults())
-                [resultListener chooseFilename: juceStringToNS (f.getFullPathName())];
-        }
-       #else
-        ignoreUnused (resultListener, allowMultipleFiles);
-        jassertfalse; // Can't use this without modal loops being enabled!
-       #endif
+            DeletedFileChooserWrapper (std::unique_ptr<FileChooser> fc, id<WebOpenPanelResultListener> rl)
+                : chooser (std::move (fc)), listener (rl)
+            {
+                [listener retain];
+            }
+
+            ~DeletedFileChooserWrapper()
+            {
+                [listener release];
+            }
+
+            std::unique_ptr<FileChooser> chooser;
+            id<WebOpenPanelResultListener> listener;
+        };
+
+        auto chooser = std::make_unique<FileChooser> (TRANS("Select the file you want to upload..."),
+                                                      File::getSpecialLocation (File::userHomeDirectory), "*");
+        auto* wrapper = new DeletedFileChooserWrapper (std::move (chooser), resultListener);
+
+        auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
+                    | (allowMultipleFiles ? FileBrowserComponent::canSelectMultipleItems : 0);
+
+        wrapper->chooser->launchAsync (flags, [wrapper] (const FileChooser&)
+        {
+            for (auto& f : wrapper->chooser->getResults())
+                [wrapper->listener chooseFilename: juceStringToNS (f.getFullPathName())];
+
+            delete wrapper;
+        });
     }
 };
 
@@ -531,14 +603,32 @@ public:
                   const StringArray* headers,
                   const MemoryBlock* postData)
     {
-        stop();
-
         if (url.trimStart().startsWithIgnoreCase ("javascript:"))
         {
-            [webView stringByEvaluatingJavaScriptFromString:
-                juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            [webView stringByEvaluatingJavaScriptFromString: juceStringToNS (url.fromFirstOccurrenceOf (":", false, false))];
+            return;
         }
-        else if (NSMutableURLRequest* request = getRequestForURL (url, headers, postData))
+
+        stop();
+
+        auto getRequest = [&]() -> NSMutableURLRequest*
+        {
+            if (url.trimStart().startsWithIgnoreCase ("file:"))
+            {
+                auto file = URL (url).getLocalFile();
+
+                if (NSURL* nsUrl = [NSURL fileURLWithPath: juceStringToNS (file.getFullPathName())])
+                    return [NSMutableURLRequest requestWithURL: appendParametersToFileURL (url, nsUrl)
+                                                   cachePolicy: NSURLRequestUseProtocolCachePolicy
+                                               timeoutInterval: 30.0];
+
+                return nullptr;
+            }
+
+            return getRequestForURL (url, headers, postData);
+        };
+
+        if (NSMutableURLRequest* request = getRequest())
         {
            #if JUCE_MAC
             [[webView mainFrame] loadRequest: request];
@@ -587,7 +677,7 @@ private:
 
 //==============================================================================
 WebBrowserComponent::WebBrowserComponent (bool unloadWhenHidden)
-    : unloadPageWhenBrowserIsHidden (unloadWhenHidden)
+    : unloadPageWhenHidden (unloadWhenHidden)
 {
     setOpaque (true);
     browser.reset (new Pimpl (this));
@@ -666,7 +756,7 @@ void WebBrowserComponent::checkWindowAssociation()
     }
     else
     {
-        if (unloadPageWhenBrowserIsHidden && ! blankPageShown)
+        if (unloadPageWhenHidden && ! blankPageShown)
         {
             // when the component becomes invisible, some stuff like flash
             // carries on playing audio, so we need to force it onto a blank

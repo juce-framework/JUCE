@@ -163,13 +163,26 @@ class JUCE_API ModalCallbackFunction
 {
 public:
     /** This is a utility function to create a ModalComponentManager::Callback that will
-        call a lambda function.
-        The lambda that you supply must take an integer parameter, which is the result code that
+        call a callable object.
+
+        The function that you supply must take an integer parameter, which is the result code that
         was returned when the modal component was dismissed.
 
         @see ModalComponentManager::Callback
     */
-    static ModalComponentManager::Callback* create (std::function<void (int)>);
+    template <typename CallbackFn>
+    static ModalComponentManager::Callback* create (CallbackFn&& fn)
+    {
+        struct Callable  : public ModalComponentManager::Callback
+        {
+            explicit Callable (CallbackFn&& f)  : fn (std::forward<CallbackFn> (f)) {}
+            void modalStateFinished (int result) override  { NullCheckedInvocation::invoke (std::move (fn), result); }
+
+            std::remove_reference_t<CallbackFn> fn;
+        };
+
+        return new Callable (std::forward<CallbackFn> (fn));
+    }
 
     //==============================================================================
     /** This is a utility function to create a ModalComponentManager::Callback that will
@@ -197,7 +210,10 @@ public:
     static ModalComponentManager::Callback* create (void (*functionToCall) (int, ParamType),
                                                     ParamType parameterValue)
     {
-        return create ([=] (int r) { functionToCall (r, parameterValue); });
+        return create ([functionToCall, parameterValue] (int r)
+        {
+            functionToCall (r, parameterValue);
+        });
     }
 
     //==============================================================================
@@ -227,7 +243,10 @@ public:
                                                        ParamType1 parameterValue1,
                                                        ParamType2 parameterValue2)
     {
-        return create ([=] (int r) { functionToCall (r, parameterValue1, parameterValue2); });
+        return create ([functionToCall, parameterValue1, parameterValue2] (int r)
+        {
+            functionToCall (r, parameterValue1, parameterValue2);
+        });
     }
 
     //==============================================================================
@@ -257,8 +276,10 @@ public:
     static ModalComponentManager::Callback* forComponent (void (*functionToCall) (int, ComponentType*),
                                                           ComponentType* component)
     {
-        WeakReference<Component> comp (component);
-        return create ([=] (int r) { functionToCall (r, static_cast<ComponentType*> (comp.get())); });
+        return create ([functionToCall, comp = WeakReference<Component> { component }] (int r)
+        {
+            functionToCall (r, static_cast<ComponentType*> (comp.get()));
+        });
     }
 
     //==============================================================================
@@ -289,8 +310,10 @@ public:
                                                           ComponentType* component,
                                                           ParamType param)
     {
-        WeakReference<Component> comp (component);
-        return create ([=] (int r) { functionToCall (r, static_cast<ComponentType*> (comp.get()), param); });
+        return create ([functionToCall, param, comp = WeakReference<Component> { component }] (int r)
+        {
+            functionToCall (r, static_cast<ComponentType*> (comp.get()), param);
+        });
     }
 
 private:

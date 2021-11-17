@@ -39,7 +39,7 @@ public:
         {
             if (auto* r = document.getResources() [row])
                 document.getResources().browseForResource ("Select a file to replace this resource", "*",
-                                                           File (r->originalFilename), r->name);
+                                                           File (r->originalFilename), r->name, nullptr);
         };
     }
 
@@ -69,7 +69,10 @@ ResourceEditorPanel::ResourceEditorPanel (JucerDocument& doc)
       delButton ("Delete selected resources")
 {
     addAndMakeVisible (addButton);
-    addButton.onClick = [this] { document.getResources().browseForResource ("Select a file to add as a resource", "*", {}, {}); };
+    addButton.onClick = [this]
+    {
+        document.getResources().browseForResource ("Select a file to add as a resource", "*", {}, {}, nullptr);
+    };
 
     addAndMakeVisible (reloadAllButton);
     reloadAllButton.onClick = [this] { reloadAll(); };
@@ -258,16 +261,12 @@ void ResourceEditorPanel::reloadAll()
     StringArray failed;
 
     for (int i = 0; i < document.getResources().size(); ++i)
-    {
         if (! document.getResources().reload (i))
             failed.add (document.getResources().getResourceNames() [i]);
-    }
 
     if (failed.size() > 0)
-    {
-        AlertWindow::showMessageBox (AlertWindow::WarningIcon,
-                                     TRANS("Reloading resources"),
-                                     TRANS("The following resources couldn't be reloaded from their original files:\n\n")
-                                     + failed.joinIntoString (", "));
-    }
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
+                                          TRANS("Reloading resources"),
+                                          TRANS("The following resources couldn't be reloaded from their original files:\n\n")
+                                              + failed.joinIntoString (", "));
 }

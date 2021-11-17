@@ -132,7 +132,7 @@ namespace AAXClasses
 
     static void check (AAX_Result result)
     {
-        jassert (result == AAX_SUCCESS); ignoreUnused (result);
+        jassertquiet (result == AAX_SUCCESS);
     }
 
     // maps a channel index of an AAX format to an index of a juce format
@@ -1023,7 +1023,7 @@ namespace AAXClasses
                  || transport.GetTimelineSelectionStartPosition (&info.timeInSamples) != AAX_SUCCESS)
                 check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
 
-            info.timeInSeconds = info.timeInSamples / sampleRate;
+            info.timeInSeconds = (float) info.timeInSamples / sampleRate;
 
             int64_t ticks = 0;
 
@@ -1032,13 +1032,13 @@ namespace AAXClasses
             else
                 check (transport.GetCurrentTickPosition (&ticks));
 
-            info.ppqPosition = ticks / 960000.0;
+            info.ppqPosition = (double) ticks / 960000.0;
 
             info.isLooping = false;
             int64_t loopStartTick = 0, loopEndTick = 0;
             check (transport.GetCurrentLoopPosition (&info.isLooping, &loopStartTick, &loopEndTick));
-            info.ppqLoopStart = loopStartTick / 960000.0;
-            info.ppqLoopEnd   = loopEndTick   / 960000.0;
+            info.ppqLoopStart = (double) loopStartTick / 960000.0;
+            info.ppqLoopEnd   = (double) loopEndTick   / 960000.0;
 
             info.editOriginTime = 0;
             info.frameRate = AudioPlayHead::fpsUnknown;
@@ -1085,24 +1085,28 @@ namespace AAXClasses
                 SetParameterNormalizedValue (paramID, (double) newValue);
         }
 
-        void audioProcessorChanged (AudioProcessor* processor) override
+        void audioProcessorChanged (AudioProcessor* processor, const ChangeDetails& details) override
         {
             ++mNumPlugInChanges;
 
-            auto numParameters = juceParameters.getNumParameters();
-
-            for (int i = 0; i < numParameters; ++i)
+            if (details.parameterInfoChanged)
             {
-                if (auto* p = mParameterManager.GetParameterByID (getAAXParamIDFromJuceIndex (i)))
-                {
-                    auto newName = juceParameters.getParamForIndex (i)->getName (31);
+                auto numParameters = juceParameters.getNumParameters();
 
-                    if (p->Name() != newName.toRawUTF8())
-                        p->SetName (AAX_CString (newName.toRawUTF8()));
+                for (int i = 0; i < numParameters; ++i)
+                {
+                    if (auto* p = mParameterManager.GetParameterByID (getAAXParamIDFromJuceIndex (i)))
+                    {
+                        auto newName = juceParameters.getParamForIndex (i)->getName (31);
+
+                        if (p->Name() != newName.toRawUTF8())
+                            p->SetName (AAX_CString (newName.toRawUTF8()));
+                    }
                 }
             }
 
-            check (Controller()->SetSignalLatency (processor->getLatencySamples()));
+            if (details.latencyChanged)
+                check (Controller()->SetSignalLatency (processor->getLatencySamples()));
         }
 
         void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int parameterIndex) override
@@ -1124,11 +1128,25 @@ namespace AAXClasses
                 case AAX_eNotificationEvent_EnteringOfflineMode:  pluginInstance->setNonRealtime (true);  break;
                 case AAX_eNotificationEvent_ExitingOfflineMode:   pluginInstance->setNonRealtime (false); break;
 
+                case AAX_eNotificationEvent_ASProcessingState:
+                {
+                    if (data != nullptr && size == sizeof (AAX_EProcessingState))
+                    {
+                        const auto state = *static_cast<const AAX_EProcessingState*> (data);
+                        const auto nonRealtime = state == AAX_eProcessingState_Start
+                                              || state == AAX_eProcessingState_StartPass
+                                              || state == AAX_eProcessingState_BeginPassGroup;
+                        pluginInstance->setNonRealtime (nonRealtime);
+                    }
+
+                    break;
+                }
+
                 case AAX_eNotificationEvent_TrackNameChanged:
                     if (data != nullptr)
                     {
                         AudioProcessor::TrackProperties props;
-                        props.name = static_cast<const AAX_IString*> (data)->Get();
+                        props.name = String::fromUTF8 (static_cast<const AAX_IString*> (data)->Get());
 
                         pluginInstance->updateTrackProperties (props);
                     }
@@ -1251,8 +1269,7 @@ namespace AAXClasses
         {
             auto currentLayout = getDefaultLayout (p, true);
             bool success = p.checkBusesLayoutSupported (currentLayout);
-            jassert (success);
-            ignoreUnused (success);
+            jassertquiet (success);
 
             auto numInputBuses  = p.getBusCount (true);
             auto numOutputBuses = p.getBusCount (false);
@@ -1325,7 +1342,7 @@ namespace AAXClasses
                     return foundValid;
 
                 for (int i = 2; i < numInputBuses; ++i)
-                    if (currentLayout.outputBuses.getReference (i) != AudioChannelSet::disabled())
+                    if (! currentLayout.inputBuses.getReference (i).isDisabled())
                         return foundValid;
             }
 
@@ -2205,6 +2222,10 @@ namespace AAXClasses
         properties->AddProperty (AAX_eProperty_Constraint_AlwaysProcess, true);
        #endif
 
+       #if JucePlugin_AAXDisableDefaultSettingsChunks
+        properties->AddProperty (AAX_eProperty_Constraint_DoNotApplyDefaultSettings, true);
+       #endif
+
        #if JucePlugin_AAXDisableSaveRestore
         properties->AddProperty (AAX_eProperty_SupportsSaveRestore, false);
        #endif
@@ -2280,7 +2301,6 @@ namespace AAXClasses
 
         auto pluginNames = plugin->getAlternateDisplayNames();
 
-        pluginNames.insert (0, JucePlugin_Desc);
         pluginNames.insert (0, JucePlugin_Name);
 
         pluginNames.removeDuplicates (false);

@@ -30,16 +30,13 @@
 #include "../../ProjectSaving/jucer_ProjectExporter.h"
 #include "../../Project/UI/jucer_ProjectContentComponent.h"
 
-#include "../../LiveBuildEngine/jucer_MessageIDs.h"
-#include "../../LiveBuildEngine/jucer_SourceCodeRange.h"
-#include "../../LiveBuildEngine/jucer_ClassDatabase.h"
-#include "../../LiveBuildEngine/jucer_DiagnosticMessage.h"
-#include "../../LiveBuildEngine/jucer_CompileEngineClient.h"
-
 //==============================================================================
 HeaderComponent::HeaderComponent (ProjectContentComponent* pcc)
     : projectContentComponent (pcc)
 {
+    setTitle ("Header");
+    setFocusContainerType (FocusContainerType::focusContainer);
+
     addAndMakeVisible (configLabel);
     addAndMakeVisible (exporterBox);
 
@@ -55,15 +52,6 @@ HeaderComponent::HeaderComponent (ProjectContentComponent* pcc)
     addAndMakeVisible (projectNameLabel);
 
     initialiseButtons();
-}
-
-HeaderComponent::~HeaderComponent()
-{
-    if (childProcess != nullptr)
-    {
-        childProcess->activityList.removeChangeListener (this);
-        childProcess->errorList.removeChangeListener (this);
-    }
 }
 
 //==============================================================================
@@ -92,7 +80,6 @@ void HeaderComponent::resized()
 
         exporterBounds.setCentre (bounds.getCentre());
 
-        runAppButton.setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
         saveAndOpenInIDEButton.setBounds (exporterBounds.removeFromRight (exporterBounds.getHeight()).reduced (2));
 
         exporterBounds.removeFromRight (5);
@@ -107,17 +94,11 @@ void HeaderComponent::resized()
 void HeaderComponent::paint (Graphics& g)
 {
     g.fillAll (findColour (backgroundColourId));
-
-    if (isBuilding)
-        getLookAndFeel().drawSpinningWaitAnimation (g, findColour (treeIconColourId),
-                                                    runAppButton.getX(), runAppButton.getY(),
-                                                    runAppButton.getWidth(), runAppButton.getHeight());
 }
 
 //==============================================================================
 void HeaderComponent::setCurrentProject (Project* newProject)
 {
-    isBuilding = false;
     stopTimer();
     repaint();
 
@@ -134,22 +115,6 @@ void HeaderComponent::setCurrentProject (Project* newProject)
         projectNameValue.referTo (project->getProjectValue (Ids::name));
         projectNameValue.addListener (this);
         updateName();
-
-        childProcess = ProjucerApplication::getApp().childProcessCache->getExisting (*project);
-
-        if (childProcess != nullptr)
-        {
-            childProcess->activityList.addChangeListener (this);
-            childProcess->errorList.addChangeListener (this);
-
-            runAppButton.setTooltip ({});
-            runAppButton.setEnabled (true);
-        }
-        else
-        {
-            runAppButton.setTooltip ("Enable live-build engine to launch application");
-            runAppButton.setEnabled (false);
-        }
     }
 }
 
@@ -233,25 +198,11 @@ void HeaderComponent::sidebarTabsWidthChanged (int newWidth)
     resized();
 }
 
-void HeaderComponent::liveBuildEnablementChanged (bool isEnabled)
-{
-    runAppButton.setVisible (isEnabled);
-}
-
 //==============================================================================
 void HeaderComponent::changeListenerCallback (ChangeBroadcaster* source)
 {
     if (source == &userAvatar)
-    {
         resized();
-    }
-    else if (childProcess != nullptr && source == &childProcess->activityList)
-    {
-        if (childProcess->activityList.getNumActivities() > 0)
-            buildPing();
-        else
-            buildFinished (childProcess->errorList.getNumErrors() == 0);
-    }
 }
 
 void HeaderComponent::valueChanged (Value&)
@@ -275,39 +226,29 @@ void HeaderComponent::initialiseButtons()
     saveAndOpenInIDEButton.setIconInset (7);
     saveAndOpenInIDEButton.onClick = [this]
     {
-        if (project != nullptr)
+        if (project == nullptr)
+            return;
+
+        if (! project->isSaveAndExportDisabled())
         {
-            if (project->isSaveAndExportDisabled())
-            {
-                auto setWarningVisible = [this] (const Identifier& identifier)
-                {
-                    auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
-                                                              .getChildWithName (identifier);
-
-                    if (child.isValid())
-                        child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
-                };
-
-                if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
-                    setWarningVisible (ProjectMessages::Ids::incompatibleLicense);
-
-                if (project->isFileModificationCheckPending())
-                    setWarningVisible (ProjectMessages::Ids::jucerFileModified);
-            }
-            else
-            {
-                if (auto exporter = getSelectedExporter())
-                    project->openProjectInIDE (*exporter, true);
-            }
+            projectContentComponent->openInSelectedIDE (true);
+            return;
         }
-    };
 
-    addAndMakeVisible (runAppButton);
-    runAppButton.setIconInset (7);
-    runAppButton.onClick = [this]
-    {
-        if (childProcess != nullptr)
-            childProcess->launchApp();
+        auto setWarningVisible = [this] (const Identifier& identifier)
+        {
+            auto child = project->getProjectMessages().getChildWithName (ProjectMessages::Ids::warning)
+                                                      .getChildWithName (identifier);
+
+            if (child.isValid())
+                child.setProperty (ProjectMessages::Ids::isVisible, true, nullptr);
+        };
+
+        if (project->hasIncompatibleLicenseTypeAndSplashScreenSetting())
+            setWarningVisible (ProjectMessages::Ids::incompatibleLicense);
+
+        if (project->isFileModificationCheckPending())
+            setWarningVisible (ProjectMessages::Ids::jucerFileModified);
     };
 
     updateExporterButton();
@@ -335,58 +276,4 @@ void HeaderComponent::updateExporterButton()
             }
         }
     }
-}
-
-//==============================================================================
-void HeaderComponent::buildPing()
-{
-    if (! isTimerRunning())
-    {
-        isBuilding = true;
-        runAppButton.setEnabled (false);
-        runAppButton.setTooltip ("Building...");
-
-        startTimer (50);
-    }
-}
-
-void HeaderComponent::buildFinished (bool success)
-{
-    stopTimer();
-    isBuilding = false;
-
-    repaint();
-
-    setRunAppButtonState (success);
-}
-
-void HeaderComponent::setRunAppButtonState (bool buildWasSuccessful)
-{
-    bool shouldEnableButton = false;
-
-    if (buildWasSuccessful)
-    {
-        if (childProcess != nullptr)
-        {
-            if (childProcess->isAppRunning() || (! childProcess->isAppRunning() && childProcess->canLaunchApp()))
-            {
-                runAppButton.setTooltip ("Launch application");
-                shouldEnableButton = true;
-            }
-            else
-            {
-                runAppButton.setTooltip ("Application can't be launched");
-            }
-        }
-        else
-        {
-            runAppButton.setTooltip ("Enable live-build engine to launch application");
-        }
-    }
-    else
-    {
-        runAppButton.setTooltip ("Error building application");
-    }
-
-    runAppButton.setEnabled (shouldEnableButton);
 }

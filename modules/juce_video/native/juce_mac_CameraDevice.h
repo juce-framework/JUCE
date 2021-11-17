@@ -496,8 +496,7 @@ private:
     {
         handleImageCapture (image);
 
-        WeakReference<Pimpl> weakRef (this);
-        MessageManager::callAsync ([weakRef, image]() mutable
+        MessageManager::callAsync ([weakRef = WeakReference<Pimpl> { this }, image]() mutable
         {
             if (weakRef != nullptr && weakRef->pictureTakenCallback != nullptr)
                 weakRef->pictureTakenCallback (image);

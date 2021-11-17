@@ -130,7 +130,9 @@ private:
         {
             ModuleDescription m (path);
 
-            if (m.isValid())
+            if (m.isValid()
+                && std::find_if (list.begin(), list.end(),
+                                 [&m] (const ModuleIDAndFolder& element) { return element.first == m.getID(); }) == std::end (list))
             {
                 list.push_back ({ m.getID(), path });
                 return true;
@@ -139,30 +141,33 @@ private:
             return false;
         }
 
-        static void addAllModulesInSubfoldersRecursively (const File& path, int depth, ModuleIDAndFolderList& list)
+        static void addAllModulesInFolder (const File& topLevelPath, ModuleIDAndFolderList& list)
         {
-            if (depth > 0)
+            struct FileAndDepth
             {
-                for (const auto& iter : RangedDirectoryIterator (path, false, "*", File::findDirectories))
+                File file;
+                int depth;
+            };
+
+            std::queue<FileAndDepth> pathsToCheck;
+            pathsToCheck.push ({ topLevelPath, 0 });
+
+            while (! pathsToCheck.empty())
+            {
+                const auto path = pathsToCheck.front();
+                pathsToCheck.pop();
+
+                if (tryToAddModuleFromFolder (path.file, list) || path.depth == 3)
+                    continue;
+
+                for (const auto& iter : RangedDirectoryIterator (path.file, false, "*", File::findDirectories))
                 {
                     if (auto* job = ThreadPoolJob::getCurrentThreadPoolJob())
                         if (job->shouldExit())
                             return;
 
-                    auto childPath = iter.getFile();
-
-                    if (! tryToAddModuleFromFolder (childPath, list))
-                        addAllModulesInSubfoldersRecursively (childPath, depth - 1, list);
+                    pathsToCheck.push({ iter.getFile(), path.depth + 1 });
                 }
-            }
-        }
-
-        static void addAllModulesInFolder (const File& path, ModuleIDAndFolderList& list)
-        {
-            if (! tryToAddModuleFromFolder (path, list))
-            {
-                constexpr int subfolders = 3;
-                addAllModulesInSubfoldersRecursively (path, subfolders, list);
             }
         }
 
@@ -180,6 +185,9 @@ private:
     {
         return std::make_unique<ModuleScannerJob> (paths, [this] (ModuleIDAndFolderList scannedModulesList)
         {
+            if (scannedModulesList == modulesList)
+                return;
+
             {
                 const ScopedLock swapLock (lock);
                 modulesList.swap (scannedModulesList);

@@ -38,7 +38,7 @@ class PluginGraph   : public FileBasedDocument,
 {
 public:
     //==============================================================================
-    PluginGraph (AudioPluginFormatManager&);
+    PluginGraph (AudioPluginFormatManager&, KnownPluginList&);
     ~PluginGraph() override;
 
     //==============================================================================
@@ -60,7 +60,7 @@ public:
 
     //==============================================================================
     void audioProcessorParameterChanged (AudioProcessor*, int, float) override {}
-    void audioProcessorChanged (AudioProcessor*) override { changed(); }
+    void audioProcessorChanged (AudioProcessor*, const ChangeDetails&) override { changed(); }
 
     //==============================================================================
     std::unique_ptr<XmlElement> createXml() const;
@@ -85,6 +85,7 @@ public:
 private:
     //==============================================================================
     AudioPluginFormatManager& formatManager;
+    KnownPluginList& knownPlugins;
     OwnedArray<PluginWindow> activePluginWindows;
 
     NodeID lastUID;

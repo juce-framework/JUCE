@@ -81,7 +81,7 @@
 #elif JUCE_ANDROID
  #include "native/juce_android_BluetoothMidiDevicePairingDialogue.cpp"
 
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #if JUCE_USE_CDREADER
   #include "native/juce_linux_AudioCDReader.cpp"
  #endif

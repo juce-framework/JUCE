@@ -25,10 +25,6 @@
 
 #include "../../Application/jucer_Headers.h"
 
-#ifdef BUILDING_JUCE_COMPILEENGINE
- const char* getPreferredLineFeed() { return "\r\n"; }
-#endif
-
 //==============================================================================
 String joinLinesIntoSourceFile (StringArray& lines)
 {
@@ -123,12 +119,12 @@ StringPairArray parsePreprocessorDefs (const String& text)
     while (! s.isEmpty())
     {
         String token, value;
-        s = s.findEndOfWhitespace();
+        s.incrementToEndOfWhitespace();
 
         while ((! s.isEmpty()) && *s != '=' && ! s.isWhitespace())
             token << s.getAndAdvance();
 
-        s = s.findEndOfWhitespace();
+        s.incrementToEndOfWhitespace();
 
         if (*s == '=')
         {
@@ -269,7 +265,6 @@ StringArray getJUCEModules() noexcept
         "juce_audio_plugin_client",
         "juce_audio_processors",
         "juce_audio_utils",
-        "juce_blocks_basics",
         "juce_box2d",
         "juce_core",
         "juce_cryptography",

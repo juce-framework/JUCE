@@ -313,36 +313,89 @@ namespace CoreMidiHelpers
 
     using SenderToUse = Sender<implementationStrategy>;
 
+    template <typename Resource, typename Destructor>
+    class ScopedMidiResource
+    {
+    public:
+        ScopedMidiResource() = default;
+
+        explicit ScopedMidiResource (Resource r) : contents (r, {}) {}
+
+        ~ScopedMidiResource() noexcept
+        {
+            auto ref = std::get<0> (contents);
+
+            if (ref != 0)
+                std::get<1> (contents) (ref);
+        }
+
+        ScopedMidiResource (const ScopedMidiResource& other) = delete;
+        ScopedMidiResource& operator= (const ScopedMidiResource& other) = delete;
+
+        ScopedMidiResource (ScopedMidiResource&& other) noexcept { swap (other); }
+
+        ScopedMidiResource& operator= (ScopedMidiResource&& other) noexcept
+        {
+            swap (other);
+            return *this;
+        }
+
+        void swap (ScopedMidiResource& other) noexcept { std::swap (other.contents, contents); }
+
+        Resource operator*() const noexcept { return std::get<0> (contents); }
+
+        Resource release() noexcept
+        {
+            auto old = std::get<0> (contents);
+            std::get<0> (contents) = 0;
+            return old;
+        }
+
+    private:
+        std::tuple<Resource, Destructor> contents { {}, {} };
+    };
+
+    struct PortRefDestructor
+    {
+        void operator() (MIDIPortRef p) const noexcept { MIDIPortDispose (p); }
+    };
+
+    using ScopedPortRef = ScopedMidiResource<MIDIPortRef, PortRefDestructor>;
+
+    struct EndpointRefDestructor
+    {
+        void operator() (MIDIEndpointRef p) const noexcept { MIDIEndpointDispose (p); }
+    };
+
+    using ScopedEndpointRef = ScopedMidiResource<MIDIEndpointRef, EndpointRefDestructor>;
+
     //==============================================================================
     class MidiPortAndEndpoint
     {
     public:
-        MidiPortAndEndpoint (MIDIPortRef p, MIDIEndpointRef ep) noexcept
-            : port (p), endpoint (ep), sender (ep)
+        MidiPortAndEndpoint (ScopedPortRef p, ScopedEndpointRef ep) noexcept
+            : port (std::move (p)), endpoint (std::move (ep)), sender (*endpoint)
         {}
 
         ~MidiPortAndEndpoint() noexcept
         {
-            if (port != 0)
-                MIDIPortDispose (port);
-
-            // if port == nullptr, it means we created the endpoint, so it's safe to delete it
-            if (port == 0 && endpoint != 0)
-                MIDIEndpointDispose (endpoint);
+            // if port != 0, it means we didn't create the endpoint, so it's not safe to delete it
+            if (*port != 0)
+                endpoint.release();
         }
 
         void send (const MidiMessage& m)
         {
-            sender.send (port, endpoint, m);
+            sender.send (*port, *endpoint, m);
         }
 
         void send (ump::Iterator b, ump::Iterator e)
         {
-            sender.send (port, endpoint, b, e);
+            sender.send (*port, *endpoint, b, e);
         }
 
-        bool canStop() const noexcept  { return port != 0; }
-        void stop() const              { CHECK_ERROR (MIDIPortDisconnectSource (port, endpoint)); }
+        bool canStop() const noexcept  { return *port != 0; }
+        void stop() const              { CHECK_ERROR (MIDIPortDisconnectSource (*port, *endpoint)); }
 
         ump::MidiProtocol getProtocol() const noexcept
         {
@@ -350,8 +403,8 @@ namespace CoreMidiHelpers
         }
 
     private:
-        MIDIPortRef port;
-        MIDIEndpointRef endpoint;
+        ScopedPortRef port;
+        ScopedEndpointRef endpoint;
 
         SenderToUse sender;
     };
@@ -361,10 +414,10 @@ namespace CoreMidiHelpers
         MidiDeviceInfo info;
 
         {
-            ScopedCFString str;
+            CFObjectHolder<CFStringRef> str;
 
-            if (CHECK_ERROR (MIDIObjectGetStringProperty (entity, kMIDIPropertyName, &str.cfString)))
-                info.name = String::fromCFString (str.cfString);
+            if (CHECK_ERROR (MIDIObjectGetStringProperty (entity, kMIDIPropertyName, &str.object)))
+                info.name = String::fromCFString (str.object);
         }
 
         SInt32 objectID = 0;
@@ -375,10 +428,10 @@ namespace CoreMidiHelpers
         }
         else
         {
-            ScopedCFString str;
+            CFObjectHolder<CFStringRef> str;
 
-            if (CHECK_ERROR (MIDIObjectGetStringProperty (entity, kMIDIPropertyUniqueID, &str.cfString)))
-                info.identifier = String::fromCFString (str.cfString);
+            if (CHECK_ERROR (MIDIObjectGetStringProperty (entity, kMIDIPropertyUniqueID, &str.object)))
+                info.identifier = String::fromCFString (str.object);
         }
 
         return info;
@@ -433,18 +486,18 @@ namespace CoreMidiHelpers
         MidiDeviceInfo result;
 
         // Does the endpoint have connections?
-        CFDataRef connections = nullptr;
+        CFObjectHolder<CFDataRef> connections;
         int numConnections = 0;
 
-        MIDIObjectGetDataProperty (endpoint, kMIDIPropertyConnectionUniqueID, &connections);
+        MIDIObjectGetDataProperty (endpoint, kMIDIPropertyConnectionUniqueID, &connections.object);
 
-        if (connections != nullptr)
+        if (connections.object != nullptr)
         {
-            numConnections = ((int) CFDataGetLength (connections)) / (int) sizeof (MIDIUniqueID);
+            numConnections = ((int) CFDataGetLength (connections.object)) / (int) sizeof (MIDIUniqueID);
 
             if (numConnections > 0)
             {
-                auto* pid = reinterpret_cast<const SInt32*> (CFDataGetBytePtr (connections));
+                auto* pid = reinterpret_cast<const SInt32*> (CFDataGetBytePtr (connections.object));
 
                 for (int i = 0; i < numConnections; ++i, ++pid)
                 {
@@ -480,8 +533,6 @@ namespace CoreMidiHelpers
                     }
                 }
             }
-
-            CFRelease (connections);
         }
 
         // Here, either the endpoint had no connections, or we failed to obtain names for them.
@@ -499,24 +550,15 @@ namespace CoreMidiHelpers
         uniqueID = JUCE_STRINGIFY (JucePlugin_CFBundleIdentifier);
        #else
         auto appBundle = File::getSpecialLocation (File::currentApplicationFile);
-        ScopedCFString appBundlePath (appBundle.getFullPathName());
+        CFUniquePtr<CFStringRef> appBundlePath (appBundle.getFullPathName().toCFString());
 
-        if (auto bundleURL = CFURLCreateWithFileSystemPath (kCFAllocatorDefault,
-                                                            appBundlePath.cfString,
-                                                            kCFURLPOSIXPathStyle,
-                                                            true))
-        {
-            auto bundleRef = CFBundleCreate (kCFAllocatorDefault, bundleURL);
-            CFRelease (bundleURL);
-
-            if (bundleRef != nullptr)
-            {
-                if (auto bundleId = CFBundleGetIdentifier (bundleRef))
+        if (auto bundleURL = CFUniquePtr<CFURLRef> (CFURLCreateWithFileSystemPath (kCFAllocatorDefault,
+                                                                                   appBundlePath.get(),
+                                                                                   kCFURLPOSIXPathStyle,
+                                                                                   true)))
+            if (auto bundleRef = CFUniquePtr<CFBundleRef> (CFBundleCreate (kCFAllocatorDefault, bundleURL.get())))
+                if (auto bundleId = CFBundleGetIdentifier (bundleRef.get()))
                     uniqueID = String::fromCFString (bundleId);
-
-                CFRelease (bundleRef);
-            }
-        }
        #endif
 
         if (uniqueID.isEmpty())
@@ -567,8 +609,8 @@ namespace CoreMidiHelpers
 
             enableSimulatorMidiSession();
 
-            ScopedCFString name (getGlobalMidiClientName());
-            CHECK_ERROR (MIDIClientCreate (name.cfString, &globalSystemChangeCallback, nullptr, &globalMidiClient));
+            CFUniquePtr<CFStringRef> name (getGlobalMidiClientName().toCFString());
+            CHECK_ERROR (MIDIClientCreate (name.get(), &globalSystemChangeCallback, nullptr, &globalMidiClient));
         }
 
         return globalMidiClient;
@@ -1005,25 +1047,24 @@ public:
                 if (deviceIdentifier != endpointInfo.identifier)
                     continue;
 
-                ScopedCFString cfName;
+                CFObjectHolder<CFStringRef> cfName;
 
-                if (! CHECK_ERROR (MIDIObjectGetStringProperty (endpoint, kMIDIPropertyName, &cfName.cfString)))
+                if (! CHECK_ERROR (MIDIObjectGetStringProperty (endpoint, kMIDIPropertyName, &cfName.object)))
                     continue;
 
                 if (auto input = makeInput (endpointInfo.name, endpointInfo.identifier, std::forward<Args> (args)...))
                 {
                     MIDIPortRef port;
 
-                    if (! CHECK_ERROR (CreatorFunctionsToUse::createInputPort (protocol, client, cfName.cfString, input->internal.get(), &port)))
+                    if (! CHECK_ERROR (CreatorFunctionsToUse::createInputPort (protocol, client, cfName.object, input->internal.get(), &port)))
                         continue;
 
-                    if (! CHECK_ERROR (MIDIPortConnectSource (port, endpoint, nullptr)))
-                    {
-                        CHECK_ERROR (MIDIPortDispose (port));
-                        continue;
-                    }
+                    ScopedPortRef scopedPort { port };
 
-                    input->internal->portAndEndpoint = std::make_unique<MidiPortAndEndpoint> (port, endpoint);
+                    if (! CHECK_ERROR (MIDIPortConnectSource (*scopedPort, endpoint, nullptr)))
+                        continue;
+
+                    input->internal->portAndEndpoint = std::make_unique<MidiPortAndEndpoint> (std::move (scopedPort), ScopedEndpointRef { endpoint });
                     return input;
                 }
             }
@@ -1046,9 +1087,10 @@ public:
             if (auto input = makeInput (deviceName, String (deviceIdentifier), std::forward<Args> (args)...))
             {
                 MIDIEndpointRef endpoint;
-                ScopedCFString name (deviceName);
+                CFUniquePtr<CFStringRef> name (deviceName.toCFString());
 
-                auto err = CreatorFunctionsToUse::createDestination (protocol, client, name.cfString, input->internal.get(), &endpoint);
+                auto err = CreatorFunctionsToUse::createDestination (protocol, client, name.get(), input->internal.get(), &endpoint);
+                ScopedEndpointRef scopedEndpoint { endpoint };
 
                #if JUCE_IOS
                 if (err == kMIDINotPermitted)
@@ -1066,7 +1108,7 @@ public:
                 if (! CHECK_ERROR (MIDIObjectSetIntegerProperty (endpoint, kMIDIPropertyUniqueID, (SInt32) deviceIdentifier)))
                     return {};
 
-                input->internal->portAndEndpoint = std::make_unique<MidiPortAndEndpoint> ((MIDIPortRef) 0, endpoint);
+                input->internal->portAndEndpoint = std::make_unique<MidiPortAndEndpoint> (ScopedPortRef{}, std::move (scopedEndpoint));
                 return input;
             }
         }
@@ -1175,18 +1217,20 @@ std::unique_ptr<MidiOutput> MidiOutput::openDevice (const String& deviceIdentifi
             if (deviceIdentifier != endpointInfo.identifier)
                 continue;
 
-            ScopedCFString cfName;
+            CFObjectHolder<CFStringRef> cfName;
 
-            if (! CHECK_ERROR (MIDIObjectGetStringProperty (endpoint, kMIDIPropertyName, &cfName.cfString)))
+            if (! CHECK_ERROR (MIDIObjectGetStringProperty (endpoint, kMIDIPropertyName, &cfName.object)))
                 continue;
 
             MIDIPortRef port;
 
-            if (! CHECK_ERROR (MIDIOutputPortCreate (client, cfName.cfString, &port)))
+            if (! CHECK_ERROR (MIDIOutputPortCreate (client, cfName.object, &port)))
                 continue;
 
+            ScopedPortRef scopedPort { port };
+
             auto midiOutput = rawToUniquePtr (new MidiOutput (endpointInfo.name, endpointInfo.identifier));
-            midiOutput->internal = std::make_unique<Pimpl> (port, endpoint);
+            midiOutput->internal = std::make_unique<Pimpl> (std::move (scopedPort), ScopedEndpointRef { endpoint });
 
             return midiOutput;
         }
@@ -1203,9 +1247,10 @@ std::unique_ptr<MidiOutput> MidiOutput::createNewDevice (const String& deviceNam
     {
         MIDIEndpointRef endpoint;
 
-        ScopedCFString name (deviceName);
+        CFUniquePtr<CFStringRef> name (deviceName.toCFString());
 
-        auto err = CreatorFunctionsToUse::createSource (ump::PacketProtocol::MIDI_1_0, client, name.cfString, &endpoint);
+        auto err = CreatorFunctionsToUse::createSource (ump::PacketProtocol::MIDI_1_0, client, name.get(), &endpoint);
+        ScopedEndpointRef scopedEndpoint { endpoint };
 
        #if JUCE_IOS
         if (err == kMIDINotPermitted)
@@ -1222,11 +1267,11 @@ std::unique_ptr<MidiOutput> MidiOutput::createNewDevice (const String& deviceNam
 
         auto deviceIdentifier = createUniqueIDForMidiPort (deviceName, false);
 
-        if (! CHECK_ERROR (MIDIObjectSetIntegerProperty (endpoint, kMIDIPropertyUniqueID, (SInt32) deviceIdentifier)))
+        if (! CHECK_ERROR (MIDIObjectSetIntegerProperty (*scopedEndpoint, kMIDIPropertyUniqueID, (SInt32) deviceIdentifier)))
             return {};
 
         auto midiOutput = rawToUniquePtr (new MidiOutput (deviceName, String (deviceIdentifier)));
-        midiOutput->internal = std::make_unique<Pimpl> ((UInt32) 0, endpoint);
+        midiOutput->internal = std::make_unique<Pimpl> (ScopedPortRef{}, std::move (scopedEndpoint));
 
         return midiOutput;
     }

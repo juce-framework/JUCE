@@ -61,17 +61,19 @@ void LibraryModule::addSearchPathsToExporter (ProjectExporter& exporter) const
 
     exporter.addToExtraSearchPaths (moduleRelativePath.getParentDirectory());
 
-    String libDirPlatform;
+    const auto libDirPlatform = [&]() -> String
+    {
+        if (exporter.isLinux())
+            return "Linux";
 
-    if (exporter.isLinux())
-        libDirPlatform = "Linux";
-    else if (exporter.isCodeBlocks() && exporter.isWindows())
-        libDirPlatform = "MinGW";
-    else
-        libDirPlatform = exporter.getTargetFolder().getFileName();
+        if (exporter.isCodeBlocks() && exporter.isWindows())
+            return "MinGW";
+
+        return exporter.getTypeInfoForExporter (exporter.getExporterIdentifier()).targetFolder;
+    }();
 
     auto libSubdirPath = moduleRelativePath.toUnixStyle() + "/libs/" + libDirPlatform;
-    auto moduleLibDir = File (exporter.getProject().getProjectFolder().getFullPathName() + "/" + libSubdirPath);
+    auto moduleLibDir = exporter.getProject().resolveFilename (libSubdirPath);
 
     if (moduleLibDir.exists())
         exporter.addToModuleLibPaths ({ libSubdirPath, moduleRelativePath.getRoot() });
@@ -662,15 +664,16 @@ void EnabledModulesList::addModuleInteractive (const String& moduleID)
 
 void EnabledModulesList::addModuleFromUserSelectedFile()
 {
-    auto lastLocation = getDefaultModulesFolder();
+    chooser = std::make_unique<FileChooser> ("Select a module to add...", getDefaultModulesFolder(), "");
+    auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectDirectories;
 
-    FileChooser fc ("Select a module to add...", lastLocation, {});
-
-    if (fc.browseForDirectory())
+    chooser->launchAsync (flags, [this] (const FileChooser& fc)
     {
-        lastLocation = fc.getResult();
-        addModuleOfferingToCopy (lastLocation, true);
-    }
+        if (fc.getResult() == File{})
+            return;
+
+        addModuleOfferingToCopy (fc.getResult(), true);
+    });
 }
 
 void EnabledModulesList::addModuleOfferingToCopy (const File& f, bool isFromUserSpecifiedFolder)
@@ -679,14 +682,14 @@ void EnabledModulesList::addModuleOfferingToCopy (const File& f, bool isFromUser
 
     if (! m.isValid())
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           "Add Module", "This wasn't a valid module folder!");
         return;
     }
 
     if (isModuleEnabled (m.getID()))
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           "Add Module", "The project already contains this module!");
         return;
     }

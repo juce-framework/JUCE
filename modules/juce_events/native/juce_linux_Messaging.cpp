@@ -30,8 +30,7 @@ public:
     InternalMessageQueue()
     {
         auto err = ::socketpair (AF_LOCAL, SOCK_STREAM, 0, msgpipe);
-        jassert (err == 0);
-        ignoreUnused (err);
+        jassertquiet (err == 0);
 
         LinuxEventLoop::registerFdCallback (getReadHandle(),
                                             [this] (int fd)
@@ -288,7 +287,7 @@ void MessageManager::broadcastMessage (const String&)
 }
 
 // this function expects that it will NEVER be called simultaneously for two concurrent threads
-bool MessageManager::dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
+bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages)
 {
     for (;;)
     {

@@ -48,7 +48,7 @@ struct TargetOS
         return windows;
        #elif JUCE_MAC
         return osx;
-       #elif JUCE_LINUX
+       #elif JUCE_LINUX || JUCE_BSD
         return linux;
        #else
         return unknown;

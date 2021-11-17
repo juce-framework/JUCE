@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)) || DOXYGEN
+#if (JUCE_PLUGINHOST_VST3 && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD)) || DOXYGEN
 
 /**
     Implements a plugin format for VST3s.
@@ -43,11 +43,16 @@ public:
     ~VST3PluginFormat() override;
 
     //==============================================================================
-    /** Attempts to reload a VST3 plugin's state from some preset file data.
+    /** Instead of using this function, use AudioPluginInstance::getExtensions()
+        to visit the ExtensionsVisitor::VST3 struct for the instance, if it exists.
+        Then, call ExtensionsVisitor::VST3::setPreset() to set the state using the
+        contents of a vstpreset file.
+
+        Attempts to reload a VST3 plugin's state from some preset file data.
 
         @see VSTPluginFormat::loadFromFXBFile
     */
-    static bool setStateFromVSTPresetFile (AudioPluginInstance*, const MemoryBlock&);
+    JUCE_DEPRECATED (static bool setStateFromVSTPresetFile (AudioPluginInstance*, const MemoryBlock&));
 
     //==============================================================================
     static String getFormatName()                   { return "VST3"; }

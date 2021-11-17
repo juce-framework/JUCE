@@ -958,11 +958,12 @@ PNG_INTERNAL_DATA(const png_byte, png_sRGB_delta, [512]);
 #endif /* SIMPLIFIED_READ/WRITE */
 
 
-// JUCE modification
+// JUCE CHANGE STARTS HERE
 ///* Inhibit C++ name-mangling for libpng functions but not for system calls. */
 //#ifdef __cplusplus
 //extern "C" {
 //#endif /* __cplusplus */
+// JUCE CHANGE ENDS HERE
 
 /* Internal functions; these are not exported from a DLL however because they
  * are used within several of the C source files they have to be C extern.
@@ -2145,10 +2146,11 @@ PNG_INTERNAL_FUNCTION(int,
 
 #include "pngdebug.h"
 
-// JUCE modification
+// JUCE CHANGE STARTS HERE
 //#ifdef __cplusplus
 //}
 //#endif
+// JUCE CHANGE ENDS HERE
 
 #endif /* PNG_VERSION_INFO_ONLY */
 #endif /* PNGPRIV_H */

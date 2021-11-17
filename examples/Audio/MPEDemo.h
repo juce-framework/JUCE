@@ -524,7 +524,7 @@ private:
 
     void handleInvalidLegacyModeParameters() const
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                           "Invalid legacy mode channel layout",
                                           "Cannot set legacy mode start/end channel:\n"
                                           "The end channel must not be less than the start channel!",

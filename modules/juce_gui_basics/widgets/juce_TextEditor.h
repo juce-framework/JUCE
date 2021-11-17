@@ -68,7 +68,12 @@ public:
         See also the setReturnKeyStartsNewLine() method, which will also need to be turned
         on if you want a multi-line editor with line-breaks.
 
-        @see isMultiLine, setReturnKeyStartsNewLine
+        @param shouldBeMultiLine whether the editor should be multi- or single-line.
+        @param shouldWordWrap    sets whether long lines should be broken up in multi-line editors.
+                                 If this is false and scrollbars are enabled a horizontal scrollbar
+                                 will be shown.
+
+        @see isMultiLine, setReturnKeyStartsNewLine, setScrollbarsShown
     */
     void setMultiLine (bool shouldBeMultiLine,
                        bool shouldWordWrap = true);
@@ -140,13 +145,13 @@ public:
     bool isCaretVisible() const noexcept                            { return caretVisible && ! isReadOnly(); }
 
     //==============================================================================
-    /** Enables/disables a vertical scrollbar.
+    /** Enables or disables scrollbars (this only applies when in multi-line mode).
 
-        (This only applies when in multi-line mode). When the text gets too long to fit
-        in the component, a scrollbar can appear to allow it to be scrolled. Even when
-        this is enabled, the scrollbar will be hidden unless it's needed.
+        When the text gets too long to fit in the component, a scrollbar can appear to
+        allow it to be scrolled. Even when this is enabled, the scrollbar will be hidden
+        unless it's needed.
 
-        By default the scrollbar is enabled.
+        By default scrollbars are enabled.
     */
     void setScrollbarsShown (bool shouldBeEnabled);
 
@@ -460,7 +465,7 @@ public:
     /** Finds the index of the character at a given position.
         The coordinates are relative to the component's top-left.
     */
-    int getTextIndexAt (int x, int y);
+    int getTextIndexAt (int x, int y) const;
 
     /** Counts the number of characters in the text.
 
@@ -487,6 +492,16 @@ public:
         By default there's a gap of 4 pixels.
     */
     void setIndents (int newLeftIndent, int newTopIndent);
+
+    /** Returns the gap at the top edge of the editor.
+        @see setIndents
+    */
+    int getTopIndent() const noexcept   { return topIndent; }
+
+    /** Returns the gap at the left edge of the editor.
+        @see setIndents
+    */
+    int getLeftIndent() const noexcept  { return leftIndent; }
 
     /** Changes the size of border left around the edge of the component.
         @see getBorder
@@ -519,6 +534,14 @@ public:
 
     /** Returns the current line spacing of the TextEditor. */
     float getLineSpacing() const noexcept                           { return lineSpacing; }
+
+    /** Returns the bounding box for a range of text in the editor. As the range may span
+        multiple lines, this method returns a RectangleList.
+
+        The bounds are relative to the component's top-left and may extend beyond the bounds
+        of the component if the text is long and word wrapping is disabled.
+    */
+    RectangleList<int> getTextBounds (Range<int> textRange);
 
     //==============================================================================
     void moveCaretToEnd();
@@ -772,6 +795,7 @@ private:
     ListenerList<Listener> listeners;
     Array<Range<int>> underlinedSections;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void moveCaret (int newCaretPos);
     void moveCaretTo (int newPosition, bool isSelecting);
     void recreateCaret();
@@ -787,23 +811,23 @@ private:
     void updateCaretPosition();
     void updateValueFromText();
     void textWasChangedByValue();
-    int indexAtPosition (float x, float y);
+    int indexAtPosition (float x, float y) const;
     int findWordBreakAfter (int position) const;
     int findWordBreakBefore (int position) const;
     bool moveCaretWithTransaction (int newPos, bool selecting);
     void drawContent (Graphics&);
     void checkLayout();
-    void updateTextHolderSize (int, int);
-    void updateScrollbarVisibility (int, int);
-    float getWordWrapWidth() const;
-    float getMaximumWidth() const;
-    float getMaximumHeight() const;
+    int getWordWrapWidth() const;
+    int getMaximumTextWidth() const;
+    int getMaximumTextHeight() const;
     void timerCallbackInt();
     void checkFocus();
     void repaintText (Range<int>);
     void scrollByLines (int deltaLines);
     bool undoOrRedo (bool shouldUndo);
     UndoManager* getUndoManager() noexcept;
+    void setSelection (Range<int>) noexcept;
+    Point<int> getTextOffset() const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TextEditor)
 };

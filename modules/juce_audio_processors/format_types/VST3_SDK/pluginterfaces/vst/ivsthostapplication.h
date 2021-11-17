@@ -21,17 +21,18 @@
 //------------------------------------------------------------------------
 namespace Steinberg {
 namespace Vst {
+
 //------------------------------------------------------------------------
-/** Basic Host Callback Interface.
+/** Basic host callback interface: Vst::IHostApplication
 \ingroup vstIHost vst300
 - [host imp]
 - [passed as 'context' in to IPluginBase::initialize () ]
 - [released: 3.0.0]
 - [mandatory]
 
-Basic VST host application interface. */
-//------------------------------------------------------------------------
-class IHostApplication: public FUnknown
+Basic VST host application interface.
+*/
+class IHostApplication : public FUnknown
 {
 public:
 //------------------------------------------------------------------------
@@ -48,28 +49,29 @@ public:
 DECLARE_CLASS_IID (IHostApplication, 0x58E595CC, 0xDB2D4969, 0x8B6AAF8C, 0x36A664E5)
 
 //------------------------------------------------------------------------
+/** Helper to allocate a message */
 inline IMessage* allocateMessage (IHostApplication* host)
 {
 	TUID iid;
 	IMessage::iid.toTUID (iid);
-	IMessage* m = 0;
+	IMessage* m = nullptr;
 	if (host->createInstance (iid, iid, (void**)&m) == kResultOk)
 		return m;
-	return 0;
+	return nullptr;
 }
 
 //------------------------------------------------------------------------
-/** VST 3 to VST 2 Wrapper Interface.
+/** VST 3 to VST 2 Wrapper interface: Vst::IVst3ToVst2Wrapper
 \ingroup vstIHost vst310
 - [host imp]
 - [passed as 'context' to IPluginBase::initialize () ]
 - [released: 3.1.0]
 - [mandatory]
 
-Informs the Plug-in that a VST 3 to VST 2 wrapper is used between the Plug-in and the real host.
-Implemented by the VST 2 Wrapper. */
-//------------------------------------------------------------------------
-class IVst3ToVst2Wrapper: public FUnknown
+Informs the plug-in that a VST 3 to VST 2 wrapper is used between the plug-in and the real host.
+Implemented by the VST 2 Wrapper.
+*/
+class IVst3ToVst2Wrapper : public FUnknown
 {
 public:
 	//------------------------------------------------------------------------
@@ -79,17 +81,17 @@ public:
 DECLARE_CLASS_IID (IVst3ToVst2Wrapper, 0x29633AEC, 0x1D1C47E2, 0xBB85B97B, 0xD36EAC61)
 
 //------------------------------------------------------------------------
-/** VST 3 to AU Wrapper Interface.
+/** VST 3 to AU Wrapper interface: Vst::IVst3ToAUWrapper
 \ingroup vstIHost vst310
 - [host imp]
 - [passed as 'context' to IPluginBase::initialize () ]
 - [released: 3.1.0]
 - [mandatory]
 
-Informs the Plug-in that a VST 3 to AU wrapper is used between the Plug-in and the real host.
-Implemented by the AU Wrapper. */
-//------------------------------------------------------------------------
-class IVst3ToAUWrapper: public FUnknown
+Informs the plug-in that a VST 3 to AU wrapper is used between the plug-in and the real host.
+Implemented by the AU Wrapper.
+*/
+class IVst3ToAUWrapper : public FUnknown
 {
 public:
 	//------------------------------------------------------------------------
@@ -99,16 +101,16 @@ public:
 DECLARE_CLASS_IID (IVst3ToAUWrapper, 0xA3B8C6C5, 0xC0954688, 0xB0916F0B, 0xB697AA44)
 
 //------------------------------------------------------------------------
-/** VST 3 to AAX Wrapper Interface.
+/** VST 3 to AAX Wrapper interface: Vst::IVst3ToAAXWrapper
 \ingroup vstIHost vst368
 - [host imp]
 - [passed as 'context' to IPluginBase::initialize () ]
 - [released: 3.6.8]
 - [mandatory]
 
-Informs the Plug-in that a VST 3 to AAX wrapper is used between the Plug-in and the real host.
-Implemented by the AAX Wrapper. */
-//------------------------------------------------------------------------
+Informs the plug-in that a VST 3 to AAX wrapper is used between the plug-in and the real host.
+Implemented by the AAX Wrapper.
+*/
 class IVst3ToAAXWrapper : public FUnknown
 {
 public:
@@ -118,7 +120,7 @@ public:
 DECLARE_CLASS_IID (IVst3ToAAXWrapper, 0x6D319DC6, 0x60C56242, 0xB32C951B, 0x93BEF4C6)
 
 //------------------------------------------------------------------------
-/** Wrapper MPE Support Interface
+/** Wrapper MPE Support interface: Vst::IVst3WrapperMPESupport
 \ingroup vstIHost vst3612
 - [host imp]
 - [passed as 'context' to IPluginBase::initialize () ]
@@ -127,13 +129,12 @@ DECLARE_CLASS_IID (IVst3ToAAXWrapper, 0x6D319DC6, 0x60C56242, 0xB32C951B, 0x93BE
 
 Implemented on wrappers that support MPE to Note Expression translation.
 
-Per default MPE input processing is enabled, the masterChannel will be zero, the memberBeginChannel
+By default, MPE input processing is enabled, the masterChannel will be zero, the memberBeginChannel
 will be one and the memberEndChannel will be 14.
 
 As MPE is a subset of the VST3 Note Expression feature, mapping from the three MPE expressions is
 handled via the INoteExpressionPhysicalUIMapping interface.
 */
-//------------------------------------------------------------------------
 class IVst3WrapperMPESupport : public FUnknown
 {
 public:

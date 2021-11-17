@@ -82,8 +82,12 @@ public:
         filters.trim();
         filters.removeEmptyStrings();
 
-        [panel setTitle: juceStringToNS (owner.title)];
+        NSString* nsTitle = juceStringToNS (owner.title);
+        [panel setTitle: nsTitle];
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         [panel setAllowedFileTypes: createAllowedTypesArray (filters)];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (! isSave)
         {
@@ -93,6 +97,7 @@ public:
             [openPanel setCanChooseFiles: selectsFiles];
             [openPanel setAllowsMultipleSelection: selectMultiple];
             [openPanel setResolvesAliases: YES];
+            [openPanel setMessage: nsTitle]; // equivalent to the title bar since 10.11
 
             if (owner.treatFilePackagesAsDirs)
                 [openPanel setTreatsFilePackagesAsDirectories: YES];
@@ -116,7 +121,7 @@ public:
         if (isSave || selectsDirectories)
             [panel setCanCreateDirectories: YES];
 
-        [panel setLevel:NSModalPanelWindowLevel];
+        [panel setLevel: NSModalPanelWindowLevel];
 
         if (owner.startingFile.isDirectory())
         {
@@ -183,6 +188,7 @@ public:
 
     void runModally() override
     {
+       #if JUCE_MODAL_LOOPS_PERMITTED
         ensurePanelSafe();
 
         std::unique_ptr<TemporaryMainMenuWithStandardCommands> tempMenu;
@@ -193,6 +199,9 @@ public:
         jassert (panel != nil);
         auto result = [panel runModal];
         finished (result);
+       #else
+        jassertfalse;
+       #endif
     }
 
     bool canModalEventBeSentToComponent (const Component* targetComponent) override
@@ -373,10 +382,10 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Native)
 };
 
-FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                                     FilePreviewComponent* preview)
+std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+                                                                     FilePreviewComponent* preview)
 {
-    return new FileChooser::Native (owner, flags, preview);
+    return std::make_shared<FileChooser::Native> (owner, flags, preview);
 }
 
 bool FileChooser::isPlatformDialogAvailable()

@@ -430,19 +430,19 @@ namespace GradientPixelIterators
 
             if (vertical)
             {
-                scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.y - p1.y));
+                scale = roundToInt ((double) ((int64_t) numEntries << (int) numScaleBits) / (double) (p2.y - p1.y));
                 start = roundToInt (p1.y * (float) scale);
             }
             else if (horizontal)
             {
-                scale = roundToInt ((numEntries << (int) numScaleBits) / (double) (p2.x - p1.x));
+                scale = roundToInt ((double) ((int64_t) numEntries << (int) numScaleBits) / (double) (p2.x - p1.x));
                 start = roundToInt (p1.x * (float) scale);
             }
             else
             {
                 grad = (p2.getY() - p1.y) / (double) (p1.x - p2.x);
                 yTerm = p1.getY() - p1.x / grad;
-                scale = roundToInt ((numEntries << (int) numScaleBits) / (yTerm * grad - (p2.y * grad - p2.x)));
+                scale = roundToInt ((double) ((int64_t) numEntries << (int) numScaleBits) / (yTerm * grad - (p2.y * grad - p2.x)));
                 grad *= scale;
             }
         }

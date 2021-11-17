@@ -80,11 +80,9 @@ public:
         ignoreUnused (version);
         int numAttribs = 0;
 
-       #if JUCE_OPENGL3
         attribs[numAttribs++] = NSOpenGLPFAOpenGLProfile;
         attribs[numAttribs++] = version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core
                                                      : NSOpenGLProfileVersionLegacy;
-       #endif
 
         attribs[numAttribs++] = NSOpenGLPFADoubleBuffer;
         attribs[numAttribs++] = NSOpenGLPFAClosestPolicy;
@@ -199,13 +197,13 @@ public:
 
     void updateWindowPosition (Rectangle<int>) {}
 
-    bool setSwapInterval (int numFramesPerSwap)
+    bool setSwapInterval (int numFramesPerSwapIn)
     {
+        numFramesPerSwap = numFramesPerSwapIn;
+
         // The macOS OpenGL programming guide says that numFramesPerSwap
         // can only be 0 or 1.
         jassert (isPositiveAndBelow (numFramesPerSwap, 2));
-
-        minSwapTimeMs = (numFramesPerSwap * 1000) / 60;
 
         [renderContext setValues: (const GLint*) &numFramesPerSwap
                    #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_12
@@ -213,6 +211,9 @@ public:
                    #else
                     forParameter: NSOpenGLCPSwapInterval];
                    #endif
+
+        updateMinSwapTime();
+
         return true;
     }
 
@@ -229,11 +230,24 @@ public:
         return numFrames;
     }
 
+    void setNominalVideoRefreshPeriodS (double periodS)
+    {
+        jassert (periodS > 0.0);
+        videoRefreshPeriodS = periodS;
+        updateMinSwapTime();
+    }
+
+    void updateMinSwapTime()
+    {
+        minSwapTimeMs = static_cast<int> (numFramesPerSwap * 1000 * videoRefreshPeriodS);
+    }
+
     NSOpenGLContext* renderContext = nil;
     NSOpenGLView* view = nil;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
     double lastSwapTime = 0;
-    int minSwapTimeMs = 0, underrunCounter = 0;
+    int minSwapTimeMs = 0, underrunCounter = 0, numFramesPerSwap = 0;
+    double videoRefreshPeriodS = 1.0 / 60.0;
 
     //==============================================================================
     struct MouseForwardingNSOpenGLViewClass  : public ObjCClass<NSOpenGLView>

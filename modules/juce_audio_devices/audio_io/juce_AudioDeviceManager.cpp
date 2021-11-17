@@ -120,6 +120,17 @@ const OwnedArray<AudioIODeviceType>& AudioDeviceManager::getAvailableDeviceTypes
     return availableDeviceTypes;
 }
 
+void AudioDeviceManager::updateCurrentSetup()
+{
+    if (currentAudioDevice != nullptr)
+    {
+        currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
+        currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
+        currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
+        currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
+    }
+}
+
 void AudioDeviceManager::audioDeviceListChanged()
 {
     if (currentAudioDevice != nullptr)
@@ -156,13 +167,7 @@ void AudioDeviceManager::audioDeviceListChanged()
                 initialiseDefault (preferredDeviceName, &currentSetup);
         }
 
-        if (currentAudioDevice != nullptr)
-        {
-            currentSetup.sampleRate     = currentAudioDevice->getCurrentSampleRate();
-            currentSetup.bufferSize     = currentAudioDevice->getCurrentBufferSizeSamples();
-            currentSetup.inputChannels  = currentAudioDevice->getActiveInputChannels();
-            currentSetup.outputChannels = currentAudioDevice->getActiveOutputChannels();
-        }
+        updateCurrentSetup();
     }
 
     sendChangeMessage();
@@ -339,7 +344,7 @@ String AudioDeviceManager::initialiseFromXML (const XmlElement& xml,
     midiDeviceInfosFromXml.clear();
     enabledMidiInputs.clear();
 
-    forEachXmlChildElementWithTagName (xml, c, "MIDIINPUT")
+    for (auto* c : xml.getChildWithTagNameIterator ("MIDIINPUT"))
         midiDeviceInfosFromXml.add ({ c->getStringAttribute ("name"), c->getStringAttribute ("identifier") });
 
     auto isIdentifierAvailable = [] (const Array<MidiDeviceInfo>& available, const String& identifier)
@@ -852,8 +857,9 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
         auto* src = testSound->getReadPointer (0, testSoundPosition);
 
         for (int i = 0; i < numOutputChannels; ++i)
-            for (int j = 0; j < numSamps; ++j)
-                outputChannelData [i][j] += src[j];
+            if (auto* dst = outputChannelData [i])
+                for (int j = 0; j < numSamps; ++j)
+                    dst[j] += src[j];
 
         testSoundPosition += numSamps;
 
@@ -874,6 +880,7 @@ void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device
             callbacks.getUnchecked(i)->audioDeviceAboutToStart (device);
     }
 
+    updateCurrentSetup();
     sendChangeMessage();
 }
 
@@ -1146,12 +1153,19 @@ void AudioDeviceManager::addMidiInputCallback (const String& name, MidiInputCall
 
 void AudioDeviceManager::removeMidiInputCallback (const String& name, MidiInputCallback* callbackToRemove)
 {
-    for (auto& device : MidiInput::getAvailableDevices())
+    if (name.isEmpty())
     {
-        if (device.name == name)
+        removeMidiInputDeviceCallback ({}, callbackToRemove);
+    }
+    else
+    {
+        for (auto& device : MidiInput::getAvailableDevices())
         {
-            removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
-            return;
+            if (device.name == name)
+            {
+                removeMidiInputDeviceCallback (device.identifier, callbackToRemove);
+                return;
+            }
         }
     }
 }

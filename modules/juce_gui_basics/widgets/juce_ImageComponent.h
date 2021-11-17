@@ -70,6 +70,8 @@ public:
     void paint (Graphics&) override;
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
     Image image;
     RectanglePlacement placement;
 

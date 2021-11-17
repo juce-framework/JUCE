@@ -50,7 +50,6 @@
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
 
 #include <TargetConditionals.h>
-#include <juce_core/native/juce_mac_ClangBugWorkaround.h>
 
 #if TARGET_OS_MAC
 	#include <pthread.h>

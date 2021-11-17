@@ -140,7 +140,7 @@ protected:
         String colourIdCode, colourName, xmlTagName;
     };
 
-    OwnedArray <ComponentColourInfo> colours;
+    OwnedArray<ComponentColourInfo> colours;
 
 private:
     JUCE_DECLARE_NON_COPYABLE (ComponentTypeHandler)

@@ -28,11 +28,11 @@ SourceFloat::SourceFloat(int32_t channelCount)
 
 int32_t SourceFloat::onProcess(int32_t numFrames) {
     float *outputBuffer = output.getBuffer();
-    int32_t channelCount = output.getSamplesPerFrame();
+    const int32_t channelCount = output.getSamplesPerFrame();
 
-    int32_t framesLeft = mSizeInFrames - mFrameIndex;
-    int32_t framesToProcess = std::min(numFrames, framesLeft);
-    int32_t numSamples = framesToProcess * channelCount;
+    const int32_t framesLeft = mSizeInFrames - mFrameIndex;
+    const int32_t framesToProcess = std::min(numFrames, framesLeft);
+    const int32_t numSamples = framesToProcess * channelCount;
 
     const float *floatBase = (float *) mData;
     const float *floatData = &floatBase[mFrameIndex * channelCount];

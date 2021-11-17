@@ -8,7 +8,7 @@
 //
 //-----------------------------------------------------------------------------
 // LICENSE
-// (c) 2019, Steinberg Media Technologies GmbH, All Rights Reserved
+// (c) 2021, Steinberg Media Technologies GmbH, All Rights Reserved
 //-----------------------------------------------------------------------------
 // Redistribution and use in source and binary forms, with or without modification,
 // are permitted provided that the following conditions are met:
@@ -49,8 +49,8 @@ namespace Vst {
 
 //------------------------------------------------------------------------
 /** Basic Bus object.
-\ingroup vstClasses */
-//------------------------------------------------------------------------
+\ingroup vstClasses 
+*/
 class Bus: public FObject
 {
 public:
@@ -81,14 +81,14 @@ public:
 protected:
 	String name;				///< name
 	BusType busType;			///< kMain or kAux, see \ref BusTypes
-	int32 flags;				///< flags, see \ref BusFlags
+	int32 flags;				///< flags, see \ref BusInfo::BusFlags
 	TBool active;				///< activation state
 };
 
 //------------------------------------------------------------------------
 /** Description of an Event Bus.
-\ingroup vstClasses */
-//------------------------------------------------------------------------
+\ingroup vstClasses
+*/
 class EventBus: public Bus
 {
 public:
@@ -109,8 +109,8 @@ protected:
 
 //------------------------------------------------------------------------
 /** Description of an Audio Bus.
-\ingroup vstClasses */
-//------------------------------------------------------------------------
+\ingroup vstClasses 
+*/
 class AudioBus: public Bus
 {
 public:
@@ -135,9 +135,9 @@ protected:
 };
 
 //------------------------------------------------------------------------
-/** List of Buses.
-\ingroup vstClasses */
-//------------------------------------------------------------------------
+/** List of Busses.
+\ingroup vstClasses 
+*/
 class BusList: public FObject, public std::vector<IPtr<Vst::Bus> >
 {
 public:

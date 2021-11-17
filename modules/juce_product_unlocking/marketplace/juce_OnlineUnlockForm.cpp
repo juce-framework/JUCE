@@ -100,13 +100,13 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
         if (result.errorMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                               TRANS("Registration Failed"),
                                               result.errorMessage);
         }
         else if (result.informativeMessage.isNotEmpty())
         {
-            AlertWindow::showMessageBoxAsync (AlertWindow::InfoIcon,
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                               TRANS("Registration Complete!"),
                                               result.informativeMessage);
         }
@@ -151,7 +151,7 @@ struct OnlineUnlockForm::OverlayComp  : public Component,
 
 static juce_wchar getDefaultPasswordChar() noexcept
 {
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     return 0x2022;
    #else
     return 0x25cf;

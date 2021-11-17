@@ -52,6 +52,11 @@ public:
     /** Returns the address of a named GL extension function */
     static void* getExtensionFunction (const char* functionName);
 
+    /** Returns a version string such as "#version 150" suitable for prefixing a GLSL
+        shader on this platform.
+    */
+    static String getGLSLVersionString();
+
     /** Makes some simple textual changes to a shader program to try to convert old GLSL
         keywords to their v3 equivalents.
 

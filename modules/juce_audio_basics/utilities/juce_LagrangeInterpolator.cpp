@@ -29,7 +29,7 @@ struct LagrangeResampleHelper
     static forcedinline void calc (float& a, float b) noexcept   { a *= b * (1.0f / k); }
 };
 
-template<>
+template <>
 struct LagrangeResampleHelper<0>
 {
     static forcedinline void calc (float&, float) noexcept {}

@@ -151,6 +151,8 @@ namespace ActiveXHelpers
 
         JUCE_COMRESULT QueryInterface (REFIID type, void** result)
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
             if (type == __uuidof (IOleInPlaceSite))
             {
                 inplaceSite->AddRef();
@@ -159,6 +161,8 @@ namespace ActiveXHelpers
             }
 
             return ComBaseClassHelper <IOleClientSite>::QueryInterface (type, result);
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
 
         JUCE_COMRESULT SaveObject()                                  { return E_NOTIMPL; }
@@ -184,6 +188,8 @@ namespace ActiveXHelpers
 
     static HWND getHWND (const ActiveXControlComponent* const component)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         HWND hwnd = {};
         const IID iid = __uuidof (IOleWindow);
 
@@ -194,6 +200,8 @@ namespace ActiveXHelpers
         }
 
         return hwnd;
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     static void offerActiveXMouseEventToPeer (ComponentPeer* peer, HWND hwnd, UINT message, LPARAM lParam)
@@ -229,10 +237,8 @@ namespace ActiveXHelpers
 }
 
 //==============================================================================
-class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher
-                                     #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-                                      , public ComponentPeer::ScaleFactorListener
-                                     #endif
+class ActiveXControlComponent::Pimpl  : public ComponentMovementWatcher,
+                                        public ComponentPeer::ScaleFactorListener
 {
 public:
     Pimpl (HWND hwnd, ActiveXControlComponent& activeXComp)
@@ -243,7 +249,7 @@ public:
     {
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         if (control != nullptr)
         {
@@ -254,25 +260,19 @@ public:
         clientSite->Release();
         storage->Release();
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
-            if (auto* peer = ComponentPeer::getPeer (i))
-                peer->removeScaleFactorListener (this);
-        #endif
+        if (currentPeer != nullptr)
+            currentPeer->removeScaleFactorListener (this);
     }
 
     void setControlBounds (Rectangle<int> newBounds) const
     {
         if (controlHWND != nullptr)
         {
-           #if JUCE_WIN_PER_MONITOR_DPI_AWARE
             if (auto* peer = owner.getTopLevelComponent()->getPeer())
                 newBounds = (newBounds.toDouble() * peer->getPlatformScaleFactor()).toNearestInt();
-           #endif
 
             MoveWindow (controlHWND, newBounds.getX(), newBounds.getY(), newBounds.getWidth(), newBounds.getHeight(), TRUE);
         }
-
     }
 
     void setControlVisible (bool shouldBeVisible) const
@@ -292,12 +292,15 @@ public:
 
     void componentPeerChanged() override
     {
+        if (currentPeer != nullptr)
+            currentPeer->removeScaleFactorListener (this);
+
         componentMovedOrResized (true, true);
 
-       #if JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (auto* peer = owner.getTopLevelComponent()->getPeer())
-            peer->addScaleFactorListener (this);
-       #endif
+        currentPeer = owner.getTopLevelComponent()->getPeer();
+
+        if (currentPeer != nullptr)
+            currentPeer->addScaleFactorListener (this);
     }
 
     using ComponentMovementWatcher::componentVisibilityChanged;
@@ -308,12 +311,10 @@ public:
         componentPeerChanged();
     }
 
-   #if JUCE_WIN_PER_MONITOR_DPI_AWARE
     void nativeScaleFactorChanged (double /*newScaleFactor*/) override
     {
         componentMovedOrResized (true, true);
     }
-   #endif
 
     // intercepts events going to an activeX control, so we can sneakily use the mouse events
     static LRESULT CALLBACK activeXHookWndProc (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -358,6 +359,7 @@ public:
     }
 
     ActiveXControlComponent& owner;
+    ComponentPeer* currentPeer = nullptr;
     HWND controlHWND = {};
     IStorage* storage = nullptr;
     ActiveXHelpers::JuceIOleClientSite* clientSite = nullptr;
@@ -394,9 +396,13 @@ bool ActiveXControlComponent::createControl (const void* controlIID)
 
         std::unique_ptr<Pimpl> newControl (new Pimpl (hwnd, *this));
 
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+
         HRESULT hr = OleCreate (*(const IID*) controlIID, __uuidof (IOleObject), 1 /*OLERENDER_DRAW*/, nullptr,
                                 newControl->clientSite, newControl->storage,
                                 (void**) &(newControl->control));
+
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         if (hr == S_OK)
         {

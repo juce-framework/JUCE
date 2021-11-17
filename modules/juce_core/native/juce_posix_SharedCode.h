@@ -59,7 +59,7 @@ void JUCE_CALLTYPE Process::terminate()
 }
 
 
-#if JUCE_MAC || JUCE_LINUX
+#if JUCE_MAC || JUCE_LINUX || JUCE_BSD
 bool Process::setMaxNumberOfFileHandles (int newMaxNumber) noexcept
 {
     rlimit lim;
@@ -130,16 +130,20 @@ bool File::setAsCurrentWorkingDirectory() const
     return chdir (getFullPathName().toUTF8()) == 0;
 }
 
-#if JUCE_ANDROID
- using juce_sigactionflags_type = unsigned long;
-#else
- using juce_sigactionflags_type = int;
-#endif
-
 //==============================================================================
 // The unix siginterrupt function is deprecated - this does the same job.
 int juce_siginterrupt (int sig, int flag)
 {
+   #if JUCE_WASM
+    ignoreUnused (sig, flag);
+    return 0;
+   #else
+    #if JUCE_ANDROID
+     using juce_sigactionflags_type = unsigned long;
+    #else
+     using juce_sigactionflags_type = int;
+    #endif
+
     struct ::sigaction act;
     (void) ::sigaction (sig, nullptr, &act);
 
@@ -149,6 +153,7 @@ int juce_siginterrupt (int sig, int flag)
         act.sa_flags |= static_cast<juce_sigactionflags_type> (SA_RESTART);
 
     return ::sigaction (sig, &act, nullptr);
+   #endif
 }
 
 //==============================================================================
@@ -168,6 +173,7 @@ namespace
                  && JUCE_STAT (fileName.toUTF8(), &info) == 0;
     }
 
+   #if ! JUCE_WASM
     // if this file doesn't exist, find a parent of it that does..
     bool juce_doStatFS (File f, struct statfs& result)
     {
@@ -205,6 +211,7 @@ namespace
         if (isReadOnly != nullptr)
             *isReadOnly = access (path.toUTF8(), W_OK) != 0;
     }
+   #endif
 
     Result getResultForErrno()
     {
@@ -253,7 +260,7 @@ uint64 File::getFileIdentifier() const
 
 static bool hasEffectiveRootFilePermissions()
 {
-   #if JUCE_LINUX
+   #if JUCE_LINUX || JUCE_BSD
     return geteuid() == 0;
    #else
     return false;
@@ -329,6 +336,7 @@ void File::getFileTimesInternal (int64& modificationTime, int64& accessTime, int
 
 bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64 /*creationTime*/) const
 {
+   #if ! JUCE_WASM
     juce_statStruct info;
 
     if ((modificationTime != 0 || accessTime != 0) && juce_stat (fullPath, info))
@@ -360,6 +368,7 @@ bool File::setFileTimesInternal (int64 modificationTime, int64 accessTime, int64
         return utime (fullPath.toUTF8(), &times) == 0;
        #endif
     }
+   #endif
 
     return false;
 }
@@ -533,6 +542,7 @@ String SystemStats::getEnvironmentVariable (const String& name, const String& de
 }
 
 //==============================================================================
+#if ! JUCE_WASM
 void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exclusive)
 {
     jassert (mode == readOnly || mode == readWrite);
@@ -566,6 +576,9 @@ void MemoryMappedFile::openInternal (const File& file, AccessMode mode, bool exc
         {
             range = Range<int64>();
         }
+
+        close (fileHandle);
+        fileHandle = 0;
     }
 }
 
@@ -658,6 +671,8 @@ int File::getVolumeSerialNumber() const
 {
     return 0;
 }
+
+#endif
 
 //==============================================================================
 #if ! JUCE_IOS
@@ -823,8 +838,6 @@ void InterProcessLock::exit()
 }
 
 //==============================================================================
-void JUCE_API juce_threadEntryPoint (void*);
-
 #if JUCE_ANDROID
 extern JavaVM* androidJNIJavaVM;
 #endif
@@ -853,11 +866,8 @@ static void* threadEntryProc (void* userData)
     return nullptr;
 }
 
-#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && \
-   ((JUCE_USE_ANDROID_OPENSLES || (! defined(JUCE_USE_ANDROID_OPENSLES) && JUCE_ANDROID_API_VERSION > 8)) \
- || (JUCE_USE_ANDROID_OBOE || (! defined(JUCE_USE_ANDROID_OBOE) && JUCE_ANDROID_API_VERSION > 15)))
-
-  #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
+#if JUCE_ANDROID && JUCE_MODULE_AVAILABLE_juce_audio_devices && (JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE)
+ #define JUCE_ANDROID_REALTIME_THREAD_AVAILABLE 1
 #endif
 
 #if JUCE_ANDROID_REALTIME_THREAD_AVAILABLE
@@ -928,9 +938,10 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
     {
         [[NSThread currentThread] setName: juceStringToNS (name)];
     }
-   #elif JUCE_LINUX || JUCE_ANDROID
-    #if ((JUCE_LINUX && (__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2012) \
-          || JUCE_ANDROID && __ANDROID_API__ >= 9)
+   #elif JUCE_LINUX || JUCE_BSD || JUCE_ANDROID
+    #if (JUCE_BSD \
+          || (JUCE_LINUX && (__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2012) \
+          || (JUCE_ANDROID && __ANDROID_API__ >= 9))
      pthread_setname_np (pthread_self(), name.toRawUTF8());
     #else
      prctl (PR_SET_NAME, name.toRawUTF8(), 0, 0, 0);
@@ -940,9 +951,11 @@ void JUCE_CALLTYPE Thread::setCurrentThreadName (const String& name)
 
 bool Thread::setThreadPriority (void* handle, int priority)
 {
+    constexpr auto maxInputPriority = 10;
+    constexpr auto lowestRealtimePriority = 8;
+
     struct sched_param param;
     int policy;
-    priority = jlimit (0, 10, priority);
 
     if (handle == nullptr)
         handle = (void*) pthread_self();
@@ -950,12 +963,19 @@ bool Thread::setThreadPriority (void* handle, int priority)
     if (pthread_getschedparam ((pthread_t) handle, &policy, &param) != 0)
         return false;
 
-    policy = priority == 0 ? SCHED_OTHER : SCHED_RR;
+    policy = priority < lowestRealtimePriority ? SCHED_OTHER : SCHED_RR;
 
-    const int minPriority = sched_get_priority_min (policy);
-    const int maxPriority = sched_get_priority_max (policy);
+    const auto minPriority = sched_get_priority_min (policy);
+    const auto maxPriority = sched_get_priority_max (policy);
 
-    param.sched_priority = ((maxPriority - minPriority) * priority) / 10 + minPriority;
+    param.sched_priority = [&]
+    {
+        if (policy == SCHED_OTHER)
+            return 0;
+
+        return jmap (priority, lowestRealtimePriority, maxInputPriority, minPriority, maxPriority);
+    }();
+
     return pthread_setschedparam ((pthread_t) handle, policy, &param) == 0;
 }
 
@@ -988,7 +1008,7 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (uint32 affinityMask)
         if ((affinityMask & (uint32) (1 << i)) != 0)
             CPU_SET ((size_t) i, &affinity);
 
-   #if (! JUCE_ANDROID) && ((! JUCE_LINUX) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
+   #if (! JUCE_ANDROID) && ((! (JUCE_LINUX || JUCE_BSD)) || ((__GLIBC__ * 1000 + __GLIBC_MINOR__) >= 2004))
     pthread_setaffinity_np (pthread_self(), sizeof (cpu_set_t), &affinity);
    #elif JUCE_ANDROID
     sched_setaffinity (gettid(), sizeof (cpu_set_t), &affinity);
@@ -1010,6 +1030,7 @@ void JUCE_CALLTYPE Thread::setCurrentThreadAffinityMask (uint32 affinityMask)
 }
 
 //==============================================================================
+#if ! JUCE_WASM
 bool DynamicLibrary::open (const String& name)
 {
     close();
@@ -1030,7 +1051,6 @@ void* DynamicLibrary::getFunction (const String& functionName) noexcept
 {
     return handle != nullptr ? dlsym (handle, functionName.toUTF8()) : nullptr;
 }
-
 
 //==============================================================================
 #if JUCE_LINUX || JUCE_ANDROID
@@ -1124,7 +1144,7 @@ public:
         if (childPID == 0)
             return false;
 
-        int childState;
+        int childState = 0;
         auto pid = waitpid (childPID, &childState, WNOHANG);
 
         if (pid == 0)
@@ -1220,6 +1240,8 @@ bool ChildProcess::start (const StringArray& args, int streamFlags)
 
     return activeProcess != nullptr;
 }
+
+#endif
 
 //==============================================================================
 struct HighResolutionTimer::Pimpl

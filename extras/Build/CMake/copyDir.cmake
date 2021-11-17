@@ -21,4 +21,4 @@
 #
 # ==============================================================================
 
-file(INSTALL ${src} DESTINATION ${dest})
+file(INSTALL ${src} DESTINATION ${dest} USE_SOURCE_PERMISSIONS)

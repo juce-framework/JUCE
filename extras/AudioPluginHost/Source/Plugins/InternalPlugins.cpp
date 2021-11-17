@@ -120,10 +120,11 @@ private:
         descr.manufacturerName  = "JUCE";
         descr.version           = ProjectInfo::versionString;
         descr.fileOrIdentifier  = identifier;
-        descr.uid               = identifier.hashCode();
         descr.isInstrument      = (acceptsMidi && registerAsGenerator);
         descr.numInputChannels  = ins;
         descr.numOutputChannels = outs;
+
+        descr.uniqueId = descr.deprecatedUid = identifier.hashCode();
 
         return descr;
     }
@@ -402,7 +403,7 @@ std::unique_ptr<AudioPluginInstance> InternalPluginFormat::InternalPluginFactory
     const auto begin = descriptions.begin();
     const auto it = std::find_if (begin,
                                   descriptions.end(),
-                                  [&] (const PluginDescription& desc) { return name == desc.name; });
+                                  [&] (const PluginDescription& desc) { return name.equalsIgnoreCase (desc.name); });
 
     if (it == descriptions.end())
         return nullptr;

@@ -19,12 +19,15 @@
 #include "pluginterfaces/base/fplatform.h"
 #include "pluginterfaces/base/ftypes.h"
 #include "pluginterfaces/base/smartpointer.h"
-#include <string.h>
+#include <cstring>
+
+#if SMTG_CPP11_STDLIBSUPPORT
+#include <type_traits>
+#endif
 
 //------------------------------------------------------------------------
 /*! \defgroup pluginBase Basic Interfaces
 */
-//------------------------------------------------------------------------
 
 //------------------------------------------------------------------------
 //  Unique Identifier macros
@@ -33,26 +36,26 @@
 #if COM_COMPATIBLE
 #define INLINE_UID(l1, l2, l3, l4) \
 { \
-	(::Steinberg::int8)((l1 & 0x000000FF)      ), (::Steinberg::int8)((l1 & 0x0000FF00) >>  8), \
-	(::Steinberg::int8)((l1 & 0x00FF0000) >> 16), (::Steinberg::int8)((l1 & 0xFF000000) >> 24), \
-	(::Steinberg::int8)((l2 & 0x00FF0000) >> 16), (::Steinberg::int8)((l2 & 0xFF000000) >> 24), \
-	(::Steinberg::int8)((l2 & 0x000000FF)      ), (::Steinberg::int8)((l2 & 0x0000FF00) >>  8), \
-	(::Steinberg::int8)((l3 & 0xFF000000) >> 24), (::Steinberg::int8)((l3 & 0x00FF0000) >> 16), \
-	(::Steinberg::int8)((l3 & 0x0000FF00) >>  8), (::Steinberg::int8)((l3 & 0x000000FF)      ), \
-	(::Steinberg::int8)((l4 & 0xFF000000) >> 24), (::Steinberg::int8)((l4 & 0x00FF0000) >> 16), \
-	(::Steinberg::int8)((l4 & 0x0000FF00) >>  8), (::Steinberg::int8)((l4 & 0x000000FF)      )  \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0x000000FF)      ), (::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0x0000FF00) >>  8), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0x00FF0000) >> 16), (::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0xFF000000) >> 24), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0x00FF0000) >> 16), (::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0xFF000000) >> 24), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0x000000FF)      ), (::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0x0000FF00) >>  8), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0xFF000000) >> 24), (::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0x00FF0000) >> 16), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0x0000FF00) >>  8), (::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0x000000FF)      ), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0xFF000000) >> 24), (::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0x00FF0000) >> 16), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0x0000FF00) >>  8), (::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0x000000FF)      )  \
 }
 #else
 #define INLINE_UID(l1, l2, l3, l4) \
 { \
-	(::Steinberg::int8)((l1 & 0xFF000000) >> 24), (::Steinberg::int8)((l1 & 0x00FF0000) >> 16), \
-	(::Steinberg::int8)((l1 & 0x0000FF00) >>  8), (::Steinberg::int8)((l1 & 0x000000FF)      ), \
-	(::Steinberg::int8)((l2 & 0xFF000000) >> 24), (::Steinberg::int8)((l2 & 0x00FF0000) >> 16), \
-	(::Steinberg::int8)((l2 & 0x0000FF00) >>  8), (::Steinberg::int8)((l2 & 0x000000FF)      ), \
-	(::Steinberg::int8)((l3 & 0xFF000000) >> 24), (::Steinberg::int8)((l3 & 0x00FF0000) >> 16), \
-	(::Steinberg::int8)((l3 & 0x0000FF00) >>  8), (::Steinberg::int8)((l3 & 0x000000FF)      ), \
-	(::Steinberg::int8)((l4 & 0xFF000000) >> 24), (::Steinberg::int8)((l4 & 0x00FF0000) >> 16), \
-	(::Steinberg::int8)((l4 & 0x0000FF00) >>  8), (::Steinberg::int8)((l4 & 0x000000FF)      )  \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0xFF000000) >> 24), (::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0x00FF0000) >> 16), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0x0000FF00) >>  8), (::Steinberg::int8)(((::Steinberg::uint32)(l1) & 0x000000FF)      ), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0xFF000000) >> 24), (::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0x00FF0000) >> 16), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0x0000FF00) >>  8), (::Steinberg::int8)(((::Steinberg::uint32)(l2) & 0x000000FF)      ), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0xFF000000) >> 24), (::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0x00FF0000) >> 16), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0x0000FF00) >>  8), (::Steinberg::int8)(((::Steinberg::uint32)(l3) & 0x000000FF)      ), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0xFF000000) >> 24), (::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0x00FF0000) >> 16), \
+	(::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0x0000FF00) >>  8), (::Steinberg::int8)(((::Steinberg::uint32)(l4) & 0x000000FF)      )  \
 }
 #endif
 
@@ -117,7 +120,12 @@ public:																			        \
 
 //------------------------------------------------------------------------
 #define FUNKNOWN_CTOR	{ __funknownRefCount = 1; }
+#if SMTG_FUNKNOWN_DTOR_ASSERT
+#include <cassert>
+#define FUNKNOWN_DTOR { assert (__funknownRefCount == 0); }
+#else
 #define FUNKNOWN_DTOR
+#endif
 
 //------------------------------------------------------------------------
 #define QUERY_INTERFACE(iid, obj, InterfaceIID, InterfaceName)  \
@@ -221,7 +229,6 @@ int32 PLUGIN_API atomicAdd (int32& value, int32 amount);
 Each interface declares its identifier as static member inside the interface
 namespace (e.g. FUnknown::iid).
 */
-//------------------------------------------------------------------------
 class FUID
 {
 public:
@@ -258,14 +265,14 @@ public:
 	void from4Int (uint32 d1, uint32 d2, uint32 d3, uint32 d4);
 	void to4Int (uint32& d1, uint32& d2, uint32& d3, uint32& d4) const;
 
-	typedef char8 String[64];
+	typedef char8 String[33];
 
 	/** Converts UID to a string.
 		The string will be 32 characters long, representing the hexadecimal values
 		of each data byte (e.g. "9127BE30160E4BB69966670AA6087880"). 
 		
 		Typical use-case is:
-		\code
+		\code{.cpp}
 		char8[33] strUID = {0};
 		FUID uid;
 		if (uid.generate ())
@@ -279,11 +286,11 @@ public:
 	    the ASCII-encoded hexadecimal value of the corresponding data byte. */
 	bool fromString (const char8* string);
 
-	/** Converts UID to a string in Microsoft® OLE format.
+	/** Converts UID to a string in Microsoft(R) OLE format.
 	(e.g. "{c200e360-38c5-11ce-ae62-08002b2b79ef}") */
 	void toRegistryString (char8* string) const;
 
-	/** Sets the UID data from a string in Microsoft® OLE format. */
+	/** Sets the UID data from a string in Microsoft(R) OLE format. */
 	bool fromRegistryString (const char8* string);
 
 	enum UIDPrintStyle
@@ -348,8 +355,8 @@ inline bool operator== (const FUID& f1, T f2)
 Interfaces are identified by 16 byte Globally Unique Identifiers.
 The SDK provides a class called FUID for this purpose.
 
-\ref howtoClass */
-//------------------------------------------------------------------------
+\ref howtoClass
+*/
 class FUnknown
 {
 public:
@@ -362,12 +369,12 @@ public:
 	\param obj : (out) On return, *obj points to the requested interface */
 	virtual tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) = 0;
 
-	/** Adds a reference and return the new reference count.
+	/** Adds a reference and returns the new reference count.
 	\par Remarks:
 	    The initial reference count after creating an object is 1. */
 	virtual uint32 PLUGIN_API addRef () = 0;
 
-	/** Releases a reference and return the new reference count.
+	/** Releases a reference and returns the new reference count.
 	If the reference count reaches zero, the object will be destroyed in memory. */
 	virtual uint32 PLUGIN_API release () = 0;
 
@@ -384,14 +391,13 @@ DECLARE_CLASS_IID (FUnknown, 0x00000000, 0x00000000, 0xC0000000, 0x00000046)
 //------------------------------------------------------------------------
 /** FUnknownPtr - automatic interface conversion and smart pointer in one.
     This template class can be used for interface conversion like this:
- \code
-    IPtr<IPath> path = owned (FHostCreate (IPath, hostClasses));
-    FUnknownPtr<IPath2> path2 (path); // does a query interface for IPath2
-    if (path2)
-        ...
+ \code{.cpp}
+IPtr<IPath> path = owned (FHostCreate (IPath, hostClasses));
+FUnknownPtr<IPath2> path2 (path); // does a query interface for IPath2
+if (path2)
+    ...
  \endcode
 */
-//------------------------------------------------------------------------
 template <class I>
 class FUnknownPtr : public IPtr<I>
 {
@@ -408,13 +414,83 @@ public:
 	}
 	inline I* operator= (FUnknown* unknown);
 	inline I* getInterface () { return this->ptr; }
+
+#if SMTG_CPP11_STDLIBSUPPORT
+	inline FUnknownPtr (FUnknownPtr&& p) SMTG_NOEXCEPT : IPtr<I> (std::move (p)) {}
+	inline FUnknownPtr& operator= (FUnknownPtr&& p) SMTG_NOEXCEPT
+	{
+		IPtr<I>::operator= (std::move (p));
+		return *this;
+	}
+#endif
 };
+
+#if SMTG_CPP11_STDLIBSUPPORT
+
+//------------------------------------------------------------------------
+namespace FUnknownPrivate {
+
+template <typename T>
+struct Void : std::false_type
+{
+	using Type = void;
+};
+
+template <typename T>
+using VoidT = typename Void<T>::Type;
+
+//------------------------------------------------------------------------
+/**
+ *  This type trait detects if a class has an @c iid member variable. It is used to detect if
+ *  the FUID and DECLARE_CLASS_IID method or the SKI::UID method is used.
+ */
+template <typename T, typename U = void>
+struct HasIIDType : std::false_type
+{
+};
+
+//------------------------------------------------------------------------
+template <typename T>
+struct HasIIDType<T, FUnknownPrivate::VoidT<typename T::IID>> : std::true_type
+{
+};
+
+//------------------------------------------------------------------------
+} // FUnknownPrivate
+
+//------------------------------------------------------------------------
+/** @return the TUID for a SKI interface which uses the SKI::UID method. */
+template <typename T,
+          typename std::enable_if<FUnknownPrivate::HasIIDType<T>::value>::type* = nullptr>
+const TUID& getTUID ()
+{
+	return T::IID::toTUID ();
+}
+
+//------------------------------------------------------------------------
+/** @return the TUID for a SKI interface which uses the FUID and DECLARE_CLASS_IID method. */
+template <typename T,
+          typename std::enable_if<!FUnknownPrivate::HasIIDType<T>::value>::type* = nullptr>
+const TUID& getTUID ()
+{
+	return T::iid.toTUID ();
+}
+
+#else // SMTG_CPP11_STDLIBSUPPORT
+
+template<typename T>
+const TUID& getTUID ()
+{
+	return T::iid.toTUID ();
+}
+
+#endif // SMTG_CPP11_STDLIBSUPPORT
 
 //------------------------------------------------------------------------
 template <class I>
 inline FUnknownPtr<I>::FUnknownPtr (FUnknown* unknown)
 {
-	if (unknown && unknown->queryInterface (I::iid, (void**)&this->ptr) != kResultOk)
+	if (unknown && unknown->queryInterface (getTUID<I> (), (void**)&this->ptr) != kResultOk)
 		this->ptr = 0;
 }
 
@@ -423,7 +499,7 @@ template <class I>
 inline I* FUnknownPtr<I>::operator= (FUnknown* unknown)
 {
 	I* newPtr = 0;
-	if (unknown && unknown->queryInterface (I::iid, (void**)&newPtr) == kResultOk)
+	if (unknown && unknown->queryInterface (getTUID<I> (), (void**)&newPtr) == kResultOk)
 	{
 		OPtr<I> rel (newPtr);
 		return IPtr<I>::operator= (newPtr);
@@ -440,26 +516,25 @@ This class is obsolete and is only kept for compatibility.
 The replacement for FReleaser is OPtr.
 
 Usage example with FReleaser:
- \code
-    void someFunction ()
-    {
-        IPath* path = pathCreateMethod ();
-        FReleaser releaser (path);
-        .... do something with path...
-        .... path not used anymore, releaser will destroy it when leaving function scope
-    }
- \endcode
+\code{.cpp}
+void someFunction ()
+{
+    IPath* path = pathCreateMethod ();
+    FReleaser releaser (path);
+    .... do something with path...
+    .... path not used anymore, releaser will destroy it when leaving function scope
+}
+\endcode
 Usage example with OPtr:
- \code
-    void someFunction ()
-    {
-        OPtr<IPath> path = pathCreateMethod ();
-        .... do something with path...
-        .... path not used anymore, OPtr will destroy it when leaving function scope
-    }
- \endcode
+\code{.cpp}
+void someFunction ()
+{
+    OPtr<IPath> path = pathCreateMethod ();
+    .... do something with path...
+    .... path not used anymore, OPtr will destroy it when leaving function scope
+}
+\endcode
 */
-//------------------------------------------------------------------------
 struct FReleaser
 {
 	FReleaser (FUnknown* u) : u (u) {}

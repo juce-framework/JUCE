@@ -30,6 +30,7 @@ Drawable::Drawable()
 {
     setInterceptsMouseClicks (false, false);
     setPaintingIsUnclipped (true);
+    setAccessible (false);
 }
 
 Drawable::Drawable (const Drawable& other)
@@ -37,6 +38,7 @@ Drawable::Drawable (const Drawable& other)
 {
     setInterceptsMouseClicks (false, false);
     setPaintingIsUnclipped (true);
+    setAccessible (false);
 
     setComponentID (other.getComponentID());
     setTransform (other.getTransform());
@@ -167,23 +169,15 @@ void Drawable::setTransformToFit (const Rectangle<float>& area, RectanglePlaceme
 //==============================================================================
 std::unique_ptr<Drawable> Drawable::createFromImageData (const void* data, const size_t numBytes)
 {
-    std::unique_ptr<Drawable> result;
-
     auto image = ImageFileFormat::loadFrom (data, numBytes);
 
     if (image.isValid())
-    {
-        auto* di = new DrawableImage();
-        di->setImage (image);
-        result.reset (di);
-    }
-    else
-    {
-        if (auto svg = parseXMLIfTagMatches (String::createStringFromData (data, (int) numBytes), "svg"))
-            result = Drawable::createFromSVG (*svg);
-    }
+        return std::make_unique<DrawableImage> (image);
 
-    return result;
+    if (auto svg = parseXMLIfTagMatches (String::createStringFromData (data, (int) numBytes), "svg"))
+        return Drawable::createFromSVG (*svg);
+
+    return {};
 }
 
 std::unique_ptr<Drawable> Drawable::createFromImageDataStream (InputStream& dataSource)

@@ -184,40 +184,52 @@ private:
 
             void saveScheme (bool isExit)
             {
-                FileChooser fc ("Select a file in which to save this colour-scheme...",
-                                getAppSettings().appearance.getSchemesFolder()
-                                .getNonexistentChildFile ("Scheme", AppearanceSettings::getSchemeFileSuffix()),
-                                AppearanceSettings::getSchemeFileWildCard());
+                chooser = std::make_unique<FileChooser> ("Select a file in which to save this colour-scheme...",
+                                                         getAppSettings().appearance.getSchemesFolder()
+                                                         .getNonexistentChildFile ("Scheme", AppearanceSettings::getSchemeFileSuffix()),
+                                                         AppearanceSettings::getSchemeFileWildCard());
+                auto chooserFlags = FileBrowserComponent::saveMode
+                                  | FileBrowserComponent::canSelectFiles
+                                  | FileBrowserComponent::warnAboutOverwriting;
 
-                if (fc.browseForFileToSave (true))
+                chooser->launchAsync (chooserFlags, [this, isExit] (const FileChooser& fc)
                 {
+                    if (fc.getResult() == File{})
+                    {
+                        if (isExit)
+                            restorePreviousScheme();
+
+                        return;
+                    }
+
                     File file (fc.getResult().withFileExtension (AppearanceSettings::getSchemeFileSuffix()));
                     getAppSettings().appearance.writeToFile (file);
                     getAppSettings().appearance.refreshPresetSchemeList();
 
                     saveSchemeState();
                     ProjucerApplication::getApp().selectEditorColourSchemeWithName (file.getFileNameWithoutExtension());
-                }
-                else if (isExit)
-                {
-                    restorePreviousScheme();
-                }
+                });
             }
 
             void loadScheme()
             {
-                FileChooser fc ("Please select a colour-scheme file to load...",
-                                getAppSettings().appearance.getSchemesFolder(),
-                                AppearanceSettings::getSchemeFileWildCard());
+                chooser = std::make_unique<FileChooser> ("Please select a colour-scheme file to load...",
+                                                         getAppSettings().appearance.getSchemesFolder(),
+                                                         AppearanceSettings::getSchemeFileWildCard());
+                auto chooserFlags = FileBrowserComponent::openMode
+                                  | FileBrowserComponent::canSelectFiles;
 
-                if (fc.browseForFileToOpen())
+                chooser->launchAsync (chooserFlags, [this] (const FileChooser& fc)
                 {
+                    if (fc.getResult() == File{})
+                        return;
+
                     if (getAppSettings().appearance.readFromFile (fc.getResult()))
                     {
                         rebuildProperties();
                         saveSchemeState();
                     }
-                }
+                });
             }
 
             void lookAndFeelChanged() override
@@ -264,6 +276,7 @@ private:
                     appearance.getColourValue (colourNames[i]).setValue (colourValues[i]);
             }
 
+            std::unique_ptr<FileChooser> chooser;
 
             JUCE_DECLARE_NON_COPYABLE (EditorPanel)
         };

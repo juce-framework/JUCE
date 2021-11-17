@@ -101,16 +101,18 @@ public:
     static String getParamID (AudioProcessorParameter* param, bool forceLegacyParamIDs) noexcept
     {
         if (auto* legacy = dynamic_cast<LegacyAudioParameter*> (param))
-        {
             return forceLegacyParamIDs ? String (legacy->parameterIndex) : legacy->getParamID();
-        }
-        else if (auto* paramWithID = dynamic_cast<AudioProcessorParameterWithID*> (param))
+
+        if (auto* paramWithID = dynamic_cast<AudioProcessorParameterWithID*> (param))
         {
             if (! forceLegacyParamIDs)
                 return paramWithID->paramID;
         }
 
-        return String (param->getParameterIndex());
+        if (param != nullptr)
+            return String (param->getParameterIndex());
+
+        return {};
     }
 };
 

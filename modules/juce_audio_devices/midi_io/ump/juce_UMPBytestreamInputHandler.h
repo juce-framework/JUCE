@@ -27,6 +27,8 @@ namespace universal_midi_packets
 
 /**
     A base class for classes which convert bytestream midi to other formats.
+
+    @tags{Audio}
 */
 struct BytestreamInputHandler
 {
@@ -39,6 +41,8 @@ struct BytestreamInputHandler
 /**
     Parses a continuous bytestream and emits complete MidiMessages whenever a full
     message is received.
+
+    @tags{Audio}
 */
 struct BytestreamToBytestreamHandler : public BytestreamInputHandler
 {
@@ -86,6 +90,8 @@ struct BytestreamToBytestreamHandler : public BytestreamInputHandler
 /**
     Parses a continuous MIDI 1.0 bytestream, and emits full messages in the requested
     UMP format.
+
+    @tags{Audio}
 */
 struct BytestreamToUMPHandler : public BytestreamInputHandler
 {

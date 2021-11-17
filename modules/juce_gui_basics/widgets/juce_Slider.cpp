@@ -339,6 +339,9 @@ public:
 
         if (owner.onValueChange != nullptr)
             owner.onValueChange();
+
+        if (auto* handler = owner.getAccessibilityHandler())
+            handler->notifyAccessibilityEvent (AccessibilityEvent::valueChanged);
     }
 
     void sendDragStart()
@@ -370,16 +373,6 @@ public:
             owner.onDragEnd();
     }
 
-    struct DragInProgress
-    {
-        DragInProgress (Pimpl& p)  : owner (p)      { owner.sendDragStart(); }
-        ~DragInProgress()                           { owner.sendDragEnd(); }
-
-        Pimpl& owner;
-
-        JUCE_DECLARE_NON_COPYABLE (DragInProgress)
-    };
-
     void incrementOrDecrement (double delta)
     {
         if (style == IncDecButtons)
@@ -392,7 +385,7 @@ public:
             }
             else
             {
-                DragInProgress drag (*this);
+                ScopedDragNotification drag (owner);
                 setValue (newValue, sendNotificationSync);
             }
         }
@@ -406,9 +399,13 @@ public:
                 setValue (currentValue.getValue(), dontSendNotification);
         }
         else if (value.refersToSameSourceAs (valueMin))
+        {
             setMinValue (valueMin.getValue(), dontSendNotification, true);
+        }
         else if (value.refersToSameSourceAs (valueMax))
+        {
             setMaxValue (valueMax.getValue(), dontSendNotification, true);
+        }
     }
 
     void textChanged()
@@ -417,7 +414,7 @@ public:
 
         if (newValue != static_cast<double> (currentValue.getValue()))
         {
-            DragInProgress drag (*this);
+            ScopedDragNotification drag (owner);
             setValue (newValue, sendNotificationSync);
         }
 
@@ -465,8 +462,10 @@ public:
         if (style != newStyle)
         {
             style = newStyle;
+
             owner.repaint();
             owner.lookAndFeelChanged();
+            owner.invalidateAccessibilityHandler();
         }
     }
 
@@ -567,6 +566,7 @@ public:
             owner.addAndMakeVisible (valueBox.get());
 
             valueBox->setWantsKeyboardFocus (false);
+            valueBox->setAccessible (false);
             valueBox->setText (previousTextBoxContent, dontSendNotification);
             valueBox->setTooltip (owner.getTooltip());
             updateTextBoxEnablement();
@@ -588,26 +588,24 @@ public:
             incButton.reset (lf.createSliderButton (owner, true));
             decButton.reset (lf.createSliderButton (owner, false));
 
-            owner.addAndMakeVisible (incButton.get());
-            owner.addAndMakeVisible (decButton.get());
-
-            incButton->onClick = [this] { incrementOrDecrement (normRange.interval); };
-            decButton->onClick = [this] { incrementOrDecrement (-normRange.interval); };
-
-            if (incDecButtonMode != incDecButtonsNotDraggable)
-            {
-                incButton->addMouseListener (&owner, false);
-                decButton->addMouseListener (&owner, false);
-            }
-            else
-            {
-                incButton->setRepeatSpeed (300, 100, 20);
-                decButton->setRepeatSpeed (300, 100, 20);
-            }
-
             auto tooltip = owner.getTooltip();
-            incButton->setTooltip (tooltip);
-            decButton->setTooltip (tooltip);
+
+            auto setupButton = [&] (Button& b, bool isIncrement)
+            {
+                owner.addAndMakeVisible (b);
+                b.onClick = [this, isIncrement] { incrementOrDecrement (isIncrement ? normRange.interval : -normRange.interval); };
+
+                if (incDecButtonMode != incDecButtonsNotDraggable)
+                    b.addMouseListener (&owner, false);
+                else
+                    b.setRepeatSpeed (300, 100, 20);
+
+                b.setTooltip (tooltip);
+                b.setAccessible (false);
+            };
+
+            setupButton (*incButton, true);
+            setupButton (*decButton, false);
         }
         else
         {
@@ -864,7 +862,7 @@ public:
                         popupDisplay->stopTimer();
                 }
 
-                currentDrag.reset (new DragInProgress (*this));
+                currentDrag = std::make_unique<ScopedDragNotification> (owner);
                 mouseDrag (e);
             }
         }
@@ -1042,7 +1040,7 @@ public:
     {
         if (canDoubleClickToValue())
         {
-            DragInProgress drag (*this);
+            ScopedDragNotification drag (owner);
             setValue (doubleClickReturnValue, sendNotificationSync);
         }
     }
@@ -1085,7 +1083,7 @@ public:
                     {
                         auto newValue = value + jmax (normRange.interval, std::abs (delta)) * (delta < 0 ? -1.0 : 1.0);
 
-                        DragInProgress drag (*this);
+                        ScopedDragNotification drag (owner);
                         setValue (owner.snapValue (newValue, notDragging), sendNotificationSync);
                     }
                 }
@@ -1210,7 +1208,6 @@ public:
     }
 
     //==============================================================================
-
     void resizeIncDecButtons()
     {
         auto buttonRect = sliderRect;
@@ -1257,7 +1254,7 @@ public:
     int pixelsForFullDragExtent = 250;
     Time lastMouseWheelTime;
     Rectangle<int> sliderRect;
-    std::unique_ptr<DragInProgress> currentDrag;
+    std::unique_ptr<ScopedDragNotification> currentDrag;
 
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
@@ -1357,6 +1354,17 @@ public:
     }
 };
 
+//==============================================================================
+Slider::ScopedDragNotification::ScopedDragNotification (Slider& s)
+    : sliderBeingDragged (s)
+{
+    sliderBeingDragged.pimpl->sendDragStart();
+}
+
+Slider::ScopedDragNotification::~ScopedDragNotification()
+{
+    sliderBeingDragged.pimpl->sendDragEnd();
+}
 
 //==============================================================================
 Slider::Slider()
@@ -1627,6 +1635,7 @@ void Slider::valueChanged() {}
 void Slider::setPopupMenuEnabled (bool menuEnabled)         { pimpl->menuEnabled = menuEnabled; }
 void Slider::setScrollWheelEnabled (bool enabled)           { pimpl->scrollWheelEnabled = enabled; }
 
+bool Slider::isScrollWheelEnabled() const noexcept          { return pimpl->scrollWheelEnabled; }
 bool Slider::isHorizontal() const noexcept                  { return pimpl->isHorizontal(); }
 bool Slider::isVertical() const noexcept                    { return pimpl->isVertical(); }
 bool Slider::isRotary() const noexcept                      { return pimpl->isRotary(); }
@@ -1673,6 +1682,85 @@ void Slider::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel
 {
     if (! (isEnabled() && pimpl->mouseWheelMove (e, wheel)))
         Component::mouseWheelMove (e, wheel);
+}
+
+//==============================================================================
+class SliderAccessibilityHandler  : public AccessibilityHandler
+{
+public:
+    explicit SliderAccessibilityHandler (Slider& sliderToWrap)
+        : AccessibilityHandler (sliderToWrap,
+                                AccessibilityRole::slider,
+                                AccessibilityActions{},
+                                AccessibilityHandler::Interfaces { std::make_unique<ValueInterface> (sliderToWrap) }),
+          slider (sliderToWrap)
+    {
+    }
+
+    String getHelp() const override   { return slider.getTooltip(); }
+
+private:
+    class ValueInterface  : public AccessibilityValueInterface
+    {
+    public:
+        explicit ValueInterface (Slider& sliderToWrap)
+            : slider (sliderToWrap),
+              useMaxValue (slider.isTwoValue())
+        {
+        }
+
+        bool isReadOnly() const override  { return false; }
+
+        double getCurrentValue() const override
+        {
+            return useMaxValue ? slider.getMaximum()
+                               : slider.getValue();
+        }
+
+        void setValue (double newValue) override
+        {
+            Slider::ScopedDragNotification drag (slider);
+
+            if (useMaxValue)
+                slider.setMaxValue (newValue, sendNotificationSync);
+            else
+                slider.setValue (newValue, sendNotificationSync);
+        }
+
+        String getCurrentValueAsString() const override          { return slider.getTextFromValue (getCurrentValue()); }
+        void setValueAsString (const String& newValue) override  { setValue (slider.getValueFromText (newValue)); }
+
+        AccessibleValueRange getRange() const override
+        {
+            return { { slider.getMinimum(), slider.getMaximum() },
+                     getStepSize() };
+        }
+
+    private:
+        double getStepSize() const
+        {
+            auto interval = slider.getInterval();
+
+            return interval != 0.0 ? interval
+                                   : slider.getRange().getLength() * 0.01;
+        }
+
+        Slider& slider;
+        const bool useMaxValue;
+
+        //==============================================================================
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ValueInterface)
+    };
+
+    Slider& slider;
+
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SliderAccessibilityHandler)
+};
+
+std::unique_ptr<AccessibilityHandler> Slider::createAccessibilityHandler()
+{
+    return std::make_unique<SliderAccessibilityHandler> (*this);
 }
 
 } // namespace juce

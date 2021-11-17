@@ -130,12 +130,10 @@ public:
         static BluetoothMidiPairingWindowClass cls;
         window.reset (cls.createInstance());
 
-        WeakReference<BluetoothMidiSelectorWindowHelper> safeThis (this);
-
-        auto deletionCB = [=]
+        auto deletionCB = [safeThis = WeakReference<BluetoothMidiSelectorWindowHelper> { this }]
         {
-            if (auto* t = safeThis.get())
-                delete t;
+            if (safeThis != nullptr)
+                delete safeThis.get();
         };
 
         callbacks.reset (new BluetoothMidiPairingWindowClass::Callbacks { std::move (exitCB),

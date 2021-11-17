@@ -108,6 +108,7 @@ private:
     Colour colour;
     Justification justification;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void refreshBounds();
     Rectangle<int> getTextArea (float width, float height) const;
     AffineTransform getTextTransform (float width, float height) const;

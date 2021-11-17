@@ -415,7 +415,7 @@ private:
                     pos -= 1.0;
                 }
 
-                *output++ += gain * InterpolatorTraits::valueAtOffset ((float) pos);
+                *output++ += gain * InterpolatorTraits::valueAtOffset (lastInputSamples, (float) pos, indexBuffer);
                 pos += speedRatio;
             }
         }

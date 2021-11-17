@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX) || DOXYGEN
+#if (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD)) || DOXYGEN
 
 //==============================================================================
 /**

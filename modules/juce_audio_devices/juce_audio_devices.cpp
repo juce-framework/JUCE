@@ -45,38 +45,13 @@
 
 #include "juce_audio_devices.h"
 
-#include "native/juce_MidiDataConcatenator.h"
-
-#include "midi_io/ump/juce_UMPProtocols.h"
-#include "midi_io/ump/juce_UMPUtils.h"
-#include "midi_io/ump/juce_UMPacket.h"
-#include "midi_io/ump/juce_UMPSysEx7.h"
-#include "midi_io/ump/juce_UMPView.h"
-#include "midi_io/ump/juce_UMPIterator.h"
-#include "midi_io/ump/juce_UMPackets.h"
-#include "midi_io/ump/juce_UMPFactory.h"
-#include "midi_io/ump/juce_UMPConversion.h"
-#include "midi_io/ump/juce_UMPMidi1ToBytestreamTranslator.h"
-#include "midi_io/ump/juce_UMPMidi1ToMidi2DefaultTranslator.h"
-#include "midi_io/ump/juce_UMPConverters.h"
-#include "midi_io/ump/juce_UMPDispatcher.h"
-#include "midi_io/ump/juce_UMPReceiver.h"
-#include "midi_io/ump/juce_UMPBytestreamInputHandler.h"
-#include "midi_io/ump/juce_UMPU32InputHandler.h"
-
-#include "midi_io/ump/juce_UMPUtils.cpp"
-#include "midi_io/ump/juce_UMPView.cpp"
-#include "midi_io/ump/juce_UMPSysEx7.cpp"
-#include "midi_io/ump/juce_UMPMidi1ToMidi2DefaultTranslator.cpp"
-
-#include "midi_io/ump/juce_UMPTests.cpp"
-
-namespace juce
-{
-namespace ump = universal_midi_packets;
-}
-
 //==============================================================================
+#if JUCE_MAC || JUCE_IOS
+ #include <juce_audio_basics/midi/ump/juce_UMP.h>
+ #include "midi_io/ump/juce_UMPBytestreamInputHandler.h"
+ #include "midi_io/ump/juce_UMPU32InputHandler.h"
+#endif
+
 #if JUCE_MAC
  #define Point CarbonDummyPointName
  #define Component CarbonDummyCompName
@@ -135,6 +110,7 @@ namespace ump = universal_midi_packets;
   JUCE_END_IGNORE_WARNINGS_MSVC
  #endif
 
+ #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
  #include "native/juce_win32_Midi.cpp"
 
  #if JUCE_ASIO
@@ -162,7 +138,7 @@ namespace ump = universal_midi_packets;
  #endif
 
 //==============================================================================
-#elif JUCE_LINUX
+#elif JUCE_LINUX || JUCE_BSD
  #if JUCE_ALSA
   /* Got an include error here? If so, you've either not got ALSA installed, or you've
      not got your paths set up correctly to find its header files.
@@ -189,19 +165,21 @@ namespace ump = universal_midi_packets;
   #include "native/juce_linux_JackAudio.cpp"
  #endif
 
- #if JUCE_BELA
+ #if (JUCE_LINUX && JUCE_BELA)
   /* Got an include error here? If so, you've either not got the bela headers
      installed, or you've not got your paths set up correctly to find its header
      files.
   */
   #include <Bela.h>
   #include <Midi.h>
+  #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
   #include "native/juce_linux_Bela.cpp"
  #endif
 
  #undef SIZEOF
 
  #if ! JUCE_BELA
+  #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
   #include "native/juce_linux_Midi.cpp"
  #endif
 
@@ -209,6 +187,8 @@ namespace ump = universal_midi_packets;
 #elif JUCE_ANDROID
 
  #include "native/juce_android_Audio.cpp"
+
+ #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
  #include "native/juce_android_Midi.cpp"
 
  #if JUCE_USE_ANDROID_OPENSLES || JUCE_USE_ANDROID_OBOE

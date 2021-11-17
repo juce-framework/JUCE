@@ -439,7 +439,7 @@ void TableHeaderComponent::restoreFromString (const String& storedVersion)
     {
         int index = 0;
 
-        forEachXmlChildElement (*storedXML, col)
+        for (auto* col : storedXML->getChildIterator())
         {
             auto tabId = col->getIntAttribute ("id");
 
@@ -894,6 +894,12 @@ void TableHeaderComponent::showColumnChooserMenu (const int columnIdClicked)
 
 void TableHeaderComponent::Listener::tableColumnDraggingChanged (TableHeaderComponent*, int)
 {
+}
+
+//==============================================================================
+std::unique_ptr<AccessibilityHandler> TableHeaderComponent::createAccessibilityHandler()
+{
+    return std::make_unique<AccessibilityHandler> (*this, AccessibilityRole::tableHeader);
 }
 
 } // namespace juce

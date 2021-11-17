@@ -96,7 +96,7 @@ public:
 
     //==============================================================================
     /** Processes the input and output buffers supplied in the processing context. */
-    template<typename ProcessContext>
+    template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
         auto&& inBlock  = context.getInputBlock();
@@ -128,6 +128,7 @@ public:
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6255 6386)
             auto* biases = static_cast<FloatType*> (alloca (sizeof (FloatType) * len));
 
             for (size_t i = 0; i < len; ++i)
@@ -137,6 +138,7 @@ public:
                 FloatVectorOperations::add (outBlock.getChannelPointer (chan),
                                             inBlock.getChannelPointer (chan),
                                             biases, static_cast<int> (len));
+            JUCE_END_IGNORE_WARNINGS_MSVC
         }
     }
 

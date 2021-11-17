@@ -229,7 +229,7 @@ void OnlineUnlockStatus::load()
     MemoryBlock mb;
     mb.fromBase64Encoding (getState());
 
-    if (mb.getSize() > 0)
+    if (! mb.isEmpty())
         status = ValueTree::readFromGZIPData (mb.getData(), mb.getSize());
     else
         status = ValueTree (stateTagName);
@@ -280,6 +280,8 @@ char OnlineUnlockStatus::MachineIDUtilities::getPlatformPrefix()
     return 'W';
    #elif JUCE_LINUX
     return 'L';
+   #elif JUCE_BSD
+    return 'B';
    #elif JUCE_IOS
     return 'I';
    #elif JUCE_ANDROID

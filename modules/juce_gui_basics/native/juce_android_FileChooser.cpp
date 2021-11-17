@@ -151,10 +151,8 @@ public:
 
         if (currentFileChooser != nullptr)
         {
-            WeakReference<Native> myself (this);
-
             startAndroidActivityForResult (LocalRef<jobject> (env->NewLocalRef (intent.get())), /*READ_REQUEST_CODE*/ 42,
-                                           [myself] (int requestCode, int resultCode, LocalRef<jobject> intentData) mutable
+                                           [myself = WeakReference<Native> { this }] (int requestCode, int resultCode, LocalRef<jobject> intentData) mutable
                                            {
                                                if (myself != nullptr)
                                                    myself->onActivityResult (requestCode, resultCode, intentData);
@@ -219,11 +217,11 @@ private:
 
 FileChooser::Native* FileChooser::Native::currentFileChooser = nullptr;
 
-FileChooser::Pimpl* FileChooser::showPlatformDialog (FileChooser& owner, int flags,
-                                                     FilePreviewComponent*)
+std::shared_ptr<FileChooser::Pimpl> FileChooser::showPlatformDialog (FileChooser& owner, int flags,
+                                                                     FilePreviewComponent*)
 {
     if (FileChooser::Native::currentFileChooser == nullptr)
-        return new FileChooser::Native (owner, flags);
+        return std::make_shared<FileChooser::Native> (owner, flags);
 
     // there can only be one file chooser on Android at a once
     jassertfalse;

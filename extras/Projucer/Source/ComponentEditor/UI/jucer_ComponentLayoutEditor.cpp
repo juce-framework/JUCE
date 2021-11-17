@@ -41,7 +41,7 @@ public:
     {
         setInterceptsMouseClicks (false, false);
         setWantsKeyboardFocus (false);
-        setFocusContainer (true);
+        setFocusContainerType (FocusContainerType::keyboardFocusContainer);
     }
 
     void paint (Graphics& g) override
@@ -254,7 +254,7 @@ void ComponentLayoutEditor::refreshAllComponents()
         lastComp = c;
 
         c->setWantsKeyboardFocus (false);
-        c->setFocusContainer (true);
+        c->setFocusContainerType (FocusContainerType::keyboardFocusContainer);
 
         if (isNewOverlay)
             overlay->updateBoundsToMatchTarget();
@@ -282,7 +282,7 @@ void ComponentLayoutEditor::mouseDown (const MouseEvent& e)
         for (int i = 0; i < ObjectTypes::numComponentTypes; ++i)
             m.addCommandItem (commandManager, JucerCommandIDs::newComponentBase + i);
 
-        m.show();
+        m.showMenuAsync (PopupMenu::Options());
     }
     else
     {
@@ -387,7 +387,7 @@ bool ComponentLayoutEditor::isInterestedInDragSource (const SourceDetails& dragS
 
 void ComponentLayoutEditor::itemDropped (const SourceDetails& dragSourceDetails)
 {
-    OwnedArray <Project::Item> selectedNodes;
+    OwnedArray<Project::Item> selectedNodes;
     ProjectContentComponent::getSelectedProjectItemsBeingDragged (dragSourceDetails, selectedNodes);
 
     StringArray filenames;

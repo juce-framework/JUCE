@@ -59,15 +59,13 @@ namespace juce
 #endif
 
 //==============================================================================
-#if JUCE_IOS || JUCE_LINUX
+#if JUCE_IOS || JUCE_LINUX || JUCE_BSD
   /** This will try to break into the debugger if the app is currently being debugged.
       If called by an app that's not being debugged, the behaviour isn't defined - it may
       crash or not, depending on the platform.
       @see jassert()
   */
   #define JUCE_BREAK_IN_DEBUGGER        { ::kill (0, SIGTRAP); }
-#elif JUCE_MAC && JUCE_CLANG && JUCE_ARM
-  #define JUCE_BREAK_IN_DEBUGGER        { __builtin_debugtrap(); }
 #elif JUCE_MSVC
   #ifndef __INTEL_COMPILER
     #pragma intrinsic (__debugbreak)
@@ -79,6 +77,8 @@ namespace juce
   #else
    #define JUCE_BREAK_IN_DEBUGGER       { asm ("int $3"); }
   #endif
+#elif JUCE_ARM && JUCE_MAC
+  #define JUCE_BREAK_IN_DEBUGGER        { __builtin_debugtrap(); }
 #elif JUCE_ANDROID
   #define JUCE_BREAK_IN_DEBUGGER        { __builtin_trap(); }
 #else
@@ -142,14 +142,14 @@ namespace juce
       that have important side-effects!
       @see Logger::outputDebugString
   */
-  #define DBG(textToWrite)          JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::String tempDbgBuf; tempDbgBuf << textToWrite; juce::Logger::outputDebugString (tempDbgBuf);)
+  #define DBG(textToWrite)              JUCE_BLOCK_WITH_FORCED_SEMICOLON (juce::String tempDbgBuf; tempDbgBuf << textToWrite; juce::Logger::outputDebugString (tempDbgBuf);)
 
   //==============================================================================
   /** This will always cause an assertion failure.
       It is only compiled in a debug build, (unless JUCE_LOG_ASSERTIONS is enabled for your build).
       @see jassert
   */
-  #define jassertfalse              JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION; if (juce::juce_isRunningUnderDebugger()) JUCE_BREAK_IN_DEBUGGER; JUCE_ANALYZER_NORETURN)
+  #define jassertfalse                  JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION; if (juce::juce_isRunningUnderDebugger()) JUCE_BREAK_IN_DEBUGGER; JUCE_ANALYZER_NORETURN)
 
   //==============================================================================
   /** Platform-independent assertion macro.
@@ -159,19 +159,29 @@ namespace juce
       correct behaviour of your program!
       @see jassertfalse
   */
-  #define jassert(expression)       JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
+  #define jassert(expression)           JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
+
+  /** Platform-independent assertion macro which suppresses ignored-variable
+      warnings in all build modes. You should probably use a plain jassert()
+      by default, and only replace it with jassertquiet() once you've
+      convinced yourself that any unused-variable warnings emitted by the
+      compiler are harmless.
+  */
+  #define jassertquiet(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
 
 #else
   //==============================================================================
   // If debugging is disabled, these dummy debug and assertion macros are used..
 
   #define DBG(textToWrite)
-  #define jassertfalse              JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION)
+  #define jassertfalse                  JUCE_BLOCK_WITH_FORCED_SEMICOLON (JUCE_LOG_CURRENT_ASSERTION)
 
   #if JUCE_LOG_ASSERTIONS
-   #define jassert(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
+   #define jassert(expression)          JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
+   #define jassertquiet(expression)     JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (! (expression)) jassertfalse;)
   #else
-   #define jassert(expression)      JUCE_BLOCK_WITH_FORCED_SEMICOLON ( ; )
+   #define jassert(expression)          JUCE_BLOCK_WITH_FORCED_SEMICOLON ( ; )
+   #define jassertquiet(expression)     JUCE_BLOCK_WITH_FORCED_SEMICOLON (if (false) (void) (expression);)
   #endif
 
 #endif
@@ -192,7 +202,8 @@ namespace juce
 #define JUCE_STRINGIFY(item)  JUCE_STRINGIFY_MACRO_HELPER (item)
 
 //==============================================================================
-/** This is a shorthand macro for declaring stubs for a class's copy constructor and operator=.
+/** This is a shorthand macro for deleting a class's copy constructor and
+    copy assignment operator.
 
     For example, instead of
     @code
@@ -219,6 +230,13 @@ namespace juce
 #define JUCE_DECLARE_NON_COPYABLE(className) \
     className (const className&) = delete;\
     className& operator= (const className&) = delete;
+
+/** This is a shorthand macro for deleting a class's move constructor and
+    move assignment operator.
+*/
+#define JUCE_DECLARE_NON_MOVEABLE(className) \
+    className (className&&) = delete;\
+    className& operator= (className&&) = delete;
 
 /** This is a shorthand way of writing both a JUCE_DECLARE_NON_COPYABLE and
     JUCE_LEAK_DETECTOR macro for a class.
@@ -327,7 +345,7 @@ namespace juce
 #elif ! defined (JUCE_MODAL_LOOPS_PERMITTED)
  /** Some operating environments don't provide a modal loop mechanism, so this flag can be
      used to disable any functions that try to run a modal loop. */
- #define JUCE_MODAL_LOOPS_PERMITTED 1
+ #define JUCE_MODAL_LOOPS_PERMITTED 0
 #endif
 
 //==============================================================================

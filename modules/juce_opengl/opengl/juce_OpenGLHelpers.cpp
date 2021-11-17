@@ -26,6 +26,88 @@
 namespace juce
 {
 
+class Version
+{
+public:
+    constexpr Version() = default;
+
+    constexpr explicit Version (int majorIn)
+        : Version (majorIn, 0) {}
+
+    constexpr Version (int majorIn, int minorIn)
+        : major (majorIn), minor (minorIn) {}
+
+    int major = 0, minor = 0;
+
+    constexpr bool operator== (const Version& other) const noexcept
+    {
+        return toTuple() == other.toTuple();
+    }
+
+    constexpr bool operator!= (const Version& other) const noexcept
+    {
+        return toTuple() != other.toTuple();
+    }
+
+    constexpr bool operator< (const Version& other) const noexcept
+    {
+        return toTuple() < other.toTuple();
+    }
+
+    constexpr bool operator<= (const Version& other) const noexcept
+    {
+        return toTuple() <= other.toTuple();
+    }
+
+    constexpr bool operator> (const Version& other) const noexcept
+    {
+        return toTuple() > other.toTuple();
+    }
+
+    constexpr bool operator>= (const Version& other) const noexcept
+    {
+        return toTuple() >= other.toTuple();
+    }
+
+private:
+    constexpr std::tuple<int, int> toTuple() const noexcept
+    {
+        return std::make_tuple (major, minor);
+    }
+};
+
+
+template <typename Char>
+static auto* findNullTerminator (const Char* ptr)
+{
+    while (*ptr != 0)
+        ++ptr;
+
+    return ptr;
+}
+
+static Version getOpenGLVersion()
+{
+    const auto* versionBegin = glGetString (GL_VERSION);
+
+    if (versionBegin == nullptr)
+        return {};
+
+    const auto* versionEnd = findNullTerminator (versionBegin);
+    const std::string versionString (versionBegin, versionEnd);
+    const auto spaceSeparated = StringArray::fromTokens (versionString.c_str(), false);
+
+    if (spaceSeparated.isEmpty())
+        return {};
+
+    const auto pointSeparated = StringArray::fromTokens (spaceSeparated[0], ".", "");
+
+    const auto major = pointSeparated[0].getIntValue();
+    const auto minor = pointSeparated[1].getIntValue();
+
+    return { major, minor };
+}
+
 void OpenGLHelpers::resetErrorState()
 {
     while (glGetError() != GL_NO_ERROR) {}
@@ -35,7 +117,7 @@ void* OpenGLHelpers::getExtensionFunction (const char* functionName)
 {
    #if JUCE_WINDOWS
     return (void*) wglGetProcAddress (functionName);
-   #elif JUCE_LINUX
+   #elif JUCE_LINUX || JUCE_BSD
     return (void*) glXGetProcAddress ((const GLubyte*) functionName);
    #else
     static void* handle = dlopen (nullptr, RTLD_LAZY);
@@ -81,10 +163,23 @@ void OpenGLHelpers::enableScissorTest (Rectangle<int> clip)
     glScissor (clip.getX(), clip.getY(), clip.getWidth(), clip.getHeight());
 }
 
+String OpenGLHelpers::getGLSLVersionString()
+{
+    if (getOpenGLVersion() >= Version (3, 2))
+    {
+       #if JUCE_OPENGL_ES
+        return "#version 300 es";
+       #else
+        return "#version 150";
+       #endif
+    }
+
+    return "#version 110";
+}
+
 String OpenGLHelpers::translateVertexShaderToV3 (const String& code)
 {
-   #if JUCE_OPENGL3
-    if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
+    if (getOpenGLVersion() >= Version (3, 2))
     {
         String output;
 
@@ -110,23 +205,20 @@ String OpenGLHelpers::translateVertexShaderToV3 (const String& code)
         output = code.replace ("attribute", "in");
        #endif
 
-        return JUCE_GLSL_VERSION "\n" + output.replace ("varying", "out");
+        return getGLSLVersionString() + "\n" + output.replace ("varying", "out");
     }
-   #endif
 
     return code;
 }
 
 String OpenGLHelpers::translateFragmentShaderToV3 (const String& code)
 {
-   #if JUCE_OPENGL3
-    if (OpenGLShaderProgram::getLanguageVersion() > 1.2)
-        return JUCE_GLSL_VERSION "\n"
+    if (getOpenGLVersion() >= Version (3, 2))
+        return getGLSLVersionString() + "\n"
                "out " JUCE_MEDIUMP " vec4 fragColor;\n"
                 + code.replace ("varying", "in")
                       .replace ("texture2D", "texture")
                       .replace ("gl_FragColor", "fragColor");
-   #endif
 
     return code;
 }

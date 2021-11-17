@@ -33,7 +33,7 @@ class JuceIStream   : public ComBaseClassHelper<IStream>
 {
 public:
     JuceIStream (InputStream& in) noexcept
-        : ComBaseClassHelper<IStream> (0), source (in)
+        : ComBaseClassHelper (0), source (in)
     {
     }
 
@@ -74,7 +74,7 @@ public:
         }
 
         if (resultPosition != nullptr)
-            resultPosition->QuadPart = newPos;
+            resultPosition->QuadPart = (ULONGLONG) newPos;
 
         return source.setPosition (newPos) ? S_OK : E_NOTIMPL;
     }
@@ -83,7 +83,7 @@ public:
                            ULARGE_INTEGER* bytesRead, ULARGE_INTEGER* bytesWritten)
     {
         uint64 totalCopied = 0;
-        int64 numBytes = numBytesToDo.QuadPart;
+        auto numBytes = (int64) numBytesToDo.QuadPart;
 
         while (numBytes > 0 && ! source.isExhausted())
         {
@@ -95,8 +95,8 @@ public:
             if (numRead <= 0)
                 break;
 
-            destStream->Write (buffer, numRead, nullptr);
-            totalCopied += numRead;
+            destStream->Write (buffer, (ULONG) numRead, nullptr);
+            totalCopied += (ULONG) numRead;
         }
 
         if (bytesRead != nullptr)      bytesRead->QuadPart = totalCopied;
@@ -112,7 +112,7 @@ public:
 
         zerostruct (*stat);
         stat->type = STGTY_STREAM;
-        stat->cbSize.QuadPart = jmax ((int64) 0, source.getTotalLength());
+        stat->cbSize.QuadPart = (ULONGLONG) jmax ((int64) 0, source.getTotalLength());
         return S_OK;
     }
 
@@ -124,7 +124,7 @@ private:
 
 //==============================================================================
 static const char* wmFormatName = "Windows Media";
-static const char* const extensions[] = { ".mp3", ".wmv", ".asf", ".wm", ".wma", 0 };
+static const char* const extensions[] = { ".mp3", ".wmv", ".asf", ".wm", ".wma", nullptr };
 
 //==============================================================================
 class WMAudioReader   : public AudioFormatReader
@@ -157,7 +157,7 @@ public:
         }
     }
 
-    ~WMAudioReader()
+    ~WMAudioReader() override
     {
         if (wmSyncReader != nullptr)
             wmSyncReader->Close();
@@ -174,7 +174,7 @@ public:
         clearSamplesBeyondAvailableLength (destSamples, numDestChannels, startOffsetInDestBuffer,
                                            startSampleInFile, numSamples, lengthInSamples);
 
-        const int stride = numChannels * sizeof (int16);
+        const auto stride = (int) (numChannels * sizeof (int16));
 
         while (numSamples > 0)
         {
@@ -203,20 +203,20 @@ public:
                         return false;
 
                     if (hasJumped)
-                        bufferedRange.setStart ((int64) ((sampleTime * (int64) sampleRate) / 10000000));
+                        bufferedRange.setStart ((int64) ((sampleTime * (QWORD) sampleRate) / 10000000));
                     else
                         bufferedRange.setStart (bufferedRange.getEnd()); // (because the positions returned often aren't contiguous)
 
-                    bufferedRange.setLength ((int64) (dataLength / stride));
+                    bufferedRange.setLength ((int64) dataLength / (int64) stride);
 
-                    buffer.ensureSize ((int) dataLength);
+                    buffer.ensureSize ((size_t) dataLength);
                     memcpy (buffer.getData(), rawData, (size_t) dataLength);
                 }
                 else if (hr == NS_E_NO_MORE_SAMPLES)
                 {
                     bufferedRange.setStart (startSampleInFile);
                     bufferedRange.setLength (256);
-                    buffer.ensureSize (256 * stride);
+                    buffer.ensureSize (256 * (size_t) stride);
                     buffer.fillWith (0);
                 }
                 else
@@ -231,6 +231,7 @@ public:
 
             for (int i = 0; i < numDestChannels; ++i)
             {
+                JUCE_BEGIN_IGNORE_WARNINGS_MSVC (28182)
                 jassert (destSamples[i] != nullptr);
 
                 auto srcChan = jmin (i, (int) numChannels - 1);
@@ -239,9 +240,10 @@ public:
 
                 for (int j = 0; j < numToDo; ++j)
                 {
-                    dst[j] = ((uint32) *src) << 16;
+                    dst[j] = (int) (((uint32) *src) << 16);
                     src += numChannels;
                 }
+                JUCE_END_IGNORE_WARNINGS_MSVC
             }
 
             startSampleInFile += numToDo;
@@ -260,7 +262,7 @@ private:
 
     void checkCoInitialiseCalled()
     {
-        CoInitialize (0);
+        ignoreUnused (CoInitialize (nullptr));
     }
 
     void scanFileForDetails()
@@ -284,7 +286,7 @@ private:
                     if (auto wmMediaProperties = wmStreamConfig.getInterface<IWMMediaProps>())
                     {
                         DWORD sizeMediaType;
-                        hr = wmMediaProperties->GetMediaType (0, &sizeMediaType);
+                        hr = wmMediaProperties->GetMediaType (nullptr, &sizeMediaType);
 
                         HeapBlock<WM_MEDIA_TYPE> mediaType;
                         mediaType.malloc (sizeMediaType, 1);
@@ -297,7 +299,7 @@ private:
                             sampleRate = inputFormat->nSamplesPerSec;
                             numChannels = inputFormat->nChannels;
                             bitsPerSample = inputFormat->wBitsPerSample != 0 ? inputFormat->wBitsPerSample : 16;
-                            lengthInSamples = (lengthInNanoseconds * (int) sampleRate) / 10000000;
+                            lengthInSamples = (lengthInNanoseconds * (QWORD) sampleRate) / 10000000;
                         }
                     }
                 }

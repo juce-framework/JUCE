@@ -109,8 +109,7 @@ String Base64::toBase64 (const void* sourceData, size_t sourceDataSize)
 {
     MemoryOutputStream m ((sourceDataSize * 4) / 3 + 3);
     bool ok = convertToBase64 (m, sourceData, sourceDataSize);
-    jassert (ok); // should always succeed for this simple case
-    ignoreUnused (ok);
+    jassertquiet (ok); // should always succeed for this simple case
     return m.toString();
 }
 

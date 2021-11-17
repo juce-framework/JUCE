@@ -314,25 +314,25 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AbstractFifo)
 };
 
-template<>
+template <>
 inline void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::read>::finish (AbstractFifo& f, int num) noexcept
 {
     f.finishedRead (num);
 }
 
-template<>
+template <>
 inline void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::write>::finish (AbstractFifo& f, int num) noexcept
 {
     f.finishedWrite (num);
 }
 
-template<>
+template <>
 inline void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::read>::prepare (AbstractFifo& f, int num) noexcept
 {
     f.prepareToRead (num, startIndex1, blockSize1, startIndex2, blockSize2);
 }
 
-template<>
+template <>
 inline void AbstractFifo::ScopedReadWrite<AbstractFifo::ReadOrWrite::write>::prepare (AbstractFifo& f, int num) noexcept
 {
     f.prepareToWrite (num, startIndex1, blockSize1, startIndex2, blockSize2);

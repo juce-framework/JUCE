@@ -323,7 +323,7 @@ protected:
     /** @internal */
     void enablementChanged() override;
     /** @internal */
-    KeyboardFocusTraverser* createFocusTraverser() override;
+    std::unique_ptr<ComponentTraverser> createKeyboardFocusTraverser() override;
     /** @internal */
     void textEditorTextChanged (TextEditor&) override;
     /** @internal */
@@ -356,6 +356,7 @@ private:
     bool lossOfFocusDiscardsChanges = false;
     bool leftOfOwnerComp = false;
 
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool updateFromTextEditorContents (TextEditor&);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Label)

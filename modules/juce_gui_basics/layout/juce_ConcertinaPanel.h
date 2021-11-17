@@ -120,6 +120,7 @@ public:
     };
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     void resized() override;
 
     class PanelHolder;

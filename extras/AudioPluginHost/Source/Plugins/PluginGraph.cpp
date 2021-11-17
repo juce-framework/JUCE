@@ -29,14 +29,20 @@
 #include "InternalPlugins.h"
 #include "../UI/GraphEditorPanel.h"
 
+static std::unique_ptr<ScopedDPIAwarenessDisabler> makeDPIAwarenessDisablerForPlugin (const PluginDescription& desc)
+{
+    return shouldAutoScalePlugin (desc) ? std::make_unique<ScopedDPIAwarenessDisabler>()
+                                        : nullptr;
+}
 
 //==============================================================================
-PluginGraph::PluginGraph (AudioPluginFormatManager& fm)
+PluginGraph::PluginGraph (AudioPluginFormatManager& fm, KnownPluginList& kpl)
     : FileBasedDocument (getFilenameSuffix(),
                          getFilenameWildcard(),
                          "Load a graph",
                          "Save a graph"),
-      formatManager (fm)
+      formatManager (fm),
+      knownPlugins (kpl)
 {
     newDocument();
     graph.addListener (this);
@@ -76,10 +82,12 @@ AudioProcessorGraph::Node::Ptr PluginGraph::getNodeForName (const String& name) 
 
 void PluginGraph::addPlugin (const PluginDescription& desc, Point<double> pos)
 {
+    std::shared_ptr<ScopedDPIAwarenessDisabler> dpiDisabler = makeDPIAwarenessDisablerForPlugin (desc);
+
     formatManager.createPluginInstanceAsync (desc,
                                              graph.getSampleRate(),
                                              graph.getBlockSize(),
-                                             [this, pos] (std::unique_ptr<AudioPluginInstance> instance, const String& error)
+                                             [this, pos, dpiDisabler] (std::unique_ptr<AudioPluginInstance> instance, const String& error)
                                              {
                                                  addPluginCallback (std::move (instance), error, pos);
                                              });
@@ -90,7 +98,7 @@ void PluginGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instan
 {
     if (instance == nullptr)
     {
-        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+        AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
                                           TRANS("Couldn't create plugin"),
                                           error);
     }
@@ -156,18 +164,10 @@ PluginWindow* PluginGraph::getOrCreateWindowFor (AudioProcessorGraph::Node* node
                 getCommandManager().invokeDirectly (CommandIDs::showAudioSettings, false);
                 return nullptr;
             }
-        }
 
-       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        if (! node->properties["DPIAware"]
-            && ! node->getProcessor()->getName().contains ("Kontakt")) // Kontakt doesn't behave correctly in DPI unaware mode...
-        {
-            ScopedDPIAwarenessDisabler disableDPIAwareness;
+            auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (description);
             return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
         }
-       #endif
-
-        return activePluginWindows.add (new PluginWindow (node, type, activePluginWindows));
     }
 
     return nullptr;
@@ -272,7 +272,7 @@ static void readBusLayoutFromXml (AudioProcessor::BusesLayout& busesLayout, Audi
 
     if (auto* buses = xml.getChildByName (isInput ? "INPUTS" : "OUTPUTS"))
     {
-        forEachXmlChildElementWithTagName (*buses, e, "BUS")
+        for (auto* e : buses->getChildWithTagNameIterator ("BUS"))
         {
             const int busIdx = e->getIntAttribute ("index");
             maxNumBuses = jmax (maxNumBuses, busIdx + 1);
@@ -332,9 +332,6 @@ static XmlElement* createNodeXml (AudioProcessorGraph::Node* const node) noexcep
         e->setAttribute ("uid",      (int) node->nodeID.uid);
         e->setAttribute ("x",        node->properties ["x"].toString());
         e->setAttribute ("y",        node->properties ["y"].toString());
-       #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-        e->setAttribute ("DPIAware", node->properties["DPIAware"].toString());
-       #endif
 
         for (int i = 0; i < (int) PluginWindow::Type::numTypes; ++i)
         {
@@ -377,16 +374,47 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
 {
     PluginDescription pd;
 
-    forEachXmlChildElement (xml, e)
+    for (auto* e : xml.getChildIterator())
     {
         if (pd.loadFromXml (*e))
             break;
     }
 
-    String errorMessage;
+    auto createInstanceWithFallback = [&]() -> std::unique_ptr<AudioPluginInstance>
+    {
+        auto createInstance = [this] (const PluginDescription& description)
+        {
+            String errorMessage;
 
-    if (auto instance = formatManager.createPluginInstance (pd, graph.getSampleRate(),
-                                                            graph.getBlockSize(), errorMessage))
+            auto localDpiDisabler = makeDPIAwarenessDisablerForPlugin (description);
+
+            return formatManager.createPluginInstance (description,
+                                                       graph.getSampleRate(),
+                                                       graph.getBlockSize(),
+                                                       errorMessage);
+        };
+
+        if (auto instance = createInstance (pd))
+            return instance;
+
+        const auto allFormats = formatManager.getFormats();
+        const auto matchingFormat = std::find_if (allFormats.begin(), allFormats.end(),
+                                                  [&] (const AudioPluginFormat* f) { return f->getName() == pd.pluginFormatName; });
+
+        if (matchingFormat == allFormats.end())
+            return nullptr;
+
+        const auto plugins = knownPlugins.getTypesForFormat (**matchingFormat);
+        const auto matchingPlugin = std::find_if (plugins.begin(), plugins.end(),
+                                                  [&] (const PluginDescription& desc) { return pd.uniqueId == desc.uniqueId; });
+
+        if (matchingPlugin == plugins.end())
+            return nullptr;
+
+        return createInstance (*matchingPlugin);
+    };
+
+    if (auto instance = createInstanceWithFallback())
     {
         if (auto* layoutEntity = xml.getChildByName ("LAYOUT"))
         {
@@ -408,11 +436,8 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
                 node->getProcessor()->setStateInformation (m.getData(), (int) m.getSize());
             }
 
-            node->properties.set ("x",        xml.getDoubleAttribute ("x"));
-            node->properties.set ("y",        xml.getDoubleAttribute ("y"));
-           #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-            node->properties.set ("DPIAware", xml.getDoubleAttribute ("DPIAware"));
-           #endif
+            node->properties.set ("x", xml.getDoubleAttribute ("x"));
+            node->properties.set ("y", xml.getDoubleAttribute ("y"));
 
             for (int i = 0; i < (int) PluginWindow::Type::numTypes; ++i)
             {
@@ -461,13 +486,13 @@ void PluginGraph::restoreFromXml (const XmlElement& xml)
 {
     clear();
 
-    forEachXmlChildElementWithTagName (xml, e, "FILTER")
+    for (auto* e : xml.getChildWithTagNameIterator ("FILTER"))
     {
         createNodeFromXml (*e);
         changed();
     }
 
-    forEachXmlChildElementWithTagName (xml, e, "CONNECTION")
+    for (auto* e : xml.getChildWithTagNameIterator ("CONNECTION"))
     {
         graph.addConnection ({ { NodeID ((uint32) e->getIntAttribute ("srcFilter")), e->getIntAttribute ("srcChannel") },
                                { NodeID ((uint32) e->getIntAttribute ("dstFilter")), e->getIntAttribute ("dstChannel") } });

@@ -101,6 +101,27 @@ public:
     void handleIncomingMidiMessage (MidiInput*, const MidiMessage&) override;
 
 private:
+    struct NumChannels
+    {
+        NumChannels() = default;
+        NumChannels (int numIns, int numOuts) : ins (numIns), outs (numOuts) {}
+
+        explicit NumChannels (const AudioProcessor::BusesLayout& layout)
+            : ins (layout.getNumChannels (true, 0)), outs (layout.getNumChannels (false, 0)) {}
+
+        AudioProcessor::BusesLayout toLayout() const
+        {
+            return { { AudioChannelSet::canonicalChannelSet (ins) },
+                     { AudioChannelSet::canonicalChannelSet (outs) } };
+        }
+
+        int ins = 0, outs = 0;
+    };
+
+    //==============================================================================
+    NumChannels findMostSuitableLayout (const AudioProcessor&) const;
+    void resizeChannels();
+
     //==============================================================================
     AudioProcessor* processor = nullptr;
     CriticalSection lock;
@@ -108,8 +129,8 @@ private:
     int blockSize = 0;
     bool isPrepared = false, isDoublePrecision = false;
 
-    int numInputChans = 0, numOutputChans = 0;
-    HeapBlock<float*> channels;
+    NumChannels deviceChannels, defaultProcessorChannels, actualProcessorChannels;
+    std::vector<float*> channels;
     AudioBuffer<float> tempBuffer;
     AudioBuffer<double> conversionBuffer;
 

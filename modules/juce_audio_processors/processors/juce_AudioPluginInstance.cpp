@@ -35,6 +35,8 @@ PluginDescription AudioPluginInstance::getPluginDescription() const
 
 void* AudioPluginInstance::getPlatformSpecificData() { return nullptr; }
 
+void AudioPluginInstance::getExtensions (ExtensionsVisitor& visitor) const { visitor.visitUnknown ({}); }
+
 String AudioPluginInstance::getParameterID (int parameterIndex)
 {
     assertOnceOnDeprecatedMethodUse();
