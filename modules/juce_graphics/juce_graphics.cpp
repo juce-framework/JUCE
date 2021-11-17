@@ -126,6 +126,10 @@
 #include "effects/juce_DropShadowEffect.cpp"
 #include "effects/juce_GlowEffect.cpp"
 
+#if JUCE_UNIT_TESTS
+ #include "geometry/juce_Rectangle_test.cpp"
+#endif
+
 #if JUCE_USE_FREETYPE
  #include "native/juce_freetype_Fonts.cpp"
 #endif
