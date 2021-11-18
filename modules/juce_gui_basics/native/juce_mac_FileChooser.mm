@@ -213,6 +213,18 @@ private:
     //==============================================================================
     typedef NSObject<NSOpenSavePanelDelegate> DelegateType;
 
+    static URL urlFromNSURL (NSURL* url)
+    {
+        const auto scheme = nsStringToJuce ([url scheme]);
+
+        auto pathComponents = StringArray::fromTokens (nsStringToJuce ([url path]), "/", {});
+
+        for (auto& component : pathComponents)
+            component = URL::addEscapeChars (component, false);
+
+        return { scheme + "://" + pathComponents.joinIntoString ("/") };
+    }
+
     void finished (NSInteger result)
     {
         Array<URL> chooserResults;
@@ -233,13 +245,7 @@ private:
         {
             auto addURLResult = [&chooserResults] (NSURL* urlToAdd)
             {
-                auto scheme = nsStringToJuce ([urlToAdd scheme]);
-                auto pathComponents = StringArray::fromTokens (nsStringToJuce ([urlToAdd path]), "/", {});
-
-                for (auto& component : pathComponents)
-                    component = URL::addEscapeChars (component, false);
-
-                chooserResults.add (URL (scheme + "://" + pathComponents.joinIntoString ("/")));
+                chooserResults.add (urlFromNSURL (urlToAdd));
             };
 
             if (isSave)
@@ -259,17 +265,15 @@ private:
         owner.finished (chooserResults);
     }
 
-    bool shouldShowFilename (const String& filenameToTest)
+    BOOL shouldShowURL (const URL& urlToTest)
     {
-        const File f (filenameToTest);
-        auto nsFilename = juceStringToNS (filenameToTest);
-
         for (int i = filters.size(); --i >= 0;)
-            if (f.getFileName().matchesWildcard (filters[i], true))
-                return true;
+            if (urlToTest.getFileName().matchesWildcard (filters[i], true))
+                return YES;
 
+        const auto f = urlToTest.getLocalFile();
         return f.isDirectory()
-                 && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: nsFilename];
+                 && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: juceStringToNS (f.getFullPathName())];
     }
 
     void panelSelectionDidChange (id sender)
@@ -359,8 +363,8 @@ private:
         {
             addIvar<Native*> ("cppObject");
 
-            addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename);
-            addMethod (@selector (panelSelectionDidChange:),  panelSelectionDidChange);
+            addMethod (@selector (panel:shouldEnableURL:),   shouldEnableURL);
+            addMethod (@selector (panelSelectionDidChange:), panelSelectionDidChange);
 
             addProtocol (@protocol (NSOpenSavePanelDelegate));
 
@@ -368,18 +372,14 @@ private:
         }
 
     private:
-        static BOOL shouldShowFilename (id self, SEL, id /*sender*/, NSString* filename)
+        static BOOL shouldEnableURL (id self, SEL, id /*sender*/, NSURL* url)
         {
-            auto* _this = getIvar<Native*> (self, "cppObject");
-
-            return _this->shouldShowFilename (nsStringToJuce (filename)) ? YES : NO;
+            return getIvar<Native*> (self, "cppObject")->shouldShowURL (urlFromNSURL (url));
         }
 
         static void panelSelectionDidChange (id self, SEL, id sender)
         {
-            auto* _this = getIvar<Native*> (self, "cppObject");
-
-            _this->panelSelectionDidChange (sender);
+            getIvar<Native*> (self, "cppObject")->panelSelectionDidChange (sender);
         }
     };
 
