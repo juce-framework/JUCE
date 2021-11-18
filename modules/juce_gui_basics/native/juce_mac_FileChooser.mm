@@ -82,8 +82,9 @@ public:
         filters.trim();
         filters.removeEmptyStrings();
 
-        NSString* nsTitle = juceStringToNS (owner.title);
+        auto* nsTitle = juceStringToNS (owner.title);
         [panel setTitle: nsTitle];
+        [panel setReleasedWhenClosed: YES];
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         [panel setAllowedFileTypes: createAllowedTypesArray (filters)];
@@ -153,22 +154,14 @@ public:
             if (nsViewPreview != nil)
             {
                 [panel setAccessoryView: nil];
-
                 [nsViewPreview release];
-
-                nsViewPreview = nil;
-                preview = nullptr;
             }
 
             [panel close];
-            [panel release];
         }
 
         if (delegate != nil)
-        {
             [delegate release];
-            delegate = nil;
-        }
     }
 
     void launch() override
@@ -179,10 +172,17 @@ public:
             addToDesktop (0);
 
             enterModalState (true);
-            [panel beginWithCompletionHandler:CreateObjCBlock (this, &Native::finished)];
 
-            if (preview != nullptr)
-                preview->toFront (true);
+            MessageManager::callAsync ([ref = SafePointer<Native> (this)]
+            {
+                if (ref == nullptr)
+                    return;
+
+                [ref->panel beginWithCompletionHandler: CreateObjCBlock (ref.getComponent(), &Native::finished)];
+
+                if (ref->preview != nullptr)
+                    ref->preview->toFront (true);
+            });
         }
     }
 
