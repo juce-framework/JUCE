@@ -86,9 +86,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
  #include <juce_core/native/juce_mac_CFHelpers.h>
 #endif
 
-//==============================================================================
 #if JucePlugin_Enable_ARA
-
  #include "../ARA/juce_AudioProcessor_ARAExtensions.h"
 
  #include <ARA_API/ARAVST3.h>
@@ -100,7 +98,6 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
  DEF_CLASS_IID(ARA::IPlugInEntryPoint)
  DEF_CLASS_IID(ARA::IPlugInEntryPoint2)
  DEF_CLASS_IID(ARA::IMainFactory)
-
 #endif
 
 
@@ -656,10 +653,10 @@ class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
                                public Vst::IUnitInfo,
                                public Vst::ChannelContext::IInfoListener,
+                               public AudioProcessorListener,
                              #if JucePlugin_Enable_ARA
                                public Presonus::IPlugInViewEmbedding,
                              #endif
-                               public AudioProcessorListener,
                                private ComponentRestarter::Listener
 {
 public:
@@ -3311,12 +3308,11 @@ private:
                                              UniqueBase<Vst::IUnitInfo>{},
                                              UniqueBase<Vst::IConnectionPoint>{},
                                              UniqueBase<Vst::IProcessContextRequirements>{},
-                                             SharedBase<FUnknown, Vst::IComponent>{}
                                             #if JucePlugin_Enable_ARA
-                                             , UniqueBase<ARA::IPlugInEntryPoint>{}
-                                             , UniqueBase<ARA::IPlugInEntryPoint2>{}
+                                             UniqueBase<ARA::IPlugInEntryPoint>{},
+                                             UniqueBase<ARA::IPlugInEntryPoint2>{},
                                             #endif
-                                             );
+                                             SharedBase<FUnknown, Vst::IComponent>{});
 
         if (result.isOk())
             return result;
