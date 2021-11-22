@@ -164,6 +164,14 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
         return;
     }
 
+    if (eventType == InternalAccessibilityEvent::windowOpened
+        || eventType == InternalAccessibilityEvent::windowClosed)
+    {
+        if (auto* peer = handler.getComponent().getPeer())
+            if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) == 0)
+                return;
+    }
+
     auto event = [eventType]() -> EVENTID
     {
         switch (eventType)
