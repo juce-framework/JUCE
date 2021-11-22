@@ -300,11 +300,16 @@ void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
 
         parent->openFile (newProjectFileToOpen, [parent, openInIDE] (bool openedSuccessfully)
         {
-            if (parent == nullptr)
+            if (! (openedSuccessfully && parent != nullptr && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes))
                 return;
 
-            if (openedSuccessfully && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes)
-                ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveAndOpenInIDE, false);
+            // The project component knows how to process the saveAndOpenInIDE command, but the
+            // main application does not. In order to process the command successfully, we need
+            // to ensure that the project content component has focus.
+            auto& manager = ProjucerApplication::getApp().getCommandManager();
+            manager.setFirstCommandTarget (parent->getProjectContentComponent());
+            ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveAndOpenInIDE, false);
+            manager.setFirstCommandTarget (nullptr);
         });
     });
 }
