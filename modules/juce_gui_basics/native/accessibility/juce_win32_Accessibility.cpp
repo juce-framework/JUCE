@@ -63,14 +63,14 @@ public:
 
     ~AccessibilityNativeImpl()
     {
+        ComSmartPtr<IRawElementProviderSimple> provider;
+        accessibilityElement->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
+
         accessibilityElement->invalidateElement();
         --providerCount;
 
         if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
         {
-            ComSmartPtr<IRawElementProviderSimple> provider;
-            accessibilityElement->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
-
             uiaWrapper->disconnectProvider (provider);
 
             if (providerCount == 0)
