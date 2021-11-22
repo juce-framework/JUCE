@@ -512,13 +512,15 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
                 return;
             }
 
-            SafePointer<ProjectContentComponent> safeThis { this };
-            project->saveAsync (true, true, [safeThis] (Project::SaveResult r)
-                                {
-                                    if (safeThis != nullptr && r == Project::SaveResult::savedOk)
-                                        safeThis->openInSelectedIDE (false);
-                                });
-            return;
+            if (project->hasChangedSinceSaved())
+            {
+                project->saveAsync (true, true, [safeThis = SafePointer<ProjectContentComponent> { this }] (Project::SaveResult r)
+                {
+                    if (safeThis != nullptr && r == Project::SaveResult::savedOk)
+                        safeThis->openInSelectedIDE (false);
+                });
+                return;
+            }
         }
 
         project->openProjectInIDE (*selectedExporter);
