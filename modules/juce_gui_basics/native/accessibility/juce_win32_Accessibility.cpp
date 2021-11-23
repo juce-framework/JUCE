@@ -134,7 +134,7 @@ void sendAccessibilityAutomationEvent (const AccessibilityHandler& handler, EVEN
 {
     jassert (event != EVENTID{});
 
-    getProviderWithCheckedWrapper (handler,  [event] (WindowsUIAWrapper* uiaWrapper, ComSmartPtr<IRawElementProviderSimple>& provider)
+    getProviderWithCheckedWrapper (handler, [event] (WindowsUIAWrapper* uiaWrapper, ComSmartPtr<IRawElementProviderSimple>& provider)
     {
         uiaWrapper->raiseAutomationEvent (provider, event);
     });
