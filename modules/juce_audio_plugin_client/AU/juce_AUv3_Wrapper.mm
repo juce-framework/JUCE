@@ -867,6 +867,9 @@ public:
         hostMusicalContextCallback = [getAudioUnit() musicalContextBlock];
         hostTransportStateCallback = [getAudioUnit() transportStateBlock];
 
+        if (@available (macOS 10.13, iOS 11.0, *))
+            midiOutputEventBlock = [au MIDIOutputEventBlock];
+
         reset();
 
         return true;
@@ -874,6 +877,8 @@ public:
 
     void deallocateRenderResources() override
     {
+        midiOutputEventBlock = nullptr;
+
         hostMusicalContextCallback = nullptr;
         hostTransportStateCallback = nullptr;
 
@@ -1602,7 +1607,7 @@ private:
            #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
             if (@available (macOS 10.13, iOS 11.0, *))
             {
-                if (auto midiOut = [au MIDIOutputEventBlock])
+                if (auto midiOut = midiOutputEventBlock)
                     for (const auto metadata : midiMessages)
                         midiOut (metadata.samplePosition, 0, metadata.numBytes, metadata.data);
             }
@@ -1772,6 +1777,7 @@ private:
 
     OwnedArray<BusBuffer> inBusBuffers, outBusBuffers;
     MidiBuffer midiMessages;
+    AUMIDIOutputEventBlock midiOutputEventBlock = nullptr;
 
    #if JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED
     ump::ToBytestreamDispatcher converter { 2048 };
