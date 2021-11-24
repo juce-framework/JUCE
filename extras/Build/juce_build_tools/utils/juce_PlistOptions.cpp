@@ -206,6 +206,7 @@ namespace build_tools
                     addPlistDictionaryKey (*dict2, "CFBundleTypeRole", "Editor");
                     addPlistDictionaryKey (*dict2, "CFBundleTypeIconFile", "Icon");
                     addPlistDictionaryKey (*dict2, "NSPersistentStoreTypeKey", "XML");
+                    addPlistDictionaryKey (*dict2, "LSHandlerRank", "Default");
                 }
 
                 arrayTag->createNewChildElement ("string")->addTextElement (ex);
