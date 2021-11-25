@@ -1386,7 +1386,7 @@ public:
           by calling getWantsKeyboardFocus), it gets it.
         - if the component itself doesn't want focus, it will try to pass it
           on to whichever of its children is the default component, as determined by
-          the getDefaultComponent() implemetation of the ComponentTraverser returned
+          the getDefaultComponent() implementation of the ComponentTraverser returned
           by createKeyboardFocusTraverser().
         - if none of its children want focus at all, it will pass it up to its
           parent instead, unless it's a top-level component without a parent,
@@ -1427,7 +1427,7 @@ public:
     /** Tries to move the keyboard focus to one of this component's siblings.
 
         This will try to move focus to either the next or previous component, as
-        determined by the getNextComponent() and getPreviousComponent() implemetations
+        determined by the getNextComponent() and getPreviousComponent() implementations
         of the ComponentTraverser returned by createKeyboardFocusTraverser().
 
         This is the method that is used when shifting focus by pressing the tab key.
