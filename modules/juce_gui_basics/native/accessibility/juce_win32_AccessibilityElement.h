@@ -70,7 +70,7 @@ private:
     AccessibilityHandler& accessibilityHandler;
 
     static int idCounter;
-    std::array<int, 2> rtid { UiaAppendRuntimeId,  ++idCounter };
+    std::array<int, 2> rtid { UiaAppendRuntimeId, ++idCounter };
     bool valid = true;
 
     //==============================================================================

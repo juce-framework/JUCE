@@ -63,14 +63,14 @@ public:
 
     ~AccessibilityNativeImpl()
     {
+        ComSmartPtr<IRawElementProviderSimple> provider;
+        accessibilityElement->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
+
         accessibilityElement->invalidateElement();
         --providerCount;
 
         if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
         {
-            ComSmartPtr<IRawElementProviderSimple> provider;
-            accessibilityElement->QueryInterface (IID_PPV_ARGS (provider.resetAndGetPointerAddress()));
-
             uiaWrapper->disconnectProvider (provider);
 
             if (providerCount == 0)
@@ -134,7 +134,7 @@ void sendAccessibilityAutomationEvent (const AccessibilityHandler& handler, EVEN
 {
     jassert (event != EVENTID{});
 
-    getProviderWithCheckedWrapper (handler,  [event] (WindowsUIAWrapper* uiaWrapper, ComSmartPtr<IRawElementProviderSimple>& provider)
+    getProviderWithCheckedWrapper (handler, [event] (WindowsUIAWrapper* uiaWrapper, ComSmartPtr<IRawElementProviderSimple>& provider)
     {
         uiaWrapper->raiseAutomationEvent (provider, event);
     });
@@ -162,6 +162,14 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
             sendAccessibilityAutomationEvent (*parent, UIA_LayoutInvalidatedEventId);
 
         return;
+    }
+
+    if (eventType == InternalAccessibilityEvent::windowOpened
+        || eventType == InternalAccessibilityEvent::windowClosed)
+    {
+        if (auto* peer = handler.getComponent().getPeer())
+            if ((peer->getStyleFlags() & ComponentPeer::windowHasTitleBar) == 0)
+                return;
     }
 
     auto event = [eventType]() -> EVENTID

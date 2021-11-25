@@ -633,39 +633,39 @@ public:
         info.ppqPosition = (ti->flags & Vst2::kVstPpqPosValid) != 0 ? ti->ppqPos : 0.0;
         info.ppqPositionOfLastBarStart = (ti->flags & Vst2::kVstBarsValid) != 0 ? ti->barStartPos : 0.0;
 
-        if ((ti->flags & Vst2::kVstSmpteValid) != 0)
+        std::tie (info.frameRate, info.editOriginTime) = [ti]
         {
-            AudioPlayHead::FrameRateType rate = AudioPlayHead::fpsUnknown;
-            double fps = 1.0;
+            if ((ti->flags & Vst2::kVstSmpteValid) == 0)
+                return std::make_tuple (FrameRate(), 0.0);
 
-            switch (ti->smpteFrameRate)
+            const auto rate = [&]
             {
-                case Vst2::kVstSmpte239fps:       rate = AudioPlayHead::fps23976;    fps = 24.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte24fps:        rate = AudioPlayHead::fps24;       fps = 24.0;  break;
-                case Vst2::kVstSmpte25fps:        rate = AudioPlayHead::fps25;       fps = 25.0;  break;
-                case Vst2::kVstSmpte2997fps:      rate = AudioPlayHead::fps2997;     fps = 30.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte30fps:        rate = AudioPlayHead::fps30;       fps = 30.0;  break;
-                case Vst2::kVstSmpte2997dfps:     rate = AudioPlayHead::fps2997drop; fps = 30.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte30dfps:       rate = AudioPlayHead::fps30drop;   fps = 30.0;  break;
+                switch (ti->smpteFrameRate)
+                {
+                    case Vst2::kVstSmpte24fps:          return FrameRate().withBaseRate (24);
+                    case Vst2::kVstSmpte239fps:         return FrameRate().withBaseRate (24).withPullDown();
 
-                case Vst2::kVstSmpteFilm16mm:
-                case Vst2::kVstSmpteFilm35mm:     fps = 24.0; break;
+                    case Vst2::kVstSmpte25fps:          return FrameRate().withBaseRate (25);
+                    case Vst2::kVstSmpte249fps:         return FrameRate().withBaseRate (25).withPullDown();
 
-                case Vst2::kVstSmpte249fps:       fps = 25.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte599fps:       fps = 60.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte60fps:        fps = 60; break;
+                    case Vst2::kVstSmpte30fps:          return FrameRate().withBaseRate (30);
+                    case Vst2::kVstSmpte30dfps:         return FrameRate().withBaseRate (30).withDrop();
+                    case Vst2::kVstSmpte2997fps:        return FrameRate().withBaseRate (30).withPullDown();
+                    case Vst2::kVstSmpte2997dfps:       return FrameRate().withBaseRate (30).withPullDown().withDrop();
 
-                default:                          jassertfalse; // unknown frame-rate..
-            }
+                    case Vst2::kVstSmpte60fps:          return FrameRate().withBaseRate (60);
+                    case Vst2::kVstSmpte599fps:         return FrameRate().withBaseRate (60).withPullDown();
 
-            info.frameRate = rate;
-            info.editOriginTime = ti->smpteOffset / (80.0 * fps);
-        }
-        else
-        {
-            info.frameRate = AudioPlayHead::fpsUnknown;
-            info.editOriginTime = 0;
-        }
+                    case Vst2::kVstSmpteFilm16mm:
+                    case Vst2::kVstSmpteFilm35mm:       return FrameRate().withBaseRate (24);
+                }
+
+                return FrameRate();
+            }();
+
+            const auto effectiveRate = rate.getEffectiveRate();
+            return std::make_tuple (rate, effectiveRate != 0.0 ? ti->smpteOffset / (80.0 * effectiveRate) : 0.0);
+        }();
 
         info.isRecording = (ti->flags & Vst2::kVstTransportRecording) != 0;
         info.isPlaying   = (ti->flags & (Vst2::kVstTransportRecording | Vst2::kVstTransportPlaying)) != 0;

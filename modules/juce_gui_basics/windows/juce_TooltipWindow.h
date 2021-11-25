@@ -84,7 +84,13 @@ public:
     */
     void setMillisecondsBeforeTipAppears (int newTimeMs = 700) noexcept;
 
-    /** Can be called to manually force a tip to be shown at a particular location. */
+    /** Can be called to manually force a tip to be shown at a particular location.
+
+        The tip will be shown until hideTip() is called, or a dismissal mouse event
+        occurs.
+
+        @see hideTip
+    */
     void displayTip (Point<int> screenPosition, const String& text);
 
     /** Can be called to manually hide the tip if it's showing. */

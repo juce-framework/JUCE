@@ -264,8 +264,6 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
     {
         VariantHelpers::clear (pRetVal);
 
-        const auto fragmentRoot = isFragmentRoot();
-
         const auto role    = accessibilityHandler.getRole();
         const auto state   = accessibilityHandler.getCurrentState();
         const auto ignored = accessibilityHandler.isIgnored();
@@ -329,7 +327,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
                 VariantHelpers::setInt ((int) GetCurrentProcessId(), pRetVal);
                 break;
             case UIA_NativeWindowHandlePropertyId:
-                if (fragmentRoot)
+                if (isFragmentRoot())
                     VariantHelpers::setInt ((int) (pointer_sized_int) accessibilityHandler.getComponent().getWindowHandle(), pRetVal);
 
                 break;
