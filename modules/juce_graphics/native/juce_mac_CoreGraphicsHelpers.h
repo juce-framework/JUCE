@@ -102,7 +102,7 @@ CGContextRef juce_getImageContext (const Image&);
 #endif
 
 #if JUCE_MAC
- NSImage* imageToNSImage (const Image& image, float scaleFactor = 1.0f);
+ NSImage* imageToNSImage (const ScaledImage& image);
 #endif
 
 } // namespace juce

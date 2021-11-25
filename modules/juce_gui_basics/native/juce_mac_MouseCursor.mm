@@ -111,7 +111,7 @@ private:
     }
     static NSCursor* createCursor (const CustomMouseCursorInfo& info)
     {
-        return fromNSImage (imageToNSImage (info.image, info.scaleFactor),
+        return fromNSImage (imageToNSImage (info.image),
                             NSMakePoint (info.hotspot.x, info.hotspot.y));
     }
 
@@ -125,7 +125,7 @@ private:
             {
                 case NormalCursor:
                 case ParentCursor:          c = [NSCursor arrowCursor]; break;
-                case NoCursor:              return createCursor ({ Image (Image::ARGB, 8, 8, true), {} });
+                case NoCursor:              return createCursor ({ ScaledImage (Image (Image::ARGB, 8, 8, true)), {} });
                 case DraggingHandCursor:    c = [NSCursor openHandCursor]; break;
                 case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
                 case IBeamCursor:           c = [NSCursor IBeamCursor]; break;

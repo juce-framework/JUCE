@@ -674,7 +674,9 @@ public:
 private:
     static Cursor makeHandle (const CustomMouseCursorInfo& info)
     {
-        return XWindowSystem::getInstance()->createCustomMouseCursorInfo (info.image, info.hotspot);
+        const auto image = info.image.getImage();
+        return XWindowSystem::getInstance()->createCustomMouseCursorInfo (image.rescaled ((int) (image.getWidth()  / info.image.getScale()),
+                                                                                          (int) (image.getHeight() / info.image.getScale())), info.hotspot);
     }
 
     static Cursor makeHandle (MouseCursor::StandardCursorType type)

@@ -127,15 +127,8 @@ namespace juce
 
     struct CustomMouseCursorInfo
     {
-        CustomMouseCursorInfo() = default;
-
-        CustomMouseCursorInfo (const Image& im, Point<int> hs, float scale = 1.0f) noexcept
-            : image (im), hotspot (hs), scaleFactor (scale)
-        {}
-
-        Image image;
+        ScaledImage image;
         Point<int> hotspot;
-        float scaleFactor = 1.0f;
     };
 } // namespace juce
 

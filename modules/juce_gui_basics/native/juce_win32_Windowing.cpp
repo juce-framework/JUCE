@@ -5197,14 +5197,15 @@ private:
             if (iter != cursorsBySize.end())
                 return iter->second;
 
-            const auto imgW = jmax (1, info.image.getWidth());
-            const auto imgH = jmax (1, info.image.getHeight());
+            const auto img = info.image.getImage();
+            const auto imgW = jmax (1, img.getWidth());
+            const auto imgH = jmax (1, img.getHeight());
 
             const auto scale = (float) size / (float) unityCursorSize;
             const auto scaleToUse = scale * jmin (1.0f, jmin ((float) unityCursorSize / (float) imgW,
-                                                              (float) unityCursorSize / (float) imgH)) / info.scaleFactor;
-            const auto rescaled = info.image.rescaled (roundToInt (scaleToUse * (float) imgW),
-                                                       roundToInt (scaleToUse * (float) imgH));
+                                                              (float) unityCursorSize / (float) imgH)) / info.image.getScale();
+            const auto rescaled = img.rescaled (roundToInt (scaleToUse * (float) imgW),
+                                                roundToInt (scaleToUse * (float) imgH));
             const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) info.hotspot.x));
             const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) info.hotspot.y));
 
@@ -5301,7 +5302,7 @@ private:
                       16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-                return makeHandle ({ ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 } });
+                return makeHandle ({ ScaledImage (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData))), { 8, 7 } });
             }
 
             case CopyingCursor:
@@ -5312,7 +5313,7 @@ private:
                       12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,252,114,147,74,83,
                       5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
 
-                return makeHandle ({ ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData)), { 1, 3 } });
+                return makeHandle ({ ScaledImage (ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData))), { 1, 3 } });
             }
 
             case NumStandardCursorTypes: JUCE_FALLTHROUGH
