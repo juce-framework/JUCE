@@ -1468,6 +1468,12 @@ public:
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
     }
 
+    void setHasChangedSinceSaved (bool b) override
+    {
+        if (! isSharedWindow)
+            [window setDocumentEdited: b];
+    }
+
     //==============================================================================
     NSWindow* window = nil;
     NSView* view = nil;
