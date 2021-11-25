@@ -23,6 +23,7 @@
   ==============================================================================
 */
 
+#include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_TargetPlatform.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
@@ -756,21 +757,24 @@ public:
         info.ppqLoopStart = 0;
         info.ppqLoopEnd = 0;
 
-        double framesPerSec = 24.0;
-
-        switch (fTimeCodeInfo.mFrameRate)
+        info.frameRate = [this]
         {
-            case ficFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
-            case ficFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
-            case ficFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 30.0 * 1000.0 / 1001.0; break;
-            case ficFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 30.0 * 1000.0 / 1001.0; break;
-            case ficFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
-            case ficFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
-            case ficFrameRate_23976:         info.frameRate = AudioPlayHead::fps23976;    framesPerSec = 24.0 * 1000.0 / 1001.0; break;
-            default:                         info.frameRate = AudioPlayHead::fpsUnknown;  break;
-        }
+            switch (fTimeCodeInfo.mFrameRate)
+            {
+                case ficFrameRate_24Frame:              return FrameRate().withBaseRate (24);
+                case ficFrameRate_23976:                return FrameRate().withBaseRate (24).withPullDown();
+                case ficFrameRate_25Frame:              return FrameRate().withBaseRate (25);
+                case ficFrameRate_30NonDrop:            return FrameRate().withBaseRate (30);
+                case ficFrameRate_30DropFrame:          return FrameRate().withBaseRate (30).withDrop();
+                case ficFrameRate_2997NonDrop:          return FrameRate().withBaseRate (30).withPullDown();
+                case ficFrameRate_2997DropFrame:        return FrameRate().withBaseRate (30).withPullDown().withDrop();
+            }
 
-        info.editOriginTime = fTimeCodeInfo.mFrameOffset / framesPerSec;
+            return FrameRate();
+        }();
+
+        const auto effectiveRate = info.frameRate.getEffectiveRate();
+        info.editOriginTime = effectiveRate != 0.0 ? fTimeCodeInfo.mFrameOffset / effectiveRate : 0.0;
 
         return true;
     }

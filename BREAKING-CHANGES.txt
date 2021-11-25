@@ -6,6 +6,26 @@ develop
 
 Change
 ------
+AudioFrameRate::frameRate is now a class type instead of an enum.
+
+Possible Issues
+---------------
+Code that read the old enum value will not compile.
+
+Workaround
+----------
+Call frameRate.getType() to fetch the old enum type. Alternatively, use the new
+getBaseRate(), isDrop(), isPullDown(), and getEffectiveRate() functions. The
+new functions provide a more accurate description of the host's frame rate.
+
+Rationale
+---------
+The old enum-based interface was not flexible enough to describe all the frame
+rates that might be reported by a plugin host.
+
+
+Change
+------
 FlexItem::alignSelf now defaults to "autoAlign" rather than "stretch".
 
 Possible Issues

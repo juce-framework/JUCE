@@ -30,11 +30,13 @@ struct FlexBoxLayoutCalculation
 {
     using Coord = double;
 
+    enum class Axis { main, cross };
+
     FlexBoxLayoutCalculation (FlexBox& fb, Coord w, Coord h)
-       : owner (fb), parentWidth (w), parentHeight (h), numItems (owner.items.size()),
-         isRowDirection (fb.flexDirection == FlexBox::Direction::row
-                      || fb.flexDirection == FlexBox::Direction::rowReverse),
-         containerLineLength (isRowDirection ? parentWidth : parentHeight)
+        : owner (fb), parentWidth (w), parentHeight (h), numItems (owner.items.size()),
+          isRowDirection (fb.flexDirection == FlexBox::Direction::row
+                       || fb.flexDirection == FlexBox::Direction::rowReverse),
+          containerLineLength (getContainerSize (Axis::main))
     {
         lineItems.calloc (numItems * numItems);
         lineInfo.calloc (numItems);
@@ -58,22 +60,6 @@ struct FlexBoxLayoutCalculation
             lockedMarginRight  = getValueOrZeroIfAuto (item->margin.right);
             lockedMarginTop    = getValueOrZeroIfAuto (item->margin.top);
             lockedMarginBottom = getValueOrZeroIfAuto (item->margin.bottom);
-        }
-
-        void setWidthChecked (Coord newWidth) noexcept
-        {
-            if (isAssigned (item->maxWidth))  newWidth = jmin (newWidth, static_cast<Coord> (item->maxWidth));
-            if (isAssigned (item->minWidth))  newWidth = jmax (newWidth, static_cast<Coord> (item->minWidth));
-
-            lockedWidth = newWidth;
-        }
-
-        void setHeightChecked (Coord newHeight) noexcept
-        {
-            if (isAssigned (item->maxHeight))  newHeight = jmin (newHeight, (Coord) item->maxHeight);
-            if (isAssigned (item->minHeight))  newHeight = jmax (newHeight, (Coord) item->minHeight);
-
-            lockedHeight = newHeight;
         }
     };
 
@@ -103,6 +89,65 @@ struct FlexBoxLayoutCalculation
     static Coord getValueOrZeroIfAuto (Coord value) noexcept { return isAuto (value) ? Coord() : value; }
 
     //==============================================================================
+    bool isSingleLine() const { return owner.flexWrap == FlexBox::Wrap::noWrap; }
+
+    template <typename Value>
+    Value& pickForAxis (Axis axis, Value& x, Value& y) const
+    {
+        return (isRowDirection ? axis == Axis::main : axis == Axis::cross) ? x : y;
+    }
+
+    auto& getStartMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->margin.left, item.item->margin.top);
+    }
+
+    auto& getEndMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->margin.right, item.item->margin.bottom);
+    }
+
+    auto& getStartLockedMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.lockedMarginLeft, item.lockedMarginTop);
+    }
+
+    auto& getEndLockedMargin (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.lockedMarginRight, item.lockedMarginBottom);
+    }
+
+    auto& getLockedSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.lockedWidth, item.lockedHeight);
+    }
+
+    auto& getPreferredSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.preferredWidth, item.preferredHeight);
+    }
+
+    Coord getContainerSize (Axis axis) const
+    {
+        return pickForAxis (axis, parentWidth, parentHeight);
+    }
+
+    auto& getItemSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->width, item.item->height);
+    }
+
+    auto& getMinSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->minWidth, item.item->minHeight);
+    }
+
+    auto& getMaxSize (Axis axis, ItemWithState& item) const
+    {
+        return pickForAxis (axis, item.item->maxWidth, item.item->maxHeight);
+    }
+
+    //==============================================================================
     void createStates()
     {
         itemStates.ensureStorageAllocated (numItems);
@@ -115,14 +160,14 @@ struct FlexBoxLayoutCalculation
 
         for (auto& item : itemStates)
         {
-            item.preferredWidth  = getPreferredWidth  (item);
-            item.preferredHeight = getPreferredHeight (item);
+            for (auto& axis : { Axis::main, Axis::cross })
+                getPreferredSize (axis, item) = computePreferredSize (axis, item);
         }
     }
 
     void initialiseItems() noexcept
     {
-        if (owner.flexWrap == FlexBox::Wrap::noWrap)  // for single-line, all items go in line 1
+        if (isSingleLine())  // for single-line, all items go in line 1
         {
             lineInfo[0].numItems = numItems;
             int i = 0;
@@ -143,7 +188,7 @@ struct FlexBoxLayoutCalculation
             {
                 item.resetItemLockedSize();
 
-                const auto flexitemLength = getItemLength (item);
+                const auto flexitemLength = getItemMainSize (item);
 
                 if (flexitemLength > currentLength)
                 {
@@ -195,19 +240,11 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (isRowDirection)
-                {
-                    if (isAuto (item.item->margin.left))    ++allFlexGrow;
-                    if (isAuto (item.item->margin.right))   ++allFlexGrow;
-                }
-                else
-                {
-                    if (isAuto (item.item->margin.top))     ++allFlexGrow;
-                    if (isAuto (item.item->margin.bottom))  ++allFlexGrow;
-                }
+                if (isAuto (getStartMargin (Axis::main, item))) ++allFlexGrow;
+                if (isAuto (getEndMargin   (Axis::main, item))) ++allFlexGrow;
             }
 
-            auto changeUnitWidth = remainingLength / allFlexGrow;
+            const auto changeUnitWidth = remainingLength / allFlexGrow;
 
             if (changeUnitWidth > 0)
             {
@@ -215,16 +252,11 @@ struct FlexBoxLayoutCalculation
                 {
                     auto& item = getItem (column, row);
 
-                    if (isRowDirection)
-                    {
-                        if (isAuto (item.item->margin.left))    item.lockedMarginLeft  = changeUnitWidth;
-                        if (isAuto (item.item->margin.right))   item.lockedMarginRight = changeUnitWidth;
-                    }
-                    else
-                    {
-                        if (isAuto (item.item->margin.top))     item.lockedMarginTop    = changeUnitWidth;
-                        if (isAuto (item.item->margin.bottom))  item.lockedMarginBottom = changeUnitWidth;
-                    }
+                    if (isAuto (getStartMargin (Axis::main, item)))
+                        getStartLockedMargin (Axis::main, item) = changeUnitWidth;
+
+                    if (isAuto (getEndMargin (Axis::main, item)))
+                        getEndLockedMargin   (Axis::main, item) = changeUnitWidth;
                 }
             }
         }
@@ -232,20 +264,25 @@ struct FlexBoxLayoutCalculation
 
     void calculateCrossSizesByLine() noexcept
     {
-        for (int row = 0; row < numberOfRows; ++row)
+        // https://www.w3.org/TR/css-flexbox-1/#algo-cross-line
+        // If the flex container is single-line and has a definite cross size, the cross size of the
+        // flex line is the flex container’s inner cross size.
+        if (isSingleLine())
         {
-            Coord maxSize = 0;
-            const auto numColumns = lineInfo[row].numItems;
-
-            for (int column = 0; column < numColumns; ++column)
+            lineInfo[0].crossSize = getContainerSize (Axis::cross);
+        }
+        else
+        {
+            for (int row = 0; row < numberOfRows; ++row)
             {
-                auto& item = getItem (column, row);
+                Coord maxSize = 0;
+                const auto numColumns = lineInfo[row].numItems;
 
-                maxSize = jmax (maxSize, isRowDirection ? item.lockedHeight + item.lockedMarginTop  + item.lockedMarginBottom
-                                                        : item.lockedWidth  + item.lockedMarginLeft + item.lockedMarginRight);
+                for (int column = 0; column < numColumns; ++column)
+                    maxSize = jmax (maxSize, getItemCrossSize (getItem (column, row)));
+
+                lineInfo[row].crossSize = maxSize;
             }
-
-            lineInfo[row].crossSize = maxSize;
         }
     }
 
@@ -270,7 +307,7 @@ struct FlexBoxLayoutCalculation
 
     void alignLinesPerAlignContent() noexcept
     {
-        containerCrossLength = isRowDirection ? parentHeight : parentWidth;
+        containerCrossLength = getContainerSize (Axis::cross);
 
         if (owner.alignContent == FlexBox::AlignContent::flexStart)
         {
@@ -347,26 +384,22 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (isRowDirection)
+                getStartLockedMargin (Axis::cross, item) = [&]
                 {
-                    if (isAuto (item.item->margin.top) && isAuto (item.item->margin.bottom))
-                        item.lockedMarginTop = (crossSizeForLine - item.lockedHeight) / 2;
-                    else if (isAuto (item.item->margin.top))
-                        item.lockedMarginTop = crossSizeForLine - item.lockedHeight - item.item->margin.bottom;
-                }
-                else if (isAuto (item.item->margin.left) && isAuto (item.item->margin.right))
-                {
-                    item.lockedMarginLeft = jmax (Coord(), (crossSizeForLine - item.lockedWidth) / 2);
-                }
-                else if (isAuto (item.item->margin.top))
-                {
-                    item.lockedMarginLeft = jmax (Coord(), crossSizeForLine - item.lockedHeight - item.item->margin.bottom);
-                }
+                    if (isAuto (getStartMargin (Axis::cross, item)) && isAuto (getEndMargin (Axis::cross, item)))
+                        return (crossSizeForLine - getLockedSize (Axis::cross, item)) / 2;
+
+                    if (isAuto (getStartMargin (Axis::cross, item)))
+                        return crossSizeForLine - getLockedSize (Axis::cross, item) - getEndMargin (Axis::cross, item);
+
+                    return getStartLockedMargin (Axis::cross, item);
+                }();
             }
         }
     }
 
-    void alignItemsInCrossAxisInLinesPerAlignItems() noexcept
+    // Align all flex items along the cross-axis per align-self, if neither of the item’s cross-axis margins are auto.
+    void alignItemsInCrossAxisInLinesPerAlignSelf() noexcept
     {
         for (int row = 0; row < numberOfRows; ++row)
         {
@@ -377,86 +410,65 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (item.item->alignSelf == FlexItem::AlignSelf::autoAlign)
+                if (isAuto (getStartMargin (Axis::cross, item)) || isAuto (getEndMargin (Axis::cross, item)))
+                    continue;
+
+                const auto alignment = [&]
                 {
-                    if (owner.alignItems == FlexBox::AlignItems::stretch)
+                    switch (item.item->alignSelf)
                     {
-                        item.lockedMarginTop = item.item->margin.top;
-
-                        if (isRowDirection)
-                            item.setHeightChecked (lineSize - item.item->margin.top - item.item->margin.bottom);
-                        else
-                            item.setWidthChecked (lineSize - item.item->margin.left - item.item->margin.right);
+                        case FlexItem::AlignSelf::stretch:      return FlexBox::AlignItems::stretch;
+                        case FlexItem::AlignSelf::flexStart:    return FlexBox::AlignItems::flexStart;
+                        case FlexItem::AlignSelf::flexEnd:      return FlexBox::AlignItems::flexEnd;
+                        case FlexItem::AlignSelf::center:       return FlexBox::AlignItems::center;
+                        case FlexItem::AlignSelf::autoAlign:    break;
                     }
-                    else if (owner.alignItems == FlexBox::AlignItems::flexStart)
-                    {
-                        item.lockedMarginTop = item.item->margin.top;
-                    }
-                    else if (owner.alignItems == FlexBox::AlignItems::flexEnd)
-                    {
-                        if (isRowDirection)
-                            item.lockedMarginTop = lineSize - item.lockedHeight - item.item->margin.bottom;
-                        else
-                            item.lockedMarginLeft = lineSize - item.lockedWidth - item.item->margin.right;
-                    }
-                    else if (owner.alignItems == FlexBox::AlignItems::center)
-                    {
-                        if (isRowDirection)
-                            item.lockedMarginTop = (lineSize - item.lockedHeight - item.item->margin.top - item.item->margin.bottom) / 2;
-                        else
-                            item.lockedMarginLeft = (lineSize - item.lockedWidth - item.item->margin.left - item.item->margin.right) / 2;
-                    }
-                }
-            }
-        }
-    }
 
-    void alignLinesPerAlignSelf() noexcept
-    {
-        for (int row = 0; row < numberOfRows; ++row)
-        {
-            const auto numColumns = lineInfo[row].numItems;
-            const auto lineSize = lineInfo[row].crossSize;
+                    return owner.alignItems;
+                }();
 
-            for (int column = 0; column < numColumns; ++column)
-            {
-                auto& item = getItem (column, row);
-
-                if (! isAuto (item.item->margin.top))
+                getStartLockedMargin (Axis::cross, item) = [&]
                 {
-                    if (item.item->alignSelf == FlexItem::AlignSelf::flexStart)
+                    switch (alignment)
                     {
-                        if (isRowDirection)
-                            item.lockedMarginTop = item.item->margin.top;
-                        else
-                            item.lockedMarginLeft = item.item->margin.left;
-                    }
-                    else if (item.item->alignSelf == FlexItem::AlignSelf::flexEnd)
-                    {
-                        if (isRowDirection)
-                            item.lockedMarginTop = lineSize - item.lockedHeight - item.item->margin.bottom;
-                        else
-                            item.lockedMarginLeft = lineSize - item.lockedWidth - item.item->margin.right;
-                    }
-                    else if (item.item->alignSelf == FlexItem::AlignSelf::center)
-                    {
-                        if (isRowDirection)
-                            item.lockedMarginTop = item.item->margin.top + (lineSize - item.lockedHeight - item.item->margin.top - item.item->margin.bottom) / 2;
-                        else
-                            item.lockedMarginLeft = item.item->margin.left + (lineSize - item.lockedWidth - item.item->margin.left - item.item->margin.right) / 2;
-                    }
-                    else if (item.item->alignSelf == FlexItem::AlignSelf::stretch)
-                    {
-                        item.lockedMarginTop  = item.item->margin.top;
-                        item.lockedMarginLeft = item.item->margin.left;
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-flex-start
+                        // The cross-start margin edge of the flex item is placed flush with the
+                        // cross-start edge of the line.
+                        case FlexBox::AlignItems::flexStart:
+                            return (Coord) getStartMargin (Axis::cross, item);
 
-                        if (isRowDirection)
-                            item.setHeightChecked (isAssigned (item.item->height) ? getPreferredHeight (item)
-                                                                                  : lineSize - item.item->margin.top - item.item->margin.bottom);
-                        else
-                            item.setWidthChecked (isAssigned (item.item->width) ? getPreferredWidth (item)
-                                                                                : lineSize - item.item->margin.left - item.item->margin.right);
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-flex-end
+                        // The cross-end margin edge of the flex item is placed flush with the cross-end
+                        // edge of the line.
+                        case FlexBox::AlignItems::flexEnd:
+                            return lineSize - getLockedSize (Axis::cross, item) - getEndMargin (Axis::cross, item);
+
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-center
+                        // The flex item’s margin box is centered in the cross axis within the line.
+                        case FlexBox::AlignItems::center:
+                            return getStartMargin (Axis::cross, item) + (lineSize - getLockedSize (Axis::cross, item) - getStartMargin (Axis::cross, item) - getEndMargin (Axis::cross, item)) / 2;
+
+                        // https://www.w3.org/TR/css-flexbox-1/#valdef-align-items-stretch
+                        case FlexBox::AlignItems::stretch:
+                            return (Coord) getStartMargin (Axis::cross, item);
                     }
+
+                    jassertfalse;
+                    return 0.0;
+                }();
+
+                if (alignment == FlexBox::AlignItems::stretch)
+                {
+                    auto newSize = isAssigned (getItemSize (Axis::cross, item)) ? computePreferredSize (Axis::cross, item)
+                                                                                : lineSize - getStartMargin (Axis::cross, item) - getEndMargin (Axis::cross, item);
+
+                    if (isAssigned (getMaxSize (Axis::cross, item)))
+                        newSize = jmin (newSize, (Coord) getMaxSize (Axis::cross, item));
+
+                    if (isAssigned (getMinSize (Axis::cross, item)))
+                        newSize = jmax (newSize, (Coord) getMinSize (Axis::cross, item));
+
+                    getLockedSize (Axis::cross, item) = newSize;
                 }
             }
         }
@@ -496,20 +508,15 @@ struct FlexBoxLayoutCalculation
             {
                 auto& item = getItem (column, row);
 
-                if (isRowDirection)
-                {
-                    item.lockedMarginLeft  += additionalMarginLeft;
-                    item.lockedMarginRight += additionalMarginRight;
-                    item.item->currentBounds.setPosition ((float) (x + item.lockedMarginLeft), (float) item.lockedMarginTop);
-                    x += item.lockedWidth + item.lockedMarginLeft + item.lockedMarginRight;
-                }
-                else
-                {
-                    item.lockedMarginTop    += additionalMarginLeft;
-                    item.lockedMarginBottom += additionalMarginRight;
-                    item.item->currentBounds.setPosition ((float) item.lockedMarginLeft, (float) (x + item.lockedMarginTop));
-                    x += item.lockedHeight + item.lockedMarginTop + item.lockedMarginBottom;
-                }
+                getStartLockedMargin (Axis::main, item) += additionalMarginLeft;
+                getEndLockedMargin   (Axis::main, item) += additionalMarginRight;
+
+                item.item->currentBounds.setPosition (isRowDirection ? (float) (x + item.lockedMarginLeft)
+                                                                     : (float) item.lockedMarginLeft,
+                                                      isRowDirection ? (float) item.lockedMarginTop
+                                                                     : (float) (x + item.lockedMarginTop));
+
+                x += getItemMainSize (item);
             }
         }
     }
@@ -564,8 +571,9 @@ private:
     void resetItem (ItemWithState& item) noexcept
     {
         item.locked = false;
-        item.lockedWidth  = getPreferredWidth (item);
-        item.lockedHeight = getPreferredHeight (item);
+
+        for (auto& axis : { Axis::main, Axis::cross })
+            getLockedSize (axis, item) = computePreferredSize (axis, item);
     }
 
     bool layoutRowItems (const int row) noexcept
@@ -580,11 +588,11 @@ private:
 
             if (item.locked)
             {
-                flexContainerLength -= getItemLength (item);
+                flexContainerLength -= getItemMainSize (item);
             }
             else
             {
-                totalItemsLength += getItemLength (item);
+                totalItemsLength += getItemMainSize (item);
                 totalFlexGrow   += item.item->flexGrow;
                 totalFlexShrink += item.item->flexShrink;
             }
@@ -628,12 +636,7 @@ private:
             const auto numColumns = lineInfo[row].numItems;
 
             for (int column = 0; column < numColumns; ++column)
-            {
-                const auto& item = getItem (column, row);
-
-                lineInfo[row].totalLength += isRowDirection ? item.lockedWidth + item.lockedMarginLeft + item.lockedMarginRight
-                                                            : item.lockedHeight + item.lockedMarginTop + item.lockedMarginBottom;
-            }
+                lineInfo[row].totalLength += getItemMainSize (getItem (column, row));
         }
     }
 
@@ -668,7 +671,7 @@ private:
         }
     }
 
-    Coord getItemLength (const ItemWithState& item) const noexcept
+    Coord getItemMainSize (const ItemWithState& item) const noexcept
     {
         return isRowDirection ? item.lockedWidth  + item.lockedMarginLeft + item.lockedMarginRight
                               : item.lockedHeight + item.lockedMarginTop  + item.lockedMarginBottom;
@@ -684,84 +687,59 @@ private:
     {
         bool ok = false;
 
-        if (isRowDirection)
+        const auto prefSize = computePreferredSize (Axis::main, item);
+
+        const auto pickForMainAxis = [this] (auto& a, auto& b) -> auto& { return pickForAxis (Axis::main, a, b); };
+
+        if (isAssigned (pickForMainAxis (item.item->maxWidth, item.item->maxHeight))
+            && pickForMainAxis (item.item->maxWidth, item.item->maxHeight) < prefSize + length)
         {
-            const auto prefWidth = getPreferredWidth (item);
-
-            if (isAssigned (item.item->maxWidth) && item.item->maxWidth < prefWidth + length)
-            {
-                item.lockedWidth = item.item->maxWidth;
-                item.locked = true;
-            }
-            else if (isAssigned (prefWidth) && item.item->minWidth > prefWidth + length)
-            {
-                item.lockedWidth = item.item->minWidth;
-                item.locked = true;
-            }
-            else
-            {
-                ok = true;
-                item.lockedWidth = prefWidth + length;
-            }
-
-            lineInfo[row].totalLength += item.lockedWidth + item.lockedMarginLeft + item.lockedMarginRight;
+            pickForMainAxis (item.lockedWidth, item.lockedHeight) = pickForMainAxis (item.item->maxWidth, item.item->maxHeight);
+            item.locked = true;
+        }
+        else if (isAssigned (prefSize) && pickForMainAxis (item.item->minWidth, item.item->minHeight) > prefSize + length)
+        {
+            pickForMainAxis (item.lockedWidth, item.lockedHeight) = pickForMainAxis (item.item->minWidth, item.item->minHeight);
+            item.locked = true;
         }
         else
         {
-            const auto prefHeight = getPreferredHeight (item);
-
-            if (isAssigned (item.item->maxHeight) && item.item->maxHeight < prefHeight + length)
-            {
-                item.lockedHeight = item.item->maxHeight;
-                item.locked = true;
-            }
-            else if (isAssigned (prefHeight) && item.item->minHeight > prefHeight + length)
-            {
-                item.lockedHeight = item.item->minHeight;
-                item.locked = true;
-            }
-            else
-            {
-                ok = true;
-                item.lockedHeight = prefHeight + length;
-            }
-
-            lineInfo[row].totalLength += item.lockedHeight + item.lockedMarginTop + item.lockedMarginBottom;
+            ok = true;
+            pickForMainAxis (item.lockedWidth, item.lockedHeight) = prefSize + length;
         }
+
+        lineInfo[row].totalLength += pickForMainAxis (item.lockedWidth, item.lockedHeight)
+                                     + pickForMainAxis (item.lockedMarginLeft, item.lockedMarginTop)
+                                     + pickForMainAxis (item.lockedMarginRight, item.lockedMarginBottom);
 
         return ok;
     }
 
-    Coord getPreferredWidth (const ItemWithState& itemWithState) const noexcept
+    Coord computePreferredSize (Axis axis, ItemWithState& itemWithState) const noexcept
     {
         const auto& item = *itemWithState.item;
-        auto preferredWidth = (item.flexBasis > 0 && isRowDirection)
-                                 ? item.flexBasis
-                                 : (isAssigned (item.width) ? item.width : item.minWidth);
 
-        if (isAssigned (item.minWidth) && preferredWidth < item.minWidth)  return item.minWidth;
-        if (isAssigned (item.maxWidth) && preferredWidth > item.maxWidth)  return item.maxWidth;
+        auto preferredSize = (item.flexBasis > 0 && axis == Axis::main) ? item.flexBasis
+                                                                        : (isAssigned (getItemSize (axis, itemWithState)) ? getItemSize (axis, itemWithState)
+                                                                                                                          : getMinSize (axis, itemWithState));
 
-        return preferredWidth;
-    }
+        const auto minSize = getMinSize (axis, itemWithState);
 
-    Coord getPreferredHeight (const ItemWithState& itemWithState) const noexcept
-    {
-        const auto& item = *itemWithState.item;
-        auto preferredHeight = (item.flexBasis > 0 && ! isRowDirection)
-                                 ? item.flexBasis
-                                 : (isAssigned (item.height) ? item.height : item.minHeight);
+        if (isAssigned (minSize) && preferredSize < minSize)
+            return minSize;
 
-        if (isAssigned (item.minHeight) && preferredHeight < item.minHeight)  return item.minHeight;
-        if (isAssigned (item.maxHeight) && preferredHeight > item.maxHeight)  return item.maxHeight;
+        const auto maxSize = getMaxSize (axis, itemWithState);
 
-        return preferredHeight;
+        if (isAssigned (maxSize) && maxSize < preferredSize)
+            return maxSize;
+
+        return preferredSize;
     }
 };
 
 //==============================================================================
-FlexBox::FlexBox() noexcept {}
-FlexBox::~FlexBox() noexcept {}
+FlexBox::FlexBox() noexcept = default;
+FlexBox::~FlexBox() noexcept = default;
 
 FlexBox::FlexBox (JustifyContent jc) noexcept  : justifyContent (jc) {}
 
@@ -784,8 +762,7 @@ void FlexBox::performLayout (Rectangle<float> targetArea)
         layout.calculateCrossSizeOfAllItems();
         layout.alignLinesPerAlignContent();
         layout.resolveAutoMarginsOnCrossAxis();
-        layout.alignItemsInCrossAxisInLinesPerAlignItems();
-        layout.alignLinesPerAlignSelf();
+        layout.alignItemsInCrossAxisInLinesPerAlignSelf();
         layout.alignItemsByJustifyContent();
         layout.layoutAllItems();
 
@@ -855,5 +832,313 @@ FlexItem FlexItem::withHeight (float newHeight) const noexcept       { auto fi =
 FlexItem FlexItem::withMargin (Margin m) const noexcept              { auto fi = *this; fi.margin = m; return fi; }
 FlexItem FlexItem::withOrder (int newOrder) const noexcept           { auto fi = *this; fi.order = newOrder; return fi; }
 FlexItem FlexItem::withAlignSelf (AlignSelf a) const noexcept        { auto fi = *this; fi.alignSelf = a; return fi; }
+
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class FlexBoxTests : public UnitTest
+{
+public:
+    FlexBoxTests() : UnitTest ("FlexBox", UnitTestCategories::gui) {}
+
+    void runTest() override
+    {
+        using AlignSelf = FlexItem::AlignSelf;
+        using Direction = FlexBox::Direction;
+
+        const Rectangle<float> rect (10.0f, 20.0f, 300.0f, 200.0f);
+        const auto doLayout = [&rect] (Direction direction, Array<FlexItem> items)
+        {
+            juce::FlexBox flex;
+            flex.flexDirection = direction;
+            flex.items = std::move (items);
+            flex.performLayout (rect);
+            return flex;
+        };
+
+        beginTest ("flex item with mostly auto properties");
+        {
+            const auto test = [this, &doLayout] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem{}.withAlignSelf (alignment) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            test (Direction::row, AlignSelf::autoAlign, { rect.getX(), rect.getY(), 0.0f, rect.getHeight() });
+            test (Direction::row, AlignSelf::stretch,   { rect.getX(), rect.getY(), 0.0f, rect.getHeight() });
+            test (Direction::row, AlignSelf::flexStart, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+            test (Direction::row, AlignSelf::flexEnd,   { rect.getX(), rect.getBottom(), 0.0f, 0.0f });
+            test (Direction::row, AlignSelf::center,    { rect.getX(), rect.getCentreY(), 0.0f, 0.0f });
+
+            test (Direction::column, AlignSelf::autoAlign, { rect.getX(), rect.getY(), rect.getWidth(), 0.0f });
+            test (Direction::column, AlignSelf::stretch,   { rect.getX(), rect.getY(), rect.getWidth(), 0.0f });
+            test (Direction::column, AlignSelf::flexStart, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+            test (Direction::column, AlignSelf::flexEnd,   { rect.getRight(), rect.getY(), 0.0f, 0.0f });
+            test (Direction::column, AlignSelf::center,    { rect.getCentreX(), rect.getY(), 0.0f, 0.0f });
+        }
+
+        beginTest ("flex item with specified width and height");
+        {
+            constexpr auto w = 50.0f;
+            constexpr auto h = 60.0f;
+            const auto test = [&] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withWidth (w)
+                                                                         .withHeight (h) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            test (Direction::row, AlignSelf::autoAlign, { rect.getX(), rect.getY(), w, h });
+            test (Direction::row, AlignSelf::stretch,   { rect.getX(), rect.getY(), w, h });
+            test (Direction::row, AlignSelf::flexStart, { rect.getX(), rect.getY(), w, h });
+            test (Direction::row, AlignSelf::flexEnd,   { rect.getX(), rect.getBottom() - h, w, h });
+            test (Direction::row, AlignSelf::center,    { rect.getX(), rect.getY() + (rect.getHeight() - h) * 0.5f, w, h });
+
+            test (Direction::column, AlignSelf::autoAlign, { rect.getX(), rect.getY(), w, h });
+            test (Direction::column, AlignSelf::stretch,   { rect.getX(), rect.getY(), w, h });
+            test (Direction::column, AlignSelf::flexStart, { rect.getX(), rect.getY(), w, h });
+            test (Direction::column, AlignSelf::flexEnd,   { rect.getRight() - w, rect.getY(), w, h });
+            test (Direction::column, AlignSelf::center,    { rect.getX() + (rect.getWidth() - w) * 0.5f, rect.getY(), w, h });
+        }
+
+        beginTest ("flex item with oversized width and height");
+        {
+            const auto w = rect.getWidth() * 2;
+            const auto h = rect.getHeight() * 2;
+            const auto test = [this, &doLayout, &w, &h] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withWidth (w)
+                                                                         .withHeight (h) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            const Rectangle<float> baseRow (rect.getX(), rect.getY(), rect.getWidth(), h);
+            test (Direction::row, AlignSelf::autoAlign, baseRow);
+            test (Direction::row, AlignSelf::stretch,   baseRow);
+            test (Direction::row, AlignSelf::flexStart, baseRow);
+            test (Direction::row, AlignSelf::flexEnd,   baseRow.withBottomY (rect.getBottom()));
+            test (Direction::row, AlignSelf::center,    baseRow.withCentre (rect.getCentre()));
+
+            const Rectangle<float> baseColumn (rect.getX(), rect.getY(), w, rect.getHeight());
+            test (Direction::column, AlignSelf::autoAlign, baseColumn);
+            test (Direction::column, AlignSelf::stretch,   baseColumn);
+            test (Direction::column, AlignSelf::flexStart, baseColumn);
+            test (Direction::column, AlignSelf::flexEnd,   baseColumn.withRightX (rect.getRight()));
+            test (Direction::column, AlignSelf::center,    baseColumn.withCentre (rect.getCentre()));
+        }
+
+        beginTest ("flex item with minimum width and height");
+        {
+            constexpr auto w = 50.0f;
+            constexpr auto h = 60.0f;
+            const auto test = [&] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withMinWidth (w)
+                                                                         .withMinHeight (h) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            test (Direction::row, AlignSelf::autoAlign, { rect.getX(), rect.getY(), w, rect.getHeight() });
+            test (Direction::row, AlignSelf::stretch,   { rect.getX(), rect.getY(), w, rect.getHeight() });
+            test (Direction::row, AlignSelf::flexStart, { rect.getX(), rect.getY(), w, h });
+            test (Direction::row, AlignSelf::flexEnd,   { rect.getX(), rect.getBottom() - h, w, h });
+            test (Direction::row, AlignSelf::center,    { rect.getX(), rect.getY() + (rect.getHeight() - h) * 0.5f, w, h });
+
+            test (Direction::column, AlignSelf::autoAlign, { rect.getX(), rect.getY(), rect.getWidth(), h });
+            test (Direction::column, AlignSelf::stretch,   { rect.getX(), rect.getY(), rect.getWidth(), h });
+            test (Direction::column, AlignSelf::flexStart, { rect.getX(), rect.getY(), w, h });
+            test (Direction::column, AlignSelf::flexEnd,   { rect.getRight() - w, rect.getY(), w, h });
+            test (Direction::column, AlignSelf::center,    { rect.getX() + (rect.getWidth() - w) * 0.5f, rect.getY(), w, h });
+        }
+
+        beginTest ("flex item with maximum width and height");
+        {
+            constexpr auto w = 50.0f;
+            constexpr auto h = 60.0f;
+            const auto test = [&] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withMaxWidth (w)
+                                                                         .withMaxHeight (h) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            test (Direction::row, AlignSelf::autoAlign, { rect.getX(), rect.getY(), 0.0f, h });
+            test (Direction::row, AlignSelf::stretch,   { rect.getX(), rect.getY(), 0.0f, h });
+            test (Direction::row, AlignSelf::flexStart, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+            test (Direction::row, AlignSelf::flexEnd,   { rect.getX(), rect.getBottom(), 0.0f, 0.0f });
+            test (Direction::row, AlignSelf::center,    { rect.getX(), rect.getCentreY(), 0.0f, 0.0f });
+
+            test (Direction::column, AlignSelf::autoAlign, { rect.getX(), rect.getY(), w, 0.0f });
+            test (Direction::column, AlignSelf::stretch,   { rect.getX(), rect.getY(), w, 0.0f });
+            test (Direction::column, AlignSelf::flexStart, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+            test (Direction::column, AlignSelf::flexEnd,   { rect.getRight(), rect.getY(), 0.0f, 0.0f });
+            test (Direction::column, AlignSelf::center,    { rect.getCentreX(), rect.getY(), 0.0f, 0.0f });
+        }
+
+        beginTest ("flex item with specified flex");
+        {
+            const auto test = [this, &doLayout] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment).withFlex (1.0f) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            test (Direction::row, AlignSelf::autoAlign, { rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight() });
+            test (Direction::row, AlignSelf::stretch,   { rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight() });
+            test (Direction::row, AlignSelf::flexStart, { rect.getX(), rect.getY(), rect.getWidth(), 0.0f });
+            test (Direction::row, AlignSelf::flexEnd,   { rect.getX(), rect.getBottom(), rect.getWidth(), 0.0f });
+            test (Direction::row, AlignSelf::center,    { rect.getX(), rect.getCentreY(), rect.getWidth(), 0.0f });
+
+            test (Direction::column, AlignSelf::autoAlign, { rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight() });
+            test (Direction::column, AlignSelf::stretch,   { rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight() });
+            test (Direction::column, AlignSelf::flexStart, { rect.getX(), rect.getY(), 0.0f, rect.getHeight() });
+            test (Direction::column, AlignSelf::flexEnd,   { rect.getRight(), rect.getY(), 0.0f, rect.getHeight() });
+            test (Direction::column, AlignSelf::center,    { rect.getCentreX(), rect.getY(), 0.0f, rect.getHeight() });
+        }
+
+        beginTest ("flex item with margin");
+        {
+            const FlexItem::Margin margin (10.0f, 20.0f, 30.0f, 40.0f);
+
+            const auto test = [this, &doLayout, &margin] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment).withMargin (margin) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            const auto remainingHeight = rect.getHeight() - margin.top - margin.bottom;
+            const auto remainingWidth = rect.getWidth() - margin.left - margin.right;
+
+            test (Direction::row, AlignSelf::autoAlign, { rect.getX() + margin.left, rect.getY() + margin.top, 0.0f, remainingHeight });
+            test (Direction::row, AlignSelf::stretch,   { rect.getX() + margin.left, rect.getY() + margin.top, 0.0f, remainingHeight });
+            test (Direction::row, AlignSelf::flexStart, { rect.getX() + margin.left, rect.getY() + margin.top, 0.0f, 0.0f });
+            test (Direction::row, AlignSelf::flexEnd,   { rect.getX() + margin.left, rect.getBottom() - margin.bottom, 0.0f, 0.0f });
+            test (Direction::row, AlignSelf::center,    { rect.getX() + margin.left, rect.getY() + margin.top + remainingHeight * 0.5f, 0.0f, 0.0f });
+
+            test (Direction::column, AlignSelf::autoAlign, { rect.getX() + margin.left, rect.getY() + margin.top, remainingWidth, 0.0f });
+            test (Direction::column, AlignSelf::stretch,   { rect.getX() + margin.left, rect.getY() + margin.top, remainingWidth, 0.0f });
+            test (Direction::column, AlignSelf::flexStart, { rect.getX() + margin.left, rect.getY() + margin.top, 0.0f, 0.0f });
+            test (Direction::column, AlignSelf::flexEnd,   { rect.getRight() - margin.right, rect.getY() + margin.top, 0.0f, 0.0f });
+            test (Direction::column, AlignSelf::center,    { rect.getX() + margin.left + remainingWidth * 0.5f, rect.getY() + margin.top, 0.0f, 0.0f });
+        }
+
+        const AlignSelf alignments[] { AlignSelf::autoAlign,
+                                       AlignSelf::stretch,
+                                       AlignSelf::flexStart,
+                                       AlignSelf::flexEnd,
+                                       AlignSelf::center };
+
+        beginTest ("flex item with auto margin");
+        {
+            for (const auto& alignment : alignments)
+            {
+                for (const auto& direction : { Direction::row, Direction::column })
+                {
+                    const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                             .withMargin ((float) FlexItem::autoValue) });
+                    expect (flex.items.getFirst().currentBounds == Rectangle<float> (rect.getCentre(), rect.getCentre()));
+                }
+            }
+
+            const auto testTop = [this, &doLayout] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withMargin ({ (float) FlexItem::autoValue, 0.0f, 0.0f, 0.0f }) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            for (const auto& alignment : alignments)
+                testTop (Direction::row, alignment, { rect.getX(), rect.getBottom(), 0.0f, 0.0f });
+
+            testTop (Direction::column, AlignSelf::autoAlign, { rect.getX(), rect.getBottom(), rect.getWidth(), 0.0f });
+            testTop (Direction::column, AlignSelf::stretch,   { rect.getX(), rect.getBottom(), rect.getWidth(), 0.0f });
+            testTop (Direction::column, AlignSelf::flexStart, { rect.getX(), rect.getBottom(), 0.0f, 0.0f });
+            testTop (Direction::column, AlignSelf::flexEnd,   { rect.getRight(), rect.getBottom(), 0.0f, 0.0f });
+            testTop (Direction::column, AlignSelf::center,    { rect.getCentreX(), rect.getBottom(), 0.0f, 0.0f });
+
+            const auto testBottom = [this, &doLayout] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withMargin ({ 0.0f, 0.0f, (float) FlexItem::autoValue, 0.0f }) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            for (const auto& alignment : alignments)
+                testBottom (Direction::row, alignment, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+
+            testBottom (Direction::column, AlignSelf::autoAlign, { rect.getX(), rect.getY(), rect.getWidth(), 0.0f });
+            testBottom (Direction::column, AlignSelf::stretch,   { rect.getX(), rect.getY(), rect.getWidth(), 0.0f });
+            testBottom (Direction::column, AlignSelf::flexStart, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+            testBottom (Direction::column, AlignSelf::flexEnd,   { rect.getRight(), rect.getY(), 0.0f, 0.0f });
+            testBottom (Direction::column, AlignSelf::center,    { rect.getCentreX(), rect.getY(), 0.0f, 0.0f });
+
+            const auto testLeft = [this, &doLayout] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withMargin ({ 0.0f, 0.0f, 0.0f, (float) FlexItem::autoValue }) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            testLeft (Direction::row, AlignSelf::autoAlign, { rect.getRight(), rect.getY(), 0.0f, rect.getHeight() });
+            testLeft (Direction::row, AlignSelf::stretch,   { rect.getRight(), rect.getY(), 0.0f, rect.getHeight() });
+            testLeft (Direction::row, AlignSelf::flexStart, { rect.getRight(), rect.getY(), 0.0f, 0.0f });
+            testLeft (Direction::row, AlignSelf::flexEnd,   { rect.getRight(), rect.getBottom(), 0.0f, 0.0f });
+            testLeft (Direction::row, AlignSelf::center,    { rect.getRight(), rect.getCentreY(), 0.0f, 0.0f });
+
+            for (const auto& alignment : alignments)
+                testLeft (Direction::column, alignment, { rect.getRight(), rect.getY(), 0.0f, 0.0f });
+
+            const auto testRight = [this, &doLayout] (Direction direction, AlignSelf alignment, Rectangle<float> expectedBounds)
+            {
+                const auto flex = doLayout (direction, { juce::FlexItem().withAlignSelf (alignment)
+                                                                         .withMargin ({ 0.0f, (float) FlexItem::autoValue, 0.0f, 0.0f }) });
+                expect (flex.items.getFirst().currentBounds == expectedBounds);
+            };
+
+            testRight (Direction::row, AlignSelf::autoAlign, { rect.getX(), rect.getY(), 0.0f, rect.getHeight() });
+            testRight (Direction::row, AlignSelf::stretch,   { rect.getX(), rect.getY(), 0.0f, rect.getHeight() });
+            testRight (Direction::row, AlignSelf::flexStart, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+            testRight (Direction::row, AlignSelf::flexEnd,   { rect.getX(), rect.getBottom(), 0.0f, 0.0f });
+            testRight (Direction::row, AlignSelf::center,    { rect.getX(), rect.getCentreY(), 0.0f, 0.0f });
+
+            for (const auto& alignment : alignments)
+                testRight (Direction::column, alignment, { rect.getX(), rect.getY(), 0.0f, 0.0f });
+        }
+
+        beginTest ("in a multiline layout, items too large to fit on the main axis are given a line to themselves");
+        {
+            const auto spacer = 10.0f;
+
+            for (const auto alignment : alignments)
+            {
+                juce::FlexBox flex;
+                flex.flexWrap = FlexBox::Wrap::wrap;
+                flex.items = { FlexItem().withAlignSelf (alignment)
+                                         .withWidth (spacer)
+                                         .withHeight (spacer),
+                               FlexItem().withAlignSelf (alignment)
+                                         .withWidth (rect.getWidth() * 2)
+                                         .withHeight (rect.getHeight()),
+                               FlexItem().withAlignSelf (alignment)
+                                         .withWidth (spacer)
+                                         .withHeight (spacer) };
+                flex.performLayout (rect);
+
+                expect (flex.items[0].currentBounds == Rectangle<float> (rect.getX(), rect.getY(), spacer, spacer));
+                expect (flex.items[1].currentBounds == Rectangle<float> (rect.getX(), rect.getY() + spacer, rect.getWidth(), rect.getHeight()));
+                expect (flex.items[2].currentBounds == Rectangle<float> (rect.getX(), rect.getBottom() + spacer, 10.0f, 10.0f));
+            }
+        }
+    }
+};
+
+static FlexBoxTests flexBoxTests;
+
+#endif
 
 } // namespace juce

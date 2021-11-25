@@ -164,7 +164,7 @@ String TooltipWindow::getTipFor (Component& c)
 
 void TooltipWindow::hideTip()
 {
-    if (! reentrant)
+    if (isVisible() && ! reentrant)
     {
         tipShowing = {};
         manuallyShownTip = {};
@@ -172,6 +172,8 @@ void TooltipWindow::hideTip()
 
         removeFromDesktop();
         setVisible (false);
+
+        lastHideTime = Time::getApproximateMillisecondCounter();
 
        #if JUCE_DEBUG
         activeTooltipWindows.removeAllInstancesOf (this);
@@ -194,25 +196,20 @@ std::unique_ptr<AccessibilityHandler> TooltipWindow::createAccessibilityHandler(
 
 void TooltipWindow::timerCallback()
 {
-    auto& desktop = Desktop::getInstance();
-    auto mouseSource = desktop.getMainMouseSource();
-    auto now = Time::getApproximateMillisecondCounter();
-
+    const auto mouseSource = Desktop::getInstance().getMainMouseSource();
     auto* newComp = mouseSource.isTouch() ? nullptr : mouseSource.getComponentUnderMouse();
+
+    if (manuallyShownTip.isNotEmpty())
+    {
+        if (dismissalMouseEventOccured || newComp == nullptr)
+            hideTip();
+
+        return;
+    }
 
     if (newComp == nullptr || getParentComponent() == nullptr || newComp->getPeer() == getPeer())
     {
-        const auto componentChanged = (newComp != lastComponentUnderMouse);
-
-        const auto newTip = [this, &newComp, componentChanged]
-        {
-            if (dynamic_cast<TooltipClient*> (newComp) != nullptr)
-                return getTipFor (*newComp);
-
-            return componentChanged ? String() : manuallyShownTip;
-        }();
-
-        const auto tipChanged = (newTip != lastTipUnderMouse || componentChanged);
+        const auto newTip = newComp != nullptr ? getTipFor (*newComp) : String();
 
         lastComponentUnderMouse = newComp;
         lastTipUnderMouse = newTip;
@@ -221,19 +218,16 @@ void TooltipWindow::timerCallback()
         const auto mouseMovedQuickly = (mousePos.getDistanceFrom (lastMousePos) > 12);
         lastMousePos = mousePos;
 
+        const auto tipChanged = (newTip != lastTipUnderMouse || newComp != lastComponentUnderMouse);
+        const auto now = Time::getApproximateMillisecondCounter();
+
         if (tipChanged || dismissalMouseEventOccured || mouseMovedQuickly)
             lastCompChangeTime = now;
 
-        auto showTip = [this, &mouseSource, &mousePos, &newTip]
+        const auto showTip = [this, &mouseSource, &mousePos, &newTip]
         {
-            if (mouseSource.getLastMouseDownPosition() == lastMousePos)
-                return;
-
-            const auto isShowingManualTip = (manuallyShownTip.isNotEmpty() && manuallyShownTip == newTip);
-
-            displayTipInternal (mousePos.roundToInt(),
-                                newTip,
-                                isShowingManualTip ? ShownManually::yes : ShownManually::no);
+            if (mouseSource.getLastMouseDownPosition() != lastMousePos)
+                displayTipInternal (mousePos.roundToInt(), newTip, ShownManually::no);
         };
 
         if (isVisible() || now < lastHideTime + 500)
@@ -241,17 +235,9 @@ void TooltipWindow::timerCallback()
             // if a tip is currently visible (or has just disappeared), update to a new one
             // immediately if needed..
             if (newComp == nullptr || dismissalMouseEventOccured || newTip.isEmpty())
-            {
-                if (isVisible())
-                {
-                    lastHideTime = now;
-                    hideTip();
-                }
-            }
+                hideTip();
             else if (tipChanged)
-            {
                 showTip();
-            }
         }
         else
         {

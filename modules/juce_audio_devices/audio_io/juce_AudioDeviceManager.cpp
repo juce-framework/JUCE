@@ -905,7 +905,6 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
     const ScopedLock sl (audioCallbackLock);
 
     inputLevelGetter->updateLevel (inputChannelData, numInputChannels, numSamples);
-    outputLevelGetter->updateLevel (const_cast<const float**> (outputChannelData), numOutputChannels, numSamples);
 
     if (callbacks.size() > 0)
     {
@@ -953,6 +952,8 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
         if (testSoundPosition >= testSound->getNumSamples())
             testSound.reset();
     }
+
+    outputLevelGetter->updateLevel (const_cast<const float**> (outputChannelData), numOutputChannels, numSamples);
 }
 
 void AudioDeviceManager::audioDeviceAboutToStartInt (AudioIODevice* const device)
