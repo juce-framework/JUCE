@@ -2243,18 +2243,11 @@ private:
 
     tresult PLUGIN_API queryInterface (const ::Steinberg::TUID targetIID, void** obj) override
     {
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, ARA::IMainFactory)
-        TEST_FOR_AND_RETURN_IF_VALID (targetIID, FUnknown)
+        const auto result = testFor (*this,
+                                     targetIID,
+                                     UniqueBase<ARA::IMainFactory>{});
 
-        if (doUIDsMatch (targetIID, JuceARAFactory::iid))
-        {
-            addRef();
-            *obj = this;
-            return kResultOk;
-        }
-
-        *obj = nullptr;
-        return kNoInterface;
+        return result.extract (obj);
     }
 
     //---from ARA::IMainFactory-------
