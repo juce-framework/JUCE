@@ -476,14 +476,15 @@ private:
                         {
                             pos.setSize (pos.getWidth(), item.itemHeight);
 
+                            const auto additionalScale = 2.0f;
                             auto dragImage = Component::createComponentSnapshot (pos,
                                                                                  true,
-                                                                                 Component::getApproximateScaleFactorForComponent (itemComponent));
+                                                                                 Component::getApproximateScaleFactorForComponent (itemComponent) * additionalScale);
 
                             dragImage.multiplyAllAlphas (0.6f);
 
                             auto imageOffset = pos.getPosition() - e.getPosition();
-                            dragContainer->startDragging (dragDescription, &owner, dragImage, true, &imageOffset, &e.source);
+                            dragContainer->startDragging (dragDescription, &owner, { dragImage, additionalScale }, true, &imageOffset, &e.source);
 
                             scopedScrollDisabler = std::make_unique<ScopedDisableViewportScroll> (*itemComponent);
                         }

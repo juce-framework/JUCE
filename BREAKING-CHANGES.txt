@@ -6,6 +6,26 @@ develop
 
 Change
 ------
+ListBox::createSnapshotOfRows now returns ScaledImage instead of Image.
+
+Possible Issues
+---------------
+User code that overrides this function will fail to build.
+
+Workaround
+----------
+To emulate the old behaviour, simply wrap the Image that was previous returned
+into a ScaledImage and return that instead.
+
+Rationale
+---------
+Returning a ScaledImage allows the overriding function to specify the scale
+at which the image should be drawn. Returning an oversampled image will provide
+smoother-looking results on high resolution displays.
+
+
+Change
+------
 AudioFrameRate::frameRate is now a class type instead of an enum.
 
 Possible Issues

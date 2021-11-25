@@ -538,7 +538,7 @@ public:
 
         @see Component::createComponentSnapshot
     */
-    virtual Image createSnapshotOfRows (const SparseSet<int>& rows, int& x, int& y);
+    virtual ScaledImage createSnapshotOfRows (const SparseSet<int>& rows, int& x, int& y);
 
     /** Returns the viewport that this ListBox uses.
 
