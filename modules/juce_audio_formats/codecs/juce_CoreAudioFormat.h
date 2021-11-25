@@ -100,7 +100,7 @@ public:
     using AudioFormat::createWriterFor;
 
 private:
-    CoreAudioFormat (StreamKind, StringArray);
+    CoreAudioFormat (StreamKind);
 
     StreamKind streamKind;
 

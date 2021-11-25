@@ -36,21 +36,68 @@ namespace
 {
     const char* const coreAudioFormatName = "CoreAudio supported file";
 
-    StringArray findFileExtensionsForCoreAudioCodecs()
+    StringArray getStringInfo (AudioFilePropertyID property, UInt32 size, void* data)
     {
-        StringArray extensionsArray;
         CFObjectHolder<CFArrayRef> extensions;
         UInt32 sizeOfArray = sizeof (extensions.object);
 
-        if (AudioFileGetGlobalInfo (kAudioFileGlobalInfo_AllExtensions, 0, nullptr, &sizeOfArray, &extensions.object) == noErr)
-        {
-            auto numValues = CFArrayGetCount (extensions.object);
+        const auto err = AudioFileGetGlobalInfo (property,
+                                                 size,
+                                                 data,
+                                                 &sizeOfArray,
+                                                 &extensions.object);
 
-            for (CFIndex i = 0; i < numValues; ++i)
-                extensionsArray.add ("." + String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (extensions.object, i)));
-        }
+        if (err != noErr)
+            return {};
+
+        const auto numValues = CFArrayGetCount (extensions.object);
+
+        StringArray extensionsArray;
+
+        for (CFIndex i = 0; i < numValues; ++i)
+            extensionsArray.add ("." + String::fromCFString ((CFStringRef) CFArrayGetValueAtIndex (extensions.object, i)));
 
         return extensionsArray;
+    }
+
+    StringArray findFileExtensionsForCoreAudioCodec (AudioFileTypeID type)
+    {
+        return getStringInfo (kAudioFileGlobalInfo_ExtensionsForType, sizeof (AudioFileTypeID), &type);
+    }
+
+    StringArray findFileExtensionsForCoreAudioCodecs()
+    {
+        return getStringInfo (kAudioFileGlobalInfo_AllExtensions, 0, nullptr);
+    }
+
+    static AudioFileTypeID toAudioFileTypeID (CoreAudioFormat::StreamKind kind)
+    {
+        using StreamKind = CoreAudioFormat::StreamKind;
+
+        switch (kind)
+        {
+            case StreamKind::kAiff:                 return kAudioFileAIFFType;
+            case StreamKind::kAifc:                 return kAudioFileAIFCType;
+            case StreamKind::kWave:                 return kAudioFileWAVEType;
+            case StreamKind::kSoundDesigner2:       return kAudioFileSoundDesigner2Type;
+            case StreamKind::kNext:                 return kAudioFileNextType;
+            case StreamKind::kMp3:                  return kAudioFileMP3Type;
+            case StreamKind::kMp2:                  return kAudioFileMP2Type;
+            case StreamKind::kMp1:                  return kAudioFileMP1Type;
+            case StreamKind::kAc3:                  return kAudioFileAC3Type;
+            case StreamKind::kAacAdts:              return kAudioFileAAC_ADTSType;
+            case StreamKind::kMpeg4:                return kAudioFileMPEG4Type;
+            case StreamKind::kM4a:                  return kAudioFileM4AType;
+            case StreamKind::kM4b:                  return kAudioFileM4BType;
+            case StreamKind::kCaf:                  return kAudioFileCAFType;
+            case StreamKind::k3gp:                  return kAudioFile3GPType;
+            case StreamKind::k3gp2:                 return kAudioFile3GP2Type;
+            case StreamKind::kAmr:                  return kAudioFileAMRType;
+
+            case StreamKind::kNone:                 break;
+        }
+
+        return {};
     }
 }
 
@@ -335,35 +382,6 @@ struct CoreAudioFormatMetatdata
         return isCafFile;
     }
 };
-
-static AudioFileTypeID toAudioFileTypeID (CoreAudioFormat::StreamKind kind)
-{
-    using StreamKind = CoreAudioFormat::StreamKind;
-    switch (kind)
-    {
-        case StreamKind::kAiff:                 return kAudioFileAIFFType;
-        case StreamKind::kAifc:                 return kAudioFileAIFCType;
-        case StreamKind::kWave:                 return kAudioFileWAVEType;
-        case StreamKind::kSoundDesigner2:       return kAudioFileSoundDesigner2Type;
-        case StreamKind::kNext:                 return kAudioFileNextType;
-        case StreamKind::kMp3:                  return kAudioFileMP3Type;
-        case StreamKind::kMp2:                  return kAudioFileMP2Type;
-        case StreamKind::kMp1:                  return kAudioFileMP1Type;
-        case StreamKind::kAc3:                  return kAudioFileAC3Type;
-        case StreamKind::kAacAdts:              return kAudioFileAAC_ADTSType;
-        case StreamKind::kMpeg4:                return kAudioFileMPEG4Type;
-        case StreamKind::kM4a:                  return kAudioFileM4AType;
-        case StreamKind::kM4b:                  return kAudioFileM4BType;
-        case StreamKind::kCaf:                  return kAudioFileCAFType;
-        case StreamKind::k3gp:                  return kAudioFile3GPType;
-        case StreamKind::k3gp2:                 return kAudioFile3GP2Type;
-        case StreamKind::kAmr:                  return kAudioFileAMRType;
-
-        case StreamKind::kNone:                 break;
-    }
-
-    return {};
-}
 
 //==============================================================================
 class CoreAudioReader : public AudioFormatReader
@@ -762,8 +780,8 @@ private:
 };
 
 //==============================================================================
-CoreAudioFormat::CoreAudioFormat (StreamKind kind, StringArray exts)
-    : AudioFormat (coreAudioFormatName + String (" for ") + exts[0], exts),
+CoreAudioFormat::CoreAudioFormat (StreamKind kind)
+    : AudioFormat (coreAudioFormatName, findFileExtensionsForCoreAudioCodec (toAudioFileTypeID (kind))),
       streamKind (kind)
 {
 }
@@ -802,34 +820,10 @@ AudioFormatWriter* CoreAudioFormat::createWriterFor (
     return new CoreAudioWriter (output, toAudioFileTypeID (streamKind), sampleRateToUse, numberOfChannels, (unsigned int) bitsPerSample);
 }
 
-static AudioFileTypeID audioFileTypeForExtension (String extension)
-{
-    jassert (extension.startsWith ("."));
-    AudioFileTypeID types[10];
-    UInt32 sizeOfArray = sizeof (types);
-    {
-        CFStringRef extCFStr = extension.substring (1).toCFString();
-        AudioFileGetGlobalInfo (
-            kAudioFileGlobalInfo_TypesForExtension, sizeof (extCFStr), (void*) &extCFStr, &sizeOfArray, &types);
-        CFRelease (extCFStr);
-    }
-    jassert (sizeOfArray != 0);
-    return types[0];
-}
-
 void CoreAudioFormat::registerFormats (AudioFormatManager& formats)
 {
-    std::map<AudioFileTypeID, StringArray> extensions;
-    for (auto ext : findFileExtensionsForCoreAudioCodecs())
-        extensions[audioFileTypeForExtension (ext)].add (ext);
     for (int k = (int) StreamKind::kAiff; k <= (int) StreamKind::kAmr; ++k)
-    {
-        auto kind = (StreamKind) k;
-        auto i = extensions.find (toAudioFileTypeID (kind));
-        if (i == extensions.end())
-            continue;
-        formats.registerFormat (new CoreAudioFormat (kind, i->second), false);
-    }
+        formats.registerFormat (new CoreAudioFormat ((StreamKind) k), false);
 }
 
 //==============================================================================
