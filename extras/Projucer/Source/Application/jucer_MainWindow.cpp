@@ -39,9 +39,9 @@ class BlurOverlayWithComponent  : public Component,
 {
 public:
     BlurOverlayWithComponent (MainWindow& window, std::unique_ptr<Component> comp)
-       : ComponentMovementWatcher (&window),
-         mainWindow (window),
-         componentToShow (std::move (comp))
+        : ComponentMovementWatcher (&window),
+          mainWindow (window),
+          componentToShow (std::move (comp))
     {
         kernel.createGaussianBlur (1.25f);
 
@@ -325,6 +325,11 @@ void MainWindow::setProject (std::unique_ptr<Project> newProject)
         createProjectContentCompIfNeeded();
         getProjectContentComponent()->setProject (currentProject.get());
     }
+
+    if (currentProject != nullptr)
+        currentProject->addChangeListener (this);
+
+    changeListenerCallback (currentProject.get());
 
     projectNameValue.referTo (currentProject != nullptr ? currentProject->getProjectValue (Ids::name) : Value());
     initialiseProjectWindow();
@@ -705,6 +710,16 @@ void MainWindow::valueChanged (Value& value)
     if (value == projectNameValue)
         setName (currentProject != nullptr ? currentProject->getProjectNameString() + " - Projucer"
                                            : "Projucer");
+}
+
+void MainWindow::changeListenerCallback (ChangeBroadcaster* source)
+{
+    auto* project = getProject();
+
+    if (source == project)
+        if (auto* peer = getPeer())
+            peer->setHasChangedSinceSaved (project != nullptr ? project->hasChangedSinceSaved()
+                                                              : false);
 }
 
 //==============================================================================
