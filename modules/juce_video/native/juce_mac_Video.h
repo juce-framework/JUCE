@@ -487,13 +487,13 @@ private:
         {
             if (crtp().getPlayer() != nullptr && playerStatusObserver != nullptr)
             {
-                    [crtp().getPlayer() removeObserver: playerStatusObserver.get()
-                                            forKeyPath: nsStringLiteral ("rate")
-                                               context: this];
+                [crtp().getPlayer() removeObserver: playerStatusObserver.get()
+                                        forKeyPath: nsStringLiteral ("rate")
+                                           context: this];
 
-                    [crtp().getPlayer() removeObserver: playerStatusObserver.get()
-                                            forKeyPath: nsStringLiteral ("status")
-                                               context: this];
+                [crtp().getPlayer() removeObserver: playerStatusObserver.get()
+                                        forKeyPath: nsStringLiteral ("status")
+                                           context: this];
             }
         }
 
@@ -626,6 +626,9 @@ private:
 
         void setPlayer (AVPlayer* player)
         {
+            detachPlayerStatusObserver();
+            detachPlaybackObserver();
+
            #if ! JUCE_32BIT
             if (useNativeControls)
                 [playerView setPlayer: player];
@@ -637,11 +640,6 @@ private:
             {
                 attachPlayerStatusObserver();
                 attachPlaybackObserver();
-            }
-            else
-            {
-                detachPlayerStatusObserver();
-                detachPlaybackObserver();
             }
         }
 
