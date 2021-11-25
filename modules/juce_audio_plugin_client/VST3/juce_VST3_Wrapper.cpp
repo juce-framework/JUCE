@@ -90,9 +90,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
  #include <juce_core/native/juce_mac_CFHelpers.h>
 #endif
 
-//==============================================================================
 #if JucePlugin_Enable_ARA
-
  #include "../ARA/juce_AudioProcessor_ARAExtensions.h"
 
  #include <ARA_API/ARAVST3.h>
@@ -104,7 +102,6 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
  DEF_CLASS_IID(ARA::IPlugInEntryPoint)
  DEF_CLASS_IID(ARA::IPlugInEntryPoint2)
  DEF_CLASS_IID(ARA::IMainFactory)
-
 #endif
 
 namespace juce
@@ -660,10 +657,10 @@ class JuceVST3EditController : public Vst::EditController,
                                public Vst::IMidiMapping,
                                public Vst::IUnitInfo,
                                public Vst::ChannelContext::IInfoListener,
+                               public AudioProcessorListener,
                              #if JucePlugin_Enable_ARA
                                public Presonus::IPlugInViewEmbedding,
                              #endif
-                               public AudioProcessorListener,
                                public Presonus::IGainReductionInfo,
                                private ComponentRestarter::Listener
 {
@@ -2285,20 +2282,11 @@ private:
 
     tresult PLUGIN_API queryInterface (const ::Steinberg::TUID targetIID, void** obj) override
     {
-        const auto juceProvidedInterface = queryInterfaceInternal (targetIID);
+        const auto result = testFor (*this,
+                                     targetIID,
+                                     UniqueBase<ARA::IMainFactory>{});
 
-        if (doUIDsMatch (targetIID, JuceARAFactory::iid))
-        {
-            addRef();
-            *obj = this;
-            return kResultOk;
-        }
-
-        if (juceProvidedInterface.isOk())
-            return juceProvidedInterface.extract (obj);
-
-        *obj = nullptr;
-        return kNoInterface;
+        return result.extract (obj);
     }
 
     //---from ARA::IMainFactory-------
@@ -2309,21 +2297,6 @@ private:
     static const FUID iid;
 
  private:
-    InterfaceResultWithDeferredAddRef queryInterfaceInternal (const TUID targetIID)
-    {
-        // This differs from Celemony's branch, see
-        // https://github.com/Celemony/JUCE_ARA/commit/62d1e15eb637156832257aa3b6ac084495787a22#r52101552
-        const auto result = testForMultiple (*this,
-                                             targetIID,
-                                             UniqueBase<ARA::IMainFactory>{},
-                                             UniqueBase<FUnknown>{});
-
-        if (result.isOk())
-            return result;
-
-        return {};
-    }
-
      //==============================================================================
      std::atomic<int> refCount { 1 };
  };
@@ -3373,12 +3346,11 @@ private:
                                              UniqueBase<Vst::IUnitInfo>{},
                                              UniqueBase<Vst::IConnectionPoint>{},
                                              UniqueBase<Vst::IProcessContextRequirements>{},
-                                             SharedBase<FUnknown, Vst::IComponent>{}
                                             #if JucePlugin_Enable_ARA
-                                             , UniqueBase<ARA::IPlugInEntryPoint>{}
-                                             , UniqueBase<ARA::IPlugInEntryPoint2>{}
+                                             UniqueBase<ARA::IPlugInEntryPoint>{},
+                                             UniqueBase<ARA::IPlugInEntryPoint2>{},
                                             #endif
-                                             );
+                                             SharedBase<FUnknown, Vst::IComponent>{});
 
         if (result.isOk())
             return result;
