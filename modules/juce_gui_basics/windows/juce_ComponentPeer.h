@@ -76,6 +76,31 @@ public:
 
     };
 
+    class OptionalBorderSize final
+    {
+    public:
+        OptionalBorderSize()                               : valid (false)                               {}
+        explicit OptionalBorderSize (BorderSize<int> size) : valid (true), borderSize (std::move (size)) {}
+
+        explicit operator bool() const noexcept { return valid; }
+
+        const auto& operator*() const noexcept
+        {
+            jassert (valid);
+            return borderSize;
+        }
+
+        const auto* operator->() const noexcept
+        {
+            jassert (valid);
+            return &borderSize;
+        }
+
+    private:
+        bool valid;
+        BorderSize<int> borderSize;
+    };
+
     //==============================================================================
     /** Creates a peer.
 
@@ -218,6 +243,18 @@ public:
         inside a child of this window.
     */
     virtual bool contains (Point<int> localPos, bool trueIfInAChildWindow) const = 0;
+
+    /** Returns the size of the window frame that's around this window.
+
+        Depending on the platform the border size may be invalid for a short transient
+        after creating a new window. Hence the returned value must be checked using
+        operator bool() and the contained value can be accessed using operator*() only
+        if it is present.
+
+        Whether or not the window has a normal window frame depends on the flags
+        that were set when the window was created by Component::addToDesktop()
+    */
+    virtual OptionalBorderSize getFrameSizeIfPresent() const = 0;
 
     /** Returns the size of the window frame that's around this window.
         Whether or not the window has a normal window frame depends on the flags

@@ -566,10 +566,12 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     if (peer != nullptr)
     {
-        peer->getFrameSize().addTo (newPos);
+        if (const auto frameSize = peer->getFrameSizeIfPresent())
+            frameSize->addTo (newPos);
     }
+
    #if JUCE_LINUX
-    else
+    if (peer == nullptr || ! peer->getFrameSizeIfPresent())
     {
         // We need to adjust for the frame size before we create a peer, as X11
         // doesn't provide this information at construction time.
@@ -580,7 +582,9 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
                                     tokens[firstCoord + 7].getIntValue(),
                                     tokens[firstCoord + 8].getIntValue() };
 
-            frame.addTo (newPos);
+            newPos.setX (newPos.getX() - frame.getLeft());
+            newPos.setY (newPos.getY() - frame.getTop());
+
             setBounds (newPos);
         }
     }

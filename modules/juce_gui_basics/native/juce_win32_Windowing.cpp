@@ -1764,6 +1764,11 @@ public:
         return w == hwnd || (trueIfInAChildWindow && (IsChild (hwnd, w) != 0));
     }
 
+    OptionalBorderSize getFrameSizeIfPresent() const override
+    {
+        return ComponentPeer::OptionalBorderSize { windowBorder };
+    }
+
     BorderSize<int> getFrameSize() const override
     {
         return windowBorder;

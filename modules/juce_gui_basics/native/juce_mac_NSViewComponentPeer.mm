@@ -493,12 +493,12 @@ public:
                                     : (v == view);
     }
 
-    BorderSize<int> getFrameSize() const override
+    OptionalBorderSize getFrameSizeIfPresent() const override
     {
-        BorderSize<int> b;
-
         if (! isSharedWindow)
         {
+            BorderSize<int> b;
+
             NSRect v = [view convertRect: [view frame] toView: nil];
             NSRect w = [window frame];
 
@@ -506,9 +506,19 @@ public:
             b.setBottom ((int) v.origin.y);
             b.setLeft ((int) v.origin.x);
             b.setRight ((int) (w.size.width - (v.origin.x + v.size.width)));
+
+            return OptionalBorderSize { b };
         }
 
-        return b;
+        return {};
+    }
+
+    BorderSize<int> getFrameSize() const override
+    {
+        if (const auto frameSize = getFrameSizeIfPresent())
+            return *frameSize;
+
+        return {};
     }
 
     bool hasNativeTitleBar() const

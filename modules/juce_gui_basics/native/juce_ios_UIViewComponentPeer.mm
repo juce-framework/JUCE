@@ -211,24 +211,25 @@ public:
         controller = [newController retain];
     }
 
-    Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
+    Rectangle<int> getBounds() const override                 { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
     Point<float> localToGlobal (Point<float> relativePosition) override;
     Point<float> globalToLocal (Point<float> screenPosition) override;
     using ComponentPeer::localToGlobal;
     using ComponentPeer::globalToLocal;
     void setAlpha (float newAlpha) override;
-    void setMinimised (bool) override                       {}
-    bool isMinimised() const override                       { return false; }
+    void setMinimised (bool) override                         {}
+    bool isMinimised() const override                         { return false; }
     void setFullScreen (bool shouldBeFullScreen) override;
-    bool isFullScreen() const override                      { return fullScreen; }
+    bool isFullScreen() const override                        { return fullScreen; }
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override;
-    BorderSize<int> getFrameSize() const override           { return BorderSize<int>(); }
+    OptionalBorderSize getFrameSizeIfPresent() const override { return {}; }
+    BorderSize<int> getFrameSize() const override             { return BorderSize<int>(); }
     bool setAlwaysOnTop (bool alwaysOnTop) override;
     void toFront (bool makeActiveWindow) override;
     void toBehind (ComponentPeer* other) override;
     void setIcon (const Image& newIcon) override;
-    StringArray getAvailableRenderingEngines() override     { return StringArray ("CoreGraphics Renderer"); }
+    StringArray getAvailableRenderingEngines() override       { return StringArray ("CoreGraphics Renderer"); }
 
     void drawRect (CGRect);
     bool canBecomeKeyWindow();

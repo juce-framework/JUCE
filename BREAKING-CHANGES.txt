@@ -1,6 +1,31 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+The return type of XWindowSystem::getBorderSize() was changed to
+ComponentPeer::OptionalBorderSize.
+
+Possible Issues
+---------------
+User code that uses XWindowSystem::getBorderSize() will fail to build.
+
+Workaround
+----------
+Use operator bool() to determine the validity of the new return value and
+access the contained value using operator*().
+
+Rationale
+---------
+The XWindow system cannot immediately report the correct border size after
+window creation. The underlying X11 calls will signal whether querying the
+border size was successful, but there was no way to forward this information
+through XWindowSystem::getBorderSize() until this change.
+
+
 Version 6.1.5
 =============
 
