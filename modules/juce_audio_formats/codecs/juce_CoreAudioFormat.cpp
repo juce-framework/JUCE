@@ -781,8 +781,10 @@ private:
 
 //==============================================================================
 CoreAudioFormat::CoreAudioFormat (StreamKind kind)
-    : AudioFormat (coreAudioFormatName, findFileExtensionsForCoreAudioCodec (toAudioFileTypeID (kind))),
-      streamKind (kind)
+: AudioFormat (
+    String (coreAudioFormatName) + " " + String ((int) kind),
+    findFileExtensionsForCoreAudioCodec (toAudioFileTypeID (kind)))
+, streamKind (kind)
 {
 }
 
