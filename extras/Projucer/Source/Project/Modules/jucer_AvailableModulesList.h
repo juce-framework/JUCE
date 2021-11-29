@@ -169,10 +169,10 @@ private:
     }
 
     //==============================================================================
-    std::future<void> scanner;
     ModuleIDAndFolderList modulesList;
     ListenerList<Listener> listeners;
     CriticalSection lock;
+    std::future<void> scanner;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AvailableModulesList)
