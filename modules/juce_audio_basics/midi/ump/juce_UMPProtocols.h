@@ -25,14 +25,14 @@ namespace juce
 namespace universal_midi_packets
 {
 
-/** The kinds of MIDI protocol that can be formatted into Universal MIDI Packets. */
+/*  The kinds of MIDI protocol that can be formatted into Universal MIDI Packets. */
 enum class PacketProtocol
 {
     MIDI_1_0,
     MIDI_2_0,
 };
 
-/** All kinds of MIDI protocol understood by JUCE. */
+/*  All kinds of MIDI protocol understood by JUCE. */
 enum class MidiProtocol
 {
     bytestream,

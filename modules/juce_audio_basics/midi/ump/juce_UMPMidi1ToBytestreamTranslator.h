@@ -25,7 +25,7 @@ namespace juce
 namespace universal_midi_packets
 {
 
-/**
+/*
     Parses a raw stream of uint32_t holding a series of Universal MIDI Packets using
     the MIDI 1.0 Protocol, converting to plain (non-UMP) MidiMessages.
 
@@ -34,7 +34,7 @@ namespace universal_midi_packets
 class Midi1ToBytestreamTranslator
 {
 public:
-    /** Ensures that there is room in the internal buffer for a sysex message of at least
+    /*  Ensures that there is room in the internal buffer for a sysex message of at least
         `initialBufferSize` bytes.
     */
     explicit Midi1ToBytestreamTranslator (int initialBufferSize)
@@ -42,14 +42,14 @@ public:
         pendingSysExData.reserve (size_t (initialBufferSize));
     }
 
-    /** Clears the concatenator. */
+    /*  Clears the concatenator. */
     void reset()
     {
         pendingSysExData.clear();
         pendingSysExTime = 0.0;
     }
 
-    /** Converts a Universal MIDI Packet using the MIDI 1.0 Protocol to
+    /*  Converts a Universal MIDI Packet using the MIDI 1.0 Protocol to
         an equivalent MidiMessage. Accumulates SysEx packets into a single
         MidiMessage, as appropriate.
 
@@ -91,7 +91,7 @@ public:
         }
     }
 
-    /** Converts from a Universal MIDI Packet to MIDI 1 bytestream format.
+    /*  Converts from a Universal MIDI Packet to MIDI 1 bytestream format.
 
         This is only capable of converting a single Universal MIDI Packet to
         an equivalent bytestream MIDI message. This function cannot understand
