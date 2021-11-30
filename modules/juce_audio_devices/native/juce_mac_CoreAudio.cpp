@@ -950,19 +950,18 @@ public:
           inputIndex (inputIndex_),
           outputIndex (outputIndex_)
     {
-        CoreAudioInternal* device = nullptr;
+        internal = [this, &inputDeviceId, &outputDeviceId]
+        {
+            if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
+            {
+                jassert (inputDeviceId != 0);
+                return std::make_unique<CoreAudioInternal> (*this, inputDeviceId, true, outputDeviceId != 0);
+            }
+            if (inputDeviceId == 0)
+            {
+                return std::make_unique<CoreAudioInternal> (*this, outputDeviceId, false, true);
+            }
 
-        if (outputDeviceId == 0 || outputDeviceId == inputDeviceId)
-        {
-            jassert (inputDeviceId != 0);
-            device = new CoreAudioInternal (*this, inputDeviceId, true, outputDeviceId != 0);
-        }
-        else if (inputDeviceId == 0)
-        {
-            device = new CoreAudioInternal (*this, outputDeviceId, false, true);
-        }
-        else
-        {
             // This used to be just "com.juce.aggregate", but macOS doesn't allow two different instances of an app with
             // the same bundle ID to create the same aggregate device UID, even when it's private.
             CFStringRef aggregateDeviceUid = Uuid().toString().toCFString();
@@ -986,12 +985,10 @@ public:
 
             // Guaranteed available earlier in CoreAudioIODeviceType::createDevice()
             OSStatus status = AudioHardwareCreateAggregateDevice ((CFDictionaryRef)description, &aggregateDeviceID);
-            if (status == noErr)
-                device = new CoreAudioInternal (*this, aggregateDeviceID, true, true);
-        }
+            return status == noErr ? std::make_unique<CoreAudioInternal> (*this, aggregateDeviceID, true, true) : nullptr;
+        }();
 
-        jassert (device != nullptr);
-        internal.reset (device);
+        jassert (internal != nullptr);
 
         AudioObjectPropertyAddress pa;
         pa.mSelector = kAudioObjectPropertySelectorWildcard;
