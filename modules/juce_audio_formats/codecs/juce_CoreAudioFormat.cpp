@@ -65,7 +65,7 @@ namespace
         return getStringInfo (kAudioFileGlobalInfo_ExtensionsForType, sizeof (AudioFileTypeID), &type);
     }
 
-    StringArray findFileExtensionsForCoreAudioCodecs()
+    StringArray findFileExtensionsForCoreAudioCodecs [[maybe_unused]]()
     {
         return getStringInfo (kAudioFileGlobalInfo_AllExtensions, 0, nullptr);
     }
