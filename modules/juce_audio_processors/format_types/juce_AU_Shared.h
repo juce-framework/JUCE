@@ -65,7 +65,7 @@ struct AudioUnitHelpers
             outputLayoutMapStorage.free();
         }
 
-        inline const int* get (bool input, int bus) const noexcept { return (input ? inputLayoutMap : outputLayoutMap) [bus]; }
+        inline const int* get (bool input, int bus) const noexcept { return (input ? inputLayoutMap : outputLayoutMap)[bus]; }
 
     private:
         //==============================================================================
@@ -119,15 +119,24 @@ struct AudioUnitHelpers
     class CoreAudioBufferList
     {
     public:
-        CoreAudioBufferList() { reset(); }
-
-        //==============================================================================
-        void prepare (int inChannels, int outChannels, int maxFrames)
+        void prepare (const AudioProcessor::BusesLayout& layout, int maxFrames)
         {
-            const int numChannels = jmax (inChannels, outChannels);
+            const auto getChannelOffsets = [] (const auto& range)
+            {
+                std::vector<int> result { 0 };
 
+                for (const auto& bus : range)
+                    result.push_back (result.back() + bus.size());
+
+                return result;
+            };
+
+            inputBusOffsets  = getChannelOffsets (layout.inputBuses);
+            outputBusOffsets = getChannelOffsets (layout.outputBuses);
+
+            const auto numChannels = jmax (inputBusOffsets.back(), outputBusOffsets.back());
             scratch.setSize (numChannels, maxFrames);
-            channels.calloc (static_cast<size_t> (numChannels));
+            channels.resize (static_cast<size_t> (numChannels), nullptr);
 
             reset();
         }
@@ -135,106 +144,107 @@ struct AudioUnitHelpers
         void release()
         {
             scratch.setSize (0, 0);
-            channels.free();
+            channels = {};
+            inputBusOffsets = outputBusOffsets = std::vector<int>();
         }
 
-        void reset() noexcept
+        void reset()
         {
-            pushIdx = 0;
-            popIdx = 0;
-            zeromem (channels.get(), sizeof(float*) * static_cast<size_t> (scratch.getNumChannels()));
+            std::fill (channels.begin(), channels.end(), nullptr);
         }
 
-        //==============================================================================
         float* setBuffer (const int idx, float* ptr = nullptr) noexcept
         {
             jassert (idx < scratch.getNumChannels());
-            return (channels [idx] = uniqueBuffer (idx, ptr));
+            return channels[(size_t) idx] = uniqueBuffer (idx, ptr);
         }
 
-        //==============================================================================
-        float* push() noexcept
-        {
-            jassert (pushIdx < scratch.getNumChannels());
-            return channels [pushIdx++];
-        }
-
-        void push (AudioBufferList& bufferList, const int* channelMap) noexcept
-        {
-            jassert (pushIdx < scratch.getNumChannels());
-
-            if (bufferList.mNumberBuffers > 0)
-            {
-                const UInt32 n = bufferList.mBuffers [0].mDataByteSize /
-                (bufferList.mBuffers [0].mNumberChannels * sizeof (float));
-                const bool isInterleaved = isAudioBufferInterleaved (bufferList);
-                const int numChannels = static_cast<int> (isInterleaved ? bufferList.mBuffers [0].mNumberChannels
-                                                          : bufferList.mNumberBuffers);
-
-                for (int ch = 0; ch < numChannels; ++ch)
-                {
-                    float* data = push();
-
-                    int mappedChannel = channelMap [ch];
-                    if (isInterleaved || static_cast<float*> (bufferList.mBuffers [mappedChannel].mData) != data)
-                        copyAudioBuffer (bufferList, mappedChannel, n, data);
-                }
-            }
-        }
-
-        //==============================================================================
-        float* pop() noexcept
-        {
-            jassert (popIdx < scratch.getNumChannels());
-            return channels[popIdx++];
-        }
-
-        void pop (AudioBufferList& buffer, const int* channelMap) noexcept
-        {
-            if (buffer.mNumberBuffers > 0)
-            {
-                const UInt32 n = buffer.mBuffers [0].mDataByteSize / (buffer.mBuffers [0].mNumberChannels * sizeof (float));
-                const bool isInterleaved = isAudioBufferInterleaved (buffer);
-                const int numChannels = static_cast<int> (isInterleaved ? buffer.mBuffers [0].mNumberChannels : buffer.mNumberBuffers);
-
-                for (int ch = 0; ch < numChannels; ++ch)
-                {
-                    int mappedChannel = channelMap [ch];
-                    float* nextBuffer = pop();
-
-                    if (nextBuffer == buffer.mBuffers [mappedChannel].mData && ! isInterleaved)
-                        continue; // no copying necessary
-
-                    if (buffer.mBuffers [mappedChannel].mData == nullptr && ! isInterleaved)
-                        buffer.mBuffers [mappedChannel].mData = nextBuffer;
-                    else
-                        copyAudioBuffer (nextBuffer, mappedChannel, n, buffer);
-                }
-            }
-        }
-
-        //==============================================================================
         AudioBuffer<float>& getBuffer (UInt32 frames) noexcept
         {
-            jassert (pushIdx == scratch.getNumChannels());
+           #if JUCE_DEBUG
+            for (int i = 0; i < (int) channels.size(); ++i)
+                jassert (channels[(size_t) i] != nullptr);
+           #endif
 
-          #if JUCE_DEBUG
-            for (int i = 0; i < pushIdx; ++i)
-                jassert (channels [i] != nullptr);
-          #endif
-
-            mutableBuffer.setDataToReferTo (channels, pushIdx, static_cast<int> (frames));
+            mutableBuffer.setDataToReferTo (channels.data(), (int) channels.size(), static_cast<int> (frames));
             return mutableBuffer;
         }
 
+        void set (int bus, AudioBufferList& bufferList, const int* channelMap) noexcept
+        {
+            if (bufferList.mNumberBuffers <= 0 || ! isPositiveAndBelow (bus, inputBusOffsets.size() - 1))
+                return;
+
+            const auto n = (UInt32) (bufferList.mBuffers[0].mDataByteSize / (bufferList.mBuffers[0].mNumberChannels * sizeof (float)));
+            const auto isInterleaved = isAudioBufferInterleaved (bufferList);
+            const auto numChannels = (int) (isInterleaved ? bufferList.mBuffers[0].mNumberChannels
+                                                          : bufferList.mNumberBuffers);
+
+            for (int ch = 0; ch < numChannels; ++ch)
+            {
+                float* data = channels[(size_t) (inputBusOffsets[(size_t) bus] + ch)];
+
+                const auto mappedChannel = channelMap[ch];
+
+                if (isInterleaved || static_cast<float*> (bufferList.mBuffers[mappedChannel].mData) != data)
+                    copyAudioBuffer (bufferList, mappedChannel, n, data);
+            }
+        }
+
+        void get (int bus, AudioBufferList& buffer, const int* channelMap) noexcept
+        {
+            if (buffer.mNumberBuffers <= 0 || ! isPositiveAndBelow (bus, outputBusOffsets.size() - 1))
+                return;
+
+            const auto n = (UInt32) (buffer.mBuffers[0].mDataByteSize / (buffer.mBuffers[0].mNumberChannels * sizeof (float)));
+            const auto isInterleaved = isAudioBufferInterleaved (buffer);
+            const auto numChannels = (int) (isInterleaved ? buffer.mBuffers[0].mNumberChannels
+                                                          : buffer.mNumberBuffers);
+
+            for (int ch = 0; ch < numChannels; ++ch)
+            {
+                float* data = channels[(size_t) (outputBusOffsets[(size_t) bus] + ch)];
+
+                const auto mappedChannel = channelMap[ch];
+
+                if (data == buffer.mBuffers[mappedChannel].mData && ! isInterleaved)
+                    continue; // no copying necessary
+
+                if (buffer.mBuffers[mappedChannel].mData == nullptr && ! isInterleaved)
+                    buffer.mBuffers[mappedChannel].mData = data;
+                else
+                    copyAudioBuffer (data, mappedChannel, n, buffer);
+            }
+        }
+
+        void clearInputBus (int index)
+        {
+            if (isPositiveAndBelow (index, inputBusOffsets.size() - 1))
+                clearChannels (inputBusOffsets[(size_t) index], inputBusOffsets[(size_t) (index + 1)]);
+        }
+
+        void clearUnusedChannels()
+        {
+            jassert (! inputBusOffsets .empty());
+            jassert (! outputBusOffsets.empty());
+
+            clearChannels (inputBusOffsets.back(), outputBusOffsets.back());
+        }
+
     private:
+        void clearChannels (int begin, int end)
+        {
+            for (auto i = begin; i < end; ++i)
+                zeromem (scratch.getWritePointer (i), sizeof (float) * (size_t) scratch.getNumSamples());
+        }
+
         float* uniqueBuffer (int idx, float* buffer) noexcept
         {
             if (buffer == nullptr)
                 return scratch.getWritePointer (idx);
 
             for (int ch = 0; ch < idx; ++ch)
-                if (buffer == channels[ch])
+                if (buffer == channels[(size_t) ch])
                     return scratch.getWritePointer (idx);
 
             return buffer;
@@ -242,8 +252,8 @@ struct AudioUnitHelpers
 
         //==============================================================================
         AudioBuffer<float> scratch, mutableBuffer;
-        HeapBlock<float*> channels;
-        int pushIdx, popIdx;
+        std::vector<float*> channels;
+        std::vector<int> inputBusOffsets, outputBusOffsets;
     };
 
     static bool isAudioBufferInterleaved (const AudioBufferList& audioBuffer) noexcept
@@ -307,7 +317,7 @@ struct AudioUnitHelpers
     static bool isLayoutSupported (const AudioProcessor& processor,
                                    bool isInput, int busIdx,
                                    int numChannels,
-                                   const short (&channelLayoutList) [numLayouts][2],
+                                   const short (&channelLayoutList)[numLayouts][2],
                                    bool hasLayoutMap = true)
     {
         if (const AudioProcessor::Bus* bus = processor.getBus (isInput, busIdx))

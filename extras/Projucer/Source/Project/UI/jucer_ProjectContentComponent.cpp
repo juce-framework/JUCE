@@ -512,13 +512,15 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
                 return;
             }
 
-            SafePointer<ProjectContentComponent> safeThis { this };
-            project->saveAsync (true, true, [safeThis] (Project::SaveResult r)
-                                {
-                                    if (safeThis != nullptr && r == Project::SaveResult::savedOk)
-                                        safeThis->openInSelectedIDE (false);
-                                });
-            return;
+            if (project->hasChangedSinceSaved())
+            {
+                project->saveAsync (true, true, [safeThis = SafePointer<ProjectContentComponent> { this }] (Project::SaveResult r)
+                {
+                    if (safeThis != nullptr && r == Project::SaveResult::savedOk)
+                        safeThis->openInSelectedIDE (false);
+                });
+                return;
+            }
         }
 
         project->openProjectInIDE (*selectedExporter);
@@ -859,31 +861,31 @@ bool ProjectContentComponent::perform (const InvocationInfo& info)
 
     switch (info.commandID)
     {
-        case CommandIDs::saveProject:               saveProjectAsync();  break;
-        case CommandIDs::closeProject:              closeProject();      break;
-        case CommandIDs::saveDocument:              saveDocumentAsync(); break;
-        case CommandIDs::saveDocumentAs:            saveAsAsync();       break;
-        case CommandIDs::closeDocument:             closeDocument();     break;
-        case CommandIDs::goToPreviousDoc:           goToPreviousFile();  break;
-        case CommandIDs::goToNextDoc:               goToNextFile();      break;
-        case CommandIDs::goToCounterpart:           goToCounterpart();   break;
+        case CommandIDs::saveProject:               saveProjectAsync();             break;
+        case CommandIDs::closeProject:              closeProject();                 break;
+        case CommandIDs::saveDocument:              saveDocumentAsync();            break;
+        case CommandIDs::saveDocumentAs:            saveAsAsync();                  break;
+        case CommandIDs::closeDocument:             closeDocument();                break;
+        case CommandIDs::goToPreviousDoc:           goToPreviousFile();             break;
+        case CommandIDs::goToNextDoc:               goToNextFile();                 break;
+        case CommandIDs::goToCounterpart:           goToCounterpart();              break;
 
-        case CommandIDs::showProjectSettings:       showProjectSettings();         break;
-        case CommandIDs::showFileExplorerPanel:     showFilesPanel();              break;
-        case CommandIDs::showModulesPanel:          showModulesPanel();            break;
-        case CommandIDs::showExportersPanel:        showExportersPanel();          break;
-        case CommandIDs::showExporterSettings:      showCurrentExporterSettings(); break;
+        case CommandIDs::showProjectSettings:       showProjectSettings();          break;
+        case CommandIDs::showFileExplorerPanel:     showFilesPanel();               break;
+        case CommandIDs::showModulesPanel:          showModulesPanel();             break;
+        case CommandIDs::showExportersPanel:        showExportersPanel();           break;
+        case CommandIDs::showExporterSettings:      showCurrentExporterSettings();  break;
 
-        case CommandIDs::openInIDE:                 openInSelectedIDE (false); break;
-        case CommandIDs::saveAndOpenInIDE:          openInSelectedIDE (true);  break;
+        case CommandIDs::openInIDE:                 openInSelectedIDE (false);      break;
+        case CommandIDs::saveAndOpenInIDE:          openInSelectedIDE (true);       break;
 
-        case CommandIDs::createNewExporter:         showNewExporterMenu(); break;
+        case CommandIDs::createNewExporter:         showNewExporterMenu();          break;
 
-        case CommandIDs::deleteSelectedItem:        deleteSelectedTreeItems(); break;
+        case CommandIDs::deleteSelectedItem:        deleteSelectedTreeItems();      break;
 
-        case CommandIDs::showTranslationTool:       showTranslationTool(); break;
+        case CommandIDs::showTranslationTool:       showTranslationTool();          break;
 
-        case CommandIDs::addNewGUIFile:             addNewGUIFile();                                              break;
+        case CommandIDs::addNewGUIFile:             addNewGUIFile();                break;
 
         default:
             return false;

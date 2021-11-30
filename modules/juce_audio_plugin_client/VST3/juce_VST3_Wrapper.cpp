@@ -2037,6 +2037,9 @@ private:
                                                                              &owner);
 
                     pluginEditor->setHostContext (editorHostContext.get());
+                   #if ! JUCE_MAC
+                    pluginEditor->setScaleFactor (owner.editorScaleFactor);
+                   #endif
 
                     addAndMakeVisible (pluginEditor.get());
                     pluginEditor->setTopLeftPosition (0, 0);

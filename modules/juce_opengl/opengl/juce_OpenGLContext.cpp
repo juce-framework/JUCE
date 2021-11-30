@@ -117,7 +117,8 @@ public:
     {
         if (nativeContext != nullptr)
         {
-            renderThread.reset (new ThreadPool (1));
+            renderThread = std::make_unique<ThreadPool> (1);
+            renderThread->setThreadPriorities (9);
             resume();
         }
     }

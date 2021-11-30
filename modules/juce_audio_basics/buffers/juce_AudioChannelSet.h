@@ -232,6 +232,12 @@ public:
     */
     static AudioChannelSet JUCE_CALLTYPE create7point1point4();
 
+    /** Creates a set for Dolby Atmos 7.1.6 surround setup (left, right, centre, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, LFE, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight).
+
+        Is equivalent to: k71_6 (VST), n/a (AAX), n/a (CoreAudio)
+    */
+    static AudioChannelSet JUCE_CALLTYPE create7point1point6();
+
     /** Creates a set for a 9.1.6 surround setup (left, right, centre, LFE, leftSurroundSide, rightSurroundSide, leftSurroundRear, rightSurroundRear, wideLeft, wideRight, topFrontLeft, topFrontRight, topSideLeft, topSideRight, topRearLeft, topRearRight).
 
         Is equivalent to: kAudioChannelLayoutTag_Atmos_9_1_6 (CoreAudio).

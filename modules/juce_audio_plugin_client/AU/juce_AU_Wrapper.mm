@@ -258,7 +258,7 @@ public:
         {
             juceFilter->setRateAndBufferSizeDetails (getSampleRate(), (int) GetMaxFramesPerSlice());
 
-            audioBuffer.prepare (totalInChannels, totalOutChannels, (int) GetMaxFramesPerSlice() + 32);
+            audioBuffer.prepare (AudioUnitHelpers::getBusesLayout (juceFilter.get()), (int) GetMaxFramesPerSlice() + 32);
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
 
             midiEvents.ensureSize (2048);
@@ -1408,21 +1408,12 @@ public:
             for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
             {
                 if (pulledSucceeded[busIdx])
-                {
-                    audioBuffer.push (GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
-                }
+                    audioBuffer.set (busIdx, GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
                 else
-                {
-                    const int n = juceFilter->getChannelCountOfBus (true, busIdx);
-
-                    for (int ch = 0; ch < n; ++ch)
-                        zeromem (audioBuffer.push(), sizeof (float) * nFrames);
-                }
+                    audioBuffer.clearInputBus (busIdx);
             }
 
-            // clear remaining channels
-            for (int i = totalInChannels; i < totalOutChannels; ++i)
-                zeromem (audioBuffer.push(), sizeof (float) * nFrames);
+            audioBuffer.clearUnusedChannels();
         }
 
         // swap midi buffers
@@ -1438,7 +1429,7 @@ public:
         // copy back
         {
             for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
-                audioBuffer.pop (GetOutput ((UInt32) busIdx)->GetBufferList(), mapper.get (false, busIdx));
+                audioBuffer.get (busIdx, GetOutput ((UInt32) busIdx)->GetBufferList(), mapper.get (false, busIdx));
         }
 
         // process midi output

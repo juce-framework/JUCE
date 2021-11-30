@@ -69,6 +69,8 @@ void CPUInformation::initialise() noexcept
                                     hasAVX512VL,
                                     hasAVX512VBMI,
                                     hasAVX512VPOPCNTDQ);
+   #elif JUCE_ARM && __ARM_ARCH > 7
+    hasNeon = true;
    #endif
 
     numLogicalCPUs = (int) [[NSProcessInfo processInfo] activeProcessorCount];
