@@ -421,16 +421,14 @@ public:
                      AudioComponentInstantiationOptions options,
                      NSError** error)
         : JuceAudioUnitv3Base (descr, options, error),
-          processorHolder (processor),
-          mapper (*processorHolder->get())
+          processorHolder (processor)
     {
         init();
     }
 
     JuceAudioUnitv3 (AUAudioUnit* audioUnit, AudioComponentDescription, AudioComponentInstantiationOptions, NSError**)
         : JuceAudioUnitv3Base (audioUnit),
-          processorHolder (new AudioProcessorHolder (createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3))),
-          mapper (*processorHolder->get())
+          processorHolder (new AudioProcessorHolder (createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3)))
     {
         init();
     }
@@ -844,7 +842,7 @@ public:
         allocateBusBuffer (true);
         allocateBusBuffer (false);
 
-        mapper.alloc();
+        mapper.alloc (processor);
 
         audioBuffer.prepare (AudioUnitHelpers::getBusesLayout (&processor), static_cast<int> (maxFrames));
 

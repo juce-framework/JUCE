@@ -38,22 +38,19 @@ struct AudioUnitHelpers
     class ChannelRemapper
     {
     public:
-        ChannelRemapper (AudioProcessor& p) : processor (p), inputLayoutMap (nullptr), outputLayoutMap (nullptr) {}
-        ~ChannelRemapper() {}
-
-        void alloc()
+        void alloc (AudioProcessor& processor)
         {
             const int numInputBuses  = AudioUnitHelpers::getBusCount (processor, true);
             const int numOutputBuses = AudioUnitHelpers::getBusCount (processor, false);
 
-            initializeChannelMapArray (true, numInputBuses);
-            initializeChannelMapArray (false, numOutputBuses);
+            initializeChannelMapArray (processor, true, numInputBuses);
+            initializeChannelMapArray (processor, false, numOutputBuses);
 
             for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
-                fillLayoutChannelMaps (true, busIdx);
+                fillLayoutChannelMaps (processor, true, busIdx);
 
             for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
-                fillLayoutChannelMaps (false, busIdx);
+                fillLayoutChannelMaps (processor, false, busIdx);
         }
 
         void release()
@@ -69,14 +66,13 @@ struct AudioUnitHelpers
 
     private:
         //==============================================================================
-        AudioProcessor& processor;
         HeapBlock<int*> inputLayoutMapPtrStorage, outputLayoutMapPtrStorage;
         HeapBlock<int>  inputLayoutMapStorage, outputLayoutMapStorage;
-        int** inputLayoutMap;
-        int** outputLayoutMap;
+        int** inputLayoutMap  = nullptr;
+        int** outputLayoutMap = nullptr;
 
         //==============================================================================
-        void initializeChannelMapArray (bool isInput, const int numBuses)
+        void initializeChannelMapArray (AudioProcessor& processor, bool isInput, const int numBuses)
         {
             HeapBlock<int*>& layoutMapPtrStorage = isInput ? inputLayoutMapPtrStorage : outputLayoutMapPtrStorage;
             HeapBlock<int>& layoutMapStorage = isInput ? inputLayoutMapStorage : outputLayoutMapStorage;
@@ -88,7 +84,7 @@ struct AudioUnitHelpers
             layoutMapPtrStorage.calloc (static_cast<size_t> (numBuses));
             layoutMapStorage.calloc (static_cast<size_t> (isInput ? totalInChannels : totalOutChannels));
 
-            layoutMap  = layoutMapPtrStorage. get();
+            layoutMap = layoutMapPtrStorage.get();
 
             int ch = 0;
             for (int busIdx = 0; busIdx < numBuses; ++busIdx)
@@ -98,7 +94,7 @@ struct AudioUnitHelpers
             }
         }
 
-        void fillLayoutChannelMaps (bool isInput, int busNr)
+        void fillLayoutChannelMaps (AudioProcessor& processor, bool isInput, int busNr)
         {
             int* layoutMap = (isInput ? inputLayoutMap : outputLayoutMap)[busNr];
             auto channelFormat = processor.getChannelLayoutOfBus (isInput, busNr);
