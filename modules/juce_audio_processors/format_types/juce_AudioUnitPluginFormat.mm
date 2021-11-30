@@ -312,6 +312,105 @@ namespace AudioUnitFormatHelpers
         void handleAsyncUpdate() override              { resizeToFitView(); }
     };
   #endif
+
+    template <typename Value>
+    struct BasicOptional
+    {
+        BasicOptional() = default;
+
+        explicit constexpr BasicOptional (Value&& v) : value (std::move (v)), isValid (true) {}
+        explicit constexpr BasicOptional (const Value& v) : value (v), isValid (true) {}
+
+        explicit constexpr operator bool() const noexcept { return isValid; }
+
+        Value value;
+        bool isValid { false };
+    };
+
+    template <typename Value>
+    static BasicOptional<Value> tryGetProperty (AudioUnit inUnit,
+                                                AudioUnitPropertyID inID,
+                                                AudioUnitScope inScope,
+                                                AudioUnitElement inElement)
+    {
+        Value data;
+        auto size = (UInt32) sizeof (Value);
+
+        if (AudioUnitGetProperty (inUnit, inID, inScope, inElement, &data, &size) == noErr)
+            return BasicOptional<Value> (data);
+
+        return BasicOptional<Value>();
+    }
+
+    static UInt32 getElementCount (AudioUnit comp, AudioUnitScope scope) noexcept
+    {
+        const auto count = tryGetProperty<UInt32> (comp, kAudioUnitProperty_ElementCount, scope, 0);
+        jassert (count.isValid);
+        return count.value;
+    }
+
+    /*  The plugin may expect its channels in a particular order, reported to the host
+        using kAudioUnitProperty_AudioChannelLayout.
+        This remapper allows us to respect the channel order requested by the plugin,
+        while still using the JUCE channel ordering for the AudioBuffer argument
+        of AudioProcessor::processBlock.
+    */
+    class SingleDirectionChannelMapping
+    {
+    public:
+        void setUpMapping (AudioUnit comp, bool isInput)
+        {
+            channels.clear();
+            busOffset.clear();
+
+            const auto scope = isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
+            const auto n = getElementCount (comp, scope);
+
+            for (UInt32 busIndex = 0; busIndex < n; ++busIndex)
+            {
+                std::vector<size_t> busMap;
+
+                if (const auto layout = tryGetProperty<AudioChannelLayout> (comp, kAudioUnitProperty_AudioChannelLayout, scope, busIndex))
+                {
+                    const auto juceChannelOrder = CoreAudioLayouts::fromCoreAudio (layout.value);
+                    const auto auChannelOrder   = CoreAudioLayouts::getCoreAudioLayoutChannels (layout.value);
+
+                    for (auto juceChannelIndex = 0; juceChannelIndex < juceChannelOrder.size(); ++juceChannelIndex)
+                        busMap.push_back ((size_t) auChannelOrder.indexOf (juceChannelOrder.getTypeOfChannel (juceChannelIndex)));
+                }
+
+                busOffset.push_back (busMap.empty() ? unknownChannelCount : channels.size());
+                channels.insert (channels.end(), busMap.begin(), busMap.end());
+            }
+        }
+
+        size_t getAuIndexForJuceChannel (size_t bus, size_t channel) const noexcept
+        {
+            const auto baseOffset = busOffset[bus];
+            return baseOffset != unknownChannelCount ? channels[baseOffset + channel]
+                                                     : channel;
+        }
+
+    private:
+        static constexpr size_t unknownChannelCount = std::numeric_limits<size_t>::max();
+
+        /*  The index (in the channels vector) of the first channel in each bus.
+            e.g the index of the first channel in the second bus can be found at busOffset[1].
+            It's possible for a bus not to report its channel layout, and in this case a value
+            of unknownChannelCount will be stored for that bus.
+        */
+        std::vector<size_t> busOffset;
+
+        /*  The index in a collection of JUCE channels of the AU channel with a matching channel
+            type. The mappings for all buses are stored in bus order. To find the start offset for a
+            particular bus, use the busOffset vector.
+            e.g. the index of the AU channel with the same type as the fifth channel of the third bus
+            in JUCE layout is found at channels[busOffset[2] + 4].
+            If the busOffset for the bus is unknownChannelCount, then assume there is no mapping
+            between JUCE/AU channel layouts.
+        */
+        std::vector<size_t> channels;
+    };
 }
 
 //==============================================================================
@@ -624,8 +723,8 @@ public:
 
     bool canApplyBusCountChange (bool isInput, bool isAdding, BusProperties& outProperties) override
     {
-        int currentCount = getBusCount (isInput);
-        int newCount = currentCount + (isAdding ? 1 : -1);
+        auto currentCount = (UInt32) getBusCount (isInput);
+        auto newCount = (UInt32) ((int) currentCount + (isAdding ? 1 : -1));
         AudioUnitScope scope = isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
 
         if (AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount)) == noErr)
@@ -980,7 +1079,6 @@ public:
             timeStamp.mHostTime = GetCurrentHostTime (0, newSampleRate, isAUv3);
             timeStamp.mFlags = kAudioTimeStampSampleTimeValid | kAudioTimeStampHostTimeValid;
 
-            currentBuffer = nullptr;
             wasPlaying = false;
 
             resetBuses();
@@ -1003,6 +1101,12 @@ public:
                     AudioUnitUninitialize (audioUnit);
                 }
             }
+
+            inMapping .setUpMapping (audioUnit, true);
+            outMapping.setUpMapping (audioUnit, false);
+
+            inputBuffer.setSize (jmax (getTotalNumInputChannels(), getTotalNumOutputChannels()),
+                                 estimatedSamplesPerBlock);
         }
     }
 
@@ -1015,7 +1119,6 @@ public:
             AudioUnitReset (audioUnit, kAudioUnitScope_Global, 0);
 
             outputBufferList.clear();
-            currentBuffer = nullptr;
             prepared = false;
         }
 
@@ -1030,6 +1133,14 @@ public:
 
     void processAudio (AudioBuffer<float>& buffer, MidiBuffer& midiMessages, bool processBlockBypassedCalled)
     {
+        // If these are hit, we might allocate in the process block!
+        jassert (buffer.getNumChannels() <= inputBuffer.getNumChannels());
+        jassert (buffer.getNumSamples()  <= inputBuffer.getNumSamples());
+        // Copy the input buffer to guard against the case where a bus has more output channels
+        // than input channels, so rendering the output for that bus might stamp over the input
+        // to the following bus.
+        inputBuffer.makeCopyOf (buffer, true);
+
         auto numSamples = buffer.getNumSamples();
 
         if (auSupportsBypass)
@@ -1045,27 +1156,26 @@ public:
         if (prepared)
         {
             timeStamp.mHostTime = GetCurrentHostTime (numSamples, getSampleRate(), isAUv3);
-            int numOutputBuses;
 
-            int chIdx = 0;
-            numOutputBuses = getBusCount (false);
+            const auto numOutputBuses = getBusCount (false);
 
             for (int i = 0; i < numOutputBuses; ++i)
             {
                 if (AUBuffer* buf = outputBufferList[i])
                 {
                     AudioBufferList& abl = *buf;
+                    const auto* bus = getBus (false, i);
+                    const auto channelCount = bus != nullptr ? bus->getNumberOfChannels() : 0;
 
-                    for (AudioUnitElement j = 0; j < abl.mNumberBuffers; ++j)
+                    for (auto juceChannel = 0; juceChannel < channelCount; ++juceChannel)
                     {
-                        abl.mBuffers[j].mNumberChannels = 1;
-                        abl.mBuffers[j].mDataByteSize = (UInt32) ((size_t) numSamples * sizeof (float));
-                        abl.mBuffers[j].mData = buffer.getWritePointer (chIdx++);
+                        const auto auChannel = outMapping.getAuIndexForJuceChannel ((size_t) i, (size_t) juceChannel);
+                        abl.mBuffers[auChannel].mNumberChannels = 1;
+                        abl.mBuffers[auChannel].mDataByteSize = (UInt32) ((size_t) numSamples * sizeof (float));
+                        abl.mBuffers[auChannel].mData = buffer.getWritePointer (bus->getChannelIndexInProcessBlockBuffer (juceChannel));
                     }
                 }
             }
-
-            currentBuffer = &buffer;
 
             if (wantsMidiMessages)
             {
@@ -1142,10 +1252,10 @@ public:
 
         for (int dir = 0; dir < 2; ++dir)
         {
-            const bool isInput = (dir == 0);
-            const int n = getElementCount (comp, isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output);
+            const auto isInput = (dir == 0);
+            const auto n = AudioUnitFormatHelpers::getElementCount (comp, isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output);
 
-            for (int i = 0; i < n; ++i)
+            for (UInt32 i = 0; i < n; ++i)
             {
                 String busName;
                 AudioChannelSet currentLayout;
@@ -1642,7 +1752,7 @@ private:
 
     OwnedArray<AUBuffer> outputBufferList;
     AudioTimeStamp timeStamp;
-    AudioBuffer<float>* currentBuffer = nullptr;
+    AudioBuffer<float> inputBuffer;
     Array<Array<AudioChannelSet>> supportedInLayouts, supportedOutLayouts;
 
     int numChannelInfos;
@@ -1655,6 +1765,7 @@ private:
 
     std::map<UInt32, AUInstanceParameter*> paramIDToParameter;
 
+    AudioUnitFormatHelpers::SingleDirectionChannelMapping inMapping, outMapping;
     MidiDataConcatenator midiConcatenator;
     CriticalSection midiInLock;
     MidiBuffer incomingMidi;
@@ -1811,30 +1922,33 @@ private:
                              const AudioTimeStamp*,
                              UInt32 inBusNumber,
                              UInt32 inNumberFrames,
-                             AudioBufferList* ioData) const
+                             AudioBufferList* ioData)
     {
-        if (currentBuffer != nullptr)
+        if (inputBuffer.getNumChannels() <= 0)
         {
-            // if this ever happens, might need to add extra handling
-            jassert (inNumberFrames == (UInt32) currentBuffer->getNumSamples());
-            auto buffer = static_cast<int> (inBusNumber) < getBusCount (true)
-                             ? getBusBuffer (*currentBuffer, true, static_cast<int> (inBusNumber))
-                             : AudioBuffer<float>();
+            jassertfalse;
+            return noErr;
+        }
 
-            for (int i = 0; i < static_cast<int> (ioData->mNumberBuffers); ++i)
-            {
-                if (i < buffer.getNumChannels())
-                {
-                    memcpy (ioData->mBuffers[i].mData,
-                            buffer.getReadPointer (i),
-                            sizeof (float) * inNumberFrames);
-                }
-                else
-                {
-                    zeromem (ioData->mBuffers[i].mData,
-                             sizeof (float) * inNumberFrames);
-                }
-            }
+        // if this ever happens, might need to add extra handling
+        if (inputBuffer.getNumSamples() != (int) inNumberFrames)
+        {
+            jassertfalse;
+            return noErr;
+        }
+
+        const auto buffer = static_cast<int> (inBusNumber) < getBusCount (true)
+                          ? getBusBuffer (inputBuffer, true, static_cast<int> (inBusNumber))
+                          : AudioBuffer<float>();
+
+        for (int juceChannel = 0; juceChannel < buffer.getNumChannels(); ++juceChannel)
+        {
+            const auto auChannel = (int) inMapping.getAuIndexForJuceChannel (inBusNumber, (size_t) juceChannel);
+
+            if (auChannel < buffer.getNumChannels())
+                memcpy (ioData->mBuffers[auChannel].mData, buffer.getReadPointer (juceChannel), sizeof (float) * inNumberFrames);
+            else
+                zeromem (ioData->mBuffers[auChannel].mData, sizeof (float) * inNumberFrames);
         }
 
         return noErr;
@@ -2017,28 +2131,16 @@ private:
     //==============================================================================
     int getElementCount (AudioUnitScope scope) const noexcept
     {
-        return static_cast<int> (getElementCount (audioUnit, scope));
-    }
-
-    static int getElementCount (AudioUnit comp, AudioUnitScope scope) noexcept
-    {
-        UInt32 count;
-        UInt32 countSize = sizeof (count);
-
-        auto err = AudioUnitGetProperty (comp, kAudioUnitProperty_ElementCount, scope, 0, &count, &countSize);
-        jassert (err == noErr);
-        ignoreUnused (err);
-
-        return static_cast<int> (count);
+        return static_cast<int> (AudioUnitFormatHelpers::getElementCount (audioUnit, scope));
     }
 
     //==============================================================================
-    void getBusProperties (bool isInput, int busIdx, String& busName, AudioChannelSet& currentLayout) const
+    void getBusProperties (bool isInput, UInt32 busIdx, String& busName, AudioChannelSet& currentLayout) const
     {
         getBusProperties (audioUnit, isInput, busIdx, busName, currentLayout);
     }
 
-    static void getBusProperties (AudioUnit comp, bool isInput, int busIdx, String& busName, AudioChannelSet& currentLayout)
+    static void getBusProperties (AudioUnit comp, bool isInput, UInt32 busIdx, String& busName, AudioChannelSet& currentLayout)
     {
         const AudioUnitScope scope = isInput ? kAudioUnitScope_Input : kAudioUnitScope_Output;
         busName = (isInput ? "Input #" : "Output #") + String (busIdx + 1);
@@ -2047,7 +2149,7 @@ private:
             CFObjectHolder<CFStringRef> busNameCF;
             UInt32 propertySize = sizeof (busNameCF.object);
 
-            if (AudioUnitGetProperty (comp, kAudioUnitProperty_ElementName, scope, static_cast<UInt32> (busIdx), &busNameCF.object, &propertySize) == noErr)
+            if (AudioUnitGetProperty (comp, kAudioUnitProperty_ElementName, scope, busIdx, &busNameCF.object, &propertySize) == noErr)
                 if (busNameCF.object != nullptr)
                     busName = nsStringToJuce ((NSString*) busNameCF.object);
 
@@ -2055,7 +2157,7 @@ private:
                 AudioChannelLayout auLayout;
                 propertySize = sizeof (auLayout);
 
-                if (AudioUnitGetProperty (comp, kAudioUnitProperty_AudioChannelLayout, scope, static_cast<UInt32> (busIdx), &auLayout, &propertySize) == noErr)
+                if (AudioUnitGetProperty (comp, kAudioUnitProperty_AudioChannelLayout, scope, busIdx, &auLayout, &propertySize) == noErr)
                     currentLayout = CoreAudioLayouts::fromCoreAudio (auLayout);
             }
 
@@ -2064,7 +2166,7 @@ private:
                 AudioStreamBasicDescription descr;
                 propertySize = sizeof (descr);
 
-                if (AudioUnitGetProperty (comp, kAudioUnitProperty_StreamFormat, scope, static_cast<UInt32> (busIdx), &descr, &propertySize) == noErr)
+                if (AudioUnitGetProperty (comp, kAudioUnitProperty_StreamFormat, scope, busIdx, &descr, &propertySize) == noErr)
                     currentLayout = AudioChannelSet::canonicalChannelSet (static_cast<int> (descr.mChannelsPerFrame));
             }
         }
