@@ -35,20 +35,19 @@ struct AudioTrackProducerClass  : public ObjCClass<NSObject>
         addIvar<AudioSourceHolder*> ("source");
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        addMethod (@selector (initWithAudioSourceHolder:),     initWithAudioSourceHolder,     "@@:^v");
-        addMethod (@selector (verifyDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
-                   produceDataForTrack,           "I@:@^cIQI^I");
+        addMethod (@selector (initWithAudioSourceHolder:),     initWithAudioSourceHolder);
+        addMethod (@selector (verifyDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:), produceDataForTrack);
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        addMethod (@selector (cleanupTrackAfterBurn:),         cleanupTrackAfterBurn,         "v@:@");
-        addMethod (@selector (cleanupTrackAfterVerification:), cleanupTrackAfterVerification, "c@:@");
-        addMethod (@selector (estimateLengthOfTrack:),         estimateLengthOfTrack,         "Q@:@");
-        addMethod (@selector (prepareTrack:forBurn:toMedia:),  prepareTrack,                  "c@:@@@");
-        addMethod (@selector (prepareTrackForVerification:),   prepareTrackForVerification,   "c@:@");
+        addMethod (@selector (cleanupTrackAfterBurn:),         cleanupTrackAfterBurn);
+        addMethod (@selector (cleanupTrackAfterVerification:), cleanupTrackAfterVerification);
+        addMethod (@selector (estimateLengthOfTrack:),         estimateLengthOfTrack);
+        addMethod (@selector (prepareTrack:forBurn:toMedia:),  prepareTrack);
+        addMethod (@selector (prepareTrackForVerification:),   prepareTrackForVerification);
         addMethod (@selector (produceDataForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
-                                                               produceDataForTrack,           "I@:@^cIQI^I");
+                                                               produceDataForTrack);
         addMethod (@selector (producePreGapForTrack:intoBuffer:length:atAddress:blockSize:ioFlags:),
-                                                               produceDataForTrack,           "I@:@^cIQI^I");
+                                                               produceDataForTrack);
 
         registerClass();
     }

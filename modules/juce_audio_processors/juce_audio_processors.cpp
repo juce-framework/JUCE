@@ -150,9 +150,9 @@ private:
         {
             addIvar<NSViewComponentWithParent*> ("owner");
 
-            addMethod (@selector (isFlipped),      isFlipped,     "c@:");
-            addMethod (@selector (isOpaque),       isOpaque,      "c@:");
-            addMethod (@selector (didAddSubview:), didAddSubview, "v@:@");
+            addMethod (@selector (isFlipped),      isFlipped);
+            addMethod (@selector (isOpaque),       isOpaque);
+            addMethod (@selector (didAddSubview:), didAddSubview);
 
             registerClass();
         }

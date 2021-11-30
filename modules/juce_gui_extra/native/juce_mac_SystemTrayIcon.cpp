@@ -184,7 +184,7 @@ struct ButtonBasedStatusItem   : public StatusItemContainer
         {
             addIvar<ButtonBasedStatusItem*> ("owner");
 
-            addMethod (@selector (handleEvent:), handleEvent, "v@:@");
+            addMethod (@selector (handleEvent:), handleEvent);
 
             registerClass();
         }
@@ -311,12 +311,12 @@ struct ViewBasedStatusItem   : public StatusItemContainer
             addIvar<ViewBasedStatusItem*> ("owner");
             addIvar<NSImage*> ("image");
 
-            addMethod (@selector (mouseDown:),      handleEventDown, "v@:@");
-            addMethod (@selector (rightMouseDown:), handleEventDown, "v@:@");
-            addMethod (@selector (drawRect:),       drawRect,        "v@:@");
+            addMethod (@selector (mouseDown:),      handleEventDown);
+            addMethod (@selector (rightMouseDown:), handleEventDown);
+            addMethod (@selector (drawRect:),       drawRect);
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (frameChanged:),   frameChanged,    "v@:@");
+            addMethod (@selector (frameChanged:),   frameChanged);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
