@@ -157,8 +157,15 @@ private:
 
     void timerCallback() override
     {
+        WeakReference<DropShadower> deletionChecker { static_cast<DropShadower*> (listener) };
+
         const auto wasOnVirtualDesktop = std::exchange (isOnVirtualDesktop,
                                                         isWindowOnCurrentVirtualDesktop (root->getWindowHandle()));
+
+        // on Windows, isWindowOnCurrentVirtualDesktop() may cause synchronous messages to be dispatched
+        // to the HWND so we need to check if the shadower is still valid after calling
+        if (deletionChecker == nullptr)
+            return;
 
         if (isOnVirtualDesktop != wasOnVirtualDesktop)
             listener->componentVisibilityChanged (*root);
