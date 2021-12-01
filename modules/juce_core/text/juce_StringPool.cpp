@@ -28,7 +28,6 @@ static const uint32 garbageCollectionInterval = 30000;
 
 
 StringPool::StringPool() noexcept  : lastGarbageCollectionTime (0) {}
-StringPool::~StringPool() {}
 
 struct StartEndString
 {

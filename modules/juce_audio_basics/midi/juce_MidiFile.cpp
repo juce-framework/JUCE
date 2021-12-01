@@ -264,7 +264,6 @@ namespace MidiFileHelpers
 
 //==============================================================================
 MidiFile::MidiFile()  : timeFormat ((short) (unsigned short) 0xe728) {}
-MidiFile::~MidiFile() {}
 
 MidiFile::MidiFile (const MidiFile& other)  : timeFormat (other.timeFormat)
 {

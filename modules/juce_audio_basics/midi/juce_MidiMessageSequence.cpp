@@ -25,7 +25,6 @@ namespace juce
 
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& mm) : message (mm) {}
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (MidiMessage&& mm) : message (std::move (mm)) {}
-MidiMessageSequence::MidiEventHolder::~MidiEventHolder() {}
 
 //==============================================================================
 MidiMessageSequence::MidiMessageSequence()
@@ -61,10 +60,6 @@ MidiMessageSequence& MidiMessageSequence::operator= (MidiMessageSequence&& other
 {
     list = std::move (other.list);
     return *this;
-}
-
-MidiMessageSequence::~MidiMessageSequence()
-{
 }
 
 void MidiMessageSequence::swapWith (MidiMessageSequence& other) noexcept

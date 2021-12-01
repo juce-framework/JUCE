@@ -26,10 +26,6 @@
 namespace juce
 {
 
-ApplicationProperties::ApplicationProperties()
-{
-}
-
 ApplicationProperties::~ApplicationProperties()
 {
     closeFiles();

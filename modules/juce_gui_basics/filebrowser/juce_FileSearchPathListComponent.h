@@ -45,9 +45,6 @@ public:
     /** Creates an empty FileSearchPathListComponent. */
     FileSearchPathListComponent();
 
-    /** Destructor. */
-    ~FileSearchPathListComponent() override;
-
     //==============================================================================
     /** Returns the path as it is currently shown. */
     const FileSearchPath& getPath() const noexcept                  { return path; }
