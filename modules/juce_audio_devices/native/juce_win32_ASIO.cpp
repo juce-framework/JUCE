@@ -951,11 +951,12 @@ private:
         {
             JUCE_ASIO_LOG ("rate change: " + String (currentSampleRate) + " to " + String (newRate));
             auto err = asioObject->setSampleRate (newRate);
+            JUCE_ASIO_LOG_ERROR ("setSampleRate", err);
+            Thread::sleep (10);
 
             if (err == ASE_NoClock && numClockSources > 0)
             {
                 JUCE_ASIO_LOG ("trying to set a clock source..");
-                Thread::sleep (10);
                 err = asioObject->setClockSource (clocks[0].index);
                 JUCE_ASIO_LOG_ERROR ("setClockSource2", err);
                 Thread::sleep (10);
