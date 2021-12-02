@@ -311,13 +311,16 @@ public:
             const auto displayScale = [this]
             {
                 if (auto* wrapper = cvDisplayLinkWrapper.get())
-                {
-                    if (auto* screen = wrapper->updateAndReturnActiveDisplay())
-                    {
+                    if (wrapper->updateActiveDisplay())
                         nativeContext->setNominalVideoRefreshPeriodS (wrapper->getNominalVideoRefreshPeriodS());
 
-                        return [screen backingScaleFactor];
-                    }
+                if (auto* view = getCurrentView())
+                {
+                    if ([view respondsToSelector: @selector (backingScaleFactor)])
+                        return [(id) view backingScaleFactor];
+
+                    if (auto* window = [view window])
+                        return [window backingScaleFactor];
                 }
 
                 return scale;
@@ -586,7 +589,7 @@ public:
 
        #if JUCE_MAC
         cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (*this);
-        cvDisplayLinkWrapper->updateAndReturnActiveDisplay();
+        cvDisplayLinkWrapper->updateActiveDisplay();
         nativeContext->setNominalVideoRefreshPeriodS (cvDisplayLinkWrapper->getNominalVideoRefreshPeriodS());
        #endif
 
@@ -723,6 +726,23 @@ public:
     uint32 lastMMLockReleaseTime = 0;
 
    #if JUCE_MAC
+    NSView* getCurrentView() const
+    {
+        if (auto* peer = component.getPeer())
+            return static_cast<NSView*> (peer->getNativeHandle());
+
+        return nullptr;
+    }
+
+    NSScreen* getCurrentScreen() const
+    {
+        if (auto* view = getCurrentView())
+            if (auto* window = [view window])
+                return [window screen];
+
+        return nullptr;
+    }
+
     struct CVDisplayLinkWrapper
     {
         explicit CVDisplayLinkWrapper (CachedImage& cachedImageIn)
@@ -744,30 +764,20 @@ public:
             return 0.0;
         }
 
-        NSScreen* getCurrentScreen() const
+        /*  Returns true if updated, or false otherwise. */
+        bool updateActiveDisplay()
         {
-            if (auto* peer = cachedImage.component.getPeer())
-                if (auto* view = static_cast<NSView*> (peer->getNativeHandle()))
-                    if (auto* window = [view window])
-                        return [window screen];
-
-            return nullptr;
-        }
-
-        /*  If updated, returns the new screen, or nullptr otherwise. */
-        NSScreen* updateAndReturnActiveDisplay()
-        {
-            auto* oldScreen = std::exchange (currentScreen, getCurrentScreen());
+            auto* oldScreen = std::exchange (currentScreen, cachedImage.getCurrentScreen());
 
             if (oldScreen == currentScreen)
-                return nullptr;
+                return false;
 
             for (NSScreen* screen in [NSScreen screens])
                 if (screen == currentScreen)
                     if (NSNumber* number = [[screen deviceDescription] objectForKey: @"NSScreenNumber"])
                         CVDisplayLinkSetCurrentCGDisplay (displayLink, [number unsignedIntValue]);
 
-            return currentScreen;
+            return true;
         }
 
         ~CVDisplayLinkWrapper()
