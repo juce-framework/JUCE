@@ -25,7 +25,7 @@ namespace juce
 namespace universal_midi_packets
 {
 
-/**
+/*
     Points to a single Universal MIDI Packet.
 
     The packet must be well-formed for member functions to work correctly.
@@ -43,41 +43,41 @@ namespace universal_midi_packets
 class View
 {
 public:
-    /** Create an invalid view. */
+    /*  Create an invalid view. */
     View() noexcept = default;
 
-    /** Create a view of the packet starting at address `d`. */
+    /*  Create a view of the packet starting at address `d`. */
     explicit View (const uint32_t* data) noexcept : ptr (data) {}
 
-    /** Get a pointer to the first word in the Universal MIDI Packet currently
+    /*  Get a pointer to the first word in the Universal MIDI Packet currently
         pointed-to by this view.
     */
     const uint32_t* data() const noexcept { return ptr; }
 
-    /** Get the number of 32-words (between 1 and 4 inclusive) in the Universal
+    /*  Get the number of 32-words (between 1 and 4 inclusive) in the Universal
         MIDI Packet currently pointed-to by this view.
     */
     uint32_t size() const noexcept;
 
-    /** Get a specific word from this packet.
+    /*  Get a specific word from this packet.
 
         Passing an `index` that is greater than or equal to the result of `size`
         will cause undefined behaviour.
     */
     const uint32_t& operator[] (size_t index) const noexcept { return ptr[index]; }
 
-    /** Get an iterator pointing to the first word in the packet. */
+    /*  Get an iterator pointing to the first word in the packet. */
     const uint32_t* begin() const noexcept { return ptr; }
     const uint32_t* cbegin() const noexcept { return ptr; }
 
-    /** Get an iterator pointing one-past the last word in the packet. */
+    /*  Get an iterator pointing one-past the last word in the packet. */
     const uint32_t* end() const noexcept { return ptr + size(); }
     const uint32_t* cend() const noexcept { return ptr + size(); }
 
-    /** Return true if this view is pointing to the same address as another view. */
+    /*  Return true if this view is pointing to the same address as another view. */
     bool operator== (const View& other) const noexcept { return ptr == other.ptr; }
 
-    /** Return false if this view is pointing to the same address as another view. */
+    /*  Return false if this view is pointing to the same address as another view. */
     bool operator!= (const View& other) const noexcept { return ! operator== (other); }
 
 private:

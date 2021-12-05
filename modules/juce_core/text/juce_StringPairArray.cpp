@@ -34,10 +34,6 @@ StringPairArray::StringPairArray (const StringPairArray& other)
 {
 }
 
-StringPairArray::~StringPairArray()
-{
-}
-
 StringPairArray& StringPairArray::operator= (const StringPairArray& other)
 {
     keys = other.keys;

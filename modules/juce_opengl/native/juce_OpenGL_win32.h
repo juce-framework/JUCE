@@ -49,24 +49,12 @@ public:
         if (pixFormat != 0)
             SetPixelFormat (dc, pixFormat, &pfd);
 
-        renderContext = wglCreateContext (dc);
+        initialiseWGLExtensions (dc);
+        renderContext = createRenderContext (version, dc);
 
         if (renderContext != nullptr)
         {
             makeActive();
-            initialiseGLExtensions();
-
-            if (version >= openGL3_2)
-            {
-                recreateContextWithAttributes();
-
-                if (renderContext == nullptr)
-                {
-                    // failed to create new context - fall back to default
-                    jassertfalse;
-                    renderContext = wglCreateContext (dc);
-                }
-            }
 
             auto wglFormat = wglChoosePixelFormatExtension (pixelFormat);
             deactivateCurrentContext();
@@ -82,7 +70,7 @@ public:
                 if (SetPixelFormat (dc, wglFormat, &pfd))
                 {
                     deleteRenderContext();
-                    renderContext = wglCreateContext (dc);
+                    renderContext = createRenderContext (version, dc);
                 }
             }
 
@@ -169,6 +157,75 @@ public:
     }
 
 private:
+    //==============================================================================
+    static void initialiseWGLExtensions (HDC dcIn)
+    {
+        static bool initialised = false;
+
+        if (initialised)
+            return;
+
+        initialised = true;
+
+        const auto dummyContext = wglCreateContext (dcIn);
+        wglMakeCurrent (dcIn, dummyContext);
+
+        #define JUCE_INIT_WGL_FUNCTION(name)    name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
+        JUCE_INIT_WGL_FUNCTION (wglChoosePixelFormatARB)
+        JUCE_INIT_WGL_FUNCTION (wglSwapIntervalEXT)
+        JUCE_INIT_WGL_FUNCTION (wglGetSwapIntervalEXT)
+        JUCE_INIT_WGL_FUNCTION (wglCreateContextAttribsARB)
+        #undef JUCE_INIT_WGL_FUNCTION
+
+        wglMakeCurrent (nullptr, nullptr);
+        wglDeleteContext (dummyContext);
+    }
+
+    static void initialisePixelFormatDescriptor (PIXELFORMATDESCRIPTOR& pfd, const OpenGLPixelFormat& pixelFormat)
+    {
+        zerostruct (pfd);
+        pfd.nSize           = sizeof (pfd);
+        pfd.nVersion        = 1;
+        pfd.dwFlags         = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;
+        pfd.iPixelType      = PFD_TYPE_RGBA;
+        pfd.iLayerType      = PFD_MAIN_PLANE;
+        pfd.cColorBits      = (BYTE) (pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits);
+        pfd.cRedBits        = (BYTE) pixelFormat.redBits;
+        pfd.cGreenBits      = (BYTE) pixelFormat.greenBits;
+        pfd.cBlueBits       = (BYTE) pixelFormat.blueBits;
+        pfd.cAlphaBits      = (BYTE) pixelFormat.alphaBits;
+        pfd.cDepthBits      = (BYTE) pixelFormat.depthBufferBits;
+        pfd.cStencilBits    = (BYTE) pixelFormat.stencilBufferBits;
+        pfd.cAccumBits      = (BYTE) (pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
+                                        + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits);
+        pfd.cAccumRedBits   = (BYTE) pixelFormat.accumulationBufferRedBits;
+        pfd.cAccumGreenBits = (BYTE) pixelFormat.accumulationBufferGreenBits;
+        pfd.cAccumBlueBits  = (BYTE) pixelFormat.accumulationBufferBlueBits;
+        pfd.cAccumAlphaBits = (BYTE) pixelFormat.accumulationBufferAlphaBits;
+    }
+
+    static HGLRC createRenderContext (OpenGLVersion version, HDC dcIn)
+    {
+        if (version >= openGL3_2 && wglCreateContextAttribsARB != nullptr)
+        {
+            const int attribs[] =
+            {
+                WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+                WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+                WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                0
+            };
+
+            const auto c = wglCreateContextAttribsARB (dcIn, nullptr, attribs);
+
+            if (c != nullptr)
+                return c;
+        }
+
+        return wglCreateContext (dcIn);
+    }
+
+    //==============================================================================
     struct DummyComponent  : public Component
     {
         DummyComponent (NativeContext& c) : context (c) {}
@@ -179,25 +236,7 @@ private:
         NativeContext& context;
     };
 
-    std::unique_ptr<DummyComponent> dummyComponent;
-    std::unique_ptr<ComponentPeer> nativeWindow;
-    std::unique_ptr<ScopedThreadDPIAwarenessSetter> threadAwarenessSetter;
-    HGLRC renderContext;
-    HDC dc;
-    OpenGLContext* context = {};
-
-    Component::SafePointer<Component> safeComponent;
-    double nativeScaleFactor = 1.0;
-
-    #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
-        typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
-
-    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglChoosePixelFormatARB,    BOOL,  (HDC, const int*, const FLOAT*, UINT, int*, UINT*))
-    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT,         BOOL,  (int))
-    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,      int,   ())
-    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB, HGLRC, (HDC, HGLRC, const int*))
-    #undef JUCE_DECLARE_WGL_EXTENSION_FUNCTION
-
+    //==============================================================================
     void nativeScaleFactorChanged (double newScaleFactor) override
     {
         if (approximatelyEqual (newScaleFactor, nativeScaleFactor)
@@ -209,16 +248,6 @@ private:
             nativeScaleFactor = newScaleFactor;
             updateWindowPosition (peer->getAreaCoveredBy (*safeComponent));
         }
-    }
-
-    void initialiseGLExtensions()
-    {
-        #define JUCE_INIT_WGL_FUNCTION(name)    name = (type_ ## name) OpenGLHelpers::getExtensionFunction (#name);
-        JUCE_INIT_WGL_FUNCTION (wglChoosePixelFormatARB);
-        JUCE_INIT_WGL_FUNCTION (wglSwapIntervalEXT);
-        JUCE_INIT_WGL_FUNCTION (wglGetSwapIntervalEXT);
-        JUCE_INIT_WGL_FUNCTION (wglCreateContextAttribsARB);
-        #undef JUCE_INIT_WGL_FUNCTION
     }
 
     void createNativeWindow (Component& component)
@@ -257,29 +286,6 @@ private:
     void releaseDC()
     {
         ReleaseDC ((HWND) nativeWindow->getNativeHandle(), dc);
-    }
-
-    static void initialisePixelFormatDescriptor (PIXELFORMATDESCRIPTOR& pfd, const OpenGLPixelFormat& pixelFormat)
-    {
-        zerostruct (pfd);
-        pfd.nSize           = sizeof (pfd);
-        pfd.nVersion        = 1;
-        pfd.dwFlags         = PFD_SUPPORT_OPENGL | PFD_DRAW_TO_WINDOW | PFD_DOUBLEBUFFER;
-        pfd.iPixelType      = PFD_TYPE_RGBA;
-        pfd.iLayerType      = PFD_MAIN_PLANE;
-        pfd.cColorBits      = (BYTE) (pixelFormat.redBits + pixelFormat.greenBits + pixelFormat.blueBits);
-        pfd.cRedBits        = (BYTE) pixelFormat.redBits;
-        pfd.cGreenBits      = (BYTE) pixelFormat.greenBits;
-        pfd.cBlueBits       = (BYTE) pixelFormat.blueBits;
-        pfd.cAlphaBits      = (BYTE) pixelFormat.alphaBits;
-        pfd.cDepthBits      = (BYTE) pixelFormat.depthBufferBits;
-        pfd.cStencilBits    = (BYTE) pixelFormat.stencilBufferBits;
-        pfd.cAccumBits      = (BYTE) (pixelFormat.accumulationBufferRedBits + pixelFormat.accumulationBufferGreenBits
-                                        + pixelFormat.accumulationBufferBlueBits + pixelFormat.accumulationBufferAlphaBits);
-        pfd.cAccumRedBits   = (BYTE) pixelFormat.accumulationBufferRedBits;
-        pfd.cAccumGreenBits = (BYTE) pixelFormat.accumulationBufferGreenBits;
-        pfd.cAccumBlueBits  = (BYTE) pixelFormat.accumulationBufferBlueBits;
-        pfd.cAccumAlphaBits = (BYTE) pixelFormat.accumulationBufferAlphaBits;
     }
 
     int wglChoosePixelFormatExtension (const OpenGLPixelFormat& pixelFormat) const
@@ -330,24 +336,27 @@ private:
         return format;
     }
 
-    void recreateContextWithAttributes()
-    {
-        if (wglCreateContextAttribsARB == nullptr)
-            return;
+    //==============================================================================
+    #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
+        typedef returnType (__stdcall *type_ ## name) params; static type_ ## name name;
 
-        deleteRenderContext();
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglChoosePixelFormatARB,    BOOL,  (HDC, const int*, const FLOAT*, UINT, int*, UINT*))
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT,         BOOL,  (int))
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,      int,   ())
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB, HGLRC, (HDC, HGLRC, const int*))
+    #undef JUCE_DECLARE_WGL_EXTENSION_FUNCTION
 
-        const int attribs[] =
-        {
-            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-            WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-            WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-            0
-        };
+    //==============================================================================
+    std::unique_ptr<DummyComponent> dummyComponent;
+    std::unique_ptr<ComponentPeer> nativeWindow;
+    std::unique_ptr<ScopedThreadDPIAwarenessSetter> threadAwarenessSetter;
+    Component::SafePointer<Component> safeComponent;
+    HGLRC renderContext;
+    HDC dc;
+    OpenGLContext* context = nullptr;
+    double nativeScaleFactor = 1.0;
 
-        renderContext = wglCreateContextAttribsARB (dc, nullptr, attribs);
-    }
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
 };
 

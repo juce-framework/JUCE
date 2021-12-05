@@ -25,7 +25,7 @@ namespace juce
 namespace universal_midi_packets
 {
 
-/**
+/*
     Translates a series of MIDI 1 Universal MIDI Packets to corresponding MIDI 2
     packets.
 
@@ -36,7 +36,7 @@ class Midi1ToMidi2DefaultTranslator
 public:
     Midi1ToMidi2DefaultTranslator() = default;
 
-    /** Converts MIDI 1 Universal MIDI Packets to corresponding MIDI 2 packets,
+    /*  Converts MIDI 1 Universal MIDI Packets to corresponding MIDI 2 packets,
         calling `callback` with each converted packet.
 
         In some cases (such as RPN/NRPN messages) multiple MIDI 1 packets will

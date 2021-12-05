@@ -25,7 +25,7 @@ namespace juce
 namespace universal_midi_packets
 {
 
-/**
+/*
     Enables iteration over a collection of Universal MIDI Packets stored as
     a contiguous range of 32-bit words.
 
@@ -37,10 +37,10 @@ namespace universal_midi_packets
 class Iterator
 {
 public:
-    /** Creates an invalid (singular) iterator. */
+    /*  Creates an invalid (singular) iterator. */
     Iterator() noexcept = default;
 
-    /** Creates an iterator pointing at `ptr`. */
+    /*  Creates an iterator pointing at `ptr`. */
     explicit Iterator (const uint32_t* ptr, size_t bytes) noexcept
         : view (ptr)
        #if JUCE_DEBUG
@@ -56,7 +56,7 @@ public:
     using pointer            = const View*;
     using iterator_category  = std::forward_iterator_tag;
 
-    /** Moves this iterator to the next packet in the range. */
+    /*  Moves this iterator to the next packet in the range. */
     Iterator& operator++() noexcept
     {
         const auto increment = view.size();
@@ -73,7 +73,7 @@ public:
         return *this;
     }
 
-    /** Moves this iterator to the next packet in the range,
+    /*  Moves this iterator to the next packet in the range,
         returning the value of the iterator before it was
         incremented.
     */
@@ -84,7 +84,7 @@ public:
         return copy;
     }
 
-    /** Returns true if this iterator points to the same address
+    /*  Returns true if this iterator points to the same address
         as another iterator.
     */
     bool operator== (const Iterator& other) const noexcept
@@ -92,7 +92,7 @@ public:
         return view == other.view;
     }
 
-    /** Returns false if this iterator points to the same address
+    /*  Returns false if this iterator points to the same address
         as another iterator.
     */
     bool operator!= (const Iterator& other) const noexcept
@@ -100,14 +100,14 @@ public:
         return ! operator== (other);
     }
 
-    /** Returns a reference to a View of the packet currently
+    /*  Returns a reference to a View of the packet currently
         pointed-to by this iterator.
 
         The View can be queried for its size and content.
     */
     reference operator*() noexcept { return view; }
 
-    /** Returns a pointer to a View of the packet currently
+    /*  Returns a pointer to a View of the packet currently
         pointed-to by this iterator.
 
         The View can be queried for its size and content.

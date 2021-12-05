@@ -81,10 +81,6 @@ FileSearchPathListComponent::FileSearchPathListComponent()
     updateButtons();
 }
 
-FileSearchPathListComponent::~FileSearchPathListComponent()
-{
-}
-
 void FileSearchPathListComponent::updateButtons()
 {
     const bool anythingSelected = listBox.getNumSelectedRows() > 0;

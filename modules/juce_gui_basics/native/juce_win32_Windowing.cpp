@@ -1430,7 +1430,7 @@ private:
     //==============================================================================
     struct ComBaseModule
     {
-        ComBaseModule() {}
+        ComBaseModule() = default;
         ComBaseModule (LPCWSTR libraryName) : h (::LoadLibrary (libraryName)) {}
         ComBaseModule (ComBaseModule&& o) : h (o.h) { o.h = nullptr; }
         ~ComBaseModule() { release(); }

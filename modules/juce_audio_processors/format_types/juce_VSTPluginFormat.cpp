@@ -1585,7 +1585,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             {
                 char nm[264] = { 0 };
 
-                if (dispatch (Vst2::effGetProgramNameIndexed, jlimit (0, getNumPrograms(), index), -1, nm, 0) != 0)
+                if (dispatch (Vst2::effGetProgramNameIndexed, jlimit (0, getNumPrograms() - 1, index), -1, nm, 0) != 0)
                     return String::fromUTF8 (nm).trim();
             }
         }
