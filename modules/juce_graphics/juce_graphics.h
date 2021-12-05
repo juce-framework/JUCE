@@ -140,6 +140,7 @@ namespace juce
 #include "contexts/juce_GraphicsContext.h"
 #include "contexts/juce_LowLevelGraphicsContext.h"
 #include "images/juce_Image.h"
+#include "images/juce_ScaledImage.h"
 #include "colour/juce_FillType.h"
 #include "native/juce_RenderingHelpers.h"
 #include "contexts/juce_LowLevelGraphicsSoftwareRenderer.h"

@@ -960,6 +960,8 @@ private:
                 JUCE_ASIO_LOG_ERROR ("setClockSource2", err);
                 Thread::sleep (10);
                 err = asioObject->setSampleRate (newRate);
+                JUCE_ASIO_LOG_ERROR ("setSampleRate", err);
+                Thread::sleep (10);
             }
 
             if (err == 0)

@@ -87,6 +87,8 @@ public:
         {
             controller.reset ([controllerClassInstance initWithDocumentTypes: utTypeArray
                                                                       inMode: UIDocumentPickerModeOpen]);
+            if (@available (iOS 11.0, *))
+                [controller.get() setAllowsMultipleSelection: (flags & FileBrowserComponent::canSelectMultipleItems) != 0];
         }
 
         FileChooserControllerClass::setOwner (controller.get(), this);
@@ -224,37 +226,47 @@ private:
     }
 
     //==============================================================================
-    void didPickDocumentAtURL (NSURL* url)
+    void didPickDocumentsAtURLs (NSArray<NSURL*>* urls)
     {
         cancelPendingUpdate();
 
-        bool isWriting = controller.get().documentPickerMode == UIDocumentPickerModeExportToService
-                       | controller.get().documentPickerMode == UIDocumentPickerModeMoveToService;
+        const auto isWriting =  controller.get().documentPickerMode == UIDocumentPickerModeExportToService
+                             || controller.get().documentPickerMode == UIDocumentPickerModeMoveToService;
+        const auto accessOptions = isWriting ? 0 : NSFileCoordinatorReadingWithoutChanges;
 
-        NSUInteger accessOptions = isWriting ? 0 : NSFileCoordinatorReadingWithoutChanges;
+        auto* fileCoordinator = [[[NSFileCoordinator alloc] initWithFilePresenter: nil] autorelease];
+        auto* intents = [[[NSMutableArray alloc] init] autorelease];
 
-        auto* fileAccessIntent = isWriting
-                               ? [NSFileAccessIntent writingIntentWithURL: url options: accessOptions]
-                               : [NSFileAccessIntent readingIntentWithURL: url options: accessOptions];
-
-        NSArray<NSFileAccessIntent*>* intents = @[fileAccessIntent];
-
-        auto fileCoordinator = [[[NSFileCoordinator alloc] initWithFilePresenter: nil] autorelease];
+        for (NSURL* url in urls)
+        {
+            auto* fileAccessIntent = isWriting
+                                   ? [NSFileAccessIntent writingIntentWithURL: url options: accessOptions]
+                                   : [NSFileAccessIntent readingIntentWithURL: url options: accessOptions];
+            [intents addObject: fileAccessIntent];
+        }
 
         [fileCoordinator coordinateAccessWithIntents: intents queue: [NSOperationQueue mainQueue] byAccessor: ^(NSError* err)
         {
-            Array<URL> chooserResults;
+            if (err != nil)
+            {
+                auto desc = [err localizedDescription];
+                ignoreUnused (desc);
+                jassertfalse;
+                return;
+            }
 
-            if (err == nil)
+            Array<URL> result;
+
+            for (NSURL* url in urls)
             {
                 [url startAccessingSecurityScopedResource];
 
                 NSError* error = nil;
 
-                NSData* bookmark = [url bookmarkDataWithOptions: 0
-                                 includingResourceValuesForKeys: nil
-                                                  relativeToURL: nil
-                                                          error: &error];
+                auto* bookmark = [url bookmarkDataWithOptions: 0
+                               includingResourceValuesForKeys: nil
+                                                relativeToURL: nil
+                                                        error: &error];
 
                 [bookmark retain];
 
@@ -273,17 +285,16 @@ private:
                     jassertfalse;
                 }
 
-                chooserResults.add (juceUrl);
-            }
-            else
-            {
-                auto desc = [err localizedDescription];
-                ignoreUnused (desc);
-                jassertfalse;
+                result.add (std::move (juceUrl));
             }
 
-            owner.finished (chooserResults);
+            owner.finished (std::move (result));
         }];
+    }
+
+    void didPickDocumentAtURL (NSURL* url)
+    {
+        didPickDocumentsAtURLs (@[url]);
     }
 
     void pickerWasCancelled()
@@ -301,8 +312,9 @@ private:
         {
             addIvar<Native*> ("owner");
 
-            addMethod (@selector (documentPicker:didPickDocumentAtURL:), didPickDocumentAtURL);
-            addMethod (@selector (documentPickerWasCancelled:),          documentPickerWasCancelled);
+            addMethod (@selector (documentPicker:didPickDocumentAtURL:),   didPickDocumentAtURL);
+            addMethod (@selector (documentPicker:didPickDocumentsAtURLs:), didPickDocumentsAtURLs);
+            addMethod (@selector (documentPickerWasCancelled:),            documentPickerWasCancelled);
 
             addProtocol (@protocol (UIDocumentPickerDelegate));
 
@@ -317,6 +329,12 @@ private:
         {
             if (auto* picker = getOwner (self))
                 picker->didPickDocumentAtURL (url);
+        }
+
+        static void didPickDocumentsAtURLs (id self, SEL, UIDocumentPickerViewController*, NSArray<NSURL*>* urls)
+        {
+            if (auto* picker = getOwner (self))
+                picker->didPickDocumentsAtURLs (urls);
         }
 
         static void documentPickerWasCancelled (id self, SEL, UIDocumentPickerViewController*)

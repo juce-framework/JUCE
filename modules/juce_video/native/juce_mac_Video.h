@@ -489,13 +489,13 @@ private:
         {
             if (crtp().getPlayer() != nullptr && playerStatusObserver != nullptr)
             {
-                    [crtp().getPlayer() removeObserver: playerStatusObserver.get()
-                                            forKeyPath: nsStringLiteral ("rate")
-                                               context: this];
+                [crtp().getPlayer() removeObserver: playerStatusObserver.get()
+                                        forKeyPath: nsStringLiteral ("rate")
+                                           context: this];
 
-                    [crtp().getPlayer() removeObserver: playerStatusObserver.get()
-                                            forKeyPath: nsStringLiteral ("status")
-                                               context: this];
+                [crtp().getPlayer() removeObserver: playerStatusObserver.get()
+                                        forKeyPath: nsStringLiteral ("status")
+                                           context: this];
             }
         }
 

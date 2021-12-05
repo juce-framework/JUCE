@@ -75,8 +75,8 @@ private:
     JUCE_DECLARE_NON_COPYABLE (ShadowWindow)
 };
 
-class ParentVisibilityChangedListener  : public ComponentListener,
-                                         private Timer
+class DropShadower::ParentVisibilityChangedListener  : public ComponentListener,
+                                                       private Timer
 {
 public:
     ParentVisibilityChangedListener (Component& r, ComponentListener& l)
@@ -86,7 +86,10 @@ public:
             updateParentHierarchy (firstParent);
 
         if ((SystemStats::getOperatingSystemType() & SystemStats::Windows) != 0)
-            startTimerHz (20);
+        {
+            isOnVirtualDesktop = isWindowOnCurrentVirtualDesktop (root->getWindowHandle());
+            startTimerHz (5);
+        }
     }
 
     ~ParentVisibilityChangedListener() override
@@ -107,6 +110,8 @@ public:
             if (auto* firstParent = root->getParentComponent())
                 updateParentHierarchy (firstParent);
     }
+
+    bool isWindowOnVirtualDesktop() const noexcept  { return isOnVirtualDesktop; }
 
 private:
     class ComponentWithWeakReference
@@ -152,12 +157,17 @@ private:
 
     void timerCallback() override
     {
-        listener->componentVisibilityChanged (*root);
+        const auto wasOnVirtualDesktop = std::exchange (isOnVirtualDesktop,
+                                                        isWindowOnCurrentVirtualDesktop (root->getWindowHandle()));
+
+        if (isOnVirtualDesktop != wasOnVirtualDesktop)
+            listener->componentVisibilityChanged (*root);
     }
 
     Component* root = nullptr;
     ComponentListener* listener = nullptr;
     std::set<ComponentWithWeakReference> observedComponents;
+    bool isOnVirtualDesktop = true;
 
     JUCE_DECLARE_NON_COPYABLE (ParentVisibilityChangedListener)
     JUCE_DECLARE_NON_MOVEABLE (ParentVisibilityChangedListener)
@@ -259,7 +269,7 @@ void DropShadower::updateShadows()
         && owner->isShowing()
         && owner->getWidth() > 0 && owner->getHeight() > 0
         && (Desktop::canUseSemiTransparentWindows() || owner->getParentComponent() != nullptr)
-        && isWindowOnCurrentVirtualDesktop (owner->getWindowHandle()))
+        && (visibilityChangedListener != nullptr && visibilityChangedListener->isWindowOnVirtualDesktop()))
     {
         while (shadowWindows.size() < 4)
             shadowWindows.add (new ShadowWindow (owner, shadow));

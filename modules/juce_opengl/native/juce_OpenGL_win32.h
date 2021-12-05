@@ -36,7 +36,7 @@ public:
                    const OpenGLPixelFormat& pixelFormat,
                    void* contextToShareWithIn,
                    bool /*useMultisampling*/,
-                   OpenGLVersion)
+                   OpenGLVersion version)
     {
         dummyComponent.reset (new DummyComponent (*this));
         createNativeWindow (component);
@@ -55,6 +55,18 @@ public:
         {
             makeActive();
             initialiseGLExtensions();
+
+            if (version >= openGL3_2)
+            {
+                recreateContextWithAttributes();
+
+                if (renderContext == nullptr)
+                {
+                    // failed to create new context - fall back to default
+                    jassertfalse;
+                    renderContext = wglCreateContext (dc);
+                }
+            }
 
             auto wglFormat = wglChoosePixelFormatExtension (pixelFormat);
             deactivateCurrentContext();
@@ -180,9 +192,10 @@ private:
     #define JUCE_DECLARE_WGL_EXTENSION_FUNCTION(name, returnType, params) \
         typedef returnType (__stdcall *type_ ## name) params; type_ ## name name;
 
-    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglChoosePixelFormatARB,  BOOL, (HDC, const int*, const FLOAT*, UINT, int*, UINT*))
-    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT,       BOOL, (int))
-    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,    int, ())
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglChoosePixelFormatARB,    BOOL,  (HDC, const int*, const FLOAT*, UINT, int*, UINT*))
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT,         BOOL,  (int))
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT,      int,   ())
+    JUCE_DECLARE_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB, HGLRC, (HDC, HGLRC, const int*))
     #undef JUCE_DECLARE_WGL_EXTENSION_FUNCTION
 
     void nativeScaleFactorChanged (double newScaleFactor) override
@@ -204,6 +217,7 @@ private:
         JUCE_INIT_WGL_FUNCTION (wglChoosePixelFormatARB);
         JUCE_INIT_WGL_FUNCTION (wglSwapIntervalEXT);
         JUCE_INIT_WGL_FUNCTION (wglGetSwapIntervalEXT);
+        JUCE_INIT_WGL_FUNCTION (wglCreateContextAttribsARB);
         #undef JUCE_INIT_WGL_FUNCTION
     }
 
@@ -314,6 +328,24 @@ private:
         }
 
         return format;
+    }
+
+    void recreateContextWithAttributes()
+    {
+        if (wglCreateContextAttribsARB == nullptr)
+            return;
+
+        deleteRenderContext();
+
+        const int attribs[] =
+        {
+            WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+            WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+            WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+            0
+        };
+
+        renderContext = wglCreateContextAttribsARB (dc, nullptr, attribs);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeContext)
