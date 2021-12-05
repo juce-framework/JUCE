@@ -537,7 +537,7 @@ public:
             if (! windowRepresentsFile)
                 [window setRepresentedFilename:juceStringToNS (" ")]; // can't just use an empty string for some reason...
 
-            [[window standardWindowButton:NSWindowDocumentIconButton] setImage:imageToNSImage (newIcon)];
+            [[window standardWindowButton:NSWindowDocumentIconButton] setImage:imageToNSImage (ScaledImage (newIcon))];
         }
     }
 

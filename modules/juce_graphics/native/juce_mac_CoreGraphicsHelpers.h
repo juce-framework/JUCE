@@ -111,7 +111,7 @@ CGContextRef juce_getImageContext (const Image&);
  Image juce_returnImageWithNativeColourSpace (const Image& src,
                                               void* rawNSScreenPointer);
 
- NSImage* imageToNSImage (const Image& image, float scaleFactor = 1.0f);
+ NSImage* imageToNSImage (const ScaledImage& image);
 #endif
 
 } // namespace juce
