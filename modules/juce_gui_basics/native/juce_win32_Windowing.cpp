@@ -1430,7 +1430,7 @@ private:
     //==============================================================================
     struct ComBaseModule
     {
-        ComBaseModule() {}
+        ComBaseModule() = default;
         ComBaseModule (LPCWSTR libraryName) : h (::LoadLibrary (libraryName)) {}
         ComBaseModule (ComBaseModule&& o) : h (o.h) { o.h = nullptr; }
         ~ComBaseModule() { release(); }
@@ -3393,7 +3393,7 @@ private:
 
     LRESULT handlePositionChanging (WINDOWPOS& wp)
     {
-        if (isConstrainedNativeWindow())
+        if (isConstrainedNativeWindow() && ! isFullScreen())
         {
             if ((wp.flags & (SWP_NOMOVE | SWP_NOSIZE)) != (SWP_NOMOVE | SWP_NOSIZE)
                  && (wp.x > -32000 && wp.y > -32000)
@@ -5177,8 +5177,7 @@ private:
     class ImageImpl : public Impl
     {
     public:
-        ImageImpl (Image imageIn, Point<int> hotspotIn)
-            : image (std::move (imageIn)), hotspot (hotspotIn) {}
+        explicit ImageImpl (const CustomMouseCursorInfo& infoIn) : info (infoIn) {}
 
         ~ImageImpl() override
         {
@@ -5198,23 +5197,23 @@ private:
             if (iter != cursorsBySize.end())
                 return iter->second;
 
-            const auto imgW = jmax (1, image.getWidth());
-            const auto imgH = jmax (1, image.getHeight());
+            const auto img = info.image.getImage();
+            const auto imgW = jmax (1, img.getWidth());
+            const auto imgH = jmax (1, img.getHeight());
 
             const auto scale = (float) size / (float) unityCursorSize;
             const auto scaleToUse = scale * jmin (1.0f, jmin ((float) unityCursorSize / (float) imgW,
-                                                              (float) unityCursorSize / (float) imgH));
-            const auto rescaled = image.rescaled (roundToInt (scaleToUse * (float) imgW),
-                                                  roundToInt (scaleToUse * (float) imgH));
-            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) hotspot.x));
-            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) hotspot.y));
+                                                              (float) unityCursorSize / (float) imgH)) / info.image.getScale();
+            const auto rescaled = img.rescaled (roundToInt (scaleToUse * (float) imgW),
+                                                roundToInt (scaleToUse * (float) imgH));
+            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) info.hotspot.x));
+            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) info.hotspot.y));
 
             return cursorsBySize.emplace (size, IconConverters::createHICONFromImage (rescaled, false, hx, hy)).first->second;
         }
 
     private:
-        Image image;
-        Point<int> hotspot;
+        const CustomMouseCursorInfo info;
         std::map<int, HCURSOR> cursorsBySize;
     };
 
@@ -5263,7 +5262,7 @@ private:
 
     static std::unique_ptr<Impl> makeHandle (const CustomMouseCursorInfo& info)
     {
-        return std::make_unique<ImageImpl> (info.image, info.hotspot);
+        return std::make_unique<ImageImpl> (info);
     }
 
     static std::unique_ptr<Impl> makeHandle (const MouseCursor::StandardCursorType type)
@@ -5303,7 +5302,7 @@ private:
                       16,0,0,2,52,148,47,0,200,185,16,130,90,12,74,139,107,84,123,39,132,117,151,116,132,146,248,60,209,138,
                       98,22,203,114,34,236,37,52,77,217,247,154,191,119,110,240,193,128,193,95,163,56,60,234,98,135,2,0,59 };
 
-                return makeHandle ({ ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData)), { 8, 7 } });
+                return makeHandle ({ ScaledImage (ImageFileFormat::loadFrom (dragHandData, sizeof (dragHandData))), { 8, 7 } });
             }
 
             case CopyingCursor:
@@ -5314,7 +5313,7 @@ private:
                       12,108,212,87,235,174, 15,54,214,126,237,226,37,96,59,141,16,37,18,201,142,157,230,204,51,112,252,114,147,74,83,
                       5,50,68,147,208,217,16,71,149,252,124,5,0,59,0,0 };
 
-                return makeHandle ({ ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData)), { 1, 3 } });
+                return makeHandle ({ ScaledImage (ImageFileFormat::loadFrom (copyCursorData, sizeof (copyCursorData))), { 1, 3 } });
             }
 
             case NumStandardCursorTypes: JUCE_FALLTHROUGH

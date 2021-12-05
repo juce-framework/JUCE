@@ -117,7 +117,7 @@ struct WebViewKeyEquivalentResponder : public ObjCClass<WebViewClass>
     WebViewKeyEquivalentResponder()
         : ObjCClass<WebViewClass> ("WebViewKeyEquivalentResponder_")
     {
-        ObjCClass<WebViewClass>::addMethod (@selector (performKeyEquivalent:), performKeyEquivalent, @encode (BOOL), "@:@");
+        ObjCClass<WebViewClass>::addMethod (@selector (performKeyEquivalent:), performKeyEquivalent);
         ObjCClass<WebViewClass>::registerClass();
     }
 
@@ -164,15 +164,13 @@ struct DownloadClickDetectorClass  : public ObjCClass<NSObject>
     {
         addIvar<WebBrowserComponent*> ("owner");
 
-        addMethod (@selector (webView:decidePolicyForNavigationAction:request:frame:decisionListener:),
-                   decidePolicyForNavigationAction, "v@:@@@@@");
-        addMethod (@selector (webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:),
-                   decidePolicyForNewWindowAction, "v@:@@@@@");
-        addMethod (@selector (webView:didFinishLoadForFrame:), didFinishLoadForFrame, "v@:@@");
-        addMethod (@selector (webView:didFailLoadWithError:forFrame:),  didFailLoadWithError,  "v@:@@@");
-        addMethod (@selector (webView:didFailProvisionalLoadWithError:forFrame:),  didFailLoadWithError,  "v@:@@@");
-        addMethod (@selector (webView:willCloseFrame:), willCloseFrame, "v@:@@");
-        addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:), runOpenPanel, "v@:@@", @encode (BOOL));
+        addMethod (@selector (webView:decidePolicyForNavigationAction:request:frame:decisionListener:), decidePolicyForNavigationAction);
+        addMethod (@selector (webView:decidePolicyForNewWindowAction:request:newFrameName:decisionListener:), decidePolicyForNewWindowAction);
+        addMethod (@selector (webView:didFinishLoadForFrame:), didFinishLoadForFrame);
+        addMethod (@selector (webView:didFailLoadWithError:forFrame:),  didFailLoadWithError);
+        addMethod (@selector (webView:didFailProvisionalLoadWithError:forFrame:),  didFailLoadWithError);
+        addMethod (@selector (webView:willCloseFrame:), willCloseFrame);
+        addMethod (@selector (webView:runOpenPanelForFileButtonWithResultListener:allowMultipleFiles:), runOpenPanel);
 
         registerClass();
     }
@@ -271,17 +269,17 @@ struct WebViewDelegateClass  : public ObjCClass<NSObject>
     {
         addIvar<WebBrowserComponent*> ("owner");
 
-        addMethod (@selector (webView:decidePolicyForNavigationAction:decisionHandler:),  decidePolicyForNavigationAction, "v@:@@@");
-        addMethod (@selector (webView:didFinishNavigation:),                              didFinishNavigation,             "v@:@@");
-        addMethod (@selector (webView:didFailNavigation:withError:),                      didFailNavigation,               "v@:@@@");
-        addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation,    "v@:@@@");
-        addMethod (@selector (webViewDidClose:),                                          webViewDidClose,                 "v@:@");
+        addMethod (@selector (webView:decidePolicyForNavigationAction:decisionHandler:),  decidePolicyForNavigationAction);
+        addMethod (@selector (webView:didFinishNavigation:),                              didFinishNavigation);
+        addMethod (@selector (webView:didFailNavigation:withError:),                      didFailNavigation);
+        addMethod (@selector (webView:didFailProvisionalNavigation:withError:),           didFailProvisionalNavigation);
+        addMethod (@selector (webViewDidClose:),                                          webViewDidClose);
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
-                              windowFeatures:),                                           createWebView,                   "@@:@@@@");
+                              windowFeatures:),                                           createWebView);
 
        #if WKWEBVIEW_OPENPANEL_SUPPORTED
         if (@available (macOS 10.12, *))
-            addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:), runOpenPanel, "v@:@@@@");
+            addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:), runOpenPanel);
        #endif
 
         registerClass();

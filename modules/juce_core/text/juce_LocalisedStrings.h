@@ -90,7 +90,7 @@ public:
     LocalisedStrings& operator= (const LocalisedStrings&);
 
     /** Destructor. */
-    ~LocalisedStrings();
+    ~LocalisedStrings() = default;
 
     //==============================================================================
     /** Selects the current set of mappings to be used by the system.

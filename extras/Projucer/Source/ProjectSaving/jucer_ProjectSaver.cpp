@@ -64,8 +64,7 @@ void ProjectSaver::saveProjectAsync (ProjectExporter* exporterToSave, std::funct
         ref->saveThread->waitForThreadToExit (-1);
         ref->saveThread = nullptr;
 
-        if (onCompletion != nullptr)
-            onCompletion (result);
+        NullCheckedInvocation::invoke (onCompletion, result);
     });
     saveThread->launchThread();
 }

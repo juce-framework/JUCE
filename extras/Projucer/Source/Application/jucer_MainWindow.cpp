@@ -39,9 +39,9 @@ class BlurOverlayWithComponent  : public Component,
 {
 public:
     BlurOverlayWithComponent (MainWindow& window, std::unique_ptr<Component> comp)
-       : ComponentMovementWatcher (&window),
-         mainWindow (window),
-         componentToShow (std::move (comp))
+        : ComponentMovementWatcher (&window),
+          mainWindow (window),
+          componentToShow (std::move (comp))
     {
         kernel.createGaussianBlur (1.25f);
 
@@ -300,11 +300,16 @@ void MainWindow::moveProject (File newProjectFileToOpen, OpenInIDE openInIDE)
 
         parent->openFile (newProjectFileToOpen, [parent, openInIDE] (bool openedSuccessfully)
         {
-            if (parent == nullptr)
+            if (! (openedSuccessfully && parent != nullptr && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes))
                 return;
 
-            if (openedSuccessfully && parent->currentProject != nullptr && openInIDE == OpenInIDE::yes)
-                ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveAndOpenInIDE, false);
+            // The project component knows how to process the saveAndOpenInIDE command, but the
+            // main application does not. In order to process the command successfully, we need
+            // to ensure that the project content component has focus.
+            auto& manager = ProjucerApplication::getApp().getCommandManager();
+            manager.setFirstCommandTarget (parent->getProjectContentComponent());
+            ProjucerApplication::getApp().getCommandManager().invokeDirectly (CommandIDs::saveAndOpenInIDE, false);
+            manager.setFirstCommandTarget (nullptr);
         });
     });
 }
@@ -325,6 +330,11 @@ void MainWindow::setProject (std::unique_ptr<Project> newProject)
         createProjectContentCompIfNeeded();
         getProjectContentComponent()->setProject (currentProject.get());
     }
+
+    if (currentProject != nullptr)
+        currentProject->addChangeListener (this);
+
+    changeListenerCallback (currentProject.get());
 
     projectNameValue.referTo (currentProject != nullptr ? currentProject->getProjectValue (Ids::name) : Value());
     initialiseProjectWindow();
@@ -705,6 +715,16 @@ void MainWindow::valueChanged (Value& value)
     if (value == projectNameValue)
         setName (currentProject != nullptr ? currentProject->getProjectNameString() + " - Projucer"
                                            : "Projucer");
+}
+
+void MainWindow::changeListenerCallback (ChangeBroadcaster* source)
+{
+    auto* project = getProject();
+
+    if (source == project)
+        if (auto* peer = getPeer())
+            peer->setHasChangedSinceSaved (project != nullptr ? project->hasChangedSinceSaved()
+                                                              : false);
 }
 
 //==============================================================================

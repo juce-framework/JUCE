@@ -1765,12 +1765,13 @@ void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) co
         else if (auto* c = peer.getConstrainer())
         {
             const auto windowBorder = peer.getFrameSize();
+            const auto factor       = peer.getPlatformScaleFactor();
             const auto leftAndRight = windowBorder.getLeftAndRight();
             const auto topAndBottom = windowBorder.getTopAndBottom();
-            hints->min_width  = jmax (1, c->getMinimumWidth()  - leftAndRight);
-            hints->max_width  = jmax (1, c->getMaximumWidth()  - leftAndRight);
-            hints->min_height = jmax (1, c->getMinimumHeight() - topAndBottom);
-            hints->max_height = jmax (1, c->getMaximumHeight() - topAndBottom);
+            hints->min_width  = jmax (1, (int) (factor * c->getMinimumWidth())  - leftAndRight);
+            hints->max_width  = jmax (1, (int) (factor * c->getMaximumWidth())  - leftAndRight);
+            hints->min_height = jmax (1, (int) (factor * c->getMinimumHeight()) - topAndBottom);
+            hints->max_height = jmax (1, (int) (factor * c->getMaximumHeight()) - topAndBottom);
             hints->flags = PMinSize | PMaxSize;
         }
 

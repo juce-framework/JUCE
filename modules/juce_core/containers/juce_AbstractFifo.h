@@ -76,9 +76,6 @@ public:
     /** Creates a FIFO to manage a buffer with the specified capacity. */
     AbstractFifo (int capacity) noexcept;
 
-    /** Destructor */
-    ~AbstractFifo();
-
     //==============================================================================
     /** Returns the total size of the buffer being managed. */
     int getTotalSize() const noexcept;

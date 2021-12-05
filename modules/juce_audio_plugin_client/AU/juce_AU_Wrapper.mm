@@ -258,7 +258,7 @@ public:
         {
             juceFilter->setRateAndBufferSizeDetails (getSampleRate(), (int) GetMaxFramesPerSlice());
 
-            audioBuffer.prepare (totalInChannels, totalOutChannels, (int) GetMaxFramesPerSlice() + 32);
+            audioBuffer.prepare (AudioUnitHelpers::getBusesLayout (juceFilter.get()), (int) GetMaxFramesPerSlice() + 32);
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
 
             midiEvents.ensureSize (2048);
@@ -1397,21 +1397,12 @@ public:
             for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
             {
                 if (pulledSucceeded[busIdx])
-                {
-                    audioBuffer.push (GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
-                }
+                    audioBuffer.set (busIdx, GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
                 else
-                {
-                    const int n = juceFilter->getChannelCountOfBus (true, busIdx);
-
-                    for (int ch = 0; ch < n; ++ch)
-                        zeromem (audioBuffer.push(), sizeof (float) * nFrames);
-                }
+                    audioBuffer.clearInputBus (busIdx);
             }
 
-            // clear remaining channels
-            for (int i = totalInChannels; i < totalOutChannels; ++i)
-                zeromem (audioBuffer.push(), sizeof (float) * nFrames);
+            audioBuffer.clearUnusedChannels();
         }
 
         // swap midi buffers
@@ -1427,7 +1418,7 @@ public:
         // copy back
         {
             for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
-                audioBuffer.pop (GetOutput ((UInt32) busIdx)->GetBufferList(), mapper.get (false, busIdx));
+                audioBuffer.get (busIdx, GetOutput ((UInt32) busIdx)->GetBufferList(), mapper.get (false, busIdx));
         }
 
         // process midi output
@@ -1674,10 +1665,10 @@ public:
             addIvar<JuceAU*> ("au");
             addIvar<EditorCompHolder*> ("editor");
 
-            addMethod (@selector (dealloc),                     dealloc,                    "v@:");
-            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate,   "v@:@");
-            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow,        "v@:");
-            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow,     "c@:");
+            addMethod (@selector (dealloc),                     dealloc);
+            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate);
+            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow);
+            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow);
 
             registerClass();
         }
@@ -1761,9 +1752,9 @@ public:
     {
         JuceUICreationClass()  : ObjCClass<NSObject> ("JUCE_AUCocoaViewClass_")
         {
-            addMethod (@selector (interfaceVersion),             interfaceVersion,    @encode (unsigned int), "@:");
-            addMethod (@selector (description),                  description,         @encode (NSString*),    "@:");
-            addMethod (@selector (uiViewForAudioUnit:withSize:), uiViewForAudioUnit,  @encode (NSView*),      "@:", @encode (AudioUnit), @encode (NSSize));
+            addMethod (@selector (interfaceVersion),             interfaceVersion);
+            addMethod (@selector (description),                  description);
+            addMethod (@selector (uiViewForAudioUnit:withSize:), uiViewForAudioUnit);
 
             addProtocol (@protocol (AUCocoaUIBase));
 

@@ -53,9 +53,6 @@ public:
     /** Move assignment operator */
     MidiMessageSequence& operator= (MidiMessageSequence&&) noexcept;
 
-    /** Destructor. */
-    ~MidiMessageSequence();
-
     //==============================================================================
     /** Structure used to hold midi events in the sequence.
 
@@ -68,9 +65,6 @@ public:
     {
     public:
         //==============================================================================
-        /** Destructor. */
-        ~MidiEventHolder();
-
         /** The message itself, whose timestamp is used to specify the event's time. */
         MidiMessage message;
 

@@ -42,12 +42,12 @@ public:
         addIvar<CABTLEMIDIWindowController*> ("controller");
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        addMethod (@selector (initWithCallbacks:),       initWithCallbacks,       "@@:^v");
-        addMethod (@selector (show:),                    show,                    "v@:^v");
-        addMethod (@selector (receivedWindowWillClose:), receivedWindowWillClose, "v@:^v");
+        addMethod (@selector (initWithCallbacks:),       initWithCallbacks);
+        addMethod (@selector (show:),                    show);
+        addMethod (@selector (receivedWindowWillClose:), receivedWindowWillClose);
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        addMethod (@selector (dealloc), dealloc, "v@:");
+        addMethod (@selector (dealloc), dealloc);
 
         registerClass();
     }

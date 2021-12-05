@@ -118,13 +118,13 @@ private:
         AccessibilityContainer()
             : ObjCClass ("JUCEUIAccessibilityElementContainer_")
         {
-            addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement,     "c@:");
-            addMethod (@selector (accessibilityFrame),         getAccessibilityFrame,         @encode (CGRect), "@:");
-            addMethod (@selector (accessibilityElements),      getAccessibilityElements,      "@@:");
+            addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement);
+            addMethod (@selector (accessibilityFrame),         getAccessibilityFrame);
+            addMethod (@selector (accessibilityElements),      getAccessibilityElements);
 
            #if JUCE_IOS_CONTAINER_API_AVAILABLE
             if (@available (iOS 11.0, *))
-                addMethod (@selector (accessibilityContainerType), getAccessibilityContainerType, "i@:");
+                addMethod (@selector (accessibilityContainerType), getAccessibilityContainerType);
            #endif
 
             addIvar<AccessibilityHandler*> ("handler");
@@ -200,42 +200,42 @@ private:
 
         AccessibilityElement (Type elementType)
         {
-            addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement,     "c@:");
-            addMethod (@selector (accessibilityContainer),     getAccessibilityContainer,     "@@:");
-            addMethod (@selector (accessibilityFrame),         getAccessibilityFrame,         @encode (CGRect), "@:");
-            addMethod (@selector (accessibilityTraits),        getAccessibilityTraits,        "i@:");
-            addMethod (@selector (accessibilityLabel),         getAccessibilityTitle,         "@@:");
-            addMethod (@selector (accessibilityHint),          getAccessibilityHelp,          "@@:");
-            addMethod (@selector (accessibilityValue),         getAccessibilityValue,         "@@:");
-            addMethod (@selector (setAccessibilityValue:),     setAccessibilityValue,         "v@:@");
+            addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement);
+            addMethod (@selector (accessibilityContainer),     getAccessibilityContainer);
+            addMethod (@selector (accessibilityFrame),         getAccessibilityFrame);
+            addMethod (@selector (accessibilityTraits),        getAccessibilityTraits);
+            addMethod (@selector (accessibilityLabel),         getAccessibilityTitle);
+            addMethod (@selector (accessibilityHint),          getAccessibilityHelp);
+            addMethod (@selector (accessibilityValue),         getAccessibilityValue);
+            addMethod (@selector (setAccessibilityValue:),     setAccessibilityValue);
 
-            addMethod (@selector (accessibilityElementDidBecomeFocused), onFocusGain, "v@:");
-            addMethod (@selector (accessibilityElementDidLoseFocus),     onFocusLoss, "v@:");
-            addMethod (@selector (accessibilityElementIsFocused),        isFocused,   "c@:");
-            addMethod (@selector (accessibilityViewIsModal),             getIsAccessibilityModal, "c@:");
+            addMethod (@selector (accessibilityElementDidBecomeFocused), onFocusGain);
+            addMethod (@selector (accessibilityElementDidLoseFocus),     onFocusLoss);
+            addMethod (@selector (accessibilityElementIsFocused),        isFocused);
+            addMethod (@selector (accessibilityViewIsModal),             getIsAccessibilityModal);
 
-            addMethod (@selector (accessibilityActivate),      accessibilityPerformActivate,  "c@:");
-            addMethod (@selector (accessibilityIncrement),     accessibilityPerformIncrement, "c@:");
-            addMethod (@selector (accessibilityDecrement),     accessibilityPerformDecrement, "c@:");
-            addMethod (@selector (accessibilityPerformEscape), accessibilityPerformEscape,    "c@:");
+            addMethod (@selector (accessibilityActivate),      accessibilityPerformActivate);
+            addMethod (@selector (accessibilityIncrement),     accessibilityPerformIncrement);
+            addMethod (@selector (accessibilityDecrement),     accessibilityPerformDecrement);
+            addMethod (@selector (accessibilityPerformEscape), accessibilityPerformEscape);
 
            #if JUCE_IOS_CONTAINER_API_AVAILABLE
             if (@available (iOS 11.0, *))
             {
-                addMethod (@selector (accessibilityDataTableCellElementForRow:column:), getAccessibilityDataTableCellElementForRowColumn, "@@:ii");
-                addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount,                         "i@:");
-                addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount,                      "i@:");
-                addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange,                    @encode (NSRange), "@:");
-                addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange,                 @encode (NSRange), "@:");
+                addMethod (@selector (accessibilityDataTableCellElementForRow:column:), getAccessibilityDataTableCellElementForRowColumn);
+                addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
+                addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
+                addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
+                addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
             }
            #endif
 
             if (elementType == Type::textElement)
             {
-                addMethod (@selector (accessibilityLineNumberForPoint:),   getAccessibilityLineNumberForPoint,   "i@:", @encode (CGPoint));
-                addMethod (@selector (accessibilityContentForLineNumber:), getAccessibilityContentForLineNumber, "@@:i");
-                addMethod (@selector (accessibilityFrameForLineNumber:),   getAccessibilityFrameForLineNumber,   @encode (CGRect), "@:i");
-                addMethod (@selector (accessibilityPageContent),           getAccessibilityPageContent,          "@@:");
+                addMethod (@selector (accessibilityLineNumberForPoint:),   getAccessibilityLineNumberForPoint);
+                addMethod (@selector (accessibilityContentForLineNumber:), getAccessibilityContentForLineNumber);
+                addMethod (@selector (accessibilityFrameForLineNumber:),   getAccessibilityFrameForLineNumber);
+                addMethod (@selector (accessibilityPageContent),           getAccessibilityPageContent);
 
                 addProtocol (@protocol (UIAccessibilityReadingContent));
             }

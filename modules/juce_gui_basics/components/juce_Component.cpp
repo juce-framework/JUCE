@@ -1761,6 +1761,8 @@ void Component::enterModalState (bool shouldTakeKeyboardFocus,
 
 void Component::exitModalState (int returnValue)
 {
+    WeakReference<Component> deletionChecker (this);
+
     if (isCurrentlyModal (false))
     {
         if (MessageManager::getInstance()->isThisTheMessageThread())
@@ -1772,7 +1774,8 @@ void Component::exitModalState (int returnValue)
             // While this component is in modal state it may block other components from receiving
             // mouseEnter events. To keep mouseEnter and mouseExit calls balanced on these components,
             // we must manually force the mouse to "enter" blocked components.
-            ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*this, &Component::internalMouseEnter);
+            if (deletionChecker != nullptr)
+                ComponentHelpers::sendMouseEventToComponentsThatAreBlockedByModal (*deletionChecker, &Component::internalMouseEnter);
         }
         else
         {

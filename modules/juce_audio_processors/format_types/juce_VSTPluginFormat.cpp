@@ -1585,7 +1585,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             {
                 char nm[264] = { 0 };
 
-                if (dispatch (Vst2::effGetProgramNameIndexed, jlimit (0, getNumPrograms(), index), -1, nm, 0) != 0)
+                if (dispatch (Vst2::effGetProgramNameIndexed, jlimit (0, getNumPrograms() - 1, index), -1, nm, 0) != 0)
                     return String::fromUTF8 (nm).trim();
             }
         }
@@ -2917,18 +2917,28 @@ public:
                               0,
                               0,
                               SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER);
+
+                MessageManager::callAsync ([ref = SafePointer<Component> (this)]
+                {
+                    // Clean up after the editor window, in case it tried to move itself
+                    // into the wrong location over this component.
+                    if (ref == nullptr)
+                        return;
+
+                    if (auto* p = ref->getPeer())
+                        p->repaint (p->getBounds().withPosition ({}));
+                });
             }
            #elif JUCE_LINUX || JUCE_BSD
             if (pluginWindow != 0)
             {
-                const auto editorSize = plugin.getEditorSize();
                 auto* symbols = X11Symbols::getInstance();
                 symbols->xMoveResizeWindow (display,
                                             pluginWindow,
                                             pos.getX(),
                                             pos.getY(),
-                                            (unsigned int) editorSize.getWidth(),
-                                            (unsigned int) editorSize.getHeight());
+                                            (unsigned int) pos.getWidth(),
+                                            (unsigned int) pos.getHeight());
                 symbols->xMapRaised (display, pluginWindow);
                 symbols->xFlush (display);
             }

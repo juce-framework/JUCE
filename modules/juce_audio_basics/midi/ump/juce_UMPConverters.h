@@ -24,7 +24,7 @@ namespace juce
 {
 namespace universal_midi_packets
 {
-    /**
+    /*
         Allows conversion from bytestream- or Universal MIDI Packet-formatted
         messages to MIDI 1.0 messages in UMP format.
 
@@ -45,7 +45,7 @@ namespace universal_midi_packets
         }
     };
 
-    /**
+    /*
         Allows conversion from bytestream- or Universal MIDI Packet-formatted
         messages to MIDI 2.0 messages in UMP format.
 
@@ -76,7 +76,7 @@ namespace universal_midi_packets
         Midi1ToMidi2DefaultTranslator translator;
     };
 
-    /**
+    /*
         Allows conversion from bytestream- or Universal MIDI Packet-formatted
         messages to UMP format.
 
@@ -131,7 +131,7 @@ namespace universal_midi_packets
         const PacketProtocol mode{};
     };
 
-    /**
+    /*
         Allows conversion from bytestream- or Universal MIDI Packet-formatted
         messages to bytestream format.
 

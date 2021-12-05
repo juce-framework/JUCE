@@ -239,11 +239,11 @@ struct NSDraggingSourceHelper   : public ObjCClass<NSObject<NSDraggingSource>>
         addIvar<String*> ("text");
         addIvar<NSDragOperation*> ("operation");
 
-        addMethod (@selector (dealloc), dealloc, "v@:");
-        addMethod (@selector (pasteboard:item:provideDataForType:), provideDataForType, "v@:@@@");
+        addMethod (@selector (dealloc), dealloc);
+        addMethod (@selector (pasteboard:item:provideDataForType:), provideDataForType);
 
-        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), sourceOperationMaskForDraggingContext, "c@:@@");
-        addMethod (@selector (draggingSession:endedAtPoint:operation:), draggingSessionEnded, "v@:@@@");
+        addMethod (@selector (draggingSession:sourceOperationMaskForDraggingContext:), sourceOperationMaskForDraggingContext);
+        addMethod (@selector (draggingSession:endedAtPoint:operation:), draggingSessionEnded);
 
         addProtocol (@protocol (NSPasteboardItemDataProvider));
 
@@ -474,7 +474,7 @@ private:
             addIvar<NativeDarkModeChangeDetectorImpl*> ("owner");
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (darkModeChanged:), darkModeChanged, "v@:@");
+            addMethod (@selector (darkModeChanged:), darkModeChanged);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();

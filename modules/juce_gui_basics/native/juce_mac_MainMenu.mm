@@ -457,8 +457,8 @@ private:
         {
             ValidatorClass()  : ObjCClass ("JUCEMenuValidator_")
             {
-                addMethod (menuItemInvokedSelector,       menuItemInvoked,  "c@:@");
-                addMethod (@selector (validateMenuItem:), validateMenuItem, "c@:@");
+                addMethod (menuItemInvokedSelector,       menuItemInvoked);
+                addMethod (@selector (validateMenuItem:), validateMenuItem);
 
                #if defined (MAC_OS_X_VERSION_10_14)
                 addProtocol (@protocol (NSMenuItemValidation));
@@ -551,9 +551,9 @@ private:
         {
             addIvar<JuceMainMenuHandler*> ("owner");
 
-            addMethod (menuItemInvokedSelector,       menuItemInvoked,  "v@:@");
-            addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate,  "v@:@");
-            addMethod (@selector (validateMenuItem:), validateMenuItem, "c@:@");
+            addMethod (menuItemInvokedSelector,       menuItemInvoked);
+            addMethod (@selector (menuNeedsUpdate:),  menuNeedsUpdate);
+            addMethod (@selector (validateMenuItem:), validateMenuItem);
 
             addProtocol (@protocol (NSMenuDelegate));
 

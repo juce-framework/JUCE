@@ -69,7 +69,7 @@ public:
     BigInteger& operator= (BigInteger&&) noexcept;
 
     /** Destructor. */
-    ~BigInteger();
+    ~BigInteger() = default;
 
     //==============================================================================
     /** Copies another BigInteger onto this one. */

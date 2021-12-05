@@ -28,10 +28,6 @@ MidiKeyboardState::MidiKeyboardState()
     zerostruct (noteStates);
 }
 
-MidiKeyboardState::~MidiKeyboardState()
-{
-}
-
 //==============================================================================
 void MidiKeyboardState::reset()
 {

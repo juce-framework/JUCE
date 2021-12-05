@@ -913,6 +913,7 @@ public:
         if (audioUnit != nullptr)
         {
             releaseResources();
+            setPluginCallbacks();
 
             for (int dir = 0; dir < 2; ++dir)
             {
@@ -995,8 +996,6 @@ public:
             {
                 if (! haveParameterList)
                     refreshParameterList();
-
-                setPluginCallbacks();
 
                 if (! syncBusLayouts (getBusesLayout(), true, ignore))
                 {

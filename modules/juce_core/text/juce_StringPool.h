@@ -43,9 +43,6 @@ public:
     /** Creates an empty pool. */
     StringPool() noexcept;
 
-    /** Destructor */
-    ~StringPool();
-
     //==============================================================================
     /** Returns a pointer to a shared copy of the string that is passed in.
         The pool will always return the same String object when asked for a string that matches it.

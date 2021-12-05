@@ -256,9 +256,9 @@ public:
     {
         MouseForwardingNSOpenGLViewClass()  : ObjCClass<NSOpenGLView> ("JUCEGLView_")
         {
-            addMethod (@selector (rightMouseDown:),      rightMouseDown,     "v@:@");
-            addMethod (@selector (rightMouseUp:),        rightMouseUp,       "v@:@");
-            addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse,  "v@:@");
+            addMethod (@selector (rightMouseDown:),      rightMouseDown);
+            addMethod (@selector (rightMouseUp:),        rightMouseUp);
+            addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse);
 
             registerClass();
         }

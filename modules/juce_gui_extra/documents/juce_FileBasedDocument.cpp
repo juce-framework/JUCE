@@ -72,7 +72,7 @@ public:
     }
 
     //==============================================================================
-    bool hasChangedSinceSaved()
+    bool hasChangedSinceSaved() const
     {
         return changedSinceSave;
     }

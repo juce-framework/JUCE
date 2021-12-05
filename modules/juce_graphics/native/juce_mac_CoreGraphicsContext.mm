@@ -929,8 +929,11 @@ CGContextRef juce_getImageContext (const Image& image)
 #endif
 
 #if JUCE_MAC
- NSImage* imageToNSImage (const Image& image, float scaleFactor)
+ NSImage* imageToNSImage (const ScaledImage& scaled)
  {
+     const auto image = scaled.getImage();
+     const auto scaleFactor = scaled.getScale();
+
      JUCE_AUTORELEASEPOOL
      {
          NSImage* im = [[NSImage alloc] init];

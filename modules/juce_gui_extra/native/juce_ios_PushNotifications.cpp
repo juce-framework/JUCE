@@ -486,19 +486,19 @@ private:
         {
             addIvar<PushNotificationsDelegate*> ("self");
 
-            addMethod (@selector (application:didRegisterUserNotificationSettings:),                                                 didRegisterUserNotificationSettings,                            "v@:@@");
-            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:),                                    registeredForRemoteNotifications,                               "v@:@@");
-            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:),                                    failedToRegisterForRemoteNotifications,                         "v@:@@");
-            addMethod (@selector (application:didReceiveRemoteNotification:),                                                        didReceiveRemoteNotification,                                   "v@:@@");
-            addMethod (@selector (application:didReceiveRemoteNotification:fetchCompletionHandler:),                                 didReceiveRemoteNotificationFetchCompletionHandler,             "v@:@@@");
-            addMethod (@selector (application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:), handleActionForRemoteNotificationCompletionHandler,             "v@:@@@@@");
-            addMethod (@selector (application:didReceiveLocalNotification:),                                                         didReceiveLocalNotification,                                    "v@:@@");
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:),                   handleActionForLocalNotificationCompletionHandler,              "v@:@@@@");
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:),  handleActionForLocalNotificationWithResponseCompletionHandler,  "v@:@@@@@");
+            addMethod (@selector (application:didRegisterUserNotificationSettings:),                                                 didRegisterUserNotificationSettings);
+            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:),                                    registeredForRemoteNotifications);
+            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:),                                    failedToRegisterForRemoteNotifications);
+            addMethod (@selector (application:didReceiveRemoteNotification:),                                                        didReceiveRemoteNotification);
+            addMethod (@selector (application:didReceiveRemoteNotification:fetchCompletionHandler:),                                 didReceiveRemoteNotificationFetchCompletionHandler);
+            addMethod (@selector (application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:), handleActionForRemoteNotificationCompletionHandler);
+            addMethod (@selector (application:didReceiveLocalNotification:),                                                         didReceiveLocalNotification);
+            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:),                   handleActionForLocalNotificationCompletionHandler);
+            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:),  handleActionForLocalNotificationWithResponseCompletionHandler);
 
            #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-            addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:),                            willPresentNotificationWithCompletionHandler,                   "v@:@@@");
-            addMethod (@selector (userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:),                     didReceiveNotificationResponseWithCompletionHandler,            "v@:@@@");
+            addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:),                            willPresentNotificationWithCompletionHandler);
+            addMethod (@selector (userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:),                     didReceiveNotificationResponseWithCompletionHandler);
            #endif
 
             registerClass();

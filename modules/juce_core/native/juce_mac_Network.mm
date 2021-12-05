@@ -339,13 +339,13 @@ private:
         {
             addIvar<URLConnectionStatePreYosemite*> ("state");
 
-            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse,            "v@:@@");
-            addMethod (@selector (connection:didFailWithError:),   didFailWithError,              "v@:@@");
-            addMethod (@selector (connection:didReceiveData:),     didReceiveData,                "v@:@@");
+            addMethod (@selector (connection:didReceiveResponse:), didReceiveResponse);
+            addMethod (@selector (connection:didFailWithError:),   didFailWithError);
+            addMethod (@selector (connection:didReceiveData:),     didReceiveData);
             addMethod (@selector (connection:didSendBodyData:totalBytesWritten:totalBytesExpectedToWrite:),
-                                                                   connectionDidSendBodyData,     "v@:@iii");
-            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading,    "v@:@");
-            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest, "@@:@@@");
+                                                                   connectionDidSendBodyData);
+            addMethod (@selector (connectionDidFinishLoading:),    connectionDidFinishLoading);
+            addMethod (@selector (connection:willSendRequest:redirectResponse:), willSendRequest);
 
             registerClass();
         }
@@ -608,14 +608,14 @@ private:
             addIvar<URLConnectionState*> ("state");
 
             addMethod (@selector (URLSession:dataTask:didReceiveResponse:completionHandler:),
-                                                                            didReceiveResponse,         "v@:@@@@");
-            addMethod (@selector (URLSession:didBecomeInvalidWithError:),   didBecomeInvalidWithError,  "v@:@@");
-            addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData,             "v@:@@@");
+                                                                            didReceiveResponse);
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),   didBecomeInvalidWithError);
+            addMethod (@selector (URLSession:dataTask:didReceiveData:),     didReceiveData);
             addMethod (@selector (URLSession:task:didSendBodyData:totalBytesSent:totalBytesExpectedToSend:),
-                                                                            didSendBodyData,            "v@:@@qqq");
+                                                                            didSendBodyData);
             addMethod (@selector (URLSession:task:willPerformHTTPRedirection:newRequest:completionHandler:),
-                                                                            willPerformHTTPRedirection, "v@:@@@@@");
-            addMethod (@selector (URLSession:task:didCompleteWithError:),   didCompleteWithError,       "v@:@@@");
+                                                                            willPerformHTTPRedirection);
+            addMethod (@selector (URLSession:task:didCompleteWithError:),   didCompleteWithError);
 
             registerClass();
         }
@@ -872,11 +872,10 @@ struct BackgroundDownloadTask  : public URL::DownloadTask
         {
             addIvar<BackgroundDownloadTask*> ("state");
 
-            addMethod (@selector (URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:),
-                                                                                        didWriteData,               "v@:@@qqq");
-            addMethod (@selector (URLSession:downloadTask:didFinishDownloadingToURL:),  didFinishDownloadingToURL,  "v@:@@@");
-            addMethod (@selector (URLSession:task:didCompleteWithError:),               didCompleteWithError,       "v@:@@@");
-            addMethod (@selector (URLSession:didBecomeInvalidWithError:),               didBecomeInvalidWithError,  "v@:@@@");
+            addMethod (@selector (URLSession:downloadTask:didWriteData:totalBytesWritten:totalBytesExpectedToWrite:), didWriteData);
+            addMethod (@selector (URLSession:downloadTask:didFinishDownloadingToURL:),  didFinishDownloadingToURL);
+            addMethod (@selector (URLSession:task:didCompleteWithError:),               didCompleteWithError);
+            addMethod (@selector (URLSession:didBecomeInvalidWithError:),               didBecomeInvalidWithError);
 
             registerClass();
         }
