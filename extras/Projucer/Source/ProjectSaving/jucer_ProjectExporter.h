@@ -89,6 +89,8 @@ public:
     virtual bool isOSX() const     = 0;
     virtual bool isiOS() const     = 0;
 
+    virtual File getIDEProjectFile() const  { return {}; }
+
     virtual String getNewLineString() const = 0;
     virtual String getDescription()  { return {}; }
 
