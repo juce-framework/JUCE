@@ -34,7 +34,7 @@ namespace juce
 struct NullCheckedInvocation
 {
     template <typename... Signature, typename... Args>
-    static void invoke (std::function<Signature...>&& fn, Args&&... args)
+    static void invoke (const std::function<Signature...>& fn, Args&&... args)
     {
         if (fn != nullptr)
             fn (std::forward<Args> (args)...);
