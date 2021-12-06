@@ -1531,6 +1531,15 @@ public:
 
     void textInputRequired (Point<int>, TextInputTarget&) override {}
 
+    void dismissPendingTextInput() override
+    {
+        stringBeingComposed.clear();
+        const auto* inputContext = [NSTextInputContext currentInputContext];
+
+        if (inputContext != nil)
+            [inputContext discardMarkedText];
+    }
+
     void resetWindowPresentation()
     {
         if (hasNativeTitleBar())
