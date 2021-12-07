@@ -23,6 +23,7 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
 namespace detail
 {
     template <typename...>
@@ -36,6 +37,7 @@ namespace detail
     struct EqualityComparableToNullptr<T, Void<decltype (std::declval<T>() != nullptr)>>
         : std::true_type {};
 } // namespace detail
+#endif
 
 //==============================================================================
 /** Some helper methods for checking a callable object before invoking with
