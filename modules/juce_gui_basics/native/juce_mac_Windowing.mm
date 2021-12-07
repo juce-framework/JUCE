@@ -82,7 +82,7 @@ private:
         [alert setInformativeText: juceStringToNS (options.getMessage())];
 
         [alert setAlertStyle: options.getIconType() == MessageBoxIconType::WarningIcon ? NSAlertStyleCritical
-                                                                                                : NSAlertStyleInformational];
+                                                                                       : NSAlertStyleInformational];
 
         const auto button1Text = options.getButtonText (0);
 

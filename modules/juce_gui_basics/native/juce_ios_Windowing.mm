@@ -437,8 +437,11 @@ void LookAndFeel::playAlertSound()
 class iOSMessageBox
 {
 public:
-    iOSMessageBox (const MessageBoxOptions& opts, std::unique_ptr<ModalComponentManager::Callback>&& cb)
-        : callback (std::move (cb))
+    iOSMessageBox (const MessageBoxOptions& opts,
+                   std::unique_ptr<ModalComponentManager::Callback>&& cb,
+                   bool deleteOnCompletion)
+        : callback (std::move (cb)),
+          shouldDeleteThis (deleteOnCompletion)
     {
         if (currentlyFocusedPeer != nullptr)
         {
@@ -480,10 +483,10 @@ public:
         result = buttonIndex;
 
         if (callback != nullptr)
-        {
             callback->modalStateFinished (result);
+
+        if (shouldDeleteThis)
             delete this;
-        }
     }
 
 private:
@@ -501,6 +504,7 @@ private:
 
     int result = -1;
     std::unique_ptr<ModalComponentManager::Callback> callback;
+    const bool shouldDeleteThis;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox)
 };
@@ -517,13 +521,18 @@ static int showDialog (const MessageBoxOptions& options,
         {
             jassert (mapFn != nullptr);
 
-            iOSMessageBox messageBox (options, nullptr);
+            iOSMessageBox messageBox (options, nullptr, false);
             return mapFn (messageBox.getResult());
         }
     }
    #endif
 
-    const auto showBox = [options, callbackIn, mapFn] { new iOSMessageBox (options, AlertWindowMappings::getWrappedCallback (callbackIn, mapFn)); };
+    const auto showBox = [options, callbackIn, mapFn]
+    {
+        new iOSMessageBox (options,
+                           AlertWindowMappings::getWrappedCallback (callbackIn, mapFn),
+                           true);
+    };
 
     if (MessageManager::getInstance()->isThisTheMessageThread())
         showBox();
