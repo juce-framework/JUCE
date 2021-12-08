@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 // Forward declarations to avoid leaking implementation details.
 namespace Steinberg
 {
@@ -30,7 +32,9 @@ namespace Steinberg
     {
         class IComponent;
     }
-}
+} // namespace Steinberg
+
+#endif
 
 //==============================================================================
 #if (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) || (defined(AUDIOCOMPONENT_NOCARBONINSTANCES) && AUDIOCOMPONENT_NOCARBONINSTANCES)
