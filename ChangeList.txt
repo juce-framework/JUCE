@@ -3,6 +3,17 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 6.1.3
+  - Added support for Visual Studio 2022 to the Projucer
+  - Added support for creating OpenGL 3.2 contexts on Windows
+  - Added support for plugin hosts to easily retrieve stable parameter IDs
+  - Added high-resolution image support to DragAndDropContainer
+  - Added support for a wider range of frame-rates in plugins and hosts
+  - Made Font and TypefaceCache threadsafe, to allow font rendering on background threads
+  - Improved FlexBox compatibility with the CSS FlexBox specification
+  - Improved macOS 12 compatibility, including OpenGL and FileChooser fixes
+  - Improved accessibility support
+
 Version 6.1.2
   - Fixed an OpenGL display refresh rate issue on macOS
   - Improved the scaling behaviour of hosted VST3 plug-ins

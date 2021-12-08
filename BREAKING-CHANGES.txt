@@ -1,8 +1,31 @@
 JUCE breaking changes
 =====================
 
-develop
-=======
+Version 6.1.3
+=============
+
+Change
+------
+The format specific structs of ExtensionsVisitor now return pointers to forward
+declared types instead of `void*`. For this purpose the `struct AEffect;`
+forward declaration was placed inside the global namespace.
+
+Possible Issues
+---------------
+User code that includes the VST headers inside a namespace may fail to build,
+because the forward declared type can collide with the contents of `aeffect.h`.
+
+Workaround
+----------
+The collision can be avoided by placing a `struct AEffect;` forward declaration
+in the same namespace where the VST headers are included. The forward
+declaration must come before the inclusion.
+
+Rationale
+---------
+Using the forward declared types eliminates the need for error prone casting
+at the site where the ExtensionsVisitor facility is used.
+
 
 Change
 ------
