@@ -20,12 +20,14 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
 {
 
-/*
+/**
     A base class for classes which receive Universal MIDI Packets from an input.
 
     @tags{Audio}
@@ -34,9 +36,11 @@ struct Receiver
 {
     virtual ~Receiver() noexcept = default;
 
-    /*  This will be called each time a new packet is ready for processing. */
+    /** This will be called each time a new packet is ready for processing. */
     virtual void packetReceived (const View& packet, double time) = 0;
 };
 
 }
 }
+
+#endif
