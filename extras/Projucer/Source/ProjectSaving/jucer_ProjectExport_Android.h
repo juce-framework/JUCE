@@ -1639,7 +1639,7 @@ private:
         setAttributeIfNotPresent (*manifest, "xmlns:android", "http://schemas.android.com/apk/res/android");
         setAttributeIfNotPresent (*manifest, "android:versionCode", androidVersionCode.get());
         setAttributeIfNotPresent (*manifest, "android:versionName",  project.getVersionString());
-        setAttributeIfNotPresent (*manifest, "package", project.getBundleIdentifierString());
+        setAttributeIfNotPresent (*manifest, "package", project.getBundleIdentifierString().toLowerCase());
 
         return manifest;
     }
