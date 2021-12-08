@@ -173,3 +173,8 @@ if __name__ == "__main__":
     # Create an extra header file containing the module hierarchy.
     with open(os.path.join(args.dest_dir, "juce_modules.dox"), "w") as f:
         f.write("\r\n\r\n".join(module_definitions))
+
+    # Copy markdown docs
+    for name in ["JUCE Module Format.md", "CMake API.md"]:
+        shutil.copyfile(os.path.join(args.source_dir, "..", "docs", name),
+                        os.path.join(args.dest_dir, name))
