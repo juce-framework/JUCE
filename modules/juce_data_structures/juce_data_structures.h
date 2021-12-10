@@ -61,6 +61,6 @@
 #include "values/juce_ValueTree.h"
 #include "values/juce_ValueTreeSynchroniser.h"
 #include "values/juce_CachedValue.h"
-#include "values/juce_ValueWithDefault.h"
+#include "values/juce_ValueTreePropertyWithDefault.h"
 #include "app_properties/juce_PropertiesFile.h"
 #include "app_properties/juce_ApplicationProperties.h"
