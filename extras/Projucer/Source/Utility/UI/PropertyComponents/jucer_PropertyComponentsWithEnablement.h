@@ -31,26 +31,26 @@ class TextPropertyComponentWithEnablement    : public TextPropertyComponent,
                                                private Value::Listener
 {
 public:
-    TextPropertyComponentWithEnablement (ValueWithDefault& valueToControl,
-                                         ValueWithDefault valueToListenTo,
+    TextPropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
+                                         ValueTreePropertyWithDefault valueToListenTo,
                                          const String& propertyName,
                                          int maxNumChars,
                                          bool multiLine)
         : TextPropertyComponent (valueToControl, propertyName, maxNumChars, multiLine),
-          valueWithDefault (valueToListenTo),
-          value (valueWithDefault.getPropertyAsValue())
+          propertyWithDefault (valueToListenTo),
+          value (propertyWithDefault.getPropertyAsValue())
     {
         value.addListener (this);
-        setEnabled (valueWithDefault.get());
+        setEnabled (propertyWithDefault.get());
     }
 
-    ~TextPropertyComponentWithEnablement() override    { value.removeListener (this); }
+    ~TextPropertyComponentWithEnablement() override  { value.removeListener (this); }
 
 private:
-    ValueWithDefault valueWithDefault;
+    ValueTreePropertyWithDefault propertyWithDefault;
     Value value;
 
-    void valueChanged (Value&) override       { setEnabled (valueWithDefault.get()); }
+    void valueChanged (Value&) override  { setEnabled (propertyWithDefault.get()); }
 };
 
 //==============================================================================
@@ -58,21 +58,21 @@ class ChoicePropertyComponentWithEnablement    : public ChoicePropertyComponent,
                                                  private Value::Listener
 {
 public:
-    ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
-                                           ValueWithDefault valueToListenTo,
+    ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
+                                           ValueTreePropertyWithDefault valueToListenTo,
                                            const String& propertyName,
                                            const StringArray& choiceToUse,
                                            const Array<var>& correspondingValues)
         : ChoicePropertyComponent (valueToControl, propertyName, choiceToUse, correspondingValues),
-          valueWithDefault (valueToListenTo),
+          propertyWithDefault (valueToListenTo),
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
         valueChanged (value);
     }
 
-    ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
-                                           ValueWithDefault valueToListenTo,
+    ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
+                                           ValueTreePropertyWithDefault valueToListenTo,
                                            const Identifier& multiChoiceID,
                                            const String& propertyName,
                                            const StringArray& choicesToUse,
@@ -87,11 +87,11 @@ public:
         valueChanged (value);
     }
 
-    ChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
-                                           ValueWithDefault valueToListenTo,
+    ChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
+                                           ValueTreePropertyWithDefault valueToListenTo,
                                            const String& propertyName)
         : ChoicePropertyComponent (valueToControl, propertyName),
-          valueWithDefault (valueToListenTo),
+          propertyWithDefault (valueToListenTo),
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
@@ -101,7 +101,7 @@ public:
     ~ChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
-    ValueWithDefault valueWithDefault;
+    ValueTreePropertyWithDefault propertyWithDefault;
     Value value;
 
     bool isMultiChoice = false;
@@ -111,7 +111,7 @@ private:
     {
         jassert (isMultiChoice);
 
-        auto v = valueWithDefault.get();
+        auto v = propertyWithDefault.get();
 
         if (auto* varArray = v.getArray())
             return varArray->contains (idToCheck.toString());
@@ -125,7 +125,7 @@ private:
         if (isMultiChoice)
             setEnabled (checkMultiChoiceVar());
         else
-            setEnabled (valueWithDefault.get());
+            setEnabled (propertyWithDefault.get());
     }
 };
 
@@ -134,8 +134,8 @@ class MultiChoicePropertyComponentWithEnablement    : public MultiChoiceProperty
                                                       private Value::Listener
 {
 public:
-    MultiChoicePropertyComponentWithEnablement (ValueWithDefault& valueToControl,
-                                                ValueWithDefault valueToListenTo,
+    MultiChoicePropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
+                                                ValueTreePropertyWithDefault valueToListenTo,
                                                 const String& propertyName,
                                                 const StringArray& choices,
                                                 const Array<var>& correspondingValues)
@@ -143,7 +143,7 @@ public:
                                         propertyName,
                                         choices,
                                         correspondingValues),
-          valueWithDefault (valueToListenTo),
+          propertyWithDefault (valueToListenTo),
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
@@ -153,8 +153,8 @@ public:
     ~MultiChoicePropertyComponentWithEnablement() override    { value.removeListener (this); }
 
 private:
-    void valueChanged (Value&) override       { setEnabled (valueWithDefault.get()); }
+    void valueChanged (Value&) override       { setEnabled (propertyWithDefault.get()); }
 
-    ValueWithDefault valueWithDefault;
+    ValueTreePropertyWithDefault propertyWithDefault;
     Value value;
 };
