@@ -454,10 +454,16 @@ static Identifier identifierForOS (DependencyPathOS os) noexcept
     return {};
 }
 
-ValueWithDefault StoredSettings::getStoredPath (const Identifier& key, DependencyPathOS os)
+ValueTreePropertyWithDefault StoredSettings::getStoredPath (const Identifier& key, DependencyPathOS os)
 {
     auto tree = (os == TargetOS::getThisOS() ? projectDefaults
                                              : fallbackPaths.getOrCreateChildWithName (identifierForOS (os), nullptr));
 
     return { tree, key, nullptr, getFallbackPathForOS (key, os) };
 }
+
+void StoredSettings::addProjectDefaultsListener (ValueTree::Listener& l)     { projectDefaults.addListener (&l); }
+void StoredSettings::removeProjectDefaultsListener (ValueTree::Listener& l)  { projectDefaults.removeListener (&l); }
+
+void StoredSettings::addFallbackPathsListener (ValueTree::Listener& l)       { fallbackPaths.addListener (&l); }
+void StoredSettings::removeFallbackPathsListener (ValueTree::Listener& l)    { fallbackPaths.removeListener (&l); }

@@ -27,7 +27,7 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
-#include "../Utility/Helpers/jucer_ValueWithDefaultWrapper.h"
+#include "../Utility/Helpers/jucer_ValueTreePropertyWithDefaultWrapper.h"
 #include "../Project/Modules/jucer_Modules.h"
 
 class ProjectSaver;
@@ -157,7 +157,7 @@ public:
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
-    ValueWithDefault getPathForModuleValue (const String& moduleID);
+    ValueTreePropertyWithDefault getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
 
@@ -306,9 +306,9 @@ public:
         const ProjectExporter& exporter;
 
     protected:
-        ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, recommendedWarningsValue, optimisationLevelValue,
-                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue,
-                         usePrecompiledHeaderFileValue, precompiledHeaderFileValue;
+        ValueTreePropertyWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, recommendedWarningsValue, optimisationLevelValue,
+                                     linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue,
+                                     usePrecompiledHeaderFileValue, precompiledHeaderFileValue;
 
     private:
         std::map<String, CompilerWarningFlags> recommendedCompilerWarningFlags;
@@ -409,13 +409,13 @@ protected:
     const File projectFolder;
 
     //==============================================================================
-    ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
+    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
 
-    ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
-                     userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
+    ValueTreePropertyWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
+                                 userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
 
     Value projectCompilerFlagSchemesValue;
-    HashMap<String, ValueWithDefault> compilerFlagSchemesMap;
+    HashMap<String, ValueTreePropertyWithDefault> compilerFlagSchemesMap;
 
     mutable Array<Project::Item> itemGroups;
     Project::Item* modulesGroup = nullptr;

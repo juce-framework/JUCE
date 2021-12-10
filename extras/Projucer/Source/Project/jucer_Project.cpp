@@ -2001,7 +2001,7 @@ ValueTree Project::getConfigNode()
     return projectRoot.getOrCreateChildWithName (Ids::JUCEOPTIONS, nullptr);
 }
 
-ValueWithDefault Project::getConfigFlag (const String& name)
+ValueTreePropertyWithDefault Project::getConfigFlag (const String& name)
 {
     auto configNode = getConfigNode();
 

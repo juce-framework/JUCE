@@ -107,7 +107,8 @@ protected:
 
     private:
         //==============================================================================
-        ValueWithDefault architectureTypeValue, pluginBinaryCopyStepValue, vstBinaryLocation, vst3BinaryLocation, unityPluginBinaryLocation;
+        ValueTreePropertyWithDefault architectureTypeValue, pluginBinaryCopyStepValue,
+                                     vstBinaryLocation, vst3BinaryLocation, unityPluginBinaryLocation;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -508,7 +509,7 @@ public:
     }
 
 private:
-    ValueWithDefault extraPkgConfigValue;
+    ValueTreePropertyWithDefault extraPkgConfigValue;
 
     //==============================================================================
     StringPairArray getDefines (const BuildConfiguration& config) const

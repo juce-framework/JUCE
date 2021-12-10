@@ -887,11 +887,11 @@ protected:
         //==============================================================================
         bool iOS;
 
-        ValueWithDefault macOSBaseSDK, macOSDeploymentTarget, macOSArchitecture, iosBaseSDK, iosDeploymentTarget,
-                         customXcodeFlags, plistPreprocessorDefinitions, codeSignIdentity,
-                         fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled,
-                         vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
-                         aaxBinaryLocation, unityPluginBinaryLocation;
+        ValueTreePropertyWithDefault macOSBaseSDK, macOSDeploymentTarget, macOSArchitecture, iosBaseSDK, iosDeploymentTarget,
+                                     customXcodeFlags, plistPreprocessorDefinitions, codeSignIdentity,
+                                     fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled,
+                                     vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
+                                     aaxBinaryLocation, unityPluginBinaryLocation;
 
         //==============================================================================
         void valueTreePropertyChanged (ValueTree&, const Identifier& property) override
@@ -968,7 +968,9 @@ protected:
             if (macOSArchitecture.get() == "default")
                 macOSArchitecture.resetToDefault();
 
-            const auto updateSDKString = [this] (const Identifier& propertyName, ValueWithDefault& value, const String& suffix)
+            const auto updateSDKString = [this] (const Identifier& propertyName,
+                                                 ValueTreePropertyWithDefault& value,
+                                                 const String& suffix)
             {
                 auto sdkString = config[propertyName].toString();
 
@@ -3561,24 +3563,24 @@ private:
 
     const bool iOS;
 
-    ValueWithDefault applicationCategoryValue,
-                     customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
-                     subprojectsValue,
-                     validArchsValue,
-                     extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
-                     postbuildCommandValue, prebuildCommandValue,
-                     duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
-                     iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
-                     appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
-                     hardenedRuntimeValue, hardenedRuntimeOptionsValue,
-                     microphonePermissionNeededValue, microphonePermissionsTextValue,
-                     cameraPermissionNeededValue, cameraPermissionTextValue,
-                     bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
-                     sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
-                     uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, uiRequiresFullScreenValue, documentExtensionsValue, iosInAppPurchasesValue,
-                     iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
-                     networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
-                     exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
+    ValueTreePropertyWithDefault applicationCategoryValue,
+                                 customPListValue, pListPrefixHeaderValue, pListPreprocessValue,
+                                 subprojectsValue,
+                                 validArchsValue,
+                                 extraFrameworksValue, frameworkSearchPathsValue, extraCustomFrameworksValue, embeddedFrameworksValue,
+                                 postbuildCommandValue, prebuildCommandValue,
+                                 duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
+                                 iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
+                                 appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
+                                 hardenedRuntimeValue, hardenedRuntimeOptionsValue,
+                                 microphonePermissionNeededValue, microphonePermissionsTextValue,
+                                 cameraPermissionNeededValue, cameraPermissionTextValue,
+                                 bluetoothPermissionNeededValue, bluetoothPermissionTextValue,
+                                 sendAppleEventsPermissionNeededValue, sendAppleEventsPermissionTextValue,
+                                 uiFileSharingEnabledValue, uiSupportsDocumentBrowserValue, uiStatusBarHiddenValue, uiRequiresFullScreenValue, documentExtensionsValue, iosInAppPurchasesValue,
+                                 iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
+                                 networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
+                                 exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)
 };

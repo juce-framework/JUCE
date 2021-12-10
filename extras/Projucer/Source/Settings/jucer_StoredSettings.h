@@ -61,7 +61,13 @@ public:
     };
 
     //==============================================================================
-    ValueWithDefault getStoredPath (const Identifier& key, DependencyPathOS os);
+    void addProjectDefaultsListener (ValueTree::Listener&);
+    void removeProjectDefaultsListener (ValueTree::Listener&);
+
+    void addFallbackPathsListener (ValueTree::Listener&);
+    void removeFallbackPathsListener (ValueTree::Listener&);
+
+    ValueTreePropertyWithDefault getStoredPath (const Identifier& key, DependencyPathOS os);
     bool isJUCEPathIncorrect();
 
     //==============================================================================
