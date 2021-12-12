@@ -188,7 +188,7 @@ public:
     }
 
 private:
-    ValueWithDefault targetPlatformValue;
+    ValueTreePropertyWithDefault targetPlatformValue;
 
     String getTargetPlatformString() const    { return targetPlatformValue.get(); }
 
@@ -235,7 +235,7 @@ private:
         String getArchitectureTypeString() const    { return architectureTypeValue.get(); }
 
         //==============================================================================
-        ValueWithDefault architectureTypeValue;
+        ValueTreePropertyWithDefault architectureTypeValue;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override

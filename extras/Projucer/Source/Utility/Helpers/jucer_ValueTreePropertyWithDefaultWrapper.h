@@ -28,16 +28,18 @@
 
 //==============================================================================
 /**
-    Wraps a ValueWithDefault object that has a default which depends on a global value.
+    Wraps a ValueTreePropertyWithDefault object that has a default which depends on a global value.
 */
-class ValueWithDefaultWrapper  : private Value::Listener
+class ValueTreePropertyWithDefaultWrapper  : private Value::Listener
 {
 public:
-    ValueWithDefaultWrapper() = default;
+    ValueTreePropertyWithDefaultWrapper() = default;
 
-    void init (const ValueWithDefault& vwd, ValueWithDefault global, TargetOS::OS targetOS)
+    void init (const ValueTreePropertyWithDefault& v,
+               ValueTreePropertyWithDefault global,
+               TargetOS::OS targetOS)
     {
-        wrappedValue = vwd;
+        wrappedValue = v;
         globalValue = global.getPropertyAsValue();
         globalIdentifier = global.getPropertyID();
         os = targetOS;
@@ -49,7 +51,7 @@ public:
         valueChanged (globalValue);
     }
 
-    ValueWithDefault& getWrappedValueWithDefault()
+    ValueTreePropertyWithDefault& getWrappedValueTreePropertyWithDefault()
     {
         return wrappedValue;
     }
@@ -65,7 +67,7 @@ private:
         wrappedValue.setDefault (getAppSettings().getStoredPath (globalIdentifier, os).get());
     }
 
-    ValueWithDefault wrappedValue;
+    ValueTreePropertyWithDefault wrappedValue;
     Value globalValue;
 
     Identifier globalIdentifier;

@@ -90,15 +90,15 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
-                     androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
-                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
-                     androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
-                     androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
-                     androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
-                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+    ValueTreePropertyWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
+                                 androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
+                                 androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
+                                 androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
+                                 androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
+                                 androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
+                                 androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
+                                 androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -335,9 +335,9 @@ protected:
             return "${ANDROID_ABI}";
         }
 
-        ValueWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
-                         androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
-                         androidAdditionalRawValueResources, androidCustomStringXmlElements;
+        ValueTreePropertyWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
+                                     androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
+                                     androidAdditionalRawValueResources, androidCustomStringXmlElements;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
