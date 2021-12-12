@@ -289,7 +289,7 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
 
         if (project.shouldEnableARA() || project.isARAPluginHost())
         {
-            props.add (new FilePathPropertyComponent (araPathValueWrapper.getWrappedValueWithDefault(), "ARA SDK Folder", true,
+            props.add (new FilePathPropertyComponent (araPathValueWrapper.getWrappedValueTreePropertyWithDefault(), "ARA SDK Folder", true,
                                                       getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
                        "If you're building an ARA enabled plug-in, this must be the folder containing the ARA SDK. This can be an absolute path, or a path relative to the Projucer project file.");
         }
