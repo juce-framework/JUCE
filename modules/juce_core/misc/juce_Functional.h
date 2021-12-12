@@ -23,24 +23,43 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
+namespace detail
+{
+    template <typename...>
+    using Void = void;
+
+    template <typename, typename = void>
+    struct EqualityComparableToNullptr
+        : std::false_type {};
+
+    template <typename T>
+    struct EqualityComparableToNullptr<T, Void<decltype (std::declval<T>() != nullptr)>>
+        : std::true_type {};
+} // namespace detail
+#endif
+
+//==============================================================================
 /** Some helper methods for checking a callable object before invoking with
     the specified arguments.
 
-    If the object is a std::function it will check for nullptr before
-    calling. For a callable object it will invoke the function call operator.
+    If the object provides a comparison operator for nullptr it will check before
+    calling. For other objects it will just invoke the function call operator.
 
     @tags{Core}
 */
 struct NullCheckedInvocation
 {
-    template <typename... Signature, typename... Args>
-    static void invoke (std::function<Signature...>&& fn, Args&&... args)
+    template <typename Callable, typename... Args,
+              std::enable_if_t<detail::EqualityComparableToNullptr<Callable>::value, int> = 0>
+    static void invoke (Callable&& fn, Args&&... args)
     {
         if (fn != nullptr)
             fn (std::forward<Args> (args)...);
     }
 
-    template <typename Callable, typename... Args>
+    template <typename Callable, typename... Args,
+              std::enable_if_t<! detail::EqualityComparableToNullptr<Callable>::value, int> = 0>
     static void invoke (Callable&& fn, Args&&... args)
     {
         fn (std::forward<Args> (args)...);

@@ -160,17 +160,17 @@ private:
         static BOOL isFlipped (id, SEL) { return YES; }
         static BOOL isOpaque  (id, SEL) { return YES; }
 
-        static void nudge (NSView* self)
+        static void nudge (id self)
         {
             if (auto* owner = getIvar<NSViewComponentWithParent*> (self, "owner"))
                 if (owner->wantsNudge == WantsNudge::yes)
                     owner->triggerAsyncUpdate();
         }
 
-        static void viewDidUnhide (NSView* self, SEL)               { nudge (self); }
-        static void didAddSubview (NSView* self, SEL, NSView*)      { nudge (self); }
-        static void viewDidMoveToSuperview (NSView* self, SEL)      { nudge (self); }
-        static void viewDidMoveToWindow (NSView* self, SEL)         { nudge (self); }
+        static void viewDidUnhide (id self, SEL)               { nudge (self); }
+        static void didAddSubview (id self, SEL, NSView*)      { nudge (self); }
+        static void viewDidMoveToSuperview (id self, SEL)      { nudge (self); }
+        static void viewDidMoveToWindow (id self, SEL)         { nudge (self); }
     };
 
     static FlippedNSView& getViewClass()

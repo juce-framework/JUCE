@@ -20,12 +20,14 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
 {
 
-/*
+/**
     This struct acts as a single-file namespace for Univeral MIDI Packet
     functionality related to 7-bit SysEx.
 
@@ -33,7 +35,7 @@ namespace universal_midi_packets
 */
 struct SysEx7
 {
-    /*  Returns the number of 64-bit packets required to hold a series of
+    /** Returns the number of 64-bit packets required to hold a series of
         SysEx bytes.
 
         The number passed to this function should exclude the leading/trailing
@@ -42,32 +44,34 @@ struct SysEx7
     */
     static uint32_t getNumPacketsRequiredForDataSize (uint32_t);
 
-    /*  The different kinds of UMP SysEx-7 message. */
+    /** The different kinds of UMP SysEx-7 message. */
     enum class Kind : uint8_t
     {
-        /*  The whole message fits in a single 2-word packet. */
+        /** The whole message fits in a single 2-word packet. */
         complete     = 0,
 
-        /*  The packet begins a SysEx message that will continue in subsequent packets. */
+        /** The packet begins a SysEx message that will continue in subsequent packets. */
         begin        = 1,
 
-        /*  The packet is a continuation of an ongoing SysEx message. */
+        /** The packet is a continuation of an ongoing SysEx message. */
         continuation = 2,
 
-        /*  The packet terminates an ongoing SysEx message. */
+        /** The packet terminates an ongoing SysEx message. */
         end          = 3
     };
 
-    /*  Holds the bytes from a single SysEx-7 packet. */
+    /** Holds the bytes from a single SysEx-7 packet. */
     struct PacketBytes
     {
         std::array<uint8_t, 6> data;
         uint8_t size;
     };
 
-    /*  Extracts the data bytes from a 64-bit data message. */
+    /** Extracts the data bytes from a 64-bit data message. */
     static PacketBytes getDataBytes (const PacketX2& packet);
 };
 
 }
 }
+
+#endif

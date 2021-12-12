@@ -23,12 +23,16 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 // Forward declaration to avoid leaking implementation details.
 namespace Steinberg
 {
     class FUnknown;
     using TUID = char[16];
-}
+} // namespace Steinberg
+
+#endif
 
 namespace juce
 {

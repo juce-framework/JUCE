@@ -332,7 +332,7 @@ private:
         jassert ([panel preventsApplicationTerminationWhenModal]);
     }
 
-    static BOOL preventsApplicationTerminationWhenModal() { return YES; }
+    static BOOL preventsApplicationTerminationWhenModal (id, SEL) { return YES; }
 
     template <typename Base>
     struct SafeModalPanel : public ObjCClass<Base>

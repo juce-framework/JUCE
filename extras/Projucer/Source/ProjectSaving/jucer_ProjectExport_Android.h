@@ -90,15 +90,15 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
-                     androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
-                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
-                     androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
-                     androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
-                     androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
-                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+    ValueTreePropertyWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
+                                 androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
+                                 androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
+                                 androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
+                                 androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
+                                 androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
+                                 androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
+                                 androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -141,7 +141,7 @@ public:
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.0.2"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.0.0"),
-          AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
+          androidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
         targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
@@ -165,22 +165,25 @@ public:
     //==============================================================================
     bool canLaunchProject() override
     {
-        return AndroidExecutable.exists();
+        return androidExecutable.exists();
     }
 
     bool launchProject() override
     {
-        if (! AndroidExecutable.exists())
+        if (! androidExecutable.exists())
         {
             jassertfalse;
             return false;
         }
 
-        auto targetFolder = getTargetFolder();
-
         // we have to surround the path with extra quotes, otherwise Android Studio
         // will choke if there are any space characters in the path.
-        return AndroidExecutable.startAsProcess ("\"" + targetFolder.getFullPathName() + "\"");
+        return androidExecutable.startAsProcess (getIDEProjectFile().getFullPathName().quoted());
+    }
+
+    File getIDEProjectFile() const override
+    {
+        return getTargetFolder();
     }
 
     //==============================================================================
@@ -332,9 +335,9 @@ protected:
             return "${ANDROID_ABI}";
         }
 
-        ValueWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
-                         androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
-                         androidAdditionalRawValueResources, androidCustomStringXmlElements;
+        ValueTreePropertyWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
+                                     androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
+                                     androidAdditionalRawValueResources, androidCustomStringXmlElements;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -1874,7 +1877,7 @@ private:
     }
 
     //==============================================================================
-    const File AndroidExecutable;
+    const File androidExecutable;
 
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };

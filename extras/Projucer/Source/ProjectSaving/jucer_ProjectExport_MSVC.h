@@ -313,12 +313,12 @@ public:
         }
 
     private:
-        ValueWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
-                         generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
-                         intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
-                         pluginBinaryCopyStepValue;
+        ValueTreePropertyWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
+                                     generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
+                                     intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
+                                     pluginBinaryCopyStepValue;
 
-        ValueWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, unityPluginBinaryLocation;
+        ValueTreePropertyWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, unityPluginBinaryLocation;
 
         Value architectureValueToListenTo;
 
@@ -1479,7 +1479,7 @@ public:
     bool launchProject() override
     {
        #if JUCE_WINDOWS
-        return getSLNFile().startAsProcess();
+        return getIDEProjectFile().startAsProcess();
        #else
         return false;
        #endif
@@ -1492,6 +1492,11 @@ public:
        #else
         return false;
        #endif
+    }
+
+    File getIDEProjectFile() const override
+    {
+        return getSLNFile();
     }
 
     void createExporterProperties (PropertyListBuilder& props) override
@@ -1598,12 +1603,12 @@ protected:
     mutable File rcFile, iconFile, packagesConfigFile;
     OwnedArray<MSVCTargetBase> targets;
 
-    ValueWithDefault IPPLibraryValue,
-                     IPP1ALibraryValue,
-                     MKL1ALibraryValue,
-                     platformToolsetValue,
-                     targetPlatformVersion,
-                     manifestFileValue;
+    ValueTreePropertyWithDefault IPPLibraryValue,
+                                 IPP1ALibraryValue,
+                                 MKL1ALibraryValue,
+                                 platformToolsetValue,
+                                 targetPlatformVersion,
+                                 manifestFileValue;
 
     File getProjectFile (const String& extension, const String& target) const
     {

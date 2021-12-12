@@ -20,12 +20,14 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
 {
 
-/*
+/**
     A base class for classes which convert bytestream midi to other formats.
 
     @tags{Audio}
@@ -38,7 +40,7 @@ struct BytestreamInputHandler
     virtual void pushMidiData (const void* data, int bytes, double time) = 0;
 };
 
-/*
+/**
     Parses a continuous bytestream and emits complete MidiMessages whenever a full
     message is received.
 
@@ -49,7 +51,7 @@ struct BytestreamToBytestreamHandler : public BytestreamInputHandler
     BytestreamToBytestreamHandler (MidiInput& i, MidiInputCallback& c)
         : input (i), callback (c), concatenator (2048) {}
 
-    /*
+    /**
         Provides an `operator()` which can create an input handler for a given
         MidiInput.
 
@@ -87,7 +89,7 @@ struct BytestreamToBytestreamHandler : public BytestreamInputHandler
     MidiDataConcatenator concatenator;
 };
 
-/*
+/**
     Parses a continuous MIDI 1.0 bytestream, and emits full messages in the requested
     UMP format.
 
@@ -98,7 +100,7 @@ struct BytestreamToUMPHandler : public BytestreamInputHandler
     BytestreamToUMPHandler (PacketProtocol protocol, Receiver& c)
         : recipient (c), dispatcher (protocol, 2048) {}
 
-    /*
+    /**
         Provides an `operator()` which can create an input handler for a given
         MidiInput.
 
@@ -138,3 +140,5 @@ struct BytestreamToUMPHandler : public BytestreamInputHandler
 
 }
 }
+
+#endif

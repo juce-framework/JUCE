@@ -20,12 +20,14 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
 {
 
-/*
+/**
     Functions to assist conversion of UMP messages to/from other formats,
     especially older 'bytestream' formatted MidiMessages.
 
@@ -33,7 +35,7 @@ namespace universal_midi_packets
 */
 struct Conversion
 {
-    /*  Converts from a MIDI 1 bytestream to MIDI 1 on Universal MIDI Packets.
+    /** Converts from a MIDI 1 bytestream to MIDI 1 on Universal MIDI Packets.
 
         `callback` is a function which accepts a single View argument.
     */
@@ -97,7 +99,7 @@ struct Conversion
         }
     }
 
-    /*  Converts a MidiMessage to one or more messages in UMP format, using
+    /** Converts a MidiMessage to one or more messages in UMP format, using
         the MIDI 1.0 Protocol.
 
         `packets` is an out-param to allow the caller to control
@@ -111,7 +113,7 @@ struct Conversion
         toMidi1 (m, [&] (const View& view) { packets.add (view); });
     }
 
-    /*  Widens a 7-bit MIDI 1.0 value to a 8-bit MIDI 2.0 value. */
+    /** Widens a 7-bit MIDI 1.0 value to a 8-bit MIDI 2.0 value. */
     static uint8_t scaleTo8 (uint8_t word7Bit)
     {
         const auto shifted = (uint8_t) (word7Bit << 0x1);
@@ -120,7 +122,7 @@ struct Conversion
         return (uint8_t) (shifted | ((repeat >> 5) & mask));
     }
 
-    /*  Widens a 7-bit MIDI 1.0 value to a 16-bit MIDI 2.0 value. */
+    /** Widens a 7-bit MIDI 1.0 value to a 16-bit MIDI 2.0 value. */
     static uint16_t scaleTo16 (uint8_t word7Bit)
     {
         const auto shifted = (uint16_t) (word7Bit << 0x9);
@@ -129,7 +131,7 @@ struct Conversion
         return (uint16_t) (shifted | (((repeat << 3) | (repeat >> 3)) & mask));
     }
 
-    /*  Widens a 14-bit MIDI 1.0 value to a 16-bit MIDI 2.0 value. */
+    /** Widens a 14-bit MIDI 1.0 value to a 16-bit MIDI 2.0 value. */
     static uint16_t scaleTo16 (uint16_t word14Bit)
     {
         const auto shifted = (uint16_t) (word14Bit << 0x2);
@@ -138,7 +140,7 @@ struct Conversion
         return (uint16_t) (shifted | ((repeat >> 11) & mask));
     }
 
-    /*  Widens a 7-bit MIDI 1.0 value to a 32-bit MIDI 2.0 value. */
+    /** Widens a 7-bit MIDI 1.0 value to a 32-bit MIDI 2.0 value. */
     static uint32_t scaleTo32 (uint8_t word7Bit)
     {
         const auto shifted = (uint32_t) (word7Bit << 0x19);
@@ -151,7 +153,7 @@ struct Conversion
                                      | (repeat >> 5)) & mask));
     }
 
-    /*  Widens a 14-bit MIDI 1.0 value to a 32-bit MIDI 2.0 value. */
+    /** Widens a 14-bit MIDI 1.0 value to a 32-bit MIDI 2.0 value. */
     static uint32_t scaleTo32 (uint16_t word14Bit)
     {
         const auto shifted = (uint32_t) (word14Bit << 0x12);
@@ -160,22 +162,22 @@ struct Conversion
         return (uint32_t) (shifted | (((repeat << 5) | (repeat >> 8)) & mask));
     }
 
-    /*  Narrows a 16-bit MIDI 2.0 value to a 7-bit MIDI 1.0 value. */
+    /** Narrows a 16-bit MIDI 2.0 value to a 7-bit MIDI 1.0 value. */
     static uint8_t scaleTo7 (uint8_t word8Bit) { return (uint8_t) (word8Bit >> 1); }
 
-    /*  Narrows a 16-bit MIDI 2.0 value to a 7-bit MIDI 1.0 value. */
+    /** Narrows a 16-bit MIDI 2.0 value to a 7-bit MIDI 1.0 value. */
     static uint8_t scaleTo7 (uint16_t word16Bit) { return (uint8_t) (word16Bit >> 9); }
 
-    /*  Narrows a 32-bit MIDI 2.0 value to a 7-bit MIDI 1.0 value. */
+    /** Narrows a 32-bit MIDI 2.0 value to a 7-bit MIDI 1.0 value. */
     static uint8_t scaleTo7 (uint32_t word32Bit) { return (uint8_t) (word32Bit >> 25); }
 
-    /*  Narrows a 32-bit MIDI 2.0 value to a 14-bit MIDI 1.0 value. */
+    /** Narrows a 32-bit MIDI 2.0 value to a 14-bit MIDI 1.0 value. */
     static uint16_t scaleTo14 (uint16_t word16Bit) { return (uint16_t) (word16Bit >> 2); }
 
-    /*  Narrows a 32-bit MIDI 2.0 value to a 14-bit MIDI 1.0 value. */
+    /** Narrows a 32-bit MIDI 2.0 value to a 14-bit MIDI 1.0 value. */
     static uint16_t scaleTo14 (uint32_t word32Bit) { return (uint16_t) (word32Bit >> 18); }
 
-    /*  Converts UMP messages which may include MIDI 2.0 channel voice messages into
+    /** Converts UMP messages which may include MIDI 2.0 channel voice messages into
         equivalent MIDI 1.0 messages (still in UMP format).
 
         `callback` is a function that accepts a single View argument and will be
@@ -324,3 +326,5 @@ struct Conversion
 
 }
 }
+
+#endif

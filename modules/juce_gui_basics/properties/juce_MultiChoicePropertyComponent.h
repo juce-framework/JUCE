@@ -63,9 +63,9 @@ public:
                                   const Array<var>& correspondingValues,
                                   int maxChoices = -1);
 
-    /** Creates the component using a ValueWithDefault object. This will select the default options.
+    /** Creates the component using a ValueTreePropertyWithDefault object. This will select the default options.
 
-        @param valueToControl       the ValueWithDefault object that contains the Value object that the ToggleButtons will read and control.
+        @param valueToControl       the ValueTreePropertyWithDefault object that contains the Value object that the ToggleButtons will read and control.
         @param propertyName         the name of the property
         @param choices              the list of possible values that will be represented
         @param correspondingValues  a list of values corresponding to each item in the 'choices' StringArray.
@@ -75,13 +75,11 @@ public:
         @param maxChoices           the maximum number of values which can be selected at once. The default of
                                     -1 will not limit the number that can be selected
     */
-    MultiChoicePropertyComponent (ValueWithDefault& valueToControl,
+    MultiChoicePropertyComponent (const ValueTreePropertyWithDefault& valueToControl,
                                   const String& propertyName,
                                   const StringArray& choices,
                                   const Array<var>& correspondingValues,
                                   int maxChoices = -1);
-
-    ~MultiChoicePropertyComponent() override;
 
     //==============================================================================
     /** Returns true if the list of options is expanded. */
@@ -100,7 +98,11 @@ public:
     */
     void setExpanded (bool expanded) noexcept;
 
-    /** You can assign a lambda to this callback object to have it called when the MultiChoicePropertyComponent height changes. */
+    /** You can assign a lambda to this callback object to have it called when the
+        height of this component changes in response to being expanded/collapsed.
+
+        @see setExpanded
+    */
     std::function<void()> onHeightChange;
 
     //==============================================================================
@@ -121,8 +123,6 @@ private:
     void lookAndFeelChanged() override;
 
     //==============================================================================
-    WeakReference<ValueWithDefault> valueWithDefault;
-
     static constexpr int collapsedHeight = 125;
     static constexpr int buttonHeight = 25;
     static constexpr int expandAreaHeight = 20;
@@ -130,6 +130,7 @@ private:
     int maxHeight = 0, numHidden = 0;
     bool expandable = false, expanded = false;
 
+    ValueTreePropertyWithDefault value;
     OwnedArray<ToggleButton> choiceButtons;
     ShapeButton expandButton { "Expand", Colours::transparentBlack, Colours::transparentBlack, Colours::transparentBlack };
 

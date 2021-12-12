@@ -20,25 +20,27 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
 {
 
-/*
+/**
     Helpful types and functions for interacting with Universal MIDI Packets.
 
     @tags{Audio}
 */
 struct Utils
 {
-    /*  Joins 4 bytes into a single 32-bit word. */
+    /** Joins 4 bytes into a single 32-bit word. */
     static constexpr uint32_t bytesToWord (uint8_t a, uint8_t b, uint8_t c, uint8_t d)
     {
         return uint32_t (a << 0x18 | b << 0x10 | c << 0x08 | d << 0x00);
     }
 
-    /*  Returns the expected number of 32-bit words in a Universal MIDI Packet, given
+    /** Returns the expected number of 32-bit words in a Universal MIDI Packet, given
         the first word of the packet.
 
         The result will be between 1 and 4 inclusive.
@@ -46,7 +48,7 @@ struct Utils
     */
     static uint32_t getNumWordsForMessageType (uint32_t);
 
-    /*
+    /**
         Helper functions for setting/getting 4-bit ranges inside a 32-bit word.
     */
     template <size_t Index>
@@ -65,7 +67,7 @@ struct Utils
         }
     };
 
-    /*
+    /**
         Helper functions for setting/getting 8-bit ranges inside a 32-bit word.
     */
     template <size_t Index>
@@ -84,7 +86,7 @@ struct Utils
         }
     };
 
-    /*
+    /**
         Helper functions for setting/getting 16-bit ranges inside a 32-bit word.
     */
     template <size_t Index>
@@ -111,3 +113,5 @@ struct Utils
 
 }
 }
+
+#endif

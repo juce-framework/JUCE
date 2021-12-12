@@ -384,9 +384,9 @@ struct ObjCClass
     }
 
     template <typename Result, typename... Args>
-    void addMethod (SEL selector, Result (*callbackFn) (Args...))
+    void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
     {
-        const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (Args)...);
+        const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
         const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
         jassertquiet (b);
     }
