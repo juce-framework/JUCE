@@ -126,7 +126,12 @@ public:
 
     bool launchProject() override
     {
-        return getCLionExecutableOrApp().startAsProcess (getTargetFolder().getFullPathName().quoted());
+        return getCLionExecutableOrApp().startAsProcess (getIDEProjectFile().getFullPathName().quoted());
+    }
+
+    File getIDEProjectFile() const override
+    {
+        return getTargetFolder();
     }
 
     String getDescription() override

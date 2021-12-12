@@ -247,341 +247,341 @@ commands, properties beginning with `JUCE_` can be _queried_, but changing their
 have any effect (or might even break things in unexpected ways!), so always pass JUCE target
 attributes directly to these creation functions, rather than adding them later.
 
-- `PRODUCT_NAME`
-  - The name of the output built by this target, similar to CMake's `OUTPUT_NAME` property. If not
-    specified, this will default to the target name.
+`PRODUCT_NAME`
+- The name of the output built by this target, similar to CMake's `OUTPUT_NAME` property. If not
+  specified, this will default to the target name.
 
-- `VERSION`
-  - A version number string in the format "major.minor.bugfix". If not specified, the `VERSION` of
-    the project containing the target will be used instead. On Apple platforms, this is the
-    user-facing version string. This option corresponds to the `CFBundleShortVersionString` field in
-    the target's plist.
-
-- `BUILD_VERSION`
-  - A version number string in the format "major.minor.bugfix". If not specified, this will match
-    the `VERSION` of the target. On Apple platforms, this is the private version string used to
-    distinguish between App Store builds. This option corresponds to the `CFBundleVersion` field in
-    the target's plist.
-
-- `BUNDLE_ID`
-  - An identifier string in the form "com.yourcompany.productname" which should uniquely identify
-    this target. Mainly used for macOS builds. If not specified, a default will be generated using
-    the target's `COMPANY_NAME` and `PRODUCT_NAME`.
-
-- `MICROPHONE_PERMISSION_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
-
-- `MICROPHONE_PERMISSION_TEXT`
-  - The text your app will display when it requests microphone permissions.
-
-- `CAMERA_PERMISSION_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
-
-- `CAMERA_PERMISSION_TEXT`
-  - The text your app will display when it requests camera permissions.
-
-- `BLUETOOTH_PERMISSION_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
-
-- `BLUETOOTH_PERMISSION_TEXT`
-  - The text your app will display when it requests bluetooth permissions.
-
-- `SEND_APPLE_EVENTS_PERMISSION_ENABLED`
-  - May be either TRUE or FALSE. Enable this to allow your app to send Apple events.
-
-- `SEND_APPLE_EVENTS_PERMISSION_TEXT`
-  - The text your app will display when it requests permission to send Apple events.
-
-- `FILE_SHARING_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
-
-- `DOCUMENT_BROWSER_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
-
-- `STATUS_BAR_HIDDEN`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
-
- - `REQUIRES_FULL_SCREEN`
-   - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
-
-- `BACKGROUND_AUDIO_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
-
-- `BACKGROUND_BLE_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
-
-- `APP_GROUPS_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's entitlements.
-
-- `APP_GROUP_IDS`
-  - The app groups to which your iOS app belongs. These will be added to your app's entitlements.
-
-- `ICLOUD_PERMISSIONS_ENABLED`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's entitlements.
-
-- `IPHONE_SCREEN_ORIENTATIONS`
-  - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
-    `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
-    `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
-
-- `IPAD_SCREEN_ORIENTATIONS`
-  - May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
-    `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
-    `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
-
-- `LAUNCH_STORYBOARD_FILE`
-  - A custom launch storyboard file to use on iOS. If not supplied, a default storyboard will be
-    used.
-
-- `CUSTOM_XCASSETS_FOLDER`
-  - A path to an xcassets directory, containing icons and/or launch images for this target. If this
-    is specified, the ICON_BIG and ICON_SMALL arguments will not have an effect on iOS, and a launch
-    storyboard will not be used.
-
-- `TARGETED_DEVICE_FAMILY`
-  - Specifies the device families on which the product must be capable of running. Allowed values
-    are "1", "2", and "1,2"; these correspond to "iPhone/iPod touch", "iPad", and "iPhone/iPod and
-    iPad" respectively. This will default to "1,2", meaning that the target will target iPhone,
-    iPod, and iPad.
-
-- `ICON_BIG`, `ICON_SMALL`
-  - Paths to image files that will be used to generate app icons. If only one of these parameters
-    is specified, then that image will be used for all icon resolutions. If both arguments are
-    specified, then the appropriate image will be picked for each icon resolution.
-
-- `COMPANY_COPYRIGHT`
-  - Copyright text which will be added to the app/plugin's Info.plist. The value of this argument
-    will be inherited from the `JUCE_COMPANY_COPYRIGHT` property, so if you want to use the same
-    `COMPANY_COPYRIGHT` for several targets in a build tree, you can call
-    `set_directory_properties(PROPERTIES JUCE_COMPANY_COPYRIGHT ...)` after including JUCE but
-    before adding the targets, and then omit the `COMPANY_COPYRIGHT` argument when creating the
-    individual targets.
-
-- `COMPANY_NAME`
-  - The name of this target's author. Will be added to the app/plugin's Info.plist, and may be used
-    to generate part of the `BUNDLE_ID` if no ID was given explicitly. The value of this argument
-    will be inherited from the `JUCE_COMPANY_NAME` property, so if you want to use the same
-    `COMPANY_NAME` for several targets in a build tree, you can call
-    `set_directory_properties(PROPERTIES JUCE_COMPANY_NAME ...)` after including JUCE but before
-    adding the targets, and then omit the `COMPANY_NAME` argument when creating the individual
-    targets.
-
-- `COMPANY_WEBSITE`
-  - The address of a website related to this target in some way. The value of this argument will be
-    inherited from the `JUCE_COMPANY_WEBSITE` property, so if you want to use the same
-    `COMPANY_WEBSITE` for several targets in a build tree, you can call
-    `set_directory_properties(PROPERTIES JUCE_COMPANY_WEBSITE ...)` after including JUCE but before
-    adding the targets, and then omit the `COMPANY_WEBSITE` argument when creating the individual
-    targets.
-
-- `COMPANY_EMAIL`
-  - An email address for this target's author. The value of this argument will be inherited from the
-    `JUCE_COMPANY_EMAIL` property, so if you want to use the same `COMPANY_EMAIL` for several
-    targets in a build tree, you can call `set_directory_properties(PROPERTIES JUCE_COMPANY_EMAIL
-    ...)` after including JUCE but before adding the targets, and then omit the `COMPANY_EMAIL`
-    argument when creating the individual targets.
-
-- `DOCUMENT_EXTENSIONS`
-  - File extensions that should be associated with this target. For example, the Projucer passes
-    the string `jucer` because it wants to open `.jucer` files. If your target has several different
-    document types, you can pass them as multiple arguments, e.g. `DOCUMENT_EXTENSIONS wav mp3 aif`.
-
-- `NEEDS_CURL`
-  - On Linux, JUCE may or may not need to link to Curl depending on the compile definitions that are
-    set on a JUCE target. By default, we don't link Curl because you might not need it, but if you
-    get linker or include errors that reference Curl, just set this argument to `TRUE`.
-
-- `NEEDS_WEB_BROWSER`
-  - On Linux, JUCE may or may not need to link to Webkit depending on the compile definitions that
-    are set on a JUCE target. By default, we don't link Webkit because you might not need it, but
-    if you get linker or include errors that reference Webkit, just set this argument to `TRUE`.
-
-- `NEEDS_STORE_KIT`
-  - On macOS, JUCE may or may not need to link to StoreKit depending on the compile definitions that
-    are set on a JUCE target. By default, we don't link StoreKit because you might not need it, but
-    if you get linker or include errors that reference StoreKit, just set this argument to `TRUE`.
-
-- `PUSH_NOTIFICATIONS_ENABLED`
-  - Sets app entitlements to allow push notifications. False by default.
-
-- `NETWORK_MULTICAST_ENABLED`
-  - Sets app entitlements to allow IP multicast or broadcast on macOS/iOS. False by default.
-
-- `HARDENED_RUNTIME_ENABLED`
-  - Enables macOS' hardened runtime for this target. Required for notarisation. False by default.
-
-- `HARDENED_RUNTIME_OPTIONS`
-  - A set of space-separated entitlement keys that will be added to this target's entitlements
-    plist if `HARDENED_RUNTIME_ENABLED` is `TRUE`. Each key should be in the form
-    `com.apple.security.*` where `*` is a specific entitlement.
-
-- `APP_SANDBOX_ENABLED`
-  - Enables macOS' app sandbox for this target. False by default.
-
-- `APP_SANDBOX_INHERIT`
-  - Allows child processes to inherit the static entitlements of their parent process. If this
-    is set to `TRUE`, no other app sandbox entitlements will be set on this target.
-
-- `APP_SANDBOX_OPTIONS`
-  - A set of space-separated entitlement keys that will be added to this target's entitlements
-    plist if `APP_SANDBOX_ENABLED` is `TRUE`. Each key should be in the form `com.apple.security.*`
-    where `*` is a specific entitlement.
-
-- `PLIST_TO_MERGE`
-  - A string to insert into an app/plugin's Info.plist.
-
-- `FORMATS`
-  - For plugin targets, specifies the plugin targets to build. Should be provided as a
-    space-separated list. Valid values are `Standalone Unity VST3 AU AUv3 AAX VST`. `AU` and `AUv3`
-    plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
-    without first calling `juce_set_aax_sdk_path` or `juce_set_vst2_sdk_path` respectively.
-
-- `PLUGIN_NAME`
-  - The name of the plugin. In a DAW environment, this is the name that will be displayed to the
-    user when they go to load a plugin. This name may differ from the name of the physical plugin
-    file (to set the name of the plugin file, use the `PRODUCT_NAME` option). If not specified,
-    the `PLUGIN_NAME` will default to match the `PRODUCT_NAME`.
-
-- `PLUGIN_MANUFACTURER_CODE`
-  - A four-character unique ID for your company. For AU compatibility, this must contain at least
-    one upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the
-    remaining letters to be lower-case.
-
-- `PLUGIN_CODE`
-  - A four-character unique ID for your plugin. For AU compatibility, this must contain exactly one
-    upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the remaining
-    letters to be lower-case.
-
-- `DESCRIPTION`
-  - A short description of your plugin.
-
-- `IS_SYNTH`
-  - Whether the plugin is a synth. Will be used to set sensible plugin category values if they
-    are not provided explicitly.
-
-- `NEEDS_MIDI_INPUT`
-  - Whether the plugin should provide a midi input.
-
-- `NEEDS_MIDI_OUTPUT`
-  - Whether the plugin should provide a midi output.
-
-- `IS_MIDI_EFFECT`
-  - Whether the plugin is a MIDI effect (some hosts provide a special channel-strip location for
-    MIDI effect plugins).
-
-- `EDITOR_WANTS_KEYBOARD_FOCUS`
-  - Whether the plugin requires keyboard focus, or should defer all keyboard handling to the host.
-
-- `DISABLE_AAX_BYPASS`
-  - Whether the AAX bypass function should be disabled.
-
-- `DISABLE_AAX_MULTI_MONO`
-  - Whether the AAX multi mono bus layout should be disabled.
-
-- `AAX_IDENTIFIER`
-  - The bundle ID for the AAX plugin target. Matches the `BUNDLE_ID` by default.
-
-- `VST_NUM_MIDI_INS`
-  - For VST2 and VST3 plugins that accept midi, this allows you to configure the number of inputs.
-
-- `VST_NUM_MIDI_OUTS`
-  - For VST2 and VST3 plugins that produce midi, this allows you to configure the number of outputs.
-
-- `VST2_CATEGORY`
-  - Should be one of: `kPlugCategUnknown`, `kPlugCategEffect`, `kPlugCategSynth`,
-    `kPlugCategAnalysis`, `kPlugCategMatering`, `kPlugCategSpacializer`, `kPlugCategRoomFx`,
-    `kPlugSurroundFx`, `kPlugCategRestoration`, `kPlugCategOfflineProcess`, `kPlugCategShell`,
-    `kPlugCategGenerator`.
-
-- `VST3_CATEGORIES`
-  - Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
-    `Delay`, `Distortion`, `Drum`, `Dynamics`, `EQ`, `External`, `Filter`, `Generator`, `Mastering`,
-    `Modulation`, `Mono`, `Network`, `NoOfflineProcess`, `OnlyOfflineProcess`, `OnlyRT`,
-    `Pitch Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`,
-    `Tools`, `Up-Downmix`
-
-- `AU_MAIN_TYPE`
-  - Should be one of: `kAudioUnitType_Effect`, `kAudioUnitType_FormatConverter`,
-    `kAudioUnitType_Generator`, `kAudioUnitType_MIDIProcessor`, `kAudioUnitType_Mixer`,
-    `kAudioUnitType_MusicDevice`, `kAudioUnitType_MusicEffect`, `kAudioUnitType_OfflineEffect`,
-    `kAudioUnitType_Output`, `kAudioUnitType_Panner`
-
-- `AU_EXPORT_PREFIX`
-  - A prefix for the names of entry-point functions that your component exposes. Typically this
-    will be a version of your plugin's name that can be used as part of a C++ token. Defaults
-    to your plugin's name with the suffix 'AU'.
-
-- `AU_SANDBOX_SAFE`
-  - May be either TRUE or FALSE. Adds the appropriate entries to an AU plugin's Info.plist.
-
-- `SUPPRESS_AU_PLIST_RESOURCE_USAGE`
-  - May be either TRUE or FALSE. Defaults to FALSE. Set this to TRUE to disable the `resourceUsage`
-    key in the target's plist. This is useful for AU plugins that must access resources which cannot
-    be declared in the resourceUsage block, such as UNIX domain sockets. In particular,
-    PACE-protected AU plugins may require this option to be enabled in order for the plugin to load
-    in GarageBand.
-
-- `AAX_CATEGORY`
-  - Should be one or more of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
-    `AAX_ePlugInCategory_Dynamics`, `AAX_ePlugInCategory_PitchShift`, `AAX_ePlugInCategory_Reverb`,
-    `AAX_ePlugInCategory_Delay`, `AAX_ePlugInCategory_Modulation`, `AAX_ePlugInCategory_Harmonic`,
-    `AAX_ePlugInCategory_NoiseReduction`, `AAX_ePlugInCategory_Dither`,
-    `AAX_ePlugInCategory_SoundField`, `AAX_ePlugInCategory_HWGenerators`,
-    `AAX_ePlugInCategory_SWGenerators`, `AAX_ePlugInCategory_WrappedPlugin`,
-    `AAX_ePlugInCategory_Effect`
-
-- `PLUGINHOST_AU`
-  - May be either TRUE or FALSE (defaults to FALSE). If TRUE, will add the preprocessor definition
-    `JUCE_PLUGINHOST_AU=1` to the new target, and will link the macOS frameworks necessary for
-    hosting plugins. Using this parameter should be preferred over using
-    `target_compile_definitions` to manually set the `JUCE_PLUGINHOST_AU` preprocessor definition.
-
-- `USE_LEGACY_COMPATIBILITY_PLUGIN_CODE`
-  - May be either TRUE or FALSE (defaults to FALSE). If TRUE, will override the value of the
-    preprocessor definition "JucePlugin_ManufacturerCode" with the hex equivalent of "proj". This
-    option exists to maintain compatiblity with a previous, buggy version of JUCE's CMake support
-    which mishandled the manufacturer code property. Most projects should leave this option set to
-    its default value.
-
-- `COPY_PLUGIN_AFTER_BUILD`
-  - Whether or not to install the plugin to the current system after building. False by default.
-    If you want all of the plugins in a subdirectory to be installed automatically after building,
-    you can set the property `JUCE_COPY_PLUGIN_AFTER_BUILD` on the directory before adding the
-    plugins, rather than setting this argument on each individual target. Note that on Windows,
-    the default install locations may not be writable by normal user accounts.
-
-- `VST_COPY_DIR`
-  - The location to which VST2 (legacy) plugins will be copied after building if
-    `COPY_PLUGIN_AFTER_BUILD` is set on this target. If you want to install all of the VST2 plugins
-    in a subdirectory to a non-default location, you can set the `JUCE_VST_COPY_DIR` property on
-    the directory before adding the plugin targets, rather than setting this argument on each
-    individual target.
-
-- `VST3_COPY_DIR`
-  - The location to which VST3 plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
-    is set on this target. If you want to install all of the VST3 plugins in a subdirectory to a
-    non-default location, you can set the `JUCE_VST3_COPY_DIR` property on the directory before
-    adding the plugin targets, rather than setting this argument on each individual target.
-
-- `AAX_COPY_DIR`
-  - The location to which AAX plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
-    is set on this target. If you want to install all of the AAX plugins in a subdirectory to a
-    non-default location, you can set the `JUCE_AAX_COPY_DIR` property on the directory before
-    adding the plugin targets, rather than setting this argument on each individual target.
-
-- `AU_COPY_DIR`
-  - The location to which AU plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
-    is set on this target. If you want to install all of the AU plugins in a subdirectory to a
-    non-default location, you can set the `JUCE_AU_COPY_DIR` property on the directory before
-    adding the plugin targets, rather than setting this argument on each individual target.
-
-- `UNITY_COPY_DIR`
-  - The location to which Unity plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
-    is set on this target. If you want to install all of the Unity plugins in a subdirectory to a
-    non-default location, you can set the `JUCE_UNITY_COPY_DIR` property on the directory before
-    adding the plugin targets, rather than setting this argument on each individual target.
-    Unlike the other `COPY_DIR` arguments, this argument does not have a default value so be sure
-    to set it if you have enabled `COPY_PLUGIN_AFTER_BUILD` and the `Unity` format.
+`VERSION`
+- A version number string in the format "major.minor.bugfix". If not specified, the `VERSION` of
+  the project containing the target will be used instead. On Apple platforms, this is the
+  user-facing version string. This option corresponds to the `CFBundleShortVersionString` field in
+  the target's plist.
+
+`BUILD_VERSION`
+- A version number string in the format "major.minor.bugfix". If not specified, this will match
+  the `VERSION` of the target. On Apple platforms, this is the private version string used to
+  distinguish between App Store builds. This option corresponds to the `CFBundleVersion` field in
+  the target's plist.
+
+`BUNDLE_ID`
+- An identifier string in the form "com.yourcompany.productname" which should uniquely identify
+  this target. Mainly used for macOS builds. If not specified, a default will be generated using
+  the target's `COMPANY_NAME` and `PRODUCT_NAME`.
+
+`MICROPHONE_PERMISSION_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+
+`MICROPHONE_PERMISSION_TEXT`
+- The text your app will display when it requests microphone permissions.
+
+`CAMERA_PERMISSION_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+
+`CAMERA_PERMISSION_TEXT`
+- The text your app will display when it requests camera permissions.
+
+`BLUETOOTH_PERMISSION_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an app's Info.plist.
+
+`BLUETOOTH_PERMISSION_TEXT`
+- The text your app will display when it requests bluetooth permissions.
+
+`SEND_APPLE_EVENTS_PERMISSION_ENABLED`
+- May be either TRUE or FALSE. Enable this to allow your app to send Apple events.
+
+`SEND_APPLE_EVENTS_PERMISSION_TEXT`
+- The text your app will display when it requests permission to send Apple events.
+
+`FILE_SHARING_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+
+`DOCUMENT_BROWSER_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+
+`STATUS_BAR_HIDDEN`
+- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+
+ `REQUIRES_FULL_SCREEN`
+ - May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+
+`BACKGROUND_AUDIO_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+
+`BACKGROUND_BLE_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's Info.plist.
+
+`APP_GROUPS_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's entitlements.
+
+`APP_GROUP_IDS`
+- The app groups to which your iOS app belongs. These will be added to your app's entitlements.
+
+`ICLOUD_PERMISSIONS_ENABLED`
+- May be either TRUE or FALSE. Adds the appropriate entries to an iOS app's entitlements.
+
+`IPHONE_SCREEN_ORIENTATIONS`
+- May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
+  `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
+  `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
+
+`IPAD_SCREEN_ORIENTATIONS`
+- May be one or more of `UIInterfaceOrientationUnknown`, `UIInterfaceOrientationPortrait`,
+  `UIInterfaceOrientationPortraitUpsideDown`, `UIInterfaceOrientationLandscapeLeft`, or
+  `UIInterfaceOrientationLandscapeRight`. Adds appropriate entries to an iOS app's plist.
+
+`LAUNCH_STORYBOARD_FILE`
+- A custom launch storyboard file to use on iOS. If not supplied, a default storyboard will be
+  used.
+
+`CUSTOM_XCASSETS_FOLDER`
+- A path to an xcassets directory, containing icons and/or launch images for this target. If this
+  is specified, the ICON_BIG and ICON_SMALL arguments will not have an effect on iOS, and a launch
+  storyboard will not be used.
+
+`TARGETED_DEVICE_FAMILY`
+- Specifies the device families on which the product must be capable of running. Allowed values
+  are "1", "2", and "1,2"; these correspond to "iPhone/iPod touch", "iPad", and "iPhone/iPod and
+  iPad" respectively. This will default to "1,2", meaning that the target will target iPhone,
+  iPod, and iPad.
+
+`ICON_BIG`, `ICON_SMALL`
+- Paths to image files that will be used to generate app icons. If only one of these parameters
+  is specified, then that image will be used for all icon resolutions. If both arguments are
+  specified, then the appropriate image will be picked for each icon resolution.
+
+`COMPANY_COPYRIGHT`
+- Copyright text which will be added to the app/plugin's Info.plist. The value of this argument
+  will be inherited from the `JUCE_COMPANY_COPYRIGHT` property, so if you want to use the same
+  `COMPANY_COPYRIGHT` for several targets in a build tree, you can call
+  `set_directory_properties(PROPERTIES JUCE_COMPANY_COPYRIGHT ...)` after including JUCE but
+  before adding the targets, and then omit the `COMPANY_COPYRIGHT` argument when creating the
+  individual targets.
+
+`COMPANY_NAME`
+- The name of this target's author. Will be added to the app/plugin's Info.plist, and may be used
+  to generate part of the `BUNDLE_ID` if no ID was given explicitly. The value of this argument
+  will be inherited from the `JUCE_COMPANY_NAME` property, so if you want to use the same
+  `COMPANY_NAME` for several targets in a build tree, you can call
+  `set_directory_properties(PROPERTIES JUCE_COMPANY_NAME ...)` after including JUCE but before
+  adding the targets, and then omit the `COMPANY_NAME` argument when creating the individual
+  targets.
+
+`COMPANY_WEBSITE`
+- The address of a website related to this target in some way. The value of this argument will be
+  inherited from the `JUCE_COMPANY_WEBSITE` property, so if you want to use the same
+  `COMPANY_WEBSITE` for several targets in a build tree, you can call
+  `set_directory_properties(PROPERTIES JUCE_COMPANY_WEBSITE ...)` after including JUCE but before
+  adding the targets, and then omit the `COMPANY_WEBSITE` argument when creating the individual
+  targets.
+
+`COMPANY_EMAIL`
+- An email address for this target's author. The value of this argument will be inherited from the
+  `JUCE_COMPANY_EMAIL` property, so if you want to use the same `COMPANY_EMAIL` for several
+  targets in a build tree, you can call `set_directory_properties(PROPERTIES JUCE_COMPANY_EMAIL
+  ...)` after including JUCE but before adding the targets, and then omit the `COMPANY_EMAIL`
+  argument when creating the individual targets.
+
+`DOCUMENT_EXTENSIONS`
+- File extensions that should be associated with this target. For example, the Projucer passes
+  the string `jucer` because it wants to open `.jucer` files. If your target has several different
+  document types, you can pass them as multiple arguments, e.g. `DOCUMENT_EXTENSIONS wav mp3 aif`.
+
+`NEEDS_CURL`
+- On Linux, JUCE may or may not need to link to Curl depending on the compile definitions that are
+  set on a JUCE target. By default, we don't link Curl because you might not need it, but if you
+  get linker or include errors that reference Curl, just set this argument to `TRUE`.
+
+`NEEDS_WEB_BROWSER`
+- On Linux, JUCE may or may not need to link to Webkit depending on the compile definitions that
+  are set on a JUCE target. By default, we don't link Webkit because you might not need it, but
+  if you get linker or include errors that reference Webkit, just set this argument to `TRUE`.
+
+`NEEDS_STORE_KIT`
+- On macOS, JUCE may or may not need to link to StoreKit depending on the compile definitions that
+  are set on a JUCE target. By default, we don't link StoreKit because you might not need it, but
+  if you get linker or include errors that reference StoreKit, just set this argument to `TRUE`.
+
+`PUSH_NOTIFICATIONS_ENABLED`
+- Sets app entitlements to allow push notifications. False by default.
+
+`NETWORK_MULTICAST_ENABLED`
+- Sets app entitlements to allow IP multicast or broadcast on macOS/iOS. False by default.
+
+`HARDENED_RUNTIME_ENABLED`
+- Enables macOS' hardened runtime for this target. Required for notarisation. False by default.
+
+`HARDENED_RUNTIME_OPTIONS`
+- A set of space-separated entitlement keys that will be added to this target's entitlements
+  plist if `HARDENED_RUNTIME_ENABLED` is `TRUE`. Each key should be in the form
+  `com.apple.security.*` where `*` is a specific entitlement.
+
+`APP_SANDBOX_ENABLED`
+- Enables macOS' app sandbox for this target. False by default.
+
+`APP_SANDBOX_INHERIT`
+- Allows child processes to inherit the static entitlements of their parent process. If this
+  is set to `TRUE`, no other app sandbox entitlements will be set on this target.
+
+`APP_SANDBOX_OPTIONS`
+- A set of space-separated entitlement keys that will be added to this target's entitlements
+  plist if `APP_SANDBOX_ENABLED` is `TRUE`. Each key should be in the form `com.apple.security.*`
+  where `*` is a specific entitlement.
+
+`PLIST_TO_MERGE`
+- A string to insert into an app/plugin's Info.plist.
+
+`FORMATS`
+- For plugin targets, specifies the plugin targets to build. Should be provided as a
+  space-separated list. Valid values are `Standalone Unity VST3 AU AUv3 AAX VST`. `AU` and `AUv3`
+  plugins will only be enabled when building on macOS. It is an error to pass `AAX` or `VST`
+  without first calling `juce_set_aax_sdk_path` or `juce_set_vst2_sdk_path` respectively.
+
+`PLUGIN_NAME`
+- The name of the plugin. In a DAW environment, this is the name that will be displayed to the
+  user when they go to load a plugin. This name may differ from the name of the physical plugin
+  file (to set the name of the plugin file, use the `PRODUCT_NAME` option). If not specified,
+  the `PLUGIN_NAME` will default to match the `PRODUCT_NAME`.
+
+`PLUGIN_MANUFACTURER_CODE`
+- A four-character unique ID for your company. For AU compatibility, this must contain at least
+  one upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the
+  remaining letters to be lower-case.
+
+`PLUGIN_CODE`
+- A four-character unique ID for your plugin. For AU compatibility, this must contain exactly one
+  upper-case letter. GarageBand 10.3 requires the first letter to be upper-case, and the remaining
+  letters to be lower-case.
+
+`DESCRIPTION`
+- A short description of your plugin.
+
+`IS_SYNTH`
+- Whether the plugin is a synth. Will be used to set sensible plugin category values if they
+  are not provided explicitly.
+
+`NEEDS_MIDI_INPUT`
+- Whether the plugin should provide a midi input.
+
+`NEEDS_MIDI_OUTPUT`
+- Whether the plugin should provide a midi output.
+
+`IS_MIDI_EFFECT`
+- Whether the plugin is a MIDI effect (some hosts provide a special channel-strip location for
+  MIDI effect plugins).
+
+`EDITOR_WANTS_KEYBOARD_FOCUS`
+- Whether the plugin requires keyboard focus, or should defer all keyboard handling to the host.
+
+`DISABLE_AAX_BYPASS`
+- Whether the AAX bypass function should be disabled.
+
+`DISABLE_AAX_MULTI_MONO`
+- Whether the AAX multi mono bus layout should be disabled.
+
+`AAX_IDENTIFIER`
+- The bundle ID for the AAX plugin target. Matches the `BUNDLE_ID` by default.
+
+`VST_NUM_MIDI_INS`
+- For VST2 and VST3 plugins that accept midi, this allows you to configure the number of inputs.
+
+`VST_NUM_MIDI_OUTS`
+- For VST2 and VST3 plugins that produce midi, this allows you to configure the number of outputs.
+
+`VST2_CATEGORY`
+- Should be one of: `kPlugCategUnknown`, `kPlugCategEffect`, `kPlugCategSynth`,
+  `kPlugCategAnalysis`, `kPlugCategMatering`, `kPlugCategSpacializer`, `kPlugCategRoomFx`,
+  `kPlugSurroundFx`, `kPlugCategRestoration`, `kPlugCategOfflineProcess`, `kPlugCategShell`,
+  `kPlugCategGenerator`.
+
+`VST3_CATEGORIES`
+- Should be one or more, separated by spaces, of the following: `Fx`, `Instrument`, `Analyzer`,
+  `Delay`, `Distortion`, `Drum`, `Dynamics`, `EQ`, `External`, `Filter`, `Generator`, `Mastering`,
+  `Modulation`, `Mono`, `Network`, `NoOfflineProcess`, `OnlyOfflineProcess`, `OnlyRT`,
+  `Pitch Shift`, `Restoration`, `Reverb`, `Sampler`, `Spatial`, `Stereo`, `Surround`, `Synth`,
+  `Tools`, `Up-Downmix`
+
+`AU_MAIN_TYPE`
+- Should be one of: `kAudioUnitType_Effect`, `kAudioUnitType_FormatConverter`,
+  `kAudioUnitType_Generator`, `kAudioUnitType_MIDIProcessor`, `kAudioUnitType_Mixer`,
+  `kAudioUnitType_MusicDevice`, `kAudioUnitType_MusicEffect`, `kAudioUnitType_OfflineEffect`,
+  `kAudioUnitType_Output`, `kAudioUnitType_Panner`
+
+`AU_EXPORT_PREFIX`
+- A prefix for the names of entry-point functions that your component exposes. Typically this
+  will be a version of your plugin's name that can be used as part of a C++ token. Defaults
+  to your plugin's name with the suffix 'AU'.
+
+`AU_SANDBOX_SAFE`
+- May be either TRUE or FALSE. Adds the appropriate entries to an AU plugin's Info.plist.
+
+`SUPPRESS_AU_PLIST_RESOURCE_USAGE`
+- May be either TRUE or FALSE. Defaults to FALSE. Set this to TRUE to disable the `resourceUsage`
+  key in the target's plist. This is useful for AU plugins that must access resources which cannot
+  be declared in the resourceUsage block, such as UNIX domain sockets. In particular,
+  PACE-protected AU plugins may require this option to be enabled in order for the plugin to load
+  in GarageBand.
+
+`AAX_CATEGORY`
+- Should be one or more of: `AAX_ePlugInCategory_None`, `AAX_ePlugInCategory_EQ`,
+  `AAX_ePlugInCategory_Dynamics`, `AAX_ePlugInCategory_PitchShift`, `AAX_ePlugInCategory_Reverb`,
+  `AAX_ePlugInCategory_Delay`, `AAX_ePlugInCategory_Modulation`, `AAX_ePlugInCategory_Harmonic`,
+  `AAX_ePlugInCategory_NoiseReduction`, `AAX_ePlugInCategory_Dither`,
+  `AAX_ePlugInCategory_SoundField`, `AAX_ePlugInCategory_HWGenerators`,
+  `AAX_ePlugInCategory_SWGenerators`, `AAX_ePlugInCategory_WrappedPlugin`,
+  `AAX_ePlugInCategory_Effect`
+
+`PLUGINHOST_AU`
+- May be either TRUE or FALSE (defaults to FALSE). If TRUE, will add the preprocessor definition
+  `JUCE_PLUGINHOST_AU=1` to the new target, and will link the macOS frameworks necessary for
+  hosting plugins. Using this parameter should be preferred over using
+  `target_compile_definitions` to manually set the `JUCE_PLUGINHOST_AU` preprocessor definition.
+
+`USE_LEGACY_COMPATIBILITY_PLUGIN_CODE`
+- May be either TRUE or FALSE (defaults to FALSE). If TRUE, will override the value of the
+  preprocessor definition "JucePlugin_ManufacturerCode" with the hex equivalent of "proj". This
+  option exists to maintain compatiblity with a previous, buggy version of JUCE's CMake support
+  which mishandled the manufacturer code property. Most projects should leave this option set to
+  its default value.
+
+`COPY_PLUGIN_AFTER_BUILD`
+- Whether or not to install the plugin to the current system after building. False by default.
+  If you want all of the plugins in a subdirectory to be installed automatically after building,
+  you can set the property `JUCE_COPY_PLUGIN_AFTER_BUILD` on the directory before adding the
+  plugins, rather than setting this argument on each individual target. Note that on Windows,
+  the default install locations may not be writable by normal user accounts.
+
+`VST_COPY_DIR`
+- The location to which VST2 (legacy) plugins will be copied after building if
+  `COPY_PLUGIN_AFTER_BUILD` is set on this target. If you want to install all of the VST2 plugins
+  in a subdirectory to a non-default location, you can set the `JUCE_VST_COPY_DIR` property on
+  the directory before adding the plugin targets, rather than setting this argument on each
+  individual target.
+
+`VST3_COPY_DIR`
+- The location to which VST3 plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
+  is set on this target. If you want to install all of the VST3 plugins in a subdirectory to a
+  non-default location, you can set the `JUCE_VST3_COPY_DIR` property on the directory before
+  adding the plugin targets, rather than setting this argument on each individual target.
+
+`AAX_COPY_DIR`
+- The location to which AAX plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
+  is set on this target. If you want to install all of the AAX plugins in a subdirectory to a
+  non-default location, you can set the `JUCE_AAX_COPY_DIR` property on the directory before
+  adding the plugin targets, rather than setting this argument on each individual target.
+
+`AU_COPY_DIR`
+- The location to which AU plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
+  is set on this target. If you want to install all of the AU plugins in a subdirectory to a
+  non-default location, you can set the `JUCE_AU_COPY_DIR` property on the directory before
+  adding the plugin targets, rather than setting this argument on each individual target.
+
+`UNITY_COPY_DIR`
+- The location to which Unity plugins will be copied after building if `COPY_PLUGIN_AFTER_BUILD`
+  is set on this target. If you want to install all of the Unity plugins in a subdirectory to a
+  non-default location, you can set the `JUCE_UNITY_COPY_DIR` property on the directory before
+  adding the plugin targets, rather than setting this argument on each individual target.
+  Unlike the other `COPY_DIR` arguments, this argument does not have a default value so be sure
+  to set it if you have enabled `COPY_PLUGIN_AFTER_BUILD` and the `Unity` format.
 
 #### `juce_add_binary_data`
 

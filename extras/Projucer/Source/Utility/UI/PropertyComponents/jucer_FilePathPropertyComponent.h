@@ -48,8 +48,12 @@ public:
     }
 
     /** Displays a default value when no value is specified by the user. */
-    FilePathPropertyComponent (ValueWithDefault& valueToControl, const String& propertyName, bool isDir, bool thisOS = true,
-                               const String& wildcardsToUse = "*", const File& relativeRoot = File())
+    FilePathPropertyComponent (ValueTreePropertyWithDefault valueToControl,
+                               const String& propertyName,
+                               bool isDir,
+                               bool thisOS = true,
+                               const String& wildcardsToUse = "*",
+                               const File& relativeRoot = File())
        : PropertyComponent (propertyName),
          text (valueToControl, propertyName, 1024, false),
          isDirectory (isDir), isThisOS (thisOS), wildcards (wildcardsToUse), root (relativeRoot)
@@ -211,8 +215,8 @@ private:
 class FilePathPropertyComponentWithEnablement  : public FilePathPropertyComponent
 {
 public:
-    FilePathPropertyComponentWithEnablement (ValueWithDefault& valueToControl,
-                                             ValueWithDefault valueToListenTo,
+    FilePathPropertyComponentWithEnablement (const ValueTreePropertyWithDefault& valueToControl,
+                                             ValueTreePropertyWithDefault valueToListenTo,
                                              const String& propertyName,
                                              bool isDir,
                                              bool thisOS = true,
@@ -224,7 +228,7 @@ public:
                                      thisOS,
                                      wildcardsToUse,
                                      relativeRoot),
-          valueWithDefault (valueToListenTo),
+          propertyWithDefault (valueToListenTo),
           value (valueToListenTo.getPropertyAsValue())
     {
         value.addListener (this);
@@ -237,9 +241,9 @@ private:
     void valueChanged (Value& v) override
     {
         FilePathPropertyComponent::valueChanged (v);
-        setEnabled (valueWithDefault.get());
+        setEnabled (propertyWithDefault.get());
     }
 
-    ValueWithDefault valueWithDefault;
+    ValueTreePropertyWithDefault propertyWithDefault;
     Value value;
 };
