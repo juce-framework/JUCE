@@ -690,6 +690,11 @@ void ProjectExporter::updateOldModulePaths()
     }
 }
 
+static bool areSameExporters (const ProjectExporter& p1, const ProjectExporter& p2)
+{
+    return p1.getExporterIdentifier() == p2.getExporterIdentifier();
+}
+
 static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExporter& p2)
 {
     return (p1.isVisualStudio() && p2.isVisualStudio())
@@ -701,39 +706,33 @@ static bool areCompatibleExporters (const ProjectExporter& p1, const ProjectExpo
 
 void ProjectExporter::createDefaultModulePaths()
 {
-    for (Project::ExporterIterator exporter (project); exporter.next();)
+    auto exporterToCopy = [this]() -> std::unique_ptr<ProjectExporter>
     {
-        if (areCompatibleExporters (*this, *exporter))
+        std::vector<std::unique_ptr<ProjectExporter>> exporters;
+
+        for (Project::ExporterIterator exporter (project); exporter.next();)
+            exporters.push_back (std::move (exporter.exporter));
+
+        auto getIf = [&exporters] (auto predicate)
         {
-            for (int i = project.getEnabledModules().getNumModules(); --i >= 0;)
-            {
-                auto modID = project.getEnabledModules().getModuleID (i);
-                getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID);
-            }
+            auto iter = std::find_if (exporters.begin(), exporters.end(), predicate);
+            return iter != exporters.end() ? std::move (*iter) : nullptr;
+        };
 
-            return;
-        }
-    }
+        if (auto exporter = getIf ([this] (auto& x) { return areSameExporters (*this, *x); }))
+            return exporter;
 
-    for (Project::ExporterIterator exporter (project); exporter.next();)
-    {
-        if (exporter->canLaunchProject())
-        {
-            for (int i = project.getEnabledModules().getNumModules(); --i >= 0;)
-            {
-                auto modID = project.getEnabledModules().getModuleID (i);
-                getPathForModuleValue (modID) = exporter->getPathForModuleValue (modID);
-            }
+        if (auto exporter = getIf ([this] (auto& x) { return areCompatibleExporters (*this, *x); }))
+            return exporter;
 
-            return;
-        }
-    }
+        if (auto exporter = getIf ([] (auto& x) { return x->canLaunchProject(); }))
+            return exporter;
 
-    for (int i = project.getEnabledModules().getNumModules(); --i >= 0;)
-    {
-        auto modID = project.getEnabledModules().getModuleID (i);
-        getPathForModuleValue (modID) = "../../juce";
-    }
+        return {};
+    }();
+
+    for (const auto& modID : project.getEnabledModules().getAllModules())
+        getPathForModuleValue (modID) = (exporterToCopy != nullptr ? exporterToCopy->getPathForModuleString (modID) : "../../juce");
 }
 
 //==============================================================================
