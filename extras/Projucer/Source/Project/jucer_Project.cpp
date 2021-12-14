@@ -958,7 +958,6 @@ void Project::licenseStateChanged()
 void Project::changeListenerCallback (ChangeBroadcaster*)
 {
     updateJUCEPathWarning();
-    changed();
 }
 
 void Project::availableModulesChanged (AvailableModulesList* listThatHasChanged)
