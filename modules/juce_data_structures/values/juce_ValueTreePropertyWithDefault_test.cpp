@@ -64,6 +64,8 @@ public:
 
         beginTest ("set default");
         {
+            ScopedJuceInitialiser_GUI scopedJuceInitialiser_gui;
+
             ValueTree t ("root");
 
             ValueTreePropertyWithDefault value (t, "testkey", nullptr);
