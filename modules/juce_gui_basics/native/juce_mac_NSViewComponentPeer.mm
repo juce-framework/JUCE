@@ -925,7 +925,7 @@ public:
                 }
 
                 detail::ColorSpacePtr colourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
-                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace.get(), false);
+                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace.get());
                 CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, r.origin.x, r.origin.y + clipH));
                 CGContextDrawImage (cg, CGRectMake (0.0f, 0.0f, clipW, clipH), image);
                 CGImageRelease (image);
