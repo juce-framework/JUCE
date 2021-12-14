@@ -504,9 +504,6 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
 
     if (auto selectedExporter = headerComponent.getSelectedExporter())
     {
-        if (! selectedExporter->canLaunchProject())
-            return;
-
         if (saveFirst)
         {
             if (project->isTemporaryProject())
@@ -515,7 +512,7 @@ void ProjectContentComponent::openInSelectedIDE (bool saveFirst)
                 return;
             }
 
-            if (project->hasChangedSinceSaved() || ! selectedExporter->getIDEProjectFile().exists())
+            if (project->hasChangedSinceSaved())
             {
                 project->saveAsync (true, true, [safeThis = SafePointer<ProjectContentComponent> { this }] (Project::SaveResult r)
                 {
