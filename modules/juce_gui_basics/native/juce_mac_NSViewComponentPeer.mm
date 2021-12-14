@@ -535,9 +535,10 @@ public:
         {
             // need to set a dummy represented file here to show the file icon (which we then set to the new icon)
             if (! windowRepresentsFile)
-                [window setRepresentedFilename:juceStringToNS (" ")]; // can't just use an empty string for some reason...
+                [window setRepresentedFilename: juceStringToNS (" ")]; // can't just use an empty string for some reason...
 
-            [[window standardWindowButton:NSWindowDocumentIconButton] setImage:imageToNSImage (ScaledImage (newIcon))];
+            auto img = NSUniquePtr<NSImage> { imageToNSImage (ScaledImage (newIcon)) };
+            [[window standardWindowButton: NSWindowDocumentIconButton] setImage: img.get()];
         }
     }
 
