@@ -680,8 +680,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
+static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
+
 UIViewComponentPeer::~UIViewComponentPeer()
 {
+    if (currentlyFocusedPeer == this)
+        currentlyFocusedPeer = nullptr;
+    
     currentTouches.deleteAllTouchesForPeer (this);
     Desktop::getInstance().removeFocusChangeListener (this);
 
@@ -1007,8 +1012,6 @@ void UIViewComponentPeer::onScroll (UIPanGestureRecognizer* gesture)
 #endif
 
 //==============================================================================
-static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
-
 void UIViewComponentPeer::viewFocusGain()
 {
     if (currentlyFocusedPeer != this)
