@@ -4033,7 +4033,9 @@ private:
             return false;
 
         if (auto* current = Component::getCurrentlyModalComponent())
-            current->inputAttemptWhenModal();
+            if (auto* owner = getOwnerOfWindow ((HWND) current->getWindowHandle()))
+                if (! owner->shouldIgnoreModalDismiss)
+                    current->inputAttemptWhenModal();
 
         return true;
     }

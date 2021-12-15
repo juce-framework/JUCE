@@ -1598,6 +1598,11 @@ public:
     SliderLabelComp() : Label ({}, {}) {}
 
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override {}
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
 };
 
 Label* LookAndFeel_V2::createSliderTextBox (Slider& slider)

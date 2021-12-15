@@ -94,7 +94,7 @@ namespace
    #endif
 }
 
-CGImageRef juce_createCoreGraphicsImage (const Image&, CGColorSpaceRef, bool mustOutliveSource);
+CGImageRef juce_createCoreGraphicsImage (const Image&, CGColorSpaceRef);
 CGContextRef juce_getImageContext (const Image&);
 
 #if JUCE_IOS

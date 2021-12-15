@@ -112,6 +112,11 @@ struct ButtonBasedStatusItem   : public StatusItemContainer
        #endif
     }
 
+    ~ButtonBasedStatusItem() override
+    {
+        [statusItem.get() button].image = nullptr;
+    }
+
     void configureIcon() override
     {
         [statusIcon.get() setTemplate: true];
