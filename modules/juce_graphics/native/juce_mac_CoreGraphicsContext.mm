@@ -149,8 +149,6 @@ public:
 
         using Ptr = ReferenceCountedObjectPtr<ImageDataContainer>;
         HeapBlock<uint8> data;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ImageDataContainer)
     };
 
     ImageDataContainer::Ptr imageData = new ImageDataContainer();
