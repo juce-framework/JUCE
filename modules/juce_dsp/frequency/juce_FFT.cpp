@@ -772,7 +772,7 @@ struct IntelFFT  : public FFT::Instance
         : order (orderToUse), c2c (c2cToUse), c2r (cr2ToUse)
     {}
 
-    ~IntelFFT()
+    ~IntelFFT() override
     {
         DftiFreeDescriptor (&c2c);
         DftiFreeDescriptor (&c2r);
