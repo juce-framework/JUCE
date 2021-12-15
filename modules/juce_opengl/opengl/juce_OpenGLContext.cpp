@@ -117,8 +117,12 @@ public:
     {
         if (nativeContext != nullptr)
         {
+           #if JUCE_MAC
+            cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (*this);
+            cvDisplayLinkWrapper->updateActiveDisplay();
+           #endif
+
             renderThread = std::make_unique<ThreadPool> (1);
-            renderThread->setThreadPriorities (9);
             resume();
         }
     }
@@ -142,6 +146,10 @@ public:
             pause();
             renderThread.reset();
         }
+
+       #if JUCE_MAC
+        cvDisplayLinkWrapper = nullptr;
+       #endif
 
         hasInitialised = false;
     }
@@ -592,8 +600,7 @@ public:
             context.renderer->newOpenGLContextCreated();
 
        #if JUCE_MAC
-        cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (*this);
-        cvDisplayLinkWrapper->updateActiveDisplay();
+        jassert (cvDisplayLinkWrapper != nullptr);
         nativeContext->setNominalVideoRefreshPeriodS (cvDisplayLinkWrapper->getNominalVideoRefreshPeriodS());
        #endif
 
@@ -602,10 +609,6 @@ public:
 
     void shutdownOnThread()
     {
-       #if JUCE_MAC
-        cvDisplayLinkWrapper = nullptr;
-       #endif
-
         if (context.renderer != nullptr)
             context.renderer->openGLContextClosing();
 
@@ -740,6 +743,8 @@ public:
 
     NSScreen* getCurrentScreen() const
     {
+        JUCE_ASSERT_MESSAGE_THREAD;
+
         if (auto* view = getCurrentView())
             if (auto* window = [view window])
                 return [window screen];

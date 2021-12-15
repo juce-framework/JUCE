@@ -567,7 +567,6 @@ public:
             owner.addAndMakeVisible (valueBox.get());
 
             valueBox->setWantsKeyboardFocus (false);
-            valueBox->setAccessible (false);
             valueBox->setText (previousTextBoxContent, dontSendNotification);
             valueBox->setTooltip (owner.getTooltip());
             updateTextBoxEnablement();

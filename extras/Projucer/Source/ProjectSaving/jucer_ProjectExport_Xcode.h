@@ -661,7 +661,7 @@ public:
     bool launchProject() override
     {
        #if JUCE_MAC
-        return getIDEProjectFile().startAsProcess();
+        return getProjectBundle().startAsProcess();
        #else
         return false;
        #endif
@@ -674,11 +674,6 @@ public:
        #else
         return false;
        #endif
-    }
-
-    File getIDEProjectFile() const override
-    {
-        return getProjectBundle();
     }
 
     //==============================================================================
@@ -2499,8 +2494,7 @@ private:
         if (isUsingDefaultSigningIdentity (config))
             return iOS ? "iPhone Developer" : "Mac Developer";
 
-        const auto identity = config.getCodeSignIdentityString();
-        return identity.isNotEmpty() ? identity : "-";
+        return config.getCodeSignIdentityString();
     }
 
     StringPairArray getProjectSettings (const XcodeBuildConfiguration& config) const
@@ -3393,7 +3387,7 @@ private:
     {
         std::map<String, String> attributes;
 
-        attributes["LastUpgradeCheck"] = "1310";
+        attributes["LastUpgradeCheck"] = "1320";
         attributes["ORGANIZATIONNAME"] = getProject().getCompanyNameString().quoted();
 
         if (projectType.isGUIApplication() || projectType.isAudioPlugin())

@@ -112,7 +112,7 @@ public:
             return defaultValue;
 
         if (delimiter.isNotEmpty())
-            return delimitedStringToVarArray (targetTree[targetProperty].toString());
+            return delimitedStringToVarArray (targetTree[targetProperty].toString(), delimiter);
 
         return targetTree[targetProperty];
     }
@@ -157,7 +157,7 @@ public:
     void setValue (const var& newValue, UndoManager* undoManagerToUse)
     {
         if (auto* array = newValue.getArray())
-            targetTree.setProperty (targetProperty, varArrayToDelimitedString (*array), undoManagerToUse);
+            targetTree.setProperty (targetProperty, varArrayToDelimitedString (*array, delimiter), undoManagerToUse);
         else
             targetTree.setProperty (targetProperty, newValue, undoManagerToUse);
     }
@@ -172,7 +172,11 @@ public:
                   const Identifier& property,
                   UndoManager* um)
     {
-        referToWithDefault (tree, property, um, {}, {});
+        referToWithDefault (tree,
+                            property,
+                            um,
+                            Value (new SynchronousValueSource (var())),
+                            {});
     }
 
     /** Makes the ValueTreePropertyWithDefault refer to the specified property inside
@@ -185,7 +189,11 @@ public:
                   UndoManager* um,
                   var defaultVal)
     {
-        referToWithDefault (tree, property, um, Value (defaultVal), {});
+        referToWithDefault (tree,
+                            property,
+                            um,
+                            Value (new SynchronousValueSource (defaultVal)),
+                            {});
     }
 
     /** Makes the ValueTreePropertyWithDefault refer to the specified property inside
@@ -199,7 +207,11 @@ public:
                   var defaultVal,
                   StringRef arrayDelimiter)
     {
-        referToWithDefault (tree, property, um, Value (defaultVal), arrayDelimiter);
+        referToWithDefault (tree,
+                            property,
+                            um,
+                            Value (new SynchronousValueSource (defaultVal)),
+                            arrayDelimiter);
     }
 
     //==============================================================================
@@ -226,21 +238,65 @@ public:
 
 private:
     //==============================================================================
-    ValueTree targetTree;
-    Identifier targetProperty;
-    UndoManager* undoManager = nullptr;
-    Value defaultValue;
+    class SynchronousValueSource  : public Value::ValueSource
+    {
+    public:
+        explicit SynchronousValueSource (const var& initialValue)
+            : value (initialValue)
+        {
+        }
 
-    String delimiter;
+        var getValue() const override
+        {
+            return value;
+        }
+
+        void setValue (const var& newValue) override
+        {
+            if (! newValue.equalsWithSameType (value))
+            {
+                value = newValue;
+                sendChangeMessage (true);
+            }
+        }
+
+    private:
+        var value;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynchronousValueSource)
+    };
 
     //==============================================================================
+    static String varArrayToDelimitedString (const Array<var>& input, StringRef delim)
+    {
+        // if you are trying to control a var that is an array then you need to
+        // set a delimiter string that will be used when writing to XML!
+        jassert (delim.isNotEmpty());
+
+        StringArray elements;
+
+        for (auto& v : input)
+            elements.add (v.toString());
+
+        return elements.joinIntoString (delim);
+    }
+
+    static Array<var> delimitedStringToVarArray (StringRef input, StringRef delim)
+    {
+        Array<var> arr;
+
+        for (auto t : StringArray::fromTokens (input, delim, {}))
+            arr.add (t);
+
+        return arr;
+    }
+
     void valueChanged (Value&) override
     {
         if (onDefaultChange != nullptr)
             onDefaultChange();
     }
 
-    //==============================================================================
     void referToWithDefault (ValueTree v,
                              const Identifier& i,
                              UndoManager* um,
@@ -257,29 +313,14 @@ private:
     }
 
     //==============================================================================
-    String varArrayToDelimitedString (const Array<var>& input) const noexcept
-    {
-        // if you are trying to control a var that is an array then you need to
-        // set a delimiter string that will be used when writing to XML!
-        jassert (delimiter.isNotEmpty());
+    ValueTree targetTree;
+    Identifier targetProperty;
+    UndoManager* undoManager = nullptr;
+    Value defaultValue;
+    String delimiter;
 
-        StringArray elements;
-
-        for (auto& v : input)
-            elements.add (v.toString());
-
-        return elements.joinIntoString (delimiter);
-    }
-
-    Array<var> delimitedStringToVarArray (StringRef input) const noexcept
-    {
-        Array<var> arr;
-
-        for (auto t : StringArray::fromTokens (input, delimiter, {}))
-            arr.add (t);
-
-        return arr;
-    }
+    //==============================================================================
+    JUCE_LEAK_DETECTOR (ValueTreePropertyWithDefault)
 };
 
 //==============================================================================

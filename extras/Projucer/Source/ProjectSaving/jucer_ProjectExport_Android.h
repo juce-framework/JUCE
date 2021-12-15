@@ -141,7 +141,7 @@ public:
           gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.0.2"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
           androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.0.0"),
-          androidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
+          AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
         targetLocationValue.setDefault (getDefaultBuildsRootFolder() + getTargetFolderName());
@@ -165,25 +165,22 @@ public:
     //==============================================================================
     bool canLaunchProject() override
     {
-        return androidExecutable.exists();
+        return AndroidExecutable.exists();
     }
 
     bool launchProject() override
     {
-        if (! androidExecutable.exists())
+        if (! AndroidExecutable.exists())
         {
             jassertfalse;
             return false;
         }
 
+        auto targetFolder = getTargetFolder();
+
         // we have to surround the path with extra quotes, otherwise Android Studio
         // will choke if there are any space characters in the path.
-        return androidExecutable.startAsProcess (getIDEProjectFile().getFullPathName().quoted());
-    }
-
-    File getIDEProjectFile() const override
-    {
-        return getTargetFolder();
+        return AndroidExecutable.startAsProcess ("\"" + targetFolder.getFullPathName() + "\"");
     }
 
     //==============================================================================
@@ -1877,7 +1874,7 @@ private:
     }
 
     //==============================================================================
-    const File androidExecutable;
+    const File AndroidExecutable;
 
     JUCE_DECLARE_NON_COPYABLE (AndroidProjectExporter)
 };

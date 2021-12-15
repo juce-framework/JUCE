@@ -1479,7 +1479,7 @@ public:
     bool launchProject() override
     {
        #if JUCE_WINDOWS
-        return getIDEProjectFile().startAsProcess();
+        return getSLNFile().startAsProcess();
        #else
         return false;
        #endif
@@ -1492,11 +1492,6 @@ public:
        #else
         return false;
        #endif
-    }
-
-    File getIDEProjectFile() const override
-    {
-        return getSLNFile();
     }
 
     void createExporterProperties (PropertyListBuilder& props) override
