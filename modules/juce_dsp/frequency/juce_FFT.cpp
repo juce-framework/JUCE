@@ -945,6 +945,86 @@ FFT::EngineImpl<IntelPerformancePrimitivesFFT> intelPerformancePrimitivesFFT;
 
 //==============================================================================
 //==============================================================================
+#if JUCE_USE_PFFFT
+class PrettyFastFFT : public FFT::Instance
+{
+public:
+    static constexpr auto priority = 7;
+
+    static PrettyFastFFT* create (const int order)
+    {
+        if (order < 5)
+        {
+            // Not supported according to PFFFT's docs:
+            //
+            // > supports only transforms for inputs of length N of the form
+            // > N=(2^a)*(3^b)*(5^c), a >= 5, b >=0, c >= 0
+            return nullptr;
+        }
+        return new PrettyFastFFT (order);
+    }
+
+    void perform (const Complex<float>* input, Complex<float>* output, bool inverse) const noexcept override
+    {
+        pffft_transform_ordered (setupComp, (const float*) input, (float*) output, workBuf, inverse ? PFFFT_BACKWARD : PFFFT_FORWARD);
+        if (inverse)
+            FloatVectorOperations::multiply ((float*) output, 1.0f / float (1 << order), 1 << (order + 1));
+    }
+
+    void performRealOnlyForwardTransform (float* inoutData, bool ignoreNegativeFreqs) const noexcept override
+    {
+        pffft_transform_ordered (setupReal, inoutData, inoutData, workBuf, PFFFT_FORWARD);
+        const int nyquist = 1 << (order - 1);
+        inoutData[2 * nyquist] = inoutData[1];
+        inoutData[2 * nyquist + 1] = 0.0f;
+        inoutData[1] = 0.0f;
+        if (! ignoreNegativeFreqs)
+        {
+            // Silly anti-feature to produce redundant negative freqs!
+            auto out = (Complex<float>*) inoutData;
+            for (int i = 1; i < nyquist; ++i)
+                out[nyquist + i] = std::conj (out[nyquist - i]);
+        }
+    }
+
+    void performRealOnlyInverseTransform (float* inoutData) const noexcept override
+    {
+        inoutData[1] = inoutData[1 << order];
+        pffft_transform_ordered (setupReal, inoutData, inoutData, workBuf, PFFFT_BACKWARD);
+        FloatVectorOperations::multiply (inoutData, 1.0f / float (1 << order), 1 << order);
+    }
+
+    ~PrettyFastFFT() override
+    {
+        pffft_destroy_setup (setupReal);
+        pffft_destroy_setup (setupComp);
+        pffft_aligned_free (workBuf);
+    }
+
+private:
+    PrettyFastFFT (int order_) : order (order_)
+    {
+        setupReal = pffft_new_setup (1 << order, PFFFT_REAL);
+        jassert (setupReal != nullptr);
+
+        setupComp = pffft_new_setup (1 << order, PFFFT_COMPLEX);
+        jassert (setupComp != nullptr);
+
+        workBuf = (float*) pffft_aligned_malloc (sizeof (float) << (order + 1));
+        jassert (workBuf != nullptr);
+    }
+
+    PFFFT_Setup* setupReal;
+    PFFFT_Setup* setupComp;
+    float* workBuf;
+    int order;
+};
+
+FFT::EngineImpl<PrettyFastFFT> prettyFastFft;
+#endif
+
+//==============================================================================
+//==============================================================================
 FFT::FFT (int order)
     : engine (FFT::Engine::createBestEngineForPlatform (order)),
       size (1 << order)
