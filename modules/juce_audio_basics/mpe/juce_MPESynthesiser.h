@@ -65,11 +65,10 @@ public:
     /** Constructor to pass to the synthesiser a custom MPEInstrument object
         to handle the MPE note state, MIDI channel assignment etc.
         (in case you need custom logic for this that goes beyond MIDI and MPE).
-        The synthesiser will take ownership of this object.
 
         @see MPESynthesiserBase, MPEInstrument
     */
-    MPESynthesiser (MPEInstrument* instrumentToUse);
+    MPESynthesiser (MPEInstrument& instrumentToUse);
 
     /** Destructor. */
     ~MPESynthesiser() override;
@@ -303,7 +302,7 @@ protected:
 
 private:
     //==============================================================================
-    bool shouldStealVoices = false;
+    std::atomic<bool> shouldStealVoices { false };
     uint32 lastNoteOnCounter = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MPESynthesiser)

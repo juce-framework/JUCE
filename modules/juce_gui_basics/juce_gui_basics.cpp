@@ -94,8 +94,6 @@
  #endif
 #endif
 
-#include <set>
-
 //==============================================================================
 #define JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED_OR_OFFSCREEN \
     jassert ((MessageManager::getInstanceWithoutCreating() != nullptr \

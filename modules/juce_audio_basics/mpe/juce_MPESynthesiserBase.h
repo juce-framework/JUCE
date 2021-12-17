@@ -52,13 +52,12 @@ public:
 
     /** Constructor.
 
-        If you use this constructor, the synthesiser will take ownership of the
-        provided instrument object, and will use it internally to handle the
-        MPE note state logic.
+        If you use this constructor, the synthesiser will use the provided instrument
+        object to handle the MPE note state logic.
         This is useful if you want to use an instance of your own class derived
         from MPEInstrument for the MPE logic.
     */
-    MPESynthesiserBase (MPEInstrument* instrument);
+    MPESynthesiserBase (MPEInstrument& instrument);
 
     //==============================================================================
     /** Returns the synthesiser's internal MPE zone layout.
@@ -200,10 +199,12 @@ protected:
 protected:
     //==============================================================================
     /** @internal */
-    std::unique_ptr<MPEInstrument> instrument;
+    MPEInstrument& instrument;
 
 private:
     //==============================================================================
+    MPEInstrument defaultInstrument { MPEZone (MPEZone::Type::lower, 15) };
+
     CriticalSection noteStateLock;
     double sampleRate = 0.0;
     int minimumSubBlockSize = 32;

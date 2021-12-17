@@ -115,7 +115,7 @@ struct JUCE_API  MPENote
     */
     MPEValue noteOnVelocity  { MPEValue::minValue() };
 
-    /** Current per-note pitchbend of the note  (in units of MIDI pitchwheel
+    /** Current per-note pitchbend of the note (in units of MIDI pitchwheel
         position). This dimension can be modulated while the note sounds.
 
         Note: This value is not aware of the currently used pitchbend range,
