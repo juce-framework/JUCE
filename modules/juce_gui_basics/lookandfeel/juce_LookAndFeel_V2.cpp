@@ -2056,9 +2056,28 @@ int LookAndFeel_V2::getDefaultMenuBarHeight()
 }
 
 //==============================================================================
-DropShadower* LookAndFeel_V2::createDropShadowerForComponent (Component*)
+std::unique_ptr<DropShadower> LookAndFeel_V2::createDropShadowerForComponent (Component&)
 {
-    return new DropShadower (DropShadow (Colours::black.withAlpha (0.4f), 10, Point<int> (0, 2)));
+    return std::make_unique<DropShadower> (DropShadow (Colours::black.withAlpha (0.4f), 10, Point<int> (0, 2)));
+}
+
+std::unique_ptr<FocusOutline> LookAndFeel_V2::createFocusOutlineForComponent (Component&)
+{
+    struct WindowProperties  : public FocusOutline::OutlineWindowProperties
+    {
+        Rectangle<int> getOutlineBounds (Component& c) override
+        {
+            return c.getScreenBounds();
+        }
+
+        void drawOutline (Graphics& g, int width, int height) override
+        {
+            g.setColour (Colours::yellow.withAlpha (0.6f));
+            g.drawRoundedRectangle ({ (float) width, (float) height }, 3.0f, 3.0f);
+        }
+    };
+
+    return std::make_unique<FocusOutline> (std::make_unique<WindowProperties>());
 }
 
 //==============================================================================

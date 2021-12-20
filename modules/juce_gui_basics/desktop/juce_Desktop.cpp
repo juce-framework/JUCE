@@ -189,6 +189,24 @@ void Desktop::addFocusChangeListener    (FocusChangeListener* l)   { focusListen
 void Desktop::removeFocusChangeListener (FocusChangeListener* l)   { focusListeners.remove (l); }
 void Desktop::triggerFocusCallback()                               { triggerAsyncUpdate(); }
 
+void Desktop::updateFocusOutline()
+{
+    if (auto* currentFocus = Component::getCurrentlyFocusedComponent())
+    {
+        if (currentFocus->hasFocusOutline())
+        {
+            focusOutline = currentFocus->getLookAndFeel().createFocusOutlineForComponent (*currentFocus);
+
+            if (focusOutline != nullptr)
+                focusOutline->setOwner (currentFocus);
+
+            return;
+        }
+    }
+
+    focusOutline = nullptr;
+}
+
 void Desktop::handleAsyncUpdate()
 {
     // The component may be deleted during this operation, but we'll use a SafePointer rather than a
@@ -197,6 +215,8 @@ void Desktop::handleAsyncUpdate()
     {
         l.globalFocusChanged (currentFocus.get());
     });
+
+    updateFocusOutline();
 }
 
 //==============================================================================

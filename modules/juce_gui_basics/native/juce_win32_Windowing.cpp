@@ -2452,7 +2452,7 @@ private:
         if (! component.isCurrentlyModal() && (styleFlags & windowHasDropShadow) != 0
             && ((! hasTitleBar()) || SystemStats::getOperatingSystemType() < SystemStats::WinVista))
         {
-            shadower.reset (component.getLookAndFeel().createDropShadowerForComponent (&component));
+            shadower = component.getLookAndFeel().createDropShadowerForComponent (component);
 
             if (shadower != nullptr)
                 shadower->setOwner (&component);

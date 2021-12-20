@@ -161,6 +161,7 @@ namespace juce
 
     class FlexBox;
     class Grid;
+    class FocusOutline;
 
    #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
     Image createSnapshotOfNativeWindow (void* nativeWindowHandle);
@@ -259,6 +260,7 @@ namespace juce
 #include "menus/juce_BurgerMenuComponent.h"
 #include "buttons/juce_ToolbarButton.h"
 #include "misc/juce_DropShadower.h"
+#include "misc/juce_FocusOutline.h"
 #include "misc/juce_JUCESplashScreen.h"
 #include "widgets/juce_TreeView.h"
 #include "windows/juce_TopLevelWindow.h"
