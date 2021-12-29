@@ -41,8 +41,20 @@ struct PopupMenu::HelperClasses
 class MouseSourceState;
 struct MenuWindow;
 
-static bool canBeTriggered (const PopupMenu::Item& item) noexcept        { return item.isEnabled && item.itemID != 0 && ! item.isSectionHeader; }
-static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept      { return item.isEnabled && item.subMenu != nullptr && item.subMenu->items.size() > 0; }
+static bool canBeTriggered (const PopupMenu::Item& item) noexcept
+{
+    return item.isEnabled
+        && item.itemID != 0
+        && ! item.isSectionHeader
+        && (item.customComponent == nullptr || item.customComponent->isTriggeredAutomatically());
+}
+
+static bool hasActiveSubMenu (const PopupMenu::Item& item) noexcept
+{
+    return item.isEnabled
+        && item.subMenu != nullptr
+        && item.subMenu->items.size() > 0;
+}
 
 //==============================================================================
 struct HeaderItemComponent  : public PopupMenu::CustomComponent
@@ -71,6 +83,11 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
                                                                options);
         idealHeight += idealHeight / 2;
         idealWidth += idealWidth / 4;
+    }
+
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return nullptr;
     }
 
     const Options& options;
@@ -164,6 +181,11 @@ struct ItemComponent  : public Component
         }
     }
 
+    static bool isAccessibilityHandlerRequired (const PopupMenu::Item& item)
+    {
+        return item.isSectionHeader || hasActiveSubMenu (item) || canBeTriggered (item);
+    }
+
     PopupMenu::Item item;
 
 private:
@@ -173,7 +195,8 @@ private:
     public:
         explicit ItemAccessibilityHandler (ItemComponent& itemComponentToWrap)
             : AccessibilityHandler (itemComponentToWrap,
-                                    AccessibilityRole::menuItem,
+                                    isAccessibilityHandlerRequired (itemComponentToWrap.item) ? AccessibilityRole::menuItem
+                                                                                              : AccessibilityRole::ignored,
                                     getAccessibilityActions (*this, itemComponentToWrap)),
               itemComponent (itemComponentToWrap)
         {
@@ -209,12 +232,6 @@ private:
                 item.parentWindow.setCurrentlyHighlightedChild (&item);
             };
 
-            auto onPress = [&item]
-            {
-                item.parentWindow.setCurrentlyHighlightedChild (&item);
-                item.parentWindow.triggerCurrentlyHighlightedItem();
-            };
-
             auto onToggle = [&handler, &item, onFocus]
             {
                 if (handler.getCurrentState().isSelected())
@@ -224,8 +241,16 @@ private:
             };
 
             auto actions = AccessibilityActions().addAction (AccessibilityActionType::focus,  std::move (onFocus))
-                                                 .addAction (AccessibilityActionType::press,  std::move (onPress))
                                                  .addAction (AccessibilityActionType::toggle, std::move (onToggle));
+
+            if (canBeTriggered (item.item))
+            {
+                actions.addAction (AccessibilityActionType::press, [&item]
+                {
+                    item.parentWindow.setCurrentlyHighlightedChild (&item);
+                    item.parentWindow.triggerCurrentlyHighlightedItem();
+                });
+            }
 
             if (hasActiveSubMenu (item.item))
             {
@@ -1176,10 +1201,7 @@ struct MenuWindow  : public Component
 
     void triggerCurrentlyHighlightedItem()
     {
-        if (currentChild != nullptr
-             && canBeTriggered (currentChild->item)
-             && (currentChild->item.customComponent == nullptr
-                  || currentChild->item.customComponent->isTriggeredAutomatically()))
+        if (currentChild != nullptr && canBeTriggered (currentChild->item))
         {
             dismissMenu (&currentChild->item);
         }
@@ -1720,7 +1742,7 @@ PopupMenu::Item&& PopupMenu::Item::setImage (std::unique_ptr<Drawable> newImage)
 void PopupMenu::addItem (Item newItem)
 {
     // An ID of 0 is used as a return value to indicate that the user
-    // didn't pick anything, so you shouldn't use it as the ID for an item..
+    // didn't pick anything, so you shouldn't use it as the ID for an item.
     jassert (newItem.itemID != 0
               || newItem.isSeparator || newItem.isSectionHeader
               || newItem.subMenu != nullptr);
@@ -1828,12 +1850,23 @@ void PopupMenu::addColouredItem (int itemResultID, String itemText, Colour itemT
 
 void PopupMenu::addCustomItem (int itemResultID,
                                std::unique_ptr<CustomComponent> cc,
-                               std::unique_ptr<const PopupMenu> subMenu)
+                               std::unique_ptr<const PopupMenu> subMenu,
+                               const String& itemTitle)
 {
     Item i;
+    i.text = itemTitle;
     i.itemID = itemResultID;
     i.customComponent = cc.release();
     i.subMenu.reset (createCopyIfNotNull (subMenu.get()));
+
+    // If this assertion is hit, this item will be visible to screen readers but with
+    // no name, which may be confusing to users.
+    // It's probably a good idea to add a title for this menu item that describes
+    // the meaning of the item, or the contents of the submenu, as appropriate.
+    // If you don't want this menu item to be press-able directly, pass "false" to the
+    // constructor of the CustomComponent.
+    jassert (! (HelperClasses::ItemComponent::isAccessibilityHandlerRequired (i) && itemTitle.isEmpty()));
+
     addItem (std::move (i));
 }
 
@@ -1841,11 +1874,12 @@ void PopupMenu::addCustomItem (int itemResultID,
                                Component& customComponent,
                                int idealWidth, int idealHeight,
                                bool triggerMenuItemAutomaticallyWhenClicked,
-                               std::unique_ptr<const PopupMenu> subMenu)
+                               std::unique_ptr<const PopupMenu> subMenu,
+                               const String& itemTitle)
 {
     auto comp = std::make_unique<HelperClasses::NormalComponentWrapper> (customComponent, idealWidth, idealHeight,
                                                                          triggerMenuItemAutomaticallyWhenClicked);
-    addCustomItem (itemResultID, std::move (comp), std::move (subMenu));
+    addCustomItem (itemResultID, std::move (comp), std::move (subMenu), itemTitle);
 }
 
 void PopupMenu::addSubMenu (String subMenuName, PopupMenu subMenu, bool isActive)
@@ -2211,12 +2245,10 @@ void PopupMenu::setItem (CustomComponent& c, const Item* itemToUse)
 }
 
 //==============================================================================
+PopupMenu::CustomComponent::CustomComponent() : CustomComponent (true) {}
+
 PopupMenu::CustomComponent::CustomComponent (bool autoTrigger)
     : triggeredAutomatically (autoTrigger)
-{
-}
-
-PopupMenu::CustomComponent::~CustomComponent()
 {
 }
 

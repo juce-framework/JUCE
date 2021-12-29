@@ -333,11 +333,15 @@ public:
 
         Note that native macOS menus do not support custom components.
 
+        itemTitle will be used as the fallback text for this item, and will
+        be exposed to screen reader clients.
+
         @see CustomComponent
     */
     void addCustomItem (int itemResultID,
                         std::unique_ptr<CustomComponent> customComponent,
-                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr);
+                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr,
+                        const String& itemTitle = {});
 
     /** Appends a custom menu item that can't be used to trigger a result.
 
@@ -350,6 +354,9 @@ public:
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
 
+        itemTitle will be used as the fallback text for this item, and will
+        be exposed to screen reader clients.
+
         Note that native macOS menus do not support custom components.
     */
     void addCustomItem (int itemResultID,
@@ -357,7 +364,8 @@ public:
                         int idealWidth,
                         int idealHeight,
                         bool triggerMenuItemAutomaticallyWhenClicked,
-                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr);
+                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr,
+                        const String& itemTitle = {});
 
     /** Appends a sub-menu.
 
@@ -820,15 +828,22 @@ public:
                                        public SingleThreadedReferenceCountedObject
     {
     public:
+        /** Creates a custom item that is triggered automatically. */
+        CustomComponent();
+
         /** Creates a custom item.
+
             If isTriggeredAutomatically is true, then the menu will automatically detect
             a mouse-click on this component and use that to invoke the menu item. If it's
             false, then it's up to your class to manually trigger the item when it wants to.
-        */
-        CustomComponent (bool isTriggeredAutomatically = true);
 
-        /** Destructor. */
-        ~CustomComponent() override;
+            If isTriggeredAutomatically is true, then an accessibility handler 'wrapper'
+            will be created for the item that allows pressing, focusing, and toggling.
+            If isTriggeredAutomatically is false, and the item has no submenu, then
+            no accessibility wrapper will be created and your component must be
+            independently accessible.
+        */
+        explicit CustomComponent (bool isTriggeredAutomatically);
 
         /** Returns a rectangle with the size that this component would like to have.
 
