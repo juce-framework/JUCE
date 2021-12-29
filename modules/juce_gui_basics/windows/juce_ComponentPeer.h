@@ -418,6 +418,34 @@ public:
     */
     virtual void setHasChangedSinceSaved (bool) {}
 
+
+    enum class Style
+    {
+        /** A style that matches the system-wide style. */
+        automatic,
+
+        /** A light style, which will probably use dark text on a light background. */
+        light,
+
+        /** A dark style, which will probably use light text on a dark background. */
+        dark
+    };
+
+    /** On operating systems that support it, this will update the style of this
+        peer as requested.
+
+        Note that this will not update the theme system-wide. This will only
+        update UI elements so that they display appropriately for this peer!
+    */
+    void setAppStyle (Style s)
+    {
+        if (std::exchange (style, s) != style)
+            appStyleChanged();
+    }
+
+    /** Returns the style requested for this app. */
+    Style getAppStyle() const { return style; }
+
 protected:
     //==============================================================================
     static void forceDisplayUpdate();
@@ -428,9 +456,12 @@ protected:
     ComponentBoundsConstrainer* constrainer = nullptr;
     static std::function<ModifierKeys()> getNativeRealtimeModifiers;
     ListenerList<ScaleFactorListener> scaleFactorListeners;
+    Style style = Style::automatic;
 
 private:
     //==============================================================================
+    virtual void appStyleChanged() {}
+
     Component* getTargetForKeyPress();
 
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
