@@ -197,8 +197,7 @@ public:
             [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
-            if ((windowStyleFlags & windowHasMaximiseButton) == windowHasMaximiseButton)
-                [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
+            setCollectionBehaviour (false);
 
             [window setRestorable: NO];
 
@@ -407,22 +406,42 @@ public:
         return [window isMiniaturized];
     }
 
+    NSWindowCollectionBehavior getCollectionBehavior (bool forceFullScreen) const
+    {
+        if (forceFullScreen)
+            return NSWindowCollectionBehaviorFullScreenPrimary;
+
+        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenNone
+        constexpr auto fullScreenNone = (NSUInteger) (1 << 9);
+
+        return (getStyleFlags() & (windowHasMaximiseButton | windowIsResizable)) == (windowHasMaximiseButton | windowIsResizable)
+             ? NSWindowCollectionBehaviorFullScreenPrimary
+             : fullScreenNone;
+    }
+
+    void setCollectionBehaviour (bool forceFullScreen) const
+    {
+        [window setCollectionBehavior: getCollectionBehavior (forceFullScreen)];
+    }
+
     void setFullScreen (bool shouldBeFullScreen) override
     {
-        if (! isSharedWindow)
-        {
-            if (isMinimised())
-                setMinimised (false);
+        if (isSharedWindow)
+            return;
 
-            if (hasNativeTitleBar())
-            {
-                if (shouldBeFullScreen != isFullScreen())
-                    [window toggleFullScreen: nil];
-            }
-            else
-            {
-                [window zoom: nil];
-            }
+        setCollectionBehaviour (shouldBeFullScreen);
+
+        if (isMinimised())
+            setMinimised (false);
+
+        if (hasNativeTitleBar())
+        {
+            if (shouldBeFullScreen != isFullScreen())
+                [window toggleFullScreen: nil];
+        }
+        else
+        {
+            [window zoom: nil];
         }
     }
 
@@ -1549,6 +1568,7 @@ public:
         }
 
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+        setCollectionBehaviour (isFullScreen());
     }
 
     void setHasChangedSinceSaved (bool b) override
@@ -2323,8 +2343,12 @@ private:
         return makeNSRect (Rectangle<int> (10000, 10000));
     }
 
-    static BOOL windowShouldZoomToFrame (id, SEL, NSWindow* window, NSRect frame)
+    static BOOL windowShouldZoomToFrame (id self, SEL, NSWindow* window, NSRect frame)
     {
+        if (auto* owner = getOwner (self))
+            if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
+                return NO;
+
         return convertToRectFloat ([window frame]).withZeroOrigin() != convertToRectFloat (frame).withZeroOrigin();
     }
 
@@ -2545,7 +2569,7 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
         else if (! shouldBeEnabled)
             [NSApp setPresentationOptions: NSApplicationPresentationDefault];
 
-        [peer->window toggleFullScreen: nil];
+        peer->setFullScreen (true);
     }
     else
     {
