@@ -1342,8 +1342,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
    #if TARGET_IPHONE_SIMULATOR
     static constexpr int defaultBufferSize = 512;
    #else
-   // Updating to 1024 as a temporary fix until we can find better ways of catching CHOC_ASSERT 
-    static constexpr int defaultBufferSize = 1024;
+    static constexpr int defaultBufferSize = 256;
    #endif
     int targetBufferSize = defaultBufferSize, bufferSize = targetBufferSize;
 
