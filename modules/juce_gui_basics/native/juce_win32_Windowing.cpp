@@ -5199,17 +5199,18 @@ private:
             if (iter != cursorsBySize.end())
                 return iter->second;
 
-            const auto img = info.image.getImage();
-            const auto imgW = jmax (1, img.getWidth());
-            const auto imgH = jmax (1, img.getHeight());
-
+            const auto logicalSize = info.image.getScaledBounds();
             const auto scale = (float) size / (float) unityCursorSize;
-            const auto scaleToUse = scale * jmin (1.0f, jmin ((float) unityCursorSize / (float) imgW,
-                                                              (float) unityCursorSize / (float) imgH)) / info.image.getScale();
-            const auto rescaled = img.rescaled (roundToInt (scaleToUse * (float) imgW),
-                                                roundToInt (scaleToUse * (float) imgH));
-            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) info.hotspot.x));
-            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) info.hotspot.y));
+            const auto physicalSize = logicalSize * scale;
+
+            const auto& image = info.image.getImage();
+            const auto rescaled = image.rescaled (roundToInt ((float) physicalSize.getWidth()),
+                                                  roundToInt ((float) physicalSize.getHeight()));
+
+            const auto effectiveScale = rescaled.getWidth() / logicalSize.getWidth();
+
+            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt ((float) info.hotspot.x * effectiveScale));
+            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt ((float) info.hotspot.y * effectiveScale));
 
             return cursorsBySize.emplace (size, IconConverters::createHICONFromImage (rescaled, false, hx, hy)).first->second;
         }
