@@ -35,10 +35,6 @@ struct SimpleDeviceManagerInputLevelMeter  : public Component,
         inputLevelGetter = manager.getInputLevelGetter();
     }
 
-    ~SimpleDeviceManagerInputLevelMeter() override
-    {
-    }
-
     void timerCallback() override
     {
         if (isShowing())
