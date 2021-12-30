@@ -1607,7 +1607,11 @@ private:
             {
                 if (auto midiOut = midiOutputEventBlock)
                     for (const auto metadata : midiMessages)
-                        midiOut (metadata.samplePosition, 0, metadata.numBytes, metadata.data);
+                        if (isPositiveAndBelow (metadata.samplePosition, frameCount))
+                            midiOut ((int64_t) metadata.samplePosition + (int64_t) (timestamp->mSampleTime + 0.5),
+                                     0,
+                                     metadata.numBytes,
+                                     metadata.data);
             }
            #endif
         }
