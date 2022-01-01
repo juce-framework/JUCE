@@ -40,6 +40,10 @@ namespace ReturnHelpers
     using functionName      = returnType (*) args; \
     functionName objectName = [] args -> returnType  { return ReturnHelpers::returnDefaultConstructedAnyType<returnType>(); };
 
+// gcc 11.1 reports `sorry, unimplemented: converting lambda that uses `...` to function pointer`
+#define JUCE_GENERATE_FUNCTION_WITH_DEFAULT_NULLPTR(functionName, objectName, args, returnType) \
+    using functionName      = returnType (*) args; \
+    functionName objectName = nullptr;
 
 //==============================================================================
 class JUCE_API  X11Symbols
@@ -321,6 +325,10 @@ public:
                                          (XKeyEvent*, const char*, int, KeySym*, XComposeStatus*),
                                          int)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (Xutf8LookupString, xUtf8LookupString,
+                                         (XIC, XKeyPressedEvent*, char*, int, KeySym*, Status*),
+                                         int)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XMapRaised, xMapRaised,
                                          (::Display*, ::Window),
                                          void)
@@ -337,9 +345,61 @@ public:
                                          (::Display*, XEvent*),
                                          int)
 
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XFilterEvent, xFilterEvent,
+                                         (XEvent*, ::Window),
+                                         Bool)
+
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XOpenDisplay, xOpenDisplay,
                                          (const char*),
                                          ::Display*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetLocaleModifiers, xSetLocaleModifiers,
+                                         (const char*),
+                                         char*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XRegisterIMInstantiateCallback, xRegisterIMInstantiateCallback,
+                                         (::Display*, XrmDatabase, char*, char*, XIMProc, XPointer),
+                                         Bool)
+    
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XUnregisterIMInstantiateCallback, xUnregisterIMInstantiateCallback,
+                                         (::Display*, XrmDatabase, char*, char*, XIMProc, XPointer),
+                                         Bool)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XOpenIM, xOpenIM,
+                                         (::Display*, XrmDatabase, char*, char*),
+                                         XIM)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XCloseIM, xCloseIM,
+                                         (XIM),
+                                         Status)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT_NULLPTR (XSetIMValues, xSetIMValues,
+                                                 (XIM, ...),
+                                                 char*)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT_NULLPTR (XCreateIC, xCreateIC,
+                                                 (XIM, ...),
+                                                 XIC)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XDestroyIC, xDestroyIC,
+                                         (XIC),
+                                         void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XSetICFocus, xSetICFocus,
+                                         (XIC),
+                                         void)
+    
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XUnsetICFocus, xUnsetICFocus,
+                                         (XIC),
+                                         void)
+
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT_NULLPTR (XSetICValues, xSetICValues,
+                                                 (XIC, ...),
+                                                 char*)
+    
+    JUCE_GENERATE_FUNCTION_WITH_DEFAULT_NULLPTR (XVaCreateNestedList, xVaCreateNestedList,
+                                                 (int, ...),
+                                                 XVaNestedList)
 
     JUCE_GENERATE_FUNCTION_WITH_DEFAULT (XPeekEvent, xPeekEvent,
                                          (::Display*, XEvent*),

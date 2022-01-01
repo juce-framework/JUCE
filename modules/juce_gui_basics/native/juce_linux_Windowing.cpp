@@ -307,7 +307,35 @@ public:
 
     void setAlpha (float) override                                  {}
     bool setAlwaysOnTop (bool) override                             { return false; }
-    void textInputRequired (Point<int>, TextInputTarget&) override  {}
+    void textInputRequired (Point<int>, TextInputTarget& target) override  {
+        XWindowSystem::getInstance()->bindImeContext(windowH);
+        target.insertTextAtCaret(String());
+        isImeEditing = true;
+    }
+
+    void dismissPendingTextInput() override {
+        isImeEditing = false;
+        XWindowSystem::getInstance()->unbindImeContext(windowH);
+    }
+
+    //==============================================================================
+    void imeAccept(const String& s) noexcept {
+        if (auto target = findCurrentTextInputTarget()) {
+            target->insertTextAtCaret(s);
+        }
+        // updateIMESpot is called in `XWindowSystem::handleKeyPressEvent()`
+    }
+
+    void updateIMESpot() noexcept {
+        if (auto target = findCurrentTextInputTarget()) {
+            auto* targetComp = dynamic_cast<Component*> (target);
+            auto spot = getComponent().getLocalPoint (targetComp, target->getCaretRectangle().getBottomLeft());
+            XPoint xspot;
+            xspot.x = spot.getX();
+            xspot.y = spot.getY();
+            XWindowSystem::getInstance()->setIMESpot(windowH, xspot);
+        }
+    }
 
     //==============================================================================
     void addOpenGLRepaintListener (Component* dummy)
@@ -370,6 +398,7 @@ public:
     //==============================================================================
     static bool isActiveApplication;
     bool focused = false;
+    bool isImeEditing = false;
 
 private:
     //==============================================================================

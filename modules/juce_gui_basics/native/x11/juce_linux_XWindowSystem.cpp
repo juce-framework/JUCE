@@ -323,6 +323,7 @@ void XWindowSystemUtilities::XSettings::update()
 //==============================================================================
 ::Window juce_messageWindowHandle;
 XContext windowHandleXContext;
+static XContext xicXContext;
 
 #if JUCE_X11_SUPPORTS_XEMBED
  bool juce_handleXEmbedEvent (ComponentPeer*, void*);
@@ -1407,6 +1408,22 @@ ComponentPeer* getPeerFor (::Window windowH)
     return unalignedPointerCast<ComponentPeer*> (peer);
 }
 
+XIC getXICFor (::Window windowH)
+{
+    if (windowH == 0)
+        return nullptr;
+
+    XIC xic = nullptr;
+
+    if (auto* display = XWindowSystem::getInstance()->getDisplay())
+    {
+        XWindowSystemUtilities::ScopedXLock xLock;
+        X11Symbols::getInstance()->xFindContext (display, (XID) windowH, xicXContext, reinterpret_cast<XPointer*>(&xic));
+    }
+
+    return xic;
+}
+
 //==============================================================================
 static std::unordered_map<LinuxComponentPeer*, X11DragState> dragAndDropStateMap;
 
@@ -1447,12 +1464,21 @@ XWindowSystem::XWindowSystem()
         X11Symbols::deleteInstance();
         xIsAvailable = false;
     }
+
+    if (! initialiseXIM()) {
+        if (JUCEApplicationBase::isStandaloneApp())
+            X11ErrorHandling::removeXErrorHandlers();
+
+        X11Symbols::deleteInstance();
+        xIsAvailable = false;
+    }
 }
 
 XWindowSystem::~XWindowSystem()
 {
     if (xIsAvailable)
     {
+        destroyXIM();
         destroyXDisplay();
 
         if (JUCEApplicationBase::isStandaloneApp())
@@ -1580,6 +1606,8 @@ void XWindowSystem::destroyWindow (::Window windowH)
         return;
     }
 
+    unbindImeContext(windowH);
+
    #if JUCE_X11_SUPPORTS_XEMBED
     juce_handleXEmbedEvent (peer, nullptr);
    #endif
@@ -1610,6 +1638,51 @@ void XWindowSystem::destroyWindow (::Window windowH)
     if (XSHMHelpers::isShmAvailable (display))
         shmPaintsPendingMap.erase (windowH);
    #endif
+}
+
+//==============================================================================
+void XWindowSystem::bindImeContext (::Window windowH) {
+    auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
+    if (peer == nullptr) {
+        jassertfalse;
+        return;
+    }
+    if (std::find(ime_windows.cbegin(), ime_windows.cend(), windowH) != ime_windows.cend()) {
+        return;
+    }
+    
+    ime_windows.push_back(windowH);
+    X11Symbols::getInstance()->xSaveContext (display, (XID) windowH, xicXContext, nullptr);
+    tryCreateXIC(windowH);
+}
+
+void XWindowSystem::unbindImeContext (::Window windowH) {
+    auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
+
+    if (peer == nullptr) {
+        jassertfalse;
+        return;
+    }
+
+    auto it = std::find(ime_windows.cbegin(), ime_windows.cend(), windowH);
+    if (it == ime_windows.cend()) {
+        return;
+    }
+    
+    ime_windows.erase(it);
+    tryDestroyXIC(windowH);
+    X11Symbols::getInstance()->xDeleteContext (display, (XID) windowH, xicXContext);
+}
+
+void XWindowSystem::setIMESpot(::Window windowH, XPoint pos) {
+    auto xic = getXICFor(windowH);
+    if (!xic) {
+        return;
+    }
+    XVaNestedList preedit_attr;
+    preedit_attr = X11Symbols::getInstance()->xVaCreateNestedList(0, XNSpotLocation, &pos, nullptr);
+    X11Symbols::getInstance()->xSetICValues(xic, XNPreeditAttributes, preedit_attr, nullptr);
+    X11Symbols::getInstance()->xFree(preedit_attr);
 }
 
 //==============================================================================
@@ -1993,6 +2066,10 @@ bool XWindowSystem::grabFocus (::Window windowH) const
         && ! isFocused (windowH))
     {
         X11Symbols::getInstance()->xSetInputFocus (display, getFocusWindow (windowH), RevertToParent, (::Time) getUserTime (windowH));
+        auto xic = getXICFor(windowH);
+        if (xic) {
+            X11Symbols::getInstance()->xSetICFocus(xic);
+        }
         return true;
     }
 
@@ -3151,6 +3228,20 @@ bool XWindowSystem::initialiseXDisplay()
                                                         return;
 
                                                     X11Symbols::getInstance()->xNextEvent (display, &evt);
+
+                                                    // Any client that uses the XIM interface should call XFilterEvent to
+                                                    // allow input methods to process their events without knowledge of the
+                                                    // client's dispatching mechanism.
+                                                    if (X11Symbols::getInstance()->xFilterEvent(&evt, 0)) {
+                                                        // move ime candidate box to correct position...
+                                                        if (evt.xany.window != None && evt.xany.window != juce_messageWindowHandle) {
+                                                            auto peer = dynamic_cast<LinuxComponentPeer*>(getPeerFor(evt.xany.window));
+                                                            if (peer && peer->isImeEditing) {
+                                                                peer->updateIMESpot();
+                                                            }
+                                                        }
+                                                        return;
+                                                    }
                                                 }
 
                                                 if (evt.type == SelectionRequest && evt.xany.window == juce_messageWindowHandle)
@@ -3186,6 +3277,129 @@ void XWindowSystem::destroyXDisplay()
         display = nullptr;
         displayVisuals = nullptr;
     }
+}
+
+//==============================================================================
+void XWindowSystem::imInstantiateCallback(::Display *dpy, XPointer client, XPointer) noexcept {
+    auto self = reinterpret_cast<XWindowSystem*>(client);
+    jassert (self->getDisplay() == dpy);
+    jassert (self->getXIM() == nullptr);
+
+    X11Symbols::getInstance()->xUnregisterIMInstantiateCallback(
+        dpy,
+        nullptr, nullptr, nullptr,
+        reinterpret_cast<XIMProc>(imInstantiateCallback), client
+    );
+
+    String oldModifier (X11Symbols::getInstance()->xSetLocaleModifiers(nullptr));
+    String oldLocale (::setlocale(LC_CTYPE, ""));
+    X11Symbols::getInstance()->xSetLocaleModifiers("");
+    self->xim = X11Symbols::getInstance()->xOpenIM(dpy, nullptr, nullptr, nullptr);
+    if (oldModifier.isNotEmpty()) {
+        X11Symbols::getInstance()->xSetLocaleModifiers(oldModifier.toRawUTF8());
+    }
+    if (oldLocale.isNotEmpty()) {
+        ::setlocale (LC_ALL, oldLocale.toRawUTF8());
+    }
+    XIMCallback imdestroy;
+    imdestroy.client_data = client;
+    imdestroy.callback = reinterpret_cast<XIMProc>(imDestroyCallback);
+    X11Symbols::getInstance()->xSetIMValues(self->xim, XNDestroyCallback, &imdestroy, nullptr);
+
+    for (auto windowH : self->ime_windows) {
+        self->tryCreateXIC(windowH);
+    }
+}
+
+void XWindowSystem::imDestroyCallback(XIM im, XPointer client, XPointer) noexcept {
+    auto self = reinterpret_cast<XWindowSystem*>(client);
+    jassert (self->getDisplay() != nullptr);
+    jassert (self->getXIM() == im);
+    (void) im;
+    self->xim = nullptr;
+
+    X11Symbols::getInstance()->xRegisterIMInstantiateCallback(
+        self->getDisplay(),
+        nullptr, nullptr, nullptr,
+        reinterpret_cast<XIMProc>(imInstantiateCallback), client
+    );
+
+    for (auto windowH : self->ime_windows) {
+        self->tryDestroyXIC(windowH);
+    }
+}
+
+bool XWindowSystem::initialiseXIM() {
+    xicXContext = (XContext) X11Symbols::getInstance()->xrmUniqueQuark();
+
+    X11Symbols::getInstance()->xRegisterIMInstantiateCallback(
+        display,
+        nullptr, nullptr, nullptr,
+        reinterpret_cast<XIMProc>(imInstantiateCallback), reinterpret_cast<XPointer>(this)
+    );
+    return true;
+}
+
+void XWindowSystem::destroyXIM() {
+    if (xim) {
+        jassert(ime_windows.empty());
+        X11Symbols::getInstance()->xCloseIM(xim);
+        xim = nullptr;
+    }
+    X11Symbols::getInstance()->xUnregisterIMInstantiateCallback(
+        display,
+        nullptr, nullptr, nullptr,
+        reinterpret_cast<XIMProc>(imInstantiateCallback), reinterpret_cast<XPointer>(this)
+    );
+}
+
+//==============================================================================
+void XWindowSystem::tryCreateXIC(::Window windowH) {
+    auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
+    if (peer == nullptr) {
+        jassertfalse;
+        return;
+    }
+
+    if (getXICFor(windowH) != nullptr) {
+        jassertfalse;
+        return;
+    }
+
+    if (xim != nullptr) {
+        XIC xic = X11Symbols::getInstance()->xCreateIC(
+            xim,
+            XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
+            XNClientWindow, windowH,
+            nullptr
+        );
+
+        if (xic) {
+            X11Symbols::getInstance()->xSaveContext (display, (XID) windowH, xicXContext, (XPointer)xic);
+
+            if (peer->focused) {
+                X11Symbols::getInstance()->xSetICFocus(xic);
+            }
+        }
+    }
+}
+
+void XWindowSystem::tryDestroyXIC(::Window windowH) {
+    auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (windowH));
+    if (peer == nullptr) {
+        jassertfalse;
+        return;
+    }
+
+    auto xic = getXICFor(windowH);
+    if (xic == nullptr) {
+        return;
+    }
+
+    if (xim) {
+        X11Symbols::getInstance()->xDestroyIC(xic);
+    }
+    X11Symbols::getInstance()->xSaveContext (display, (XID) windowH, xicXContext, nullptr);
 }
 
 //==============================================================================
@@ -3273,122 +3487,158 @@ void XWindowSystem::handleWindowMessage (LinuxComponentPeer* peer, XEvent& event
 
 void XWindowSystem::handleKeyPressEvent (LinuxComponentPeer* peer, XKeyEvent& keyEvent) const
 {
-    auto oldMods = ModifierKeys::currentModifiers;
+    bool bypass_ime = false;
+    while (true) {
+        if (!peer->isImeEditing || bypass_ime) {
+            auto oldMods = ModifierKeys::currentModifiers;
 
-    char utf8 [64] = { 0 };
-    juce_wchar unicodeChar = 0;
-    int keyCode = 0;
-    bool keyDownChange = false;
-    KeySym sym;
+            char utf8 [64] = { 0 };
+            juce_wchar unicodeChar = 0;
+            int keyCode = 0;
+            bool keyDownChange = false;
+            KeySym sym;
 
-    {
-        XWindowSystemUtilities::ScopedXLock xLock;
-        updateKeyStates ((int) keyEvent.keycode, true);
+            {
+                XWindowSystemUtilities::ScopedXLock xLock;
+                updateKeyStates ((int) keyEvent.keycode, true);
 
-        String oldLocale (::setlocale (LC_ALL, nullptr));
-        ::setlocale (LC_ALL, "");
-        X11Symbols::getInstance()->xLookupString (&keyEvent, utf8, sizeof (utf8), &sym, nullptr);
-
-        if (oldLocale.isNotEmpty())
-            ::setlocale (LC_ALL, oldLocale.toRawUTF8());
-
-        unicodeChar = *CharPointer_UTF8 (utf8);
-        keyCode = (int) unicodeChar;
-
-        if (keyCode < 0x20)
-            keyCode = (int) X11Symbols::getInstance()->xkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0,
-                                                                           ModifierKeys::currentModifiers.isShiftDown() ? 1 : 0);
-
-        keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
-    }
-
-    bool keyPressed = false;
-
-    if ((sym & 0xff00) == 0xff00 || keyCode == XK_ISO_Left_Tab)
-    {
-        switch (sym)  // Translate keypad
-        {
-            case XK_KP_Add:         keyCode = XK_plus;      break;
-            case XK_KP_Subtract:    keyCode = XK_hyphen;    break;
-            case XK_KP_Divide:      keyCode = XK_slash;     break;
-            case XK_KP_Multiply:    keyCode = XK_asterisk;  break;
-            case XK_KP_Enter:       keyCode = XK_Return;    break;
-            case XK_KP_Insert:      keyCode = XK_Insert;    break;
-            case XK_Delete:
-            case XK_KP_Delete:      keyCode = XK_Delete;    break;
-            case XK_KP_Left:        keyCode = XK_Left;      break;
-            case XK_KP_Right:       keyCode = XK_Right;     break;
-            case XK_KP_Up:          keyCode = XK_Up;        break;
-            case XK_KP_Down:        keyCode = XK_Down;      break;
-            case XK_KP_Home:        keyCode = XK_Home;      break;
-            case XK_KP_End:         keyCode = XK_End;       break;
-            case XK_KP_Page_Down:   keyCode = XK_Page_Down; break;
-            case XK_KP_Page_Up:     keyCode = XK_Page_Up;   break;
-
-            case XK_KP_0:           keyCode = XK_0;         break;
-            case XK_KP_1:           keyCode = XK_1;         break;
-            case XK_KP_2:           keyCode = XK_2;         break;
-            case XK_KP_3:           keyCode = XK_3;         break;
-            case XK_KP_4:           keyCode = XK_4;         break;
-            case XK_KP_5:           keyCode = XK_5;         break;
-            case XK_KP_6:           keyCode = XK_6;         break;
-            case XK_KP_7:           keyCode = XK_7;         break;
-            case XK_KP_8:           keyCode = XK_8;         break;
-            case XK_KP_9:           keyCode = XK_9;         break;
-
-            default:                break;
-        }
-
-        switch (keyCode)
-        {
-            case XK_Left:
-            case XK_Right:
-            case XK_Up:
-            case XK_Down:
-            case XK_Page_Up:
-            case XK_Page_Down:
-            case XK_End:
-            case XK_Home:
-            case XK_Delete:
-            case XK_Insert:
-                keyPressed = true;
-                keyCode = (keyCode & 0xff) | Keys::extendedKeyModifier;
-                break;
-
-            case XK_Tab:
-            case XK_Return:
-            case XK_Escape:
-            case XK_BackSpace:
-                keyPressed = true;
-                keyCode &= 0xff;
-                break;
-
-            case XK_ISO_Left_Tab:
-                keyPressed = true;
-                keyCode = XK_Tab & 0xff;
-                break;
-
-            default:
-                if (sym >= XK_F1 && sym <= XK_F35)
-                {
-                    keyPressed = true;
-                    keyCode = static_cast<int> ((sym & 0xff) | Keys::extendedKeyModifier);
+                String oldLocale (::setlocale (LC_ALL, nullptr));
+                ::setlocale (LC_ALL, "");
+                X11Symbols::getInstance()->xLookupString (&keyEvent, utf8, sizeof (utf8), &sym, nullptr);
+                if (oldLocale.isNotEmpty()) {
+                    ::setlocale (LC_ALL, oldLocale.toRawUTF8());
                 }
-                break;
+
+                unicodeChar = *CharPointer_UTF8 (utf8);
+                keyCode = (int) unicodeChar;
+
+                if (keyCode < 0x20)
+                    keyCode = (int) X11Symbols::getInstance()->xkbKeycodeToKeysym (display, (::KeyCode) keyEvent.keycode, 0,
+                                                                                ModifierKeys::currentModifiers.isShiftDown() ? 1 : 0);
+
+                keyDownChange = (sym != NoSymbol) && ! updateKeyModifiersFromSym (sym, true);
+            }
+
+            bool keyPressed = false;
+
+            if ((sym & 0xff00) == 0xff00 || keyCode == XK_ISO_Left_Tab)
+            {
+                switch (sym)  // Translate keypad
+                {
+                    case XK_KP_Add:         keyCode = XK_plus;      break;
+                    case XK_KP_Subtract:    keyCode = XK_hyphen;    break;
+                    case XK_KP_Divide:      keyCode = XK_slash;     break;
+                    case XK_KP_Multiply:    keyCode = XK_asterisk;  break;
+                    case XK_KP_Enter:       keyCode = XK_Return;    break;
+                    case XK_KP_Insert:      keyCode = XK_Insert;    break;
+                    case XK_Delete:
+                    case XK_KP_Delete:      keyCode = XK_Delete;    break;
+                    case XK_KP_Left:        keyCode = XK_Left;      break;
+                    case XK_KP_Right:       keyCode = XK_Right;     break;
+                    case XK_KP_Up:          keyCode = XK_Up;        break;
+                    case XK_KP_Down:        keyCode = XK_Down;      break;
+                    case XK_KP_Home:        keyCode = XK_Home;      break;
+                    case XK_KP_End:         keyCode = XK_End;       break;
+                    case XK_KP_Page_Down:   keyCode = XK_Page_Down; break;
+                    case XK_KP_Page_Up:     keyCode = XK_Page_Up;   break;
+
+                    case XK_KP_0:           keyCode = XK_0;         break;
+                    case XK_KP_1:           keyCode = XK_1;         break;
+                    case XK_KP_2:           keyCode = XK_2;         break;
+                    case XK_KP_3:           keyCode = XK_3;         break;
+                    case XK_KP_4:           keyCode = XK_4;         break;
+                    case XK_KP_5:           keyCode = XK_5;         break;
+                    case XK_KP_6:           keyCode = XK_6;         break;
+                    case XK_KP_7:           keyCode = XK_7;         break;
+                    case XK_KP_8:           keyCode = XK_8;         break;
+                    case XK_KP_9:           keyCode = XK_9;         break;
+
+                    default:                break;
+                }
+
+                switch (keyCode)
+                {
+                    case XK_Left:
+                    case XK_Right:
+                    case XK_Up:
+                    case XK_Down:
+                    case XK_Page_Up:
+                    case XK_Page_Down:
+                    case XK_End:
+                    case XK_Home:
+                    case XK_Delete:
+                    case XK_Insert:
+                        keyPressed = true;
+                        keyCode = (keyCode & 0xff) | Keys::extendedKeyModifier;
+                        break;
+
+                    case XK_Tab:
+                    case XK_Return:
+                    case XK_Escape:
+                    case XK_BackSpace:
+                        keyPressed = true;
+                        keyCode &= 0xff;
+                        break;
+
+                    case XK_ISO_Left_Tab:
+                        keyPressed = true;
+                        keyCode = XK_Tab & 0xff;
+                        break;
+
+                    default:
+                        if (sym >= XK_F1 && sym <= XK_F35)
+                        {
+                            keyPressed = true;
+                            keyCode = static_cast<int> ((sym & 0xff) | Keys::extendedKeyModifier);
+                        }
+                        break;
+                }
+            }
+
+            if (utf8[0] != 0 || ((sym & 0xff00) == 0 && sym >= 8))
+                keyPressed = true;
+
+            if (oldMods != ModifierKeys::currentModifiers)
+                peer->handleModifierKeysChange();
+
+            if (keyDownChange)
+                peer->handleKeyUpOrDown (true);
+
+            if (keyPressed)
+                peer->handleKeyPress (keyCode, unicodeChar);
         }
+        else {
+            auto windowH = keyEvent.window;
+            auto xic = getXICFor(windowH);
+            if (!xic) {
+                bypass_ime = true;
+                continue;
+            }
+            KeySym ksym;
+            Status status;
+            int c = X11Symbols::getInstance()->xUtf8LookupString(xic, &keyEvent, nullptr, 0, &ksym, &status);
+
+            std::vector<char> buf(size_t(c) + 1, 0);
+            if (c) {
+                X11Symbols::getInstance()->xUtf8LookupString(xic, &keyEvent, buf.data(), c, &ksym, &status);
+                auto s = String::fromUTF8(buf.data());
+                if (c == 1 && (s[0] < 0x20 || s[0] == 127)) {
+                    bypass_ime = true;
+                    continue;
+                }
+                peer->imeAccept(s);
+            }
+            else {
+                bypass_ime = true;
+                continue;
+            }
+        }
+        break;
     }
 
-    if (utf8[0] != 0 || ((sym & 0xff00) == 0 && sym >= 8))
-        keyPressed = true;
-
-    if (oldMods != ModifierKeys::currentModifiers)
-        peer->handleModifierKeysChange();
-
-    if (keyDownChange)
-        peer->handleKeyUpOrDown (true);
-
-    if (keyPressed)
-        peer->handleKeyPress (keyCode, unicodeChar);
+    if (peer->isImeEditing) {
+        peer->updateIMESpot();
+    }
 }
 
 void XWindowSystem::handleKeyReleaseEvent (LinuxComponentPeer* peer, const XKeyEvent& keyEvent) const
@@ -3717,6 +3967,11 @@ void XWindowSystem::handleClientMessageEvent (LinuxComponentPeer* peer, XClientM
                         X11Symbols::getInstance()->xSetInputFocus (display, (clientMsg.window == windowH ? getFocusWindow (windowH)
                                                                                                          : clientMsg.window),
                                                                    RevertToParent, (::Time) clientMsg.data.l[1]);
+                        
+                        auto xic = getXICFor(windowH);
+                        if (xic) {
+                            X11Symbols::getInstance()->xSetICFocus(xic);
+                        }
                     }
                 }
             }
@@ -3814,6 +4069,9 @@ void XWindowSystem::windowMessageReceive (XEvent& event)
 
             if (auto* peer = dynamic_cast<LinuxComponentPeer*> (getPeerFor (event.xany.window)))
             {
+                if (peer->isImeEditing) {
+                    peer->updateIMESpot();
+                }
                 XWindowSystem::getInstance()->handleWindowMessage (peer, event);
                 return;
             }

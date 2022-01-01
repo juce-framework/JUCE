@@ -173,6 +173,10 @@ public:
     ::Window createWindow (::Window parentWindow, LinuxComponentPeer*) const;
     void destroyWindow    (::Window);
 
+    void bindImeContext (::Window windowH);
+    void unbindImeContext (::Window windowH);
+    void setIMESpot(::Window windowH, XPoint pos);
+
     void setTitle (::Window, const String&) const;
     void setIcon (::Window , const Image&) const;
     void setVisible (::Window, bool shouldBeVisible) const;
@@ -234,6 +238,7 @@ public:
     String getLocalClipboardContent() const noexcept  { return localClipboardContent; }
 
     ::Display* getDisplay() const noexcept                            { return display; }
+    XIM getXIM() const noexcept                                       { return xim; }
     const XWindowSystemUtilities::Atoms& getAtoms() const noexcept    { return atoms; }
     XWindowSystemUtilities::XSettings* getXSettings() const noexcept  { return xSettings.get(); }
 
@@ -272,9 +277,23 @@ private:
         Visual* visual32Bit = nullptr;
     };
 
+    struct XICHandler {
+        LinuxComponentPeer* peer;
+        ::Window win;
+        XIC xic;
+    };
+
     bool initialiseXDisplay();
     void destroyXDisplay();
 
+    bool initialiseXIM();
+    void destroyXIM();
+
+    void tryCreateXIC(::Window windowH);
+    void tryDestroyXIC(::Window windowH);
+    
+    static void imInstantiateCallback(::Display *dpy, XPointer, XPointer call) noexcept;
+    static void imDestroyCallback(XIM im, XPointer, XPointer call_data) noexcept;
     //==============================================================================
     ::Window getFocusWindow (::Window) const;
 
@@ -330,6 +349,9 @@ private:
     ::Display* display = nullptr;
     std::unique_ptr<DisplayVisuals> displayVisuals;
     std::unique_ptr<XWindowSystemUtilities::XSettings> xSettings;
+
+    XIM xim = nullptr;
+    std::vector<::Window> ime_windows;
 
    #if JUCE_USE_XSHM
     std::map<::Window, int> shmPaintsPendingMap;
