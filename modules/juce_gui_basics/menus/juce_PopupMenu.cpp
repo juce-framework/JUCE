@@ -98,9 +98,7 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
 //==============================================================================
 struct ItemComponent  : public Component
 {
-    ItemComponent (const PopupMenu::Item& i,
-                   const PopupMenu::Options& o,
-                   MenuWindow& parent)
+    ItemComponent (const PopupMenu::Item& i, const PopupMenu::Options& o, MenuWindow& parent)
         : item (i), parentWindow (parent), options (o), customComp (i.customComponent)
     {
         if (item.isSectionHeader)
@@ -189,6 +187,29 @@ struct ItemComponent  : public Component
     PopupMenu::Item item;
 
 private:
+    class ValueInterface  : public AccessibilityValueInterface
+    {
+    public:
+        ValueInterface() = default;
+
+        bool isReadOnly() const override  { return true; }
+
+        double getCurrentValue() const override
+        {
+            return 1.0;
+        }
+
+        String getCurrentValueAsString() const override
+        {
+            return TRANS ("Checked");
+        }
+
+        void setValue (double) override {}
+        void setValueAsString (const String&) override  {}
+
+        AccessibleValueRange getRange() const override { return {}; }
+    };
+
     //==============================================================================
     class ItemAccessibilityHandler  : public AccessibilityHandler
     {
@@ -197,7 +218,9 @@ private:
             : AccessibilityHandler (itemComponentToWrap,
                                     isAccessibilityHandlerRequired (itemComponentToWrap.item) ? AccessibilityRole::menuItem
                                                                                               : AccessibilityRole::ignored,
-                                    getAccessibilityActions (*this, itemComponentToWrap)),
+                                    getAccessibilityActions (*this, itemComponentToWrap),
+                                    AccessibilityHandler::Interfaces { itemComponentToWrap.item.isTicked ? std::make_unique<ValueInterface>()
+                                                                                                         : nullptr }),
               itemComponent (itemComponentToWrap)
         {
         }
@@ -217,6 +240,9 @@ private:
                 state = itemComponent.parentWindow.isSubMenuVisible() ? state.withExpandable().withExpanded()
                                                                       : state.withExpandable().withCollapsed();
             }
+
+            if (itemComponent.item.isTicked)
+                state = state.withChecked();
 
             return state.isFocused() ? state.withSelected() : state;
         }
