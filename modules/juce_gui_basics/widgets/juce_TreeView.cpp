@@ -313,6 +313,9 @@ public:
 
         if (iter != itemComponents.end())
         {
+            if (itemUnderMouse == iter->get())
+                itemUnderMouse = nullptr;
+
             if (isMouseDraggingInChildComp (*(iter->get())))
                 owner.hideDragHighlight();
 
