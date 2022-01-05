@@ -381,6 +381,34 @@ namespace juce
 
 //==============================================================================
 #if JUCE_WINDOWS
+namespace juce
+{
+MIDL_INTERFACE ("a5cd92ff-29be-454c-8d04-d82879fb3f1b")
+juce_IVirtualDesktopManager : public IUnknown
+{
+public:
+    virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
+         __RPC__in HWND topLevelWindow,
+         __RPC__out BOOL * onCurrentDesktop) = 0;
+
+    virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(
+         __RPC__in HWND topLevelWindow,
+         __RPC__out GUID * desktopId) = 0;
+
+    virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(
+         __RPC__in HWND topLevelWindow,
+         __RPC__in REFGUID desktopId) = 0;
+};
+
+JUCE_COMCLASS (juce_VirtualDesktopManager, "aa509086-5ca9-4c25-8f95-589d3c07b48a");
+
+} // namespace juce
+
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::juce_IVirtualDesktopManager, 0xa5cd92ff, 0x29be, 0x454c, 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b)
+__CRT_UUID_DECL (juce::juce_VirtualDesktopManager,  0xaa509086, 0x5ca9, 0x4c25, 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a)
+#endif
+
 bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 {
     if (x == nullptr)
@@ -388,29 +416,9 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 
     static auto* desktopManager = []
     {
-        // IVirtualDesktopManager Copied from ShObjdl_core.h, because it may not be defined
-        MIDL_INTERFACE ("a5cd92ff-29be-454c-8d04-d82879fb3f1b")
-        juce_IVirtualDesktopManager : public IUnknown
-        {
-        public:
-            virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
-                 __RPC__in HWND topLevelWindow,
-                 __RPC__out BOOL * onCurrentDesktop) = 0;
-
-            virtual HRESULT STDMETHODCALLTYPE GetWindowDesktopId(
-                 __RPC__in HWND topLevelWindow,
-                 __RPC__out GUID * desktopId) = 0;
-
-            virtual HRESULT STDMETHODCALLTYPE MoveWindowToDesktop(
-                 __RPC__in HWND topLevelWindow,
-                 __RPC__in REFGUID desktopId) = 0;
-        };
-
         juce_IVirtualDesktopManager* result = nullptr;
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-
-        class DECLSPEC_UUID("aa509086-5ca9-4c25-8f95-589d3c07b48a") juce_VirtualDesktopManager;
 
         if (SUCCEEDED (CoCreateInstance (__uuidof (juce_VirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
             return result;
@@ -428,6 +436,7 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 
     return true;
 }
+
 #else
  bool juce::isWindowOnCurrentVirtualDesktop (void*) { return true; }
  juce::ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()  { ignoreUnused (previousContext); }

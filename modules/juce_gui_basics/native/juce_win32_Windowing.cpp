@@ -1244,6 +1244,15 @@ JUCE_IUNKNOWNCLASS (ITipInvocation, "37c994e7-432b-4834-a2f7-dce1f13b834b")
     JUCE_COMCALL Toggle (HWND) = 0;
 };
 
+} // namespace juce
+
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::ITipInvocation, 0x37c994e7, 0x432b, 0x4834, 0xa2, 0xf7, 0xdc, 0xe1, 0xf1, 0x3b, 0x83, 0x4b)
+#endif
+
+namespace juce
+{
+
 struct OnScreenKeyboard   : public DeletedAtShutdown,
                             private Timer
 {
@@ -1358,7 +1367,15 @@ JUCE_COMCLASS (IUIViewSettings, "c63657f6-8850-470d-88f8-455e16ea2c26")  : publi
     JUCE_COMCALL GetUserInteractionMode (UserInteractionMode*) = 0;
 };
 
+} // namespace juce
 
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::IUIViewSettingsInterop, 0x3694dbf9, 0x8f68, 0x44be, 0x8f, 0xf5, 0x19, 0x5c, 0x98, 0xed, 0xe8, 0xa6)
+__CRT_UUID_DECL (juce::IUIViewSettings,        0xc63657f6, 0x8850, 0x470d, 0x88, 0xf8, 0x45, 0x5e, 0x16, 0xea, 0x2c, 0x26)
+#endif
+
+namespace juce
+{
 struct UWPUIViewSettings
 {
     UWPUIViewSettings()
