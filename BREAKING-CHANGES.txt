@@ -1,6 +1,28 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+XWindowSystemUtilities::XSettings now has a private constructor.
+
+Possible Issues
+---------------
+User code that uses XSettings::XSettings() will fail to build.
+
+Workaround
+----------
+Use the XSettings::createXSettings() factory function.
+
+Rationale
+---------
+The XSETTINGS facility is not available on all Linux distributions and the old
+constructor would fail on such systems, potentially crashing the application.
+The factory function will return nullptr in such situations instead.
+
+
 Version 6.1.3
 =============
 
