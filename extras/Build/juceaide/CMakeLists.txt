@@ -53,9 +53,11 @@ else()
     # environment variables, which is unfortunate because we really don't want to cross-compile
     # juceaide. If you really want to set the compilers for juceaide, pass the appropriate
     # CMAKE_<lang>_COMPILER flags when configuring CMake.
-    unset(ENV{ASM})
-    unset(ENV{CC})
-    unset(ENV{CXX})
+    if((CMAKE_SYSTEM_NAME STREQUAL "Android") OR (CMAKE_SYSTEM_NAME STREQUAL "iOS"))
+        unset(ENV{ASM})
+        unset(ENV{CC})
+        unset(ENV{CXX})
+    endif()
 
     message(STATUS "Configuring juceaide")
 
