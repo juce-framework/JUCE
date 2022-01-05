@@ -38,6 +38,12 @@ namespace SampleTypeHelpers // Internal classes needed for handling sample type 
     };
 
     template <typename T>
+    struct ElementType<const T, false>
+    {
+        using Type = const typename T::value_type;
+    };
+
+    template <typename T>
     struct ElementType<T, false>
     {
         using Type = typename T::value_type;
