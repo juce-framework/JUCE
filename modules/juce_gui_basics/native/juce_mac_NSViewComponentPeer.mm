@@ -2353,19 +2353,21 @@ private:
        #endif
     }
 
-    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow*, NSRect)
+    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow*, NSRect r)
     {
         if (auto* owner = getOwner (self))
         {
             if (auto* constrainer = owner->getConstrainer())
             {
-                return flippedScreenRect (makeNSRect (owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()
-                                                                                                          .withWidth (constrainer->getMaximumWidth())
-                                                                                                          .withHeight (constrainer->getMaximumHeight()))));
+                const auto originalBounds = owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()).toFloat();
+                const auto expanded = originalBounds.withWidth  ((float) constrainer->getMaximumWidth())
+                                                    .withHeight ((float) constrainer->getMaximumHeight());
+                const auto constrained = expanded.constrainedWithin (convertToRectFloat (flippedScreenRect (r)));
+                return flippedScreenRect (makeNSRect (constrained));
             }
         }
 
-        return makeNSRect (Rectangle<int> (10000, 10000));
+        return r;
     }
 
     static BOOL windowShouldZoomToFrame (id self, SEL, NSWindow* window, NSRect frame)
