@@ -189,8 +189,9 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 }
                 case UIA_TogglePatternId:
                 {
-                    if (accessibilityHandler.getActions().contains (AccessibilityActionType::toggle)
-                        && accessibilityHandler.getCurrentState().isCheckable())
+                    if (accessibilityHandler.getCurrentState().isCheckable()
+                        && (accessibilityHandler.getActions().contains (AccessibilityActionType::toggle)
+                            || accessibilityHandler.getActions().contains (AccessibilityActionType::press)))
                     {
                         return new UIAToggleProvider (this);
                     }

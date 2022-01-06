@@ -354,7 +354,8 @@ public:
                                  isSelected ? ACTION_CLEAR_SELECTION : ACTION_SELECT);
         }
 
-        if (accessibilityHandler.getActions().contains (AccessibilityActionType::press))
+        if ((accessibilityHandler.getCurrentState().isCheckable() && accessibilityHandler.getActions().contains (AccessibilityActionType::toggle))
+            || accessibilityHandler.getActions().contains (AccessibilityActionType::press))
         {
             env->CallVoidMethod (info,
                                  AndroidAccessibilityNodeInfo.setClickable,
@@ -480,7 +481,8 @@ public:
 
             case ACTION_CLICK:
             {
-                if (accessibilityHandler.getActions().invoke (AccessibilityActionType::press))
+                if ((accessibilityHandler.getCurrentState().isCheckable() && accessibilityHandler.getActions().invoke (AccessibilityActionType::toggle))
+                    || accessibilityHandler.getActions().invoke (AccessibilityActionType::press))
                 {
                     sendAccessibilityEventImpl (accessibilityHandler, TYPE_VIEW_CLICKED, 0);
                     return true;

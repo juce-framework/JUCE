@@ -44,7 +44,8 @@ public:
 
         const auto& handler = getHandler();
 
-        if (handler.getActions().invoke (AccessibilityActionType::toggle))
+        if (handler.getActions().invoke (AccessibilityActionType::toggle)
+            || handler.getActions().invoke (AccessibilityActionType::press))
         {
             VARIANT newValue;
             VariantHelpers::setInt (getCurrentToggleState(), &newValue);

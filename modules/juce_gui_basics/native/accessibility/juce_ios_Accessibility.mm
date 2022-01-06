@@ -403,7 +403,7 @@ private:
                 // which element it thinks has focus and forward the event on to that element if it differs
                 id focusedElement = UIAccessibilityFocusedElement (UIAccessibilityNotificationVoiceOverIdentifier);
 
-                if (! [(id) handler->getNativeImplementation() isEqual: focusedElement])
+                if (focusedElement != nullptr && ! [(id) handler->getNativeImplementation() isEqual: focusedElement])
                     return [focusedElement accessibilityActivate];
 
                 if (handler->hasFocus (false))

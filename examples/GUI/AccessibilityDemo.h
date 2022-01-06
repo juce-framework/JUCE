@@ -418,6 +418,7 @@ constexpr NameAndRole accessibilityRoles[]
     { "Ignored",       AccessibilityRole::ignored },
     { "Unspecified",   AccessibilityRole::unspecified },
     { "Button",        AccessibilityRole::button },
+    { "Toggle",        AccessibilityRole::toggleButton },
     { "ComboBox",      AccessibilityRole::comboBox },
     { "Slider",        AccessibilityRole::slider },
     { "Static Text",   AccessibilityRole::staticText },
