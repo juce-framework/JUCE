@@ -167,7 +167,8 @@ void StringPairArray::minimiseStorageOverheads()
     values.minimiseStorageOverheads();
 }
 
-void StringPairArray::addMap (const std::map<String, String>& toAdd)
+template <typename Map>
+void StringPairArray::addMapImpl (const Map& toAdd)
 {
     // If we just called `set` for each item in `toAdd`, that would
     // perform badly when adding to large StringPairArrays, as `set`
@@ -200,6 +201,9 @@ void StringPairArray::addMap (const std::map<String, String>& toAdd)
         }
     }
 }
+
+void StringPairArray::addUnorderedMap (const std::unordered_map<String, String>& toAdd) { addMapImpl (toAdd); }
+void StringPairArray::addMap (const std::map<String, String>& toAdd)                    { addMapImpl (toAdd); }
 
 //==============================================================================
 //==============================================================================
