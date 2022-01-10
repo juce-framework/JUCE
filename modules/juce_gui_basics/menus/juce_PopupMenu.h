@@ -39,20 +39,22 @@ namespace juce
         m.addItem (1, "item 1");
         m.addItem (2, "item 2");
 
-        const int result = m.show();
-
-        if (result == 0)
-        {
-            // user dismissed the menu without picking anything
-        }
-        else if (result == 1)
-        {
-            // user picked item 1
-        }
-        else if (result == 2)
-        {
-            // user picked item 2
-        }
+        m.showMenuAsync (PopupMenu::Options(),
+                         [] (int result)
+                         {
+                             if (result == 0)
+                             {
+                                 // user dismissed the menu without picking anything
+                             }
+                             else if (result == 1)
+                             {
+                                 // user picked item 1
+                             }
+                             else if (result == 2)
+                             {
+                                 // user picked item 2
+                             }
+                         });
     }
     @endcode
 
@@ -68,9 +70,7 @@ namespace juce
         mainMenu.addItem (3, "item 3");
         mainMenu.addSubMenu ("other choices", subMenu);
 
-        const int result = m.show();
-
-        ...etc
+        m.showMenuAsync (...);
     }
     @endcode
 
