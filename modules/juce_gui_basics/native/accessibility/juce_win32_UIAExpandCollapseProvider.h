@@ -28,13 +28,10 @@ namespace juce
 
 //==============================================================================
 class UIAExpandCollapseProvider  : public UIAProviderBase,
-                                   public ComBaseClassHelper<IExpandCollapseProvider>
+                                   public ComBaseClassHelper<ComTypes::IExpandCollapseProvider>
 {
 public:
-    explicit UIAExpandCollapseProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT Expand() override
@@ -47,13 +44,13 @@ public:
         return invokeShowMenu();
     }
 
-    JUCE_COMRESULT get_ExpandCollapseState (ExpandCollapseState* pRetVal) override
+    JUCE_COMRESULT get_ExpandCollapseState (ComTypes::ExpandCollapseState* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
             *pRetVal = getHandler().getCurrentState().isExpanded()
-                           ? ExpandCollapseState_Expanded
-                           : ExpandCollapseState_Collapsed;
+                           ? ComTypes::ExpandCollapseState_Expanded
+                           : ComTypes::ExpandCollapseState_Collapsed;
 
             return S_OK;
         });
@@ -70,8 +67,8 @@ private:
         if (handler.getActions().invoke (AccessibilityActionType::showMenu))
         {
             sendAccessibilityAutomationEvent (handler, handler.getCurrentState().isExpanded()
-                                                           ? UIA_MenuOpenedEventId
-                                                           : UIA_MenuClosedEventId);
+                                                           ? ComTypes::UIA_MenuOpenedEventId
+                                                           : ComTypes::UIA_MenuClosedEventId);
 
             return S_OK;
         }

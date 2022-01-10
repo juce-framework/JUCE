@@ -28,8 +28,8 @@ namespace juce
 
 struct InternalWebViewType
 {
-    InternalWebViewType() {}
-    virtual ~InternalWebViewType() {}
+    InternalWebViewType() = default;
+    virtual ~InternalWebViewType() = default;
 
     virtual void createBrowser() = 0;
     virtual bool hasBrowserBeenCreated() = 0;
@@ -46,20 +46,6 @@ struct InternalWebViewType
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InternalWebViewType)
 };
-
-#if JUCE_MINGW
- JUCE_DECLARE_UUID_GETTER (IOleClientSite,           "00000118-0000-0000-c000-000000000046")
- JUCE_DECLARE_UUID_GETTER (IDispatch,                "00020400-0000-0000-c000-000000000046")
-
- #ifndef WebBrowser
-  class WebBrowser;
- #endif
-#endif
-
-JUCE_DECLARE_UUID_GETTER (DWebBrowserEvents2,        "34A715A0-6587-11D0-924A-0020AFC7AC4D")
-JUCE_DECLARE_UUID_GETTER (IConnectionPointContainer, "B196B284-BAB4-101A-B69C-00AA00341D07")
-JUCE_DECLARE_UUID_GETTER (IWebBrowser2,              "D30C1661-CDAF-11D0-8A3E-00C04FC9E26E")
-JUCE_DECLARE_UUID_GETTER (WebBrowser,                "8856F961-340A-11D0-A96B-00C04FD705A2")
 
 //==============================================================================
 class Win32WebView   : public InternalWebViewType,

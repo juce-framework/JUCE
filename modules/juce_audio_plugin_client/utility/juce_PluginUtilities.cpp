@@ -46,7 +46,7 @@ namespace juce
  #define VST3_REPLACEMENT_AVAILABLE 1
 
  // NB: Nasty old-fashioned code in here because it's copied from the Steinberg example code.
- void JUCE_API getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
+ void getUUIDForVST2ID (bool forControllerUID, uint8 uuid[16])
  {
      #if JUCE_MSVC
       const auto juce_sprintf = [] (auto&& head, auto&&... tail) { sprintf_s (head, numElementsInArray (head), tail...); };

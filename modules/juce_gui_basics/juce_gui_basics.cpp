@@ -67,11 +67,8 @@
  #include <vfw.h>
  #include <commdlg.h>
  #include <commctrl.h>
-
- #if ! JUCE_MINGW
-  #include <UIAutomation.h>
-  #include <sapi.h>
- #endif
+ #include <UIAutomation.h>
+ #include <sapi.h>
 
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>
@@ -310,26 +307,13 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include "native/juce_mac_MouseCursor.mm"
 
 #elif JUCE_WINDOWS
-
- #if ! JUCE_MINGW
-  #include "native/accessibility/juce_win32_WindowsUIAWrapper.h"
-  #include "native/accessibility/juce_win32_AccessibilityElement.h"
-  #include "native/accessibility/juce_win32_UIAHelpers.h"
-  #include "native/accessibility/juce_win32_UIAProviders.h"
-  #include "native/accessibility/juce_win32_AccessibilityElement.cpp"
-  #include "native/accessibility/juce_win32_Accessibility.cpp"
- #else
-  namespace juce
-  {
-      namespace WindowsAccessibility
-      {
-          long getUiaRootObjectId()  { return -1; }
-          bool handleWmGetObject (AccessibilityHandler*, WPARAM, LPARAM, LRESULT*) { return false; }
-          void revokeUIAMapEntriesForWindow (HWND) {}
-      }
-  }
- #endif
-
+ #include "native/accessibility/juce_win32_ComInterfaces.h"
+ #include "native/accessibility/juce_win32_WindowsUIAWrapper.h"
+ #include "native/accessibility/juce_win32_AccessibilityElement.h"
+ #include "native/accessibility/juce_win32_UIAHelpers.h"
+ #include "native/accessibility/juce_win32_UIAProviders.h"
+ #include "native/accessibility/juce_win32_AccessibilityElement.cpp"
+ #include "native/accessibility/juce_win32_Accessibility.cpp"
  #include "native/juce_win32_Windowing.cpp"
  #include "native/juce_win32_DragAndDrop.cpp"
  #include "native/juce_win32_FileChooser.cpp"
@@ -383,8 +367,8 @@ namespace juce
 #if JUCE_WINDOWS
 namespace juce
 {
-MIDL_INTERFACE ("a5cd92ff-29be-454c-8d04-d82879fb3f1b")
-juce_IVirtualDesktopManager : public IUnknown
+
+JUCE_COMCLASS (JuceIVirtualDesktopManager, "a5cd92ff-29be-454c-8d04-d82879fb3f1b") : public IUnknown
 {
 public:
     virtual HRESULT STDMETHODCALLTYPE IsWindowOnCurrentVirtualDesktop(
@@ -400,13 +384,13 @@ public:
          __RPC__in REFGUID desktopId) = 0;
 };
 
-JUCE_COMCLASS (juce_VirtualDesktopManager, "aa509086-5ca9-4c25-8f95-589d3c07b48a");
+JUCE_COMCLASS (JuceVirtualDesktopManager, "aa509086-5ca9-4c25-8f95-589d3c07b48a");
 
 } // namespace juce
 
 #ifdef __CRT_UUID_DECL
-__CRT_UUID_DECL (juce::juce_IVirtualDesktopManager, 0xa5cd92ff, 0x29be, 0x454c, 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b)
-__CRT_UUID_DECL (juce::juce_VirtualDesktopManager,  0xaa509086, 0x5ca9, 0x4c25, 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a)
+__CRT_UUID_DECL (juce::JuceIVirtualDesktopManager, 0xa5cd92ff, 0x29be, 0x454c, 0x8d, 0x04, 0xd8, 0x28, 0x79, 0xfb, 0x3f, 0x1b)
+__CRT_UUID_DECL (juce::JuceVirtualDesktopManager,  0xaa509086, 0x5ca9, 0x4c25, 0x8f, 0x95, 0x58, 0x9d, 0x3c, 0x07, 0xb4, 0x8a)
 #endif
 
 bool juce::isWindowOnCurrentVirtualDesktop (void* x)
@@ -416,16 +400,16 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 
     static auto* desktopManager = []
     {
-        juce_IVirtualDesktopManager* result = nullptr;
+        JuceIVirtualDesktopManager* result = nullptr;
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
-        if (SUCCEEDED (CoCreateInstance (__uuidof (juce_VirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
+        if (SUCCEEDED (CoCreateInstance (__uuidof (JuceVirtualDesktopManager), nullptr, CLSCTX_ALL, IID_PPV_ARGS (&result))))
             return result;
 
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        return static_cast<juce_IVirtualDesktopManager*> (nullptr);
+        return static_cast<JuceIVirtualDesktopManager*> (nullptr);
     }();
 
     BOOL current = false;

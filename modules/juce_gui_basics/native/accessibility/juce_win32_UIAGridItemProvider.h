@@ -28,13 +28,10 @@ namespace juce
 
 //==============================================================================
 class UIAGridItemProvider  : public UIAProviderBase,
-                             public ComBaseClassHelper<IGridItemProvider>
+                             public ComBaseClassHelper<ComTypes::IGridItemProvider>
 {
 public:
-    explicit UIAGridItemProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT get_Row (int* pRetVal) override

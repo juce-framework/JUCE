@@ -1133,7 +1133,6 @@ namespace IconConverters
 
         if (auto* dc = ::CreateCompatibleDC (deviceContext.dc))
         {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
             BITMAPV5HEADER header = {};
             header.bV5Size = sizeof (BITMAPV5HEADER);
             header.bV5Width = bm.bmWidth;
@@ -1145,15 +1144,8 @@ namespace IconConverters
             header.bV5GreenMask = 0x0000FF00;
             header.bV5BlueMask = 0x000000FF;
             header.bV5AlphaMask = 0xFF000000;
-
-           #if JUCE_MINGW
-            header.bV5CSType = 'Win ';
-           #else
-            header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
-           #endif
-
+            header.bV5CSType = 0x57696E20; // 'Win '
             header.bV5Intent = LCS_GM_IMAGES;
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             uint32* bitmapImageData = nullptr;
 
@@ -4545,8 +4537,8 @@ class PreVistaMessageBox  : public WindowsMessageBoxBase
 public:
     PreVistaMessageBox (const MessageBoxOptions& opts,
                         UINT extraFlags,
-                        std::unique_ptr<ModalComponentManager::Callback>&& callback)
-        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+                        std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (cb)),
           flags (extraFlags | getMessageBoxFlags (opts.getIconType())),
           title (opts.getTitle()), message (opts.getMessage())
     {
@@ -4598,8 +4590,8 @@ class WindowsTaskDialog  : public WindowsMessageBoxBase
 {
 public:
     WindowsTaskDialog (const MessageBoxOptions& opts,
-                       std::unique_ptr<ModalComponentManager::Callback>&& callback)
-        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+                       std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (cb)),
           iconType (opts.getIconType()),
           title (opts.getTitle()), message (opts.getMessage()),
           button1 (opts.getButtonText (0)), button2 (opts.getButtonText (1)), button3 (opts.getButtonText (2))

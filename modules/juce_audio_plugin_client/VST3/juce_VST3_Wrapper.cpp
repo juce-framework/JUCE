@@ -58,7 +58,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 
 #if JUCE_VST3_CAN_REPLACE_VST2
 
- #if ! JUCE_MSVC
+ #if ! JUCE_MSVC && ! defined (__cdecl)
   #define __cdecl
  #endif
 
@@ -3541,10 +3541,12 @@ DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_Manufa
 DEF_CLASS_IID (JuceAudioProcessor)
 
 #if JUCE_VST3_CAN_REPLACE_VST2
+ // Defined in PluginUtilities.cpp
+ void getUUIDForVST2ID (bool, uint8[16]);
+
  FUID getFUIDForVST2ID (bool forControllerUID)
  {
      TUID uuid;
-     extern JUCE_API void getUUIDForVST2ID (bool, uint8[16]);
      getUUIDForVST2ID (forControllerUID, (uint8*) uuid);
      return FUID (uuid);
  }
