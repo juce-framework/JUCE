@@ -683,10 +683,14 @@ public:
     {
         const ScopedLock sl (callbackLock);
 
+        if (callback == nullptr && callbackToNotify != nullptr)
+        {
+            callback = callbackToNotify;
+            callback->audioDeviceAboutToStart (&owner);
+        }
+
         if (! started)
         {
-            callback = nullptr;
-
             if (deviceID != 0)
             {
                 if (OK (AudioDeviceCreateIOProcID (deviceID, audioIOProc, this, &audioProcID)))
@@ -701,14 +705,6 @@ public:
                         audioProcID = {};
                     }
                 }
-            }
-
-            if (started)
-            {
-                callback = callbackToNotify;
-
-                if (callback != nullptr)
-                    callback->audioDeviceAboutToStart (&owner);
             }
         }
 
