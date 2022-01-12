@@ -3155,9 +3155,27 @@ public:
                 return kResultFalse;
         }
 
-        if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data, channelListFloat);
-        else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data, channelListDouble);
-        else jassertfalse;
+        // If all of these are zero, the host is attempting to flush parameters without processing audio.
+        if (data.numSamples != 0 || data.numInputs != 0 || data.numOutputs != 0)
+        {
+            if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data, channelListFloat);
+            else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data, channelListDouble);
+            else jassertfalse;
+        }
+
+        if (auto* changes = data.outputParameterChanges)
+        {
+            comPluginInstance->forAllChangedParameters ([&] (Vst::ParamID paramID, float value)
+                                                        {
+                                                            Steinberg::int32 queueIndex = 0;
+
+                                                            if (auto* queue = changes->addParameterData (paramID, queueIndex))
+                                                            {
+                                                                Steinberg::int32 pointIndex = 0;
+                                                                queue->addPoint (0, value, pointIndex);
+                                                            }
+                                                        });
+        }
 
        #if JucePlugin_ProducesMidiOutput
         if (isMidiOutputBusEnabled && data.outputEvents != nullptr)
@@ -3380,20 +3398,6 @@ private:
             */
             jassert (midiBuffer.getNumEvents() <= numMidiEventsComingIn);
            #endif
-        }
-
-        if (auto* changes = data.outputParameterChanges)
-        {
-            comPluginInstance->forAllChangedParameters ([&] (Vst::ParamID paramID, float value)
-            {
-                Steinberg::int32 queueIndex = 0;
-
-                if (auto* queue = changes->addParameterData (paramID, queueIndex))
-                {
-                    Steinberg::int32 pointIndex = 0;
-                    queue->addPoint (0, value, pointIndex);
-                }
-            });
         }
     }
 
