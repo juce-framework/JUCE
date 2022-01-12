@@ -4594,6 +4594,7 @@ public:
         TASKDIALOGCONFIG config{};
 
         config.cbSize         = sizeof (config);
+        config.hwndParent     = getParentHWND();
         config.pszWindowTitle = title.toWideCharPointer();
         config.pszContent     = message.toWideCharPointer();
         config.hInstance      = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
