@@ -32,7 +32,7 @@ namespace juce
 #endif
 class ScopedNoDenormals;
 
-
+#if ! DOXYGEN
 namespace detail
 {
 
@@ -131,6 +131,7 @@ struct NameForwarder<Head, Tail...> : Head, NameForwarder<Tail...>
 };
 
 } // namespace detail
+#endif
 
 //==============================================================================
 /**
