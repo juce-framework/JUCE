@@ -269,13 +269,14 @@ public:
     bool fromBase64Encoding  (StringRef encodedString);
 
     //==============================================================================
-    // This method has been deprecated in favour of the replaceAll() method which will
-    // also replace the data when `numBytes == 0`
-    JUCE_DEPRECATED_WITH_BODY (void replaceWith (const void* srcData, size_t numBytes),
+   #ifndef DOXYGEN
+    [[deprecated ("Use the replaceAll method instead, which will also replace the data when numBytes == 0.")]]
+    void replaceWith (const void* srcData, size_t numBytes)
     {
         if (numBytes > 0)
             replaceAll (srcData, numBytes);
-    })
+    }
+   #endif
 
 private:
     //==============================================================================

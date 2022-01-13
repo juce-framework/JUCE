@@ -37,13 +37,19 @@ TooltipWindow::TooltipWindow (Component* parentComp, int delayMs)
     if (parentComp != nullptr)
         parentComp->addChildComponent (this);
 
-    if (Desktop::getInstance().getMainMouseSource().canHover())
+    auto& desktop = Desktop::getInstance();
+
+    if (desktop.getMainMouseSource().canHover())
+    {
+        desktop.addGlobalMouseListener (this);
         startTimer (123);
+    }
 }
 
 TooltipWindow::~TooltipWindow()
 {
     hideTip();
+    Desktop::getInstance().removeGlobalMouseListener (this);
 }
 
 void TooltipWindow::setMillisecondsBeforeTipAppears (const int newTimeMs) noexcept
@@ -56,9 +62,22 @@ void TooltipWindow::paint (Graphics& g)
     getLookAndFeel().drawTooltip (g, tipShowing, getWidth(), getHeight());
 }
 
-void TooltipWindow::mouseEnter (const MouseEvent&)
+void TooltipWindow::mouseEnter (const MouseEvent& e)
 {
-    hideTip();
+    if (e.eventComponent == this)
+        hideTip();
+}
+
+void TooltipWindow::mouseDown (const MouseEvent&)
+{
+    if (isVisible())
+        dismissalMouseEventOccured = true;
+}
+
+void TooltipWindow::mouseWheelMove (const MouseEvent&, const MouseWheelDetails&)
+{
+    if (isVisible())
+        dismissalMouseEventOccured = true;
 }
 
 void TooltipWindow::updatePosition (const String& tip, Point<int> pos, Rectangle<int> parentArea)
@@ -75,6 +94,11 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
 {
     jassert (tip.isNotEmpty());
 
+    displayTipInternal (screenPos, tip, ShownManually::yes);
+}
+
+void TooltipWindow::displayTipInternal (Point<int> screenPos, const String& tip, ShownManually shownManually)
+{
     if (! reentrant)
     {
         ScopedValueSetter<bool> setter (reentrant, true, false);
@@ -120,6 +144,8 @@ void TooltipWindow::displayTip (Point<int> screenPos, const String& tip)
        #endif
 
         toFront (false);
+        manuallyShownTip = shownManually == ShownManually::yes ? tip : String();
+        dismissalMouseEventOccured = false;
     }
 }
 
@@ -138,11 +164,16 @@ String TooltipWindow::getTipFor (Component& c)
 
 void TooltipWindow::hideTip()
 {
-    if (! reentrant)
+    if (isVisible() && ! reentrant)
     {
-        tipShowing.clear();
+        tipShowing = {};
+        manuallyShownTip = {};
+        dismissalMouseEventOccured = false;
+
         removeFromDesktop();
         setVisible (false);
+
+        lastHideTime = Time::getApproximateMillisecondCounter();
 
        #if JUCE_DEBUG
         activeTooltipWindows.removeAllInstancesOf (this);
@@ -165,60 +196,59 @@ std::unique_ptr<AccessibilityHandler> TooltipWindow::createAccessibilityHandler(
 
 void TooltipWindow::timerCallback()
 {
-    auto& desktop = Desktop::getInstance();
-    auto mouseSource = desktop.getMainMouseSource();
-    auto now = Time::getApproximateMillisecondCounter();
-
+    const auto mouseSource = Desktop::getInstance().getMainMouseSource();
     auto* newComp = mouseSource.isTouch() ? nullptr : mouseSource.getComponentUnderMouse();
+
+    if (manuallyShownTip.isNotEmpty())
+    {
+        if (dismissalMouseEventOccured || newComp == nullptr)
+            hideTip();
+
+        return;
+    }
 
     if (newComp == nullptr || getParentComponent() == nullptr || newComp->getPeer() == getPeer())
     {
-        auto newTip = newComp != nullptr ? getTipFor (*newComp) : String();
-        bool tipChanged = (newTip != lastTipUnderMouse || newComp != lastComponentUnderMouse);
-        lastComponentUnderMouse = newComp;
-        lastTipUnderMouse = newTip;
+        const auto newTip = newComp != nullptr ? getTipFor (*newComp) : String();
 
-        auto clickCount = desktop.getMouseButtonClickCounter();
-        auto wheelCount = desktop.getMouseWheelMoveCounter();
-        bool mouseWasClicked = (clickCount > mouseClicks || wheelCount > mouseWheelMoves);
-        mouseClicks = clickCount;
-        mouseWheelMoves = wheelCount;
-
-        auto mousePos = mouseSource.getScreenPosition();
-        bool mouseMovedQuickly = mousePos.getDistanceFrom (lastMousePos) > 12;
+        const auto mousePos = mouseSource.getScreenPosition();
+        const auto mouseMovedQuickly = (mousePos.getDistanceFrom (lastMousePos) > 12);
         lastMousePos = mousePos;
 
-        if (tipChanged || mouseWasClicked || mouseMovedQuickly)
+        const auto tipChanged = (newTip != lastTipUnderMouse || newComp != lastComponentUnderMouse);
+        const auto now = Time::getApproximateMillisecondCounter();
+
+        if (tipChanged || dismissalMouseEventOccured || mouseMovedQuickly)
             lastCompChangeTime = now;
+
+        const auto showTip = [this, &mouseSource, &mousePos, &newTip]
+        {
+            if (mouseSource.getLastMouseDownPosition() != lastMousePos)
+                displayTipInternal (mousePos.roundToInt(), newTip, ShownManually::no);
+        };
 
         if (isVisible() || now < lastHideTime + 500)
         {
             // if a tip is currently visible (or has just disappeared), update to a new one
             // immediately if needed..
-            if (newComp == nullptr || mouseWasClicked || newTip.isEmpty())
-            {
-                if (isVisible())
-                {
-                    lastHideTime = now;
-                    hideTip();
-                }
-            }
+            if (newComp == nullptr || dismissalMouseEventOccured || newTip.isEmpty())
+                hideTip();
             else if (tipChanged)
-            {
-                displayTip (mousePos.roundToInt(), newTip);
-            }
+                showTip();
         }
         else
         {
-            // if there isn't currently a tip, but one is needed, only let it
-            // appear after a timeout..
+            // if there isn't currently a tip, but one is needed, only let it appear after a timeout
             if (newTip.isNotEmpty()
-                 && newTip != tipShowing
-                 && now > lastCompChangeTime + (uint32) millisecondsBeforeTipAppears)
+                && newTip != tipShowing
+                && now > lastCompChangeTime + (uint32) millisecondsBeforeTipAppears)
             {
-                displayTip (mousePos.roundToInt(), newTip);
+                showTip();
             }
         }
+
+        lastComponentUnderMouse = newComp;
+        lastTipUnderMouse = newTip;
     }
 }
 

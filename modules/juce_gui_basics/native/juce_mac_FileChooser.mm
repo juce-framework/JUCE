@@ -82,8 +82,9 @@ public:
         filters.trim();
         filters.removeEmptyStrings();
 
-        NSString* nsTitle = juceStringToNS (owner.title);
+        auto* nsTitle = juceStringToNS (owner.title);
         [panel setTitle: nsTitle];
+        [panel setReleasedWhenClosed: YES];
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         [panel setAllowedFileTypes: createAllowedTypesArray (filters)];
@@ -153,22 +154,14 @@ public:
             if (nsViewPreview != nil)
             {
                 [panel setAccessoryView: nil];
-
                 [nsViewPreview release];
-
-                nsViewPreview = nil;
-                preview = nullptr;
             }
 
             [panel close];
-            [panel release];
         }
 
         if (delegate != nil)
-        {
             [delegate release];
-            delegate = nil;
-        }
     }
 
     void launch() override
@@ -179,10 +172,17 @@ public:
             addToDesktop (0);
 
             enterModalState (true);
-            [panel beginWithCompletionHandler:CreateObjCBlock (this, &Native::finished)];
 
-            if (preview != nullptr)
-                preview->toFront (true);
+            MessageManager::callAsync ([ref = SafePointer<Native> (this)]
+            {
+                if (ref == nullptr)
+                    return;
+
+                [ref->panel beginWithCompletionHandler: CreateObjCBlock (ref.getComponent(), &Native::finished)];
+
+                if (ref->preview != nullptr)
+                    ref->preview->toFront (true);
+            });
         }
     }
 
@@ -213,28 +213,39 @@ private:
     //==============================================================================
     typedef NSObject<NSOpenSavePanelDelegate> DelegateType;
 
+    static URL urlFromNSURL (NSURL* url)
+    {
+        const auto scheme = nsStringToJuce ([url scheme]);
+
+        auto pathComponents = StringArray::fromTokens (nsStringToJuce ([url path]), "/", {});
+
+        for (auto& component : pathComponents)
+            component = URL::addEscapeChars (component, false);
+
+        return { scheme + "://" + pathComponents.joinIntoString ("/") };
+    }
+
     void finished (NSInteger result)
     {
         Array<URL> chooserResults;
 
         exitModalState (0);
 
-        if (panel != nil && result ==
-                             #if defined (MAC_OS_X_VERSION_10_9) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_9
-                               NSModalResponseOK)
-                             #else
-                               NSFileHandlingPanelOKButton)
-                             #endif
+        const auto okResult = []() -> NSInteger
+        {
+            if (@available (macOS 10.9, *))
+                return NSModalResponseOK;
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            return NSFileHandlingPanelOKButton;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }();
+
+        if (panel != nil && result == okResult)
         {
             auto addURLResult = [&chooserResults] (NSURL* urlToAdd)
             {
-                auto scheme = nsStringToJuce ([urlToAdd scheme]);
-                auto pathComponents = StringArray::fromTokens (nsStringToJuce ([urlToAdd path]), "/", {});
-
-                for (auto& component : pathComponents)
-                    component = URL::addEscapeChars (component, false);
-
-                chooserResults.add (URL (scheme + "://" + pathComponents.joinIntoString ("/")));
+                chooserResults.add (urlFromNSURL (urlToAdd));
             };
 
             if (isSave)
@@ -254,17 +265,15 @@ private:
         owner.finished (chooserResults);
     }
 
-    bool shouldShowFilename (const String& filenameToTest)
+    BOOL shouldShowURL (const URL& urlToTest)
     {
-        const File f (filenameToTest);
-        auto nsFilename = juceStringToNS (filenameToTest);
-
         for (int i = filters.size(); --i >= 0;)
-            if (f.getFileName().matchesWildcard (filters[i], true))
-                return true;
+            if (urlToTest.getFileName().matchesWildcard (filters[i], true))
+                return YES;
 
+        const auto f = urlToTest.getLocalFile();
         return f.isDirectory()
-                 && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: nsFilename];
+                 && ! [[NSWorkspace sharedWorkspace] isFilePackageAtPath: juceStringToNS (f.getFullPathName())];
     }
 
     void panelSelectionDidChange (id sender)
@@ -323,7 +332,7 @@ private:
         jassert ([panel preventsApplicationTerminationWhenModal]);
     }
 
-    static BOOL preventsApplicationTerminationWhenModal() { return YES; }
+    static BOOL preventsApplicationTerminationWhenModal (id, SEL) { return YES; }
 
     template <typename Base>
     struct SafeModalPanel : public ObjCClass<Base>
@@ -331,8 +340,7 @@ private:
         explicit SafeModalPanel (const char* name) : ObjCClass<Base> (name)
         {
             this->addMethod (@selector (preventsApplicationTerminationWhenModal),
-                             preventsApplicationTerminationWhenModal,
-                             "c@:");
+                             preventsApplicationTerminationWhenModal);
 
             this->registerClass();
         }
@@ -355,8 +363,8 @@ private:
         {
             addIvar<Native*> ("cppObject");
 
-            addMethod (@selector (panel:shouldShowFilename:), shouldShowFilename,      "c@:@@");
-            addMethod (@selector (panelSelectionDidChange:),  panelSelectionDidChange, "c@");
+            addMethod (@selector (panel:shouldEnableURL:),   shouldEnableURL);
+            addMethod (@selector (panelSelectionDidChange:), panelSelectionDidChange);
 
             addProtocol (@protocol (NSOpenSavePanelDelegate));
 
@@ -364,18 +372,14 @@ private:
         }
 
     private:
-        static BOOL shouldShowFilename (id self, SEL, id /*sender*/, NSString* filename)
+        static BOOL shouldEnableURL (id self, SEL, id /*sender*/, NSURL* url)
         {
-            auto* _this = getIvar<Native*> (self, "cppObject");
-
-            return _this->shouldShowFilename (nsStringToJuce (filename)) ? YES : NO;
+            return getIvar<Native*> (self, "cppObject")->shouldShowURL (urlFromNSURL (url));
         }
 
         static void panelSelectionDidChange (id self, SEL, id sender)
         {
-            auto* _this = getIvar<Native*> (self, "cppObject");
-
-            _this->panelSelectionDidChange (sender);
+            getIvar<Native*> (self, "cppObject")->panelSelectionDidChange (sender);
         }
     };
 

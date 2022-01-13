@@ -203,7 +203,7 @@ public:
             Creates a new critical section to exclusively access methods which can
             only be called when the message manager is locked.
 
-            Unlike CrititcalSection, multiple instances of this lock class provide
+            Unlike CriticalSection, multiple instances of this lock class provide
             exclusive access to a single resource - the MessageManager.
         */
         Lock();

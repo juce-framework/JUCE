@@ -81,7 +81,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_CarbonVisibility.h"
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
@@ -259,7 +258,7 @@ public:
         {
             juceFilter->setRateAndBufferSizeDetails (getSampleRate(), (int) GetMaxFramesPerSlice());
 
-            audioBuffer.prepare (totalInChannels, totalOutChannels, (int) GetMaxFramesPerSlice() + 32);
+            audioBuffer.prepare (AudioUnitHelpers::getBusesLayout (juceFilter.get()), (int) GetMaxFramesPerSlice() + 32);
             juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
 
             midiEvents.ensureSize (2048);
@@ -1078,10 +1077,11 @@ public:
             {
                 auto value = inValue / getMaximumParameterValue (param);
 
-                param->setValue (value);
-
-                inParameterChangedCallback = true;
-                param->sendValueChangedMessageToListeners (value);
+                if (value != param->getValue())
+                {
+                    inParameterChangedCallback = true;
+                    param->setValueNotifyingHost (value);
+                }
 
                 return noErr;
             }
@@ -1143,22 +1143,27 @@ public:
         info.ppqPositionOfLastBarStart = 0;
         info.isRecording = false;
 
-        switch (lastTimeStamp.mSMPTETime.mType)
+        info.frameRate = [this]
         {
-            case kSMPTETimeType2398:        info.frameRate = AudioPlayHead::fps23976;    break;
-            case kSMPTETimeType24:          info.frameRate = AudioPlayHead::fps24;       break;
-            case kSMPTETimeType25:          info.frameRate = AudioPlayHead::fps25;       break;
-            case kSMPTETimeType30Drop:      info.frameRate = AudioPlayHead::fps30drop;   break;
-            case kSMPTETimeType30:          info.frameRate = AudioPlayHead::fps30;       break;
-            case kSMPTETimeType2997:        info.frameRate = AudioPlayHead::fps2997;     break;
-            case kSMPTETimeType2997Drop:    info.frameRate = AudioPlayHead::fps2997drop; break;
-            case kSMPTETimeType60:          info.frameRate = AudioPlayHead::fps60;       break;
-            case kSMPTETimeType60Drop:      info.frameRate = AudioPlayHead::fps60drop;   break;
-            case kSMPTETimeType5994:
-            case kSMPTETimeType5994Drop:
-            case kSMPTETimeType50:
-            default:                        info.frameRate = AudioPlayHead::fpsUnknown;  break;
-        }
+            switch (lastTimeStamp.mSMPTETime.mType)
+            {
+                case kSMPTETimeType2398:        return FrameRate().withBaseRate (24).withPullDown();
+                case kSMPTETimeType24:          return FrameRate().withBaseRate (24);
+                case kSMPTETimeType25:          return FrameRate().withBaseRate (25);
+                case kSMPTETimeType30Drop:      return FrameRate().withBaseRate (30).withDrop();
+                case kSMPTETimeType30:          return FrameRate().withBaseRate (30);
+                case kSMPTETimeType2997:        return FrameRate().withBaseRate (30).withPullDown();
+                case kSMPTETimeType2997Drop:    return FrameRate().withBaseRate (30).withPullDown().withDrop();
+                case kSMPTETimeType60:          return FrameRate().withBaseRate (60);
+                case kSMPTETimeType60Drop:      return FrameRate().withBaseRate (60).withDrop();
+                case kSMPTETimeType5994:        return FrameRate().withBaseRate (60).withPullDown();
+                case kSMPTETimeType5994Drop:    return FrameRate().withBaseRate (60).withPullDown().withDrop();
+                case kSMPTETimeType50:          return FrameRate().withBaseRate (50);
+                default:                        break;
+            }
+
+            return FrameRate();
+        }();
 
         if (CallHostBeatAndTempo (&info.ppqPosition, &info.bpm) != noErr)
         {
@@ -1392,21 +1397,12 @@ public:
             for (int busIdx = 0; busIdx < numInputBuses; ++busIdx)
             {
                 if (pulledSucceeded[busIdx])
-                {
-                    audioBuffer.push (GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
-                }
+                    audioBuffer.set (busIdx, GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
                 else
-                {
-                    const int n = juceFilter->getChannelCountOfBus (true, busIdx);
-
-                    for (int ch = 0; ch < n; ++ch)
-                        zeromem (audioBuffer.push(), sizeof (float) * nFrames);
-                }
+                    audioBuffer.clearInputBus (busIdx);
             }
 
-            // clear remaining channels
-            for (int i = totalInChannels; i < totalOutChannels; ++i)
-                zeromem (audioBuffer.push(), sizeof (float) * nFrames);
+            audioBuffer.clearUnusedChannels();
         }
 
         // swap midi buffers
@@ -1422,7 +1418,7 @@ public:
         // copy back
         {
             for (int busIdx = 0; busIdx < numOutputBuses; ++busIdx)
-                audioBuffer.pop (GetOutput ((UInt32) busIdx)->GetBufferList(), mapper.get (false, busIdx));
+                audioBuffer.get (busIdx, GetOutput ((UInt32) busIdx)->GetBufferList(), mapper.get (false, busIdx));
         }
 
         // process midi output
@@ -1533,7 +1529,6 @@ public:
             setWantsKeyboardFocus (true);
            #endif
 
-            ignoreUnused (fakeMouseGenerator);
             setBounds (getSizeToContainChild());
 
             lastBounds = getBounds();
@@ -1645,7 +1640,6 @@ public:
         }
 
     private:
-        FakeMouseMoveGenerator fakeMouseGenerator;
         Rectangle<int> lastBounds;
 
         JUCE_DECLARE_NON_COPYABLE (EditorCompHolder)
@@ -1671,10 +1665,10 @@ public:
             addIvar<JuceAU*> ("au");
             addIvar<EditorCompHolder*> ("editor");
 
-            addMethod (@selector (dealloc),                     dealloc,                    "v@:");
-            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate,   "v@:@");
-            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow,        "v@:");
-            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow,     "c@:");
+            addMethod (@selector (dealloc),                     dealloc);
+            addMethod (@selector (applicationWillTerminate:),   applicationWillTerminate);
+            addMethod (@selector (viewDidMoveToWindow),         viewDidMoveToWindow);
+            addMethod (@selector (mouseDownCanMoveWindow),      mouseDownCanMoveWindow);
 
             registerClass();
         }
@@ -1758,9 +1752,9 @@ public:
     {
         JuceUICreationClass()  : ObjCClass<NSObject> ("JUCE_AUCocoaViewClass_")
         {
-            addMethod (@selector (interfaceVersion),             interfaceVersion,    @encode (unsigned int), "@:");
-            addMethod (@selector (description),                  description,         @encode (NSString*),    "@:");
-            addMethod (@selector (uiViewForAudioUnit:withSize:), uiViewForAudioUnit,  @encode (NSView*),      "@:", @encode (AudioUnit), @encode (NSSize));
+            addMethod (@selector (interfaceVersion),             interfaceVersion);
+            addMethod (@selector (description),                  description);
+            addMethod (@selector (uiViewForAudioUnit:withSize:), uiViewForAudioUnit);
 
             addProtocol (@protocol (AUCocoaUIBase));
 
@@ -2117,7 +2111,7 @@ private:
         }
         else
         {
-            for (auto* param : juceParameters.params)
+            for (auto* param : juceParameters)
             {
                 const AudioUnitParameterID auParamID = generateAUParameterID (param);
 
@@ -2134,14 +2128,14 @@ private:
        #if JUCE_DEBUG
         // Some hosts can't handle the huge numbers of discrete parameter values created when
         // using the default number of steps.
-        for (auto* param : juceParameters.params)
+        for (auto* param : juceParameters)
             if (param->isDiscrete())
                 jassert (param->getNumSteps() != AudioProcessor::getDefaultNumParameterSteps());
        #endif
 
         parameterValueStringArrays.ensureStorageAllocated (numParams);
 
-        for (auto* param : juceParameters.params)
+        for (auto* param : juceParameters)
         {
             OwnedArray<const __CFString>* stringValues = nullptr;
 
@@ -2490,7 +2484,6 @@ private:
     //==============================================================================
     AudioProcessor* juceFilter;
     std::unique_ptr<Component> windowComp;
-    FakeMouseMoveGenerator fakeMouseGenerator;
 
     void deleteUI()
     {

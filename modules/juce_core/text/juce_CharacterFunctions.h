@@ -24,7 +24,7 @@ namespace juce
 {
 
 //==============================================================================
-#if JUCE_WINDOWS && ! DOXYGEN
+#if JUCE_WINDOWS && ! defined (DOXYGEN)
  #define JUCE_NATIVE_WCHAR_IS_UTF8      0
  #define JUCE_NATIVE_WCHAR_IS_UTF16     1
  #define JUCE_NATIVE_WCHAR_IS_UTF32     0
@@ -60,7 +60,7 @@ namespace juce
  #define T(stringLiteral)   JUCE_T(stringLiteral)
 #endif
 
-#if ! DOXYGEN
+#ifndef DOXYGEN
 
 //==============================================================================
 // GNU libstdc++ does not have std::make_unsigned
@@ -490,6 +490,9 @@ public:
     template <typename ResultType>
     struct HexParser
     {
+        static_assert (std::is_unsigned<ResultType>::value, "ResultType must be unsigned because "
+                                                            "left-shifting a negative value is UB");
+
         template <typename CharPointerType>
         static ResultType parse (CharPointerType t) noexcept
         {
@@ -497,10 +500,10 @@ public:
 
             while (! t.isEmpty())
             {
-                auto hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
+                auto hexValue = static_cast<ResultType> (CharacterFunctions::getHexDigitValue (t.getAndAdvance()));
 
                 if (hexValue >= 0)
-                    result = (result << 4) | hexValue;
+                    result = static_cast<ResultType> (result << 4) | hexValue;
             }
 
             return result;

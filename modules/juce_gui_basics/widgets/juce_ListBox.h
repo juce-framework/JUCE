@@ -538,7 +538,7 @@ public:
 
         @see Component::createComponentSnapshot
     */
-    virtual Image createSnapshotOfRows (const SparseSet<int>& rows, int& x, int& y);
+    virtual ScaledImage createSnapshotOfRows (const SparseSet<int>& rows, int& x, int& y);
 
     /** Returns the viewport that this ListBox uses.
 
@@ -572,6 +572,12 @@ public:
     void startDragAndDrop (const MouseEvent&, const SparseSet<int>& rowsToDrag,
                            const var& dragDescription, bool allowDraggingToOtherWindows);
 
+    //==============================================================================
+   #ifndef DOXYGEN
+    [[deprecated ("This method's bool parameter has changed: see the new method signature.")]]
+    void setSelectedRows (const SparseSet<int>&, bool);
+   #endif
+
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (class ListViewport)
@@ -592,14 +598,6 @@ private:
     bool hasAccessibleHeaderComponent() const;
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
                             bool deselectOthersFirst, bool isMouseClick);
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This method's bool parameter has changed: see the new method signature.
-    JUCE_DEPRECATED (void setSelectedRows (const SparseSet<int>&, bool));
-    // This method has been replaced by the more flexible method createSnapshotOfRows.
-    // Please call createSnapshotOfRows (getSelectedRows(), x, y) to get the same behaviour.
-    JUCE_DEPRECATED (virtual void createSnapshotOfSelectedRows (int&, int&)) {}
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ListBox)
 };

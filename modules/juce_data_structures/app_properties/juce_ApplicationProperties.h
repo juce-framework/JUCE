@@ -57,7 +57,7 @@ public:
         Before using it, you must call setStorageParameters() to give it the info
         it needs to create the property files.
     */
-    ApplicationProperties();
+    ApplicationProperties() = default;
 
     /** Destructor. */
     ~ApplicationProperties();

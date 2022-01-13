@@ -35,7 +35,7 @@
 
   ID:                 juce_opengl
   vendor:             juce
-  version:            6.1.2
+  version:            6.1.4
   name:               JUCE OpenGL classes
   description:        Classes for rendering OpenGL in a JUCE window.
   website:            http://www.juce.com/juce
@@ -71,7 +71,7 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 
 //==============================================================================
-#if JUCE_OPENGL_ES || defined (DOXYGEN)
+#if JUCE_OPENGL_ES || DOXYGEN
  /** This macro is a helper for use in GLSL shader code which needs to compile on both GLES and desktop GL.
      Since it's mandatory in GLES to mark a variable with a precision, but the keywords don't exist in normal GLSL,
      these macros define the various precision keywords only on GLES.

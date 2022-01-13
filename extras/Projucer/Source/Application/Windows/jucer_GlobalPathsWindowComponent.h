@@ -300,9 +300,9 @@ private:
     //==============================================================================
     Value selectedOSValue;
 
-    ValueWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
-                     vstPathValue, rtasPathValue, aaxPathValue, araPathValue,
-                     androidSDKPathValue, clionExePathValue, androidStudioExePathValue;
+    ValueTreePropertyWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
+                                 vstPathValue, rtasPathValue, aaxPathValue, araPathValue, androidSDKPathValue,
+                                 clionExePathValue, androidStudioExePathValue;
 
     Viewport propertyViewport;
     PropertyGroupComponent propertyGroup  { "Global Paths", { getIcons().openFolder, Colours::transparentBlack } };

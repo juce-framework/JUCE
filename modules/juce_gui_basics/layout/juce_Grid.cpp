@@ -26,9 +26,20 @@
 namespace juce
 {
 
+struct AllTracksIncludingImplicit
+{
+    Array<Grid::TrackInfo> items;
+    int numImplicitLeading; // The number of implicit items before the explicit items
+};
+
+struct Tracks
+{
+    AllTracksIncludingImplicit columns, rows;
+};
+
 struct Grid::SizeCalculation
 {
-    static float getTotalAbsoluteSize (const Array<Grid::TrackInfo>& tracks, Px gapSize) noexcept
+    static float getTotalAbsoluteSize (const Array<TrackInfo>& tracks, Px gapSize) noexcept
     {
         float totalCellSize = 0.0f;
 
@@ -42,7 +53,7 @@ struct Grid::SizeCalculation
         return totalCellSize + totalGap;
     }
 
-    static float getRelativeUnitSize (float size, float totalAbsolute, const Array<Grid::TrackInfo>& tracks) noexcept
+    static float getRelativeUnitSize (float size, float totalAbsolute, const Array<TrackInfo>& tracks) noexcept
     {
         const float totalRelative = jlimit (0.0f, size, size - totalAbsolute);
         float factorsSum = 0.0f;
@@ -56,50 +67,47 @@ struct Grid::SizeCalculation
     }
 
     //==============================================================================
-    static float getTotalAbsoluteHeight (const Array<Grid::TrackInfo>& rowTracks, Px rowGap)
+    static float getTotalAbsoluteHeight (const Array<TrackInfo>& rowTracks, Px rowGap)
     {
         return getTotalAbsoluteSize (rowTracks, rowGap);
     }
 
-    static float getTotalAbsoluteWidth (const Array<Grid::TrackInfo>& columnTracks, Px columnGap)
+    static float getTotalAbsoluteWidth (const Array<TrackInfo>& columnTracks, Px columnGap)
     {
         return getTotalAbsoluteSize (columnTracks, columnGap);
     }
 
-    static float getRelativeWidthUnit (float gridWidth, Px columnGap, const Array<Grid::TrackInfo>& columnTracks)
+    static float getRelativeWidthUnit (float gridWidth, Px columnGap, const Array<TrackInfo>& columnTracks)
     {
         return getRelativeUnitSize (gridWidth, getTotalAbsoluteWidth (columnTracks, columnGap), columnTracks);
     }
 
-    static float getRelativeHeightUnit (float gridHeight, Px rowGap, const Array<Grid::TrackInfo>& rowTracks)
+    static float getRelativeHeightUnit (float gridHeight, Px rowGap, const Array<TrackInfo>& rowTracks)
     {
         return getRelativeUnitSize (gridHeight, getTotalAbsoluteHeight (rowTracks, rowGap), rowTracks);
     }
 
     //==============================================================================
-    static bool hasAnyFractions (const Array<Grid::TrackInfo>& tracks)
+    static bool hasAnyFractions (const Array<TrackInfo>& tracks)
     {
-        for (auto& t : tracks)
-            if (t.isFractional())
-                return true;
-
-        return false;
+        return std::any_of (tracks.begin(),
+                            tracks.end(),
+                            [] (const auto& t) { return t.isFractional(); });
     }
 
     void computeSizes (float gridWidth, float gridHeight,
                        Px columnGapToUse, Px rowGapToUse,
-                       const Array<Grid::TrackInfo>& columnTracks,
-                       const Array<Grid::TrackInfo>& rowTracks)
+                       const Tracks& tracks)
     {
-        if (hasAnyFractions (columnTracks))
-            relativeWidthUnit = getRelativeWidthUnit (gridWidth, columnGapToUse, columnTracks);
+        if (hasAnyFractions (tracks.columns.items))
+            relativeWidthUnit = getRelativeWidthUnit (gridWidth, columnGapToUse, tracks.columns.items);
         else
-            remainingWidth = gridWidth - getTotalAbsoluteSize (columnTracks, columnGapToUse);
+            remainingWidth = gridWidth - getTotalAbsoluteSize (tracks.columns.items, columnGapToUse);
 
-        if (hasAnyFractions (rowTracks))
-            relativeHeightUnit = getRelativeHeightUnit (gridHeight, rowGapToUse, rowTracks);
+        if (hasAnyFractions (tracks.rows.items))
+            relativeHeightUnit = getRelativeHeightUnit (gridHeight, rowGapToUse, tracks.rows.items);
         else
-            remainingHeight = gridHeight - getTotalAbsoluteSize (rowTracks, rowGapToUse);
+            remainingHeight = gridHeight - getTotalAbsoluteSize (tracks.rows.items, rowGapToUse);
     }
 
     float relativeWidthUnit  = 0.0f;
@@ -126,7 +134,7 @@ struct Grid::PlacementHelpers
     };
 
     //==============================================================================
-    static Array<LineInfo> getArrayOfLinesFromTracks (const Array<Grid::TrackInfo>& tracks)
+    static Array<LineInfo> getArrayOfLinesFromTracks (const Array<TrackInfo>& tracks)
     {
         // fill line info array
         Array<LineInfo> lines;
@@ -168,7 +176,7 @@ struct Grid::PlacementHelpers
 
     //==============================================================================
     static int deduceAbsoluteLineNumberFromLineName (GridItem::Property prop,
-                                                     const Array<Grid::TrackInfo>& tracks)
+                                                     const Array<TrackInfo>& tracks)
     {
         jassert (prop.hasAbsolute());
 
@@ -195,19 +203,27 @@ struct Grid::PlacementHelpers
     }
 
     static int deduceAbsoluteLineNumber (GridItem::Property prop,
-                                         const Array<Grid::TrackInfo>& tracks)
+                                         const Array<TrackInfo>& tracks)
     {
         jassert (prop.hasAbsolute());
 
         if (prop.hasName())
             return deduceAbsoluteLineNumberFromLineName (prop, tracks);
 
-        return prop.getNumber() > 0 ? prop.getNumber() : tracks.size() + 2 + prop.getNumber();
+        if (prop.getNumber() > 0)
+            return prop.getNumber();
+
+        if (prop.getNumber() < 0)
+            return tracks.size() + 2 + prop.getNumber();
+
+        // An integer value of 0 is invalid
+        jassertfalse;
+        return 1;
     }
 
     static int deduceAbsoluteLineNumberFromNamedSpan (int startLineNumber,
                                                       GridItem::Property propertyWithSpan,
-                                                      const Array<Grid::TrackInfo>& tracks)
+                                                      const Array<TrackInfo>& tracks)
     {
         jassert (propertyWithSpan.hasSpan());
 
@@ -235,7 +251,7 @@ struct Grid::PlacementHelpers
 
     static int deduceAbsoluteLineNumberBasedOnSpan (int startLineNumber,
                                                     GridItem::Property propertyWithSpan,
-                                                    const Array<Grid::TrackInfo>& tracks)
+                                                    const Array<TrackInfo>& tracks)
     {
         jassert (propertyWithSpan.hasSpan());
 
@@ -246,10 +262,8 @@ struct Grid::PlacementHelpers
     }
 
     //==============================================================================
-    static LineRange deduceLineRange (GridItem::StartAndEndProperty prop, const Array<Grid::TrackInfo>& tracks)
+    static LineRange deduceLineRange (GridItem::StartAndEndProperty prop, const Array<TrackInfo>& tracks)
     {
-        LineRange s;
-
         jassert (! (prop.start.hasAuto() && prop.end.hasAuto()));
 
         if (prop.start.hasAbsolute() && prop.end.hasAuto())
@@ -261,27 +275,30 @@ struct Grid::PlacementHelpers
             prop.start = GridItem::Span (1);
         }
 
-        if (prop.start.hasAbsolute() && prop.end.hasAbsolute())
+        auto s = [&]() -> LineRange
         {
-            s.start = deduceAbsoluteLineNumber (prop.start, tracks);
-            s.end   = deduceAbsoluteLineNumber (prop.end, tracks);
-        }
-        else if (prop.start.hasAbsolute() && prop.end.hasSpan())
-        {
-            s.start = deduceAbsoluteLineNumber (prop.start, tracks);
-            s.end   = deduceAbsoluteLineNumberBasedOnSpan (s.start, prop.end, tracks);
-        }
-        else if (prop.start.hasSpan() && prop.end.hasAbsolute())
-        {
-            s.start = deduceAbsoluteLineNumber (prop.end, tracks);
-            s.end   = deduceAbsoluteLineNumberBasedOnSpan (s.start, prop.start, tracks);
-        }
-        else
-        {
+            if (prop.start.hasAbsolute() && prop.end.hasAbsolute())
+            {
+                return { deduceAbsoluteLineNumber (prop.start, tracks),
+                         deduceAbsoluteLineNumber (prop.end, tracks) };
+            }
+
+            if (prop.start.hasAbsolute() && prop.end.hasSpan())
+            {
+                const auto start = deduceAbsoluteLineNumber (prop.start, tracks);
+                return { start, deduceAbsoluteLineNumberBasedOnSpan (start, prop.end, tracks) };
+            }
+
+            if (prop.start.hasSpan() && prop.end.hasAbsolute())
+            {
+                const auto start = deduceAbsoluteLineNumber (prop.end, tracks);
+                return { start, deduceAbsoluteLineNumberBasedOnSpan (start, prop.start, tracks) };
+            }
+
             // Can't have an item with spans on both start and end.
             jassertfalse;
-            s.start = s.end = {};
-        }
+            return {};
+        }();
 
         // swap if start overtakes end
         if (s.start > s.end)
@@ -388,81 +405,77 @@ struct Grid::PlacementHelpers
     }
 
     //==============================================================================
-    static float getCoord (int trackNumber, float relativeUnit, Px gap, const Array<Grid::TrackInfo>& tracks)
+    static float getCoord (int trackNumber, float relativeUnit, Px gap, const Array<TrackInfo>& tracks)
     {
         float c = 0;
 
-        for (const auto* it = tracks.begin(); it != tracks.begin() + trackNumber - 1; ++it)
+        for (const auto* it = tracks.begin(); it != tracks.begin() + trackNumber; ++it)
             c += it->getAbsoluteSize (relativeUnit) + static_cast<float> (gap.pixels);
 
         return c;
     }
 
     static Rectangle<float> getCellBounds (int columnNumber, int rowNumber,
-                                                 const Array<Grid::TrackInfo>& columnTracks,
-                                                 const Array<Grid::TrackInfo>& rowTracks,
-                                                 Grid::SizeCalculation calculation,
-                                                 Px columnGap, Px rowGap)
+                                           const Tracks& tracks,
+                                           SizeCalculation calculation,
+                                           Px columnGap, Px rowGap)
     {
-        jassert (columnNumber >= 1 && columnNumber <= columnTracks.size());
-        jassert (rowNumber >= 1 && rowNumber <= rowTracks.size());
+        const auto correctedColumn = columnNumber - 1 + tracks.columns.numImplicitLeading;
+        const auto correctedRow    = rowNumber    - 1 + tracks.rows   .numImplicitLeading;
 
-        const auto x = getCoord (columnNumber, calculation.relativeWidthUnit, columnGap, columnTracks);
-        const auto y = getCoord (rowNumber, calculation.relativeHeightUnit, rowGap, rowTracks);
+        jassert (isPositiveAndBelow (correctedColumn, tracks.columns.items.size()));
+        jassert (isPositiveAndBelow (correctedRow,    tracks.rows   .items.size()));
 
-        const auto& columnTrackInfo = columnTracks.getReference (columnNumber - 1);
-        const float width = columnTrackInfo.getAbsoluteSize (calculation.relativeWidthUnit);
-
-        const auto& rowTrackInfo = rowTracks.getReference (rowNumber - 1);
-        const float height = rowTrackInfo.getAbsoluteSize (calculation.relativeHeightUnit);
-
-        return { x, y, width, height };
+        return { getCoord (correctedColumn, calculation.relativeWidthUnit,  columnGap, tracks.columns.items),
+                 getCoord (correctedRow,    calculation.relativeHeightUnit, rowGap,    tracks.rows   .items),
+                 tracks.columns.items.getReference (correctedColumn).getAbsoluteSize (calculation.relativeWidthUnit),
+                 tracks.rows   .items.getReference (correctedRow)   .getAbsoluteSize (calculation.relativeHeightUnit) };
     }
 
     static Rectangle<float> alignCell (Rectangle<float> area,
-                                             int columnNumber, int rowNumber,
-                                             int numberOfColumns, int numberOfRows,
-                                             Grid::SizeCalculation calculation,
-                                             Grid::AlignContent alignContent,
-                                             Grid::JustifyContent justifyContent)
+                                       int columnNumber, int rowNumber,
+                                       int numberOfColumns, int numberOfRows,
+                                       SizeCalculation calculation,
+                                       AlignContent alignContent,
+                                       JustifyContent justifyContent)
     {
-        if (alignContent == Grid::AlignContent::end)
+        if (alignContent == AlignContent::end)
             area.setY (area.getY() + calculation.remainingHeight);
 
-        if (justifyContent == Grid::JustifyContent::end)
+        if (justifyContent == JustifyContent::end)
             area.setX (area.getX() + calculation.remainingWidth);
 
-        if (alignContent == Grid::AlignContent::center)
+        if (alignContent == AlignContent::center)
             area.setY (area.getY() + calculation.remainingHeight / 2);
 
-        if (justifyContent == Grid::JustifyContent::center)
+        if (justifyContent == JustifyContent::center)
             area.setX (area.getX() + calculation.remainingWidth / 2);
 
-        if (alignContent == Grid::AlignContent::spaceBetween)
+        if (alignContent == AlignContent::spaceBetween)
         {
             const auto shift = ((float) (rowNumber - 1) * (calculation.remainingHeight / float(numberOfRows - 1)));
             area.setY (area.getY() + shift);
         }
 
-        if (justifyContent == Grid::JustifyContent::spaceBetween)
+        if (justifyContent == JustifyContent::spaceBetween)
         {
             const auto shift = ((float) (columnNumber - 1) * (calculation.remainingWidth / float(numberOfColumns - 1)));
             area.setX (area.getX() + shift);
         }
 
-        if (alignContent == Grid::AlignContent::spaceEvenly)
+        if (alignContent == AlignContent::spaceEvenly)
         {
             const auto shift = ((float) rowNumber * (calculation.remainingHeight / float(numberOfRows + 1)));
             area.setY (area.getY() + shift);
         }
 
-        if (justifyContent == Grid::JustifyContent::spaceEvenly)
+        if (justifyContent == JustifyContent::spaceEvenly)
         {
             const auto shift = ((float) columnNumber * (calculation.remainingWidth / float(numberOfColumns + 1)));
             area.setX (area.getX() + shift);
         }
 
-        if (alignContent == Grid::AlignContent::spaceAround)
+        if (alignContent == AlignContent::spaceAround)
         {
             const auto inbetweenShift = calculation.remainingHeight / float(numberOfRows);
             const auto sidesShift = inbetweenShift / 2;
@@ -471,7 +484,7 @@ struct Grid::PlacementHelpers
             area.setY (area.getY() + shift);
         }
 
-        if (justifyContent == Grid::JustifyContent::spaceAround)
+        if (justifyContent == JustifyContent::spaceAround)
         {
             const auto inbetweenShift = calculation.remainingWidth / float(numberOfColumns);
             const auto sidesShift = inbetweenShift / 2;
@@ -483,50 +496,49 @@ struct Grid::PlacementHelpers
         return area;
     }
 
-    static Rectangle<float> getAreaBounds (int columnLineNumberStart, int columnLineNumberEnd,
-                                                 int rowLineNumberStart, int rowLineNumberEnd,
-                                                 const Array<Grid::TrackInfo>& columnTracks,
-                                                 const Array<Grid::TrackInfo>& rowTracks,
-                                                 Grid::SizeCalculation calculation,
-                                                 Grid::AlignContent alignContent,
-                                                 Grid::JustifyContent justifyContent,
-                                                 Px columnGap, Px rowGap)
+    static Rectangle<float> getAreaBounds (PlacementHelpers::LineRange columnRange,
+                                           PlacementHelpers::LineRange rowRange,
+                                           const Tracks& tracks,
+                                           SizeCalculation calculation,
+                                           AlignContent alignContent,
+                                           JustifyContent justifyContent,
+                                           Px columnGap, Px rowGap)
     {
-        auto startCell = getCellBounds (columnLineNumberStart, rowLineNumberStart,
-                                        columnTracks, rowTracks,
-                                        calculation,
-                                        columnGap, rowGap);
+        const auto findAlignedCell = [&] (int column, int row)
+        {
+            const auto cell = getCellBounds (column, row, tracks, calculation, columnGap, rowGap);
+            return alignCell (cell,
+                              column,
+                              row,
+                              tracks.columns.items.size(),
+                              tracks.rows.items.size(),
+                              calculation,
+                              alignContent,
+                              justifyContent);
+        };
 
-        auto endCell = getCellBounds (columnLineNumberEnd - 1, rowLineNumberEnd - 1,
-                                      columnTracks, rowTracks,
-                                      calculation,
-                                      columnGap, rowGap);
+        const auto startCell = findAlignedCell (columnRange.start,   rowRange.start);
+        const auto endCell   = findAlignedCell (columnRange.end - 1, rowRange.end - 1);
 
-        startCell = alignCell (startCell,
-                               columnLineNumberStart, rowLineNumberStart,
-                               columnTracks.size(), rowTracks.size(),
-                               calculation,
-                               alignContent,
-                               justifyContent);
-
-        endCell = alignCell (endCell,
-                             columnLineNumberEnd - 1, rowLineNumberEnd - 1,
-                             columnTracks.size(), rowTracks.size(),
-                             calculation,
-                             alignContent,
-                             justifyContent);
-
-        auto horizontalRange = startCell.getHorizontalRange().getUnionWith (endCell.getHorizontalRange());
-        auto verticalRange = startCell.getVerticalRange().getUnionWith (endCell.getVerticalRange());
+        const auto horizontalRange = startCell.getHorizontalRange().getUnionWith (endCell.getHorizontalRange());
+        const auto verticalRange   = startCell.getVerticalRange()  .getUnionWith (endCell.getVerticalRange());
         return { horizontalRange.getStart(),  verticalRange.getStart(),
                  horizontalRange.getLength(), verticalRange.getLength() };
     }
 };
 
+template <typename Item>
+static Array<Item> operator+ (const Array<Item>& a, const Array<Item>& b)
+{
+    auto copy = a;
+    copy.addArray (b);
+    return copy;
+}
+
 //==============================================================================
 struct Grid::AutoPlacement
 {
-    using ItemPlacementArray = Array<std::pair<GridItem*, Grid::PlacementHelpers::LineArea>>;
+    using ItemPlacementArray = Array<std::pair<GridItem*, PlacementHelpers::LineArea>>;
 
     //==============================================================================
     struct OccupancyPlane
@@ -538,7 +550,7 @@ struct Grid::AutoPlacement
               columnFirst (isColumnFirst)
         {}
 
-        Grid::PlacementHelpers::LineArea setCell (Cell cell, int columnSpan, int rowSpan)
+        PlacementHelpers::LineArea setCell (Cell cell, int columnSpan, int rowSpan)
         {
             for (int i = 0; i < columnSpan; i++)
                 for (int j = 0; j < rowSpan; j++)
@@ -547,7 +559,7 @@ struct Grid::AutoPlacement
             return { { cell.column, cell.column + columnSpan }, { cell.row, cell.row + rowSpan } };
         }
 
-        Grid::PlacementHelpers::LineArea setCell (Cell start, Cell end)
+        PlacementHelpers::LineArea setCell (Cell start, Cell end)
         {
             return setCell (start, std::abs (end.column - start.column),
                                    std::abs (end.row - start.row));
@@ -703,16 +715,16 @@ struct Grid::AutoPlacement
     }
 
     //==============================================================================
-    static bool hasDenseAutoFlow (Grid::AutoFlow autoFlow)
+    static bool hasDenseAutoFlow (AutoFlow autoFlow)
     {
-        return autoFlow == Grid::AutoFlow::columnDense
-            || autoFlow == Grid::AutoFlow::rowDense;
+        return autoFlow == AutoFlow::columnDense
+            || autoFlow == AutoFlow::rowDense;
     }
 
-    static bool isColumnAutoFlow (Grid::AutoFlow autoFlow)
+    static bool isColumnAutoFlow (AutoFlow autoFlow)
     {
-        return autoFlow == Grid::AutoFlow::column
-            || autoFlow == Grid::AutoFlow::columnDense;
+        return autoFlow == AutoFlow::column
+            || autoFlow == AutoFlow::columnDense;
     }
 
     //==============================================================================
@@ -730,7 +742,7 @@ struct Grid::AutoPlacement
     //==============================================================================
     ItemPlacementArray deduceAllItems (Grid& grid) const
     {
-        const auto namedAreas = Grid::PlacementHelpers::deduceNamedAreas (grid.templateAreas);
+        const auto namedAreas = PlacementHelpers::deduceNamedAreas (grid.templateAreas);
 
         OccupancyPlane plane (jmax (grid.templateColumns.size() + 1, 2),
                               jmax (grid.templateRows.size() + 1, 2),
@@ -750,7 +762,7 @@ struct Grid::AutoPlacement
         {
             if (hasFullyFixedPlacement (*item))
             {
-                const auto a = Grid::PlacementHelpers::deduceLineArea (*item, grid, namedAreas);
+                const auto a = PlacementHelpers::deduceLineArea (*item, grid, namedAreas);
                 plane.setCell ({ a.column.start, a.row.start }, { a.column.end, a.row.end });
                 itemPlacementArray.add ({ item, a });
             }
@@ -764,7 +776,7 @@ struct Grid::AutoPlacement
             {
                 if (isFixed (item->column))
                 {
-                    const auto p = Grid::PlacementHelpers::deduceLineRange (item->column, grid.templateColumns);
+                    const auto p = PlacementHelpers::deduceLineRange (item->column, grid.templateColumns);
                     const auto columnSpan = std::abs (p.start - p.end);
                     const auto rowSpan = getSpanFromAuto (item->row);
 
@@ -778,7 +790,7 @@ struct Grid::AutoPlacement
                 }
                 else if (isFixed (item->row))
                 {
-                    const auto p = Grid::PlacementHelpers::deduceLineRange (item->row, grid.templateRows);
+                    const auto p = PlacementHelpers::deduceLineRange (item->row, grid.templateRows);
                     const auto columnSpan = getSpanFromAuto (item->column);
                     const auto rowSpan = std::abs (p.start - p.end);
 
@@ -818,72 +830,84 @@ struct Grid::AutoPlacement
     }
 
     //==============================================================================
-    static std::pair<int, int> getHighestEndLinesNumbers (const ItemPlacementArray& items)
+    template <typename Accessor>
+    static PlacementHelpers::LineRange findFullLineRange (const ItemPlacementArray& items, Accessor&& accessor)
     {
-        int columnEndLine = 1;
-        int rowEndLine = 1;
+        if (items.isEmpty())
+            return { 1, 1 };
 
-        for (auto& item : items)
+        const auto combine = [&accessor] (const auto& acc, const auto& item)
         {
-            const auto p = item.second;
-            columnEndLine = std::max (p.column.end, columnEndLine);
-            rowEndLine = std::max (p.row.end, rowEndLine);
-        }
+            const auto newRange = accessor (item);
+            return PlacementHelpers::LineRange { std::min (acc.start, newRange.start),
+                                                 std::max (acc.end,   newRange.end) };
+        };
 
-        return { columnEndLine, rowEndLine };
+        return std::accumulate (std::next (items.begin()), items.end(), accessor (*items.begin()), combine);
     }
 
-    static std::pair<Array<TrackInfo>, Array<TrackInfo>> createImplicitTracks (const Grid& grid,
-                                                                                           const ItemPlacementArray& items)
+    static PlacementHelpers::LineArea findFullLineArea (const ItemPlacementArray& items)
     {
-        const auto columnAndRowLineEnds = getHighestEndLinesNumbers (items);
+        return { findFullLineRange (items, [] (const auto& item) { return item.second.column; }),
+                 findFullLineRange (items, [] (const auto& item) { return item.second.row; }) };
+    }
 
-        Array<TrackInfo> implicitColumnTracks, implicitRowTracks;
+    template <typename Item>
+    static Array<Item> repeated (int repeats, const Item& item)
+    {
+        Array<Item> result;
+        result.insertMultiple (-1, item, repeats);
+        return result;
+    }
 
-        for (int i = grid.templateColumns.size() + 1; i < columnAndRowLineEnds.first; i++)
-            implicitColumnTracks.add (grid.autoColumns);
+    static Tracks createImplicitTracks (const Grid& grid, const ItemPlacementArray& items)
+    {
+        const auto fullArea = findFullLineArea (items);
 
-        for (int i = grid.templateRows.size() + 1; i < columnAndRowLineEnds.second; i++)
-            implicitRowTracks.add (grid.autoRows);
+        const auto leadingColumns = std::max (0, 1 - fullArea.column.start);
+        const auto leadingRows    = std::max (0, 1 - fullArea.row.start);
 
-        return { implicitColumnTracks, implicitRowTracks };
+        const auto trailingColumns = std::max (0, fullArea.column.end - grid.templateColumns.size() - 1);
+        const auto trailingRows    = std::max (0, fullArea.row   .end - grid.templateRows   .size() - 1);
+
+        return  { { repeated (leadingColumns, grid.autoColumns) + grid.templateColumns + repeated (trailingColumns, grid.autoColumns),
+                    leadingColumns },
+                  { repeated (leadingRows,    grid.autoRows)    + grid.templateRows    + repeated (trailingRows,    grid.autoRows),
+                    leadingRows } };
     }
 
     //==============================================================================
-    static void applySizeForAutoTracks (Array<Grid::TrackInfo>& columns,
-                                        Array<Grid::TrackInfo>& rows,
-                                        const ItemPlacementArray& itemPlacementArray)
+    static void applySizeForAutoTracks (Tracks& tracks, const ItemPlacementArray& placements)
     {
-        auto isSpan = [] (Grid::PlacementHelpers::LineRange r) -> bool { return std::abs (r.end - r.start) > 1; };
-
-        auto getHighestItemOnRow = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
+        const auto setSizes = [&placements] (auto& tracksInDirection, const auto& getItem, const auto& getItemSize)
         {
-            float highestRowSize = 0.0f;
+            auto& array = tracksInDirection.items;
 
-            for (const auto& i : itemPlacementArrayToUse)
-                if (! isSpan (i.second.row) && i.second.row.start == rowNumber)
-                    highestRowSize = std::max (highestRowSize, i.first->height + i.first->margin.top + i.first->margin.bottom);
+            for (int index = 0; index < array.size(); ++index)
+            {
+                if (array.getReference (index).isAuto())
+                {
+                    const auto combiner = [&] (const auto acc, const auto& element)
+                    {
+                        const auto item = getItem (element.second);
+                        const auto isNotSpan = std::abs (item.end - item.start) <= 1;
+                        return isNotSpan && item.start == index + 1 - tracksInDirection.numImplicitLeading
+                               ? std::max (acc, getItemSize (*element.first))
+                               : acc;
+                    };
 
-            return highestRowSize;
+                    array.getReference (index).size = std::accumulate (placements.begin(), placements.end(), 0.0f, combiner);
+                }
+            }
         };
 
-        auto getHighestItemOnColumn = [isSpan] (int rowNumber, const ItemPlacementArray& itemPlacementArrayToUse) -> float
-        {
-            float highestColumnSize = 0.0f;
-            for (const auto& i : itemPlacementArrayToUse)
-                if (! isSpan (i.second.column) && i.second.column.start == rowNumber)
-                    highestColumnSize = std::max (highestColumnSize, i.first->width + i.first->margin.left + i.first->margin.right);
+        setSizes (tracks.rows,
+                  [] (const auto& i) { return i.row; },
+                  [] (const auto& i) { return i.height + i.margin.top + i.margin.bottom; });
 
-            return highestColumnSize;
-        };
-
-        for (int i = 0; i < rows.size(); i++)
-            if (rows.getReference (i).isAuto())
-                rows.getReference (i).size = getHighestItemOnRow (i + 1, itemPlacementArray);
-
-        for (int i = 0; i < columns.size(); i++)
-            if (columns.getReference (i).isAuto())
-                columns.getReference (i).size = getHighestItemOnColumn (i + 1, itemPlacementArray);
+        setSizes (tracks.columns,
+                  [] (const auto& i) { return i.column; },
+                  [] (const auto& i) { return i.width + i.margin.left + i.margin.right; });
     }
 };
 
@@ -891,22 +915,17 @@ struct Grid::AutoPlacement
 struct Grid::BoxAlignment
 {
     static Rectangle<float> alignItem (const GridItem& item,
-                                             const Grid& grid,
-                                             Rectangle<float> area)
+                                       const Grid& grid,
+                                       Rectangle<float> area)
     {
         // if item align is auto, inherit value from grid
-        Grid::AlignItems alignType = Grid::AlignItems::start;
-        Grid::JustifyItems justifyType = Grid::JustifyItems::start;
+        const auto alignType = item.alignSelf == GridItem::AlignSelf::autoValue
+                             ? grid.alignItems
+                             : static_cast<AlignItems> (item.alignSelf);
 
-        if (item.alignSelf == GridItem::AlignSelf::autoValue)
-            alignType = grid.alignItems;
-        else
-            alignType = static_cast<Grid::AlignItems> (item.alignSelf);
-
-        if (item.justifySelf == GridItem::JustifySelf::autoValue)
-            justifyType = grid.justifyItems;
-        else
-            justifyType = static_cast<Grid::JustifyItems> (item.justifySelf);
+        const auto justifyType = item.justifySelf == GridItem::JustifySelf::autoValue
+                               ? grid.justifyItems
+                               : static_cast<JustifyItems> (item.justifySelf);
 
         // subtract margin from area
         area = BorderSize<float> (item.margin.top, item.margin.left, item.margin.bottom, item.margin.right)
@@ -922,13 +941,13 @@ struct Grid::BoxAlignment
         if (item.maxHeight != (float) GridItem::notAssigned)  r.setHeight (jmin (item.maxHeight, r.getHeight()));
         if (item.minHeight > 0.0f)                            r.setHeight (jmax (item.minHeight, r.getHeight()));
 
-        if (alignType == Grid::AlignItems::start && justifyType == Grid::JustifyItems::start)
+        if (alignType == AlignItems::start && justifyType == JustifyItems::start)
             return r;
 
-        if (alignType   == Grid::AlignItems::end)       r.setY (r.getY() + (area.getHeight() - r.getHeight()));
-        if (justifyType == Grid::JustifyItems::end)     r.setX (r.getX() + (area.getWidth()  - r.getWidth()));
-        if (alignType   == Grid::AlignItems::center)    r.setCentre (r.getCentreX(),    area.getCentreY());
-        if (justifyType == Grid::JustifyItems::center)  r.setCentre (area.getCentreX(), r.getCentreY());
+        if (alignType   == AlignItems::end)       r.setY (r.getY() + (area.getHeight() - r.getHeight()));
+        if (justifyType == JustifyItems::end)     r.setX (r.getX() + (area.getWidth()  - r.getWidth()));
+        if (alignType   == AlignItems::center)    r.setCentre (r.getCentreX(),    area.getCentreY());
+        if (justifyType == JustifyItems::center)  r.setCentre (area.getCentreX(), r.getCentreY());
 
         return r;
     }
@@ -937,90 +956,83 @@ struct Grid::BoxAlignment
 //==============================================================================
 Grid::TrackInfo::TrackInfo() noexcept : hasKeyword (true) {}
 
-Grid::TrackInfo::TrackInfo (Px sizeInPixels) noexcept : size (static_cast<float> (sizeInPixels.pixels)), isFraction (false) {}
+Grid::TrackInfo::TrackInfo (Px sizeInPixels) noexcept
+    : size (static_cast<float> (sizeInPixels.pixels)), isFraction (false) {}
 
-Grid::TrackInfo::TrackInfo (Fr fractionOfFreeSpace) noexcept : size ((float)fractionOfFreeSpace.fraction), isFraction (true) {}
+Grid::TrackInfo::TrackInfo (Fr fractionOfFreeSpace) noexcept
+    : size ((float)fractionOfFreeSpace.fraction), isFraction (true) {}
 
-Grid::TrackInfo::TrackInfo (Px sizeInPixels, const String& endLineNameToUse) noexcept : Grid::TrackInfo (sizeInPixels)
+Grid::TrackInfo::TrackInfo (Px sizeInPixels, const String& endLineNameToUse) noexcept
+    : TrackInfo (sizeInPixels)
 {
     endLineName = endLineNameToUse;
 }
 
-Grid::TrackInfo::TrackInfo (Fr fractionOfFreeSpace, const String& endLineNameToUse) noexcept : Grid::TrackInfo (fractionOfFreeSpace)
+Grid::TrackInfo::TrackInfo (Fr fractionOfFreeSpace, const String& endLineNameToUse) noexcept
+    : TrackInfo (fractionOfFreeSpace)
 {
     endLineName = endLineNameToUse;
 }
 
-Grid::TrackInfo::TrackInfo (const String& startLineNameToUse, Px sizeInPixels) noexcept : Grid::TrackInfo (sizeInPixels)
+Grid::TrackInfo::TrackInfo (const String& startLineNameToUse, Px sizeInPixels) noexcept
+    : TrackInfo (sizeInPixels)
 {
     startLineName = startLineNameToUse;
 }
 
-Grid::TrackInfo::TrackInfo (const String& startLineNameToUse, Fr fractionOfFreeSpace) noexcept : Grid::TrackInfo (fractionOfFreeSpace)
+Grid::TrackInfo::TrackInfo (const String& startLineNameToUse, Fr fractionOfFreeSpace) noexcept
+    : TrackInfo (fractionOfFreeSpace)
 {
     startLineName = startLineNameToUse;
 }
 
 Grid::TrackInfo::TrackInfo (const String& startLineNameToUse, Px sizeInPixels, const String& endLineNameToUse) noexcept
-  : Grid::TrackInfo (startLineNameToUse, sizeInPixels)
+    : TrackInfo (startLineNameToUse, sizeInPixels)
 {
     endLineName = endLineNameToUse;
 }
 
 Grid::TrackInfo::TrackInfo (const String& startLineNameToUse, Fr fractionOfFreeSpace, const String& endLineNameToUse) noexcept
-  : Grid::TrackInfo (startLineNameToUse, fractionOfFreeSpace)
+  : TrackInfo (startLineNameToUse, fractionOfFreeSpace)
 {
     endLineName = endLineNameToUse;
 }
 
 float Grid::TrackInfo::getAbsoluteSize (float relativeFractionalUnit) const
 {
-    if (isFractional())
-        return size * relativeFractionalUnit;
-    else
-        return size;
+    return isFractional() ? size * relativeFractionalUnit : size;
 }
-
-//==============================================================================
-Grid::Grid() noexcept {}
-Grid::~Grid() noexcept {}
 
 //==============================================================================
 void Grid::performLayout (Rectangle<int> targetArea)
 {
-    const auto itemsAndAreas = Grid::AutoPlacement().deduceAllItems (*this);
+    const auto itemsAndAreas = AutoPlacement().deduceAllItems (*this);
 
-    const auto implicitTracks = Grid::AutoPlacement::createImplicitTracks (*this, itemsAndAreas);
-    auto columnTracks = templateColumns;
-    auto rowTracks = templateRows;
-    columnTracks.addArray (implicitTracks.first);
-    rowTracks.addArray (implicitTracks.second);
+    auto implicitTracks = AutoPlacement::createImplicitTracks (*this, itemsAndAreas);
 
-    Grid::AutoPlacement::applySizeForAutoTracks (columnTracks, rowTracks, itemsAndAreas);
+    AutoPlacement::applySizeForAutoTracks (implicitTracks, itemsAndAreas);
 
-    Grid::SizeCalculation calculation;
+    SizeCalculation calculation;
     calculation.computeSizes (targetArea.toFloat().getWidth(),
                               targetArea.toFloat().getHeight(),
                               columnGap,
                               rowGap,
-                              columnTracks,
-                              rowTracks);
+                              implicitTracks);
 
     for (auto& itemAndArea : itemsAndAreas)
     {
         const auto a = itemAndArea.second;
-        const auto areaBounds = Grid::PlacementHelpers::getAreaBounds (a.column.start, a.column.end,
-                                                                       a.row.start, a.row.end,
-                                                                       columnTracks,
-                                                                       rowTracks,
-                                                                       calculation,
-                                                                       alignContent,
-                                                                       justifyContent,
-                                                                       columnGap,
-                                                                       rowGap);
+        const auto areaBounds = PlacementHelpers::getAreaBounds (a.column,
+                                                                 a.row,
+                                                                 implicitTracks,
+                                                                 calculation,
+                                                                 alignContent,
+                                                                 justifyContent,
+                                                                 columnGap,
+                                                                 rowGap);
 
         auto* item = itemAndArea.first;
-        item->currentBounds = Grid::BoxAlignment::alignItem (*item, *this, areaBounds)
+        item->currentBounds = BoxAlignment::alignItem (*item, *this, areaBounds)
                                 + targetArea.toFloat().getPosition();
 
         if (auto* c = item->associatedComponent)
@@ -1042,6 +1054,13 @@ struct GridTests  : public UnitTest
         using Fr = Grid::Fr;
         using Tr = Grid::TrackInfo;
         using Rect = Rectangle<float>;
+
+        beginTest ("Layout calculation of an empty grid is a no-op");
+        {
+            const Rectangle<int> bounds { 100, 200 };
+            Grid grid;
+            grid.performLayout (bounds);
+        }
 
         {
             Grid grid;
@@ -1165,6 +1184,23 @@ struct GridTests  : public UnitTest
         }
 
         {
+            Grid grid;
+
+            grid.templateColumns = { Tr ("first", 20_px, "in"), Tr ("in", 1_fr, "in"), Tr (20_px, "last") };
+            grid.templateRows = { Tr (1_fr), Tr (20_px) };
+
+            beginTest ("Grid items placement tests: integer, counting backward");
+
+            grid.items = { GridItem{}.withColumn ({  -2, -1 }).withRow ({ 1,  3 }),
+                           GridItem{}.withColumn ({ -10, -1 }).withRow ({ 1, -1 }) };
+
+            grid.performLayout ({ 140, 100 });
+
+            expect (grid.items[0].currentBounds == Rect (120.0f, 0.0f, 20.0f, 100.0f));
+            expect (grid.items[1].currentBounds == Rect (0.0f, 0.0f,  140.0f, 100.0f));
+        }
+
+        {
             beginTest ("Grid items placement tests: areas");
 
             Grid grid;
@@ -1259,6 +1295,55 @@ struct GridTests  : public UnitTest
             expect (grid.items[4].currentBounds == Rect (250.f, 150.f, 100.f, 100.f));
         }
 
+        {
+            beginTest ("Grid implicit rows and columns: triggered by out-of-bounds indices");
+
+            Grid grid;
+
+            grid.templateColumns = { Tr (1_fr),  Tr (1_fr) };
+            grid.templateRows    = { Tr (60_px), Tr (60_px) };
+
+            grid.autoColumns = Tr (20_px);
+            grid.autoRows    = Tr (1_fr);
+
+            grid.items = { GridItem{}.withColumn ({  5,  8 }).withRow ({ -5, -4 }),
+                           GridItem{}.withColumn ({  4,  7 }).withRow ({ -4, -3 }),
+                           GridItem{}.withColumn ({ -2, -1 }).withRow ({  4,  5 }) };
+
+            grid.performLayout ({ 500, 400 });
+
+            //       -3  -2  -1
+            //        1   2   3   4   5   6   7   8
+            //  -5    +---+---+---+---+---+---+---+   0
+            //        |   |   |   |   | 0 | 0 | 0 |
+            //  -4    +---+---+---+---+---+---+---+  70
+            //        |   |   |   | 1 | 1 | 1 |   |
+            //  -3  1 +---+---+---+---+---+---+---+ 140
+            //        | x | x |   |   |   |   |   |
+            //  -2  2 +---+---+---+---+---+---+---+ 200  y positions
+            //        | x | x |   |   |   |   |   |
+            //  -1  3 +---+---+---+---+---+---+---+ 260
+            //        |   |   |   |   |   |   |   |
+            //      4 +---+---+---+---+---+---+---+ 330
+            //        |   | 2 |   |   |   |   |   |
+            //      5 +---+---+---+---+---+---+---+ 400
+            //
+            //        0  200 400 420 440 460 480 500
+            //                 x positions
+            //
+            // The cells marked "x" are the explicit cells specified by the template rows
+            // and columns.
+            //
+            // The cells marked 0/1/2 correspond to the GridItems at those indices in the
+            // items array.
+            //
+            // Note that negative indices count back from the last explicit line
+            // number in that direction, so "2" and "-2" both correspond to the same line.
+
+            expect (grid.items[0].currentBounds == Rect (440.0f,   0.0f,  60.0f, 70.0f));
+            expect (grid.items[1].currentBounds == Rect (420.0f,  70.0f,  60.0f, 70.0f));
+            expect (grid.items[2].currentBounds == Rect (200.0f, 330.0f, 200.0f, 70.0f));
+        }
     }
 };
 

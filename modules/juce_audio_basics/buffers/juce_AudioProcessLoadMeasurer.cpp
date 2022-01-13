@@ -23,8 +23,8 @@
 namespace juce
 {
 
-AudioProcessLoadMeasurer::AudioProcessLoadMeasurer() {}
-AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer() {}
+AudioProcessLoadMeasurer::AudioProcessLoadMeasurer()    = default;
+AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer()   = default;
 
 void AudioProcessLoadMeasurer::reset()
 {
@@ -33,43 +33,55 @@ void AudioProcessLoadMeasurer::reset()
 
 void AudioProcessLoadMeasurer::reset (double sampleRate, int blockSize)
 {
-    cpuUsageMs = 0;
+    cpuUsageProportion = 0;
     xruns = 0;
 
     if (sampleRate > 0.0 && blockSize > 0)
     {
-        msPerBlock = 1000.0 * blockSize / sampleRate;
-        timeToCpuScale = (msPerBlock > 0.0) ? (1.0 / msPerBlock) : 0.0;
+        msPerSample = 1000.0 / sampleRate;
+        timeToCpuScale = (msPerSample > 0.0) ? (1.0 / msPerSample) : 0.0;
     }
     else
     {
-        msPerBlock = 0;
+        msPerSample = 0;
         timeToCpuScale = 0;
     }
 }
 
 void AudioProcessLoadMeasurer::registerBlockRenderTime (double milliseconds)
 {
-    const double filterAmount = 0.2;
-    cpuUsageMs += filterAmount * (milliseconds - cpuUsageMs);
+    registerRenderTime (milliseconds, samplesPerBlock);
+}
 
-    if (milliseconds > msPerBlock)
+void AudioProcessLoadMeasurer::registerRenderTime (double milliseconds, int numSamples)
+{
+    const auto maxMilliseconds = numSamples * msPerSample;
+    const auto usedProportion = milliseconds / maxMilliseconds;
+    const auto filterAmount = 0.2;
+    cpuUsageProportion += filterAmount * (usedProportion - cpuUsageProportion);
+
+    if (milliseconds > maxMilliseconds)
         ++xruns;
 }
 
-double AudioProcessLoadMeasurer::getLoadAsProportion() const   { return jlimit (0.0, 1.0, timeToCpuScale * cpuUsageMs); }
+double AudioProcessLoadMeasurer::getLoadAsProportion() const   { return jlimit (0.0, 1.0, cpuUsageProportion); }
 double AudioProcessLoadMeasurer::getLoadAsPercentage() const   { return 100.0 * getLoadAsProportion(); }
 
 int AudioProcessLoadMeasurer::getXRunCount() const             { return xruns; }
 
 AudioProcessLoadMeasurer::ScopedTimer::ScopedTimer (AudioProcessLoadMeasurer& p)
-   : owner (p), startTime (Time::getMillisecondCounterHiRes())
+    : ScopedTimer (p, p.samplesPerBlock)
+{
+}
+
+AudioProcessLoadMeasurer::ScopedTimer::ScopedTimer (AudioProcessLoadMeasurer& p, int numSamplesInBlock)
+    : owner (p), startTime (Time::getMillisecondCounterHiRes()), samplesInBlock (numSamplesInBlock)
 {
 }
 
 AudioProcessLoadMeasurer::ScopedTimer::~ScopedTimer()
 {
-    owner.registerBlockRenderTime (Time::getMillisecondCounterHiRes() - startTime);
+    owner.registerRenderTime (Time::getMillisecondCounterHiRes() - startTime, samplesInBlock);
 }
 
 } // namespace juce

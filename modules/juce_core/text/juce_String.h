@@ -20,7 +20,7 @@
   ==============================================================================
 */
 
-#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
+#if ! defined (DOXYGEN) && (JUCE_MAC || JUCE_IOS)
  // Annoyingly we can only forward-declare a typedef by forward-declaring the
  // aliased type
  #if __has_attribute(objc_bridge)
@@ -1326,15 +1326,13 @@ public:
     int getReferenceCount() const noexcept;
 
     //==============================================================================
-    /*  This was a static empty string object, but is now deprecated as it's too easy to accidentally
-        use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation
-        problems.
-        @deprecated If you need an empty String object, just use String() or {}.
-        The only time you might miss having String::empty available might be if you need to return an
-        empty string from a function by reference, but if you need to do that, it's easy enough to use
-        a function-local static String object and return that, avoiding any order-of-initialisation issues.
-    */
-    JUCE_DEPRECATED_STATIC (static const String empty;)
+   #if JUCE_ALLOW_STATIC_NULL_VARIABLES && ! defined (DOXYGEN)
+    [[deprecated ("This was a static empty string object, but is now deprecated as it's too easy to accidentally "
+                 "use it indirectly during a static constructor, leading to hard-to-find order-of-initialisation "
+                 "problems. If you need an empty String object, just use String() or {}. For returning an empty "
+                 "String from a function by reference, use a function-local static String object and return that.")]]
+    static const String empty;
+   #endif
 
 private:
     //==============================================================================
@@ -1349,7 +1347,6 @@ private:
 
     explicit String (const PreallocationBytes&); // This constructor preallocates a certain amount of memory
     size_t getByteOffsetOfEnd() const noexcept;
-    JUCE_DEPRECATED (String (const String&, size_t));
 
     // This private cast operator should prevent strings being accidentally cast
     // to bools (this is possible because the compiler can add an implicit cast
@@ -1499,7 +1496,7 @@ JUCE_API OutputStream& JUCE_CALLTYPE operator<< (OutputStream& stream, StringRef
 
 } // namespace juce
 
-#if ! DOXYGEN
+#ifndef DOXYGEN
 namespace std
 {
     template <> struct hash<juce::String>

@@ -28,8 +28,6 @@ AbstractFifo::AbstractFifo (int capacity) noexcept : bufferSize (capacity)
     jassert (bufferSize > 0);
 }
 
-AbstractFifo::~AbstractFifo() {}
-
 int AbstractFifo::getTotalSize() const noexcept    { return bufferSize; }
 int AbstractFifo::getFreeSpace() const noexcept    { return bufferSize - getNumReady() - 1; }
 

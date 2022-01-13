@@ -104,7 +104,7 @@ public:
         This determines the alignment of the item along the cross-axis (perpendicular to the direction
         of flow).
     */
-    AlignSelf alignSelf = AlignSelf::stretch;
+    AlignSelf alignSelf = AlignSelf::autoAlign;
 
     //==============================================================================
     /** This constant can be used for sizes to indicate that 'auto' mode should be used. */

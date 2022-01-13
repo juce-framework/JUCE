@@ -40,6 +40,7 @@ String createAlphaNumericUID();
 String createGUID (const String& seed); // Turns a seed into a windows GUID
 
 String escapeSpaces (const String& text); // replaces spaces with blackslash-space
+String escapeQuotesAndSpaces (const String& text);
 String addQuotesIfContainsSpaces (const String& text);
 
 StringPairArray parsePreprocessorDefs (const String& defs);
@@ -90,13 +91,17 @@ struct PropertyListBuilder
         add (propertyComp);
     }
 
-    void addSearchPathProperty (const Value& value, const String& name, const String& mainHelpText)
+    void addSearchPathProperty (const Value& value,
+                                const String& name,
+                                const String& mainHelpText)
     {
         add (new TextPropertyComponent (value, name, 16384, true),
              mainHelpText + " Use semi-colons or new-lines to separate multiple paths.");
     }
 
-    void addSearchPathProperty (ValueWithDefault& value, const String& name, const String& mainHelpText)
+    void addSearchPathProperty (const ValueTreePropertyWithDefault& value,
+                                const String& name,
+                                const String& mainHelpText)
     {
         add (new TextPropertyComponent (value, name, 16384, true),
              mainHelpText + " Use semi-colons or new-lines to separate multiple paths.");

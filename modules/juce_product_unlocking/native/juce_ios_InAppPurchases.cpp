@@ -54,13 +54,13 @@ private:
         {
             addIvar<SKDelegateAndPaymentObserver*> ("self");
 
-            addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse,                          "v@:@@");
-            addMethod (@selector (requestDidFinish:),                                         requestDidFinish,                            "v@:@");
-            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError,                     "v@:@@");
-            addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions,                         "v@:@@");
-            addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError, "v@:@@");
-            addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished,        "v@:@");
-            addMethod (@selector (paymentQueue:updatedDownloads:),                            updatedDownloads,                            "v@:@@");
+            addMethod (@selector (productsRequest:didReceiveResponse:),                       didReceiveResponse);
+            addMethod (@selector (requestDidFinish:),                                         requestDidFinish);
+            addMethod (@selector (request:didFailWithError:),                                 requestDidFailWithError);
+            addMethod (@selector (paymentQueue:updatedTransactions:),                         updatedTransactions);
+            addMethod (@selector (paymentQueue:restoreCompletedTransactionsFailedWithError:), restoreCompletedTransactionsFailedWithError);
+            addMethod (@selector (paymentQueueRestoreCompletedTransactionsFinished:),         restoreCompletedTransactionsFinished);
+            addMethod (@selector (paymentQueue:updatedDownloads:),                            updatedDownloads);
 
             registerClass();
         }

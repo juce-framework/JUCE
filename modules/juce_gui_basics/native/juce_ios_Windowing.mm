@@ -437,8 +437,11 @@ void LookAndFeel::playAlertSound()
 class iOSMessageBox
 {
 public:
-    iOSMessageBox (const MessageBoxOptions& opts, std::unique_ptr<ModalComponentManager::Callback>&& cb)
-        : callback (std::move (cb))
+    iOSMessageBox (const MessageBoxOptions& opts,
+                   std::unique_ptr<ModalComponentManager::Callback>&& cb,
+                   bool deleteOnCompletion)
+        : callback (std::move (cb)),
+          shouldDeleteThis (deleteOnCompletion)
     {
         if (currentlyFocusedPeer != nullptr)
         {
@@ -480,10 +483,10 @@ public:
         result = buttonIndex;
 
         if (callback != nullptr)
-        {
             callback->modalStateFinished (result);
+
+        if (shouldDeleteThis)
             delete this;
-        }
     }
 
 private:
@@ -501,6 +504,7 @@ private:
 
     int result = -1;
     std::unique_ptr<ModalComponentManager::Callback> callback;
+    const bool shouldDeleteThis;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (iOSMessageBox)
 };
@@ -517,13 +521,24 @@ static int showDialog (const MessageBoxOptions& options,
         {
             jassert (mapFn != nullptr);
 
-            iOSMessageBox messageBox (options, nullptr);
+            iOSMessageBox messageBox (options, nullptr, false);
             return mapFn (messageBox.getResult());
         }
     }
    #endif
 
-    new iOSMessageBox (options, AlertWindowMappings::getWrappedCallback (callbackIn, mapFn));
+    const auto showBox = [options, callbackIn, mapFn]
+    {
+        new iOSMessageBox (options,
+                           AlertWindowMappings::getWrappedCallback (callbackIn, mapFn),
+                           true);
+    };
+
+    if (MessageManager::getInstance()->isThisTheMessageThread())
+        showBox();
+    else
+        MessageManager::callAsync (showBox);
+
     return 0;
 }
 
@@ -658,7 +673,7 @@ void SystemClipboard::copyTextToClipboard (const String& text)
 
 String SystemClipboard::getTextFromClipboard()
 {
-    return nsStringToJuce ([[UIPasteboard generalPasteboard] valueForPasteboardType: @"public.text"]);
+    return nsStringToJuce ([[UIPasteboard generalPasteboard] string]);
 }
 
 //==============================================================================
@@ -676,6 +691,77 @@ bool MouseInputSource::SourceList::canUseTouch()
 bool Desktop::canUseSemiTransparentWindows() noexcept
 {
     return true;
+}
+
+bool Desktop::isDarkModeActive() const
+{
+   #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
+    if (@available (iOS 12.0, *))
+        return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
+   #endif
+
+    return false;
+}
+
+class Desktop::NativeDarkModeChangeDetectorImpl
+{
+public:
+    NativeDarkModeChangeDetectorImpl()
+    {
+        static DelegateClass delegateClass;
+
+        delegate = [delegateClass.createInstance() init];
+        object_setInstanceVariable (delegate, "owner", this);
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        [[NSNotificationCenter defaultCenter] addObserver: delegate
+                                                 selector: @selector (darkModeChanged:)
+                                                     name: UIViewComponentPeer::getDarkModeNotificationName()
+                                                   object: nil];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }
+
+    ~NativeDarkModeChangeDetectorImpl()
+    {
+        object_setInstanceVariable (delegate, "owner", nullptr);
+        [[NSNotificationCenter defaultCenter] removeObserver: delegate];
+        [delegate release];
+    }
+
+    void darkModeChanged()
+    {
+        Desktop::getInstance().darkModeChanged();
+    }
+
+private:
+    struct DelegateClass  : public ObjCClass<NSObject>
+    {
+        DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
+        {
+            addIvar<NativeDarkModeChangeDetectorImpl*> ("owner");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (darkModeChanged:), darkModeChanged);
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            registerClass();
+        }
+
+        static void darkModeChanged (id self, SEL, NSNotification*)
+        {
+            if (auto* owner = getIvar<NativeDarkModeChangeDetectorImpl*> (self, "owner"))
+                owner->darkModeChanged();
+        }
+    };
+
+    id delegate = nil;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
+};
+
+std::unique_ptr<Desktop::NativeDarkModeChangeDetectorImpl> Desktop::createNativeDarkModeChangeDetectorImpl()
+{
+    return std::make_unique<NativeDarkModeChangeDetectorImpl>();
 }
 
 Point<float> MouseInputSource::getCurrentRawMousePosition()
@@ -716,19 +802,25 @@ static Rectangle<int> getRecommendedWindowBounds()
 
 static BorderSize<int> getSafeAreaInsets (float masterScale)
 {
-   #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_11_0
-    UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
+   #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
+    if (@available (iOS 11.0, *))
+    {
+        UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
 
-    auto getInset = [&] (CGFloat original) { return roundToInt (original / masterScale); };
+        auto getInset = [&] (CGFloat original) { return roundToInt (original / masterScale); };
 
-    return { getInset (safeInsets.top),    getInset (safeInsets.left),
-             getInset (safeInsets.bottom), getInset (safeInsets.right) };
-   #else
+        return { getInset (safeInsets.top),    getInset (safeInsets.left),
+                 getInset (safeInsets.bottom), getInset (safeInsets.right) };
+    }
+   #endif
+
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     auto statusBarSize = [UIApplication sharedApplication].statusBarFrame.size;
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
     auto statusBarHeight = jmin (statusBarSize.width, statusBarSize.height);
 
     return { roundToInt (statusBarHeight / masterScale), 0, 0, 0 };
-   #endif
 }
 
 void Displays::findDisplays (float masterScale)

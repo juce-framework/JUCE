@@ -107,7 +107,8 @@ protected:
 
     private:
         //==============================================================================
-        ValueWithDefault architectureTypeValue, pluginBinaryCopyStepValue, vstBinaryLocation, vst3BinaryLocation, unityPluginBinaryLocation;
+        ValueTreePropertyWithDefault architectureTypeValue, pluginBinaryCopyStepValue,
+                                     vstBinaryLocation, vst3BinaryLocation, unityPluginBinaryLocation;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -186,7 +187,7 @@ public:
             if (! ldflags.isEmpty())
                 s.add ("JUCE_LDFLAGS_" + getTargetVarName() + " := " + ldflags.joinIntoString (" "));
 
-            auto targetName = owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString());
+            auto targetName = owner.replacePreprocessorTokens (config, config.getTargetBinaryNameString (type == UnityPlugIn));
 
             if (owner.projectType.isStaticLibrary())
                 targetName = getStaticLibbedFilename (targetName);
@@ -197,7 +198,7 @@ public:
 
             if (type == VST3PlugIn)
             {
-                s.add ("JUCE_VST3DIR := " + escapeSpaces (targetName).upToLastOccurrenceOf (".", false, false) + ".vst3");
+                s.add ("JUCE_VST3DIR := " + escapeQuotesAndSpaces (targetName).upToLastOccurrenceOf (".", false, false) + ".vst3");
                 s.add ("VST3_PLATFORM_ARCH := $(shell $(CXX) make_helpers/arch_detection.cpp 2>&1 | tr '\\n' ' ' | sed \"s/.*JUCE_ARCH \\([a-zA-Z0-9_-]*\\).*/\\1/\")");
                 s.add ("JUCE_VST3SUBDIR := Contents/$(VST3_PLATFORM_ARCH)-linux");
 
@@ -209,7 +210,7 @@ public:
                 targetName = "$(JUCE_UNITYDIR)/" + targetName;
             }
 
-            s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeSpaces (targetName));
+            s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeQuotesAndSpaces (targetName));
 
             if (config.isPluginBinaryCopyStepEnabled() && (type == VST3PlugIn || type == VSTPlugIn || type == UnityPlugIn))
             {
@@ -223,7 +224,7 @@ public:
                 else if (type == VSTPlugIn)
                 {
                     s.add ("JUCE_VSTDESTDIR := " + config.getVSTBinaryLocationString());
-                    s.add (copyCmd + escapeSpaces (targetName) + " $(JUCE_VSTDESTDIR)");
+                    s.add (copyCmd + escapeQuotesAndSpaces (targetName) + " $(JUCE_VSTDESTDIR)");
                 }
                 else if (type == UnityPlugIn)
                 {
@@ -256,7 +257,7 @@ public:
             out << "OBJECTS_" + getTargetVarName() + String (" := \\") << newLine;
 
             for (auto& f : filesToCompile)
-                out << "  $(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder }))
+                out << "  $(JUCE_OBJDIR)/" << escapeQuotesAndSpaces (owner.getObjectFileFor ({ f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder }))
                     << " \\" << newLine;
 
             out << newLine;
@@ -271,7 +272,7 @@ public:
             {
                 build_tools::RelativePath relativePath (f.first, owner.getTargetFolder(), build_tools::RelativePath::buildTargetFolder);
 
-                out << "$(JUCE_OBJDIR)/" << escapeSpaces (owner.getObjectFileFor (relativePath)) << ": " << escapeSpaces (relativePath.toUnixStyle()) << newLine
+                out << "$(JUCE_OBJDIR)/" << escapeQuotesAndSpaces (owner.getObjectFileFor (relativePath)) << ": " << escapeQuotesAndSpaces (relativePath.toUnixStyle()) << newLine
                     << "\t-$(V_AT)mkdir -p $(JUCE_OBJDIR)"                                                                                            << newLine
                     << "\t@echo \"Compiling " << relativePath.getFileName() << "\""                                                                   << newLine
                     << (relativePath.hasFileExtension ("c;s;S") ? "\t$(V_AT)$(CC) $(JUCE_CFLAGS) " : "\t$(V_AT)$(CXX) $(JUCE_CXXFLAGS) ")
@@ -508,7 +509,7 @@ public:
     }
 
 private:
-    ValueWithDefault extraPkgConfigValue;
+    ValueTreePropertyWithDefault extraPkgConfigValue;
 
     //==============================================================================
     StringPairArray getDefines (const BuildConfiguration& config) const
@@ -604,7 +605,7 @@ private:
         if (config.isLinkTimeOptimisationEnabled())
             result.add ("-flto");
 
-        for (auto& recommended : config.getRecommendedCompilerWarningFlags())
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags().common)
             result.add (recommended);
 
         auto extra = replacePreprocessorTokens (config, getExtraCompilerFlagsString()).trim();
@@ -615,18 +616,19 @@ private:
         return result;
     }
 
-    StringArray getCXXFlags() const
+    StringArray getCXXFlags (const BuildConfiguration& config) const
     {
         StringArray result;
+
+        for (auto& recommended : config.getRecommendedCompilerWarningFlags().cpp)
+            result.add (recommended);
 
         auto cppStandard = project.getCppStandardString();
 
         if (cppStandard == "latest")
-            cppStandard = "17";
+            cppStandard = project.getLatestNumberedCppStandardString();
 
-        cppStandard = "-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard;
-
-        result.add (cppStandard);
+        result.add ("-std=" + String (shouldUseGNUExtensions() ? "gnu++" : "c++") + cppStandard);
 
         return result;
     }
@@ -710,7 +712,7 @@ private:
     void writeHeaderPathFlags (OutputStream& out, const BuildConfiguration& config) const
     {
         for (auto& path : getHeaderSearchPaths (config))
-            out << " -I" << escapeSpaces (path).replace ("~", "$(HOME)");
+            out << " -I" << escapeQuotesAndSpaces (path).replace ("~", "$(HOME)");
     }
 
     void writeCppFlags (OutputStream& out, const MakeBuildConfiguration& config) const
@@ -728,7 +730,7 @@ private:
         out << "  JUCE_LDFLAGS += $(TARGET_ARCH) -L$(JUCE_BINDIR) -L$(JUCE_LIBDIR)";
 
         for (auto path : getLibrarySearchPaths (config))
-            out << " -L" << escapeSpaces (path).replace ("~", "$(HOME)");
+            out << " -L" << escapeQuotesAndSpaces (path).replace ("~", "$(HOME)");
 
         auto pkgConfigFlags = getLinkerPkgConfigFlags();
 
@@ -801,11 +803,11 @@ private:
             outputDir = binaryPath.rebased (projectFolder, getTargetFolder(), build_tools::RelativePath::buildTargetFolder).toUnixStyle();
         }
 
-        out << "ifeq ($(CONFIG)," << escapeSpaces (config.getName()) << ")" << newLine
-            << "  JUCE_BINDIR := " << escapeSpaces (buildDirName)           << newLine
-            << "  JUCE_LIBDIR := " << escapeSpaces (buildDirName)           << newLine
-            << "  JUCE_OBJDIR := " << escapeSpaces (intermediatesDirName)   << newLine
-            << "  JUCE_OUTDIR := " << escapeSpaces (outputDir)              << newLine
+        out << "ifeq ($(CONFIG)," << escapeQuotesAndSpaces (config.getName()) << ")" << newLine
+            << "  JUCE_BINDIR := " << escapeQuotesAndSpaces (buildDirName)           << newLine
+            << "  JUCE_LIBDIR := " << escapeQuotesAndSpaces (buildDirName)           << newLine
+            << "  JUCE_OBJDIR := " << escapeQuotesAndSpaces (intermediatesDirName)   << newLine
+            << "  JUCE_OUTDIR := " << escapeQuotesAndSpaces (outputDir)              << newLine
             << newLine
             << "  ifeq ($(TARGET_ARCH),)"                                   << newLine
             << "    TARGET_ARCH := " << getArchFlags (config)               << newLine
@@ -835,7 +837,7 @@ private:
 
         out << "  JUCE_CXXFLAGS += $(JUCE_CFLAGS)";
 
-        auto cxxflags = getCXXFlags().joinIntoString (" ");
+        auto cxxflags = getCXXFlags (config).joinIntoString (" ");
 
         if (cxxflags.isNotEmpty())
             out << " " << cxxflags;
@@ -943,9 +945,9 @@ private:
             << "endif"     << newLine
             << newLine;
 
-        out << "ifndef CONFIG"                                              << newLine
-            << "  CONFIG=" << escapeSpaces (getConfiguration(0)->getName()) << newLine
-            << "endif"                                                      << newLine
+        out << "ifndef CONFIG"                                                       << newLine
+            << "  CONFIG=" << escapeQuotesAndSpaces (getConfiguration(0)->getName()) << newLine
+            << "endif"                                                               << newLine
             << newLine;
 
         out << "JUCE_ARCH_LABEL := $(shell uname -m)" << newLine

@@ -904,9 +904,14 @@ private:
                 notification.setBounds (r.removeFromTop (NotificationArea::height));
 
             if (editor != nullptr)
-                editor->setBoundsConstrained (editor->getLocalArea (this, r.toFloat())
-                                                     .withPosition (r.getTopLeft().toFloat().transformedBy (editor->getTransform().inverted()))
-                                                .toNearestInt());
+            {
+                const auto newPos = r.getTopLeft().toFloat().transformedBy (editor->getTransform().inverted());
+
+                if (preventResizingEditor)
+                    editor->setTopLeftPosition (newPos.roundToInt());
+                else
+                    editor->setBoundsConstrained (editor->getLocalArea (this, r.toFloat()).withPosition (newPos).toNearestInt());
+            }
         }
 
     private:
@@ -1001,6 +1006,8 @@ private:
         //==============================================================================
         void componentMovedOrResized (Component&, bool, bool) override
         {
+            const ScopedValueSetter<bool> scope (preventResizingEditor, true);
+
             if (editor != nullptr)
             {
                 auto rect = getSizeToContainEditor();
@@ -1024,6 +1031,7 @@ private:
         std::unique_ptr<AudioProcessorEditor> editor;
         Value inputMutedValue;
         bool shouldShowNotification = false;
+        bool preventResizingEditor = false;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
     };

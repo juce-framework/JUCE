@@ -27,7 +27,7 @@
 
 #include "../Project/jucer_Project.h"
 #include "../Utility/UI/PropertyComponents/jucer_PropertyComponentsWithEnablement.h"
-#include "../Utility/Helpers/jucer_ValueWithDefaultWrapper.h"
+#include "../Utility/Helpers/jucer_ValueTreePropertyWithDefaultWrapper.h"
 #include "../Project/Modules/jucer_Modules.h"
 
 class ProjectSaver;
@@ -144,7 +144,8 @@ public:
     String getExtraCompilerFlagsString() const            { return extraCompilerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
     String getExtraLinkerFlagsString() const              { return extraLinkerFlagsValue.get().toString().replaceCharacters ("\r\n", "  "); }
 
-    String getExternalLibrariesString() const             { return getSearchPathsFromString (externalLibrariesValue.get().toString()).joinIntoString (";"); }
+    StringArray getExternalLibrariesStringArray() const   { return getSearchPathsFromString (externalLibrariesValue.get().toString()); }
+    String getExternalLibrariesString() const             { return getExternalLibrariesStringArray().joinIntoString (";"); }
 
     bool shouldUseGNUExtensions() const                   { return gnuExtensionsValue.get(); }
 
@@ -155,7 +156,7 @@ public:
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
-    ValueWithDefault getPathForModuleValue (const String& moduleID);
+    ValueTreePropertyWithDefault getPathForModuleValue (const String& moduleID);
     String getPathForModuleString (const String& moduleID) const;
     void removePathForModule (const String& moduleID);
 
@@ -269,7 +270,32 @@ public:
         void createPropertyEditors (PropertyListBuilder&);
         void addRecommendedLinuxCompilerWarningsProperty (PropertyListBuilder&);
         void addRecommendedLLVMCompilerWarningsProperty (PropertyListBuilder&);
-        StringArray getRecommendedCompilerWarningFlags() const;
+
+        struct CompilerNames
+        {
+            static constexpr const char* gcc = "GCC";
+            static constexpr const char* llvm = "LLVM";
+        };
+
+        struct CompilerWarningFlags
+        {
+            static CompilerWarningFlags getRecommendedForGCCAndLLVM()
+            {
+                CompilerWarningFlags result;
+                result.common = { "-Wall", "-Wstrict-aliasing", "-Wuninitialized", "-Wunused-parameter",
+                                  "-Wswitch-enum", "-Wsign-conversion", "-Wsign-compare",
+                                  "-Wunreachable-code", "-Wcast-align", "-Wno-ignored-qualifiers" };
+                result.cpp = { "-Woverloaded-virtual", "-Wreorder", "-Wzero-as-null-pointer-constant" };
+
+                return result;
+            }
+
+            StringArray common;
+            StringArray cpp;
+        };
+
+        CompilerWarningFlags getRecommendedCompilerWarningFlags() const;
+
         void addGCCOptimisationProperty (PropertyListBuilder&);
         void removeFromExporter();
 
@@ -279,12 +305,12 @@ public:
         const ProjectExporter& exporter;
 
     protected:
-        ValueWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, recommendedWarningsValue, optimisationLevelValue,
-                         linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue,
-                         usePrecompiledHeaderFileValue, precompiledHeaderFileValue;
+        ValueTreePropertyWithDefault isDebugValue, configNameValue, targetNameValue, targetBinaryPathValue, recommendedWarningsValue, optimisationLevelValue,
+                                     linkTimeOptimisationValue, ppDefinesValue, headerSearchPathValue, librarySearchPathValue, userNotesValue,
+                                     usePrecompiledHeaderFileValue, precompiledHeaderFileValue;
 
     private:
-        std::map<String, StringArray> recommendedCompilerWarningFlags;
+        std::map<String, CompilerWarningFlags> recommendedCompilerWarningFlags;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BuildConfiguration)
     };
@@ -382,13 +408,13 @@ protected:
     const File projectFolder;
 
     //==============================================================================
-    ValueWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper, araPathValueWrapper;
+    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper, araPathValueWrapper;
 
-    ValueWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
-                     userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
+    ValueTreePropertyWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
+                                 userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
 
     Value projectCompilerFlagSchemesValue;
-    HashMap<String, ValueWithDefault> compilerFlagSchemesMap;
+    HashMap<String, ValueTreePropertyWithDefault> compilerFlagSchemesMap;
 
     mutable Array<Project::Item> itemGroups;
     Project::Item* modulesGroup = nullptr;

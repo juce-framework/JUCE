@@ -1,6 +1,122 @@
 JUCE breaking changes
 =====================
 
+Version 6.1.3
+=============
+
+Change
+------
+The format specific structs of ExtensionsVisitor now return pointers to forward
+declared types instead of `void*`. For this purpose the `struct AEffect;`
+forward declaration was placed inside the global namespace.
+
+Possible Issues
+---------------
+User code that includes the VST headers inside a namespace may fail to build,
+because the forward declared type can collide with the contents of `aeffect.h`.
+
+Workaround
+----------
+The collision can be avoided by placing a `struct AEffect;` forward declaration
+in the same namespace where the VST headers are included. The forward
+declaration must come before the inclusion.
+
+Rationale
+---------
+Using the forward declared types eliminates the need for error prone casting
+at the site where the ExtensionsVisitor facility is used.
+
+
+Change
+------
+ListBox::createSnapshotOfRows now returns ScaledImage instead of Image.
+
+Possible Issues
+---------------
+User code that overrides this function will fail to build.
+
+Workaround
+----------
+To emulate the old behaviour, simply wrap the Image that was previous returned
+into a ScaledImage and return that instead.
+
+Rationale
+---------
+Returning a ScaledImage allows the overriding function to specify the scale
+at which the image should be drawn. Returning an oversampled image will provide
+smoother-looking results on high resolution displays.
+
+
+Change
+------
+AudioFrameRate::frameRate is now a class type instead of an enum.
+
+Possible Issues
+---------------
+Code that read the old enum value will not compile.
+
+Workaround
+----------
+Call frameRate.getType() to fetch the old enum type. Alternatively, use the new
+getBaseRate(), isDrop(), isPullDown(), and getEffectiveRate() functions. The
+new functions provide a more accurate description of the host's frame rate.
+
+Rationale
+---------
+The old enum-based interface was not flexible enough to describe all the frame
+rates that might be reported by a plugin host.
+
+
+Change
+------
+FlexItem::alignSelf now defaults to "autoAlign" rather than "stretch".
+
+Possible Issues
+---------------
+FlexBox layouts will be different in cases where FlexBox::alignItems is set to
+a value other than "stretch". This is because each FlexItem will now default
+to using the FlexBox's alignItems value. Layouts that explicitly set
+FlexItem::alignSelf on each item will not be affected.
+
+Workaround
+----------
+To restore the previous layout behaviour, set FlexItem::alignSelf to "stretch"
+on all FlexItems that would otherwise use the default value for alignSelf.
+
+Rationale
+---------
+The new behaviour more closely matches the behaviour of CSS FlexBox
+implementations. In CSS, "align-self" has an initial value of "auto", which
+computes to the parent's "align-items" value.
+
+
+Change
+------
+Functions on AudioPluginInstance that can add parameters have been made
+private.
+
+Possible Issues
+---------------
+Code implementing custom plugin formats may stop building if it calls these
+functions.
+
+Workaround
+----------
+When implementing custom plugin formats, ensure that the plugin parameters
+derive from AudioPluginInstance::HostedParameter and then use
+addHostedParameter, addHostedParameterGroup or setHostedParameterTree to add
+the parameters to the plugin instance.
+
+Rationale
+---------
+In a plugin host, it is very important to be able to uniquely identify
+parameters across different versions of the same plugin. To make this possible,
+we needed to introduce a way of retrieving a unique ID for each parameter,
+which is now possible using the HostedParameter class. However, we also needed
+to enforce that all AudioPluginInstances can only have parameters which are of
+the type HostedParameter, which required hiding the old functions.
+
+
 Version 6.1.0
 =============
 
@@ -256,7 +372,7 @@ that the behaviour is the same.
 Rationale
 ---------
 The ownership of this method is now clearer as the previous code relied on the
-caller deleting the object. The name has changed to accomodate the new
+caller deleting the object. The name has changed to accommodate the new
 `Component::createFocusTraverser()` method that returns an object for
 determining basic focus traversal, of which keyboard focus is generally a
 subset.
@@ -369,8 +485,8 @@ Change
 ------
 CharacterFunctions::readDoubleValue now returns values consistent with other
 C++ number parsing libraries. Parsing values smaller than the minimum number
-respresentable in a double will return (+/-)0.0 and parsing values larger than
-the maximum number respresentable in a double will return (+/-)inf.
+representable in a double will return (+/-)0.0 and parsing values larger than
+the maximum number representable in a double will return (+/-)inf.
 
 Possible Issues
 ---------------
@@ -627,8 +743,8 @@ Limited.
 
 Possible Issues
 ---------------
-Exising projects, particularly Android, may need to be resaved by the Projucer
-and have the old build artifacts deleted before they will build.
+Existing projects, particularly Android, may need to be resaved by the Projucer
+and have the old build artefacts deleted before they will build.
 
 Workaround
 ----------
@@ -682,7 +798,7 @@ Update the subproject path in the Projucer.
 
 Rationale
 ---------
-Most other Xcode specific paths are specified reltive to the build directory.
+Most other Xcode specific paths are specified relative to the build directory.
 This change brings the Xcode subproject path in line with the rest of the
 configuration.
 
@@ -1032,7 +1148,7 @@ Multiple changes to low-level, non-public JNI and Android APIs.
 Possible Issues
 ---------------
 If you were using any non-public, low-level JNI macros, calling java code or
-recieving JNI callbacks, then your code will probably no longer work. See the
+receiving JNI callbacks, then your code will probably no longer work. See the
 forum for further details.
 
 Workaround
@@ -1061,7 +1177,7 @@ Rationale
 ---------
 Less than 0.5% of all devices in the world run versions of Android older than
 Android 4.1. In the interest of keeping JUCE code clean and lean, we must
-depricate support for very old Android versions from time to time.
+deprecate support for very old Android versions from time to time.
 
 
 Version 5.4.0
@@ -1757,7 +1873,7 @@ or
 Rationale
 ---------
 Previously, PopupMenus would not scale if the GUI of the target component (or
-any of it’s parents) were scaled. The only way to scale PopupMenus was via the
+any of its parents) were scaled. The only way to scale PopupMenus was via the
 global scaling factor. This had several drawbacks as the global scaling factor
 would scale everything. This was especially problematic in plug-in editors.
 
@@ -1862,7 +1978,7 @@ then you will need to update your plug-in to the new multi-bus API. Pre JUCE
 4.0.0 plug-ins are not affected apart from other breaking changes listed in
 this document.
 
-Woraround
+Workaround
 ---------
 None.
 

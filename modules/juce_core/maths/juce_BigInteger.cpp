@@ -130,10 +130,6 @@ BigInteger& BigInteger::operator= (BigInteger&& other) noexcept
     return *this;
 }
 
-BigInteger::~BigInteger()
-{
-}
-
 void BigInteger::swapWith (BigInteger& other) noexcept
 {
     for (int i = 0; i < numPreallocatedInts; ++i)

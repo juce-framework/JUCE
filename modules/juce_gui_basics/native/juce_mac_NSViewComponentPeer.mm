@@ -61,6 +61,16 @@ public:
 
         [view registerForDraggedTypes: getSupportedDragTypes()];
 
+        const auto options = NSTrackingMouseEnteredAndExited
+                           | NSTrackingMouseMoved
+                           | NSTrackingEnabledDuringMouseDrag
+                           | NSTrackingActiveAlways
+                           | NSTrackingInVisibleRect;
+        [view addTrackingArea: [[NSTrackingArea alloc] initWithRect: r
+                                                            options: options
+                                                              owner: view
+                                                           userInfo: nil]];
+
         notificationCenter = [NSNotificationCenter defaultCenter];
 
         [notificationCenter  addObserver: view
@@ -70,12 +80,14 @@ public:
 
         [view setPostsFrameChangedNotifications: YES];
 
-       #if defined (MAC_OS_X_VERSION_10_8) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_8) \
-        && USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
+       #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
         if (! getComponentAsyncLayerBackedViewDisabled (component))
         {
-            [view setWantsLayer: YES];
-            [[view layer] setDrawsAsynchronously: YES];
+            if (@available (macOS 10.8, *))
+            {
+                [view setWantsLayer: YES];
+                [[view layer] setDrawsAsynchronously: YES];
+            }
         }
        #endif
 
@@ -96,14 +108,8 @@ public:
                                                            defer: YES];
             setOwner (window, this);
 
-          #if JUCE_OBJC_HAS_AVAILABLE_FEATURE || (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
-           #if JUCE_OBJC_HAS_AVAILABLE_FEATURE
             if (@available (macOS 10.10, *))
-           #endif
-            {
                 [window setAccessibilityElement: YES];
-            }
-          #endif
 
             [window orderOut: nil];
             [window setDelegate: (id<NSWindowDelegate>) window];
@@ -113,9 +119,8 @@ public:
             if (! [window isOpaque])
                 [window setBackgroundColor: [NSColor clearColor]];
 
-           #if defined (MAC_OS_X_VERSION_10_9) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_9)
-            [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
-           #endif
+           if (@available (macOS 10.9, *))
+                [view setAppearance: [NSAppearance appearanceNamed: NSAppearanceNameAqua]];
 
             [window setHasShadow: ((windowStyleFlags & windowHasDropShadow) != 0)];
 
@@ -123,7 +128,6 @@ public:
                 setAlwaysOnTop (true);
 
             [window setContentView: view];
-            [window setAcceptsMouseMovedEvents: YES];
 
             // We'll both retain and also release this on closing because plugin hosts can unexpectedly
             // close the window for us, and also tend to get cause trouble if setReleasedWhenClosed is NO.
@@ -133,14 +137,13 @@ public:
             [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
-            if ((windowStyleFlags & (windowHasMaximiseButton | windowHasTitleBar)) == (windowHasMaximiseButton | windowHasTitleBar))
+            if ((windowStyleFlags & windowHasMaximiseButton) == windowHasMaximiseButton)
                 [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
-            if ([window respondsToSelector: @selector (setRestorable:)])
-                [window setRestorable: NO];
+            [window setRestorable: NO];
 
-           #if defined (MAC_OS_X_VERSION_10_13) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13)
-            if ([window respondsToSelector: @selector (setTabbingMode:)])
+           #if defined (MAC_OS_X_VERSION_10_12) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12)
+            if (@available (macOS 10.12, *))
                 [window setTabbingMode: NSWindowTabbingModeDisallowed];
            #endif
 
@@ -261,10 +264,8 @@ public:
         }
     }
 
-    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
+    void setBounds (const Rectangle<int>& newBounds, bool) override
     {
-        fullScreen = isNowFullScreen;
-
         auto r = makeNSRect (newBounds);
         auto oldViewSize = [view frame].size;
 
@@ -350,39 +351,29 @@ public:
     {
         if (! isSharedWindow)
         {
-            auto r = lastNonFullscreenBounds;
-
             if (isMinimised())
                 setMinimised (false);
 
-            if (fullScreen != shouldBeFullScreen)
+            if (hasNativeTitleBar())
             {
-                if (shouldBeFullScreen && hasNativeTitleBar())
-                {
-                    fullScreen = true;
-                    [window performZoom: nil];
-                }
-                else
-                {
-                    if (shouldBeFullScreen)
-                        r = component.getParentMonitorArea();
-
-                    // (can't call the component's setBounds method because that'll reset our fullscreen flag)
-                    if (r != component.getBounds() && ! r.isEmpty())
-                        setBounds (ScalingHelpers::scaledScreenPosToUnscaled (component, r), shouldBeFullScreen);
-                }
+                if (shouldBeFullScreen != isFullScreen())
+                    [window toggleFullScreen: nil];
+            }
+            else
+            {
+                [window zoom: nil];
             }
         }
     }
 
     bool isFullScreen() const override
     {
-        return fullScreen;
+        return ([window styleMask] & NSWindowStyleMaskFullScreen) != 0;
     }
 
     bool isKioskMode() const override
     {
-        return isWindowInKioskMode || ComponentPeer::isKioskMode();
+        return isFullScreen() && ComponentPeer::isKioskMode();
     }
 
     static bool isWindowAtPoint (NSWindow* w, NSPoint screenPoint)
@@ -398,7 +389,7 @@ public:
         NSRect viewFrame = [view frame];
 
         if (! (isPositiveAndBelow (localPos.getX(), viewFrame.size.width)
-             && isPositiveAndBelow (localPos.getY(), viewFrame.size.height)))
+            && isPositiveAndBelow (localPos.getY(), viewFrame.size.height)))
             return false;
 
         if (! SystemStats::isRunningInAppExtensionSandbox())
@@ -432,29 +423,13 @@ public:
             NSRect v = [view convertRect: [view frame] toView: nil];
             NSRect w = [window frame];
 
-            b.setTop ((int) v.origin.y);
-            b.setBottom ((int) (w.size.height - (v.origin.y + v.size.height)));
+            b.setTop ((int) (w.size.height - (v.origin.y + v.size.height)));
+            b.setBottom ((int) v.origin.y);
             b.setLeft ((int) v.origin.x);
             b.setRight ((int) (w.size.width - (v.origin.x + v.size.width)));
         }
 
         return b;
-    }
-
-    void updateFullscreenStatus()
-    {
-        if (hasNativeTitleBar())
-        {
-            isWindowInKioskMode = (([window styleMask] & NSWindowStyleMaskFullScreen) != 0);
-
-            auto screen = getFrameSize().subtractedFrom (component.getParentMonitorArea());
-
-            fullScreen = component.getScreenBounds().expanded (2, 2).contains (screen);
-        }
-        else
-        {
-            isWindowInKioskMode = false;
-        }
     }
 
     bool hasNativeTitleBar() const
@@ -560,9 +535,10 @@ public:
         {
             // need to set a dummy represented file here to show the file icon (which we then set to the new icon)
             if (! windowRepresentsFile)
-                [window setRepresentedFilename:juceStringToNS (" ")]; // can't just use an empty string for some reason...
+                [window setRepresentedFilename: juceStringToNS (" ")]; // can't just use an empty string for some reason...
 
-            [[window standardWindowButton:NSWindowDocumentIconButton] setImage:imageToNSImage (newIcon)];
+            auto img = NSUniquePtr<NSImage> { imageToNSImage (ScaledImage (newIcon)) };
+            [[window standardWindowButton: NSWindowDocumentIconButton] setImage: img.get()];
         }
     }
 
@@ -636,21 +612,12 @@ public:
 
     void redirectMouseEnter (NSEvent* ev)
     {
-        if (shouldIgnoreMouseEnterExit (ev))
-            return;
-
-        Desktop::getInstance().getMainMouseSource().forceMouseCursorUpdate();
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
-        sendMouseEvent (ev);
+        sendMouseEnterExit (ev);
     }
 
     void redirectMouseExit (NSEvent* ev)
     {
-        if (shouldIgnoreMouseEnterExit (ev))
-            return;
-
-        ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withoutMouseButtons();
-        sendMouseEvent (ev);
+        sendMouseEnterExit (ev);
     }
 
     static float checkDeviceDeltaReturnValue (float v) noexcept
@@ -858,12 +825,15 @@ public:
         if (r.size.width < 1.0f || r.size.height < 1.0f)
             return;
 
-        auto cg = (CGContextRef) [[NSGraphicsContext currentContext]
-       #if (defined (MAC_OS_X_VERSION_10_10) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_10)
-                                  CGContext];
-       #else
-                                  graphicsPort];
-       #endif
+        auto cg = []
+        {
+            if (@available (macOS 10.10, *))
+                return (CGContextRef) [[NSGraphicsContext currentContext] CGContext];
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            return (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }();
 
         if (! component.isOpaque())
             CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
@@ -899,7 +869,7 @@ public:
                     NSRect rect = rects[i];
                     CGContextSaveGState (cg);
                     CGContextClipToRect (cg, CGRectMake (rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
-                    drawRect (cg, rect, displayScale);
+                    drawRectWithContext (cg, rect, displayScale);
                     CGContextRestoreGState (cg);
                 }
 
@@ -909,11 +879,11 @@ public:
         }
        #endif
 
-        drawRect (cg, r, displayScale);
+        drawRectWithContext (cg, r, displayScale);
         invalidateTransparentWindowShadow();
     }
 
-    void drawRect (CGContextRef cg, NSRect r, float displayScale)
+    void drawRectWithContext (CGContextRef cg, NSRect r, float displayScale)
     {
        #if USE_COREGRAPHICS_RENDERING
         if (usingCoreGraphics)
@@ -956,7 +926,7 @@ public:
                 }
 
                 detail::ColorSpacePtr colourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
-                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace.get(), false);
+                CGImageRef image = juce_createCoreGraphicsImage (temp, colourSpace.get());
                 CGContextConcatCTM (cg, CGAffineTransformMake (1, 0, 0, -1, r.origin.x, r.origin.y + clipH));
                 CGContextDrawImage (cg, CGRectMake (0.0f, 0.0f, clipW, clipH), image);
                 CGImageRelease (image);
@@ -1049,12 +1019,14 @@ public:
     {
         if (isBlockedByModalComponent())
             if (auto* modal = Component::getCurrentlyModalComponent())
-                modal->inputAttemptWhenModal();
+                if (auto* otherPeer = modal->getPeer())
+                    if ((otherPeer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
+                        modal->inputAttemptWhenModal();
     }
 
     bool canBecomeKeyWindow()
     {
-        return component.isVisible() && (getStyleFlags() & juce::ComponentPeer::windowIgnoresKeyPresses) == 0;
+        return component.isVisible() && (getStyleFlags() & ComponentPeer::windowIgnoresKeyPresses) == 0;
     }
 
     bool canBecomeMainWindow()
@@ -1092,7 +1064,6 @@ public:
 
     void redirectMovedOrResized()
     {
-        updateFullscreenStatus();
         handleMovedOrResized();
     }
 
@@ -1121,12 +1092,15 @@ public:
                                        name: NSWindowWillMiniaturizeNotification
                                      object: currentWindow];
 
-           #if JUCE_COREGRAPHICS_DRAW_ASYNC
             [notificationCenter addObserver: view
                                    selector: becomeKeySelector
                                        name: NSWindowDidBecomeKeyNotification
                                      object: currentWindow];
-           #endif
+
+            [notificationCenter addObserver: view
+                                   selector: resignKeySelector
+                                       name: NSWindowDidResignKeyNotification
+                                     object: currentWindow];
         }
     }
 
@@ -1139,6 +1113,12 @@ public:
     void becomeKey()
     {
         component.repaint();
+    }
+
+    void resignKey()
+    {
+        viewFocusLoss();
+        sendModalInputAttemptIfBlocked();
     }
 
     void liveResizingStart()
@@ -1160,7 +1140,7 @@ public:
 
     NSRect constrainRect (const NSRect r)
     {
-        if (constrainer == nullptr || isKioskMode())
+        if (constrainer == nullptr || isKioskMode() || isFullScreen())
             return r;
 
         const auto scale = getComponent().getDesktopScaleFactor();
@@ -1345,14 +1325,19 @@ public:
 
     static NSArray* getSupportedDragTypes()
     {
-        const auto type =
-               #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_13
-                NSPasteboardTypeFileURL;
-               #else
-                kUTTypeFileURL;
-               #endif
+        const auto type = []
+        {
+           #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
+            if (@available (macOS 10.13, *))
+                return NSPasteboardTypeFileURL;
+           #endif
 
-        return [NSArray arrayWithObjects: (NSString*) type, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+            return (NSString*) kUTTypeFileURL;
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+        }();
+
+        return [NSArray arrayWithObjects: type, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
     }
 
     BOOL sendDragCallback (const int type, id <NSDraggingInfo> sender)
@@ -1484,12 +1469,17 @@ public:
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
     }
 
+    void setHasChangedSinceSaved (bool b) override
+    {
+        if (! isSharedWindow)
+            [window setDocumentEdited: b];
+    }
+
     //==============================================================================
     NSWindow* window = nil;
     NSView* view = nil;
     WeakReference<Component> safeComponent;
-    bool isSharedWindow = false, fullScreen = false;
-    bool isWindowInKioskMode = false;
+    bool isSharedWindow = false;
    #if USE_COREGRAPHICS_RENDERING
     bool usingCoreGraphics = true;
    #else
@@ -1514,15 +1504,19 @@ public:
     static const SEL asyncMouseDownSelector;
     static const SEL asyncMouseUpSelector;
     static const SEL becomeKeySelector;
+    static const SEL resignKeySelector;
 
 private:
     static NSView* createViewInstance();
     static NSWindow* createWindowInstance();
 
-    bool shouldIgnoreMouseEnterExit (NSEvent* ev) const
+    void sendMouseEnterExit (NSEvent* ev)
     {
-        auto* eventTrackingArea = [ev trackingArea];
-        return eventTrackingArea != nil && ! [[view trackingAreas] containsObject: eventTrackingArea];
+        if (auto* area = [ev trackingArea])
+            if (! [[view trackingAreas] containsObject: area])
+                return;
+
+        sendMouseEvent (ev);
     }
 
     static void setOwner (id viewOrWindow, NSViewComponentPeer* newOwner)
@@ -1676,6 +1670,7 @@ private:
         const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
                                          0.0f);
         [window setMinFullScreenContentSize: minSize];
+        [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
@@ -1689,6 +1684,7 @@ const SEL NSViewComponentPeer::frameChangedSelector   = @selector (frameChanged:
 const SEL NSViewComponentPeer::asyncMouseDownSelector = @selector (asyncMouseDown:);
 const SEL NSViewComponentPeer::asyncMouseUpSelector   = @selector (asyncMouseUp:);
 const SEL NSViewComponentPeer::becomeKeySelector      = @selector (becomeKey:);
+const SEL NSViewComponentPeer::resignKeySelector      = @selector (resignKey:);
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 //==============================================================================
@@ -1720,82 +1716,83 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 {
     JuceNSViewClass()  : NSViewComponentPeerWrapper ("JUCEView_")
     {
-        addMethod (@selector (isOpaque),                      isOpaque,                          "c@:");
-        addMethod (@selector (drawRect:),                     drawRect,                          "v@:", @encode (NSRect));
-        addMethod (@selector (mouseDown:),                    mouseDown,                         "v@:@");
-        addMethod (@selector (mouseUp:),                      mouseUp,                           "v@:@");
-        addMethod (@selector (mouseDragged:),                 mouseDragged,                      "v@:@");
-        addMethod (@selector (mouseMoved:),                   mouseMoved,                        "v@:@");
-        addMethod (@selector (mouseEntered:),                 mouseEntered,                      "v@:@");
-        addMethod (@selector (mouseExited:),                  mouseExited,                       "v@:@");
-        addMethod (@selector (rightMouseDown:),               mouseDown,                         "v@:@");
-        addMethod (@selector (rightMouseDragged:),            mouseDragged,                      "v@:@");
-        addMethod (@selector (rightMouseUp:),                 mouseUp,                           "v@:@");
-        addMethod (@selector (otherMouseDown:),               mouseDown,                         "v@:@");
-        addMethod (@selector (otherMouseDragged:),            mouseDragged,                      "v@:@");
-        addMethod (@selector (otherMouseUp:),                 mouseUp,                           "v@:@");
-        addMethod (@selector (scrollWheel:),                  scrollWheel,                       "v@:@");
-        addMethod (@selector (magnifyWithEvent:),             magnify,                           "v@:@");
-        addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse,                 "c@:@");
-        addMethod (@selector (windowWillMiniaturize:),        windowWillMiniaturize,             "v@:@");
-        addMethod (@selector (windowDidDeminiaturize:),       windowDidDeminiaturize,            "v@:@");
-        addMethod (@selector (wantsDefaultClipping),          wantsDefaultClipping,              "c@:");
-        addMethod (@selector (worksWhenModal),                worksWhenModal,                    "c@:");
-        addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow,               "v@:");
-        addMethod (@selector (viewWillDraw),                  viewWillDraw,                      "v@:");
-        addMethod (@selector (keyDown:),                      keyDown,                           "v@:@");
-        addMethod (@selector (keyUp:),                        keyUp,                             "v@:@");
-        addMethod (@selector (insertText:),                   insertText,                        "v@:@");
-        addMethod (@selector (doCommandBySelector:),          doCommandBySelector,               "v@::");
-        addMethod (@selector (setMarkedText:selectedRange:),  setMarkedText,                     "v@:@", @encode (NSRange));
-        addMethod (@selector (unmarkText),                    unmarkText,                        "v@:");
-        addMethod (@selector (hasMarkedText),                 hasMarkedText,                     "c@:");
-        addMethod (@selector (conversationIdentifier),        conversationIdentifier,            "l@:");
-        addMethod (@selector (attributedSubstringFromRange:), attributedSubstringFromRange,      "@@:", @encode (NSRange));
-        addMethod (@selector (markedRange),                   markedRange,                       @encode (NSRange), "@:");
-        addMethod (@selector (selectedRange),                 selectedRange,                     @encode (NSRange), "@:");
-        addMethod (@selector (firstRectForCharacterRange:),   firstRectForCharacterRange,        @encode (NSRect), "@:", @encode (NSRange));
-        addMethod (@selector (characterIndexForPoint:),       characterIndexForPoint,            "L@:", @encode (NSPoint));
-        addMethod (@selector (validAttributesForMarkedText),  validAttributesForMarkedText,      "@@:");
-        addMethod (@selector (flagsChanged:),                 flagsChanged,                      "v@:@");
+        addMethod (@selector (isOpaque),                      isOpaque);
+        addMethod (@selector (drawRect:),                     drawRect);
+        addMethod (@selector (mouseDown:),                    mouseDown);
+        addMethod (@selector (mouseUp:),                      mouseUp);
+        addMethod (@selector (mouseDragged:),                 mouseDragged);
+        addMethod (@selector (mouseMoved:),                   mouseMoved);
+        addMethod (@selector (mouseEntered:),                 mouseEntered);
+        addMethod (@selector (mouseExited:),                  mouseExited);
+        addMethod (@selector (rightMouseDown:),               mouseDown);
+        addMethod (@selector (rightMouseDragged:),            mouseDragged);
+        addMethod (@selector (rightMouseUp:),                 mouseUp);
+        addMethod (@selector (otherMouseDown:),               mouseDown);
+        addMethod (@selector (otherMouseDragged:),            mouseDragged);
+        addMethod (@selector (otherMouseUp:),                 mouseUp);
+        addMethod (@selector (scrollWheel:),                  scrollWheel);
+        addMethod (@selector (magnifyWithEvent:),             magnify);
+        addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse);
+        addMethod (@selector (windowWillMiniaturize:),        windowWillMiniaturize);
+        addMethod (@selector (windowDidDeminiaturize:),       windowDidDeminiaturize);
+        addMethod (@selector (wantsDefaultClipping),          wantsDefaultClipping);
+        addMethod (@selector (worksWhenModal),                worksWhenModal);
+        addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow);
+        addMethod (@selector (viewWillDraw),                  viewWillDraw);
+        addMethod (@selector (keyDown:),                      keyDown);
+        addMethod (@selector (keyUp:),                        keyUp);
+        addMethod (@selector (insertText:),                   insertText);
+        addMethod (@selector (doCommandBySelector:),          doCommandBySelector);
+        addMethod (@selector (setMarkedText:selectedRange:),  setMarkedText);
+        addMethod (@selector (unmarkText),                    unmarkText);
+        addMethod (@selector (hasMarkedText),                 hasMarkedText);
+        addMethod (@selector (conversationIdentifier),        conversationIdentifier);
+        addMethod (@selector (attributedSubstringFromRange:), attributedSubstringFromRange);
+        addMethod (@selector (markedRange),                   markedRange);
+        addMethod (@selector (selectedRange),                 selectedRange);
+        addMethod (@selector (firstRectForCharacterRange:),   firstRectForCharacterRange);
+        addMethod (@selector (characterIndexForPoint:),       characterIndexForPoint);
+        addMethod (@selector (validAttributesForMarkedText),  validAttributesForMarkedText);
+        addMethod (@selector (flagsChanged:),                 flagsChanged);
 
-        addMethod (@selector (becomeFirstResponder),          becomeFirstResponder,              "c@:");
-        addMethod (@selector (resignFirstResponder),          resignFirstResponder,              "c@:");
-        addMethod (@selector (acceptsFirstResponder),         acceptsFirstResponder,             "c@:");
+        addMethod (@selector (becomeFirstResponder),          becomeFirstResponder);
+        addMethod (@selector (resignFirstResponder),          resignFirstResponder);
+        addMethod (@selector (acceptsFirstResponder),         acceptsFirstResponder);
 
-        addMethod (@selector (draggingEntered:),              draggingEntered,                   @encode (NSDragOperation), "@:@");
-        addMethod (@selector (draggingUpdated:),              draggingUpdated,                   @encode (NSDragOperation), "@:@");
-        addMethod (@selector (draggingEnded:),                draggingEnded,                     "v@:@");
-        addMethod (@selector (draggingExited:),               draggingExited,                    "v@:@");
-        addMethod (@selector (prepareForDragOperation:),      prepareForDragOperation,           "c@:@");
-        addMethod (@selector (performDragOperation:),         performDragOperation,              "c@:@");
-        addMethod (@selector (concludeDragOperation:),        concludeDragOperation,             "v@:@");
+        addMethod (@selector (draggingEntered:),              draggingEntered);
+        addMethod (@selector (draggingUpdated:),              draggingUpdated);
+        addMethod (@selector (draggingEnded:),                draggingEnded);
+        addMethod (@selector (draggingExited:),               draggingExited);
+        addMethod (@selector (prepareForDragOperation:),      prepareForDragOperation);
+        addMethod (@selector (performDragOperation:),         performDragOperation);
+        addMethod (@selector (concludeDragOperation:),        concludeDragOperation);
 
-        addMethod (@selector (paste:),                        paste,                             "v@:@");
-        addMethod (@selector (copy:),                         copy,                              "v@:@");
-        addMethod (@selector (cut:),                          cut,                               "v@:@");
-        addMethod (@selector (selectAll:),                    selectAll,                         "v@:@");
+        addMethod (@selector (paste:),                        paste);
+        addMethod (@selector (copy:),                         copy);
+        addMethod (@selector (cut:),                          cut);
+        addMethod (@selector (selectAll:),                    selectAll);
 
-        addMethod (@selector (viewWillMoveToWindow:),         willMoveToWindow,                  "v@:@");
+        addMethod (@selector (viewWillMoveToWindow:),         willMoveToWindow);
 
-        addMethod (@selector (isAccessibilityElement),        getIsAccessibilityElement,         "c@:");
-        addMethod (@selector (accessibilityChildren),         getAccessibilityChildren,          "@@:");
-        addMethod (@selector (accessibilityHitTest:),         accessibilityHitTest,              "@@:", @encode (NSPoint));
-        addMethod (@selector (accessibilityFocusedUIElement), getAccessibilityFocusedUIElement,  "@@:");
+        addMethod (@selector (isAccessibilityElement),        getIsAccessibilityElement);
+        addMethod (@selector (accessibilityChildren),         getAccessibilityChildren);
+        addMethod (@selector (accessibilityHitTest:),         accessibilityHitTest);
+        addMethod (@selector (accessibilityFocusedUIElement), getAccessibilityFocusedUIElement);
 
         // deprecated methods required for backwards compatibility
-        addMethod (@selector (accessibilityIsIgnored),        getAccessibilityIsIgnored,         "c@:");
-        addMethod (@selector (accessibilityAttributeValue:),  getAccessibilityAttributeValue,    "@@:@");
+        addMethod (@selector (accessibilityIsIgnored),        getAccessibilityIsIgnored);
+        addMethod (@selector (accessibilityAttributeValue:),  getAccessibilityAttributeValue);
 
-        addMethod (@selector (isFlipped),                     isFlipped,                  "c@:");
+        addMethod (@selector (isFlipped),                     isFlipped);
 
-        addMethod (NSViewComponentPeer::dismissModalsSelector,  dismissModals,            "v@:");
-        addMethod (NSViewComponentPeer::asyncMouseDownSelector, asyncMouseDown,           "v@:@");
-        addMethod (NSViewComponentPeer::asyncMouseUpSelector,   asyncMouseUp,             "v@:@");
-        addMethod (NSViewComponentPeer::frameChangedSelector,   frameChanged,             "v@:@");
-        addMethod (NSViewComponentPeer::becomeKeySelector,      becomeKey,                "v@:@");
+        addMethod (NSViewComponentPeer::dismissModalsSelector,  dismissModals);
+        addMethod (NSViewComponentPeer::asyncMouseDownSelector, asyncMouseDown);
+        addMethod (NSViewComponentPeer::asyncMouseUpSelector,   asyncMouseUp);
+        addMethod (NSViewComponentPeer::frameChangedSelector,   frameChanged);
+        addMethod (NSViewComponentPeer::becomeKeySelector,      becomeKey);
+        addMethod (NSViewComponentPeer::resignKeySelector,      resignKey);
 
-        addMethod (@selector (performKeyEquivalent:),           performKeyEquivalent,     "c@:@");
+        addMethod (@selector (performKeyEquivalent:),           performKeyEquivalent);
 
         addProtocol (@protocol (NSTextInput));
 
@@ -1837,29 +1834,30 @@ private:
         }
     }
 
-    static void asyncMouseDown   (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseDown  (ev); }
-    static void asyncMouseUp     (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseUp    (ev); }
-    static void mouseDragged     (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseDrag  (ev); }
-    static void mouseMoved       (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseMove  (ev); }
-    static void mouseEntered     (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseEnter (ev); }
-    static void mouseExited      (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseExit  (ev); }
-    static void scrollWheel      (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMouseWheel (ev); }
-    static void magnify          (id self, SEL, NSEvent* ev)   { if (auto* p = getOwner (self)) p->redirectMagnify    (ev); }
-    static void copy             (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectCopy       (s);  }
-    static void paste            (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectPaste      (s);  }
-    static void cut              (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectCut        (s);  }
-    static void selectAll        (id self, SEL, NSObject* s)   { if (auto* p = getOwner (self)) p->redirectSelectAll  (s);  }
-    static void willMoveToWindow (id self, SEL, NSWindow* w)   { if (auto* p = getOwner (self)) p->redirectWillMoveToWindow (w); }
+    static void asyncMouseDown   (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseDown,        ev); }
+    static void asyncMouseUp     (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseUp,          ev); }
+    static void mouseDragged     (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseDrag,        ev); }
+    static void mouseMoved       (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseMove,        ev); }
+    static void mouseEntered     (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseEnter,       ev); }
+    static void mouseExited      (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseExit,        ev); }
+    static void scrollWheel      (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMouseWheel,       ev); }
+    static void magnify          (id self, SEL, NSEvent* ev)   { callOnOwner (self, &NSViewComponentPeer::redirectMagnify,          ev); }
+    static void copy             (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectCopy,             s);  }
+    static void paste            (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectPaste,            s);  }
+    static void cut              (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectCut,              s);  }
+    static void selectAll        (id self, SEL, NSObject* s)   { callOnOwner (self, &NSViewComponentPeer::redirectSelectAll,        s);  }
+    static void willMoveToWindow (id self, SEL, NSWindow* w)   { callOnOwner (self, &NSViewComponentPeer::redirectWillMoveToWindow, w);  }
 
     static BOOL acceptsFirstMouse (id, SEL, NSEvent*)          { return YES; }
     static BOOL wantsDefaultClipping (id, SEL)                 { return YES; } // (this is the default, but may want to customise it in future)
     static BOOL worksWhenModal (id self, SEL)                  { if (auto* p = getOwner (self)) return p->worksWhenModal(); return NO; }
 
-    static void drawRect (id self, SEL, NSRect r)              { if (auto* p = getOwner (self)) p->drawRect (r); }
-    static void frameChanged (id self, SEL, NSNotification*)   { if (auto* p = getOwner (self)) p->redirectMovedOrResized(); }
-    static void viewDidMoveToWindow (id self, SEL)             { if (auto* p = getOwner (self)) p->viewMovedToWindow(); }
-    static void dismissModals (id self, SEL)                   { if (auto* p = getOwner (self)) p->dismissModals(); }
-    static void becomeKey (id self, SEL)                       { if (auto* p = getOwner (self)) p->becomeKey(); }
+    static void drawRect (id self, SEL, NSRect r)              { callOnOwner (self, &NSViewComponentPeer::drawRect, r); }
+    static void frameChanged (id self, SEL, NSNotification*)   { callOnOwner (self, &NSViewComponentPeer::redirectMovedOrResized); }
+    static void viewDidMoveToWindow (id self, SEL)             { callOnOwner (self, &NSViewComponentPeer::viewMovedToWindow); }
+    static void dismissModals (id self, SEL)                   { callOnOwner (self, &NSViewComponentPeer::dismissModals); }
+    static void becomeKey (id self, SEL)                       { callOnOwner (self, &NSViewComponentPeer::becomeKey); }
+    static void resignKey (id self, SEL)                       { callOnOwner (self, &NSViewComponentPeer::resignKey); }
 
     static BOOL isFlipped (id, SEL)                            { return true; }
 
@@ -1868,7 +1866,7 @@ private:
         // Without setting contentsFormat macOS Big Sur will always set the invalid area
         // to be the entire frame.
        #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
-        if (NSFoundationVersionNumber > (double) NSFoundationVersionNumber10_11_Max)
+        if (@available (macOS 10.12, *))
         {
             CALayer* layer = ((NSView*) self).layer;
             layer.contentsFormat = kCAContentsFormatRGBA8Uint;
@@ -2060,23 +2058,18 @@ private:
     //==============================================================================
     static void flagsChanged (id self, SEL, NSEvent* ev)
     {
-        if (auto* owner = getOwner (self))
-            owner->redirectModKeyChange (ev);
+        callOnOwner (self, &NSViewComponentPeer::redirectModKeyChange, ev);
     }
 
     static BOOL becomeFirstResponder (id self, SEL)
     {
-        if (auto* owner = getOwner (self))
-            owner->viewFocusGain();
-
+        callOnOwner (self, &NSViewComponentPeer::viewFocusGain);
         return YES;
     }
 
     static BOOL resignFirstResponder (id self, SEL)
     {
-        if (auto* owner = getOwner (self))
-            owner->viewFocusLoss();
-
+        callOnOwner (self, &NSViewComponentPeer::viewFocusLoss);
         return YES;
     }
 
@@ -2108,8 +2101,7 @@ private:
 
     static void draggingExited (id self, SEL, id<NSDraggingInfo> sender)
     {
-        if (auto* owner = getOwner (self))
-            owner->sendDragCallback (1, sender);
+        callOnOwner (self, &NSViewComponentPeer::sendDragCallback, 1, sender);
     }
 
     static BOOL prepareForDragOperation (id, SEL, id<NSDraggingInfo>)
@@ -2186,6 +2178,13 @@ private:
 
         return sendSuperclassMessage<BOOL> (self, s, event);
     }
+
+    template <typename Func, typename... Args>
+    static void callOnOwner (id self, Func&& func, Args&&... args)
+    {
+        if (auto* owner = getOwner (self))
+            (owner->*func) (std::forward<Args> (args)...);
+    }
 };
 
 //==============================================================================
@@ -2193,30 +2192,30 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
 {
     JuceNSWindowClass()  : NSViewComponentPeerWrapper ("JUCEWindow_")
     {
-        addMethod (@selector (canBecomeKeyWindow),                  canBecomeKeyWindow,        "c@:");
-        addMethod (@selector (canBecomeMainWindow),                 canBecomeMainWindow,       "c@:");
-        addMethod (@selector (becomeKeyWindow),                     becomeKeyWindow,           "v@:");
-        addMethod (@selector (resignKeyWindow),                     resignKeyWindow,           "v@:");
-        addMethod (@selector (windowShouldClose:),                  windowShouldClose,         "c@:@");
-        addMethod (@selector (constrainFrameRect:toScreen:),        constrainFrameRect,        @encode (NSRect), "@:",  @encode (NSRect), "@");
-        addMethod (@selector (windowWillResize:toSize:),            windowWillResize,          @encode (NSSize), "@:@", @encode (NSSize));
-        addMethod (@selector (windowDidExitFullScreen:),            windowDidExitFullScreen,   "v@:@");
-        addMethod (@selector (windowWillEnterFullScreen:),          windowWillEnterFullScreen, "v@:@");
-        addMethod (@selector (zoom:),                               zoom,                      "v@:@");
-        addMethod (@selector (windowWillStartLiveResize:),          windowWillStartLiveResize, "v@:@");
-        addMethod (@selector (windowDidEndLiveResize:),             windowDidEndLiveResize,    "v@:@");
-        addMethod (@selector (window:shouldPopUpDocumentPathMenu:), shouldPopUpPathMenu, "c@:@", @encode (NSMenu*));
-        addMethod (@selector (isFlipped),                           isFlipped,                 "c@:");
+        addMethod (@selector (canBecomeKeyWindow),                  canBecomeKeyWindow);
+        addMethod (@selector (canBecomeMainWindow),                 canBecomeMainWindow);
+        addMethod (@selector (becomeKeyWindow),                     becomeKeyWindow);
+        addMethod (@selector (resignKeyWindow),                     resignKeyWindow);
+        addMethod (@selector (windowShouldClose:),                  windowShouldClose);
+        addMethod (@selector (constrainFrameRect:toScreen:),        constrainFrameRect);
+        addMethod (@selector (windowWillResize:toSize:),            windowWillResize);
+        addMethod (@selector (windowDidExitFullScreen:),            windowDidExitFullScreen);
+        addMethod (@selector (windowWillEnterFullScreen:),          windowWillEnterFullScreen);
+        addMethod (@selector (windowWillStartLiveResize:),          windowWillStartLiveResize);
+        addMethod (@selector (windowDidEndLiveResize:),             windowDidEndLiveResize);
+        addMethod (@selector (window:shouldPopUpDocumentPathMenu:), shouldPopUpPathMenu);
+        addMethod (@selector (isFlipped),                           isFlipped);
+        addMethod (@selector (windowWillUseStandardFrame:defaultFrame:), windowWillUseStandardFrame);
+        addMethod (@selector (windowShouldZoom:toFrame:),                windowShouldZoomToFrame);
 
-        addMethod (@selector (accessibilityTitle),                  getAccessibilityTitle,     "@@:");
-        addMethod (@selector (accessibilityLabel),                  getAccessibilityLabel,     "@@:");
-        addMethod (@selector (accessibilityTopLevelUIElement),      getAccessibilityWindow,    "@@:");
-        addMethod (@selector (accessibilityWindow),                 getAccessibilityWindow,    "@@:");
-        addMethod (@selector (accessibilityRole),                   getAccessibilityRole,      "@@:");
-        addMethod (@selector (accessibilitySubrole),                getAccessibilitySubrole,   "@@:");
+        addMethod (@selector (accessibilityTitle),                  getAccessibilityTitle);
+        addMethod (@selector (accessibilityLabel),                  getAccessibilityLabel);
+        addMethod (@selector (accessibilityTopLevelUIElement),      getAccessibilityWindow);
+        addMethod (@selector (accessibilityWindow),                 getAccessibilityWindow);
+        addMethod (@selector (accessibilityRole),                   getAccessibilityRole);
+        addMethod (@selector (accessibilitySubrole),                getAccessibilitySubrole);
 
-        addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:),
-                   shouldAllowIconDrag, "c@:@", @encode (NSEvent*), @encode (NSPoint), @encode (NSPasteboard*));
+        addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:), shouldAllowIconDrag);
 
         addProtocol (@protocol (NSWindowDelegate));
 
@@ -2226,6 +2225,26 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
 private:
     //==============================================================================
     static BOOL isFlipped (id, SEL) { return true; }
+
+    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow*, NSRect)
+    {
+        if (auto* owner = getOwner (self))
+        {
+            if (auto* constrainer = owner->getConstrainer())
+            {
+                return flippedScreenRect (makeNSRect (owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()
+                                                                                                          .withWidth (constrainer->getMaximumWidth())
+                                                                                                          .withHeight (constrainer->getMaximumHeight()))));
+            }
+        }
+
+        return makeNSRect (Rectangle<int> (10000, 10000));
+    }
+
+    static BOOL windowShouldZoomToFrame (id, SEL, NSWindow* window, NSRect frame)
+    {
+        return convertToRectFloat ([window frame]).withZeroOrigin() != convertToRectFloat (frame).withZeroOrigin();
+    }
 
     static BOOL canBecomeKeyWindow (id self, SEL)
     {
@@ -2321,19 +2340,6 @@ private:
         if (auto* owner = getOwner (self))
             if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
                 [owner->window setStyleMask: NSWindowStyleMaskBorderless];
-    }
-
-    static void zoom (id self, SEL, id sender)
-    {
-        if (auto* owner = getOwner (self))
-        {
-            {
-                const ScopedValueSetter<bool> svs (owner->isZooming, true);
-                sendSuperclassMessage<void> (self, @selector (zoom:), sender);
-            }
-
-            owner->redirectMovedOrResized();
-        }
     }
 
     static void windowWillStartLiveResize (id self, SEL, NSNotification*)
@@ -2450,23 +2456,19 @@ void Desktop::setKioskComponent (Component* kioskComp, bool shouldBeEnabled, boo
     auto* peer = dynamic_cast<NSViewComponentPeer*> (kioskComp->getPeer());
     jassert (peer != nullptr); // (this should have been checked by the caller)
 
-    if (peer->hasNativeTitleBar()
-          && [peer->window respondsToSelector: @selector (toggleFullScreen:)])
+    if (peer->hasNativeTitleBar())
     {
         if (shouldBeEnabled && ! allowMenusAndBars)
             [NSApp setPresentationOptions: NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar];
         else if (! shouldBeEnabled)
             [NSApp setPresentationOptions: NSApplicationPresentationDefault];
 
-        [peer->window performSelector: @selector (toggleFullScreen:) withObject: nil];
+        [peer->window toggleFullScreen: nil];
     }
     else
     {
         if (shouldBeEnabled)
         {
-            if (peer->hasNativeTitleBar())
-                [peer->window setStyleMask: NSWindowStyleMaskBorderless];
-
             [NSApp setPresentationOptions: (allowMenusAndBars ? (NSApplicationPresentationAutoHideDock | NSApplicationPresentationAutoHideMenuBar)
                                                               : (NSApplicationPresentationHideDock | NSApplicationPresentationHideMenuBar))];
 

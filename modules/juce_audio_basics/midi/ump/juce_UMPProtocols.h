@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
@@ -42,3 +44,5 @@ enum class MidiProtocol
 
 }
 }
+
+#endif

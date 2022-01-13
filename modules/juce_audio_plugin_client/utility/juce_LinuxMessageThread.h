@@ -33,6 +33,7 @@ namespace juce
 // Implemented in juce_linux_Messaging.cpp
 bool dispatchNextMessageOnSystemQueue (bool returnIfNoPendingMessages);
 
+/** @internal */
 class MessageThread
 {
 public:

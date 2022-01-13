@@ -108,13 +108,14 @@ namespace juce
 */
 struct OpenGLExtensionFunctions
 {
-    /** A more complete set of GL commands can be found in the juce::gl namespace.
+    //==============================================================================
+   #ifndef DOXYGEN
+    [[deprecated ("A more complete set of GL commands can be found in the juce::gl namespace. "
+                  "You should use juce::gl::loadFunctions() to load GL functions.")]]
+    static void initialise();
+   #endif
 
-        You should use juce::gl::loadFunctions() to load GL functions.
-    */
-    JUCE_DEPRECATED (static void initialise());
-
-   #if JUCE_WINDOWS && ! DOXYGEN
+   #if JUCE_WINDOWS && ! defined (DOXYGEN)
     typedef char GLchar;
     typedef pointer_sized_int GLsizeiptr;
     typedef pointer_sized_int GLintptr;

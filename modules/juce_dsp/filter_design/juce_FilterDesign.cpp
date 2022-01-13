@@ -386,16 +386,19 @@ ReferenceCountedArray<IIR::Coefficients<FloatType>>
                                                                      FloatType passbandAmplitudedB,
                                                                      FloatType stopbandAmplitudedB)
 {
-    jassert (sampleRate > 0);
-    jassert (frequency > 0 && frequency <= sampleRate * 0.5);
-    jassert (normalisedTransitionWidth > 0 && normalisedTransitionWidth <= 0.5);
-    jassert (passbandAmplitudedB > -20 && passbandAmplitudedB < 0);
-    jassert (stopbandAmplitudedB > -300 && stopbandAmplitudedB < -20);
+    jassert (0 < sampleRate);
+    jassert (0 < frequency && frequency <= sampleRate * 0.5);
+    jassert (0 < normalisedTransitionWidth && normalisedTransitionWidth <= 0.5);
+    jassert (-20 < passbandAmplitudedB && passbandAmplitudedB < 0);
+    jassert (-300 < stopbandAmplitudedB && stopbandAmplitudedB < -20);
 
     auto normalisedFrequency = frequency / sampleRate;
 
     auto fp = normalisedFrequency - normalisedTransitionWidth / 2;
+    jassert (0.0 < fp && fp < 0.5);
+
     auto fs = normalisedFrequency + normalisedTransitionWidth / 2;
+    jassert (0.0 < fs && fs < 0.5);
 
     double Ap = passbandAmplitudedB;
     double As = stopbandAmplitudedB;

@@ -127,6 +127,7 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xGetErrorDatabaseText,       "XGetErrorDatabaseText"),
                        makeSymbolBinding (xGetErrorText,               "XGetErrorText"),
                        makeSymbolBinding (xGetGeometry,                "XGetGeometry"),
+                       makeSymbolBinding (xGetImage,                   "XGetImage"),
                        makeSymbolBinding (xGetInputFocus,              "XGetInputFocus"),
                        makeSymbolBinding (xGetModifierMapping,         "XGetModifierMapping"),
                        makeSymbolBinding (xGetPointerMapping,          "XGetPointerMapping"),
@@ -188,6 +189,7 @@ bool X11Symbols::loadAllSymbols()
                        makeSymbolBinding (xUngrabServer,               "XUngrabServer"),
                        makeSymbolBinding (xUnlockDisplay,              "XUnlockDisplay"),
                        makeSymbolBinding (xUnmapWindow,                "XUnmapWindow"),
+                       makeSymbolBinding (xutf8TextListToTextProperty, "Xutf8TextListToTextProperty"),
                        makeSymbolBinding (xWarpPointer,                "XWarpPointer")))
         return false;
 

@@ -167,6 +167,8 @@ namespace FlacNamespace
 //==============================================================================
 static const char* const flacFormatName = "FLAC file";
 
+template <typename Item>
+auto emptyRange (Item item) { return Range<Item>::emptyRange (item); }
 
 //==============================================================================
 class FlacReader  : public AudioFormatReader
@@ -217,66 +219,61 @@ public:
         reservoir.setSize ((int) numChannels, 2 * (int) info.max_blocksize, false, false, true);
     }
 
-    // returns the number of samples read
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
         if (! ok)
             return false;
 
-        while (numSamples > 0)
+        const auto getBufferedRange = [this] { return bufferedRange; };
+
+        const auto readFromReservoir = [this, &destSamples, &numDestChannels, &startOffsetInDestBuffer, &startSampleInFile] (const Range<int64> rangeToRead)
         {
-            if (startSampleInFile >= reservoirStart
-                 && startSampleInFile < reservoirStart + samplesInReservoir)
+            const auto bufferIndices = rangeToRead - bufferedRange.getStart();
+            const auto writePos = (int64) startOffsetInDestBuffer + (rangeToRead.getStart() - startSampleInFile);
+
+            for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
             {
-                auto num = (int) jmin ((int64) numSamples,
-                                       reservoirStart + samplesInReservoir - startSampleInFile);
-
-                jassert (num > 0);
-
-                for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
-                    if (destSamples[i] != nullptr)
-                        memcpy (destSamples[i] + startOffsetInDestBuffer,
-                                reservoir.getReadPointer (i, (int) (startSampleInFile - reservoirStart)),
-                                (size_t) num * sizeof (int));
-
-                startOffsetInDestBuffer += num;
-                startSampleInFile += num;
-                numSamples -= num;
+                if (destSamples[i] != nullptr)
+                {
+                    memcpy (destSamples[i] + writePos,
+                            reservoir.getReadPointer (i) + bufferIndices.getStart(),
+                            (size_t) bufferIndices.getLength() * sizeof (int));
+                }
             }
-            else
-            {
-                if (startSampleInFile >= lengthInSamples)
-                {
-                    samplesInReservoir = 0;
-                }
-                else if (startSampleInFile < reservoirStart
-                          || startSampleInFile > reservoirStart + jmax (samplesInReservoir, (int64) 511))
-                {
-                    // had some problems with flac crashing if the read pos is aligned more
-                    // accurately than this. Probably fixed in newer versions of the library, though.
-                    reservoirStart = (int) (startSampleInFile & ~511);
-                    samplesInReservoir = 0;
-                    FLAC__stream_decoder_seek_absolute (decoder, (FlacNamespace::FLAC__uint64) reservoirStart);
-                }
-                else
-                {
-                    reservoirStart += samplesInReservoir;
-                    samplesInReservoir = 0;
-                    FLAC__stream_decoder_process_single (decoder);
-                }
+        };
 
-                if (samplesInReservoir == 0)
-                    break;
-            }
-        }
-
-        if (numSamples > 0)
+        const auto fillReservoir = [this] (const int64 requestedStart)
         {
+            if (requestedStart >= lengthInSamples)
+            {
+                bufferedRange = emptyRange (requestedStart);
+                return;
+            }
+
+            if (requestedStart < bufferedRange.getStart()
+                || jmax (bufferedRange.getEnd(), bufferedRange.getStart() + (int64) 511) < requestedStart)
+            {
+                // had some problems with flac crashing if the read pos is aligned more
+                // accurately than this. Probably fixed in newer versions of the library, though.
+                bufferedRange = emptyRange (requestedStart & ~511);
+                FLAC__stream_decoder_seek_absolute (decoder, (FlacNamespace::FLAC__uint64) bufferedRange.getStart());
+                return;
+            }
+
+            bufferedRange = emptyRange (bufferedRange.getEnd());
+            FLAC__stream_decoder_process_single (decoder);
+        };
+
+        const auto remainingSamples = Reservoir::doBufferedRead (Range<int64> { startSampleInFile, startSampleInFile + numSamples },
+                                                                 getBufferedRange,
+                                                                 readFromReservoir,
+                                                                 fillReservoir);
+
+        if (! remainingSamples.isEmpty())
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) numSamples * sizeof (int));
-        }
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) remainingSamples.getLength() * sizeof (int));
 
         return true;
     }
@@ -304,14 +301,14 @@ public:
 
                 if (src != nullptr)
                 {
-                    auto* dest = reinterpret_cast<int*> (reservoir.getWritePointer(i));
+                    auto* dest = reinterpret_cast<int*> (reservoir.getWritePointer (i));
 
                     for (int j = 0; j < numSamples; ++j)
                         dest[j] = src[j] << bitsToShift;
                 }
             }
 
-            samplesInReservoir = numSamples;
+            bufferedRange.setLength (numSamples);
         }
     }
 
@@ -368,7 +365,7 @@ public:
 private:
     FlacNamespace::FLAC__StreamDecoder* decoder;
     AudioBuffer<float> reservoir;
-    int64 reservoirStart = 0, samplesInReservoir = 0;
+    Range<int64> bufferedRange;
     bool ok = false, scanningForLength = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlacReader)

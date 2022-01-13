@@ -42,30 +42,24 @@ namespace juce
     {
         void addToFifo (const int* someData, int numItems)
         {
-            int start1, size1, start2, size2;
-            abstractFifo.prepareToWrite (numItems, start1, size1, start2, size2);
+            const auto scope = abstractFifo.write (numItems);
 
-            if (size1 > 0)
-                copySomeData (myBuffer + start1, someData, size1);
+            if (scope.blockSize1 > 0)
+                copySomeData (myBuffer + scope.startIndex1, someData, scope.blockSize1);
 
-            if (size2 > 0)
-                copySomeData (myBuffer + start2, someData + size1, size2);
-
-            abstractFifo.finishedWrite (size1 + size2);
+            if (scope.blockSize2 > 0)
+                copySomeData (myBuffer + scope.startIndex2, someData, scope.blockSize2);
         }
 
         void readFromFifo (int* someData, int numItems)
         {
-            int start1, size1, start2, size2;
-            abstractFifo.prepareToRead (numItems, start1, size1, start2, size2);
+            const auto scope = abstractFifo.read (numItems);
 
-            if (size1 > 0)
-                copySomeData (someData, myBuffer + start1, size1);
+            if (scope.blockSize1 > 0)
+                copySomeData (someData, myBuffer + scope.startIndex1, scope.blockSize1);
 
-            if (size2 > 0)
-                copySomeData (someData + size1, myBuffer + start2, size2);
-
-            abstractFifo.finishedRead (size1 + size2);
+            if (scope.blockSize2 > 0)
+                copySomeData (someData + scope.blockSize1, myBuffer + scope.startIndex2, scope.blockSize2);
         }
 
         AbstractFifo abstractFifo { 1024 };
@@ -81,9 +75,6 @@ public:
     //==============================================================================
     /** Creates a FIFO to manage a buffer with the specified capacity. */
     AbstractFifo (int capacity) noexcept;
-
-    /** Destructor */
-    ~AbstractFifo();
 
     //==============================================================================
     /** Returns the total size of the buffer being managed. */

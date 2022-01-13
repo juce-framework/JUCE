@@ -103,7 +103,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 using namespace juce;
 
-#include "../utility/juce_FakeMouseMoveGenerator.h"
 #include "../utility/juce_WindowsHooks.h"
 #include "../utility/juce_LinuxMessageThread.h"
 
@@ -634,39 +633,39 @@ public:
         info.ppqPosition = (ti->flags & Vst2::kVstPpqPosValid) != 0 ? ti->ppqPos : 0.0;
         info.ppqPositionOfLastBarStart = (ti->flags & Vst2::kVstBarsValid) != 0 ? ti->barStartPos : 0.0;
 
-        if ((ti->flags & Vst2::kVstSmpteValid) != 0)
+        std::tie (info.frameRate, info.editOriginTime) = [ti]
         {
-            AudioPlayHead::FrameRateType rate = AudioPlayHead::fpsUnknown;
-            double fps = 1.0;
+            if ((ti->flags & Vst2::kVstSmpteValid) == 0)
+                return std::make_tuple (FrameRate(), 0.0);
 
-            switch (ti->smpteFrameRate)
+            const auto rate = [&]
             {
-                case Vst2::kVstSmpte239fps:       rate = AudioPlayHead::fps23976;    fps = 24.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte24fps:        rate = AudioPlayHead::fps24;       fps = 24.0;  break;
-                case Vst2::kVstSmpte25fps:        rate = AudioPlayHead::fps25;       fps = 25.0;  break;
-                case Vst2::kVstSmpte2997fps:      rate = AudioPlayHead::fps2997;     fps = 30.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte30fps:        rate = AudioPlayHead::fps30;       fps = 30.0;  break;
-                case Vst2::kVstSmpte2997dfps:     rate = AudioPlayHead::fps2997drop; fps = 30.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte30dfps:       rate = AudioPlayHead::fps30drop;   fps = 30.0;  break;
+                switch (ti->smpteFrameRate)
+                {
+                    case Vst2::kVstSmpte24fps:          return FrameRate().withBaseRate (24);
+                    case Vst2::kVstSmpte239fps:         return FrameRate().withBaseRate (24).withPullDown();
 
-                case Vst2::kVstSmpteFilm16mm:
-                case Vst2::kVstSmpteFilm35mm:     fps = 24.0; break;
+                    case Vst2::kVstSmpte25fps:          return FrameRate().withBaseRate (25);
+                    case Vst2::kVstSmpte249fps:         return FrameRate().withBaseRate (25).withPullDown();
 
-                case Vst2::kVstSmpte249fps:       fps = 25.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte599fps:       fps = 60.0 * 1000.0 / 1001.0; break;
-                case Vst2::kVstSmpte60fps:        fps = 60; break;
+                    case Vst2::kVstSmpte30fps:          return FrameRate().withBaseRate (30);
+                    case Vst2::kVstSmpte30dfps:         return FrameRate().withBaseRate (30).withDrop();
+                    case Vst2::kVstSmpte2997fps:        return FrameRate().withBaseRate (30).withPullDown();
+                    case Vst2::kVstSmpte2997dfps:       return FrameRate().withBaseRate (30).withPullDown().withDrop();
 
-                default:                          jassertfalse; // unknown frame-rate..
-            }
+                    case Vst2::kVstSmpte60fps:          return FrameRate().withBaseRate (60);
+                    case Vst2::kVstSmpte599fps:         return FrameRate().withBaseRate (60).withPullDown();
 
-            info.frameRate = rate;
-            info.editOriginTime = ti->smpteOffset / (80.0 * fps);
-        }
-        else
-        {
-            info.frameRate = AudioPlayHead::fpsUnknown;
-            info.editOriginTime = 0;
-        }
+                    case Vst2::kVstSmpteFilm16mm:
+                    case Vst2::kVstSmpteFilm35mm:       return FrameRate().withBaseRate (24);
+                }
+
+                return FrameRate();
+            }();
+
+            const auto effectiveRate = rate.getEffectiveRate();
+            return std::make_tuple (rate, effectiveRate != 0.0 ? ti->smpteOffset / (80.0 * effectiveRate) : 0.0);
+        }();
 
         info.isRecording = (ti->flags & Vst2::kVstTransportRecording) != 0;
         info.isPlaying   = (ti->flags & (Vst2::kVstTransportRecording | Vst2::kVstTransportPlaying)) != 0;
@@ -703,12 +702,7 @@ public:
     void setParameter (int32 index, float value)
     {
         if (auto* param = juceParameters.getParamForIndex (index))
-        {
-            param->setValue (value);
-
-            inParameterChangedCallback = true;
-            param->sendValueChangedMessageToListeners (value);
-        }
+            setValueAndNotifyIfChanged (*param, value);
     }
 
     static void setParameterCB (Vst2::AEffect* vstInterface, int32 index, float value)
@@ -850,7 +844,7 @@ public:
             if (auto* ed = processor->createEditorIfNeeded())
             {
                 setHasEditorFlag (true);
-                editorComp.reset (new EditorCompWrapper (*this, *ed));
+                editorComp.reset (new EditorCompWrapper (*this, *ed, editorScaleFactor));
             }
             else
             {
@@ -974,10 +968,15 @@ public:
                               , public Timer
                              #endif
     {
-        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor)
+        EditorCompWrapper (JuceVSTWrapper& w, AudioProcessorEditor& editor, float initialScale)
             : wrapper (w)
         {
             editor.setOpaque (true);
+           #if ! JUCE_MAC
+            editor.setScaleFactor (initialScale);
+           #else
+            ignoreUnused (initialScale);
+           #endif
             addAndMakeVisible (editor);
 
             auto editorBounds = getSizeToContainChild();
@@ -989,7 +988,6 @@ public:
            #endif
 
             setOpaque (true);
-            ignoreUnused (fakeMouseGenerator);
         }
 
         ~EditorCompWrapper() override
@@ -1218,24 +1216,19 @@ public:
 
         void setContentScaleFactor (float scale)
         {
-            if (! approximatelyEqual (scale, editorScaleFactor))
+            if (auto* pluginEditor = getEditorComp())
             {
-                editorScaleFactor = scale;
+                auto prevEditorBounds = pluginEditor->getLocalArea (this, lastBounds);
 
-                if (auto* pluginEditor = getEditorComp())
                 {
-                    auto prevEditorBounds = pluginEditor->getLocalArea (this, lastBounds);
+                    const ScopedValueSetter<bool> resizingChildSetter (resizingChild, true);
 
-                    {
-                        const ScopedValueSetter<bool> resizingChildSetter (resizingChild, true);
-
-                        pluginEditor->setScaleFactor (editorScaleFactor);
-                        pluginEditor->setBounds (prevEditorBounds.withPosition (0, 0));
-                    }
-
-                    lastBounds = getSizeToContainChild();
-                    updateWindowSize();
+                    pluginEditor->setScaleFactor (scale);
+                    pluginEditor->setBounds (prevEditorBounds.withPosition (0, 0));
                 }
+
+                lastBounds = getSizeToContainChild();
+                updateWindowSize();
             }
         }
 
@@ -1259,7 +1252,7 @@ public:
          {
              auto hostWindowScale = (float) getScaleFactorForWindow ((HostWindowType) hostWindow);
 
-             if (hostWindowScale > 0.0f && ! approximatelyEqual (hostWindowScale, editorScaleFactor))
+             if (hostWindowScale > 0.0f && ! approximatelyEqual (hostWindowScale, wrapper.editorScaleFactor))
                  wrapper.handleSetContentScaleFactor (hostWindowScale);
          }
 
@@ -1296,10 +1289,8 @@ public:
 
         //==============================================================================
         JuceVSTWrapper& wrapper;
-        FakeMouseMoveGenerator fakeMouseGenerator;
         bool resizingChild = false, resizingParent = false;
 
-        float editorScaleFactor = 1.0f;
         juce::Rectangle<int> lastBounds;
 
        #if JUCE_LINUX || JUCE_BSD
@@ -1432,6 +1423,15 @@ private:
    #else
     static void checkWhetherMessageThreadIsCorrect() {}
    #endif
+
+    void setValueAndNotifyIfChanged (AudioProcessorParameter& param, float newValue)
+    {
+        if (param.getValue() == newValue)
+            return;
+
+        inParameterChangedCallback = true;
+        param.setValueNotifyingHost (newValue);
+    }
 
     //==============================================================================
     template <typename FloatType>
@@ -1716,12 +1716,7 @@ private:
         {
             if (! LegacyAudioParameter::isLegacy (param))
             {
-                auto value = param->getValueForText (String::fromUTF8 ((char*) args.ptr));
-                param->setValue (value);
-
-                inParameterChangedCallback = true;
-                param->sendValueChangedMessageToListeners (value);
-
+                setValueAndNotifyIfChanged (*param, param->getValueForText (String::fromUTF8 ((char*) args.ptr)));
                 return 1;
             }
         }
@@ -1994,9 +1989,18 @@ private:
 
     pointer_sized_int handleSetContentScaleFactor (float scale)
     {
+        checkWhetherMessageThreadIsCorrect();
+        const MessageManagerLock mmLock;
+
        #if ! JUCE_MAC
-        if (editorComp != nullptr)
-            editorComp->setContentScaleFactor (scale);
+        if (! approximatelyEqual (scale, editorScaleFactor))
+        {
+            editorScaleFactor = scale;
+
+            if (editorComp != nullptr)
+                editorComp->setContentScaleFactor (editorScaleFactor);
+        }
+
        #else
         ignoreUnused (scale);
        #endif
@@ -2066,6 +2070,7 @@ private:
     CriticalSection stateInformationLock;
     juce::MemoryBlock chunkMemory;
     uint32 chunkMemoryTime = 0;
+    float editorScaleFactor = 1.0f;
     std::unique_ptr<EditorCompWrapper> editorComp;
     Vst2::ERect editorRect;
     MidiBuffer midiEvents;

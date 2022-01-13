@@ -66,10 +66,6 @@
  #define JUCE_CXX14_IS_AVAILABLE (__cplusplus >= 201402L)
  #define JUCE_CXX17_IS_AVAILABLE (__cplusplus >= 201703L)
 
- #if defined (__OBJC__)
-  #define JUCE_OBJC_HAS_AVAILABLE_FEATURE (__clang_major__ >= 9)
- #endif
-
 #endif
 
 //==============================================================================
@@ -96,7 +92,7 @@
 #endif
 
 //==============================================================================
-#if ! DOXYGEN
+#ifndef DOXYGEN
  // These are old flags that are now supported on all compatible build targets
  #define JUCE_COMPILER_SUPPORTS_OVERRIDE_AND_FINAL 1
  #define JUCE_COMPILER_SUPPORTS_VARIADIC_TEMPLATES 1

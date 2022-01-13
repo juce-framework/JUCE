@@ -191,9 +191,10 @@ public:
 
             lastCurrentValue = newValue;
 
-            // (need to do this comparison because the Value will use equalsWithSameType to compare
-            // the new and old values, so will generate unwanted change events if the type changes)
-            if (currentValue != newValue)
+            // Need to do this comparison because the Value will use equalsWithSameType to compare
+            // the new and old values, so will generate unwanted change events if the type changes.
+            // Cast to double before comparing, to prevent comparing as another type (e.g. String).
+            if (static_cast<double> (currentValue.getValue()) != newValue)
                 currentValue = newValue;
 
             updateText();
@@ -566,7 +567,6 @@ public:
             owner.addAndMakeVisible (valueBox.get());
 
             valueBox->setWantsKeyboardFocus (false);
-            valueBox->setAccessible (false);
             valueBox->setText (previousTextBoxContent, dontSendNotification);
             valueBox->setTooltip (owner.getTooltip());
             updateTextBoxEnablement();
@@ -1363,7 +1363,8 @@ Slider::ScopedDragNotification::ScopedDragNotification (Slider& s)
 
 Slider::ScopedDragNotification::~ScopedDragNotification()
 {
-    sliderBeingDragged.pimpl->sendDragEnd();
+    if (sliderBeingDragged.pimpl != nullptr)
+        sliderBeingDragged.pimpl->sendDragEnd();
 }
 
 //==============================================================================

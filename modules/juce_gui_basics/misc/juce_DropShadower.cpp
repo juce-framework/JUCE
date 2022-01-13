@@ -75,6 +75,110 @@ private:
     JUCE_DECLARE_NON_COPYABLE (ShadowWindow)
 };
 
+class DropShadower::ParentVisibilityChangedListener  : public ComponentListener,
+                                                       private Timer
+{
+public:
+    ParentVisibilityChangedListener (Component& r, ComponentListener& l)
+        : root (&r), listener (&l)
+    {
+        if (auto* firstParent = root->getParentComponent())
+            updateParentHierarchy (firstParent);
+
+        if ((SystemStats::getOperatingSystemType() & SystemStats::Windows) != 0)
+        {
+            isOnVirtualDesktop = isWindowOnCurrentVirtualDesktop (root->getWindowHandle());
+            startTimerHz (5);
+        }
+    }
+
+    ~ParentVisibilityChangedListener() override
+    {
+        for (auto& compEntry : observedComponents)
+            if (auto* comp = compEntry.get())
+                comp->removeComponentListener (this);
+    }
+
+    void componentVisibilityChanged (Component&) override
+    {
+        listener->componentVisibilityChanged (*root);
+    }
+
+    void componentParentHierarchyChanged (Component& component) override
+    {
+        if (root == &component)
+            if (auto* firstParent = root->getParentComponent())
+                updateParentHierarchy (firstParent);
+    }
+
+    bool isWindowOnVirtualDesktop() const noexcept  { return isOnVirtualDesktop; }
+
+private:
+    class ComponentWithWeakReference
+    {
+    public:
+        explicit ComponentWithWeakReference (Component& c)
+            : ptr (&c), ref (&c) {}
+
+        Component* get() const { return ref.get(); }
+
+        bool operator< (const ComponentWithWeakReference& other) const { return ptr < other.ptr; }
+
+    private:
+        Component* ptr;
+        WeakReference<Component> ref;
+    };
+
+    void updateParentHierarchy (Component* rootComponent)
+    {
+        const auto lastSeenComponents = std::exchange (observedComponents, [&]
+        {
+            std::set<ComponentWithWeakReference> result;
+
+            for (auto node = rootComponent; node != nullptr; node = node->getParentComponent())
+                result.emplace (*node);
+
+            return result;
+        }());
+
+        const auto withDifference = [] (const auto& rangeA, const auto& rangeB, auto&& callback)
+        {
+            std::vector<ComponentWithWeakReference> result;
+            std::set_difference (rangeA.begin(), rangeA.end(), rangeB.begin(), rangeB.end(), std::back_inserter (result));
+
+            for (const auto& item : result)
+                if (auto* c = item.get())
+                    callback (*c);
+        };
+
+        withDifference (lastSeenComponents, observedComponents, [this] (auto& comp) { comp.removeComponentListener (this); });
+        withDifference (observedComponents, lastSeenComponents, [this] (auto& comp) { comp.addComponentListener (this); });
+    }
+
+    void timerCallback() override
+    {
+        WeakReference<DropShadower> deletionChecker { static_cast<DropShadower*> (listener) };
+
+        const auto wasOnVirtualDesktop = std::exchange (isOnVirtualDesktop,
+                                                        isWindowOnCurrentVirtualDesktop (root->getWindowHandle()));
+
+        // on Windows, isWindowOnCurrentVirtualDesktop() may cause synchronous messages to be dispatched
+        // to the HWND so we need to check if the shadower is still valid after calling
+        if (deletionChecker == nullptr)
+            return;
+
+        if (isOnVirtualDesktop != wasOnVirtualDesktop)
+            listener->componentVisibilityChanged (*root);
+    }
+
+    Component* root = nullptr;
+    ComponentListener* listener = nullptr;
+    std::set<ComponentWithWeakReference> observedComponents;
+    bool isOnVirtualDesktop = true;
+
+    JUCE_DECLARE_NON_COPYABLE (ParentVisibilityChangedListener)
+    JUCE_DECLARE_NON_MOVEABLE (ParentVisibilityChangedListener)
+};
 
 //==============================================================================
 DropShadower::DropShadower (const DropShadow& ds)  : shadow (ds)  {}
@@ -108,6 +212,11 @@ void DropShadower::setOwner (Component* componentToFollow)
 
         updateParent();
         owner->addComponentListener (this);
+
+        // The visibility of `owner` is transitively affected by the visibility of its parents. Thus we need to trigger the
+        // componentVisibilityChanged() event in case it changes for any of the parents.
+        visibilityChangedListener = std::make_unique<ParentVisibilityChangedListener> (*owner,
+                                                                                       static_cast<ComponentListener&> (*this));
 
         updateShadows();
     }
@@ -163,15 +272,11 @@ void DropShadower::updateShadows()
 
     const ScopedValueSetter<bool> setter (reentrant, true);
 
-    if (owner == nullptr)
-    {
-        shadowWindows.clear();
-        return;
-    }
-
-    if (owner->isShowing()
-         && owner->getWidth() > 0 && owner->getHeight() > 0
-         && (Desktop::canUseSemiTransparentWindows() || owner->getParentComponent() != nullptr))
+    if (owner != nullptr
+        && owner->isShowing()
+        && owner->getWidth() > 0 && owner->getHeight() > 0
+        && (Desktop::canUseSemiTransparentWindows() || owner->getParentComponent() != nullptr)
+        && (visibilityChangedListener != nullptr && visibilityChangedListener->isWindowOnVirtualDesktop()))
     {
         while (shadowWindows.size() < 4)
             shadowWindows.add (new ShadowWindow (owner, shadow));

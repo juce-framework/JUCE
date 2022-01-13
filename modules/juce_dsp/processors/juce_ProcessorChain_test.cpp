@@ -132,6 +132,32 @@ public:
             expect (get<0> (chain).bufferWasClear);
             expect (! get<1> (chain).bufferWasClear);
         }
+
+        beginTest ("Chains with trailing items that only support replacing contexts can be built");
+        {
+            AudioBuffer<float> inBuf (1, 1), outBuf (1, 1);
+            juce::dsp::AudioBlock<float> in (inBuf), out (outBuf);
+
+            struct OnlyReplacing
+            {
+                void prepare (const juce::dsp::ProcessSpec&) {}
+                void process (const juce::dsp::ProcessContextReplacing<float>& c)
+                {
+                    c.getOutputBlock().multiplyBy (2.0f);
+                }
+                void reset() {}
+            };
+
+            {
+                juce::dsp::ProcessorChain<juce::dsp::Gain<float>, OnlyReplacing, OnlyReplacing> c;
+                juce::dsp::ProcessContextNonReplacing<float> context (in, out);
+                get<0> (c).setGainLinear (1.0f);
+                c.prepare (ProcessSpec{});
+                inBuf.setSample (0, 0, 1.0f);
+                c.process (context);
+                expectEquals (outBuf.getSample (0, 0), 4.0f);
+            }
+        }
     }
 };
 

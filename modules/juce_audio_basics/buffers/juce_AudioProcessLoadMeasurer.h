@@ -72,11 +72,13 @@ public:
     struct JUCE_API  ScopedTimer
     {
         ScopedTimer (AudioProcessLoadMeasurer&);
+        ScopedTimer (AudioProcessLoadMeasurer&, int numSamplesInBlock);
         ~ScopedTimer();
 
     private:
         AudioProcessLoadMeasurer& owner;
         double startTime;
+        int samplesInBlock;
 
         JUCE_DECLARE_NON_COPYABLE (ScopedTimer)
     };
@@ -87,9 +89,15 @@ public:
     */
     void registerBlockRenderTime (double millisecondsTaken);
 
+    /** Can be called manually to add the time of a callback to the stats.
+        Normally you probably would never call this - it's simpler and more robust to
+        use a ScopedTimer to measure the time using an RAII pattern.
+    */
+    void registerRenderTime (double millisecondsTaken, int numSamples);
+
 private:
-    double cpuUsageMs = 0, timeToCpuScale = 0, msPerBlock = 0;
-    int xruns = 0;
+    double cpuUsageProportion = 0, timeToCpuScale = 0, msPerSample = 0;
+    int xruns = 0, samplesPerBlock = 0;
 };
 
 

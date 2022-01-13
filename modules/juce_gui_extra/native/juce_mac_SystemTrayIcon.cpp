@@ -26,7 +26,7 @@
 namespace juce
 {
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new", "-Wdeprecated-declarations")
 
 extern NSMenu* createNSMenu (const PopupMenu&, const String& name, int topLevelMenuId,
                              int topLevelIndex, bool addDelegate);
@@ -36,7 +36,7 @@ struct StatusItemContainer   : public Timer
 {
     //==============================================================================
     StatusItemContainer (SystemTrayIconComponent& iconComp, const Image& im)
-        : owner (iconComp), statusIcon (imageToNSImage (im))
+        : owner (iconComp), statusIcon (imageToNSImage (ScaledImage (im)))
     {
     }
 
@@ -51,7 +51,7 @@ struct StatusItemContainer   : public Timer
 
     void updateIcon (const Image& newImage)
     {
-        statusIcon.reset (imageToNSImage (newImage));
+        statusIcon.reset (imageToNSImage (ScaledImage (newImage)));
         setIconSize();
         configureIcon();
     }
@@ -110,6 +110,11 @@ struct ButtonBasedStatusItem   : public StatusItemContainer
        #else
         [button sendActionOn: NSLeftMouseDownMask | NSRightMouseDownMask | NSScrollWheelMask];
        #endif
+    }
+
+    ~ButtonBasedStatusItem() override
+    {
+        [statusItem.get() button].image = nullptr;
     }
 
     void configureIcon() override
@@ -184,7 +189,7 @@ struct ButtonBasedStatusItem   : public StatusItemContainer
         {
             addIvar<ButtonBasedStatusItem*> ("owner");
 
-            addMethod (@selector (handleEvent:), handleEvent, "v@:@");
+            addMethod (@selector (handleEvent:), handleEvent);
 
             registerClass();
         }
@@ -311,12 +316,12 @@ struct ViewBasedStatusItem   : public StatusItemContainer
             addIvar<ViewBasedStatusItem*> ("owner");
             addIvar<NSImage*> ("image");
 
-            addMethod (@selector (mouseDown:),      handleEventDown, "v@:@");
-            addMethod (@selector (rightMouseDown:), handleEventDown, "v@:@");
-            addMethod (@selector (drawRect:),       drawRect,        "v@:@");
+            addMethod (@selector (mouseDown:),      handleEventDown);
+            addMethod (@selector (rightMouseDown:), handleEventDown);
+            addMethod (@selector (drawRect:),       drawRect);
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (frameChanged:),   frameChanged,    "v@:@");
+            addMethod (@selector (frameChanged:),   frameChanged);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();

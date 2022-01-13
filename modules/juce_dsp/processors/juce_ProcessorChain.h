@@ -37,9 +37,8 @@ namespace detail
 {
     template <typename Fn, typename Tuple, size_t... Ix>
     constexpr void forEachInTuple (Fn&& fn, Tuple&& tuple, std::index_sequence<Ix...>)
-        noexcept (noexcept (std::initializer_list<int> { (fn (std::get<Ix> (tuple), Ix), 0)... }))
     {
-        (void) std::initializer_list<int> { ((void) fn (std::get<Ix> (tuple), Ix), 0)... };
+        (void) std::initializer_list<int> { ((void) fn (std::get<Ix> (tuple), std::integral_constant<size_t, Ix>()), 0)... };
     }
 
     template <typename T>
@@ -47,10 +46,16 @@ namespace detail
 
     template <typename Fn, typename Tuple>
     constexpr void forEachInTuple (Fn&& fn, Tuple&& tuple)
-        noexcept (noexcept (forEachInTuple (std::forward<Fn> (fn), std::forward<Tuple> (tuple), TupleIndexSequence<Tuple>{})))
     {
         forEachInTuple (std::forward<Fn> (fn), std::forward<Tuple> (tuple), TupleIndexSequence<Tuple>{});
     }
+
+    // This could be a template variable, but that code causes an internal compiler error in MSVC 19.00.24215
+    template <typename Context, size_t Ix>
+    struct UseContextDirectly
+    {
+        static constexpr auto value = ! Context::usesSeparateInputAndOutputBlocks() || Ix == 0;
+    };
 }
 #endif
 
@@ -80,40 +85,43 @@ public:
     /** Prepare all inner processors with the provided `ProcessSpec`. */
     void prepare (const ProcessSpec& spec)
     {
-        detail::forEachInTuple ([&] (auto& proc, size_t) { proc.prepare (spec); }, processors);
+        detail::forEachInTuple ([&] (auto& proc, auto) { proc.prepare (spec); }, processors);
     }
 
     /** Reset all inner processors. */
     void reset()
     {
-        detail::forEachInTuple ([] (auto& proc, size_t) { proc.reset(); }, processors);
+        detail::forEachInTuple ([] (auto& proc, auto) { proc.reset(); }, processors);
     }
 
     /** Process `context` through all inner processors in sequence. */
     template <typename ProcessContext>
     void process (const ProcessContext& context) noexcept
     {
-        detail::forEachInTuple ([&] (auto& proc, size_t index) noexcept
-        {
-            if (context.usesSeparateInputAndOutputBlocks() && index != 0)
-            {
-                jassert (context.getOutputBlock().getNumChannels() == context.getInputBlock().getNumChannels());
-                ProcessContextReplacing<typename ProcessContext::SampleType> replacingContext (context.getOutputBlock());
-                replacingContext.isBypassed = (bypassed[index] || context.isBypassed);
-
-                proc.process (replacingContext);
-            }
-            else
-            {
-                ProcessContext contextCopy (context);
-                contextCopy.isBypassed = (bypassed[index] || context.isBypassed);
-
-                proc.process (contextCopy);
-            }
-        }, processors);
+        detail::forEachInTuple ([this, &context] (auto& proc, auto index) noexcept { this->processOne (context, proc, index); },
+                                processors);
     }
 
 private:
+    template <typename Context, typename Proc, size_t Ix, std::enable_if_t<! detail::UseContextDirectly<Context, Ix>::value, int> = 0>
+    void processOne (const Context& context, Proc& proc, std::integral_constant<size_t, Ix>) noexcept
+    {
+        jassert (context.getOutputBlock().getNumChannels() == context.getInputBlock().getNumChannels());
+        ProcessContextReplacing<typename Context::SampleType> replacingContext (context.getOutputBlock());
+        replacingContext.isBypassed = (bypassed[Ix] || context.isBypassed);
+
+        proc.process (replacingContext);
+    }
+
+    template <typename Context, typename Proc, size_t Ix, std::enable_if_t<detail::UseContextDirectly<Context, Ix>::value, int> = 0>
+    void processOne (const Context& context, Proc& proc, std::integral_constant<size_t, Ix>) noexcept
+    {
+        auto contextCopy = context;
+        contextCopy.isBypassed = (bypassed[Ix] || context.isBypassed);
+
+        proc.process (contextCopy);
+    }
+
     std::tuple<Processors...> processors;
     std::array<bool, sizeof...(Processors)> bypassed { {} };
 };
@@ -156,3 +164,22 @@ inline bool isBypassed (const ProcessorChain<Processors...>& chain) noexcept
 
 } // namespace dsp
 } // namespace juce
+
+#ifndef DOXYGEN
+namespace std
+{
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmismatched-tags")
+
+/** Adds support for C++17 structured bindings. */
+template <typename... Processors>
+struct tuple_size<::juce::dsp::ProcessorChain<Processors...>> : integral_constant<size_t, sizeof... (Processors)> {};
+
+/** Adds support for C++17 structured bindings. */
+template <size_t I, typename... Processors>
+struct tuple_element<I, ::juce::dsp::ProcessorChain<Processors...>> : tuple_element<I, tuple<Processors...>> {};
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+} // namespace std
+#endif

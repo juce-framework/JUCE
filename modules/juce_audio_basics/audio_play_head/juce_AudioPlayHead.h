@@ -60,6 +60,98 @@ public:
         fpsUnknown      = 99
     };
 
+    /** More descriptive frame rate type. */
+    class JUCE_API  FrameRate
+    {
+    public:
+        /** Creates a frame rate with a base rate of 0. */
+        FrameRate() = default;
+
+        /** Creates a FrameRate instance from a FrameRateType. */
+        FrameRate (FrameRateType type) : FrameRate (fromType (type)) {}
+
+        /** Gets the FrameRateType that matches the state of this FrameRate.
+
+            Returns fpsUnknown if this FrameRate cannot be represented by any of the
+            other enum fields.
+        */
+        FrameRateType getType() const
+        {
+            switch (base)
+            {
+                case 24:    return pulldown ? fps23976 : fps24;
+                case 25:    return fps25;
+                case 30:    return pulldown ? (drop ? fps2997drop : fps2997)
+                                            : (drop ? fps30drop   : fps30);
+                case 60:    return drop ? fps60drop : fps60;
+            }
+
+            return fpsUnknown;
+        }
+
+        /** Returns the plain rate, without taking pulldown into account. */
+        int getBaseRate() const                         { return base; }
+
+        /** Returns true if drop-frame timecode is in use. */
+        bool isDrop() const                             { return drop; }
+
+        /** Returns true if the effective framerate is actually equal to the base rate divided by 1.001 */
+        bool isPullDown() const                         { return pulldown; }
+
+        /** Returns the actual rate described by this object, taking pulldown into account. */
+        double getEffectiveRate() const                 { return pulldown ? (double) base / 1.001 : (double) base; }
+
+        /** Returns a copy of this object with the specified base rate. */
+        FrameRate withBaseRate (int x) const            { return with (&FrameRate::base, x); }
+
+        /** Returns a copy of this object with drop frames enabled or disabled, as specified. */
+        FrameRate withDrop (bool x = true) const        { return with (&FrameRate::drop, x); }
+
+        /** Returns a copy of this object with pulldown enabled or disabled, as specified. */
+        FrameRate withPullDown (bool x = true) const    { return with (&FrameRate::pulldown, x); }
+
+        /** Returns true if this instance is equal to other. */
+        bool operator== (const FrameRate& other) const
+        {
+            const auto tie = [] (const FrameRate& x) { return std::tie (x.base, x.drop, x.pulldown); };
+            return tie (*this) == tie (other);
+        }
+
+        /** Returns true if this instance is not equal to other. */
+        bool operator!= (const FrameRate& other) const { return ! (*this == other); }
+
+    private:
+        static FrameRate fromType (FrameRateType type)
+        {
+            switch (type)
+            {
+                case fps23976:      return FrameRate().withBaseRate (24).withPullDown();
+                case fps24:         return FrameRate().withBaseRate (24);
+                case fps25:         return FrameRate().withBaseRate (25);
+                case fps2997:       return FrameRate().withBaseRate (30).withPullDown();
+                case fps30:         return FrameRate().withBaseRate (30);
+                case fps2997drop:   return FrameRate().withBaseRate (30).withDrop().withPullDown();
+                case fps30drop:     return FrameRate().withBaseRate (30).withDrop();
+                case fps60:         return FrameRate().withBaseRate (60);
+                case fps60drop:     return FrameRate().withBaseRate (60).withDrop();
+                case fpsUnknown:    break;
+            }
+
+            return {};
+        }
+
+        template <typename Member, typename Value>
+        FrameRate with (Member&& member, Value&& value) const
+        {
+            auto copy = *this;
+            copy.*member = std::forward<Value> (value);
+            return copy;
+        }
+
+        int base = 0;
+        bool drop = false, pulldown = false;
+    };
+
     //==============================================================================
     /** This structure is filled-in by the AudioPlayHead::getCurrentPosition() method.
     */
@@ -95,7 +187,7 @@ public:
         double ppqPositionOfLastBarStart = 0;
 
         /** The video frame rate, if applicable. */
-        FrameRateType frameRate = FrameRateType::fps23976;
+        FrameRate frameRate = FrameRateType::fps23976;
 
         /** True if the transport is currently playing. */
         bool isPlaying = false;
@@ -124,7 +216,7 @@ public:
         //==============================================================================
         bool operator== (const CurrentPositionInfo& other) const noexcept
         {
-            auto tie = [] (const CurrentPositionInfo& i)
+            const auto tie = [] (const CurrentPositionInfo& i)
             {
                 return std::tie (i.timeInSamples,
                                  i.ppqPosition,

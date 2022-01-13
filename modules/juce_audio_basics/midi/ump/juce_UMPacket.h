@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 namespace juce
 {
 namespace universal_midi_packets
@@ -187,3 +189,5 @@ using PacketX4 = Packet<4>;
 
 }
 }
+
+#endif

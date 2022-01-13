@@ -28,22 +28,28 @@ namespace juce
 namespace build_tools
 {
     //==============================================================================
-    static bool keyFoundAndNotSequentialDuplicate (XmlElement& xml, const String& key)
+    static XmlElement* getKeyWithName (XmlElement& xml, const String& key)
     {
         for (auto* element : xml.getChildWithTagNameIterator ("key"))
-        {
             if (element->getAllSubText().trim().equalsIgnoreCase (key))
-            {
-                if (element->getNextElement() != nullptr && element->getNextElement()->hasTagName ("key"))
-                {
-                    // found broken plist format (sequential duplicate), fix by removing
-                    xml.removeChildElement (element, true);
-                    return false;
-                }
+                return element;
 
-                // key found (not sequential duplicate)
-                return true;
+        return nullptr;
+    }
+
+    static bool keyFoundAndNotSequentialDuplicate (XmlElement& xml, const String& key)
+    {
+        if (auto* element = getKeyWithName (xml, key))
+        {
+            if (element->getNextElement() != nullptr && element->getNextElement()->hasTagName ("key"))
+            {
+                // found broken plist format (sequential duplicate), fix by removing
+                xml.removeChildElement (element, true);
+                return false;
             }
+
+            // key found (not sequential duplicate)
+            return true;
         }
 
         // key not found
@@ -87,6 +93,9 @@ namespace build_tools
 
     static void addArrayToPlist (XmlElement& dict, String arrayKey, const StringArray& arrayElements)
     {
+        if (getKeyWithName (dict, arrayKey) != nullptr)
+            return;
+
         dict.createNewChildElement ("key")->addTextElement (arrayKey);
         auto* plistStringArray = dict.createNewChildElement ("array");
 
@@ -197,6 +206,7 @@ namespace build_tools
                     addPlistDictionaryKey (*dict2, "CFBundleTypeRole", "Editor");
                     addPlistDictionaryKey (*dict2, "CFBundleTypeIconFile", "Icon");
                     addPlistDictionaryKey (*dict2, "NSPersistentStoreTypeKey", "XML");
+                    addPlistDictionaryKey (*dict2, "LSHandlerRank", "Default");
                 }
 
                 arrayTag->createNewChildElement ("string")->addTextElement (ex);

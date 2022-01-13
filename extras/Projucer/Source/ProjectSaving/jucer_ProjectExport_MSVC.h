@@ -25,6 +25,14 @@
 
 #pragma once
 
+inline String msBuildEscape (String str)
+{
+    // see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-special-characters?view=vs-2019
+    for (const auto& special : { "%", "$", "@", "'", ";", "?", "\""})
+        str = str.replace (special, "%" + String::toHexString (*special));
+
+    return str;
+}
 
 //==============================================================================
 class MSVCProjectExporterBase   : public ProjectExporter
@@ -34,6 +42,7 @@ public:
         : ProjectExporter (p, t),
           IPPLibraryValue       (settings, Ids::IPPLibrary,                   getUndoManager()),
           IPP1ALibraryValue     (settings, Ids::IPP1ALibrary,                 getUndoManager()),
+          MKL1ALibraryValue     (settings, Ids::MKL1ALibrary,                 getUndoManager()),
           platformToolsetValue  (settings, Ids::toolset,                      getUndoManager()),
           targetPlatformVersion (settings, Ids::windowsTargetPlatformVersion, getUndoManager()),
           manifestFileValue     (settings, Ids::msvcManifestFile,             getUndoManager())
@@ -51,6 +60,7 @@ public:
     //==============================================================================
     String getIPPLibrary() const                      { return IPPLibraryValue.get(); }
     String getIPP1ALibrary() const                    { return IPP1ALibraryValue.get(); }
+    String getMKL1ALibrary() const                    { return MKL1ALibraryValue.get(); }
     String getPlatformToolset() const                 { return platformToolsetValue.get(); }
     String getWindowsTargetPlatformVersion() const    { return targetPlatformVersion.get(); }
 
@@ -303,12 +313,12 @@ public:
         }
 
     private:
-        ValueWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
-                         generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
-                         intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
-                         pluginBinaryCopyStepValue;
+        ValueTreePropertyWithDefault warningLevelValue, warningsAreErrorsValue, prebuildCommandValue, postbuildCommandValue, generateDebugSymbolsValue,
+                                     generateManifestValue, enableIncrementalLinkingValue, useRuntimeLibDLLValue, multiProcessorCompilationValue,
+                                     intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
+                                     pluginBinaryCopyStepValue;
 
-        ValueWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, unityPluginBinaryLocation;
+        ValueTreePropertyWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, unityPluginBinaryLocation;
 
         Value architectureValueToListenTo;
 
@@ -441,14 +451,15 @@ public:
 
                 addWindowsTargetPlatformToConfig (*e);
 
-                struct IPPLibraryInfo
+                struct IntelLibraryInfo
                 {
                     String libraryKind;
                     String configString;
                 };
 
-                for (const auto& info : { IPPLibraryInfo { owner.getIPPLibrary(),   "UseIntelIPP" },
-                                          IPPLibraryInfo { owner.getIPP1ALibrary(), "UseIntelIPP1A" }})
+                for (const auto& info : { IntelLibraryInfo { owner.getIPPLibrary(),   "UseIntelIPP" },
+                                          IntelLibraryInfo { owner.getIPP1ALibrary(), "UseIntelIPP1A" },
+                                          IntelLibraryInfo { owner.getMKL1ALibrary(), "UseInteloneMKL" } })
                 {
                     if (info.libraryKind.isNotEmpty())
                         e->createNewChildElement (info.configString)->addTextElement (info.libraryKind);
@@ -505,7 +516,7 @@ public:
                     {
                         auto* targetName = props->createNewChildElement ("TargetName");
                         setConditionAttribute (*targetName, config);
-                        targetName->addTextElement (config.getOutputFilename ("", false, type == UnityPlugIn));
+                        targetName->addTextElement (msBuildEscape (config.getOutputFilename ("", false, type == UnityPlugIn)));
                     }
 
                     {
@@ -598,9 +609,9 @@ public:
                                                                                                     : "NDEBUG;%(PreprocessorDefinitions)");
                 }
 
-                auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesString());
-                auto additionalDependencies = type != SharedCodeTarget && externalLibraries.isNotEmpty()
-                                                        ? getOwner().replacePreprocessorTokens (config, externalLibraries).trim() + ";%(AdditionalDependencies)"
+                auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesStringArray());
+                auto additionalDependencies = type != SharedCodeTarget && ! externalLibraries.isEmpty()
+                                                        ? externalLibraries.joinIntoString (";") + ";%(AdditionalDependencies)"
                                                         : String();
 
                 auto librarySearchPaths = config.getLibrarySearchPaths();
@@ -1324,22 +1335,25 @@ public:
             return librarySearchPaths;
         }
 
-        String getExternalLibraries (const MSVCBuildConfiguration& config, const String& otherLibs) const
+        StringArray getExternalLibraries (const MSVCBuildConfiguration& config, const StringArray& otherLibs) const
         {
-            StringArray libraries;
+            const auto sharedCodeLib = [&]() -> StringArray
+            {
+                if (type != SharedCodeTarget)
+                    if (auto* shared = getOwner().getSharedCodeTarget())
+                        return { shared->getBinaryNameWithSuffix (config, false) };
 
-            if (otherLibs.isNotEmpty())
-                libraries.add (otherLibs);
+                return {};
+            }();
 
-            auto moduleLibs = getOwner().getModuleLibs();
-            if (! moduleLibs.isEmpty())
-                libraries.addArray (moduleLibs);
+            auto result = otherLibs;
+            result.addArray (getOwner().getModuleLibs());
+            result.addArray (sharedCodeLib);
 
-            if (type != SharedCodeTarget)
-                if (auto* shared = getOwner().getSharedCodeTarget())
-                    libraries.add (shared->getBinaryNameWithSuffix (config, false));
+            for (auto& i : result)
+                i = msBuildEscape (getOwner().replacePreprocessorTokens (config, i).trim());
 
-            return libraries.joinIntoString (";");
+            return result;
         }
 
         String getDelayLoadedDLLs() const
@@ -1496,6 +1510,11 @@ public:
                                                 { var(), "true",                   "Static_Library",     "Dynamic_Library" }),
                    "Enable this to use Intel's Integrated Performance Primitives library, supplied as part of the oneAPI toolkit.");
 
+        props.add (new ChoicePropertyComponent (MKL1ALibraryValue, "Use MKL Library (oneAPI)",
+                                                { "No",  "Parallel", "Sequential", "Cluster" },
+                                                { var(), "Parallel", "Sequential", "Cluster" }),
+                   "Enable this to use Intel's MKL library, supplied as part of the oneAPI toolkit.");
+
         {
             auto isWindows10SDK = getVisualStudioVersion() > 14;
 
@@ -1579,7 +1598,12 @@ protected:
     mutable File rcFile, iconFile, packagesConfigFile;
     OwnedArray<MSVCTargetBase> targets;
 
-    ValueWithDefault IPPLibraryValue, IPP1ALibraryValue, platformToolsetValue, targetPlatformVersion, manifestFileValue;
+    ValueTreePropertyWithDefault IPPLibraryValue,
+                                 IPP1ALibraryValue,
+                                 MKL1ALibraryValue,
+                                 platformToolsetValue,
+                                 targetPlatformVersion,
+                                 manifestFileValue;
 
     File getProjectFile (const String& extension, const String& target) const
     {
@@ -1659,10 +1683,18 @@ protected:
 
     void writeSolutionFile (OutputStream& out, const String& versionString, String commentString) const
     {
+        const unsigned char bomBytes[] { CharPointer_UTF8::byteOrderMark1,
+                                         CharPointer_UTF8::byteOrderMark2,
+                                         CharPointer_UTF8::byteOrderMark3 };
+
+        for (const auto& byte : bomBytes)
+            out.writeByte ((char) byte);
+
         if (commentString.isNotEmpty())
             commentString += newLine;
 
-        out << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
+        out << newLine
+            << "Microsoft Visual Studio Solution File, Format Version " << versionString << newLine
             << commentString << newLine;
 
         writeProjectDependencies (out);
@@ -1722,7 +1754,7 @@ protected:
     }
 
     static String getWebView2PackageName()     { return "Microsoft.Web.WebView2"; }
-    static String getWebView2PackageVersion()  { return "0.9.488"; }
+    static String getWebView2PackageVersion()  { return "1.0.902.49"; }
 
     void createPackagesConfigFile() const
     {
@@ -1793,7 +1825,7 @@ public:
     Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 14; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2015"; }
+    String getSolutionComment() const override                       { return "# Visual Studio 14"; }
     String getToolsVersion() const override                          { return "14.0"; }
     String getDefaultToolset() const override                        { return "v140"; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return "8.1"; }
@@ -1838,7 +1870,7 @@ public:
     Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 15; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2017"; }
+    String getSolutionComment() const override                       { return "# Visual Studio 15"; }
     String getToolsVersion() const override                          { return "15.0"; }
     String getDefaultToolset() const override                        { return "v141"; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return "Latest"; }
@@ -1883,7 +1915,7 @@ public:
     Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
 
     int getVisualStudioVersion() const override                      { return 16; }
-    String getSolutionComment() const override                       { return "# Visual Studio 2019"; }
+    String getSolutionComment() const override                       { return "# Visual Studio Version 16"; }
     String getToolsVersion() const override                          { return "16.0"; }
     String getDefaultToolset() const override                        { return "v142"; }
     String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
@@ -1906,4 +1938,49 @@ public:
     }
 
     JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2019)
+};
+
+//==============================================================================
+class MSVCProjectExporterVC2022  : public MSVCProjectExporterBase
+{
+public:
+    MSVCProjectExporterVC2022 (Project& p, const ValueTree& t)
+        : MSVCProjectExporterBase (p, t, getTargetFolderName())
+    {
+        name = getDisplayName();
+
+        targetPlatformVersion.setDefault (getDefaultWindowsTargetPlatformVersion());
+        platformToolsetValue.setDefault (getDefaultToolset());
+    }
+
+    static String getDisplayName()        { return "Visual Studio 2022"; }
+    static String getValueTreeTypeName()  { return "VS2022"; }
+    static String getTargetFolderName()   { return "VisualStudio2022"; }
+
+    Identifier getExporterIdentifier() const override { return getValueTreeTypeName(); }
+
+    int getVisualStudioVersion() const override                      { return 17; }
+    String getSolutionComment() const override                       { return "# Visual Studio Version 17"; }
+    String getToolsVersion() const override                          { return "17.0"; }
+    String getDefaultToolset() const override                        { return "v143"; }
+    String getDefaultWindowsTargetPlatformVersion() const override   { return "10.0"; }
+
+    static MSVCProjectExporterVC2022* createForSettings (Project& projectToUse, const ValueTree& settingsToUse)
+    {
+        if (settingsToUse.hasType (getValueTreeTypeName()))
+            return new MSVCProjectExporterVC2022 (projectToUse, settingsToUse);
+
+        return nullptr;
+    }
+
+    void createExporterProperties (PropertyListBuilder& props) override
+    {
+        static const char* toolsetNames[] = { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143" };
+        const var toolsets[]              = { "v140", "v140_xp", "v141", "v141_xp", "v142", "v143" };
+        addToolsetProperty (props, toolsetNames, toolsets, numElementsInArray (toolsets));
+
+        MSVCProjectExporterBase::createExporterProperties (props);
+    }
+
+    JUCE_DECLARE_NON_COPYABLE (MSVCProjectExporterVC2022)
 };

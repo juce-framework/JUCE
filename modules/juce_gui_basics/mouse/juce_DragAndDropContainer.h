@@ -94,10 +94,26 @@ public:
     */
     void startDragging (const var& sourceDescription,
                         Component* sourceComponent,
-                        Image dragImage = Image(),
+                        const ScaledImage& dragImage = ScaledImage(),
                         bool allowDraggingToOtherJuceWindows = false,
                         const Point<int>* imageOffsetFromMouse = nullptr,
                         const MouseInputSource* inputSourceCausingDrag = nullptr);
+
+    [[deprecated ("This overload does not allow the image's scale to be specified. Use the other overload of startDragging instead.")]]
+    void startDragging (const var& sourceDescription,
+                        Component* sourceComponent,
+                        Image dragImage,
+                        bool allowDraggingToOtherJuceWindows = false,
+                        const Point<int>* imageOffsetFromMouse = nullptr,
+                        const MouseInputSource* inputSourceCausingDrag = nullptr)
+    {
+        startDragging (sourceDescription,
+                       sourceComponent,
+                       ScaledImage (dragImage),
+                       allowDraggingToOtherJuceWindows,
+                       imageOffsetFromMouse,
+                       inputSourceCausingDrag);
+    }
 
     /** Returns true if something is currently being dragged. */
     bool isDragAndDropActive() const;
@@ -130,13 +146,19 @@ public:
 
         @see setDragImageForIndex
     */
-    void setCurrentDragImage (const Image& newImage);
+    void setCurrentDragImage (const ScaledImage& newImage);
+
+    [[deprecated ("This overload does not allow the image's scale to be specified. Use the other overload of setCurrentDragImage instead.")]]
+    void setCurrentDragImage (const Image& newImage) { setCurrentDragImage (ScaledImage (newImage)); }
 
     /** Same as the setCurrentDragImage() method but takes a touch index parameter.
 
         @see setCurrentDragImage
-     */
-    void setDragImageForIndex (int index, const Image& newImage);
+    */
+    void setDragImageForIndex (int index, const ScaledImage& newImage);
+
+    [[deprecated ("This overload does not allow the image's scale to be specified. Use the other overload of setDragImageForIndex instead.")]]
+    void setDragImageForIndex (int index, const Image& newImage) { setDragImageForIndex (index, ScaledImage (newImage)); }
 
     /** Utility to find the DragAndDropContainer for a given Component.
 
@@ -237,13 +259,6 @@ private:
 
     const MouseInputSource* getMouseInputSourceForDrag (Component* sourceComponent, const MouseInputSource* inputSourceCausingDrag);
     bool isAlreadyDragging (Component* sourceComponent) const noexcept;
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This is just here to cause a compile error in old code that hasn't been changed to use the new
-    // version of this method.
-    virtual int dragOperationStarted()              { return 0; }
-    virtual int dragOperationEnded()                { return 0; }
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragAndDropContainer)
 };

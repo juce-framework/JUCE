@@ -50,6 +50,7 @@ namespace OggVorbisNamespace
                                       "-Wmisleading-indentation",
                                       "-Wmissing-prototypes",
                                       "-Wcast-align")
+ JUCE_BEGIN_NO_SANITIZE ("undefined")
 
  #include "oggvorbis/vorbisenc.h"
  #include "oggvorbis/codec.h"
@@ -79,6 +80,7 @@ namespace OggVorbisNamespace
  #include "oggvorbis/libvorbis-1.3.7/lib/vorbisfile.c"
  #include "oggvorbis/libvorbis-1.3.7/lib/window.c"
 
+ JUCE_END_NO_SANITIZE
  JUCE_END_IGNORE_WARNINGS_MSVC
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #else
@@ -158,72 +160,62 @@ public:
     bool readSamples (int** destSamples, int numDestChannels, int startOffsetInDestBuffer,
                       int64 startSampleInFile, int numSamples) override
     {
-        while (numSamples > 0)
+        const auto getBufferedRange = [this] { return bufferedRange; };
+
+        const auto readFromReservoir = [this, &destSamples, &numDestChannels, &startOffsetInDestBuffer, &startSampleInFile] (const Range<int64> rangeToRead)
         {
-            auto numAvailable = (reservoirStart + samplesInReservoir - startSampleInFile);
+            const auto bufferIndices = rangeToRead - bufferedRange.getStart();
+            const auto writePos = (int64) startOffsetInDestBuffer + (rangeToRead.getStart() - startSampleInFile);
 
-            if (startSampleInFile >= reservoirStart && numAvailable > 0)
+            for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
+                if (destSamples[i] != nullptr)
+                    memcpy (destSamples[i] + writePos,
+                            reservoir.getReadPointer (i) + bufferIndices.getStart(),
+                            (size_t) bufferIndices.getLength() * sizeof (float));
+        };
+
+        const auto fillReservoir = [this] (int64 requestedStart)
+        {
+            const auto newStart = jmax ((int64) 0, requestedStart);
+            bufferedRange = Range<int64> { newStart, newStart + reservoir.getNumSamples() };
+
+            if (bufferedRange.getStart() != ov_pcm_tell (&ovFile))
+                ov_pcm_seek (&ovFile, bufferedRange.getStart());
+
+            int bitStream = 0;
+            int offset = 0;
+            int numToRead = (int) bufferedRange.getLength();
+
+            while (numToRead > 0)
             {
-                // got a few samples overlapping, so use them before seeking..
+                float** dataIn = nullptr;
+                auto samps = static_cast<int> (ov_read_float (&ovFile, &dataIn, numToRead, &bitStream));
 
-                auto numToUse = jmin ((int64) numSamples, numAvailable);
-
-                for (int i = jmin (numDestChannels, reservoir.getNumChannels()); --i >= 0;)
-                    if (destSamples[i] != nullptr)
-                        memcpy (destSamples[i] + startOffsetInDestBuffer,
-                                reservoir.getReadPointer (i, (int) (startSampleInFile - reservoirStart)),
-                                (size_t) numToUse * sizeof (float));
-
-                startSampleInFile += numToUse;
-                numSamples -= (int) numToUse;
-                startOffsetInDestBuffer += (int) numToUse;
-
-                if (numSamples == 0)
+                if (samps <= 0)
                     break;
+
+                jassert (samps <= numToRead);
+
+                for (int i = jmin ((int) numChannels, reservoir.getNumChannels()); --i >= 0;)
+                    memcpy (reservoir.getWritePointer (i, offset), dataIn[i], (size_t) samps * sizeof (float));
+
+                numToRead -= samps;
+                offset += samps;
             }
 
-            if (startSampleInFile < reservoirStart
-                || startSampleInFile + numSamples > reservoirStart + samplesInReservoir)
-            {
-                // buffer miss, so refill the reservoir
-                reservoirStart = jmax (0, (int) startSampleInFile);
-                samplesInReservoir = reservoir.getNumSamples();
+            if (numToRead > 0)
+                reservoir.clear (offset, numToRead);
+        };
 
-                if (reservoirStart != (int) ov_pcm_tell (&ovFile))
-                    ov_pcm_seek (&ovFile, reservoirStart);
+        const auto remainingSamples = Reservoir::doBufferedRead (Range<int64> { startSampleInFile, startSampleInFile + numSamples },
+                                                                 getBufferedRange,
+                                                                 readFromReservoir,
+                                                                 fillReservoir);
 
-                int bitStream = 0;
-                int offset = 0;
-                int numToRead = (int) samplesInReservoir;
-
-                while (numToRead > 0)
-                {
-                    float** dataIn = nullptr;
-                    auto samps = static_cast<int> (ov_read_float (&ovFile, &dataIn, numToRead, &bitStream));
-
-                    if (samps <= 0)
-                        break;
-
-                    jassert (samps <= numToRead);
-
-                    for (int i = jmin ((int) numChannels, reservoir.getNumChannels()); --i >= 0;)
-                        memcpy (reservoir.getWritePointer (i, offset), dataIn[i], (size_t) samps * sizeof (float));
-
-                    numToRead -= samps;
-                    offset += samps;
-                }
-
-                if (numToRead > 0)
-                    reservoir.clear (offset, numToRead);
-            }
-        }
-
-        if (numSamples > 0)
-        {
+        if (! remainingSamples.isEmpty())
             for (int i = numDestChannels; --i >= 0;)
                 if (destSamples[i] != nullptr)
-                    zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) numSamples * sizeof (int));
-        }
+                    zeromem (destSamples[i] + startOffsetInDestBuffer, (size_t) remainingSamples.getLength() * sizeof (int));
 
         return true;
     }
@@ -261,7 +253,7 @@ private:
     OggVorbisNamespace::OggVorbis_File ovFile;
     OggVorbisNamespace::ov_callbacks callbacks;
     AudioBuffer<float> reservoir;
-    int64 reservoirStart = 0, samplesInReservoir = 0;
+    Range<int64> bufferedRange;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OggReader)
 };

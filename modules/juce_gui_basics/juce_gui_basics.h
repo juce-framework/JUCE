@@ -35,7 +35,7 @@
 
   ID:                 juce_gui_basics
   vendor:             juce
-  version:            6.1.2
+  version:            6.1.4
   name:               JUCE GUI core classes
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
@@ -161,6 +161,10 @@ namespace juce
 
     class FlexBox;
     class Grid;
+
+   #if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX
+    Image createSnapshotOfNativeWindow (void* nativeWindowHandle);
+   #endif
 }
 
 #include "mouse/juce_MouseCursor.h"
@@ -366,3 +370,4 @@ namespace juce
 
 #include "layout/juce_GridItem.h"
 #include "layout/juce_Grid.h"
+#include "native/juce_ScopedDPIAwarenessDisabler.h"

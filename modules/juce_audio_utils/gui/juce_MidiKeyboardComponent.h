@@ -399,6 +399,7 @@ protected:
 private:
     //==============================================================================
     struct UpDownButton;
+    struct NoteAndVelocity { int note; float velocity; };
 
     MidiKeyboardState& state;
     float blackNoteLengthRatio = 0.7f;
@@ -413,7 +414,7 @@ private:
 
     Array<int> mouseOverNotes, mouseDownNotes;
     BigInteger keysPressed, keysCurrentlyDrawnDown;
-    bool shouldCheckState = false;
+    std::atomic<bool> noPendingUpdates { true };
 
     int rangeStart = 0, rangeEnd = 127;
     float firstKey = 12 * 4.0f;
@@ -425,20 +426,13 @@ private:
     int keyMappingOctave = 6, octaveNumForMiddleC = 3;
 
     Range<float> getKeyPos (int midiNoteNumber) const;
-    int xyToNote (Point<float>, float& mousePositionVelocity);
-    int remappedXYToNote (Point<float>, float& mousePositionVelocity) const;
+    NoteAndVelocity xyToNote (Point<float>);
+    NoteAndVelocity remappedXYToNote (Point<float>) const;
     void resetAnyKeysInUse();
     void updateNoteUnderMouse (Point<float>, bool isDown, int fingerNum);
     void updateNoteUnderMouse (const MouseEvent&, bool isDown);
     void repaintNote (int midiNoteNumber);
     void setLowestVisibleKeyFloat (float noteNumber);
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // Note that the parameters for these method have changed
-    virtual int getKeyPosition (int, float, int&, int&) const { return 0; }
-    virtual int drawWhiteNote (int, Graphics&, int, int, int, int, bool, bool, const Colour&, const Colour&) { return 0; }
-    virtual int drawBlackNote (int, Graphics&, int, int, int, int, bool, bool, const Colour&) { return 0; }
-   #endif
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent)
 };

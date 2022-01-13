@@ -76,13 +76,48 @@ public:
     */
     virtual void getExtensions (ExtensionsVisitor&) const;
 
+    using HostedParameter = HostedAudioProcessorParameter;
+
+    /** Adds a parameter to this instance.
+
+        @see AudioProcessor::addParameter()
+    */
+    void addHostedParameter (std::unique_ptr<HostedParameter>);
+
+    /** Adds multiple parameters to this instance.
+
+        In debug mode, this will also check that all added parameters derive from
+        HostedParameter.
+
+        @see AudioProcessor::addParameterGroup()
+    */
+    void addHostedParameterGroup (std::unique_ptr<AudioProcessorParameterGroup>);
+
+    /** Adds multiple parameters to this instance.
+
+        In debug mode, this will also check that all added parameters derive from
+        HostedParameter.
+
+        @see AudioProcessor::setParameterTree()
+    */
+    void setHostedParameterTree (AudioProcessorParameterGroup);
+
+    /** Gets the parameter at a particular index.
+
+        If you want to find lots of parameters by their IDs, you should probably build and
+        use a map<String, HostedParameter*> by looping through all parameters.
+    */
+    HostedParameter* getHostedParameter (int index) const;
+
+   #ifndef DOXYGEN
     /** Use the new typesafe visitor-based interface rather than this function.
 
         Returns a pointer to some kind of platform-specific data about the plugin.
         E.g. For a VST, this value can be cast to an AEffect*. For an AudioUnit, it can be
         cast to an AudioUnit handle.
     */
-    JUCE_DEPRECATED (virtual void* getPlatformSpecificData());
+    [[deprecated ("Use the new typesafe visitor-based interface rather than this function.")]]
+    virtual void* getPlatformSpecificData();
 
     // Rather than using these methods you should call the corresponding methods
     // on the AudioProcessorParameter objects returned from getParameters().
@@ -91,33 +126,36 @@ public:
     //
     // In addition to being marked as deprecated these methods will assert on
     // the first call.
-    JUCE_DEPRECATED (String getParameterID (int index) override);
-    JUCE_DEPRECATED (float getParameter (int parameterIndex) override);
-    JUCE_DEPRECATED (void setParameter (int parameterIndex, float newValue) override);
-    JUCE_DEPRECATED (const String getParameterName (int parameterIndex) override);
-    JUCE_DEPRECATED (String getParameterName (int parameterIndex, int maximumStringLength) override);
-    JUCE_DEPRECATED (const String getParameterText (int parameterIndex) override);
-    JUCE_DEPRECATED (String getParameterText (int parameterIndex, int maximumStringLength) override);
-    JUCE_DEPRECATED (int getParameterNumSteps (int parameterIndex) override);
-    JUCE_DEPRECATED (bool isParameterDiscrete (int parameterIndex) const override);
-    JUCE_DEPRECATED (bool isParameterAutomatable (int parameterIndex) const override);
-    JUCE_DEPRECATED (float getParameterDefaultValue (int parameterIndex) override);
-    JUCE_DEPRECATED (String getParameterLabel (int parameterIndex) const override);
-    JUCE_DEPRECATED (bool isParameterOrientationInverted (int parameterIndex) const override);
-    JUCE_DEPRECATED (bool isMetaParameter (int parameterIndex) const override);
-    JUCE_DEPRECATED (AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const override);
+    [[deprecated]] String getParameterID (int index) override;
+    [[deprecated]] float getParameter (int parameterIndex) override;
+    [[deprecated]] void setParameter (int parameterIndex, float newValue) override;
+    [[deprecated]] const String getParameterName (int parameterIndex) override;
+    [[deprecated]] String getParameterName (int parameterIndex, int maximumStringLength) override;
+    [[deprecated]] const String getParameterText (int parameterIndex) override;
+    [[deprecated]] String getParameterText (int parameterIndex, int maximumStringLength) override;
+    [[deprecated]] int getParameterNumSteps (int parameterIndex) override;
+    [[deprecated]] bool isParameterDiscrete (int parameterIndex) const override;
+    [[deprecated]] bool isParameterAutomatable (int parameterIndex) const override;
+    [[deprecated]] float getParameterDefaultValue (int parameterIndex) override;
+    [[deprecated]] String getParameterLabel (int parameterIndex) const override;
+    [[deprecated]] bool isParameterOrientationInverted (int parameterIndex) const override;
+    [[deprecated]] bool isMetaParameter (int parameterIndex) const override;
+    [[deprecated]] AudioProcessorParameter::Category getParameterCategory (int parameterIndex) const override;
+   #endif
 
 protected:
     //==============================================================================
     /** Structure used to describe plugin parameters */
-    struct Parameter   : public AudioProcessorParameter
+    struct Parameter   : public HostedParameter
     {
+    public:
         Parameter();
         ~Parameter() override;
 
         String getText (float value, int maximumStringLength) const override;
         float getValueForText (const String& text) const override;
 
+    private:
         StringArray onStrings, offStrings;
     };
 
@@ -127,6 +165,12 @@ protected:
     AudioPluginInstance (const short channelLayoutList[numLayouts][2]) : AudioProcessor (channelLayoutList) {}
 
 private:
+    // It's not safe to add a plain AudioProcessorParameter to an AudioPluginInstance.
+    // Instead, all parameters must be HostedParameters.
+    using AudioProcessor::addParameter;
+    using AudioProcessor::addParameterGroup;
+    using AudioProcessor::setParameterTree;
+
     void assertOnceOnDeprecatedMethodUse() const noexcept;
 
     static bool deprecationAssertiontriggered;

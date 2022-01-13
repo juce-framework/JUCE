@@ -97,15 +97,18 @@ static Version getOpenGLVersion()
     const std::string versionString (versionBegin, versionEnd);
     const auto spaceSeparated = StringArray::fromTokens (versionString.c_str(), false);
 
-    if (spaceSeparated.isEmpty())
-        return {};
+    for (const auto& token : spaceSeparated)
+    {
+        const auto pointSeparated = StringArray::fromTokens (token, ".", "");
 
-    const auto pointSeparated = StringArray::fromTokens (spaceSeparated[0], ".", "");
+        const auto major = pointSeparated[0].getIntValue();
+        const auto minor = pointSeparated[1].getIntValue();
 
-    const auto major = pointSeparated[0].getIntValue();
-    const auto minor = pointSeparated[1].getIntValue();
+        if (major != 0)
+            return { major, minor };
+    }
 
-    return { major, minor };
+    return {};
 }
 
 void OpenGLHelpers::resetErrorState()

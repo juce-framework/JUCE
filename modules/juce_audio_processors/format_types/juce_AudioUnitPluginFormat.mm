@@ -39,18 +39,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
  #include <AudioUnit/AudioUnitCarbonView.h>
 #endif
 
-#ifndef JUCE_SUPPORTS_AUv3
- #if __OBJC2__ \
-      && (JUCE_IOS || (defined (MAC_OS_X_VERSION_10_11) && (MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_11)))
-  #define JUCE_SUPPORTS_AUv3 1
- #else
-  #define JUCE_SUPPORTS_AUv3 0
- #endif
-#endif
-
-#if JUCE_SUPPORTS_AUv3
- #include <CoreAudioKit/AUViewController.h>
-#endif
+#include <CoreAudioKit/AUViewController.h>
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
 #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
@@ -330,7 +319,7 @@ class AudioUnitPluginWindowCarbon;
 class AudioUnitPluginWindowCocoa;
 
 //==============================================================================
-class AudioUnitPluginInstance     : public AudioPluginInstance
+class AudioUnitPluginInstance final    : public AudioPluginInstance
 {
 public:
     struct AUInstanceParameter final  : public Parameter
@@ -488,6 +477,11 @@ public:
             return auValueStrings;
         }
 
+        String getParameterID() const override
+        {
+            return String (paramID);
+        }
+
         void sendParameterChangeEvent()
         {
            #if JUCE_MAC
@@ -514,6 +508,9 @@ public:
             return minValue + (range * normalisedValue);
         }
 
+        UInt32 getRawParamID() const { return paramID; }
+
+    private:
         AudioUnitPluginInstance& pluginInstance;
         const UInt32 paramID;
         const String name;
@@ -539,9 +536,7 @@ public:
 
         AudioComponentGetDescription (auComponent, &componentDesc);
 
-      #if JUCE_SUPPORTS_AUv3
         isAUv3 = ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
-      #endif
 
         wantsMidiMessages = componentDesc.componentType == kAudioUnitType_MusicDevice
                          || componentDesc.componentType == kAudioUnitType_MusicEffect
@@ -598,11 +593,7 @@ public:
     void cleanup()
     {
        #if JUCE_MAC
-        if (eventListenerRef != nullptr)
-        {
-            AUListenerDispose (eventListenerRef);
-            eventListenerRef = nullptr;
-        }
+        disposeEventListener();
        #endif
 
         if (prepared)
@@ -618,7 +609,11 @@ public:
         setRateAndBufferSizeDetails (rate, blockSize);
         setLatencySamples (0);
         refreshParameterList();
-        createPluginCallbacks();
+        setPluginCallbacks();
+
+       #if JUCE_MAC
+        createEventListener();
+       #endif
 
         return true;
     }
@@ -884,7 +879,7 @@ public:
         {
             explicit Extensions (const AudioUnitPluginInstance* instanceIn) : instance (instanceIn) {}
 
-            void* getAudioUnitHandle() const noexcept override   { return instance->audioUnit; }
+            AudioUnit getAudioUnitHandle() const noexcept override   { return instance->audioUnit; }
 
             const AudioUnitPluginInstance* instance = nullptr;
         };
@@ -918,6 +913,7 @@ public:
         if (audioUnit != nullptr)
         {
             releaseResources();
+            setPluginCallbacks();
 
             for (int dir = 0; dir < 2; ++dir)
             {
@@ -1128,15 +1124,13 @@ public:
     {
        #if JUCE_MAC
         return true;
-       #elif JUCE_SUPPORTS_AUv3
+       #else
         UInt32 dataSize;
         Boolean isWritable;
 
         return (AudioUnitGetPropertyInfo (audioUnit, kAudioUnitProperty_RequestViewController,
                                           kAudioUnitScope_Global, 0, &dataSize, &isWritable) == noErr
                 && dataSize == sizeof (uintptr_t) && isWritable != 0);
-       #else
-        return false;
        #endif
     }
 
@@ -1486,7 +1480,7 @@ public:
             }
         }
 
-        setParameterTree (std::move (newParameterTree));
+        setHostedParameterTree (std::move (newParameterTree));
 
         UInt32 propertySize = 0;
         Boolean writable = false;
@@ -1552,7 +1546,7 @@ private:
     };
 
     //==============================================================================
-    struct AUBypassParameter    : Parameter
+    struct AUBypassParameter final : public Parameter
     {
         AUBypassParameter (AudioUnitPluginInstance& effectToUse)
              : parent (effectToUse), currentValue (getCurrentHostValue())
@@ -1636,6 +1630,8 @@ private:
         StringArray getAllValueStrings() const override                     { return values; }
         String getLabel() const override                                    { return {}; }
 
+        String getParameterID() const override                              { return {}; }
+
         AudioUnitPluginInstance& parent;
         const StringArray auOnStrings  { TRANS("on"),  TRANS("yes"), TRANS("true") };
         const StringArray auOffStrings { TRANS("off"), TRANS("no"),  TRANS("false") };
@@ -1666,7 +1662,7 @@ private:
     bool lastProcessBlockCallWasBypass = false, auSupportsBypass = false;
     bool haveParameterList = false;
 
-    void createPluginCallbacks()
+    void setPluginCallbacks()
     {
         if (audioUnit != nullptr)
         {
@@ -1684,52 +1680,65 @@ private:
             }
            #endif
 
-            {
-                HostCallbackInfo info;
-                zerostruct (info);
+            HostCallbackInfo info;
+            zerostruct (info);
 
-                info.hostUserData = this;
-                info.beatAndTempoProc = getBeatAndTempoCallback;
-                info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
-                info.transportStateProc = getTransportStateCallback;
+            info.hostUserData = this;
+            info.beatAndTempoProc = getBeatAndTempoCallback;
+            info.musicalTimeLocationProc = getMusicalTimeLocationCallback;
+            info.transportStateProc = getTransportStateCallback;
 
-                AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks,
-                                      kAudioUnitScope_Global, 0, &info, sizeof (info));
-            }
-           #if JUCE_MAC
-            AUEventListenerCreate (eventListenerCallback, this, CFRunLoopGetMain(),
-                                   kCFRunLoopDefaultMode, 0, 0, &eventListenerRef);
-
-            for (auto* param : getParameters())
-            {
-                if (auto* auParam = dynamic_cast<AUInstanceParameter*> (param))
-                {
-                    AudioUnitEvent event;
-                    event.mArgument.mParameter.mAudioUnit = audioUnit;
-                    event.mArgument.mParameter.mParameterID = auParam->paramID;
-                    event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
-                    event.mArgument.mParameter.mElement = 0;
-
-                    event.mEventType = kAudioUnitEvent_ParameterValueChange;
-                    AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
-
-                    event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
-                    AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
-
-                    event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
-                    AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
-                }
-            }
-
-            addPropertyChangeListener (kAudioUnitProperty_PresentPreset);
-            addPropertyChangeListener (kAudioUnitProperty_ParameterList);
-            addPropertyChangeListener (kAudioUnitProperty_Latency);
-            addPropertyChangeListener (kAudioUnitProperty_BypassEffect);
-           #endif
+            AudioUnitSetProperty (audioUnit, kAudioUnitProperty_HostCallbacks,
+                                  kAudioUnitScope_Global, 0, &info, sizeof (info));
         }
     }
 
    #if JUCE_MAC
+    void disposeEventListener()
+    {
+        if (eventListenerRef != nullptr)
+        {
+            AUListenerDispose (eventListenerRef);
+            eventListenerRef = nullptr;
+        }
+    }
+
+    void createEventListener()
+    {
+        if (audioUnit == nullptr)
+            return;
+
+        disposeEventListener();
+
+        AUEventListenerCreate (eventListenerCallback, this, CFRunLoopGetMain(),
+                               kCFRunLoopDefaultMode, 0, 0, &eventListenerRef);
+
+        for (auto* param : getParameters())
+        {
+            jassert (dynamic_cast<AUInstanceParameter*> (param) != nullptr);
+
+            AudioUnitEvent event;
+            event.mArgument.mParameter.mAudioUnit = audioUnit;
+            event.mArgument.mParameter.mParameterID = static_cast<AUInstanceParameter*> (param)->getRawParamID();
+            event.mArgument.mParameter.mScope = kAudioUnitScope_Global;
+            event.mArgument.mParameter.mElement = 0;
+
+            event.mEventType = kAudioUnitEvent_ParameterValueChange;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+
+            event.mEventType = kAudioUnitEvent_BeginParameterChangeGesture;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+
+            event.mEventType = kAudioUnitEvent_EndParameterChangeGesture;
+            AUEventListenerAddEventType (eventListenerRef, nullptr, &event);
+        }
+
+        addPropertyChangeListener (kAudioUnitProperty_PresentPreset);
+        addPropertyChangeListener (kAudioUnitProperty_ParameterList);
+        addPropertyChangeListener (kAudioUnitProperty_Latency);
+        addPropertyChangeListener (kAudioUnitProperty_BypassEffect);
+    }
+
     void addPropertyChangeListener (AudioUnitPropertyID type) const
     {
         AudioUnitEvent event;
@@ -2236,10 +2245,8 @@ public:
     {
         addAndMakeVisible (wrapper);
 
-       #if JUCE_SUPPORTS_AUv3
         viewControllerCallback =
             CreateObjCBlock (this, &AudioUnitPluginWindowCocoa::requestViewControllerCallback);
-       #endif
 
         setOpaque (true);
         setVisible (true);
@@ -2259,7 +2266,6 @@ public:
         }
     }
 
-   #if JUCE_SUPPORTS_AUv3
     void embedViewController (JUCE_IOS_MAC_VIEW* pluginView, const CGSize& size)
     {
         wrapper.setView (pluginView);
@@ -2274,7 +2280,6 @@ public:
         wrapper.setSize (static_cast<int> (size.width), static_cast<int> (size.height));
       #endif
     }
-   #endif
 
     bool isValid() const        { return wrapper.getView() != nil || waitingForViewCallback; }
 
@@ -2298,10 +2303,8 @@ private:
     AudioUnitPluginInstance& plugin;
     AudioUnitFormatHelpers::AutoResizingNSViewComponent wrapper;
 
-   #if JUCE_SUPPORTS_AUv3
     typedef void (^ViewControllerCallbackBlock)(AUViewControllerBase *);
     ObjCBlock<ViewControllerCallbackBlock> viewControllerCallback;
-   #endif
 
     bool waitingForViewCallback = false;
 
@@ -2350,7 +2353,6 @@ private:
         dataSize = 0;
         isWritable = false;
 
-       #if JUCE_SUPPORTS_AUv3
         if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_RequestViewController, kAudioUnitScope_Global,
                                           0, &dataSize, &isWritable) == noErr
                 && dataSize == sizeof (ViewControllerCallbackBlock))
@@ -2366,7 +2368,6 @@ private:
 
             waitingForViewCallback = false;
         }
-       #endif
 
        #if JUCE_MAC
         if (createGenericViewIfNeeded && (pluginView == nil))
@@ -2393,11 +2394,18 @@ private:
         return pluginView != nil;
     }
 
-   #if JUCE_SUPPORTS_AUv3
     void requestViewControllerCallback (AUViewControllerBase* controller)
     {
-        auto nsSize = [controller preferredContentSize];
-        auto viewSize = CGSizeMake (nsSize.width, nsSize.height);
+        const auto viewSize = [&controller]
+        {
+            auto size = [controller preferredContentSize];
+
+            if (size.width == 0 || size.height == 0)
+                size = controller.view.frame.size;
+
+            return CGSizeMake (jmax ((CGFloat) 20.0f, size.width),
+                               jmax ((CGFloat) 20.0f, size.height));
+        }();
 
         if (! MessageManager::getInstance()->isThisTheMessageThread())
         {
@@ -2426,7 +2434,6 @@ private:
             embedViewController ([controller view], viewSize);
         }
     }
-   #endif
 };
 
 #if JUCE_SUPPORT_CARBON
@@ -2660,23 +2667,17 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
 
         struct AUAsyncInitializationCallback
         {
-           #if JUCE_SUPPORTS_AUv3
             typedef void (^AUCompletionCallbackBlock)(AudioComponentInstance, OSStatus);
-           #endif
 
             AUAsyncInitializationCallback (double inSampleRate, int inFramesPerBuffer,
                                            PluginCreationCallback inOriginalCallback)
                 : sampleRate (inSampleRate), framesPerBuffer (inFramesPerBuffer),
                   originalCallback (std::move (inOriginalCallback))
             {
-               #if JUCE_SUPPORTS_AUv3
                 block = CreateObjCBlock (this, &AUAsyncInitializationCallback::completion);
-               #endif
             }
 
-           #if JUCE_SUPPORTS_AUv3
-            AUCompletionCallbackBlock getBlock() noexcept       { return block; }
-           #endif
+            AUCompletionCallbackBlock getBlock() noexcept  { return block; }
 
             void completion (AudioComponentInstance audioUnit, OSStatus err)
             {
@@ -2701,26 +2702,18 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
             double sampleRate;
             int framesPerBuffer;
             PluginCreationCallback originalCallback;
-
-           #if JUCE_SUPPORTS_AUv3
             ObjCBlock<AUCompletionCallbackBlock> block;
-           #endif
         };
 
         auto callbackBlock = new AUAsyncInitializationCallback (rate, blockSize, std::move (callback));
 
-       #if JUCE_SUPPORTS_AUv3
-        //==============================================================================
-        bool isAUv3 = ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
-
-        if (isAUv3)
+        if ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0)
         {
             AudioComponentInstantiate (auComponent, kAudioComponentInstantiation_LoadOutOfProcess,
                                        callbackBlock->getBlock());
 
             return;
         }
-       #endif // JUCE_SUPPORTS_AUv3
 
         AudioComponentInstance audioUnit;
         auto err = AudioComponentInstanceNew(auComponent, &audioUnit);
@@ -2734,7 +2727,6 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
 
 bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const PluginDescription& desc) const
 {
-   #if JUCE_SUPPORTS_AUv3
     String pluginName, version, manufacturer;
     AudioComponentDescription componentDesc;
 
@@ -2747,9 +2739,6 @@ bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const 
             if (AudioComponentGetDescription (auComp, &componentDesc) == noErr)
                 return ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
     }
-   #else
-    ignoreUnused (desc);
-   #endif
 
     return false;
 }
@@ -2782,11 +2771,9 @@ StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath&,
         {
             ignoreUnused (allowPluginsWhichRequireAsynchronousInstantiation);
 
-           #if JUCE_SUPPORTS_AUv3
-            bool isAUv3 = ((desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
+            const auto isAUv3 = ((desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
 
             if (allowPluginsWhichRequireAsynchronousInstantiation || ! isAUv3)
-           #endif
                 result.add (AudioUnitFormatHelpers::createPluginIdentifier (desc));
         }
     }

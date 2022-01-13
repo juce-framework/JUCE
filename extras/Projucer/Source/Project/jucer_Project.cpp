@@ -293,7 +293,7 @@ void Project::initialiseProjectValues()
     useAppConfigValue.referTo             (projectRoot, Ids::useAppConfig,                  getUndoManager(), true);
     addUsingNamespaceToJuceHeader.referTo (projectRoot, Ids::addUsingNamespaceToJuceHeader, getUndoManager(), true);
 
-    cppStandardValue.referTo       (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
+    cppStandardValue.referTo (projectRoot, Ids::cppLanguageStandard, getUndoManager(), "14");
 
     headerSearchPathsValue.referTo   (projectRoot, Ids::headerPath, getUndoManager());
     preprocessorDefsValue.referTo    (projectRoot, Ids::defines,    getUndoManager());
@@ -731,15 +731,17 @@ void Project::saveProject (Async async,
         return;
     }
 
-    if (saver != nullptr)
+    if (isTemporaryProject())
     {
-        onCompletion (Result::ok());
+        // Don't try to save a temporary project directly. Instead, check whether the
+        // project is temporary before saving it, and call saveAndMoveTemporaryProject
+        // in that case.
+        onCompletion (Result::fail ("Cannot save temporary project."));
         return;
     }
 
-    if (isTemporaryProject())
+    if (saver != nullptr)
     {
-        saveAndMoveTemporaryProject (false);
         onCompletion (Result::ok());
         return;
     }
@@ -762,9 +764,7 @@ void Project::saveProject (Async async,
             return;
 
         ref->saver = nullptr;
-
-        if (onCompletion != nullptr)
-            onCompletion (result);
+        NullCheckedInvocation::invoke (onCompletion, result);
     });
 }
 
@@ -1125,9 +1125,9 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         {
             updateModuleWarnings();
         }
-
-        changed();
     }
+
+    changed();
 }
 
 void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
@@ -2059,7 +2059,7 @@ ValueTree Project::getConfigNode()
     return projectRoot.getOrCreateChildWithName (Ids::JUCEOPTIONS, nullptr);
 }
 
-ValueWithDefault Project::getConfigFlag (const String& name)
+ValueTreePropertyWithDefault Project::getConfigFlag (const String& name)
 {
     auto configNode = getConfigNode();
 
@@ -2758,7 +2758,7 @@ StringPairArray Project::getAudioPluginFlags() const
 
         for (int i = 0; i < 4; ++i)
             hexRepresentation = (hexRepresentation << 8u)
-                                |  (static_cast<unsigned int> (fourCharCode[i]) & 0xffu);
+                                | (static_cast<unsigned int> (fourCharCode[i]) & 0xffu);
 
         return "0x" + String::toHexString (static_cast<int> (hexRepresentation));
     };
@@ -2811,7 +2811,7 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_AAXDisableMultiMono",         boolToString (isPluginAAXMultiMonoDisabled()));
     flags.set ("JucePlugin_IAAType",                     toCharLiteral (getIAATypeCode()));
     flags.set ("JucePlugin_IAASubType",                  "JucePlugin_PluginCode");
-    flags.set ("JucePlugin_IAAName",                     getIAAPluginName().quoted());
+    flags.set ("JucePlugin_IAAName",                     toStringLiteral (getIAAPluginName()));
     flags.set ("JucePlugin_VSTNumMidiInputs",            getVSTNumMIDIInputsString());
     flags.set ("JucePlugin_VSTNumMidiOutputs",           getVSTNumMIDIOutputsString());
     flags.set ("JucePlugin_ARAContentTypes",             String (getARAContentTypes()));

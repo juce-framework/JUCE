@@ -772,7 +772,7 @@ struct IntelFFT  : public FFT::Instance
         : order (orderToUse), c2c (c2cToUse), c2r (cr2ToUse)
     {}
 
-    ~IntelFFT()
+    ~IntelFFT() override
     {
         DftiFreeDescriptor (&c2c);
         DftiFreeDescriptor (&c2r);
@@ -902,9 +902,6 @@ private:
             SpecPtr specPtr = nullptr;
 
             if (Traits::init (&specPtr, order, flag, hint, specBuf.get(), initBuf.get()) != ippStsNoErr)
-                return {};
-
-            if (reinterpret_cast<const Ipp8u*> (specPtr) != specBuf.get())
                 return {};
 
             return { std::move (specBuf), IppPtr (ippsMalloc_8u (workSize)), specPtr };

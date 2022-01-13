@@ -93,62 +93,36 @@ void DryWetMixer<SampleType>::reset()
 
     dryDelayLine.reset();
 
-    offsetInBuffer = 0;
-    numUsedSamples = 0;
-}
-
-template <typename SampleType>
-struct FirstAndSecondPartBlocks
-{
-    AudioBlock<SampleType> first, second;
-};
-
-template <typename SampleType>
-static FirstAndSecondPartBlocks<SampleType> getFirstAndSecondPartBlocks (AudioBuffer<SampleType>& bufferDry,
-                                                                         size_t firstPartStart,
-                                                                         size_t channelsToCopy,
-                                                                         size_t samplesToCopy)
-{
-    const auto actualChannelsToCopy = jmin (channelsToCopy, (size_t) bufferDry.getNumChannels());
-    const auto firstPartLength = jmin ((size_t) bufferDry.getNumSamples() - firstPartStart, samplesToCopy);
-    const auto secondPartLength = samplesToCopy - firstPartLength;
-
-    const auto channelBlock = AudioBlock<SampleType> (bufferDry).getSubsetChannelBlock (0, actualChannelsToCopy);
-
-    return { channelBlock.getSubBlock (firstPartStart, firstPartLength),
-             secondPartLength != 0 ? channelBlock.getSubBlock (0, samplesToCopy - firstPartLength) : AudioBlock<SampleType>() };
+    fifo = SingleThreadedAbstractFifo (nextPowerOfTwo (bufferDry.getNumSamples()));
+    bufferDry.setSize (bufferDry.getNumChannels(), fifo.getSize(), false, false, true);
 }
 
 //==============================================================================
 template <typename SampleType>
 void DryWetMixer<SampleType>::pushDrySamples (const AudioBlock<const SampleType> drySamples)
 {
-    const auto remainingSpace = (size_t) bufferDry.getNumSamples() - numUsedSamples;
-
     jassert (drySamples.getNumChannels() <= (size_t) bufferDry.getNumChannels());
-    jassert (drySamples.getNumSamples() <= remainingSpace);
+    jassert (drySamples.getNumSamples() <= (size_t) fifo.getRemainingSpace());
 
-    auto blocks = getFirstAndSecondPartBlocks (bufferDry,
-                                               (offsetInBuffer + numUsedSamples) % (size_t) bufferDry.getNumSamples(),
-                                               drySamples.getNumChannels(),
-                                               jmin (drySamples.getNumSamples(), remainingSpace));
+    auto offset = 0;
 
-    const auto processSubBlock = [this, &drySamples] (AudioBlock<SampleType> block, size_t startOffset)
+    for (const auto& range : fifo.write ((int) drySamples.getNumSamples()))
     {
-        auto inputBlock = drySamples.getSubBlock (startOffset, block.getNumSamples());
+        if (range.getLength() == 0)
+            continue;
+
+        auto block = AudioBlock<SampleType> (bufferDry).getSubsetChannelBlock (0, drySamples.getNumChannels())
+                                                       .getSubBlock ((size_t) range.getStart(), (size_t) range.getLength());
+
+        auto inputBlock = drySamples.getSubBlock ((size_t) offset, (size_t) range.getLength());
 
         if (maximumWetLatencyInSamples == 0)
             block.copyFrom (inputBlock);
         else
             dryDelayLine.process (ProcessContextNonReplacing<SampleType> (inputBlock, block));
-    };
 
-    processSubBlock (blocks.first, 0);
-
-    if (blocks.second.getNumSamples() > 0)
-        processSubBlock (blocks.second, blocks.first.getNumSamples());
-
-    numUsedSamples += blocks.first.getNumSamples() + blocks.second.getNumSamples();
+        offset += range.getLength();
+    }
 }
 
 template <typename SampleType>
@@ -156,24 +130,22 @@ void DryWetMixer<SampleType>::mixWetSamples (AudioBlock<SampleType> inOutBlock)
 {
     inOutBlock.multiplyBy (wetVolume);
 
-    jassert (inOutBlock.getNumSamples() <= numUsedSamples);
+    jassert (inOutBlock.getNumSamples() <= (size_t) fifo.getNumReadable());
 
-    auto blocks = getFirstAndSecondPartBlocks (bufferDry,
-                                               offsetInBuffer,
-                                               inOutBlock.getNumChannels(),
-                                               jmin (inOutBlock.getNumSamples(), numUsedSamples));
-    blocks.first.multiplyBy (dryVolume);
-    inOutBlock.add (blocks.first);
+    auto offset = 0;
 
-    if (blocks.second.getNumSamples() != 0)
+    for (const auto& range : fifo.read ((int) inOutBlock.getNumSamples()))
     {
-        blocks.second.multiplyBy (dryVolume);
-        inOutBlock.getSubBlock (blocks.first.getNumSamples()).add (blocks.second);
-    }
+        if (range.getLength() == 0)
+            continue;
 
-    const auto samplesToCopy = blocks.first.getNumSamples() + blocks.second.getNumSamples();
-    offsetInBuffer = (offsetInBuffer + samplesToCopy) % (size_t) bufferDry.getNumSamples();
-    numUsedSamples -= samplesToCopy;
+        auto block = AudioBlock<SampleType> (bufferDry).getSubsetChannelBlock (0, inOutBlock.getNumChannels())
+                                                       .getSubBlock ((size_t) range.getStart(), (size_t) range.getLength());
+        block.multiplyBy (dryVolume);
+        inOutBlock.getSubBlock ((size_t) offset).add (block);
+
+        offset += range.getLength();
+    }
 }
 
 //==============================================================================
@@ -271,7 +243,7 @@ struct DryWetMixerTests : public UnitTest
         const auto wetBuffer = getRampBuffer (spec, Kind::up);
         const auto dryBuffer = getRampBuffer (spec, Kind::down);
 
-        for (auto maxLatency : { 0, 512 })
+        for (auto maxLatency : { 0, 100, 200, 512 })
         {
             beginTest ("Mixer can push multiple small buffers");
             {

@@ -350,7 +350,7 @@ public:
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
 
-        Note that native macOS menus do support custom components.
+        Note that native macOS menus do not support custom components.
     */
     void addCustomItem (int itemResultID,
                         Component& customComponent,
@@ -448,7 +448,9 @@ public:
     class JUCE_API  Options
     {
     public:
+        /** By default, the target screen area will be the current mouse position. */
         Options();
+
         Options (const Options&) = default;
         Options& operator= (const Options&) = default;
 
@@ -459,38 +461,170 @@ public:
         };
 
         //==============================================================================
+        /** Sets the target component to use when displaying the menu.
+
+            This is normally the button or other control that triggered the menu.
+
+            The target component is primarily used to control the scale of the menu, so
+            it's important to supply a target component if you'll be using your program
+            on hi-DPI displays.
+
+            This function will also set the target screen area, so that the menu displays
+            next to the target component. If you need to display the menu at a specific
+            location, you should call withTargetScreenArea() after withTargetComponent.
+
+            @see withTargetComponent, withTargetScreenArea
+        */
         Options withTargetComponent (Component* targetComponent) const;
         Options withTargetComponent (Component& targetComponent) const;
+
+        /** Sets the region of the screen next to which the menu should be displayed.
+
+            To display the menu next to the mouse cursor use withMousePosition(),
+            which is equivalent to passing the following to this function:
+            @code
+            Rectangle<int>{}.withPosition (Desktop::getMousePosition())
+            @endcode
+
+            withTargetComponent() will also set the target screen area. If you need
+            a target component and a target screen area, make sure to call
+            withTargetScreenArea() after withTargetComponent().
+
+            @see withMousePosition
+        */
         Options withTargetScreenArea (Rectangle<int> targetArea) const;
+
+        /** Sets the target screen area to match the current mouse position.
+
+            Make sure to call this after withTargetComponent().
+
+            @see withTargetScreenArea
+        */
+        Options withMousePosition() const;
+
+        /** If the passed component has been deleted when the popup menu exits,
+            the selected item's action will not be called.
+
+            This is useful for avoiding dangling references inside the action
+            callback, in the case that the callback needs to access a component that
+            may be deleted.
+        */
         Options withDeletionCheck (Component& componentToWatchForDeletion) const;
+
+        /** Sets the minimum width of the popup window. */
         Options withMinimumWidth (int minWidth) const;
+
+        /** Sets the minimum number of columns in the popup window. */
         Options withMinimumNumColumns (int minNumColumns) const;
+
+        /** Sets the maximum number of columns in the popup window. */
         Options withMaximumNumColumns (int maxNumColumns) const;
+
+        /** Sets the default height of each item in the popup menu. */
         Options withStandardItemHeight (int standardHeight) const;
+
+        /** Sets an item which must be visible when the menu is initially drawn.
+
+            This is useful to ensure that a particular item is shown when the menu
+            contains too many items to display on a single screen.
+        */
         Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+
+        /** Sets a component that the popup menu will be drawn into.
+
+            Some plugin formats, such as AUv3, dislike it when the plugin editor
+            spawns additional windows. Some AUv3 hosts display pink backgrounds
+            underneath transparent popup windows, which is confusing and can appear
+            as though the plugin is malfunctioning. Setting a parent component will
+            avoid this unwanted behaviour, but with the downside that the menu size
+            will be constrained by the size of the parent component.
+        */
         Options withParentComponent (Component* parentComponent) const;
+
+        /** Sets the direction of the popup menu relative to the target screen area. */
         Options withPreferredPopupDirection (PopupDirection direction) const;
+
+        /** Sets an item to select in the menu.
+
+            This is useful for controls such as combo boxes, where opening the combo box
+            with the keyboard should ideally highlight the currently-selected item, allowing
+            the next/previous item to be selected by pressing up/down on the keyboard, rather
+            than needing to move the highlighted row down from the top of the menu each time
+            it is opened.
+        */
         Options withInitiallySelectedItem (int idOfItemToBeSelected) const;
 
         //==============================================================================
+        /** Gets the parent component. This may be nullptr if the Component has been deleted.
+
+            @see withParentComponent
+        */
         Component* getParentComponent() const noexcept               { return parentComponent; }
+
+        /** Gets the target component. This may be nullptr if the Component has been deleted.
+
+            @see withTargetComponent
+        */
         Component* getTargetComponent() const noexcept               { return targetComponent; }
+
+        /** Returns true if the menu was watching a component, and that component has been deleted, and false otherwise.
+
+            @see withDeletionCheck
+        */
         bool hasWatchedComponentBeenDeleted() const noexcept         { return isWatchingForDeletion && componentToWatchForDeletion == nullptr; }
+
+        /** Gets the target screen area.
+
+            @see withTargetScreenArea
+        */
         Rectangle<int> getTargetScreenArea() const noexcept          { return targetArea; }
+
+        /** Gets the minimum width.
+
+            @see withMinimumWidth
+        */
         int getMinimumWidth() const noexcept                         { return minWidth; }
+
+        /** Gets the maximum number of columns.
+
+            @see withMaximumNumColumns
+        */
         int getMaximumNumColumns() const noexcept                    { return maxColumns; }
+
+        /** Gets the minimum number of columns.
+
+            @see withMinimumNumColumns
+        */
         int getMinimumNumColumns() const noexcept                    { return minColumns; }
+
+        /** Gets the default height of items in the menu.
+
+            @see withStandardItemHeight
+        */
         int getStandardItemHeight() const noexcept                   { return standardHeight; }
+
+        /** Gets the ID of the item that must be visible when the menu is initially shown.
+
+            @see withItemThatMustBeVisible
+        */
         int getItemThatMustBeVisible() const noexcept                { return visibleItemID; }
+
+        /** Gets the preferred popup menu direction.
+
+            @see withPreferredPopupDirection
+        */
         PopupDirection getPreferredPopupDirection() const noexcept   { return preferredPopupDirection; }
+
+        /** Gets the ID of the item that must be selected when the menu is initially shown.
+
+            @see withItemThatMustBeVisible
+        */
         int getInitiallySelectedItemId() const noexcept              { return initiallySelectedItemId; }
 
     private:
         //==============================================================================
         Rectangle<int> targetArea;
-        Component* targetComponent = nullptr;
-        Component* parentComponent = nullptr;
-        WeakReference<Component> componentToWatchForDeletion;
+        WeakReference<Component> targetComponent, parentComponent, componentToWatchForDeletion;
         int visibleItemID = 0, minWidth = 0, minColumns = 1, maxColumns = 0, standardHeight = 0, initiallySelectedItemId = 0;
         bool isWatchingForDeletion = false;
         PopupDirection preferredPopupDirection = PopupDirection::downwards;
@@ -870,6 +1004,12 @@ public:
         virtual int getPopupMenuColumnSeparatorWidthWithOptions (const Options&) = 0;
     };
 
+    //==============================================================================
+   #ifndef DOXYGEN
+    [[deprecated ("Use the new method.")]]
+    int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
+   #endif
+
 private:
     //==============================================================================
     JUCE_PUBLIC_IN_DLL_BUILD (struct HelperClasses)
@@ -884,11 +1024,6 @@ private:
     int showWithOptionalCallback (const Options&, ModalComponentManager::Callback*, bool);
 
     static void setItem (CustomComponent&, const Item*);
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // These methods have new implementations now - see its new definition
-    int drawPopupMenuItem (Graphics&, int, int, bool, bool, bool, bool, bool, const String&, const String&, Image*, const Colour*) { return 0; }
-   #endif
 
     JUCE_LEAK_DETECTOR (PopupMenu)
 };

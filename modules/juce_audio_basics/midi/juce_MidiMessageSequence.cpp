@@ -25,7 +25,6 @@ namespace juce
 
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (const MidiMessage& mm) : message (mm) {}
 MidiMessageSequence::MidiEventHolder::MidiEventHolder (MidiMessage&& mm) : message (std::move (mm)) {}
-MidiMessageSequence::MidiEventHolder::~MidiEventHolder() {}
 
 //==============================================================================
 MidiMessageSequence::MidiMessageSequence()
@@ -61,10 +60,6 @@ MidiMessageSequence& MidiMessageSequence::operator= (MidiMessageSequence&& other
 {
     list = std::move (other.list);
     return *this;
-}
-
-MidiMessageSequence::~MidiMessageSequence()
-{
 }
 
 void MidiMessageSequence::swapWith (MidiMessageSequence& other) noexcept
@@ -309,43 +304,182 @@ void MidiMessageSequence::deleteSysExMessages()
 }
 
 //==============================================================================
-void MidiMessageSequence::createControllerUpdatesForTime (int channelNumber, double time, Array<MidiMessage>& dest)
+class OptionalPitchWheel
 {
-    bool doneProg = false;
-    bool donePitchWheel = false;
-    bool doneControllers[128] = {};
+    int value = 0;
+    bool valid = false;
 
-    for (int i = list.size(); --i >= 0;)
+public:
+    void emit (int channel, Array<MidiMessage>& out) const
     {
-        auto& mm = list.getUnchecked(i)->message;
+        if (valid)
+            out.add (MidiMessage::pitchWheel (channel, value));
+    }
 
-        if (mm.isForChannel (channelNumber) && mm.getTimeStamp() <= time)
+    void set (int v)
+    {
+        value = v;
+        valid = true;
+    }
+};
+
+class OptionalControllerValues
+{
+    int values[128];
+
+public:
+    OptionalControllerValues()
+    {
+        std::fill (std::begin (values), std::end (values), -1);
+    }
+
+    void emit (int channel, Array<MidiMessage>& out) const
+    {
+        for (auto it = std::begin (values); it != std::end (values); ++it)
+            if (*it != -1)
+                out.add (MidiMessage::controllerEvent (channel, (int) std::distance (std::begin (values), it), *it));
+    }
+
+    void set (int controller, int value)
+    {
+        values[controller] = value;
+    }
+};
+
+class OptionalProgramChange
+{
+    int value = -1, bankLSB = -1, bankMSB = -1;
+
+public:
+    void emit (int channel, double time, Array<MidiMessage>& out) const
+    {
+        if (value == -1)
+            return;
+
+        if (bankLSB != -1 && bankMSB != -1)
         {
-            if (mm.isProgramChange() && ! doneProg)
-            {
-                doneProg = true;
-                dest.add (MidiMessage (mm, 0.0));
-            }
-            else if (mm.isPitchWheel() && ! donePitchWheel)
-            {
-                donePitchWheel = true;
-                dest.add (MidiMessage (mm, 0.0));
-            }
-            else if (mm.isController())
-            {
-                auto controllerNumber = mm.getControllerNumber();
-                jassert (isPositiveAndBelow (controllerNumber, 128));
+            out.add (MidiMessage::controllerEvent (channel, 0x00, bankMSB).withTimeStamp (time));
+            out.add (MidiMessage::controllerEvent (channel, 0x20, bankLSB).withTimeStamp (time));
+        }
 
-                if (! doneControllers[controllerNumber])
-                {
-                    doneControllers[controllerNumber] = true;
-                    dest.add (MidiMessage (mm, 0.0));
-                }
+        out.add (MidiMessage::programChange (channel, value).withTimeStamp (time));
+    }
+
+    // Returns true if this is a bank number change, and false otherwise.
+    bool trySetBank (int controller, int v)
+    {
+        switch (controller)
+        {
+            case 0x00: bankMSB = v; return true;
+            case 0x20: bankLSB = v; return true;
+        }
+
+        return false;
+    }
+
+    void setProgram (int v) { value   = v; }
+};
+
+class ParameterNumberState
+{
+    enum class Kind { rpn, nrpn };
+
+    int newestRpnLsb = -1, newestRpnMsb = -1, newestNrpnLsb = -1, newestNrpnMsb = -1;
+    int lastSentLsb = -1, lastSentMsb = -1;
+    Kind lastSentKind = Kind::rpn, newestKind = Kind::rpn;
+
+public:
+    // If the effective parameter number has changed since the last time this function was called,
+    // this will emit the current parameter in full (MSB and LSB).
+    // This should be called before each data message (entry, increment, decrement: 0x06, 0x26, 0x60, 0x61)
+    // to ensure that the data message operates on the correct parameter number.
+    void sendIfNecessary (int channel, double time, Array<MidiMessage>& out)
+    {
+        const auto newestMsb = newestKind == Kind::rpn ? newestRpnMsb : newestNrpnMsb;
+        const auto newestLsb = newestKind == Kind::rpn ? newestRpnLsb : newestNrpnLsb;
+
+        auto lastSent = std::tie (lastSentKind, lastSentMsb, lastSentLsb);
+        const auto newest = std::tie (newestKind, newestMsb, newestLsb);
+
+        if (lastSent == newest || newestMsb == -1 || newestLsb == -1)
+            return;
+
+        out.add (MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x65 : 0x63, newestMsb).withTimeStamp (time));
+        out.add (MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x64 : 0x62, newestLsb).withTimeStamp (time));
+
+        lastSent = newest;
+    }
+
+    // Returns true if this is a parameter number change, and false otherwise.
+    bool trySetProgramNumber (int controller, int value)
+    {
+        switch (controller)
+        {
+            case 0x65: newestRpnMsb  = value; newestKind = Kind::rpn;  return true;
+            case 0x64: newestRpnLsb  = value; newestKind = Kind::rpn;  return true;
+            case 0x63: newestNrpnMsb = value; newestKind = Kind::nrpn; return true;
+            case 0x62: newestNrpnLsb = value; newestKind = Kind::nrpn; return true;
+        }
+
+        return false;
+    }
+};
+
+void MidiMessageSequence::createControllerUpdatesForTime (int channel, double time, Array<MidiMessage>& dest)
+{
+    OptionalProgramChange programChange;
+    OptionalControllerValues controllers;
+    OptionalPitchWheel pitchWheel;
+    ParameterNumberState parameterNumberState;
+
+    for (const auto& item : list)
+    {
+        const auto& mm = item->message;
+
+        if (! (mm.isForChannel (channel) && mm.getTimeStamp() <= time))
+            continue;
+
+        if (mm.isController())
+        {
+            const auto num = mm.getControllerNumber();
+
+            if (parameterNumberState.trySetProgramNumber (num, mm.getControllerValue()))
+                continue;
+
+            if (programChange.trySetBank (num, mm.getControllerValue()))
+                continue;
+
+            constexpr int passthroughs[] { 0x06, 0x26, 0x60, 0x61 };
+
+            if (std::find (std::begin (passthroughs), std::end (passthroughs), num) != std::end (passthroughs))
+            {
+                parameterNumberState.sendIfNecessary (channel, mm.getTimeStamp(), dest);
+                dest.add (mm);
+            }
+            else
+            {
+                controllers.set (num, mm.getControllerValue());
             }
         }
+        else if (mm.isProgramChange())
+        {
+            programChange.setProgram (mm.getProgramChangeNumber());
+        }
+        else if (mm.isPitchWheel())
+        {
+            pitchWheel.set (mm.getPitchWheelValue());
+        }
     }
-}
 
+    pitchWheel.emit (channel, dest);
+    controllers.emit (channel, dest);
+
+    // Also emits bank change messages if necessary.
+    programChange.emit (channel, time, dest);
+
+    // Set the parameter number to its final state.
+    parameterNumberState.sendIfNecessary (channel, time, dest);
+}
 
 //==============================================================================
 //==============================================================================
@@ -402,6 +536,338 @@ struct MidiMessageSequenceTest  : public UnitTest
         expectEquals (s.getNumEvents(), 7);
         expectEquals (s.getIndexOfMatchingKeyUp (0), -1); // Truncated note, should be no note off
         expectEquals (s.getTimeOfMatchingKeyUp (1), 5.0);
+
+        struct ControlValue { int control, value; };
+
+        struct DataEntry
+        {
+            int controllerBase, channel, parameter, value;
+            double time;
+
+            std::array<ControlValue, 4> getControlValues() const
+            {
+                return { { { controllerBase + 1, (parameter >> 7) & 0x7f },
+                           { controllerBase + 0, (parameter >> 0) & 0x7f },
+                           { 0x06,               (value     >> 7) & 0x7f },
+                           { 0x26,               (value     >> 0) & 0x7f } } };
+            }
+
+            void addToSequence (MidiMessageSequence& s) const
+            {
+                for (const auto& pair : getControlValues())
+                    s.addEvent (MidiMessage::controllerEvent (channel, pair.control, pair.value), time);
+            }
+
+            bool matches (const MidiMessage* begin, const MidiMessage* end) const
+            {
+                const auto isEqual = [this] (const ControlValue& cv, const MidiMessage& msg)
+                {
+                    return msg.getTimeStamp() == time
+                        && msg.isController()
+                        && msg.getChannel() == channel
+                        && msg.getControllerNumber() == cv.control
+                        && msg.getControllerValue()  == cv.value;
+                };
+
+                const auto pairs = getControlValues();
+                return std::equal (pairs.begin(), pairs.end(), begin, end, isEqual);
+            }
+        };
+
+        const auto addNrpn = [&] (MidiMessageSequence& seq, int channel, int parameter, int value, double time = 0.0)
+        {
+            DataEntry { 0x62, channel, parameter, value, time }.addToSequence (seq);
+        };
+
+        const auto addRpn = [&] (MidiMessageSequence& seq, int channel, int parameter, int value, double time = 0.0)
+        {
+            DataEntry { 0x64, channel, parameter, value, time }.addToSequence (seq);
+        };
+
+        const auto checkNrpn = [&] (const MidiMessage* begin, const MidiMessage* end, int channel, int parameter, int value, double time = 0.0)
+        {
+            expect (DataEntry { 0x62, channel, parameter, value, time }.matches (begin, end));
+        };
+
+        const auto checkRpn = [&] (const MidiMessage* begin, const MidiMessage* end, int channel, int parameter, int value, double time = 0.0)
+        {
+            expect (DataEntry { 0x64, channel, parameter, value, time }.matches (begin, end));
+        };
+
+        beginTest ("createControllerUpdatesForTime should emit (N)RPN components in the correct order");
+        {
+            const auto channel = 1;
+            const auto number = 200;
+            const auto value = 300;
+
+            MidiMessageSequence sequence;
+            addNrpn (sequence, channel, number, value);
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, 1.0, m);
+
+            checkNrpn (m.begin(), m.end(), channel, number, value);
+        }
+
+        beginTest ("createControllerUpdatesForTime ignores (N)RPNs after the final requested time");
+        {
+            const auto channel = 2;
+            const auto number = 123;
+            const auto value = 456;
+
+            MidiMessageSequence sequence;
+            addRpn (sequence, channel, number, value, 0.5);
+            addRpn (sequence, channel, 111,    222,   1.5);
+            addRpn (sequence, channel, 333,    444,   2.5);
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, 1.0, m);
+
+            checkRpn (m.begin(), std::next (m.begin(), 4), channel, number, value, 0.5);
+        }
+
+        beginTest ("createControllerUpdatesForTime should emit separate (N)RPN messages when appropriate");
+        {
+            const auto channel = 2;
+            const auto numberA = 1111;
+            const auto valueA = 9999;
+
+            const auto numberB = 8888;
+            const auto valueB = 2222;
+
+            const auto numberC = 7777;
+            const auto valueC = 3333;
+
+            const auto numberD = 6666;
+            const auto valueD = 4444;
+
+            const auto time = 0.5;
+
+            MidiMessageSequence sequence;
+            addRpn  (sequence, channel, numberA, valueA, time);
+            addRpn  (sequence, channel, numberB, valueB, time);
+            addNrpn (sequence, channel, numberC, valueC, time);
+            addNrpn (sequence, channel, numberD, valueD, time);
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, time * 2, m);
+
+            checkRpn  (std::next (m.begin(), 0),  std::next (m.begin(), 4),  channel, numberA, valueA, time);
+            checkRpn  (std::next (m.begin(), 4),  std::next (m.begin(), 8),  channel, numberB, valueB, time);
+            checkNrpn (std::next (m.begin(), 8),  std::next (m.begin(), 12), channel, numberC, valueC, time);
+            checkNrpn (std::next (m.begin(), 12), std::next (m.begin(), 16), channel, numberD, valueD, time);
+        }
+
+        beginTest ("createControllerUpdatesForTime correctly emits (N)RPN messages on multiple channels");
+        {
+            struct Info { int channel, number, value; };
+
+            const Info infos[] { { 2, 1111, 9999 },
+                                 { 8, 8888, 2222 },
+                                 { 5, 7777, 3333 },
+                                 { 1, 6666, 4444 } };
+
+            const auto time = 0.5;
+
+            MidiMessageSequence sequence;
+
+            for (const auto& info : infos)
+                addRpn (sequence, info.channel, info.number, info.value, time);
+
+            for (const auto& info : infos)
+            {
+                Array<MidiMessage> m;
+                sequence.createControllerUpdatesForTime (info.channel, time * 2, m);
+                checkRpn  (std::next (m.begin(), 0),  std::next (m.begin(), 4),  info.channel, info.number, info.value, time);
+            }
+        }
+
+        const auto messagesAreEqual = [] (const MidiMessage& a, const MidiMessage& b)
+        {
+            return std::equal (a.getRawData(), a.getRawData() + a.getRawDataSize(),
+                               b.getRawData(), b.getRawData() + b.getRawDataSize());
+        };
+
+        beginTest ("createControllerUpdatesForTime sends bank select messages when the next program is in a new bank");
+        {
+            MidiMessageSequence sequence;
+
+            const auto time = 0.0;
+            const auto channel = 1;
+
+            sequence.addEvent (MidiMessage::programChange (channel, 5), time);
+
+            sequence.addEvent (MidiMessage::controllerEvent (channel, 0x00, 128), time);
+            sequence.addEvent (MidiMessage::controllerEvent (channel, 0x20, 64), time);
+            sequence.addEvent (MidiMessage::programChange (channel, 63), time);
+
+            const Array<MidiMessage> finalEvents { MidiMessage::controllerEvent (channel, 0x00, 50),
+                                                   MidiMessage::controllerEvent (channel, 0x20, 40),
+                                                   MidiMessage::programChange (channel, 30) };
+
+            for (const auto& e : finalEvents)
+                sequence.addEvent (e);
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, 1.0, m);
+
+            expect (std::equal (m.begin(), m.end(), finalEvents.begin(), finalEvents.end(), messagesAreEqual));
+        }
+
+        beginTest ("createControllerUpdatesForTime preserves all Data Increment and Data Decrement messages");
+        {
+            MidiMessageSequence sequence;
+
+            const auto time = 0.0;
+            const auto channel = 1;
+
+            const Array<MidiMessage> messages { MidiMessage::controllerEvent (channel, 0x60, 0),
+                                                MidiMessage::controllerEvent (channel, 0x06, 100),
+                                                MidiMessage::controllerEvent (channel, 0x26, 50),
+                                                MidiMessage::controllerEvent (channel, 0x60, 10),
+                                                MidiMessage::controllerEvent (channel, 0x61, 10),
+                                                MidiMessage::controllerEvent (channel, 0x06, 20),
+                                                MidiMessage::controllerEvent (channel, 0x26, 30),
+                                                MidiMessage::controllerEvent (channel, 0x61, 10),
+                                                MidiMessage::controllerEvent (channel, 0x61, 20) };
+
+            for (const auto& m : messages)
+                sequence.addEvent (m, time);
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, 1.0, m);
+
+            expect (std::equal (m.begin(), m.end(), messages.begin(), messages.end(), messagesAreEqual));
+        }
+
+        beginTest ("createControllerUpdatesForTime does not emit redundant parameter number changes");
+        {
+            MidiMessageSequence sequence;
+
+            const auto time = 0.0;
+            const auto channel = 1;
+
+            const Array<MidiMessage> messages { MidiMessage::controllerEvent (channel, 0x65, 0),
+                                                MidiMessage::controllerEvent (channel, 0x64, 100),
+                                                MidiMessage::controllerEvent (channel, 0x63, 50),
+                                                MidiMessage::controllerEvent (channel, 0x62, 10),
+                                                MidiMessage::controllerEvent (channel, 0x06, 10) };
+
+            for (const auto& m : messages)
+                sequence.addEvent (m, time);
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, 1.0, m);
+
+            const Array<MidiMessage> expected { MidiMessage::controllerEvent (channel, 0x63, 50),
+                                                MidiMessage::controllerEvent (channel, 0x62, 10),
+                                                MidiMessage::controllerEvent (channel, 0x06, 10) };
+
+            expect (std::equal (m.begin(), m.end(), expected.begin(), expected.end(), messagesAreEqual));
+        }
+
+        beginTest ("createControllerUpdatesForTime sets parameter number correctly at end of sequence");
+        {
+            MidiMessageSequence sequence;
+
+            const auto time = 0.0;
+            const auto channel = 1;
+
+            const Array<MidiMessage> messages { MidiMessage::controllerEvent (channel, 0x65, 0),
+                                                MidiMessage::controllerEvent (channel, 0x64, 100),
+                                                MidiMessage::controllerEvent (channel, 0x63, 50),
+                                                MidiMessage::controllerEvent (channel, 0x62, 10),
+                                                MidiMessage::controllerEvent (channel, 0x06, 10),
+                                                MidiMessage::controllerEvent (channel, 0x64, 5) };
+
+            for (const auto& m : messages)
+                sequence.addEvent (m, time);
+
+            const auto finalTime = 1.0;
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, finalTime, m);
+
+            const Array<MidiMessage> expected { MidiMessage::controllerEvent (channel, 0x63, 50),
+                                                MidiMessage::controllerEvent (channel, 0x62, 10),
+                                                MidiMessage::controllerEvent (channel, 0x06, 10),
+                                                // Note: we should send both the MSB and LSB!
+                                                MidiMessage::controllerEvent (channel, 0x65, 0).withTimeStamp (finalTime),
+                                                MidiMessage::controllerEvent (channel, 0x64, 5).withTimeStamp (finalTime) };
+
+            expect (std::equal (m.begin(), m.end(), expected.begin(), expected.end(), messagesAreEqual));
+        }
+
+        beginTest ("createControllerUpdatesForTime does not emit duplicate parameter number change messages");
+        {
+            MidiMessageSequence sequence;
+
+            const auto time = 0.0;
+            const auto channel = 1;
+
+            const Array<MidiMessage> messages { MidiMessage::controllerEvent (channel, 0x65, 1),
+                                                MidiMessage::controllerEvent (channel, 0x64, 2),
+                                                MidiMessage::controllerEvent (channel, 0x63, 3),
+                                                MidiMessage::controllerEvent (channel, 0x62, 4),
+                                                MidiMessage::controllerEvent (channel, 0x06, 10),
+                                                MidiMessage::controllerEvent (channel, 0x63, 30),
+                                                MidiMessage::controllerEvent (channel, 0x62, 40),
+                                                MidiMessage::controllerEvent (channel, 0x63, 3),
+                                                MidiMessage::controllerEvent (channel, 0x62, 4),
+                                                MidiMessage::controllerEvent (channel, 0x60, 5),
+                                                MidiMessage::controllerEvent (channel, 0x65, 10) };
+
+            for (const auto& m : messages)
+                sequence.addEvent (m, time);
+
+            const auto finalTime = 1.0;
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, finalTime, m);
+
+            const Array<MidiMessage> expected { MidiMessage::controllerEvent (channel, 0x63, 3),
+                                                MidiMessage::controllerEvent (channel, 0x62, 4),
+                                                MidiMessage::controllerEvent (channel, 0x06, 10),
+                                                // Parameter number is set to (30, 40) then back to (3, 4),
+                                                // so there is no need to resend it
+                                                MidiMessage::controllerEvent (channel, 0x60, 5),
+                                                // Set parameter number to final value
+                                                MidiMessage::controllerEvent (channel, 0x65, 10).withTimeStamp (finalTime),
+                                                MidiMessage::controllerEvent (channel, 0x64, 2) .withTimeStamp (finalTime) };
+
+            expect (std::equal (m.begin(), m.end(), expected.begin(), expected.end(), messagesAreEqual));
+        }
+
+        beginTest ("createControllerUpdatesForTime emits bank change messages immediately before program change");
+        {
+            MidiMessageSequence sequence;
+
+            const auto time = 0.0;
+            const auto channel = 1;
+
+            const Array<MidiMessage> messages { MidiMessage::controllerEvent (channel, 0x00, 1),
+                                                MidiMessage::controllerEvent (channel, 0x20, 2),
+                                                MidiMessage::controllerEvent (channel, 0x65, 0),
+                                                MidiMessage::controllerEvent (channel, 0x64, 0),
+                                                MidiMessage::programChange (channel, 5) };
+
+            for (const auto& m : messages)
+                sequence.addEvent (m, time);
+
+            const auto finalTime = 1.0;
+
+            Array<MidiMessage> m;
+            sequence.createControllerUpdatesForTime (channel, finalTime, m);
+
+            const Array<MidiMessage> expected { MidiMessage::controllerEvent (channel, 0x00, 1),
+                                                MidiMessage::controllerEvent (channel, 0x20, 2),
+                                                MidiMessage::programChange (channel, 5),
+                                                MidiMessage::controllerEvent (channel, 0x65, 0).withTimeStamp (finalTime),
+                                                MidiMessage::controllerEvent (channel, 0x64, 0).withTimeStamp (finalTime) };
+
+
+            expect (std::equal (m.begin(), m.end(), expected.begin(), expected.end(), messagesAreEqual));
+        }
     }
 };
 

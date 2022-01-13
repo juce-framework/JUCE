@@ -195,7 +195,7 @@ void MidiKeyboardComponent::setMidiChannel (int midiChannelNumber)
 void MidiKeyboardComponent::setMidiChannelsToDisplay (int midiChannelMask)
 {
     midiInChannelMask = midiChannelMask;
-    shouldCheckState = true;
+    noPendingUpdates.store (false);
 }
 
 void MidiKeyboardComponent::setVelocity (float v, bool useMousePosition)
@@ -279,14 +279,13 @@ float MidiKeyboardComponent::getTotalKeyboardWidth() const noexcept
 
 int MidiKeyboardComponent::getNoteAtPosition (Point<float> p)
 {
-    float v;
-    return xyToNote (p, v);
+    return xyToNote (p).note;
 }
 
-int MidiKeyboardComponent::xyToNote (Point<float> pos, float& mousePositionVelocity)
+MidiKeyboardComponent::NoteAndVelocity MidiKeyboardComponent::xyToNote (Point<float> pos)
 {
-    if (! reallyContains (pos.toInt(), false))
-        return -1;
+    if (! reallyContains (pos, false))
+        return { -1, 0.0f };
 
     auto p = pos;
 
@@ -300,10 +299,10 @@ int MidiKeyboardComponent::xyToNote (Point<float> pos, float& mousePositionVeloc
             p = { (float) getHeight() - p.x, p.y };
     }
 
-    return remappedXYToNote (p + Point<float> (xOffset, 0), mousePositionVelocity);
+    return remappedXYToNote (p + Point<float> (xOffset, 0));
 }
 
-int MidiKeyboardComponent::remappedXYToNote (Point<float> pos, float& mousePositionVelocity) const
+MidiKeyboardComponent::NoteAndVelocity MidiKeyboardComponent::remappedXYToNote (Point<float> pos) const
 {
     auto blackNoteLength = getBlackNoteLength();
 
@@ -315,12 +314,11 @@ int MidiKeyboardComponent::remappedXYToNote (Point<float> pos, float& mousePosit
             {
                 auto note = octaveStart + blackNotes[i];
 
-                if (note >= rangeStart && note <= rangeEnd)
+                if (rangeStart <= note && note <= rangeEnd)
                 {
                     if (getKeyPos (note).contains (pos.x - xOffset))
                     {
-                        mousePositionVelocity = jmax (0.0f, pos.y / blackNoteLength);
-                        return note;
+                        return { note, jmax (0.0f, pos.y / blackNoteLength) };
                     }
                 }
             }
@@ -338,15 +336,13 @@ int MidiKeyboardComponent::remappedXYToNote (Point<float> pos, float& mousePosit
                 if (getKeyPos (note).contains (pos.x - xOffset))
                 {
                     auto whiteNoteLength = (orientation == horizontalKeyboard) ? getHeight() : getWidth();
-                    mousePositionVelocity = jmax (0.0f, pos.y / (float) whiteNoteLength);
-                    return note;
+                    return { note, jmax (0.0f, pos.y / (float) whiteNoteLength) };
                 }
             }
         }
     }
 
-    mousePositionVelocity = 0;
-    return -1;
+    return { -1, 0 };
 }
 
 //==============================================================================
@@ -643,9 +639,8 @@ void MidiKeyboardComponent::resized()
 
             auto endOfLastKey = getKeyPos (rangeEnd).getEnd();
 
-            float mousePositionVelocity;
             auto spaceAvailable = w;
-            auto lastStartKey = remappedXYToNote ({ endOfLastKey - (float) spaceAvailable, 0 }, mousePositionVelocity) + 1;
+            auto lastStartKey = remappedXYToNote ({ endOfLastKey - (float) spaceAvailable, 0 }).note + 1;
 
             if (lastStartKey >= 0 && ((int) firstKey) > lastStartKey)
             {
@@ -668,12 +663,12 @@ void MidiKeyboardComponent::resized()
 //==============================================================================
 void MidiKeyboardComponent::handleNoteOn (MidiKeyboardState*, int /*midiChannel*/, int /*midiNoteNumber*/, float /*velocity*/)
 {
-    shouldCheckState = true; // (probably being called from the audio thread, so avoid blocking in here)
+    noPendingUpdates.store (false);
 }
 
 void MidiKeyboardComponent::handleNoteOff (MidiKeyboardState*, int /*midiChannel*/, int /*midiNoteNumber*/, float /*velocity*/)
 {
-    shouldCheckState = true; // (probably being called from the audio thread, so avoid blocking in here)
+    noPendingUpdates.store (false);
 }
 
 //==============================================================================
@@ -709,11 +704,11 @@ void MidiKeyboardComponent::updateNoteUnderMouse (const MouseEvent& e, bool isDo
 
 void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown, int fingerNum)
 {
-    float mousePositionVelocity = 0.0f;
-    auto newNote = xyToNote (pos, mousePositionVelocity);
-    auto oldNote = mouseOverNotes.getUnchecked (fingerNum);
-    auto oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
-    auto eventVelocity = useMousePositionForVelocity ? mousePositionVelocity * velocity : velocity;
+    const auto noteInfo = xyToNote (pos);
+    const auto newNote = noteInfo.note;
+    const auto oldNote = mouseOverNotes.getUnchecked (fingerNum);
+    const auto oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
+    const auto eventVelocity = useMousePositionForVelocity ? noteInfo.velocity * velocity : velocity;
 
     if (oldNote != newNote)
     {
@@ -757,8 +752,7 @@ void MidiKeyboardComponent::mouseMove (const MouseEvent& e)
 
 void MidiKeyboardComponent::mouseDrag (const MouseEvent& e)
 {
-    float mousePositionVelocity;
-    auto newNote = xyToNote (e.position, mousePositionVelocity);
+    auto newNote = xyToNote (e.position).note;
 
     if (newNote >= 0 && mouseDraggedToKey (newNote, e))
         updateNoteUnderMouse (e, true);
@@ -770,8 +764,7 @@ void MidiKeyboardComponent::mouseUpOnKey      (int, const MouseEvent&)  {}
 
 void MidiKeyboardComponent::mouseDown (const MouseEvent& e)
 {
-    float mousePositionVelocity;
-    auto newNote = xyToNote (e.position, mousePositionVelocity);
+    auto newNote = xyToNote (e.position).note;
 
     if (newNote >= 0 && mouseDownOnKey (newNote, e))
         updateNoteUnderMouse (e, true);
@@ -781,8 +774,7 @@ void MidiKeyboardComponent::mouseUp (const MouseEvent& e)
 {
     updateNoteUnderMouse (e, false);
 
-    float mousePositionVelocity;
-    auto note = xyToNote (e.position, mousePositionVelocity);
+    auto note = xyToNote (e.position).note;
 
     if (note >= 0)
         mouseUpOnKey (note, e);
@@ -809,19 +801,17 @@ void MidiKeyboardComponent::mouseWheelMove (const MouseEvent&, const MouseWheelD
 
 void MidiKeyboardComponent::timerCallback()
 {
-    if (shouldCheckState)
+    if (noPendingUpdates.exchange (true))
+        return;
+
+    for (int i = rangeStart; i <= rangeEnd; ++i)
     {
-        shouldCheckState = false;
+        bool isOn = state.isNoteOnForChannels (midiInChannelMask, i);
 
-        for (int i = rangeStart; i <= rangeEnd; ++i)
+        if (keysCurrentlyDrawnDown[i] != isOn)
         {
-            bool isOn = state.isNoteOnForChannels (midiInChannelMask, i);
-
-            if (keysCurrentlyDrawnDown[i] != isOn)
-            {
-                keysCurrentlyDrawnDown.setBit (i, isOn);
-                repaintNote (i);
-            }
+            keysCurrentlyDrawnDown.setBit (i, isOn);
+            repaintNote (i);
         }
     }
 }

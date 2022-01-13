@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if defined (__IPHONE_13_0)
+#if defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
  #define JUCE_HAS_IOS_POINTER_SUPPORT 1
 #else
  #define JUCE_HAS_IOS_POINTER_SUPPORT 0
@@ -38,15 +38,18 @@ static UIInterfaceOrientation getWindowOrientation()
 {
     UIApplication* sharedApplication = [UIApplication sharedApplication];
 
-   #if (defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0)
-    for (UIScene* scene in [sharedApplication connectedScenes])
-        if ([scene isKindOfClass: [UIWindowScene class]])
-            return [(UIWindowScene*) scene interfaceOrientation];
-
-    return UIInterfaceOrientationPortrait;
-   #else
-    return [sharedApplication statusBarOrientation];
+   #if defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
+    if (@available (iOS 13.0, *))
+    {
+        for (UIScene* scene in [sharedApplication connectedScenes])
+            if ([scene isKindOfClass: [UIWindowScene class]])
+                return [(UIWindowScene*) scene interfaceOrientation];
+    }
    #endif
+
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+    return [sharedApplication statusBarOrientation];
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 }
 
 namespace Orientations
@@ -136,6 +139,8 @@ using namespace juce;
 - (BOOL) canBecomeFirstResponder;
 
 - (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text;
+
+- (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection;
 
 - (BOOL) isAccessibilityElement;
 - (CGRect) accessibilityFrame;
@@ -270,6 +275,11 @@ public:
         return getMouseTime ([e timestamp]);
     }
 
+    static NSString* getDarkModeNotificationName()
+    {
+        return @"ViewDarkModeChanged";
+    }
+
     static MultiTouchMapper<UITouch*> currentTouches;
 
 private:
@@ -296,25 +306,27 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
 };
 
+static UIViewComponentPeer* getViewPeer (JuceUIViewController* c)
+{
+    if (JuceUIView* juceView = (JuceUIView*) [c view])
+        return juceView->owner;
+
+    jassertfalse;
+    return nullptr;
+}
+
 static void sendScreenBoundsUpdate (JuceUIViewController* c)
 {
-    JuceUIView* juceView = (JuceUIView*) [c view];
-
-    if (juceView != nil && juceView->owner != nullptr)
-        juceView->owner->updateScreenBounds();
+    if (auto* peer = getViewPeer (c))
+        peer->updateScreenBounds();
 }
 
 static bool isKioskModeView (JuceUIViewController* c)
 {
-    JuceUIView* juceView = (JuceUIView*) [c view];
+    if (auto* peer = getViewPeer (c))
+        return Desktop::getInstance().getKioskModeComponent() == &(peer->getComponent());
 
-    if (juceView == nil || juceView->owner == nullptr)
-    {
-        jassertfalse;
-        return false;
-    }
-
-    return Desktop::getInstance().getKioskModeComponent() == &(juceView->owner->getComponent());
+    return false;
 }
 
 MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
@@ -542,6 +554,22 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     ignoreUnused (textView);
     return owner->textViewReplaceCharacters (Range<int> ((int) range.location, (int) (range.location + range.length)),
                                              nsStringToJuce (text));
+}
+
+- (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection
+{
+    [super traitCollectionDidChange: previousTraitCollection];
+
+   #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
+    if (@available (iOS 12.0, *))
+    {
+        const auto wasDarkModeActive = ([previousTraitCollection userInterfaceStyle] == UIUserInterfaceStyleDark);
+
+        if (wasDarkModeActive != Desktop::getInstance().isDarkModeActive())
+            [[NSNotificationCenter defaultCenter] postNotificationName: UIViewComponentPeer::getDarkModeNotificationName()
+                                                                object: nil];
+    }
+   #endif
 }
 
 - (BOOL) isAccessibilityElement

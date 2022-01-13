@@ -75,7 +75,11 @@ private:
     void updateParent();
     void updateShadows();
 
+    class ParentVisibilityChangedListener;
+    std::unique_ptr<ParentVisibilityChangedListener> visibilityChangedListener;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower)
+    JUCE_DECLARE_WEAK_REFERENCEABLE (DropShadower)
 };
 
 } // namespace juce

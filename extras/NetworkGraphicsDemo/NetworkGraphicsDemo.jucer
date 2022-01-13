@@ -10,8 +10,8 @@
       <FILE id="xdUc9q" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
       <FILE id="Vjuvqu" name="MasterComponent.h" compile="0" resource="0"
             file="Source/MasterComponent.h"/>
-      <FILE id="KbZNxO" name="SlaveComponent.h" compile="0" resource="0"
-            file="Source/SlaveComponent.h"/>
+      <FILE id="KbZNxO" name="ClientComponent.h" compile="0" resource="0"
+            file="Source/ClientComponent.h"/>
       <FILE id="F7A4kl" name="SharedCanvas.h" compile="0" resource="0" file="Source/SharedCanvas.h"/>
     </GROUP>
     <FILE id="Ww6bQw" name="juce_icon.png" compile="0" resource="1" file="Source/juce_icon.png"/>
@@ -41,7 +41,7 @@
         <MODULEPATH id="juce_cryptography" path="../../modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2019 targetFolder="Builds/VisualStudio2019">
+    <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="JUCE Network Graphics Demo"/>
@@ -62,7 +62,7 @@
         <MODULEPATH id="juce_audio_devices" path="../../modules"/>
         <MODULEPATH id="juce_audio_basics" path="../../modules"/>
       </MODULEPATHS>
-    </VS2019>
+    </VS2022>
     <XCODE_IPHONE targetFolder="Builds/iOS" bigIcon="Ww6bQw">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="JUCE Network Graphics Demo"/>

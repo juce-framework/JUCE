@@ -320,18 +320,18 @@ private:
 
     //==============================================================================
     ValueTree pipTree  { "PIPSettings" };
-    ValueWithDefault nameValue          { pipTree, Ids::name,          nullptr, "MyComponentPIP" },
-                     versionValue       { pipTree, Ids::version,       nullptr },
-                     vendorValue        { pipTree, Ids::vendor,        nullptr },
-                     websiteValue       { pipTree, Ids::website,       nullptr },
-                     descriptionValue   { pipTree, Ids::description,   nullptr },
-                     dependenciesValue  { pipTree, Ids::dependencies_, nullptr, getModulesRequiredForComponent(), "," },
-                     exportersValue     { pipTree, Ids::exporters,     nullptr, StringArray (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier.toString()), "," },
-                     moduleFlagsValue   { pipTree, Ids::moduleFlags,   nullptr, "JUCE_STRICT_REFCOUNTEDPOINTER=1" },
-                     definesValue       { pipTree, Ids::defines,       nullptr },
-                     typeValue          { pipTree, Ids::type,          nullptr, "Component" },
-                     mainClassValue     { pipTree, Ids::mainClass,     nullptr, "MyComponent" },
-                     useLocalCopyValue  { pipTree, Ids::useLocalCopy,  nullptr, false };
+    ValueTreePropertyWithDefault nameValue          { pipTree, Ids::name,          nullptr, "MyComponentPIP" },
+                                 versionValue       { pipTree, Ids::version,       nullptr },
+                                 vendorValue        { pipTree, Ids::vendor,        nullptr },
+                                 websiteValue       { pipTree, Ids::website,       nullptr },
+                                 descriptionValue   { pipTree, Ids::description,   nullptr },
+                                 dependenciesValue  { pipTree, Ids::dependencies_, nullptr, getModulesRequiredForComponent(), "," },
+                                 exportersValue     { pipTree, Ids::exporters,     nullptr, StringArray (ProjectExporter::getCurrentPlatformExporterTypeInfo().identifier.toString()), "," },
+                                 moduleFlagsValue   { pipTree, Ids::moduleFlags,   nullptr, "JUCE_STRICT_REFCOUNTEDPOINTER=1" },
+                                 definesValue       { pipTree, Ids::defines,       nullptr },
+                                 typeValue          { pipTree, Ids::type,          nullptr, "Component" },
+                                 mainClassValue     { pipTree, Ids::mainClass,     nullptr, "MyComponent" },
+                                 useLocalCopyValue  { pipTree, Ids::useLocalCopy,  nullptr, false };
 
     std::unique_ptr<PIPCreatorLookAndFeel> lf;
 

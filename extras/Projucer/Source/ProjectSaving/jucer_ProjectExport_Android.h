@@ -90,15 +90,15 @@ public:
     }
 
     //==============================================================================
-    ValueWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
-                     androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
-                     androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
-                     androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
-                     androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
-                     androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
-                     androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
-                     androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
-                     androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
+    ValueTreePropertyWithDefault androidJavaLibs, androidAdditionalJavaFolders, androidAdditionalResourceFolders, androidProjectRepositories,
+                                 androidRepositories, androidDependencies, androidCustomAppBuildGradleContent, androidScreenOrientation,
+                                 androidCustomActivityClass, androidCustomApplicationClass, androidManifestCustomXmlElements,
+                                 androidGradleSettingsContent, androidVersionCode, androidMinimumSDK, androidTargetSDK, androidTheme,
+                                 androidExtraAssetsFolder, androidOboeRepositoryPath, androidInternetNeeded, androidMicNeeded, androidCameraNeeded,
+                                 androidBluetoothNeeded, androidExternalReadPermission, androidExternalWritePermission,
+                                 androidInAppBillingPermission, androidVibratePermission, androidOtherPermissions, androidPushNotifications,
+                                 androidEnableRemoteNotifications, androidRemoteNotificationsConfigFile, androidEnableContentSharing, androidKeyStore,
+                                 androidKeyStorePass, androidKeyAlias, androidKeyAliasPass, gradleVersion, gradleToolchain, androidPluginVersion;
 
     //==============================================================================
     AndroidProjectExporter (Project& p, const ValueTree& t)
@@ -332,9 +332,9 @@ protected:
             return "${ANDROID_ABI}";
         }
 
-        ValueWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
-                         androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
-                         androidAdditionalRawValueResources, androidCustomStringXmlElements;
+        ValueTreePropertyWithDefault androidArchitectures, androidBuildConfigRemoteNotifsConfigFile,
+                                     androidAdditionalXmlValueResources, androidAdditionalDrawableResources,
+                                     androidAdditionalRawValueResources, androidCustomStringXmlElements;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& v) const override
@@ -545,8 +545,11 @@ private:
                 mo << "if( JUCE_BUILD_CONFIGURATION MATCHES \"" << cfg.getProductFlavourCMakeIdentifier() << "\" )" << newLine;
                 mo << "    target_compile_options( ${BINARY_NAME} PRIVATE";
 
-                for (auto& flag : cfg.getRecommendedCompilerWarningFlags())
-                    mo << " " << flag;
+                auto recommendedFlags = cfg.getRecommendedCompilerWarningFlags();
+
+                for (auto& recommendedFlagsType : { recommendedFlags.common, recommendedFlags.cpp })
+                    for (auto& flag : recommendedFlagsType)
+                        mo << " " << flag;
 
                 mo << ")" << newLine;
                 mo << "endif()" << newLine << newLine;
@@ -586,7 +589,7 @@ private:
         MemoryOutputStream mo;
         mo.setNewLineString (getNewLineString());
 
-        mo << "rootProject.name = " << "\'" << projectName << "\'" << newLine;
+        mo << "rootProject.name = " << "\'" << escapeQuotes (projectName) << "\'" << newLine;
         mo << (isLibrary() ? "include ':lib'" : "include ':app'");
 
         auto extraContent = androidGradleSettingsContent.get().toString();
@@ -1278,6 +1281,11 @@ private:
         return "android-" + androidMinimumSDK.get().toString();
     }
 
+    static String escapeQuotes (const String& str)
+    {
+        return str.replace ("'", "\\'").replace ("\"", "\\\"");
+    }
+
     //==============================================================================
     void writeStringsXML (const File& folder) const
     {
@@ -1286,7 +1294,7 @@ private:
             auto& cfg = dynamic_cast<const AndroidBuildConfiguration&> (*config);
 
             String customStringsXmlContent ("<resources>\n");
-            customStringsXmlContent << "<string name=\"app_name\">" << projectName << "</string>\n";
+            customStringsXmlContent << "<string name=\"app_name\">" << escapeQuotes (projectName) << "</string>\n";
             customStringsXmlContent << cfg.getCustomStringsXml();
             customStringsXmlContent << "\n</resources>";
 
@@ -1427,7 +1435,7 @@ private:
             auto projectStandard = project.getCppStandardString();
 
             if (projectStandard == "latest")
-                return String ("17");
+                return project.getLatestNumberedCppStandardString();
 
             return projectStandard;
         }();
@@ -1576,20 +1584,13 @@ private:
 
         for (int i = 0; i < defs.size(); ++i)
         {
-            auto escaped = "\"-D" + defs.getAllKeys()[i];
+            auto escaped = "[[-D" + defs.getAllKeys()[i];
             auto value = defs.getAllValues()[i];
 
             if (value.isNotEmpty())
-            {
-                value = value.replace ("\"", "\\\"");
-
-                if (value.containsChar (L' ') && ! value.startsWith ("\\\"") && ! value.endsWith ("\\\""))
-                    value = "\\\"" + value + "\\\"";
-
                 escaped += ("=" + value);
-            }
 
-            escapedDefs.add (escaped + "\"");
+            escapedDefs.add (escaped + "]]");
         }
 
         return escapedDefs;
@@ -1600,7 +1601,7 @@ private:
         StringArray escaped;
 
         for (auto& flag : flags)
-            escaped.add ("\"" + flag + "\"");
+            escaped.add ("[[" + flag + "]]");
 
         return escaped;
     }
@@ -1746,6 +1747,8 @@ private:
         if (! act->hasAttribute ("android:hardwareAccelerated"))
             act->setAttribute ("android:hardwareAccelerated", "true"); // (using the 2D acceleration slows down openGL)
 
+        act->setAttribute ("android:exported", "true");
+
         return act;
     }
 
@@ -1830,6 +1833,7 @@ private:
             s.add ("android.permission.BLUETOOTH");
             s.add ("android.permission.BLUETOOTH_ADMIN");
             s.add ("android.permission.ACCESS_FINE_LOCATION");
+            s.add ("android.permission.ACCESS_COARSE_LOCATION");
         }
 
         if (androidExternalReadPermission.get())

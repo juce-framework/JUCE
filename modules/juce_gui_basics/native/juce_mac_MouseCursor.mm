@@ -29,8 +29,34 @@ namespace juce
 #if JUCE_MAC
 
 //==============================================================================
-namespace MouseCursorHelpers
+class MouseCursor::PlatformSpecificHandle
 {
+public:
+    PlatformSpecificHandle (const MouseCursor::StandardCursorType type)
+        : cursorHandle (createCursor (type)) {}
+
+    PlatformSpecificHandle (const CustomMouseCursorInfo& info)
+        : cursorHandle (createCursor (info)) {}
+
+    ~PlatformSpecificHandle()
+    {
+        [cursorHandle release];
+    }
+
+    static void showInWindow (PlatformSpecificHandle* handle, ComponentPeer*)
+    {
+        auto c = [&]
+        {
+            if (handle == nullptr || handle->cursorHandle == nullptr)
+                return [NSCursor arrowCursor];
+
+            return handle->cursorHandle;
+        }();
+
+        [c set];
+    }
+
+private:
     static NSCursor* fromNSImage (NSImage* im, NSPoint hotspot)
     {
         NSCursor* c = [[NSCursor alloc] initWithImage: im
@@ -39,13 +65,13 @@ namespace MouseCursorHelpers
         return c;
     }
 
-    static void* fromHIServices (const char* filename)
+    static NSCursor* fromHIServices (const char* filename)
     {
         JUCE_AUTORELEASEPOOL
         {
             auto cursorPath = String ("/System/Library/Frameworks/ApplicationServices.framework/Versions/A/Frameworks/"
                                       "HIServices.framework/Versions/A/Resources/cursors/")
-                                  + filename;
+                              + filename;
 
             NSImage* originalImage = [[NSImage alloc] initByReferencingFile: juceStringToNS (cursorPath + "/cursor.pdf")];
             NSSize originalSize = [originalImage size];
@@ -59,7 +85,7 @@ namespace MouseCursorHelpers
                 if (CGImageRef rasterCGImage = [originalImage CGImageForProposedRect: nil
                                                                              context: nil
                                                                                hints: [NSDictionary dictionaryWithObjectsAndKeys:
-                                                                                         NSImageHintCTM, scaleTransform, nil]])
+                                                                                                            NSImageHintCTM, scaleTransform, nil]])
                 {
                     NSBitmapImageRep* imageRep = [[NSBitmapImageRep alloc] initWithCGImage: rasterCGImage];
                     [imageRep setSize: originalSize];
@@ -83,98 +109,88 @@ namespace MouseCursorHelpers
             return fromNSImage (resultImage, NSMakePoint (hotspotX, hotspotY));
         }
     }
-}
-
-void* CustomMouseCursorInfo::create() const
-{
-    return MouseCursorHelpers::fromNSImage (imageToNSImage (image, scaleFactor),
-                                            NSMakePoint (hotspot.x, hotspot.y));
-}
-
-void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType type)
-{
-    JUCE_AUTORELEASEPOOL
+    static NSCursor* createCursor (const CustomMouseCursorInfo& info)
     {
-        NSCursor* c = nil;
+        return fromNSImage (imageToNSImage (info.image),
+                            NSMakePoint (info.hotspot.x, info.hotspot.y));
+    }
 
-        switch (type)
+    static NSCursor* createCursor (const MouseCursor::StandardCursorType type)
+    {
+        JUCE_AUTORELEASEPOOL
         {
-            case NormalCursor:
-            case ParentCursor:          c = [NSCursor arrowCursor]; break;
-            case NoCursor:              return CustomMouseCursorInfo (Image (Image::ARGB, 8, 8, true), {}).create();
-            case DraggingHandCursor:    c = [NSCursor openHandCursor]; break;
-            case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
-            case IBeamCursor:           c = [NSCursor IBeamCursor]; break;
-            case PointingHandCursor:    c = [NSCursor pointingHandCursor]; break;
-            case LeftEdgeResizeCursor:  c = [NSCursor resizeLeftCursor]; break;
-            case RightEdgeResizeCursor: c = [NSCursor resizeRightCursor]; break;
-            case CrosshairCursor:       c = [NSCursor crosshairCursor]; break;
+            NSCursor* c = nil;
 
-            case CopyingCursor:
+            switch (type)
             {
-                c = [NSCursor dragCopyCursor];
-                break;
+                case NormalCursor:
+                case ParentCursor:          c = [NSCursor arrowCursor]; break;
+                case NoCursor:              return createCursor ({ ScaledImage (Image (Image::ARGB, 8, 8, true)), {} });
+                case DraggingHandCursor:    c = [NSCursor openHandCursor]; break;
+                case WaitCursor:            c = [NSCursor arrowCursor]; break; // avoid this on the mac, let the OS provide the beachball
+                case IBeamCursor:           c = [NSCursor IBeamCursor]; break;
+                case PointingHandCursor:    c = [NSCursor pointingHandCursor]; break;
+                case LeftEdgeResizeCursor:  c = [NSCursor resizeLeftCursor]; break;
+                case RightEdgeResizeCursor: c = [NSCursor resizeRightCursor]; break;
+                case CrosshairCursor:       c = [NSCursor crosshairCursor]; break;
+
+                case CopyingCursor:
+                {
+                    c = [NSCursor dragCopyCursor];
+                    break;
+                }
+
+                case UpDownResizeCursor:
+                case TopEdgeResizeCursor:
+                case BottomEdgeResizeCursor:
+                    if (NSCursor* m = fromHIServices ("resizenorthsouth"))
+                        return m;
+
+                    c = [NSCursor resizeUpDownCursor];
+                    break;
+
+                case LeftRightResizeCursor:
+                    if (NSCursor* m = fromHIServices ("resizeeastwest"))
+                        return m;
+
+                    c = [NSCursor resizeLeftRightCursor];
+                    break;
+
+                case TopLeftCornerResizeCursor:
+                case BottomRightCornerResizeCursor:
+                    return fromHIServices ("resizenorthwestsoutheast");
+
+                case TopRightCornerResizeCursor:
+                case BottomLeftCornerResizeCursor:
+                    return fromHIServices ("resizenortheastsouthwest");
+
+                case UpDownLeftRightResizeCursor:
+                    return fromHIServices ("move");
+
+                case NumStandardCursorTypes:
+                default:
+                    jassertfalse;
+                    break;
             }
 
-            case UpDownResizeCursor:
-            case TopEdgeResizeCursor:
-            case BottomEdgeResizeCursor:
-                if (void* m = MouseCursorHelpers::fromHIServices ("resizenorthsouth"))
-                    return m;
-
-                c = [NSCursor resizeUpDownCursor];
-                break;
-
-            case LeftRightResizeCursor:
-                if (void* m = MouseCursorHelpers::fromHIServices ("resizeeastwest"))
-                    return m;
-
-                c = [NSCursor resizeLeftRightCursor];
-                break;
-
-            case TopLeftCornerResizeCursor:
-            case BottomRightCornerResizeCursor:
-                return MouseCursorHelpers::fromHIServices ("resizenorthwestsoutheast");
-
-            case TopRightCornerResizeCursor:
-            case BottomLeftCornerResizeCursor:
-                return MouseCursorHelpers::fromHIServices ("resizenortheastsouthwest");
-
-            case UpDownLeftRightResizeCursor:
-                return MouseCursorHelpers::fromHIServices ("move");
-
-            case NumStandardCursorTypes:
-            default:
-                jassertfalse;
-                break;
+            [c retain];
+            return c;
         }
-
-        [c retain];
-        return c;
     }
-}
 
-void MouseCursor::deleteMouseCursor (void* const cursorHandle, const bool /*isStandard*/)
-{
-    [((NSCursor*) cursorHandle) release];
-}
-
-void MouseCursor::showInWindow (ComponentPeer*) const
-{
-    auto c = (NSCursor*) getHandle();
-
-    if (c == nil)
-        c = [NSCursor arrowCursor];
-
-    [c set];
-}
+    NSCursor* cursorHandle;
+};
 
 #else
 
-void* CustomMouseCursorInfo::create() const                                              { return nullptr; }
-void* MouseCursor::createStandardMouseCursor (MouseCursor::StandardCursorType)           { return nullptr; }
-void MouseCursor::deleteMouseCursor (void*, bool)                                        {}
-void MouseCursor::showInWindow (ComponentPeer*) const                                    {}
+class MouseCursor::PlatformSpecificHandle
+{
+public:
+    PlatformSpecificHandle (const MouseCursor::StandardCursorType)      {}
+    PlatformSpecificHandle (const CustomMouseCursorInfo&)               {}
+
+    static void showInWindow (PlatformSpecificHandle*, ComponentPeer*)  {}
+};
 
 #endif
 

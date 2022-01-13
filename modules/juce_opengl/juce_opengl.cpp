@@ -264,6 +264,16 @@ private:
  #include "opengl/juce_wgl.h"
  #include "native/juce_OpenGL_win32.h"
 
+#define JUCE_IMPL_WGL_EXTENSION_FUNCTION(name) \
+    decltype (juce::OpenGLContext::NativeContext::name) juce::OpenGLContext::NativeContext::name = nullptr;
+
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglChoosePixelFormatARB)
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglSwapIntervalEXT)
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglGetSwapIntervalEXT)
+JUCE_IMPL_WGL_EXTENSION_FUNCTION (wglCreateContextAttribsARB)
+
+#undef JUCE_IMPL_WGL_EXTENSION_FUNCTION
+
 #elif JUCE_LINUX || JUCE_BSD
  #include "native/juce_OpenGL_linux_X11.h"
 

@@ -152,6 +152,9 @@ public:
             for (Project::ExporterIterator exporter (project); exporter.next();)
                 paths.addIfNotAlreadyThere (exporter->getPathForModuleString (moduleID).trim());
 
+            paths.removeEmptyStrings();
+            paths.removeDuplicates (true);
+
             pathText = paths.joinIntoString (", ");
         }
 

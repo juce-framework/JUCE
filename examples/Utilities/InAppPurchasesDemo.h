@@ -480,6 +480,8 @@ class InAppPurchasesDemo : public Component,
 public:
     InAppPurchasesDemo()
     {
+        manager.registerBasicFormats();
+
         Desktop::getInstance().getDefaultLookAndFeel().setUsingNativeAlertWindows (true);
 
         dm.addAudioCallback (&player);
@@ -568,12 +570,8 @@ private:
             auto assetName = "Purchases/" + soundNames[idx] + String (phraseListBox.getSelectedRow()) + ".ogg";
 
             if (auto fileStream = createAssetInputStream (assetName.toRawUTF8()))
-            {
-                currentPhraseData.reset();
-                fileStream->readIntoMemoryBlock (currentPhraseData);
-
-                player.play (currentPhraseData.getData(), currentPhraseData.getSize());
-            }
+                if (auto* reader = manager.createReaderFor (std::move (fileStream)))
+                    player.play (reader, true);
         }
     }
 
@@ -593,7 +591,7 @@ private:
     ListBox voiceListBox                       { "voiceListBox" };
     std::unique_ptr<VoiceModel> voiceModel     { new VoiceModel (purchases) };
 
-    MemoryBlock currentPhraseData;
+    AudioFormatManager manager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InAppPurchasesDemo)
 };

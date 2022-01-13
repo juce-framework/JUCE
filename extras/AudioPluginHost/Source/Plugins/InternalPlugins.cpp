@@ -30,6 +30,25 @@
 #include "InternalPlugins.h"
 #include "PluginGraph.h"
 
+#define PIP_DEMO_UTILITIES_INCLUDED 1
+
+// An alternative version of createAssetInputStream from the demo utilities header
+// that fetches resources from embedded binary data instead of files
+static std::unique_ptr<InputStream> createAssetInputStream (const char* resourcePath)
+{
+    for (int i = 0; i < BinaryData::namedResourceListSize; ++i)
+    {
+        if (String (BinaryData::originalFilenames[i]) == String (resourcePath))
+        {
+            int dataSizeInBytes;
+            auto* resource = BinaryData::getNamedResource (BinaryData::namedResourceList[i], dataSizeInBytes);
+            return std::make_unique<MemoryInputStream> (resource, dataSizeInBytes, false);
+        }
+    }
+
+    return {};
+}
+
 #include "../../../../examples/Plugins/AUv3SynthPluginDemo.h"
 #include "../../../../examples/Plugins/ArpeggiatorPluginDemo.h"
 #include "../../../../examples/Plugins/AudioPluginDemo.h"
@@ -232,7 +251,7 @@ private:
             double cyclesPerSecond = MidiMessage::getMidiNoteInHertz (midiNoteNumber);
             double cyclesPerSample = cyclesPerSecond / getSampleRate();
 
-            angleDelta = cyclesPerSample * 2.0 * double_Pi;
+            angleDelta = cyclesPerSample * 2.0 * MathConstants<double>::pi;
         }
 
         void stopNote (float /*velocity*/, bool allowTailOff) override

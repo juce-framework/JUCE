@@ -25,7 +25,7 @@
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <VS2019 targetFolder="Builds/VisualStudio2019">
+    <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" isDebug="1" targetName="BinaryBuilder"/>
         <CONFIGURATION name="Release" isDebug="0" targetName="BinaryBuilder"/>
@@ -33,7 +33,7 @@
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../modules"/>
       </MODULEPATHS>
-    </VS2019>
+    </VS2022>
   </EXPORTFORMATS>
   <MAINGROUP id="TTBP5JihO" name="BinaryBuilder">
     <GROUP id="noYkBuTg" name="Source">

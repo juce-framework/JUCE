@@ -46,7 +46,7 @@ namespace DelayLineInterpolationTypes
 
     /**
         Successive samples in the delay line will be linearly interpolated. This
-        type of interpolation has a low compuational cost where the delay can be
+        type of interpolation has a low computational cost where the delay can be
         modulated in real time, but it also introduces a low-pass filtering effect
         into your audio signal.
 
@@ -111,6 +111,21 @@ public:
     //==============================================================================
     /** Initialises the processor. */
     void prepare (const ProcessSpec& spec);
+
+    /** Sets a new maximum delay in samples.
+
+        Also clears the delay line.
+
+        This may allocate internally, so you should never call it from the audio thread.
+    */
+    void setMaximumDelayInSamples (int maxDelayInSamples);
+
+    /** Gets the maximum possible delay in samples.
+
+        For very short delay times, the result of getMaximumDelayInSamples() may
+        differ from the last value passed to setMaximumDelayInSamples().
+    */
+    int getMaximumDelayInSamples() const noexcept       { return totalSize - 1; }
 
     /** Resets the internal state variables of the processor. */
     void reset();

@@ -31,6 +31,10 @@
 namespace juce
 {
 
+// UB Sanitizer doesn't necessarily have instrumentation for loaded plugins, so
+// it won't recognize the dynamic types of pointers to the plugin's interfaces.
+JUCE_BEGIN_NO_SANITIZE ("vptr")
+
 using namespace Steinberg;
 
 //==============================================================================
@@ -267,20 +271,9 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
         context.cycleStartMusic     = position.ppqLoopStart;
         context.cycleEndMusic       = position.ppqLoopEnd;
 
-        switch (position.frameRate)
-        {
-            case AudioPlayHead::fps23976:    fr.framesPerSecond = 24; fr.flags = FrameRate::kPullDownRate; break;
-            case AudioPlayHead::fps24:       fr.framesPerSecond = 24; fr.flags = 0; break;
-            case AudioPlayHead::fps25:       fr.framesPerSecond = 25; fr.flags = 0; break;
-            case AudioPlayHead::fps2997:     fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate; break;
-            case AudioPlayHead::fps2997drop: fr.framesPerSecond = 30; fr.flags = FrameRate::kPullDownRate | FrameRate::kDropRate; break;
-            case AudioPlayHead::fps30:       fr.framesPerSecond = 30; fr.flags = 0; break;
-            case AudioPlayHead::fps30drop:   fr.framesPerSecond = 30; fr.flags = FrameRate::kDropRate; break;
-            case AudioPlayHead::fps60:       fr.framesPerSecond = 60; fr.flags = 0; break;
-            case AudioPlayHead::fps60drop:   fr.framesPerSecond = 60; fr.flags = FrameRate::kDropRate; break;
-            case AudioPlayHead::fpsUnknown:  break;
-            default:                         jassertfalse; break; // New frame rate?
-        }
+        context.frameRate.framesPerSecond = (Steinberg::uint32) position.frameRate.getBaseRate();
+        context.frameRate.flags = (Steinberg::uint32) ((position.frameRate.isDrop()     ? FrameRate::kDropRate     : 0)
+                                                     | (position.frameRate.isPullDown() ? FrameRate::kPullDownRate : 0));
 
         if (position.isPlaying)     context.state |= ProcessContext::kPlaying;
         if (position.isRecording)   context.state |= ProcessContext::kRecording;
@@ -325,7 +318,6 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
     VST3HostContext()
     {
         appName = File::getSpecialLocation (File::currentApplicationFile).getFileNameWithoutExtension();
-        attributeList = new AttributeList (this);
     }
 
     ~VST3HostContext() override = default;
@@ -345,13 +337,9 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
     tresult PLUGIN_API endEdit (Vst::ParamID paramID) override;
 
     tresult PLUGIN_API restartComponent (Steinberg::int32 flags) override;
+    tresult PLUGIN_API setDirty (TBool) override;
 
     //==============================================================================
-    tresult PLUGIN_API setDirty (TBool) override
-    {
-        return kResultFalse;
-    }
-
     tresult PLUGIN_API requestOpenEditor (FIDString name) override
     {
         ignoreUnused (name);
@@ -513,18 +501,13 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
 
         if (doUIDsMatch (cid, Vst::IMessage::iid) && doUIDsMatch (iid, Vst::IMessage::iid))
         {
-            VSTComSmartPtr<Message> m (new Message (attributeList));
-            messageMap.add (m);
-            m->addRef();
-            *obj = m;
+            *obj = new Message;
             return kResultOk;
         }
 
         if (doUIDsMatch (cid, Vst::IAttributeList::iid) && doUIDsMatch (iid, Vst::IAttributeList::iid))
         {
-            VSTComSmartPtr<AttributeList> l (new AttributeList (this));
-            l->addRef();
-            *obj = l;
+            *obj = new AttributeList;
             return kResultOk;
         }
 
@@ -544,12 +527,6 @@ struct VST3HostContext  : public Vst::IComponentHandler,  // From VST V3.0.0
     //==============================================================================
     tresult PLUGIN_API queryInterface (const TUID iid, void** obj) override
     {
-        if (doUIDsMatch (iid, Vst::IAttributeList::iid))
-        {
-            *obj = attributeList.get();
-            return kResultOk;
-        }
-
         return testForMultiple (*this,
                                 iid,
                                 UniqueBase<Vst::IComponentHandler>{},
@@ -572,23 +549,214 @@ private:
     void restartComponentOnMessageThread (int32 flags) override;
 
     //==============================================================================
+    class Attribute
+    {
+    public:
+        using Int    = Steinberg::int64;
+        using Float  = double;
+        using String = std::vector<Vst::TChar>;
+        using Binary = std::vector<char>;
+
+        explicit Attribute (Int    x) noexcept { constructFrom (std::move (x)); }
+        explicit Attribute (Float  x) noexcept { constructFrom (std::move (x)); }
+        explicit Attribute (String x) noexcept { constructFrom (std::move (x)); }
+        explicit Attribute (Binary x) noexcept { constructFrom (std::move (x)); }
+
+        Attribute (Attribute&& other) noexcept
+        {
+            moveFrom (std::move (other));
+        }
+
+        Attribute& operator= (Attribute&& other) noexcept
+        {
+            reset();
+            moveFrom (std::move (other));
+            return *this;
+        }
+
+        ~Attribute() noexcept
+        {
+            reset();
+        }
+
+        tresult getInt (Steinberg::int64& result) const
+        {
+            if (kind != Kind::Int)
+                return kResultFalse;
+
+            result = storage.storedInt;
+            return kResultTrue;
+        }
+
+        tresult getFloat (double& result) const
+        {
+            if (kind != Kind::Float)
+                return kResultFalse;
+
+            result = storage.storedFloat;
+            return kResultTrue;
+        }
+
+        tresult getString (Vst::TChar* data, Steinberg::uint32 numBytes) const
+        {
+            if (kind != Kind::String)
+                return kResultFalse;
+
+            std::memcpy (data,
+                         storage.storedString.data(),
+                         jmin (sizeof (Vst::TChar) * storage.storedString.size(), (size_t) numBytes));
+            return kResultTrue;
+        }
+
+        tresult getBinary (const void*& data, Steinberg::uint32& numBytes) const
+        {
+            if (kind != Kind::Binary)
+                return kResultFalse;
+
+            data = storage.storedBinary.data();
+            numBytes = (Steinberg::uint32) storage.storedBinary.size();
+            return kResultTrue;
+        }
+
+    private:
+        void constructFrom (Int    x) noexcept { kind = Kind::Int;    new (&storage.storedInt)    Int    (std::move (x)); }
+        void constructFrom (Float  x) noexcept { kind = Kind::Float;  new (&storage.storedFloat)  Float  (std::move (x)); }
+        void constructFrom (String x) noexcept { kind = Kind::String; new (&storage.storedString) String (std::move (x)); }
+        void constructFrom (Binary x) noexcept { kind = Kind::Binary; new (&storage.storedBinary) Binary (std::move (x)); }
+
+        void reset() noexcept
+        {
+            switch (kind)
+            {
+                case Kind::Int:                                    break;
+                case Kind::Float:                                  break;
+                case Kind::String: storage.storedString.~vector(); break;
+                case Kind::Binary: storage.storedBinary.~vector(); break;
+            }
+        }
+
+        void moveFrom (Attribute&& other) noexcept
+        {
+            switch (other.kind)
+            {
+                case Kind::Int:    constructFrom (std::move (other.storage.storedInt));    break;
+                case Kind::Float:  constructFrom (std::move (other.storage.storedFloat));  break;
+                case Kind::String: constructFrom (std::move (other.storage.storedString)); break;
+                case Kind::Binary: constructFrom (std::move (other.storage.storedBinary)); break;
+            }
+        }
+
+        enum class Kind { Int, Float, String, Binary };
+
+        union Storage
+        {
+            Storage() {}
+            ~Storage() {}
+
+            Steinberg::int64              storedInt;
+            double                        storedFloat;
+            std::vector<Vst::TChar>       storedString;
+            std::vector<char>             storedBinary;
+        };
+
+        Storage storage;
+        Kind kind;
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Attribute)
+    };
+
+    //==============================================================================
+    class AttributeList  : public Vst::IAttributeList
+    {
+    public:
+        AttributeList() = default;
+        virtual ~AttributeList() = default;
+
+        JUCE_DECLARE_VST3_COM_REF_METHODS
+        JUCE_DECLARE_VST3_COM_QUERY_METHODS
+
+        //==============================================================================
+        tresult PLUGIN_API setInt (AttrID attr, Steinberg::int64 value) override
+        {
+            return set (attr, value);
+        }
+
+        tresult PLUGIN_API setFloat (AttrID attr, double value) override
+        {
+            return set (attr, value);
+        }
+
+        tresult PLUGIN_API setString (AttrID attr, const Vst::TChar* string) override
+        {
+            return set (attr, std::vector<Vst::TChar> (string, string + 1 + tstrlen (string)));
+        }
+
+        tresult PLUGIN_API setBinary (AttrID attr, const void* data, Steinberg::uint32 size) override
+        {
+            const auto* ptr = static_cast<const char*> (data);
+            return set (attr, std::vector<char> (ptr, ptr + size));
+        }
+
+        tresult PLUGIN_API getInt (AttrID attr, Steinberg::int64& result) override
+        {
+            return get (attr, [&] (const auto& x) { return x.getInt (result); });
+        }
+
+        tresult PLUGIN_API getFloat (AttrID attr, double& result) override
+        {
+            return get (attr, [&] (const auto& x) { return x.getFloat (result); });
+        }
+
+        tresult PLUGIN_API getString (AttrID attr, Vst::TChar* result, Steinberg::uint32 length) override
+        {
+            return get (attr, [&] (const auto& x) { return x.getString (result, length); });
+        }
+
+        tresult PLUGIN_API getBinary (AttrID attr, const void*& data, Steinberg::uint32& size) override
+        {
+            return get (attr, [&] (const auto& x) { return x.getBinary (data, size); });
+        }
+
+    private:
+        template <typename Value>
+        tresult set (AttrID attr, Value&& value)
+        {
+            if (attr == nullptr)
+                return kInvalidArgument;
+
+            const auto iter = attributes.find (attr);
+
+            if (iter != attributes.end())
+                iter->second = Attribute (std::move (value));
+            else
+                attributes.emplace (attr, Attribute (std::move (value)));
+
+            return kResultTrue;
+        }
+
+        template <typename Visitor>
+        tresult get (AttrID attr, Visitor&& visitor)
+        {
+            if (attr == nullptr)
+                return kInvalidArgument;
+
+            const auto iter = attributes.find (attr);
+
+            if (iter == attributes.cend())
+                return kResultFalse;
+
+            return visitor (iter->second);
+        }
+
+        std::map<std::string, Attribute> attributes;
+        Atomic<int> refCount { 1 };
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttributeList)
+    };
+
     struct Message  : public Vst::IMessage
     {
-        explicit Message (Vst::IAttributeList* list)
-           : attributeList (list)
-        {
-        }
-
-        Message (Vst::IAttributeList* list, FIDString id)
-           : attributeList (list), messageId (toString (id))
-        {
-        }
-
-        Message (Vst::IAttributeList* list, FIDString id, const var& v)
-           : value (v), attributeList (list), messageId (toString (id))
-        {
-        }
-
+        Message() = default;
         virtual ~Message() = default;
 
         JUCE_DECLARE_VST3_COM_REF_METHODS
@@ -596,204 +764,14 @@ private:
 
         FIDString PLUGIN_API getMessageID() override              { return messageId.toRawUTF8(); }
         void PLUGIN_API setMessageID (FIDString id) override      { messageId = toString (id); }
-        Vst::IAttributeList* PLUGIN_API getAttributes() override  { return attributeList; }
-
-        var value;
+        Vst::IAttributeList* PLUGIN_API getAttributes() override  { return &attributeList; }
 
     private:
-        VSTComSmartPtr<Vst::IAttributeList> attributeList;
+        AttributeList attributeList;
         String messageId;
-        Atomic<int> refCount;
+        Atomic<int> refCount { 1 };
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Message)
-    };
-
-    class MessageMap
-    {
-    public:
-        tresult getBinary (const char* id, const void*& data, Steinberg::uint32& size)
-        {
-            jassert (id != nullptr);
-
-            const ScopedLock lock (mutex);
-
-            const auto it = storage.find (id);
-
-            if (it != storage.cend())
-            {
-                if (auto* binaryData = it->second->value.getBinaryData())
-                {
-                    data = binaryData->getData();
-                    size = (Steinberg::uint32) binaryData->getSize();
-                    return kResultTrue;
-                }
-            }
-
-            return kResultFalse;
-        }
-
-        template <typename Type>
-        void addMessageToQueue (const char* id, Vst::IAttributeList* list, const Type& value)
-        {
-            jassert (id != nullptr);
-
-            const ScopedLock lock (mutex);
-
-            const auto it = storage.find (id);
-
-            if (it != storage.cend())
-                it->second->value = value;
-            else
-                storage.emplace (id, new Message (list, id, value));
-        }
-
-        template <typename Type>
-        bool findMessageOnQueueWithID (const char* id, Type& value)
-        {
-            jassert (id != nullptr);
-
-            const ScopedLock lock (mutex);
-
-            const auto it = storage.find (id);
-
-            if (it == storage.cend())
-                return false;
-
-            value = it->second->value;
-            return true;
-        }
-
-        void add (VSTComSmartPtr<Message> message)
-        {
-            const ScopedLock lock (mutex);
-
-            const auto* id = message->getMessageID();
-            storage.erase (id);
-            storage.emplace (id, std::move (message));
-        }
-
-    private:
-        struct Comparator
-        {
-            bool operator() (const char* a, const char* b) const noexcept
-            {
-                return std::strcmp (a, b) < 0;
-            }
-        };
-
-        // Steinberg's docs say:
-        // >  Please note that messages from the processor to the controller must not be sent during
-        //    the process call, as this would not be fast enough and would break the real time
-        //    processing. Such tasks should be handled in a separate timer thread.
-
-        // Using a lock here is fine (plugins should be aware that sending messages is not
-        // realtime-safe), and protects the data structure in case the processor sends messages from
-        // a background thread rather than from the message thread.
-
-        std::map<const char*, VSTComSmartPtr<Message>, Comparator> storage;
-        CriticalSection mutex;
-    };
-
-    MessageMap messageMap;
-
-    //==============================================================================
-    struct AttributeList  : public Vst::IAttributeList
-    {
-        AttributeList (VST3HostContext* o)  : owner (o) {}
-        virtual ~AttributeList() = default;
-
-        JUCE_DECLARE_VST3_COM_REF_METHODS
-        JUCE_DECLARE_VST3_COM_QUERY_METHODS
-
-        //==============================================================================
-        tresult PLUGIN_API setInt (AttrID id, Steinberg::int64 value) override
-        {
-            addMessageToQueue (id, value);
-            return kResultTrue;
-        }
-
-        tresult PLUGIN_API setFloat (AttrID id, double value) override
-        {
-            addMessageToQueue (id, value);
-            return kResultTrue;
-        }
-
-        tresult PLUGIN_API setString (AttrID id, const Vst::TChar* string) override
-        {
-            addMessageToQueue (id, toString (string));
-            return kResultTrue;
-        }
-
-        tresult PLUGIN_API setBinary (AttrID id, const void* data, Steinberg::uint32 size) override
-        {
-            jassert (data != nullptr || size == 0);
-            addMessageToQueue (id, MemoryBlock (data, (size_t) size));
-            return kResultTrue;
-        }
-
-        //==============================================================================
-        tresult PLUGIN_API getInt (AttrID id, Steinberg::int64& result) override
-        {
-            jassert (id != nullptr);
-
-            if (findMessageOnQueueWithID (id, result))
-                return kResultTrue;
-
-            jassertfalse;
-            return kResultFalse;
-        }
-
-        tresult PLUGIN_API getFloat (AttrID id, double& result) override
-        {
-            jassert (id != nullptr);
-
-            if (findMessageOnQueueWithID (id, result))
-                return kResultTrue;
-
-            jassertfalse;
-            return kResultFalse;
-        }
-
-        tresult PLUGIN_API getString (AttrID id, Vst::TChar* result, Steinberg::uint32 length) override
-        {
-            jassert (id != nullptr);
-
-            String stringToFetch;
-            if (findMessageOnQueueWithID (id, stringToFetch))
-            {
-                Steinberg::String str (stringToFetch.toRawUTF8());
-                str.copyTo (result, 0, (Steinberg::int32) jmin (length, (Steinberg::uint32) std::numeric_limits<Steinberg::int32>::max()));
-
-                return kResultTrue;
-            }
-
-            jassertfalse;
-            return kResultFalse;
-        }
-
-        tresult PLUGIN_API getBinary (AttrID id, const void*& data, Steinberg::uint32& size) override
-        {
-            return owner->messageMap.getBinary (id, data, size);
-        }
-
-    private:
-        VST3HostContext* owner;
-        Atomic<int> refCount;
-
-        //==============================================================================
-        template <typename Type>
-        void addMessageToQueue (AttrID id, const Type& value)
-        {
-            owner->messageMap.addMessageToQueue (id, this, value);
-        }
-
-        template <typename Type>
-        bool findMessageOnQueueWithID (AttrID id, Type& value)
-        {
-            return owner->messageMap.findMessageOnQueueWithID (id, value);
-        }
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AttributeList)
     };
 
     VSTComSmartPtr<AttributeList> attributeList;
@@ -1351,17 +1329,17 @@ private:
 
 //==============================================================================
 struct VST3PluginWindow : public AudioProcessorEditor,
-                          public ComponentMovementWatcher,
-                          public ComponentPeer::ScaleFactorListener,
-                          public IPlugFrame
+                          private ComponentMovementWatcher,
+                          private ComponentPeer::ScaleFactorListener,
+                          private IPlugFrame
 {
     VST3PluginWindow (AudioPluginInstance* owner, IPlugView* pluginView)
-      : AudioProcessorEditor (owner),
-        ComponentMovementWatcher (this),
-        view (pluginView, false)
-       #if JUCE_MAC
-      , embeddedComponent (*owner)
-       #endif
+        : AudioProcessorEditor (owner),
+          ComponentMovementWatcher (this),
+          view (pluginView, false)
+         #if JUCE_MAC
+        , embeddedComponent (*owner)
+         #endif
     {
         setSize (10, 10);
         setOpaque (true);
@@ -1369,6 +1347,10 @@ struct VST3PluginWindow : public AudioProcessorEditor,
 
         warnOnFailure (view->setFrame (this));
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
+
+        if (scaleInterface != nullptr)
+            warnOnFailure (scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor));
+
         resizeToFit();
     }
 
@@ -1434,6 +1416,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
     bool keyStateChanged (bool /*isKeyDown*/) override  { return true; }
     bool keyPressed (const KeyPress& /*key*/) override  { return true; }
 
+private:
     //==============================================================================
     void componentPeerChanged() override
     {
@@ -1495,25 +1478,16 @@ struct VST3PluginWindow : public AudioProcessorEditor,
     void componentVisibilityChanged() override
     {
         attachPluginWindow();
-
-        if (! hasDoneInitialResize)
-            resizeToFit();
-
+        resizeToFit();
         componentMovedOrResized (true, true);
     }
     using ComponentMovementWatcher::componentVisibilityChanged;
 
     void nativeScaleFactorChanged (double newScaleFactor) override
     {
-        if (approximatelyEqual ((float) newScaleFactor, nativeScaleFactor))
-            return;
-
         nativeScaleFactor = (float) newScaleFactor;
-
-        if (pluginHandle != HandleFormat{} && scaleInterface != nullptr)
-            scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
-        else
-            resizeToFit();
+        updatePluginScale();
+        componentMovedOrResized (false, true);
     }
 
     void resizeToFit()
@@ -1521,12 +1495,12 @@ struct VST3PluginWindow : public AudioProcessorEditor,
         ViewRect rect;
         warnOnFailure (view->getSize (&rect));
         resizeWithRect (*this, rect, nativeScaleFactor);
-
-        hasDoneInitialResize = true;
     }
 
     tresult PLUGIN_API resizeView (IPlugView* incomingView, ViewRect* newSize) override
     {
+        const ScopedValueSetter<bool> recursiveResizeSetter (recursiveResize, true);
+
         if (incomingView != nullptr && newSize != nullptr && incomingView == view)
         {
             auto scaleToViewRect = [this] (int dimension)
@@ -1538,6 +1512,11 @@ struct VST3PluginWindow : public AudioProcessorEditor,
             auto oldHeight = scaleToViewRect (getHeight());
 
             resizeWithRect (embeddedComponent, *newSize, nativeScaleFactor);
+
+           #if JUCE_WINDOWS
+            setPluginWindowPos (*newSize);
+           #endif
+
             setSize (embeddedComponent.getWidth(), embeddedComponent.getHeight());
 
             // According to the VST3 Workflow Diagrams, a resizeView from the plugin should
@@ -1561,14 +1540,11 @@ struct VST3PluginWindow : public AudioProcessorEditor,
         return kInvalidArgument;
     }
 
-private:
     //==============================================================================
     static void resizeWithRect (Component& comp, const ViewRect& rect, float scaleFactor)
     {
-        comp.setBounds (roundToInt ((float) rect.left / scaleFactor),
-                        roundToInt ((float) rect.top  / scaleFactor),
-                        jmax (10, std::abs (roundToInt ((float) rect.getWidth()  / scaleFactor))),
-                        jmax (10, std::abs (roundToInt ((float) rect.getHeight() / scaleFactor))));
+        comp.setSize (jmax (10, std::abs (roundToInt ((float) rect.getWidth()  / scaleFactor))),
+                      jmax (10, std::abs (roundToInt ((float) rect.getHeight() / scaleFactor))));
     }
 
     void attachPluginWindow()
@@ -1598,11 +1574,7 @@ private:
             }
 
             warnOnFailure (view->attached ((void*) pluginHandle, defaultVST3WindowType));
-
-            if (scaleInterface != nullptr)
-                scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
-            else
-                resizeToFit();
+            updatePluginScale();
         }
     }
 
@@ -1614,6 +1586,14 @@ private:
          for (int i = 0; i < ComponentPeer::getNumPeers(); ++i)
              if (ComponentPeer::getPeer (i) == currentPeer)
                  currentPeer->removeScaleFactorListener (this);
+    }
+
+    void updatePluginScale()
+    {
+        if (scaleInterface != nullptr)
+            warnOnFailure (scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor));
+        else
+            resizeToFit();
     }
 
     //==============================================================================
@@ -1661,7 +1641,7 @@ private:
    #endif
 
     HandleFormat pluginHandle = {};
-    bool recursiveResize = false, hasDoneInitialResize = false, isInOnSize = false;
+    bool recursiveResize = false, isInOnSize = false;
 
     ComponentPeer* currentPeer = nullptr;
     Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
@@ -2037,7 +2017,7 @@ private:
 };
 
 //==============================================================================
-class VST3PluginInstance : public AudioPluginInstance
+class VST3PluginInstance final  : public AudioPluginInstance
 {
 public:
     //==============================================================================
@@ -2151,6 +2131,11 @@ public:
         StringArray getAllValueStrings() const override
         {
             return {};
+        }
+
+        String getParameterID() const override
+        {
+            return String (paramID);
         }
 
         Steinberg::Vst::ParamID getParamID() const noexcept { return paramID; }
@@ -2296,7 +2281,7 @@ public:
         {
             explicit Extensions (const VST3PluginInstance* instanceIn) : instance (instanceIn) {}
 
-            void* getIComponentPtr() const noexcept override   { return instance->holder->component; }
+            Steinberg::Vst::IComponent* getIComponentPtr() const noexcept override   { return instance->holder->component; }
 
             MemoryBlock getPreset() const override             { return instance->getStateForPresetFile(); }
 
@@ -3141,7 +3126,7 @@ private:
             group->addChild (std::unique_ptr<AudioProcessorParameter> (param));
         }
 
-        setParameterTree (std::move (newParameterTree));
+        setHostedParameterTree (std::move (newParameterTree));
 
         idToParamMap = [this]
         {
@@ -3497,6 +3482,14 @@ tresult VST3HostContext::restartComponent (Steinberg::int32 flags)
     return kResultTrue;
 }
 
+tresult PLUGIN_API VST3HostContext::setDirty (TBool needsSave)
+{
+    if (needsSave)
+        plugin->updateHostDisplay (AudioPluginInstance::ChangeDetails{}.withNonParameterStateChanged (true));
+
+    return kResultOk;
+}
+
 void VST3HostContext::restartComponentOnMessageThread (int32 flags)
 {
     if (plugin == nullptr)
@@ -3761,6 +3754,8 @@ FileSearchPath VST3PluginFormat::getDefaultLocationsToSearch()
     return FileSearchPath ("/usr/lib/vst3/;/usr/local/lib/vst3/;~/.vst3/");
    #endif
 }
+
+JUCE_END_NO_SANITIZE
 
 } // namespace juce
 

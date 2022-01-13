@@ -252,6 +252,95 @@ struct NSObjectDeleter
 template <typename NSType>
 using NSUniquePtr = std::unique_ptr<NSType, NSObjectDeleter>;
 
+/*  This has very similar semantics to NSUniquePtr, with the main difference that it doesn't
+    automatically add a pointer to the managed type. This makes it possible to declare
+    scoped handles to id or block types.
+*/
+template <typename T>
+class ObjCObjectHandle
+{
+public:
+    ObjCObjectHandle() = default;
+
+    // Note that this does *not* retain the argument.
+    explicit ObjCObjectHandle (T ptr) : item (ptr) {}
+
+    ~ObjCObjectHandle() noexcept { reset(); }
+
+    ObjCObjectHandle (const ObjCObjectHandle& other)
+        : item (other.item)
+    {
+        if (item != nullptr)
+            [item retain];
+    }
+
+    ObjCObjectHandle& operator= (const ObjCObjectHandle& other)
+    {
+        auto copy = other;
+        swap (copy);
+        return *this;
+    }
+
+    ObjCObjectHandle (ObjCObjectHandle&& other) noexcept { swap (other); }
+
+    ObjCObjectHandle& operator= (ObjCObjectHandle&& other) noexcept
+    {
+        reset();
+        swap (other);
+        return *this;
+    }
+
+    // Note that this does *not* retain the argument.
+    void reset (T ptr) { *this = ObjCObjectHandle { ptr }; }
+
+    T get() const { return item; }
+
+    void reset()
+    {
+        if (item != nullptr)
+            [item release];
+
+        item = {};
+    }
+
+    bool operator== (const ObjCObjectHandle& other) const { return item == other.item; }
+    bool operator!= (const ObjCObjectHandle& other) const { return ! (*this == other); }
+
+private:
+    void swap (ObjCObjectHandle& other) noexcept { std::swap (other.item, item); }
+
+    T item{};
+};
+
+//==============================================================================
+namespace detail
+{
+    constexpr auto makeCompileTimeStr()
+    {
+        return std::array<char, 1> { { '\0' } };
+    }
+
+    template <typename A, size_t... As, typename B, size_t... Bs>
+    constexpr auto joinCompileTimeStrImpl (A&& a, std::index_sequence<As...>,
+                                           B&& b, std::index_sequence<Bs...>)
+    {
+        return std::array<char, sizeof... (As) + sizeof... (Bs) + 1> { { a[As]..., b[Bs]..., '\0' } };
+    }
+
+    template <size_t A, size_t B>
+    constexpr auto joinCompileTimeStr (const char (&a)[A], std::array<char, B> b)
+    {
+        return joinCompileTimeStrImpl (a, std::make_index_sequence<A - 1>(),
+                                       b, std::make_index_sequence<B - 1>());
+    }
+
+    template <size_t A, typename... Others>
+    constexpr auto makeCompileTimeStr (const char (&v)[A], Others&&... others)
+    {
+        return joinCompileTimeStr (v, makeCompileTimeStr (others...));
+    }
+} // namespace detail
+
 //==============================================================================
 template <typename Type>
 inline Type getIvar (id self, const char* name)
@@ -294,29 +383,12 @@ struct ObjCClass
         jassert (b); ignoreUnused (b);
     }
 
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* signature)
+    template <typename Result, typename... Args>
+    void addMethod (SEL selector, Result (*callbackFn) (id, SEL, Args...))
     {
-        BOOL b = class_addMethod (cls, selector, (IMP) callbackFn, signature);
-        jassert (b); ignoreUnused (b);
-    }
-
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2)
-    {
-        addMethod (selector, callbackFn, (String (sig1) + sig2).toUTF8());
-    }
-
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2, const char* sig3)
-    {
-        addMethod (selector, callbackFn, (String (sig1) + sig2 + sig3).toUTF8());
-    }
-
-    template <typename FunctionType>
-    void addMethod (SEL selector, FunctionType callbackFn, const char* sig1, const char* sig2, const char* sig3, const char* sig4)
-    {
-        addMethod (selector, callbackFn, (String (sig1) + sig2 + sig3 + sig4).toUTF8());
+        const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
+        const auto b = class_addMethod (cls, selector, (IMP) callbackFn, s.data());
+        jassertquiet (b);
     }
 
     void addProtocol (Protocol* protocol)
@@ -353,10 +425,10 @@ struct ObjCLifetimeManagedClass : public ObjCClass<NSObject>
         addIvar<JuceClass*> ("cppObject");
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        addMethod (@selector (initWithJuceObject:), initWithJuceObject, "@@:@");
+        addMethod (@selector (initWithJuceObject:), initWithJuceObject);
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-        addMethod (@selector (dealloc),             dealloc,            "v@:");
+        addMethod (@selector (dealloc),             dealloc);
 
         registerClass();
     }

@@ -45,9 +45,6 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
         setSource (nullptr, 0, nullptr); // deselect and reselect to avoid releasing resources wrongly
     }
 
-    readAheadBufferSize = readAheadSize;
-    sourceSampleRate = sourceSampleRateToCorrectFor;
-
     ResamplingAudioSource* newResamplerSource = nullptr;
     BufferingAudioSource* newBufferingSource = nullptr;
     PositionableAudioSource* newPositionableSource = nullptr;
@@ -82,8 +79,8 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
 
         if (isPrepared)
         {
-            if (newResamplerSource != nullptr && sourceSampleRate > 0 && sampleRate > 0)
-                newResamplerSource->setResamplingRatio (sourceSampleRate / sampleRate);
+            if (newResamplerSource != nullptr && sourceSampleRateToCorrectFor > 0 && sampleRate > 0)
+                newResamplerSource->setResamplingRatio (sourceSampleRateToCorrectFor / sampleRate);
 
             newMasterSource->prepareToPlay (blockSize, sampleRate);
         }
@@ -97,8 +94,9 @@ void AudioTransportSource::setSource (PositionableAudioSource* const newSource,
         bufferingSource = newBufferingSource;
         masterSource = newMasterSource;
         positionableSource = newPositionableSource;
+        readAheadBufferSize = readAheadSize;
+        sourceSampleRate = sourceSampleRateToCorrectFor;
 
-        inputStreamEOF = false;
         playing = false;
     }
 
@@ -114,7 +112,6 @@ void AudioTransportSource::start()
             const ScopedLock sl (callbackLock);
             playing = true;
             stopped = false;
-            inputStreamEOF = false;
         }
 
         sendChangeMessage();
@@ -157,6 +154,12 @@ double AudioTransportSource::getLengthInSeconds() const
     return 0.0;
 }
 
+bool AudioTransportSource::hasStreamFinished() const noexcept
+{
+    return positionableSource->getNextReadPosition() > positionableSource->getTotalLength() + 1
+              && ! positionableSource->isLooping();
+}
+
 void AudioTransportSource::setNextReadPosition (int64 newPosition)
 {
     if (positionableSource != nullptr)
@@ -168,13 +171,13 @@ void AudioTransportSource::setNextReadPosition (int64 newPosition)
 
         if (resamplerSource != nullptr)
             resamplerSource->flushBuffers();
-
-        inputStreamEOF = false;
     }
 }
 
 int64 AudioTransportSource::getNextReadPosition() const
 {
+    const ScopedLock sl (callbackLock);
+
     if (positionableSource != nullptr)
     {
         const double ratio = (sampleRate > 0 && sourceSampleRate > 0) ? sampleRate / sourceSampleRate : 1.0;
@@ -221,7 +224,6 @@ void AudioTransportSource::prepareToPlay (int samplesPerBlockExpected, double ne
     if (resamplerSource != nullptr && sourceSampleRate > 0)
         resamplerSource->setResamplingRatio (sourceSampleRate / sampleRate);
 
-    inputStreamEOF = false;
     isPrepared = true;
 }
 
@@ -258,11 +260,9 @@ void AudioTransportSource::getNextAudioBlock (const AudioSourceChannelInfo& info
                 info.buffer->clear (info.startSample + 256, info.numSamples - 256);
         }
 
-        if (positionableSource->getNextReadPosition() > positionableSource->getTotalLength() + 1
-              && ! positionableSource->isLooping())
+        if (hasStreamFinished())
         {
             playing = false;
-            inputStreamEOF = true;
             sendChangeMessage();
         }
 

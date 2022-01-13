@@ -154,10 +154,10 @@ public:
 
     //==============================================================================
     /** Creates an empty Grid container with default parameters. */
-    Grid() noexcept;
+    Grid() = default;
 
     /** Destructor */
-    ~Grid() noexcept;
+    ~Grid() noexcept = default;
 
     //==============================================================================
     /** Specifies the alignment of content inside the items along the rows. */

@@ -39,7 +39,8 @@ class MainWindow  : public DocumentWindow,
                     public ApplicationCommandTarget,
                     public FileDragAndDropTarget,
                     public DragAndDropContainer,
-                    private Value::Listener
+                    private Value::Listener,
+                    private ChangeListener
 {
 public:
     //==============================================================================
@@ -87,6 +88,7 @@ public:
                                                StringArray& files, bool& canMoveFiles) override;
 private:
     void valueChanged (Value&) override;
+    void changeListenerCallback (ChangeBroadcaster* source) override;
 
     static const char* getProjectWindowPosName()   { return "projectWindowPos"; }
     void createProjectContentCompIfNeeded();

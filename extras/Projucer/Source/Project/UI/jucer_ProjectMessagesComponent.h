@@ -299,42 +299,34 @@ private:
                 return true;
             };
 
-            messages.erase (std::remove_if (std::begin (messages), std::end (messages), removePredicate),
-                                            std::end (messages));
+            messages.erase (std::remove_if (messages.begin(), messages.end(), removePredicate),
+                                            messages.end());
 
-            for (int i = 0; i < warningsTree.getNumChildren(); ++i)
+            for (auto* tree : { &warningsTree, &notificationsTree })
             {
-                auto child = warningsTree.getChild (i);
-
-                if (! child.getProperty (ProjectMessages::Ids::isVisible))
-                    continue;
-
-                if (std::find_if (std::begin (messages), std::end (messages),
-                                  [child] (const std::unique_ptr<MessageComponent>& messageComponent) { return messageComponent->message == child.getType(); })
-                    == std::end (messages))
+                for (int i = 0; i < tree->getNumChildren(); ++i)
                 {
-                    messages.push_back (std::make_unique<MessageComponent> (*this, child.getType(), project.getMessageActions (child.getType())));
-                    addAndMakeVisible (*messages.back());
+                    auto child = tree->getChild (i);
+
+                    if (! child.getProperty (ProjectMessages::Ids::isVisible))
+                        continue;
+
+                    const auto messageMatchesType = [&child] (const auto& messageComponent)
+                    {
+                        return messageComponent->message == child.getType();
+                    };
+
+                    if (std::none_of (messages.begin(), messages.end(), messageMatchesType))
+                    {
+                        messages.push_back (std::make_unique<MessageComponent> (*this,
+                                                                                child.getType(),
+                                                                                project.getMessageActions (child.getType())));
+                        addAndMakeVisible (*messages.back());
+                    }
                 }
             }
 
-            for (int i = 0; i < notificationsTree.getNumChildren(); ++i)
-            {
-                auto child = notificationsTree.getChild (i);
-
-                if (! child.getProperty (ProjectMessages::Ids::isVisible))
-                    continue;
-
-                if (std::find_if (std::begin (messages), std::end (messages),
-                                  [child] (const std::unique_ptr<MessageComponent>& messageComponent) { return messageComponent->message == child.getType(); })
-                    == std::end (messages))
-                {
-                    messages.push_back (std::make_unique<MessageComponent> (*this, child.getType(), project.getMessageActions (child.getType())));
-                    addAndMakeVisible (*messages.back());
-                }
-            }
-
-            auto isNowShowing = (messages.size() > 0);
+            const auto isNowShowing = (messages.size() > 0);
 
             owner.updateBounds (isNowShowing != listWasShowing);
             updateSize (owner.getWidth());

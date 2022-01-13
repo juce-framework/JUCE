@@ -84,7 +84,6 @@ private:
     friend struct AudioSessionHolder;
 
     struct Pimpl;
-    friend struct Pimpl;
     std::unique_ptr<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE (iOSAudioIODevice)

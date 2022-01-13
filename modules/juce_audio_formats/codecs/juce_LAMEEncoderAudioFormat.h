@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if JUCE_USE_LAME_AUDIO_FORMAT || defined (DOXYGEN)
+#if JUCE_USE_LAME_AUDIO_FORMAT || DOXYGEN
 
 //==============================================================================
 /**

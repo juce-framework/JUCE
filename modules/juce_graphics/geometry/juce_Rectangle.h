@@ -26,6 +26,34 @@
 namespace juce
 {
 
+#ifndef DOXYGEN
+namespace detail
+{
+
+template <typename> struct Tag {};
+
+inline auto getNumericValue (StringRef s, Tag<int>)    { return s.text.getIntValue32(); }
+inline auto getNumericValue (StringRef s, Tag<double>) { return s.text.getDoubleValue(); }
+inline auto getNumericValue (StringRef s, Tag<float>)  { return static_cast<float> (s.text.getDoubleValue()); }
+
+template <typename ValueType>
+ValueType parseAfterSpace (StringRef s) noexcept
+{
+    return static_cast<ValueType> (getNumericValue (s.text.findEndOfWhitespace(),
+                                                    Tag<ValueType>{}));
+}
+
+inline int floorAsInt (int n) noexcept     { return n; }
+inline int floorAsInt (float n) noexcept   { return n > (float)  std::numeric_limits<int>::min() ? (int) std::floor (n) : std::numeric_limits<int>::min(); }
+inline int floorAsInt (double n) noexcept  { return n > (double) std::numeric_limits<int>::min() ? (int) std::floor (n) : std::numeric_limits<int>::min(); }
+
+inline int ceilAsInt (int n) noexcept      { return n; }
+inline int ceilAsInt (float n) noexcept    { return n < (float)  std::numeric_limits<int>::max() ? (int) std::ceil (n) : std::numeric_limits<int>::max(); }
+inline int ceilAsInt (double n) noexcept   { return n < (double) std::numeric_limits<int>::max() ? (int) std::ceil (n) : std::numeric_limits<int>::max(); }
+
+} // namespace detail
+#endif
+
 //==============================================================================
 /**
     Manages a rectangle and allows geometric operations to be performed on it.
@@ -811,10 +839,10 @@ public:
     */
     Rectangle<int> getSmallestIntegerContainer() const noexcept
     {
-        return Rectangle<int>::leftTopRightBottom (floorAsInt (pos.x),
-                                                   floorAsInt (pos.y),
-                                                   ceilAsInt  (pos.x + w),
-                                                   ceilAsInt  (pos.y + h));
+        return Rectangle<int>::leftTopRightBottom (detail::floorAsInt (pos.x),
+                                                   detail::floorAsInt (pos.y),
+                                                   detail::ceilAsInt  (pos.x + w),
+                                                   detail::ceilAsInt  (pos.y + h));
     }
 
     /** Casts this rectangle to a Rectangle<int>.
@@ -937,7 +965,7 @@ public:
 
     /** Parses a string containing a rectangle's details.
 
-        The string should contain 4 integer tokens, in the form "x y width height". They
+        The string should contain 4 numeric tokens, in the form "x y width height". They
         can be comma or whitespace separated.
 
         This method is intended to go with the toString() method, to form an easy way
@@ -950,15 +978,15 @@ public:
         StringArray toks;
         toks.addTokens (stringVersion.text.findEndOfWhitespace(), ",; \t\r\n", "");
 
-        return { parseIntAfterSpace (toks[0]),
-                 parseIntAfterSpace (toks[1]),
-                 parseIntAfterSpace (toks[2]),
-                 parseIntAfterSpace (toks[3]) };
+        return { detail::parseAfterSpace<ValueType> (toks[0]),
+                 detail::parseAfterSpace<ValueType> (toks[1]),
+                 detail::parseAfterSpace<ValueType> (toks[2]),
+                 detail::parseAfterSpace<ValueType> (toks[3]) };
     }
 
    #ifndef DOXYGEN
-    // This has been renamed by transformedBy, in order to match the method names used in the Point class.
-    JUCE_DEPRECATED_WITH_BODY (Rectangle transformed (const AffineTransform& t) const noexcept, { return transformedBy (t); })
+    [[deprecated ("This has been renamed to transformedBy in order to match the method names used in the Point class.")]]
+    Rectangle transformed (const AffineTransform& t) const noexcept { return transformedBy (t); }
    #endif
 
 private:
@@ -967,19 +995,9 @@ private:
     Point<ValueType> pos;
     ValueType w {}, h {};
 
-    static ValueType parseIntAfterSpace (StringRef s) noexcept
-        { return static_cast<ValueType> (s.text.findEndOfWhitespace().getIntValue32()); }
-
-    void copyWithRounding (Rectangle<int>& result) const noexcept    { result = getSmallestIntegerContainer(); }
-    void copyWithRounding (Rectangle<float>& result) const noexcept  { result = toFloat(); }
+    void copyWithRounding (Rectangle<int>&    result) const noexcept { result = getSmallestIntegerContainer(); }
+    void copyWithRounding (Rectangle<float>&  result) const noexcept { result = toFloat(); }
     void copyWithRounding (Rectangle<double>& result) const noexcept { result = toDouble(); }
-
-    static int floorAsInt (int n) noexcept     { return n; }
-    static int floorAsInt (float n) noexcept   { return n > (float)  std::numeric_limits<int>::min() ? (int) std::floor (n) : std::numeric_limits<int>::min(); }
-    static int floorAsInt (double n) noexcept  { return n > (double) std::numeric_limits<int>::min() ? (int) std::floor (n) : std::numeric_limits<int>::min(); }
-    static int ceilAsInt (int n) noexcept      { return n; }
-    static int ceilAsInt (float n) noexcept    { return n < (float)  std::numeric_limits<int>::max() ? (int) std::ceil (n) : std::numeric_limits<int>::max(); }
-    static int ceilAsInt (double n) noexcept   { return n < (double) std::numeric_limits<int>::max() ? (int) std::ceil (n) : std::numeric_limits<int>::max(); }
 };
 
 } // namespace juce

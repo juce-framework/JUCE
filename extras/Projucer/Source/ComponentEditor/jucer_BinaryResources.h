@@ -93,4 +93,7 @@ private:
     JucerDocument* document;
     OwnedArray<BinaryResource> resources;
     std::unique_ptr<FileChooser> chooser;
+
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE (BinaryResources)
 };

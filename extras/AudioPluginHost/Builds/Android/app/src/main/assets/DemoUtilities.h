@@ -17,13 +17,10 @@
   ==============================================================================
 */
 
-#pragma once
+#ifndef PIP_DEMO_UTILITIES_INCLUDED
+#define PIP_DEMO_UTILITIES_INCLUDED 1
 
 #include <JuceHeader.h>
-
-#ifndef PIP_DEMO_UTILITIES_INCLUDED
- #define PIP_DEMO_UTILITIES_INCLUDED 1
-#endif
 
 //==============================================================================
 /*
@@ -244,3 +241,5 @@ struct SlowerBouncingNumber  : public BouncingNumber
         speed *= 0.3;
     }
 };
+
+#endif   // PIP_DEMO_UTILITIES_INCLUDED

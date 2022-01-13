@@ -23,10 +23,12 @@
   ==============================================================================
 */
 
-#if ! DOXYGEN
+#ifndef DOXYGEN
 
 namespace juce
 {
+
+JUCE_BEGIN_NO_SANITIZE ("vptr")
 
 //==============================================================================
 #define JUCE_DECLARE_VST3_COM_REF_METHODS \
@@ -368,10 +370,13 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
     if (channels == AudioChannelSet::create7point1SDDS())   return k71Cine;
     if (channels == AudioChannelSet::ambisonic())           return kAmbi1stOrderACN;
     if (channels == AudioChannelSet::quadraphonic())        return k40Music;
+    if (channels == AudioChannelSet::create5point1point4()) return k51_4;
     if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
     if (channels == AudioChannelSet::create7point1point2()) return k71_2;
     if (channels == AudioChannelSet::create7point0point4()) return k71_4 & ~(Steinberg::Vst::kSpeakerLfe);
     if (channels == AudioChannelSet::create7point1point4()) return k71_4;
+    if (channels == AudioChannelSet::create7point1point6()) return k71_6;
+    if (channels == AudioChannelSet::create9point1point6()) return k91_6;
     if (channels == AudioChannelSet::ambisonic (0))         return (1ull << 20);
     if (channels == AudioChannelSet::ambisonic (1))         return (1ull << 20) | (1ull << 21) | (1ull << 22) | (1ull << 23);
    #if VST_VERSION >= 0x030608
@@ -381,10 +386,8 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
 
     Steinberg::Vst::SpeakerArrangement result = 0;
 
-    Array<AudioChannelSet::ChannelType> types (channels.getChannelTypes());
-
-    for (int i = 0; i < types.size(); ++i)
-        result |= getSpeakerType (channels, types.getReference(i));
+    for (const auto& type : channels.getChannelTypes())
+        result |= getSpeakerType (channels, type);
 
     return result;
 }
@@ -416,6 +419,7 @@ static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
         case k71_2 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point2();
         case k71_4:                                           return AudioChannelSet::create7point1point4();
         case k71_4 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point4();
+        case k71_6:                                           return AudioChannelSet::create7point1point6();
         case (1 << 20):                                       return AudioChannelSet::ambisonic (0);
         case kAmbi1stOrderACN:                                return AudioChannelSet::ambisonic (1);
        #if VST_VERSION >= 0x030608
@@ -1219,6 +1223,8 @@ private:
     std::atomic<int32> flags { 0 };
 };
 
+JUCE_END_NO_SANITIZE
+
 } // namespace juce
 
-#endif // ! DOXYGEN
+#endif

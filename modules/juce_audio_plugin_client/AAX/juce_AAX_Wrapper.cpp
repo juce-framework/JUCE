@@ -31,7 +31,6 @@
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
 #include "../utility/juce_WindowsHooks.h"
-#include "../utility/juce_FakeMouseMoveGenerator.h"
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
@@ -592,8 +591,6 @@ namespace AAXClasses
                     setBounds (lastValidSize);
                     pluginEditor->addMouseListener (this, true);
                 }
-
-                ignoreUnused (fakeMouseGenerator);
             }
 
             ~ContentWrapperComponent() override
@@ -673,7 +670,6 @@ namespace AAXClasses
            #if JUCE_WINDOWS
             WindowsHooks hooks;
            #endif
-            FakeMouseMoveGenerator fakeMouseGenerator;
             juce::Rectangle<int> lastValidSize;
 
             JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ContentWrapperComponent)
@@ -683,6 +679,31 @@ namespace AAXClasses
         ScopedJuceInitialiser_GUI libraryInitialiser;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceAAX_GUI)
+    };
+
+    // Copied here, because not all versions of the AAX SDK define all of these values
+    enum JUCE_AAX_EFrameRate : std::underlying_type_t<AAX_EFrameRate>
+    {
+        JUCE_AAX_eFrameRate_Undeclared = 0,
+        JUCE_AAX_eFrameRate_24Frame = 1,
+        JUCE_AAX_eFrameRate_25Frame = 2,
+        JUCE_AAX_eFrameRate_2997NonDrop = 3,
+        JUCE_AAX_eFrameRate_2997DropFrame = 4,
+        JUCE_AAX_eFrameRate_30NonDrop = 5,
+        JUCE_AAX_eFrameRate_30DropFrame = 6,
+        JUCE_AAX_eFrameRate_23976 = 7,
+        JUCE_AAX_eFrameRate_47952 = 8,
+        JUCE_AAX_eFrameRate_48Frame = 9,
+        JUCE_AAX_eFrameRate_50Frame = 10,
+        JUCE_AAX_eFrameRate_5994NonDrop = 11,
+        JUCE_AAX_eFrameRate_5994DropFrame = 12,
+        JUCE_AAX_eFrameRate_60NonDrop = 13,
+        JUCE_AAX_eFrameRate_60DropFrame = 14,
+        JUCE_AAX_eFrameRate_100Frame = 15,
+        JUCE_AAX_eFrameRate_11988NonDrop = 16,
+        JUCE_AAX_eFrameRate_11988DropFrame = 17,
+        JUCE_AAX_eFrameRate_120NonDrop = 18,
+        JUCE_AAX_eFrameRate_120DropFrame = 19
     };
 
     static void AAX_CALLBACK algorithmProcessCallback (JUCEAlgorithmContext* const instancesBegin[], const void* const instancesEnd);
@@ -826,11 +847,15 @@ namespace AAXClasses
             // * The preset is loaded in PT 10 using the AAX version.
             // * The session is then saved, and closed.
             // * The saved session is loaded, but acting as if the preset was never loaded.
+            // IMPORTANT! If the plugin doesn't manage its own bypass parameter, don't try
+            // to overwrite the bypass parameter value.
             auto numParameters = juceParameters.getNumParameters();
 
             for (int i = 0; i < numParameters; ++i)
-                if (auto paramID = getAAXParamIDFromJuceIndex(i))
-                    SetParameterNormalizedValue (paramID, juceParameters.getParamForIndex (i)->getValue());
+                if (auto* juceParam = juceParameters.getParamForIndex (i))
+                    if (juceParam != ownedBypassParameter.get())
+                        if (auto paramID = getAAXParamIDFromJuceIndex (i))
+                            SetParameterNormalizedValue (paramID, juceParam->getValue());
 
             return AAX_SUCCESS;
         }
@@ -898,6 +923,13 @@ namespace AAXClasses
                     param->sendValueChangedMessageToListeners (newValue);
                 }
             }
+        }
+
+        AAX_Result GetNumberOfChanges (int32_t* numChanges) const override
+        {
+            const auto result = AAX_CEffectParameters::GetNumberOfChanges (numChanges);
+            *numChanges += numSetDirtyCalls;
+            return result;
         }
 
         AAX_Result UpdateParameterNormalizedValue (AAX_CParamID paramID, double value, AAX_EUpdateSource source) override
@@ -1040,31 +1072,54 @@ namespace AAXClasses
             info.ppqLoopStart = (double) loopStartTick / 960000.0;
             info.ppqLoopEnd   = (double) loopEndTick   / 960000.0;
 
-            info.editOriginTime = 0;
-            info.frameRate = AudioPlayHead::fpsUnknown;
-
-            AAX_EFrameRate frameRate;
-            int32_t offset;
-
-            if (transport.GetTimeCodeInfo (&frameRate, &offset) == AAX_SUCCESS)
+            std::tie (info.frameRate, info.editOriginTime) = [&transport]
             {
-                double framesPerSec = 24.0;
+                AAX_EFrameRate frameRate;
+                int32_t offset;
 
-                switch (frameRate)
+                if (transport.GetTimeCodeInfo (&frameRate, &offset) != AAX_SUCCESS)
+                    return std::make_tuple (FrameRate(), 0.0);
+
+                const auto rate = [&]
                 {
-                    case AAX_eFrameRate_Undeclared:    break;
-                    case AAX_eFrameRate_24Frame:       info.frameRate = AudioPlayHead::fps24;       break;
-                    case AAX_eFrameRate_25Frame:       info.frameRate = AudioPlayHead::fps25;       framesPerSec = 25.0; break;
-                    case AAX_eFrameRate_2997NonDrop:   info.frameRate = AudioPlayHead::fps2997;     framesPerSec = 30.0 * 1000.0 / 1001.0; break;
-                    case AAX_eFrameRate_2997DropFrame: info.frameRate = AudioPlayHead::fps2997drop; framesPerSec = 30.0 * 1000.0 / 1001.0; break;
-                    case AAX_eFrameRate_30NonDrop:     info.frameRate = AudioPlayHead::fps30;       framesPerSec = 30.0; break;
-                    case AAX_eFrameRate_30DropFrame:   info.frameRate = AudioPlayHead::fps30drop;   framesPerSec = 30.0; break;
-                    case AAX_eFrameRate_23976:         info.frameRate = AudioPlayHead::fps23976;    framesPerSec = 24.0 * 1000.0 / 1001.0; break;
-                    default:                           break;
-                }
+                    switch ((JUCE_AAX_EFrameRate) frameRate)
+                    {
+                        case JUCE_AAX_eFrameRate_24Frame:         return FrameRate().withBaseRate (24);
+                        case JUCE_AAX_eFrameRate_23976:           return FrameRate().withBaseRate (24).withPullDown();
 
-                info.editOriginTime = offset / framesPerSec;
-            }
+                        case JUCE_AAX_eFrameRate_25Frame:         return FrameRate().withBaseRate (25);
+
+                        case JUCE_AAX_eFrameRate_30NonDrop:       return FrameRate().withBaseRate (30);
+                        case JUCE_AAX_eFrameRate_30DropFrame:     return FrameRate().withBaseRate (30).withDrop();
+                        case JUCE_AAX_eFrameRate_2997NonDrop:     return FrameRate().withBaseRate (30).withPullDown();
+                        case JUCE_AAX_eFrameRate_2997DropFrame:   return FrameRate().withBaseRate (30).withPullDown().withDrop();
+
+                        case JUCE_AAX_eFrameRate_48Frame:         return FrameRate().withBaseRate (48);
+                        case JUCE_AAX_eFrameRate_47952:           return FrameRate().withBaseRate (48).withPullDown();
+
+                        case JUCE_AAX_eFrameRate_50Frame:         return FrameRate().withBaseRate (50);
+
+                        case JUCE_AAX_eFrameRate_60NonDrop:       return FrameRate().withBaseRate (60);
+                        case JUCE_AAX_eFrameRate_60DropFrame:     return FrameRate().withBaseRate (60).withDrop();
+                        case JUCE_AAX_eFrameRate_5994NonDrop:     return FrameRate().withBaseRate (60).withPullDown();
+                        case JUCE_AAX_eFrameRate_5994DropFrame:   return FrameRate().withBaseRate (60).withPullDown().withDrop();
+
+                        case JUCE_AAX_eFrameRate_100Frame:        return FrameRate().withBaseRate (100);
+
+                        case JUCE_AAX_eFrameRate_120NonDrop:      return FrameRate().withBaseRate (120);
+                        case JUCE_AAX_eFrameRate_120DropFrame:    return FrameRate().withBaseRate (120).withDrop();
+                        case JUCE_AAX_eFrameRate_11988NonDrop:    return FrameRate().withBaseRate (120).withPullDown();
+                        case JUCE_AAX_eFrameRate_11988DropFrame:  return FrameRate().withBaseRate (120).withPullDown().withDrop();
+
+                        case JUCE_AAX_eFrameRate_Undeclared:      break;
+                    }
+
+                    return FrameRate();
+                }();
+
+                const auto effectiveRate = rate.getEffectiveRate();
+                return std::make_tuple (rate, effectiveRate != 0.0 ? offset / effectiveRate : 0.0);
+            }();
 
             // No way to get these: (?)
             info.isRecording = false;
@@ -1107,6 +1162,9 @@ namespace AAXClasses
 
             if (details.latencyChanged)
                 check (Controller()->SetSignalLatency (processor->getLatencySamples()));
+
+            if (details.nonParameterStateChanged)
+                ++numSetDirtyCalls;
         }
 
         void audioProcessorParameterChangeGestureBegin (AudioProcessor*, int parameterIndex) override
@@ -1548,11 +1606,11 @@ namespace AAXClasses
             }
 
             if (! bypassPartOfRegularParams)
-                juceParameters.params.add (bypassParameter);
+                juceParameters.addNonOwning (bypassParameter);
 
             int parameterIndex = 0;
 
-            for (auto* juceParam : juceParameters.params)
+            for (auto* juceParam : juceParameters)
             {
                 auto isBypassParameter = (juceParam == bypassParameter);
 
@@ -1999,7 +2057,7 @@ namespace AAXClasses
         bool isPrepared = false;
         MidiBuffer midiBuffer;
         Array<float*> channelList;
-        int32_t juceChunkIndex = 0;
+        int32_t juceChunkIndex = 0, numSetDirtyCalls = 0;
         AAX_CSampleRate sampleRate = 0;
         int lastBufferSize = 1024, maxBufferSize = 1024;
         bool hasSidechain = false, canDisableSidechain = false, lastSideChainState = false;
@@ -2102,7 +2160,7 @@ namespace AAXClasses
 
         int meterIdx = 0;
 
-        for (auto* param : params.params)
+        for (auto* param : params)
         {
             auto category = param->getCategory();
 
@@ -2367,7 +2425,7 @@ namespace AAXClasses
         jassert (pluginIds.size() > 0);
        #endif
     }
-}
+} // namespace AAXClasses
 
 void AAX_CALLBACK AAXClasses::algorithmProcessCallback (JUCEAlgorithmContext* const instancesBegin[], const void* const instancesEnd)
 {

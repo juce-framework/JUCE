@@ -936,6 +936,19 @@ public:
     */
     bool contains (Point<int> localPoint);
 
+    /** Returns true if a given point lies within this component or one of its children.
+
+        Never override this method! Use hitTest to create custom hit regions.
+
+        @param localPoint    the coordinate to test, relative to this component's top-left.
+        @returns    true if the point is within the component's hit-test area, but only if
+                    that part of the component isn't clipped by its parent component. Note
+                    that this won't take into account any overlapping sibling components
+                    which might be in the way - for that, see reallyContains()
+        @see hitTest, reallyContains, getComponentAt
+    */
+    bool contains (Point<float> localPoint);
+
     /** Returns true if a given point lies in this component, taking any overlapping
         siblings into account.
 
@@ -945,6 +958,16 @@ public:
         @see contains, getComponentAt
     */
     bool reallyContains (Point<int> localPoint, bool returnTrueIfWithinAChild);
+
+    /** Returns true if a given point lies in this component, taking any overlapping
+        siblings into account.
+
+        @param localPoint    the coordinate to test, relative to this component's top-left.
+        @param returnTrueIfWithinAChild     if the point actually lies within a child of this component,
+                                            this determines whether that is counted as a hit.
+        @see contains, getComponentAt
+    */
+    bool reallyContains (Point<float> localPoint, bool returnTrueIfWithinAChild);
 
     /** Returns the component at a certain point within this one.
 
@@ -968,6 +991,17 @@ public:
         @see hitTest, contains, reallyContains
     */
     Component* getComponentAt (Point<int> position);
+
+    /** Returns the component at a certain point within this one.
+
+        @param position  the coordinate to test, relative to this component's top-left.
+        @returns    the component that is at this position - which may be 0, this component,
+                    or one of its children. Note that overlapping siblings that might actually
+                    be in the way are not taken into account by this method - to account for these,
+                    instead call getComponentAt on the top-level parent of this component.
+        @see hitTest, contains, reallyContains
+    */
+    Component* getComponentAt (Point<float> position);
 
     //==============================================================================
     /** Marks the whole component as needing to be redrawn.
@@ -1227,7 +1261,7 @@ public:
     */
     int getExplicitFocusOrder() const;
 
-    /** A focus container type that can be passed to setFocusContainer().
+    /** A focus container type that can be passed to setFocusContainerType().
 
         If a component is marked as a focus container or keyboard focus container then
         it will act as the top-level component within which focus or keyboard focus is
@@ -1284,25 +1318,25 @@ public:
 
     /** Returns true if this component has been marked as a focus container.
 
-        @see setFocusContainer
+        @see setFocusContainerType
     */
     bool isFocusContainer() const noexcept;
 
     /** Returns true if this component has been marked as a keyboard focus container.
 
-        @see setFocusContainer
+        @see setFocusContainerType
     */
     bool isKeyboardFocusContainer() const noexcept;
 
     /** Returns the focus container for this component.
 
-        @see isFocusContainer, setFocusContainer
+        @see isFocusContainer, setFocusContainerType
     */
     Component* findFocusContainer() const;
 
     /** Returns the keyboard focus container for this component.
 
-        @see isFocusContainer, setFocusContainer
+        @see isFocusContainer, setFocusContainerType
     */
     Component* findKeyboardFocusContainer() const;
 
@@ -1352,7 +1386,7 @@ public:
           by calling getWantsKeyboardFocus), it gets it.
         - if the component itself doesn't want focus, it will try to pass it
           on to whichever of its children is the default component, as determined by
-          the getDefaultComponent() implemetation of the ComponentTraverser returned
+          the getDefaultComponent() implementation of the ComponentTraverser returned
           by createKeyboardFocusTraverser().
         - if none of its children want focus at all, it will pass it up to its
           parent instead, unless it's a top-level component without a parent,
@@ -1393,14 +1427,14 @@ public:
     /** Tries to move the keyboard focus to one of this component's siblings.
 
         This will try to move focus to either the next or previous component, as
-        determined by the getNextComponent() and getPreviousComponent() implemetations
+        determined by the getNextComponent() and getPreviousComponent() implementations
         of the ComponentTraverser returned by createKeyboardFocusTraverser().
 
         This is the method that is used when shifting focus by pressing the tab key.
 
         @param moveToNext   if true, the focus will move forwards; if false, it will
                             move backwards
-        @see grabKeyboardFocus, giveAwayKeyboardFocus, setFocusContainer, setWantsKeyboardFocus
+        @see grabKeyboardFocus, giveAwayKeyboardFocus, setFocusContainerType, setWantsKeyboardFocus
     */
     void moveKeyboardFocusToSibling (bool moveToNext);
 
@@ -1418,8 +1452,8 @@ public:
         passed from this component.
 
         The default implementation of this method will return an instance of FocusTraverser
-        if this component is a focus container (as determined by the setFocusContainer() method).
-        If the component isn't a focus container, then it will recursively call
+        if this component is a focus container (as determined by the setFocusContainerType()
+        method). If the component isn't a focus container, then it will recursively call
         createFocusTraverser() on its parents.
 
         If you override this to return a custom traverser object, then this component and
@@ -1432,8 +1466,8 @@ public:
 
         The default implementation of this method will return an instance of
         KeyboardFocusTraverser if this component is a keyboard focus container (as determined by
-        the setFocusContainer() method). If the component isn't a keyboard focus container, then
-        it will recursively call createKeyboardFocusTraverser() on its parents.
+        the setFocusContainerType() method). If the component isn't a keyboard focus container,
+        then it will recursively call createKeyboardFocusTraverser() on its parents.
 
         If you override this to return a custom traverser object, then this component and
         all its sub-components will use the new object to make their keyboard focusing
@@ -2442,13 +2476,15 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    // This method has been deprecated in favour of the setFocusContainerType() method
-    // that takes a more descriptive enum.
-    JUCE_DEPRECATED_WITH_BODY (void setFocusContainer (bool shouldBeFocusContainer) noexcept,
+    [[deprecated ("Use the setFocusContainerType that takes a more descriptive enum.")]]
+    void setFocusContainer (bool shouldBeFocusContainer) noexcept
     {
         setFocusContainerType (shouldBeFocusContainer ? FocusContainerType::keyboardFocusContainer
                                                       : FocusContainerType::none);
-    })
+    }
+
+    [[deprecated ("Use the contains that takes a Point<int>.")]]
+    void contains (int, int) = delete;
    #endif
 
 private:
@@ -2472,7 +2508,6 @@ private:
 
     //==============================================================================
     friend class ComponentPeer;
-    friend class MouseInputSource;
     friend class MouseInputSourceInternal;
 
    #ifndef DOXYGEN
@@ -2572,10 +2607,6 @@ private:
     void sendEnablementChangeMessage();
     void sendVisibilityChangeMessage();
 
-    bool containsInternal (Point<float>);
-    bool reallyContainsInternal (Point<float>, bool);
-    Component* getComponentAtInternal (Point<float>);
-
     struct ComponentHelpers;
     friend struct ComponentHelpers;
 
@@ -2583,19 +2614,6 @@ private:
        You might need to give your subclasses a private dummy constructor to avoid compiler warnings.
     */
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Component)
-
-    //==============================================================================
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This is included here just to cause a compile error if your code is still handling
-    // drag-and-drop with this method. If so, just update it to use the new FileDragAndDropTarget
-    // class, which is easy (just make your class inherit from FileDragAndDropTarget, and
-    // implement its methods instead of this Component method).
-    virtual void filesDropped (const StringArray&, int, int) {}
-
-    // This is included here to cause an error if you use or overload it - it has been deprecated in
-    // favour of contains (Point<int>)
-    void contains (int, int) = delete;
-   #endif
 
 protected:
     //==============================================================================

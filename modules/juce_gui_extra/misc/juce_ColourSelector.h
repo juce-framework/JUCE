@@ -162,12 +162,6 @@ private:
     void resized() override;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ColourSelector)
-
-   #if JUCE_CATCH_DEPRECATED_CODE_MISUSE
-    // This constructor is here temporarily to prevent old code compiling, because the parameters
-    // have changed - if you get an error here, update your code to use the new constructor instead..
-    ColourSelector (bool);
-   #endif
 };
 
 } // namespace juce

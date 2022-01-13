@@ -387,11 +387,18 @@ public:
     Scanner (PluginListComponent& plc, AudioPluginFormat& format, const StringArray& filesOrIdentifiers,
              PropertiesFile* properties, bool allowPluginsWhichRequireAsynchronousInstantiation, int threads,
              const String& title, const String& text)
-        : owner (plc), formatToScan (format), filesOrIdentifiersToScan (filesOrIdentifiers), propertiesToUse (properties),
+        : owner (plc),
+          formatToScan (format),
+          filesOrIdentifiersToScan (filesOrIdentifiers),
+          propertiesToUse (properties),
           pathChooserWindow (TRANS("Select folders to scan..."), String(), MessageBoxIconType::NoIcon),
           progressWindow (title, text, MessageBoxIconType::NoIcon),
-          numThreads (threads), allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
+          numThreads (threads),
+          allowAsync (allowPluginsWhichRequireAsynchronousInstantiation)
     {
+        const auto blacklisted = owner.list.getBlacklistedFiles();
+        initiallyBlacklistedFiles = std::set<String> (blacklisted.begin(), blacklisted.end());
+
         FileSearchPath path (formatToScan.getDefaultLocationsToSearch());
 
         // You need to use at least one thread when scanning plug-ins asynchronously
@@ -443,9 +450,10 @@ private:
     FileSearchPathListComponent pathList;
     String pluginBeingScanned;
     double progress = 0;
-    int numThreads;
+    const int numThreads;
     bool allowAsync, finished = false, timerReentrancyCheck = false;
     std::unique_ptr<ThreadPool> pool;
+    std::set<String> initiallyBlacklistedFiles;
 
     static void startScanCallback (int result, AlertWindow* alert, Scanner* scanner)
     {
@@ -557,8 +565,16 @@ private:
 
     void finishedScan()
     {
-        owner.scanFinished (scanner != nullptr ? scanner->getFailedFiles()
-                                               : StringArray());
+        const auto blacklisted = owner.list.getBlacklistedFiles();
+        std::set<String> allBlacklistedFiles (blacklisted.begin(), blacklisted.end());
+
+        std::vector<String> newBlacklistedFiles;
+        std::set_difference (allBlacklistedFiles.begin(), allBlacklistedFiles.end(),
+                             initiallyBlacklistedFiles.begin(), initiallyBlacklistedFiles.end(),
+                             std::back_inserter (newBlacklistedFiles));
+
+        owner.scanFinished (scanner != nullptr ? scanner->getFailedFiles() : StringArray(),
+                            newBlacklistedFiles);
     }
 
     void timerCallback() override
@@ -632,21 +648,33 @@ bool PluginListComponent::isScanning() const noexcept
     return currentScanner != nullptr;
 }
 
-void PluginListComponent::scanFinished (const StringArray& failedFiles)
+void PluginListComponent::scanFinished (const StringArray& failedFiles,
+                                        const std::vector<String>& newBlacklistedFiles)
 {
-    StringArray shortNames;
+    StringArray warnings;
 
-    for (auto& f : failedFiles)
-        shortNames.add (File::createFileWithoutCheckingPath (f).getFileName());
+    const auto addWarningText = [&warnings] (const auto& range, const auto& prefix)
+    {
+        if (range.size() == 0)
+            return;
+
+        StringArray names;
+
+        for (auto& f : range)
+            names.add (File::createFileWithoutCheckingPath (f).getFileName());
+
+        warnings.add (prefix + ":\n\n" + names.joinIntoString (", "));
+    };
+
+    addWarningText (newBlacklistedFiles,  TRANS ("The following files encountered fatal errors during validation"));
+    addWarningText (failedFiles,          TRANS ("The following files appeared to be plugin files, but failed to load correctly"));
 
     currentScanner.reset(); // mustn't delete this before using the failed files array
 
-    if (shortNames.size() > 0)
+    if (! warnings.isEmpty())
         AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon,
                                           TRANS("Scan complete"),
-                                          TRANS("Note that the following files appeared to be plugin files, but failed to load correctly")
-                                            + ":\n\n"
-                                            + shortNames.joinIntoString (", "));
+                                          warnings.joinIntoString ("\n\n"));
 }
 
 } // namespace juce
