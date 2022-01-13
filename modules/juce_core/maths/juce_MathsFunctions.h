@@ -175,8 +175,8 @@ Type mapFromLog10 (Type valueInLogRange, Type logRangeMin, Type logRangeMax)
 }
 
 /** Scans an array of values, returning the minimum value that it contains. */
-template <typename Type>
-Type findMinimum (const Type* data, int numValues)
+template <typename Type, typename Size>
+Type findMinimum (const Type* data, Size numValues)
 {
     if (numValues <= 0)
         return Type (0);
@@ -195,8 +195,8 @@ Type findMinimum (const Type* data, int numValues)
 }
 
 /** Scans an array of values, returning the maximum value that it contains. */
-template <typename Type>
-Type findMaximum (const Type* values, int numValues)
+template <typename Type, typename Size>
+Type findMaximum (const Type* values, Size numValues)
 {
     if (numValues <= 0)
         return Type (0);
