@@ -151,13 +151,14 @@ ContentSharer::ContentSharer() {}
 ContentSharer::~ContentSharer() { clearSingletonInstance(); }
 
 void ContentSharer::shareFiles (const Array<URL>& files,
-                                std::function<void (bool, const String&)> callbackToUse)
+                                std::function<void (bool, const String&)> callbackToUse,
+                                Component *parentComponent)
 {
   #if JUCE_CONTENT_SHARING
-    startNewShare (callbackToUse);
+    startNewShare (callbackToUse, parentComponent);
     pimpl->shareFiles (files);
   #else
-    ignoreUnused (files);
+    ignoreUnused (files, parentComponent);
 
     // Content sharing is not available on this platform!
     jassertfalse;
@@ -168,7 +169,8 @@ void ContentSharer::shareFiles (const Array<URL>& files,
 }
 
 #if JUCE_CONTENT_SHARING
-void ContentSharer::startNewShare (std::function<void (bool, const String&)> callbackToUse)
+void ContentSharer::startNewShare (std::function<void (bool, const String&)> callbackToUse,
+                                   Component *parentComponent)
 {
     // You should not start another sharing operation before the previous one is finished.
     // Forcibly stopping a previous sharing operation is rarely a good idea!
@@ -183,19 +185,21 @@ void ContentSharer::startNewShare (std::function<void (bool, const String&)> cal
     // You need to pass a valid callback.
     jassert (callbackToUse);
     callback = std::move (callbackToUse);
+    parent = parentComponent;
 
     pimpl.reset (createPimpl());
 }
 #endif
 
 void ContentSharer::shareText (const String& text,
-                               std::function<void (bool, const String&)> callbackToUse)
+                               std::function<void (bool, const String&)> callbackToUse,
+                               Component *parentComponent)
 {
   #if JUCE_CONTENT_SHARING
-    startNewShare (callbackToUse);
+    startNewShare (callbackToUse, parentComponent);
     pimpl->shareText (text);
   #else
-    ignoreUnused (text);
+    ignoreUnused (text, parentComponent);
 
     // Content sharing is not available on this platform!
     jassertfalse;
@@ -207,13 +211,14 @@ void ContentSharer::shareText (const String& text,
 
 void ContentSharer::shareImages (const Array<Image>& images,
                                  std::function<void (bool, const String&)> callbackToUse,
-                                 ImageFileFormat* imageFileFormatToUse)
+                                 ImageFileFormat* imageFileFormatToUse,
+                                 Component *parentComponent)
 {
   #if JUCE_CONTENT_SHARING
-    startNewShare (callbackToUse);
+    startNewShare (callbackToUse, parentComponent);
     prepareImagesThread.reset (new PrepareImagesThread (*this, images, imageFileFormatToUse));
   #else
-    ignoreUnused (images, imageFileFormatToUse);
+    ignoreUnused (images, imageFileFormatToUse, parentComponent);
 
     // Content sharing is not available on this platform!
     jassertfalse;
@@ -239,13 +244,14 @@ void ContentSharer::filesToSharePrepared()
 #endif
 
 void ContentSharer::shareData (const MemoryBlock& mb,
-                               std::function<void (bool, const String&)> callbackToUse)
+                               std::function<void (bool, const String&)> callbackToUse,
+                               Component *parentComponent)
 {
   #if JUCE_CONTENT_SHARING
-    startNewShare (callbackToUse);
+    startNewShare (callbackToUse, parentComponent);
     prepareDataThread.reset (new PrepareDataThread (*this, mb));
   #else
-    ignoreUnused (mb);
+    ignoreUnused (mb, parentComponent);
 
     if (callbackToUse)
         callbackToUse (false, "Content sharing not available on this platform!");

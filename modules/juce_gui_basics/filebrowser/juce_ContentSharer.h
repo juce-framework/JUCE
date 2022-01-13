@@ -52,7 +52,8 @@ public:
         succeeded. Also, the optional error message is always empty on Android.
     */
     void shareFiles (const Array<URL>& files,
-                     std::function<void (bool /*success*/, const String& /*error*/)> callback);
+                     std::function<void (bool /*success*/, const String& /*error*/)> callback,
+                     Component *parentComponent = nullptr);
 
     /** Shares the given text.
 
@@ -62,7 +63,8 @@ public:
         succeeded. Also, the optional error message is always empty on Android.
     */
     void shareText (const String& text,
-                    std::function<void (bool /*success*/, const String& /*error*/)> callback);
+                    std::function<void (bool /*success*/, const String& /*error*/)> callback,
+                    Component *parentComponent = nullptr);
 
     /** A convenience function to share an image. This is useful when you have images
         loaded in memory. The images will be written to temporary files first, so if
@@ -87,7 +89,8 @@ public:
     */
     void shareImages (const Array<Image>& images,
                       std::function<void (bool /*success*/, const String& /*error*/)> callback,
-                      ImageFileFormat* imageFileFormatToUse = nullptr);
+                      ImageFileFormat* imageFileFormatToUse = nullptr,
+                      Component *parentComponent = nullptr);
 
     /** A convenience function to share arbitrary data. The data will be written
         to a temporary file and then that file will be shared. If you have
@@ -99,7 +102,8 @@ public:
         succeeded. Also, the optional error message is always empty on Android.
     */
     void shareData (const MemoryBlock& mb,
-                    std::function<void (bool /*success*/, const String& /*error*/)> callback);
+                    std::function<void (bool /*success*/, const String& /*error*/)> callback,
+                    Component *parentComponent = nullptr);
 
 private:
     ContentSharer();
@@ -108,6 +112,7 @@ private:
     Array<File> temporaryFiles;
 
     std::function<void (bool, String)> callback;
+    Component *parent = nullptr;
 
   #if JUCE_CONTENT_SHARING
     struct Pimpl
@@ -120,7 +125,7 @@ private:
     std::unique_ptr<Pimpl> pimpl;
     Pimpl* createPimpl();
 
-    void startNewShare (std::function<void (bool, const String&)>);
+    void startNewShare (std::function<void (bool, const String&)>, Component *);
 
     class ContentSharerNativeImpl;
     friend class ContentSharerNativeImpl;

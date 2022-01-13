@@ -124,12 +124,21 @@ private:
 
         controller.get().modalTransitionStyle = UIModalTransitionStyleCoverVertical;
 
-        auto bounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
-        setBounds (bounds);
-
         setAlwaysOnTop (true);
-        setVisible (true);
-        addToDesktop (0);
+
+        if (owner.parent)
+        {
+                setBounds (owner.parent->getLocalBounds());
+                owner.parent->addAndMakeVisible (this);
+        }
+        else
+        {
+                auto bounds = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;
+                setBounds (bounds);
+
+                setVisible (true);
+                addToDesktop (0);
+        }
 
         enterModalState (true,
                          ModalCallbackFunction::create ([this] (int)
@@ -157,11 +166,19 @@ private:
             {
                 controller.get().preferredContentSize = peer->view.frame.size;
 
-                auto screenBounds = [UIScreen mainScreen].bounds;
-
                 auto* popoverController = controller.get().popoverPresentationController;
                 popoverController.sourceView = peer->view;
-                popoverController.sourceRect = CGRectMake (0.f, screenBounds.size.height - 10.f, screenBounds.size.width, 10.f);
+
+                if (owner.parent)
+                {
+                    popoverController.sourceRect = CGRectMake (0.f, getHeight() - 10.f, getWidth(), 10.f);
+                }
+                else
+                {
+                    auto screenBounds = [UIScreen mainScreen].bounds;
+                    popoverController.sourceRect = CGRectMake (0.f, screenBounds.size.height - 10.f, screenBounds.size.width, 10.f);
+                }
+
                 popoverController.canOverlapSourceViewRect = YES;
                 popoverController.delegate = popoverDelegate.get();
             }
