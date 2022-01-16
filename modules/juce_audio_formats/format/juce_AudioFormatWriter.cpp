@@ -157,7 +157,7 @@ bool AudioFormatWriter::writeFromFloatArrays (const float* const* channels, int 
     if (isFloatingPoint())
         return write ((const int**) channels, numSamples);
 
-    std::vector<int*> chans (256);
+    std::vector<int*> chans (numSourceChannels + 1);
     std::vector<int> scratch (4096);
 
     jassert (numSourceChannels < (int) chans.size());
