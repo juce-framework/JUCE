@@ -3,6 +3,11 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 6.1.4
+  - Restored Projucer project saving behavior
+  - Fixed a CGImage memory access violation on Monterey
+  - Improved macOS thread priority management
+
 Version 6.1.3
   - Added support for Visual Studio 2022 to the Projucer
   - Added support for creating OpenGL 3.2 contexts on Windows

@@ -232,7 +232,7 @@ public:
         If it does need saving it'll prompt the user, and if they say "discard changes" the
         callback will be called with savedOk, so again, you can safely delete the document.
 
-        If the user clicks "cancel", the callback will be aclled with userCancelledSave, so
+        If the user clicks "cancel", the callback will be called with userCancelledSave, so
         you can abort the close-document operation.
 
         And if they click "save changes", it'll try to save and the callback will be called
