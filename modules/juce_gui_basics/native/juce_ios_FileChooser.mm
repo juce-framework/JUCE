@@ -131,6 +131,16 @@ public:
     ~Native() override
     {
         exitModalState (0);
+
+        // Our old peer may not have received a becomeFirstResponder call at this point,
+        // so the static currentlyFocusedPeer may be null.
+        // We'll try to find an appropriate peer to focus.
+
+        for (auto i = 0; i < ComponentPeer::getNumPeers(); ++i)
+            if (auto* p = ComponentPeer::getPeer (i))
+                if (p != getPeer())
+                    if (auto* view = (UIView*) p->getNativeHandle())
+                        [view becomeFirstResponder];
     }
 
     void launch() override
@@ -300,9 +310,8 @@ private:
     void pickerWasCancelled()
     {
         cancelPendingUpdate();
-
         owner.finished ({});
-        exitModalState (0);
+        // Calling owner.finished will delete this Pimpl instance, so don't call any more member functions here!
     }
 
     //==============================================================================

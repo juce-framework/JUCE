@@ -255,7 +255,7 @@ public final class ComponentPeerView extends ViewGroup
     }
 
     //==============================================================================
-    private native void handleKeyDown (long host, int keycode, int textchar);
+    private native void handleKeyDown (long host, int keycode, int textchar, int kbFlags);
     private native void handleKeyUp (long host, int keycode, int textchar);
     private native void handleBackButton (long host);
     private native void handleKeyboardHidden (long host);
@@ -300,7 +300,7 @@ public final class ComponentPeerView extends ViewGroup
                 return super.onKeyDown (keyCode, event);
             case KeyEvent.KEYCODE_BACK:
             {
-                backButtonPressed();
+                backButtonPressed ();
                 return true;
             }
 
@@ -308,7 +308,10 @@ public final class ComponentPeerView extends ViewGroup
                 break;
         }
 
-        handleKeyDown (host, keyCode, event.getUnicodeChar ());
+        handleKeyDown (host,
+                       keyCode,
+                       event.getUnicodeChar (),
+                       event.getMetaState ());
         return true;
     }
 
@@ -334,7 +337,11 @@ public final class ComponentPeerView extends ViewGroup
         if (event.getCharacters () != null)
         {
             int utf8Char = event.getCharacters ().codePointAt (0);
-            handleKeyDown (host, utf8Char, utf8Char);
+
+            handleKeyDown (host,
+                           keyCode,
+                           utf8Char,
+                           event.getMetaState ());
             return true;
         }
 

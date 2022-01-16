@@ -256,9 +256,10 @@ public:
     {
         MouseForwardingNSOpenGLViewClass()  : ObjCClass<NSOpenGLView> ("JUCEGLView_")
         {
-            addMethod (@selector (rightMouseDown:),      rightMouseDown);
-            addMethod (@selector (rightMouseUp:),        rightMouseUp);
-            addMethod (@selector (acceptsFirstMouse:),   acceptsFirstMouse);
+            addMethod (@selector (rightMouseDown:),       rightMouseDown);
+            addMethod (@selector (rightMouseUp:),         rightMouseUp);
+            addMethod (@selector (acceptsFirstMouse:),    acceptsFirstMouse);
+            addMethod (@selector (accessibilityHitTest:), accessibilityHitTest);
 
             registerClass();
         }
@@ -267,6 +268,7 @@ public:
         static void rightMouseDown (id self, SEL, NSEvent* ev)      { [[(NSOpenGLView*) self superview] rightMouseDown: ev]; }
         static void rightMouseUp   (id self, SEL, NSEvent* ev)      { [[(NSOpenGLView*) self superview] rightMouseUp:   ev]; }
         static BOOL acceptsFirstMouse (id, SEL, NSEvent*)           { return YES; }
+        static id accessibilityHitTest (id self, SEL, NSPoint p)    { return [[(NSOpenGLView*) self superview] accessibilityHitTest: p]; }
     };
 
 
