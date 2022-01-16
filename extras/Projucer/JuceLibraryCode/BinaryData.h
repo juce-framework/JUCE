@@ -120,10 +120,10 @@ namespace BinaryData
     const int            jucer_AudioPluginARADocumentControllerTemplate_hSize = 1420;
 
     extern const char*   jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
-    const int            jucer_AudioPluginARAPlaybackRendererTemplate_cppSize = 3882;
+    const int            jucer_AudioPluginARAPlaybackRendererTemplate_cppSize = 3948;
 
     extern const char*   jucer_AudioPluginARAPlaybackRendererTemplate_h;
-    const int            jucer_AudioPluginARAPlaybackRendererTemplate_hSize = 1481;
+    const int            jucer_AudioPluginARAPlaybackRendererTemplate_hSize = 1544;
 
     extern const char*   jucer_AudioPluginEditorTemplate_cpp;
     const int            jucer_AudioPluginEditorTemplate_cppSize = 1647;
