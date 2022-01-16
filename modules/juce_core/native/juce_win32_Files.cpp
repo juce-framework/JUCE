@@ -706,7 +706,8 @@ String File::getVersion() const
 //==============================================================================
 bool File::isSymbolicLink() const
 {
-    return (GetFileAttributes (fullPath.toWideCharPointer()) & FILE_ATTRIBUTE_REPARSE_POINT) != 0;
+    const auto attributes = WindowsFileHelpers::getAtts (fullPath);
+    return (attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_REPARSE_POINT) != 0);
 }
 
 bool File::isShortcut() const

@@ -8,7 +8,7 @@ Note that Celemony is not endorsing the use of JUCE by providing this fork. JUCE
 In order to use this branch you'll need to install the [ARA SDK](https://github.com/Celemony/ARA_SDK). You'll also need to use the ARA-enabled build of the Projucer that's part of this fork.
 For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
 
-Current ARA SDK compatibility version: 2.0.0
+Current ARA SDK compatibility version: [2.1.0](https://github.com/Celemony/ARA_SDK/releases/tag/releases%2F2.1.0)
 
 
 ## JUCE and the ARA API

@@ -1043,10 +1043,10 @@ void FFT::perform (const Complex<float>* input, Complex<float>* output, bool inv
         engine->perform (input, output, inverse);
 }
 
-void FFT::performRealOnlyForwardTransform (float* inputOutputData, bool ignoreNeagtiveFreqs) const noexcept
+void FFT::performRealOnlyForwardTransform (float* inputOutputData, bool ignoreNegativeFreqs) const noexcept
 {
     if (engine != nullptr)
-        engine->performRealOnlyForwardTransform (inputOutputData, ignoreNeagtiveFreqs);
+        engine->performRealOnlyForwardTransform (inputOutputData, ignoreNegativeFreqs);
 }
 
 void FFT::performRealOnlyInverseTransform (float* inputOutputData) const noexcept
@@ -1055,18 +1055,20 @@ void FFT::performRealOnlyInverseTransform (float* inputOutputData) const noexcep
         engine->performRealOnlyInverseTransform (inputOutputData);
 }
 
-void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData) const noexcept
+void FFT::performFrequencyOnlyForwardTransform (float* inputOutputData, bool ignoreNegativeFreqs) const noexcept
 {
     if (size == 1)
         return;
 
-    performRealOnlyForwardTransform (inputOutputData);
+    performRealOnlyForwardTransform (inputOutputData, ignoreNegativeFreqs);
     auto* out = reinterpret_cast<Complex<float>*> (inputOutputData);
 
-    for (int i = 0; i < size; ++i)
+    const auto limit = ignoreNegativeFreqs ? (size / 2) + 1 : size;
+
+    for (int i = 0; i < limit; ++i)
         inputOutputData[i] = std::abs (out[i]);
 
-    zeromem (&inputOutputData[size], static_cast<size_t> (size) * sizeof (float));
+    zeromem (inputOutputData + limit, static_cast<size_t> (size * 2 - limit) * sizeof (float));
 }
 
 } // namespace dsp

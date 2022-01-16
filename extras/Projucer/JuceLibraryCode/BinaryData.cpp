@@ -6888,11 +6888,12 @@ static const unsigned char temp_binary_data_37[] =
 "%%araplaybackrenderer_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"void %%araplaybackrenderer_class_name%%::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans)\r\n"
+"void %%araplaybackrenderer_class_name%%::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans, bool alwaysNonRT)\r\n"
 "{\r\n"
 "    sampleRate = rate;\r\n"
 "    maximumSamplesPerBlock = maxSamplesPerBlock;\r\n"
 "    numChannels = numChans;\r\n"
+"    alwaysNonRealtime = alwaysNonRT;\r\n"
 "}\r\n"
 "\r\n"
 "void %%araplaybackrenderer_class_name%%::releaseResources()\r\n"
@@ -6903,9 +6904,9 @@ static const unsigned char temp_binary_data_37[] =
 "bool %%araplaybackrenderer_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, bool isNonRealtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept\r\n"
 "{\r\n"
 "    const auto numSamples = buffer.getNumSamples();\r\n"
-"    const auto numChannels = buffer.getNumChannels();\r\n"
 "    jassert (numSamples <= maximumSamplesPerBlock);\r\n"
-"    jassert (numChannels == numChannels);\r\n"
+"    jassert (numChannels == buffer.getNumChannels());\r\n"
+"    jassert (isNonRealtime || ! alwaysNonRealtime);\r\n"
 "    const auto timeInSamples = positionInfo.timeInSamples;\r\n"
 "    const auto isPlaying = positionInfo.isPlaying;\r\n"
 "\r\n"
@@ -6995,7 +6996,7 @@ static const unsigned char temp_binary_data_38[] =
 "    using juce::ARAPlaybackRenderer::ARAPlaybackRenderer;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels) override;\r\n"
+"    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels, bool alwaysNonRealtime) override;\r\n"
 "    void releaseResources() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
@@ -7006,6 +7007,7 @@ static const unsigned char temp_binary_data_38[] =
 "    double sampleRate { 44100.0 };\r\n"
 "    int maximumSamplesPerBlock { 4096 };\r\n"
 "    int numChannels { 1 };\r\n"
+"    bool alwaysNonRealtime { false };\r\n"
 "\r\n"
 "    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%araplaybackrenderer_class_name%%)\r\n"
 "};\r\n";
@@ -8563,8 +8565,8 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
         case 0x744d44d6:  numBytes = 1890; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
         case 0x3eb8f45b:  numBytes = 1420; return jucer_AudioPluginARADocumentControllerTemplate_h;
-        case 0xea35a37d:  numBytes = 3882; return jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
-        case 0x78a6d0c2:  numBytes = 1481; return jucer_AudioPluginARAPlaybackRendererTemplate_h;
+        case 0xea35a37d:  numBytes = 3948; return jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
+        case 0x78a6d0c2:  numBytes = 1544; return jucer_AudioPluginARAPlaybackRendererTemplate_h;
         case 0x27c5a93a:  numBytes = 1647; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 1094; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 7361; return jucer_AudioPluginFilterTemplate_cpp;

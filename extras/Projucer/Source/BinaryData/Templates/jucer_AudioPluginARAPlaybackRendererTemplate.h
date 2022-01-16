@@ -22,7 +22,7 @@ public:
     using juce::ARAPlaybackRenderer::ARAPlaybackRenderer;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels) override;
+    void prepareToPlay (double sampleRate, int maximumSamplesPerBlock, int numChannels, bool alwaysNonRealtime) override;
     void releaseResources() override;
 
     //==============================================================================
@@ -33,6 +33,7 @@ private:
     double sampleRate { 44100.0 };
     int maximumSamplesPerBlock { 4096 };
     int numChannels { 1 };
+    bool alwaysNonRealtime { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (%%araplaybackrenderer_class_name%%)
 };

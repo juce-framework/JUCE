@@ -139,8 +139,7 @@ public:
         : AudioProcessorHolder (activePlugins.size() + activeUIs.size() == 0),
           MusicDeviceBase (component,
                            (UInt32) AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true),
-                           (UInt32) AudioUnitHelpers::getBusCountForWrapper (*juceFilter, false)),
-          mapper (*juceFilter)
+                           (UInt32) AudioUnitHelpers::getBusCountForWrapper (*juceFilter, false))
     {
         inParameterChangedCallback = false;
 
@@ -216,7 +215,7 @@ public:
         if ((err = MusicDeviceBase::Initialize()) != noErr)
             return err;
 
-        mapper.alloc();
+        mapper.alloc (*juceFilter);
         pulledSucceeded.calloc (static_cast<size_t> (AudioUnitHelpers::getBusCountForWrapper (*juceFilter, true)));
 
         prepareToPlay();

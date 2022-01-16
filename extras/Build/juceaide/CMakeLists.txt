@@ -64,6 +64,7 @@ else()
             "."
             "-B${JUCE_BINARY_DIR}/tools"
             "-G${CMAKE_GENERATOR}"
+            "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}"
             "-DCMAKE_BUILD_TYPE=Debug"
             "-DJUCE_BUILD_HELPER_TOOLS=ON"
             "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"

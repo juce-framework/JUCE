@@ -130,7 +130,7 @@ namespace XWindowSystemUtilities
     class XSettings
     {
     public:
-        explicit XSettings (::Display*);
+        static std::unique_ptr<XSettings> createXSettings (::Display*);
 
         //==============================================================================
         void update();
@@ -157,6 +157,8 @@ namespace XWindowSystemUtilities
 
         std::unordered_map<String, XSetting> settings;
         ListenerList<Listener> listeners;
+
+        XSettings (::Display*, Atom, ::Window);
 
         //==============================================================================
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (XSettings)

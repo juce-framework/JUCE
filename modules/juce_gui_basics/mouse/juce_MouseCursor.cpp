@@ -43,7 +43,7 @@ public:
           standard (false)
     {
         // your hotspot needs to be within the bounds of the image!
-        jassert (image.getImage().getBounds().contains (hotSpot));
+        jassert (image.getScaledBounds().toNearestInt().contains (hotSpot));
     }
 
     static std::shared_ptr<SharedCursorHandle> createStandard (const MouseCursor::StandardCursorType type)

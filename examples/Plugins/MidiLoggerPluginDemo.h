@@ -125,6 +125,7 @@ public:
         {
             auto header = std::make_unique<TableHeaderComponent>();
             header->addColumn ("Message", messageColumn, 200, 30, -1, TableHeaderComponent::notSortable);
+            header->addColumn ("Time",    timeColumn,    100, 30, -1, TableHeaderComponent::notSortable);
             header->addColumn ("Channel", channelColumn, 100, 30, -1, TableHeaderComponent::notSortable);
             header->addColumn ("Data",    dataColumn,    200, 30, -1, TableHeaderComponent::notSortable);
             return header;
@@ -141,6 +142,7 @@ private:
     enum
     {
         messageColumn = 1,
+        timeColumn,
         channelColumn,
         dataColumn
     };
@@ -165,6 +167,7 @@ private:
             switch (columnId)
             {
                 case messageColumn: return getEventString (message);
+                case timeColumn:    return String (message.getTimeStamp());
                 case channelColumn: return String (message.getChannel());
                 case dataColumn:    return getDataString (message);
                 default:            break;
@@ -221,7 +224,7 @@ public:
     MidiLoggerPluginDemoProcessor()
         : AudioProcessor (getBusesLayout())
     {
-        state.addChild ({ "uiState", { { "width",  500 }, { "height", 300 } }, {} }, -1, nullptr);
+        state.addChild ({ "uiState", { { "width",  600 }, { "height", 300 } }, {} }, -1, nullptr);
         startTimerHz (60);
     }
 

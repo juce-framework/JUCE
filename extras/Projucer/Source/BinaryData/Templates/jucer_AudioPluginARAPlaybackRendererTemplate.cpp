@@ -11,11 +11,12 @@
 %%araplaybackrenderer_headers%%
 
 //==============================================================================
-void %%araplaybackrenderer_class_name%%::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans)
+void %%araplaybackrenderer_class_name%%::prepareToPlay (double rate, int maxSamplesPerBlock, int numChans, bool alwaysNonRT)
 {
     sampleRate = rate;
     maximumSamplesPerBlock = maxSamplesPerBlock;
     numChannels = numChans;
+    alwaysNonRealtime = alwaysNonRT;
 }
 
 void %%araplaybackrenderer_class_name%%::releaseResources()
@@ -26,9 +27,9 @@ void %%araplaybackrenderer_class_name%%::releaseResources()
 bool %%araplaybackrenderer_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, bool isNonRealtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept
 {
     const auto numSamples = buffer.getNumSamples();
-    const auto numChannels = buffer.getNumChannels();
     jassert (numSamples <= maximumSamplesPerBlock);
-    jassert (numChannels == numChannels);
+    jassert (numChannels == buffer.getNumChannels());
+    jassert (isNonRealtime || ! alwaysNonRealtime);
     const auto timeInSamples = positionInfo.timeInSamples;
     const auto isPlaying = positionInfo.isPlaying;
 

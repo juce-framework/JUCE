@@ -179,15 +179,21 @@ XWindowSystemUtilities::GetXProperty::~GetXProperty()
 }
 
 //==============================================================================
-XWindowSystemUtilities::XSettings::XSettings (::Display* d)
-    : display (d)
+std::unique_ptr<XWindowSystemUtilities::XSettings> XWindowSystemUtilities::XSettings::createXSettings (::Display* d)
 {
-    settingsAtom = Atoms::getCreating (display, "_XSETTINGS_SETTINGS");
+    const auto settingsAtom = Atoms::getCreating (d, "_XSETTINGS_SETTINGS");
+    const auto settingsWindow = X11Symbols::getInstance()->xGetSelectionOwner (d,
+                                                                               Atoms::getCreating (d, "_XSETTINGS_S0"));
 
-    settingsWindow = X11Symbols::getInstance()->xGetSelectionOwner (display,
-                                                                    Atoms::getCreating (display, "_XSETTINGS_S0"));
+    if (settingsWindow == None)
+        return {};
 
-    jassert (settingsWindow != None);
+    return rawToUniquePtr (new XWindowSystemUtilities::XSettings (d, settingsWindow, settingsAtom));
+}
+
+XWindowSystemUtilities::XSettings::XSettings (::Display* d, ::Window settingsWindowIn, Atom settingsAtomIn)
+    : display (d), settingsWindow (settingsWindowIn), settingsAtom (settingsAtomIn)
+{
     update();
 }
 
@@ -3030,11 +3036,12 @@ long XWindowSystem::getUserTime (::Window windowH) const
 
 void XWindowSystem::initialiseXSettings()
 {
-    xSettings = std::make_unique<XWindowSystemUtilities::XSettings> (display);
+    xSettings = XWindowSystemUtilities::XSettings::createXSettings (display);
 
-    X11Symbols::getInstance()->xSelectInput (display,
-                                             xSettings->getSettingsWindow(),
-                                             StructureNotifyMask | PropertyChangeMask);
+    if (xSettings != nullptr)
+        X11Symbols::getInstance()->xSelectInput (display,
+                                                 xSettings->getSettingsWindow(),
+                                                 StructureNotifyMask | PropertyChangeMask);
 }
 
 XWindowSystem::DisplayVisuals::DisplayVisuals (::Display* xDisplay)

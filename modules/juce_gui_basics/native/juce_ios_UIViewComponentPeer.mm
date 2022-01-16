@@ -283,6 +283,11 @@ public:
     static MultiTouchMapper<UITouch*> currentTouches;
 
 private:
+    void appStyleChanged() override
+    {
+        [controller setNeedsStatusBarAppearanceUpdate];
+    }
+
     //==============================================================================
     class AsyncRepaintMessage  : public CallbackMessage
     {
@@ -395,6 +400,24 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
 - (UIStatusBarStyle) preferredStatusBarStyle
 {
+   #if defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
+    if (@available (iOS 13.0, *))
+    {
+        if (auto* peer = getViewPeer (self))
+        {
+            switch (peer->getAppStyle())
+            {
+                case ComponentPeer::Style::automatic:
+                    return UIStatusBarStyleDefault;
+                case ComponentPeer::Style::light:
+                    return UIStatusBarStyleDarkContent;
+                case ComponentPeer::Style::dark:
+                    return UIStatusBarStyleLightContent;
+            }
+        }
+    }
+   #endif
+
     return UIStatusBarStyleDefault;
 }
 
@@ -680,8 +703,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
+static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
+
 UIViewComponentPeer::~UIViewComponentPeer()
 {
+    if (currentlyFocusedPeer == this)
+        currentlyFocusedPeer = nullptr;
+
     currentTouches.deleteAllTouchesForPeer (this);
     Desktop::getInstance().removeFocusChangeListener (this);
 
@@ -1007,8 +1035,6 @@ void UIViewComponentPeer::onScroll (UIPanGestureRecognizer* gesture)
 #endif
 
 //==============================================================================
-static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
-
 void UIViewComponentPeer::viewFocusGain()
 {
     if (currentlyFocusedPeer != this)
