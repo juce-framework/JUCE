@@ -255,7 +255,7 @@ struct BufferHelpers<float>
         }
 
         AudioData::deinterleaveSamples (AudioData::InterleavedSource<LittleEndianFloat32> { srcInterleaved,                        numChannels },
-                                        AudioData::nonInterleavedDest<NativeFloat32>      { audioBuffer.getArrayOfWritePointers(), numChannels },
+                                        AudioData::NonInterleavedDest<NativeFloat32>      { audioBuffer.getArrayOfWritePointers(), numChannels },
                                         audioBuffer.getNumSamples());
     }
 
