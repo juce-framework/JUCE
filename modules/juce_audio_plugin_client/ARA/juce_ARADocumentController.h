@@ -78,7 +78,11 @@ public:
         return ARA::PlugIn::PlugInEntry::getPlugInEntry<FactoryConfig, CustomSubclass> ()->getFactory ();
     }
 
-    using ARA::PlugIn::DocumentController::DocumentController;
+    ARADocumentController (const ARA::PlugIn::PlugInEntry* entry, const ARA::ARADocumentControllerHostInstance* instance) noexcept
+        : ARA::PlugIn::DocumentController::DocumentController (entry, instance)
+    {
+        internalAnalysisProgressIsSynced.test_and_set (std::memory_order_release);
+    }
 
     // overloading inherited templated getters to default to juce versions of the returned classes
     template <typename Document_t = ARADocument>
@@ -301,7 +305,7 @@ public:
 #endif
 
 private:
-    std::atomic_flag internalAnalysisProgressIsSynced { true };
+    std::atomic_flag internalAnalysisProgressIsSynced;
 
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
