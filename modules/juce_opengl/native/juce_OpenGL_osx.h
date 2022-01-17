@@ -248,7 +248,8 @@ public:
     NSOpenGLView* view = nil;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
     double lastSwapTime = 0;
-    int minSwapTimeMs = 0, underrunCounter = 0, numFramesPerSwap = 0;
+    std::atomic<int> minSwapTimeMs { 0 };
+    int underrunCounter = 0, numFramesPerSwap = 0;
     double videoRefreshPeriodS = 1.0 / 60.0;
 
     //==============================================================================
