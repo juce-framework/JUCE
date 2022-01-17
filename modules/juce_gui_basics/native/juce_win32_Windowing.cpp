@@ -1583,6 +1583,13 @@ public:
 
     void setBounds (const Rectangle<int>& bounds, bool isNowFullScreen) override
     {
+        // If we try to set new bounds while handling an existing position change,
+        // Windows may get confused about our current scale and size.
+        // This can happen when moving a window between displays, because the mouse-move
+        // generator in handlePositionChanged can cause the window to move again.
+        if (inHandlePositionChanged)
+            return;
+
         const ScopedValueSetter<bool> scope (shouldIgnoreModalDismiss, true);
 
         fullScreen = isNowFullScreen;
@@ -1608,7 +1615,7 @@ public:
         if (! hasMoved)    flags |= SWP_NOMOVE;
         if (! hasResized)  flags |= SWP_NOSIZE;
 
-        setWindowPos (hwnd, newBounds, flags, numInDpiChange == 0);
+        setWindowPos (hwnd, newBounds, flags, ! inDpiChange);
 
         if (hasResized && isValidPeer (this))
         {
@@ -2125,7 +2132,7 @@ private:
    #endif
 
     double scaleFactor = 1.0;
-    int numInDpiChange = 0;
+    bool inDpiChange = 0, inHandlePositionChanged = 0;
 
     bool isAccessibilityActive = false;
 
@@ -3448,6 +3455,8 @@ private:
 
         if (contains (pos.roundToInt(), false))
         {
+            const ScopedValueSetter<bool> scope (inHandlePositionChanged, true);
+
             if (! areOtherTouchSourcesActive())
                 doMouseEvent (pos, MouseInputSource::invalidPressure);
 
@@ -3477,15 +3486,27 @@ private:
         scaleFactor = newScale;
 
         {
-            const ScopedValueSetter<int> setter (numInDpiChange, numInDpiChange + 1);
-            setBounds (windowBorder.subtractedFrom (convertPhysicalScreenRectangleToLogical (rectangleFromRECT (newRect), hwnd)), fullScreen);
+            const ScopedValueSetter<bool> setter (inDpiChange, true);
+            SetWindowPos (hwnd,
+                          nullptr,
+                          newRect.left,
+                          newRect.top,
+                          newRect.right  - newRect.left,
+                          newRect.bottom - newRect.top,
+                          SWP_NOZORDER | SWP_NOACTIVATE);
         }
 
         // This is to handle reentrancy. If responding to a DPI change triggers further DPI changes,
         // we should only notify listeners and resize windows once all of the DPI changes have
         // resolved.
-        if (numInDpiChange != 0)
+        if (inDpiChange)
+        {
+            // Danger! Re-entrant call to handleDPIChanging.
+            // Please report this issue on the JUCE forum, along with instructions
+            // so that a JUCE developer can reproduce the issue.
+            jassertfalse;
             return 0;
+        }
 
         updateShadower();
         InvalidateRect (hwnd, nullptr, FALSE);
