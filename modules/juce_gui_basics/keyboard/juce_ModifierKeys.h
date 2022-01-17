@@ -163,23 +163,23 @@ public:
 
     //==============================================================================
     /** Returns a copy of only the mouse-button flags */
-    ModifierKeys withOnlyMouseButtons() const noexcept                  { return ModifierKeys (flags & allMouseButtonModifiers); }
+    JUCE_NODISCARD ModifierKeys withOnlyMouseButtons() const noexcept                  { return ModifierKeys (flags & allMouseButtonModifiers); }
 
     /** Returns a copy of only the non-mouse flags */
-    ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
+    JUCE_NODISCARD ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
 
-    bool operator== (const ModifierKeys other) const noexcept           { return flags == other.flags; }
-    bool operator!= (const ModifierKeys other) const noexcept           { return flags != other.flags; }
+    bool operator== (const ModifierKeys other) const noexcept                          { return flags == other.flags; }
+    bool operator!= (const ModifierKeys other) const noexcept                          { return flags != other.flags; }
 
     //==============================================================================
     /** Returns the raw flags for direct testing. */
-    inline int getRawFlags() const noexcept                             { return flags; }
+    inline int getRawFlags() const noexcept                                            { return flags; }
 
-    ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept      { return ModifierKeys (flags & ~rawFlagsToClear); }
-    ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
+    JUCE_NODISCARD ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept      { return ModifierKeys (flags & ~rawFlagsToClear); }
+    JUCE_NODISCARD ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
 
     /** Tests a combination of flags and returns true if any of them are set. */
-    bool testFlags (int flagsToTest) const noexcept                     { return (flags & flagsToTest) != 0; }
+    bool testFlags (int flagsToTest) const noexcept                                    { return (flags & flagsToTest) != 0; }
 
     /** Returns the total number of mouse buttons that are down. */
     int getNumMouseButtonsDown() const noexcept;
@@ -194,7 +194,7 @@ public:
         This method is here for backwards compatibility and there's no need to call it anymore,
         you should use the public currentModifiers member directly.
      */
-    static ModifierKeys getCurrentModifiers() noexcept                  { return currentModifiers; }
+    static ModifierKeys getCurrentModifiers() noexcept                                 { return currentModifiers; }
 
     /** Creates a ModifierKeys object to represent the current state of the
         keyboard and mouse buttons.

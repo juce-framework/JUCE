@@ -185,7 +185,7 @@ public:
             findPanel      = (1 << 2)
         };
 
-        AdditionalComponents with (Type t)
+        JUCE_NODISCARD AdditionalComponents with (Type t)
         {
             auto copy = *this;
             copy.componentTypes |= t;
