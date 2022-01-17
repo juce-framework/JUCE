@@ -204,6 +204,7 @@ struct ChildProcessWorker::Connection  : public InterprocessConnection,
     ~Connection() override
     {
         stopThread (10000);
+        disconnect();
     }
 
 private:
