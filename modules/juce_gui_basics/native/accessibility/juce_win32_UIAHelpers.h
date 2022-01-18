@@ -28,6 +28,17 @@ namespace juce
 
 namespace VariantHelpers
 {
+    namespace Detail
+    {
+        template <typename Fn, typename ValueType>
+        inline VARIANT getWithValueGeneric (Fn&& setter, ValueType value)
+        {
+            VARIANT result{};
+            setter (value, &result);
+            return result;
+        }
+    }
+
     inline void clear (VARIANT* variant)
     {
         variant->vt = VT_EMPTY;
@@ -56,6 +67,9 @@ namespace VariantHelpers
         variant->vt     = VT_R8;
         variant->dblVal = value;
     }
+
+    inline VARIANT getWithValue (double value)        { return Detail::getWithValueGeneric (&setDouble, value); }
+    inline VARIANT getWithValue (const String& value) { return Detail::getWithValueGeneric (&setString, value); }
 }
 
 inline JUCE_COMRESULT addHandlersToArray (const std::vector<const AccessibilityHandler*>& handlers, SAFEARRAY** pRetVal)
