@@ -206,10 +206,14 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
     {
         if (auto* valueInterface = getValueInterface())
         {
-            VARIANT newValue;
-            VariantHelpers::setString (valueInterface->getCurrentValueAsString(), &newValue);
+            const auto propertyType = getRole() == AccessibilityRole::slider ? UIA_RangeValueValuePropertyId
+                                                                             : UIA_ValueValuePropertyId;
 
-            sendAccessibilityPropertyChangedEvent (*this, UIA_ValueValuePropertyId, newValue);
+            const auto value = getRole() == AccessibilityRole::slider
+                               ? VariantHelpers::getWithValue (valueInterface->getCurrentValue())
+                               : VariantHelpers::getWithValue (valueInterface->getCurrentValueAsString());
+
+            sendAccessibilityPropertyChangedEvent (*this, propertyType, value);
         }
 
         return;
