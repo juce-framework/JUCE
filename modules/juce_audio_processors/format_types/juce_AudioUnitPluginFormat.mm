@@ -485,15 +485,8 @@ public:
             return defaultValue;
         }
 
-        String getName (int /*maximumStringLength*/) const override
-        {
-            return name;
-        }
-
-        String getLabel() const override
-        {
-            return valueLabel;
-        }
+        String getName (int /*maximumStringLength*/) const override { return name; }
+        String getLabel() const override { return valueLabel; }
 
         String getText (float value, int maximumLength) const override
         {
@@ -609,15 +602,18 @@ public:
 
         UInt32 getRawParamID() const { return paramID; }
 
+        void setName  (String&& newName)  { name       = std::move (newName); }
+        void setLabel (String&& newLabel) { valueLabel = std::move (newLabel); }
+
     private:
         AudioUnitPluginInstance& pluginInstance;
         const UInt32 paramID;
-        const String name;
+        String name;
         const AudioUnitParameterValue minValue, maxValue, range;
         const bool automatable, discrete;
         const int numSteps;
         const bool valuesHaveStrings, isSwitch;
-        const String valueLabel;
+        String valueLabel;
         const AudioUnitParameterValue defaultValue;
         StringArray auValueStrings;
     };
@@ -1493,98 +1489,71 @@ public:
 
                 for (size_t i = 0; i < numParams; ++i)
                 {
-                    AudioUnitParameterInfo info;
-                    UInt32 sz = sizeof (info);
+                    const ScopedAudioUnitParameterInfo info { audioUnit, ids[i] };
 
-                    if (AudioUnitGetProperty (audioUnit,
-                                              kAudioUnitProperty_ParameterInfo,
-                                              kAudioUnitScope_Global,
-                                              ids[i], &info, &sz) == noErr)
+                    if (! info.isValid())
+                        continue;
+
+                    const auto paramName = getParamName (info.get());
+                    const auto label = getParamLabel (info.get());
+                    const auto isDiscrete = (info.get().unit == kAudioUnitParameterUnit_Indexed
+                                          || info.get().unit == kAudioUnitParameterUnit_Boolean);
+                    const auto isBoolean = info.get().unit == kAudioUnitParameterUnit_Boolean;
+
+                    auto parameter = std::make_unique<AUInstanceParameter> (*this,
+                                                                            ids[i],
+                                                                            paramName,
+                                                                            info.get().minValue,
+                                                                            info.get().maxValue,
+                                                                            info.get().defaultValue,
+                                                                            (info.get().flags & kAudioUnitParameterFlag_NonRealTime) == 0,
+                                                                            isDiscrete,
+                                                                            isDiscrete ? (int) (info.get().maxValue - info.get().minValue + 1.0f) : AudioProcessor::getDefaultNumParameterSteps(),
+                                                                            isBoolean,
+                                                                            label,
+                                                                            (info.get().flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
+
+                    paramIDToParameter.emplace (ids[i], parameter.get());
+
+                    if (info.get().flags & kAudioUnitParameterFlag_HasClump)
                     {
-                        String paramName;
+                        auto groupInfo = groupIDMap.find (info.get().clumpID);
 
-                        if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) != 0)
+                        if (groupInfo == groupIDMap.end())
                         {
-                            paramName = String::fromCFString (info.cfNameString);
+                            const auto clumpName = [this, &info]
+                            {
+                                AudioUnitParameterNameInfo clumpNameInfo;
+                                UInt32 clumpSz = sizeof (clumpNameInfo);
+                                zerostruct (clumpNameInfo);
+                                clumpNameInfo.inID = info.get().clumpID;
+                                clumpNameInfo.inDesiredLength = (SInt32) 256;
 
-                            if ((info.flags & kAudioUnitParameterFlag_CFNameRelease) != 0)
-                                CFRelease (info.cfNameString);
+                                if (AudioUnitGetProperty (audioUnit,
+                                                          kAudioUnitProperty_ParameterClumpName,
+                                                          kAudioUnitScope_Global,
+                                                          0,
+                                                          &clumpNameInfo,
+                                                          &clumpSz) == noErr)
+                                    return String::fromCFString (clumpNameInfo.outName);
+
+                                return String (info.get().clumpID);
+                            }();
+
+                            auto group = std::make_unique<AudioProcessorParameterGroup> (String (info.get().clumpID),
+                                                                                         clumpName, String());
+                            group->addChild (std::move (parameter));
+                            groupIDMap[info.get().clumpID] = group.get();
+                            newParameterTree.addChild (std::move (group));
                         }
                         else
                         {
-                            paramName = String (info.name, sizeof (info.name));
+                            groupInfo->second->addChild (std::move (parameter));
                         }
-
-                        bool isDiscrete = (info.unit == kAudioUnitParameterUnit_Indexed
-                                        || info.unit == kAudioUnitParameterUnit_Boolean);
-                        bool isBoolean = info.unit == kAudioUnitParameterUnit_Boolean;
-
-                        auto label = [info]() -> String
-                        {
-                            if (info.unit == kAudioUnitParameterUnit_Percent)       return "%";
-                            if (info.unit == kAudioUnitParameterUnit_Seconds)       return "s";
-                            if (info.unit == kAudioUnitParameterUnit_Hertz)         return "Hz";
-                            if (info.unit == kAudioUnitParameterUnit_Decibels)      return "dB";
-                            if (info.unit == kAudioUnitParameterUnit_Milliseconds)  return "ms";
-
-                            return {};
-                        }();
-
-                        auto parameter = std::make_unique<AUInstanceParameter> (*this,
-                                                                                ids[i],
-                                                                                paramName,
-                                                                                info.minValue,
-                                                                                info.maxValue,
-                                                                                info.defaultValue,
-                                                                                (info.flags & kAudioUnitParameterFlag_NonRealTime) == 0,
-                                                                                isDiscrete,
-                                                                                isDiscrete ? (int) (info.maxValue - info.minValue + 1.0f) : AudioProcessor::getDefaultNumParameterSteps(),
-                                                                                isBoolean,
-                                                                                label,
-                                                                                (info.flags & kAudioUnitParameterFlag_ValuesHaveStrings) != 0);
-
-                        paramIDToParameter.emplace (ids[i], parameter.get());
-
-                        if (info.flags & kAudioUnitParameterFlag_HasClump)
-                        {
-                            auto groupInfo = groupIDMap.find (info.clumpID);
-
-                            if (groupInfo == groupIDMap.end())
-                            {
-                                auto getClumpName = [this, info]
-                                {
-                                    AudioUnitParameterNameInfo clumpNameInfo;
-                                    UInt32 clumpSz = sizeof (clumpNameInfo);
-                                    zerostruct (clumpNameInfo);
-                                    clumpNameInfo.inID = info.clumpID;
-                                    clumpNameInfo.inDesiredLength = (SInt32) 256;
-
-                                    if (AudioUnitGetProperty (audioUnit,
-                                                              kAudioUnitProperty_ParameterClumpName,
-                                                              kAudioUnitScope_Global,
-                                                              0,
-                                                              &clumpNameInfo,
-                                                              &clumpSz) == noErr)
-                                        return String::fromCFString (clumpNameInfo.outName);
-
-                                    return String (info.clumpID);
-                                };
-
-                                auto group = std::make_unique<AudioProcessorParameterGroup> (String (info.clumpID),
-                                                                                             getClumpName(), String());
-                                group->addChild (std::move (parameter));
-                                groupIDMap[info.clumpID] = group.get();
-                                newParameterTree.addChild (std::move (group));
-                            }
-                            else
-                            {
-                                groupInfo->second->addChild (std::move (parameter));
-                            }
-                        }
-                        else
-                        {
-                            newParameterTree.addChild (std::move (parameter));
-                        }
+                    }
+                    else
+                    {
+                        newParameterTree.addChild (std::move (parameter));
                     }
                 }
             }
@@ -1889,6 +1858,7 @@ private:
         switch (prop.mPropertyID)
         {
             case kAudioUnitProperty_ParameterList:
+                updateParameterInfo();
                 updateHostDisplay (AudioProcessorListener::ChangeDetails().withParameterInfoChanged (true));
                 break;
 
@@ -1912,10 +1882,91 @@ private:
     static void eventListenerCallback (void* userRef, void*, const AudioUnitEvent* event,
                                        UInt64, AudioUnitParameterValue value)
     {
+        JUCE_ASSERT_MESSAGE_THREAD
         jassert (event != nullptr);
         static_cast<AudioUnitPluginInstance*> (userRef)->eventCallback (*event, value);
     }
+
+    void updateParameterInfo()
+    {
+        for (const auto& idAndParam : paramIDToParameter)
+        {
+            const auto& id    = idAndParam.first;
+            const auto& param = idAndParam.second;
+
+            const ScopedAudioUnitParameterInfo info { audioUnit, id };
+
+            if (! info.isValid())
+                continue;
+
+            param->setName  (getParamName  (info.get()));
+            param->setLabel (getParamLabel (info.get()));
+        }
+    }
    #endif
+
+    /*  Some fields in the AudioUnitParameterInfo may need to be released after use,
+        so we'll do that using RAII.
+    */
+    class ScopedAudioUnitParameterInfo
+    {
+    public:
+        ScopedAudioUnitParameterInfo (AudioUnit au, UInt32 paramId)
+        {
+            auto sz = (UInt32) sizeof (info);
+            valid = noErr == AudioUnitGetProperty (au,
+                                                   kAudioUnitProperty_ParameterInfo,
+                                                   kAudioUnitScope_Global,
+                                                   paramId,
+                                                   &info,
+                                                   &sz);
+        }
+
+        ScopedAudioUnitParameterInfo (const ScopedAudioUnitParameterInfo&) = delete;
+        ScopedAudioUnitParameterInfo (ScopedAudioUnitParameterInfo&&) = delete;
+        ScopedAudioUnitParameterInfo& operator= (const ScopedAudioUnitParameterInfo&) = delete;
+        ScopedAudioUnitParameterInfo& operator= (ScopedAudioUnitParameterInfo&&) = delete;
+
+        ~ScopedAudioUnitParameterInfo() noexcept
+        {
+            if ((info.flags & kAudioUnitParameterFlag_CFNameRelease) == 0)
+                return;
+
+            if (info.cfNameString != nullptr)
+                CFRelease (info.cfNameString);
+
+            if (info.unit == kAudioUnitParameterUnit_CustomUnit && info.unitName != nullptr)
+                CFRelease (info.unitName);
+        }
+
+        bool isValid() const { return valid; }
+
+        const AudioUnitParameterInfo& get() const noexcept { return info; }
+
+    private:
+        AudioUnitParameterInfo info;
+        bool valid = false;
+    };
+
+    static String getParamName (const AudioUnitParameterInfo& info)
+    {
+        if ((info.flags & kAudioUnitParameterFlag_HasCFNameString) == 0)
+            return { info.name, sizeof (info.name) };
+
+        return String::fromCFString (info.cfNameString);
+    }
+
+    static String getParamLabel (const AudioUnitParameterInfo& info)
+    {
+        if (info.unit == kAudioUnitParameterUnit_CustomUnit)    return String::fromCFString (info.unitName);
+        if (info.unit == kAudioUnitParameterUnit_Percent)       return "%";
+        if (info.unit == kAudioUnitParameterUnit_Seconds)       return "s";
+        if (info.unit == kAudioUnitParameterUnit_Hertz)         return "Hz";
+        if (info.unit == kAudioUnitParameterUnit_Decibels)      return "dB";
+        if (info.unit == kAudioUnitParameterUnit_Milliseconds)  return "ms";
+
+        return {};
+    }
 
     //==============================================================================
     OSStatus renderGetInput (AudioUnitRenderActionFlags*,
