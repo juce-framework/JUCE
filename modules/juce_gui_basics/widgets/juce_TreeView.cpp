@@ -40,7 +40,8 @@ static int getItemDepth (const TreeViewItem* item)
 }
 
 //==============================================================================
-class TreeView::ItemComponent  : public Component
+class TreeView::ItemComponent  : public Component,
+                                 public TooltipClient
 {
 public:
     explicit ItemComponent (TreeViewItem& itemToRepresent)
@@ -76,6 +77,11 @@ public:
     TreeViewItem& getRepresentedItem() const noexcept
     {
         return item;
+    }
+
+    String getTooltip() override
+    {
+        return item.getTooltip();
     }
 
 private:
