@@ -1094,13 +1094,34 @@ public:
         return false;
     }
 
-    void sendModalInputAttemptIfBlocked()
+    enum class KeyWindowChanged { no, yes };
+
+    void sendModalInputAttemptIfBlocked (KeyWindowChanged keyChanged)
     {
-        if (isBlockedByModalComponent())
-            if (auto* modal = Component::getCurrentlyModalComponent())
-                if (auto* otherPeer = modal->getPeer())
-                    if ((otherPeer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
-                        modal->inputAttemptWhenModal();
+        if (! isBlockedByModalComponent())
+            return;
+
+        if (auto* modal = Component::getCurrentlyModalComponent())
+        {
+            if (auto* otherPeer = modal->getPeer())
+            {
+                const auto modalPeerIsTemporary = (otherPeer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0;
+
+                if (! modalPeerIsTemporary)
+                    return;
+
+                // When a peer resigns key status, it might be because we just created a modal
+                // component that is now key.
+                // In this case, we should only dismiss the modal component if it isn't key,
+                // implying that a third window has become key.
+                const auto modalPeerIsKey = [NSApp keyWindow] == static_cast<NSViewComponentPeer*> (otherPeer)->window;
+
+                if (keyChanged == KeyWindowChanged::yes && modalPeerIsKey)
+                    return;
+
+                modal->inputAttemptWhenModal();
+            }
+        }
     }
 
     bool canBecomeKeyWindow()
@@ -1163,7 +1184,7 @@ public:
         {
             [notificationCenter addObserver: view
                                    selector: dismissModalsSelector
-                                       name: NSWindowDidMoveNotification
+                                       name: NSWindowWillMoveNotification
                                      object: currentWindow];
 
             [notificationCenter addObserver: view
@@ -1186,7 +1207,7 @@ public:
     void dismissModals()
     {
         if (hasNativeTitleBar() || isSharedWindow)
-            sendModalInputAttemptIfBlocked();
+            sendModalInputAttemptIfBlocked (KeyWindowChanged::no);
     }
 
     void becomeKey()
@@ -1197,7 +1218,7 @@ public:
     void resignKey()
     {
         viewFocusLoss();
-        sendModalInputAttemptIfBlocked();
+        sendModalInputAttemptIfBlocked (KeyWindowChanged::yes);
     }
 
     void liveResizingStart()
