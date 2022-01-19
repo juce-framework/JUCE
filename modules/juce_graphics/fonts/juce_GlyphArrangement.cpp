@@ -26,6 +26,14 @@
 namespace juce
 {
 
+static constexpr bool isNonBreakingSpace (const juce_wchar c)
+{
+    return c == 0x00a0
+        || c == 0x2007
+        || c == 0x202f
+        || c == 0x2060;
+}
+
 PositionedGlyph::PositionedGlyph() noexcept
     : character (0), glyph (0), x (0), y (0), w (0), whitespace (false)
 {
@@ -37,8 +45,6 @@ PositionedGlyph::PositionedGlyph (const Font& font_, juce_wchar character_, int 
       x (anchorX), y (baselineY), w (width), whitespace (whitespace_)
 {
 }
-
-PositionedGlyph::~PositionedGlyph() {}
 
 static void drawGlyphWithFont (Graphics& g, int glyph, const Font& font, AffineTransform t)
 {
@@ -168,7 +174,7 @@ void GlyphArrangement::addCurtailedLineOfText (const Font& font, const String& t
             }
 
             auto thisX = xOffsets.getUnchecked (i);
-            bool isWhitespace = t.isWhitespace();
+            auto isWhitespace = isNonBreakingSpace (*t) || t.isWhitespace();
 
             glyphs.add (PositionedGlyph (font, t.getAndAdvance(),
                                          newGlyphs.getUnchecked(i),
@@ -545,7 +551,7 @@ void GlyphArrangement::spreadOutLine (int start, int num, float targetWidth)
 
 static bool isBreakableGlyph (const PositionedGlyph& g) noexcept
 {
-    return g.isWhitespace() || g.getCharacter() == '-';
+    return ! isNonBreakingSpace (g.getCharacter()) && (g.isWhitespace() || g.getCharacter() == '-');
 }
 
 void GlyphArrangement::splitLines (const String& text, Font font, int startIndex,
