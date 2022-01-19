@@ -942,7 +942,10 @@ public:
 
             @see globalApplicationsDirectory
         */
-        globalApplicationsDirectoryX86
+        globalApplicationsDirectoryX86,
+
+        /** On a Windows machine returns the %LOCALAPPDATA% folder. */
+        windowsLocalAppData
        #endif
     };
 

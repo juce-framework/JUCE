@@ -3746,12 +3746,13 @@ void VST3PluginFormat::recursiveFileSearch (StringArray& results, const File& di
 FileSearchPath VST3PluginFormat::getDefaultLocationsToSearch()
 {
    #if JUCE_WINDOWS
-    auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
-    return FileSearchPath (programFiles + "\\Common Files\\VST3");
+    const auto localAppData = File::getSpecialLocation (File::windowsLocalAppData)        .getFullPathName();
+    const auto programFiles = File::getSpecialLocation (File::globalApplicationsDirectory).getFullPathName();
+    return FileSearchPath (localAppData + "\\Programs\\Common\\VST3;" + programFiles + "\\Common Files\\VST3");
    #elif JUCE_MAC
-    return FileSearchPath ("/Library/Audio/Plug-Ins/VST3;~/Library/Audio/Plug-Ins/VST3");
+    return FileSearchPath ("~/Library/Audio/Plug-Ins/VST3;/Library/Audio/Plug-Ins/VST3");
    #else
-    return FileSearchPath ("/usr/lib/vst3/;/usr/local/lib/vst3/;~/.vst3/");
+    return FileSearchPath ("~/.vst3/;/usr/lib/vst3/;/usr/local/lib/vst3/");
    #endif
 }
 
