@@ -43,7 +43,7 @@ public:
 
     int getResult() const
     {
-        switch (getRawResult())
+        switch ([getAlert() runModal])
         {
             case NSAlertFirstButtonReturn:   return 0;
             case NSAlertSecondButtonReturn:  return 1;
@@ -60,8 +60,30 @@ public:
 private:
     void handleAsyncUpdate() override
     {
-        auto result = getResult();
+        if (auto* comp = options.getAssociatedComponent())
+        {
+            if (auto* peer = comp->getPeer())
+            {
+                if (auto* view = static_cast<NSView*> (peer->getNativeHandle()))
+                {
+                    if (auto* window = [view window])
+                    {
+                        [getAlert() beginSheetModalForWindow: window completionHandler: ^(NSModalResponse result)
+                        {
+                            handleModalFinished ((int) result);
+                        }];
 
+                        return;
+                    }
+                }
+            }
+        }
+
+        handleModalFinished ((int) [getAlert() runModal]);
+    }
+
+    void handleModalFinished (int result)
+    {
         if (callback != nullptr)
             callback->modalStateFinished (result);
 
@@ -74,7 +96,7 @@ private:
             [alert addButtonWithTitle: juceStringToNS (button)];
     }
 
-    NSInteger getRawResult() const
+    NSAlert* getAlert() const
     {
         NSAlert* alert = [[[NSAlert alloc] init] autorelease];
 
@@ -90,7 +112,7 @@ private:
         addButton (alert, options.getButtonText (1));
         addButton (alert, options.getButtonText (2));
 
-        return [alert runModal];
+        return alert;
     }
 
     MessageBoxOptions options;
