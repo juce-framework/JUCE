@@ -72,12 +72,7 @@ of the target you wish to build.
 
 ## Contributing
 
-For bug reports and features requests, please visit the [JUCE Forum](https://forum.juce.com/) -
-the JUCE developers are active there and will read every post and respond accordingly. When
-submitting a bug report, please ensure that it follows the
-[issue template](/.github/ISSUE_TEMPLATE.txt).
-We don't accept third party GitHub pull requests directly due to copyright restrictions
-but if you would like to contribute any changes please contact us.
+Please see our [contribution guidelines](.github/contributing.md).
 
 ## License
 
