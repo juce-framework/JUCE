@@ -294,7 +294,7 @@ public:
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, ranges)))
             {
-                for (auto r : { 8000, 11025, 16000, 22050, 32000,
+                for (auto r : { 8000, 11025, 16000, 22050, 24000, 32000,
                                 44100, 48000, 88200, 96000, 176400,
                                 192000, 352800, 384000, 705600, 768000 })
                 {

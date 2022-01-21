@@ -50,7 +50,7 @@ namespace
 
 static void getDeviceSampleRates (snd_pcm_t* handle, Array<double>& rates)
 {
-    const int ratesToTry[] = { 22050, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
+    const int ratesToTry[] = { 22050, 24000, 32000, 44100, 48000, 88200, 96000, 176400, 192000, 0 };
 
     snd_pcm_hw_params_t* hwParams;
     snd_pcm_hw_params_alloca (&hwParams);
