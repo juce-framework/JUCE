@@ -6,6 +6,36 @@ develop
 
 Change
 ------
+Plugin wrappers will no longer call processBlockBypassed() if the wrapped
+AudioProcessor returns a parameter from getBypassParameter().
+
+Possible Issues
+---------------
+Plugins that used to depend on processBlockBypassed() being called may no
+longer correctly enter a bypassed state.
+
+Workaround
+----------
+AudioProcessors that implement getBypassParameter() must check the current
+value of the bypass parameter on each call to processBlock(), and bypass
+processing as appropriate. When switching between bypassed and non-bypassed
+states, the plugin must use some sort of ramping or smoothing to avoid
+discontinuities in the output. If the plugin introduces latency when not
+bypassed, the plugin must delay its output when in bypassed mode so that the
+overall latency does not change when enabling/disabling bypass.
+
+Rationale
+---------
+The documentation for AudioProcessor::getBypassParameter() says
+> if this method returns a non-null value, you should never call
+  processBlockBypassed but use the returned parameter to control the bypass
+  state instead.
+Some plugin wrappers were not following this rule. After this change, the
+behaviour of all plugin wrappers is consistent with the documented behaviour.
+
+
+Change
+------
 The ComponentPeer::getFrameSize() function has been deprecated on Linux.
 
 Possible Issues

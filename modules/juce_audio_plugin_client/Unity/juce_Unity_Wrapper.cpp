@@ -350,6 +350,11 @@ public:
 
     void process (float* inBuffer, float* outBuffer, int bufferSize, int numInChannels, int numOutChannels, bool isBypassed)
     {
+        // If the plugin has a bypass parameter, set it to the current bypass state
+        if (auto* param = pluginInstance->getBypassParameter())
+            if (isBypassed != (param->getValue() >= 0.5f))
+                param->setValueNotifyingHost (isBypassed ? 1.0f : 0.0f);
+
         for (int pos = 0; pos < bufferSize;)
         {
             auto max = jmin (bufferSize - pos, samplesPerBlock);
@@ -452,7 +457,7 @@ private:
             {
                 MidiBuffer mb;
 
-                if (isBypassed)
+                if (isBypassed && pluginInstance->getBypassParameter() == nullptr)
                     pluginInstance->processBlockBypassed (scratchBuffer, mb);
                 else
                     pluginInstance->processBlock (scratchBuffer, mb);
@@ -619,8 +624,7 @@ namespace UnityCallbacks
             auto isMuted   = ((state->flags & stateIsMuted)   != 0);
             auto isPaused  = ((state->flags & stateIsPaused)  != 0);
 
-            auto bypassed = ! isPlaying || (isMuted || isPaused);
-
+            const auto bypassed = ! isPlaying || (isMuted || isPaused);
             pluginInstance->process (inBuffer, outBuffer, static_cast<int> (bufferSize), numInChannels, numOutChannels, bypassed);
         }
         else

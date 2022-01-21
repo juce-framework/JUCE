@@ -447,7 +447,7 @@ public:
                     const int numChannels = jmax (numIn, numOut);
                     AudioBuffer<FloatType> chans (tmpBuffers.channels, isMidiEffect ? 0 : numChannels, numSamples);
 
-                    if (isBypassed)
+                    if (isBypassed && processor->getBypassParameter() == nullptr)
                         processor->processBlockBypassed (chans, midiEvents);
                     else
                         processor->processBlock (chans, midiEvents);
@@ -737,7 +737,7 @@ public:
     void parameterValueChanged (int, float newValue) override
     {
         // this can only come from the bypass parameter
-        isBypassed = (newValue != 0.0f);
+        isBypassed = (newValue >= 0.5f);
     }
 
     void parameterGestureChanged (int, bool) override {}
@@ -1800,10 +1800,10 @@ private:
 
     pointer_sized_int handleSetBypass (VstOpCodeArguments args)
     {
-        isBypassed = (args.value != 0);
+        isBypassed = args.value != 0;
 
-        if (auto* bypass = processor->getBypassParameter())
-            bypass->setValueNotifyingHost (isBypassed ? 1.0f : 0.0f);
+        if (auto* param = processor->getBypassParameter())
+            param->setValueNotifyingHost (isBypassed ? 1.0f : 0.0f);
 
         return 1;
     }

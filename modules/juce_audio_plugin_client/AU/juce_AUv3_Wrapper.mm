@@ -1652,7 +1652,7 @@ private:
 
         if (processor.isSuspended())
             buffer.clear();
-        else if (bypassParam != nullptr && [au shouldBypassEffect])
+        else if (bypassParam == nullptr && [au shouldBypassEffect])
             processor.processBlockBypassed (buffer, midiBuffer);
         else
             processor.processBlock (buffer, midiBuffer);
