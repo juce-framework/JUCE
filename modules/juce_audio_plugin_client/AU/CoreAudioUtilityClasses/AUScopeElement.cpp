@@ -404,7 +404,7 @@ UInt32		AUIOElement::GetAudioChannelLayout (AudioChannelLayout		*outMapPtr,
 
 // the incoming channel map will be at least as big as a basic AudioChannelLayout
 // but its contents will determine its actual size
-// Subclass should overide if channel map is writable
+// Subclass should override if channel map is writable
 OSStatus	AUIOElement::SetAudioChannelLayout (const AudioChannelLayout &inData)
 {
 	return kAudioUnitErr_InvalidProperty;

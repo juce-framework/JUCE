@@ -249,7 +249,7 @@ bool	CAMutex::Try(bool& outWasLocked)
 		}
 		else
 		{
-			//	any other return value means something really bad happenned
+			//	any other return value means something really bad happened
 			ThrowIfError(theError, CAException(theError), "CAMutex::Try: call to pthread_mutex_trylock failed");
 		}
 	}
@@ -292,7 +292,7 @@ bool	CAMutex::Try(bool& outWasLocked)
 		}
 		else
 		{
-			//	any other return value means something really bad happenned
+			//	any other return value means something really bad happened
 			ThrowIfError(theError, CAException(GetLastError()), "CAMutex::Try: call to lock the mutex failed");
 		}
 	}

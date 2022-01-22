@@ -309,7 +309,7 @@ namespace oboe {
 
         /**
          * Use this for notifying the user when a message has arrived or some
-         * other background event has occured.
+         * other background event has occurred.
          */
         Notification = 5, // AAUDIO_USAGE_NOTIFICATION
 

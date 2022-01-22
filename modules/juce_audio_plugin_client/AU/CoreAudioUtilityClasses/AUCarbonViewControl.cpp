@@ -120,7 +120,7 @@ void	AUCarbonViewControl::ParameterToControl(Float32 paramValue)
 			// special case [1] -- menu parameters
 			if (mParam.HasNamedParams()) {
 				// if we're dealing with menus they behave differently!
-				// becaue setting min and max doesn't work correctly for the control value
+				// because setting min and max doesn't work correctly for the control value
 				// first menu item always reports a control value of 1
 				ControlKind ctrlKind;
 				if (GetControlKind(mControl, &ctrlKind) == noErr) {
@@ -188,7 +188,7 @@ void	AUCarbonViewControl::ControlToParameter()
 			// special case [1] -- Menus
 			if (mParam.HasNamedParams()) {
 				// if we're dealing with menus they behave differently!
-				// becaue setting min and max doesn't work correctly for the control value
+				// because setting min and max doesn't work correctly for the control value
 				// first menu item always reports a control value of 1
 				ControlKind ctrlKind;
 				if (GetControlKind(mControl, &ctrlKind) == noErr) {

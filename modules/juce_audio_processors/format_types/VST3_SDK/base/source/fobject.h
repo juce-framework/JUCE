@@ -108,7 +108,7 @@ public:
 	virtual void addDependent (IDependent* dep);							///< adds dependency to the object
 	virtual void removeDependent (IDependent* dep);							///< removes dependency from the object
 	virtual void changed (int32 msg = kChanged);							///< Inform all dependents, that the object has changed.
-	virtual void deferUpdate (int32 msg = kChanged);						///< Similar to triggerUpdates, except only delivered in idle (usefull in collecting updates).
+	virtual void deferUpdate (int32 msg = kChanged);						///< Similar to triggerUpdates, except only delivered in idle (useful in collecting updates).
 	virtual void updateDone (int32 /* msg */) {}							///< empty virtual method that should be overridden by derived classes
 	virtual bool isEqualInstance (FUnknown* d) {return this == d;}
 	

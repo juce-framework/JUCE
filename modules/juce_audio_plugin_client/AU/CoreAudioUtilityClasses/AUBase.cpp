@@ -783,7 +783,7 @@ OSStatus			AUBase::DispatchGetProperty(	AudioUnitPropertyID 			inID,
 			{
 				result = CopyClumpName(inScope, ioClumpInfo->inID, ioClumpInfo->inDesiredLength, &ioClumpInfo->outName);
 
-					// this is provided for compatbility with existing implementations that don't know
+					// this is provided for compatibility with existing implementations that don't know
 					// about this new mechanism
 				if (result == kAudioUnitErr_InvalidProperty)
 					result = GetProperty (inID, inScope, inElement, outData);
@@ -863,7 +863,7 @@ OSStatus			AUBase::DispatchSetProperty(	AudioUnitPropertyID 			inID,
 
 			CAStreamBasicDescription newDesc;
 				// now we're going to be ultra conservative! because of discrepancies between
-				// sizes of this struct based on aligment padding inconsistencies
+				// sizes of this struct based on alignment padding inconsistencies
 			memset (&newDesc, 0, sizeof(newDesc));
 			memcpy (&newDesc, inData, 36);
 

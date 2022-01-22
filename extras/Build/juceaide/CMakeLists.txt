@@ -61,7 +61,7 @@ else()
 
     message(STATUS "Configuring juceaide")
 
-    # Looks like we're boostrapping, reinvoke CMake
+    # Looks like we're bootstrapping, reinvoke CMake
     execute_process(COMMAND "${CMAKE_COMMAND}"
             "."
             "-B${JUCE_BINARY_DIR}/tools"

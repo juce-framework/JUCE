@@ -164,7 +164,7 @@ bool BluetoothMidiDevicePairingDialogue::open (ModalComponentManager::Callback* 
     }
 
     std::unique_ptr<ModalComponentManager::Callback> cb (exitCallback);
-    // This functionality is unavailable when targetting OSX < 10.11. Instead,
+    // This functionality is unavailable when targeting OSX < 10.11. Instead,
     // you should pair Bluetooth MIDI devices using the "Audio MIDI Setup" app
     // (located in /Applications/Utilities).
     jassertfalse;

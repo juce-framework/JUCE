@@ -437,7 +437,7 @@ static OSStatus AUMethodStop(void *self)
 // ------------------------------------------------------------------------------------------------
 
 #if !CA_BASIC_AU_FEATURES
-// I don't know what I'm doing here; conflicts with the multiple inheritence in MusicDeviceBase.
+// I don't know what I'm doing here; conflicts with the multiple inheritance in MusicDeviceBase.
 static OSStatus AUMethodMIDIEvent(void *self, UInt32 inStatus, UInt32 inData1, UInt32 inData2, UInt32 inOffsetSampleFrame)
 {
 	OSStatus result = noErr;

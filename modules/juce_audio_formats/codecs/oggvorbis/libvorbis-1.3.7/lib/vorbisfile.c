@@ -1920,7 +1920,7 @@ vorbis_info *ov_info(OggVorbis_File *vf,int link){
   }
 }
 
-/* grr, strong typing, grr, no templates/inheritence, grr */
+/* grr, strong typing, grr, no templates/inheritance, grr */
 vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
   if(vf->seekable){
     if(link<0)
