@@ -1812,7 +1812,7 @@ private:
 
     //==============================================================================
     LegacyAudioParametersWrapper juceParameters;
-    HashMap<int32, AudioProcessorParameter*> paramMap;
+    std::unordered_map<int32, AudioProcessorParameter*> paramMap;
     Array<AudioUnitParameterID> auParamIDs;
     Array<const AudioProcessorParameterGroup*> parameterGroups;
 
@@ -2057,10 +2057,10 @@ private:
 
                 // Consider yourself very unlucky if you hit this assertion. The hash codes of your
                 // parameter ids are not unique.
-                jassert (! paramMap.contains (static_cast<int32> (auParamID)));
+                jassert (paramMap.find (static_cast<int32> (auParamID)) == paramMap.end());
 
                 auParamIDs.add (auParamID);
-                paramMap.set (static_cast<int32> (auParamID), param);
+                paramMap.emplace (static_cast<int32> (auParamID), param);
                 Globals()->SetParameter (auParamID, param->getValue());
             }
         }
@@ -2141,9 +2141,13 @@ private:
 
     AudioProcessorParameter* getParameterForAUParameterID (AudioUnitParameterID address) const noexcept
     {
-        auto index = static_cast<int32> (address);
-        return forceUseLegacyParamIDs ? juceParameters.getParamForIndex (index)
-                                      : paramMap[index];
+        const auto index = static_cast<int32> (address);
+
+        if (forceUseLegacyParamIDs)
+            return juceParameters.getParamForIndex (index);
+
+        const auto iter = paramMap.find (index);
+        return iter != paramMap.end() ? iter->second : nullptr;
     }
 
     //==============================================================================
