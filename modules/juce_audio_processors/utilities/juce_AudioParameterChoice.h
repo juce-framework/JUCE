@@ -50,13 +50,15 @@ public:
         @param indexFromString     An optional lambda function that parses a string and
                                    converts it into a choice index. Some hosts use this
                                    to allow users to type in parameter values.
+        @param versionHint         See AudioProcessorParameter::getVersionHint()
     */
     AudioParameterChoice (const String& parameterID, const String& parameterName,
                           const StringArray& choices,
                           int defaultItemIndex,
                           const String& parameterLabel = String(),
                           std::function<String (int index, int maximumStringLength)> stringFromIndex = nullptr,
-                          std::function<int (const String& text)> indexFromString = nullptr);
+                          std::function<int (const String& text)> indexFromString = nullptr,
+                          int versionHint = 0);
 
     /** Destructor. */
     ~AudioParameterChoice() override;

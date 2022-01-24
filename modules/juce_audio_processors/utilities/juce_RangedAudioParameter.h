@@ -38,11 +38,14 @@ class JUCE_API RangedAudioParameter   : public AudioProcessorParameterWithID
 public:
     /** The creation of this object requires providing a name and ID which will be
         constant for its lifetime.
+
+        @param parameterID          Used to uniquely identify the parameter
+        @param parameterName        The user-facing name of the parameter
+        @param parameterLabel       An optional label for the parameter's value
+        @param parameterCategory    The semantics of this parameter
+        @param versionHint          See AudioProcessorParameter::getVersionHint()
     */
-    RangedAudioParameter (const String& parameterID,
-                          const String& parameterName,
-                          const String& parameterLabel = {},
-                          Category parameterCategory = AudioProcessorParameter::genericParameter);
+    using AudioProcessorParameterWithID::AudioProcessorParameterWithID;
 
     /** Returns the range of values that the parameter can take. */
     virtual const NormalisableRange<float>& getNormalisableRange() const = 0;

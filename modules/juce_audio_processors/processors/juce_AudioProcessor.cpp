@@ -1492,8 +1492,6 @@ void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioPro
 void AudioProcessorListener::audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int) {}
 
 //==============================================================================
-AudioProcessorParameter::AudioProcessorParameter() noexcept {}
-
 AudioProcessorParameter::~AudioProcessorParameter()
 {
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING

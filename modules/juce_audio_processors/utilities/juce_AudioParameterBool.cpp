@@ -26,11 +26,14 @@
 namespace juce
 {
 
-AudioParameterBool::AudioParameterBool (const String& idToUse, const String& nameToUse,
-                                        bool def, const String& labelToUse,
+AudioParameterBool::AudioParameterBool (const String& idToUse,
+                                        const String& nameToUse,
+                                        bool def,
+                                        const String& labelToUse,
                                         std::function<String (bool, int)> stringFromBool,
-                                        std::function<bool (const String&)> boolFromString)
-   : RangedAudioParameter (idToUse, nameToUse, labelToUse),
+                                        std::function<bool (const String&)> boolFromString,
+                                        int versionHintToUse)
+   : RangedAudioParameter (idToUse, nameToUse, labelToUse, Category::genericParameter, versionHintToUse),
      value (def ? 1.0f : 0.0f),
      defaultValue (value),
      stringFromBoolFunction (stringFromBool),

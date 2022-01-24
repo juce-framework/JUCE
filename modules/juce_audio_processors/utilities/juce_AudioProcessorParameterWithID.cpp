@@ -29,9 +29,15 @@ namespace juce
 AudioProcessorParameterWithID::AudioProcessorParameterWithID (const String& idToUse,
                                                               const String& nameToUse,
                                                               const String& labelToUse,
-                                                              AudioProcessorParameter::Category categoryToUse)
-    : paramID (idToUse), name (nameToUse), label (labelToUse), category (categoryToUse) {}
-AudioProcessorParameterWithID::~AudioProcessorParameterWithID() {}
+                                                              AudioProcessorParameter::Category categoryToUse,
+                                                              int versionHintToUse)
+    : HostedAudioProcessorParameter (versionHintToUse),
+      paramID (idToUse),
+      name (nameToUse),
+      label (labelToUse),
+      category (categoryToUse)
+{
+}
 
 String AudioProcessorParameterWithID::getName (int maximumStringLength) const        { return name.substring (0, maximumStringLength); }
 String AudioProcessorParameterWithID::getLabel() const                               { return label; }

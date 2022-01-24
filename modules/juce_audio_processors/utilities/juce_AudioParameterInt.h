@@ -51,13 +51,15 @@ public:
         @param intFromString       An optional lambda function that parses a string
                                    and converts it into an int. Some hosts use this
                                    to allow users to type in parameter values.
+        @param versionHint         See AudioProcessorParameter::getVersionHint()
     */
     AudioParameterInt (const String& parameterID, const String& parameterName,
                        int minValue, int maxValue,
                        int defaultValue,
                        const String& parameterLabel = String(),
                        std::function<String (int value, int maximumStringLength)> stringFromInt = nullptr,
-                       std::function<int (const String& text)> intFromString = nullptr);
+                       std::function<int (const String& text)> intFromString = nullptr,
+                       int versionHint = 0);
 
     /** Destructor. */
     ~AudioParameterInt() override;

@@ -409,7 +409,8 @@ public:
                    bool isAutomatableParameter = true,
                    bool isDiscrete = false,
                    AudioProcessorParameter::Category parameterCategory = AudioProcessorParameter::genericParameter,
-                   bool isBoolean = false);
+                   bool isBoolean = false,
+                   int versionHint = 0);
 
         float getDefaultValue() const override;
         int getNumSteps() const override;

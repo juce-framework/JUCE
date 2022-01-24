@@ -30,8 +30,9 @@ AudioParameterInt::AudioParameterInt (const String& idToUse, const String& nameT
                                       int minValue, int maxValue, int def,
                                       const String& labelToUse,
                                       std::function<String (int, int)> stringFromInt,
-                                      std::function<int (const String&)> intFromString)
-   : RangedAudioParameter (idToUse, nameToUse, labelToUse),
+                                      std::function<int (const String&)> intFromString,
+                                      int versionHintToUse)
+   : RangedAudioParameter (idToUse, nameToUse, labelToUse, Category::genericParameter, versionHintToUse),
      range ([minValue, maxValue]
             {
                 NormalisableRange<float> rangeWithInterval { (float) minValue, (float) maxValue,

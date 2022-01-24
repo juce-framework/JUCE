@@ -51,6 +51,7 @@ public:
         @param valueFromString     An optional lambda function that parses a string and
                                    converts it into a non-normalised value. Some hosts use
                                    this to allow users to type in parameter values.
+        @param versionHint         See AudioProcessorParameter::getVersionHint()
     */
     AudioParameterFloat (const String& parameterID,
                          const String& parameterName,
@@ -59,7 +60,8 @@ public:
                          const String& parameterLabel = String(),
                          Category parameterCategory = AudioProcessorParameter::genericParameter,
                          std::function<String (float value, int maximumStringLength)> stringFromValue = nullptr,
-                         std::function<float (const String& text)> valueFromString = nullptr);
+                         std::function<float (const String& text)> valueFromString = nullptr,
+                         int versionHint = 0);
 
     /** Creates a AudioParameterFloat with an ID, name, and range.
         On creation, its value is set to the default value.

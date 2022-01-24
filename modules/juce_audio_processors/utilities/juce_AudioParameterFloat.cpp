@@ -30,8 +30,9 @@ AudioParameterFloat::AudioParameterFloat (const String& idToUse, const String& n
                                           NormalisableRange<float> r, float def,
                                           const String& labelToUse, Category categoryToUse,
                                           std::function<String (float, int)> stringFromValue,
-                                          std::function<float (const String&)> valueFromString)
-   : RangedAudioParameter (idToUse, nameToUse, labelToUse, categoryToUse),
+                                          std::function<float (const String&)> valueFromString,
+                                          int versionHintToUse)
+   : RangedAudioParameter (idToUse, nameToUse, labelToUse, categoryToUse, versionHintToUse),
      range (r), value (def), defaultValue (def),
      stringFromValueFunction (stringFromValue),
      valueFromStringFunction (valueFromString)

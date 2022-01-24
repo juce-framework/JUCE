@@ -34,6 +34,8 @@ namespace juce
 */
 struct HostedAudioProcessorParameter : public AudioProcessorParameter
 {
+    using AudioProcessorParameter::AudioProcessorParameter;
+
     /** Returns an ID that is unique to this parameter.
 
         Parameter indices are unstable across plugin versions, which means that the

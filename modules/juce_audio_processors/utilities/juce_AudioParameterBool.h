@@ -48,11 +48,13 @@ public:
         @param boolFromString      An optional lambda function that parses a string and
                                    converts it into a bool value. Some hosts use this
                                    to allow users to type in parameter values.
+        @param versionHint         See AudioProcessorParameter::getVersionHint()
     */
     AudioParameterBool (const String& parameterID, const String& parameterName, bool defaultValue,
                         const String& parameterLabel = String(),
                         std::function<String (bool value, int maximumStringLength)> stringFromBool = nullptr,
-                        std::function<bool (const String& text)> boolFromString = nullptr);
+                        std::function<bool (const String& text)> boolFromString = nullptr,
+                        int versionHint = 0);
 
     /** Destructor. */
     ~AudioParameterBool() override;
