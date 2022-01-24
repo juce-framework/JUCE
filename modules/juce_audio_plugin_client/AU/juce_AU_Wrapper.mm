@@ -1816,6 +1816,9 @@ private:
     Array<AudioUnitParameterID> auParamIDs;
     Array<const AudioProcessorParameterGroup*> parameterGroups;
 
+    // Stores the parameter IDs in the order that they will be reported to the host.
+    std::vector<AudioUnitParameterID> cachedParameterList;
+
     //==============================================================================
     // According to the docs, this is the maximum size of a MIDIPacketList.
     static constexpr UInt32 packetListBytes = 65536;
@@ -2037,6 +2040,40 @@ private:
         return { {}, {}, {}, kAudioUnitErr_InvalidElement };
     }
 
+    OSStatus GetParameterList (AudioUnitScope inScope, AudioUnitParameterID* outParameterList, UInt32& outNumParameters) override
+    {
+        if (forceUseLegacyParamIDs || inScope != kAudioUnitScope_Global)
+            return MusicDeviceBase::GetParameterList (inScope, outParameterList, outNumParameters);
+
+        outNumParameters = (UInt32) juceParameters.size();
+
+        if (outParameterList == nullptr)
+            return noErr;
+
+        if (cachedParameterList.empty())
+        {
+            struct ParamInfo
+            {
+                AudioUnitParameterID identifier;
+                int versionHint;
+            };
+
+            std::vector<ParamInfo> vec;
+            vec.reserve (juceParameters.size());
+
+            for (const auto* param : juceParameters)
+                vec.push_back ({ generateAUParameterID (*param), param->getVersionHint() });
+
+            std::sort        (vec.begin(), vec.end(), [] (auto a, auto b) { return a.identifier  < b.identifier; });
+            std::stable_sort (vec.begin(), vec.end(), [] (auto a, auto b) { return a.versionHint < b.versionHint; });
+            std::transform   (vec.begin(), vec.end(), std::back_inserter (cachedParameterList), [] (auto x) { return x.identifier; });
+        }
+
+        std::copy (cachedParameterList.begin(), cachedParameterList.end(), outParameterList);
+
+        return noErr;
+    }
+
     //==============================================================================
     void addParameters()
     {
@@ -2053,7 +2090,7 @@ private:
         {
             for (auto* param : juceParameters)
             {
-                const AudioUnitParameterID auParamID = generateAUParameterID (param);
+                const AudioUnitParameterID auParamID = generateAUParameterID (*param);
 
                 // Consider yourself very unlucky if you hit this assertion. The hash codes of your
                 // parameter ids are not unique.
@@ -2119,9 +2156,9 @@ private:
     }
 
     //==============================================================================
-    AudioUnitParameterID generateAUParameterID (AudioProcessorParameter* param) const
+    static AudioUnitParameterID generateAUParameterID (const AudioProcessorParameter& param)
     {
-        const String& juceParamID = LegacyAudioParameter::getParamID (param, forceUseLegacyParamIDs);
+        const String& juceParamID = LegacyAudioParameter::getParamID (&param, forceUseLegacyParamIDs);
         AudioUnitParameterID paramHash = static_cast<AudioUnitParameterID> (juceParamID.hashCode());
 
        #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
