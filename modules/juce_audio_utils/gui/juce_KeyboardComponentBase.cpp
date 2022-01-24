@@ -360,10 +360,20 @@ void KeyboardComponentBase::paint (Graphics& g)
     for (int octaveBase = 0; octaveBase < 128; octaveBase += 12)
     {
         for (auto noteNum : whiteNotes)
-            drawWhiteKey (octaveBase + noteNum, g, getRectangleForKey (octaveBase + noteNum));
+        {
+            const auto key = octaveBase + noteNum;
+
+            if (rangeStart <= key && key <= rangeEnd)
+                drawWhiteKey (key, g, getRectangleForKey (key));
+        }
 
         for (auto noteNum : blackNotes)
-            drawBlackKey (octaveBase + noteNum, g, getRectangleForKey (octaveBase + noteNum));
+        {
+            const auto key = octaveBase + noteNum;
+
+            if (rangeStart <= key && key <= rangeEnd)
+                drawBlackKey (key, g, getRectangleForKey (key));
+        }
     }
 }
 
