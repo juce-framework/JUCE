@@ -362,7 +362,7 @@ struct CameraDevice::Pimpl  : public ChangeBroadcaster
 
                             using Fn = HRESULT (*) (IWMProfileManager**);
 
-                            // This function is available on Windows 2000 and up, but we load it at runtime anway
+                            // This function is available on Windows 2000 and up, but we load it at runtime anyway
                             // because some versions of MinGW ship with libraries that don't include this symbol.
                             if (auto* fn = reinterpret_cast<Fn> (wmvcoreLibrary.getFunction ("WMCreateProfileManager")))
                                 hr = fn (profileManager.resetAndGetPointerAddress());

@@ -24,7 +24,7 @@ tool) or with CMake.
 The repository doesn't contain a pre-built Projucer so you will need to build it
 for your platform - Xcode, Visual Studio and Linux Makefile projects are located in
 [extras/Projucer/Builds](/extras/Projucer/Builds)
-(the minumum system requirements are listed in the __System Requirements__ section below).
+(the minimum system requirements are listed in the __System Requirements__ section below).
 The Projucer can then be used to create new JUCE projects, view tutorials and run examples.
 It is also possible to include the JUCE modules source code in an existing project directly,
 or build them into a static or dynamic library which can be linked into a project.

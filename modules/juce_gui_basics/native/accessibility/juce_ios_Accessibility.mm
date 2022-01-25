@@ -399,7 +399,7 @@ private:
         {
             if (auto* handler = getHandler (self))
             {
-                // occasionaly VoiceOver sends accessibilityActivate to the wrong element, so we first query
+                // Occasionally VoiceOver sends accessibilityActivate to the wrong element, so we first query
                 // which element it thinks has focus and forward the event on to that element if it differs
                 id focusedElement = UIAccessibilityFocusedElement (UIAccessibilityNotificationVoiceOverIdentifier);
 
