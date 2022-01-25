@@ -638,8 +638,12 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_utils/gui/juce_AudioVisualiserComponent.cpp"
     "../../../../../modules/juce_audio_utils/gui/juce_AudioVisualiserComponent.h"
     "../../../../../modules/juce_audio_utils/gui/juce_BluetoothMidiDevicePairingDialogue.h"
+    "../../../../../modules/juce_audio_utils/gui/juce_KeyboardComponentBase.cpp"
+    "../../../../../modules/juce_audio_utils/gui/juce_KeyboardComponentBase.h"
     "../../../../../modules/juce_audio_utils/gui/juce_MidiKeyboardComponent.cpp"
     "../../../../../modules/juce_audio_utils/gui/juce_MidiKeyboardComponent.h"
+    "../../../../../modules/juce_audio_utils/gui/juce_MPEKeyboardComponent.cpp"
+    "../../../../../modules/juce_audio_utils/gui/juce_MPEKeyboardComponent.h"
     "../../../../../modules/juce_audio_utils/native/juce_android_BluetoothMidiDevicePairingDialogue.cpp"
     "../../../../../modules/juce_audio_utils/native/juce_ios_BluetoothMidiDevicePairingDialogue.mm"
     "../../../../../modules/juce_audio_utils/native/juce_linux_AudioCDReader.cpp"
@@ -1334,6 +1338,8 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/misc/juce_BubbleComponent.h"
     "../../../../../modules/juce_gui_basics/misc/juce_DropShadower.cpp"
     "../../../../../modules/juce_gui_basics/misc/juce_DropShadower.h"
+    "../../../../../modules/juce_gui_basics/misc/juce_FocusOutline.cpp"
+    "../../../../../modules/juce_gui_basics/misc/juce_FocusOutline.h"
     "../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.cpp"
     "../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_ComponentDragger.cpp"
@@ -1364,6 +1370,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_Accessibility.cpp"
     "../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_AccessibilityElement.cpp"
     "../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_AccessibilityElement.h"
+    "../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_ComInterfaces.h"
     "../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_UIAExpandCollapseProvider.h"
     "../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_UIAGridItemProvider.h"
     "../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_UIAGridProvider.h"
@@ -2226,8 +2233,12 @@ set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_Au
 set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_AudioVisualiserComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_AudioVisualiserComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_BluetoothMidiDevicePairingDialogue.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_KeyboardComponentBase.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_KeyboardComponentBase.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_MidiKeyboardComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_MidiKeyboardComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_MPEKeyboardComponent.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_utils/gui/juce_MPEKeyboardComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_utils/native/juce_android_BluetoothMidiDevicePairingDialogue.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_utils/native/juce_ios_BluetoothMidiDevicePairingDialogue.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_utils/native/juce_linux_AudioCDReader.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2922,6 +2933,8 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_Bu
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_BubbleComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_DropShadower.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_DropShadower.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_FocusOutline.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_FocusOutline.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/misc/juce_JUCESplashScreen.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_ComponentDragger.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2952,6 +2965,7 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/native/acces
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_Accessibility.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_AccessibilityElement.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_AccessibilityElement.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_ComInterfaces.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_UIAExpandCollapseProvider.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_UIAGridItemProvider.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/native/accessibility/juce_win32_UIAGridProvider.h" PROPERTIES HEADER_FILE_ONLY TRUE)

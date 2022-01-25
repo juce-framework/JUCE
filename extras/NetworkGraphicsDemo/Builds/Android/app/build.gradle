@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     externalNativeBuild {
         cmake {
             path "CMakeLists.txt"
@@ -20,7 +20,7 @@ android {
     defaultConfig {
         applicationId "com.juce.networkgraphicsdemo"
         minSdkVersion    16
-        targetSdkVersion 29
+        targetSdkVersion 30
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_TOOLCHAIN=clang", "-DANDROID_PLATFORM=android-16", "-DANDROID_STL=c++_static", "-DANDROID_CPP_FEATURES=exceptions rtti", "-DANDROID_ARM_MODE=arm", "-DANDROID_ARM_NEON=TRUE", "-DCMAKE_CXX_STANDARD=14", "-DCMAKE_CXX_EXTENSIONS=OFF"
