@@ -620,8 +620,6 @@
               file="Source/Utility/Helpers/jucer_TranslationHelpers.h"/>
         <FILE id="EuC4K4" name="jucer_ValueSourceHelpers.h" compile="0" resource="0"
               file="Source/Utility/Helpers/jucer_ValueSourceHelpers.h"/>
-        <FILE id="W5a5Fy" name="jucer_ValueWithDefaultWrapper.h" compile="0"
-              resource="0" file="Source/Utility/Helpers/jucer_ValueWithDefaultWrapper.h"/>
         <FILE id="BPCoKV" name="jucer_VersionInfo.cpp" compile="1" resource="0"
               file="Source/Utility/Helpers/jucer_VersionInfo.cpp"/>
         <FILE id="TnBQtv" name="jucer_VersionInfo.h" compile="0" resource="0"

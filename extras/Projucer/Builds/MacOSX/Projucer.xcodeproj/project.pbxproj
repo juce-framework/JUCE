@@ -126,7 +126,6 @@
 		210CD22F25F2C22F9CEEB025 /* AVFoundation.framework */ /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		21F4833C5B5C17B159B956F3 /* juce_events */ /* juce_events */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_events; path = ../../../../modules/juce_events; sourceTree = SOURCE_ROOT; };
 		233C7FC5157176DB33FE2F27 /* RecentFilesMenuTemplate.nib */ /* RecentFilesMenuTemplate.nib */ = {isa = PBXFileReference; lastKnownFileType = file.nib; name = RecentFilesMenuTemplate.nib; path = ../../../Build/CMake/RecentFilesMenuTemplate.nib; sourceTree = SOURCE_ROOT; };
-		234251407CD1A499D8A816BB /* jucer_ValueWithDefaultWrapper.h */ /* jucer_ValueWithDefaultWrapper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ValueWithDefaultWrapper.h; path = ../../Source/Utility/Helpers/jucer_ValueWithDefaultWrapper.h; sourceTree = SOURCE_ROOT; };
 		23A8DE16C0CDB8EED18B008B /* jucer_CommandIDs.h */ /* jucer_CommandIDs.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_CommandIDs.h; path = ../../Source/Application/jucer_CommandIDs.h; sourceTree = SOURCE_ROOT; };
 		23D79A22569BEDF63B57DD36 /* jucer_CodeHelpers.h */ /* jucer_CodeHelpers.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_CodeHelpers.h; path = ../../Source/Utility/Helpers/jucer_CodeHelpers.h; sourceTree = SOURCE_ROOT; };
 		247768B490B9D759DDA79359 /* jucer_UserAvatarComponent.h */ /* jucer_UserAvatarComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_UserAvatarComponent.h; path = ../../Source/Project/UI/jucer_UserAvatarComponent.h; sourceTree = SOURCE_ROOT; };
@@ -766,7 +765,6 @@
 				58F1FF52E887887A93E84FC2,
 				6FD8DBC0FF42C87D8BEE2452,
 				00515BA4EC5A7D4DC078ED37,
-				234251407CD1A499D8A816BB,
 				FF3A6A384D536E1AEF47CD54,
 				C16F9F479A3A5F6DAD7647A2,
 			);
