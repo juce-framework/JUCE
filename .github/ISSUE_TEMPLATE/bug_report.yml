@@ -22,8 +22,8 @@ body:
   - type: dropdown
     id: os
     attributes:
-      label: Operating system
-      description: What operating system do you see the bug on?
+      label: Operating systems
+      description: What operating systems do you see the bug on?
       multiple: true
       options:
         - Windows
@@ -37,14 +37,14 @@ body:
   - type: textarea
     id: osversion
     attributes:
-      label: What version of the operating system?
+      label: What versions of the operating systems?
     validations:
       required: true
   - type: dropdown
     id: architecture
     attributes:
-      label: Architecture
-      description: What type of machine do you see the bug on?
+      label: Architectures
+      description: What types of machine do you see the bug on?
       multiple: true
       options:
         - x86_64
@@ -63,7 +63,7 @@ body:
   - type: dropdown
     id: pluginformat
     attributes:
-      label: Plug-in format (if applicable)
+      label: Plug-in formats (if applicable)
       multiple: true
       options:
         - VST2
@@ -76,14 +76,17 @@ body:
   - type: textarea
     id: pluginhost
     attributes:
-      label: Plug-in host application (DAW) (if applicable)
-  - type: checkboxes
-    id: developbranch
+      label: Plug-in host applications (DAWs) (if applicable)
+  - type: dropdown
+    id: branch
     attributes:
-      label: Tested against the `develop` branch
+      label: Testing on the `develop` branch
       description: We have often already fixed bugs on our `develop` branch. Please confirm if you have tested with the latest commit.
       options:
-        - label: I can reproduce the bug on the `develop` branch
+        - The bug is present on the `develop` branch
+        - I have not tested against the `develop` branch
+    validations:
+      required: true
   - type: checkboxes
     id: terms
     attributes:
