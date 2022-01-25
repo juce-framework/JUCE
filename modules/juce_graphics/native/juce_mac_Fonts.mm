@@ -208,15 +208,51 @@ namespace CoreTextTypeLayout
     }
 
     //==============================================================================
+    // A flatmap that properly retains/releases font refs
+    class FontMap
+    {
+    public:
+        void emplace (CTFontRef ctFontRef, Font value)
+        {
+            pairs.emplace (std::lower_bound (pairs.begin(), pairs.end(), ctFontRef), ctFontRef, std::move (value));
+        }
+
+        const Font* find (CTFontRef ctFontRef) const
+        {
+            const auto iter = std::lower_bound (pairs.begin(), pairs.end(), ctFontRef);
+
+            if (iter == pairs.end())
+                return nullptr;
+
+            if (iter->key.get() != ctFontRef)
+                return nullptr;
+
+            return &iter->value;
+        }
+
+    private:
+        struct Pair
+        {
+            Pair (CTFontRef ref, Font font) : key (ref), value (std::move (font)) { CFRetain (ref); }
+
+            auto operator< (CTFontRef other) const { return key.get() < other; }
+
+            CFUniquePtr<CTFontRef> key;
+            Font value;
+        };
+
+        std::vector<Pair> pairs;
+    };
+
     struct AttributedStringAndFontMap
     {
         CFUniquePtr<CFAttributedStringRef> string;
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
     };
 
     static AttributedStringAndFontMap createCFAttributedString (const AttributedString& text)
     {
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
 
         const detail::ColorSpacePtr rgbColourSpace { CGColorSpaceCreateWithName (kCGColorSpaceSRGB) };
 
@@ -300,7 +336,7 @@ namespace CoreTextTypeLayout
     struct FramesetterAndFontMap
     {
         CFUniquePtr<CTFramesetterRef> framesetter;
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
     };
 
     static FramesetterAndFontMap createCTFramesetter (const AttributedString& text)
@@ -324,7 +360,7 @@ namespace CoreTextTypeLayout
     struct FrameAndFontMap
     {
         CFUniquePtr<CTFrameRef> frame;
-        std::map<CTFontRef, Font> fontMap;
+        FontMap fontMap;
     };
 
     static FrameAndFontMap createCTFrame (const AttributedString& text, CGRect bounds)
@@ -476,10 +512,8 @@ namespace CoreTextTypeLayout
                 {
                     glyphRun->font = [&]
                     {
-                        auto it = frameAndMap.fontMap.find (ctRunFont);
-
-                        if (it != frameAndMap.fontMap.end())
-                            return it->second;
+                        if (auto* it = frameAndMap.fontMap.find (ctRunFont))
+                            return *it;
 
                         CFUniquePtr<CFStringRef> cfsFontName (CTFontCopyPostScriptName (ctRunFont));
                         CFUniquePtr<CTFontRef> ctFontRef (CTFontCreateWithName (cfsFontName.get(), referenceFontSize, nullptr));
