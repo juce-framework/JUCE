@@ -1398,6 +1398,16 @@ void Component::getInterceptsMouseClicks (bool& allowsClicksOnThisComponent,
     allowsClicksOnChildComponents = flags.allowChildMouseClicksFlag;
 }
 
+void Component::setDisableDefaultMouseEvents(bool value) noexcept
+{
+	flags.disableDefaultMouseEvents = value;
+}
+
+bool Component::getDisableDefaultMouseEvents() const noexcept
+{
+	return (bool)flags.disableDefaultMouseEvents;
+}
+
 bool Component::contains (Point<int> point)
 {
     return contains (point.toFloat());
@@ -2386,7 +2396,7 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
                          MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
                          MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
                          this, this, time, relativePos, time, 0, false);
-    mouseEnter (me);
+	if (!flags.disableDefaultMouseEvents) mouseEnter (me);
 
     flags.cachedMouseInsideComponent = true;
 
@@ -2419,7 +2429,7 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
                          MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
                          this, this, time, relativePos, time, 0, false);
 
-    mouseExit (me);
+	if (!flags.disableDefaultMouseEvents) mouseExit (me);
 
     if (checker.shouldBailOut())
         return;
@@ -2484,7 +2494,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
     const MouseEvent me (source, relativePos, source.getCurrentModifiers(), pressure,
                          orientation, rotation, tiltX, tiltY, this, this, time, relativePos,
                          time, source.getNumberOfMultipleClicks(), false);
-    mouseDown (me);
+    if(!flags.disableDefaultMouseEvents) mouseDown (me);
 
     if (checker.shouldBailOut())
         return;
@@ -2511,7 +2521,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
                          source.getLastMouseDownTime(),
                          source.getNumberOfMultipleClicks(),
                          source.isLongPressOrDrag());
-    mouseUp (me);
+	if (!flags.disableDefaultMouseEvents) mouseUp (me);
 
     if (checker.shouldBailOut())
         return;
@@ -2527,7 +2537,7 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
     // check for double-click
     if (me.getNumberOfClicks() >= 2)
     {
-        mouseDoubleClick (me);
+		if (!flags.disableDefaultMouseEvents) mouseDoubleClick (me);
 
         if (checker.shouldBailOut())
             return;
@@ -2550,7 +2560,7 @@ void Component::internalMouseDrag (MouseInputSource source, Point<float> relativ
                              source.getLastMouseDownTime(),
                              source.getNumberOfMultipleClicks(),
                              source.isLongPressOrDrag());
-        mouseDrag (me);
+		if (!flags.disableDefaultMouseEvents) mouseDrag (me);
 
         if (checker.shouldBailOut())
             return;
@@ -2578,7 +2588,7 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
                              MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
                              MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
                              this, this, time, relativePos, time, 0, false);
-        mouseMove (me);
+		if (!flags.disableDefaultMouseEvents) mouseMove (me);
 
         if (checker.shouldBailOut())
             return;
@@ -2607,7 +2617,7 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
     }
     else
     {
-        mouseWheelMove (me, wheel);
+		if (!flags.disableDefaultMouseEvents) mouseWheelMove (me, wheel);
 
         if (checker.shouldBailOut())
             return;
