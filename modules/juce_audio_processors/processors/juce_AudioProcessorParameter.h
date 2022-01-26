@@ -39,6 +39,15 @@ class AudioProcessor;
 class JUCE_API  AudioProcessorParameter
 {
 public:
+    enum Orientation
+    {
+        fillFromLeft,
+        fillFromRight,
+        spreadFromMiddle,
+        spreadFromMiddleClockwise,
+        spreadFromMiddleAntiClockwise
+    };
+
     AudioProcessorParameter() noexcept;
 
     /** Destructor. */
@@ -163,6 +172,12 @@ public:
         (Not all plugin formats or hosts will actually use this information).
     */
     virtual bool isOrientationInverted() const;
+
+    /** This can be overridden to tell the host a specific orientation to use
+        when displaying parameter controls on external control surfaces.
+        (Not all plugin formats or hosts will actually use this information).
+    */
+    virtual Orientation getOrientation() const;
 
     /** Returns true if the host can automate this parameter.
         By default, this returns true.
