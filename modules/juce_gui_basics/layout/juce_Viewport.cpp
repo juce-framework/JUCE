@@ -26,7 +26,132 @@
 namespace juce
 {
 
-Viewport::Viewport (const String& name)  : Component (name)
+static bool viewportWouldScrollOnEvent (const Viewport* vp, const MouseInputSource& src) noexcept
+{
+    if (vp != nullptr)
+    {
+        switch (vp->getScrollOnDragMode())
+        {
+            case Viewport::ScrollOnDragMode::all:           return true;
+            case Viewport::ScrollOnDragMode::nonHover:      return ! src.canHover();
+            case Viewport::ScrollOnDragMode::never:         return false;
+        }
+    }
+
+    return false;
+}
+
+using ViewportDragPosition = AnimatedPosition<AnimatedPositionBehaviours::ContinuousWithMomentum>;
+
+struct Viewport::DragToScrollListener   : private MouseListener,
+                                          private ViewportDragPosition::Listener
+{
+    DragToScrollListener (Viewport& v)  : viewport (v)
+    {
+        viewport.contentHolder.addMouseListener (this, true);
+        offsetX.addListener (this);
+        offsetY.addListener (this);
+        offsetX.behaviour.setMinimumVelocity (60);
+        offsetY.behaviour.setMinimumVelocity (60);
+    }
+
+    ~DragToScrollListener() override
+    {
+        viewport.contentHolder.removeMouseListener (this);
+        Desktop::getInstance().removeGlobalMouseListener (this);
+    }
+
+    void positionChanged (ViewportDragPosition&, double) override
+    {
+        viewport.setViewPosition (originalViewPos - Point<int> ((int) offsetX.getPosition(),
+                                                                (int) offsetY.getPosition()));
+    }
+
+    void mouseDown (const MouseEvent& e) override
+    {
+        if (! isGlobalMouseListener && viewportWouldScrollOnEvent (&viewport, e.source))
+        {
+            offsetX.setPosition (offsetX.getPosition());
+            offsetY.setPosition (offsetY.getPosition());
+
+            // switch to a global mouse listener so we still receive mouseUp events
+            // if the original event component is deleted
+            viewport.contentHolder.removeMouseListener (this);
+            Desktop::getInstance().addGlobalMouseListener (this);
+
+            isGlobalMouseListener = true;
+
+            scrollSource = e.source;
+        }
+    }
+
+    void mouseDrag (const MouseEvent& e) override
+    {
+        if (e.source == scrollSource
+            && ! doesMouseEventComponentBlockViewportDrag (e.eventComponent))
+        {
+            auto totalOffset = e.getOffsetFromDragStart().toFloat();
+
+            if (! isDragging && totalOffset.getDistanceFromOrigin() > 8.0f && viewportWouldScrollOnEvent (&viewport, e.source))
+            {
+                isDragging = true;
+
+                originalViewPos = viewport.getViewPosition();
+                offsetX.setPosition (0.0);
+                offsetX.beginDrag();
+                offsetY.setPosition (0.0);
+                offsetY.beginDrag();
+            }
+
+            if (isDragging)
+            {
+                offsetX.drag (totalOffset.x);
+                offsetY.drag (totalOffset.y);
+            }
+        }
+    }
+
+    void mouseUp (const MouseEvent& e) override
+    {
+        if (isGlobalMouseListener && e.source == scrollSource)
+            endDragAndClearGlobalMouseListener();
+    }
+
+    void endDragAndClearGlobalMouseListener()
+    {
+        offsetX.endDrag();
+        offsetY.endDrag();
+        isDragging = false;
+
+        viewport.contentHolder.addMouseListener (this, true);
+        Desktop::getInstance().removeGlobalMouseListener (this);
+
+        isGlobalMouseListener = false;
+    }
+
+    bool doesMouseEventComponentBlockViewportDrag (const Component* eventComp)
+    {
+        for (auto c = eventComp; c != nullptr && c != &viewport; c = c->getParentComponent())
+            if (c->getViewportIgnoreDragFlag())
+                return true;
+
+        return false;
+    }
+
+    Viewport& viewport;
+    ViewportDragPosition offsetX, offsetY;
+    Point<int> originalViewPos;
+    MouseInputSource scrollSource = Desktop::getInstance().getMainMouseSource();
+    bool isDragging = false;
+    bool isGlobalMouseListener = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragToScrollListener)
+};
+
+//==============================================================================
+Viewport::Viewport (const String& name)
+    : Component (name),
+      dragToScrollListener (std::make_unique<DragToScrollListener> (*this))
 {
     // content holder is used to clip the contents so they don't overlap the scrollbars
     addAndMakeVisible (contentHolder);
@@ -36,14 +161,12 @@ Viewport::Viewport (const String& name)  : Component (name)
 
     setInterceptsMouseClicks (false, true);
     setWantsKeyboardFocus (true);
-    setScrollOnDragEnabled (Desktop::getInstance().getMainMouseSource().isTouch());
 
     recreateScrollbars();
 }
 
 Viewport::~Viewport()
 {
-    setScrollOnDragEnabled (false);
     deleteOrRemoveContentComp();
 }
 
@@ -196,132 +319,14 @@ void Viewport::componentMovedOrResized (Component&, bool, bool)
 }
 
 //==============================================================================
-typedef AnimatedPosition<AnimatedPositionBehaviours::ContinuousWithMomentum> ViewportDragPosition;
-
-struct Viewport::DragToScrollListener   : private MouseListener,
-                                          private ViewportDragPosition::Listener
+void Viewport::setScrollOnDragMode (const ScrollOnDragMode mode)
 {
-    DragToScrollListener (Viewport& v)  : viewport (v)
-    {
-        viewport.contentHolder.addMouseListener (this, true);
-        offsetX.addListener (this);
-        offsetY.addListener (this);
-        offsetX.behaviour.setMinimumVelocity (60);
-        offsetY.behaviour.setMinimumVelocity (60);
-    }
-
-    ~DragToScrollListener() override
-    {
-        viewport.contentHolder.removeMouseListener (this);
-        Desktop::getInstance().removeGlobalMouseListener (this);
-    }
-
-    void positionChanged (ViewportDragPosition&, double) override
-    {
-        viewport.setViewPosition (originalViewPos - Point<int> ((int) offsetX.getPosition(),
-                                                                (int) offsetY.getPosition()));
-    }
-
-    void mouseDown (const MouseEvent& e) override
-    {
-        if (! isGlobalMouseListener)
-        {
-            offsetX.setPosition (offsetX.getPosition());
-            offsetY.setPosition (offsetY.getPosition());
-
-            // switch to a global mouse listener so we still receive mouseUp events
-            // if the original event component is deleted
-            viewport.contentHolder.removeMouseListener (this);
-            Desktop::getInstance().addGlobalMouseListener (this);
-
-            isGlobalMouseListener = true;
-
-            scrollSource = e.source;
-        }
-    }
-
-    void mouseDrag (const MouseEvent& e) override
-    {
-        if (e.source == scrollSource
-            && ! doesMouseEventComponentBlockViewportDrag (e.eventComponent))
-        {
-            auto totalOffset = e.getOffsetFromDragStart().toFloat();
-
-            if (! isDragging && totalOffset.getDistanceFromOrigin() > 8.0f)
-            {
-                isDragging = true;
-
-                originalViewPos = viewport.getViewPosition();
-                offsetX.setPosition (0.0);
-                offsetX.beginDrag();
-                offsetY.setPosition (0.0);
-                offsetY.beginDrag();
-            }
-
-            if (isDragging)
-            {
-                offsetX.drag (totalOffset.x);
-                offsetY.drag (totalOffset.y);
-            }
-        }
-    }
-
-    void mouseUp (const MouseEvent& e) override
-    {
-        if (isGlobalMouseListener && e.source == scrollSource)
-            endDragAndClearGlobalMouseListener();
-    }
-
-    void endDragAndClearGlobalMouseListener()
-    {
-        offsetX.endDrag();
-        offsetY.endDrag();
-        isDragging = false;
-
-        viewport.contentHolder.addMouseListener (this, true);
-        Desktop::getInstance().removeGlobalMouseListener (this);
-
-        isGlobalMouseListener = false;
-    }
-
-    bool doesMouseEventComponentBlockViewportDrag (const Component* eventComp)
-    {
-        for (auto c = eventComp; c != nullptr && c != &viewport; c = c->getParentComponent())
-            if (c->getViewportIgnoreDragFlag())
-                return true;
-
-        return false;
-    }
-
-    Viewport& viewport;
-    ViewportDragPosition offsetX, offsetY;
-    Point<int> originalViewPos;
-    MouseInputSource scrollSource = Desktop::getInstance().getMainMouseSource();
-    bool isDragging = false;
-    bool isGlobalMouseListener = false;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DragToScrollListener)
-};
-
-void Viewport::setScrollOnDragEnabled (bool shouldScrollOnDrag)
-{
-    if (isScrollOnDragEnabled() != shouldScrollOnDrag)
-    {
-        if (shouldScrollOnDrag)
-            dragToScrollListener.reset (new DragToScrollListener (*this));
-        else
-            dragToScrollListener.reset();
-    }
-}
-
-bool Viewport::isScrollOnDragEnabled() const noexcept
-{
-    return dragToScrollListener != nullptr;
+    scrollOnDragMode = mode;
 }
 
 bool Viewport::isCurrentlyScrollingOnDrag() const noexcept
 {
-    return dragToScrollListener != nullptr && dragToScrollListener->isDragging;
+    return dragToScrollListener->isDragging;
 }
 
 //==============================================================================
