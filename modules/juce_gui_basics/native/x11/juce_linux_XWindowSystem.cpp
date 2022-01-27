@@ -1744,7 +1744,13 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
             X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
         }
 
-        auto windowBorder = peer->getFrameSize();
+        const auto windowBorder = [&]() -> BorderSize<int>
+        {
+            if (const auto& frameSize = peer->getFrameSizeIfPresent())
+                return *frameSize;
+
+            return {};
+        }();
 
         X11Symbols::getInstance()->xMoveResizeWindow (display, windowH,
                                                       newBounds.getX() - windowBorder.getLeft(),
@@ -1774,7 +1780,14 @@ void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) co
         }
         else if (auto* c = peer.getConstrainer())
         {
-            const auto windowBorder = peer.getFrameSize();
+            const auto windowBorder = [&]() -> BorderSize<int>
+            {
+                if (const auto& frameSize = peer.getFrameSizeIfPresent())
+                    return *frameSize;
+
+                return {};
+            }();
+
             const auto factor       = peer.getPlatformScaleFactor();
             const auto leftAndRight = windowBorder.getLeftAndRight();
             const auto topAndBottom = windowBorder.getTopAndBottom();

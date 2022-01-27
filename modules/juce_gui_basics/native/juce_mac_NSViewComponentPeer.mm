@@ -2390,7 +2390,16 @@ private:
         {
             if (auto* constrainer = owner->getConstrainer())
             {
-                const auto originalBounds = owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()).toFloat();
+                const auto originalBounds = [&]() -> Rectangle<float>
+                {
+                    const auto screenBounds = owner->getComponent().getScreenBounds();
+
+                    if (const auto frameSize = owner->getFrameSizeIfPresent())
+                        return frameSize->addedTo (screenBounds).toFloat();
+
+                    return screenBounds.toFloat();
+                }();
+
                 const auto expanded = originalBounds.withWidth  ((float) constrainer->getMaximumWidth())
                                                     .withHeight ((float) constrainer->getMaximumHeight());
                 const auto constrained = expanded.constrainedWithin (convertToRectFloat (flippedScreenRect (r)));

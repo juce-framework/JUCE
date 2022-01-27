@@ -6,6 +6,30 @@ develop
 
 Change
 ------
+The ComponentPeer::getFrameSize() function has been deprecated on Linux.
+
+Possible Issues
+---------------
+Deprecation warnings will be seen when compiling code which uses this function
+and eventually builds will fail when it is later removed from the API.
+
+Workaround
+----------
+Use the ComponentPeer::getFrameSizeIfPresent() function. The new function returns
+an OptionalBorderSize object. Use operator bool() to determine if the border size
+is valid, then access the value using operator*() only if it is.
+
+Rationale
+---------
+The XWindow system cannot return a valid border size immediately after window
+creation. ComponentPeer::getFrameSize() returns a default constructed
+BorderSize<int> instance in such cases that corresponds to a frame size of
+zero. That however can be a valid value, and needs to be treated differently
+from the situation when the frame size is not yet available.
+
+
+Change
+------
 The return type of XWindowSystem::getBorderSize() was changed to
 ComponentPeer::OptionalBorderSize.
 

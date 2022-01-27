@@ -260,6 +260,9 @@ public:
         Whether or not the window has a normal window frame depends on the flags
         that were set when the window was created by Component::addToDesktop()
     */
+   #if JUCE_LINUX || JUCE_BSD
+    [[deprecated ("Use getFrameSizeIfPresent instead.")]]
+   #endif
     virtual BorderSize<int> getFrameSize() const = 0;
 
     /** This is called when the window's bounds change.

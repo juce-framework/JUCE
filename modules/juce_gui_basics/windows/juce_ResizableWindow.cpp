@@ -532,9 +532,12 @@ String ResizableWindow::getWindowStateAsString()
    #if JUCE_LINUX
     if (auto* peer = isOnDesktop() ? getPeer() : nullptr)
     {
-        const auto frameSize = peer->getFrameSize();
-        stateString << " frame " << frameSize.getTop() << ' ' << frameSize.getLeft()
-                    << ' ' << frameSize.getBottom() << ' ' << frameSize.getRight();
+        if (const auto optionalFrameSize = peer->getFrameSizeIfPresent())
+        {
+            const auto& frameSize = *optionalFrameSize;
+            stateString << " frame " << frameSize.getTop() << ' ' << frameSize.getLeft()
+                        << ' ' << frameSize.getBottom() << ' ' << frameSize.getRight();
+        }
     }
    #endif
 
@@ -610,7 +613,9 @@ bool ResizableWindow::restoreWindowStateFromString (const String& s)
 
     if (peer != nullptr)
     {
-        peer->getFrameSize().subtractFrom (newPos);
+        if (const auto frameSize = peer->getFrameSizeIfPresent())
+            frameSize->subtractFrom (newPos);
+
         peer->setNonFullScreenBounds (newPos);
     }
 
