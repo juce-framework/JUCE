@@ -34,6 +34,14 @@ inline String msBuildEscape (String str)
     return str;
 }
 
+inline StringArray msBuildEscape (StringArray range)
+{
+    for (auto& i : range)
+        i = msBuildEscape (i);
+
+    return range;
+}
+
 //==============================================================================
 class MSVCProjectExporterBase   : public ProjectExporter
 {
@@ -508,7 +516,6 @@ public:
 
                         intdir->addTextElement (build_tools::windowsStylePath (intermediatesPath));
                     }
-
 
                     {
                         auto* targetName = props->createNewChildElement ("TargetName");
@@ -1332,23 +1339,25 @@ public:
             return librarySearchPaths;
         }
 
+        /*  Libraries specified in the Projucer don't get escaped automatically.
+            To include a special character in the name of a library,
+            you must use the appropriate escape code instead.
+            Module and shared code library names are not preprocessed.
+            Special characters in the names of these libraries will be toEscape
+            as appropriate.
+        */
         StringArray getExternalLibraries (const MSVCBuildConfiguration& config, const StringArray& otherLibs) const
         {
-            const auto sharedCodeLib = [&]() -> StringArray
-            {
-                if (type != SharedCodeTarget)
-                    if (auto* shared = getOwner().getSharedCodeTarget())
-                        return { shared->getBinaryNameWithSuffix (config, false) };
-
-                return {};
-            }();
-
             auto result = otherLibs;
-            result.addArray (getOwner().getModuleLibs());
-            result.addArray (sharedCodeLib);
 
             for (auto& i : result)
-                i = msBuildEscape (getOwner().replacePreprocessorTokens (config, i).trim());
+                i = getOwner().replacePreprocessorTokens (config, i).trim();
+
+            result.addArray (msBuildEscape (getOwner().getModuleLibs()));
+
+            if (type != SharedCodeTarget)
+                if (auto* shared = getOwner().getSharedCodeTarget())
+                    result.add (msBuildEscape (shared->getBinaryNameWithSuffix (config, false)));
 
             return result;
         }
