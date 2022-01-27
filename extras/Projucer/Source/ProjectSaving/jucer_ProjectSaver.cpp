@@ -293,20 +293,6 @@ Result ProjectSaver::saveProject (ProjectExporter* specifiedExporterToSave)
     {
         if (project.isAudioPluginProject())
         {
-            const auto isInvalidCode = [] (String code)
-            {
-                return code.length() != 4 || code.toStdString().size() != 4;
-            };
-
-            if (isInvalidCode (project.getPluginManufacturerCodeString()))
-                return Result::fail ("The plugin manufacturer code must contain exactly four characters.");
-
-            if (isInvalidCode (project.getPluginCodeString()))
-                return Result::fail ("The plugin code must contain exactly four characters.");
-        }
-
-        if (project.isAudioPluginProject())
-        {
             if (project.shouldBuildUnityPlugin())
                 writeUnityScriptFile();
         }

@@ -50,6 +50,8 @@ namespace ProjectMessages
         DECLARE_ID (oldProjucer);
         DECLARE_ID (cLion);
         DECLARE_ID (newVersionAvailable);
+        DECLARE_ID (pluginCodeInvalid);
+        DECLARE_ID (manufacturerCodeInvalid);
 
         DECLARE_ID (notification);
         DECLARE_ID (warning);
@@ -63,7 +65,7 @@ namespace ProjectMessages
     {
         static Identifier warnings[] = { Ids::incompatibleLicense, Ids::cppStandard, Ids::moduleNotFound,
                                          Ids::jucePath, Ids::jucerFileModified, Ids::missingModuleDependencies,
-                                         Ids::oldProjucer, Ids::cLion };
+                                         Ids::oldProjucer, Ids::cLion, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid };
 
         if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
             return Ids::warning;
@@ -86,6 +88,8 @@ namespace ProjectMessages
         if (message == Ids::oldProjucer)                return "Projucer Out of Date";
         if (message == Ids::newVersionAvailable)        return "New Version Available";
         if (message == Ids::cLion)                      return "Deprecated Exporter";
+        if (message == Ids::pluginCodeInvalid)          return "Invalid Plugin Code";
+        if (message == Ids::manufacturerCodeInvalid)    return "Invalid Manufacturer Code";
 
         jassertfalse;
         return {};
@@ -102,6 +106,8 @@ namespace ProjectMessages
         if (message == Ids::oldProjucer)                return "The version of the Projucer you are using is out of date.";
         if (message == Ids::newVersionAvailable)        return "A new version of JUCE is available to download.";
         if (message == Ids::cLion)                      return "The CLion exporter is deprecated. Use JUCE's CMake support instead.";
+        if (message == Ids::pluginCodeInvalid)          return "The plugin code should be exactly four characters in length.";
+        if (message == Ids::manufacturerCodeInvalid)    return "The manufacturer code should be exactly four characters in length.";
 
         jassertfalse;
         return {};
@@ -618,6 +624,7 @@ private:
     void updateOldProjucerWarning (bool showWarning);
     void updateCLionWarning (bool showWarning);
     void updateModuleNotFoundWarning (bool showWarning);
+    void updateCodeWarning (Identifier identifier, String value);
 
     ValueTree projectMessages { ProjectMessages::Ids::projectMessages, {},
                                 { { ProjectMessages::Ids::notification, {} }, { ProjectMessages::Ids::warning, {} } } };
