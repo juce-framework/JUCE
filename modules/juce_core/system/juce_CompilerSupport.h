@@ -102,7 +102,7 @@
  #define JUCE_CONSTEXPR constexpr
 #endif
 
-#if __cplusplus >= 201703L
+#if JUCE_CXX17_IS_AVAILABLE
  #define JUCE_NODISCARD [[nodiscard]]
 #else
  #define JUCE_NODISCARD
