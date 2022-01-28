@@ -442,15 +442,17 @@ public:
 
     Component* refreshComponentForRow (int row, bool selected, Component* existing) override
     {
+        auto safePtr = rawToUniquePtr (existing);
+
         if (isPositiveAndBelow (row, voiceProducts.size()))
         {
-            if (existing == nullptr)
-                existing = new VoiceRow (purchases);
+            if (safePtr == nullptr)
+                safePtr = std::make_unique<VoiceRow> (purchases);
 
-            if (auto* voiceRow = dynamic_cast<VoiceRow*> (existing))
+            if (auto* voiceRow = dynamic_cast<VoiceRow*> (safePtr.get()))
                 voiceRow->update (row, selected);
 
-            return existing;
+            return safePtr.release();
         }
 
         return nullptr;
