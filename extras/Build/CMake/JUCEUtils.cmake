@@ -856,7 +856,15 @@ function(juce_enable_copy_plugin_step shared_code_target)
         get_target_property(source "${target}" JUCE_PLUGIN_ARTEFACT_FILE)
 
         if(source)
-            get_target_property(dest   "${target}" JUCE_PLUGIN_COPY_DIR)
+            if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+                add_custom_command(TARGET ${target} POST_BUILD
+                    COMMAND "${CMAKE_COMMAND}"
+                        "-Dsrc=${source}"
+                        "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
+                    VERBATIM)
+            endif()
+
+            get_target_property(dest "${target}" JUCE_PLUGIN_COPY_DIR)
 
             if(dest)
                 _juce_copy_dir("${target}" "${source}" "$<GENEX_EVAL:${dest}>")
