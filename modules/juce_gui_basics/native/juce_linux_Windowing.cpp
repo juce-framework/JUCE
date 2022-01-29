@@ -309,7 +309,6 @@ public:
     bool setAlwaysOnTop (bool) override                             { return false; }
     void textInputRequired (Point<int>, TextInputTarget& target) override  {
         XWindowSystem::getInstance()->bindImeContext(windowH);
-        target.insertTextAtCaret(String());
         isImeEditing = true;
     }
 
