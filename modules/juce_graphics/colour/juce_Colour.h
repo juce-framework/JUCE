@@ -387,14 +387,14 @@ public:
         Looks for a colour that contrasts with both of the colours passed-in.
         Handy for things like choosing a highlight colour in text editors, etc.
     */
-    static JUCE_NODISCARD Colour contrasting (Colour colour1,
+    JUCE_NODISCARD static Colour contrasting (Colour colour1,
                                               Colour colour2) noexcept;
 
     //==============================================================================
     /** Returns an opaque shade of grey.
         @param brightness the level of grey to return - 0 is black, 1.0 is white
     */
-    static JUCE_NODISCARD Colour greyLevel (float brightness) noexcept;
+    JUCE_NODISCARD static Colour greyLevel (float brightness) noexcept;
 
     //==============================================================================
     /** Returns a stringified version of this colour.
@@ -403,7 +403,7 @@ public:
     String toString() const;
 
     /** Reads the colour from a string that was created with toString(). */
-    static JUCE_NODISCARD Colour fromString (StringRef encodedColourString);
+    JUCE_NODISCARD static Colour fromString (StringRef encodedColourString);
 
     /** Returns the colour as a hex string in the form RRGGBB or AARRGGBB. */
     String toDisplayString (bool includeAlphaValue) const;
