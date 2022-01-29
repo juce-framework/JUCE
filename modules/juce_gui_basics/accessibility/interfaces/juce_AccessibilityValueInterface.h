@@ -113,7 +113,7 @@ public:
         /** Returns the minimum value for this range. */
         double getMinimumValue() const noexcept  { return range.min; }
 
-        /** Returns the maxiumum value for this range. */
+        /** Returns the maximum value for this range. */
         double getMaximumValue() const noexcept  { return range.max; }
 
         /** Returns the interval for this range. */

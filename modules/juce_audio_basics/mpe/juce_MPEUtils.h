@@ -63,6 +63,11 @@ public:
     */
     int findMidiChannelForNewNote (int noteNumber) noexcept;
 
+    /** If a note has been added using findMidiChannelForNewNote() this will return the channel
+        to which it was assigned, otherwise it will return -1.
+    */
+    int findMidiChannelForExistingNote (int initialNoteOnNumber) noexcept;
+
     /** You must call this method for all note-offs that you receive so that this class
         can keep track of the currently playing notes internally.
 
@@ -86,7 +91,7 @@ private:
         int lastNotePlayed = -1;
         bool isFree() const noexcept  { return notes.isEmpty(); }
     };
-    MidiChannel midiChannels[17];
+    std::array<MidiChannel, 17> midiChannels;
 
     //==============================================================================
     int findMidiChannelPlayingClosestNonequalNote (int noteNumber) noexcept;

@@ -581,7 +581,7 @@ private:
 
         tresult getInt (Steinberg::int64& result) const
         {
-            if (kind != Kind::Int)
+            if (kind != Kind::tagInt)
                 return kResultFalse;
 
             result = storage.storedInt;
@@ -590,7 +590,7 @@ private:
 
         tresult getFloat (double& result) const
         {
-            if (kind != Kind::Float)
+            if (kind != Kind::tagFloat)
                 return kResultFalse;
 
             result = storage.storedFloat;
@@ -599,7 +599,7 @@ private:
 
         tresult getString (Vst::TChar* data, Steinberg::uint32 numBytes) const
         {
-            if (kind != Kind::String)
+            if (kind != Kind::tagString)
                 return kResultFalse;
 
             std::memcpy (data,
@@ -610,7 +610,7 @@ private:
 
         tresult getBinary (const void*& data, Steinberg::uint32& numBytes) const
         {
-            if (kind != Kind::Binary)
+            if (kind != Kind::tagBinary)
                 return kResultFalse;
 
             data = storage.storedBinary.data();
@@ -619,19 +619,19 @@ private:
         }
 
     private:
-        void constructFrom (Int    x) noexcept { kind = Kind::Int;    new (&storage.storedInt)    Int    (std::move (x)); }
-        void constructFrom (Float  x) noexcept { kind = Kind::Float;  new (&storage.storedFloat)  Float  (std::move (x)); }
-        void constructFrom (String x) noexcept { kind = Kind::String; new (&storage.storedString) String (std::move (x)); }
-        void constructFrom (Binary x) noexcept { kind = Kind::Binary; new (&storage.storedBinary) Binary (std::move (x)); }
+        void constructFrom (Int    x) noexcept { kind = Kind::tagInt;    new (&storage.storedInt)    Int    (std::move (x)); }
+        void constructFrom (Float  x) noexcept { kind = Kind::tagFloat;  new (&storage.storedFloat)  Float  (std::move (x)); }
+        void constructFrom (String x) noexcept { kind = Kind::tagString; new (&storage.storedString) String (std::move (x)); }
+        void constructFrom (Binary x) noexcept { kind = Kind::tagBinary; new (&storage.storedBinary) Binary (std::move (x)); }
 
         void reset() noexcept
         {
             switch (kind)
             {
-                case Kind::Int:                                    break;
-                case Kind::Float:                                  break;
-                case Kind::String: storage.storedString.~vector(); break;
-                case Kind::Binary: storage.storedBinary.~vector(); break;
+                case Kind::tagInt:                                    break;
+                case Kind::tagFloat:                                  break;
+                case Kind::tagString: storage.storedString.~vector(); break;
+                case Kind::tagBinary: storage.storedBinary.~vector(); break;
             }
         }
 
@@ -639,14 +639,14 @@ private:
         {
             switch (other.kind)
             {
-                case Kind::Int:    constructFrom (std::move (other.storage.storedInt));    break;
-                case Kind::Float:  constructFrom (std::move (other.storage.storedFloat));  break;
-                case Kind::String: constructFrom (std::move (other.storage.storedString)); break;
-                case Kind::Binary: constructFrom (std::move (other.storage.storedBinary)); break;
+                case Kind::tagInt:    constructFrom (std::move (other.storage.storedInt));    break;
+                case Kind::tagFloat:  constructFrom (std::move (other.storage.storedFloat));  break;
+                case Kind::tagString: constructFrom (std::move (other.storage.storedString)); break;
+                case Kind::tagBinary: constructFrom (std::move (other.storage.storedBinary)); break;
             }
         }
 
-        enum class Kind { Int, Float, String, Binary };
+        enum class Kind { tagInt, tagFloat, tagString, tagBinary };
 
         union Storage
         {

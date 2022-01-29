@@ -36,6 +36,7 @@ namespace
         uint32 index = 0;
         BOOL exists = false;
         auto hr = names->FindLocaleName (L"en-us", &index, &exists);
+        ignoreUnused (hr);
 
         if (! exists)
             index = 0;
@@ -54,7 +55,7 @@ namespace
         jassert (family != nullptr);
         ComSmartPtr<IDWriteLocalizedStrings> familyNames;
         auto hr = family->GetFamilyNames (familyNames.resetAndGetPointerAddress());
-        jassert (SUCCEEDED (hr)); ignoreUnused (hr);
+        jassertquiet (SUCCEEDED (hr));
         return getLocalisedName (familyNames);
     }
 
@@ -63,7 +64,7 @@ namespace
         jassert (font != nullptr);
         ComSmartPtr<IDWriteLocalizedStrings> faceNames;
         auto hr = font->GetFaceNames (faceNames.resetAndGetPointerAddress());
-        jassert (SUCCEEDED (hr)); ignoreUnused (hr);
+        jassertquiet (SUCCEEDED (hr));
         return getLocalisedName (faceNames);
     }
 
@@ -152,6 +153,7 @@ public:
 
         uint32 fontIndex = 0;
         auto hr = fontCollection->FindFamilyName (font.getTypefaceName().toWideCharPointer(), &fontIndex, &fontFound);
+        ignoreUnused (hr);
 
         if (! fontFound)
             fontIndex = 0;

@@ -25,12 +25,10 @@ namespace juce
 
 MPESynthesiser::MPESynthesiser()
 {
-    MPEZoneLayout zoneLayout;
-    zoneLayout.setLowerZone (15);
-    setZoneLayout (zoneLayout);
 }
 
-MPESynthesiser::MPESynthesiser (MPEInstrument* mpeInstrument)  : MPESynthesiserBase (mpeInstrument)
+MPESynthesiser::MPESynthesiser (MPEInstrument& mpeInstrument)
+    : MPESynthesiserBase (mpeInstrument)
 {
 }
 
@@ -314,7 +312,7 @@ void MPESynthesiser::turnOffAllVoices (bool allowTailOff)
     }
 
     // finally make sure the MPE Instrument also doesn't have any notes anymore.
-    instrument->releaseAllNotes();
+    instrument.releaseAllNotes();
 }
 
 //==============================================================================

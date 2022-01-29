@@ -1133,7 +1133,6 @@ namespace IconConverters
 
         if (auto* dc = ::CreateCompatibleDC (deviceContext.dc))
         {
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wfour-char-constants")
             BITMAPV5HEADER header = {};
             header.bV5Size = sizeof (BITMAPV5HEADER);
             header.bV5Width = bm.bmWidth;
@@ -1145,15 +1144,8 @@ namespace IconConverters
             header.bV5GreenMask = 0x0000FF00;
             header.bV5BlueMask = 0x000000FF;
             header.bV5AlphaMask = 0xFF000000;
-
-           #if JUCE_MINGW
-            header.bV5CSType = 'Win ';
-           #else
-            header.bV5CSType = LCS_WINDOWS_COLOR_SPACE;
-           #endif
-
+            header.bV5CSType = 0x57696E20; // 'Win '
             header.bV5Intent = LCS_GM_IMAGES;
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             uint32* bitmapImageData = nullptr;
 
@@ -1243,6 +1235,15 @@ JUCE_IUNKNOWNCLASS (ITipInvocation, "37c994e7-432b-4834-a2f7-dce1f13b834b")
 
     JUCE_COMCALL Toggle (HWND) = 0;
 };
+
+} // namespace juce
+
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::ITipInvocation, 0x37c994e7, 0x432b, 0x4834, 0xa2, 0xf7, 0xdc, 0xe1, 0xf1, 0x3b, 0x83, 0x4b)
+#endif
+
+namespace juce
+{
 
 struct OnScreenKeyboard   : public DeletedAtShutdown,
                             private Timer
@@ -1358,7 +1359,15 @@ JUCE_COMCLASS (IUIViewSettings, "c63657f6-8850-470d-88f8-455e16ea2c26")  : publi
     JUCE_COMCALL GetUserInteractionMode (UserInteractionMode*) = 0;
 };
 
+} // namespace juce
 
+#ifdef __CRT_UUID_DECL
+__CRT_UUID_DECL (juce::IUIViewSettingsInterop, 0x3694dbf9, 0x8f68, 0x44be, 0x8f, 0xf5, 0x19, 0x5c, 0x98, 0xed, 0xe8, 0xa6)
+__CRT_UUID_DECL (juce::IUIViewSettings,        0xc63657f6, 0x8850, 0x470d, 0x88, 0xf8, 0x45, 0x5e, 0x16, 0xea, 0x2c, 0x26)
+#endif
+
+namespace juce
+{
 struct UWPUIViewSettings
 {
     UWPUIViewSettings()
@@ -2443,7 +2452,7 @@ private:
         if (! component.isCurrentlyModal() && (styleFlags & windowHasDropShadow) != 0
             && ((! hasTitleBar()) || SystemStats::getOperatingSystemType() < SystemStats::WinVista))
         {
-            shadower.reset (component.getLookAndFeel().createDropShadowerForComponent (&component));
+            shadower = component.getLookAndFeel().createDropShadowerForComponent (component);
 
             if (shadower != nullptr)
                 shadower->setOwner (&component);
@@ -4528,8 +4537,8 @@ class PreVistaMessageBox  : public WindowsMessageBoxBase
 public:
     PreVistaMessageBox (const MessageBoxOptions& opts,
                         UINT extraFlags,
-                        std::unique_ptr<ModalComponentManager::Callback>&& callback)
-        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+                        std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (cb)),
           flags (extraFlags | getMessageBoxFlags (opts.getIconType())),
           title (opts.getTitle()), message (opts.getMessage())
     {
@@ -4581,8 +4590,8 @@ class WindowsTaskDialog  : public WindowsMessageBoxBase
 {
 public:
     WindowsTaskDialog (const MessageBoxOptions& opts,
-                       std::unique_ptr<ModalComponentManager::Callback>&& callback)
-        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (callback)),
+                       std::unique_ptr<ModalComponentManager::Callback>&& cb)
+        : WindowsMessageBoxBase (opts.getAssociatedComponent(), std::move (cb)),
           iconType (opts.getIconType()),
           title (opts.getTitle()), message (opts.getMessage()),
           button1 (opts.getButtonText (0)), button2 (opts.getButtonText (1)), button3 (opts.getButtonText (2))
@@ -4594,6 +4603,7 @@ public:
         TASKDIALOGCONFIG config{};
 
         config.cbSize         = sizeof (config);
+        config.hwndParent     = getParentHWND();
         config.pszWindowTitle = title.toWideCharPointer();
         config.pszContent     = message.toWideCharPointer();
         config.hInstance      = (HINSTANCE) Process::getCurrentModuleInstanceHandle();
@@ -5199,17 +5209,18 @@ private:
             if (iter != cursorsBySize.end())
                 return iter->second;
 
-            const auto img = info.image.getImage();
-            const auto imgW = jmax (1, img.getWidth());
-            const auto imgH = jmax (1, img.getHeight());
-
+            const auto logicalSize = info.image.getScaledBounds();
             const auto scale = (float) size / (float) unityCursorSize;
-            const auto scaleToUse = scale * jmin (1.0f, jmin ((float) unityCursorSize / (float) imgW,
-                                                              (float) unityCursorSize / (float) imgH)) / info.image.getScale();
-            const auto rescaled = img.rescaled (roundToInt (scaleToUse * (float) imgW),
-                                                roundToInt (scaleToUse * (float) imgH));
-            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt (scaleToUse * (float) info.hotspot.x));
-            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt (scaleToUse * (float) info.hotspot.y));
+            const auto physicalSize = logicalSize * scale;
+
+            const auto& image = info.image.getImage();
+            const auto rescaled = image.rescaled (roundToInt ((float) physicalSize.getWidth()),
+                                                  roundToInt ((float) physicalSize.getHeight()));
+
+            const auto effectiveScale = rescaled.getWidth() / logicalSize.getWidth();
+
+            const auto hx = jlimit (0, rescaled.getWidth(),  roundToInt ((float) info.hotspot.x * effectiveScale));
+            const auto hy = jlimit (0, rescaled.getHeight(), roundToInt ((float) info.hotspot.y * effectiveScale));
 
             return cursorsBySize.emplace (size, IconConverters::createHICONFromImage (rescaled, false, hx, hy)).first->second;
         }

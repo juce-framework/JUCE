@@ -36,7 +36,7 @@ namespace juce
     Only after a Bluetooth MIDI device has been paired will its MIDI ports
     be available through JUCE's MidiInput and MidiOutput classes.
 
-    This dialogue is currently only available on macOS targetting versions 10.11+,
+    This dialogue is currently only available on macOS targeting versions 10.11+,
     iOS and Android. When targeting older versions of macOS you should instead
     pair Bluetooth MIDI devices using the "Audio MIDI Setup" app (located in
     /Applications/Utilities). On Windows, you should use the system settings. On

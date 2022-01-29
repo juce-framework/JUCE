@@ -65,7 +65,7 @@ public:
     ScaledImage (const Image& imageIn, double scaleIn)
         : image (imageIn), scaleFactor (scaleIn) {}
 
-    /** Returns the image at its original dimentions. */
+    /** Returns the image at its original dimensions. */
     Image getImage() const { return image; }
 
     /** Returns the image's scale. */

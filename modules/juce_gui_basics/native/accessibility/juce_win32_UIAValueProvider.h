@@ -28,13 +28,10 @@ namespace juce
 
 //==============================================================================
 class UIAValueProvider  : public UIAProviderBase,
-                          public ComBaseClassHelper<IValueProvider>
+                          public ComBaseClassHelper<ComTypes::IValueProvider>
 {
 public:
-    UIAValueProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT SetValue (LPCWSTR val) override

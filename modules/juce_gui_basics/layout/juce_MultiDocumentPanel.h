@@ -328,7 +328,7 @@ public:
         operation you could give a value of false to the callback to abort the close operation.
 
         If your component is based on the FileBasedDocument class, then you'd probably want
-        to call FileBasedDocument::saveIfNeededAndUserAgreesAsync() and call the calback with
+        to call FileBasedDocument::saveIfNeededAndUserAgreesAsync() and call the callback with
         true if this returned FileBasedDocument::savedOk.
 
         @see closeDocumentAsync, FileBasedDocument::saveIfNeededAndUserAgreesAsync()

@@ -379,8 +379,7 @@ String Time::getTimeZone() const
 {
     String zone[2];
 
-  #if JUCE_WINDOWS
-   #if JUCE_MSVC || JUCE_CLANG
+  #if JUCE_WINDOWS && (JUCE_MSVC || JUCE_CLANG)
     _tzset();
 
     for (int i = 0; i < 2; ++i)
@@ -390,9 +389,6 @@ String Time::getTimeZone() const
         _get_tzname (&length, name, sizeof (name) - 1, i);
         zone[i] = name;
     }
-   #else
-    #warning "Can't find a replacement for tzset on mingw - ideas welcome!"
-   #endif
   #else
     tzset();
 

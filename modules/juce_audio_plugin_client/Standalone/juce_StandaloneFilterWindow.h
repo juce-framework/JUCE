@@ -979,8 +979,17 @@ private:
                 if (auto* editorConstrainer = editor->getConstrainer())
                 {
                     const auto borders = owner.getContentComponentBorder();
-                    const auto extraWindowWidth = borders.getLeftAndRight();
-                    const auto extraWindowHeight = extraHeight + borders.getTopAndBottom();
+
+                    const auto windowBorders = [&]() -> BorderSize<int>
+                    {
+                        if (auto* peer = owner.getPeer())
+                            return peer->getFrameSize();
+
+                        return {};
+                    }();
+
+                    const auto extraWindowWidth = borders.getLeftAndRight() + windowBorders.getLeftAndRight();
+                    const auto extraWindowHeight = extraHeight + borders.getTopAndBottom() + windowBorders.getTopAndBottom();
 
                     owner.setResizeLimits (jmax (10, editorConstrainer->getMinimumWidth()  + extraWindowWidth),
                                            jmax (10, editorConstrainer->getMinimumHeight() + extraWindowHeight),

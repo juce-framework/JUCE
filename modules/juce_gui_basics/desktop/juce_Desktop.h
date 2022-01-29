@@ -436,6 +436,8 @@ private:
     std::unique_ptr<LookAndFeel> defaultLookAndFeel;
     WeakReference<LookAndFeel> currentLookAndFeel;
 
+    std::unique_ptr<FocusOutline> focusOutline;
+
     Component* kioskModeComponent = nullptr;
     Rectangle<int> kioskComponentOriginalBounds;
     bool kioskModeReentrant = false;
@@ -458,6 +460,7 @@ private:
     void setKioskComponent (Component*, bool shouldBeEnabled, bool allowMenusAndBars);
 
     void triggerFocusCallback();
+    void updateFocusOutline();
     void handleAsyncUpdate() override;
 
     static Point<float> getMousePositionFloat();

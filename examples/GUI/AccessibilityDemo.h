@@ -190,10 +190,13 @@ private:
         ButtonsComponent()
         {
             addAndMakeVisible (radioButtons);
+
+            textButton.setHasFocusOutline (true);
             addAndMakeVisible (textButton);
 
             shapeButton.setShape (getJUCELogoPath(), false, true, false);
             shapeButton.onClick = [] { AlertWindow::showMessageBoxAsync (MessageBoxIconType::InfoIcon, "Alert", "This is an AlertWindow"); };
+            shapeButton.setHasFocusOutline (true);
             addAndMakeVisible (shapeButton);
         }
 
@@ -217,6 +220,7 @@ private:
                 {
                     b.setRadioGroupId (1);
                     b.setButtonText ("Button " + String (index++));
+                    b.setHasFocusOutline (true);
                     addAndMakeVisible (b);
                 }
 
@@ -418,6 +422,7 @@ constexpr NameAndRole accessibilityRoles[]
     { "Ignored",       AccessibilityRole::ignored },
     { "Unspecified",   AccessibilityRole::unspecified },
     { "Button",        AccessibilityRole::button },
+    { "Toggle",        AccessibilityRole::toggleButton },
     { "ComboBox",      AccessibilityRole::comboBox },
     { "Slider",        AccessibilityRole::slider },
     { "Static Text",   AccessibilityRole::staticText },

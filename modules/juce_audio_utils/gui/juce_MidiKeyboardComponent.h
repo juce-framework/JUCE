@@ -46,30 +46,18 @@ namespace juce
 
     @tags{Audio}
 */
-class JUCE_API  MidiKeyboardComponent  : public Component,
-                                         public MidiKeyboardState::Listener,
-                                         public ChangeBroadcaster,
+class JUCE_API  MidiKeyboardComponent  : public KeyboardComponentBase,
+                                         private MidiKeyboardState::Listener,
                                          private Timer
 {
 public:
     //==============================================================================
-    /** The direction of the keyboard.
-        @see setOrientation
-    */
-    enum Orientation
-    {
-        horizontalKeyboard,
-        verticalKeyboardFacingLeft,
-        verticalKeyboardFacingRight,
-    };
-
     /** Creates a MidiKeyboardComponent.
 
         @param state        the midi keyboard model that this component will represent
         @param orientation  whether the keyboard is horizontal or vertical
     */
-    MidiKeyboardComponent (MidiKeyboardState& state,
-                           Orientation orientation);
+    MidiKeyboardComponent (MidiKeyboardState& state, Orientation orientation);
 
     /** Destructor. */
     ~MidiKeyboardComponent() override;
@@ -84,6 +72,7 @@ public:
     */
     void setVelocity (float velocity, bool useMousePositionForVelocity);
 
+    //==============================================================================
     /** Changes the midi channel number that will be used for events triggered by clicking
         on the component.
 
@@ -100,7 +89,7 @@ public:
     /** Returns the midi channel that the keyboard is using for midi messages.
         @see setMidiChannel
     */
-    int getMidiChannel() const noexcept                             { return midiChannel; }
+    int getMidiChannel() const noexcept            { return midiChannel; }
 
     /** Sets a mask to indicate which incoming midi channels should be represented by
         key movements.
@@ -119,86 +108,41 @@ public:
     /** Returns the current set of midi channels represented by the component.
         This is the value that was set with setMidiChannelsToDisplay().
     */
-    int getMidiChannelsToDisplay() const noexcept                   { return midiInChannelMask; }
+    int getMidiChannelsToDisplay() const noexcept  { return midiInChannelMask; }
 
     //==============================================================================
-    /** Changes the width used to draw the white keys. */
-    void setKeyWidth (float widthInPixels);
+    /** Deletes all key-mappings.
 
-    /** Returns the width that was set by setKeyWidth(). */
-    float getKeyWidth() const noexcept                              { return keyWidth; }
-
-    /** Changes the width used to draw the buttons that scroll the keyboard up/down in octaves. */
-    void setScrollButtonWidth (int widthInPixels);
-
-    /** Returns the width that was set by setScrollButtonWidth(). */
-    int getScrollButtonWidth() const noexcept                       { return scrollButtonWidth; }
-
-    /** Changes the keyboard's current direction. */
-    void setOrientation (Orientation newOrientation);
-
-    /** Returns the keyboard's current direction. */
-    Orientation getOrientation() const noexcept                     { return orientation; }
-
-    /** Sets the range of midi notes that the keyboard will be limited to.
-
-        By default the range is 0 to 127 (inclusive), but you can limit this if you
-        only want a restricted set of the keys to be shown.
-
-        Note that the values here are inclusive and must be between 0 and 127.
+        @see setKeyPressForNote
     */
-    void setAvailableRange (int lowestNote,
-                            int highestNote);
+    void clearKeyMappings();
 
-    /** Returns the first note in the available range.
-        @see setAvailableRange
+    /** Maps a key-press to a given note.
+
+        @param key                  the key that should trigger the note
+        @param midiNoteOffsetFromC  how many semitones above C the triggered note should
+                                    be. The actual midi note that gets played will be
+                                    this value + (12 * the current base octave). To change
+                                    the base octave, see setKeyPressBaseOctave()
     */
-    int getRangeStart() const noexcept                              { return rangeStart; }
+    void setKeyPressForNote (const KeyPress& key, int midiNoteOffsetFromC);
 
-    /** Returns the last note in the available range.
-        @see setAvailableRange
+    /** Removes any key-mappings for a given note.
+
+        For a description of what the note number means, see setKeyPressForNote().
     */
-    int getRangeEnd() const noexcept                                { return rangeEnd; }
+    void removeKeyPressForNote (int midiNoteOffsetFromC);
 
-    /** If the keyboard extends beyond the size of the component, this will scroll
-        it to show the given key at the start.
+    /** Changes the base note above which key-press-triggered notes are played.
 
-        Whenever the keyboard's position is changed, this will use the ChangeBroadcaster
-        base class to send a callback to any ChangeListeners that have been registered.
+        The set of key-mappings that trigger notes can be moved up and down to cover
+        the entire scale using this method.
+
+        The value passed in is an octave number between 0 and 10 (inclusive), and
+        indicates which C is the base note to which the key-mapped notes are
+        relative.
     */
-    void setLowestVisibleKey (int noteNumber);
-
-    /** Returns the number of the first key shown in the component.
-        @see setLowestVisibleKey
-    */
-    int getLowestVisibleKey() const noexcept                        { return (int) firstKey; }
-
-    /** Sets the length of the black notes as a proportion of the white note length. */
-    void setBlackNoteLengthProportion (float ratio) noexcept;
-
-    /** Returns the length of the black notes as a proportion of the white note length. */
-    float getBlackNoteLengthProportion() const noexcept             { return blackNoteLengthRatio; }
-
-    /** Returns the absolute length of the black notes.
-        This will be their vertical or horizontal length, depending on the keyboard's orientation.
-    */
-    float getBlackNoteLength() const noexcept;
-
-    /** Sets the width of the black notes as a proportion of the white note width. */
-    void setBlackNoteWidthProportion (float ratio) noexcept;
-
-    /** Returns the width of the black notes as a proportion of the white note width. */
-    float getBlackNoteWidthProportion() const noexcept             { return blackNoteWidthRatio; }
-
-    /** Returns the absolute width of the black notes.
-        This will be their vertical or horizontal width, depending on the keyboard's orientation.
-    */
-    float getBlackNoteWidth() const noexcept                       { return keyWidth * blackNoteWidthRatio; }
-
-    /** If set to true, then scroll buttons will appear at either end of the keyboard
-        if there are too many notes to fit them all in the component at once.
-    */
-    void setScrollButtonsVisible (bool canScroll);
+    void setKeyPressBaseOctave (int newOctaveNumber);
 
     //==============================================================================
     /** A set of colour IDs to use to change the colour of various aspects of the keyboard.
@@ -216,80 +160,65 @@ public:
         mouseOverKeyOverlayColourId     = 0x1005003,  /**< This colour will be overlaid on the normal note colour. */
         keyDownOverlayColourId          = 0x1005004,  /**< This colour will be overlaid on the normal note colour. */
         textLabelColourId               = 0x1005005,
-        upDownButtonBackgroundColourId  = 0x1005006,
-        upDownButtonArrowColourId       = 0x1005007,
-        shadowColourId                  = 0x1005008
+        shadowColourId                  = 0x1005006
     };
 
-    /** Returns the position within the component of the left-hand edge of a key.
-
-        Depending on the keyboard's orientation, this may be a horizontal or vertical
-        distance, in either direction.
-    */
-    float getKeyStartPosition (int midiNoteNumber) const;
-
-    /** Returns the total width needed to fit all the keys in the available range. */
-    float getTotalKeyboardWidth() const noexcept;
-
-    /** Returns the key at a given coordinate. */
-    int getNoteAtPosition (Point<float> position);
-
     //==============================================================================
-    /** Deletes all key-mappings.
-        @see setKeyPressForNote
+    /** Use this method to draw a white note of the keyboard in a given rectangle.
+
+        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
+        currently pressed down.
+
+        When doing this, be sure to note the keyboard's orientation.
     */
-    void clearKeyMappings();
+    virtual void drawWhiteNote (int midiNoteNumber, Graphics& g, Rectangle<float> area,
+                                bool isDown, bool isOver, Colour lineColour, Colour textColour);
 
-    /** Maps a key-press to a given note.
+    /** Use this method to draw a black note of the keyboard in a given rectangle.
 
-        @param key                  the key that should trigger the note
-        @param midiNoteOffsetFromC  how many semitones above C the triggered note should
-                                    be. The actual midi note that gets played will be
-                                    this value + (12 * the current base octave). To change
-                                    the base octave, see setKeyPressBaseOctave()
+        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
+        currently pressed down.
+
+        When doing this, be sure to note the keyboard's orientation.
     */
-    void setKeyPressForNote (const KeyPress& key,
-                             int midiNoteOffsetFromC);
+    virtual void drawBlackNote (int midiNoteNumber, Graphics& g, Rectangle<float> area,
+                                bool isDown, bool isOver, Colour noteFillColour);
 
-    /** Removes any key-mappings for a given note.
-        For a description of what the note number means, see setKeyPressForNote().
+    /** Callback when the mouse is clicked on a key.
+
+        You could use this to do things like handle right-clicks on keys, etc.
+
+        Return true if you want the click to trigger the note, or false if you
+        want to handle it yourself and not have the note played.
+
+        @see mouseDraggedToKey
     */
-    void removeKeyPressForNote (int midiNoteOffsetFromC);
+    virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e)     { ignoreUnused (midiNoteNumber, e); return true; }
 
-    /** Changes the base note above which key-press-triggered notes are played.
+    /** Callback when the mouse is dragged from one key onto another.
 
-        The set of key-mappings that trigger notes can be moved up and down to cover
-        the entire scale using this method.
+        Return true if you want the drag to trigger the new note, or false if you
+        want to handle it yourself and not have the note played.
 
-        The value passed in is an octave number between 0 and 10 (inclusive), and
-        indicates which C is the base note to which the key-mapped notes are
-        relative.
+        @see mouseDownOnKey
     */
-    void setKeyPressBaseOctave (int newOctaveNumber);
+    virtual bool mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e)  { ignoreUnused (midiNoteNumber, e); return true; }
 
-    /** This sets the octave number which is shown as the octave number for middle C.
+    /** Callback when the mouse is released from a key.
 
-        This affects only the default implementation of getWhiteNoteText(), which
-        passes this octave number to MidiMessage::getMidiNoteName() in order to
-        get the note text. See MidiMessage::getMidiNoteName() for more info about
-        the parameter.
-
-        By default this value is set to 3.
-
-        @see getOctaveForMiddleC
+        @see mouseDownOnKey
     */
-    void setOctaveForMiddleC (int octaveNumForMiddleC);
+    virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e)       { ignoreUnused (midiNoteNumber, e); }
 
-    /** This returns the value set by setOctaveForMiddleC().
+    /** Allows text to be drawn on the white notes.
+
+        By default this is used to label the C in each octave, but could be used for other things.
+
         @see setOctaveForMiddleC
     */
-    int getOctaveForMiddleC() const noexcept            { return octaveNumForMiddleC; }
+    virtual String getWhiteNoteText (int midiNoteNumber);
 
     //==============================================================================
-    /** @internal */
-    void paint (Graphics&) override;
-    /** @internal */
-    void resized() override;
     /** @internal */
     void mouseMove (const MouseEvent&) override;
     /** @internal */
@@ -303,8 +232,6 @@ public:
     /** @internal */
     void mouseExit (const MouseEvent&) override;
     /** @internal */
-    void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
-    /** @internal */
     void timerCallback() override;
     /** @internal */
     bool keyStateChanged (bool isKeyDown) override;
@@ -313,127 +240,39 @@ public:
     /** @internal */
     void focusLost (FocusChangeType) override;
     /** @internal */
-    void handleNoteOn (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
-    /** @internal */
-    void handleNoteOff (MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
-    /** @internal */
     void colourChanged() override;
-
-protected:
-    //==============================================================================
-    /** Draws a white note in the given rectangle.
-
-        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
-        currently pressed down.
-
-        When doing this, be sure to note the keyboard's orientation.
-    */
-    virtual void drawWhiteNote (int midiNoteNumber,
-                                Graphics& g, Rectangle<float> area,
-                                bool isDown, bool isOver,
-                                Colour lineColour, Colour textColour);
-
-    /** Draws a black note in the given rectangle.
-
-        isOver indicates whether the mouse is over the key, isDown indicates whether the key is
-        currently pressed down.
-
-        When doing this, be sure to note the keyboard's orientation.
-    */
-    virtual void drawBlackNote (int midiNoteNumber,
-                                Graphics& g, Rectangle<float> area,
-                                bool isDown, bool isOver,
-                                Colour noteFillColour);
-
-    /** Allows text to be drawn on the white notes.
-        By default this is used to label the C in each octave, but could be used for other things.
-        @see setOctaveForMiddleC
-    */
-    virtual String getWhiteNoteText (int midiNoteNumber);
-
-    /** Draws the up and down buttons that scroll the keyboard up/down in octaves. */
-    virtual void drawUpDownButton (Graphics& g, int w, int h,
-                                   bool isMouseOver,
-                                   bool isButtonPressed,
-                                   bool movesOctavesUp);
-
-    /** Callback when the mouse is clicked on a key.
-
-        You could use this to do things like handle right-clicks on keys, etc.
-
-        Return true if you want the click to trigger the note, or false if you
-        want to handle it yourself and not have the note played.
-
-        @see mouseDraggedToKey
-    */
-    virtual bool mouseDownOnKey (int midiNoteNumber, const MouseEvent& e);
-
-    /** Callback when the mouse is dragged from one key onto another.
-
-        Return true if you want the drag to trigger the new note, or false if you
-        want to handle it yourself and not have the note played.
-
-        @see mouseDownOnKey
-    */
-    virtual bool mouseDraggedToKey (int midiNoteNumber, const MouseEvent& e);
-
-    /** Callback when the mouse is released from a key.
-        @see mouseDownOnKey
-    */
-    virtual void mouseUpOnKey (int midiNoteNumber, const MouseEvent& e);
-
-    /** Calculates the position of a given midi-note.
-
-        This can be overridden to create layouts with custom key-widths.
-
-        @param midiNoteNumber   the note to find
-        @param keyWidth         the desired width in pixels of one key - see setKeyWidth()
-        @returns                the start and length of the key along the axis of the keyboard
-    */
-    virtual Range<float> getKeyPosition (int midiNoteNumber, float keyWidth) const;
-
-    /** Returns the rectangle for a given key if within the displayable range */
-    Rectangle<float> getRectangleForKey (int midiNoteNumber) const;
-
 
 private:
     //==============================================================================
-    struct UpDownButton;
-    struct NoteAndVelocity { int note; float velocity; };
+    void drawKeyboardBackground (Graphics& g, Rectangle<float> area) override final;
+    void drawWhiteKey (int midiNoteNumber, Graphics& g, Rectangle<float> area) override final;
+    void drawBlackKey (int midiNoteNumber, Graphics& g, Rectangle<float> area) override final;
 
-    MidiKeyboardState& state;
-    float blackNoteLengthRatio = 0.7f;
-    float blackNoteWidthRatio = 0.7f;
-    float xOffset = 0;
-    float keyWidth = 16.0f;
-    int scrollButtonWidth = 12;
-    Orientation orientation;
+    void handleNoteOn  (MidiKeyboardState*, int, int, float) override;
+    void handleNoteOff (MidiKeyboardState*, int, int, float) override;
 
-    int midiChannel = 1, midiInChannelMask = 0xffff;
-    float velocity = 1.0f;
-
-    Array<int> mouseOverNotes, mouseDownNotes;
-    BigInteger keysPressed, keysCurrentlyDrawnDown;
-    std::atomic<bool> noPendingUpdates { true };
-
-    int rangeStart = 0, rangeEnd = 127;
-    float firstKey = 12 * 4.0f;
-    bool canScroll = true, useMousePositionForVelocity = true;
-    std::unique_ptr<Button> scrollDown, scrollUp;
-
-    Array<KeyPress> keyPresses;
-    Array<int> keyPressNotes;
-    int keyMappingOctave = 6, octaveNumForMiddleC = 3;
-
-    Range<float> getKeyPos (int midiNoteNumber) const;
-    NoteAndVelocity xyToNote (Point<float>);
-    NoteAndVelocity remappedXYToNote (Point<float>) const;
+    //==============================================================================
     void resetAnyKeysInUse();
     void updateNoteUnderMouse (Point<float>, bool isDown, int fingerNum);
     void updateNoteUnderMouse (const MouseEvent&, bool isDown);
     void repaintNote (int midiNoteNumber);
-    void setLowestVisibleKeyFloat (float noteNumber);
 
+    //==============================================================================
+    MidiKeyboardState& state;
+    int midiChannel = 1, midiInChannelMask = 0xffff;
+    int keyMappingOctave = 6;
+
+    float velocity = 1.0f;
+    bool useMousePositionForVelocity = true;
+
+    Array<int> mouseOverNotes, mouseDownNotes;
+    Array<KeyPress> keyPresses;
+    Array<int> keyPressNotes;
+    BigInteger keysPressed, keysCurrentlyDrawnDown;
+
+    std::atomic<bool> noPendingUpdates { true };
+
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiKeyboardComponent)
 };
 

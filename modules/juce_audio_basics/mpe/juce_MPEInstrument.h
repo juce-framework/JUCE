@@ -38,10 +38,8 @@ namespace juce
     MPE. If you pass it a message, it will know what notes on what
     channels (if any) should be affected by that message.
 
-    The class has a Listener class with the three callbacks MPENoteAdded,
-    MPENoteChanged, and MPENoteFinished. Implement such a
-    Listener class to react to note changes and trigger some functionality for
-    your application that depends on the MPE note state.
+    The class has a Listener class that can be used to react to note and
+    state changes and trigger some functionality for your application.
     For example, you can use this class to write an MPE visualiser.
 
     If you want to write a real-time audio synth with MPE functionality,
@@ -59,10 +57,13 @@ public:
 
         This will construct an MPE instrument with inactive lower and upper zones.
 
-        In order to process incoming MIDI, call setZoneLayout, define the layout
-        via MIDI RPN messages, or set the instrument to legacy mode.
+        In order to process incoming MIDI messages call setZoneLayout, use the MPEZoneLayout
+        constructor, define the layout via MIDI RPN messages, or set the instrument to legacy mode.
     */
     MPEInstrument() noexcept;
+
+    /** Constructs an MPE instrument with the specified zone layout. */
+    MPEInstrument (MPEZoneLayout layout);
 
     /** Destructor. */
     virtual ~MPEInstrument();
@@ -229,6 +230,9 @@ public:
     */
     MPENote getNote (int midiChannel, int midiNoteNumber) const noexcept;
 
+    /** Returns the note with a given ID. */
+    MPENote getNoteWithID (uint16 noteID) const noexcept;
+
     /** Returns the most recent note that is playing on the given midiChannel
         (this will be the note which has received the most recent note-on without
         a corresponding note-off), if there is such a note. Otherwise, this returns an
@@ -244,8 +248,8 @@ public:
     MPENote getMostRecentNoteOtherThan (MPENote otherThanThisNote) const noexcept;
 
     //==============================================================================
-    /** Derive from this class to be informed about any changes in the expressive
-        MIDI notes played by this instrument.
+    /** Derive from this class to be informed about any changes in the MPE notes played
+        by this instrument, and any changes to its zone layout.
 
         Note: This listener type receives its callbacks immediately, and not
         via the message thread (so you might be for example in the MIDI thread).
@@ -297,6 +301,11 @@ public:
             and should therefore stop playing.
         */
         virtual void noteReleased (MPENote finishedNote)         { ignoreUnused (finishedNote); }
+
+        /** Implement this callback to be informed whenever the MPE zone layout
+            or legacy mode settings of this instrument have been changed.
+        */
+        virtual void zoneLayoutChanged()                         {}
     };
 
     //==============================================================================
@@ -307,7 +316,9 @@ public:
     void removeListener (Listener* listenerToRemove);
 
     //==============================================================================
-    /** Puts the instrument into legacy mode.
+    /** Puts the instrument into legacy mode. If legacy mode is already enabled this method
+        does nothing.
+
         As a side effect, this will discard all currently playing notes,
         and call noteReleased for all of them.
 
@@ -360,9 +371,9 @@ private:
 
     struct LegacyMode
     {
-        bool isEnabled;
+        bool isEnabled = false;
         Range<int> channelRange;
-        int pitchbendRange;
+        int pitchbendRange = 2;
     };
 
     struct MPEDimension

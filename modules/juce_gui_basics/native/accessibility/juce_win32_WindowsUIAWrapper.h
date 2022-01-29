@@ -127,7 +127,9 @@ private:
     template <typename FuncType>
     static FuncType getUiaFunction (HMODULE module, LPCSTR funcName)
     {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wcast-function-type")
         return (FuncType) GetProcAddress (module, funcName);
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     //==============================================================================

@@ -36,6 +36,8 @@ void AudioProcessLoadMeasurer::reset (double sampleRate, int blockSize)
     cpuUsageProportion = 0;
     xruns = 0;
 
+    samplesPerBlock = blockSize;
+
     if (sampleRate > 0.0 && blockSize > 0)
     {
         msPerSample = 1000.0 / sampleRate;
@@ -77,6 +79,9 @@ AudioProcessLoadMeasurer::ScopedTimer::ScopedTimer (AudioProcessLoadMeasurer& p)
 AudioProcessLoadMeasurer::ScopedTimer::ScopedTimer (AudioProcessLoadMeasurer& p, int numSamplesInBlock)
     : owner (p), startTime (Time::getMillisecondCounterHiRes()), samplesInBlock (numSamplesInBlock)
 {
+    // numSamplesInBlock should never be zero. Did you remember to call AudioProcessLoadMeasurer::reset(),
+    // passing the expected samples per block?
+    jassert (numSamplesInBlock);
 }
 
 AudioProcessLoadMeasurer::ScopedTimer::~ScopedTimer()

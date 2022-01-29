@@ -135,7 +135,7 @@ struct FFTUnitTest  : public UnitTest
 
     struct FrequencyOnlyTest
     {
-        static void run(FFTUnitTest& u)
+        static void run (FFTUnitTest& u)
         {
             Random random (378272);
             for (size_t order = 0; order <= 8; ++order)
@@ -144,19 +144,23 @@ struct FFTUnitTest  : public UnitTest
 
                 FFT fft ((int) order);
 
-                HeapBlock<float> inout (n << 1), reference (n << 1);
-                HeapBlock<Complex<float>> frequency (n);
+                std::vector<float> inout ((size_t) n << 1), reference ((size_t) n << 1);
+                std::vector<Complex<float>> frequency (n);
 
-                fillRandom (random, inout.getData(), n);
-                zeromem (reference.getData(), sizeof (float) * ((size_t) n << 1));
-                performReferenceFourier (inout.getData(), frequency.getData(), n, false);
+                fillRandom (random, inout.data(), n);
+                zeromem (reference.data(), sizeof (float) * ((size_t) n << 1));
+                performReferenceFourier (inout.data(), frequency.data(), n, false);
 
                 for (size_t i = 0; i < n; ++i)
-                    reference.getData()[i] = std::abs (frequency.getData()[i]);
+                    reference[i] = std::abs (frequency[i]);
 
-                fft.performFrequencyOnlyForwardTransform (inout.getData());
-
-                u.expect (checkArrayIsSimilar (inout.getData(), reference.getData(), n));
+                for (auto ignoreNegative : { false, true })
+                {
+                    auto inoutCopy = inout;
+                    fft.performFrequencyOnlyForwardTransform (inoutCopy.data(), ignoreNegative);
+                    auto numMatching = ignoreNegative ? (n / 2) + 1 : n;
+                    u.expect (checkArrayIsSimilar (inoutCopy.data(), reference.data(), numMatching));
+                }
             }
         }
     };

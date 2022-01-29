@@ -3,6 +3,15 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 6.1.5
+  - Improved the accessibility framework
+  - Added handling of non-Latin virtual key codes on macOS
+  - Improved X11 compatibility
+  - Updated the iOS in-app purchases workflow
+  - Improved macOS windowing behaviour
+  - Improved MinGW-w64 compatibility
+  - Added an MPEKeyboardComponent class
+
 Version 6.1.4
   - Restored Projucer project saving behavior
   - Fixed a CGImage memory access violation on Monterey
