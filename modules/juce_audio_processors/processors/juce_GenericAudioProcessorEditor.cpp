@@ -97,13 +97,19 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterListener)
 };
 
+class ParameterComponent : public Component,
+                           public ParameterListener
+{
+public:
+    using ParameterListener::ParameterListener;
+};
+
 //==============================================================================
-class BooleanParameterComponent final   : public Component,
-                                          private ParameterListener
+class BooleanParameterComponent : public ParameterComponent
 {
 public:
     BooleanParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
-        : ParameterListener (proc, param)
+        : ParameterComponent (proc, param)
     {
         // Set the initial value.
         handleNewParameterValue();
@@ -122,12 +128,12 @@ public:
         button.setBounds (area.reduced (0, 10));
     }
 
-private:
     void handleNewParameterValue() override
     {
         button.setToggleState (isParameterOn(), dontSendNotification);
     }
 
+private:
     void buttonClicked()
     {
         if (isParameterOn() != button.getToggleState())
@@ -146,12 +152,11 @@ private:
 };
 
 //==============================================================================
-class SwitchParameterComponent final   : public Component,
-                                         private ParameterListener
+class SwitchParameterComponent : public ParameterComponent
 {
 public:
     SwitchParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
-        : ParameterListener (proc, param)
+        : ParameterComponent (proc, param)
     {
         for (auto& button : buttons)
         {
@@ -186,7 +191,6 @@ public:
             button.setBounds (area.removeFromLeft (80));
     }
 
-private:
     void handleNewParameterValue() override
     {
         bool newState = isParameterOn();
@@ -198,6 +202,7 @@ private:
         }
     }
 
+private:
     void rightButtonChanged()
     {
         auto buttonState = buttons[1].getToggleState();
@@ -249,12 +254,11 @@ private:
 };
 
 //==============================================================================
-class ChoiceParameterComponent final   : public Component,
-                                         private ParameterListener
+class ChoiceParameterComponent : public ParameterComponent
 {
 public:
     ChoiceParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
-        : ParameterListener (proc, param),
+        : ParameterComponent (proc, param),
           parameterValues (getParameter().getAllValueStrings())
     {
         box.addItemList (parameterValues, 1);
@@ -312,12 +316,11 @@ private:
 };
 
 //==============================================================================
-class SliderParameterComponent final   : public Component,
-                                         private ParameterListener
+class SliderParameterComponent : public ParameterComponent
 {
 public:
     SliderParameterComponent (AudioProcessor& proc, AudioProcessorParameter& param)
-        : ParameterListener (proc, param)
+        : ParameterComponent (proc, param)
     {
         if (getParameter().getNumSteps() != AudioProcessor::getDefaultNumParameterSteps())
             slider.setRange (0.0, 1.0, 1.0 / (getParameter().getNumSteps() - 1.0));
@@ -354,12 +357,6 @@ public:
         slider.setBounds (area);
     }
 
-private:
-    void updateTextDisplay()
-    {
-        valueLabel.setText (getParameter().getCurrentValueAsText(), dontSendNotification);
-    }
-
     void handleNewParameterValue() override
     {
         if (! isDragging)
@@ -367,6 +364,12 @@ private:
             slider.setValue (getParameter().getValue(), dontSendNotification);
             updateTextDisplay();
         }
+    }
+
+private:
+    void updateTextDisplay()
+    {
+        valueLabel.setText (getParameter().getCurrentValueAsText(), dontSendNotification);
     }
 
     void sliderValueChanged()
@@ -458,9 +461,9 @@ private:
     AudioProcessorEditor& editor;
     AudioProcessorParameter& parameter;
     Label parameterName, parameterLabel;
-    std::unique_ptr<Component> parameterComp;
+    std::unique_ptr<ParameterComponent> parameterComp;
 
-    std::unique_ptr<Component> createParameterComp (AudioProcessor& processor) const
+    std::unique_ptr<ParameterComponent> createParameterComp (AudioProcessor& processor) const
     {
         // The AU, AUv3 and VST (only via a .vstxml file) SDKs support
         // marking a parameter as boolean. If you want consistency across
@@ -501,6 +504,9 @@ private:
     {
         parameterName .setText (parameter.getName (128), dontSendNotification);
         parameterLabel.setText (parameter.getLabel(),    dontSendNotification);
+
+        if (auto* p = parameterComp.get())
+            p->handleNewParameterValue();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParameterDisplayComponent)

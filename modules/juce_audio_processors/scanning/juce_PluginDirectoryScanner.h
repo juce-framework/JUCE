@@ -126,7 +126,7 @@ private:
     File deadMansPedalFile;
     StringArray failedFiles;
     Atomic<int> nextIndex;
-    float progress = 0;
+    std::atomic<float> progress { 0.0f };
     const bool allowAsync;
 
     void updateProgress();
