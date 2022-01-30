@@ -1,0 +1,98 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue with JUCE.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Detailed steps on how to reproduce the bug
+      description: If possible please use already existing JUCE code such as the examples or the demo plug-in
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What is the expected behaviour?
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating systems
+      description: What operating systems do you see the bug on?
+      multiple: true
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - iOS
+        - Android
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: osversion
+    attributes:
+      label: What versions of the operating systems?
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Architectures
+      description: What types of machine do you see the bug on?
+      multiple: true
+      options:
+        - x86_64
+        - ARM
+        - Other
+        - 64-bit
+        - 32-bit
+    validations:
+      required: true
+  - type: textarea
+    id: stacktrace
+    attributes:
+      label: Stacktrace
+      description: Please copy and paste any relevant stack trace. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  - type: dropdown
+    id: pluginformat
+    attributes:
+      label: Plug-in formats (if applicable)
+      multiple: true
+      options:
+        - VST2
+        - VST3
+        - AU
+        - AUv3
+        - AAX
+        - LV2
+        - Standalone
+  - type: textarea
+    id: pluginhost
+    attributes:
+      label: Plug-in host applications (DAWs) (if applicable)
+  - type: dropdown
+    id: branch
+    attributes:
+      label: Testing on the `develop` branch
+      description: We have often already fixed bugs on our `develop` branch. Please confirm if you have tested with the latest commit.
+      options:
+        - The bug is present on the `develop` branch
+        - I have not tested against the `develop` branch
+    validations:
+      required: true
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [Code of Conduct](https://berlincodeofconduct.org/)
+      options:
+        - label: I agree to follow the Code of Conduct
+          required: true
+

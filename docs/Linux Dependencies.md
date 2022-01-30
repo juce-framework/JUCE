@@ -6,7 +6,7 @@ flag used to disable it is noted.
 
 This has been tested on Ubuntu 16.04 LTS (Xenial Xerus), 18.04 LTS (Bionic
 Beaver), and 20.04 LTS (Focal Fossa). Packages may differ in name or not be
-available on other distrubutions.
+available on other distributions.
 
 ## Compiler
 A C++ compiler is required. JUCE has been tested thoroughly with Clang and GCC:

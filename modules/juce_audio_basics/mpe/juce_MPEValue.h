@@ -53,6 +53,12 @@ public:
     */
     static MPEValue from14BitInt (int value) noexcept;
 
+    /** Constructs an MPEValue from a float between 0.0f and 1.0f. */
+    static MPEValue fromUnsignedFloat (float value) noexcept;
+
+    /** Constructs an MPEValue from a float between -1.0f and 1.0f. */
+    static MPEValue fromSignedFloat (float value) noexcept;
+
     /** Constructs an MPEValue corresponding to the centre value. */
     static MPEValue centreValue() noexcept;
 

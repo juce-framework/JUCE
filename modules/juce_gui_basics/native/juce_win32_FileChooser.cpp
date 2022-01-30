@@ -23,10 +23,6 @@
   ==============================================================================
 */
 
-#if JUCE_MINGW
-LWSTDAPI IUnknown_GetWindow (IUnknown* punk, HWND* phwnd);
-#endif
-
 namespace juce
 {
 
@@ -253,7 +249,9 @@ private:
             JUCE_COMRESULT updateHwnd (IFileDialog* d)
             {
                 HWND hwnd = nullptr;
-                IUnknown_GetWindow (d, &hwnd);
+
+                if (auto window = ComSmartPtr<IFileDialog> { d }.getInterface<IOleWindow>())
+                    window->GetWindow (&hwnd);
 
                 ScopedLock lock (owner.deletingDialog);
 
@@ -501,13 +499,11 @@ private:
 
         const Remover remover (*this);
 
-       #if ! JUCE_MINGW
         if (SystemStats::getOperatingSystemType() >= SystemStats::WinVista
             && customComponent == nullptr)
         {
             return openDialogVistaAndUp (async);
         }
-       #endif
 
         return openDialogPreVista (async);
     }
@@ -781,9 +777,9 @@ class FileChooser::Native     : public std::enable_shared_from_this<Native>,
                                 public FileChooser::Pimpl
 {
 public:
-    Native (FileChooser& fileChooser, int flags, FilePreviewComponent* previewComp)
+    Native (FileChooser& fileChooser, int flagsIn, FilePreviewComponent* previewComp)
         : owner (fileChooser),
-          nativeFileChooser (std::make_unique<Win32NativeFileChooser> (this, flags, previewComp, fileChooser.startingFile,
+          nativeFileChooser (std::make_unique<Win32NativeFileChooser> (this, flagsIn, previewComp, fileChooser.startingFile,
                                                                        fileChooser.title, fileChooser.filters))
     {
         auto mainMon = Desktop::getInstance().getDisplays().getPrimaryDisplay()->userArea;

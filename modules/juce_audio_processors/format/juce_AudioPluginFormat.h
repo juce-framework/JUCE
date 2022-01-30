@@ -137,6 +137,9 @@ public:
     */
     virtual FileSearchPath getDefaultLocationsToSearch() = 0;
 
+    /** Returns true if instantiation of this plugin type must be done from a non-message thread. */
+    virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const = 0;
+
 protected:
     //==============================================================================
     friend class AudioPluginFormatManager;
@@ -148,9 +151,6 @@ protected:
     */
     virtual void createPluginInstance (const PluginDescription&, double initialSampleRate,
                                        int initialBufferSize, PluginCreationCallback) = 0;
-
-    /** Returns true if instantiation of this plugin type must be done from a non-message thread. */
-    virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const = 0;
 
 private:
     struct AsyncCreateMessage;

@@ -80,7 +80,7 @@ public:
         So for example you might use this in a command line app called "unlocker" and
         then call it like this:
 
-        unlocker MyGreatApp Joe_Bloggs joebloggs@foobar.com 1234abcd,95432ff 22d9aec92d986dd1,923ad49e9e7ff294c
+        unlocker MyGreatApp joebloggs@foobar.com Joe_Bloggs 1234abcd,95432ff 22d9aec92d986dd1,923ad49e9e7ff294c
     */
     static int keyGenerationAppMain (int argc, char* argv[])
     {

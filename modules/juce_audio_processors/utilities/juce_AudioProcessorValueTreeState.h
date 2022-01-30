@@ -175,7 +175,7 @@ public:
                        std::make_unique<AudioParameterInt> ("b", "Parameter B", 0, 5, 2) })
         @endcode
 
-        To add parameters programatically you can call `add` repeatedly on a
+        To add parameters programmatically you can call `add` repeatedly on a
         ParameterLayout instance:
 
         @code

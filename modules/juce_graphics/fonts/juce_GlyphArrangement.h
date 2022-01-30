@@ -47,13 +47,6 @@ public:
     PositionedGlyph (const Font& font, juce_wchar character, int glyphNumber,
                      float anchorX, float baselineY, float width, bool isWhitespace);
 
-    PositionedGlyph (const PositionedGlyph&) = default;
-    PositionedGlyph& operator= (const PositionedGlyph&) = default;
-    PositionedGlyph (PositionedGlyph&&) noexcept = default;
-    PositionedGlyph& operator= (PositionedGlyph&&) noexcept = default;
-
-    ~PositionedGlyph();
-
     /** Returns the character the glyph represents. */
     juce_wchar getCharacter() const noexcept    { return character; }
     /** Checks whether the glyph is actually empty. */

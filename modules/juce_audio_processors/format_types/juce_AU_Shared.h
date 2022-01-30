@@ -162,7 +162,9 @@ struct AudioUnitHelpers
                 jassert (channels[(size_t) i] != nullptr);
            #endif
 
-            mutableBuffer.setDataToReferTo (channels.data(), (int) channels.size(), static_cast<int> (frames));
+            if (! channels.empty())
+                mutableBuffer.setDataToReferTo (channels.data(), (int) channels.size(), static_cast<int> (frames));
+
             return mutableBuffer;
         }
 

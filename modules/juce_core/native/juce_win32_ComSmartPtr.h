@@ -23,7 +23,7 @@
 namespace juce
 {
 
-#if JUCE_MINGW || (! (defined (_MSC_VER) || defined (__uuidof)))
+#if (JUCE_MINGW && JUCE_32BIT) || (! defined (_MSC_VER) && ! defined (__uuidof))
  #ifdef __uuidof
   #undef __uuidof
  #endif
@@ -47,7 +47,7 @@ namespace juce
 
 #else
  #define JUCE_DECLARE_UUID_GETTER(name, uuid)
- #define JUCE_COMCLASS(name, guid)       struct __declspec (uuid (guid)) name
+ #define JUCE_COMCLASS(name, guid)       struct DECLSPEC_UUID (guid) name
 #endif
 
 #define JUCE_IUNKNOWNCLASS(name, guid)   JUCE_COMCLASS(name, guid) : public IUnknown

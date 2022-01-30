@@ -797,7 +797,8 @@ private:
                         continue;
 
                     if (selector == @selector (accessibilityPerformPress))
-                        return handler->getActions().contains (AccessibilityActionType::press);
+                        return (handler->getCurrentState().isCheckable() && handler->getActions().contains (AccessibilityActionType::toggle))
+                                || handler->getActions().contains (AccessibilityActionType::press);
 
                     if (selector == @selector (accessibilityPerformShowMenu))
                         return handler->getActions().contains (AccessibilityActionType::showMenu);

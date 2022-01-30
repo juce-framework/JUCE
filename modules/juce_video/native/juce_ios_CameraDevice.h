@@ -1305,7 +1305,7 @@ struct CameraDevice::ViewerComponent  : public UIViewComponent
     {
         static JuceCameraDeviceViewerClass cls;
 
-        // Initial size that can be overriden later.
+        // Initial size that can be overridden later.
         setSize (640, 480);
 
         auto view = [cls.createInstance() init];

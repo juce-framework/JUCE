@@ -28,7 +28,7 @@ namespace universal_midi_packets
 {
 
 /**
-    This struct acts as a single-file namespace for Univeral MIDI Packet
+    This struct acts as a single-file namespace for Universal MIDI Packet
     functionality related to 7-bit SysEx.
 
     @tags{Audio}

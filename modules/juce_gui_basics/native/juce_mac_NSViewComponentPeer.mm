@@ -1094,13 +1094,34 @@ public:
         return false;
     }
 
-    void sendModalInputAttemptIfBlocked()
+    enum class KeyWindowChanged { no, yes };
+
+    void sendModalInputAttemptIfBlocked (KeyWindowChanged keyChanged)
     {
-        if (isBlockedByModalComponent())
-            if (auto* modal = Component::getCurrentlyModalComponent())
-                if (auto* otherPeer = modal->getPeer())
-                    if ((otherPeer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0)
-                        modal->inputAttemptWhenModal();
+        if (! isBlockedByModalComponent())
+            return;
+
+        if (auto* modal = Component::getCurrentlyModalComponent())
+        {
+            if (auto* otherPeer = modal->getPeer())
+            {
+                const auto modalPeerIsTemporary = (otherPeer->getStyleFlags() & ComponentPeer::windowIsTemporary) != 0;
+
+                if (! modalPeerIsTemporary)
+                    return;
+
+                // When a peer resigns key status, it might be because we just created a modal
+                // component that is now key.
+                // In this case, we should only dismiss the modal component if it isn't key,
+                // implying that a third window has become key.
+                const auto modalPeerIsKey = [NSApp keyWindow] == static_cast<NSViewComponentPeer*> (otherPeer)->window;
+
+                if (keyChanged == KeyWindowChanged::yes && modalPeerIsKey)
+                    return;
+
+                modal->inputAttemptWhenModal();
+            }
+        }
     }
 
     bool canBecomeKeyWindow()
@@ -1163,7 +1184,7 @@ public:
         {
             [notificationCenter addObserver: view
                                    selector: dismissModalsSelector
-                                       name: NSWindowDidMoveNotification
+                                       name: NSWindowWillMoveNotification
                                      object: currentWindow];
 
             [notificationCenter addObserver: view
@@ -1186,7 +1207,7 @@ public:
     void dismissModals()
     {
         if (hasNativeTitleBar() || isSharedWindow)
-            sendModalInputAttemptIfBlocked();
+            sendModalInputAttemptIfBlocked (KeyWindowChanged::no);
     }
 
     void becomeKey()
@@ -1197,7 +1218,7 @@ public:
     void resignKey()
     {
         viewFocusLoss();
-        sendModalInputAttemptIfBlocked();
+        sendModalInputAttemptIfBlocked (KeyWindowChanged::yes);
     }
 
     void liveResizingStart()
@@ -2317,6 +2338,8 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
         addMethod (@selector (accessibilityRole),                   getAccessibilityRole);
         addMethod (@selector (accessibilitySubrole),                getAccessibilitySubrole);
 
+        addMethod (@selector (keyDown:),                            keyDown);
+
         addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:), shouldAllowIconDrag);
 
         addProtocol (@protocol (NSWindowDelegate));
@@ -2328,19 +2351,44 @@ private:
     //==============================================================================
     static BOOL isFlipped (id, SEL) { return true; }
 
-    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow*, NSRect)
+    // Key events will be processed by the peer's component.
+    // If the component is unable to use the event, it will be re-sent
+    // to performKeyEquivalent.
+    // performKeyEquivalent will send the event to the view's superclass,
+    // which will try passing the event to the main menu.
+    // If the event still hasn't been processed, it will be passed to the
+    // next responder in the chain, which will be the NSWindow for a peer
+    // that is on the desktop.
+    // If the NSWindow still doesn't handle the event, the Apple docs imply
+    // that the event should be sent to the NSApp for processing, but this
+    // doesn't seem to happen for keyDown events.
+    // Instead, the NSWindow attempts to process the event, fails, and
+    // triggers an annoying NSBeep.
+    // Overriding keyDown to "handle" the event seems to suppress the beep.
+    static void keyDown (id, SEL, NSEvent* ev)
+    {
+        ignoreUnused (ev);
+
+       #if JUCE_DEBUG_UNHANDLED_KEYPRESSES
+        DBG ("unhandled key down event with keycode: " << [ev keyCode]);
+       #endif
+    }
+
+    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow*, NSRect r)
     {
         if (auto* owner = getOwner (self))
         {
             if (auto* constrainer = owner->getConstrainer())
             {
-                return flippedScreenRect (makeNSRect (owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()
-                                                                                                          .withWidth (constrainer->getMaximumWidth())
-                                                                                                          .withHeight (constrainer->getMaximumHeight()))));
+                const auto originalBounds = owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()).toFloat();
+                const auto expanded = originalBounds.withWidth  ((float) constrainer->getMaximumWidth())
+                                                    .withHeight ((float) constrainer->getMaximumHeight());
+                const auto constrained = expanded.constrainedWithin (convertToRectFloat (flippedScreenRect (r)));
+                return flippedScreenRect (makeNSRect (constrained));
             }
         }
 
-        return makeNSRect (Rectangle<int> (10000, 10000));
+        return r;
     }
 
     static BOOL windowShouldZoomToFrame (id self, SEL, NSWindow* window, NSRect frame)
