@@ -140,7 +140,7 @@ private:
     String tipShowing, lastTipUnderMouse, manuallyShownTip;
     int millisecondsBeforeTipAppears;
     unsigned int lastCompChangeTime = 0, lastHideTime = 0;
-    bool reentrant = false, dismissalMouseEventOccured = false;
+    bool reentrant = false, dismissalMouseEventOccurred = false;
 
     enum ShownManually { yes, no };
     void displayTipInternal (Point<int>, const String&, ShownManually);

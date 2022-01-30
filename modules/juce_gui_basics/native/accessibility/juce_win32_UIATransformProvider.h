@@ -28,13 +28,10 @@ namespace juce
 
 //==============================================================================
 class UIATransformProvider  : public UIAProviderBase,
-                              public ComBaseClassHelper<ITransformProvider>
+                              public ComBaseClassHelper<ComTypes::ITransformProvider>
 {
 public:
-    explicit UIATransformProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT Move (double x, double y) override

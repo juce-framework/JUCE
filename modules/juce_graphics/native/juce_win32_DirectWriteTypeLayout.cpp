@@ -201,6 +201,7 @@ namespace DirectWriteTypeLayout
 
             ComSmartPtr<IDWriteFont> dwFont;
             auto hr = fontCollection.GetFontFromFontFace (glyphRun.fontFace, dwFont.resetAndGetPointerAddress());
+            ignoreUnused (hr);
             jassert (dwFont != nullptr);
 
             ComSmartPtr<IDWriteFontFamily> dwFontFamily;
@@ -289,6 +290,7 @@ namespace DirectWriteTypeLayout
 
             ComSmartPtr<IDWriteFontFamily> fontFamily;
             auto hr = fontCollection.GetFontFamily (fontIndex, fontFamily.resetAndGetPointerAddress());
+            ignoreUnused (hr);
 
             ComSmartPtr<IDWriteFont> dwFont;
             uint32 fontFacesCount = 0;
@@ -394,6 +396,7 @@ namespace DirectWriteTypeLayout
 
         UINT32 actualLineCount = 0;
         auto hr = dwTextLayout->GetLineMetrics (nullptr, 0, &actualLineCount);
+        ignoreUnused (hr);
 
         layout.ensureStorageAllocated ((int) actualLineCount);
 
@@ -415,7 +418,7 @@ namespace DirectWriteTypeLayout
             line.stringRange = Range<int> (lastLocation, lastLocation + (int) dwLineMetrics[i].length);
             line.lineOrigin.y += yAdjustment;
             yAdjustment += extraLineSpacing;
-            lastLocation += dwLineMetrics[i].length;
+            lastLocation += (int) dwLineMetrics[i].length;
         }
     }
 

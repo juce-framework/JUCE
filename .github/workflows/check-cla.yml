@@ -1,0 +1,30 @@
+name: check-CLA
+on: [pull_request_target]
+jobs:
+  check-cla:
+    runs-on: ubuntu-latest
+    env:
+      PR_NUMBER: ${{ github.event.number }}
+    steps:
+      - name: check-CLA
+        run: |
+          import urllib.request
+          import json
+          import itertools
+          import sys
+          def jsonRequest(url, data={}):
+              req = urllib.request.Request(url,
+                                           headers={'Content-Type': 'application/json'},
+                                           data=json.dumps(data).encode('utf-8') if data else None)
+              with urllib.request.urlopen(req) as response:
+                  return json.loads(response.read().decode('utf-8'))
+          prCommits = jsonRequest('https://api.github.com/repos/juce-framework/JUCE/pulls/${{ github.event.number }}/commits')
+          authors = map(lambda commit: [commit['author']['login'], commit['committer']['login']], prCommits)
+          uniqueAuthors = list(set(itertools.chain.from_iterable(authors)))
+          print(f'\nPR authors: {", ".join(uniqueAuthors)}')
+          claResult = jsonRequest('https://cla.juce.com/check', {'logins': uniqueAuthors})
+          unsignedLogins = claResult['unsigned']
+          if (len(unsignedLogins) != 0):
+              print(f'\nThe following GitHub users need to sign the JUCE CLA: {", ".join(unsignedLogins)}\n\nPlease go to https://cla.juce.com to sign the JUCE Contributor Licence Agreement\n')
+              sys.exit(1)
+        shell: python

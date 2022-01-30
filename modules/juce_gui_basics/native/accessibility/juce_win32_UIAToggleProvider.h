@@ -28,13 +28,10 @@ namespace juce
 
 //==============================================================================
 class UIAToggleProvider  : public UIAProviderBase,
-                           public ComBaseClassHelper<IToggleProvider>
+                           public ComBaseClassHelper<ComTypes::IToggleProvider>
 {
 public:
-    explicit UIAToggleProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT Toggle() override
@@ -44,7 +41,8 @@ public:
 
         const auto& handler = getHandler();
 
-        if (handler.getActions().invoke (AccessibilityActionType::toggle))
+        if (handler.getActions().invoke (AccessibilityActionType::toggle)
+            || handler.getActions().invoke (AccessibilityActionType::press))
         {
             VARIANT newValue;
             VariantHelpers::setInt (getCurrentToggleState(), &newValue);
@@ -57,7 +55,7 @@ public:
         return (HRESULT) UIA_E_NOTSUPPORTED;
     }
 
-    JUCE_COMRESULT get_ToggleState (ToggleState* pRetVal) override
+    JUCE_COMRESULT get_ToggleState (ComTypes::ToggleState* pRetVal) override
     {
         return withCheckedComArgs (pRetVal, *this, [&]
         {
@@ -67,10 +65,10 @@ public:
     }
 
 private:
-    ToggleState getCurrentToggleState() const
+    ComTypes::ToggleState getCurrentToggleState() const
     {
-        return getHandler().getCurrentState().isChecked() ? ToggleState_On
-                                                          : ToggleState_Off;
+        return getHandler().getCurrentState().isChecked() ? ComTypes::ToggleState_On
+                                                          : ComTypes::ToggleState_Off;
     }
 
     //==============================================================================

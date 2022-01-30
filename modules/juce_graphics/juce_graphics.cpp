@@ -54,6 +54,14 @@
  #endif
 
  #if JUCE_USE_DIRECTWRITE || JUCE_DIRECT2D
+  /*  This is a workaround for broken-by-default function definitions
+      in the MinGW headers. If you're using a newer distribution of MinGW,
+      then your headers may substitute the broken definitions with working definitions
+      when this flag is enabled. Unfortunately, not all MinGW headers contain this
+      workaround, so Direct2D remains disabled by default when building with MinGW.
+  */
+  #define WIDL_EXPLICIT_AGGREGATE_RETURNS 1
+
   /* If you hit a compile error trying to include these files, you may need to update
      your version of the Windows SDK to the latest one. The DirectWrite and Direct2D
      headers are in the version 7 SDKs.

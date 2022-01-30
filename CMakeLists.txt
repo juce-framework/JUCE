@@ -23,7 +23,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(JUCE VERSION 6.1.4 LANGUAGES C CXX)
+project(JUCE VERSION 6.1.5 LANGUAGES C CXX)
 
 include(CMakeDependentOption)
 

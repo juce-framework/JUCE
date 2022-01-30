@@ -76,7 +76,7 @@ public:
     {
     }
 
-    /** Initalises from a null-terminated raw array of values.
+    /** Initialises from a null-terminated raw array of values.
         @param data   the data to copy from
     */
     template <typename TypeToCreateFrom>
@@ -86,7 +86,7 @@ public:
             add (*data++);
     }
 
-    /** Initalises from a raw array of values.
+    /** Initialises from a raw array of values.
         @param data         the data to copy from
         @param numValues    the number of values in the array
     */
@@ -96,26 +96,26 @@ public:
         values.addArray (data, numValues);
     }
 
-    /** Initalises an Array of size 1 containing a single element. */
+    /** Initialises an Array of size 1 containing a single element. */
     Array (const ElementType& singleElementToAdd)
     {
         add (singleElementToAdd);
     }
 
-    /** Initalises an Array of size 1 containing a single element. */
+    /** Initialises an Array of size 1 containing a single element. */
     Array (ElementType&& singleElementToAdd)
     {
         add (std::move (singleElementToAdd));
     }
 
-    /** Initalises an Array from a list of items. */
+    /** Initialises an Array from a list of items. */
     template <typename... OtherElements>
     Array (const ElementType& firstNewElement, OtherElements&&... otherElements)
     {
         values.add (firstNewElement, std::forward<OtherElements> (otherElements)...);
     }
 
-    /** Initalises an Array from a list of items. */
+    /** Initialises an Array from a list of items. */
     template <typename... OtherElements>
     Array (ElementType&& firstNewElement, OtherElements&&... otherElements)
     {

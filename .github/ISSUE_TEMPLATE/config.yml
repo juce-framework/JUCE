@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: JUCE Support
+    url: https://forum.juce.com/
+    about: Please use the JUCE forum to ask questions.
+  - name: Feature Requests
+    url: https://forum.juce.com/c/feature-requests
+    about: Please submit feature requests on the JUCE forum.

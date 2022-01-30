@@ -52,25 +52,25 @@ int MPEChannelAssigner::findMidiChannelForNewNote (int noteNumber) noexcept
     if (numChannels <= 1)
         return firstChannel;
 
-    for (auto ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
+    for (int ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
     {
-        if (midiChannels[ch].isFree() && midiChannels[ch].lastNotePlayed == noteNumber)
+        if (midiChannels[(size_t) ch].isFree() && midiChannels[(size_t) ch].lastNotePlayed == noteNumber)
         {
             midiChannelLastAssigned = ch;
-            midiChannels[ch].notes.add (noteNumber);
+            midiChannels[(size_t) ch].notes.add (noteNumber);
             return ch;
         }
     }
 
-    for (auto ch = midiChannelLastAssigned + channelIncrement; ; ch += channelIncrement)
+    for (int ch = midiChannelLastAssigned + channelIncrement; ; ch += channelIncrement)
     {
         if (ch == lastChannel + channelIncrement)  // loop wrap-around
             ch = firstChannel;
 
-        if (midiChannels[ch].isFree())
+        if (midiChannels[(size_t) ch].isFree())
         {
             midiChannelLastAssigned = ch;
-            midiChannels[ch].notes.add (noteNumber);
+            midiChannels[(size_t) ch].notes.add (noteNumber);
             return ch;
         }
 
@@ -79,9 +79,19 @@ int MPEChannelAssigner::findMidiChannelForNewNote (int noteNumber) noexcept
     }
 
     midiChannelLastAssigned = findMidiChannelPlayingClosestNonequalNote (noteNumber);
-    midiChannels[midiChannelLastAssigned].notes.add (noteNumber);
+    midiChannels[(size_t) midiChannelLastAssigned].notes.add (noteNumber);
 
     return midiChannelLastAssigned;
+}
+
+int MPEChannelAssigner::findMidiChannelForExistingNote (int noteNumber) noexcept
+{
+    const auto iter = std::find_if (midiChannels.cbegin(), midiChannels.cend(), [&] (auto& ch)
+    {
+        return std::find (ch.notes.begin(), ch.notes.end(), noteNumber) != ch.notes.end();
+    });
+
+    return iter != midiChannels.cend() ? (int) std::distance (midiChannels.cbegin(), iter) : -1;
 }
 
 void MPEChannelAssigner::noteOff (int noteNumber, int midiChannel)
@@ -99,7 +109,7 @@ void MPEChannelAssigner::noteOff (int noteNumber, int midiChannel)
 
     if (midiChannel >= 0 && midiChannel <= 16)
     {
-        removeNote (midiChannels[midiChannel], noteNumber);
+        removeNote (midiChannels[(size_t) midiChannel], noteNumber);
         return;
     }
 
@@ -126,9 +136,9 @@ int MPEChannelAssigner::findMidiChannelPlayingClosestNonequalNote (int noteNumbe
     auto channelWithClosestNote = firstChannel;
     int closestNoteDistance = 127;
 
-    for (auto ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
+    for (int ch = firstChannel; (isLegacy || zone->isLowerZone() ? ch <= lastChannel : ch >= lastChannel); ch += channelIncrement)
     {
-        for (auto note : midiChannels[ch].notes)
+        for (auto note : midiChannels[(size_t) ch].notes)
         {
             auto noteDistance = std::abs (note - noteNumber);
 
@@ -296,24 +306,35 @@ struct MPEUtilsUnitTests  : public UnitTest
                 // check that channels are assigned in correct order
                 int noteNum = 60;
                 for (int ch = 2; ch <= 16; ++ch)
-                    expectEquals (channelAssigner.findMidiChannelForNewNote (noteNum++), ch);
+                {
+                    expectEquals (channelAssigner.findMidiChannelForNewNote (noteNum), ch);
+                    expectEquals (channelAssigner.findMidiChannelForExistingNote (noteNum), ch);
+
+                    ++noteNum;
+                }
 
                 // check that note-offs are processed
                 channelAssigner.noteOff (60);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (60), 2);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (60), 2);
 
                 channelAssigner.noteOff (61);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (61), 3);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (61), 3);
 
                 // check that assigned channel was last to play note
                 channelAssigner.noteOff (65);
                 channelAssigner.noteOff (66);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (66), 8);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (65), 7);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (66), 8);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (65), 7);
 
                 // find closest channel playing nonequal note
                 expectEquals (channelAssigner.findMidiChannelForNewNote (80), 16);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (55), 2);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (80), 16);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (55), 2);
 
                 // all notes off
                 channelAssigner.allNotesOff();
@@ -323,10 +344,16 @@ struct MPEUtilsUnitTests  : public UnitTest
                 expectEquals (channelAssigner.findMidiChannelForNewNote (65), 7);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (80), 16);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (55), 2);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (66), 8);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (65), 7);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (80), 16);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (55), 2);
 
                 // normal assignment
                 expectEquals (channelAssigner.findMidiChannelForNewNote (101), 3);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (20), 4);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (101), 3);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (20), 4);
             }
 
             // upper
@@ -339,24 +366,35 @@ struct MPEUtilsUnitTests  : public UnitTest
                 // check that channels are assigned in correct order
                 int noteNum = 60;
                 for (int ch = 15; ch >= 1; --ch)
-                    expectEquals (channelAssigner.findMidiChannelForNewNote (noteNum++), ch);
+                {
+                    expectEquals (channelAssigner.findMidiChannelForNewNote (noteNum), ch);
+                    expectEquals (channelAssigner.findMidiChannelForExistingNote (noteNum), ch);
+
+                    ++noteNum;
+                }
 
                 // check that note-offs are processed
                 channelAssigner.noteOff (60);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (60), 15);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (60), 15);
 
                 channelAssigner.noteOff (61);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (61), 14);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (61), 14);
 
                 // check that assigned channel was last to play note
                 channelAssigner.noteOff (65);
                 channelAssigner.noteOff (66);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (66), 9);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (65), 10);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (66), 9);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (65), 10);
 
                 // find closest channel playing nonequal note
                 expectEquals (channelAssigner.findMidiChannelForNewNote (80), 1);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (55), 15);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (80), 1);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (55), 15);
 
                 // all notes off
                 channelAssigner.allNotesOff();
@@ -366,10 +404,16 @@ struct MPEUtilsUnitTests  : public UnitTest
                 expectEquals (channelAssigner.findMidiChannelForNewNote (65), 10);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (80), 1);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (55), 15);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (66), 9);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (65), 10);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (80), 1);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (55), 15);
 
                 // normal assignment
                 expectEquals (channelAssigner.findMidiChannelForNewNote (101), 14);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (20), 13);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (101), 14);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (20), 13);
             }
 
             // legacy
@@ -379,24 +423,35 @@ struct MPEUtilsUnitTests  : public UnitTest
                 // check that channels are assigned in correct order
                 int noteNum = 60;
                 for (int ch = 1; ch <= 16; ++ch)
-                    expectEquals (channelAssigner.findMidiChannelForNewNote (noteNum++), ch);
+                {
+                    expectEquals (channelAssigner.findMidiChannelForNewNote (noteNum), ch);
+                    expectEquals (channelAssigner.findMidiChannelForExistingNote (noteNum), ch);
+
+                    ++noteNum;
+                }
 
                 // check that note-offs are processed
                 channelAssigner.noteOff (60);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (60), 1);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (60), 1);
 
                 channelAssigner.noteOff (61);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (61), 2);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (61), 2);
 
                 // check that assigned channel was last to play note
                 channelAssigner.noteOff (65);
                 channelAssigner.noteOff (66);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (66), 7);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (65), 6);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (66), 7);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (65), 6);
 
                 // find closest channel playing nonequal note
                 expectEquals (channelAssigner.findMidiChannelForNewNote (80), 16);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (55), 1);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (80), 16);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (55), 1);
 
                 // all notes off
                 channelAssigner.allNotesOff();
@@ -406,10 +461,16 @@ struct MPEUtilsUnitTests  : public UnitTest
                 expectEquals (channelAssigner.findMidiChannelForNewNote (65), 6);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (80), 16);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (55), 1);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (66), 7);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (65), 6);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (80), 16);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (55), 1);
 
                 // normal assignment
                 expectEquals (channelAssigner.findMidiChannelForNewNote (101), 2);
                 expectEquals (channelAssigner.findMidiChannelForNewNote (20), 3);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (101), 2);
+                expectEquals (channelAssigner.findMidiChannelForExistingNote (20), 3);
             }
         }
 
