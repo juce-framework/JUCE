@@ -982,16 +982,16 @@ public:
             {
                 const auto value = (newValue != nullptr ? *newValue : juceParam->getValue()) * getMaximumParameterValue (juceParam);
 
-                if (type == AUParameterAutomationEventTypeValue)
-                {
-                    [param setValue: value originator: editorObserverToken];
-                }
-                else if (@available (macOS 10.12, *))
+                if (@available (macOS 10.12, *))
                 {
                     [param setValue: value
                          originator: editorObserverToken
                          atHostTime: lastTimeStamp.mHostTime
                           eventType: type];
+                }
+                else if (type == AUParameterAutomationEventTypeValue)
+                {
+                    [param setValue: value originator: editorObserverToken];
                 }
             }
         }
