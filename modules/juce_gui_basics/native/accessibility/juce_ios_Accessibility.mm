@@ -225,8 +225,11 @@ private:
                 addMethod (@selector (accessibilityDataTableCellElementForRow:column:), getAccessibilityDataTableCellElementForRowColumn);
                 addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
                 addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
+                addProtocol (@protocol (UIAccessibilityContainerDataTable));
+
                 addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
                 addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
+                addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
             }
            #endif
 
