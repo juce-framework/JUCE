@@ -438,7 +438,7 @@ private:
 
         static id getAccessibilityDataTableCellElementForRowColumn (id self, SEL, NSUInteger row, NSUInteger column)
         {
-            if (auto* tableInterface = getTableInterface (self))
+            if (auto* tableInterface = getEnclosingInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
                 if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
                     return (id) cellHandler->getNativeImplementation();
 
