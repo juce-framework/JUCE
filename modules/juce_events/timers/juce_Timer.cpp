@@ -112,6 +112,8 @@ public:
             JUCE_TRY
             {
                 timer->timerCallback();
+                if (timer->onTimer)
+                    timer->onTimer();
             }
             JUCE_CATCH_EXCEPTION
 
@@ -313,7 +315,8 @@ Timer::TimerThread::LockType Timer::TimerThread::lock;
 
 //==============================================================================
 Timer::Timer() noexcept {}
-Timer::Timer (const Timer&) noexcept {}
+Timer::Timer (std::function<void()> callback) noexcept { onTimer = std::move (callback); }
+Timer::Timer (const Timer& other) noexcept { onTimer = other.onTimer; }
 
 Timer::~Timer()
 {
