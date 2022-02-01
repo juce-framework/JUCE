@@ -197,7 +197,7 @@ public:
             [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
-            setCollectionBehaviour (false);
+            [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
 
             [window setRestorable: NO];
 
@@ -406,43 +406,16 @@ public:
         return [window isMiniaturized];
     }
 
-    NSWindowCollectionBehavior getCollectionBehavior (bool forceFullScreen) const
-    {
-        if (forceFullScreen)
-            return NSWindowCollectionBehaviorFullScreenPrimary;
-
-        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenNone
-        constexpr auto fullScreenNone = (NSUInteger) (1 << 9);
-
-        return (getStyleFlags() & (windowHasMaximiseButton | windowIsResizable)) == (windowHasMaximiseButton | windowIsResizable)
-             ? NSWindowCollectionBehaviorFullScreenPrimary
-             : fullScreenNone;
-    }
-
-    void setCollectionBehaviour (bool forceFullScreen) const
-    {
-        [window setCollectionBehavior: getCollectionBehavior (forceFullScreen)];
-    }
-
     void setFullScreen (bool shouldBeFullScreen) override
     {
         if (isSharedWindow)
             return;
 
-        setCollectionBehaviour (shouldBeFullScreen);
-
         if (isMinimised())
             setMinimised (false);
 
-        if (hasNativeTitleBar())
-        {
-            if (shouldBeFullScreen != isFullScreen())
-                [window toggleFullScreen: nil];
-        }
-        else
-        {
-            [window zoom: nil];
-        }
+        if (shouldBeFullScreen != isFullScreen())
+            [window toggleFullScreen: nil];
     }
 
     bool isFullScreen() const override
@@ -1599,7 +1572,6 @@ public:
         }
 
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
-        setCollectionBehaviour (isFullScreen());
     }
 
     void setHasChangedSinceSaved (bool b) override
@@ -2335,6 +2307,7 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
         addMethod (@selector (windowWillResize:toSize:),            windowWillResize);
         addMethod (@selector (windowDidExitFullScreen:),            windowDidExitFullScreen);
         addMethod (@selector (windowWillEnterFullScreen:),          windowWillEnterFullScreen);
+        addMethod (@selector (windowWillExitFullScreen:),           windowWillExitFullScreen);
         addMethod (@selector (windowWillStartLiveResize:),          windowWillStartLiveResize);
         addMethod (@selector (windowDidEndLiveResize:),             windowDidEndLiveResize);
         addMethod (@selector (window:shouldPopUpDocumentPathMenu:), shouldPopUpPathMenu);
@@ -2352,6 +2325,8 @@ struct JuceNSWindowClass   : public NSViewComponentPeerWrapper<ObjCClass<NSWindo
         addMethod (@selector (keyDown:),                            keyDown);
 
         addMethod (@selector (window:shouldDragDocumentWithEvent:from:withPasteboard:), shouldAllowIconDrag);
+
+        addMethod (@selector (toggleFullScreen:),                                         toggleFullScreen);
 
         addProtocol (@protocol (NSWindowDelegate));
 
@@ -2503,10 +2478,37 @@ private:
         return frameRect.size;
     }
 
+    static void toggleFullScreen (id self, SEL name, id sender)
+    {
+        if (auto* owner = getOwner (self))
+        {
+            const auto isFullScreen = owner->isFullScreen();
+
+            if (! isFullScreen)
+                owner->lastSizeBeforeZoom = owner->getBounds().toFloat();
+
+            sendSuperclassMessage<void> (self, name, sender);
+
+            if (isFullScreen)
+            {
+                [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+                owner->setBounds (owner->lastSizeBeforeZoom.toNearestInt(), false);
+            }
+        }
+    }
+
     static void windowDidExitFullScreen (id self, SEL, NSNotification*)
     {
         if (auto* owner = getOwner (self))
             owner->resetWindowPresentation();
+    }
+
+    static void windowWillExitFullScreen (id self, SEL, NSNotification*)
+    {
+        // The exit-fullscreen animation looks bad on Monterey if the window isn't resizable...
+        if (auto* owner = getOwner (self))
+            if (auto* window = owner->window)
+                [window setStyleMask: [window styleMask] | NSWindowStyleMaskResizable];
     }
 
     static void windowWillEnterFullScreen (id self, SEL, NSNotification*)
