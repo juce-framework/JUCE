@@ -69,4 +69,20 @@ struct NullCheckedInvocation
     static void invoke (std::nullptr_t, Args&&...) {}
 };
 
+/** Can be used to disable template constructors that would otherwise cause ambiguity with
+    compiler-generated copy and move constructors.
+
+    Adapted from https://ericniebler.com/2013/08/07/universal-references-and-the-copy-constructo/
+*/
+template <typename A, typename B>
+using DisableIfSameOrDerived = typename std::enable_if_t<! std::is_base_of<A, std::remove_reference_t<B>>::value>;
+
+/** Copies an object, sets one of the copy's members to the specified value, and then returns the copy. */
+template <typename Object, typename OtherObject, typename Member>
+Object withMember (Object copy, Member OtherObject::* member, Member&& value)
+{
+    copy.*member = std::forward<Member> (value);
+    return copy;
+}
+
 } // namespace juce

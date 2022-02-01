@@ -1,6 +1,34 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+Constructors of AudioParameterBool, AudioParameterChoice, AudioParameterFloat,
+AudioParameterInt, and AudioProcessorParameterWithID have been deprecated and
+replaced with new constructors taking an 'Attributes' argument.
+
+Possible Issues
+---------------
+The compiler may issue a deprecation warning upon encountering usages of the
+old constructors.
+
+Workaround
+----------
+Update code to pass an 'Attributes' instance instead. Example usages of the new
+constructors are given in the constructor documentation, and in the plugin
+example projects.
+
+Rationale
+---------
+Parameter types have many different properties. Setting a non-default property
+using the old constructors required explicitly setting other normally-defaulted
+properties, which was redundant. The new Attributes types allow non-default
+properties to be set in isolation.
+
+
 Version 6.1.6
 =============
 

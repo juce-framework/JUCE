@@ -26,16 +26,17 @@
 namespace juce
 {
 
-AudioProcessorParameterWithID::AudioProcessorParameterWithID (const String& idToUse,
+AudioProcessorParameterWithID::AudioProcessorParameterWithID (const ParameterID& idToUse,
                                                               const String& nameToUse,
-                                                              const String& labelToUse,
-                                                              AudioProcessorParameter::Category categoryToUse,
-                                                              int versionHintToUse)
-    : HostedAudioProcessorParameter (versionHintToUse),
-      paramID (idToUse),
+                                                              const AudioProcessorParameterWithIDAttributes& attributes)
+    : HostedAudioProcessorParameter (idToUse.getVersionHint()),
+      paramID (idToUse.getParamID()),
       name (nameToUse),
-      label (labelToUse),
-      category (categoryToUse)
+      label (attributes.getLabel()),
+      category (attributes.getCategory()),
+      meta (attributes.getMeta()),
+      automatable (attributes.getAutomatable()),
+      inverted (attributes.getInverted())
 {
 }
 

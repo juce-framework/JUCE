@@ -1601,7 +1601,7 @@ namespace AAXClasses
 
             if (bypassParameter == nullptr)
             {
-                ownedBypassParameter.reset (new AudioParameterBool (cDefaultMasterBypassID, "Master Bypass", false, {}, {}, {}));
+                ownedBypassParameter.reset (new AudioParameterBool (cDefaultMasterBypassID, "Master Bypass", false));
                 bypassParameter = ownedBypassParameter.get();
             }
 
