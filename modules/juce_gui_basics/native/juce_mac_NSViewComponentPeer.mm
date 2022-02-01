@@ -1625,6 +1625,7 @@ public:
     String stringBeingComposed;
     NSNotificationCenter* notificationCenter = nil;
 
+    Rectangle<float> lastSizeBeforeZoom;
     RectangleList<float> deferredRepaints;
     uint32 lastRepaintTime;
 
@@ -2384,39 +2385,42 @@ private:
        #endif
     }
 
-    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow*, NSRect r)
+    static NSRect windowWillUseStandardFrame (id self, SEL, NSWindow* window, NSRect r)
     {
         if (auto* owner = getOwner (self))
         {
             if (auto* constrainer = owner->getConstrainer())
             {
-                const auto originalBounds = [&]() -> Rectangle<float>
+                if (auto* screen = [window screen])
                 {
-                    const auto screenBounds = owner->getComponent().getScreenBounds();
+                    const auto safeScreenBounds = convertToRectFloat (flippedScreenRect (owner->hasNativeTitleBar() ? r : [screen visibleFrame]));
+                    const auto originalBounds = owner->getFrameSize().addedTo (owner->getComponent().getScreenBounds()).toFloat();
+                    const auto expanded = originalBounds.withWidth  ((float) constrainer->getMaximumWidth())
+                                                        .withHeight ((float) constrainer->getMaximumHeight());
+                    const auto constrained = expanded.constrainedWithin (safeScreenBounds);
 
-                    if (const auto frameSize = owner->getFrameSizeIfPresent())
-                        return frameSize->addedTo (screenBounds).toFloat();
+                    return flippedScreenRect (makeNSRect ([&]
+                    {
+                        if (constrained == owner->getBounds().toFloat())
+                            return owner->lastSizeBeforeZoom.toFloat();
 
-                    return screenBounds.toFloat();
-                }();
-
-                const auto expanded = originalBounds.withWidth  ((float) constrainer->getMaximumWidth())
-                                                    .withHeight ((float) constrainer->getMaximumHeight());
-                const auto constrained = expanded.constrainedWithin (convertToRectFloat (flippedScreenRect (r)));
-                return flippedScreenRect (makeNSRect (constrained));
+                        owner->lastSizeBeforeZoom = owner->getBounds().toFloat();
+                        return constrained;
+                    }()));
+                }
             }
         }
 
         return r;
     }
 
-    static BOOL windowShouldZoomToFrame (id self, SEL, NSWindow* window, NSRect frame)
+    static BOOL windowShouldZoomToFrame (id self, SEL, NSWindow*, NSRect)
     {
         if (auto* owner = getOwner (self))
             if (owner->hasNativeTitleBar() && (owner->getStyleFlags() & ComponentPeer::windowIsResizable) == 0)
                 return NO;
 
-        return convertToRectFloat ([window frame]).withZeroOrigin() != convertToRectFloat (frame).withZeroOrigin();
+        return YES;
     }
 
     static BOOL canBecomeKeyWindow (id self, SEL)
