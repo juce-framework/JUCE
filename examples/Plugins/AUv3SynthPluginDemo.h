@@ -317,8 +317,8 @@ public:
           currentRecording (1, 1), currentProgram (0)
     {
         // initialize parameters
-        addParameter (isRecordingParam = new AudioParameterBool  ("isRecording", "Is Recording", false));
-        addParameter (roomSizeParam    = new AudioParameterFloat ("roomSize", "Room Size", 0.0f, 1.0f, 0.5f));
+        addParameter (isRecordingParam = new AudioParameterBool  ({ "isRecording", 1 }, "Is Recording", false));
+        addParameter (roomSizeParam    = new AudioParameterFloat ({ "roomSize", 1 }, "Room Size", 0.0f, 1.0f, 0.5f));
 
         formatManager.registerBasicFormats();
 
