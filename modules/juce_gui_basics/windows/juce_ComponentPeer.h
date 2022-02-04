@@ -76,20 +76,42 @@ public:
 
     };
 
-    class OptionalBorderSize final
+    /** Represents the window borders around a window component.
+
+        You must use operator bool() to evaluate the validity of the object before accessing
+        its value.
+
+        Returned by getFrameSizeIfPresent(). A missing value may be returned on Linux for a
+        short time after window creation.
+    */
+    class JUCE_API  OptionalBorderSize final
     {
     public:
+        /** Default constructor. Creates an invalid object. */
         OptionalBorderSize()                               : valid (false)                               {}
+
+        /** Constructor. Creates a valid object containing the provided BorderSize<int>. */
         explicit OptionalBorderSize (BorderSize<int> size) : valid (true), borderSize (std::move (size)) {}
 
+        /** Returns true if a valid value has been provided. */
         explicit operator bool() const noexcept { return valid; }
 
+        /** Returns a reference to the value.
+
+            You must not call this function on an invalid object. Use operator bool() to
+            determine validity.
+        */
         const auto& operator*() const noexcept
         {
             jassert (valid);
             return borderSize;
         }
 
+        /** Returns a pointer to the value.
+
+            You must not call this function on an invalid object. Use operator bool() to
+            determine validity.
+        */
         const auto* operator->() const noexcept
         {
             jassert (valid);
