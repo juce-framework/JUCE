@@ -126,10 +126,11 @@ public:
                            | NSTrackingEnabledDuringMouseDrag
                            | NSTrackingActiveAlways
                            | NSTrackingInVisibleRect;
-        [view addTrackingArea: [[NSTrackingArea alloc] initWithRect: r
-                                                            options: options
-                                                              owner: view
-                                                           userInfo: nil]];
+        const NSUniquePtr<NSTrackingArea> trackingArea { [[NSTrackingArea alloc] initWithRect: r
+                                                                                      options: options
+                                                                                        owner: view
+                                                                                     userInfo: nil] };
+        [view addTrackingArea: trackingArea.get()];
 
         notificationCenter = [NSNotificationCenter defaultCenter];
 
