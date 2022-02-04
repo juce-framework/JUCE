@@ -17,7 +17,7 @@ JUCE convention for naming modules is lower-case with underscores, e.g.
     juce_events
     juce_graphics
 
-But any name that is a valid C++ identifer is OK.
+But any name that is a valid C++ identifier is OK.
 
 Inside the root of this folder, there must be a set of public header and source files which
 the user's' project will include. The module may have as many other internal source files as

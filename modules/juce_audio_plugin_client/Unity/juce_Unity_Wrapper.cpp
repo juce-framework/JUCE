@@ -270,6 +270,7 @@ private:
     bool isFocused() const override                                   { return true; }
     void grabFocus() override                                         {}
     void* getNativeHandle() const override                            { return nullptr; }
+    OptionalBorderSize getFrameSizeIfPresent() const override         { return {}; }
     BorderSize<int> getFrameSize() const override                     { return {}; }
     void setVisible (bool) override                                   {}
     void setTitle (const String&) override                            {}

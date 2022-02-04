@@ -217,42 +217,42 @@ public:
     void setVerticalRange (Range<ValueType> range) noexcept                                         { pos.y = range.getStart(); h = range.getLength(); }
 
     /** Returns a rectangle which has the same size and y-position as this one, but with a different x-position. */
-    Rectangle withX (ValueType newX) const noexcept                                                 { return { newX, pos.y, w, h }; }
+    JUCE_NODISCARD Rectangle withX (ValueType newX) const noexcept                                  { return { newX, pos.y, w, h }; }
 
     /** Returns a rectangle which has the same size and x-position as this one, but with a different y-position. */
-    Rectangle withY (ValueType newY) const noexcept                                                 { return { pos.x, newY, w, h }; }
+    JUCE_NODISCARD Rectangle withY (ValueType newY) const noexcept                                  { return { pos.x, newY, w, h }; }
 
     /** Returns a rectangle which has the same size and y-position as this one, but whose right-hand edge has the given position. */
-    Rectangle withRightX (ValueType newRightX) const noexcept                                       { return { newRightX - w, pos.y, w, h }; }
+    JUCE_NODISCARD Rectangle withRightX (ValueType newRightX) const noexcept                        { return { newRightX - w, pos.y, w, h }; }
 
     /** Returns a rectangle which has the same size and x-position as this one, but whose bottom edge has the given position. */
-    Rectangle withBottomY (ValueType newBottomY) const noexcept                                     { return { pos.x, newBottomY - h, w, h }; }
+    JUCE_NODISCARD Rectangle withBottomY (ValueType newBottomY) const noexcept                      { return { pos.x, newBottomY - h, w, h }; }
 
     /** Returns a rectangle with the same size as this one, but a new position. */
-    Rectangle withPosition (ValueType newX, ValueType newY) const noexcept                          { return { newX, newY, w, h }; }
+    JUCE_NODISCARD Rectangle withPosition (ValueType newX, ValueType newY) const noexcept           { return { newX, newY, w, h }; }
 
     /** Returns a rectangle with the same size as this one, but a new position. */
-    Rectangle withPosition (Point<ValueType> newPos) const noexcept                                 { return { newPos.x, newPos.y, w, h }; }
+    JUCE_NODISCARD Rectangle withPosition (Point<ValueType> newPos) const noexcept                  { return { newPos.x, newPos.y, w, h }; }
 
     /** Returns a rectangle whose size is the same as this one, but whose top-left position is (0, 0). */
-    Rectangle withZeroOrigin() const noexcept                                                       { return { w, h }; }
+    JUCE_NODISCARD Rectangle withZeroOrigin() const noexcept                                        { return { w, h }; }
 
     /** Returns a rectangle with the same size as this one, but a new centre position. */
-    Rectangle withCentre (Point<ValueType> newCentre) const noexcept                                { return { newCentre.x - w / (ValueType) 2,
+    JUCE_NODISCARD Rectangle withCentre (Point<ValueType> newCentre) const noexcept                 { return { newCentre.x - w / (ValueType) 2,
                                                                                                                newCentre.y - h / (ValueType) 2, w, h }; }
 
     /** Returns a rectangle which has the same position and height as this one, but with a different width. */
-    Rectangle withWidth (ValueType newWidth) const noexcept                                         { return { pos.x, pos.y, jmax (ValueType(), newWidth), h }; }
+    JUCE_NODISCARD Rectangle withWidth (ValueType newWidth) const noexcept                          { return { pos.x, pos.y, jmax (ValueType(), newWidth), h }; }
 
     /** Returns a rectangle which has the same position and width as this one, but with a different height. */
-    Rectangle withHeight (ValueType newHeight) const noexcept                                       { return { pos.x, pos.y, w, jmax (ValueType(), newHeight) }; }
+    JUCE_NODISCARD Rectangle withHeight (ValueType newHeight) const noexcept                        { return { pos.x, pos.y, w, jmax (ValueType(), newHeight) }; }
 
     /** Returns a rectangle with the same top-left position as this one, but a new size. */
-    Rectangle withSize (ValueType newWidth, ValueType newHeight) const noexcept                     { return { pos.x, pos.y, jmax (ValueType(), newWidth), jmax (ValueType(), newHeight) }; }
+    JUCE_NODISCARD Rectangle withSize (ValueType newWidth, ValueType newHeight) const noexcept      { return { pos.x, pos.y, jmax (ValueType(), newWidth), jmax (ValueType(), newHeight) }; }
 
     /** Returns a rectangle with the same centre position as this one, but a new size. */
-    Rectangle withSizeKeepingCentre (ValueType newWidth, ValueType newHeight) const noexcept        { return { pos.x + (w - newWidth)  / (ValueType) 2,
-                                                                                                               pos.y + (h - newHeight) / (ValueType) 2, newWidth, newHeight }; }
+    JUCE_NODISCARD Rectangle withSizeKeepingCentre (ValueType newWidth, ValueType newHeight) const noexcept { return { pos.x + (w - newWidth)  / (ValueType) 2,
+                                                                                                                       pos.y + (h - newHeight) / (ValueType) 2, newWidth, newHeight }; }
 
     /** Moves the x position, adjusting the width so that the right-hand edge remains in the same place.
         If the x is moved to be on the right of the current right-hand edge, the width will be set to zero.
@@ -264,7 +264,7 @@ public:
         If the new x is beyond the right of the current right-hand edge, the width will be set to zero.
         @see setLeft
     */
-    Rectangle withLeft (ValueType newLeft) const noexcept       { return { newLeft, pos.y, jmax (ValueType(), pos.x + w - newLeft), h }; }
+    JUCE_NODISCARD Rectangle withLeft (ValueType newLeft) const noexcept       { return { newLeft, pos.y, jmax (ValueType(), pos.x + w - newLeft), h }; }
 
     /** Moves the y position, adjusting the height so that the bottom edge remains in the same place.
         If the y is moved to be below the current bottom edge, the height will be set to zero.
@@ -276,7 +276,7 @@ public:
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
         @see setTop
     */
-    Rectangle withTop (ValueType newTop) const noexcept         { return { pos.x, newTop, w, jmax (ValueType(), pos.y + h - newTop) }; }
+    JUCE_NODISCARD Rectangle withTop (ValueType newTop) const noexcept         { return { pos.x, newTop, w, jmax (ValueType(), pos.y + h - newTop) }; }
 
     /** Adjusts the width so that the right-hand edge of the rectangle has this new value.
         If the new right is below the current X value, the X will be pushed down to match it.
@@ -288,7 +288,7 @@ public:
         If the new right edge is below the current left-hand edge, the width will be set to zero.
         @see setRight
     */
-    Rectangle withRight (ValueType newRight) const noexcept     { return { jmin (pos.x, newRight), pos.y, jmax (ValueType(), newRight - pos.x), h }; }
+    JUCE_NODISCARD Rectangle withRight (ValueType newRight) const noexcept     { return { jmin (pos.x, newRight), pos.y, jmax (ValueType(), newRight - pos.x), h }; }
 
     /** Adjusts the height so that the bottom edge of the rectangle has this new value.
         If the new bottom is lower than the current Y value, the Y will be pushed down to match it.
@@ -300,19 +300,19 @@ public:
         If the new y is beyond the bottom of the current rectangle, the height will be set to zero.
         @see setBottom
     */
-    Rectangle withBottom (ValueType newBottom) const noexcept   { return { pos.x, jmin (pos.y, newBottom), w, jmax (ValueType(), newBottom - pos.y) }; }
+    JUCE_NODISCARD Rectangle withBottom (ValueType newBottom) const noexcept   { return { pos.x, jmin (pos.y, newBottom), w, jmax (ValueType(), newBottom - pos.y) }; }
 
     /** Returns a version of this rectangle with the given amount removed from its left-hand edge. */
-    Rectangle withTrimmedLeft (ValueType amountToRemove) const noexcept     { return withLeft (pos.x + amountToRemove); }
+    JUCE_NODISCARD Rectangle withTrimmedLeft (ValueType amountToRemove) const noexcept     { return withLeft (pos.x + amountToRemove); }
 
     /** Returns a version of this rectangle with the given amount removed from its right-hand edge. */
-    Rectangle withTrimmedRight (ValueType amountToRemove) const noexcept    { return withWidth (w - amountToRemove); }
+    JUCE_NODISCARD Rectangle withTrimmedRight (ValueType amountToRemove) const noexcept    { return withWidth (w - amountToRemove); }
 
     /** Returns a version of this rectangle with the given amount removed from its top edge. */
-    Rectangle withTrimmedTop (ValueType amountToRemove) const noexcept      { return withTop (pos.y + amountToRemove); }
+    JUCE_NODISCARD Rectangle withTrimmedTop (ValueType amountToRemove) const noexcept      { return withTop (pos.y + amountToRemove); }
 
     /** Returns a version of this rectangle with the given amount removed from its bottom edge. */
-    Rectangle withTrimmedBottom (ValueType amountToRemove) const noexcept   { return withHeight (h - amountToRemove); }
+    JUCE_NODISCARD Rectangle withTrimmedBottom (ValueType amountToRemove) const noexcept   { return withHeight (h - amountToRemove); }
 
     //==============================================================================
     /** Moves the rectangle's position by adding amount to its x and y coordinates. */

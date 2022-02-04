@@ -126,6 +126,10 @@ protected:
 
     static BOOL accessibilityPerformPress (id self, SEL)
     {
+        if (auto* handler = getHandler (self))
+            if (handler->getCurrentState().isCheckable() && handler->getActions().invoke (AccessibilityActionType::toggle))
+                return YES;
+
         return performActionIfSupported (self, AccessibilityActionType::press);
     }
 

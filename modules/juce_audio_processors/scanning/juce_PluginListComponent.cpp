@@ -451,7 +451,8 @@ private:
     String pluginBeingScanned;
     double progress = 0;
     const int numThreads;
-    bool allowAsync, finished = false, timerReentrancyCheck = false;
+    bool allowAsync, timerReentrancyCheck = false;
+    std::atomic<bool> finished { false };
     std::unique_ptr<ThreadPool> pool;
     std::set<String> initiallyBlacklistedFiles;
 
@@ -582,6 +583,8 @@ private:
         if (timerReentrancyCheck)
             return;
 
+        progress = scanner->getProgress();
+
         if (pool == nullptr)
         {
             const ScopedValueSetter<bool> setter (timerReentrancyCheck, true);
@@ -602,10 +605,7 @@ private:
     bool doNextScan()
     {
         if (scanner->scanNextFile (true, pluginBeingScanned))
-        {
-            progress = scanner->getProgress();
             return true;
-        }
 
         finished = true;
         return false;

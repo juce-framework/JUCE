@@ -1,6 +1,77 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+The ComponentPeer::getFrameSize() function has been deprecated on Linux.
+
+Possible Issues
+---------------
+Deprecation warnings will be seen when compiling code which uses this function
+and eventually builds will fail when it is later removed from the API.
+
+Workaround
+----------
+Use the ComponentPeer::getFrameSizeIfPresent() function. The new function returns
+an OptionalBorderSize object. Use operator bool() to determine if the border size
+is valid, then access the value using operator*() only if it is.
+
+Rationale
+---------
+The XWindow system cannot return a valid border size immediately after window
+creation. ComponentPeer::getFrameSize() returns a default constructed
+BorderSize<int> instance in such cases that corresponds to a frame size of
+zero. That however can be a valid value, and needs to be treated differently
+from the situation when the frame size is not yet available.
+
+
+Change
+------
+The return type of XWindowSystem::getBorderSize() was changed to
+ComponentPeer::OptionalBorderSize.
+
+Possible Issues
+---------------
+User code that uses XWindowSystem::getBorderSize() will fail to build.
+
+Workaround
+----------
+Use operator bool() to determine the validity of the new return value and
+access the contained value using operator*().
+
+Rationale
+---------
+The XWindow system cannot immediately report the correct border size after
+window creation. The underlying X11 calls will signal whether querying the
+border size was successful, but there was no way to forward this information
+through XWindowSystem::getBorderSize() until this change.
+
+
+Version 6.1.5
+=============
+
+Change
+------
+XWindowSystemUtilities::XSettings now has a private constructor.
+
+Possible Issues
+---------------
+User code that uses XSettings::XSettings() will fail to build.
+
+Workaround
+----------
+Use the XSettings::createXSettings() factory function.
+
+Rationale
+---------
+The XSETTINGS facility is not available on all Linux distributions and the old
+constructor would fail on such systems, potentially crashing the application.
+The factory function will return nullptr in such situations instead.
+
+
 Version 6.1.3
 =============
 

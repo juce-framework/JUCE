@@ -539,7 +539,7 @@ attributes directly to these creation functions, rather than adding them later.
 `USE_LEGACY_COMPATIBILITY_PLUGIN_CODE`
 - May be either TRUE or FALSE (defaults to FALSE). If TRUE, will override the value of the
   preprocessor definition "JucePlugin_ManufacturerCode" with the hex equivalent of "proj". This
-  option exists to maintain compatiblity with a previous, buggy version of JUCE's CMake support
+  option exists to maintain compatibility with a previous, buggy version of JUCE's CMake support
   which mishandled the manufacturer code property. Most projects should leave this option set to
   its default value.
 

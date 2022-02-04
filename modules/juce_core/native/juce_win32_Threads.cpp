@@ -53,8 +53,6 @@ void CriticalSection::exit() const noexcept         { LeaveCriticalSection ((CRI
 
 
 //==============================================================================
-void JUCE_API juce_threadEntryPoint (void*);
-
 static unsigned int STDMETHODCALLTYPE threadEntryProc (void* userData)
 {
     if (juce_messageWindowHandle != nullptr)

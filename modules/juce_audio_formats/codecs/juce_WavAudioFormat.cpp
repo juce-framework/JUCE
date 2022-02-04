@@ -26,6 +26,24 @@
 namespace juce
 {
 
+using StringMap = std::unordered_map<String, String>;
+
+static auto toMap (const StringPairArray& array)
+{
+    StringMap result;
+
+    for (auto i = 0; i < array.size(); ++i)
+        result[array.getAllKeys()[i]] = array.getAllValues()[i];
+
+    return result;
+}
+
+static auto getValueWithDefault (const StringMap& m, const String& key, const String& fallback = {})
+{
+    const auto iter = m.find (key);
+    return iter != m.cend() ? iter->second : fallback;
+}
+
 static const char* const wavFormatName = "WAV file";
 
 //==============================================================================
@@ -177,43 +195,42 @@ namespace WavFileHelpers
         uint8 reserved[190];
         char codingHistory[1];
 
-        void copyTo (StringPairArray& values, const int totalSize) const
+        void copyTo (StringMap& values, const int totalSize) const
         {
-            values.set (WavAudioFormat::bwavDescription,     String::fromUTF8 (description,     sizeof (description)));
-            values.set (WavAudioFormat::bwavOriginator,      String::fromUTF8 (originator,      sizeof (originator)));
-            values.set (WavAudioFormat::bwavOriginatorRef,   String::fromUTF8 (originatorRef,   sizeof (originatorRef)));
-            values.set (WavAudioFormat::bwavOriginationDate, String::fromUTF8 (originationDate, sizeof (originationDate)));
-            values.set (WavAudioFormat::bwavOriginationTime, String::fromUTF8 (originationTime, sizeof (originationTime)));
+            values[WavAudioFormat::bwavDescription]     = String::fromUTF8 (description,     sizeof (description));
+            values[WavAudioFormat::bwavOriginator]      = String::fromUTF8 (originator,      sizeof (originator));
+            values[WavAudioFormat::bwavOriginatorRef]   = String::fromUTF8 (originatorRef,   sizeof (originatorRef));
+            values[WavAudioFormat::bwavOriginationDate] = String::fromUTF8 (originationDate, sizeof (originationDate));
+            values[WavAudioFormat::bwavOriginationTime] = String::fromUTF8 (originationTime, sizeof (originationTime));
 
             auto timeLow  = ByteOrder::swapIfBigEndian (timeRefLow);
             auto timeHigh = ByteOrder::swapIfBigEndian (timeRefHigh);
             auto time = (((int64) timeHigh) << 32) + timeLow;
 
-            values.set (WavAudioFormat::bwavTimeReference, String (time));
-            values.set (WavAudioFormat::bwavCodingHistory,
-                        String::fromUTF8 (codingHistory, totalSize - (int) offsetof (BWAVChunk, codingHistory)));
+            values[WavAudioFormat::bwavTimeReference] = String (time);
+            values[WavAudioFormat::bwavCodingHistory] = String::fromUTF8 (codingHistory, totalSize - (int) offsetof (BWAVChunk, codingHistory));
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
-            MemoryBlock data (roundUpSize (sizeof (BWAVChunk) + values[WavAudioFormat::bwavCodingHistory].getNumBytesAsUTF8()));
+            MemoryBlock data (roundUpSize (sizeof (BWAVChunk) + getValueWithDefault (values, WavAudioFormat::bwavCodingHistory).getNumBytesAsUTF8()));
             data.fillWith (0);
 
             auto* b = (BWAVChunk*) data.getData();
 
             // Allow these calls to overwrite an extra byte at the end, which is fine as long
-            // as they get called in the right order..
-            values[WavAudioFormat::bwavDescription]    .copyToUTF8 (b->description, 257);
-            values[WavAudioFormat::bwavOriginator]     .copyToUTF8 (b->originator, 33);
-            values[WavAudioFormat::bwavOriginatorRef]  .copyToUTF8 (b->originatorRef, 33);
-            values[WavAudioFormat::bwavOriginationDate].copyToUTF8 (b->originationDate, 11);
-            values[WavAudioFormat::bwavOriginationTime].copyToUTF8 (b->originationTime, 9);
+            // as they get called in the right order.
+            getValueWithDefault (values, WavAudioFormat::bwavDescription)    .copyToUTF8 (b->description, 257);
+            getValueWithDefault (values, WavAudioFormat::bwavOriginator)     .copyToUTF8 (b->originator, 33);
+            getValueWithDefault (values, WavAudioFormat::bwavOriginatorRef)  .copyToUTF8 (b->originatorRef, 33);
+            getValueWithDefault (values, WavAudioFormat::bwavOriginationDate).copyToUTF8 (b->originationDate, 11);
+            getValueWithDefault (values, WavAudioFormat::bwavOriginationTime).copyToUTF8 (b->originationTime, 9);
 
-            auto time = values[WavAudioFormat::bwavTimeReference].getLargeIntValue();
+            auto time = getValueWithDefault (values, WavAudioFormat::bwavTimeReference).getLargeIntValue();
             b->timeRefLow = ByteOrder::swapIfBigEndian ((uint32) (time & 0xffffffff));
             b->timeRefHigh = ByteOrder::swapIfBigEndian ((uint32) (time >> 32));
 
-            values[WavAudioFormat::bwavCodingHistory].copyToUTF8 (b->codingHistory, 0x7fffffff);
+            getValueWithDefault (values, WavAudioFormat::bwavCodingHistory).copyToUTF8 (b->codingHistory, 0x7fffffff);
 
             if (b->description[0] != 0
                 || b->originator[0] != 0
@@ -270,17 +287,17 @@ namespace WavFileHelpers
         SampleLoop loops[1];
 
         template <typename NameType>
-        static void setValue (StringPairArray& values, NameType name, uint32 val)
+        static void setValue (StringMap& values, NameType name, uint32 val)
         {
-            values.set (name, String (ByteOrder::swapIfBigEndian (val)));
+            values[name] = String (ByteOrder::swapIfBigEndian (val));
         }
 
-        static void setValue (StringPairArray& values, int prefix, const char* name, uint32 val)
+        static void setValue (StringMap& values, int prefix, const char* name, uint32 val)
         {
             setValue (values, "Loop" + String (prefix) + name, val);
         }
 
-        void copyTo (StringPairArray& values, const int totalSize) const
+        void copyTo (StringMap& values, const int totalSize) const
         {
             setValue (values, "Manufacturer",      manufacturer);
             setValue (values, "Product",           product);
@@ -307,20 +324,20 @@ namespace WavFileHelpers
         }
 
         template <typename NameType>
-        static uint32 getValue (const StringPairArray& values, NameType name, const char* def)
+        static uint32 getValue (const StringMap& values, NameType name, const char* def)
         {
-            return ByteOrder::swapIfBigEndian ((uint32) values.getValue (name, def).getIntValue());
+            return ByteOrder::swapIfBigEndian ((uint32) getValueWithDefault (values, name, def).getIntValue());
         }
 
-        static uint32 getValue (const StringPairArray& values, int prefix, const char* name, const char* def)
+        static uint32 getValue (const StringMap& values, int prefix, const char* name, const char* def)
         {
             return getValue (values, "Loop" + String (prefix) + name, def);
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
             MemoryBlock data;
-            auto numLoops = jmin (64, values.getValue ("NumSampleLoops", "0").getIntValue());
+            auto numLoops = jmin (64, getValueWithDefault (values, "NumSampleLoops", "0").getIntValue());
 
             data.setSize (roundUpSize (sizeof (SMPLChunk) + (size_t) (jmax (0, numLoops - 1)) * sizeof (SampleLoop)), true);
 
@@ -362,12 +379,12 @@ namespace WavFileHelpers
         int8 lowVelocity;
         int8 highVelocity;
 
-        static void setValue (StringPairArray& values, const char* name, int val)
+        static void setValue (StringMap& values, const char* name, int val)
         {
-            values.set (name, String (val));
+            values[name] = String (val);
         }
 
-        void copyTo (StringPairArray& values) const
+        void copyTo (StringMap& values) const
         {
             setValue (values, "MidiUnityNote",  baseNote);
             setValue (values, "Detune",         detune);
@@ -378,17 +395,17 @@ namespace WavFileHelpers
             setValue (values, "HighVelocity",   highVelocity);
         }
 
-        static int8 getValue (const StringPairArray& values, const char* name, const char* def)
+        static int8 getValue (const StringMap& values, const char* name, const char* def)
         {
-            return (int8) values.getValue (name, def).getIntValue();
+            return (int8) getValueWithDefault (values, name, def).getIntValue();
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
             MemoryBlock data;
-            auto& keys = values.getAllKeys();
 
-            if (keys.contains ("LowNote", true) && keys.contains ("HighNote", true))
+            if (   values.find ("LowNote")  != values.cend()
+                && values.find ("HighNote") != values.cend())
             {
                 data.setSize (8, true);
                 auto* inst = static_cast<InstChunk*> (data.getData());
@@ -422,14 +439,14 @@ namespace WavFileHelpers
         uint32 numCues;
         Cue cues[1];
 
-        static void setValue (StringPairArray& values, int prefix, const char* name, uint32 val)
+        static void setValue (StringMap& values, int prefix, const char* name, uint32 val)
         {
-            values.set ("Cue" + String (prefix) + name, String (ByteOrder::swapIfBigEndian (val)));
+            values["Cue" + String (prefix) + name] = String (ByteOrder::swapIfBigEndian (val));
         }
 
-        void copyTo (StringPairArray& values, const int totalSize) const
+        void copyTo (StringMap& values, const int totalSize) const
         {
-            values.set ("NumCuePoints", String (ByteOrder::swapIfBigEndian (numCues)));
+            values["NumCuePoints"] = String (ByteOrder::swapIfBigEndian (numCues));
 
             for (int i = 0; i < (int) numCues; ++i)
             {
@@ -445,10 +462,10 @@ namespace WavFileHelpers
             }
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
             MemoryBlock data;
-            const int numCues = values.getValue ("NumCuePoints", "0").getIntValue();
+            const int numCues = getValueWithDefault (values, "NumCuePoints", "0").getIntValue();
 
             if (numCues > 0)
             {
@@ -468,23 +485,23 @@ namespace WavFileHelpers
                 for (int i = 0; i < numCues; ++i)
                 {
                     auto prefix = "Cue" + String (i);
-                    auto identifier = (uint32) values.getValue (prefix + "Identifier", "0").getIntValue();
+                    auto identifier = (uint32) getValueWithDefault (values, prefix + "Identifier", "0").getIntValue();
 
                    #if JUCE_DEBUG
                     jassert (! identifiers.contains (identifier));
                     identifiers.add (identifier);
                    #endif
 
-                    auto order = values.getValue (prefix + "Order", String (nextOrder)).getIntValue();
+                    auto order = getValueWithDefault (values, prefix + "Order", String (nextOrder)).getIntValue();
                     nextOrder = jmax (nextOrder, order) + 1;
 
                     auto& cue = c->cues[i];
                     cue.identifier   = ByteOrder::swapIfBigEndian ((uint32) identifier);
                     cue.order        = ByteOrder::swapIfBigEndian ((uint32) order);
-                    cue.chunkID      = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "ChunkID", dataChunkID).getIntValue());
-                    cue.chunkStart   = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "ChunkStart", "0").getIntValue());
-                    cue.blockStart   = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "BlockStart", "0").getIntValue());
-                    cue.offset       = ByteOrder::swapIfBigEndian ((uint32) values.getValue (prefix + "Offset", "0").getIntValue());
+                    cue.chunkID      = ByteOrder::swapIfBigEndian ((uint32) getValueWithDefault (values, prefix + "ChunkID", dataChunkID).getIntValue());
+                    cue.chunkStart   = ByteOrder::swapIfBigEndian ((uint32) getValueWithDefault (values, prefix + "ChunkStart", "0").getIntValue());
+                    cue.blockStart   = ByteOrder::swapIfBigEndian ((uint32) getValueWithDefault (values, prefix + "BlockStart", "0").getIntValue());
+                    cue.offset       = ByteOrder::swapIfBigEndian ((uint32) getValueWithDefault (values, prefix + "Offset", "0").getIntValue());
                 }
             }
 
@@ -496,20 +513,20 @@ namespace WavFileHelpers
     //==============================================================================
     namespace ListChunk
     {
-        static int getValue (const StringPairArray& values, const String& name)
+        static int getValue (const StringMap& values, const String& name)
         {
-            return values.getValue (name, "0").getIntValue();
+            return getValueWithDefault (values, name, "0").getIntValue();
         }
 
-        static int getValue (const StringPairArray& values, const String& prefix, const char* name)
+        static int getValue (const StringMap& values, const String& prefix, const char* name)
         {
             return getValue (values, prefix + name);
         }
 
-        static void appendLabelOrNoteChunk (const StringPairArray& values, const String& prefix,
+        static void appendLabelOrNoteChunk (const StringMap& values, const String& prefix,
                                             const int chunkType, MemoryOutputStream& out)
         {
-            auto label = values.getValue (prefix + "Text", prefix);
+            auto label = getValueWithDefault (values, prefix + "Text", prefix);
             auto labelLength = (int) label.getNumBytesAsUTF8() + 1;
             auto chunkLength = 4 + labelLength + (labelLength & 1);
 
@@ -522,9 +539,9 @@ namespace WavFileHelpers
                 out.writeByte (0);
         }
 
-        static void appendExtraChunk (const StringPairArray& values, const String& prefix, MemoryOutputStream& out)
+        static void appendExtraChunk (const StringMap& values, const String& prefix, MemoryOutputStream& out)
         {
-            auto text = values.getValue (prefix + "Text", prefix);
+            auto text = getValueWithDefault (values, prefix + "Text", prefix);
 
             auto textLength = (int) text.getNumBytesAsUTF8() + 1; // include null terminator
             auto chunkLength = textLength + 20 + (textLength & 1);
@@ -544,7 +561,7 @@ namespace WavFileHelpers
                 out.writeByte (0);
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
             auto numCueLabels  = getValue (values, "NumCueLabels");
             auto numCueNotes   = getValue (values, "NumCueNotes");
@@ -668,7 +685,7 @@ namespace WavFileHelpers
             return true;
         }
 
-        static void addToMetadata (StringPairArray& values, InputStream& input, int64 chunkEnd)
+        static void addToMetadata (StringMap& values, InputStream& input, int64 chunkEnd)
         {
             while (input.getPosition() < chunkEnd)
             {
@@ -688,8 +705,8 @@ namespace WavFileHelpers
                         {
                             MemoryBlock mb;
                             input.readIntoMemoryBlock (mb, (ssize_t) infoLength);
-                            values.set (type, String::createStringFromData ((const char*) mb.getData(),
-                                                                            (int) mb.getSize()));
+                            values[type] = String::createStringFromData ((const char*) mb.getData(),
+                                                                         (int) mb.getSize());
                             break;
                         }
                     }
@@ -697,9 +714,9 @@ namespace WavFileHelpers
             }
         }
 
-        static bool writeValue (const StringPairArray& values, MemoryOutputStream& out, const char* paramName)
+        static bool writeValue (const StringMap& values, MemoryOutputStream& out, const char* paramName)
         {
-            auto value = values.getValue (paramName, {});
+            auto value = getValueWithDefault (values, paramName, {});
 
             if (value.isEmpty())
                 return false;
@@ -717,7 +734,7 @@ namespace WavFileHelpers
             return true;
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
             MemoryOutputStream out;
             out.writeInt (chunkName ("INFO"));
@@ -741,7 +758,7 @@ namespace WavFileHelpers
             input.read (this, (int) jmin (sizeof (*this), length));
         }
 
-        AcidChunk (const StringPairArray& values)
+        AcidChunk (const StringMap& values)
         {
             zerostruct (*this);
 
@@ -751,18 +768,20 @@ namespace WavFileHelpers
                   | getFlagIfPresent (values, WavAudioFormat::acidDiskBased, 0x08)
                   | getFlagIfPresent (values, WavAudioFormat::acidizerFlag,  0x10);
 
-            if (values[WavAudioFormat::acidRootSet].getIntValue() != 0)
-                rootNote = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidRootNote].getIntValue());
+            if (getValueWithDefault (values, WavAudioFormat::acidRootSet).getIntValue() != 0)
+                rootNote = ByteOrder::swapIfBigEndian ((uint16) getValueWithDefault (values, WavAudioFormat::acidRootNote).getIntValue());
 
-            numBeats          = ByteOrder::swapIfBigEndian ((uint32) values[WavAudioFormat::acidBeats].getIntValue());
-            meterDenominator  = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidDenominator].getIntValue());
-            meterNumerator    = ByteOrder::swapIfBigEndian ((uint16) values[WavAudioFormat::acidNumerator].getIntValue());
+            numBeats          = ByteOrder::swapIfBigEndian ((uint32) getValueWithDefault (values, WavAudioFormat::acidBeats).getIntValue());
+            meterDenominator  = ByteOrder::swapIfBigEndian ((uint16) getValueWithDefault (values, WavAudioFormat::acidDenominator).getIntValue());
+            meterNumerator    = ByteOrder::swapIfBigEndian ((uint16) getValueWithDefault (values, WavAudioFormat::acidNumerator).getIntValue());
 
-            if (values.containsKey (WavAudioFormat::acidTempo))
-                tempo = swapFloatByteOrder (values[WavAudioFormat::acidTempo].getFloatValue());
+            const auto iter = values.find (WavAudioFormat::acidTempo);
+
+            if (iter != values.cend())
+                tempo = swapFloatByteOrder (iter->second.getFloatValue());
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
             return AcidChunk (values).toMemoryBlock();
         }
@@ -773,7 +792,7 @@ namespace WavFileHelpers
                       ? MemoryBlock (this, sizeof (*this)) : MemoryBlock();
         }
 
-        void addToMetadata (StringPairArray& values) const
+        void addToMetadata (StringMap& values) const
         {
             setBoolFlag (values, WavAudioFormat::acidOneShot,   0x01);
             setBoolFlag (values, WavAudioFormat::acidRootSet,   0x02);
@@ -782,22 +801,22 @@ namespace WavFileHelpers
             setBoolFlag (values, WavAudioFormat::acidizerFlag,  0x10);
 
             if (flags & 0x02) // root note set
-                values.set (WavAudioFormat::acidRootNote, String (ByteOrder::swapIfBigEndian (rootNote)));
+                values[WavAudioFormat::acidRootNote] = String (ByteOrder::swapIfBigEndian (rootNote));
 
-            values.set (WavAudioFormat::acidBeats,       String (ByteOrder::swapIfBigEndian (numBeats)));
-            values.set (WavAudioFormat::acidDenominator, String (ByteOrder::swapIfBigEndian (meterDenominator)));
-            values.set (WavAudioFormat::acidNumerator,   String (ByteOrder::swapIfBigEndian (meterNumerator)));
-            values.set (WavAudioFormat::acidTempo,       String (swapFloatByteOrder (tempo)));
+            values[WavAudioFormat::acidBeats]       = String (ByteOrder::swapIfBigEndian (numBeats));
+            values[WavAudioFormat::acidDenominator] = String (ByteOrder::swapIfBigEndian (meterDenominator));
+            values[WavAudioFormat::acidNumerator]   = String (ByteOrder::swapIfBigEndian (meterNumerator));
+            values[WavAudioFormat::acidTempo]       = String (swapFloatByteOrder (tempo));
         }
 
-        void setBoolFlag (StringPairArray& values, const char* name, uint32 mask) const
+        void setBoolFlag (StringMap& values, const char* name, uint32 mask) const
         {
-            values.set (name, (flags & ByteOrder::swapIfBigEndian (mask)) ? "1" : "0");
+            values[name] = (flags & ByteOrder::swapIfBigEndian (mask)) ? "1" : "0";
         }
 
-        static uint32 getFlagIfPresent (const StringPairArray& values, const char* name, uint32 flag)
+        static uint32 getFlagIfPresent (const StringMap& values, const char* name, uint32 flag)
         {
-            return values[name].getIntValue() != 0 ? ByteOrder::swapIfBigEndian (flag) : 0;
+            return getValueWithDefault (values, name).getIntValue() != 0 ? ByteOrder::swapIfBigEndian (flag) : 0;
         }
 
         static float swapFloatByteOrder (const float x) noexcept
@@ -826,10 +845,10 @@ namespace WavFileHelpers
     //==============================================================================
     struct TracktionChunk
     {
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
             MemoryOutputStream out;
-            auto s = values[WavAudioFormat::tracktionLoopInfo];
+            auto s = getValueWithDefault (values, WavAudioFormat::tracktionLoopInfo);
 
             if (s.isNotEmpty())
             {
@@ -846,7 +865,7 @@ namespace WavFileHelpers
     //==============================================================================
     namespace AXMLChunk
     {
-        static void addToMetadata (StringPairArray& destValues, const String& source)
+        static void addToMetadata (StringMap& destValues, const String& source)
         {
             if (auto xml = parseXML (source))
             {
@@ -861,7 +880,7 @@ namespace WavFileHelpers
                                 auto ISRCCode = xml4->getAllSubText().fromFirstOccurrenceOf ("ISRC:", false, true);
 
                                 if (ISRCCode.isNotEmpty())
-                                    destValues.set (WavAudioFormat::ISRC, ISRCCode);
+                                    destValues[WavAudioFormat::ISRC] = ISRCCode;
                             }
                         }
                     }
@@ -869,9 +888,9 @@ namespace WavFileHelpers
             }
         }
 
-        static MemoryBlock createFrom (const StringPairArray& values)
+        static MemoryBlock createFrom (const StringMap& values)
         {
-            auto ISRC = values.getValue (WavAudioFormat::ISRC, {});
+            auto ISRC = getValueWithDefault (values, WavAudioFormat::ISRC);
             MemoryOutputStream xml;
 
             if (ISRC.isNotEmpty())
@@ -940,6 +959,8 @@ public:
         int cueNoteIndex = 0;
         int cueLabelIndex = 0;
         int cueRegionIndex = 0;
+
+        StringMap dict;
 
         auto streamStartPos = input->getPosition();
         auto firstChunkType = input->readInt();
@@ -1019,7 +1040,7 @@ public:
                         {
                             input->skipNextBytes (4); // skip over size and bitsPerSample
                             auto channelMask = input->readInt();
-                            metadataValues.set ("ChannelMask", String (channelMask));
+                            dict["ChannelMask"] = String (channelMask);
                             channelLayout = getChannelLayoutFromMask (channelMask, numChannels);
 
                             ExtensibleWavSubFormat subFormat;
@@ -1074,34 +1095,34 @@ public:
                     HeapBlock<BWAVChunk> bwav;
                     bwav.calloc (jmax ((size_t) length + 1, sizeof (BWAVChunk)), 1);
                     input->read (bwav, (int) length);
-                    bwav->copyTo (metadataValues, (int) length);
+                    bwav->copyTo (dict, (int) length);
                 }
                 else if (chunkType == chunkName ("smpl"))
                 {
                     HeapBlock<SMPLChunk> smpl;
                     smpl.calloc (jmax ((size_t) length + 1, sizeof (SMPLChunk)), 1);
                     input->read (smpl, (int) length);
-                    smpl->copyTo (metadataValues, (int) length);
+                    smpl->copyTo (dict, (int) length);
                 }
                 else if (chunkType == chunkName ("inst") || chunkType == chunkName ("INST")) // need to check which...
                 {
                     HeapBlock<InstChunk> inst;
                     inst.calloc (jmax ((size_t) length + 1, sizeof (InstChunk)), 1);
                     input->read (inst, (int) length);
-                    inst->copyTo (metadataValues);
+                    inst->copyTo (dict);
                 }
                 else if (chunkType == chunkName ("cue "))
                 {
                     HeapBlock<CueChunk> cue;
                     cue.calloc (jmax ((size_t) length + 1, sizeof (CueChunk)), 1);
                     input->read (cue, (int) length);
-                    cue->copyTo (metadataValues, (int) length);
+                    cue->copyTo (dict, (int) length);
                 }
                 else if (chunkType == chunkName ("axml"))
                 {
                     MemoryBlock axml;
                     input->readIntoMemoryBlock (axml, (ssize_t) length);
-                    AXMLChunk::addToMetadata (metadataValues, axml.toString());
+                    AXMLChunk::addToMetadata (dict, axml.toString());
                 }
                 else if (chunkType == chunkName ("LIST"))
                 {
@@ -1109,7 +1130,7 @@ public:
 
                     if (subChunkType == chunkName ("info") || subChunkType == chunkName ("INFO"))
                     {
-                        ListInfoChunk::addToMetadata (metadataValues, *input, chunkEnd);
+                        ListInfoChunk::addToMetadata (dict, *input, chunkEnd);
                     }
                     else if (subChunkType == chunkName ("adtl"))
                     {
@@ -1134,8 +1155,8 @@ public:
                                 MemoryBlock textBlock;
                                 input->readIntoMemoryBlock (textBlock, stringLength);
 
-                                metadataValues.set (prefix + "Identifier", String (identifier));
-                                metadataValues.set (prefix + "Text", textBlock.toString());
+                                dict[prefix + "Identifier"] = String (identifier);
+                                dict[prefix + "Text"] = textBlock.toString();
                             }
                             else if (adtlChunkType == chunkName ("ltxt"))
                             {
@@ -1152,14 +1173,14 @@ public:
                                 MemoryBlock textBlock;
                                 input->readIntoMemoryBlock (textBlock, (int) stringLength);
 
-                                metadataValues.set (prefix + "Identifier",   String (identifier));
-                                metadataValues.set (prefix + "SampleLength", String (sampleLength));
-                                metadataValues.set (prefix + "Purpose",      String (purpose));
-                                metadataValues.set (prefix + "Country",      String (country));
-                                metadataValues.set (prefix + "Language",     String (language));
-                                metadataValues.set (prefix + "Dialect",      String (dialect));
-                                metadataValues.set (prefix + "CodePage",     String (codePage));
-                                metadataValues.set (prefix + "Text",         textBlock.toString());
+                                dict[prefix + "Identifier"]   = String (identifier);
+                                dict[prefix + "SampleLength"] = String (sampleLength);
+                                dict[prefix + "Purpose"]      = String (purpose);
+                                dict[prefix + "Country"]      = String (country);
+                                dict[prefix + "Language"]     = String (language);
+                                dict[prefix + "Dialect"]      = String (dialect);
+                                dict[prefix + "CodePage"]     = String (codePage);
+                                dict[prefix + "Text"]         = textBlock.toString();
                             }
 
                             input->setPosition (adtlChunkEnd);
@@ -1168,13 +1189,13 @@ public:
                 }
                 else if (chunkType == chunkName ("acid"))
                 {
-                    AcidChunk (*input, length).addToMetadata (metadataValues);
+                    AcidChunk (*input, length).addToMetadata (dict);
                 }
                 else if (chunkType == chunkName ("Trkn"))
                 {
                     MemoryBlock tracktion;
                     input->readIntoMemoryBlock (tracktion, (ssize_t) length);
-                    metadataValues.set (WavAudioFormat::tracktionLoopInfo, tracktion.toString());
+                    dict[WavAudioFormat::tracktionLoopInfo] = tracktion.toString();
                 }
                 else if (chunkEnd <= input->getPosition())
                 {
@@ -1185,10 +1206,12 @@ public:
             }
         }
 
-        if (cueLabelIndex > 0)          metadataValues.set ("NumCueLabels",    String (cueLabelIndex));
-        if (cueNoteIndex > 0)           metadataValues.set ("NumCueNotes",     String (cueNoteIndex));
-        if (cueRegionIndex > 0)         metadataValues.set ("NumCueRegions",   String (cueRegionIndex));
-        if (metadataValues.size() > 0)  metadataValues.set ("MetaDataSource",  "WAV");
+        if (cueLabelIndex > 0)          dict["NumCueLabels"]    = String (cueLabelIndex);
+        if (cueNoteIndex > 0)           dict["NumCueNotes"]     = String (cueNoteIndex);
+        if (cueRegionIndex > 0)         dict["NumCueRegions"]   = String (cueRegionIndex);
+        if (dict.size() > 0)            dict["MetaDataSource"]  = "WAV";
+
+        metadataValues.addUnorderedMap (dict);
     }
 
     //==============================================================================
@@ -1312,15 +1335,17 @@ public:
             // key should be removed (or set to "WAV") once this has been done
             jassert (metadataValues.getValue ("MetaDataSource", "None") != "AIFF");
 
-            bwavChunk     = BWAVChunk::createFrom (metadataValues);
-            axmlChunk     = AXMLChunk::createFrom (metadataValues);
-            smplChunk     = SMPLChunk::createFrom (metadataValues);
-            instChunk     = InstChunk::createFrom (metadataValues);
-            cueChunk      = CueChunk ::createFrom (metadataValues);
-            listChunk     = ListChunk::createFrom (metadataValues);
-            listInfoChunk = ListInfoChunk::createFrom (metadataValues);
-            acidChunk     = AcidChunk::createFrom (metadataValues);
-            trckChunk     = TracktionChunk::createFrom (metadataValues);
+            const auto map = toMap (metadataValues);
+
+            bwavChunk     = BWAVChunk::createFrom (map);
+            axmlChunk     = AXMLChunk::createFrom (map);
+            smplChunk     = SMPLChunk::createFrom (map);
+            instChunk     = InstChunk::createFrom (map);
+            cueChunk      = CueChunk ::createFrom (map);
+            listChunk     = ListChunk::createFrom (map);
+            listInfoChunk = ListInfoChunk::createFrom (map);
+            acidChunk     = AcidChunk::createFrom (map);
+            trckChunk     = TracktionChunk::createFrom (map);
         }
 
         headerPosition = out->getPosition();
@@ -1792,7 +1817,7 @@ bool WavAudioFormat::replaceMetadataInFile (const File& wavFile, const StringPai
 
         if (bwavSize > 0)
         {
-            auto chunk = BWAVChunk::createFrom (newMetadata);
+            auto chunk = BWAVChunk::createFrom (toMap (newMetadata));
 
             if (chunk.getSize() <= (size_t) bwavSize)
             {
@@ -1834,31 +1859,34 @@ struct WaveAudioFormatTests : public UnitTest
     {
         beginTest ("Setting up metadata");
 
-        StringPairArray metadataValues = WavAudioFormat::createBWAVMetadata ("description",
-                                                                             "originator",
-                                                                             "originatorRef",
-                                                                             Time::getCurrentTime(),
-                                                                             numTestAudioBufferSamples,
-                                                                             "codingHistory");
+        auto metadataValues = toMap (WavAudioFormat::createBWAVMetadata ("description",
+                                                                         "originator",
+                                                                         "originatorRef",
+                                                                         Time::getCurrentTime(),
+                                                                         numTestAudioBufferSamples,
+                                                                         "codingHistory"));
 
         for (int i = numElementsInArray (WavFileHelpers::ListInfoChunk::types); --i >= 0;)
-            metadataValues.set (WavFileHelpers::ListInfoChunk::types[i],
-                                WavFileHelpers::ListInfoChunk::types[i]);
+            metadataValues[WavFileHelpers::ListInfoChunk::types[i]] = WavFileHelpers::ListInfoChunk::types[i];
 
         if (metadataValues.size() > 0)
-            metadataValues.set ("MetaDataSource", "WAV");
+            metadataValues["MetaDataSource"] = "WAV";
 
-        metadataValues.addArray (createDefaultSMPLMetadata());
+        const auto smplMetadata = createDefaultSMPLMetadata();
+        metadataValues.insert (smplMetadata.cbegin(), smplMetadata.cend());
 
         WavAudioFormat format;
         MemoryBlock memoryBlock;
+
+        StringPairArray metadataArray;
+        metadataArray.addUnorderedMap (metadataValues);
 
         {
             beginTest ("Creating a basic wave writer");
 
             std::unique_ptr<AudioFormatWriter> writer (format.createWriterFor (new MemoryOutputStream (memoryBlock, false),
                                                                                44100.0, numTestAudioBufferChannels,
-                                                                               32, metadataValues, 0));
+                                                                               32, metadataArray, 0));
             expect (writer != nullptr);
 
             AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
@@ -1873,7 +1901,7 @@ struct WaveAudioFormatTests : public UnitTest
 
             std::unique_ptr<AudioFormatReader> reader (format.createReaderFor (new MemoryInputStream (memoryBlock, false), false));
             expect (reader != nullptr);
-            expect (reader->metadataValues == metadataValues, "Somehow, the metadata is different!");
+            expect (reader->metadataValues == metadataArray, "Somehow, the metadata is different!");
         }
     }
 
@@ -1884,19 +1912,19 @@ private:
         numTestAudioBufferSamples = 256
     };
 
-    StringPairArray createDefaultSMPLMetadata() const
+    static StringMap createDefaultSMPLMetadata()
     {
-        StringPairArray m;
+        StringMap m;
 
-        m.set ("Manufacturer", "0");
-        m.set ("Product", "0");
-        m.set ("SamplePeriod", "0");
-        m.set ("MidiUnityNote", "60");
-        m.set ("MidiPitchFraction", "0");
-        m.set ("SmpteFormat", "0");
-        m.set ("SmpteOffset", "0");
-        m.set ("NumSampleLoops", "0");
-        m.set ("SamplerData", "0");
+        m["Manufacturer"] = "0";
+        m["Product"] = "0";
+        m["SamplePeriod"] = "0";
+        m["MidiUnityNote"] = "60";
+        m["MidiPitchFraction"] = "0";
+        m["SmpteFormat"] = "0";
+        m["SmpteOffset"] = "0";
+        m["NumSampleLoops"] = "0";
+        m["SamplerData"] = "0";
 
         return m;
     }

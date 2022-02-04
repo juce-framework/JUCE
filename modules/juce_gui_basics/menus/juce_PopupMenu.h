@@ -39,20 +39,22 @@ namespace juce
         m.addItem (1, "item 1");
         m.addItem (2, "item 2");
 
-        const int result = m.show();
-
-        if (result == 0)
-        {
-            // user dismissed the menu without picking anything
-        }
-        else if (result == 1)
-        {
-            // user picked item 1
-        }
-        else if (result == 2)
-        {
-            // user picked item 2
-        }
+        m.showMenuAsync (PopupMenu::Options(),
+                         [] (int result)
+                         {
+                             if (result == 0)
+                             {
+                                 // user dismissed the menu without picking anything
+                             }
+                             else if (result == 1)
+                             {
+                                 // user picked item 1
+                             }
+                             else if (result == 2)
+                             {
+                                 // user picked item 2
+                             }
+                         });
     }
     @endcode
 
@@ -68,9 +70,7 @@ namespace juce
         mainMenu.addItem (3, "item 3");
         mainMenu.addSubMenu ("other choices", subMenu);
 
-        const int result = m.show();
-
-        ...etc
+        m.showMenuAsync (...);
     }
     @endcode
 
@@ -333,11 +333,15 @@ public:
 
         Note that native macOS menus do not support custom components.
 
+        itemTitle will be used as the fallback text for this item, and will
+        be exposed to screen reader clients.
+
         @see CustomComponent
     */
     void addCustomItem (int itemResultID,
                         std::unique_ptr<CustomComponent> customComponent,
-                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr);
+                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr,
+                        const String& itemTitle = {});
 
     /** Appends a custom menu item that can't be used to trigger a result.
 
@@ -350,6 +354,9 @@ public:
         menu ID specified in itemResultID. If this is false, the menu item can't
         be triggered, so itemResultID is not used.
 
+        itemTitle will be used as the fallback text for this item, and will
+        be exposed to screen reader clients.
+
         Note that native macOS menus do not support custom components.
     */
     void addCustomItem (int itemResultID,
@@ -357,7 +364,8 @@ public:
                         int idealWidth,
                         int idealHeight,
                         bool triggerMenuItemAutomaticallyWhenClicked,
-                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr);
+                        std::unique_ptr<const PopupMenu> optionalSubMenu = nullptr,
+                        const String& itemTitle = {});
 
     /** Appends a sub-menu.
 
@@ -475,8 +483,8 @@ public:
 
             @see withTargetComponent, withTargetScreenArea
         */
-        Options withTargetComponent (Component* targetComponent) const;
-        Options withTargetComponent (Component& targetComponent) const;
+        JUCE_NODISCARD Options withTargetComponent (Component* targetComponent) const;
+        JUCE_NODISCARD Options withTargetComponent (Component& targetComponent) const;
 
         /** Sets the region of the screen next to which the menu should be displayed.
 
@@ -492,7 +500,7 @@ public:
 
             @see withMousePosition
         */
-        Options withTargetScreenArea (Rectangle<int> targetArea) const;
+        JUCE_NODISCARD Options withTargetScreenArea (Rectangle<int> targetArea) const;
 
         /** Sets the target screen area to match the current mouse position.
 
@@ -500,7 +508,7 @@ public:
 
             @see withTargetScreenArea
         */
-        Options withMousePosition() const;
+        JUCE_NODISCARD Options withMousePosition() const;
 
         /** If the passed component has been deleted when the popup menu exits,
             the selected item's action will not be called.
@@ -509,26 +517,26 @@ public:
             callback, in the case that the callback needs to access a component that
             may be deleted.
         */
-        Options withDeletionCheck (Component& componentToWatchForDeletion) const;
+        JUCE_NODISCARD Options withDeletionCheck (Component& componentToWatchForDeletion) const;
 
         /** Sets the minimum width of the popup window. */
-        Options withMinimumWidth (int minWidth) const;
+        JUCE_NODISCARD Options withMinimumWidth (int minWidth) const;
 
         /** Sets the minimum number of columns in the popup window. */
-        Options withMinimumNumColumns (int minNumColumns) const;
+        JUCE_NODISCARD Options withMinimumNumColumns (int minNumColumns) const;
 
         /** Sets the maximum number of columns in the popup window. */
-        Options withMaximumNumColumns (int maxNumColumns) const;
+        JUCE_NODISCARD Options withMaximumNumColumns (int maxNumColumns) const;
 
         /** Sets the default height of each item in the popup menu. */
-        Options withStandardItemHeight (int standardHeight) const;
+        JUCE_NODISCARD Options withStandardItemHeight (int standardHeight) const;
 
         /** Sets an item which must be visible when the menu is initially drawn.
 
             This is useful to ensure that a particular item is shown when the menu
             contains too many items to display on a single screen.
         */
-        Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
+        JUCE_NODISCARD Options withItemThatMustBeVisible (int idOfItemToBeVisible) const;
 
         /** Sets a component that the popup menu will be drawn into.
 
@@ -539,10 +547,10 @@ public:
             avoid this unwanted behaviour, but with the downside that the menu size
             will be constrained by the size of the parent component.
         */
-        Options withParentComponent (Component* parentComponent) const;
+        JUCE_NODISCARD Options withParentComponent (Component* parentComponent) const;
 
         /** Sets the direction of the popup menu relative to the target screen area. */
-        Options withPreferredPopupDirection (PopupDirection direction) const;
+        JUCE_NODISCARD Options withPreferredPopupDirection (PopupDirection direction) const;
 
         /** Sets an item to select in the menu.
 
@@ -552,7 +560,7 @@ public:
             than needing to move the highlighted row down from the top of the menu each time
             it is opened.
         */
-        Options withInitiallySelectedItem (int idOfItemToBeSelected) const;
+        JUCE_NODISCARD Options withInitiallySelectedItem (int idOfItemToBeSelected) const;
 
         //==============================================================================
         /** Gets the parent component. This may be nullptr if the Component has been deleted.
@@ -820,15 +828,22 @@ public:
                                        public SingleThreadedReferenceCountedObject
     {
     public:
+        /** Creates a custom item that is triggered automatically. */
+        CustomComponent();
+
         /** Creates a custom item.
+
             If isTriggeredAutomatically is true, then the menu will automatically detect
             a mouse-click on this component and use that to invoke the menu item. If it's
             false, then it's up to your class to manually trigger the item when it wants to.
-        */
-        CustomComponent (bool isTriggeredAutomatically = true);
 
-        /** Destructor. */
-        ~CustomComponent() override;
+            If isTriggeredAutomatically is true, then an accessibility handler 'wrapper'
+            will be created for the item that allows pressing, focusing, and toggling.
+            If isTriggeredAutomatically is false, and the item has no submenu, then
+            no accessibility wrapper will be created and your component must be
+            independently accessible.
+        */
+        explicit CustomComponent (bool isTriggeredAutomatically);
 
         /** Returns a rectangle with the size that this component would like to have.
 

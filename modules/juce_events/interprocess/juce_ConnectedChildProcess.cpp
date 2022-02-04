@@ -51,6 +51,8 @@ struct ChildProcessPingThread  : public Thread,
         pingReceived();
     }
 
+    void startPinging()                     { startThread (4); }
+
     void pingReceived() noexcept            { countdown = timeoutMs / 1000 + 1; }
     void triggerConnectionLostMessage()     { triggerAsyncUpdate(); }
 
@@ -90,14 +92,15 @@ struct ChildProcessCoordinator::Connection  : public InterprocessConnection,
           ChildProcessPingThread (timeout),
           owner (m)
     {
-        if (createPipe (pipeName, timeoutMs))
-            startThread (4);
+        createPipe (pipeName, timeoutMs);
     }
 
     ~Connection() override
     {
         stopThread (10000);
     }
+
+    using ChildProcessPingThread::startPinging;
 
 private:
     void connectionMade() override  {}
@@ -198,13 +201,15 @@ struct ChildProcessWorker::Connection  : public InterprocessConnection,
           owner (p)
     {
         connectToPipe (pipeName, timeoutMs);
-        startThread (4);
     }
 
     ~Connection() override
     {
         stopThread (10000);
+        disconnect();
     }
+
+    using ChildProcessPingThread::startPinging;
 
 private:
     ChildProcessWorker& owner;
@@ -274,7 +279,9 @@ bool ChildProcessWorker::initialiseFromCommandLine (const String& commandLine,
         {
             connection.reset (new Connection (*this, pipeName, timeoutMs <= 0 ? defaultTimeoutMs : timeoutMs));
 
-            if (! connection->isConnected())
+            if (connection->isConnected())
+                connection->startPinging();
+            else
                 connection.reset();
         }
     }

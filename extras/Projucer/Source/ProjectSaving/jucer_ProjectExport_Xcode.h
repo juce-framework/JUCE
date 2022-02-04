@@ -359,7 +359,7 @@ public:
                 { "Developer Tools",      "developer-tools" },
                 { "Education",            "education" },
                 { "Entertainment",        "entertainment" },
-                { "Finace",               "finance" },
+                { "Finance",              "finance" },
                 { "Games",                "games" },
                 { "Games - Action",       "action-games" },
                 { "Games - Adventure",    "adventure-games" },

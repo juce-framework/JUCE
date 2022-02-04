@@ -179,15 +179,21 @@ XWindowSystemUtilities::GetXProperty::~GetXProperty()
 }
 
 //==============================================================================
-XWindowSystemUtilities::XSettings::XSettings (::Display* d)
-    : display (d)
+std::unique_ptr<XWindowSystemUtilities::XSettings> XWindowSystemUtilities::XSettings::createXSettings (::Display* d)
 {
-    settingsAtom = Atoms::getCreating (display, "_XSETTINGS_SETTINGS");
+    const auto settingsAtom = Atoms::getCreating (d, "_XSETTINGS_SETTINGS");
+    const auto settingsWindow = X11Symbols::getInstance()->xGetSelectionOwner (d,
+                                                                               Atoms::getCreating (d, "_XSETTINGS_S0"));
 
-    settingsWindow = X11Symbols::getInstance()->xGetSelectionOwner (display,
-                                                                    Atoms::getCreating (display, "_XSETTINGS_S0"));
+    if (settingsWindow == None)
+        return {};
 
-    jassert (settingsWindow != None);
+    return rawToUniquePtr (new XWindowSystemUtilities::XSettings (d, settingsWindow, settingsAtom));
+}
+
+XWindowSystemUtilities::XSettings::XSettings (::Display* d, ::Window settingsWindowIn, Atom settingsAtomIn)
+    : display (d), settingsWindow (settingsWindowIn), settingsAtom (settingsAtomIn)
+{
     update();
 }
 
@@ -1345,18 +1351,22 @@ namespace ClipboardHelpers
             {
                 auto localContent = XWindowSystem::getInstance()->getLocalClipboardContent();
 
-                // translate to utf8
-                numDataItems = localContent.getNumBytesAsUTF8() + 1;
-                data.calloc (numDataItems);
-                localContent.copyToUTF8 (data, numDataItems);
-                propertyFormat = 8; // bits/item
+                // Translate to utf8
+                numDataItems = localContent.getNumBytesAsUTF8();
+                auto numBytesRequiredToStore = numDataItems + 1;
+                data.calloc (numBytesRequiredToStore);
+                localContent.copyToUTF8 (data, numBytesRequiredToStore);
+                propertyFormat = 8;   // bits per item
             }
             else if (evt.target == atoms.targets)
             {
-                // another application wants to know what we are able to send
+                // Another application wants to know what we are able to send
+
                 numDataItems = 2;
-                propertyFormat = 32; // atoms are 32-bit
-                data.calloc (numDataItems * 4);
+                data.calloc (numDataItems * sizeof (Atom));
+
+                // Atoms are flagged as 32-bit irrespective of sizeof (Atom)
+                propertyFormat = 32;
 
                 auto* dataAtoms = unalignedPointerCast<Atom*> (data.getData());
 
@@ -1380,7 +1390,7 @@ namespace ClipboardHelpers
             {
                 X11Symbols::getInstance()->xChangeProperty (evt.display, evt.requestor,
                                                             evt.property, evt.target,
-                                                            propertyFormat /* 8 or 32 */, PropModeReplace,
+                                                            propertyFormat, PropModeReplace,
                                                             reinterpret_cast<const unsigned char*> (data.getData()), (int) numDataItems);
                 reply.property = evt.property; // " == success"
             }
@@ -1734,7 +1744,13 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
             X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
         }
 
-        auto windowBorder = peer->getFrameSize();
+        const auto windowBorder = [&]() -> BorderSize<int>
+        {
+            if (const auto& frameSize = peer->getFrameSizeIfPresent())
+                return *frameSize;
+
+            return {};
+        }();
 
         X11Symbols::getInstance()->xMoveResizeWindow (display, windowH,
                                                       newBounds.getX() - windowBorder.getLeft(),
@@ -1764,7 +1780,14 @@ void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) co
         }
         else if (auto* c = peer.getConstrainer())
         {
-            const auto windowBorder = peer.getFrameSize();
+            const auto windowBorder = [&]() -> BorderSize<int>
+            {
+                if (const auto& frameSize = peer.getFrameSizeIfPresent())
+                    return *frameSize;
+
+                return {};
+            }();
+
             const auto factor       = peer.getPlatformScaleFactor();
             const auto leftAndRight = windowBorder.getLeftAndRight();
             const auto topAndBottom = windowBorder.getTopAndBottom();
@@ -1792,7 +1815,7 @@ bool XWindowSystem::contains (::Window windowH, Point<int> localPos) const
           && child == None;
 }
 
-BorderSize<int> XWindowSystem::getBorderSize (::Window windowH) const
+ComponentPeer::OptionalBorderSize XWindowSystem::getBorderSize (::Window windowH) const
 {
     jassert (windowH != 0);
 
@@ -1814,7 +1837,7 @@ BorderSize<int> XWindowSystem::getBorderSize (::Window windowH) const
                 data += sizeof (unsigned long);
             }
 
-            return { (int) sizes[2], (int) sizes[0], (int) sizes[3], (int) sizes[1] };
+            return ComponentPeer::OptionalBorderSize ({ (int) sizes[2], (int) sizes[0], (int) sizes[3], (int) sizes[1] });
         }
     }
 
@@ -3030,11 +3053,12 @@ long XWindowSystem::getUserTime (::Window windowH) const
 
 void XWindowSystem::initialiseXSettings()
 {
-    xSettings = std::make_unique<XWindowSystemUtilities::XSettings> (display);
+    xSettings = XWindowSystemUtilities::XSettings::createXSettings (display);
 
-    X11Symbols::getInstance()->xSelectInput (display,
-                                             xSettings->getSettingsWindow(),
-                                             StructureNotifyMask | PropertyChangeMask);
+    if (xSettings != nullptr)
+        X11Symbols::getInstance()->xSelectInput (display,
+                                                 xSettings->getSettingsWindow(),
+                                                 StructureNotifyMask | PropertyChangeMask);
 }
 
 XWindowSystem::DisplayVisuals::DisplayVisuals (::Display* xDisplay)

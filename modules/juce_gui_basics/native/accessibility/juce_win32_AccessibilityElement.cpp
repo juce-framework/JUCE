@@ -57,41 +57,41 @@ static auto roleToControlTypeId (AccessibilityRole roleType)
         case AccessibilityRole::popupMenu:
         case AccessibilityRole::dialogWindow:
         case AccessibilityRole::splashScreen:
-        case AccessibilityRole::window:        return UIA_WindowControlTypeId;
+        case AccessibilityRole::window:        return ComTypes::UIA_WindowControlTypeId;
 
         case AccessibilityRole::label:
-        case AccessibilityRole::staticText:    return UIA_TextControlTypeId;
+        case AccessibilityRole::staticText:    return ComTypes::UIA_TextControlTypeId;
 
         case AccessibilityRole::column:
-        case AccessibilityRole::row:           return UIA_HeaderItemControlTypeId;
+        case AccessibilityRole::row:           return ComTypes::UIA_HeaderItemControlTypeId;
 
-        case AccessibilityRole::button:        return UIA_ButtonControlTypeId;
-        case AccessibilityRole::toggleButton:  return UIA_CheckBoxControlTypeId;
-        case AccessibilityRole::radioButton:   return UIA_RadioButtonControlTypeId;
-        case AccessibilityRole::comboBox:      return UIA_ComboBoxControlTypeId;
-        case AccessibilityRole::image:         return UIA_ImageControlTypeId;
-        case AccessibilityRole::slider:        return UIA_SliderControlTypeId;
-        case AccessibilityRole::editableText:  return UIA_EditControlTypeId;
-        case AccessibilityRole::menuItem:      return UIA_MenuItemControlTypeId;
-        case AccessibilityRole::menuBar:       return UIA_MenuBarControlTypeId;
-        case AccessibilityRole::table:         return UIA_TableControlTypeId;
-        case AccessibilityRole::tableHeader:   return UIA_HeaderControlTypeId;
-        case AccessibilityRole::cell:          return UIA_DataItemControlTypeId;
-        case AccessibilityRole::hyperlink:     return UIA_HyperlinkControlTypeId;
-        case AccessibilityRole::list:          return UIA_ListControlTypeId;
-        case AccessibilityRole::listItem:      return UIA_ListItemControlTypeId;
-        case AccessibilityRole::tree:          return UIA_TreeControlTypeId;
-        case AccessibilityRole::treeItem:      return UIA_TreeItemControlTypeId;
-        case AccessibilityRole::progressBar:   return UIA_ProgressBarControlTypeId;
-        case AccessibilityRole::group:         return UIA_GroupControlTypeId;
-        case AccessibilityRole::scrollBar:     return UIA_ScrollBarControlTypeId;
-        case AccessibilityRole::tooltip:       return UIA_ToolTipControlTypeId;
+        case AccessibilityRole::button:        return ComTypes::UIA_ButtonControlTypeId;
+        case AccessibilityRole::toggleButton:  return ComTypes::UIA_CheckBoxControlTypeId;
+        case AccessibilityRole::radioButton:   return ComTypes::UIA_RadioButtonControlTypeId;
+        case AccessibilityRole::comboBox:      return ComTypes::UIA_ComboBoxControlTypeId;
+        case AccessibilityRole::image:         return ComTypes::UIA_ImageControlTypeId;
+        case AccessibilityRole::slider:        return ComTypes::UIA_SliderControlTypeId;
+        case AccessibilityRole::editableText:  return ComTypes::UIA_EditControlTypeId;
+        case AccessibilityRole::menuItem:      return ComTypes::UIA_MenuItemControlTypeId;
+        case AccessibilityRole::menuBar:       return ComTypes::UIA_MenuBarControlTypeId;
+        case AccessibilityRole::table:         return ComTypes::UIA_TableControlTypeId;
+        case AccessibilityRole::tableHeader:   return ComTypes::UIA_HeaderControlTypeId;
+        case AccessibilityRole::cell:          return ComTypes::UIA_DataItemControlTypeId;
+        case AccessibilityRole::hyperlink:     return ComTypes::UIA_HyperlinkControlTypeId;
+        case AccessibilityRole::list:          return ComTypes::UIA_ListControlTypeId;
+        case AccessibilityRole::listItem:      return ComTypes::UIA_ListItemControlTypeId;
+        case AccessibilityRole::tree:          return ComTypes::UIA_TreeControlTypeId;
+        case AccessibilityRole::treeItem:      return ComTypes::UIA_TreeItemControlTypeId;
+        case AccessibilityRole::progressBar:   return ComTypes::UIA_ProgressBarControlTypeId;
+        case AccessibilityRole::group:         return ComTypes::UIA_GroupControlTypeId;
+        case AccessibilityRole::scrollBar:     return ComTypes::UIA_ScrollBarControlTypeId;
+        case AccessibilityRole::tooltip:       return ComTypes::UIA_ToolTipControlTypeId;
 
         case AccessibilityRole::ignored:
         case AccessibilityRole::unspecified:   break;
     };
 
-    return UIA_CustomControlTypeId;
+    return ComTypes::UIA_CustomControlTypeId;
 }
 
 //==============================================================================
@@ -109,7 +109,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::QueryInterface (REFIID refId, void** r
     if (! isElementValid())
         return (HRESULT) UIA_E_ELEMENTNOTAVAILABLE;
 
-    if ((refId == __uuidof (IRawElementProviderFragmentRoot) && ! isFragmentRoot()))
+    if ((refId == __uuidof (ComTypes::IRawElementProviderFragmentRoot) && ! isFragmentRoot()))
         return E_NOINTERFACE;
 
     return ComBaseClassHelper::QueryInterface (refId, result);
@@ -133,7 +133,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_ProviderOptions (ProviderOptions* 
     if (options == nullptr)
         return E_INVALIDARG;
 
-    *options = ProviderOptions_ServerSideProvider | ProviderOptions_UseComThreading;
+    *options = (ProviderOptions) (ProviderOptions_ServerSideProvider | ProviderOptions_UseComThreading);
     return S_OK;
 }
 
@@ -148,36 +148,36 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
             switch (pId)
             {
-                case UIA_WindowPatternId:
+                case ComTypes::UIA_WindowPatternId:
                 {
                     if (fragmentRoot)
                         return new UIAWindowProvider (this);
 
                     break;
                 }
-                case UIA_TransformPatternId:
+                case ComTypes::UIA_TransformPatternId:
                 {
                     if (fragmentRoot)
                         return new UIATransformProvider (this);
 
                     break;
                 }
-                case UIA_TextPatternId:
-                case UIA_TextPattern2Id:
+                case ComTypes::UIA_TextPatternId:
+                case ComTypes::UIA_TextPattern2Id:
                 {
                     if (accessibilityHandler.getTextInterface() != nullptr)
                         return new UIATextProvider (this);
 
                     break;
                 }
-                case UIA_ValuePatternId:
+                case ComTypes::UIA_ValuePatternId:
                 {
                     if (accessibilityHandler.getValueInterface() != nullptr)
                         return new UIAValueProvider (this);
 
                     break;
                 }
-                case UIA_RangeValuePatternId:
+                case ComTypes::UIA_RangeValuePatternId:
                 {
                     if (accessibilityHandler.getValueInterface() != nullptr
                         && accessibilityHandler.getValueInterface()->getRange().isValid())
@@ -187,17 +187,18 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                     break;
                 }
-                case UIA_TogglePatternId:
+                case ComTypes::UIA_TogglePatternId:
                 {
-                    if (accessibilityHandler.getActions().contains (AccessibilityActionType::toggle)
-                        && accessibilityHandler.getCurrentState().isCheckable())
+                    if (accessibilityHandler.getCurrentState().isCheckable()
+                        && (accessibilityHandler.getActions().contains (AccessibilityActionType::toggle)
+                            || accessibilityHandler.getActions().contains (AccessibilityActionType::press)))
                     {
                         return new UIAToggleProvider (this);
                     }
 
                     break;
                 }
-                case UIA_SelectionPatternId:
+                case ComTypes::UIA_SelectionPatternId:
                 {
                     if (role == AccessibilityRole::list
                         || role == AccessibilityRole::popupMenu
@@ -208,7 +209,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                     break;
                 }
-                case UIA_SelectionItemPatternId:
+                case ComTypes::UIA_SelectionItemPatternId:
                 {
                     auto state = accessibilityHandler.getCurrentState();
 
@@ -220,28 +221,28 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                     break;
                 }
-                case UIA_GridPatternId:
+                case ComTypes::UIA_GridPatternId:
                 {
                     if (accessibilityHandler.getTableInterface() != nullptr)
                         return new UIAGridProvider (this);
 
                     break;
                 }
-                case UIA_GridItemPatternId:
+                case ComTypes::UIA_GridItemPatternId:
                 {
                     if (accessibilityHandler.getCellInterface() != nullptr)
                         return new UIAGridItemProvider (this);
 
                     break;
                 }
-                case UIA_InvokePatternId:
+                case ComTypes::UIA_InvokePatternId:
                 {
                     if (accessibilityHandler.getActions().contains (AccessibilityActionType::press))
                         return new UIAInvokeProvider (this);
 
                     break;
                 }
-                case UIA_ExpandCollapsePatternId:
+                case ComTypes::UIA_ExpandCollapsePatternId:
                 {
                     if (accessibilityHandler.getActions().contains (AccessibilityActionType::showMenu)
                         && accessibilityHandler.getCurrentState().isExpandable())
@@ -312,7 +313,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
                     VariantHelpers::setBool (textInterface->isDisplayingProtectedText(), pRetVal);
 
                 break;
-            case UIA_IsPeripheralPropertyId:
+            case ComTypes::UIA_IsPeripheralPropertyId:
                 VariantHelpers::setBool (role == AccessibilityRole::tooltip
                                          || role == AccessibilityRole::popupMenu
                                          || role == AccessibilityRole::splashScreen,
@@ -338,27 +339,27 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
 }
 
 //==============================================================================
-JUCE_COMRESULT AccessibilityNativeHandle::Navigate (NavigateDirection direction, IRawElementProviderFragment** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::Navigate (ComTypes::NavigateDirection direction, ComTypes::IRawElementProviderFragment** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
         auto* handler = [&]() -> AccessibilityHandler*
         {
-            if (direction == NavigateDirection_Parent)
+            if (direction == ComTypes::NavigateDirection_Parent)
                 return accessibilityHandler.getParent();
 
-            if (direction == NavigateDirection_FirstChild
-                || direction == NavigateDirection_LastChild)
+            if (direction == ComTypes::NavigateDirection_FirstChild
+                || direction == ComTypes::NavigateDirection_LastChild)
             {
                 auto children = accessibilityHandler.getChildren();
 
                 return children.empty() ? nullptr
-                                        : (direction == NavigateDirection_FirstChild ? children.front()
-                                                                                     : children.back());
+                                        : (direction == ComTypes::NavigateDirection_FirstChild ? children.front()
+                                                                                               : children.back());
             }
 
-            if (direction == NavigateDirection_NextSibling
-                || direction == NavigateDirection_PreviousSibling)
+            if (direction == ComTypes::NavigateDirection_NextSibling
+                || direction == ComTypes::NavigateDirection_PreviousSibling)
             {
                 if (auto* parent = accessibilityHandler.getParent())
                 {
@@ -368,10 +369,10 @@ JUCE_COMRESULT AccessibilityNativeHandle::Navigate (NavigateDirection direction,
                     if (iter == siblings.end())
                         return nullptr;
 
-                    if (direction == NavigateDirection_NextSibling && iter != std::prev (siblings.cend()))
+                    if (direction == ComTypes::NavigateDirection_NextSibling && iter != std::prev (siblings.cend()))
                         return *std::next (iter);
 
-                    if (direction == NavigateDirection_PreviousSibling && iter != siblings.cbegin())
+                    if (direction == ComTypes::NavigateDirection_PreviousSibling && iter != siblings.cbegin())
                         return *std::prev (iter);
                 }
             }
@@ -412,7 +413,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetRuntimeId (SAFEARRAY** pRetVal)
     });
 }
 
-JUCE_COMRESULT AccessibilityNativeHandle::get_BoundingRectangle (UiaRect* pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::get_BoundingRectangle (ComTypes::UiaRect* pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
@@ -451,7 +452,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::SetFocus()
     return S_OK;
 }
 
-JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (IRawElementProviderFragmentRoot** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (ComTypes::IRawElementProviderFragmentRoot** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]() -> HRESULT
     {
@@ -477,7 +478,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::get_FragmentRoot (IRawElementProviderF
 }
 
 //==============================================================================
-JUCE_COMRESULT AccessibilityNativeHandle::ElementProviderFromPoint (double x, double y, IRawElementProviderFragment** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::ElementProviderFromPoint (double x, double y, ComTypes::IRawElementProviderFragment** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {
@@ -499,7 +500,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::ElementProviderFromPoint (double x, do
     });
 }
 
-JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (IRawElementProviderFragment** pRetVal)
+JUCE_COMRESULT AccessibilityNativeHandle::GetFocus (ComTypes::IRawElementProviderFragment** pRetVal)
 {
     return withCheckedComArgs (pRetVal, *this, [&]
     {

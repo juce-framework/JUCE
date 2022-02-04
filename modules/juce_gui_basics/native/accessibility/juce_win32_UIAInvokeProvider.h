@@ -28,13 +28,10 @@ namespace juce
 
 //==============================================================================
 class UIAInvokeProvider  : public UIAProviderBase,
-                           public ComBaseClassHelper<IInvokeProvider>
+                           public ComBaseClassHelper<ComTypes::IInvokeProvider>
 {
 public:
-    explicit UIAInvokeProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT Invoke() override
@@ -47,7 +44,7 @@ public:
         if (handler.getActions().invoke (AccessibilityActionType::press))
         {
             if (isElementValid())
-                sendAccessibilityAutomationEvent (handler, UIA_Invoke_InvokedEventId);
+                sendAccessibilityAutomationEvent (handler, ComTypes::UIA_Invoke_InvokedEventId);
 
             return S_OK;
         }

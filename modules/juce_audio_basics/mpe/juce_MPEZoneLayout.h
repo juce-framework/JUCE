@@ -25,6 +25,83 @@ namespace juce
 
 //==============================================================================
 /**
+    This struct represents an MPE zone.
+
+    It can either be a lower or an upper zone, where:
+      - A lower zone encompasses master channel 1 and an arbitrary number of ascending
+        MIDI channels, increasing from channel 2.
+      - An upper zone encompasses master channel 16 and an arbitrary number of descending
+        MIDI channels, decreasing from channel 15.
+
+    It also defines a pitchbend range (in semitones) to be applied for per-note pitchbends and
+    master pitchbends, respectively.
+*/
+struct MPEZone
+{
+    enum class Type { lower, upper };
+
+    MPEZone() = default;
+    MPEZone (const MPEZone& other) = default;
+
+    MPEZone (Type type, int memberChannels = 0, int perNotePitchbend = 48, int masterPitchbend = 2)
+        : zoneType (type),
+          numMemberChannels (memberChannels),
+          perNotePitchbendRange (perNotePitchbend),
+          masterPitchbendRange (masterPitchbend)
+    {}
+
+    bool isLowerZone() const noexcept             { return zoneType == Type::lower; }
+    bool isUpperZone() const noexcept             { return zoneType == Type::upper; }
+
+    bool isActive() const noexcept                { return numMemberChannels > 0; }
+
+    int getMasterChannel() const noexcept         { return isLowerZone() ? lowerZoneMasterChannel : upperZoneMasterChannel; }
+    int getFirstMemberChannel() const noexcept    { return isLowerZone() ? lowerZoneMasterChannel + 1 : upperZoneMasterChannel - 1; }
+    int getLastMemberChannel() const noexcept     { return isLowerZone() ? (lowerZoneMasterChannel + numMemberChannels)
+                                                                         : (upperZoneMasterChannel - numMemberChannels); }
+
+    bool isUsingChannelAsMemberChannel (int channel) const noexcept
+    {
+        return isLowerZone() ? (lowerZoneMasterChannel < channel && channel <= getLastMemberChannel())
+                             : (channel < upperZoneMasterChannel && getLastMemberChannel() <= channel);
+    }
+
+    bool isUsing (int channel) const noexcept
+    {
+        return isUsingChannelAsMemberChannel (channel) || channel == getMasterChannel();
+    }
+
+    static auto tie (const MPEZone& z)
+    {
+        return std::tie (z.zoneType,
+                         z.numMemberChannels,
+                         z.perNotePitchbendRange,
+                         z.masterPitchbendRange);
+    }
+
+    bool operator== (const MPEZone& other) const
+    {
+        return tie (*this) == tie (other);
+    }
+
+    bool operator!= (const MPEZone& other) const
+    {
+        return tie (*this) != tie (other);
+    }
+
+    //==============================================================================
+    static constexpr int lowerZoneMasterChannel = 1,
+                         upperZoneMasterChannel = 16;
+
+    Type zoneType = Type::lower;
+
+    int numMemberChannels     = 0;
+    int perNotePitchbendRange = 48;
+    int masterPitchbendRange  = 2;
+};
+
+//==============================================================================
+/**
     This class represents the current MPE zone layout of a device capable of handling MPE.
 
     An MPE device can have up to two zones: a lower zone with master channel 1 and
@@ -44,89 +121,28 @@ namespace juce
 class JUCE_API  MPEZoneLayout
 {
 public:
-    /** Default constructor.
+    //==============================================================================
+    /** Creates a layout with inactive upper and lower zones. */
+    MPEZoneLayout() = default;
 
-        This will create a layout with inactive lower and upper zones, representing
-        a device with MPE mode disabled.
+    /** Creates a layout with the given upper and lower zones. */
+    MPEZoneLayout (MPEZone lower, MPEZone upper);
 
-        You can set the lower or upper MPE zones using the setZone() method.
+    /** Creates a layout with a single upper or lower zone, leaving the other zone uninitialised. */
+    MPEZoneLayout (MPEZone singleZone);
 
-        @see setZone
-    */
-    MPEZoneLayout() noexcept;
-
-    /** Copy constuctor.
-        This will not copy the listeners registered to the MPEZoneLayout.
-    */
     MPEZoneLayout (const MPEZoneLayout& other);
-
-    /** Copy assignment operator.
-        This will not copy the listeners registered to the MPEZoneLayout.
-    */
     MPEZoneLayout& operator= (const MPEZoneLayout& other);
 
+    bool operator== (const MPEZoneLayout& other) const { return lowerZone == other.lowerZone && upperZone == other.upperZone; }
+    bool operator!= (const MPEZoneLayout& other) const { return ! operator== (other); }
+
     //==============================================================================
-    /**
-        This struct represents an MPE zone.
+    /** Returns a struct representing the lower MPE zone. */
+    MPEZone getLowerZone() const noexcept    { return lowerZone; }
 
-        It can either be a lower or an upper zone, where:
-          - A lower zone encompasses master channel 1 and an arbitrary number of ascending
-            MIDI channels, increasing from channel 2.
-          - An upper zone encompasses master channel 16 and an arbitrary number of descending
-            MIDI channels, decreasing from channel 15.
-
-        It also defines a pitchbend range (in semitones) to be applied for per-note pitchbends and
-        master pitchbends, respectively.
-    */
-    struct Zone
-    {
-        Zone (const Zone& other) = default;
-
-        bool isLowerZone() const noexcept             { return lowerZone; }
-        bool isUpperZone() const noexcept             { return ! lowerZone; }
-
-        bool isActive() const noexcept                { return numMemberChannels > 0; }
-
-        int getMasterChannel() const noexcept         { return lowerZone ? 1 : 16; }
-        int getFirstMemberChannel() const noexcept    { return lowerZone ? 2 : 15; }
-        int getLastMemberChannel() const noexcept     { return lowerZone ? (1 + numMemberChannels)
-                                                                         : (16 - numMemberChannels); }
-
-        bool isUsingChannelAsMemberChannel (int channel) const noexcept
-        {
-            return lowerZone ? (channel > 1 && channel <= 1 + numMemberChannels)
-                             : (channel < 16 && channel >= 16 - numMemberChannels);
-        }
-
-        bool isUsing (int channel) const noexcept
-        {
-            return isUsingChannelAsMemberChannel (channel) || channel == getMasterChannel();
-        }
-
-        bool operator== (const Zone& other) const noexcept    { return lowerZone == other.lowerZone
-                                                                    && numMemberChannels == other.numMemberChannels
-                                                                    && perNotePitchbendRange == other.perNotePitchbendRange
-                                                                    && masterPitchbendRange == other.masterPitchbendRange; }
-
-        bool operator!= (const Zone& other) const noexcept    { return ! operator== (other); }
-
-        int numMemberChannels;
-        int perNotePitchbendRange;
-        int masterPitchbendRange;
-
-    private:
-        friend class MPEZoneLayout;
-
-        Zone (bool lower, int memberChans = 0, int perNotePb = 48, int masterPb = 2) noexcept
-            : numMemberChannels (memberChans),
-              perNotePitchbendRange (perNotePb),
-              masterPitchbendRange (masterPb),
-              lowerZone (lower)
-        {
-        }
-
-        bool lowerZone;
-    };
+    /** Returns a struct representing the upper MPE zone. */
+    MPEZone getUpperZone() const noexcept    { return upperZone; }
 
     /** Sets the lower zone of this layout. */
     void setLowerZone (int numMemberChannels = 0,
@@ -138,16 +154,13 @@ public:
                        int perNotePitchbendRange = 48,
                        int masterPitchbendRange = 2) noexcept;
 
-    /** Returns a struct representing the lower MPE zone. */
-    const Zone getLowerZone() const noexcept    { return lowerZone; }
-
-    /** Returns a struct representing the upper MPE zone. */
-    const Zone getUpperZone() const noexcept    { return upperZone; }
-
     /** Clears the lower and upper zones of this layout, making them both inactive
         and disabling MPE mode.
     */
     void clearAllZones();
+
+    /** Returns true if either of the zones are active. */
+    bool isActive() const  { return lowerZone.isActive() || upperZone.isActive(); }
 
     //==============================================================================
     /** Pass incoming MIDI messages to an object of this class if you want the
@@ -200,10 +213,14 @@ public:
     /** Removes a listener. */
     void removeListener (Listener* const listenerToRemove) noexcept;
 
+   #ifndef DOXYGEN
+    using Zone = MPEZone;
+   #endif
+
 private:
     //==============================================================================
-    Zone lowerZone { true, 0 };
-    Zone upperZone { false, 0 };
+    MPEZone lowerZone { MPEZone::Type::lower, 0 };
+    MPEZone upperZone { MPEZone::Type::upper, 0 };
 
     MidiRPNDetector rpnDetector;
     ListenerList<Listener> listeners;
@@ -215,8 +232,8 @@ private:
     void processZoneLayoutRpnMessage (MidiRPNMessage);
     void processPitchbendRangeRpnMessage (MidiRPNMessage);
 
-    void updateMasterPitchbend (Zone&, int);
-    void updatePerNotePitchbendRange (Zone&, int);
+    void updateMasterPitchbend (MPEZone&, int);
+    void updatePerNotePitchbendRange (MPEZone&, int);
 
     void sendLayoutChangeMessage();
     void checkAndLimitZoneParameters (int, int, int&) noexcept;

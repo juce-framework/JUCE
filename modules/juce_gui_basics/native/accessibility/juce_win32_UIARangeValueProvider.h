@@ -28,13 +28,10 @@ namespace juce
 
 //==============================================================================
 class UIARangeValueProvider  : public UIAProviderBase,
-                               public ComBaseClassHelper<IRangeValueProvider>
+                               public ComBaseClassHelper<ComTypes::IRangeValueProvider>
 {
 public:
-    explicit UIARangeValueProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT SetValue (double val) override

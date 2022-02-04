@@ -497,6 +497,25 @@ function(juce_add_module module_path)
         target_compile_definitions(${module_name} INTERFACE LINUX=1)
     endif()
 
+    if((${module_name} STREQUAL "juce_audio_devices") AND (CMAKE_SYSTEM_NAME STREQUAL "Android"))
+        add_subdirectory("${module_path}/native/oboe")
+        target_link_libraries(${module_name} INTERFACE oboe)
+    endif()
+
+    if((${module_name} STREQUAL "juce_opengl") AND (CMAKE_SYSTEM_NAME STREQUAL "Android"))
+        set(platform_supports_gl3 0)
+
+        if(CMAKE_SYSTEM_VERSION VERSION_GREATER_EQUAL 18)
+            set(platform_supports_gl3 1)
+        endif()
+
+        if(platform_supports_gl3)
+            target_compile_definitions(${module_name} INTERFACE JUCE_ANDROID_GL_ES_VERSION_3_0=1)
+        endif()
+
+        target_link_libraries(${module_name} INTERFACE EGL $<IF:${platform_supports_gl3},GLESv3,GLESv2>)
+    endif()
+
     _juce_extract_metadata_block(JUCE_MODULE_DECLARATION "${module_path}/${module_header_name}" metadata_dict)
 
     _juce_get_metadata("${metadata_dict}" minimumCppStandard module_cpp_standard)

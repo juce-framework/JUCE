@@ -40,7 +40,8 @@ static int getItemDepth (const TreeViewItem* item)
 }
 
 //==============================================================================
-class TreeView::ItemComponent  : public Component
+class TreeView::ItemComponent  : public Component,
+                                 public TooltipClient
 {
 public:
     explicit ItemComponent (TreeViewItem& itemToRepresent)
@@ -76,6 +77,11 @@ public:
     TreeViewItem& getRepresentedItem() const noexcept
     {
         return item;
+    }
+
+    String getTooltip() override
+    {
+        return item.getTooltip();
     }
 
 private:
@@ -313,6 +319,9 @@ public:
 
         if (iter != itemComponents.end())
         {
+            if (itemUnderMouse == iter->get())
+                itemUnderMouse = nullptr;
+
             if (isMouseDraggingInChildComp (*(iter->get())))
                 owner.hideDragHighlight();
 
@@ -335,7 +344,7 @@ public:
                 auto newComp = std::make_unique<ItemComponent> (*treeItem);
 
                 addAndMakeVisible (*newComp);
-                newComp->addMouseListener (this, false);
+                newComp->addMouseListener (this, treeItem->customComponentUsesTreeViewMouseHandler());
                 componentsToKeep.insert (newComp.get());
 
                 itemComponents.push_back (std::move (newComp));

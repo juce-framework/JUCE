@@ -983,7 +983,8 @@ private:
                     const auto windowBorders = [&]() -> BorderSize<int>
                     {
                         if (auto* peer = owner.getPeer())
-                            return peer->getFrameSize();
+                            if (const auto frameSize = peer->getFrameSizeIfPresent())
+                                return *frameSize;
 
                         return {};
                     }();

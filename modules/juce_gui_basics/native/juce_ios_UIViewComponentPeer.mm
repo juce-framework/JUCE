@@ -211,24 +211,25 @@ public:
         controller = [newController retain];
     }
 
-    Rectangle<int> getBounds() const override               { return getBounds (! isSharedWindow); }
+    Rectangle<int> getBounds() const override                 { return getBounds (! isSharedWindow); }
     Rectangle<int> getBounds (bool global) const;
     Point<float> localToGlobal (Point<float> relativePosition) override;
     Point<float> globalToLocal (Point<float> screenPosition) override;
     using ComponentPeer::localToGlobal;
     using ComponentPeer::globalToLocal;
     void setAlpha (float newAlpha) override;
-    void setMinimised (bool) override                       {}
-    bool isMinimised() const override                       { return false; }
+    void setMinimised (bool) override                         {}
+    bool isMinimised() const override                         { return false; }
     void setFullScreen (bool shouldBeFullScreen) override;
-    bool isFullScreen() const override                      { return fullScreen; }
+    bool isFullScreen() const override                        { return fullScreen; }
     bool contains (Point<int> localPos, bool trueIfInAChildWindow) const override;
-    BorderSize<int> getFrameSize() const override           { return BorderSize<int>(); }
+    OptionalBorderSize getFrameSizeIfPresent() const override { return {}; }
+    BorderSize<int> getFrameSize() const override             { return BorderSize<int>(); }
     bool setAlwaysOnTop (bool alwaysOnTop) override;
     void toFront (bool makeActiveWindow) override;
     void toBehind (ComponentPeer* other) override;
     void setIcon (const Image& newIcon) override;
-    StringArray getAvailableRenderingEngines() override     { return StringArray ("CoreGraphics Renderer"); }
+    StringArray getAvailableRenderingEngines() override       { return StringArray ("CoreGraphics Renderer"); }
 
     void drawRect (CGRect);
     bool canBecomeKeyWindow();
@@ -283,6 +284,11 @@ public:
     static MultiTouchMapper<UITouch*> currentTouches;
 
 private:
+    void appStyleChanged() override
+    {
+        [controller setNeedsStatusBarAppearanceUpdate];
+    }
+
     //==============================================================================
     class AsyncRepaintMessage  : public CallbackMessage
     {
@@ -395,6 +401,24 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
 - (UIStatusBarStyle) preferredStatusBarStyle
 {
+   #if defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
+    if (@available (iOS 13.0, *))
+    {
+        if (auto* peer = getViewPeer (self))
+        {
+            switch (peer->getAppStyle())
+            {
+                case ComponentPeer::Style::automatic:
+                    return UIStatusBarStyleDefault;
+                case ComponentPeer::Style::light:
+                    return UIStatusBarStyleDarkContent;
+                case ComponentPeer::Style::dark:
+                    return UIStatusBarStyleLightContent;
+            }
+        }
+    }
+   #endif
+
     return UIStatusBarStyleDefault;
 }
 
@@ -680,8 +704,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     Desktop::getInstance().addFocusChangeListener (this);
 }
 
+static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
+
 UIViewComponentPeer::~UIViewComponentPeer()
 {
+    if (currentlyFocusedPeer == this)
+        currentlyFocusedPeer = nullptr;
+
     currentTouches.deleteAllTouchesForPeer (this);
     Desktop::getInstance().removeFocusChangeListener (this);
 
@@ -1007,8 +1036,6 @@ void UIViewComponentPeer::onScroll (UIPanGestureRecognizer* gesture)
 #endif
 
 //==============================================================================
-static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
-
 void UIViewComponentPeer::viewFocusGain()
 {
     if (currentlyFocusedPeer != this)

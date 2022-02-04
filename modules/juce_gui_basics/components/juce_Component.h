@@ -1475,6 +1475,23 @@ public:
     */
     virtual std::unique_ptr<ComponentTraverser> createKeyboardFocusTraverser();
 
+    /** Use this to indicate that the component should have an outline drawn around it
+        when it has keyboard focus.
+
+        If this is set to true, then when the component gains keyboard focus the
+        LookAndFeel::createFocusOutlineForComponent() method will be used to draw an outline
+        around it.
+
+        @see FocusOutline, hasFocusOutline
+    */
+    void setHasFocusOutline (bool hasFocusOutline) noexcept  { flags.hasFocusOutlineFlag = hasFocusOutline; }
+
+    /** Returns true if this component should have a focus outline.
+
+        @see FocusOutline, setHasFocusOutline
+    */
+    bool hasFocusOutline() const noexcept                    { return flags.hasFocusOutlineFlag; }
+
     //==============================================================================
     /** Returns true if the component (and all its parents) are enabled.
 
@@ -2548,6 +2565,7 @@ private:
         bool isKeyboardFocusContainerFlag : 1;
         bool childKeyboardFocusedFlag     : 1;
         bool dontFocusOnMouseClickFlag    : 1;
+        bool hasFocusOutlineFlag          : 1;
         bool alwaysOnTopFlag              : 1;
         bool bufferToImageFlag            : 1;
         bool bringToFrontOnClickFlag      : 1;

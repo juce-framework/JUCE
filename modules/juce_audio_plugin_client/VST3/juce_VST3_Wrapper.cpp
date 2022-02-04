@@ -58,7 +58,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 
 #if JUCE_VST3_CAN_REPLACE_VST2
 
- #if ! JUCE_MSVC
+ #if ! JUCE_MSVC && ! defined (__cdecl)
   #define __cdecl
  #endif
 
@@ -3155,9 +3155,27 @@ public:
                 return kResultFalse;
         }
 
-        if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data, channelListFloat);
-        else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data, channelListDouble);
-        else jassertfalse;
+        // If all of these are zero, the host is attempting to flush parameters without processing audio.
+        if (data.numSamples != 0 || data.numInputs != 0 || data.numOutputs != 0)
+        {
+            if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data, channelListFloat);
+            else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data, channelListDouble);
+            else jassertfalse;
+        }
+
+        if (auto* changes = data.outputParameterChanges)
+        {
+            comPluginInstance->forAllChangedParameters ([&] (Vst::ParamID paramID, float value)
+                                                        {
+                                                            Steinberg::int32 queueIndex = 0;
+
+                                                            if (auto* queue = changes->addParameterData (paramID, queueIndex))
+                                                            {
+                                                                Steinberg::int32 pointIndex = 0;
+                                                                queue->addPoint (0, value, pointIndex);
+                                                            }
+                                                        });
+        }
 
        #if JucePlugin_ProducesMidiOutput
         if (isMidiOutputBusEnabled && data.outputEvents != nullptr)
@@ -3381,20 +3399,6 @@ private:
             jassert (midiBuffer.getNumEvents() <= numMidiEventsComingIn);
            #endif
         }
-
-        if (auto* changes = data.outputParameterChanges)
-        {
-            comPluginInstance->forAllChangedParameters ([&] (Vst::ParamID paramID, float value)
-            {
-                Steinberg::int32 queueIndex = 0;
-
-                if (auto* queue = changes->addParameterData (paramID, queueIndex))
-                {
-                    Steinberg::int32 pointIndex = 0;
-                    queue->addPoint (0, value, pointIndex);
-                }
-            });
-        }
     }
 
     //==============================================================================
@@ -3541,10 +3545,12 @@ DECLARE_CLASS_IID (JuceAudioProcessor, 0x0101ABAB, 0xABCDEF01, JucePlugin_Manufa
 DEF_CLASS_IID (JuceAudioProcessor)
 
 #if JUCE_VST3_CAN_REPLACE_VST2
+ // Defined in PluginUtilities.cpp
+ void getUUIDForVST2ID (bool, uint8[16]);
+
  FUID getFUIDForVST2ID (bool forControllerUID)
  {
      TUID uuid;
-     extern JUCE_API void getUUIDForVST2ID (bool, uint8[16]);
      getUUIDForVST2ID (forControllerUID, (uint8*) uuid);
      return FUID (uuid);
  }

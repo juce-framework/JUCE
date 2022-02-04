@@ -35,22 +35,23 @@ class PluginScannerSubprocess : private ChildProcessWorker,
                                 private AsyncUpdater
 {
 public:
-    PluginScannerSubprocess()
-    {
-        formatManager.addDefaultFormats();
-    }
-
     using ChildProcessWorker::initialiseFromCommandLine;
 
 private:
     void handleMessageFromCoordinator (const MemoryBlock& mb) override
     {
-        {
-            const std::lock_guard<std::mutex> lock (mutex);
-            pendingBlocks.emplace (mb);
-        }
+        if (mb.isEmpty())
+            return;
 
-        triggerAsyncUpdate();
+        if (! doScan (mb))
+        {
+            {
+                const std::lock_guard<std::mutex> lock (mutex);
+                pendingBlocks.emplace (mb);
+            }
+
+            triggerAsyncUpdate();
+        }
     }
 
     void handleConnectionLost() override
@@ -58,7 +59,6 @@ private:
         JUCEApplicationBase::quit();
     }
 
-    // It's important to run the plugin scan on the main thread!
     void handleAsyncUpdate() override
     {
         for (;;)
@@ -78,27 +78,55 @@ private:
             if (block.isEmpty())
                 return;
 
-            MemoryInputStream stream { block, false };
-            const auto formatName = stream.readString();
-            const auto identifier = stream.readString();
-
-            OwnedArray<PluginDescription> results;
-
-            for (auto* format : formatManager.getFormats())
-                if (format->getName() == formatName)
-                    format->findAllTypesForFile (results, identifier);
-
-            XmlElement xml ("LIST");
-
-            for (const auto& desc : results)
-                xml.addChildElement (desc->createXml().release());
-
-            const auto str = xml.toString();
-            sendMessageToCoordinator ({ str.toRawUTF8(), str.getNumBytesAsUTF8() });
+            doScan (block);
         }
     }
 
-    AudioPluginFormatManager formatManager;
+    bool doScan (const MemoryBlock& block)
+    {
+        AudioPluginFormatManager formatManager;
+        formatManager.addDefaultFormats();
+
+        MemoryInputStream stream { block, false };
+        const auto formatName = stream.readString();
+        const auto identifier = stream.readString();
+
+        PluginDescription pd;
+        pd.fileOrIdentifier = identifier;
+        pd.uniqueId = pd.deprecatedUid = 0;
+
+        const auto matchingFormat = [&]() -> AudioPluginFormat*
+        {
+            for (auto* format : formatManager.getFormats())
+                if (format->getName() == formatName)
+                    return format;
+
+            return nullptr;
+        }();
+
+        if (matchingFormat == nullptr
+            || (! MessageManager::getInstance()->isThisTheMessageThread()
+                && ! matchingFormat->requiresUnblockedMessageThreadDuringCreation (pd)))
+        {
+            return false;
+        }
+
+        OwnedArray<PluginDescription> results;
+        matchingFormat->findAllTypesForFile (results, identifier);
+        sendPluginDescriptions (results);
+        return true;
+    }
+
+    void sendPluginDescriptions (const OwnedArray<PluginDescription>& results)
+    {
+        XmlElement xml ("LIST");
+
+        for (const auto& desc : results)
+            xml.addChildElement (desc->createXml().release());
+
+        const auto str = xml.toString();
+        sendMessageToCoordinator ({ str.toRawUTF8(), str.getNumBytesAsUTF8() });
+    }
 
     std::mutex mutex;
     std::queue<MemoryBlock> pendingBlocks;
@@ -132,7 +160,6 @@ public:
         appProperties->setStorageParameters (options);
 
         mainWindow.reset (new MainHostWindow());
-        mainWindow->setUsingNativeTitleBar (true);
 
         commandManager.registerAllCommandsForTarget (this);
         commandManager.registerAllCommandsForTarget (mainWindow.get());

@@ -144,6 +144,7 @@ public final class ComponentPeerView extends ViewGroup
     private native void handleMouseDown (long host, int index, float x, float y, long time);
     private native void handleMouseDrag (long host, int index, float x, float y, long time);
     private native void handleMouseUp (long host, int index, float x, float y, long time);
+    private native void handleAccessibilityHover (long host, int action, float x, float y, long time);
 
     @Override
     public boolean onTouchEvent (MotionEvent event)
@@ -227,35 +228,17 @@ public final class ComponentPeerView extends ViewGroup
     @Override
     public boolean onHoverEvent (MotionEvent event)
     {
-        if (host == 0 || ! accessibilityManager.isTouchExplorationEnabled ())
-            return false;
-
-        int action = event.getAction ();
-        long time = event.getEventTime ();
-
-        switch (action & MotionEvent.ACTION_MASK) // simulate "mouse" events when touch exploration is enabled
+        if (accessibilityManager.isTouchExplorationEnabled())
         {
-            case MotionEvent.ACTION_HOVER_ENTER:
-                handleMouseDown (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
-                return true;
-
-            case MotionEvent.ACTION_HOVER_EXIT:
-                handleMouseUp (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
-                return true;
-
-            case MotionEvent.ACTION_HOVER_MOVE:
-                handleMouseDrag (host, event.getPointerId (0), event.getRawX (), event.getRawY (), time);
-                return true;
-
-            default:
-                break;
+            handleAccessibilityHover (host, event.getActionMasked(), event.getRawX(), event.getRawY(), event.getEventTime());
+            return true;
         }
 
         return false;
     }
 
     //==============================================================================
-    private native void handleKeyDown (long host, int keycode, int textchar);
+    private native void handleKeyDown (long host, int keycode, int textchar, int kbFlags);
     private native void handleKeyUp (long host, int keycode, int textchar);
     private native void handleBackButton (long host);
     private native void handleKeyboardHidden (long host);
@@ -300,7 +283,7 @@ public final class ComponentPeerView extends ViewGroup
                 return super.onKeyDown (keyCode, event);
             case KeyEvent.KEYCODE_BACK:
             {
-                backButtonPressed();
+                backButtonPressed ();
                 return true;
             }
 
@@ -308,7 +291,10 @@ public final class ComponentPeerView extends ViewGroup
                 break;
         }
 
-        handleKeyDown (host, keyCode, event.getUnicodeChar ());
+        handleKeyDown (host,
+                       keyCode,
+                       event.getUnicodeChar (),
+                       event.getMetaState ());
         return true;
     }
 
@@ -334,7 +320,11 @@ public final class ComponentPeerView extends ViewGroup
         if (event.getCharacters () != null)
         {
             int utf8Char = event.getCharacters ().codePointAt (0);
-            handleKeyDown (host, utf8Char, utf8Char);
+
+            handleKeyDown (host,
+                           keyCode,
+                           utf8Char,
+                           event.getMetaState ());
             return true;
         }
 

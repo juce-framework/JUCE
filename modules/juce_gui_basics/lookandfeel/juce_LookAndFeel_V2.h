@@ -299,7 +299,8 @@ public:
                                         bool positionTitleBarButtonsOnLeft) override;
 
     //==============================================================================
-    DropShadower* createDropShadowerForComponent (Component*) override;
+    std::unique_ptr<DropShadower> createDropShadowerForComponent (Component&) override;
+    std::unique_ptr<FocusOutline> createFocusOutlineForComponent (Component&) override;
 
     //==============================================================================
     void drawStretchableLayoutResizerBar (Graphics&, int w, int h, bool isVerticalBar,

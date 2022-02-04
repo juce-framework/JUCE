@@ -63,14 +63,14 @@ public:
     }
 
     /** Returns a range with a given start and length. */
-    static Range withStartAndLength (const ValueType startValue, const ValueType length) noexcept
+    JUCE_NODISCARD static Range withStartAndLength (const ValueType startValue, const ValueType length) noexcept
     {
         jassert (length >= ValueType());
         return Range (startValue, startValue + length);
     }
 
     /** Returns a range with the specified start position and a length of zero. */
-    constexpr static Range emptyRange (const ValueType start) noexcept
+    JUCE_NODISCARD constexpr static Range emptyRange (const ValueType start) noexcept
     {
         return Range (start, start);
     }
@@ -104,13 +104,13 @@ public:
         If the new start position is higher than the current end of the range, the end point
         will be pushed along to equal it, returning an empty range at the new position.
     */
-    constexpr Range withStart (const ValueType newStart) const noexcept
+    JUCE_NODISCARD constexpr Range withStart (const ValueType newStart) const noexcept
     {
         return Range (newStart, jmax (newStart, end));
     }
 
     /** Returns a range with the same length as this one, but moved to have the given start position. */
-    constexpr Range movedToStartAt (const ValueType newStart) const noexcept
+    JUCE_NODISCARD constexpr Range movedToStartAt (const ValueType newStart) const noexcept
     {
         return Range (newStart, end + (newStart - start));
     }
@@ -130,13 +130,13 @@ public:
         If the new end position is below the current start of the range, the start point
         will be pushed back to equal the new end point.
     */
-    constexpr Range withEnd (const ValueType newEnd) const noexcept
+    JUCE_NODISCARD constexpr Range withEnd (const ValueType newEnd) const noexcept
     {
         return Range (jmin (start, newEnd), newEnd);
     }
 
     /** Returns a range with the same length as this one, but moved to have the given end position. */
-    constexpr Range movedToEndAt (const ValueType newEnd) const noexcept
+    JUCE_NODISCARD constexpr Range movedToEndAt (const ValueType newEnd) const noexcept
     {
         return Range (start + (newEnd - end), newEnd);
     }
@@ -152,7 +152,7 @@ public:
     /** Returns a range with the same start as this one, but a different length.
         Lengths less than zero are treated as zero.
     */
-    constexpr Range withLength (const ValueType newLength) const noexcept
+    JUCE_NODISCARD constexpr Range withLength (const ValueType newLength) const noexcept
     {
         return Range (start, start + newLength);
     }
@@ -161,7 +161,7 @@ public:
         given amount.
         @returns The returned range will be (start - amount, end + amount)
     */
-    constexpr Range expanded (ValueType amount) const noexcept
+    JUCE_NODISCARD constexpr Range expanded (ValueType amount) const noexcept
     {
         return Range (start - amount, end + amount);
     }
@@ -231,21 +231,21 @@ public:
 
     /** Returns the range that is the intersection of the two ranges, or an empty range
         with an undefined start position if they don't overlap. */
-    constexpr Range getIntersectionWith (Range other) const noexcept
+    JUCE_NODISCARD constexpr Range getIntersectionWith (Range other) const noexcept
     {
         return Range (jmax (start, other.start),
                       jmin (end, other.end));
     }
 
     /** Returns the smallest range that contains both this one and the other one. */
-    constexpr Range getUnionWith (Range other) const noexcept
+    JUCE_NODISCARD constexpr Range getUnionWith (Range other) const noexcept
     {
         return Range (jmin (start, other.start),
                       jmax (end, other.end));
     }
 
     /** Returns the smallest range that contains both this one and the given value. */
-    constexpr Range getUnionWith (const ValueType valueToInclude) const noexcept
+    JUCE_NODISCARD constexpr Range getUnionWith (const ValueType valueToInclude) const noexcept
     {
         return Range (jmin (valueToInclude, start),
                       jmax (valueToInclude, end));
@@ -270,7 +270,8 @@ public:
     }
 
     /** Scans an array of values for its min and max, and returns these as a Range. */
-    static Range findMinAndMax (const ValueType* values, int numValues) noexcept
+    template <typename Integral, std::enable_if_t<std::is_integral<Integral>::value, int> = 0>
+    static Range findMinAndMax (const ValueType* values, Integral numValues) noexcept
     {
         if (numValues <= 0)
             return Range();

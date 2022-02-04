@@ -28,21 +28,13 @@ namespace juce
 
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 
-JUCE_COMCLASS (ISelectionProvider2, "14f68475-ee1c-44f6-a869-d239381f0fe7")  : public ISelectionProvider
-{
-    JUCE_COMCALL get_FirstSelectedItem   (IRawElementProviderSimple** retVal) = 0;
-    JUCE_COMCALL get_LastSelectedItem    (IRawElementProviderSimple** retVal) = 0;
-    JUCE_COMCALL get_CurrentSelectedItem (IRawElementProviderSimple** retVal) = 0;
-    JUCE_COMCALL get_ItemCount (int* retVal) = 0;
-};
-
 //==============================================================================
 class UIASelectionItemProvider  : public UIAProviderBase,
-                                  public ComBaseClassHelper<ISelectionItemProvider>
+                                  public ComBaseClassHelper<ComTypes::ISelectionItemProvider>
 {
 public:
-    explicit UIASelectionItemProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle),
+    explicit UIASelectionItemProvider (AccessibilityNativeHandle* handle)
+        : UIAProviderBase (handle),
           isRadioButton (getHandler().getRole() == AccessibilityRole::radioButton)
     {
     }
@@ -58,7 +50,7 @@ public:
         if (isRadioButton)
         {
             handler.getActions().invoke (AccessibilityActionType::press);
-            sendAccessibilityAutomationEvent (handler, UIA_SelectionItem_ElementSelectedEventId);
+            sendAccessibilityAutomationEvent (handler, ComTypes::UIA_SelectionItem_ElementSelectedEventId);
 
             return S_OK;
         }
@@ -136,22 +128,19 @@ private:
 
 //==============================================================================
 class UIASelectionProvider  : public UIAProviderBase,
-                              public ComBaseClassHelper<ISelectionProvider2>
+                              public ComBaseClassHelper<ComTypes::ISelectionProvider2>
 {
 public:
-    explicit UIASelectionProvider (AccessibilityNativeHandle* nativeHandle)
-        : UIAProviderBase (nativeHandle)
-    {
-    }
+    using UIAProviderBase::UIAProviderBase;
 
     //==============================================================================
     JUCE_COMRESULT QueryInterface (REFIID iid, void** result) override
     {
-        if (iid == _uuidof (IUnknown) || iid == _uuidof (ISelectionProvider))
-            return castToType<ISelectionProvider> (result);
+        if (iid == __uuidof (IUnknown) || iid == __uuidof (ComTypes::ISelectionProvider))
+            return castToType<ComTypes::ISelectionProvider> (result);
 
-        if (iid == _uuidof (ISelectionProvider2))
-            return castToType<ISelectionProvider2> (result);
+        if (iid == __uuidof (ComTypes::ISelectionProvider2))
+            return castToType<ComTypes::ISelectionProvider2> (result);
 
         *result = nullptr;
         return E_NOINTERFACE;

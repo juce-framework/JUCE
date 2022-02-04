@@ -1314,7 +1314,7 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
                "which may simplify the includes in the project.");
 
     props.add (new ChoicePropertyComponent (addUsingNamespaceToJuceHeader, "Add \"using namespace juce\" to JuceHeader.h"),
-               "If enabled, the JuceHeader.h will include a \"using namepace juce\" statement. If disabled, "
+               "If enabled, the JuceHeader.h will include a \"using namespace juce\" statement. If disabled, "
                "no such statement will be included. This setting used to be enabled by default, but it "
                "is recommended to leave it disabled for new projects.");
 

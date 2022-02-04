@@ -101,3 +101,9 @@
  #define JUCE_DELETED_FUNCTION = delete
  #define JUCE_CONSTEXPR constexpr
 #endif
+
+#if JUCE_CXX17_IS_AVAILABLE
+ #define JUCE_NODISCARD [[nodiscard]]
+#else
+ #define JUCE_NODISCARD
+#endif
