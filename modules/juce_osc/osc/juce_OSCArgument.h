@@ -40,6 +40,12 @@ namespace juce
 class JUCE_API  OSCArgument
 {
 public:
+    /** Constructs an OSCArgument with type I (for Impulse). */
+    OSCArgument();
+    
+    /** Constructs an OSCArgument with type boolean T or F depending on the value. */
+    OSCArgument(bool trueOrFalse);
+
     /** Constructs an OSCArgument with type int32 and a given value. */
     OSCArgument (int32 value);
 
@@ -65,6 +71,12 @@ public:
     */
     OSCType getType() const noexcept        { return type; }
 
+    /** Returns whether the type of the OSCArgument is T or F. */
+    bool isImpulse() const noexcept { return type == OSCTypes::I; }
+   
+    /** Returns whether the type of the OSCArgument is T or F. */
+    bool isTorF() const noexcept { return type == OSCTypes::T || type == OSCTypes::F; }
+    
     /** Returns whether the type of the OSCArgument is int32. */
     bool isInt32() const noexcept           { return type == OSCTypes::int32; }
 
@@ -79,6 +91,11 @@ public:
 
     /** Returns whether the type of the OSCArgument is colour. */
     bool isColour() const noexcept          { return type == OSCTypes::colour; }
+
+    /** Returns the value of the OSCArgument as an int32.
+        If the type of the OSCArgument is not int32, the behaviour is undefined.
+    */
+    bool getBool() const noexcept;
 
     /** Returns the value of the OSCArgument as an int32.
         If the type of the OSCArgument is not int32, the behaviour is undefined.

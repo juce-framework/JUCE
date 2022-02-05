@@ -123,6 +123,9 @@ namespace
         {
             switch (arg.getType())
             {
+                case OSCTypes::T:           return true;
+                case OSCTypes::F:           return true;
+                case OSCTypes::I:           return true;
                 case OSCTypes::int32:       return writeInt32 (arg.getInt32());
                 case OSCTypes::float32:     return writeFloat32 (arg.getFloat32());
                 case OSCTypes::string:      return writeString (arg.getString());

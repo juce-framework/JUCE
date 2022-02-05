@@ -26,13 +26,24 @@
 namespace juce
 {
 
-OSCArgument::OSCArgument (int32 v)              : type (OSCTypes::int32),   intValue (v) {}
-OSCArgument::OSCArgument (float v)              : type (OSCTypes::float32), floatValue (v) {}
-OSCArgument::OSCArgument (const String& s)      : type (OSCTypes::string),  stringValue (s) {}
-OSCArgument::OSCArgument (MemoryBlock b)        : type (OSCTypes::blob),    blob (std::move (b)) {}
-OSCArgument::OSCArgument (OSCColour c)          : type (OSCTypes::colour),  intValue ((int32) c.toInt32()) {}
+OSCArgument::OSCArgument()                      : type(OSCTypes::I) {}
+OSCArgument::OSCArgument(bool v)                : type (v?OSCTypes::T:OSCTypes::F)               {}
+OSCArgument::OSCArgument (int32 v)              : type (OSCTypes::int32),           intValue (v) {}
+OSCArgument::OSCArgument (float v)              : type (OSCTypes::float32),         floatValue (v) {}
+OSCArgument::OSCArgument (const String& s)      : type (OSCTypes::string),          stringValue (s) {}
+OSCArgument::OSCArgument (MemoryBlock b)        : type (OSCTypes::blob),            blob (std::move (b)) {}
+OSCArgument::OSCArgument (OSCColour c)          : type (OSCTypes::colour),          intValue ((int32) c.toInt32()) {}
 
 //==============================================================================
+bool OSCArgument::getBool() const noexcept
+{
+    if (isTorF())
+        return type == OSCTypes::T;
+
+    jassertfalse; // you must check the type of an argument before attempting to get its value!
+    return {};
+}
+
 String OSCArgument::getString() const noexcept
 {
     if (isString())

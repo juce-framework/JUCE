@@ -119,6 +119,11 @@ public:
     void clear();
 
     //==============================================================================
+    /** Creates a new OSCArgument of type T or F depending on the given value,
+        and adds it to the OSCMessage object.
+    */
+    void addBool(bool value);
+    
     /** Creates a new OSCArgument of type int32 with the given value,
         and adds it to the OSCMessage object.
     */

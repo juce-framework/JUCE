@@ -46,6 +46,9 @@ using OSCTypeList = Array<OSCType>;
 class JUCE_API  OSCTypes
 {
 public:
+    static const OSCType T;
+    static const OSCType F;
+    static const OSCType I;
     static const OSCType int32;
     static const OSCType float32;
     static const OSCType string;
@@ -54,7 +57,10 @@ public:
 
     static bool isSupportedType (OSCType type) noexcept
     {
-        return type == OSCTypes::int32
+        return type == OSCTypes::T
+            || type == OSCTypes::F
+            || type == OSCTypes::I
+            || type == OSCTypes::int32
             || type == OSCTypes::float32
             || type == OSCTypes::string
             || type == OSCTypes::blob

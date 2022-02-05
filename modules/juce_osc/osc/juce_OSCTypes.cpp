@@ -26,6 +26,9 @@
 namespace juce
 {
 
+const OSCType OSCTypes::T = 'T';
+const OSCType OSCTypes::F = 'F';
+const OSCType OSCTypes::I = 'I';
 const OSCType OSCTypes::int32   = 'i';
 const OSCType OSCTypes::float32 = 'f';
 const OSCType OSCTypes::string  = 's';

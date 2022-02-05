@@ -174,17 +174,19 @@ namespace
             return typeList;
         }
 
-        //==============================================================================
-        OSCArgument readArgument (OSCType type)
-        {
-            switch (type)
+			//==============================================================================
+		OSCArgument readArgument(OSCType type)
+		{
+			switch (type)
             {
-                case OSCTypes::int32:       return OSCArgument (readInt32());
-                case OSCTypes::float32:     return OSCArgument (readFloat32());
-                case OSCTypes::string:      return OSCArgument (readString());
-                case OSCTypes::blob:        return OSCArgument (readBlob());
-                case OSCTypes::colour:      return OSCArgument (readColour());
-
+				case OSCTypes::I:			return OSCArgument();
+				case OSCTypes::T:			return OSCArgument(true);
+				case OSCTypes::F:			return OSCArgument(false);
+				case OSCTypes::int32:       return OSCArgument(readInt32());
+				case OSCTypes::float32:     return OSCArgument(readFloat32());
+				case OSCTypes::string:      return OSCArgument(readString());
+				case OSCTypes::blob:        return OSCArgument(readBlob());
+				case OSCTypes::colour:      return OSCArgument(readColour());
                 default:
                     // You supplied an invalid OSCType when calling readArgument! This should never happen.
                     jassertfalse;
