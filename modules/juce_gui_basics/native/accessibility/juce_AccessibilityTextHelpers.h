@@ -50,12 +50,12 @@ namespace AccessibilityTextHelpers
         const auto numCharacters = textInterface.getTotalNumCharacters();
         const auto isForwards = (direction == Direction::forwards);
 
-        auto offsetWithDirecton = [isForwards] (int input) { return isForwards ? input : -input; };
+        const auto offsetWithDirecton = [isForwards] (int input) { return isForwards ? input : -input; };
 
         switch (boundary)
         {
             case BoundaryType::character:
-                return jlimit (0, numCharacters, currentPosition + offsetWithDirecton (1));
+                return jlimit (0, numCharacters, isForwards ? currentPosition + 1 : currentPosition);
 
             case BoundaryType::word:
             case BoundaryType::line:
