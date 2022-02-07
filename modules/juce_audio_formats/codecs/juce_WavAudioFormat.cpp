@@ -168,8 +168,9 @@ const char* const WavAudioFormat::riffInfoWatermarkURL          = "IWMU";
 const char* const WavAudioFormat::riffInfoWrittenBy             = "IWRI";
 const char* const WavAudioFormat::riffInfoYear                  = "YEAR";
 
-const char* const WavAudioFormat::ISRC                 = "ISRC";
-const char* const WavAudioFormat::tracktionLoopInfo    = "tracktion loop info";
+const char* const WavAudioFormat::ISRC                                  = "ISRC";
+const char* const WavAudioFormat::internationalStandardRecordingCode    = "international standard recording code";
+const char* const WavAudioFormat::tracktionLoopInfo                     = "tracktion loop info";
 
 //==============================================================================
 namespace WavFileHelpers
@@ -880,7 +881,12 @@ namespace WavFileHelpers
                                 auto ISRCCode = xml4->getAllSubText().fromFirstOccurrenceOf ("ISRC:", false, true);
 
                                 if (ISRCCode.isNotEmpty())
-                                    destValues[WavAudioFormat::ISRC] = ISRCCode;
+                                {
+                                    // We set ISRC here for backwards compatibility.
+                                    // If the INFO 'source' field is set in the info chunk, then the
+                                    // value for this key will be overwritten later.
+                                    destValues[WavAudioFormat::riffInfoSource] = destValues[WavAudioFormat::internationalStandardRecordingCode] = ISRCCode;
+                                }
                             }
                         }
                     }
@@ -890,11 +896,24 @@ namespace WavFileHelpers
 
         static MemoryBlock createFrom (const StringMap& values)
         {
-            auto ISRC = getValueWithDefault (values, WavAudioFormat::ISRC);
+            // Use the new ISRC key if it is present, but fall back to the
+            // INFO 'source' value for backwards compatibility.
+            auto ISRC = getValueWithDefault (values,
+                                             WavAudioFormat::internationalStandardRecordingCode,
+                                             getValueWithDefault (values, WavAudioFormat::riffInfoSource));
+
             MemoryOutputStream xml;
 
             if (ISRC.isNotEmpty())
             {
+                // If you are trying to set the ISRC, make sure that you are using
+                // WavAudioFormat::internationalStandardRecordingCode as the metadata key,
+                // and that the value is 12 characters long. If you are trying to set the
+                // 'source' field in the INFO chunk, set the
+                // WavAudioFormat::internationalStandardRecordingCode metadata field to the
+                // empty string to silence this assertion.
+                jassert (ISRC.length() == 12);
+
                 xml << "<ebucore:ebuCoreMain xmlns:dc=\" http://purl.org/dc/elements/1.1/\" "
                                             "xmlns:ebucore=\"urn:ebu:metadata-schema:ebuCore_2012\">"
                          "<ebucore:coreMetadata>"
@@ -1869,6 +1888,8 @@ struct WaveAudioFormatTests : public UnitTest
         for (int i = numElementsInArray (WavFileHelpers::ListInfoChunk::types); --i >= 0;)
             metadataValues[WavFileHelpers::ListInfoChunk::types[i]] = WavFileHelpers::ListInfoChunk::types[i];
 
+        metadataValues[WavAudioFormat::internationalStandardRecordingCode] = WavAudioFormat::internationalStandardRecordingCode;
+
         if (metadataValues.size() > 0)
             metadataValues["MetaDataSource"] = "WAV";
 
@@ -1882,30 +1903,113 @@ struct WaveAudioFormatTests : public UnitTest
         metadataArray.addUnorderedMap (metadataValues);
 
         {
-            beginTest ("Creating a basic wave writer");
+            beginTest ("Metadata can be written and read");
 
-            std::unique_ptr<AudioFormatWriter> writer (format.createWriterFor (new MemoryOutputStream (memoryBlock, false),
-                                                                               44100.0, numTestAudioBufferChannels,
-                                                                               32, metadataArray, 0));
-            expect (writer != nullptr);
-
-            AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
-            buffer.clear();
-
-            beginTest ("Writing audio data to the basic wave writer");
-            expect (writer->writeFromAudioSampleBuffer (buffer, 0, numTestAudioBufferSamples));
+            const auto newMetadata = getMetadataAfterReading (format, writeToBlock (format, metadataArray));
+            expect (newMetadata == metadataArray, "Somehow, the metadata is different!");
         }
 
         {
-            beginTest ("Creating a basic wave reader");
+            beginTest ("Files containing a riff info source and an empty ISRC associate the source with the riffInfoSource key");
+            StringPairArray meta;
+            meta.addMap ({ { WavAudioFormat::riffInfoSource, "customsource" },
+                           { WavAudioFormat::internationalStandardRecordingCode, "" } });
+            const auto mb = writeToBlock (format, meta);
+            checkPatternsPresent (mb, { "INFOISRC" });
+            checkPatternsNotPresent (mb, { "ISRC:", "<ebucore" });
+            const auto a = getMetadataAfterReading (format, mb);
+            expect (a[WavAudioFormat::riffInfoSource] == "customsource");
+            expect (a[WavAudioFormat::internationalStandardRecordingCode] == "");
+        }
 
-            std::unique_ptr<AudioFormatReader> reader (format.createReaderFor (new MemoryInputStream (memoryBlock, false), false));
-            expect (reader != nullptr);
-            expect (reader->metadataValues == metadataArray, "Somehow, the metadata is different!");
+        {
+            beginTest ("Files containing a riff info source and no ISRC associate the source with both keys "
+                       "for backwards compatibility");
+            StringPairArray meta;
+            meta.addMap ({ { WavAudioFormat::riffInfoSource, "customsource" } });
+            const auto mb = writeToBlock (format, meta);
+            checkPatternsPresent (mb, { "INFOISRC", "ISRC:customsource", "<ebucore" });
+            const auto a = getMetadataAfterReading (format, mb);
+            expect (a[WavAudioFormat::riffInfoSource] == "customsource");
+            expect (a[WavAudioFormat::internationalStandardRecordingCode] == "customsource");
+        }
+
+        {
+            beginTest ("Files containing an ISRC associate the value with the internationalStandardRecordingCode key "
+                       "and the riffInfoSource key for backwards compatibility");
+            StringPairArray meta;
+            meta.addMap ({ { WavAudioFormat::internationalStandardRecordingCode, "AABBBCCDDDDD" } });
+            const auto mb = writeToBlock (format, meta);
+            checkPatternsPresent (mb, { "ISRC:AABBBCCDDDDD", "<ebucore" });
+            checkPatternsNotPresent (mb, { "INFOISRC" });
+            const auto a = getMetadataAfterReading (format, mb);
+            expect (a[WavAudioFormat::riffInfoSource] == "AABBBCCDDDDD");
+            expect (a[WavAudioFormat::internationalStandardRecordingCode] == "AABBBCCDDDDD");
+        }
+
+        {
+            beginTest ("Files containing an ISRC and a riff info source associate the values with the appropriate keys");
+            StringPairArray meta;
+            meta.addMap ({ { WavAudioFormat::riffInfoSource, "source" } });
+            meta.addMap ({ { WavAudioFormat::internationalStandardRecordingCode, "UUVVVXXYYYYY" } });
+            const auto mb = writeToBlock (format, meta);
+            checkPatternsPresent (mb, { "INFOISRC", "ISRC:UUVVVXXYYYYY", "<ebucore" });
+            const auto a = getMetadataAfterReading (format, mb);
+            expect (a[WavAudioFormat::riffInfoSource] == "source");
+            expect (a[WavAudioFormat::internationalStandardRecordingCode] == "UUVVVXXYYYYY");
         }
     }
 
 private:
+    MemoryBlock writeToBlock (WavAudioFormat& format, StringPairArray meta)
+    {
+        MemoryBlock mb;
+
+        {
+            // The destructor of the writer will modify the block, so make sure that we've
+            // destroyed the writer before returning the block!
+            auto writer = rawToUniquePtr (format.createWriterFor (new MemoryOutputStream (mb, false),
+                                                                  44100.0,
+                                                                  numTestAudioBufferChannels,
+                                                                  16,
+                                                                  meta,
+                                                                  0));
+            expect (writer != nullptr);
+            AudioBuffer<float> buffer (numTestAudioBufferChannels, numTestAudioBufferSamples);
+            expect (writer->writeFromAudioSampleBuffer (buffer, 0, numTestAudioBufferSamples));
+        }
+
+        return mb;
+    }
+
+    StringPairArray getMetadataAfterReading (WavAudioFormat& format, const MemoryBlock& mb)
+    {
+        auto reader = rawToUniquePtr (format.createReaderFor (new MemoryInputStream (mb, false), true));
+        expect (reader != nullptr);
+        return reader->metadataValues;
+    }
+
+    template <typename Fn>
+    void checkPatterns (const MemoryBlock& mb, const std::vector<std::string>& patterns, Fn&& fn)
+    {
+        for (const auto& pattern : patterns)
+        {
+            const auto begin = static_cast<const char*> (mb.getData());
+            const auto end = begin + mb.getSize();
+            expect (fn (std::search (begin, end, pattern.begin(), pattern.end()), end));
+        }
+    }
+
+    void checkPatternsPresent (const MemoryBlock& mb, const std::vector<std::string>& patterns)
+    {
+        checkPatterns (mb, patterns, std::not_equal_to<>{});
+    }
+
+    void checkPatternsNotPresent (const MemoryBlock& mb, const std::vector<std::string>& patterns)
+    {
+        checkPatterns (mb, patterns, std::equal_to<>{});
+    }
+
     enum
     {
         numTestAudioBufferChannels = 2,
