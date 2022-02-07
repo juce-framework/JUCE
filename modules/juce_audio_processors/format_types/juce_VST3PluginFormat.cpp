@@ -1365,7 +1365,9 @@ struct VST3PluginWindow : public AudioProcessorEditor,
          embeddedComponent.removeClient();
         #endif
 
-        warnOnFailure (view->removed());
+        if (attachedCalled)
+            warnOnFailure (view->removed());
+
         warnOnFailure (view->setFrame (nullptr));
 
         processor.editorBeingDeleted (this);
@@ -1573,7 +1575,12 @@ private:
                 return;
             }
 
-            warnOnFailure (view->attached ((void*) pluginHandle, defaultVST3WindowType));
+            const auto attachedResult = view->attached ((void*) pluginHandle, defaultVST3WindowType);
+            ignoreUnused (warnOnFailure (attachedResult));
+
+            if (attachedResult == kResultOk)
+                attachedCalled = true;
+
             updatePluginScale();
         }
     }
@@ -1641,7 +1648,7 @@ private:
    #endif
 
     HandleFormat pluginHandle = {};
-    bool recursiveResize = false, isInOnSize = false;
+    bool recursiveResize = false, isInOnSize = false, attachedCalled = false;
 
     ComponentPeer* currentPeer = nullptr;
     Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
