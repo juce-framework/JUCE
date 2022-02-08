@@ -214,12 +214,13 @@ namespace CoreTextTypeLayout
     public:
         void emplace (CTFontRef ctFontRef, Font value)
         {
-            pairs.emplace (std::lower_bound (pairs.begin(), pairs.end(), ctFontRef), ctFontRef, std::move (value));
+            const auto iter = std::lower_bound (pairs.begin(), pairs.end(), ctFontRef, [] (const Pair& p, CTFontRef other) { return p.key.get() < other; });
+            pairs.emplace (iter, ctFontRef, std::move (value));
         }
 
         const Font* find (CTFontRef ctFontRef) const
         {
-            const auto iter = std::lower_bound (pairs.begin(), pairs.end(), ctFontRef);
+            const auto iter = std::lower_bound (pairs.begin(), pairs.end(), ctFontRef, [] (const Pair& p, CTFontRef other) { return p.key.get() < other; });
 
             if (iter == pairs.end())
                 return nullptr;
@@ -234,8 +235,6 @@ namespace CoreTextTypeLayout
         struct Pair
         {
             Pair (CTFontRef ref, Font font) : key (ref), value (std::move (font)) { CFRetain (ref); }
-
-            auto operator< (CTFontRef other) const { return key.get() < other; }
 
             CFUniquePtr<CTFontRef> key;
             Font value;
