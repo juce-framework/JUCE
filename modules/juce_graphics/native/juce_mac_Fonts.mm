@@ -235,7 +235,7 @@ namespace CoreTextTypeLayout
         {
             Pair (CTFontRef ref, Font font) : key (ref), value (std::move (font)) { CFRetain (ref); }
 
-            auto operator< (CTFontRef other) const { return key.get() < other; }
+            bool operator< (CTFontRef other) const { return key.get() < other; }
 
             CFUniquePtr<CTFontRef> key;
             Font value;
