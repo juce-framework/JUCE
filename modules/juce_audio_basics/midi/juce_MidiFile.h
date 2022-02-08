@@ -133,7 +133,7 @@ public:
     */
     void findAllTimeSigEvents (MidiMessageSequence& timeSigEvents) const;
 
-    /** Makes a list of all the time-signature meta-events from all tracks in the midi file.
+    /** Makes a list of all the key-signature meta-events from all tracks in the midi file.
         @param keySigEvents         a list to which all the events will be added
     */
     void findAllKeySigEvents (MidiMessageSequence& keySigEvents) const;
