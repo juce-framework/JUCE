@@ -232,8 +232,12 @@ struct AudioUnitHelpers
     private:
         void clearChannels (int begin, int end)
         {
-            for (auto i = begin; i < end; ++i)
-                zeromem (scratch.getWritePointer (i), sizeof (float) * (size_t) scratch.getNumSamples());
+            if (begin <= end && end <= (int) channels.size())
+            {
+                std::for_each (channels.begin() + begin,
+                               channels.begin() + end,
+                               [this] (float* ptr) { zeromem (ptr, sizeof (float) * (size_t) scratch.getNumSamples()); });
+            }
         }
 
         float* uniqueBuffer (int idx, float* buffer) noexcept
