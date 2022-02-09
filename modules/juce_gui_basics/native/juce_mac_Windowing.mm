@@ -43,7 +43,15 @@ public:
 
     int getResult() const
     {
-        switch ([getAlert() runModal])
+        return convertResult ([getAlert() runModal]);
+    }
+
+    using AsyncUpdater::triggerAsyncUpdate;
+
+private:
+    static int convertResult (NSModalResponse response)
+    {
+        switch (response)
         {
             case NSAlertFirstButtonReturn:   return 0;
             case NSAlertSecondButtonReturn:  return 1;
@@ -55,9 +63,6 @@ public:
         return 0;
     }
 
-    using AsyncUpdater::triggerAsyncUpdate;
-
-private:
     void handleAsyncUpdate() override
     {
         if (auto* comp = options.getAssociatedComponent())
@@ -68,24 +73,27 @@ private:
                 {
                     if (auto* window = [view window])
                     {
-                        [getAlert() beginSheetModalForWindow: window completionHandler: ^(NSModalResponse result)
+                        if (@available (macOS 10.9, *))
                         {
-                            handleModalFinished ((int) result);
-                        }];
+                            [getAlert() beginSheetModalForWindow: window completionHandler: ^(NSModalResponse result)
+                            {
+                                handleModalFinished (result);
+                            }];
 
-                        return;
+                            return;
+                        }
                     }
                 }
             }
         }
 
-        handleModalFinished ((int) [getAlert() runModal]);
+        handleModalFinished ([getAlert() runModal]);
     }
 
-    void handleModalFinished (int result)
+    void handleModalFinished (NSModalResponse result)
     {
         if (callback != nullptr)
-            callback->modalStateFinished (result);
+            callback->modalStateFinished (convertResult (result));
 
         delete this;
     }
