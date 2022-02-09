@@ -265,22 +265,29 @@ endfunction()
 
 # ==================================================================================================
 
-# Takes a target, a link visibility, and a variable-length list of framework
-# names. On macOS, finds the requested frameworks using `find_library` and
-# links them. On iOS, links directly with `-framework Name`.
+# Takes a target, a link visibility, if it should be a weak link, and a variable-length list of
+# framework names. On macOS, for non-weak links, this finds the requested frameworks using
+# `find_library`.
 function(_juce_link_frameworks target visibility)
-    foreach(framework IN LISTS ARGN)
+    set(options WEAK)
+    cmake_parse_arguments(JUCE_LINK_FRAMEWORKS "${options}" "" "" ${ARGN})
+    foreach(framework IN LISTS JUCE_LINK_FRAMEWORKS_UNPARSED_ARGUMENTS)
         if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-            find_library("juce_found_${framework}" "${framework}" REQUIRED)
-            target_link_libraries("${target}" "${visibility}" "${juce_found_${framework}}")
+            if(JUCE_LINK_FRAMEWORKS_WEAK)
+                set(framework_flags "-weak_framework ${framework}")
+            else()
+                find_library("juce_found_${framework}" "${framework}" REQUIRED)
+                set(framework_flags "${juce_found_${framework}}")
+            endif()
         elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
             # CoreServices is only available on iOS 12+, we must link it weakly on earlier platforms
-            if((framework STREQUAL "CoreServices") AND (CMAKE_OSX_DEPLOYMENT_TARGET LESS 12.0))
+            if(JUCE_LINK_FRAMEWORKS_WEAK OR ((framework STREQUAL "CoreServices") AND (CMAKE_OSX_DEPLOYMENT_TARGET LESS 12.0)))
                 set(framework_flags "-weak_framework ${framework}")
             else()
                 set(framework_flags "-framework ${framework}")
             endif()
-
+        endif()
+        if(NOT framework_flags STREQUAL "")
             target_link_libraries("${target}" "${visibility}" "${framework_flags}")
         endif()
     endforeach()
@@ -390,6 +397,11 @@ function(_juce_add_module_staticlib_paths module_target module_path)
 endfunction()
 
 # ==================================================================================================
+
+function(_juce_remove_empty_list_elements arg)
+    list(FILTER ${arg} EXCLUDE REGEX "^$")
+    set(${arg} ${${arg}} PARENT_SCOPE)
+endfunction()
 
 function(juce_add_module module_path)
     set(one_value_args INSTALL_PATH ALIAS_NAMESPACE)
@@ -522,24 +534,32 @@ function(juce_add_module module_path)
     if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
         _juce_get_metadata("${metadata_dict}" OSXFrameworks module_osxframeworks)
 
+        _juce_remove_empty_list_elements(module_osxframeworks)
         foreach(module_framework IN LISTS module_osxframeworks)
-            if(module_framework STREQUAL "")
-                continue()
-            endif()
-
             _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
+        endforeach()
+
+        _juce_get_metadata("${metadata_dict}" WeakOSXFrameworks module_weakosxframeworks)
+
+        _juce_remove_empty_list_elements(module_weakosxframeworks)
+        foreach(module_framework IN LISTS module_weakosxframeworks)
+            _juce_link_frameworks("${module_name}" INTERFACE WEAK "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" OSXLibs)
     elseif(CMAKE_SYSTEM_NAME STREQUAL "iOS")
         _juce_get_metadata("${metadata_dict}" iOSFrameworks module_iosframeworks)
 
+        _juce_remove_empty_list_elements(module_iosframeworks)
         foreach(module_framework IN LISTS module_iosframeworks)
-            if(module_framework STREQUAL "")
-                continue()
-            endif()
-
             _juce_link_frameworks("${module_name}" INTERFACE "${module_framework}")
+        endforeach()
+
+        _juce_get_metadata("${metadata_dict}" WeakiOSFrameworks module_weakiosframeworks)
+
+        _juce_remove_empty_list_elements(module_weakiosframeworks)
+        foreach(module_framework IN LISTS module_weakiosframeworks)
+            _juce_link_frameworks("${module_name}" INTERFACE WEAK "${module_framework}")
         endforeach()
 
         _juce_link_libs_from_metadata("${module_name}" "${metadata_dict}" iOSLibs)

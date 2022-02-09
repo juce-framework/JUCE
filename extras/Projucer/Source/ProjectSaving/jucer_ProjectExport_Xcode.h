@@ -1696,6 +1696,9 @@ public:
                 StringArray linkerFlags, librarySearchPaths;
                 getLinkerSettings (config, linkerFlags, librarySearchPaths);
 
+                for (const auto& weakFramework : owner.xcodeWeakFrameworks)
+                    linkerFlags.add ("-weak_framework " + weakFramework);
+
                 if (linkerFlags.size() > 0)
                     s.set ("OTHER_LDFLAGS", linkerFlags.joinIntoString (" ").quoted());
 
@@ -2054,6 +2057,7 @@ public:
     };
 
     mutable StringArray xcodeFrameworks;
+    mutable StringArray xcodeWeakFrameworks;
     StringArray xcodeLibs;
 
 private:

@@ -29,16 +29,16 @@ class LibraryModule
 public:
     LibraryModule (const ModuleDescription&);
 
-    bool isValid() const                    { return moduleInfo.isValid(); }
-    String getID() const                    { return moduleInfo.getID(); }
-    String getVendor() const                { return moduleInfo.getVendor(); }
-    String getVersion() const               { return moduleInfo.getVersion(); }
-    String getName() const                  { return moduleInfo.getName(); }
-    String getDescription() const           { return moduleInfo.getDescription(); }
-    String getLicense() const               { return moduleInfo.getLicense(); }
-    String getMinimumCppStandard() const    { return moduleInfo.getMinimumCppStandard(); }
+    bool isValid() const                    { return moduleDescription.isValid(); }
+    String getID() const                    { return moduleDescription.getID(); }
+    String getVendor() const                { return moduleDescription.getVendor(); }
+    String getVersion() const               { return moduleDescription.getVersion(); }
+    String getName() const                  { return moduleDescription.getName(); }
+    String getDescription() const           { return moduleDescription.getDescription(); }
+    String getLicense() const               { return moduleDescription.getLicense(); }
+    String getMinimumCppStandard() const    { return moduleDescription.getMinimumCppStandard(); }
 
-    File getFolder() const                  { return moduleInfo.getFolder(); }
+    File getFolder() const                  { return moduleDescription.getFolder(); }
 
     void writeIncludes (ProjectSaver&, OutputStream&);
     void addSettingsForModuleToExporter (ProjectExporter&, ProjectSaver&) const;
@@ -61,7 +61,7 @@ public:
                                   build_tools::ProjectType::Target::Type forTarget =
                                       build_tools::ProjectType::Target::unspecified) const;
 
-    ModuleDescription moduleInfo;
+    ModuleDescription moduleDescription;
 
 private:
     void addSearchPathsToExporter (ProjectExporter&) const;

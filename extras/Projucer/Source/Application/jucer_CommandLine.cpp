@@ -323,7 +323,7 @@ namespace
 
                     var moduleInfo (new DynamicObject());
                     moduleInfo.getDynamicObject()->setProperty ("file", getModulePackageName (module));
-                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleInfo.getModuleInfo());
+                    moduleInfo.getDynamicObject()->setProperty ("info", module.moduleDescription.getModuleInfo());
                     infoList.append (moduleInfo);
                 }
             }
