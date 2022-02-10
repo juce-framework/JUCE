@@ -962,7 +962,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
         AudioComponentDescription desc;
         desc.componentType = kAudioUnitType_Output;
-        desc.componentSubType = kAudioUnitSubType_RemoteIO;
+        desc.componentSubType = kAudioUnitSubType_VoiceProcessingIO;
         desc.componentManufacturer = kAudioUnitManufacturer_Apple;
         desc.componentFlags = 0;
         desc.componentFlagsMask = 0;
