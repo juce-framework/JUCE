@@ -452,7 +452,7 @@ function(_juce_to_char_literal str out_var help_text)
     string(LENGTH "${str}" string_length)
 
     if(NOT "${string_length}" EQUAL "4")
-        message(FATAL_ERROR "The ${help_text} code must contain exactly four characters, but it was set to '${str}'")
+        message(WARNING "The ${help_text} code must contain exactly four characters, but it was set to '${str}'")
     endif()
 
     # Round-tripping through a file is the simplest way to convert a string to hex...
@@ -464,7 +464,8 @@ function(_juce_to_char_literal str out_var help_text)
     file(READ "${scratch_file}" four_chars_hex HEX)
     file(REMOVE "${scratch_file}")
 
-    set(${out_var} ${four_chars_hex} PARENT_SCOPE)
+    string(SUBSTRING "${four_chars_hex}00000000" 0 8 four_chars_hex)
+    set(${out_var} "${four_chars_hex}" PARENT_SCOPE)
 endfunction()
 
 # ==================================================================================================
@@ -856,7 +857,15 @@ function(juce_enable_copy_plugin_step shared_code_target)
         get_target_property(source "${target}" JUCE_PLUGIN_ARTEFACT_FILE)
 
         if(source)
-            get_target_property(dest   "${target}" JUCE_PLUGIN_COPY_DIR)
+            if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+                add_custom_command(TARGET ${target} POST_BUILD
+                    COMMAND "${CMAKE_COMMAND}"
+                        "-Dsrc=${source}"
+                        "-P" "${JUCE_CMAKE_UTILS_DIR}/checkBundleSigning.cmake"
+                    VERBATIM)
+            endif()
+
+            get_target_property(dest "${target}" JUCE_PLUGIN_COPY_DIR)
 
             if(dest)
                 _juce_copy_dir("${target}" "${source}" "$<GENEX_EVAL:${dest}>")

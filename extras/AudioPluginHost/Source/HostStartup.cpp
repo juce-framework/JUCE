@@ -160,7 +160,6 @@ public:
         appProperties->setStorageParameters (options);
 
         mainWindow.reset (new MainHostWindow());
-        mainWindow->setUsingNativeTitleBar (true);
 
         commandManager.registerAllCommandsForTarget (this);
         commandManager.registerAllCommandsForTarget (mainWindow.get());

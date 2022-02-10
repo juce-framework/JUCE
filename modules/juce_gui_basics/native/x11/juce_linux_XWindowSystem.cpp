@@ -1744,7 +1744,13 @@ void XWindowSystem::setBounds (::Window windowH, Rectangle<int> newBounds, bool 
             X11Symbols::getInstance()->xSetWMNormalHints (display, windowH, hints.get());
         }
 
-        auto windowBorder = peer->getFrameSize();
+        const auto windowBorder = [&]() -> BorderSize<int>
+        {
+            if (const auto& frameSize = peer->getFrameSizeIfPresent())
+                return *frameSize;
+
+            return {};
+        }();
 
         X11Symbols::getInstance()->xMoveResizeWindow (display, windowH,
                                                       newBounds.getX() - windowBorder.getLeft(),
@@ -1774,7 +1780,14 @@ void XWindowSystem::updateConstraints (::Window windowH, ComponentPeer& peer) co
         }
         else if (auto* c = peer.getConstrainer())
         {
-            const auto windowBorder = peer.getFrameSize();
+            const auto windowBorder = [&]() -> BorderSize<int>
+            {
+                if (const auto& frameSize = peer.getFrameSizeIfPresent())
+                    return *frameSize;
+
+                return {};
+            }();
+
             const auto factor       = peer.getPlatformScaleFactor();
             const auto leftAndRight = windowBorder.getLeftAndRight();
             const auto topAndBottom = windowBorder.getTopAndBottom();
@@ -1802,7 +1815,7 @@ bool XWindowSystem::contains (::Window windowH, Point<int> localPos) const
           && child == None;
 }
 
-BorderSize<int> XWindowSystem::getBorderSize (::Window windowH) const
+ComponentPeer::OptionalBorderSize XWindowSystem::getBorderSize (::Window windowH) const
 {
     jassert (windowH != 0);
 
@@ -1824,7 +1837,7 @@ BorderSize<int> XWindowSystem::getBorderSize (::Window windowH) const
                 data += sizeof (unsigned long);
             }
 
-            return { (int) sizes[2], (int) sizes[0], (int) sizes[3], (int) sizes[1] };
+            return ComponentPeer::OptionalBorderSize ({ (int) sizes[2], (int) sizes[0], (int) sizes[3], (int) sizes[1] });
         }
     }
 

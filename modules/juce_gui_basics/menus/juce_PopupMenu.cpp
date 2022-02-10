@@ -541,6 +541,7 @@ struct MenuWindow  : public Component
             auto resultID = options.hasWatchedComponentBeenDeleted() ? 0 : getResultItemID (item);
 
             exitModalState (resultID);
+            exitingModalState = true;
 
             if (makeInvisible && deletionChecker != nullptr)
                 setVisible (false);
@@ -738,6 +739,9 @@ struct MenuWindow  : public Component
         if (auto* currentlyModalWindow = dynamic_cast<MenuWindow*> (Component::getCurrentlyModalComponent()))
             if (! treeContains (currentlyModalWindow))
                 return false;
+
+        if (exitingModalState)
+            return false;
 
         return true;
     }
@@ -1323,6 +1327,7 @@ struct MenuWindow  : public Component
     uint32 windowCreationTime, lastFocusedTime, timeEnteredCurrentChildComp;
     OwnedArray<MouseSourceState> mouseSourceStates;
     float scaleFactor;
+    bool exitingModalState = false;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuWindow)
 };

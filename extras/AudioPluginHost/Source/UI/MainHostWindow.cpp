@@ -300,6 +300,8 @@ MainHostWindow::MainHostWindow()
 
     setContentNonOwned (graphHolder.get(), false);
 
+    setUsingNativeTitleBar (true);
+
     restoreWindowStateFromString (getAppProperties().getUserSettings()->getValue ("mainWindowPos"));
 
     setVisible (true);

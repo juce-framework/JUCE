@@ -561,18 +561,18 @@ void File::readLines (StringArray& destLines) const
 }
 
 //==============================================================================
-Array<File> File::findChildFiles (int whatToLookFor, bool searchRecursively, const String& wildcard) const
+Array<File> File::findChildFiles (int whatToLookFor, bool searchRecursively, const String& wildcard, FollowSymlinks followSymlinks) const
 {
     Array<File> results;
-    findChildFiles (results, whatToLookFor, searchRecursively, wildcard);
+    findChildFiles (results, whatToLookFor, searchRecursively, wildcard, followSymlinks);
     return results;
 }
 
-int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRecursively, const String& wildcard) const
+int File::findChildFiles (Array<File>& results, int whatToLookFor, bool searchRecursively, const String& wildcard, FollowSymlinks followSymlinks) const
 {
     int total = 0;
 
-    for (const auto& di : RangedDirectoryIterator (*this, searchRecursively, wildcard, whatToLookFor))
+    for (const auto& di : RangedDirectoryIterator (*this, searchRecursively, wildcard, whatToLookFor, followSymlinks))
     {
         results.add (di.getFile());
         ++total;

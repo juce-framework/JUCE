@@ -631,6 +631,12 @@ public:
                                                                     (float) localPos.y * scale));
     }
 
+    OptionalBorderSize getFrameSizeIfPresent() const override
+    {
+        // TODO
+        return {};
+    }
+
     BorderSize<int> getFrameSize() const override
     {
         // TODO

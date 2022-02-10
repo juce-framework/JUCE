@@ -2467,6 +2467,9 @@ public:
             expect (String (StringRef ("abc")) == StringRef ("abc"));
             expect (String ("abc") + StringRef ("def") == "abcdef");
 
+            expect (String ("0x00").getHexValue32() == 0);
+            expect (String ("0x100").getHexValue32() == 256);
+
             String s2 ("123");
             s2 << ((int) 4) << ((short) 5) << "678" << L"9" << '0';
             s2 += "xyz";

@@ -609,7 +609,7 @@ private:
         ComSmartPtr<ICoreWebView2Settings> settings;
         webView->get_Settings (settings.resetAndGetPointerAddress());
 
-        if (settings == nullptr)
+        if (settings != nullptr)
         {
             settings->put_IsStatusBarEnabled (! preferences.getIsStatusBarDisabled());
             settings->put_IsBuiltInErrorPageEnabled (! preferences.getIsBuiltInErrorPageDisabled());

@@ -2458,10 +2458,10 @@ public:
     tresult PLUGIN_API getRoutingInfo (Vst::RoutingInfo&, Vst::RoutingInfo&) override   { return kNotImplemented; }
 
     //==============================================================================
-    bool isBypassed()
+    bool isBypassed() const
     {
         if (auto* bypassParam = comPluginInstance->getBypassParameter())
-            return (bypassParam->getValue() != 0.0f);
+            return bypassParam->getValue() >= 0.5f;
 
         return false;
     }
@@ -3466,7 +3466,9 @@ private:
                 if (totalInputChans == pluginInstance->getTotalNumInputChannels()
                  && totalOutputChans == pluginInstance->getTotalNumOutputChannels())
                 {
-                    if (isBypassed())
+                    // processBlockBypassed should only ever be called if the AudioProcessor doesn't
+                    // return a valid parameter from getBypassParameter
+                    if (pluginInstance->getBypassParameter() == nullptr && comPluginInstance->getBypassParameter()->getValue() >= 0.5f)
                         pluginInstance->processBlockBypassed (buffer, midiBuffer);
                     else
                         pluginInstance->processBlock (buffer, midiBuffer);
@@ -3612,7 +3614,7 @@ private:
             ptr = {};
         }
 
-        T* operator->()               { return ptr.operator->(); }
+        T* operator->() const         { return ptr.operator->(); }
         T* get() const noexcept       { return ptr.get(); }
         operator T*() const noexcept  { return ptr.get(); }
 
