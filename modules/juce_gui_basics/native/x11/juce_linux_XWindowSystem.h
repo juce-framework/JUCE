@@ -181,8 +181,8 @@ public:
     void setBounds (::Window, Rectangle<int>, bool fullScreen) const;
     void updateConstraints (::Window) const;
 
-    BorderSize<int> getBorderSize   (::Window) const;
-    Rectangle<int>  getWindowBounds (::Window, ::Window parentWindow);
+    ComponentPeer::OptionalBorderSize getBorderSize (::Window) const;
+    Rectangle<int> getWindowBounds (::Window, ::Window parentWindow);
     Point<int> getPhysicalParentScreenPosition() const;
 
     bool contains (::Window, Point<int> localPos) const;

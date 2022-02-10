@@ -225,8 +225,11 @@ private:
                 addMethod (@selector (accessibilityDataTableCellElementForRow:column:), getAccessibilityDataTableCellElementForRowColumn);
                 addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
                 addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
+                addProtocol (@protocol (UIAccessibilityContainerDataTable));
+
                 addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
                 addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
+                addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
             }
            #endif
 
@@ -435,7 +438,7 @@ private:
 
         static id getAccessibilityDataTableCellElementForRowColumn (id self, SEL, NSUInteger row, NSUInteger column)
         {
-            if (auto* tableInterface = getTableInterface (self))
+            if (auto* tableInterface = getEnclosingInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
                 if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
                     return (id) cellHandler->getNativeImplementation();
 

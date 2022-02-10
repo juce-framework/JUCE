@@ -500,10 +500,10 @@ public:
 
             while (! t.isEmpty())
             {
-                auto hexValue = static_cast<ResultType> (CharacterFunctions::getHexDigitValue (t.getAndAdvance()));
+                auto hexValue = CharacterFunctions::getHexDigitValue (t.getAndAdvance());
 
                 if (hexValue >= 0)
-                    result = static_cast<ResultType> (result << 4) | hexValue;
+                    result = static_cast<ResultType> (result << 4) | static_cast<ResultType> (hexValue);
             }
 
             return result;

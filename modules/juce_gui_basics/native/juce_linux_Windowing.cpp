@@ -141,9 +141,15 @@ public:
         return bounds;
     }
 
-    BorderSize<int> getFrameSize() const override
+    OptionalBorderSize getFrameSizeIfPresent() const override
     {
         return windowBorder;
+    }
+
+    BorderSize<int> getFrameSize() const override
+    {
+        const auto optionalBorderSize = getFrameSizeIfPresent();
+        return optionalBorderSize ? (*optionalBorderSize) : BorderSize<int>();
     }
 
     Point<float> localToGlobal (Point<float> relativePosition) override
@@ -362,9 +368,14 @@ public:
     void updateBorderSize()
     {
         if ((styleFlags & windowHasTitleBar) == 0)
-            windowBorder = {};
-        else if (windowBorder.getTopAndBottom() == 0 && windowBorder.getLeftAndRight() == 0)
+        {
+            windowBorder = ComponentPeer::OptionalBorderSize { BorderSize<int>() };
+        }
+        else if (! windowBorder
+                 || ((*windowBorder).getTopAndBottom() == 0 && (*windowBorder).getLeftAndRight() == 0))
+        {
             windowBorder = XWindowSystem::getInstance()->getBorderSize (windowH);
+        }
     }
 
     //==============================================================================
@@ -504,7 +515,7 @@ private:
 
     ::Window windowH = {}, parentWindow = {};
     Rectangle<int> bounds;
-    BorderSize<int> windowBorder;
+    ComponentPeer::OptionalBorderSize windowBorder;
     bool fullScreen = false, isAlwaysOnTop = false;
     double currentScaleFactor = 1.0;
     Array<Component*> glRepaintListeners;

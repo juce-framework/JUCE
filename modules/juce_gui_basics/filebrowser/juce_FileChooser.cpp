@@ -27,7 +27,8 @@ namespace juce
 {
 
 //==============================================================================
-class FileChooser::NonNative    : public FileChooser::Pimpl
+class FileChooser::NonNative    : public std::enable_shared_from_this<NonNative>,
+                                  public FileChooser::Pimpl
 {
 public:
     NonNative (FileChooser& fileChooser, int flags, FilePreviewComponent* preview)
@@ -50,7 +51,15 @@ public:
     void launch() override
     {
         dialogBox.centreWithDefaultSize (nullptr);
-        dialogBox.enterModalState (true, ModalCallbackFunction::create ([this] (int r) { modalStateFinished (r); }), true);
+
+        const std::weak_ptr<NonNative> ref (shared_from_this());
+        auto* callback = ModalCallbackFunction::create ([ref] (int r)
+        {
+            if (auto locked = ref.lock())
+                locked->modalStateFinished (r);
+        });
+
+        dialogBox.enterModalState (true, callback, true);
     }
 
     void runModally() override
