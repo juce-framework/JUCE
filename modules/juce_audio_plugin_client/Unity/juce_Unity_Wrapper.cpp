@@ -162,7 +162,9 @@ private:
         {
             ignoreUnused (mode);
 
-            bitmap.data = imageData + x * pixelStride + y * lineStride;
+            const auto offset = (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
+            bitmap.data = imageData + offset;
+            bitmap.size = (size_t) (lineStride * height) - offset;
             bitmap.pixelFormat = pixelFormat;
             bitmap.lineStride = lineStride;
             bitmap.pixelStride = pixelStride;

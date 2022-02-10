@@ -1213,7 +1213,9 @@ private:
             bm.lineStride = width * static_cast<int> (sizeof (jint));
             bm.pixelStride = static_cast<int> (sizeof (jint));
             bm.pixelFormat = Image::ARGB;
-            bm.data = (uint8*) (data + x + y * width);
+            const auto offset = (size_t) x + (size_t) y * (size_t) width;
+            bm.data = (uint8*) (data + offset);
+            bm.size = sizeof (jint) * (((size_t) height * (size_t) width) - offset);
         }
 
         ImagePixelData::Ptr clone() override
