@@ -34,6 +34,11 @@ namespace juce
     An attributed string lets you create a string with varied fonts, colours, word-wrapping,
     layout, etc., and draw it using AttributedString::draw().
 
+    Invariants:
+    - Every character in the string is a member of exactly one attribute.
+    - Attributes are sorted such that the range-end of attribute 'i' is equal to the
+      range-begin of attribute 'i + 1'.
+
     @see TextLayout
 
     @tags{Graphics}
