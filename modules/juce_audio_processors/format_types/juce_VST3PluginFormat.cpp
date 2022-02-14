@@ -2937,7 +2937,7 @@ public:
 
     MemoryBlock getStateForPresetFile() const
     {
-        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream();
+        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream (new Steinberg::MemoryStream(), false);
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return {};
@@ -2955,8 +2955,8 @@ public:
 
     bool setStateFromPresetFile (const MemoryBlock& rawData) const
     {
-        MemoryBlock rawDataCopy (rawData);
-        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize());
+        auto rawDataCopy = rawData;
+        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream (new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()), false);
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;
