@@ -243,10 +243,7 @@ private:
 Toolbar::Toolbar()
 {
     lookAndFeelChanged();
-    addChildComponent (missingItemsButton.get());
-
-    missingItemsButton->setAlwaysOnTop (true);
-    missingItemsButton->onClick = [this] { showMissingItems(); };
+    initMissingItemButton();
 }
 
 Toolbar::~Toolbar()
@@ -534,6 +531,16 @@ void Toolbar::updateAllItemPositions (bool animate)
 }
 
 //==============================================================================
+void Toolbar::initMissingItemButton()
+{
+    if (missingItemsButton == nullptr)
+        return;
+
+    addChildComponent (*missingItemsButton);
+    missingItemsButton->setAlwaysOnTop (true);
+    missingItemsButton->onClick = [this] { showMissingItems(); };
+}
+
 void Toolbar::showMissingItems()
 {
     jassert (missingItemsButton->isShowing());
@@ -643,6 +650,7 @@ void Toolbar::itemDropped (const SourceDetails& dragSourceDetails)
 void Toolbar::lookAndFeelChanged()
 {
     missingItemsButton.reset (getLookAndFeel().createToolbarMissingItemsButton (*this));
+    initMissingItemButton();
 }
 
 void Toolbar::mouseDown (const MouseEvent&) {}
