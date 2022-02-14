@@ -54,7 +54,8 @@ bool PluginDescription::matchesIdentifierString (const String& identifierString)
 
 String PluginDescription::createIdentifierString() const
 {
-    return pluginFormatName + "-" + name + getPluginDescSuffix (*this, uniqueId);
+    const auto idToUse = uniqueId != 0 ? uniqueId : deprecatedUid;
+    return pluginFormatName + "-" + name + getPluginDescSuffix (*this, idToUse);
 }
 
 std::unique_ptr<XmlElement> PluginDescription::createXml() const
