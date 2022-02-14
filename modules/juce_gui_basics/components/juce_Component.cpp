@@ -26,6 +26,17 @@
 namespace juce
 {
 
+static Component* findFirstEnabledAncestor (Component* in)
+{
+    if (in == nullptr)
+        return nullptr;
+
+    if (in->isEnabled())
+        return in;
+
+    return findFirstEnabledAncestor (in->getParentComponent());
+}
+
 Component* Component::currentlyFocusedComponent = nullptr;
 
 
@@ -2269,16 +2280,16 @@ void Component::mouseDoubleClick (const MouseEvent&)    {}
 
 void Component::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr && parentComponent->isEnabled())
-        parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent), wheel);
+    // the base class just passes this event up to the nearest enabled ancestor
+    if (auto* enabledComponent = findFirstEnabledAncestor (getParentComponent()))
+        enabledComponent->mouseWheelMove (e.getEventRelativeTo (enabledComponent), wheel);
 }
 
 void Component::mouseMagnify (const MouseEvent& e, float magnifyAmount)
 {
-    // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr && parentComponent->isEnabled())
-        parentComponent->mouseMagnify (e.getEventRelativeTo (parentComponent), magnifyAmount);
+    // the base class just passes this event up to the nearest enabled ancestor
+    if (auto* enabledComponent = findFirstEnabledAncestor (getParentComponent()))
+        enabledComponent->mouseMagnify (e.getEventRelativeTo (enabledComponent), magnifyAmount);
 }
 
 //==============================================================================
