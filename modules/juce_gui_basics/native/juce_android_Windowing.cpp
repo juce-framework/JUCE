@@ -126,12 +126,18 @@ static const uint8 javaComponentPeerView[] =
 
 //==============================================================================
 #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
- extern bool juce_handleNotificationIntent (void*);
- extern void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
- extern void juce_firebaseRemoteNotificationReceived (void*);
- extern void juce_firebaseRemoteMessagesDeleted();
- extern void juce_firebaseRemoteMessageSent(void*);
- extern void juce_firebaseRemoteMessageSendError (void*, void*);
+ bool juce_handleNotificationIntent (void*);
+ void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
+ void juce_firebaseRemoteNotificationReceived (void*);
+ void juce_firebaseRemoteMessagesDeleted();
+ void juce_firebaseRemoteMessageSent(void*);
+ void juce_firebaseRemoteMessageSendError (void*, void*);
+#endif
+
+#if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
+ void juce_handleOnResume();
+#else
+ static void juce_handleOnResume() {}
 #endif
 
 //==============================================================================
@@ -2091,7 +2097,8 @@ const int KeyPress::rewindKey               = extendedKeyModifier + 72;
  struct JuceActivityNewIntentListener
  {
      #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-      CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V")
+      CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V") \
+      CALLBACK (appOnResume,  "appOnResume",  "()V")
 
       DECLARE_JNI_CLASS (JavaActivity, JUCE_PUSH_NOTIFICATIONS_ACTIVITY)
      #undef JNI_CLASS_MEMBERS
@@ -2099,6 +2106,11 @@ const int KeyPress::rewindKey               = extendedKeyModifier + 72;
      static void JNICALL appNewIntent (JNIEnv*, jobject /*activity*/, jobject intentData)
      {
          juce_handleNotificationIntent (static_cast<void*> (intentData));
+     }
+
+     static void JNICALL appOnResume (JNIEnv*, jobject)
+     {
+         juce_handleOnResume();
      }
  };
 
