@@ -192,20 +192,23 @@ private:
     {
         purchaseInProgress = false;
 
-        auto idx = findVoiceIndexFromIdentifier (info.purchase.productId);
-
-        if (isPositiveAndBelow (idx, voiceProducts.size()))
+        for (const auto productId : info.purchase.productIds)
         {
-            auto& voiceProduct = voiceProducts.getReference (idx);
+            auto idx = findVoiceIndexFromIdentifier (productId);
 
-            voiceProduct.isPurchased = success;
-            voiceProduct.purchaseInProgress = false;
-        }
-        else
-        {
-            // On failure Play Store will not tell us which purchase failed
-            for (auto& voiceProduct : voiceProducts)
+            if (isPositiveAndBelow (idx, voiceProducts.size()))
+            {
+                auto& voiceProduct = voiceProducts.getReference (idx);
+
+                voiceProduct.isPurchased = success;
                 voiceProduct.purchaseInProgress = false;
+            }
+            else
+            {
+                // On failure Play Store will not tell us which purchase failed
+                for (auto& voiceProduct : voiceProducts)
+                    voiceProduct.purchaseInProgress = false;
+            }
         }
 
         guiUpdater.triggerAsyncUpdate();
@@ -217,13 +220,16 @@ private:
         {
             for (auto& info : infos)
             {
-                auto idx = findVoiceIndexFromIdentifier (info.purchase.productId);
-
-                if (isPositiveAndBelow (idx, voiceProducts.size()))
+                for (const auto productId : info.purchase.productIds)
                 {
-                    auto& voiceProduct = voiceProducts.getReference (idx);
+                    auto idx = findVoiceIndexFromIdentifier (productId);
 
-                    voiceProduct.isPurchased = true;
+                    if (isPositiveAndBelow (idx, voiceProducts.size()))
+                    {
+                        auto& voiceProduct = voiceProducts.getReference (idx);
+
+                        voiceProduct.isPurchased = true;
+                    }
                 }
             }
 

@@ -33,6 +33,7 @@ public class JuceActivity   extends Activity
 {
     //==============================================================================
     private native void appNewIntent (Intent intent);
+    private native void appOnResume();
 
     @Override
     protected void onNewIntent (Intent intent)
@@ -41,5 +42,13 @@ public class JuceActivity   extends Activity
         setIntent(intent);
 
         appNewIntent (intent);
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        appOnResume();
     }
 }
