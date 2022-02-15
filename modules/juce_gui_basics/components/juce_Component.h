@@ -2594,9 +2594,9 @@ private:
     //==============================================================================
     void internalMouseEnter (MouseInputSource, Point<float>, Time);
     void internalMouseExit  (MouseInputSource, Point<float>, Time);
-    void internalMouseDown  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
-    void internalMouseUp    (MouseInputSource, Point<float>, Time, const ModifierKeys oldModifiers, float, float, float, float, float);
-    void internalMouseDrag  (MouseInputSource, Point<float>, Time, float, float, float, float, float);
+    void internalMouseDown  (MouseInputSource, const PointerState&, Time);
+    void internalMouseUp    (MouseInputSource, const PointerState&, Time, const ModifierKeys oldModifiers);
+    void internalMouseDrag  (MouseInputSource, const PointerState&, Time);
     void internalMouseMove  (MouseInputSource, Point<float>, Time);
     void internalMouseWheel (MouseInputSource, Point<float>, Time, const MouseWheelDetails&);
     void internalMagnifyGesture (MouseInputSource, Point<float>, Time, float);

@@ -126,8 +126,8 @@ public:
     {
         ModifierKeys::currentModifiers = mods;
 
-        handleMouseEvent (juce::MouseInputSource::mouse, position, mods, juce::MouseInputSource::invalidPressure,
-                          juce::MouseInputSource::invalidOrientation, juce::Time::currentTimeMillis());
+        handleMouseEvent (juce::MouseInputSource::mouse, position, mods, juce::MouseInputSource::defaultPressure,
+                          juce::MouseInputSource::defaultOrientation, juce::Time::currentTimeMillis());
     }
 
     void forwardKeyPress (int code, String name, ModifierKeys mods)
@@ -199,7 +199,7 @@ private:
 
                 if (! ms.getCurrentModifiers().isLeftButtonDown())
                     owner.handleMouseEvent (juce::MouseInputSource::mouse, owner.globalToLocal (pos.toFloat()), {},
-                                            juce::MouseInputSource::invalidPressure, juce::MouseInputSource::invalidOrientation, juce::Time::currentTimeMillis());
+                                            juce::MouseInputSource::defaultPressure, juce::MouseInputSource::defaultOrientation, juce::Time::currentTimeMillis());
 
                 lastMousePos = pos;
             }
