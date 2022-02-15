@@ -81,8 +81,8 @@ public:
                               const bool filled, const Justification justification);
     static Path getChoiceComponentArrowPath (Rectangle<float> arrowZone);
 
-    static Font getPropertyComponentFont()                                 { return { 14.0f, Font::FontStyleFlags::bold }; }
-    static int getTextWidthForPropertyComponent (PropertyComponent* pp)    { return jmin (200, pp->getWidth() / 2); }
+    static Font getPropertyComponentFont()                                       { return { 14.0f, Font::FontStyleFlags::bold }; }
+    static int getTextWidthForPropertyComponent (const PropertyComponent& pc)    { return jmin (200, pc.getWidth() / 2); }
 
     static ColourScheme getProjucerDarkColourScheme()
     {

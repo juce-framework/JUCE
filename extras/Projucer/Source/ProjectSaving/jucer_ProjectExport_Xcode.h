@@ -74,6 +74,10 @@ public:
           appSandboxValue                              (settings, Ids::appSandbox,                              getUndoManager()),
           appSandboxInheritanceValue                   (settings, Ids::appSandboxInheritance,                   getUndoManager()),
           appSandboxOptionsValue                       (settings, Ids::appSandboxOptions,                       getUndoManager(), Array<var>(), ","),
+          appSandboxHomeDirROValue                     (settings, Ids::appSandboxHomeDirRO,                     getUndoManager()),
+          appSandboxHomeDirRWValue                     (settings, Ids::appSandboxHomeDirRW,                     getUndoManager()),
+          appSandboxAbsDirROValue                      (settings, Ids::appSandboxAbsDirRO,                      getUndoManager()),
+          appSandboxAbsDirRWValue                      (settings, Ids::appSandboxAbsDirRW,                      getUndoManager()),
           hardenedRuntimeValue                         (settings, Ids::hardenedRuntime,                         getUndoManager()),
           hardenedRuntimeOptionsValue                  (settings, Ids::hardenedRuntimeOptions,                  getUndoManager(), Array<var>(), ","),
           microphonePermissionNeededValue              (settings, Ids::microphonePermissionNeeded,              getUndoManager()),
@@ -172,6 +176,21 @@ public:
     bool isAppSandboxEnabled() const                        { return appSandboxValue.get(); }
     bool isAppSandboxInhertianceEnabled() const             { return appSandboxInheritanceValue.get(); }
     Array<var> getAppSandboxOptions() const                 { return *appSandboxOptionsValue.get().getArray(); }
+
+    auto getAppSandboxTemporaryPaths() const
+    {
+        std::vector<build_tools::EntitlementOptions::KeyAndStringArray> result;
+
+        for (const auto& entry : sandboxFileAccessProperties)
+        {
+            auto paths = getCommaOrWhitespaceSeparatedItems (entry.property.get());
+
+            if (! paths.isEmpty())
+                result.push_back ({ "com.apple.security.temporary-exception.files." + entry.key, std::move (paths) });
+        }
+
+        return result;
+    }
 
     Array<var> getValidArchs() const                        { return *validArchsValue.get().getArray(); }
 
@@ -457,29 +476,36 @@ public:
                 { "Temporary Exception: Audio Unit Hosting",                       "temporary-exception.audio-unit-host" },
                 { "Temporary Exception: Global Mach Service",                      "temporary-exception.mach-lookup.global-name" },
                 { "Temporary Exception: Global Mach Service Dynamic Registration", "temporary-exception.mach-register.global-name" },
-                { "Temporary Exception: Home Directory File Access (Read Only)",   "temporary-exception.files.home-relative-path.read-only" },
-                { "Temporary Exception: Home Directory File Access (Read/Write)",  "temporary-exception.files.home-relative-path.read-write" },
-                { "Temporary Exception: Absolute Path File Access (Read Only)",    "temporary-exception.files.absolute-path.read-only" },
-                { "Temporary Exception: Absolute Path File Access (Read/Write)",   "temporary-exception.files.absolute-path.read-write" },
                 { "Temporary Exception: IOKit User Client Class",                  "temporary-exception.iokit-user-client-class" },
                 { "Temporary Exception: Shared Preference Domain (Read Only)",     "temporary-exception.shared-preference.read-only" },
                 { "Temporary Exception: Shared Preference Domain (Read/Write)",    "temporary-exception.shared-preference.read-write" }
             };
 
             StringArray sandboxKeys;
-            Array<var> sanboxValues;
+            Array<var> sandboxValues;
 
             for (auto& opt : sandboxOptions)
             {
                 sandboxKeys.add (opt.first);
-                sanboxValues.add ("com.apple.security." + opt.second);
+                sandboxValues.add ("com.apple.security." + opt.second);
             }
 
             props.add (new MultiChoicePropertyComponentWithEnablement (appSandboxOptionsValue,
                                                                        appSandboxValue,
                                                                        "App Sandbox Options",
                                                                        sandboxKeys,
-                                                                       sanboxValues));
+                                                                       sandboxValues));
+
+            for (const auto& entry : sandboxFileAccessProperties)
+            {
+                props.add (new TextPropertyComponentWithEnablement (entry.property,
+                                                                    appSandboxValue,
+                                                                    entry.label,
+                                                                    8192,
+                                                                    true),
+                           "A list of the corresponding paths (separated by newlines or whitespace). "
+                           "See Apple's File Access Temporary Exceptions documentation.");
+            }
 
             props.add (new ChoicePropertyComponent (hardenedRuntimeValue, "Use Hardened Runtime"),
                        "Enable this to use the hardened runtime required for app notarization.");
@@ -3085,6 +3111,7 @@ private:
         options.appGroupIdString                = getAppGroupIdString();
         options.hardenedRuntimeOptions          = getHardenedRuntimeOptions();
         options.appSandboxOptions               = getAppSandboxOptions();
+        options.appSandboxTemporaryPaths        = getAppSandboxTemporaryPaths();
 
         const auto entitlementsFile = getTargetFolder().getChildFile (target.getEntitlementsFilename());
         build_tools::overwriteFileIfDifferentOrThrow (entitlementsFile, options.getEntitlementsFileContent());
@@ -3566,6 +3593,7 @@ private:
                                  duplicateAppExResourcesFolderValue, iosDeviceFamilyValue, iPhoneScreenOrientationValue,
                                  iPadScreenOrientationValue, customXcodeResourceFoldersValue, customXcassetsFolderValue,
                                  appSandboxValue, appSandboxInheritanceValue, appSandboxOptionsValue,
+                                 appSandboxHomeDirROValue, appSandboxHomeDirRWValue, appSandboxAbsDirROValue, appSandboxAbsDirRWValue,
                                  hardenedRuntimeValue, hardenedRuntimeOptionsValue,
                                  microphonePermissionNeededValue, microphonePermissionsTextValue,
                                  cameraPermissionNeededValue, cameraPermissionTextValue,
@@ -3575,6 +3603,20 @@ private:
                                  iosContentSharingValue, iosBackgroundAudioValue, iosBackgroundBleValue, iosPushNotificationsValue, iosAppGroupsValue, iCloudPermissionsValue,
                                  networkingMulticastValue, iosDevelopmentTeamIDValue, iosAppGroupsIDValue, keepCustomXcodeSchemesValue, useHeaderMapValue, customLaunchStoryboardValue,
                                  exporterBundleIdentifierValue, suppressPlistResourceUsageValue, useLegacyBuildSystemValue, buildNumber;
+
+    struct SandboxFileAccessProperty
+    {
+        const ValueTreePropertyWithDefault& property;
+        const String label, key;
+    };
+
+    const std::vector<SandboxFileAccessProperty> sandboxFileAccessProperties
+    {
+        { appSandboxHomeDirROValue, "App sandbox temporary exception: home directory read only file access",  "home-relative-path.read-only" },
+        { appSandboxHomeDirRWValue, "App sandbox temporary exception: home directory read/write file access", "home-relative-path.read-write" },
+        { appSandboxAbsDirROValue,  "App sandbox temporary exception: absolute path read only file access",   "absolute-path.read-only" },
+        { appSandboxAbsDirRWValue,  "App sandbox temporary exception: absolute path read/write file access",  "absolute-path.read-write" }
+    };
 
     JUCE_DECLARE_NON_COPYABLE (XcodeProjectExporter)
 };

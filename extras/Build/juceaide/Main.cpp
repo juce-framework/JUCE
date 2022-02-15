@@ -343,6 +343,29 @@ juce::build_tools::EntitlementOptions parseEntitlementsOptions (const juce::File
     updateField ("APP_SANDBOX_OPTIONS",             result.appSandboxOptions);
     updateField ("NETWORK_MULTICAST_ENABLED",       result.isNetworkingMulticastEnabled);
 
+    struct SandboxTemporaryAccessKey
+    {
+        juce::String cMakeVar, key;
+    };
+
+    SandboxTemporaryAccessKey sandboxTemporaryAccessKeys[]
+    {
+        { "APP_SANDBOX_FILE_ACCESS_HOME_RO", "home-relative-path.read-only" },
+        { "APP_SANDBOX_FILE_ACCESS_HOME_RW", "home-relative-path.read-write" },
+        { "APP_SANDBOX_FILE_ACCESS_ABS_RO",  "absolute-path.read-only" },
+        { "APP_SANDBOX_FILE_ACCESS_ABS_RW",  "absolute-path.read-write" }
+    };
+
+    for (const auto& entry : sandboxTemporaryAccessKeys)
+    {
+        juce::StringArray values;
+        updateField (entry.cMakeVar, values);
+
+        if (! values.isEmpty())
+            result.appSandboxTemporaryPaths.push_back ({ "com.apple.security.temporary-exception.files." + entry.key,
+                                                         std::move (values) });
+    }
+
     result.type = type;
 
     return result;
