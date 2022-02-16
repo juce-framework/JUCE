@@ -2442,7 +2442,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
 {
 #ifdef IGNORE_MOUSE_WITH_PRO_TOOLS_AUTOMATION_MODIFIERS
     const auto curModifiers = ModifierKeys::getCurrentModifiers();
-    wasProToolsModifiersDownState = curModifiers.isCommandDown() && curModifiers.isCtrlDown();
+    wasProToolsModifiersDownState = curModifiers.isCommandOrWinKeyDown() && curModifiers.isCtrlDown();
 #endif
 
     auto& desktop = Desktop::getInstance();
