@@ -334,6 +334,7 @@ static constexpr int translateAndroidKeyboardFlags (int javaFlags) noexcept
     constexpr int metaShiftOn = 0x1;
     constexpr int metaAltOn   = 0x02;
     constexpr int metaCtrlOn  = 0x1000;
+    constexpr int metaMetaOn  = 0x00010000;
 
     int flags = 0;
 

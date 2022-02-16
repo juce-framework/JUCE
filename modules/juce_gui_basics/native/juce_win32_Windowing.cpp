@@ -1920,6 +1920,8 @@ public:
             keyMods = (keyMods & ~ModifierKeys::ctrlModifier) | ModifierKeys::altModifier;
         }
 
+        if (isKeyDown (VK_LWIN) || isKeyDown (VK_RWIN)) keyMods |= ModifierKeys::commandModifier;
+
         ModifierKeys::currentModifiers = ModifierKeys::currentModifiers.withOnlyMouseButtons().withFlags (keyMods);
     }
 
@@ -3341,7 +3343,7 @@ private:
                 key = (int) keyChar;
 
             // avoid sending junk text characters for some control-key combinations
-            if (textChar < ' ' && ModifierKeys::currentModifiers.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::altModifier))
+            if (textChar < ' ' && ModifierKeys::currentModifiers.testFlags (ModifierKeys::ctrlModifier | ModifierKeys::commandModifier | ModifierKeys::altModifier))
                 textChar = 0;
         }
 

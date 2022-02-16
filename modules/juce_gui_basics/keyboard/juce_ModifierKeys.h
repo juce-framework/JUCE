@@ -65,7 +65,21 @@ public:
         preferred command-key modifier - so on the Mac it tests for the cmd key, on
         Windows/Linux, it's actually checking for the CTRL key.
     */
-    inline bool isCommandDown() const noexcept          { return testFlags (commandModifier); }
+    inline bool isCommandDown() const noexcept          {
+    #if JUCE_MAC || JUCE_IOS
+        return testFlags (commandModifier);
+    #else
+        return isCtrlDown();
+    #endif
+    }
+
+    //==============================================================================
+    /** Checks whether the 'Windows' / 'Start' / 'Super' or 'Command' key flag is set (Both Left and Right)
+
+        Due to legacy reasons, JUCE mapped 'command' to Ctrl on Windows. While handy,
+        Sometimes you it's need to check this specific key.
+    */
+    inline bool isCommandOrWinKeyDown() const noexcept          { return testFlags (commandModifier); }
 
     /** Checks whether the user is trying to launch a pop-up menu.
 
@@ -135,17 +149,14 @@ public:
         /** Middle mouse button flag. */
         middleButtonModifier                    = 64,
 
-       #if JUCE_MAC || JUCE_IOS
-        /** Command key flag - on windows this is the same as the CTRL key flag. */
+        /** Command / Win / Start / Super key flag.*/
         commandModifier                         = 8,
 
+       #if JUCE_MAC || JUCE_IOS
         /** Popup menu flag - on windows this is the same as rightButtonModifier, on the
             Mac it's the same as (rightButtonModifier | ctrlModifier). */
         popupMenuClickModifier                  = rightButtonModifier | ctrlModifier,
        #else
-        /** Command key flag - on windows this is the same as the CTRL key flag. */
-        commandModifier                         = ctrlModifier,
-
         /** Popup menu flag - on windows this is the same as rightButtonModifier, on the
             Mac it's the same as (rightButtonModifier | ctrlModifier). */
         popupMenuClickModifier                  = rightButtonModifier,

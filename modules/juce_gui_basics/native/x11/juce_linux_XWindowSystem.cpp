@@ -526,6 +526,9 @@ static bool updateKeyModifiersFromSym (KeySym sym, bool press) noexcept
         case XK_Control_L:
         case XK_Control_R: modifier = ModifierKeys::ctrlModifier; break;
 
+        case XK_Super_L:
+        case XK_Super_R:   modifier = ModifierKeys::commandModifier; break;
+
         case XK_Alt_L:
         case XK_Alt_R:     modifier = ModifierKeys::altModifier; break;
 
