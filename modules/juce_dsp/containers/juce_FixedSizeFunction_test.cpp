@@ -204,6 +204,9 @@ public:
                     throw std::runtime_error { "this was meant to happen" };
                 }
 
+                BadConstructor (const BadConstructor&) = default;
+                BadConstructor& operator= (const BadConstructor&) = delete;
+
                 ~BadConstructor() noexcept { counts.destructions += 1; }
 
                 void operator()() const noexcept { counts.calls += 1; }

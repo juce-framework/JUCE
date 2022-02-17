@@ -33,9 +33,10 @@ namespace dsp
 template <typename Type>
 struct SIMDRegister<Type>::ElementAccess
 {
-    operator Type() const                                { return simd.get (idx); }
-    ElementAccess& operator= (Type scalar) noexcept      { simd.set (idx, scalar); return *this; }
-    ElementAccess& operator= (ElementAccess& o) noexcept { return operator= ((Type) o); }
+    ElementAccess (const ElementAccess&) = default;
+    operator Type() const                                       { return simd.get (idx); }
+    ElementAccess& operator= (Type scalar) noexcept             { simd.set (idx, scalar); return *this; }
+    ElementAccess& operator= (const ElementAccess& o) noexcept  { return operator= ((Type) o); }
 
 private:
     friend struct SIMDRegister;

@@ -50,9 +50,6 @@ public:
     */
     Random();
 
-    /** Destructor. */
-    ~Random() noexcept;
-
     /** Returns the next random 32 bit integer.
         @returns a random integer from the full range 0x80000000 to 0x7fffffff
     */
