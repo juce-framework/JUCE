@@ -758,6 +758,11 @@ public:
        #endif
     }
 
+    ~NativeDarkModeChangeDetectorImpl()
+    {
+        UnhookWindowsHookEx (hook);
+    }
+
     bool isDarkModeEnabled() const noexcept  { return darkModeEnabled; }
 
 private:
