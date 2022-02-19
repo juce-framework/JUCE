@@ -1107,7 +1107,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
       for (AVAudioSessionPortDescription* port in route.outputs)
       {
-        if (port.portType != AVAudioSessionPortBuiltInSpeaker)
+        if (![port.portType isEqualToString: AVAudioSessionPortBuiltInSpeaker])
         {
           return false;
         }
