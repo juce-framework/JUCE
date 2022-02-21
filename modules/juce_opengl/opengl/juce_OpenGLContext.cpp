@@ -414,7 +414,7 @@ public:
 
     void bindVertexArray() noexcept
     {
-        if (context.versionRequired >= juce::OpenGLContext::OpenGLVersion::openGL3_2)
+        if (openGLVersion.major >= 3)
             if (vertexArrayObject != 0)
                 context.extensions.glBindVertexArray (vertexArrayObject);
     }
