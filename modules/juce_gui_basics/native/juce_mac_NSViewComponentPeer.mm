@@ -198,7 +198,7 @@ public:
             [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
-            [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
+            setCollectionBehaviour (false);
 
             [window setRestorable: NO];
 
@@ -407,10 +407,31 @@ public:
         return [window isMiniaturized];
     }
 
+    NSWindowCollectionBehavior getCollectionBehavior (bool forceFullScreen) const
+    {
+        if (forceFullScreen)
+            return NSWindowCollectionBehaviorFullScreenPrimary;
+
+        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenNone
+        constexpr auto fullScreenNone = (NSUInteger) (1 << 9);
+
+        return (getStyleFlags() & (windowHasMaximiseButton | windowIsResizable)) == (windowHasMaximiseButton | windowIsResizable)
+             ? NSWindowCollectionBehaviorFullScreenPrimary
+             : fullScreenNone;
+    }
+
+    void setCollectionBehaviour (bool forceFullScreen) const
+    {
+        [window setCollectionBehavior: getCollectionBehavior (forceFullScreen)];
+    }
+
     void setFullScreen (bool shouldBeFullScreen) override
     {
         if (isSharedWindow)
             return;
+
+        if (shouldBeFullScreen)
+            setCollectionBehaviour (true);
 
         if (isMinimised())
             setMinimised (false);
@@ -1573,6 +1594,7 @@ public:
         }
 
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+        setCollectionBehaviour (isFullScreen());
     }
 
     void setHasChangedSinceSaved (bool b) override
