@@ -53,10 +53,18 @@ else()
     # environment variables, which is unfortunate because we really don't want to cross-compile
     # juceaide. If you really want to set the compilers for juceaide, pass the appropriate
     # CMAKE_<lang>_COMPILER flags when configuring CMake.
-    if((CMAKE_SYSTEM_NAME STREQUAL "Android") OR (CMAKE_SYSTEM_NAME STREQUAL "iOS"))
+    if(CMAKE_CROSSCOMPILING)
         unset(ENV{ASM})
         unset(ENV{CC})
         unset(ENV{CXX})
+    else()
+        # When building with clang-cl in Clion on Windows for an x64 target, the ABI detection phase
+        # of the inner build can fail unless we pass through these flags too
+        set(extra_configure_flags
+            "-DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}"
+            "-DCMAKE_C_FLAGS=${CMAKE_C_FLAGS}"
+            "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_EXE_LINKER_FLAGS}"
+            "-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
     endif()
 
     message(STATUS "Configuring juceaide")
@@ -70,6 +78,7 @@ else()
             "-DCMAKE_BUILD_TYPE=Debug"
             "-DJUCE_BUILD_HELPER_TOOLS=ON"
             "-DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}"
+            ${extra_configure_flags}
         WORKING_DIRECTORY "${JUCE_SOURCE_DIR}"
         OUTPUT_VARIABLE command_output
         ERROR_VARIABLE command_output

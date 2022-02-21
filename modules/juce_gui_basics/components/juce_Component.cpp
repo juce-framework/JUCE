@@ -2382,10 +2382,16 @@ void Component::internalMouseEnter (MouseInputSource source, Point<float> relati
 
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
     mouseEnter (me);
 
     flags.cachedMouseInsideComponent = true;
@@ -2414,10 +2420,16 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
 
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
 
     mouseExit (me);
 
@@ -2429,8 +2441,7 @@ void Component::internalMouseExit (MouseInputSource source, Point<float> relativ
     MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseExit, me);
 }
 
-void Component::internalMouseDown (MouseInputSource source, Point<float> relativePos, Time time,
-                                   float pressure, float orientation, float rotation, float tiltX, float tiltY)
+void Component::internalMouseDown (MouseInputSource source, const PointerState& relativePointerState, Time time)
 {
     auto& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
@@ -2448,9 +2459,16 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
         if (isCurrentlyBlockedByAnotherModalComponent())
         {
             // allow blocked mouse-events to go to global listeners..
-            const MouseEvent me (source, relativePos, source.getCurrentModifiers(), pressure,
-                                 orientation, rotation, tiltX, tiltY, this, this, time, relativePos,
-                                 time, source.getNumberOfMultipleClicks(), false);
+            const auto me = makeMouseEvent (source,
+                                            relativePointerState,
+                                            source.getCurrentModifiers(),
+                                            this,
+                                            this,
+                                            time,
+                                            relativePointerState.position,
+                                            time,
+                                            source.getNumberOfMultipleClicks(),
+                                            false);
 
             desktop.getMouseListeners().callChecked (checker, [&] (MouseListener& l) { l.mouseDown (me); });
             return;
@@ -2481,9 +2499,16 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), pressure,
-                         orientation, rotation, tiltX, tiltY, this, this, time, relativePos,
-                         time, source.getNumberOfMultipleClicks(), false);
+    const auto me = makeMouseEvent (source,
+                                    relativePointerState,
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePointerState.position,
+                                    time,
+                                    source.getNumberOfMultipleClicks(),
+                                    false);
     mouseDown (me);
 
     if (checker.shouldBailOut())
@@ -2494,8 +2519,7 @@ void Component::internalMouseDown (MouseInputSource source, Point<float> relativ
     MouseListenerList::template sendMouseEvent<const MouseEvent&> (*this, checker, &MouseListener::mouseDown, me);
 }
 
-void Component::internalMouseUp (MouseInputSource source, Point<float> relativePos, Time time,
-                                 const ModifierKeys oldModifiers, float pressure, float orientation, float rotation, float tiltX, float tiltY)
+void Component::internalMouseUp (MouseInputSource source, const PointerState& relativePointerState, Time time, const ModifierKeys oldModifiers)
 {
     if (flags.mouseDownWasBlocked && isCurrentlyBlockedByAnotherModalComponent())
         return;
@@ -2505,12 +2529,16 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
     if (flags.repaintOnMouseActivityFlag)
         repaint();
 
-    const MouseEvent me (source, relativePos, oldModifiers, pressure, orientation,
-                         rotation, tiltX, tiltY, this, this, time,
-                         getLocalPoint (nullptr, source.getLastMouseDownPosition()),
-                         source.getLastMouseDownTime(),
-                         source.getNumberOfMultipleClicks(),
-                         source.isLongPressOrDrag());
+    const auto me = makeMouseEvent (source,
+                                    relativePointerState,
+                                    oldModifiers,
+                                    this,
+                                    this,
+                                    time,
+                                    getLocalPoint (nullptr, source.getLastMouseDownPosition()),
+                                    source.getLastMouseDownTime(),
+                                    source.getNumberOfMultipleClicks(),
+                                    source.isLongPressOrDrag());
     mouseUp (me);
 
     if (checker.shouldBailOut())
@@ -2537,19 +2565,22 @@ void Component::internalMouseUp (MouseInputSource source, Point<float> relativeP
     }
 }
 
-void Component::internalMouseDrag (MouseInputSource source, Point<float> relativePos, Time time,
-                                   float pressure, float orientation, float rotation, float tiltX, float tiltY)
+void Component::internalMouseDrag (MouseInputSource source, const PointerState& relativePointerState, Time time)
 {
     if (! isCurrentlyBlockedByAnotherModalComponent())
     {
         BailOutChecker checker (this);
 
-        const MouseEvent me (source, relativePos, source.getCurrentModifiers(),
-                             pressure, orientation, rotation, tiltX, tiltY, this, this, time,
-                             getLocalPoint (nullptr, source.getLastMouseDownPosition()),
-                             source.getLastMouseDownTime(),
-                             source.getNumberOfMultipleClicks(),
-                             source.isLongPressOrDrag());
+        const auto me = makeMouseEvent (source,
+                                        relativePointerState,
+                                        source.getCurrentModifiers(),
+                                        this,
+                                        this,
+                                        time,
+                                        getLocalPoint (nullptr, source.getLastMouseDownPosition()),
+                                        source.getLastMouseDownTime(),
+                                        source.getNumberOfMultipleClicks(),
+                                        source.isLongPressOrDrag());
         mouseDrag (me);
 
         if (checker.shouldBailOut())
@@ -2574,10 +2605,16 @@ void Component::internalMouseMove (MouseInputSource source, Point<float> relativ
     {
         BailOutChecker checker (this);
 
-        const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                             MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                             MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                             this, this, time, relativePos, time, 0, false);
+        const auto me = makeMouseEvent (source,
+                                        PointerState().withPosition (relativePos),
+                                        source.getCurrentModifiers(),
+                                        this,
+                                        this,
+                                        time,
+                                        relativePos,
+                                        time,
+                                        0,
+                                        false);
         mouseMove (me);
 
         if (checker.shouldBailOut())
@@ -2595,10 +2632,16 @@ void Component::internalMouseWheel (MouseInputSource source, Point<float> relati
     auto& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {
@@ -2625,10 +2668,16 @@ void Component::internalMagnifyGesture (MouseInputSource source, Point<float> re
     auto& desktop = Desktop::getInstance();
     BailOutChecker checker (this);
 
-    const MouseEvent me (source, relativePos, source.getCurrentModifiers(), MouseInputSource::invalidPressure,
-                         MouseInputSource::invalidOrientation, MouseInputSource::invalidRotation,
-                         MouseInputSource::invalidTiltX, MouseInputSource::invalidTiltY,
-                         this, this, time, relativePos, time, 0, false);
+    const auto me = makeMouseEvent (source,
+                                    PointerState().withPosition (relativePos),
+                                    source.getCurrentModifiers(),
+                                    this,
+                                    this,
+                                    time,
+                                    relativePos,
+                                    time,
+                                    0,
+                                    false);
 
     if (isCurrentlyBlockedByAnotherModalComponent())
     {

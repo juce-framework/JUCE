@@ -6,6 +6,30 @@ develop
 
 Change
 ------
+The invalidPressure, invalidOrientation, invalidRotation, invalidTiltX and
+invalidTiltY members of MouseInputSource have been deprecated.
+
+Possible Issues
+---------------
+Deprecation warnings will be seen when compiling code which uses these members
+and eventually builds will fail when they are later removed from the API.
+
+Workaround
+----------
+Use the equivalent defaultPressure, defaultOrientation, defaultRotation,
+defaultTiltX and defaultTiltY members of MouseInputSource.
+
+Rationale
+---------
+The deprecated members represent valid values and the isPressureValid() etc.
+functions return true when using them. This could be a source of confusion and
+may be inviting programming errors. The new names are in line with the ongoing
+practice of using these values to provide a neutral default in the absence of
+actual OS provided values.
+
+
+Change
+------
 Plugin wrappers will no longer call processBlockBypassed() if the wrapped
 AudioProcessor returns a parameter from getBypassParameter().
 

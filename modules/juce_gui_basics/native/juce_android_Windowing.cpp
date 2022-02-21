@@ -679,8 +679,8 @@ public:
         handleMouseEvent (MouseInputSource::InputSourceType::touch,
                           pos,
                           ModifierKeys::currentModifiers.withoutMouseButtons(),
-                          MouseInputSource::invalidPressure,
-                          MouseInputSource::invalidOrientation,
+                          MouseInputSource::defaultPressure,
+                          MouseInputSource::defaultOrientation,
                           time,
                           {},
                           index);
@@ -702,8 +702,8 @@ public:
         handleMouseEvent (MouseInputSource::InputSourceType::touch,
                           pos,
                           ModifierKeys::currentModifiers.withoutMouseButtons().withFlags (ModifierKeys::leftButtonModifier),
-                          MouseInputSource::invalidPressure,
-                          MouseInputSource::invalidOrientation,
+                          MouseInputSource::defaultPressure,
+                          MouseInputSource::defaultOrientation,
                           time,
                           {},
                           index);
@@ -723,8 +723,8 @@ public:
         handleMouseEvent (MouseInputSource::InputSourceType::touch,
                           pos,
                           ModifierKeys::currentModifiers.withoutMouseButtons(),
-                          MouseInputSource::invalidPressure,
-                          MouseInputSource::invalidOrientation,
+                          MouseInputSource::defaultPressure,
+                          MouseInputSource::defaultOrientation,
                           time,
                           {},
                           index);
