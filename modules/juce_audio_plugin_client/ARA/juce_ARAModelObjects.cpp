@@ -1,5 +1,18 @@
 #include "juce_ARAModelObjects.h"
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunused-function")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4505)
+#undef JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY
+#define JUCE_VST3HEADERS_INCLUDE_HEADERS_ONLY 1
+#include <juce_audio_processors/format_types/juce_VST3Headers.h>
+#include <juce_audio_processors/format_types/juce_VST3Common.h>
+JUCE_END_IGNORE_WARNINGS_MSVC
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+#if JUCE_MAC || JUCE_IOS
+#include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#endif
+
 namespace juce
 {
 
@@ -56,6 +69,35 @@ double ARARegionSequence::getCommonSampleRate() const
 ARAAudioSource::ARAAudioSource (ARADocument* document, ARA::ARAAudioSourceHostRef hostRef)
     : ARA::PlugIn::AudioSource (document, hostRef)
 {}
+
+void ARAAudioSource::doUpdateChannelArrangement (const ARA::ChannelArrangement& channelArrangement) noexcept
+{
+    switch (channelArrangement.getChannelArrangementDataType())
+    {
+        default:
+            jassertfalse;   // fall through to kARAChannelArrangementUndefined here
+        case ARA::kARAChannelArrangementUndefined:
+            if (getChannelCount() == 1)
+                layout = AudioChannelSet::mono();
+            else if (getChannelCount() == 2)
+                layout = AudioChannelSet::stereo();
+            else
+                layout = AudioChannelSet::discreteChannels (getChannelCount());
+            break;
+        case ARA::kARAChannelArrangementVST3SpeakerArrangement:
+            layout = getChannelSetForSpeakerArrangement (*static_cast<const Steinberg::Vst::SpeakerArrangement*> (channelArrangement.getChannelArrangement()));
+            break;
+#if JUCE_MAC || JUCE_IOS
+        case ARA::kARAChannelArrangementCoreAudioChannelLayout:
+            layout = CoreAudioLayouts::fromCoreAudio (*static_cast<const AudioChannelLayout*> (channelArrangement.getChannelArrangement()));
+            break;
+#endif
+// TODO JUCE_ARA add this when adding ARA AAX support
+//        case ARA::kARAChannelArrangementAAXStemFormat:
+//            //layout = channelSetFromStemFormat (*static_cast<const AAX_EStemFormat*> (channelArrangement.getChannelArrangement()), false);
+//            break;
+    }
+}
 
 void ARAAudioSource::notifyAnalysisProgressStarted()
 {

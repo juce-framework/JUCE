@@ -154,7 +154,18 @@
  #include <winsock2.h>
  #include <ws2tcpip.h>
  #include <iphlpapi.h>
+
+ #if ! JUCE_CXX17_IS_AVAILABLE
+  #pragma push_macro ("WIN_NOEXCEPT")
+  #define WIN_NOEXCEPT
+ #endif
+
  #include <mapi.h>
+
+ #if ! JUCE_CXX17_IS_AVAILABLE
+  #pragma pop_macro ("WIN_NOEXCEPT")
+ #endif
+
  #include <float.h>
  #include <process.h>
  #include <shlobj.h>

@@ -127,6 +127,8 @@ namespace juce
     };
 } // namespace juce
 
+#include "mouse/juce_PointerState.h"
+
 #include "accessibility/juce_AccessibilityHandler.cpp"
 #include "components/juce_Component.cpp"
 #include "components/juce_ComponentListener.cpp"

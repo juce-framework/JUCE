@@ -224,8 +224,8 @@ namespace ActiveXHelpers
                                         { (float) (GET_X_LPARAM (lParam) + activeXRect.left - peerRect.left),
                                           (float) (GET_Y_LPARAM (lParam) + activeXRect.top  - peerRect.top) },
                                         ComponentPeer::getCurrentModifiersRealtime(),
-                                        MouseInputSource::invalidPressure,
-                                        MouseInputSource::invalidOrientation,
+                                        MouseInputSource::defaultPressure,
+                                        MouseInputSource::defaultOrientation,
                                         getMouseEventTime());
                 break;
             }

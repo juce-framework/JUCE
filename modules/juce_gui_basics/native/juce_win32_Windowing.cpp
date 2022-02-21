@@ -2812,8 +2812,8 @@ private:
         if (now >= lastMouseTime + minTimeBetweenMouses)
         {
             lastMouseTime = now;
-            doMouseEvent (position, MouseInputSource::invalidPressure,
-                          MouseInputSource::invalidOrientation, modsToSend);
+            doMouseEvent (position, MouseInputSource::defaultPressure,
+                          MouseInputSource::defaultOrientation, modsToSend);
         }
     }
 
@@ -2839,7 +2839,7 @@ private:
 
             isDragging = true;
 
-            doMouseEvent (position, MouseInputSource::invalidPressure);
+            doMouseEvent (position, MouseInputSource::defaultPressure);
         }
     }
 
@@ -2866,7 +2866,7 @@ private:
         // NB: under some circumstances (e.g. double-clicking a native title bar), a mouse-up can
         // arrive without a mouse-down, so in that case we need to avoid sending a message.
         if (wasDragging)
-            doMouseEvent (position, MouseInputSource::invalidPressure);
+            doMouseEvent (position, MouseInputSource::defaultPressure);
     }
 
     void doCaptureChanged()
@@ -2888,7 +2888,7 @@ private:
         isMouseOver = false;
 
         if (! areOtherTouchSourcesActive())
-            doMouseEvent (getCurrentMousePos(), MouseInputSource::invalidPressure);
+            doMouseEvent (getCurrentMousePos(), MouseInputSource::defaultPressure);
     }
 
     ComponentPeer* findPeerUnderMouse (Point<float>& localPos)
@@ -3005,7 +3005,7 @@ private:
     }
 
     bool handleTouchInput (const TOUCHINPUT& touch, const bool isDown, const bool isUp,
-                           const float touchPressure = MouseInputSource::invalidPressure,
+                           const float touchPressure = MouseInputSource::defaultPressure,
                            const float orientation = 0.0f)
     {
         auto isCancel = false;
@@ -3082,9 +3082,9 @@ private:
                 return false;
 
             const auto pressure = touchInfo.touchMask & TOUCH_MASK_PRESSURE ? static_cast<float> (touchInfo.pressure)
-                                                                            : MouseInputSource::invalidPressure;
+                                                                            : MouseInputSource::defaultPressure;
             const auto orientation = touchInfo.touchMask & TOUCH_MASK_ORIENTATION ? degreesToRadians (static_cast<float> (touchInfo.orientation))
-                                                                                  : MouseInputSource::invalidOrientation;
+                                                                                  : MouseInputSource::defaultOrientation;
 
             if (! handleTouchInput (emulateTouchEventFromPointer (touchInfo.pointerInfo.ptPixelLocationRaw, wParam),
                                     isDown, isUp, pressure, orientation))
@@ -3097,7 +3097,7 @@ private:
             if (! getPointerPenInfo (GET_POINTERID_WPARAM (wParam), &penInfo))
                 return false;
 
-            const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? (float) penInfo.pressure / 1024.0f : MouseInputSource::invalidPressure;
+            const auto pressure = (penInfo.penMask & PEN_MASK_PRESSURE) ? (float) penInfo.pressure / 1024.0f : MouseInputSource::defaultPressure;
 
             if (! handlePenInput (penInfo, globalToLocal (convertPhysicalScreenPointToLogical (pointFromPOINT (getPOINTFromLParam (lParam)), hwnd).toFloat()),
                                   pressure, isDown, isUp))
@@ -3128,9 +3128,9 @@ private:
         ModifierKeys modsToSend (ModifierKeys::currentModifiers);
         PenDetails penDetails;
 
-        penDetails.rotation = (penInfo.penMask & PEN_MASK_ROTATION) ? degreesToRadians (static_cast<float> (penInfo.rotation)) : MouseInputSource::invalidRotation;
-        penDetails.tiltX = (penInfo.penMask & PEN_MASK_TILT_X) ? (float) penInfo.tiltX / 90.0f : MouseInputSource::invalidTiltX;
-        penDetails.tiltY = (penInfo.penMask & PEN_MASK_TILT_Y) ? (float) penInfo.tiltY / 90.0f : MouseInputSource::invalidTiltY;
+        penDetails.rotation = (penInfo.penMask & PEN_MASK_ROTATION) ? degreesToRadians (static_cast<float> (penInfo.rotation)) : MouseInputSource::defaultRotation;
+        penDetails.tiltX = (penInfo.penMask & PEN_MASK_TILT_X) ? (float) penInfo.tiltX / 90.0f : MouseInputSource::defaultTiltX;
+        penDetails.tiltY = (penInfo.penMask & PEN_MASK_TILT_Y) ? (float) penInfo.tiltY / 90.0f : MouseInputSource::defaultTiltY;
 
         auto pInfoFlags = penInfo.pointerInfo.pointerFlags;
 
@@ -3145,7 +3145,7 @@ private:
 
             // this forces a mouse-enter/up event, in case for some reason we didn't get a mouse-up before.
             handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend.withoutMouseButtons(),
-                              pressure, MouseInputSource::invalidOrientation, time, penDetails);
+                              pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
             if (! isValidPeer (this)) // (in case this component was deleted by the event)
                 return false;
@@ -3157,7 +3157,7 @@ private:
         }
 
         handleMouseEvent (MouseInputSource::InputSourceType::pen, pos, modsToSend, pressure,
-                          MouseInputSource::invalidOrientation, time, penDetails);
+                          MouseInputSource::defaultOrientation, time, penDetails);
 
         if (! isValidPeer (this)) // (in case this component was deleted by the event)
             return false;
@@ -3165,7 +3165,7 @@ private:
         if (isUp)
         {
             handleMouseEvent (MouseInputSource::InputSourceType::pen, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
-                              pressure, MouseInputSource::invalidOrientation, time, penDetails);
+                              pressure, MouseInputSource::defaultOrientation, time, penDetails);
 
             if (! isValidPeer (this))
                 return false;
@@ -3465,7 +3465,7 @@ private:
             const ScopedValueSetter<bool> scope (inHandlePositionChanged, true);
 
             if (! areOtherTouchSourcesActive())
-                doMouseEvent (pos, MouseInputSource::invalidPressure);
+                doMouseEvent (pos, MouseInputSource::defaultPressure);
 
             if (! isValidPeer (this))
                 return true;

@@ -76,6 +76,11 @@ bool ARAPluginDemoDocumentController::doStoreObjectsToStream (juce::ARAOutputStr
     return success;
 }
 
+bool ARAPluginDemoDocumentController::doIsAudioModificationPreservingAudioSourceSignal (ARA::PlugIn::AudioModification* audioModification) noexcept
+{
+    return ! static_cast<ARAPluginDemoAudioModification*>(audioModification)->isDimmed();
+}
+
 //==============================================================================
 // This creates the static ARAFactory instances for the plugin.
 const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory()

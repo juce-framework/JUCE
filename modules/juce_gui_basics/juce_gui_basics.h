@@ -158,6 +158,7 @@ namespace juce
     class Displays;
     class AccessibilityHandler;
     class KeyboardFocusTraverser;
+    class PointerState;
 
     class FlexBox;
     class Grid;

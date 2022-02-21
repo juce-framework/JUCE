@@ -224,16 +224,50 @@ public:
     /** A default value for pressure, which is used when a device doesn't support it, or for
         mouse-moves, mouse-ups, etc.
     */
-    static const float invalidPressure;
+    static constexpr float defaultPressure = 0.0f;
 
     /** A default value for orientation, which is used when a device doesn't support it */
-    static const float invalidOrientation;
+    static constexpr float defaultOrientation = 0.0f;
 
     /** A default value for rotation, which is used when a device doesn't support it */
-    static const float invalidRotation;
+    static constexpr float defaultRotation = 0.0f;
 
     /** Default values for tilt, which are used when a device doesn't support it */
+    static constexpr float defaultTiltX = 0.0f;
+    static constexpr float defaultTiltY = 0.0f;
+
+    /** A default value for pressure, which is used when a device doesn't support it.
+
+        This is a valid value, returning true when calling isPressureValid() hence the
+        deprecation. Use defaultPressure instead.
+    */
+    [[deprecated ("Use defaultPressure instead.")]]
+    static const float invalidPressure;
+
+    /** A default value for orientation, which is used when a device doesn't support it.
+
+        This is a valid value, returning true when calling isOrientationValid() hence the
+        deprecation. Use defaultOrientation instead.
+    */
+    [[deprecated ("Use defaultOrientation instead.")]]
+    static const float invalidOrientation;
+
+    /** A default value for rotation, which is used when a device doesn't support it.
+
+        This is a valid value, returning true when calling isRotationValid() hence the
+        deprecation. Use defaultRotation instead.
+    */
+    [[deprecated ("Use defaultRotation instead.")]]
+    static const float invalidRotation;
+
+    /** Default values for tilt, which are used when a device doesn't support it
+
+        These are valid values, returning true when calling isTiltValid() hence the
+        deprecation. Use defaultTiltX and defaultTiltY instead.
+    */
+    [[deprecated ("Use defaultTiltX instead.")]]
     static const float invalidTiltX;
+    [[deprecated ("Use defaultTiltY instead.")]]
     static const float invalidTiltY;
 
     /** An offscreen mouse position used when triggering mouse exits where we don't want to move

@@ -668,7 +668,7 @@ public:
         else
             // moved into another window which overlaps this one, so trigger an exit
             handleMouseEvent (MouseInputSource::InputSourceType::mouse, MouseInputSource::offscreenMousePos, ModifierKeys::currentModifiers,
-                              getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
+                              getMousePressure (ev), MouseInputSource::defaultOrientation, getMouseTime (ev));
 
         showArrowCursorIfNeeded();
     }
@@ -780,7 +780,7 @@ public:
     {
         updateModifiers (ev);
         handleMouseEvent (MouseInputSource::InputSourceType::mouse, getMousePos (ev, view), ModifierKeys::currentModifiers,
-                          getMousePressure (ev), MouseInputSource::invalidOrientation, getMouseTime (ev));
+                          getMousePressure (ev), MouseInputSource::defaultOrientation, getMouseTime (ev));
     }
 
     bool handleKeyEvent (NSEvent* ev, bool isKeyDown)

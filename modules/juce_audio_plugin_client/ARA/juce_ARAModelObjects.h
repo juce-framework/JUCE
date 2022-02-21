@@ -352,6 +352,8 @@ public:
     template <typename AudioModification_t = ARAAudioModification>
     std::vector<AudioModification_t*> const& getAudioModifications() const noexcept { return ARA::PlugIn::AudioSource::getAudioModifications<AudioModification_t>(); }
 
+    const AudioChannelSet& getLayout() const noexcept { return layout; }
+
     class JUCE_API  Listener  : public ARAListenableModelClass<ARAAudioSource>::Listener
     {
     public:
@@ -457,6 +459,10 @@ public:
     void notifyContentChanged (ARAContentUpdateScopes scopeFlags, bool notifyARAHost);
 
 private:
+    void doUpdateChannelArrangement (const ARA::ChannelArrangement& channelArrangement) noexcept override;
+
+    AudioChannelSet layout;
+
     friend ARADocumentController;
     ARA::PlugIn::AnalysisProgressTracker internalAnalysisProgressTracker;
 };

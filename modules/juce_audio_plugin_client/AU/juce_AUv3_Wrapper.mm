@@ -1969,7 +1969,7 @@ public:
         if (holder == nullptr)
             return nullptr;
 
-        return (new JuceAudioUnitv3 (holder, descr, 0, error))->getAudioUnit();
+        return [(new JuceAudioUnitv3 (holder, descr, 0, error))->getAudioUnit() autorelease];
     }
 
 private:

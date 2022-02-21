@@ -1595,7 +1595,7 @@ public:
                 newCallback->audioDeviceAboutToStart (this);
 
             const ScopedLock sl (callbackLock);
-            previousCallback = std::exchange (callback, newCallback);
+            previousCallback = callback = newCallback;
         }
     }
 
