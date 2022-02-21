@@ -906,6 +906,7 @@ public:
 
     void setShaderProgram (const String& vertexShader, const String& fragmentShader)
     {
+        const ScopedLock lock (shaderMutex); // Prevent concurrent access to shader strings and status
         newVertexShader = vertexShader;
         newFragmentShader = fragmentShader;
     }
@@ -931,6 +932,7 @@ public:
 private:
     void handleAsyncUpdate() override
     {
+        const ScopedLock lock (shaderMutex); // Prevent concurrent access to shader strings and status
         controlsOverlay->statusLabel.setText (statusText, dontSendNotification);
     }
 
@@ -1246,6 +1248,7 @@ private:
     OpenGLUtils::DemoTexture* textureToUse = nullptr;
     OpenGLUtils::DemoTexture* lastTexture  = nullptr;
 
+    CriticalSection shaderMutex;
     String newVertexShader, newFragmentShader, statusText;
 
     struct BackgroundStar
@@ -1258,6 +1261,8 @@ private:
     //==============================================================================
     void updateShader()
     {
+        const ScopedLock lock (shaderMutex); // Prevent concurrent access to shader strings and status
+
         if (newVertexShader.isNotEmpty() || newFragmentShader.isNotEmpty())
         {
             std::unique_ptr<OpenGLShaderProgram> newShader (new OpenGLShaderProgram (openGLContext));
