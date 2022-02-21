@@ -177,7 +177,11 @@ public:
 
     //==============================================================================
     /** Metadata property name used when reading an ISRC code from an AXML chunk. */
+    [[deprecated ("This string is identical to riffInfoSource, making it impossible to differentiate between the two")]]
     static const char* const ISRC;
+
+    /** Metadata property name used when reading and writing ISRC codes to/from AXML chunks. */
+    static const char* const internationalStandardRecordingCode;
 
     /** Metadata property name used when reading a WAV file with a Tracktion chunk. */
     static const char* const tracktionLoopInfo;

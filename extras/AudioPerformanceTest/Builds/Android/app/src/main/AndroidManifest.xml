@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="1" android:versionName="1.0.0"
-          package="com.juce.AudioPerformanceTest">
+          package="com.juce.audioperformancetest">
   <supports-screens android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:anyDensity="true"
                     android:xlargeScreens="true"/>
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>

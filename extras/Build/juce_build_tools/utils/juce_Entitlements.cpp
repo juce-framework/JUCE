@@ -79,7 +79,7 @@ namespace build_tools
         if (isAppGroupsEnabled)
         {
             auto appGroups = StringArray::fromTokens (appGroupIdString, ";", {});
-            auto groups = String ("<array>");
+            String groups = "<array>";
 
             for (auto group : appGroups)
                 groups += "\n\t\t<string>" + group.trim() + "</string>";
@@ -101,13 +101,27 @@ namespace build_tools
             {
                 // no other sandbox options can be specified if sandbox inheritance is enabled!
                 jassert (appSandboxOptions.isEmpty());
+                jassert (appSandboxTemporaryPaths.empty());
 
                 entitlements.set ("com.apple.security.inherit", "<true/>");
             }
 
             if (isAppSandboxEnabled)
+            {
                 for (auto& option : appSandboxOptions)
                     entitlements.set (option, "<true/>");
+
+                for (auto& option : appSandboxTemporaryPaths)
+                {
+                    String paths = "<array>";
+
+                    for (const auto& path : option.values)
+                        paths += "\n\t\t<string>" + path + "</string>";
+
+                    paths += "\n\t</array>";
+                    entitlements.set (option.key, paths);
+                }
+            }
         }
 
         if (isNetworkingMulticastEnabled)

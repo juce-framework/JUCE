@@ -201,6 +201,10 @@ namespace Ids
     DECLARE_ID (appSandbox);
     DECLARE_ID (appSandboxInheritance);
     DECLARE_ID (appSandboxOptions);
+    DECLARE_ID (appSandboxHomeDirRO);
+    DECLARE_ID (appSandboxHomeDirRW);
+    DECLARE_ID (appSandboxAbsDirRO);
+    DECLARE_ID (appSandboxAbsDirRW);
     DECLARE_ID (hardenedRuntime);
     DECLARE_ID (hardenedRuntimeOptions);
     DECLARE_ID (microphonePermissionNeeded);

@@ -1359,6 +1359,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_basics/mouse/juce_MouseInputSource.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_MouseListener.cpp"
     "../../../../../modules/juce_gui_basics/mouse/juce_MouseListener.h"
+    "../../../../../modules/juce_gui_basics/mouse/juce_PointerState.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_SelectedItemSet.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_TextDragAndDropTarget.h"
     "../../../../../modules/juce_gui_basics/mouse/juce_TooltipClient.h"
@@ -2954,6 +2955,7 @@ set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_M
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_MouseInputSource.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_MouseListener.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_MouseListener.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_PointerState.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_SelectedItemSet.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_TextDragAndDropTarget.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_basics/mouse/juce_TooltipClient.h" PROPERTIES HEADER_FILE_ONLY TRUE)

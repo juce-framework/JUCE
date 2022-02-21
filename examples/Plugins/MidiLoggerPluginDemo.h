@@ -80,6 +80,9 @@ public:
     template <typename It>
     void addMessages (It begin, It end)
     {
+        if (begin == end)
+            return;
+
         const auto numNewMessages = (int) std::distance (begin, end);
         const auto numToAdd = juce::jmin (numToStore, numNewMessages);
         const auto numToRemove = jmax (0, (int) messages.size() + numToAdd - numToStore);

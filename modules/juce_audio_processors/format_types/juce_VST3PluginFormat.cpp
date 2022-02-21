@@ -1348,9 +1348,7 @@ struct VST3PluginWindow : public AudioProcessorEditor,
         warnOnFailure (view->setFrame (this));
         view->queryInterface (Steinberg::IPlugViewContentScaleSupport::iid, (void**) &scaleInterface);
 
-        if (scaleInterface != nullptr)
-            warnOnFailure (scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor));
-
+        setContentScaleFactor();
         resizeToFit();
     }
 
@@ -1365,7 +1363,9 @@ struct VST3PluginWindow : public AudioProcessorEditor,
          embeddedComponent.removeClient();
         #endif
 
-        warnOnFailure (view->removed());
+        if (attachedCalled)
+            warnOnFailure (view->removed());
+
         warnOnFailure (view->setFrame (nullptr));
 
         processor.editorBeingDeleted (this);
@@ -1573,7 +1573,12 @@ private:
                 return;
             }
 
-            warnOnFailure (view->attached ((void*) pluginHandle, defaultVST3WindowType));
+            const auto attachedResult = view->attached ((void*) pluginHandle, defaultVST3WindowType);
+            ignoreUnused (warnOnFailure (attachedResult));
+
+            if (attachedResult == kResultOk)
+                attachedCalled = true;
+
             updatePluginScale();
         }
     }
@@ -1591,9 +1596,22 @@ private:
     void updatePluginScale()
     {
         if (scaleInterface != nullptr)
-            warnOnFailure (scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor));
+            setContentScaleFactor();
         else
             resizeToFit();
+    }
+
+    void setContentScaleFactor()
+    {
+        if (scaleInterface != nullptr)
+        {
+            const auto result = scaleInterface->setContentScaleFactor ((Steinberg::IPlugViewContentScaleSupport::ScaleFactor) nativeScaleFactor);
+            ignoreUnused (result);
+
+           #if ! JUCE_MAC
+            ignoreUnused (warnOnFailure (result));
+           #endif
+        }
     }
 
     //==============================================================================
@@ -1641,7 +1659,7 @@ private:
    #endif
 
     HandleFormat pluginHandle = {};
-    bool recursiveResize = false, isInOnSize = false;
+    bool recursiveResize = false, isInOnSize = false, attachedCalled = false;
 
     ComponentPeer* currentPeer = nullptr;
     Steinberg::IPlugViewContentScaleSupport* scaleInterface = nullptr;
@@ -1669,16 +1687,33 @@ struct VST3ComponentHolder
     // transfers ownership to the plugin instance!
     AudioPluginInstance* createPluginInstance();
 
+    bool isIComponentAlsoIEditController() const
+    {
+        if (component == nullptr)
+        {
+            jassertfalse;
+            return false;
+        }
+
+        return VSTComSmartPtr<Vst::IEditController>().loadFrom (component);
+    }
+
     bool fetchController (VSTComSmartPtr<Vst::IEditController>& editController)
     {
         if (! isComponentInitialised && ! initialise())
             return false;
 
+        editController.loadFrom (component);
+
         // Get the IEditController:
         TUID controllerCID = { 0 };
 
-        if (component->getControllerClassId (controllerCID) == kResultTrue && FUID (controllerCID).isValid())
+        if (editController == nullptr
+            && component->getControllerClassId (controllerCID) == kResultTrue
+            && FUID (controllerCID).isValid())
+        {
             editController.loadFrom (factory, controllerCID);
+        }
 
         if (editController == nullptr)
         {
@@ -1694,9 +1729,6 @@ struct VST3ComponentHolder
                     editController.loadFrom (factory, classInfo.cid);
             }
         }
-
-        if (editController == nullptr)
-            editController.loadFrom (component);
 
         return (editController != nullptr);
     }
@@ -2213,7 +2245,7 @@ public:
 
         editController->setComponentHandler (nullptr);
 
-        if (isControllerInitialised)
+        if (isControllerInitialised && ! holder->isIComponentAlsoIEditController())
             editController->terminate();
 
         holder->terminate();
@@ -2245,8 +2277,10 @@ public:
         if (! (isControllerInitialised || holder->fetchController (editController)))
             return false;
 
-        // (May return an error if the plugin combines the IComponent and IEditController implementations)
-        editController->initialize (holder->host->getFUnknown());
+        // If the IComponent and IEditController are the same, we will have
+        // already initialized the object at this point and should avoid doing so again.
+        if (! holder->isIComponentAlsoIEditController())
+            editController->initialize (holder->host->getFUnknown());
 
         isControllerInitialised = true;
         editController->setComponentHandler (holder->host);
@@ -2903,7 +2937,7 @@ public:
 
     MemoryBlock getStateForPresetFile() const
     {
-        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream();
+        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream (new Steinberg::MemoryStream(), false);
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return {};
@@ -2921,8 +2955,8 @@ public:
 
     bool setStateFromPresetFile (const MemoryBlock& rawData) const
     {
-        MemoryBlock rawDataCopy (rawData);
-        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream = new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize());
+        auto rawDataCopy = rawData;
+        VSTComSmartPtr<Steinberg::MemoryStream> memoryStream (new Steinberg::MemoryStream (rawDataCopy.getData(), (int) rawDataCopy.getSize()), false);
 
         if (memoryStream == nullptr || holder->component == nullptr)
             return false;

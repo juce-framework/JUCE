@@ -452,7 +452,7 @@ public:
     {
         if (e.mods.isRightButtonDown())
             if (auto* context = editor.getHostContext())
-                if (auto menu = context->getContextMenuForParameterIndex (&parameter))
+                if (auto menu = context->getContextMenuForParameter (&parameter))
                     menu->getEquivalentPopupMenu().showMenuAsync (PopupMenu::Options().withTargetComponent (this)
                                                                                       .withMousePosition());
     }
