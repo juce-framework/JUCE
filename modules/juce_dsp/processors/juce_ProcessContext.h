@@ -146,7 +146,7 @@ public:
     using AudioBlockType = AudioBlock<SampleType>;
     using ConstAudioBlockType = AudioBlock<const SampleType>;
 
-    /** Creates a ProcessContextReplacing that uses the given input and output blocks.
+    /** Creates a ProcessContextNonReplacing that uses the given input and output blocks.
         Note that the caller must not delete these blocks while they are still in use by this object!
     */
     ProcessContextNonReplacing (const ConstAudioBlockType& input, AudioBlockType& output) noexcept

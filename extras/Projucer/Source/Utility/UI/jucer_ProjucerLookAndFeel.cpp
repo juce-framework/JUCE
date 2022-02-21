@@ -94,23 +94,21 @@ int ProjucerLookAndFeel::getTabButtonBestWidth (TabBarButton& button, int)
     return 120;
 }
 
-void ProjucerLookAndFeel::drawPropertyComponentLabel (Graphics& g, int width, int height, PropertyComponent& component)
+void ProjucerLookAndFeel::drawPropertyComponentLabel (Graphics& g, int, int height, PropertyComponent& component)
 {
-    ignoreUnused (width);
-
     g.setColour (component.findColour (defaultTextColourId)
                           .withMultipliedAlpha (component.isEnabled() ? 1.0f : 0.6f));
 
-    auto textWidth = getTextWidthForPropertyComponent (&component);
+    auto textWidth = getTextWidthForPropertyComponent (component);
 
     g.setFont (getPropertyComponentFont());
-    g.drawFittedText (component.getName(), 0, 0, textWidth - 5, height, Justification::centredLeft, 5, 1.0f);
+    g.drawFittedText (component.getName(), 0, 0, textWidth, height, Justification::centredLeft, 5, 1.0f);
 }
 
 Rectangle<int> ProjucerLookAndFeel::getPropertyComponentContentPosition (PropertyComponent& component)
 {
-    const auto textW = getTextWidthForPropertyComponent (&component);
-    return { textW, 0, component.getWidth() - textW, component.getHeight() - 1 };
+    const auto paddedTextW = getTextWidthForPropertyComponent (component) + 5;
+    return { paddedTextW , 0, component.getWidth() - paddedTextW, component.getHeight() - 1 };
 }
 
 void ProjucerLookAndFeel::drawButtonBackground (Graphics& g,

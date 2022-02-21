@@ -401,50 +401,38 @@ struct GraphEditorPanel::PluginComponent   : public Component,
     void showPopupMenu()
     {
         menu.reset (new PopupMenu);
-        menu->addItem (1, "Delete this filter");
-        menu->addItem (2, "Disconnect all pins");
-        menu->addItem (3, "Toggle Bypass");
+        menu->addItem ("Delete this filter", [this] { graph.graph.removeNode (pluginID); });
+        menu->addItem ("Disconnect all pins", [this] { graph.graph.disconnectNode (pluginID); });
+        menu->addItem ("Toggle Bypass", [this]
+        {
+            if (auto* node = graph.graph.getNodeForId (pluginID))
+                node->setBypassed (! node->isBypassed());
+
+            repaint();
+        });
 
         menu->addSeparator();
         if (getProcessor()->hasEditor())
-            menu->addItem (10, "Show plugin GUI");
+            menu->addItem ("Show plugin GUI", [this] { showWindow (PluginWindow::Type::normal); });
 
-        menu->addItem (11, "Show all programs");
-        menu->addItem (12, "Show all parameters");
-        menu->addItem (13, "Show debug log");
+        menu->addItem ("Show all programs", [this] { showWindow (PluginWindow::Type::programs); });
+        menu->addItem ("Show all parameters", [this] { showWindow (PluginWindow::Type::generic); });
+        menu->addItem ("Show debug log", [this] { showWindow (PluginWindow::Type::debug); });
 
         if (autoScaleOptionAvailable)
             addPluginAutoScaleOptionsSubMenu (dynamic_cast<AudioPluginInstance*> (getProcessor()), *menu);
 
         menu->addSeparator();
-        menu->addItem (20, "Configure Audio I/O");
-        menu->addItem (21, "Test state save/load");
+        menu->addItem ("Configure Audio I/O", [this] { showWindow (PluginWindow::Type::audioIO); });
+        menu->addItem ("Test state save/load", [this] { testStateSaveLoad(); });
 
-        menu->showMenuAsync ({}, ModalCallbackFunction::create
-                             ([this] (int r) {
-        switch (r)
-        {
-            case 1:   graph.graph.removeNode (pluginID); break;
-            case 2:   graph.graph.disconnectNode (pluginID); break;
-            case 3:
-            {
-                if (auto* node = graph.graph.getNodeForId (pluginID))
-                    node->setBypassed (! node->isBypassed());
+       #if ! JUCE_IOS && ! JUCE_ANDROID
+        menu->addSeparator();
+        menu->addItem ("Save plugin state", [this] { savePluginState(); });
+        menu->addItem ("Load plugin state", [this] { loadPluginState(); });
+       #endif
 
-                repaint();
-
-                break;
-            }
-            case 10:  showWindow (PluginWindow::Type::normal); break;
-            case 11:  showWindow (PluginWindow::Type::programs); break;
-            case 12:  showWindow (PluginWindow::Type::generic)  ; break;
-            case 13:  showWindow (PluginWindow::Type::debug); break;
-            case 20:  showWindow (PluginWindow::Type::audioIO); break;
-            case 21:  testStateSaveLoad(); break;
-
-            default:  break;
-        }
-        }));
+        menu->showMenuAsync ({});
     }
 
     void testStateSaveLoad()
@@ -484,6 +472,59 @@ struct GraphEditorPanel::PluginComponent   : public Component,
 
     void handleAsyncUpdate() override { repaint(); }
 
+    void savePluginState()
+    {
+        fileChooser = std::make_unique<FileChooser> ("Save plugin state");
+
+        const auto onChosen = [ref = SafePointer<PluginComponent> (this)] (const FileChooser& chooser)
+        {
+            if (ref == nullptr)
+                return;
+
+            const auto result = chooser.getResult();
+
+            if (result == File())
+                return;
+
+            if (auto* node = ref->graph.graph.getNodeForId (ref->pluginID))
+            {
+                MemoryBlock block;
+                node->getProcessor()->getStateInformation (block);
+                result.replaceWithData (block.getData(), block.getSize());
+            }
+        };
+
+        fileChooser->launchAsync (FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting, onChosen);
+    }
+
+    void loadPluginState()
+    {
+        fileChooser = std::make_unique<FileChooser> ("Load plugin state");
+
+        const auto onChosen = [ref = SafePointer<PluginComponent> (this)] (const FileChooser& chooser)
+        {
+            if (ref == nullptr)
+                return;
+
+            const auto result = chooser.getResult();
+
+            if (result == File())
+                return;
+
+            if (auto* node = ref->graph.graph.getNodeForId (ref->pluginID))
+            {
+                if (auto stream = result.createInputStream())
+                {
+                    MemoryBlock block;
+                    stream->readIntoMemoryBlock (block);
+                    node->getProcessor()->setStateInformation (block.getData(), (int) block.getSize());
+                }
+            }
+        };
+
+        fileChooser->launchAsync (FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, onChosen);
+    }
+
     GraphEditorPanel& panel;
     PluginGraph& graph;
     const AudioProcessorGraph::NodeID pluginID;
@@ -495,6 +536,7 @@ struct GraphEditorPanel::PluginComponent   : public Component,
     int numIns = 0, numOuts = 0;
     DropShadowEffect shadow;
     std::unique_ptr<PopupMenu> menu;
+    std::unique_ptr<FileChooser> fileChooser;
     const String formatSuffix = getFormatSuffix (getProcessor());
 };
 
