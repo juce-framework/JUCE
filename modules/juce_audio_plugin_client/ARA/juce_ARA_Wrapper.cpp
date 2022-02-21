@@ -12,6 +12,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 #include <ARA_Library/PlugIn/ARAPlug.cpp>
 #include <ARA_Library/Debug/ARADebug.c>
 #include <ARA_Library/Dispatch/ARAPlugInDispatch.cpp>
+#include <ARA_Library/Utilities/ARAChannelArrangement.cpp>
 #include <ARA_Library/Utilities/ARAPitchInterpretation.cpp>
 
 // Include these source files directly for now
