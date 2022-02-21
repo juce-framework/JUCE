@@ -2000,8 +2000,9 @@ public:
     private:
         Point<float> getMousePos (POINTL mousePos) const
         {
-            return peer.getComponent().getLocalPoint (nullptr, convertPhysicalScreenPointToLogical (pointFromPOINT ({ mousePos.x, mousePos.y }),
-                                                                                                    (HWND) peer.getNativeHandle()).toFloat());
+            const auto originalPos = pointFromPOINT ({ mousePos.x, mousePos.y });
+            const auto logicalPos = convertPhysicalScreenPointToLogical (originalPos, peer.hwnd);
+            return ScalingHelpers::screenPosToLocalPos (peer.component, logicalPos.toFloat());
         }
 
         struct DroppedData

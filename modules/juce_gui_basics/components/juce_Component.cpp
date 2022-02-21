@@ -275,6 +275,18 @@ struct ScalingHelpers
     static Rectangle<int>   subtractPosition (Rectangle<int> p,   const Component& c) noexcept  { return p - c.getPosition(); }
     static Point<float>     subtractPosition (Point<float> p,     const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
     static Rectangle<float> subtractPosition (Rectangle<float> p, const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
+
+    static Point<float> screenPosToLocalPos (Component& comp, Point<float> pos)
+    {
+        if (auto* peer = comp.getPeer())
+        {
+            pos = peer->globalToLocal (pos);
+            auto& peerComp = peer->getComponent();
+            return comp.getLocalPoint (&peerComp, unscaledScreenPosToScaled (peerComp, pos));
+        }
+
+        return comp.getLocalPoint (nullptr, unscaledScreenPosToScaled (comp, pos));
+    }
 };
 
 static const char colourPropertyPrefix[] = "jcclr_";
