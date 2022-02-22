@@ -94,8 +94,7 @@ static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 constexpr int extendedKeyModifier = 0x30000;
 
 //==============================================================================
-class NSViewComponentPeer  : public ComponentPeer,
-                             private Timer
+class NSViewComponentPeer  : public ComponentPeer
 {
 public:
     NSViewComponentPeer (Component& comp, const int windowStyleFlags, NSView* viewToAttachTo)
@@ -144,6 +143,8 @@ public:
             }
         }
        #endif
+
+        createCVDisplayLink();
 
         if (isSharedWindow)
         {
@@ -239,6 +240,9 @@ public:
 
     ~NSViewComponentPeer() override
     {
+        CVDisplayLinkStop (displayLink);
+        dispatch_source_cancel (displaySource);
+
         [notificationCenter removeObserver: view];
         setOwner (view, nullptr);
 
@@ -779,6 +783,10 @@ public:
             [notificationCenter removeObserver: view
                                           name: NSWindowDidBecomeKeyNotification
                                         object: currentWindow];
+
+            [notificationCenter removeObserver: view
+                                          name: NSWindowDidChangeScreenNotification
+                                        object: currentWindow];
         }
 
         if (isSharedWindow && [view window] == window && newWindow == nullptr)
@@ -1016,43 +1024,31 @@ public:
         // a few when there's a lot of activity.
         // As a work around for this, we use a RectangleList to do our own coalescing of regions before
         // asynchronously asking the OS to repaint them.
-        deferredRepaints.add ((float) area.getX(), (float) area.getY(),
-                              (float) area.getWidth(), (float) area.getHeight());
+        deferredRepaints.add (area.toFloat());
+    }
 
-        if (isTimerRunning())
+    static bool shouldThrottleRepaint()
+    {
+        return areAnyWindowsInLiveResize();
+    }
+
+    void setNeedsDisplayRectangles()
+    {
+        if (deferredRepaints.isEmpty())
             return;
 
         auto now = Time::getMillisecondCounter();
         auto msSinceLastRepaint = (lastRepaintTime >= now) ? now - lastRepaintTime
                                                            : (std::numeric_limits<uint32>::max() - lastRepaintTime) + now;
 
-        static uint32 minimumRepaintInterval = 1000 / 30; // 30fps
+        constexpr uint32 minimumRepaintInterval = 1000 / 30; // 30fps
 
         // When windows are being resized, artificially throttling high-frequency repaints helps
         // to stop the event queue getting clogged, and keeps everything working smoothly.
         // For some reason Logic also needs this throttling to record parameter events correctly.
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
-        {
-            startTimer (static_cast<int> (minimumRepaintInterval - msSinceLastRepaint));
             return;
-        }
 
-        setNeedsDisplayRectangles();
-    }
-
-    static bool shouldThrottleRepaint()
-    {
-        return areAnyWindowsInLiveResize() || ! JUCEApplication::isStandaloneApp();
-    }
-
-    void timerCallback() override
-    {
-        setNeedsDisplayRectangles();
-        stopTimer();
-    }
-
-    void setNeedsDisplayRectangles()
-    {
         for (auto& i : deferredRepaints)
             [view setNeedsDisplayInRect: makeNSRect (i)];
 
@@ -1163,6 +1159,11 @@ public:
         handleMovedOrResized();
     }
 
+    void windowDidChangeScreen()
+    {
+        updateCVDisplayLinkScreen();
+    }
+
     void viewMovedToWindow()
     {
         if (isSharedWindow)
@@ -1197,6 +1198,13 @@ public:
                                    selector: resignKeySelector
                                        name: NSWindowDidResignKeyNotification
                                      object: currentWindow];
+
+            [notificationCenter addObserver: view
+                                   selector: @selector (windowDidChangeScreen:)
+                                       name: NSWindowDidChangeScreenNotification
+                                     object: currentWindow];
+
+            updateCVDisplayLinkScreen();
         }
     }
 
@@ -1786,6 +1794,48 @@ private:
         [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
     }
 
+    void onDisplaySourceCallback()
+    {
+        setNeedsDisplayRectangles();
+    }
+
+    void onDisplayLinkCallback()
+    {
+        dispatch_source_merge_data (displaySource, 1);
+    }
+
+    static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
+                                         CVOptionFlags, CVOptionFlags*, void* context)
+    {
+        static_cast<NSViewComponentPeer*> (context)->onDisplayLinkCallback();
+        return kCVReturnSuccess;
+    }
+
+    void updateCVDisplayLinkScreen()
+    {
+        auto viewDisplayID = (CGDirectDisplayID) [window.screen.deviceDescription[@"NSScreenNumber"] unsignedIntegerValue];
+        auto result = CVDisplayLinkSetCurrentCGDisplay (displayLink, viewDisplayID);
+        jassertquiet (result == kCVReturnSuccess);
+    }
+
+    void createCVDisplayLink()
+    {
+        displaySource = dispatch_source_create (DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, dispatch_get_main_queue());
+        dispatch_source_set_event_handler (displaySource, ^(){ onDisplaySourceCallback(); });
+        dispatch_resume (displaySource);
+
+        auto cvReturn = CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
+        jassertquiet (cvReturn == kCVReturnSuccess);
+
+        cvReturn = CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
+        jassertquiet (cvReturn == kCVReturnSuccess);
+
+        CVDisplayLinkStart (displayLink);
+    }
+
+    CVDisplayLinkRef displayLink = nullptr;
+    dispatch_source_t displaySource = nullptr;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
 
@@ -1848,6 +1898,7 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
         addMethod (@selector (acceptsFirstMouse:),            acceptsFirstMouse);
         addMethod (@selector (windowWillMiniaturize:),        windowWillMiniaturize);
         addMethod (@selector (windowDidDeminiaturize:),       windowDidDeminiaturize);
+        addMethod (@selector (windowDidChangeScreen:),        windowDidChangeScreen);
         addMethod (@selector (wantsDefaultClipping),          wantsDefaultClipping);
         addMethod (@selector (worksWhenModal),                worksWhenModal);
         addMethod (@selector (viewDidMoveToWindow),           viewDidMoveToWindow);
@@ -2012,6 +2063,12 @@ private:
 
             p->redirectMovedOrResized();
         }
+    }
+
+    static void windowDidChangeScreen (id self, SEL, NSNotification*)
+    {
+        if (auto* p = getOwner (self))
+            p->windowDidChangeScreen();
     }
 
     static BOOL isOpaque (id self, SEL)

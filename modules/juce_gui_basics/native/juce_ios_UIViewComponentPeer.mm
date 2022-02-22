@@ -105,15 +105,27 @@ enum class MouseEventFlags
 
 using namespace juce;
 
+struct CADisplayLinkDeleter
+{
+    void operator() (CADisplayLink* displayLink) const noexcept
+    {
+        [displayLink invalidate];
+        [displayLink release];
+    }
+};
+
 @interface JuceUIView : UIView <UITextViewDelegate>
 {
 @public
     UIViewComponentPeer* owner;
     UITextView* hiddenTextView;
+    std::unique_ptr<CADisplayLink, CADisplayLinkDeleter> displayLink;
 }
 
 - (JuceUIView*) initWithOwner: (UIViewComponentPeer*) owner withFrame: (CGRect) frame;
 - (void) dealloc;
+
+- (void) displayLinkCallback: (CADisplayLink*) dl;
 
 - (void) drawRect: (CGRect) r;
 
@@ -224,6 +236,8 @@ public:
     void setIcon (const Image& newIcon) override;
     StringArray getAvailableRenderingEngines() override       { return StringArray ("CoreGraphics Renderer"); }
 
+    void displayLinkCallback();
+
     void drawRect (CGRect);
     bool canBecomeKeyWindow();
 
@@ -300,6 +314,8 @@ private:
                 peer->repaint (rect);
         }
     };
+
+    RectangleList<float> deferredRepaints;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
@@ -453,6 +469,11 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     [super initWithFrame: frame];
     owner = peer;
 
+    displayLink.reset ([CADisplayLink displayLinkWithTarget: self
+                                                   selector: @selector (displayLinkCallback:)]);
+    [displayLink.get() addToRunLoop: [NSRunLoop mainRunLoop]
+                            forMode: NSDefaultRunLoopMode];
+
     hiddenTextView = [[UITextView alloc] initWithFrame: CGRectZero];
     [self addSubview: hiddenTextView];
     hiddenTextView.delegate = self;
@@ -487,7 +508,16 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     [hiddenTextView removeFromSuperview];
     [hiddenTextView release];
 
+    displayLink = nullptr;
+
     [super dealloc];
+}
+
+//==============================================================================
+- (void) displayLinkCallback: (CADisplayLink*) dl
+{
+    if (owner != nullptr)
+        owner->displayLinkCallback();
 }
 
 //==============================================================================
@@ -1138,6 +1168,15 @@ void UIViewComponentPeer::globalFocusChanged (Component*)
 }
 
 //==============================================================================
+void UIViewComponentPeer::displayLinkCallback()
+{
+    for (const auto& r : deferredRepaints)
+        [view setNeedsDisplayInRect: convertToCGRect (r)];
+
+    deferredRepaints.clear();
+}
+
+//==============================================================================
 void UIViewComponentPeer::drawRect (CGRect r)
 {
     if (r.size.width < 1.0f || r.size.height < 1.0f)
@@ -1201,9 +1240,12 @@ void Desktop::allowedOrientationsChanged()
 void UIViewComponentPeer::repaint (const Rectangle<int>& area)
 {
     if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
+    {
         (new AsyncRepaintMessage (this, area))->post();
-    else
-        [view setNeedsDisplayInRect: convertToCGRect (area)];
+        return;
+    }
+
+    deferredRepaints.add (area.toFloat());
 }
 
 void UIViewComponentPeer::performAnyPendingRepaintsNow()
