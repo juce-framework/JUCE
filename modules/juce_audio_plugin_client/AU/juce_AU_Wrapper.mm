@@ -1346,10 +1346,10 @@ public:
                 if (pulledSucceeded[busIdx])
                     audioBuffer.set (busIdx, GetInput ((UInt32) busIdx)->GetBufferList(), mapper.get (true, busIdx));
                 else
-                    audioBuffer.clearInputBus (busIdx);
+                    audioBuffer.clearInputBus (busIdx, (int) nFrames);
             }
 
-            audioBuffer.clearUnusedChannels();
+            audioBuffer.clearUnusedChannels ((int) nFrames);
         }
 
         // swap midi buffers

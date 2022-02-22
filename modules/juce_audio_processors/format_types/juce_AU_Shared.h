@@ -215,28 +215,30 @@ struct AudioUnitHelpers
             }
         }
 
-        void clearInputBus (int index)
+        void clearInputBus (int index, int bufferLength)
         {
             if (isPositiveAndBelow (index, inputBusOffsets.size() - 1))
-                clearChannels (inputBusOffsets[(size_t) index], inputBusOffsets[(size_t) (index + 1)]);
+                clearChannels ({ inputBusOffsets[(size_t) index], inputBusOffsets[(size_t) (index + 1)] }, bufferLength);
         }
 
-        void clearUnusedChannels()
+        void clearUnusedChannels (int bufferLength)
         {
             jassert (! inputBusOffsets .empty());
             jassert (! outputBusOffsets.empty());
 
-            clearChannels (inputBusOffsets.back(), outputBusOffsets.back());
+            clearChannels ({ inputBusOffsets.back(), outputBusOffsets.back() }, bufferLength);
         }
 
     private:
-        void clearChannels (int begin, int end)
+        void clearChannels (Range<int> range, int bufferLength)
         {
-            if (begin <= end && end <= (int) channels.size())
+            jassert (bufferLength <= scratch.getNumSamples());
+
+            if (range.getEnd() <= (int) channels.size())
             {
-                std::for_each (channels.begin() + begin,
-                               channels.begin() + end,
-                               [this] (float* ptr) { zeromem (ptr, sizeof (float) * (size_t) scratch.getNumSamples()); });
+                std::for_each (channels.begin() + range.getStart(),
+                               channels.begin() + range.getEnd(),
+                               [bufferLength] (float* ptr) { zeromem (ptr, sizeof (float) * (size_t) bufferLength); });
             }
         }
 
