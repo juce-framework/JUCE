@@ -1016,16 +1016,6 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             AudioUnitSetProperty (audioUnit, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, 1, &one, sizeof (one));
         }
 
-        if (!isUsingBuiltInSpeaker()) {
-          const UInt32 one = 1;
-          AudioUnitSetProperty(audioUnit,
-                               kAUVoiceIOProperty_BypassVoiceProcessing,
-                               kAudioUnitScope_Global,
-                               1,
-                               &one,
-                               sizeof(one));
-        }
-
         {
             AURenderCallbackStruct inputProc;
             inputProc.inputProc = processStatic;
@@ -1063,6 +1053,16 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                 JUCE_IOS_AUDIO_LOG ("Internal buffer size: " << String (framesPerSlice));
                 channelData.setFloatBufferSize (static_cast<int> (framesPerSlice));
             }
+        }
+
+        if (!isUsingBuiltInSpeaker()) {
+          const UInt32 one = 1;
+          AudioUnitSetProperty(audioUnit,
+                               kAUVoiceIOProperty_BypassVoiceProcessing,
+                               kAudioUnitScope_Global,
+                               1,
+                               &one,
+                               sizeof(one));
         }
 
         AudioUnitAddPropertyListener (audioUnit, kAudioUnitProperty_StreamFormat, dispatchAudioUnitPropertyChange, this);
