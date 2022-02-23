@@ -1055,6 +1055,16 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
             }
         }
 
+        if (!isUsingBuiltInSpeaker()) {
+          const UInt32 one = 1;
+          AudioUnitSetProperty(audioUnit,
+                               kAUVoiceIOProperty_BypassVoiceProcessing,
+                               kAudioUnitScope_Global,
+                               1,
+                               &one,
+                               sizeof(one));
+        }
+
         AudioUnitAddPropertyListener (audioUnit, kAudioUnitProperty_StreamFormat, dispatchAudioUnitPropertyChange, this);
 
         return true;
@@ -1098,6 +1108,21 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                 setAudioSessionActive (true);
             }
         }
+    }
+
+    static bool isUsingBuiltInSpeaker()
+    {
+      auto session = [AVAudioSession sharedInstance];
+      auto route = session.currentRoute;
+
+      for (AVAudioSessionPortDescription* port in route.outputs)
+      {
+        if (![port.portType isEqualToString: AVAudioSessionPortBuiltInSpeaker])
+        {
+          return false;
+        }
+      }
+      return true;
     }
 
     void restart()
