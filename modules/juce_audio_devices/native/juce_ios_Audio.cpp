@@ -962,7 +962,7 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
         AudioComponentDescription desc;
         desc.componentType = kAudioUnitType_Output;
-        desc.componentSubType = isUsingBuiltInSpeaker() ? kAudioUnitSubType_VoiceProcessingIO : kAudioUnitSubType_RemoteIO;
+        desc.componentSubType = kAudioUnitSubType_VoiceProcessingIO;
         desc.componentManufacturer = kAudioUnitManufacturer_Apple;
         desc.componentFlags = 0;
         desc.componentFlagsMask = 0;
@@ -1053,6 +1053,16 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                 JUCE_IOS_AUDIO_LOG ("Internal buffer size: " << String (framesPerSlice));
                 channelData.setFloatBufferSize (static_cast<int> (framesPerSlice));
             }
+        }
+
+        if (!isUsingBuiltInSpeaker()) {
+          const UInt32 one = 1;
+          AudioUnitSetProperty(audioUnit,
+                               kAUVoiceIOProperty_BypassVoiceProcessing,
+                               kAudioUnitScope_Global,
+                               1,
+                               &one,
+                               sizeof(one));
         }
 
         AudioUnitAddPropertyListener (audioUnit, kAudioUnitProperty_StreamFormat, dispatchAudioUnitPropertyChange, this);
