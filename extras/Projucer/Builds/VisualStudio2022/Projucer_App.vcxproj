@@ -2129,6 +2129,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_SystemTrayIconComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_WebBrowserComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\native\juce_mac_CarbonViewWrapperComponent.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\native\juce_mac_NSViewFrameWatcher.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\juce_gui_extra.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h"/>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h"/>
