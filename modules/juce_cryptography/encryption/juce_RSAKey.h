@@ -107,9 +107,6 @@ public:
     */
     explicit RSAKey (const String& stringRepresentation);
 
-    /** Destructor. */
-    ~RSAKey();
-
     bool operator== (const RSAKey& other) const noexcept;
     bool operator!= (const RSAKey& other) const noexcept;
 

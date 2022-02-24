@@ -1617,7 +1617,7 @@ private:
                 for (int busIdx = 0; busIdx < numProcessorBusesIn; ++busIdx)
                     audioBuffer.set (busIdx, *inBusBuffers[busIdx]->get(), mapper.get (true, busIdx));
 
-                audioBuffer.clearUnusedChannels();
+                audioBuffer.clearUnusedChannels ((int) frameCount);
             }
 
             // process audio

@@ -6,6 +6,30 @@ develop
 
 Change
 ------
+Unhandled mouse wheel and magnify events will now be passed to the closest
+enclosing enabled ancestor component.
+
+Possible Issues
+---------------
+Components that previously blocked mouse wheel events when in a disabled state
+may no longer block the events as expected.
+
+Workaround
+----------
+If a component should explicitly prevent events from propagating when disabled,
+it should override mouseWheelMove() and mouseMagnify() to do nothing when the
+component is disabled.
+
+Rationale
+---------
+Previously, unhandled wheel events would be passed to the parent component,
+but only if the parent was enabled. This meant that scrolling on a component
+nested inside a disabled component would have no effect by default. This
+behaviour was not intuitive.
+
+
+Change
+------
 The invalidPressure, invalidOrientation, invalidRotation, invalidTiltX and
 invalidTiltY members of MouseInputSource have been deprecated.
 

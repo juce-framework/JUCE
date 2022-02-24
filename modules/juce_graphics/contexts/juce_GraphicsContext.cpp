@@ -45,10 +45,6 @@ namespace
 }
 
 //==============================================================================
-LowLevelGraphicsContext::LowLevelGraphicsContext() {}
-LowLevelGraphicsContext::~LowLevelGraphicsContext() {}
-
-//==============================================================================
 Graphics::Graphics (const Image& imageToDrawOnto)
     : contextHolder (imageToDrawOnto.createLowLevelContext()),
       context (*contextHolder)
@@ -58,10 +54,6 @@ Graphics::Graphics (const Image& imageToDrawOnto)
 
 Graphics::Graphics (LowLevelGraphicsContext& internalContext) noexcept
     : context (internalContext)
-{
-}
-
-Graphics::~Graphics()
 {
 }
 

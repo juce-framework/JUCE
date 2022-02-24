@@ -709,6 +709,8 @@ public:
         : DocumentWindow (title, backgroundColour, DocumentWindow::minimiseButton | DocumentWindow::closeButton),
           optionsButton ("Options")
     {
+        setConstrainer (&decoratorConstrainer);
+
        #if JUCE_IOS || JUCE_ANDROID
         setTitleBarHeight (0);
        #else
@@ -725,9 +727,9 @@ public:
 
        #if JUCE_IOS || JUCE_ANDROID
         setFullScreen (true);
-        setContentOwned (new MainContentComponent (*this), false);
+        updateContent();
        #else
-        setContentOwned (new MainContentComponent (*this), true);
+        updateContent();
 
         const auto windowScreenBounds = [this]() -> Rectangle<int>
         {
@@ -798,7 +800,7 @@ public:
             props->removeValue ("filterState");
 
         pluginHolder->createPlugin();
-        setContentOwned (new MainContentComponent (*this), true);
+        updateContent();
         pluginHolder->startPlaying();
     }
 
@@ -839,6 +841,20 @@ public:
     std::unique_ptr<StandalonePluginHolder> pluginHolder;
 
 private:
+    void updateContent()
+    {
+        auto* content = new MainContentComponent (*this);
+        decoratorConstrainer.setMainContentComponent (content);
+
+       #if JUCE_IOS || JUCE_ANDROID
+        constexpr auto resizeAutomatically = false;
+       #else
+        constexpr auto resizeAutomatically = true;
+       #endif
+
+        setContentOwned (content, resizeAutomatically);
+    }
+
     void buttonClicked (Button*) override
     {
         PopupMenu m;
@@ -914,6 +930,23 @@ private:
             }
         }
 
+        ComponentBoundsConstrainer* getEditorConstrainer() const
+        {
+            if (auto* e = editor.get())
+                return e->getConstrainer();
+
+            return nullptr;
+        }
+
+        BorderSize<int> computeBorder() const
+        {
+            const auto outer = owner.getContentComponentBorder();
+            return { outer.getTop() + (shouldShowNotification ? NotificationArea::height : 0),
+                     outer.getLeft(),
+                     outer.getBottom(),
+                     outer.getRight() };
+        }
+
     private:
         //==============================================================================
         class NotificationArea : public Component
@@ -975,29 +1008,6 @@ private:
             {
                 const int extraHeight = shouldShowNotification ? NotificationArea::height : 0;
                 const auto rect = getSizeToContainEditor();
-
-                if (auto* editorConstrainer = editor->getConstrainer())
-                {
-                    const auto borders = owner.getContentComponentBorder();
-
-                    const auto windowBorders = [&]() -> BorderSize<int>
-                    {
-                        if (auto* peer = owner.getPeer())
-                            if (const auto frameSize = peer->getFrameSizeIfPresent())
-                                return *frameSize;
-
-                        return {};
-                    }();
-
-                    const auto extraWindowWidth = borders.getLeftAndRight() + windowBorders.getLeftAndRight();
-                    const auto extraWindowHeight = extraHeight + borders.getTopAndBottom() + windowBorders.getTopAndBottom();
-
-                    owner.setResizeLimits (jmax (10, editorConstrainer->getMinimumWidth()  + extraWindowWidth),
-                                           jmax (10, editorConstrainer->getMinimumHeight() + extraWindowHeight),
-                                           editorConstrainer->getMaximumWidth()  + extraWindowWidth,
-                                           editorConstrainer->getMaximumHeight() + extraWindowHeight);
-                }
-
                 setSize (rect.getWidth(), rect.getHeight() + extraHeight);
             }
            #endif
@@ -1046,8 +1056,80 @@ private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainContentComponent)
     };
 
+    /*  This custom constrainer checks with the AudioProcessorEditor (which might itself be
+        constrained) to ensure that any size we choose for the standalone window will be suitable
+        for the editor too.
+
+        Without this constrainer, attempting to resize the standalone window may set bounds on the
+        peer that are unsupported by the inner editor. In this scenario, the peer will be set to a
+        'bad' size, then the inner editor will be resized. The editor will check the new bounds with
+        its own constrainer, and may set itself to a more suitable size. After that, the resizable
+        window will see that its content component has changed size, and set the bounds of the peer
+        accordingly. The end result is that the peer is resized twice in a row to different sizes,
+        which can appear glitchy/flickery to the user.
+    */
+    struct DecoratorConstrainer : public ComponentBoundsConstrainer
+    {
+        void checkBounds (Rectangle<int>& bounds,
+                          const Rectangle<int>& previousBounds,
+                          const Rectangle<int>& limits,
+                          bool isStretchingTop,
+                          bool isStretchingLeft,
+                          bool isStretchingBottom,
+                          bool isStretchingRight) override
+        {
+            auto* decorated = contentComponent != nullptr ? contentComponent->getEditorConstrainer()
+                                                          : nullptr;
+
+            if (decorated != nullptr)
+            {
+                const auto border = contentComponent->computeBorder();
+                const auto requestedBounds = bounds;
+
+                border.subtractFrom (bounds);
+                decorated->checkBounds (bounds,
+                                        border.subtractedFrom (previousBounds),
+                                        limits,
+                                        isStretchingTop,
+                                        isStretchingLeft,
+                                        isStretchingBottom,
+                                        isStretchingRight);
+                border.addTo (bounds);
+                bounds = bounds.withPosition (requestedBounds.getPosition());
+
+                if (isStretchingTop && ! isStretchingBottom)
+                    bounds = bounds.withBottomY (previousBounds.getBottom());
+
+                if (! isStretchingTop && isStretchingBottom)
+                    bounds = bounds.withY (previousBounds.getY());
+
+                if (isStretchingLeft && ! isStretchingRight)
+                    bounds = bounds.withRightX (previousBounds.getRight());
+
+                if (! isStretchingLeft && isStretchingRight)
+                    bounds = bounds.withX (previousBounds.getX());
+            }
+            else
+            {
+                ComponentBoundsConstrainer::checkBounds (bounds,
+                                                         previousBounds,
+                                                         limits,
+                                                         isStretchingTop,
+                                                         isStretchingLeft,
+                                                         isStretchingBottom,
+                                                         isStretchingRight);
+            }
+        }
+
+        void setMainContentComponent (MainContentComponent* in) { contentComponent = in; }
+
+    private:
+        MainContentComponent* contentComponent = nullptr;
+    };
+
     //==============================================================================
     TextButton optionsButton;
+    DecoratorConstrainer decoratorConstrainer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (StandaloneFilterWindow)
 };

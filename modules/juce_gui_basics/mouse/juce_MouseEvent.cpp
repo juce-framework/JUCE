@@ -57,10 +57,6 @@ MouseEvent::MouseEvent (MouseInputSource inputSource,
 {
 }
 
-MouseEvent::~MouseEvent() noexcept
-{
-}
-
 //==============================================================================
 MouseEvent MouseEvent::getEventRelativeTo (Component* const otherComponent) const noexcept
 {

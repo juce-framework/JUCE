@@ -1527,6 +1527,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_gui_extra/native/juce_mac_AppleRemote.mm"
     "../../../../../modules/juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h"
     "../../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm"
+    "../../../../../modules/juce_gui_extra/native/juce_mac_NSViewFrameWatcher.h"
     "../../../../../modules/juce_gui_extra/native/juce_mac_PushNotifications.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp"
     "../../../../../modules/juce_gui_extra/native/juce_mac_WebBrowserComponent.mm"
@@ -3043,6 +3044,7 @@ set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_l
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_AppleRemote.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_NSViewComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_NSViewFrameWatcher.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_PushNotifications.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_SystemTrayIcon.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_gui_extra/native/juce_mac_WebBrowserComponent.mm" PROPERTIES HEADER_FILE_ONLY TRUE)

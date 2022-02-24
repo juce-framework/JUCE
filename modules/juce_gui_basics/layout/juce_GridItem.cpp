@@ -68,9 +68,7 @@ GridItem::Margin::Margin (float v) noexcept : left (v), right (v), top (v), bott
 GridItem::Margin::Margin (float t, float r, float b, float l) noexcept : left (l), right (r), top (t), bottom (b) {}
 
 //==============================================================================
-GridItem::GridItem() noexcept {}
-GridItem::~GridItem() noexcept {}
-
+GridItem::GridItem() noexcept = default;
 GridItem::GridItem (Component& componentToUse) noexcept  : associatedComponent (&componentToUse) {}
 GridItem::GridItem (Component* componentToUse) noexcept  : associatedComponent (componentToUse) {}
 

@@ -364,7 +364,7 @@ public:
         if (auto* peer = component.getPeer())
         {
            #if JUCE_MAC
-            const auto displayScale = [this]
+            const auto displayScale = Desktop::getInstance().getGlobalScaleFactor() * [this]
             {
                 if (auto* wrapper = cvDisplayLinkWrapper.get())
                     if (wrapper->updateActiveDisplay())

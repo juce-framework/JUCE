@@ -271,12 +271,22 @@ namespace DirectWriteTypeLayout
         format.SetWordWrapping (wrapType);
     }
 
-    void addAttributedRange (const AttributedString::Attribute& attr, IDWriteTextLayout& textLayout,
-                             const int textLen, ID2D1RenderTarget& renderTarget, IDWriteFontCollection& fontCollection)
+    void addAttributedRange (const AttributedString::Attribute& attr,
+                             IDWriteTextLayout& textLayout,
+                             CharPointer_UTF16 begin,
+                             CharPointer_UTF16 textPointer,
+                             const UINT32 textLen,
+                             ID2D1RenderTarget& renderTarget,
+                             IDWriteFontCollection& fontCollection)
     {
         DWRITE_TEXT_RANGE range;
-        range.startPosition = (UINT32) attr.range.getStart();
-        range.length = (UINT32) jmin (attr.range.getLength(), textLen - attr.range.getStart());
+        range.startPosition = (UINT32) (textPointer.getAddress() - begin.getAddress());
+
+        if (textLen <= range.startPosition)
+            return;
+
+        const auto wordEnd = jmin (textLen, (UINT32) ((textPointer + attr.range.getLength()).getAddress() - begin.getAddress()));
+        range.length = wordEnd - range.startPosition;
 
         {
             auto familyName = FontStyleHelpers::getConcreteFamilyName (attr.font);
@@ -367,18 +377,28 @@ namespace DirectWriteTypeLayout
             hr = dwTextFormat->SetTrimming (&trimming, trimmingSign);
         }
 
-        auto textLen = text.getText().length();
+        const auto beginPtr = text.getText().toUTF16();
+        const auto textLen = (UINT32) (beginPtr.findTerminatingNull().getAddress() - beginPtr.getAddress());
 
-        hr = directWriteFactory.CreateTextLayout (text.getText().toWideCharPointer(), (UINT32) textLen, dwTextFormat,
-                                                  maxWidth, maxHeight, textLayout.resetAndGetPointerAddress());
+        hr = directWriteFactory.CreateTextLayout (beginPtr.getAddress(),
+                                                  textLen,
+                                                  dwTextFormat,
+                                                  maxWidth,
+                                                  maxHeight,
+                                                  textLayout.resetAndGetPointerAddress());
 
         if (FAILED (hr) || textLayout == nullptr)
             return false;
 
-        auto numAttributes = text.getNumAttributes();
+        const auto numAttributes = text.getNumAttributes();
+        auto rangePointer = beginPtr;
 
         for (int i = 0; i < numAttributes; ++i)
-            addAttributedRange (text.getAttribute (i), *textLayout, textLen, renderTarget, fontCollection);
+        {
+            const auto attribute = text.getAttribute (i);
+            addAttributedRange (attribute, *textLayout, beginPtr, rangePointer, textLen, renderTarget, fontCollection);
+            rangePointer += attribute.range.getLength();
+        }
 
         return true;
     }

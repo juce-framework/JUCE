@@ -46,9 +46,6 @@ public:
     */
     RecentlyOpenedFilesList();
 
-    /** Destructor. */
-    ~RecentlyOpenedFilesList();
-
     //==============================================================================
     /** Sets a limit for the number of files that will be stored in the list.
 

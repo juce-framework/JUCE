@@ -2456,7 +2456,7 @@ Button* LookAndFeel_V2::createTabBarExtrasButton()
     overImage.addAndMakeVisible (ellipse.createCopy().release());
     overImage.addAndMakeVisible (dp.createCopy().release());
 
-    auto db = new DrawableButton ("tabs", DrawableButton::ImageFitted);
+    auto db = new DrawableButton (TRANS ("Additional Items"), DrawableButton::ImageFitted);
     db->setImages (&normalImage, &overImage, nullptr);
     return db;
 }

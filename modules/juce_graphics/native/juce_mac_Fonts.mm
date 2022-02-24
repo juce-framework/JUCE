@@ -258,20 +258,24 @@ namespace CoreTextTypeLayout
 
         auto attribString = CFAttributedStringCreateMutable (kCFAllocatorDefault, 0);
         CFUniquePtr<CFStringRef> cfText (text.getText().toCFString());
+
         CFAttributedStringReplaceString (attribString, CFRangeMake (0, 0), cfText.get());
 
-        auto numCharacterAttributes = text.getNumAttributes();
-        auto attribStringLen = CFAttributedStringGetLength (attribString);
+        const auto numCharacterAttributes = text.getNumAttributes();
+        const auto attribStringLen = CFAttributedStringGetLength (attribString);
+        const auto beginPtr = text.getText().toUTF16();
+        auto currentPosition = beginPtr;
 
-        for (int i = 0; i < numCharacterAttributes; ++i)
+        for (int i = 0; i < numCharacterAttributes; currentPosition += text.getAttribute (i).range.getLength(), ++i)
         {
-            auto& attr = text.getAttribute (i);
-            auto rangeStart = attr.range.getStart();
+            const auto& attr = text.getAttribute (i);
+            const auto wordBegin = currentPosition.getAddress() - beginPtr.getAddress();
 
-            if (rangeStart >= attribStringLen)
+            if (attribStringLen <= wordBegin)
                 continue;
 
-            auto range = CFRangeMake (rangeStart, jmin (attr.range.getEnd(), (int) attribStringLen) - rangeStart);
+            const auto wordEnd = jmin (attribStringLen, (currentPosition + attr.range.getLength()).getAddress() - beginPtr.getAddress());
+            const auto range = CFRangeMake (wordBegin, wordEnd - wordBegin);
 
             if (auto ctFontRef = getOrCreateFont (attr.font))
             {

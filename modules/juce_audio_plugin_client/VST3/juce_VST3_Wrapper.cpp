@@ -1242,19 +1242,19 @@ public:
     //==============================================================================
     void beginGesture (Vst::ParamID vstParamId)
     {
-        if (MessageManager::getInstance()->isThisTheMessageThread())
+        if (! inSetState && MessageManager::getInstance()->isThisTheMessageThread())
             beginEdit (vstParamId);
     }
 
     void endGesture (Vst::ParamID vstParamId)
     {
-        if (MessageManager::getInstance()->isThisTheMessageThread())
+        if (! inSetState && MessageManager::getInstance()->isThisTheMessageThread())
             endEdit (vstParamId);
     }
 
     void paramChanged (Steinberg::int32 parameterIndex, Vst::ParamID vstParamId, double newValue)
     {
-        if (inParameterChangedCallback)
+        if (inParameterChangedCallback || inSetState)
             return;
 
         if (MessageManager::getInstance()->isThisTheMessageThread())
@@ -1425,6 +1425,7 @@ private:
     std::vector<std::unique_ptr<OwnedParameterListener>> ownedParameterListeners;
 
     //==============================================================================
+    bool inSetState = false;
     std::atomic<bool> vst3IsPlaying     { false },
                       inSetupProcessing { false };
 
@@ -2334,8 +2335,8 @@ class JuceVST3Component : public Vst::IComponent,
 {
 public:
     JuceVST3Component (Vst::IHostApplication* h)
-      : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3)),
-        host (h)
+        : pluginInstance (createPluginFilterOfType (AudioProcessor::wrapperType_VST3)),
+          host (h)
     {
         inParameterChangedCallback = false;
 
@@ -2560,6 +2561,10 @@ public:
 
     void setStateInformation (const void* data, int sizeAsInt)
     {
+        bool unusedState = false;
+        auto& flagToSet = juceVST3EditController != nullptr ? juceVST3EditController->inSetState : unusedState;
+        const ScopedValueSetter<bool> scope (flagToSet, true);
+
         auto size = (uint64) sizeAsInt;
 
         // Check if this data was written with a newer JUCE version
@@ -2763,6 +2768,10 @@ public:
 
     tresult PLUGIN_API setState (IBStream* state) override
     {
+        // The VST3 spec requires that this function is called from the UI thread.
+        // If this assertion fires, your host is misbehaving!
+        JUCE_ASSERT_MESSAGE_THREAD
+
         if (state == nullptr)
             return kInvalidArgument;
 

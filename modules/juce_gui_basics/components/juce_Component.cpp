@@ -26,6 +26,17 @@
 namespace juce
 {
 
+static Component* findFirstEnabledAncestor (Component* in)
+{
+    if (in == nullptr)
+        return nullptr;
+
+    if (in->isEnabled())
+        return in;
+
+    return findFirstEnabledAncestor (in->getParentComponent());
+}
+
 Component* Component::currentlyFocusedComponent = nullptr;
 
 
@@ -264,6 +275,18 @@ struct ScalingHelpers
     static Rectangle<int>   subtractPosition (Rectangle<int> p,   const Component& c) noexcept  { return p - c.getPosition(); }
     static Point<float>     subtractPosition (Point<float> p,     const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
     static Rectangle<float> subtractPosition (Rectangle<float> p, const Component& c) noexcept  { return p - c.getPosition().toFloat(); }
+
+    static Point<float> screenPosToLocalPos (Component& comp, Point<float> pos)
+    {
+        if (auto* peer = comp.getPeer())
+        {
+            pos = peer->globalToLocal (pos);
+            auto& peerComp = peer->getComponent();
+            return comp.getLocalPoint (&peerComp, unscaledScreenPosToScaled (peerComp, pos));
+        }
+
+        return comp.getLocalPoint (nullptr, unscaledScreenPosToScaled (comp, pos));
+    }
 };
 
 static const char colourPropertyPrefix[] = "jcclr_";
@@ -2269,16 +2292,16 @@ void Component::mouseDoubleClick (const MouseEvent&)    {}
 
 void Component::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr && parentComponent->isEnabled())
-        parentComponent->mouseWheelMove (e.getEventRelativeTo (parentComponent), wheel);
+    // the base class just passes this event up to the nearest enabled ancestor
+    if (auto* enabledComponent = findFirstEnabledAncestor (getParentComponent()))
+        enabledComponent->mouseWheelMove (e.getEventRelativeTo (enabledComponent), wheel);
 }
 
 void Component::mouseMagnify (const MouseEvent& e, float magnifyAmount)
 {
-    // the base class just passes this event up to its parent..
-    if (parentComponent != nullptr && parentComponent->isEnabled())
-        parentComponent->mouseMagnify (e.getEventRelativeTo (parentComponent), magnifyAmount);
+    // the base class just passes this event up to the nearest enabled ancestor
+    if (auto* enabledComponent = findFirstEnabledAncestor (getParentComponent()))
+        enabledComponent->mouseMagnify (e.getEventRelativeTo (enabledComponent), magnifyAmount);
 }
 
 //==============================================================================

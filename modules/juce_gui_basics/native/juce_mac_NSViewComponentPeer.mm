@@ -198,7 +198,7 @@ public:
             [window setExcludedFromWindowsMenu: (windowStyleFlags & windowIsTemporary) != 0];
             [window setIgnoresMouseEvents: (windowStyleFlags & windowIgnoresMouseClicks) != 0];
 
-            [window setCollectionBehavior: NSWindowCollectionBehaviorFullScreenPrimary];
+            setCollectionBehaviour (false);
 
             [window setRestorable: NO];
 
@@ -407,10 +407,31 @@ public:
         return [window isMiniaturized];
     }
 
+    NSWindowCollectionBehavior getCollectionBehavior (bool forceFullScreen) const
+    {
+        if (forceFullScreen)
+            return NSWindowCollectionBehaviorFullScreenPrimary;
+
+        // Some SDK versions don't define NSWindowCollectionBehaviorFullScreenNone
+        constexpr auto fullScreenNone = (NSUInteger) (1 << 9);
+
+        return (getStyleFlags() & (windowHasMaximiseButton | windowIsResizable)) == (windowHasMaximiseButton | windowIsResizable)
+             ? NSWindowCollectionBehaviorFullScreenPrimary
+             : fullScreenNone;
+    }
+
+    void setCollectionBehaviour (bool forceFullScreen) const
+    {
+        [window setCollectionBehavior: getCollectionBehavior (forceFullScreen)];
+    }
+
     void setFullScreen (bool shouldBeFullScreen) override
     {
         if (isSharedWindow)
             return;
+
+        if (shouldBeFullScreen)
+            setCollectionBehaviour (true);
 
         if (isMinimised())
             setMinimised (false);
@@ -1437,7 +1458,7 @@ public:
         return [NSArray arrayWithObjects: type, (NSString*) kPasteboardTypeFileURLPromise, NSPasteboardTypeString, nil];
     }
 
-    BOOL sendDragCallback (const int type, id <NSDraggingInfo> sender)
+    BOOL sendDragCallback (bool (ComponentPeer::* callback) (const DragInfo&), id <NSDraggingInfo> sender)
     {
         NSPasteboard* pasteboard = [sender draggingPasteboard];
         NSString* contentType = [pasteboard availableTypeFromArray: getSupportedDragTypes()];
@@ -1445,9 +1466,10 @@ public:
         if (contentType == nil)
             return false;
 
-        NSPoint p = [view convertPoint: [sender draggingLocation] fromView: nil];
+        const auto p = localToGlobal (convertToPointFloat ([view convertPoint: [sender draggingLocation] fromView: nil]));
+
         ComponentPeer::DragInfo dragInfo;
-        dragInfo.position.setXY ((int) p.x, (int) p.y);
+        dragInfo.position = ScalingHelpers::screenPosToLocalPos (component, p).roundToInt();
 
         if (contentType == NSPasteboardTypeString)
             dragInfo.text = nsStringToJuce ([pasteboard stringForType: NSPasteboardTypeString]);
@@ -1455,15 +1477,7 @@ public:
             dragInfo.files = getDroppedFiles (pasteboard, contentType);
 
         if (! dragInfo.isEmpty())
-        {
-            switch (type)
-            {
-                case 0:   return handleDragMove (dragInfo);
-                case 1:   return handleDragExit (dragInfo);
-                case 2:   return handleDragDrop (dragInfo);
-                default:  jassertfalse; break;
-            }
-        }
+            return (this->*callback) (dragInfo);
 
         return false;
     }
@@ -1573,6 +1587,7 @@ public:
         }
 
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
+        setCollectionBehaviour (isFullScreen());
     }
 
     void setHasChangedSinceSaved (bool b) override
@@ -2195,7 +2210,7 @@ private:
     static NSDragOperation draggingUpdated (id self, SEL, id<NSDraggingInfo> sender)
     {
         if (auto* owner = getOwner (self))
-            if (owner->sendDragCallback (0, sender))
+            if (owner->sendDragCallback (&NSViewComponentPeer::handleDragMove, sender))
                 return NSDragOperationGeneric;
 
         return NSDragOperationNone;
@@ -2208,7 +2223,7 @@ private:
 
     static void draggingExited (id self, SEL, id<NSDraggingInfo> sender)
     {
-        callOnOwner (self, &NSViewComponentPeer::sendDragCallback, 1, sender);
+        callOnOwner (self, &NSViewComponentPeer::sendDragCallback, &NSViewComponentPeer::handleDragExit, sender);
     }
 
     static BOOL prepareForDragOperation (id, SEL, id<NSDraggingInfo>)
@@ -2219,7 +2234,7 @@ private:
     static BOOL performDragOperation (id self, SEL, id<NSDraggingInfo> sender)
     {
         auto* owner = getOwner (self);
-        return owner != nullptr && owner->sendDragCallback (2, sender);
+        return owner != nullptr && owner->sendDragCallback (&NSViewComponentPeer::handleDragDrop, sender);
     }
 
     static void concludeDragOperation (id, SEL, id<NSDraggingInfo>) {}

@@ -71,7 +71,9 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        bitmap.data = imageData->data + x * pixelStride + y * lineStride;
+        const auto offset = (size_t) (x * pixelStride + y * lineStride);
+        bitmap.data = imageData->data + offset;
+        bitmap.size = (size_t) (lineStride * height) - offset;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
@@ -111,22 +113,20 @@ public:
     static CGImageRef createImage (const Image& juceImage, CGColorSpaceRef colourSpace)
     {
         const Image::BitmapData srcData (juceImage, Image::BitmapData::readOnly);
-        detail::DataProviderPtr provider;
 
-        if (auto* cgim = dynamic_cast<CoreGraphicsPixelData*> (juceImage.getPixelData()))
+        const auto provider = [&]
         {
-            provider = detail::DataProviderPtr { CGDataProviderCreateWithData (new ImageDataContainer::Ptr (cgim->imageData),
+            if (auto* cgim = dynamic_cast<CoreGraphicsPixelData*> (juceImage.getPixelData()))
+            {
+                return detail::DataProviderPtr { CGDataProviderCreateWithData (new ImageDataContainer::Ptr (cgim->imageData),
                                                                                srcData.data,
-                                                                               (size_t) srcData.lineStride * (size_t) srcData.height,
+                                                                               srcData.size,
                                                                                [] (void * __nullable info, const void*, size_t) { delete (ImageDataContainer::Ptr*) info; }) };
-        }
-        else
-        {
-            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr,
-                                                       (const UInt8*) srcData.data,
-                                                       (CFIndex) ((size_t) srcData.lineStride * (size_t) srcData.height)));
-            provider = detail::DataProviderPtr { CGDataProviderCreateWithCFData (data.get()) };
-        }
+            }
+
+            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) srcData.size));
+            return detail::DataProviderPtr { CGDataProviderCreateWithCFData (data.get()) };
+        }();
 
         CGImageRef imageRef = CGImageCreate ((size_t) srcData.width,
                                              (size_t) srcData.height,
@@ -512,7 +512,7 @@ void CoreGraphicsContext::drawImage (const Image& sourceImage, const AffineTrans
 
     auto colourSpace = sourceImage.getFormat() == Image::PixelFormat::SingleChannel ? greyColourSpace.get()
                                                                                     : rgbColourSpace.get();
-    auto image = detail::ImagePtr { CoreGraphicsPixelData::getCachedImageRef (sourceImage, colourSpace) };
+    detail::ImagePtr image { CoreGraphicsPixelData::getCachedImageRef (sourceImage, colourSpace) };
 
     ScopedCGContextState scopedState (context.get());
     CGContextSetAlpha (context.get(), state->fillType.getOpacity());

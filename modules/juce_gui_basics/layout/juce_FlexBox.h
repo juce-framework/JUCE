@@ -91,16 +91,13 @@ public:
 
     //==============================================================================
     /** Creates an empty FlexBox container with default parameters. */
-    FlexBox() noexcept;
+    FlexBox() noexcept = default;
 
     /** Creates an empty FlexBox container with these parameters. */
     FlexBox (Direction, Wrap, AlignContent, AlignItems, JustifyContent) noexcept;
 
     /** Creates an empty FlexBox container with the given content-justification mode. */
     FlexBox (JustifyContent) noexcept;
-
-    /** Destructor. */
-    ~FlexBox() noexcept;
 
     //==============================================================================
     /** Lays-out the box's items within the given rectangle. */
