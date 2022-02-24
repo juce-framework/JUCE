@@ -144,7 +144,7 @@ public:
         outside the path's boundary.
     */
     bool intersectsLine (Line<float> line,
-                         float tolerance = defaultToleranceForTesting);
+                         float tolerance = defaultToleranceForTesting) const;
 
     /** Cuts off parts of a line to keep the parts that are either inside or
         outside this path.
