@@ -254,29 +254,6 @@ namespace juce
  #include "native/accessibility/juce_AccessibilityTextHelpers.h"
 #endif
 
-namespace juce
-{
-
-static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
-
-/** Used by the macOS and iOS peers. */
-void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
-{
-    comp.getProperties().set (disableAsyncLayerBackedViewIdentifier, shouldDisableAsyncLayerBackedView);
-}
-
-/** Used by the macOS and iOS peers. */
-bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
-{
-    return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
-}
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-} // namespace juce
-
 #if JUCE_MAC || JUCE_IOS
  #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
 

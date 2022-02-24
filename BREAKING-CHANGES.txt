@@ -6,6 +6,32 @@ develop
 
 Change
 ------
+The optional JUCE_COREGRAPHICS_DRAW_ASYNC preprocessor flag has been removed
+and asynchronous Core Graphics rendering is now the default. The helper
+function setComponentAsyncLayerBackedViewDisabled has also been removed.
+
+Possible Issues
+---------------
+Components that were previously using setComponentAsyncLayerBackedViewDisabled
+to conditionally opt out of asynchronous Core Graphics rendering will no longer
+be able to do so.
+
+Workaround
+----------
+To opt out of asynchronous Core Graphics rendering the
+windowRequiresSynchronousCoreGraphicsRendering ComponentPeer style flag can be
+used when adding a component to the desktop.
+
+Rationale
+---------
+Asynchronous Core Graphics rendering provides a substantial performance
+benefit. Asynchronous rendering is a property of a Peer, rather than a
+Component, so a Peer style flag to conditionally opt out of asynchronous
+rendering is more appropriate.
+
+
+Change
+------
 Constructors of AudioParameterBool, AudioParameterChoice, AudioParameterFloat,
 AudioParameterInt, and AudioProcessorParameterWithID have been deprecated and
 replaced with new constructors taking an 'Attributes' argument.

@@ -134,8 +134,8 @@ public:
 
         [view setPostsFrameChangedNotifications: YES];
 
-       #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_DRAW_ASYNC
-        if (! getComponentAsyncLayerBackedViewDisabled (component))
+       #if USE_COREGRAPHICS_RENDERING
+        if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
             if (@available (macOS 10.8, *))
             {
@@ -776,11 +776,9 @@ public:
                                           name: NSWindowWillMiniaturizeNotification
                                         object: currentWindow];
 
-           #if JUCE_COREGRAPHICS_DRAW_ASYNC
             [notificationCenter removeObserver: view
                                           name: NSWindowDidBecomeKeyNotification
                                         object: currentWindow];
-           #endif
         }
 
         if (isSharedWindow && [view window] == window && newWindow == nullptr)
