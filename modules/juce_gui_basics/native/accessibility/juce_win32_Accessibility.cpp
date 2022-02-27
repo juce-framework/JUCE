@@ -73,7 +73,7 @@ public:
         {
             uiaWrapper->disconnectProvider (provider);
 
-            if (providerCount == 0)
+            if (providerCount == 0 && JUCEApplicationBase::isStandaloneApp())
                 uiaWrapper->disconnectAllProviders();
         }
     }
