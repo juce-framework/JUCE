@@ -128,9 +128,6 @@ public:
     /** Creates an item with a given Component to use. */
     GridItem (Component* componentToUse) noexcept;
 
-    /** Destructor. */
-    ~GridItem() noexcept;
-
     //==============================================================================
     /** If this is non-null, it represents a Component whose bounds are controlled by this item. */
     Component* associatedComponent = nullptr;

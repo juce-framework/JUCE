@@ -970,7 +970,7 @@ bool Path::contains (Point<float> point, float tolerance) const
     return contains (point.x, point.y, tolerance);
 }
 
-bool Path::intersectsLine (Line<float> line, float tolerance)
+bool Path::intersectsLine (Line<float> line, float tolerance) const
 {
     PathFlatteningIterator i (*this, AffineTransform(), tolerance);
     Point<float> intersection;

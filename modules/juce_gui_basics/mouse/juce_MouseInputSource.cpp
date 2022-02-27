@@ -57,18 +57,6 @@ public:
         return lastPeer;
     }
 
-    static Point<float> screenPosToLocalPos (Component& comp, Point<float> pos)
-    {
-        if (auto* peer = comp.getPeer())
-        {
-            pos = peer->globalToLocal (pos);
-            auto& peerComp = peer->getComponent();
-            return comp.getLocalPoint (&peerComp, ScalingHelpers::unscaledScreenPosToScaled (peerComp, pos));
-        }
-
-        return comp.getLocalPoint (nullptr, ScalingHelpers::unscaledScreenPosToScaled (comp, pos));
-    }
-
     Component* findComponentAt (Point<float> screenPos)
     {
         if (auto* peer = getPeer())
@@ -106,7 +94,7 @@ public:
     //==============================================================================
    #if JUCE_DUMP_MOUSE_EVENTS
     #define JUCE_MOUSE_EVENT_DBG(desc, screenPos)   DBG ("Mouse " << desc << " #" << index \
-                                                            << ": " << screenPosToLocalPos (comp, screenPos).toString() \
+                                                            << ": " << ScalingHelpers::screenPosToLocalPos (comp, screenPos).toString() \
                                                             << " - Comp: " << String::toHexString ((pointer_sized_int) &comp));
    #else
     #define JUCE_MOUSE_EVENT_DBG(desc, screenPos)
@@ -115,26 +103,26 @@ public:
     void sendMouseEnter (Component& comp, const PointerState& pointerState, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("enter", pointerState.position)
-        comp.internalMouseEnter (MouseInputSource (this), screenPosToLocalPos (comp, pointerState.position), time);
+        comp.internalMouseEnter (MouseInputSource (this), ScalingHelpers::screenPosToLocalPos (comp, pointerState.position), time);
     }
 
     void sendMouseExit (Component& comp, const PointerState& pointerState, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("exit", pointerState.position)
-        comp.internalMouseExit (MouseInputSource (this), screenPosToLocalPos (comp, pointerState.position), time);
+        comp.internalMouseExit (MouseInputSource (this), ScalingHelpers::screenPosToLocalPos (comp, pointerState.position), time);
     }
 
     void sendMouseMove (Component& comp, const PointerState& pointerState, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("move", pointerState.position)
-        comp.internalMouseMove (MouseInputSource (this), screenPosToLocalPos (comp, pointerState.position), time);
+        comp.internalMouseMove (MouseInputSource (this), ScalingHelpers::screenPosToLocalPos (comp, pointerState.position), time);
     }
 
     void sendMouseDown (Component& comp, const PointerState& pointerState, Time time)
     {
         JUCE_MOUSE_EVENT_DBG ("down", pointerState.position)
         comp.internalMouseDown (MouseInputSource (this),
-                                pointerState.withPosition (screenPosToLocalPos (comp, pointerState.position)),
+                                pointerState.withPosition (ScalingHelpers::screenPosToLocalPos (comp, pointerState.position)),
                                 time);
     }
 
@@ -142,7 +130,7 @@ public:
     {
         JUCE_MOUSE_EVENT_DBG ("drag", pointerState.position)
         comp.internalMouseDrag (MouseInputSource (this),
-                                pointerState.withPosition (screenPosToLocalPos (comp, pointerState.position)),
+                                pointerState.withPosition (ScalingHelpers::screenPosToLocalPos (comp, pointerState.position)),
                                 time);
     }
 
@@ -150,7 +138,7 @@ public:
     {
         JUCE_MOUSE_EVENT_DBG ("up", pointerState.position)
         comp.internalMouseUp (MouseInputSource (this),
-                              pointerState.withPosition (screenPosToLocalPos (comp, pointerState.position)),
+                              pointerState.withPosition (ScalingHelpers::screenPosToLocalPos (comp, pointerState.position)),
                               time,
                               oldMods);
     }
@@ -158,13 +146,13 @@ public:
     void sendMouseWheel (Component& comp, Point<float> screenPos, Time time, const MouseWheelDetails& wheel)
     {
         JUCE_MOUSE_EVENT_DBG ("wheel", screenPos)
-        comp.internalMouseWheel (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, wheel);
+        comp.internalMouseWheel (MouseInputSource (this), ScalingHelpers::screenPosToLocalPos (comp, screenPos), time, wheel);
     }
 
     void sendMagnifyGesture (Component& comp, Point<float> screenPos, Time time, float amount)
     {
         JUCE_MOUSE_EVENT_DBG ("magnify", screenPos)
-        comp.internalMagnifyGesture (MouseInputSource (this), screenPosToLocalPos (comp, screenPos), time, amount);
+        comp.internalMagnifyGesture (MouseInputSource (this), ScalingHelpers::screenPosToLocalPos (comp, screenPos), time, amount);
     }
 
     //==============================================================================

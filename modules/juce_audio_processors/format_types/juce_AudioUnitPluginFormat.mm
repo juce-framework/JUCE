@@ -1101,8 +1101,9 @@ public:
             inMapping .setUpMapping (audioUnit, true);
             outMapping.setUpMapping (audioUnit, false);
 
-            inputBuffer.setSize (jmax (getTotalNumInputChannels(), getTotalNumOutputChannels()),
-                                 estimatedSamplesPerBlock);
+            preparedChannels = jmax (getTotalNumInputChannels(), getTotalNumOutputChannels());
+            preparedSamples  = estimatedSamplesPerBlock;
+            inputBuffer.setSize (preparedChannels, preparedSamples);
         }
     }
 
@@ -1130,8 +1131,8 @@ public:
     void processAudio (AudioBuffer<float>& buffer, MidiBuffer& midiMessages, bool processBlockBypassedCalled)
     {
         // If these are hit, we might allocate in the process block!
-        jassert (buffer.getNumChannels() <= inputBuffer.getNumChannels());
-        jassert (buffer.getNumSamples()  <= inputBuffer.getNumSamples());
+        jassert (buffer.getNumChannels() <= preparedChannels);
+        jassert (buffer.getNumSamples()  <= preparedSamples);
         // Copy the input buffer to guard against the case where a bus has more output channels
         // than input channels, so rendering the output for that bus might stamp over the input
         // to the following bus.
@@ -1724,7 +1725,7 @@ private:
     AudioBuffer<float> inputBuffer;
     Array<Array<AudioChannelSet>> supportedInLayouts, supportedOutLayouts;
 
-    int numChannelInfos;
+    int numChannelInfos, preparedChannels = 0, preparedSamples = 0;
     HeapBlock<AUChannelInfo> channelInfos;
 
     AudioUnit audioUnit;

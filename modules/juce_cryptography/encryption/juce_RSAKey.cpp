@@ -44,10 +44,6 @@ RSAKey::RSAKey (const String& s)
     }
 }
 
-RSAKey::~RSAKey()
-{
-}
-
 bool RSAKey::operator== (const RSAKey& other) const noexcept
 {
     return part1 == other.part1 && part2 == other.part2;

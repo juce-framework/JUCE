@@ -83,10 +83,6 @@ LowLevelGraphicsPostScriptRenderer::LowLevelGraphicsPostScriptRenderer (OutputSt
         << scale << ' ' << scale << " scale\n\n";
 }
 
-LowLevelGraphicsPostScriptRenderer::~LowLevelGraphicsPostScriptRenderer()
-{
-}
-
 //==============================================================================
 bool LowLevelGraphicsPostScriptRenderer::isVectorDevice() const
 {
@@ -165,10 +161,6 @@ bool LowLevelGraphicsPostScriptRenderer::isClipEmpty() const
 LowLevelGraphicsPostScriptRenderer::SavedState::SavedState()
     : xOffset (0),
       yOffset (0)
-{
-}
-
-LowLevelGraphicsPostScriptRenderer::SavedState::~SavedState()
 {
 }
 

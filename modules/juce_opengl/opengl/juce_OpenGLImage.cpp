@@ -168,6 +168,9 @@ private:
             bitmapData.dataReleaser.reset (r);
 
             bitmapData.data = (uint8*) r->data.get();
+            bitmapData.size = (size_t) bitmapData.width
+                              * (size_t) bitmapData.height
+                              * sizeof (PixelARGB);
             bitmapData.lineStride = (bitmapData.width * bitmapData.pixelStride + 3) & ~3;
 
             ReaderType::read (frameBuffer, bitmapData, x, y);

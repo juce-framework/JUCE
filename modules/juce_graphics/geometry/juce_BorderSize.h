@@ -47,9 +47,6 @@ public:
     */
     BorderSize() = default;
 
-    /** Creates a copy of another border. */
-    BorderSize (const BorderSize&) = default;
-
     /** Creates a border with the given gaps. */
     BorderSize (ValueType topGap, ValueType leftGap, ValueType bottomGap, ValueType rightGap) noexcept
         : top (topGap), left (leftGap), bottom (bottomGap), right (rightGap)

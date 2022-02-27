@@ -97,7 +97,9 @@ public:
 
     void initialiseBitmapData (Image::BitmapData& bitmap, int x, int y, Image::BitmapData::ReadWriteMode mode) override
     {
-        bitmap.data = imageData + (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
+        const auto offset = (size_t) x * (size_t) pixelStride + (size_t) y * (size_t) lineStride;
+        bitmap.data = imageData + offset;
+        bitmap.size = (size_t) (height * lineStride) - offset;
         bitmap.pixelFormat = pixelFormat;
         bitmap.lineStride = lineStride;
         bitmap.pixelStride = pixelStride;
