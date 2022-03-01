@@ -1230,7 +1230,13 @@ function(_juce_configure_plugin_targets target)
         JucePlugin_AAXDisableBypass=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_DISABLE_AAX_BYPASS>>
         JucePlugin_AAXDisableMultiMono=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_DISABLE_AAX_MULTI_MONO>>
         JucePlugin_VSTNumMidiInputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_INS>
-        JucePlugin_VSTNumMidiOutputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_OUTS>)
+        JucePlugin_VSTNumMidiOutputs=$<TARGET_PROPERTY:${target},JUCE_VST_NUM_MIDI_OUTS>
+        JucePlugin_Enable_ARA=$<BOOL:$<TARGET_PROPERTY:${target},JUCE_IS_ARA_EFFECT>>
+        JucePlugin_ARAFactoryID=$<TARGET_PROPERTY:${target},JUCE_ARA_FACTORY_ID>
+        JucePlugin_ARADocumentArchiveID=$<TARGET_PROPERTY:${target},JUCE_ARA_DOCUMENT_ARCHIVE_ID>
+        JucePlugin_ARACompatibleArchiveIDs=$<TARGET_PROPERTY:${target},JUCE_ARA_COMPATIBLE_ARCHIVE_IDS>
+        JucePlugin_ARAContentTypes=$<TARGET_PROPERTY:${target},JUCE_ARA_ANALYSIS_TYPES>
+        JucePlugin_ARATransformationFlags=$<TARGET_PROPERTY:${target},JUCE_ARA_TRANSFORMATION_FLAGS>)
 
     set_target_properties(${target} PROPERTIES
         POSITION_INDEPENDENT_CODE TRUE
@@ -1511,6 +1517,84 @@ function(_juce_set_fallback_properties target)
     get_target_property(plugin_name ${target} JUCE_PLUGIN_NAME)
     string(MAKE_C_IDENTIFIER "${plugin_name}" plugin_name_sanitised)
     _juce_set_property_if_not_set(${target} LV2URI "${company_website}/plugins/${plugin_name_sanitised}")
+
+    # ARA configuration
+    # Analysis types
+    set(ara_analysis_type_strings
+        kARAContentTypeNotes
+        kARAContentTypeTempoEntries
+        kARAContentTypeBarSignatures
+        kARAContentTypeStaticTuning
+        kARAContentTypeKeySignatures
+        kARAContentTypeSheetChords)
+
+    get_target_property(actual_ara_analysis_types ${target} JUCE_ARA_ANALYSIS_TYPES)
+
+    set(ara_analysis_types_int "")
+
+    foreach(category_string IN LISTS actual_ara_analysis_types)
+        list(FIND ara_analysis_type_strings ${category_string} ara_index)
+
+        if(ara_index GREATER_EQUAL 0)
+            set(ara_analysis_types_bit "1 << ${ara_index}")
+
+            if(ara_analysis_types_int STREQUAL "")
+                set(ara_analysis_types_int 0)
+            endif()
+
+            math(EXPR ara_analysis_types_int "${ara_analysis_types_int} | (${ara_analysis_types_bit})")
+        endif()
+    endforeach()
+
+    if(NOT ara_analysis_types_int STREQUAL "")
+        set_target_properties(${target} PROPERTIES JUCE_ARA_ANALYSIS_TYPES ${ara_analysis_types_int})
+    endif()
+
+    _juce_set_property_if_not_set(${target} ARA_ANALYSIS_TYPES 0)
+
+    # Transformation flags
+    set(ara_transformation_flags_strings
+        kARAPlaybackTransformationNoChanges
+        kARAPlaybackTransformationTimestretch
+        kARAPlaybackTransformationTimestretchReflectingTempo
+        kARAPlaybackTransformationContentBasedFadeAtTail
+        kARAPlaybackTransformationContentBasedFadeAtHead)
+
+    set(default_ara_transformation_flags kARAPlaybackTransformationNoChanges)
+
+    _juce_set_property_if_not_set(${target} ARA_TRANSFORMATION_FLAGS ${default_ara_transformation_flags})
+
+    get_target_property(actual_ara_transformation_flags ${target} JUCE_ARA_TRANSFORMATION_FLAGS)
+
+    set(ara_transformation_flags_int "")
+
+    foreach(transformation_string IN LISTS actual_ara_transformation_flags)
+        list(FIND ara_transformation_flags_strings ${transformation_string} ara_transformation_index)
+
+        if(ara_transformation_index GREATER_EQUAL 0)
+            if(ara_transformation_index EQUAL 0)
+                set(ara_transformation_bit 0)
+            else()
+                set(ara_transformation_bit "1 << (${ara_transformation_index} - 1)")
+            endif()
+
+            if(ara_transformation_flags_int STREQUAL "")
+                set(ara_transformation_flags_int 0)
+            endif()
+
+            math(EXPR ara_transformation_flags_int "${ara_transformation_flags_int} | (${ara_transformation_bit})")
+        endif()
+    endforeach()
+
+    if(NOT ara_transformation_flags_int STREQUAL "")
+        set_target_properties(${target} PROPERTIES JUCE_ARA_TRANSFORMATION_FLAGS ${ara_transformation_flags_int})
+    endif()
+
+    _juce_set_property_if_not_set(${target} IS_ARA_EFFECT FALSE)
+    get_target_property(final_bundle_id ${target} JUCE_BUNDLE_ID)
+    _juce_set_property_if_not_set(${target} ARA_FACTORY_ID "\"${final_bundle_id}.arafactory.${final_version}\"")
+    _juce_set_property_if_not_set(${target} ARA_DOCUMENT_ARCHIVE_ID "\"${final_bundle_id}.aradocumentarchive.1\"")
+    _juce_set_property_if_not_set(${target} ARA_COMPATIBLE_ARCHIVE_IDS "\"\"")
 endfunction()
 
 # ==================================================================================================
@@ -1578,6 +1662,9 @@ function(_juce_initialise_target target)
         PLUGINHOST_AU                   # Set this true if you want to host AU plugins
         USE_LEGACY_COMPATIBILITY_PLUGIN_CODE
         LV2URI
+        IS_ARA_EFFECT
+        ARA_FACTORY_ID
+        ARA_DOCUMENT_ARCHIVE_ID
 
         VST_COPY_DIR
         VST3_COPY_DIR
@@ -1599,7 +1686,10 @@ function(_juce_initialise_target target)
         AAX_CATEGORY
         IPHONE_SCREEN_ORIENTATIONS      # iOS only
         IPAD_SCREEN_ORIENTATIONS        # iOS only
-        APP_GROUP_IDS)                  # iOS only
+        APP_GROUP_IDS                   # iOS only
+        ARA_COMPATIBLE_ARCHIVE_IDS
+        ARA_ANALYSIS_TYPES
+        ARA_TRANSFORMATION_FLAGS)
 
     cmake_parse_arguments(JUCE_ARG "" "${one_value_args}" "${multi_value_args}" ${ARGN})
 
