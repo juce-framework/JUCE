@@ -160,6 +160,7 @@
 #include "utilities/juce_ParameterAttachments.h"
 #include "utilities/juce_AudioProcessorValueTreeState.h"
 #include "utilities/juce_PluginHostType.h"
+#include "utilities/ARA/juce_ARA_utils.h"
 
 // This is here to avoid missing-prototype warnings in user code.
 // If you're implementing a plugin, you should supply a body for

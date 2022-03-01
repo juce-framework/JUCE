@@ -121,3 +121,9 @@
 #include "codecs/juce_WavAudioFormat.h"
 #include "codecs/juce_WindowsMediaAudioFormat.h"
 #include "sampler/juce_Sampler.h"
+
+#if JucePlugin_Enable_ARA
+ #include <juce_audio_processors/juce_audio_processors.h>
+
+ #include "format/juce_ARAAudioReaders.h"
+#endif

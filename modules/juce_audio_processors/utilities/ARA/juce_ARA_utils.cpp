@@ -16,18 +16,10 @@
   ==============================================================================
 */
 
-#include <juce_core/system/juce_CompilerWarnings.h>
-#include <juce_core/system/juce_TargetPlatform.h>
-
-/* Having WIN32_LEAN_AND_MEAN defined at the point of including ARADebug.c will produce warnings.
-
-   To prevent such problems it's easiest to have it in its own translation unit.
-*/
-
-#if (JucePlugin_Enable_ARA || (JUCE_PLUGINHOST_ARA && (JUCE_PLUGINHOST_VST3 || JUCE_PLUGINHOST_AU))) && (JUCE_MAC || JUCE_WINDOWS)
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wgnu-zero-variadic-macro-arguments", "-Wmissing-prototypes")
- #include <ARA_Library/Debug/ARADebug.c>
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
+#if JucePlugin_Enable_ARA
+#include "juce_ARADocumentControllerCommon.cpp"
+#include "juce_ARADocumentController.cpp"
+#include "juce_ARAModelObjects.cpp"
+#include "juce_ARAPlugInInstanceRoles.cpp"
+#include "juce_AudioProcessor_ARAExtensions.cpp"
 #endif
