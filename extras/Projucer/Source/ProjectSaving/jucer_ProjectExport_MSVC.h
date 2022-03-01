@@ -131,6 +131,9 @@ public:
 
         aaxPathValueWrapper.init ({ settings, Ids::aaxFolder, nullptr },
                                   getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::windows), TargetOS::windows);
+
+        araPathValueWrapper.init ({ settings, Ids::araFolder, nullptr },
+                                  getAppSettings().getStoredPath (Ids::araPath, TargetOS::windows), TargetOS::windows);
     }
 
     //==============================================================================

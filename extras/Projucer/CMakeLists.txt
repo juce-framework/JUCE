@@ -112,6 +112,10 @@ juce_add_binary_data(ProjucerData SOURCES
     Source/BinaryData/Templates/jucer_AudioComponentSimpleTemplate.h
     Source/BinaryData/Templates/jucer_AudioComponentTemplate.cpp
     Source/BinaryData/Templates/jucer_AudioComponentTemplate.h
+    Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.cpp
+    Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.h
+    Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.cpp
+    Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.h
     Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.cpp
     Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.h
     Source/BinaryData/Templates/jucer_AudioPluginFilterTemplate.cpp

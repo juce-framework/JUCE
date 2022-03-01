@@ -203,6 +203,8 @@
   <MAINGROUP id="YdWL7hi7p" name="AudioPluginHost">
     <GROUP id="{CFED5B3D-D1D8-0F3F-4D67-B2A810D057EF}" name="Source">
       <GROUP id="{6F257CD6-CE86-9BBC-54C1-45E43249E414}" name="Plugins">
+        <FILE id="rcuPqK" name="ARAPlugin.cpp" compile="1" resource="0" file="Source/Plugins/ARAPlugin.cpp"/>
+        <FILE id="gR1tiA" name="ARAPlugin.h" compile="0" resource="0" file="Source/Plugins/ARAPlugin.h"/>
         <FILE id="pov6wS" name="InternalPlugins.cpp" compile="1" resource="0"
               file="Source/Plugins/InternalPlugins.cpp"/>
         <FILE id="MV6AI1" name="InternalPlugins.h" compile="0" resource="0"

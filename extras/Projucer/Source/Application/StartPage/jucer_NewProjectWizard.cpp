@@ -114,11 +114,28 @@ static std::map<String, String> getPluginFileTokenReplacements (const String& na
     processorClassName = processorClassName.substring (0, 1).toUpperCase() + processorClassName.substring (1);
     auto editorClassName = processorClassName + "Editor";
 
+    const auto araDocumentControllerCppFile = sourceFolder.getChildFile ("PluginARADocumentController.cpp");
+    const auto araDocumentControllerHFile   = araDocumentControllerCppFile.withFileExtension (".h");
+    const auto araPlaybackRendererCppFile = sourceFolder.getChildFile ("PluginARAPlaybackRenderer.cpp");
+    const auto araPlaybackRendererHFile   = araPlaybackRendererCppFile.withFileExtension (".h");
+
+    const auto araDocumentControllerHInclude = CodeHelpers::createIncludeStatement (araDocumentControllerHFile, araDocumentControllerCppFile);
+    const auto araPlaybackRendererHInclude = CodeHelpers::createIncludeStatement (araPlaybackRendererHFile, araPlaybackRendererCppFile);
+
+    auto araDocumentControllerClassName = build_tools::makeValidIdentifier (name, true, true, false) + "DocumentController";
+    araDocumentControllerClassName = araDocumentControllerClassName.substring (0, 1).toUpperCase() + araDocumentControllerClassName.substring (1);
+    auto araPlaybackRendererClassName = build_tools::makeValidIdentifier (name, true, true, false) + "PlaybackRenderer";
+    araPlaybackRendererClassName = araPlaybackRendererClassName.substring (0, 1).toUpperCase() + araPlaybackRendererClassName.substring (1);
+
     tokenReplacements.insert ({"%%filter_headers%%",     processorHInclude + newLine + editorHInclude });
     tokenReplacements.insert ({"%%filter_class_name%%",  processorClassName });
     tokenReplacements.insert ({"%%editor_class_name%%",  editorClassName });
     tokenReplacements.insert ({"%%editor_cpp_headers%%", processorHInclude + newLine + editorHInclude });
     tokenReplacements.insert ({"%%editor_headers%%",     getJuceHeaderInclude() + newLine + processorHInclude });
+    tokenReplacements.insert ({"%%aradocumentcontroller_headers%%",     araDocumentControllerHInclude });
+    tokenReplacements.insert ({"%%aradocumentcontroller_class_name%%",  araDocumentControllerClassName });
+    tokenReplacements.insert ({"%%araplaybackrenderer_headers%%",       araPlaybackRendererHInclude });
+    tokenReplacements.insert ({"%%araplaybackrenderer_class_name%%",    araPlaybackRendererClassName });
 
     return tokenReplacements;
 }

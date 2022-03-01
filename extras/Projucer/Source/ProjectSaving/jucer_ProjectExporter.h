@@ -144,6 +144,7 @@ public:
 
     String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.getCurrentValue(); }
     String getAAXPathString() const                       { return aaxPathValueWrapper.getCurrentValue(); }
+    String getARAPathString() const                       { return araPathValueWrapper.getCurrentValue(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -405,7 +406,7 @@ protected:
     const File projectFolder;
 
     //==============================================================================
-    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, aaxPathValueWrapper;
+    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, aaxPathValueWrapper, araPathValueWrapper;
 
     ValueTreePropertyWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                                  userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
@@ -467,10 +468,12 @@ private:
 
     void createIconProperties (PropertyListBuilder&);
     void addExtraIncludePathsIfPluginOrHost();
+    void addARAPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
     void addLegacyVSTFolderToPathIfSpecified();
     build_tools::RelativePath getInternalVST3SDKPath();
     void addAAXFoldersToPath();
+    void addARAFoldersToPath();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
 };
