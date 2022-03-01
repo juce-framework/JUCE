@@ -162,7 +162,16 @@
 #include "utilities/juce_PluginHostType.h"
 #include "utilities/ARA/juce_ARA_utils.h"
 
-// This is here to avoid missing-prototype warnings in user code.
+//==============================================================================
+// These declarations are here to avoid missing-prototype warnings in user code.
+
 // If you're implementing a plugin, you should supply a body for
 // this function in your own code.
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
+
+// If you are implementing an ARA enabled plugin, you need to
+// implement this function somewhere in the codebase by returning
+// SubclassOfARADocumentControllerSpecialisation::createARAFactory<SubclassOfARADocumentControllerSpecialisation>();
+#if JucePlugin_Enable_ARA
+ const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory();
+#endif

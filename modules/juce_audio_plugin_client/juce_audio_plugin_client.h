@@ -121,3 +121,7 @@
 #endif
 
 #include "utility/juce_CreatePluginFilter.h"
+
+#if JucePlugin_Enable_ARA
+ #include "ARA/juce_ARA_Wrapper.h"
+#endif

@@ -18,23 +18,31 @@
 
 #pragma once
 
+#if JucePlugin_Enable_ARA
+// Configure ARA debug support prior to including ARA SDK headers
 namespace juce
 {
 
-inline AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioProcessor::WrapperType type)
-{
-    AudioProcessor::setTypeOfNextNewPlugin (type);
-    AudioProcessor* const pluginInstance = ::createPluginFilter();
-    AudioProcessor::setTypeOfNextNewPlugin (AudioProcessor::wrapperType_Undefined);
+#if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
 
-    // your createPluginFilter() method must return an object!
-    jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
+#define ARA_ENABLE_INTERNAL_ASSERTS 1
 
-   #if JucePlugin_Enable_ARA
-    jassert (dynamic_cast<juce::AudioProcessorARAExtension*> (pluginInstance) != nullptr);
-   #endif
+extern JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line, const char* diagnosis) noexcept;
 
-    return pluginInstance;
-}
+#if !defined(ARA_HANDLE_ASSERT)
+#define ARA_HANDLE_ASSERT(file, line, diagnosis)    juce::handleARAAssertion (file, line, diagnosis)
+#endif
+
+#if JUCE_LOG_ASSERTIONS
+#define ARA_ENABLE_DEBUG_OUTPUT 1
+#endif
+
+#else
+
+#define ARA_ENABLE_INTERNAL_ASSERTS 0
+
+#endif // (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
 
 } // namespace juce
+
+#endif
