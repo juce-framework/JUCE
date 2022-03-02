@@ -2435,7 +2435,9 @@ public:
             warnOnFailure (holder->component->activateBus (Vst::kAudio, Vst::kOutput, i, getBus (false, i)->isEnabled() ? 1 : 0));
 
         setLatencySamples (jmax (0, (int) processor->getLatencySamples()));
-        cachedBusLayouts = getBusesLayout();
+
+        inputBusMap .prepare (createChannelMappings (true));
+        outputBusMap.prepare (createChannelMappings (false));
 
         setStateForAllMidiBuses (true);
 
@@ -2670,7 +2672,7 @@ public:
 
         bool result = syncBusLayouts (layouts);
 
-        // didn't succeed? Make sure it's back in it's original state
+        // didn't succeed? Make sure it's back in its original state
         if (! result)
             syncBusLayouts (getBusesLayout());
 
@@ -3017,9 +3019,7 @@ private:
         even if there aren't enough channels to process,
         as very poorly specified by the Steinberg SDK
     */
-    VST3FloatAndDoubleBusMapComposite inputBusMap, outputBusMap;
-    Array<Vst::AudioBusBuffers> inputBuses, outputBuses;
-    AudioProcessor::BusesLayout cachedBusLayouts;
+    HostBufferMapper inputBusMap, outputBusMap;
 
     StringArray programNames;
     Vst::ParamID programParameterID = (Vst::ParamID) -1;
@@ -3214,6 +3214,17 @@ private:
         setStateForAllBusesOfType (holder->component, newState, false, false);  // Activate/deactivate MIDI outputs
     }
 
+    std::vector<ChannelMapping> createChannelMappings (bool isInput) const
+    {
+        std::vector<ChannelMapping> result;
+        result.reserve ((size_t) getBusCount (isInput));
+
+        for (auto i = 0; i < getBusCount (isInput); ++i)
+            result.emplace_back (*getBus (isInput, i));
+
+        return result;
+    }
+
     void setupIO()
     {
         setStateForAllMidiBuses (true);
@@ -3226,7 +3237,8 @@ private:
 
         warnOnFailure (processor->setupProcessing (setup));
 
-        cachedBusLayouts = getBusesLayout();
+        inputBusMap .prepare (createChannelMappings (true));
+        outputBusMap.prepare (createChannelMappings (false));
         setRateAndBufferSizeDetails (setup.sampleRate, (int) setup.maxSamplesPerBlock);
     }
 
@@ -3317,11 +3329,8 @@ private:
     template <typename FloatType>
     void associateWith (Vst::ProcessData& destination, AudioBuffer<FloatType>& buffer)
     {
-        VST3BufferExchange<FloatType>::mapBufferToBuses (inputBuses,  inputBusMap.get<FloatType>(),  cachedBusLayouts.inputBuses,  buffer);
-        VST3BufferExchange<FloatType>::mapBufferToBuses (outputBuses, outputBusMap.get<FloatType>(), cachedBusLayouts.outputBuses, buffer);
-
-        destination.inputs  = inputBuses.getRawDataPointer();
-        destination.outputs = outputBuses.getRawDataPointer();
+        destination.inputs  = inputBusMap .getVst3LayoutForJuceBuffer (buffer);
+        destination.outputs = outputBusMap.getVst3LayoutForJuceBuffer (buffer);
     }
 
     void associateWith (Vst::ProcessData& destination, MidiBuffer& midiBuffer)

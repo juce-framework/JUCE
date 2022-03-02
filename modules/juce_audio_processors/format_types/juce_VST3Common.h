@@ -395,6 +395,10 @@ namespace detail
         { k91_6,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
         { k90_6,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
     };
+
+   #if JUCE_DEBUG
+    static std::once_flag layoutTableCheckedFlag;
+   #endif
 }
 
 inline bool isLayoutTableValid()
@@ -422,7 +426,9 @@ static Array<AudioChannelSet::ChannelType> getSpeakerOrder (Steinberg::Vst::Spea
     using namespace Steinberg::Vst;
     using namespace Steinberg::Vst::SpeakerArr;
 
-    jassert (isLayoutTableValid());
+   #if JUCE_DEBUG
+    std::call_once (detail::layoutTableCheckedFlag, [] { jassert (isLayoutTableValid()); });
+   #endif
 
     // Check if this is a layout with a hard-coded conversion
     const auto arrangementMatches = [arr] (const auto& layoutPair) { return layoutPair.arrangement == arr; };
@@ -446,7 +452,9 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    jassert (isLayoutTableValid());
+   #if JUCE_DEBUG
+    std::call_once (detail::layoutTableCheckedFlag, [] { jassert (isLayoutTableValid()); });
+   #endif
 
     const auto channelSetMatches = [&channels] (const auto& layoutPair)
     {
@@ -524,6 +532,82 @@ private:
     bool active = true;
 };
 
+
+//==============================================================================
+/*
+    Remaps a JUCE buffer to an equivalent VST3 layout.
+
+    An instance of this class handles mappings for both float and double buffers, but in a single
+    direction (input or output).
+*/
+class HostBufferMapper
+{
+public:
+    /*  Builds a cached map of juce <-> vst3 channel mappings. */
+    void prepare (std::vector<ChannelMapping> arrangements)
+    {
+        mappings = std::move (arrangements);
+
+        floatBusMap .resize (mappings.size());
+        doubleBusMap.resize (mappings.size());
+        busBuffers  .resize (mappings.size());
+    }
+
+    /*  Applies the mapping to an AudioBuffer using JUCE channel layout. */
+    template <typename FloatType>
+    Steinberg::Vst::AudioBusBuffers* getVst3LayoutForJuceBuffer (AudioBuffer<FloatType>& source)
+    {
+        int channelIndexOffset = 0;
+
+        for (size_t i = 0; i < mappings.size(); ++i)
+        {
+            const auto& mapping = mappings[i];
+            associateBufferTo (busBuffers[i], get (detail::Tag<FloatType>{})[i], source, mapping, channelIndexOffset);
+            channelIndexOffset += mapping.isActive() ? (int) mapping.size() : 0;
+        }
+
+        return busBuffers.data();
+    }
+
+private:
+    template <typename FloatType>
+    using Bus = std::vector<FloatType*>;
+
+    template <typename FloatType>
+    using BusMap = std::vector<Bus<FloatType>>;
+
+    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
+    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
+
+    template <typename FloatType>
+    void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
+                            Bus<FloatType>& bus,
+                            AudioBuffer<FloatType>& buffer,
+                            const ChannelMapping& busMap,
+                            int channelStartOffset) const
+    {
+        bus.clear();
+
+        for (size_t i = 0; i < busMap.size(); ++i)
+        {
+            bus.push_back (busMap.isActive() ? buffer.getWritePointer (channelStartOffset + busMap.getJuceChannelForVst3Channel ((int) i))
+                                             : nullptr);
+        }
+
+        assignRawPointer (vstBuffers, bus.data());
+        vstBuffers.numChannels      = (Steinberg::int32) busMap.size();
+        vstBuffers.silenceFlags     = busMap.isActive() ? 0 : std::numeric_limits<Steinberg::uint64>::max();
+    }
+
+    auto& get (detail::Tag<float>)    { return floatBusMap; }
+    auto& get (detail::Tag<double>)   { return doubleBusMap; }
+
+    BusMap<float>  floatBusMap;
+    BusMap<double> doubleBusMap;
+
+    std::vector<Steinberg::Vst::AudioBusBuffers> busBuffers;
+    std::vector<ChannelMapping> mappings;
+};
 
 //==============================================================================
 template <class ObjectType>
@@ -1047,107 +1131,6 @@ private:
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
-};
-
-//==============================================================================
-template <typename FloatType>
-struct VST3BufferExchange
-{
-    using Bus = Array<FloatType*>;
-    using BusMap = Array<Bus>;
-
-    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
-    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
-
-    /** Assigns a series of AudioBuffer's channels to an AudioBusBuffers'
-        @warning For speed, does not check the channel count and offsets according to the AudioBuffer
-    */
-    static void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
-                                   Bus& bus,
-                                   AudioBuffer<FloatType>& buffer,
-                                   int numChannels, int channelStartOffset,
-                                   int sampleOffset = 0)
-    {
-        const int channelEnd = numChannels + channelStartOffset;
-        jassert (channelEnd >= 0 && channelEnd <= buffer.getNumChannels());
-
-        bus.clearQuick();
-
-        for (int i = channelStartOffset; i < channelEnd; ++i)
-            bus.add (buffer.getWritePointer (i, sampleOffset));
-
-        assignRawPointer (vstBuffers, (numChannels > 0 ? bus.getRawDataPointer() : nullptr));
-        vstBuffers.numChannels      = numChannels;
-        vstBuffers.silenceFlags     = 0;
-    }
-
-    static void mapArrangementToBuses (int& channelIndexOffset, int index,
-                                        Array<Steinberg::Vst::AudioBusBuffers>& result,
-                                        BusMap& busMapToUse, const AudioChannelSet& arrangement,
-                                        AudioBuffer<FloatType>& source)
-    {
-        const int numChansForBus = arrangement.size();
-
-        if (index >= result.size())
-            result.add (Steinberg::Vst::AudioBusBuffers());
-
-        if (index >= busMapToUse.size())
-            busMapToUse.add (Bus());
-
-        associateBufferTo (result.getReference (index),
-                           busMapToUse.getReference (index),
-                           source, numChansForBus, channelIndexOffset);
-
-        channelIndexOffset += numChansForBus;
-    }
-
-    static void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result, BusMap& busMapToUse,
-                                  const Array<AudioChannelSet>& arrangements,
-                                  AudioBuffer<FloatType>& source)
-    {
-        int channelIndexOffset = 0;
-
-        for (int i = 0; i < arrangements.size(); ++i)
-            mapArrangementToBuses (channelIndexOffset, i, result, busMapToUse,
-                                    arrangements.getUnchecked (i), source);
-    }
-
-    static void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result,
-                                  Steinberg::Vst::IAudioProcessor& processor,
-                                  BusMap& busMapToUse, bool isInput, int numBuses,
-                                  AudioBuffer<FloatType>& source)
-    {
-        int channelIndexOffset = 0;
-
-        for (int i = 0; i < numBuses; ++i)
-            mapArrangementToBuses (channelIndexOffset, i,
-                                    result, busMapToUse,
-                                    getArrangementForBus (&processor, isInput, i),
-                                    source);
-    }
-};
-
-template <typename FloatType>
-struct VST3FloatAndDoubleBusMapCompositeHelper {};
-
-struct VST3FloatAndDoubleBusMapComposite
-{
-    VST3BufferExchange<float>::BusMap  floatVersion;
-    VST3BufferExchange<double>::BusMap doubleVersion;
-
-    template <typename FloatType>
-    inline typename VST3BufferExchange<FloatType>::BusMap& get()   { return VST3FloatAndDoubleBusMapCompositeHelper<FloatType>::get (*this); }
-};
-
-
-template <> struct VST3FloatAndDoubleBusMapCompositeHelper<float>
-{
-    static VST3BufferExchange<float>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl)  { return impl.floatVersion; }
-};
-
-template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
-{
-    static VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
 };
 
 //==============================================================================
