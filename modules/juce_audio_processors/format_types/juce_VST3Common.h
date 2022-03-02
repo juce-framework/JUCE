@@ -346,41 +346,116 @@ static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArran
     return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (AudioChannelSet::discreteChannel0) + 6 + (channelType - 33));
 }
 
+namespace detail
+{
+    struct LayoutPair
+    {
+        Steinberg::Vst::SpeakerArrangement arrangement;
+        std::initializer_list<AudioChannelSet::ChannelType> channelOrder;
+    };
+
+    using namespace Steinberg::Vst::SpeakerArr;
+    using X = AudioChannelSet;
+
+    /*  Maps VST3 layouts to the equivalent JUCE channels, in VST3 order.
+
+        The channel types are taken from the equivalent JUCE AudioChannelSet, and then reordered to
+        match the VST3 speaker positions.
+    */
+    const LayoutPair layoutTable[]
+    {
+        { kEmpty,                       {} },
+        { kMono,                        { X::centre } },
+        { kStereo,                      { X::left, X::right } },
+        { k30Cine,                      { X::left, X::right, X::centre } },
+        { k30Music,                     { X::left, X::right, X::surround } },
+        { k40Cine,                      { X::left, X::right, X::centre, X::surround } },
+        { k50,                          { X::left, X::right, X::centre, X::leftSurround, X::rightSurround } },
+        { k51,                          { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround } },
+        { k60Cine,                      { X::left, X::right, X::centre, X::leftSurround, X::rightSurround, X::centreSurround } },
+        { k61Cine,                      { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::centreSurround } },
+        { k60Music,                     { X::left, X::right, X::leftSurround, X::rightSurround, X::leftSurroundSide, X::rightSurroundSide } },
+        { k61Music,                     { X::left, X::right, X::LFE, X::leftSurround, X::rightSurround, X::leftSurroundSide, X::rightSurroundSide } },
+        { k70Music,                     { X::left, X::right, X::centre, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide } },
+        { k70Cine,                      { X::left, X::right, X::centre, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre } },
+        { k71Music,                     { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide } },
+        { k71Cine,                      { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre } },
+        { k40Music,                     { X::left, X::right, X::leftSurround, X::rightSurround } },
+
+        { k51_4,                        { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k50_4,                        { X::left, X::right, X::centre,         X::leftSurround, X::rightSurround, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k71_2,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topSideLeft, X::topSideRight } },
+        { k70_2,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topSideLeft, X::topSideRight } },
+        { k71_4,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k70_4,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k71_6,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k70_6,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+
+        // The VST3 layout uses 'left/right' and 'left-of-center/right-of-center', but the JUCE layout uses 'left/right' and 'wide-left/wide-right'.
+        { k91_6,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k90_6,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+    };
+}
+
+inline bool isLayoutTableValid()
+{
+    for (const auto& item : detail::layoutTable)
+        if ((size_t) countNumberOfBits (item.arrangement) != item.channelOrder.size())
+            return false;
+
+    std::set<Steinberg::Vst::SpeakerArrangement> arrangements;
+
+    for (const auto& item : detail::layoutTable)
+        arrangements.insert (item.arrangement);
+
+    if (arrangements.size() != (size_t) numElementsInArray (detail::layoutTable))
+        return false; // There's a duplicate speaker arrangement
+
+    return std::all_of (std::begin (detail::layoutTable), std::end (detail::layoutTable), [] (const auto& item)
+    {
+        return std::set<AudioChannelSet::ChannelType> (item.channelOrder).size() == item.channelOrder.size();
+    });
+}
+
+static Array<AudioChannelSet::ChannelType> getSpeakerOrder (Steinberg::Vst::SpeakerArrangement arr)
+{
+    using namespace Steinberg::Vst;
+    using namespace Steinberg::Vst::SpeakerArr;
+
+    jassert (isLayoutTableValid());
+
+    // Check if this is a layout with a hard-coded conversion
+    const auto arrangementMatches = [arr] (const auto& layoutPair) { return layoutPair.arrangement == arr; };
+    const auto iter = std::find_if (std::begin (detail::layoutTable), std::end (detail::layoutTable), arrangementMatches);
+
+    if (iter != std::end (detail::layoutTable))
+        return iter->channelOrder;
+
+    // There's no hard-coded conversion, so assume that the channels are in the same orders in both layouts.
+    const auto channels = getChannelCount (arr);
+    Array<AudioChannelSet::ChannelType> result;
+    result.ensureStorageAllocated (channels);
+
+    for (auto i = 0; i < channels; ++i)
+        result.add (getChannelType (arr, getSpeaker (arr, i)));
+
+    return result;
+}
+
 static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    if (channels == AudioChannelSet::disabled())            return kEmpty;
-    if (channels == AudioChannelSet::mono())                return kMono;
-    if (channels == AudioChannelSet::stereo())              return kStereo;
-    if (channels == AudioChannelSet::createLCR())           return k30Cine;
-    if (channels == AudioChannelSet::createLRS())           return k30Music;
-    if (channels == AudioChannelSet::createLCRS())          return k40Cine;
-    if (channels == AudioChannelSet::create5point0())       return k50;
-    if (channels == AudioChannelSet::create5point1())       return k51;
-    if (channels == AudioChannelSet::create6point0())       return k60Cine;
-    if (channels == AudioChannelSet::create6point1())       return k61Cine;
-    if (channels == AudioChannelSet::create6point0Music())  return k60Music;
-    if (channels == AudioChannelSet::create6point1Music())  return k61Music;
-    if (channels == AudioChannelSet::create7point0())       return k70Music;
-    if (channels == AudioChannelSet::create7point0SDDS())   return k70Cine;
-    if (channels == AudioChannelSet::create7point1())       return k71CineSideFill;
-    if (channels == AudioChannelSet::create7point1SDDS())   return k71Cine;
-    if (channels == AudioChannelSet::ambisonic())           return kAmbi1stOrderACN;
-    if (channels == AudioChannelSet::quadraphonic())        return k40Music;
-    if (channels == AudioChannelSet::create5point1point4()) return k51_4;
-    if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
-    if (channels == AudioChannelSet::create7point1point2()) return k71_2;
-    if (channels == AudioChannelSet::create7point0point4()) return k71_4 & ~(Steinberg::Vst::kSpeakerLfe);
-    if (channels == AudioChannelSet::create7point1point4()) return k71_4;
-    if (channels == AudioChannelSet::create7point1point6()) return k71_6;
-    if (channels == AudioChannelSet::create9point1point6()) return k91_6;
-    if (channels == AudioChannelSet::ambisonic (0))         return (1ull << 20);
-    if (channels == AudioChannelSet::ambisonic (1))         return (1ull << 20) | (1ull << 21) | (1ull << 22) | (1ull << 23);
-   #if VST_VERSION >= 0x030608
-    if (channels == AudioChannelSet::ambisonic (2))         return kAmbi2cdOrderACN;
-    if (channels == AudioChannelSet::ambisonic (3))         return kAmbi3rdOrderACN;
-   #endif
+    jassert (isLayoutTableValid());
+
+    const auto channelSetMatches = [&channels] (const auto& layoutPair)
+    {
+        return AudioChannelSet::channelSetWithChannels (layoutPair.channelOrder) == channels;
+    };
+    const auto iter = std::find_if (std::begin (detail::layoutTable), std::end (detail::layoutTable), channelSetMatches);
+
+    if (iter != std::end (detail::layoutTable))
+        return iter->arrangement;
 
     Steinberg::Vst::SpeakerArrangement result = 0;
 
@@ -394,53 +469,61 @@ static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    switch (arr)
-    {
-        case kEmpty:                                          return AudioChannelSet::disabled();
-        case kMono:                                           return AudioChannelSet::mono();
-        case kStereo:                                         return AudioChannelSet::stereo();
-        case k30Cine:                                         return AudioChannelSet::createLCR();
-        case k30Music:                                        return AudioChannelSet::createLRS();
-        case k40Cine:                                         return AudioChannelSet::createLCRS();
-        case k50:                                             return AudioChannelSet::create5point0();
-        case k51:                                             return AudioChannelSet::create5point1();
-        case k60Cine:                                         return AudioChannelSet::create6point0();
-        case k61Cine:                                         return AudioChannelSet::create6point1();
-        case k60Music:                                        return AudioChannelSet::create6point0Music();
-        case k61Music:                                        return AudioChannelSet::create6point1Music();
-        case k70Music:                                        return AudioChannelSet::create7point0();
-        case k70Cine:                                         return AudioChannelSet::create7point0SDDS();
-        case k71CineSideFill:                                 return AudioChannelSet::create7point1();
-        case k71Cine:                                         return AudioChannelSet::create7point1SDDS();
-        case k40Music:                                        return AudioChannelSet::quadraphonic();
-        case k71_2:                                           return AudioChannelSet::create7point1point2();
-        case k71_2 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point2();
-        case k71_4:                                           return AudioChannelSet::create7point1point4();
-        case k71_4 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point4();
-        case k71_6:                                           return AudioChannelSet::create7point1point6();
-        case (1 << 20):                                       return AudioChannelSet::ambisonic (0);
-        case kAmbi1stOrderACN:                                return AudioChannelSet::ambisonic (1);
-       #if VST_VERSION >= 0x030608
-        case kAmbi2cdOrderACN:                                return AudioChannelSet::ambisonic (2);
-        case kAmbi3rdOrderACN:                                return AudioChannelSet::ambisonic (3);
-       #endif
-    }
-
-    AudioChannelSet result;
-
-    BigInteger vstChannels (static_cast<int64> (arr));
-    for (auto bit = vstChannels.findNextSetBit (0); bit != -1; bit = vstChannels.findNextSetBit (bit + 1))
-    {
-        AudioChannelSet::ChannelType channelType = getChannelType (arr, 1ull << static_cast<uint64> (bit));
-        if (channelType != AudioChannelSet::unknown)
-            result.addChannel (channelType);
-    }
+    const auto result = AudioChannelSet::channelSetWithChannels (getSpeakerOrder (arr));
 
     // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
-    jassert (result.size() == vstChannels.countNumberOfSetBits());
+    jassert (result.size() == getChannelCount (arr));
 
     return result;
 }
+
+//==============================================================================
+struct ChannelMapping
+{
+    explicit ChannelMapping (const AudioChannelSet& layout)
+        : indices (makeChannelIndices (layout)),
+          active (true)
+    {
+    }
+
+    explicit ChannelMapping (const AudioProcessor::Bus& juceBus)
+        : indices (makeChannelIndices (juceBus.getLastEnabledLayout())),
+          active (juceBus.isEnabled())
+    {
+    }
+
+    int getJuceChannelForVst3Channel (int vst3Channel) const { return indices[(size_t) vst3Channel]; }
+
+    size_t size() const { return indices.size(); }
+
+    void setActive (bool activeIn) { active = activeIn; }
+    bool isActive() const { return active; }
+
+private:
+    /*  Builds a table that provides the index of the corresponding JUCE channel, given a VST3 channel.
+
+        Depending on the mapping, the VST3 arrangement and JUCE arrangement may not contain channels
+        that map 1:1 via getChannelType. For example, the VST3 7.1 layout contains
+        'kSpeakerLs' which maps to the 'leftSurround' channel type, but the JUCE 7.1 layout does not
+        contain this channel type. As a result, we need to try to map the channels sensibly, even
+        if there's not a 'direct' mapping.
+    */
+    static std::vector<int> makeChannelIndices (const AudioChannelSet& juceArrangement)
+    {
+        const auto order = getSpeakerOrder (getVst3SpeakerArrangement (juceArrangement));
+
+        std::vector<int> result;
+
+        for (const auto& type : order)
+            result.push_back (juceArrangement.getChannelIndexForType (type));
+
+        return result;
+    }
+
+    std::vector<int> indices;
+    bool active = true;
+};
+
 
 //==============================================================================
 template <class ObjectType>
