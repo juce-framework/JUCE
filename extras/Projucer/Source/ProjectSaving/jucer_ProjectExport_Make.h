@@ -306,8 +306,8 @@ public:
 
             if (! packages.isEmpty())
             {
-                out << "\t@command -v pkg-config >/dev/null 2>&1 || { echo >&2 \"pkg-config not installed. Please, install it.\"; exit 1; }" << newLine
-                    << "\t@pkg-config --print-errors";
+                out << "\t@command -v $(PKG_CONFIG) >/dev/null 2>&1 || { echo >&2 \"pkg-config not installed. Please, install it.\"; exit 1; }" << newLine
+                    << "\t@$(PKG_CONFIG) --print-errors";
 
                 for (auto& pkg : packages)
                     out << " " << pkg;
@@ -562,7 +562,7 @@ private:
         auto compilePackages = getCompilePackages();
 
         if (compilePackages.size() > 0)
-            return "$(shell pkg-config --cflags " + compilePackages.joinIntoString (" ") + ")";
+            return "$(shell $(PKG_CONFIG) --cflags " + compilePackages.joinIntoString (" ") + ")";
 
         return {};
     }
@@ -572,7 +572,7 @@ private:
         auto linkPackages = getLinkPackages();
 
         if (linkPackages.size() > 0)
-            return "$(shell pkg-config --libs " + linkPackages.joinIntoString (" ") + ")";
+            return "$(shell $(PKG_CONFIG) --libs " + linkPackages.joinIntoString (" ") + ")";
 
         return {};
     }
@@ -933,6 +933,11 @@ private:
 
         out << "# (this disables dependency generation if multiple architectures are set)" << newLine
             << "DEPFLAGS := $(if $(word 2, $(TARGET_ARCH)), , -MMD)"                       << newLine
+            << newLine;
+
+        out << "ifndef PKG_CONFIG"       << newLine
+            << "  PKG_CONFIG=pkg-config" << newLine
+            << "endif"                   << newLine
             << newLine;
 
         out << "ifndef STRIP"  << newLine
