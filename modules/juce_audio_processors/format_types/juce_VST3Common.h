@@ -211,7 +211,7 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::centreSurround:    return Steinberg::Vst::kSpeakerCs;
         case AudioChannelSet::leftSurroundSide:  return Steinberg::Vst::kSpeakerSl;
         case AudioChannelSet::rightSurroundSide: return Steinberg::Vst::kSpeakerSr;
-        case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
+        case AudioChannelSet::topMiddle:         return Steinberg::Vst::kSpeakerTc; /* kSpeakerTm */
         case AudioChannelSet::topFrontLeft:      return Steinberg::Vst::kSpeakerTfl;
         case AudioChannelSet::topFrontCentre:    return Steinberg::Vst::kSpeakerTfc;
         case AudioChannelSet::topFrontRight:     return Steinberg::Vst::kSpeakerTfr;
@@ -221,8 +221,8 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::LFE2:              return Steinberg::Vst::kSpeakerLfe2;
         case AudioChannelSet::leftSurroundRear:  return Steinberg::Vst::kSpeakerLcs;
         case AudioChannelSet::rightSurroundRear: return Steinberg::Vst::kSpeakerRcs;
-        case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerPl;
-        case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerPr;
+        case AudioChannelSet::proximityLeft:     return Steinberg::Vst::kSpeakerPl;
+        case AudioChannelSet::proximityRight:    return Steinberg::Vst::kSpeakerPr;
         case AudioChannelSet::ambisonicACN0:     return Steinberg::Vst::kSpeakerACN0;
         case AudioChannelSet::ambisonicACN1:     return Steinberg::Vst::kSpeakerACN1;
         case AudioChannelSet::ambisonicACN2:     return Steinberg::Vst::kSpeakerACN2;
@@ -272,10 +272,9 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::ambisonicACN33:
         case AudioChannelSet::ambisonicACN34:
         case AudioChannelSet::ambisonicACN35:
-        case AudioChannelSet::proximityLeft:
-        case AudioChannelSet::proximityRight:
+        case AudioChannelSet::wideLeft:
+        case AudioChannelSet::wideRight:
         case AudioChannelSet::unknown:
-        default:
             break;
     }
 
@@ -330,14 +329,13 @@ static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArran
         case Steinberg::Vst::kSpeakerBfl:   return AudioChannelSet::bottomFrontLeft;
         case Steinberg::Vst::kSpeakerBfc:   return AudioChannelSet::bottomFrontCentre;
         case Steinberg::Vst::kSpeakerBfr:   return AudioChannelSet::bottomFrontRight;
-        case Steinberg::Vst::kSpeakerPl:    return AudioChannelSet::wideLeft;
-        case Steinberg::Vst::kSpeakerPr:    return AudioChannelSet::wideRight;
+        case Steinberg::Vst::kSpeakerPl:    return AudioChannelSet::proximityLeft;
+        case Steinberg::Vst::kSpeakerPr:    return AudioChannelSet::proximityRight;
         case Steinberg::Vst::kSpeakerBsl:   return AudioChannelSet::bottomSideLeft;
         case Steinberg::Vst::kSpeakerBsr:   return AudioChannelSet::bottomSideRight;
         case Steinberg::Vst::kSpeakerBrl:   return AudioChannelSet::bottomRearLeft;
         case Steinberg::Vst::kSpeakerBrc:   return AudioChannelSet::bottomRearCentre;
         case Steinberg::Vst::kSpeakerBrr:   return AudioChannelSet::bottomRearRight;
-        default: break;
     }
 
     auto channelType = BigInteger (static_cast<int64> (type)).findNextSetBit (0);
