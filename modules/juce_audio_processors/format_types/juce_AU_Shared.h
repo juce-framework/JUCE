@@ -157,13 +157,10 @@ struct AudioUnitHelpers
 
         AudioBuffer<float>& getBuffer (UInt32 frames) noexcept
         {
-           #if JUCE_DEBUG
-            for (int i = 0; i < (int) channels.size(); ++i)
-                jassert (channels[(size_t) i] != nullptr);
-           #endif
+            jassert (std::none_of (channels.begin(), channels.end(), [] (auto* x) { return x == nullptr; }));
 
-            if (! channels.empty())
-                mutableBuffer.setDataToReferTo (channels.data(), (int) channels.size(), static_cast<int> (frames));
+            const auto channelPtr = channels.empty() ? scratch.getArrayOfWritePointers() : channels.data();
+            mutableBuffer.setDataToReferTo (channelPtr, (int) channels.size(), static_cast<int> (frames));
 
             return mutableBuffer;
         }
