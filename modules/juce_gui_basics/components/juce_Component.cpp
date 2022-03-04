@@ -1370,7 +1370,7 @@ AffineTransform Component::getTransform() const
     return affineTransform != nullptr ? *affineTransform : AffineTransform();
 }
 
-float Component::getApproximateScaleFactorForComponent (Component* targetComponent)
+float Component::getApproximateScaleFactorForComponent (const Component* targetComponent)
 {
     AffineTransform transform;
 

@@ -615,7 +615,7 @@ public:
     /** Returns the approximate scale factor for a given component by traversing its parent hierarchy
         and applying each transform and finally scaling this by the global scale factor.
     */
-    static float JUCE_CALLTYPE getApproximateScaleFactorForComponent (Component* targetComponent);
+    static float JUCE_CALLTYPE getApproximateScaleFactorForComponent (const Component* targetComponent);
 
     //==============================================================================
     /** Returns a proportion of the component's width.
