@@ -248,7 +248,9 @@ private:
             {
                 const auto boundaryType = getBoundaryType (unit);
 
-                const auto start = AccessibilityTextHelpers::findTextBoundary (*textInterface,
+                const auto start = unit == ComTypes::TextUnit::TextUnit_Character
+                                 ? selectionRange.getStart()
+                                 : AccessibilityTextHelpers::findTextBoundary (*textInterface,
                                                                                selectionRange.getStart(),
                                                                                boundaryType,
                                                                                AccessibilityTextHelpers::Direction::backwards);
