@@ -184,6 +184,35 @@ namespace
 
 #endif
 
+#if JUCE_LINUX || JUCE_BSD
+class HostDrivenEventLoop
+{
+public:
+    HostDrivenEventLoop()
+    {
+        messageThread->stop();
+        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+    }
+
+    void processPendingEvents()
+    {
+        MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+
+        for (;;)
+            if (! dispatchNextMessageOnSystemQueue (true))
+                return;
+    }
+
+    ~HostDrivenEventLoop()
+    {
+        messageThread->start();
+    }
+
+private:
+    SharedResourcePointer<MessageThread> messageThread;
+};
+#endif
+
 //==============================================================================
 // Ableton Live host specific commands
 struct AbletonLiveHostSpecific
@@ -961,6 +990,7 @@ public:
             case Vst2::effSetProcessPrecision:      return handleSetSampleFloatType (args);
             case Vst2::effGetNumMidiInputChannels:  return handleGetNumMidiInputChannels();
             case Vst2::effGetNumMidiOutputChannels: return handleGetNumMidiOutputChannels();
+            case Vst2::effEditIdle:                 return handleEditIdle();
             default:                                return 0;
         }
     }
@@ -1103,6 +1133,7 @@ public:
         void parentSizeChanged() override
         {
             updateWindowSize();
+            repaint();
         }
 
         void childBoundsChanged (Component*) override
@@ -1127,41 +1158,11 @@ public:
             return {};
         }
 
-        void updateWindowSize()
+        void resizeHostWindow (juce::Rectangle<int> bounds)
         {
-            if (! resizingParent
-                && getEditorComp() != nullptr
-                && hostWindow != HostWindowType{})
-            {
-                auto editorBounds = getSizeToContainChild();
-
-                resizeHostWindow (editorBounds.getWidth(), editorBounds.getHeight());
-
-                {
-                    const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
-
-                   #if JUCE_LINUX || JUCE_BSD // setSize() on linux causes renoise and energyxt to fail.
-                    auto rect = convertToHostBounds ({ 0, 0, (int16) editorBounds.getHeight(), (int16) editorBounds.getWidth() });
-
-                    X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
-                                                              static_cast<unsigned int> (rect.right - rect.left),
-                                                              static_cast<unsigned int> (rect.bottom - rect.top));
-                   #else
-                    setSize (editorBounds.getWidth(), editorBounds.getHeight());
-                   #endif
-                }
-
-               #if JUCE_MAC
-                resizeHostWindow (editorBounds.getWidth(), editorBounds.getHeight()); // (doing this a second time seems to be necessary in tracktion)
-               #endif
-            }
-        }
-
-        void resizeHostWindow (int newWidth, int newHeight)
-        {
-            auto rect = convertToHostBounds ({ 0, 0, (int16) newHeight, (int16) newWidth });
-            newWidth = rect.right - rect.left;
-            newHeight = rect.bottom - rect.top;
+            auto rect = convertToHostBounds ({ 0, 0, (int16) bounds.getHeight(), (int16) bounds.getWidth() });
+            const auto newWidth = rect.right - rect.left;
+            const auto newHeight = rect.bottom - rect.top;
 
             bool sizeWasSuccessful = false;
 
@@ -1233,6 +1234,12 @@ public:
                                   SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOOWNERZORDER);
                #endif
             }
+
+           #if JUCE_LINUX || JUCE_BSD
+            X11Symbols::getInstance()->xResizeWindow (display, (Window) getWindowHandle(),
+                                                      static_cast<unsigned int> (rect.right - rect.left),
+                                                      static_cast<unsigned int> (rect.bottom - rect.top));
+           #endif
         }
 
         void setContentScaleFactor (float scale)
@@ -1294,6 +1301,34 @@ public:
        #endif
 
     private:
+        void updateWindowSize()
+        {
+            if (! resizingParent
+                && getEditorComp() != nullptr
+                && hostWindow != HostWindowType{})
+            {
+                const auto editorBounds = getSizeToContainChild();
+                resizeHostWindow (editorBounds);
+
+                {
+                    const ScopedValueSetter<bool> resizingParentSetter (resizingParent, true);
+
+                    // setSize() on linux causes renoise and energyxt to fail.
+                    // We'll resize our peer during resizeHostWindow() instead.
+                   #if ! (JUCE_LINUX || JUCE_BSD)
+                    setSize (editorBounds.getWidth(), editorBounds.getHeight());
+                   #endif
+
+                    if (auto* p = getPeer())
+                        p->updateBounds();
+                }
+
+               #if JUCE_MAC
+                resizeHostWindow (editorBounds); // (doing this a second time seems to be necessary in tracktion)
+               #endif
+            }
+        }
+
         //==============================================================================
         static Vst2::ERect convertToHostBounds (const Vst2::ERect& rect)
         {
@@ -1307,6 +1342,11 @@ public:
                      (int16) roundToInt (rect.bottom * desktopScale),
                      (int16) roundToInt (rect.right  * desktopScale) };
         }
+
+        //==============================================================================
+       #if JUCE_LINUX || JUCE_BSD
+        SharedResourcePointer<HostDrivenEventLoop> hostEventLoop;
+       #endif
 
         //==============================================================================
         JuceVSTWrapper& wrapper;
@@ -1616,7 +1656,11 @@ private:
     pointer_sized_int handleGetEditorBounds (VstOpCodeArguments args)
     {
         checkWhetherMessageThreadIsCorrect();
+       #if JUCE_LINUX || JUCE_BSD
+        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+       #else
         const MessageManagerLock mmLock;
+       #endif
         createEditorComp();
 
         if (editorComp != nullptr)
@@ -1632,7 +1676,11 @@ private:
     pointer_sized_int handleOpenEditor (VstOpCodeArguments args)
     {
         checkWhetherMessageThreadIsCorrect();
+       #if JUCE_LINUX || JUCE_BSD
+        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+       #else
         const MessageManagerLock mmLock;
+       #endif
         jassert (! recursionCheck);
 
         startTimerHz (4); // performs misc housekeeping chores
@@ -1652,8 +1700,15 @@ private:
     pointer_sized_int handleCloseEditor (VstOpCodeArguments)
     {
         checkWhetherMessageThreadIsCorrect();
+
+       #if JUCE_LINUX || JUCE_BSD
+        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+       #else
         const MessageManagerLock mmLock;
+       #endif
+
         deleteEditor (true);
+
         return 0;
     }
 
@@ -2011,7 +2066,11 @@ private:
     pointer_sized_int handleSetContentScaleFactor (float scale)
     {
         checkWhetherMessageThreadIsCorrect();
+       #if JUCE_LINUX || JUCE_BSD
+        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+       #else
         const MessageManagerLock mmLock;
+       #endif
 
        #if ! JUCE_MAC
         if (! approximatelyEqual (scale, editorScaleFactor))
@@ -2076,6 +2135,16 @@ private:
        #endif
     }
 
+    pointer_sized_int handleEditIdle()
+    {
+       #if JUCE_LINUX || JUCE_BSD
+        SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
+        hostDrivenEventLoop->processPendingEvents();
+       #endif
+
+        return 0;
+    }
+
     //==============================================================================
     ScopedJuceInitialiser_GUI libraryInitialiser;
 
@@ -2136,17 +2205,13 @@ namespace
             ScopedJuceInitialiser_GUI libraryInitialiser;
 
            #if JUCE_LINUX || JUCE_BSD
-            SharedResourcePointer<MessageThread> messageThread;
+            SharedResourcePointer<HostDrivenEventLoop> hostDrivenEventLoop;
            #endif
 
             try
             {
                 if (audioMaster (nullptr, Vst2::audioMasterVersion, 0, 0, nullptr, 0) != 0)
                 {
-                   #if JUCE_LINUX || JUCE_BSD
-                    MessageManagerLock mmLock;
-                   #endif
-
                     std::unique_ptr<AudioProcessor> processor { createPluginFilterOfType (AudioProcessor::wrapperType_VST) };
                     auto* processorPtr = processor.get();
                     auto* wrapper = new JuceVSTWrapper (audioMaster, std::move (processor));
