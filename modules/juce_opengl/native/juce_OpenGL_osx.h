@@ -29,6 +29,7 @@ public:
                    void* contextToShare,
                    bool shouldUseMultisampling,
                    OpenGLVersion version)
+        : owner (component)
     {
         NSOpenGLPixelFormatAttribute attribs[64] = { 0 };
         createAttribs (attribs, version, pixFormat, shouldUseMultisampling);
@@ -188,7 +189,16 @@ public:
         lastSwapTime = now;
     }
 
-    void updateWindowPosition (Rectangle<int>) {}
+    void updateWindowPosition (Rectangle<int>)
+    {
+        if (auto* peer = owner.getTopLevelComponent()->getPeer())
+        {
+            const auto newArea = peer->getAreaCoveredBy (owner);
+
+            if (convertToRectInt ([view frame]) != newArea)
+                [view setFrame: makeNSRect (newArea)];
+        }
+    }
 
     bool setSwapInterval (int numFramesPerSwapIn)
     {
@@ -237,6 +247,7 @@ public:
         return NSOpenGLCPSwapInterval;
     }
 
+    Component& owner;
     NSOpenGLContext* renderContext = nil;
     NSOpenGLView* view = nil;
     ReferenceCountedObjectPtr<ReferenceCountedObject> viewAttachment;
