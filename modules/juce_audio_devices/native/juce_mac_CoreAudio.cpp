@@ -843,7 +843,7 @@ private:
     bool started = false, audioDeviceStopPending = false;
     std::atomic<bool> playing { false };
     double sampleRate = 0;
-    int bufferSize = 512;
+    int bufferSize = 0;
     HeapBlock<float> audioBuffer;
     int numInputChans  = 0;
     int numOutputChans = 0;
