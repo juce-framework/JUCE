@@ -77,6 +77,26 @@ static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
 
 #endif
 
+template <typename Callback>
+void callOnMessageThread (Callback&& callback)
+{
+    if (MessageManager::getInstance()->existsAndIsLockedByCurrentThread())
+    {
+        callback();
+        return;
+    }
+
+    WaitableEvent completionEvent;
+
+    MessageManager::callAsync ([&callback, &completionEvent]
+                               {
+                                   callback();
+                                   completionEvent.signal();
+                               });
+
+    completionEvent.wait();
+}
+
 #if JUCE_MAC
 
 //==============================================================================
@@ -203,6 +223,7 @@ private:
 #include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
 #include "utilities/juce_PluginHostType.cpp"
+#include "utilities/juce_NativeScaleFactorNotifier.cpp"
 
 #if JUCE_UNIT_TESTS
  #include "format_types/juce_VST3PluginFormat_test.cpp"

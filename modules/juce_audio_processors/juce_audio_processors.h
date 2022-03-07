@@ -111,6 +111,7 @@
 //==============================================================================
 #include "utilities/juce_VSTCallbackHandler.h"
 #include "utilities/juce_VST3ClientExtensions.h"
+#include "utilities/juce_NativeScaleFactorNotifier.h"
 #include "utilities/juce_ExtensionsVisitor.h"
 #include "processors/juce_AudioProcessorParameter.h"
 #include "processors/juce_HostedAudioProcessorParameter.h"

@@ -64,6 +64,9 @@ public:
     /** Resizes this component to fit the HWND that it contains. */
     void resizeToFit();
 
+    /** Forces the bounds of the HWND to match the bounds of this component. */
+    void updateHWNDBounds();
+
     /** @internal */
     void paint (Graphics&) override;
 

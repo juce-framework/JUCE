@@ -610,7 +610,7 @@ private:
         if (auto* peer = owner.getPeer())
         {
             auto r = peer->getComponent().getLocalArea (&owner, owner.getLocalBounds());
-            return r * peer->getPlatformScaleFactor();
+            return r * peer->getPlatformScaleFactor() * peer->getComponent().getDesktopScaleFactor();
         }
 
         return owner.getLocalBounds();

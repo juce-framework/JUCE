@@ -97,7 +97,7 @@ using namespace Steinberg;
 #endif
 
 #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
- extern JUCE_API double getScaleFactorForWindow (HWND);
+ double getScaleFactorForWindow (HWND);
 #endif
 
 //==============================================================================

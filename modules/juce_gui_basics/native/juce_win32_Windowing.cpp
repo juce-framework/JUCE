@@ -465,17 +465,18 @@ static bool isPerMonitorDPIAwareWindow (HWND nativeWindow)
    #endif
 }
 
-static bool isPerMonitorDPIAwareThread()
+static bool isPerMonitorDPIAwareThread (GetThreadDPIAwarenessContextFunc getThreadDPIAwarenessContextIn = getThreadDPIAwarenessContext,
+                                        GetAwarenessFromDpiAwarenessContextFunc getAwarenessFromDPIAwarenessContextIn = getAwarenessFromDPIAwarenessContext)
 {
    #if ! JUCE_WIN_PER_MONITOR_DPI_AWARE
     return false;
    #else
     setDPIAwareness();
 
-    if (getThreadDPIAwarenessContext != nullptr
-        && getAwarenessFromDPIAwarenessContext != nullptr)
+    if (getThreadDPIAwarenessContextIn != nullptr
+        && getAwarenessFromDPIAwarenessContextIn != nullptr)
     {
-        return (getAwarenessFromDPIAwarenessContext (getThreadDPIAwarenessContext())
+        return (getAwarenessFromDPIAwarenessContextIn (getThreadDPIAwarenessContextIn())
                   == DPI_Awareness::DPI_Awareness_Per_Monitor_Aware);
     }
 
@@ -569,12 +570,17 @@ ScopedThreadDPIAwarenessSetter::~ScopedThreadDPIAwarenessSetter() = default;
 
 ScopedDPIAwarenessDisabler::ScopedDPIAwarenessDisabler()
 {
-    if (! isPerMonitorDPIAwareThread())
+    static auto localGetThreadDpiAwarenessContext            = (GetThreadDPIAwarenessContextFunc)        getUser32Function ("GetThreadDpiAwarenessContext");
+    static auto localGetAwarenessFromDpiAwarenessContextFunc = (GetAwarenessFromDpiAwarenessContextFunc) getUser32Function ("GetAwarenessFromDpiAwarenessContext");
+
+    if (! isPerMonitorDPIAwareThread (localGetThreadDpiAwarenessContext, localGetAwarenessFromDpiAwarenessContextFunc))
         return;
 
-    if (setThreadDPIAwarenessContext != nullptr)
+    static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+
+    if (localSetThreadDPIAwarenessContext != nullptr)
     {
-        previousContext = setThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
+        previousContext = localSetThreadDPIAwarenessContext (DPI_AWARENESS_CONTEXT_UNAWARE);
 
        #if JUCE_DEBUG
         ++numActiveScopedDpiAwarenessDisablers;
@@ -586,7 +592,10 @@ ScopedDPIAwarenessDisabler::~ScopedDPIAwarenessDisabler()
 {
     if (previousContext != nullptr)
     {
-        setThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
+        static auto localSetThreadDPIAwarenessContext = (SetThreadDPIAwarenessContextFunc) getUser32Function ("SetThreadDpiAwarenessContext");
+
+        if (localSetThreadDPIAwarenessContext != nullptr)
+            localSetThreadDPIAwarenessContext ((DPI_AWARENESS_CONTEXT) previousContext);
 
        #if JUCE_DEBUG
         --numActiveScopedDpiAwarenessDisablers;

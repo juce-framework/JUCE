@@ -165,4 +165,10 @@ void HWNDComponent::resizeToFit()
         setBounds (pimpl->getHWNDBounds());
 }
 
+void HWNDComponent::updateHWNDBounds()
+{
+    if (pimpl != nullptr)
+        pimpl->componentMovedOrResized (true, true);
+}
+
 } // namespace juce
