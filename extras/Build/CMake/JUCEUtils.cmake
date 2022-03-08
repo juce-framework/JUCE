@@ -1752,6 +1752,10 @@ function(juce_add_pip header)
             NEEDS_STORE_KIT TRUE)
     endif()
 
+    if("JUCE_PLUGINHOST_AU=1" IN_LIST pip_moduleflags)
+        list(APPEND extra_target_args PLUGINHOST_AU TRUE)
+    endif()
+
     if(pip_kind STREQUAL "AudioProcessor")
         set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
 
