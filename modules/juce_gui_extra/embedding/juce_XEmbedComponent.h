@@ -89,6 +89,9 @@ public:
     /** Removes the client window from the host. */
     void removeClient();
 
+    /** Forces the embedded window to match the current size of this component. */
+    void updateEmbeddedBounds();
+
 protected:
     //==============================================================================
     /** @internal */

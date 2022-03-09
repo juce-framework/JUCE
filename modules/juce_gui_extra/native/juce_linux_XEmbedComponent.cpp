@@ -250,6 +250,11 @@ public:
         return host;
     }
 
+    void updateEmbeddedBounds()
+    {
+        componentMovedOrResized (owner, true, true);
+    }
+
 private:
     //==============================================================================
     XEmbedComponent& owner;
@@ -680,6 +685,7 @@ void XEmbedComponent::focusLost   (FocusChangeType changeType)     { pimpl->focu
 void XEmbedComponent::broughtToFront()                             { pimpl->broughtToFront(); }
 unsigned long XEmbedComponent::getHostWindowID()                   { return pimpl->getHostWindowID(); }
 void XEmbedComponent::removeClient()                               { pimpl->setClient (0, true); }
+void XEmbedComponent::updateEmbeddedBounds()                       { pimpl->updateEmbeddedBounds(); }
 
 //==============================================================================
 bool juce_handleXEmbedEvent (ComponentPeer* p, void* e)
