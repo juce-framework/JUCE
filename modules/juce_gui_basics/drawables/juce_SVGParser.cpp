@@ -1748,6 +1748,7 @@ private:
         deltaAngle = fmod (deltaAngle, MathConstants<double>::twoPi);
     }
 
+    SVGState (const SVGState&) = default;
     SVGState& operator= (const SVGState&) = delete;
 };
 

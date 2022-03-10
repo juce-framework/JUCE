@@ -35,12 +35,14 @@ template <typename ElementComparator>
 struct SortFunctionConverter
 {
     SortFunctionConverter (ElementComparator& e) : comparator (e) {}
+    SortFunctionConverter (const SortFunctionConverter&) = default;
 
     template <typename Type>
     bool operator() (Type a, Type b)  { return comparator.compareElements (a, b) < 0; }
 
 private:
     ElementComparator& comparator;
+
     SortFunctionConverter& operator= (const SortFunctionConverter&) = delete;
 };
 
