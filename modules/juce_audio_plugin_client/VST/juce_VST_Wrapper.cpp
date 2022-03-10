@@ -1720,14 +1720,17 @@ private:
         auto data = (void**) args.ptr;
         bool onlyStoreCurrentProgramData = (args.index != 0);
 
-        ScopedLock lock (stateInformationLock);
-        chunkMemory.reset();
+        MemoryBlock block;
 
         if (onlyStoreCurrentProgramData)
-            processor->getCurrentProgramStateInformation (chunkMemory);
+            processor->getCurrentProgramStateInformation (block);
         else
-            processor->getStateInformation (chunkMemory);
+            processor->getStateInformation (block);
 
+        // IMPORTANT! Don't call getStateInfo while holding this lock!
+        const ScopedLock lock (stateInformationLock);
+
+        chunkMemory = std::move (block);
         *data = (void*) chunkMemory.getData();
 
         // because the chunk is only needed temporarily by the host (or at least you'd
@@ -1746,18 +1749,18 @@ private:
             bool onlyRestoreCurrentProgramData = (args.index != 0);
 
             {
-                ScopedLock lock (stateInformationLock);
+                const ScopedLock lock (stateInformationLock);
 
                 chunkMemory.reset();
                 chunkMemoryTime = 0;
+            }
 
-                if (byteSize > 0 && data != nullptr)
-                {
-                    if (onlyRestoreCurrentProgramData)
-                        processor->setCurrentProgramStateInformation (data, byteSize);
-                    else
-                        processor->setStateInformation (data, byteSize);
-                }
+            if (byteSize > 0 && data != nullptr)
+            {
+                if (onlyRestoreCurrentProgramData)
+                    processor->setCurrentProgramStateInformation (data, byteSize);
+                else
+                    processor->setStateInformation (data, byteSize);
             }
         }
 
