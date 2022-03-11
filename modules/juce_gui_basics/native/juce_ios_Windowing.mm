@@ -182,7 +182,6 @@ namespace juce
         [self applicationDidFinishLaunching:application];
     }
 
-    // mostly stolen from didPickDocumentAtURL
     NSUInteger accessOptions = NSFileCoordinatorReadingWithoutChanges;
 
     auto *fileAccessIntent = [NSFileAccessIntent readingIntentWithURL:url options:accessOptions];
