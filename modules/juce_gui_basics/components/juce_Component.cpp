@@ -1997,7 +1997,7 @@ void Component::paintComponentAndChildren (Graphics& g)
 {
     auto clipBounds = g.getClipBounds();
 
-    if (flags.dontClipGraphicsFlag)
+    if (flags.dontClipGraphicsFlag && getNumChildComponents() == 0)
     {
         paint (g);
     }

@@ -1113,10 +1113,10 @@ public:
         number of simple components being rendered, and where they are guaranteed never to do any drawing
         beyond their own boundaries, setting this to true will reduce the overhead involved in clipping
         the graphics context that gets passed to the component's paint() callback.
+
         If you enable this mode, you'll need to make sure your paint method doesn't call anything like
         Graphics::fillAll(), and doesn't draw beyond the component's bounds, because that'll produce
-        artifacts. Your component also can't have any child components that may be placed beyond its
-        bounds.
+        artifacts. This option will have no effect on components that contain any child components.
     */
     void setPaintingIsUnclipped (bool shouldPaintWithoutClipping) noexcept;
 
