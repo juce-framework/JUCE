@@ -70,9 +70,8 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
 #endif
 
 #if JUCE_LINUX || JUCE_BSD
+ #include "juce_events/native/juce_linux_EventLoopInternal.h"
  #include <unordered_map>
-
- std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
 #endif
 
 #if JUCE_MAC
@@ -103,14 +102,20 @@ using namespace Steinberg;
 //==============================================================================
 #if JUCE_LINUX || JUCE_BSD
 
-class EventHandler final  : public Steinberg::Linux::IEventHandler
+class EventHandler final  : public Steinberg::Linux::IEventHandler,
+                            private LinuxEventLoopInternal::Listener
 {
 public:
-    EventHandler() = default;
-
-    ~EventHandler()
+    EventHandler()
     {
-        jassert (hostRunLoops.size() == 0);
+        LinuxEventLoopInternal::registerLinuxEventLoopListener (*this);
+    }
+
+    ~EventHandler() override
+    {
+        jassert (hostRunLoops.empty());
+
+        LinuxEventLoopInternal::deregisterLinuxEventLoopListener (*this);
 
         if (! messageThread->isRunning())
             messageThread->start();
@@ -126,11 +131,7 @@ public:
     void PLUGIN_API onFDIsSet (Steinberg::Linux::FileDescriptor fd) override
     {
         updateCurrentMessageThread();
-
-        auto it = fdCallbackMap.find (fd);
-
-        if (it != fdCallbackMap.end())
-            it->second (fd);
+        LinuxEventLoopInternal::invokeEventLoopCallbackForFd (fd);
     }
 
     //==============================================================================
@@ -138,19 +139,7 @@ public:
     {
         if (auto* runLoop = getRunLoopFromFrame (plugFrame))
         {
-            if (hostRunLoops.contains (runLoop))
-                runLoop->unregisterEventHandler (this);
-
-            hostRunLoops.add (runLoop);
-
-            fdCallbackMap.clear();
-
-            for (auto& cb : getFdReadCallbacks())
-            {
-                fdCallbackMap[cb.first] = cb.second;
-                runLoop->registerEventHandler (this, cb.first);
-            }
-
+            refreshAttachedEventLoop ([this, runLoop] { hostRunLoops.insert (runLoop); });
             updateCurrentMessageThread();
         }
     }
@@ -158,67 +147,58 @@ public:
     void unregisterHandlerForFrame (IPlugFrame* plugFrame)
     {
         if (auto* runLoop = getRunLoopFromFrame (plugFrame))
-        {
-            hostRunLoops.remove (runLoop);
-
-            if (! hostRunLoops.contains (runLoop))
-                runLoop->unregisterEventHandler (this);
-        }
+            refreshAttachedEventLoop ([this, runLoop] { hostRunLoops.erase (runLoop); });
     }
 
 private:
-    //=============================================================================
-    class HostRunLoopInterfaces
+    //==============================================================================
+    /*  Connects all known FDs to a single host event loop instance. */
+    class AttachedEventLoop
     {
     public:
-        HostRunLoopInterfaces() = default;
+        AttachedEventLoop() = default;
 
-        void add (Steinberg::Linux::IRunLoop* runLoop)
+        AttachedEventLoop (Steinberg::Linux::IRunLoop* loopIn, Steinberg::Linux::IEventHandler* handlerIn)
+            : loop (loopIn), handler (handlerIn)
         {
-            if (auto* refCountedRunLoop = find (runLoop))
-            {
-                ++(refCountedRunLoop->refCount);
+            for (auto& fd : LinuxEventLoopInternal::getRegisteredFds())
+                loop->registerEventHandler (handler, fd);
+        }
+
+        AttachedEventLoop (AttachedEventLoop&& other) noexcept
+        {
+            swap (other);
+        }
+
+        AttachedEventLoop& operator= (AttachedEventLoop&& other) noexcept
+        {
+            swap (other);
+            return *this;
+        }
+
+        AttachedEventLoop (const AttachedEventLoop&) = delete;
+        AttachedEventLoop& operator= (const AttachedEventLoop&) = delete;
+
+        ~AttachedEventLoop()
+        {
+            if (loop == nullptr)
                 return;
-            }
 
-            runLoops.push_back ({ runLoop, 1 });
+            loop->unregisterEventHandler (handler);
         }
-
-        void remove (Steinberg::Linux::IRunLoop* runLoop)
-        {
-            if (auto* refCountedRunLoop = find (runLoop))
-                if (--(refCountedRunLoop->refCount) == 0)
-                    runLoops.erase (std::find (runLoops.begin(), runLoops.end(), runLoop));
-        }
-
-        size_t size() const noexcept                         { return runLoops.size(); }
-        bool contains (Steinberg::Linux::IRunLoop* runLoop)  { return find (runLoop) != nullptr; }
 
     private:
-        struct RefCountedRunLoop
+        void swap (AttachedEventLoop& other)
         {
-            Steinberg::Linux::IRunLoop* runLoop = nullptr;
-            int refCount = 0;
-
-            bool operator== (const Steinberg::Linux::IRunLoop* other) const noexcept { return runLoop == other; }
-        };
-
-        RefCountedRunLoop* find (const Steinberg::Linux::IRunLoop* runLoop)
-        {
-            auto iter = std::find (runLoops.begin(), runLoops.end(), runLoop);
-
-            if (iter != runLoops.end())
-                return &(*iter);
-
-            return nullptr;
+            std::swap (other.loop, loop);
+            std::swap (other.handler, handler);
         }
 
-        std::vector<RefCountedRunLoop> runLoops;
-
-        JUCE_DECLARE_NON_MOVEABLE (HostRunLoopInterfaces)
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (HostRunLoopInterfaces)
+        Steinberg::Linux::IRunLoop* loop = nullptr;
+        Steinberg::Linux::IEventHandler* handler = nullptr;
     };
 
+    //==============================================================================
     static Steinberg::Linux::IRunLoop* getRunLoopFromFrame (IPlugFrame* plugFrame)
     {
         Steinberg::Linux::IRunLoop* runLoop = nullptr;
@@ -241,12 +221,44 @@ private:
         }
     }
 
+    void fdCallbacksChanged() override
+    {
+        // The set of active FDs has changed, so deregister from the current event loop and then
+        // re-register the current set of FDs.
+        refreshAttachedEventLoop ([]{});
+    }
+
+    /*  Deregisters from any attached event loop, updates the set of known event loops, and then
+        attaches all FDs to the first known event loop.
+
+        The same event loop instance is shared between all plugin instances. Every time an event
+        loop is added or removed, this function should be called to register all FDs with a
+        suitable event loop.
+
+        Note that there's no API to deregister a single FD for a given event loop. Instead, we must
+        deregister all FDs, and then register all known FDs again.
+    */
+    template <typename Callback>
+    void refreshAttachedEventLoop (Callback&& modifyKnownRunLoops)
+    {
+        // Deregister the old event loop.
+        // It's important to call the destructor from the old attached loop before calling the
+        // constructor of the new attached loop.
+        attachedEventLoop = AttachedEventLoop();
+
+        modifyKnownRunLoops();
+
+        // If we still know about an extant event loop, attach to it.
+        if (hostRunLoops.begin() != hostRunLoops.end())
+            attachedEventLoop = AttachedEventLoop (*hostRunLoops.begin(), this);
+    }
+
     SharedResourcePointer<MessageThread> messageThread;
 
     std::atomic<int> refCount { 1 };
 
-    HostRunLoopInterfaces hostRunLoops;
-    std::unordered_map<int, std::function<void (int)>> fdCallbackMap;
+    std::multiset<Steinberg::Linux::IRunLoop*> hostRunLoops;
+    AttachedEventLoop attachedEventLoop;
 
     //==============================================================================
     JUCE_DECLARE_NON_MOVEABLE (EventHandler)
