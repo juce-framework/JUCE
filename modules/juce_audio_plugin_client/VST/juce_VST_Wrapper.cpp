@@ -1071,6 +1071,10 @@ public:
                                                          (Window) getWindowHandle(),
                                                          (HostWindowType) hostWindow,
                                                          0, 0);
+             // The host is likely to attempt to move/resize the window directly after this call,
+             // and we need to ensure that the X server knows that our window has been attached
+             // before that happens.
+             X11Symbols::getInstance()->xFlush (display);
             #elif JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
              checkHostWindowScaleFactor();
              startTimer (500);
