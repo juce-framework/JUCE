@@ -2926,8 +2926,12 @@ public:
     void componentPeerChanged() override
     {
         closePluginWindow();
-        openPluginWindow();
-        componentMovedOrResized (true, true);
+
+        if (getPeer() != nullptr)
+        {
+            openPluginWindow();
+            componentMovedOrResized (true, true);
+        }
     }
 
     void setContentScaleFactor()
