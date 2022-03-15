@@ -940,11 +940,17 @@ private:
 
         BorderSize<int> computeBorder() const
         {
-            const auto outer = owner.getContentComponentBorder();
-            return { outer.getTop() + (shouldShowNotification ? NotificationArea::height : 0),
-                     outer.getLeft(),
-                     outer.getBottom(),
-                     outer.getRight() };
+            const auto nativeFrame = [&]() -> BorderSize<int>
+            {
+                if (auto* peer = owner.getPeer())
+                    if (const auto frameSize = peer->getFrameSizeIfPresent())
+                        return *frameSize;
+
+                return {};
+            }();
+
+            return nativeFrame.addedTo (owner.getContentComponentBorder())
+                              .addedTo (BorderSize<int> { shouldShowNotification ? NotificationArea::height : 0, 0, 0, 0 });
         }
 
     private:
