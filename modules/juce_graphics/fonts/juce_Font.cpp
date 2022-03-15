@@ -236,14 +236,19 @@ public:
     {
     }
 
+    auto tie() const
+    {
+        return std::tie (height, underline, horizontalScale, kerning, typefaceName, typefaceStyle);
+    }
+
     bool operator== (const SharedFontInternal& other) const noexcept
     {
-        return height == other.height
-                && underline == other.underline
-                && horizontalScale == other.horizontalScale
-                && kerning == other.kerning
-                && typefaceName == other.typefaceName
-                && typefaceStyle == other.typefaceStyle;
+        return tie() == other.tie();
+    }
+
+    bool operator< (const SharedFontInternal& other) const noexcept
+    {
+        return tie() < other.tie();
     }
 
     /*  The typeface and ascent data members may be read/set from multiple threads
@@ -409,6 +414,11 @@ bool Font::operator== (const Font& other) const noexcept
 bool Font::operator!= (const Font& other) const noexcept
 {
     return ! operator== (other);
+}
+
+bool Font::compare (const Font& a, const Font& b) noexcept
+{
+    return *a.font < *b.font;
 }
 
 void Font::dupeInternalIfShared()

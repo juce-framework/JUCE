@@ -464,11 +464,16 @@ public:
 
 private:
     //==============================================================================
-    class SharedFontInternal;
-    ReferenceCountedObjectPtr<SharedFontInternal> font;
+    static bool compare (const Font&, const Font&) noexcept;
+
     void dupeInternalIfShared();
     void checkTypefaceSuitability();
     float getHeightToPointsFactor() const;
+
+    friend struct GraphicsFontHelpers;
+
+    class SharedFontInternal;
+    ReferenceCountedObjectPtr<SharedFontInternal> font;
 
     JUCE_LEAK_DETECTOR (Font)
 };
