@@ -1326,8 +1326,12 @@ private:
                     inputFormat[i].convertToFloat (infos[i].buffers[bufferIndex], inBuffers[i], samps);
                 }
 
-                currentCallback->audioDeviceIOCallback (const_cast<const float**> (inBuffers.getData()), numActiveInputChans,
-                                                        outBuffers, numActiveOutputChans, samps);
+                currentCallback->audioDeviceIOCallbackWithContext (const_cast<const float**> (inBuffers.getData()),
+                                                                   numActiveInputChans,
+                                                                   outBuffers,
+                                                                   numActiveOutputChans,
+                                                                   samps,
+                                                                   {});
 
                 for (int i = 0; i < numActiveOutputChans; ++i)
                 {

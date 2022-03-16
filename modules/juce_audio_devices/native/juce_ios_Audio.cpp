@@ -20,6 +20,8 @@
   ==============================================================================
 */
 
+#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
+
 namespace juce
 {
 
@@ -900,9 +902,14 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
                     zeromem (inputData[c], channelDataSize);
             }
 
-            callback->audioDeviceIOCallback ((const float**) inputData,  channelData.inputs ->numActiveChannels,
-                                                             outputData, channelData.outputs->numActiveChannels,
-                                             (int) numFrames);
+            const auto nanos = time != nullptr ? timeConversions.hostTimeToNanos (time->mHostTime) : 0;
+
+            callback->audioDeviceIOCallbackWithContext ((const float**) inputData,
+                                                        channelData.inputs ->numActiveChannels,
+                                                        outputData,
+                                                        channelData.outputs->numActiveChannels,
+                                                        (int) numFrames,
+                                                        { (time != nullptr && (time->mFlags & kAudioTimeStampHostTimeValid) != 0) ? &nanos : nullptr });
 
             for (int c = 0; c < channelData.outputs->numActiveChannels; ++c)
             {
@@ -1328,6 +1335,8 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
 
         AudioBuffer<float> audioData { 0, 0 };
     };
+
+    CoreAudioTimeConversions timeConversions;
 
     IOChannelData channelData;
 

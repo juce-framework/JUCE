@@ -85,7 +85,7 @@ public:
 
     //==============================================================================
     /** @internal */
-    void audioDeviceIOCallback (const float**, int, float**, int, int) override;
+    void audioDeviceIOCallbackWithContext (const float**, int, float**, int, int, const AudioIODeviceCallbackContext&) override;
     /** @internal */
     void audioDeviceAboutToStart (AudioIODevice*) override;
     /** @internal */

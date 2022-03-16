@@ -1016,9 +1016,12 @@ public:
 
             if (isStarted)
             {
-                callback->audioDeviceIOCallback (inputBuffers.getArrayOfReadPointers(), inputBuffers.getNumChannels(),
-                                                 outputBuffers.getArrayOfWritePointers(), outputBuffers.getNumChannels(),
-                                                 bufferSizeSamples);
+                callback->audioDeviceIOCallbackWithContext (inputBuffers.getArrayOfReadPointers(),
+                                                            inputBuffers.getNumChannels(),
+                                                            outputBuffers.getArrayOfWritePointers(),
+                                                            outputBuffers.getNumChannels(),
+                                                            bufferSizeSamples,
+                                                            {});
             }
             else
             {

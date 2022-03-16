@@ -51,6 +51,7 @@
 
 #include <juce_graphics/native/juce_mac_CoreGraphicsHelpers.h>
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
@@ -1521,6 +1522,23 @@ private:
 
         const auto numProcessorBusesOut = AudioUnitHelpers::getBusCount (processor, false);
 
+        if (timestamp != nullptr)
+        {
+            if ((timestamp->mFlags & kAudioTimeStampHostTimeValid) != 0)
+            {
+                const auto convertedTime = timeConversions.hostTimeToNanos (timestamp->mHostTime);
+                getAudioProcessor().setHostTimeNanos (&convertedTime);
+            }
+        }
+
+        struct AtEndOfScope
+        {
+            ~AtEndOfScope() { proc.setHostTimeNanos (nullptr); }
+            AudioProcessor& proc;
+        };
+
+        const AtEndOfScope scope { getAudioProcessor() };
+
         if (lastTimeStamp.mSampleTime != timestamp->mSampleTime)
         {
             // process params and incoming midi (only once for a given timestamp)
@@ -1764,6 +1782,7 @@ private:
 
     int totalInChannels, totalOutChannels;
 
+    CoreAudioTimeConversions timeConversions;
     std::unique_ptr<AUAudioUnitBusArray, NSObjectDeleter> inputBusses, outputBusses;
 
     ObjCBlock<AUImplementorValueObserver> paramObserver;

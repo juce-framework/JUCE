@@ -240,7 +240,10 @@ static void setStateForAllBusesOfType (Vst::IComponent* component,
 }
 
 //==============================================================================
-static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playHead, double sampleRate)
+static void toProcessContext (Vst::ProcessContext& context,
+                              AudioPlayHead* playHead,
+                              double sampleRate,
+                              const uint64_t* hostTimeNs)
 {
     jassert (sampleRate > 0.0); //Must always be valid, as stated by the VST3 SDK
 
@@ -295,6 +298,13 @@ static void toProcessContext (Vst::ProcessContext& context, AudioPlayHead* playH
 
     if (context.timeSigNumerator > 0 && context.timeSigDenominator > 0)
         context.state |= ProcessContext::kTimeSigValid;
+
+    if (hostTimeNs != nullptr)
+    {
+        context.systemTime = (int64_t) *hostTimeNs;
+        jassert (context.systemTime >= 0);
+        context.state |= ProcessContext::kSystemTimeValid;
+    }
 }
 
 //==============================================================================
@@ -3345,7 +3355,7 @@ private:
 
     void updateTimingInformation (Vst::ProcessData& destination, double processSampleRate)
     {
-        toProcessContext (timingInfo, getPlayHead(), processSampleRate);
+        toProcessContext (timingInfo, getPlayHead(), processSampleRate, getHostTimeNs());
         destination.processContext = &timingInfo;
     }
 

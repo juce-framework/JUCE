@@ -77,6 +77,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include "../utility/juce_CarbonVisibility.h"
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
+#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
@@ -1287,6 +1288,22 @@ public:
     {
         lastTimeStamp = inTimeStamp;
 
+        jassert (! juceFilter->getHostTimeNs());
+
+        if ((inTimeStamp.mFlags & kAudioTimeStampHostTimeValid) != 0)
+        {
+            const auto timestamp = timeConversions.hostTimeToNanos (inTimeStamp.mHostTime);
+            juceFilter->setHostTimeNanos (&timestamp);
+        }
+
+        struct AtEndOfScope
+        {
+            ~AtEndOfScope() { proc.setHostTimeNanos (nullptr); }
+            AudioProcessor& proc;
+        };
+
+        const AtEndOfScope scope { *juceFilter };
+
         // prepare buffers
         {
             pullInputAudio (ioActionFlags, inTimeStamp, nFrames);
@@ -1816,6 +1833,7 @@ private:
     // According to the docs, this is the maximum size of a MIDIPacketList.
     static constexpr UInt32 packetListBytes = 65536;
 
+    CoreAudioTimeConversions timeConversions;
     AudioUnitEvent auEvent;
     mutable Array<AUPreset> presetsArray;
     CriticalSection incomingMidiLock;

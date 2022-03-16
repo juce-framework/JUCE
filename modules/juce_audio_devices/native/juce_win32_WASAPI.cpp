@@ -1515,8 +1515,12 @@ public:
                 const ScopedTryLock sl (startStopLock);
 
                 if (sl.isLocked() && isStarted)
-                    callback->audioDeviceIOCallback (const_cast<const float**> (inputBuffers), numInputBuffers,
-                                                     outputBuffers, numOutputBuffers, bufferSize);
+                    callback->audioDeviceIOCallbackWithContext (const_cast<const float**> (inputBuffers),
+                                                                numInputBuffers,
+                                                                outputBuffers,
+                                                                numOutputBuffers,
+                                                                bufferSize,
+                                                                {});
                 else
                     outs.clear();
             }

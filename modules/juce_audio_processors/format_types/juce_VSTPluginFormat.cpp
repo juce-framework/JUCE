@@ -2367,7 +2367,6 @@ private:
 
                 if (currentPlayHead->getCurrentPosition (position))
                 {
-
                     vstHostTime.samplePos          = (double) position.timeInSamples;
                     vstHostTime.tempo              = position.bpm;
                     vstHostTime.timeSigNumerator   = position.timeSigNumerator;
@@ -2375,9 +2374,19 @@ private:
                     vstHostTime.ppqPos             = position.ppqPosition;
                     vstHostTime.barStartPos        = position.ppqPositionOfLastBarStart;
                     vstHostTime.flags |= Vst2::kVstTempoValid
-                                           | Vst2::kVstTimeSigValid
-                                           | Vst2::kVstPpqPosValid
-                                           | Vst2::kVstBarsValid;
+                                       | Vst2::kVstTimeSigValid
+                                       | Vst2::kVstPpqPosValid
+                                       | Vst2::kVstBarsValid;
+
+                    if (const auto* hostTimeNs = getHostTimeNs())
+                    {
+                        vstHostTime.nanoSeconds = (double) *hostTimeNs;
+                        vstHostTime.flags |= Vst2::kVstNanosValid;
+                    }
+                    else
+                    {
+                        vstHostTime.flags &= ~Vst2::kVstNanosValid;
+                    }
 
                     int32 newTransportFlags = 0;
                     if (position.isPlaying)     newTransportFlags |= Vst2::kVstTransportPlaying;
@@ -2389,28 +2398,22 @@ private:
                     else
                         vstHostTime.flags &= ~Vst2::kVstTransportChanged;
 
-                    struct OptionalFrameRate
-                    {
-                        bool valid;
-                        Vst2::VstInt32 rate;
-                    };
-
-                    const auto optionalFrameRate = [&fr = position.frameRate]() -> OptionalFrameRate
+                    const auto optionalFrameRate = [&fr = position.frameRate]() -> Optional<Vst2::VstInt32>
                     {
                         switch (fr.getBaseRate())
                         {
-                            case 24:        return { true, fr.isPullDown() ? Vst2::kVstSmpte239fps : Vst2::kVstSmpte24fps };
-                            case 25:        return { true, fr.isPullDown() ? Vst2::kVstSmpte249fps : Vst2::kVstSmpte25fps };
-                            case 30:        return { true, fr.isPullDown() ? (fr.isDrop() ? Vst2::kVstSmpte2997dfps : Vst2::kVstSmpte2997fps)
-                                                                           : (fr.isDrop() ? Vst2::kVstSmpte30dfps   : Vst2::kVstSmpte30fps) };
-                            case 60:        return { true, fr.isPullDown() ? Vst2::kVstSmpte599fps : Vst2::kVstSmpte60fps };
+                            case 24:        return fr.isPullDown() ? Vst2::kVstSmpte239fps : Vst2::kVstSmpte24fps;
+                            case 25:        return fr.isPullDown() ? Vst2::kVstSmpte249fps : Vst2::kVstSmpte25fps;
+                            case 30:        return fr.isPullDown() ? (fr.isDrop() ? Vst2::kVstSmpte2997dfps : Vst2::kVstSmpte2997fps)
+                                                                   : (fr.isDrop() ? Vst2::kVstSmpte30dfps   : Vst2::kVstSmpte30fps);
+                            case 60:        return fr.isPullDown() ? Vst2::kVstSmpte599fps : Vst2::kVstSmpte60fps;
                         }
 
-                        return { false, Vst2::VstSmpteFrameRate{} };
+                        return {};
                     }();
 
-                    vstHostTime.flags |= optionalFrameRate.valid ? Vst2::kVstSmpteValid : 0;
-                    vstHostTime.smpteFrameRate = optionalFrameRate.rate;
+                    vstHostTime.flags |= optionalFrameRate ? Vst2::kVstSmpteValid : 0;
+                    vstHostTime.smpteFrameRate = optionalFrameRate.orFallback (Vst2::VstSmpteFrameRate{});
                     vstHostTime.smpteOffset = (int32) (position.timeInSeconds * 80.0 * position.frameRate.getEffectiveRate() + 0.5);
 
                     if (position.isLooping)

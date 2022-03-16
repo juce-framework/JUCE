@@ -441,11 +441,12 @@ private:
             inner.audioDeviceAboutToStart (device);
         }
 
-        void audioDeviceIOCallback (const float** inputChannelData,
-                                    int numInputChannels,
-                                    float** outputChannelData,
-                                    int numOutputChannels,
-                                    int numSamples) override
+        void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+                                               int numInputChannels,
+                                               float** outputChannelData,
+                                               int numOutputChannels,
+                                               int numSamples,
+                                               const AudioIODeviceCallbackContext& context) override
         {
             jassertquiet ((int) storedInputChannels.size()  == numInputChannels);
             jassertquiet ((int) storedOutputChannels.size() == numOutputChannels);
@@ -459,11 +460,12 @@ private:
                 initChannelPointers (inputChannelData,  storedInputChannels,  position);
                 initChannelPointers (outputChannelData, storedOutputChannels, position);
 
-                inner.audioDeviceIOCallback (storedInputChannels.data(),
-                                             (int) storedInputChannels.size(),
-                                             storedOutputChannels.data(),
-                                             (int) storedOutputChannels.size(),
-                                             blockLength);
+                inner.audioDeviceIOCallbackWithContext (storedInputChannels.data(),
+                                                        (int) storedInputChannels.size(),
+                                                        storedOutputChannels.data(),
+                                                        (int) storedOutputChannels.size(),
+                                                        blockLength,
+                                                        context);
 
                 position += blockLength;
             }
@@ -591,11 +593,12 @@ private:
     };
 
     //==============================================================================
-    void audioDeviceIOCallback (const float** inputChannelData,
-                                int numInputChannels,
-                                float** outputChannelData,
-                                int numOutputChannels,
-                                int numSamples) override
+    void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+                                           int numInputChannels,
+                                           float** outputChannelData,
+                                           int numOutputChannels,
+                                           int numSamples,
+                                           const AudioIODeviceCallbackContext& context) override
     {
         if (muteInput)
         {
@@ -603,8 +606,12 @@ private:
             inputChannelData = emptyBuffer.getArrayOfReadPointers();
         }
 
-        player.audioDeviceIOCallback (inputChannelData, numInputChannels,
-                                      outputChannelData, numOutputChannels, numSamples);
+        player.audioDeviceIOCallbackWithContext (inputChannelData,
+                                                 numInputChannels,
+                                                 outputChannelData,
+                                                 numOutputChannels,
+                                                 numSamples,
+                                                 context);
     }
 
     void audioDeviceAboutToStart (AudioIODevice* device) override

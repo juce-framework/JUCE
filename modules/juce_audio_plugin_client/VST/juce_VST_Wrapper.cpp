@@ -18,6 +18,7 @@
 
 #include <juce_core/system/juce_CompilerWarnings.h>
 #include <juce_core/system/juce_TargetPlatform.h>
+#include <juce_core/containers/juce_Optional.h>
 #include "../utility/juce_CheckSettingMacros.h"
 
 #if JucePlugin_Build_VST
@@ -354,7 +355,7 @@ public:
             jassert (isProcessing);
 
             // (tragically, some hosts actually need this, although it's stupid to have
-            //  to do it here..)
+            //  to do it here.)
             if (! isProcessing)
                 resume();
 
@@ -389,6 +390,16 @@ public:
             }
             else
             {
+                updateCallbackContextInfo();
+
+                struct AtEndOfScope
+                {
+                    ~AtEndOfScope() { proc.setHostTimeNanos (nullptr); }
+                    AudioProcessor& proc;
+                };
+
+                const AtEndOfScope scope { *processor };
+
                 int i;
                 for (i = 0; i < numOut; ++i)
                 {
@@ -589,25 +600,28 @@ public:
         }
     }
 
-    //==============================================================================
-    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info) override
+    void updateCallbackContextInfo()
     {
         const Vst2::VstTimeInfo* ti = nullptr;
 
         if (hostCallback != nullptr)
         {
             int32 flags = Vst2::kVstPpqPosValid  | Vst2::kVstTempoValid
-                        | Vst2::kVstBarsValid    | Vst2::kVstCyclePosValid
-                        | Vst2::kVstTimeSigValid | Vst2::kVstSmpteValid
-                        | Vst2::kVstClockValid;
+                          | Vst2::kVstBarsValid    | Vst2::kVstCyclePosValid
+                          | Vst2::kVstTimeSigValid | Vst2::kVstSmpteValid
+                          | Vst2::kVstClockValid   | Vst2::kVstNanosValid;
 
             auto result = hostCallback (&vstEffect, Vst2::audioMasterGetTime, 0, flags, nullptr, 0);
             ti = reinterpret_cast<Vst2::VstTimeInfo*> (result);
         }
 
         if (ti == nullptr || ti->sampleRate <= 0)
-            return false;
+        {
+            currentPosition.reset();
+            return;
+        }
 
+        auto& info = currentPosition.emplace();
         info.bpm = (ti->flags & Vst2::kVstTempoValid) != 0 ? ti->tempo : 0.0;
 
         if ((ti->flags & Vst2::kVstTimeSigValid) != 0)
@@ -675,6 +689,20 @@ public:
             info.ppqLoopEnd = 0;
         }
 
+        if ((ti->flags & Vst2::kVstNanosValid) != 0)
+        {
+            const auto nanos = (uint64_t) ti->nanoSeconds;
+            processor->setHostTimeNanos (&nanos);
+        }
+    }
+
+    //==============================================================================
+    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info) override
+    {
+        if (! currentPosition.hasValue())
+            return false;
+
+        info = *currentPosition;
         return true;
     }
 
@@ -2068,6 +2096,7 @@ private:
     Vst2::ERect editorRect;
     MidiBuffer midiEvents;
     VSTMidiEventList outgoingEvents;
+    Optional<CurrentPositionInfo> currentPosition;
 
     LegacyAudioParametersWrapper juceParameters;
 

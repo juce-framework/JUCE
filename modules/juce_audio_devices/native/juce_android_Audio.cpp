@@ -357,9 +357,11 @@ public:
 
                 if (callback != nullptr)
                 {
-                    callback->audioDeviceIOCallback (inputChannelBuffer.getArrayOfReadPointers(), numClientInputChannels,
-                                                     outputChannelBuffer.getArrayOfWritePointers(), numClientOutputChannels,
-                                                     actualBufferSize);
+                    callback->audioDeviceIOCallbackWithContext (inputChannelBuffer.getArrayOfReadPointers(),
+                                                                numClientInputChannels,
+                                                                outputChannelBuffer.getArrayOfWritePointers(),
+                                                                numClientOutputChannels,
+                                                                actualBufferSize, {});
                 }
                 else
                 {

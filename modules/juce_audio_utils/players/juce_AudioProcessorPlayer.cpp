@@ -226,11 +226,12 @@ void AudioProcessorPlayer::setMidiOutput (MidiOutput* midiOutputToUse)
 }
 
 //==============================================================================
-void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChannelData,
-                                                  const int numInputChannels,
-                                                  float** const outputChannelData,
-                                                  const int numOutputChannels,
-                                                  const int numSamples)
+void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float** const inputChannelData,
+                                                             const int numInputChannels,
+                                                             float** const outputChannelData,
+                                                             const int numOutputChannels,
+                                                             const int numSamples,
+                                                             const AudioIODeviceCallbackContext& context)
 {
     const ScopedLock sl (lock);
 
@@ -258,6 +259,16 @@ void AudioProcessorPlayer::audioDeviceIOCallback (const float** const inputChann
         jassert (processor->isMidiEffect() || numOutputChannels == actualProcessorChannels.outs);
 
         const ScopedLock sl2 (processor->getCallbackLock());
+
+        processor->setHostTimeNanos (context.hostTimeNs);
+
+        struct AtEndOfScope
+        {
+            ~AtEndOfScope() { proc.setHostTimeNanos (nullptr); }
+            AudioProcessor& proc;
+        };
+
+        const AtEndOfScope scope { *processor };
 
         if (! processor->isSuspended())
         {

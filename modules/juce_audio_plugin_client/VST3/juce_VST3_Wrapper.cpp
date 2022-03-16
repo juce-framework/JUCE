@@ -3170,6 +3170,12 @@ public:
         {
             processContext = *data.processContext;
 
+            if ((processContext.state & Vst::ProcessContext::kSystemTimeValid) != 0)
+            {
+                const auto timestamp = (uint64_t) processContext.systemTime;
+                getPluginInstance().setHostTimeNanos (&timestamp);
+            }
+
             if (juceVST3EditController != nullptr)
                 juceVST3EditController->vst3IsPlaying = (processContext.state & Vst::ProcessContext::kPlaying) != 0;
         }
@@ -3180,6 +3186,14 @@ public:
             if (juceVST3EditController != nullptr)
                 juceVST3EditController->vst3IsPlaying = false;
         }
+
+        struct AtEndOfScope
+        {
+            ~AtEndOfScope() { proc.setHostTimeNanos (nullptr); }
+            AudioProcessor& proc;
+        };
+
+        const AtEndOfScope scope { getPluginInstance() };
 
         midiBuffer.clear();
 

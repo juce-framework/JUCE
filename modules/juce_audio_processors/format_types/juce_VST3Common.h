@@ -20,6 +20,8 @@
 
 #ifndef DOXYGEN
 
+#include <juce_core/containers/juce_Optional.h>
+
 namespace juce
 {
 
@@ -1033,10 +1035,8 @@ public:
             if (eventList.getEvent (i, e) != Steinberg::kResultOk)
                 continue;
 
-            const auto message = toMidiMessage (e);
-
-            if (message.isValid)
-                result.addEvent (message.item, e.sampleOffset);
+            if (const auto message = toMidiMessage (e))
+                result.addEvent (*message, e.sampleOffset);
         }
     }
 
@@ -1109,15 +1109,12 @@ private:
                 }
             }
 
-            auto maybeEvent = createVstEvent (msg, metadata.data, kind);
-
-            if (! maybeEvent.isValid)
-                continue;
-
-            auto& e = maybeEvent.item;
-            e.busIndex = 0;
-            e.sampleOffset = metadata.samplePosition;
-            result.addEvent (e);
+            if (auto maybeEvent = createVstEvent (msg, metadata.data, kind))
+            {
+                maybeEvent->busIndex = 0;
+                maybeEvent->sampleOffset = metadata.samplePosition;
+                result.addEvent (*maybeEvent);
+            }
         }
     }
 
@@ -1234,19 +1231,9 @@ private:
                                       msg.getQuarterFrameValue());
     }
 
-    template <typename Item>
-    struct BasicOptional final
-    {
-        BasicOptional() noexcept = default;
-        BasicOptional (const Item& i) noexcept : item { i }, isValid { true } {}
-
-        Item item;
-        bool isValid{};
-    };
-
-    static BasicOptional<Steinberg::Vst::Event> createVstEvent (const MidiMessage& msg,
-                                                                const uint8* midiEventData,
-                                                                EventConversionKind kind) noexcept
+    static Optional<Steinberg::Vst::Event> createVstEvent (const MidiMessage& msg,
+                                                           const uint8* midiEventData,
+                                                           EventConversionKind kind) noexcept
     {
         if (msg.isNoteOn())
             return createNoteOnEvent (msg);
@@ -1290,7 +1277,7 @@ private:
         return {};
     }
 
-    static BasicOptional<MidiMessage> toMidiMessage (const Steinberg::Vst::LegacyMIDICCOutEvent& e)
+    static Optional<MidiMessage> toMidiMessage (const Steinberg::Vst::LegacyMIDICCOutEvent& e)
     {
         if (e.controlNumber <= 127)
             return MidiMessage::controllerEvent (createSafeChannel (int16 (e.channel)),
@@ -1327,7 +1314,7 @@ private:
         }
     }
 
-    static BasicOptional<MidiMessage> toMidiMessage (const Steinberg::Vst::Event& e)
+    static Optional<MidiMessage> toMidiMessage (const Steinberg::Vst::Event& e)
     {
         switch (e.type)
         {

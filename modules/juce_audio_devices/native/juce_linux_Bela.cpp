@@ -433,9 +433,12 @@ private:
                     channelOutBuffer[ch] = &context.analogOut[(Frames) (ch - analogChannelStart) * context.audioFrames];
             }
 
-            callback->audioDeviceIOCallback (channelInBuffer.getData(), actualNumberOfInputs,
-                                             channelOutBuffer.getData(), actualNumberOfOutputs,
-                                             (int) context.audioFrames);
+            callback->audioDeviceIOCallbackWithContext (channelInBuffer.getData(),
+                                                        actualNumberOfInputs,
+                                                        channelOutBuffer.getData(),
+                                                        actualNumberOfOutputs,
+                                                        (int) context.audioFrames,
+                                                        {});
         }
     }
 

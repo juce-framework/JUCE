@@ -37,10 +37,11 @@ struct GraphRenderSequence
         FloatType** audioBuffers;
         MidiBuffer* midiBuffers;
         AudioPlayHead* audioPlayHead;
+        Optional<uint64_t> hostTimeNs;
         int numSamples;
     };
 
-    void perform (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioPlayHead* audioPlayHead)
+    void perform (AudioBuffer<FloatType>& buffer, MidiBuffer& midiMessages, AudioPlayHead* audioPlayHead, Optional<uint64_t> hostTimeNs)
     {
         auto numSamples = buffer.getNumSamples();
         auto maxSamples = renderingBuffer.getNumSamples();
@@ -57,7 +58,9 @@ struct GraphRenderSequence
                 midiChunk.clear();
                 midiChunk.addEvents (midiMessages, chunkStartSample, chunkSize, -chunkStartSample);
 
-                perform (audioChunk, midiChunk, audioPlayHead);
+                // Splitting up the buffer like this will cause the play head and host time to be
+                // invalid for all but the first chunk...
+                perform (audioChunk, midiChunk, audioPlayHead, hostTimeNs);
 
                 chunkStartSample += maxSamples;
             }
@@ -72,7 +75,7 @@ struct GraphRenderSequence
         currentMidiOutputBuffer.clear();
 
         {
-            const Context context { renderingBuffer.getArrayOfWritePointers(), midiBuffers.begin(), audioPlayHead, numSamples };
+            const Context context { renderingBuffer.getArrayOfWritePointers(), midiBuffers.begin(), audioPlayHead, hostTimeNs, numSamples };
 
             for (auto* op : renderOps)
                 op->perform (context);
@@ -257,6 +260,7 @@ private:
         void perform (const Context& c) override
         {
             processor.setPlayHead (c.audioPlayHead);
+            processor.setHostTimeNanos (c.hostTimeNs.hasValue() ? &(*c.hostTimeNs) : nullptr);
 
             for (int i = 0; i < totalChans; ++i)
                 audioChannels[i] = c.audioBuffers[audioChannelsToUse.getUnchecked (i)];
@@ -278,6 +282,8 @@ private:
                 buffer.clear();
             else
                 callProcess (buffer, c.midiBuffers[midiBufferToUse]);
+
+            processor.setHostTimeNanos (nullptr);
         }
 
         void callProcess (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
@@ -1389,6 +1395,14 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
                                    std::unique_ptr<SequenceType>& renderSequence,
                                    std::atomic<bool>& isPrepared)
 {
+    const auto getHostTime = [&]() -> Optional<uint64_t>
+    {
+        if (auto* nanos = graph.getHostTimeNs())
+            return *nanos;
+
+        return nullopt;
+    };
+
     if (graph.isNonRealtime())
     {
         while (! isPrepared)
@@ -1397,7 +1411,7 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
         const ScopedLock sl (graph.getCallbackLock());
 
         if (renderSequence != nullptr)
-            renderSequence->perform (buffer, midiMessages, graph.getPlayHead());
+            renderSequence->perform (buffer, midiMessages, graph.getPlayHead(), getHostTime());
     }
     else
     {
@@ -1406,7 +1420,7 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
         if (isPrepared)
         {
             if (renderSequence != nullptr)
-                renderSequence->perform (buffer, midiMessages, graph.getPlayHead());
+                renderSequence->perform (buffer, midiMessages, graph.getPlayHead(), getHostTime());
         }
         else
         {

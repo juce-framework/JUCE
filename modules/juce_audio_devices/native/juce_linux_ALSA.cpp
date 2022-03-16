@@ -711,11 +711,12 @@ public:
 
                 if (callback != nullptr)
                 {
-                    callback->audioDeviceIOCallback (inputChannelDataForCallback.getRawDataPointer(),
-                                                     inputChannelDataForCallback.size(),
-                                                     outputChannelDataForCallback.getRawDataPointer(),
-                                                     outputChannelDataForCallback.size(),
-                                                     bufferSize);
+                    callback->audioDeviceIOCallbackWithContext (inputChannelDataForCallback.getRawDataPointer(),
+                                                                inputChannelDataForCallback.size(),
+                                                                outputChannelDataForCallback.getRawDataPointer(),
+                                                                outputChannelDataForCallback.size(),
+                                                                bufferSize,
+                                                                {});
                 }
                 else
                 {

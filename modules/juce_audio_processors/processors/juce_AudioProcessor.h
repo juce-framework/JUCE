@@ -1126,6 +1126,51 @@ public:
     virtual void setPlayHead (AudioPlayHead* newPlayHead);
 
     //==============================================================================
+    /** Hosts may call this function to supply the system time corresponding to the
+        current audio buffer.
+
+        If you want to set a valid time, pass a pointer to a uint64_t holding the current time. The
+        value will be copied into the AudioProcessor instance without any allocation/deallocation.
+
+        If you want to clear any stored host time, pass nullptr.
+
+        Calls to this function must be synchronised (i.e. not simultaneous) with the audio callback.
+
+        @code
+        const auto currentHostTime = computeHostTimeNanos();
+        processor.setHostTimeNanos (&currentHostTime);  // Set a valid host time
+        // ...call processBlock etc.
+        processor.setHostTimeNanos (nullptr);           // Clear host time
+        @endcode
+    */
+    void setHostTimeNanos (const uint64_t* hostTimeIn)
+    {
+        hasHostTime = hostTimeIn != nullptr;
+        hostTime = hasHostTime ? *hostTimeIn : 0;
+    }
+
+    /** The plugin may call this function inside the processBlock function (and only there!)
+        to find the timestamp associated with the current audio block.
+
+        If a timestamp is available, this will return a pointer to that timestamp. You should
+        immediately copy the pointed-to value and use that in any following code. Do *not* free
+        any pointer returned by this function.
+
+        If no timestamp is provided, this will return nullptr.
+
+        @code
+        void processBlock (AudioBuffer<float>&, MidiBuffer&) override
+        {
+            if (auto* timestamp = getHostTimeNs())
+            {
+                // Use *timestamp here to compensate for callback jitter etc.
+            }
+        }
+        @endcode
+    */
+    const uint64_t* getHostTimeNs() const             { return hasHostTime ? &hostTime : nullptr; }
+
+    //==============================================================================
     /** This is called by the processor to specify its details before being played. Use this
         version of the function if you are not interested in any sidechain and/or aux buses
         and do not care about the layout of channels. Otherwise use setRateAndBufferSizeDetails.*/
@@ -1472,6 +1517,9 @@ private:
 
     AudioProcessorParameterGroup parameterTree;
     Array<AudioProcessorParameter*> flatParameterList;
+
+    uint64_t hostTime = 0;
+    bool hasHostTime = false;
 
     AudioProcessorParameter* getParamChecked (int) const;
 

@@ -34,6 +34,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
 #include <CoreAudioKit/AUViewController.h>
 
+#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
 #include <juce_audio_basics/midi/juce_MidiDataConcatenator.h>
 #include "juce_AU_Shared.h"
@@ -332,39 +333,25 @@ namespace AudioUnitFormatHelpers
   #endif
 
     template <typename Value>
-    struct BasicOptional
-    {
-        BasicOptional() = default;
-
-        explicit constexpr BasicOptional (Value&& v) : value (std::move (v)), isValid (true) {}
-        explicit constexpr BasicOptional (const Value& v) : value (v), isValid (true) {}
-
-        explicit constexpr operator bool() const noexcept { return isValid; }
-
-        Value value;
-        bool isValid { false };
-    };
-
-    template <typename Value>
-    static BasicOptional<Value> tryGetProperty (AudioUnit inUnit,
-                                                AudioUnitPropertyID inID,
-                                                AudioUnitScope inScope,
-                                                AudioUnitElement inElement)
+    static Optional<Value> tryGetProperty (AudioUnit inUnit,
+                                           AudioUnitPropertyID inID,
+                                           AudioUnitScope inScope,
+                                           AudioUnitElement inElement)
     {
         Value data;
         auto size = (UInt32) sizeof (Value);
 
         if (AudioUnitGetProperty (inUnit, inID, inScope, inElement, &data, &size) == noErr)
-            return BasicOptional<Value> (data);
+            return data;
 
-        return BasicOptional<Value>();
+        return {};
     }
 
     static UInt32 getElementCount (AudioUnit comp, AudioUnitScope scope) noexcept
     {
         const auto count = tryGetProperty<UInt32> (comp, kAudioUnitProperty_ElementCount, scope, 0);
-        jassert (count.isValid);
-        return count.value;
+        jassert (count);
+        return *count;
     }
 
     /*  The plugin may expect its channels in a particular order, reported to the host
@@ -390,8 +377,8 @@ namespace AudioUnitFormatHelpers
 
                 if (const auto layout = tryGetProperty<AudioChannelLayout> (comp, kAudioUnitProperty_AudioChannelLayout, scope, busIndex))
                 {
-                    const auto juceChannelOrder = CoreAudioLayouts::fromCoreAudio (layout.value);
-                    const auto auChannelOrder   = CoreAudioLayouts::getCoreAudioLayoutChannels (layout.value);
+                    const auto juceChannelOrder = CoreAudioLayouts::fromCoreAudio (*layout);
+                    const auto auChannelOrder   = CoreAudioLayouts::getCoreAudioLayoutChannels (*layout);
 
                     for (auto juceChannelIndex = 0; juceChannelIndex < juceChannelOrder.size(); ++juceChannelIndex)
                         busMap.push_back ((size_t) auChannelOrder.indexOf (juceChannelOrder.getTypeOfChannel (juceChannelIndex)));
@@ -1090,7 +1077,7 @@ public:
 
             zerostruct (timeStamp);
             timeStamp.mSampleTime = 0;
-            timeStamp.mHostTime = GetCurrentHostTime (0, newSampleRate, isAUv3);
+            timeStamp.mHostTime = mach_absolute_time();
             timeStamp.mFlags = kAudioTimeStampSampleTimeValid | kAudioTimeStampHostTimeValid;
 
             wasPlaying = false;
@@ -1148,6 +1135,17 @@ public:
 
     void processAudio (AudioBuffer<float>& buffer, MidiBuffer& midiMessages, bool processBlockBypassedCalled)
     {
+        if (const auto* hostTimeNs = getHostTimeNs())
+        {
+            timeStamp.mHostTime = *hostTimeNs;
+            timeStamp.mFlags |= kAudioTimeStampHostTimeValid;
+        }
+        else
+        {
+            timeStamp.mHostTime = 0;
+            timeStamp.mFlags &= ~kAudioTimeStampHostTimeValid;
+        }
+
         // If these are hit, we might allocate in the process block!
         jassert (buffer.getNumChannels() <= preparedChannels);
         jassert (buffer.getNumSamples()  <= preparedSamples);
@@ -1156,7 +1154,7 @@ public:
         // to the following bus.
         inputBuffer.makeCopyOf (buffer, true);
 
-        auto numSamples = buffer.getNumSamples();
+        const auto numSamples = buffer.getNumSamples();
 
         if (auSupportsBypass)
         {
@@ -1170,8 +1168,6 @@ public:
 
         if (prepared)
         {
-            timeStamp.mHostTime = GetCurrentHostTime (numSamples, getSampleRate(), isAUv3);
-
             const auto numOutputBuses = getBusCount (false);
 
             for (int i = 0; i < numOutputBuses; ++i)
@@ -1614,6 +1610,8 @@ private:
     friend class AudioUnitPluginWindowCarbon;
     friend class AudioUnitPluginWindowCocoa;
     friend class AudioUnitPluginFormat;
+
+    CoreAudioTimeConversions timeConversions;
 
     AudioComponentDescription componentDesc;
     AudioComponent auComponent;
@@ -2164,29 +2162,6 @@ private:
     }
 
     //==============================================================================
-    static UInt64 GetCurrentHostTime (int numSamples, double sampleRate, bool isAUv3) noexcept
-    {
-     #if ! JUCE_IOS
-       if (! isAUv3)
-           return AudioGetCurrentHostTime();
-     #else
-        ignoreUnused (isAUv3);
-     #endif
-
-        UInt64 currentTime = mach_absolute_time();
-        static mach_timebase_info_data_t sTimebaseInfo = { 0, 0 };
-
-        if (sTimebaseInfo.denom == 0)
-            mach_timebase_info (&sTimebaseInfo);
-
-        auto bufferNanos = static_cast<double> (numSamples) * 1.0e9 / sampleRate;
-        auto bufferTicks = static_cast<UInt64> (std::ceil (bufferNanos * (static_cast<double> (sTimebaseInfo.denom)
-                                                                          / static_cast<double> (sTimebaseInfo.numer))));
-        currentTime += bufferTicks;
-
-        return currentTime;
-    }
-
     bool isBusCountWritable (bool isInput) const noexcept
     {
         UInt32 countSize;

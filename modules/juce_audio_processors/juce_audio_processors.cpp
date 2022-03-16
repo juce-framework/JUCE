@@ -33,6 +33,7 @@
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_core/containers/juce_Optional.h>
 
 //==============================================================================
 #if JUCE_MAC

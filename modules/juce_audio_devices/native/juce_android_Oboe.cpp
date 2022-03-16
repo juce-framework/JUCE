@@ -428,8 +428,12 @@ private:
     {
         if (auto* cb = callback.exchange (nullptr))
         {
-            cb->audioDeviceIOCallback (inputChannelData, numInputChannels,
-                                       outputChannelData, numOutputChannels, numFrames);
+            cb->audioDeviceIOCallbackWithContext (inputChannelData,
+                                                  numInputChannels,
+                                                  outputChannelData,
+                                                  numOutputChannels,
+                                                  numFrames,
+                                                  {});
             callback.set (cb);
         }
         else

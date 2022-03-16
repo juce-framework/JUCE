@@ -526,8 +526,12 @@ private:
     class CallbackHandler;
     std::unique_ptr<CallbackHandler> callbackHandler;
 
-    void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,
-                                   float** outputChannelData, int totalNumOutputChannels, int numSamples);
+    void audioDeviceIOCallbackInt (const float** inputChannelData,
+                                   int totalNumInputChannels,
+                                   float** outputChannelData,
+                                   int totalNumOutputChannels,
+                                   int numSamples,
+                                   const AudioIODeviceCallbackContext& context);
     void audioDeviceAboutToStartInt (AudioIODevice*);
     void audioDeviceStoppedInt();
     void audioDeviceErrorInt (const String&);
