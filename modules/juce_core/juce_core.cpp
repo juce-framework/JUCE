@@ -261,6 +261,9 @@
 //==============================================================================
 #if JUCE_UNIT_TESTS
  #include "containers/juce_HashMap_test.cpp"
+
+ #include "containers/juce_Optional.h"
+ #include "containers/juce_Optional_test.cpp"
 #endif
 
 //==============================================================================
