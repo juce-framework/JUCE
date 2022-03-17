@@ -1558,7 +1558,7 @@ public:
 
     void grabFocus() override
     {
-        if (window != nil && [window canBecomeKeyWindow])
+        if (window != nil)
         {
             [window makeKeyWindow];
             [window makeFirstResponder: view];
