@@ -769,6 +769,14 @@ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
  DECLARE_JNI_CLASS (AndroidSurfaceHolder, "android/view/SurfaceHolder")
 #undef JNI_CLASS_MEMBERS
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (constructor1,     "<init>",     "(Ljava/lang/Runnable;)V") \
+ METHOD (constructor2,     "<init>",     "(Ljava/lang/Runnable;Ljava/lang/String;)V") \
+ METHOD (start,            "start",      "()V") \
+
+DECLARE_JNI_CLASS (JavaLangThread, "java/lang/Thread")
+#undef JNI_CLASS_MEMBERS
+
 //==============================================================================
 namespace
 {

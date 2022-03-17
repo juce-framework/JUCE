@@ -882,6 +882,32 @@ static void* threadEntryProc (void* userData)
 extern pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
 #endif
 
+#if ANDROID
+class ThreadTargetRunnable : public AndroidInterfaceImplementer
+{
+    Thread *juce_thread;
+public:
+    ThreadTargetRunnable(Thread *juceThread) : juce_thread(juceThread) {}
+
+    jobject invoke (jobject proxy, jobject method, jobjectArray args) override
+    {
+        auto* env = getEnv();
+
+        auto methodName = juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
+
+        if (methodName == "run")
+        {
+            juce_thread->threadHandle.set((void*) pthread_self());
+            juce_thread->threadId = (Thread::ThreadID) juce_thread->threadHandle.get();
+            threadEntryProc(juce_thread);
+            return nullptr;
+        }
+
+        return AndroidInterfaceImplementer::invoke (proxy, method, args);
+    }
+};
+#endif
+
 void Thread::launchThread()
 {
    #if JUCE_ANDROID
@@ -903,6 +929,18 @@ void Thread::launchThread()
     pthread_attr_t attr;
     pthread_attr_t* attrPtr = nullptr;
 
+#if JUCE_ANDROID
+    auto env = getEnv();
+    auto runnableNative = new ThreadTargetRunnable(this);
+    auto runnable = CreateJavaInterface(runnableNative, "java/lang/Runnable");
+    GlobalRef threadRunnableGRef { runnable };
+    auto name = env->NewStringUTF("ThreadTargetRunnable");
+    auto threadObj = env->NewObject(JavaLangThread, JavaLangThread.constructor1, threadRunnableGRef.get(), name);
+    GlobalRef threadGRef { LocalRef<jobject>(threadObj) };
+    javaThreadPeer = threadGRef;
+    env->CallVoidMethod(threadGRef.get(), JavaLangThread.start);
+#else
+
     if (pthread_attr_init (&attr) == 0)
     {
         attrPtr = &attr;
@@ -919,6 +957,7 @@ void Thread::launchThread()
 
     if (attrPtr != nullptr)
         pthread_attr_destroy (attrPtr);
+#endif
 }
 
 void Thread::closeThreadHandle()
