@@ -37,6 +37,7 @@ DECLARE_JNI_CLASS (AndroidResolveInfo, "android/content/pm/ResolveInfo")
 //==============================================================================
 JavaVM* androidJNIJavaVM = nullptr;
 jobject androidApkContext = nullptr;
+jobject androidDefaultClassLoader = nullptr;
 
 //==============================================================================
 JNIEnv* getEnv() noexcept
@@ -88,8 +89,6 @@ extern "C" jint JNIEXPORT JNI_OnLoad (JavaVM* vm, void*)
         // call Thread::initialiseJUCE manually
         env->ExceptionClear();
     }
-
-    JNIClassBase::initialiseAllClasses (env);
 
     return JNI_VERSION_1_2;
 }
@@ -293,11 +292,28 @@ void Thread::initialiseJUCE (void* jniEnv, void* context)
         androidJNIJavaVM = javaVM;
     }
 
+    if (androidDefaultClassLoader == nullptr)
+    {
+        // We haven't initialised JNIClassBase classes yet, so do not use JavaClass.getClassLoader here.
+        jclass classClass = env->FindClass("java/lang/Class");
+        jmethodID getClassLoaderID = env->GetMethodID(classClass, "getClassLoader", "()Ljava/lang/ClassLoader;");
+        // Try com.rmsl.juce.Java for better non-system class that likely used non-system ClassLoader.
+        auto targetClass = env->FindClass("com/rmsl/juce/Java");
+        if (targetClass == nullptr)
+            targetClass = env->GetObjectClass(reinterpret_cast<jobject>(context));
+        jobject classLoader = env->CallObjectMethod(targetClass, getClassLoaderID);
+        androidDefaultClassLoader = env->NewGlobalRef(classLoader);
+        jassert (androidDefaultClassLoader != nullptr);
+    }
+
     static bool firstCall = true;
 
     if (firstCall)
     {
         firstCall = false;
+
+        // Now that we have a working ClassLoader, we can initialize JNIClassBase classes.
+        JNIClassBase::initialiseAllClasses (env);
 
         // if we ever support unloading then this should probably be a weak reference
         androidApkContext = env->NewGlobalRef (static_cast<jobject> (context));

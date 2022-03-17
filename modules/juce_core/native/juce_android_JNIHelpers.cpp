@@ -149,6 +149,8 @@ static File getCodeCacheDirectory()
     return File("/data/data/" + bundleId + "/code_cache");
 }
 
+extern jobject androidDefaultClassLoader;
+
 void JNIClassBase::initialise (JNIEnv* env)
 {
     auto sdkVersion = getAndroidSDKVersion();
@@ -160,8 +162,16 @@ void JNIClassBase::initialise (JNIEnv* env)
 
         if (! SystemJavaClassComparator::isSystemClass(this))
         {
-            LocalRef<jobject> defaultClassLoader (env->CallStaticObjectMethod (JavaClassLoader, JavaClassLoader.getSystemClassLoader));
-            tryLoadingClassWithClassLoader (env, defaultClassLoader.get());
+
+            LocalRef<jobject> defaultClassLoaderRef;
+            jobject defaultClassLoader = androidDefaultClassLoader;
+            if (defaultClassLoader == nullptr) {
+                defaultClassLoaderRef = LocalRef<jobject>(
+                        env->CallStaticObjectMethod(JavaClassLoader,
+                                                    JavaClassLoader.getSystemClassLoader));
+                defaultClassLoader = defaultClassLoaderRef.get();
+            }
+            tryLoadingClassWithClassLoader (env, defaultClassLoader);
 
             if (classRef == nullptr)
             {
@@ -198,7 +208,7 @@ void JNIClassBase::initialise (JNIEnv* env)
 
                         byteCodeClassLoader = LocalRef<jobject> (env->NewObject (AndroidInMemoryDexClassLoader,
                                                                                  AndroidInMemoryDexClassLoader.constructor,
-                                                                                 byteBuffer.get(), defaultClassLoader.get()));
+                                                                                 byteBuffer.get(), defaultClassLoader));
                     }
                     else if (uncompressedByteCode.getDataSize() >= 32)
                     {
@@ -217,7 +227,7 @@ void JNIClassBase::initialise (JNIEnv* env)
                                                                                      javaString (dexFile.getFullPathName()).get(),
                                                                                      javaString (optimizedDirectory.getFullPathName()).get(),
                                                                                      nullptr,
-                                                                                     defaultClassLoader.get()));
+                                                                                     defaultClassLoader));
                         }
                         else
                         {
