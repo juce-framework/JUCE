@@ -203,7 +203,8 @@ public:
     */
     Point<ValueType> getPointAlongLine (ValueType distanceFromStart) const noexcept
     {
-        return start + (end - start) * (distanceFromStart / getLength());
+        const auto length = getLength();
+        return length == 0 ? start : start + (end - start) * (distanceFromStart / length);
     }
 
     /** Returns a point which is a certain distance along and to the side of this line.
