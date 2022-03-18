@@ -47,6 +47,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.cpp"
     "../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMP.h"
+    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMP_test.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPacket.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPackets.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h"
@@ -61,7 +62,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPReceiver.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.h"
-    "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPTests.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.cpp"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.h"
     "../../../../../modules/juce_audio_basics/midi/ump/juce_UMPView.cpp"
@@ -142,7 +142,6 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h"
     "../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBytestreamInputHandler.h"
-    "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPTests.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPU32InputHandler.h"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.cpp"
     "../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.h"
@@ -567,6 +566,7 @@ add_library( ${BINARY_NAME}
     "../../../../../modules/juce_audio_processors/format_types/juce_VST3Headers.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp"
     "../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.h"
+    "../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat_test.cpp"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTCommon.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h"
     "../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp"
@@ -1564,6 +1564,7 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/ju
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/buffers/juce_FloatVectorOperations.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMP.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMP_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPacket.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPackets.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPConversion.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1578,7 +1579,6 @@ set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/j
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPReceiver.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPSysEx7.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPTests.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPUtils.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_basics/midi/ump/juce_UMPView.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -1659,7 +1659,6 @@ set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_AudioIODeviceType.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/audio_io/juce_SystemAudioVolume.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPBytestreamInputHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
-set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPTests.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/ump/juce_UMPU32InputHandler.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_devices/midi_io/juce_MidiDevices.h" PROPERTIES HEADER_FILE_ONLY TRUE)
@@ -2084,6 +2083,7 @@ set_source_files_properties("../../../../../modules/juce_audio_processors/format
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VST3Headers.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat.h" PROPERTIES HEADER_FILE_ONLY TRUE)
+set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VST3PluginFormat_test.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTCommon.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTMidiEventList.h" PROPERTIES HEADER_FILE_ONLY TRUE)
 set_source_files_properties("../../../../../modules/juce_audio_processors/format_types/juce_VSTPluginFormat.cpp" PROPERTIES HEADER_FILE_ONLY TRUE)
