@@ -381,21 +381,21 @@ public:
     //==============================================================================
     /** Returns the last modification time of this file.
 
-        @returns    the time, or an invalid time if the file doesn't exist.
+        @returns    the time, or the Unix Epoch if the file doesn't exist.
         @see setLastModificationTime, getLastAccessTime, getCreationTime
     */
     Time getLastModificationTime() const;
 
     /** Returns the last time this file was accessed.
 
-        @returns    the time, or an invalid time if the file doesn't exist.
+        @returns    the time, or the Unix Epoch if the file doesn't exist.
         @see setLastAccessTime, getLastModificationTime, getCreationTime
     */
     Time getLastAccessTime() const;
 
     /** Returns the time that this file was created.
 
-        @returns    the time, or an invalid time if the file doesn't exist.
+        @returns    the time, or the Unix Epoch if the file doesn't exist.
         @see getLastModificationTime, getLastAccessTime
     */
     Time getCreationTime() const;
