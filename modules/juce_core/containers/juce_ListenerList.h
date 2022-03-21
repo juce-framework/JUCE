@@ -231,8 +231,6 @@ public:
 
     //==============================================================================
    #ifndef DOXYGEN
-    // There are now lambda-based call functions that can be used to replace these old method-based versions.
-    // We'll eventually deprecate these old ones, so please begin moving your code to use lambdas!
     void call (void (ListenerClass::*callbackFunction) ())
     {
         call ([=] (ListenerClass& l) { (l.*callbackFunction)(); });
