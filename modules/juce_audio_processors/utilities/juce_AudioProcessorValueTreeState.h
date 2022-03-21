@@ -488,11 +488,11 @@ public:
                    float defaultParameterValue,
                    std::function<String (float)> valueToTextFunction,
                    std::function<float (const String&)> textToValueFunction,
-                   bool isMetaParameter,
-                   bool isAutomatableParameter,
-                   bool isDiscrete,
-                   AudioProcessorParameter::Category parameterCategory,
-                   bool isBoolean)
+                   bool isMetaParameter = false,
+                   bool isAutomatableParameter = true,
+                   bool isDiscrete = false,
+                   AudioProcessorParameter::Category parameterCategory = AudioProcessorParameter::genericParameter,
+                   bool isBoolean = false)
             : Parameter (parameterID,
                          parameterName,
                          valueRange,
