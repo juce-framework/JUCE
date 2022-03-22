@@ -23,8 +23,8 @@
 namespace juce
 {
 
-AudioProcessLoadMeasurer::AudioProcessLoadMeasurer()    = default;
-AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer()   = default;
+AudioProcessLoadMeasurer::AudioProcessLoadMeasurer()  = default;
+AudioProcessLoadMeasurer::~AudioProcessLoadMeasurer() = default;
 
 void AudioProcessLoadMeasurer::reset()
 {
@@ -33,40 +33,47 @@ void AudioProcessLoadMeasurer::reset()
 
 void AudioProcessLoadMeasurer::reset (double sampleRate, int blockSize)
 {
+    const SpinLock::ScopedLockType lock (mutex);
+
     cpuUsageProportion = 0;
     xruns = 0;
 
     samplesPerBlock = blockSize;
-
-    if (sampleRate > 0.0 && blockSize > 0)
-    {
-        msPerSample = 1000.0 / sampleRate;
-        timeToCpuScale = (msPerSample > 0.0) ? (1.0 / msPerSample) : 0.0;
-    }
-    else
-    {
-        msPerSample = 0;
-        timeToCpuScale = 0;
-    }
+    msPerSample = (sampleRate > 0.0 && blockSize > 0) ? 1000.0 / sampleRate : 0;
 }
 
 void AudioProcessLoadMeasurer::registerBlockRenderTime (double milliseconds)
 {
-    registerRenderTime (milliseconds, samplesPerBlock);
+    const SpinLock::ScopedTryLockType lock (mutex);
+
+    if (lock.isLocked())
+        registerRenderTimeLocked (milliseconds, samplesPerBlock);
 }
 
 void AudioProcessLoadMeasurer::registerRenderTime (double milliseconds, int numSamples)
 {
+    const SpinLock::ScopedTryLockType lock (mutex);
+
+    if (lock.isLocked())
+        registerRenderTimeLocked (milliseconds, numSamples);
+}
+
+void AudioProcessLoadMeasurer::registerRenderTimeLocked (double milliseconds, int numSamples)
+{
+    if (msPerSample == 0)
+        return;
+
     const auto maxMilliseconds = numSamples * msPerSample;
     const auto usedProportion = milliseconds / maxMilliseconds;
     const auto filterAmount = 0.2;
-    cpuUsageProportion += filterAmount * (usedProportion - cpuUsageProportion);
+    const auto proportion = cpuUsageProportion.load();
+    cpuUsageProportion = proportion + filterAmount * (usedProportion - proportion);
 
     if (milliseconds > maxMilliseconds)
         ++xruns;
 }
 
-double AudioProcessLoadMeasurer::getLoadAsProportion() const   { return jlimit (0.0, 1.0, cpuUsageProportion); }
+double AudioProcessLoadMeasurer::getLoadAsProportion() const   { return jlimit (0.0, 1.0, cpuUsageProportion.load()); }
 double AudioProcessLoadMeasurer::getLoadAsPercentage() const   { return 100.0 * getLoadAsProportion(); }
 
 int AudioProcessLoadMeasurer::getXRunCount() const             { return xruns; }
