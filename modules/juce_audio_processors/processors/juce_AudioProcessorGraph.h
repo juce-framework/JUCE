@@ -155,17 +155,27 @@ public:
         void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*, ProcessingPrecision);
         void unprepare();
 
+        bool hasNoConnections() const noexcept   { return inputs.isEmpty() && outputs.isEmpty(); }
+
         template <typename Sample>
         void processBlock (AudioBuffer<Sample>& audio, MidiBuffer& midi)
         {
+            if (hasNoConnections())
+                return;
+
             const ScopedLock lock (processorLock);
+
             processor->processBlock (audio, midi);
         }
 
         template <typename Sample>
         void processBlockBypassed (AudioBuffer<Sample>& audio, MidiBuffer& midi)
         {
+            if (hasNoConnections())
+                return;
+
             const ScopedLock lock (processorLock);
+
             processor->processBlockBypassed (audio, midi);
         }
 
