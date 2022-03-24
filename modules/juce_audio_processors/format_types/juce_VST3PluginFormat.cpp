@@ -2456,13 +2456,13 @@ public:
 
         isActive = false;
 
-        setStateForAllMidiBuses (false);
-
         if (processor != nullptr)
             warnOnFailureIfImplemented (processor->setProcessing (false));
 
         if (holder->component != nullptr)
             warnOnFailure (holder->component->setActive (false));
+
+        setStateForAllMidiBuses (false);
     }
 
     bool supportsDoublePrecisionProcessing() const override
