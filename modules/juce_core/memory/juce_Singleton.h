@@ -184,7 +184,7 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
 #define JUCE_DECLARE_SINGLETON(Classname, doNotRecreateAfterDeletion) \
 \
     static juce::SingletonHolder<Classname, juce::CriticalSection, doNotRecreateAfterDeletion> singletonHolder; \
-    friend decltype (singletonHolder); \
+    friend juce::SingletonHolder<Classname, juce::CriticalSection, doNotRecreateAfterDeletion>; \
 \
     static Classname* JUCE_CALLTYPE getInstance()                           { return singletonHolder.get(); } \
     static Classname* JUCE_CALLTYPE getInstanceWithoutCreating() noexcept   { return singletonHolder.instance; } \
