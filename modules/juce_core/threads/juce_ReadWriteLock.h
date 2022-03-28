@@ -74,7 +74,7 @@ public:
         thread has it locked for writing, then this will fail and return false.
 
         @returns true if the lock is successfully gained.
-        @see exitRead, ScopedReadLock
+        @see exitRead, ScopedTryReadLock
     */
     bool tryEnterRead() const noexcept;
 
@@ -106,7 +106,7 @@ public:
         to obtain the lock.
 
         @returns true if the lock is successfully gained.
-        @see enterWrite
+        @see enterWrite, ScopedTryWriteLock
     */
     bool tryEnterWrite() const noexcept;
 
