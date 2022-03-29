@@ -31,6 +31,17 @@ public:
 
         if (comp->isOnDesktop())
         {
+           #if JUCE_WINDOWS
+            const auto scope = [&]() -> std::unique_ptr<ScopedThreadDPIAwarenessSetter>
+            {
+                if (comp != nullptr)
+                    if (auto* handle = comp->getWindowHandle())
+                        return std::make_unique<ScopedThreadDPIAwarenessSetter> (handle);
+
+                return nullptr;
+            }();
+           #endif
+
             setSize (1, 1); // to keep the OS happy by not having zero-size windows
             addToDesktop (ComponentPeer::windowIgnoresMouseClicks
                             | ComponentPeer::windowIsTemporary

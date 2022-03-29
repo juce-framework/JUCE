@@ -2017,6 +2017,17 @@ PopupMenu::Options PopupMenu::Options::withInitiallySelectedItem (int idOfItemTo
 Component* PopupMenu::createWindow (const Options& options,
                                     ApplicationCommandManager** managerOfChosenCommand) const
 {
+   #if JUCE_WINDOWS
+    const auto scope = [&]() -> std::unique_ptr<ScopedThreadDPIAwarenessSetter>
+    {
+        if (auto* target = options.getTargetComponent())
+            if (auto* handle = target->getWindowHandle())
+                return std::make_unique<ScopedThreadDPIAwarenessSetter> (handle);
+
+        return nullptr;
+    }();
+   #endif
+
     return items.isEmpty() ? nullptr
                            : new HelperClasses::MenuWindow (*this, nullptr, options,
                                                             ! options.getTargetScreenArea().isEmpty(),
