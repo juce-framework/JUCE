@@ -1780,7 +1780,20 @@ private:
             {
                 if (auto* editor = component->pluginEditor.get())
                 {
-                    if (auto* constrainer = editor->getConstrainer())
+                    if (canResize() == kResultFalse)
+                    {
+                        // Ableton Live will call checkSizeConstraint even if the view returns false
+                        // from canResize. Set the out param to an appropriate size for the editor
+                        // and return.
+                        auto constrainedRect = component->getLocalArea (editor, editor->getLocalBounds())
+                                                        .getSmallestIntegerContainer();
+
+                        *rectToCheck = convertFromHostBounds (*rectToCheck);
+                        rectToCheck->right  = rectToCheck->left + roundToInt (constrainedRect.getWidth());
+                        rectToCheck->bottom = rectToCheck->top  + roundToInt (constrainedRect.getHeight());
+                        *rectToCheck = convertToHostBounds (*rectToCheck);
+                    }
+                    else if (auto* constrainer = editor->getConstrainer())
                     {
                         *rectToCheck = convertFromHostBounds (*rectToCheck);
 
