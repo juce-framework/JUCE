@@ -104,7 +104,9 @@ void ComponentBoundsConstrainer::setBoundsForComponent (Component* component,
         if (auto* parent = component->getParentComponent())
             return { parent->getWidth(), parent->getHeight() };
 
-        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (targetBounds.getCentre()))
+        const auto globalBounds = component->localAreaToGlobal (targetBounds - component->getPosition());
+
+        if (auto* display = Desktop::getInstance().getDisplays().getDisplayForPoint (globalBounds.getCentre()))
             return component->getLocalArea (nullptr, display->userArea) + component->getPosition();
 
         const auto max = std::numeric_limits<int>::max();
