@@ -120,23 +120,23 @@ function(_juce_extract_metadata_block delim_str file_with_block out_dict)
 
     foreach(line IN LISTS module_header_contents)
         if(NOT append)
-            if(line MATCHES " *BEGIN_${delim_str} *")
+            if(line MATCHES "[\t ]*BEGIN_${delim_str}[\t ]*")
                 set(append YES)
             endif()
 
             continue()
         endif()
 
-        if(append AND (line MATCHES " *END_${delim_str} *"))
+        if(append AND (line MATCHES "[\t ]*END_${delim_str}[\t ]*"))
             break()
         endif()
 
-        if(line MATCHES "^ *([a-zA-Z]+):")
+        if(line MATCHES "^[\t ]*([a-zA-Z]+):")
             set(last_written_key "${CMAKE_MATCH_1}")
         endif()
 
-        string(REGEX REPLACE "^ *${last_written_key}: *" "" line "${line}")
-        string(REGEX REPLACE "[ ,]+" ";" line "${line}")
+        string(REGEX REPLACE "^[\t ]*${last_written_key}:[\t ]*" "" line "${line}")
+        string(REGEX REPLACE "[\t ,]+" ";" line "${line}")
 
         set_property(TARGET ${target_name} APPEND PROPERTY
             "INTERFACE_JUCE_${last_written_key}" "${line}")
