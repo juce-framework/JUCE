@@ -115,6 +115,7 @@ public:
     {
         if (attackRate > 0.0f)
         {
+            envelopeVal = 0.0f;
             state = State::attack;
         }
         else if (decayRate > 0.0f)
@@ -153,39 +154,54 @@ public:
     */
     float getNextSample() noexcept
     {
-        if (state == State::idle)
-            return 0.0f;
-
-        if (state == State::attack)
+        switch (state)
         {
-            envelopeVal += attackRate;
-
-            if (envelopeVal >= 1.0f)
+            case State::idle:
             {
-                envelopeVal = 1.0f;
-                goToNextState();
+                return 0.0f;
             }
-        }
-        else if (state == State::decay)
-        {
-            envelopeVal -= decayRate;
 
-            if (envelopeVal <= parameters.sustain)
+            case State::attack:
+            {
+                envelopeVal += attackRate;
+
+                if (envelopeVal >= 1.0f)
+                {
+                    envelopeVal = 1.0f;
+                    goToNextState();
+                }
+
+                break;
+            }
+
+            case State::decay:
+            {
+                envelopeVal -= decayRate;
+
+                if (envelopeVal <= parameters.sustain)
+                {
+                    envelopeVal = parameters.sustain;
+                    goToNextState();
+                }
+
+                break;
+            }
+
+            case State::sustain:
             {
                 envelopeVal = parameters.sustain;
-                goToNextState();
+                break;
             }
-        }
-        else if (state == State::sustain)
-        {
-            envelopeVal = parameters.sustain;
-        }
-        else if (state == State::release)
-        {
-            envelopeVal -= releaseRate;
 
-            if (envelopeVal <= 0.0f)
-                goToNextState();
+            case State::release:
+            {
+                envelopeVal -= releaseRate;
+
+                if (envelopeVal <= 0.0f)
+                    goToNextState();
+
+                break;
+            }
         }
 
         return envelopeVal;
@@ -250,10 +266,18 @@ private:
     void goToNextState() noexcept
     {
         if (state == State::attack)
+        {
             state = (decayRate > 0.0f ? State::decay : State::sustain);
-        else if (state == State::decay)
+            return;
+        }
+
+        if (state == State::decay)
+        {
             state = State::sustain;
-        else if (state == State::release)
+            return;
+        }
+
+        if (state == State::release)
             reset();
     }
 
