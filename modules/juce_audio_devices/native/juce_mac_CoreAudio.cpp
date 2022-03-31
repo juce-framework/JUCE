@@ -294,15 +294,11 @@ public:
 
             if (OK (AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &size, ranges)))
             {
-                for (auto r : { 8000, 11025, 16000, 22050, 24000, 32000,
-                                44100, 48000, 88200, 96000, 176400,
-                                192000, 352800, 384000, 705600, 768000 })
+                for (const auto rate : SampleRateHelpers::getAllSampleRates())
                 {
-                    auto rate = (double) r;
-
                     for (int j = size / (int) sizeof (AudioValueRange); --j >= 0;)
                     {
-                        if (rate >= ranges[j].mMinimum - 2 && rate <= ranges[j].mMaximum + 2)
+                        if (ranges[j].mMinimum - 2 <= rate && rate <= ranges[j].mMaximum + 2)
                         {
                             newSampleRates.add (rate);
                             break;
@@ -314,6 +310,11 @@ public:
 
         if (newSampleRates.isEmpty() && sampleRate > 0)
             newSampleRates.add (sampleRate);
+
+        auto nominalRate = getNominalSampleRate();
+
+        if ((nominalRate > 0) && ! newSampleRates.contains (nominalRate))
+            newSampleRates.addUsingDefaultSort (nominalRate);
 
         return newSampleRates;
     }
