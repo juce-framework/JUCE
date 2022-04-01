@@ -95,14 +95,13 @@ private:
     //==============================================================================
     struct ChannelState
     {
-        ChannelState() noexcept;
         bool handleController (int channel, int controllerNumber,
                                int value, MidiRPNMessage&) noexcept;
         void resetValue() noexcept;
         bool sendIfReady (int channel, MidiRPNMessage&) noexcept;
 
-        uint8 parameterMSB, parameterLSB, valueMSB, valueLSB;
-        bool isNRPN;
+        uint8 parameterMSB = 0xff, parameterLSB = 0xff, valueMSB = 0xff, valueLSB = 0xff;
+        bool isNRPN = false;
     };
 
     //==============================================================================
