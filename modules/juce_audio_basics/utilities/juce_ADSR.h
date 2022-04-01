@@ -31,6 +31,10 @@ namespace juce
     with setParameters() then call getNextSample() to get the envelope value to be applied
     to each audio sample or applyEnvelopeToBuffer() to apply the envelope to a whole buffer.
 
+    Do not change the parameters during playback. If you change the parameters before the
+    release stage has completed then you must call reset() before the next call to
+    noteOn().
+
     @tags{Audio}
 */
 class JUCE_API  ADSR
@@ -115,7 +119,6 @@ public:
     {
         if (attackRate > 0.0f)
         {
-            envelopeVal = 0.0f;
             state = State::attack;
         }
         else if (decayRate > 0.0f)
