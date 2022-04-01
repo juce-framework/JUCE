@@ -42,7 +42,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                      "-Wswitch-enum",
                                      "-Wswitch-default",
                                      "-Wunused-but-set-variable",
-                                     "-Wzero-as-null-pointer-constant")
+                                     "-Wzero-as-null-pointer-constant",
+                                     "-Wmaybe-uninitialized")
 
 #include <cstdarg>
 

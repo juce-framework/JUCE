@@ -1567,7 +1567,7 @@ public:
             const int num = random.nextInt (range) + 1;
 
             HeapBlock<ValueType> buffer1 (num + 16), buffer2 (num + 16);
-            HeapBlock<int> buffer3 (num + 16);
+            HeapBlock<int> buffer3 (num + 16, true);
 
            #if JUCE_ARM
             ValueType* const data1 = buffer1;
