@@ -440,6 +440,7 @@ jobject ActivityLifecycleCallbacks::invoke (jobject proxy, jobject method, jobje
     else if (methodName == "onActivityPostSaveInstanceState")  { onActivityPostSaveInstanceState (activity, bundle); return nullptr; }
     else if (methodName == "onActivityPostStarted")            { onActivityPostStarted (activity);                   return nullptr; }
     else if (methodName == "onActivityPostStopped")            { onActivityPostStopped (activity);                   return nullptr; }
+    else if (methodName == "onActivityConfigurationChanged")   { onActivityConfigurationChanged (activity);          return nullptr; }
 
     return AndroidInterfaceImplementer::invoke (proxy, method, args);
 }

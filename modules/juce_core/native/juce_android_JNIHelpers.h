@@ -916,6 +916,7 @@ public:
     virtual void onActivityPostSaveInstanceState (jobject /*activity*/, jobject /*bundle*/)  {}
     virtual void onActivityPostStarted           (jobject /*activity*/)                      {}
     virtual void onActivityPostStopped           (jobject /*activity*/)                      {}
+    virtual void onActivityConfigurationChanged  (jobject /*activity*/)                      {}
 
 private:
     jobject invoke (jobject, jobject, jobjectArray) override;
