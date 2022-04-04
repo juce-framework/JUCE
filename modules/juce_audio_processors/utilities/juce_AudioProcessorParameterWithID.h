@@ -27,6 +27,87 @@ namespace juce
 {
 
 /**
+    Combines a parameter ID and a version hint.
+*/
+class ParameterID
+{
+public:
+    ParameterID() = default;
+
+    /** Constructs an instance.
+
+        Note that this constructor implicitly converts from Strings and string-like types.
+
+        @param identifier       A string that uniquely identifies a single parameter
+        @param versionHint      Influences parameter ordering in Audio Unit plugins.
+                                Used to provide backwards compatibility of Audio Unit plugins in
+                                Logic and GarageBand.
+                                @see AudioProcessorParameter(int)
+    */
+    template <typename StringLike, typename = DisableIfSameOrDerived<ParameterID, StringLike>>
+    ParameterID (StringLike&& identifier, int versionHint = 0)
+        : paramID (std::forward<StringLike> (identifier)), version (versionHint) {}
+
+    /** @see AudioProcessorParameterWithID::paramID */
+    auto getParamID()               const { return paramID; }
+
+    /** @see AudioProcessorParameter(int) */
+    auto getVersionHint()           const { return version; }
+
+private:
+    String paramID;
+    int version = 0;
+};
+
+/**
+    An instance of this class may be passed to the constructor of an AudioProcessorParameterWithID
+    to set optional characteristics of that parameter.
+*/
+class AudioProcessorParameterWithIDAttributes
+{
+    using This = AudioProcessorParameterWithIDAttributes;
+
+public:
+    using Category = AudioProcessorParameter::Category;
+
+    /** An optional label for the parameter's value */
+    JUCE_NODISCARD auto withLabel (String x)            const { return withMember (*this, &This::label,          std::move (x)); }
+
+    /** The semantics of this parameter */
+    JUCE_NODISCARD auto withCategory (Category x)       const { return withMember (*this, &This::category,       std::move (x)); }
+
+    /** @see AudioProcessorParameter::isMetaParameter() */
+    JUCE_NODISCARD auto withMeta (bool x)               const { return withMember (*this, &This::meta,           std::move (x)); }
+
+    /** @see AudioProcessorParameter::isAutomatable() */
+    JUCE_NODISCARD auto withAutomatable (bool x)        const { return withMember (*this, &This::automatable,    std::move (x)); }
+
+    /** @see AudioProcessorParameter::isOrientationInverted() */
+    JUCE_NODISCARD auto withInverted (bool x)           const { return withMember (*this, &This::inverted,       std::move (x)); }
+
+    /** An optional label for the parameter's value */
+    JUCE_NODISCARD auto getLabel()                      const { return label; }
+
+    /** The semantics of this parameter */
+    JUCE_NODISCARD auto getCategory()                   const { return category; }
+
+    /** @see AudioProcessorParameter::isMetaParameter() */
+    JUCE_NODISCARD auto getMeta()                       const { return meta; }
+
+    /** @see AudioProcessorParameter::isAutomatable() */
+    JUCE_NODISCARD auto getAutomatable()                const { return automatable; }
+
+    /** @see AudioProcessorParameter::isOrientationInverted() */
+    JUCE_NODISCARD auto getInverted()                   const { return inverted; }
+
+private:
+    String label;
+    Category category = AudioProcessorParameter::genericParameter;
+    bool meta = false, automatable = true, inverted = false;
+};
+
+//==============================================================================
+/**
     This abstract base class is used by some AudioProcessorParameter helper classes.
 
     @see AudioParameterFloat, AudioParameterInt, AudioParameterBool, AudioParameterChoice
@@ -36,16 +117,45 @@ namespace juce
 class JUCE_API  AudioProcessorParameterWithID  : public HostedAudioProcessorParameter
 {
 public:
+    /** The creation of this object requires providing a name and ID which will be constant for its lifetime.
+
+        Given that AudioProcessorParameterWithID is abstract, you'll probably call this constructor
+        from a derived class constructor, e.g.
+        @code
+        MyParameterType (String paramID, String name, String label, bool automatable)
+            : AudioProcessorParameterWithID (paramID, name, AudioProcessorParameterWithIDAttributes().withLabel (label)
+                                                                                                     .withAutomatable (automatable))
+        {
+        }
+        @endcode
+
+        @param parameterID      Specifies the identifier, and optionally the parameter's version hint.
+        @param parameterName    The user-facing parameter name.
+        @param attributes       Other parameter properties.
+    */
+    AudioProcessorParameterWithID (const ParameterID& parameterID,
+                                   const String& parameterName,
+                                   const AudioProcessorParameterWithIDAttributes& attributes = {});
+
     /** The creation of this object requires providing a name and ID which will be
         constant for its lifetime.
-    */
-    AudioProcessorParameterWithID (const String& parameterID,
-                                   const String& parameterName,
-                                   const String& parameterLabel = {},
-                                   Category parameterCategory = AudioProcessorParameter::genericParameter);
 
-    /** Destructor. */
-    ~AudioProcessorParameterWithID() override;
+        @param parameterID          Used to uniquely identify the parameter
+        @param parameterName        The user-facing name of the parameter
+        @param parameterLabel       An optional label for the parameter's value
+        @param parameterCategory    The semantics of this parameter
+    */
+    [[deprecated ("Prefer the signature taking an Attributes argument")]]
+    AudioProcessorParameterWithID (const ParameterID& parameterID,
+                                   const String& parameterName,
+                                   const String& parameterLabel,
+                                   Category parameterCategory = AudioProcessorParameter::genericParameter)
+        : AudioProcessorParameterWithID (parameterID,
+                                         parameterName,
+                                         AudioProcessorParameterWithIDAttributes().withLabel (parameterLabel)
+                                                                                  .withCategory (parameterCategory))
+    {
+    }
 
     /** Provides access to the parameter's ID string. */
     const String paramID;
@@ -63,9 +173,14 @@ public:
     String getLabel() const override;
     Category getCategory() const override;
 
-    String getParameterID() const override { return paramID; }
+    String getParameterID()             const override { return paramID; }
+    bool isMetaParameter()              const override { return meta; }
+    bool isAutomatable()                const override { return automatable; }
+    bool isOrientationInverted()        const override { return inverted; }
 
 private:
+    bool meta = false, automatable = true, inverted = false;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorParameterWithID)
 };
 

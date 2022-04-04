@@ -26,14 +26,6 @@
 namespace juce
 {
 
-RangedAudioParameter::RangedAudioParameter (const String& parameterID,
-                                            const String& parameterName,
-                                            const String& parameterLabel,
-                                            Category parameterCategory)
-    : AudioProcessorParameterWithID (parameterID, parameterName, parameterLabel, parameterCategory)
-{
-}
-
 int RangedAudioParameter::getNumSteps() const
 {
     const auto& range = getNormalisableRange();

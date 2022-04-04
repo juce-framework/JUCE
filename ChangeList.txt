@@ -3,6 +3,13 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 6.1.6
+  - Improved the handling of AU multichannel layouts
+  - Added JUCE_NODISCARD to builder-patten functions
+  - Added recursion options to DirectoryIterator
+  - Unified the loading of OpenGL 3.2 core profiles
+  - Improved macOS full-screen behaviour with non-native titlebars
+
 Version 6.1.5
   - Improved the accessibility framework
   - Added handling of non-Latin virtual key codes on macOS

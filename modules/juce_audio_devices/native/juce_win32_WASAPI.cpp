@@ -676,9 +676,7 @@ private:
 
     void querySupportedSampleRates (WAVEFORMATEXTENSIBLE format, ComSmartPtr<IAudioClient>& audioClient)
     {
-        for (auto rate : { 8000, 11025, 16000, 22050, 24000, 32000,
-                           44100, 48000, 88200, 96000, 176400,
-                           192000, 352800, 384000, 705600, 768000 })
+        for (auto rate : SampleRateHelpers::getAllSampleRates())
         {
             if (rates.contains (rate))
                 continue;
@@ -695,7 +693,7 @@ private:
                                                                                         : &nearestFormat)))
             {
                 if (nearestFormat != nullptr)
-                    rate = (int) nearestFormat->nSamplesPerSec;
+                    rate = (double) nearestFormat->nSamplesPerSec;
 
                 if (! rates.contains (rate))
                     rates.addUsingDefaultSort (rate);

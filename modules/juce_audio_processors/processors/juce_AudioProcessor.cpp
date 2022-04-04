@@ -442,10 +442,19 @@ void AudioProcessor::updateHostDisplay (const AudioProcessorListener::ChangeDeta
             l->audioProcessorChanged (this, details);
 }
 
-void AudioProcessor::checkForUnsafeParamID (AudioProcessorParameter* param)
+void AudioProcessor::validateParameter (AudioProcessorParameter* param)
 {
     checkForDuplicateParamID (param);
     checkForDuplicateTrimmedParamID (param);
+
+    /*  If you're building this plugin as an AudioUnit, and you intend to use the plugin in
+        Logic Pro or GarageBand, it's a good idea to set version hints on all of your parameters
+        so that you can add parameters safely in future versions of the plugin.
+        See the documentation for AudioProcessorParameter(int) for more information.
+    */
+   #if JucePlugin_Build_AU
+    jassert (wrapperType == wrapperType_Undefined || param->getVersionHint() != 0);
+   #endif
 }
 
 void AudioProcessor::checkForDuplicateTrimmedParamID (AudioProcessorParameter* param)
@@ -527,7 +536,7 @@ void AudioProcessor::addParameter (AudioProcessorParameter* param)
     param->parameterIndex = flatParameterList.size();
     flatParameterList.add (param);
 
-    checkForUnsafeParamID (param);
+    validateParameter (param);
 }
 
 void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterGroup> group)
@@ -544,7 +553,7 @@ void AudioProcessor::addParameterGroup (std::unique_ptr<AudioProcessorParameterG
         p->processor = this;
         p->parameterIndex = i;
 
-        checkForUnsafeParamID (p);
+        validateParameter (p);
     }
 
     parameterTree.addChild (std::move (group));
@@ -568,7 +577,7 @@ void AudioProcessor::setParameterTree (AudioProcessorParameterGroup&& newTree)
         p->processor = this;
         p->parameterIndex = i;
 
-        checkForUnsafeParamID (p);
+        validateParameter (p);
     }
 }
 
@@ -1546,8 +1555,6 @@ void AudioProcessorListener::audioProcessorParameterChangeGestureBegin (AudioPro
 void AudioProcessorListener::audioProcessorParameterChangeGestureEnd   (AudioProcessor*, int) {}
 
 //==============================================================================
-AudioProcessorParameter::AudioProcessorParameter() noexcept {}
-
 AudioProcessorParameter::~AudioProcessorParameter()
 {
    #if JUCE_DEBUG && ! JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING

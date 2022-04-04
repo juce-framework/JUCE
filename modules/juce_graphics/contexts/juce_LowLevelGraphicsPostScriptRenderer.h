@@ -93,6 +93,7 @@ protected:
     struct SavedState
     {
         SavedState();
+        SavedState (const SavedState&) = default;
         SavedState& operator= (const SavedState&) = delete;
 
         RectangleList<int> clip;

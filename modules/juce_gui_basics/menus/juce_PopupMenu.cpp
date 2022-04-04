@@ -187,29 +187,6 @@ struct ItemComponent  : public Component
     PopupMenu::Item item;
 
 private:
-    class ValueInterface  : public AccessibilityValueInterface
-    {
-    public:
-        ValueInterface() = default;
-
-        bool isReadOnly() const override  { return true; }
-
-        double getCurrentValue() const override
-        {
-            return 1.0;
-        }
-
-        String getCurrentValueAsString() const override
-        {
-            return TRANS ("Checked");
-        }
-
-        void setValue (double) override {}
-        void setValueAsString (const String&) override  {}
-
-        AccessibleValueRange getRange() const override { return {}; }
-    };
-
     //==============================================================================
     class ItemAccessibilityHandler  : public AccessibilityHandler
     {
@@ -218,9 +195,7 @@ private:
             : AccessibilityHandler (itemComponentToWrap,
                                     isAccessibilityHandlerRequired (itemComponentToWrap.item) ? AccessibilityRole::menuItem
                                                                                               : AccessibilityRole::ignored,
-                                    getAccessibilityActions (*this, itemComponentToWrap),
-                                    AccessibilityHandler::Interfaces { itemComponentToWrap.item.isTicked ? std::make_unique<ValueInterface>()
-                                                                                                         : nullptr }),
+                                    getAccessibilityActions (*this, itemComponentToWrap)),
               itemComponent (itemComponentToWrap)
         {
         }
@@ -242,7 +217,7 @@ private:
             }
 
             if (itemComponent.item.isTicked)
-                state = state.withChecked();
+                state = state.withCheckable().withChecked();
 
             return state.isFocused() ? state.withSelected() : state;
         }

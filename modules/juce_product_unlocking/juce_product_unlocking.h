@@ -35,7 +35,7 @@
 
   ID:                 juce_product_unlocking
   vendor:             juce
-  version:            6.1.5
+  version:            6.1.6
   name:               JUCE Online marketplace support
   description:        Classes for online product authentication
   website:            http://www.juce.com/juce

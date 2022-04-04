@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#pragma once
+
 #if JUCE_BSD && ! JUCE_CUSTOM_VST3_SDK
  #error To build JUCE VST3 plug-ins on BSD you must use an external BSD-compatible VST3 SDK with JUCE_CUSTOM_VST3_SDK=1
 #endif

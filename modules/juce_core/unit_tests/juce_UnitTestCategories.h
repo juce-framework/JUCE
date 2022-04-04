@@ -28,6 +28,7 @@ namespace UnitTestCategories
     static const String analytics                  { "Analytics" };
     static const String audio                      { "Audio" };
     static const String audioProcessorParameters   { "AudioProcessorParameters" };
+    static const String audioProcessors            { "AudioProcessors" };
     static const String blocks                     { "Blocks" };
     static const String compression                { "Compression" };
     static const String containers                 { "Containers" };

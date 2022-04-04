@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#pragma once
+
 #ifndef DOXYGEN
 
 namespace juce
@@ -43,7 +45,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
         return Steinberg::kNotImplemented; \
     }
 
-static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexcept
+inline bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexcept
 {
     return std::memcmp (a, b, sizeof (Steinberg::TUID)) == 0;
 }
@@ -211,7 +213,7 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::centreSurround:    return Steinberg::Vst::kSpeakerCs;
         case AudioChannelSet::leftSurroundSide:  return Steinberg::Vst::kSpeakerSl;
         case AudioChannelSet::rightSurroundSide: return Steinberg::Vst::kSpeakerSr;
-        case AudioChannelSet::topMiddle:         return (1ull << 11); /* kSpeakerTm */
+        case AudioChannelSet::topMiddle:         return Steinberg::Vst::kSpeakerTc; /* kSpeakerTm */
         case AudioChannelSet::topFrontLeft:      return Steinberg::Vst::kSpeakerTfl;
         case AudioChannelSet::topFrontCentre:    return Steinberg::Vst::kSpeakerTfc;
         case AudioChannelSet::topFrontRight:     return Steinberg::Vst::kSpeakerTfr;
@@ -221,8 +223,8 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::LFE2:              return Steinberg::Vst::kSpeakerLfe2;
         case AudioChannelSet::leftSurroundRear:  return Steinberg::Vst::kSpeakerLcs;
         case AudioChannelSet::rightSurroundRear: return Steinberg::Vst::kSpeakerRcs;
-        case AudioChannelSet::wideLeft:          return Steinberg::Vst::kSpeakerPl;
-        case AudioChannelSet::wideRight:         return Steinberg::Vst::kSpeakerPr;
+        case AudioChannelSet::proximityLeft:     return Steinberg::Vst::kSpeakerPl;
+        case AudioChannelSet::proximityRight:    return Steinberg::Vst::kSpeakerPr;
         case AudioChannelSet::ambisonicACN0:     return Steinberg::Vst::kSpeakerACN0;
         case AudioChannelSet::ambisonicACN1:     return Steinberg::Vst::kSpeakerACN1;
         case AudioChannelSet::ambisonicACN2:     return Steinberg::Vst::kSpeakerACN2;
@@ -272,10 +274,9 @@ static Steinberg::Vst::Speaker getSpeakerType (const AudioChannelSet& set, Audio
         case AudioChannelSet::ambisonicACN33:
         case AudioChannelSet::ambisonicACN34:
         case AudioChannelSet::ambisonicACN35:
-        case AudioChannelSet::proximityLeft:
-        case AudioChannelSet::proximityRight:
+        case AudioChannelSet::wideLeft:
+        case AudioChannelSet::wideRight:
         case AudioChannelSet::unknown:
-        default:
             break;
     }
 
@@ -330,14 +331,13 @@ static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArran
         case Steinberg::Vst::kSpeakerBfl:   return AudioChannelSet::bottomFrontLeft;
         case Steinberg::Vst::kSpeakerBfc:   return AudioChannelSet::bottomFrontCentre;
         case Steinberg::Vst::kSpeakerBfr:   return AudioChannelSet::bottomFrontRight;
-        case Steinberg::Vst::kSpeakerPl:    return AudioChannelSet::wideLeft;
-        case Steinberg::Vst::kSpeakerPr:    return AudioChannelSet::wideRight;
+        case Steinberg::Vst::kSpeakerPl:    return AudioChannelSet::proximityLeft;
+        case Steinberg::Vst::kSpeakerPr:    return AudioChannelSet::proximityRight;
         case Steinberg::Vst::kSpeakerBsl:   return AudioChannelSet::bottomSideLeft;
         case Steinberg::Vst::kSpeakerBsr:   return AudioChannelSet::bottomSideRight;
         case Steinberg::Vst::kSpeakerBrl:   return AudioChannelSet::bottomRearLeft;
         case Steinberg::Vst::kSpeakerBrc:   return AudioChannelSet::bottomRearCentre;
         case Steinberg::Vst::kSpeakerBrr:   return AudioChannelSet::bottomRearRight;
-        default: break;
     }
 
     auto channelType = BigInteger (static_cast<int64> (type)).findNextSetBit (0);
@@ -348,41 +348,124 @@ static AudioChannelSet::ChannelType getChannelType (Steinberg::Vst::SpeakerArran
     return static_cast<AudioChannelSet::ChannelType> (static_cast<int> (AudioChannelSet::discreteChannel0) + 6 + (channelType - 33));
 }
 
+namespace detail
+{
+    struct LayoutPair
+    {
+        Steinberg::Vst::SpeakerArrangement arrangement;
+        std::initializer_list<AudioChannelSet::ChannelType> channelOrder;
+    };
+
+    using namespace Steinberg::Vst::SpeakerArr;
+    using X = AudioChannelSet;
+
+    /*  Maps VST3 layouts to the equivalent JUCE channels, in VST3 order.
+
+        The channel types are taken from the equivalent JUCE AudioChannelSet, and then reordered to
+        match the VST3 speaker positions.
+    */
+    const LayoutPair layoutTable[]
+    {
+        { kEmpty,                       {} },
+        { kMono,                        { X::centre } },
+        { kStereo,                      { X::left, X::right } },
+        { k30Cine,                      { X::left, X::right, X::centre } },
+        { k30Music,                     { X::left, X::right, X::surround } },
+        { k40Cine,                      { X::left, X::right, X::centre, X::surround } },
+        { k50,                          { X::left, X::right, X::centre, X::leftSurround, X::rightSurround } },
+        { k51,                          { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround } },
+        { k60Cine,                      { X::left, X::right, X::centre, X::leftSurround, X::rightSurround, X::centreSurround } },
+        { k61Cine,                      { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::centreSurround } },
+        { k60Music,                     { X::left, X::right, X::leftSurround, X::rightSurround, X::leftSurroundSide, X::rightSurroundSide } },
+        { k61Music,                     { X::left, X::right, X::LFE, X::leftSurround, X::rightSurround, X::leftSurroundSide, X::rightSurroundSide } },
+        { k70Music,                     { X::left, X::right, X::centre, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide } },
+        { k70Cine,                      { X::left, X::right, X::centre, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre } },
+        { k71Music,                     { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide } },
+        { k71Cine,                      { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::leftCentre, X::rightCentre } },
+        { k40Music,                     { X::left, X::right, X::leftSurround, X::rightSurround } },
+
+        { k51_4,                        { X::left, X::right, X::centre, X::LFE, X::leftSurround, X::rightSurround, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k50_4,                        { X::left, X::right, X::centre,         X::leftSurround, X::rightSurround, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k71_2,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topSideLeft, X::topSideRight } },
+        { k70_2,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topSideLeft, X::topSideRight } },
+        { k71_4,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k70_4,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight } },
+        { k71_6,                        { X::left, X::right, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k70_6,                        { X::left, X::right, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+
+        // The VST3 layout uses 'left/right' and 'left-of-center/right-of-center', but the JUCE layout uses 'left/right' and 'wide-left/wide-right'.
+        { k91_6,                        { X::wideLeft, X::wideRight, X::centre, X::LFE, X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+        { k90_6,                        { X::wideLeft, X::wideRight, X::centre,         X::leftSurroundRear, X::rightSurroundRear, X::left, X::right, X::leftSurroundSide, X::rightSurroundSide, X::topFrontLeft, X::topFrontRight, X::topRearLeft, X::topRearRight, X::topSideLeft, X::topSideRight } },
+    };
+
+   #if JUCE_DEBUG
+    static std::once_flag layoutTableCheckedFlag;
+   #endif
+}
+
+inline bool isLayoutTableValid()
+{
+    for (const auto& item : detail::layoutTable)
+        if ((size_t) countNumberOfBits (item.arrangement) != item.channelOrder.size())
+            return false;
+
+    std::set<Steinberg::Vst::SpeakerArrangement> arrangements;
+
+    for (const auto& item : detail::layoutTable)
+        arrangements.insert (item.arrangement);
+
+    if (arrangements.size() != (size_t) numElementsInArray (detail::layoutTable))
+        return false; // There's a duplicate speaker arrangement
+
+    return std::all_of (std::begin (detail::layoutTable), std::end (detail::layoutTable), [] (const auto& item)
+    {
+        return std::set<AudioChannelSet::ChannelType> (item.channelOrder).size() == item.channelOrder.size();
+    });
+}
+
+static Array<AudioChannelSet::ChannelType> getSpeakerOrder (Steinberg::Vst::SpeakerArrangement arr)
+{
+    using namespace Steinberg::Vst;
+    using namespace Steinberg::Vst::SpeakerArr;
+
+   #if JUCE_DEBUG
+    std::call_once (detail::layoutTableCheckedFlag, [] { jassert (isLayoutTableValid()); });
+   #endif
+
+    // Check if this is a layout with a hard-coded conversion
+    const auto arrangementMatches = [arr] (const auto& layoutPair) { return layoutPair.arrangement == arr; };
+    const auto iter = std::find_if (std::begin (detail::layoutTable), std::end (detail::layoutTable), arrangementMatches);
+
+    if (iter != std::end (detail::layoutTable))
+        return iter->channelOrder;
+
+    // There's no hard-coded conversion, so assume that the channels are in the same orders in both layouts.
+    const auto channels = getChannelCount (arr);
+    Array<AudioChannelSet::ChannelType> result;
+    result.ensureStorageAllocated (channels);
+
+    for (auto i = 0; i < channels; ++i)
+        result.add (getChannelType (arr, getSpeaker (arr, i)));
+
+    return result;
+}
+
 static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const AudioChannelSet& channels) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    if (channels == AudioChannelSet::disabled())            return kEmpty;
-    if (channels == AudioChannelSet::mono())                return kMono;
-    if (channels == AudioChannelSet::stereo())              return kStereo;
-    if (channels == AudioChannelSet::createLCR())           return k30Cine;
-    if (channels == AudioChannelSet::createLRS())           return k30Music;
-    if (channels == AudioChannelSet::createLCRS())          return k40Cine;
-    if (channels == AudioChannelSet::create5point0())       return k50;
-    if (channels == AudioChannelSet::create5point1())       return k51;
-    if (channels == AudioChannelSet::create6point0())       return k60Cine;
-    if (channels == AudioChannelSet::create6point1())       return k61Cine;
-    if (channels == AudioChannelSet::create6point0Music())  return k60Music;
-    if (channels == AudioChannelSet::create6point1Music())  return k61Music;
-    if (channels == AudioChannelSet::create7point0())       return k70Music;
-    if (channels == AudioChannelSet::create7point0SDDS())   return k70Cine;
-    if (channels == AudioChannelSet::create7point1())       return k71CineSideFill;
-    if (channels == AudioChannelSet::create7point1SDDS())   return k71Cine;
-    if (channels == AudioChannelSet::ambisonic())           return kAmbi1stOrderACN;
-    if (channels == AudioChannelSet::quadraphonic())        return k40Music;
-    if (channels == AudioChannelSet::create5point1point4()) return k51_4;
-    if (channels == AudioChannelSet::create7point0point2()) return k71_2 & ~(Steinberg::Vst::kSpeakerLfe);
-    if (channels == AudioChannelSet::create7point1point2()) return k71_2;
-    if (channels == AudioChannelSet::create7point0point4()) return k71_4 & ~(Steinberg::Vst::kSpeakerLfe);
-    if (channels == AudioChannelSet::create7point1point4()) return k71_4;
-    if (channels == AudioChannelSet::create7point1point6()) return k71_6;
-    if (channels == AudioChannelSet::create9point1point6()) return k91_6;
-    if (channels == AudioChannelSet::ambisonic (0))         return (1ull << 20);
-    if (channels == AudioChannelSet::ambisonic (1))         return (1ull << 20) | (1ull << 21) | (1ull << 22) | (1ull << 23);
-   #if VST_VERSION >= 0x030608
-    if (channels == AudioChannelSet::ambisonic (2))         return kAmbi2cdOrderACN;
-    if (channels == AudioChannelSet::ambisonic (3))         return kAmbi3rdOrderACN;
+   #if JUCE_DEBUG
+    std::call_once (detail::layoutTableCheckedFlag, [] { jassert (isLayoutTableValid()); });
    #endif
+
+    const auto channelSetMatches = [&channels] (const auto& layoutPair)
+    {
+        return AudioChannelSet::channelSetWithChannels (layoutPair.channelOrder) == channels;
+    };
+    const auto iter = std::find_if (std::begin (detail::layoutTable), std::end (detail::layoutTable), channelSetMatches);
+
+    if (iter != std::end (detail::layoutTable))
+        return iter->arrangement;
 
     Steinberg::Vst::SpeakerArrangement result = 0;
 
@@ -392,57 +475,414 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
     return result;
 }
 
-static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
+inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
-    switch (arr)
-    {
-        case kEmpty:                                          return AudioChannelSet::disabled();
-        case kMono:                                           return AudioChannelSet::mono();
-        case kStereo:                                         return AudioChannelSet::stereo();
-        case k30Cine:                                         return AudioChannelSet::createLCR();
-        case k30Music:                                        return AudioChannelSet::createLRS();
-        case k40Cine:                                         return AudioChannelSet::createLCRS();
-        case k50:                                             return AudioChannelSet::create5point0();
-        case k51:                                             return AudioChannelSet::create5point1();
-        case k60Cine:                                         return AudioChannelSet::create6point0();
-        case k61Cine:                                         return AudioChannelSet::create6point1();
-        case k60Music:                                        return AudioChannelSet::create6point0Music();
-        case k61Music:                                        return AudioChannelSet::create6point1Music();
-        case k70Music:                                        return AudioChannelSet::create7point0();
-        case k70Cine:                                         return AudioChannelSet::create7point0SDDS();
-        case k71CineSideFill:                                 return AudioChannelSet::create7point1();
-        case k71Cine:                                         return AudioChannelSet::create7point1SDDS();
-        case k40Music:                                        return AudioChannelSet::quadraphonic();
-        case k71_2:                                           return AudioChannelSet::create7point1point2();
-        case k71_2 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point2();
-        case k71_4:                                           return AudioChannelSet::create7point1point4();
-        case k71_4 & ~(Steinberg::Vst::kSpeakerLfe):          return AudioChannelSet::create7point0point4();
-        case k71_6:                                           return AudioChannelSet::create7point1point6();
-        case (1 << 20):                                       return AudioChannelSet::ambisonic (0);
-        case kAmbi1stOrderACN:                                return AudioChannelSet::ambisonic (1);
-       #if VST_VERSION >= 0x030608
-        case kAmbi2cdOrderACN:                                return AudioChannelSet::ambisonic (2);
-        case kAmbi3rdOrderACN:                                return AudioChannelSet::ambisonic (3);
-       #endif
-    }
-
-    AudioChannelSet result;
-
-    BigInteger vstChannels (static_cast<int64> (arr));
-    for (auto bit = vstChannels.findNextSetBit (0); bit != -1; bit = vstChannels.findNextSetBit (bit + 1))
-    {
-        AudioChannelSet::ChannelType channelType = getChannelType (arr, 1ull << static_cast<uint64> (bit));
-        if (channelType != AudioChannelSet::unknown)
-            result.addChannel (channelType);
-    }
+    const auto result = AudioChannelSet::channelSetWithChannels (getSpeakerOrder (arr));
 
     // VST3 <-> JUCE layout conversion error: report this bug to the JUCE forum
-    jassert (result.size() == vstChannels.countNumberOfSetBits());
+    jassert (result.size() == getChannelCount (arr));
 
     return result;
 }
+
+//==============================================================================
+/*
+    Provides fast remapping of the channels on a single bus, from VST3 order to JUCE order.
+
+    For multi-bus plugins, you'll need several instances of this, one per bus.
+*/
+struct ChannelMapping
+{
+    explicit ChannelMapping (const AudioChannelSet& layout)
+        : ChannelMapping (layout, true)
+    {
+    }
+
+    ChannelMapping (const AudioChannelSet& layout, bool activeIn)
+        : indices (makeChannelIndices (layout)),
+          active (activeIn)
+    {
+    }
+
+    explicit ChannelMapping (const AudioProcessor::Bus& juceBus)
+        : ChannelMapping (juceBus.getLastEnabledLayout(), juceBus.isEnabled())
+    {
+    }
+
+    int getJuceChannelForVst3Channel (int vst3Channel) const { return indices[(size_t) vst3Channel]; }
+
+    size_t size() const { return indices.size(); }
+
+    void setActive (bool activeIn) { active = activeIn; }
+    bool isActive() const { return active; }
+
+private:
+    /*  Builds a table that provides the index of the corresponding JUCE channel, given a VST3 channel.
+
+        Depending on the mapping, the VST3 arrangement and JUCE arrangement may not contain channels
+        that map 1:1 via getChannelType. For example, the VST3 7.1 layout contains
+        'kSpeakerLs' which maps to the 'leftSurround' channel type, but the JUCE 7.1 layout does not
+        contain this channel type. As a result, we need to try to map the channels sensibly, even
+        if there's not a 'direct' mapping.
+    */
+    static std::vector<int> makeChannelIndices (const AudioChannelSet& juceArrangement)
+    {
+        const auto order = getSpeakerOrder (getVst3SpeakerArrangement (juceArrangement));
+
+        std::vector<int> result;
+
+        for (const auto& type : order)
+            result.push_back (juceArrangement.getChannelIndexForType (type));
+
+        return result;
+    }
+
+    std::vector<int> indices;
+    bool active = true;
+};
+
+//==============================================================================
+inline auto& getAudioBusPointer (detail::Tag<float>,  Steinberg::Vst::AudioBusBuffers& data) { return data.channelBuffers32; }
+inline auto& getAudioBusPointer (detail::Tag<double>, Steinberg::Vst::AudioBusBuffers& data) { return data.channelBuffers64; }
+
+static inline int countUsedChannels (const std::vector<ChannelMapping>& inputMap,
+                                     const std::vector<ChannelMapping>& outputMap)
+{
+    const auto countUsedChannelsInVector = [] (const std::vector<ChannelMapping>& map)
+    {
+        return std::accumulate (map.begin(), map.end(), 0, [] (auto acc, const auto& item)
+        {
+            return acc + (item.isActive() ? (int) item.size() : 0);
+        });
+    };
+
+    return jmax (countUsedChannelsInVector (inputMap), countUsedChannelsInVector (outputMap));
+}
+
+/*
+    The main purpose of this class is to remap a set of buffers provided by the VST3 host into an
+    equivalent JUCE AudioBuffer using the JUCE channel layout/order.
+
+    An instance of this class handles input and output remapping for a single data type (float or
+    double), matching the FloatType template parameter.
+
+    This is in VST3Common.h, rather than in the VST3_Wrapper.cpp, so that we can test it.
+
+    @see ClientBufferMapper
+*/
+template <typename FloatType>
+class ClientBufferMapperData
+{
+public:
+    void prepare (int numChannels, int blockSize)
+    {
+        emptyBuffer.setSize (numChannels, blockSize);
+        channels.reserve ((size_t) jmin (128, numChannels));
+    }
+
+    AudioBuffer<FloatType> getMappedBuffer (Steinberg::Vst::ProcessData& data,
+                                            const std::vector<ChannelMapping>& inputMap,
+                                            const std::vector<ChannelMapping>& outputMap)
+    {
+        const auto usedChannels = countUsedChannels (inputMap, outputMap);
+
+        // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
+        const auto countValidBuses = [] (Steinberg::Vst::AudioBusBuffers* buffers, int32 num)
+        {
+            return int (std::distance (buffers, std::find_if (buffers, buffers + num, [] (Steinberg::Vst::AudioBusBuffers& buf)
+            {
+                return getAudioBusPointer (detail::Tag<FloatType>{}, buf) == nullptr && buf.numChannels > 0;
+            })));
+        };
+
+        const auto vstInputs  = countValidBuses (data.inputs,  data.numInputs);
+        const auto vstOutputs = countValidBuses (data.outputs, data.numOutputs);
+
+        if (! validateLayouts (data, vstInputs, inputMap, vstOutputs, outputMap))
+            return clearOutputBuffersAndReturnBlankBuffer (data, vstOutputs, usedChannels);
+
+        // If we're here, then we know that the host has given us a usable layout
+        channels.clear();
+
+        // Put the host-supplied output channel pointers into JUCE order
+        for (size_t i = 0; i < (size_t) vstOutputs; ++i)
+        {
+            const auto bus = getMappedOutputBus (data, outputMap, i);
+            channels.insert (channels.end(), bus.begin(), bus.end());
+        }
+
+        // For input channels that are < the total number of outputs channels, copy the input over
+        // the output buffer, at the appropriate JUCE channel index.
+        // For input channels that are >= the total number of output channels, add the input buffer
+        // pointer to the array of channel pointers.
+        for (size_t inputBus = 0, initialBusIndex = 0; inputBus < (size_t) vstInputs; ++inputBus)
+        {
+            const auto& map = inputMap[inputBus];
+
+            if (! map.isActive())
+                continue;
+
+            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.inputs[inputBus]);
+
+            for (auto i = 0; i < (int) map.size(); ++i)
+            {
+                const auto destIndex = initialBusIndex + (size_t) map.getJuceChannelForVst3Channel (i);
+
+                channels.resize (jmax (channels.size(), destIndex + 1), nullptr);
+
+                if (auto* dest = channels[destIndex])
+                    FloatVectorOperations::copy (dest, busPtr[i], (int) data.numSamples);
+                else
+                    channels[destIndex] = busPtr[i];
+            }
+
+            initialBusIndex += map.size();
+        }
+
+        return { channels.data(), (int) channels.size(), (int) data.numSamples };
+    }
+
+private:
+    AudioBuffer<FloatType> clearOutputBuffersAndReturnBlankBuffer (Steinberg::Vst::ProcessData& data, int vstOutputs, int usedChannels)
+    {
+        // The host is ignoring the bus layout we requested, so we can't process sensibly!
+        jassertfalse;
+
+        // Clear all output channels
+        std::for_each (data.outputs, data.outputs + vstOutputs, [&data] (auto& bus)
+        {
+            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
+            std::for_each (busPtr, busPtr + bus.numChannels, [&data] (auto* ptr)
+            {
+                if (ptr != nullptr)
+                    FloatVectorOperations::clear (ptr, (int) data.numSamples);
+            });
+        });
+
+        // Return a silent buffer for the AudioProcessor to process
+        emptyBuffer.clear();
+
+        return { emptyBuffer.getArrayOfWritePointers(),
+                 jmin (emptyBuffer.getNumChannels(), usedChannels),
+                 data.numSamples };
+    }
+
+    std::vector<FloatType*> getMappedOutputBus (Steinberg::Vst::ProcessData& data,
+                                                const std::vector<ChannelMapping>& maps,
+                                                size_t index) const
+    {
+        const auto& map = maps[index];
+
+        if (! map.isActive())
+            return {};
+
+        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.outputs[index]);
+
+        std::vector<FloatType*> result (map.size(), nullptr);
+
+        for (auto i = 0; i < (int) map.size(); ++i)
+            result[(size_t) map.getJuceChannelForVst3Channel (i)] = busPtr[i];
+
+        return result;
+    }
+
+    template <typename Iterator>
+    static bool validateLayouts (Iterator first, Iterator last, const std::vector<ChannelMapping>& map)
+    {
+        if ((size_t) std::distance (first, last) > map.size())
+            return false;
+
+        auto mapIterator = map.begin();
+
+        for (auto it = first; it != last; ++it, ++mapIterator)
+        {
+            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
+            const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
+
+            if (anyChannelIsNull || ((int) mapIterator->size() != it->numChannels))
+                return false;
+        }
+
+        // If the host didn't provide the full complement of buses, it must be because the other
+        // buses are all deactivated.
+        return std::none_of (mapIterator, map.end(), [] (const auto& item) { return item.isActive(); });
+    }
+
+    static bool validateLayouts (Steinberg::Vst::ProcessData& data,
+                                 int numInputs,
+                                 const std::vector<ChannelMapping>& inputMap,
+                                 int numOutputs,
+                                 const std::vector<ChannelMapping>& outputMap)
+    {
+
+        // The plug-in should only process an activated bus.
+        // The host could provide fewer busses in the process call if the last busses are not activated.
+
+        return validateLayouts (data.inputs, data.inputs + numInputs, inputMap)
+               && validateLayouts (data.outputs, data.outputs + numOutputs, outputMap);
+    }
+
+    std::vector<FloatType*> channels;
+    AudioBuffer<FloatType> emptyBuffer;
+};
+
+//==============================================================================
+/*
+    Remaps a set of buffers provided by the VST3 host into an equivalent JUCE AudioBuffer using the
+    JUCE channel layout/order.
+
+    An instance of this class can remap to either a float or double JUCE buffer, as necessary.
+
+    Although the VST3 spec requires that the bus layout does not change while the plugin is
+    activated and processing, some hosts get this wrong and try to enable/disable buses during
+    playback. This class attempts to be resilient, and should cope with buses being switched on and
+    off during processing.
+
+    This is in VST3Common.h, rather than in the VST3_Wrapper.cpp, so that we can test it.
+
+    @see ClientBufferMapper
+*/
+class ClientBufferMapper
+{
+public:
+    void prepare (const AudioProcessor& processor, int blockSize)
+    {
+        struct Pair
+        {
+            std::vector<ChannelMapping>& map;
+            bool isInput;
+        };
+
+        for (const auto& pair : { Pair { inputMap, true }, Pair { outputMap, false } })
+        {
+            pair.map.clear();
+
+            for (auto i = 0; i < processor.getBusCount (pair.isInput); ++i)
+                pair.map.emplace_back (*processor.getBus (pair.isInput, i));
+        }
+
+        const auto findMaxNumChannels = [&] (bool isInput)
+        {
+            auto sum = 0;
+
+            for (auto i = 0; i < processor.getBusCount (isInput); ++i)
+                sum += processor.getBus (isInput, i)->getLastEnabledLayout().size();
+
+            return sum;
+        };
+
+        const auto numChannels = jmax (findMaxNumChannels (true), findMaxNumChannels (false));
+
+        floatData .prepare (numChannels, blockSize);
+        doubleData.prepare (numChannels, blockSize);
+    }
+
+    void setInputBusActive (size_t bus, bool state)
+    {
+        if (bus < inputMap.size())
+            inputMap[bus].setActive (state);
+    }
+
+    void setOutputBusActive (size_t bus, bool state)
+    {
+        if (bus < outputMap.size())
+            outputMap[bus].setActive (state);
+    }
+
+    template <typename FloatType>
+    AudioBuffer<FloatType> getJuceLayoutForVst3Buffer (detail::Tag<FloatType>, Steinberg::Vst::ProcessData& data)
+    {
+        return getData (detail::Tag<FloatType>{}).getMappedBuffer (data, inputMap, outputMap);
+    }
+
+private:
+    auto& getData (detail::Tag<float>)  { return floatData; }
+    auto& getData (detail::Tag<double>) { return doubleData; }
+
+    ClientBufferMapperData<float> floatData;
+    ClientBufferMapperData<double> doubleData;
+
+    std::vector<ChannelMapping> inputMap;
+    std::vector<ChannelMapping> outputMap;
+};
+
+//==============================================================================
+/*
+    Remaps a JUCE buffer to an equivalent VST3 layout.
+
+    An instance of this class handles mappings for both float and double buffers, but in a single
+    direction (input or output).
+*/
+class HostBufferMapper
+{
+public:
+    /*  Builds a cached map of juce <-> vst3 channel mappings. */
+    void prepare (std::vector<ChannelMapping> arrangements)
+    {
+        mappings = std::move (arrangements);
+
+        floatBusMap .resize (mappings.size());
+        doubleBusMap.resize (mappings.size());
+        busBuffers  .resize (mappings.size());
+    }
+
+    /*  Applies the mapping to an AudioBuffer using JUCE channel layout. */
+    template <typename FloatType>
+    Steinberg::Vst::AudioBusBuffers* getVst3LayoutForJuceBuffer (AudioBuffer<FloatType>& source)
+    {
+        int channelIndexOffset = 0;
+
+        for (size_t i = 0; i < mappings.size(); ++i)
+        {
+            const auto& mapping = mappings[i];
+            associateBufferTo (busBuffers[i], get (detail::Tag<FloatType>{})[i], source, mapping, channelIndexOffset);
+            channelIndexOffset += mapping.isActive() ? (int) mapping.size() : 0;
+        }
+
+        return busBuffers.data();
+    }
+
+private:
+    template <typename FloatType>
+    using Bus = std::vector<FloatType*>;
+
+    template <typename FloatType>
+    using BusMap = std::vector<Bus<FloatType>>;
+
+    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
+    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
+
+    template <typename FloatType>
+    void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
+                            Bus<FloatType>& bus,
+                            AudioBuffer<FloatType>& buffer,
+                            const ChannelMapping& busMap,
+                            int channelStartOffset) const
+    {
+        bus.clear();
+
+        for (size_t i = 0; i < busMap.size(); ++i)
+        {
+            bus.push_back (busMap.isActive() ? buffer.getWritePointer (channelStartOffset + busMap.getJuceChannelForVst3Channel ((int) i))
+                                             : nullptr);
+        }
+
+        assignRawPointer (vstBuffers, bus.data());
+        vstBuffers.numChannels      = (Steinberg::int32) busMap.size();
+        vstBuffers.silenceFlags     = busMap.isActive() ? 0 : std::numeric_limits<Steinberg::uint64>::max();
+    }
+
+    auto& get (detail::Tag<float>)    { return floatBusMap; }
+    auto& get (detail::Tag<double>)   { return doubleBusMap; }
+
+    BusMap<float>  floatBusMap;
+    BusMap<double> doubleBusMap;
+
+    std::vector<Steinberg::Vst::AudioBusBuffers> busBuffers;
+    std::vector<ChannelMapping> mappings;
+};
 
 //==============================================================================
 template <class ObjectType>
@@ -966,107 +1406,6 @@ private:
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
-};
-
-//==============================================================================
-template <typename FloatType>
-struct VST3BufferExchange
-{
-    using Bus = Array<FloatType*>;
-    using BusMap = Array<Bus>;
-
-    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, float** raw)  { vstBuffers.channelBuffers32 = raw; }
-    static void assignRawPointer (Steinberg::Vst::AudioBusBuffers& vstBuffers, double** raw) { vstBuffers.channelBuffers64 = raw; }
-
-    /** Assigns a series of AudioBuffer's channels to an AudioBusBuffers'
-        @warning For speed, does not check the channel count and offsets according to the AudioBuffer
-    */
-    static void associateBufferTo (Steinberg::Vst::AudioBusBuffers& vstBuffers,
-                                   Bus& bus,
-                                   AudioBuffer<FloatType>& buffer,
-                                   int numChannels, int channelStartOffset,
-                                   int sampleOffset = 0)
-    {
-        const int channelEnd = numChannels + channelStartOffset;
-        jassert (channelEnd >= 0 && channelEnd <= buffer.getNumChannels());
-
-        bus.clearQuick();
-
-        for (int i = channelStartOffset; i < channelEnd; ++i)
-            bus.add (buffer.getWritePointer (i, sampleOffset));
-
-        assignRawPointer (vstBuffers, (numChannels > 0 ? bus.getRawDataPointer() : nullptr));
-        vstBuffers.numChannels      = numChannels;
-        vstBuffers.silenceFlags     = 0;
-    }
-
-    static void mapArrangementToBuses (int& channelIndexOffset, int index,
-                                        Array<Steinberg::Vst::AudioBusBuffers>& result,
-                                        BusMap& busMapToUse, const AudioChannelSet& arrangement,
-                                        AudioBuffer<FloatType>& source)
-    {
-        const int numChansForBus = arrangement.size();
-
-        if (index >= result.size())
-            result.add (Steinberg::Vst::AudioBusBuffers());
-
-        if (index >= busMapToUse.size())
-            busMapToUse.add (Bus());
-
-        associateBufferTo (result.getReference (index),
-                           busMapToUse.getReference (index),
-                           source, numChansForBus, channelIndexOffset);
-
-        channelIndexOffset += numChansForBus;
-    }
-
-    static void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result, BusMap& busMapToUse,
-                                  const Array<AudioChannelSet>& arrangements,
-                                  AudioBuffer<FloatType>& source)
-    {
-        int channelIndexOffset = 0;
-
-        for (int i = 0; i < arrangements.size(); ++i)
-            mapArrangementToBuses (channelIndexOffset, i, result, busMapToUse,
-                                    arrangements.getUnchecked (i), source);
-    }
-
-    static void mapBufferToBuses (Array<Steinberg::Vst::AudioBusBuffers>& result,
-                                  Steinberg::Vst::IAudioProcessor& processor,
-                                  BusMap& busMapToUse, bool isInput, int numBuses,
-                                  AudioBuffer<FloatType>& source)
-    {
-        int channelIndexOffset = 0;
-
-        for (int i = 0; i < numBuses; ++i)
-            mapArrangementToBuses (channelIndexOffset, i,
-                                    result, busMapToUse,
-                                    getArrangementForBus (&processor, isInput, i),
-                                    source);
-    }
-};
-
-template <typename FloatType>
-struct VST3FloatAndDoubleBusMapCompositeHelper {};
-
-struct VST3FloatAndDoubleBusMapComposite
-{
-    VST3BufferExchange<float>::BusMap  floatVersion;
-    VST3BufferExchange<double>::BusMap doubleVersion;
-
-    template <typename FloatType>
-    inline typename VST3BufferExchange<FloatType>::BusMap& get()   { return VST3FloatAndDoubleBusMapCompositeHelper<FloatType>::get (*this); }
-};
-
-
-template <> struct VST3FloatAndDoubleBusMapCompositeHelper<float>
-{
-    static VST3BufferExchange<float>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl)  { return impl.floatVersion; }
-};
-
-template <> struct VST3FloatAndDoubleBusMapCompositeHelper<double>
-{
-    static VST3BufferExchange<double>::BusMap& get (VST3FloatAndDoubleBusMapComposite& impl) { return impl.doubleVersion; }
 };
 
 //==============================================================================

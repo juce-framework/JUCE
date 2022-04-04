@@ -124,19 +124,18 @@ public:
                                                                                [] (void * __nullable info, const void*, size_t) { delete (ImageDataContainer::Ptr*) info; }) };
             }
 
-            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) srcData.size));
+            const auto usableSize = jmin ((size_t) srcData.lineStride * (size_t) srcData.height, srcData.size);
+            CFUniquePtr<CFDataRef> data (CFDataCreate (nullptr, (const UInt8*) srcData.data, (CFIndex) usableSize));
             return detail::DataProviderPtr { CGDataProviderCreateWithCFData (data.get()) };
         }();
 
-        CGImageRef imageRef = CGImageCreate ((size_t) srcData.width,
-                                             (size_t) srcData.height,
-                                             8,
-                                             (size_t) srcData.pixelStride * 8,
-                                             (size_t) srcData.lineStride,
-                                             colourSpace, getCGImageFlags (juceImage.getFormat()), provider.get(),
-                                             nullptr, true, kCGRenderingIntentDefault);
-
-        return imageRef;
+        return CGImageCreate ((size_t) srcData.width,
+                              (size_t) srcData.height,
+                              8,
+                              (size_t) srcData.pixelStride * 8,
+                              (size_t) srcData.lineStride,
+                              colourSpace, getCGImageFlags (juceImage.getFormat()), provider.get(),
+                              nullptr, true, kCGRenderingIntentDefault);
     }
 
     //==============================================================================

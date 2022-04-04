@@ -60,7 +60,7 @@ public:
     Arpeggiator()
         : AudioProcessor (BusesProperties()) // add no audio buses at all
     {
-        addParameter (speed = new AudioParameterFloat ("speed", "Arpeggiator Speed", 0.0, 1.0, 0.5));
+        addParameter (speed = new AudioParameterFloat ({ "speed", 1 }, "Arpeggiator Speed", 0.0, 1.0, 0.5));
     }
 
     //==============================================================================
@@ -79,7 +79,7 @@ public:
 
     void processBlock (AudioBuffer<float>& buffer, MidiBuffer& midi) override
     {
-        // the audio buffer in a midi effect will have zero channels!
+        // A pure MIDI plugin shouldn't be provided any audio data
         jassert (buffer.getNumChannels() == 0);
 
         // however we use the buffer to get timing information

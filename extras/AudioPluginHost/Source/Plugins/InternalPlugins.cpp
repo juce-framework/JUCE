@@ -111,6 +111,7 @@ public:
     void setPlayHead (AudioPlayHead* p) override                                  { inner->setPlayHead (p); }
     void updateTrackProperties (const TrackProperties& p) override                { inner->updateTrackProperties (p); }
     bool isBusesLayoutSupported (const BusesLayout& layout) const override        { return inner->checkBusesLayoutSupported (layout); }
+    bool applyBusLayouts (const BusesLayout& layouts) override                    { return inner->setBusesLayout (layouts) && AudioPluginInstance::applyBusLayouts (layouts); }
 
     bool canAddBus (bool) const override                                          { return true; }
     bool canRemoveBus (bool) const override                                       { return true; }

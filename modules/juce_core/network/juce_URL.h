@@ -52,9 +52,6 @@ public:
     /** Creates URL referring to a local file on your disk using the file:// scheme. */
     explicit URL (File localFile);
 
-    /** Destructor. */
-    ~URL() = default;
-
     /** Compares two URLs.
 
         All aspects of the URLs must be identical for them to match, including any parameters,

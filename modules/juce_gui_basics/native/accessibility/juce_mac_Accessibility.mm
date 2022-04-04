@@ -278,7 +278,7 @@ private:
             if (auto* handler = getHandler (self))
             {
                 if (handler->getCurrentState().isCheckable())
-                    return handler->getCurrentState().isChecked() ? @(1) : @(0);
+                    return juceStringToNS (handler->getCurrentState().isChecked() ? TRANS ("On") : TRANS ("Off"));
 
                 return getAccessibilityValueFromInterfaces (*handler);
             }

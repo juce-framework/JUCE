@@ -169,6 +169,7 @@ bool ChildProcessCoordinator::launchWorkerProcess (const File& executable, const
 
         if (connection->isConnected())
         {
+            connection->startPinging();
             sendMessageToWorker ({ startMessage, specialMessageSize });
             return true;
         }

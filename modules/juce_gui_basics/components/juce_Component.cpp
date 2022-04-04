@@ -509,7 +509,7 @@ struct Component::ComponentHelpers
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (auto* c = ms.getComponentUnderMouse())
                 if (modalWouldBlockComponent (*c, &modal))
-                    (c->*function) (ms, ms.getScreenPosition(), Time::getCurrentTime());
+                    (c->*function) (ms, ScalingHelpers::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
     }
 };
 
@@ -1370,7 +1370,7 @@ AffineTransform Component::getTransform() const
     return affineTransform != nullptr ? *affineTransform : AffineTransform();
 }
 
-float Component::getApproximateScaleFactorForComponent (Component* targetComponent)
+float Component::getApproximateScaleFactorForComponent (const Component* targetComponent)
 {
     AffineTransform transform;
 
@@ -1997,7 +1997,7 @@ void Component::paintComponentAndChildren (Graphics& g)
 {
     auto clipBounds = g.getClipBounds();
 
-    if (flags.dontClipGraphicsFlag)
+    if (flags.dontClipGraphicsFlag && getNumChildComponents() == 0)
     {
         paint (g);
     }

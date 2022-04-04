@@ -190,7 +190,7 @@ class ReaperEmbeddedViewDemo  : public AudioProcessor,
 public:
     ReaperEmbeddedViewDemo()
     {
-        addParameter (gain = new AudioParameterFloat ("gain", "Gain", 0.0f, 1.0f, 0.5f));
+        addParameter (gain = new AudioParameterFloat ({ "gain", 1 }, "Gain", 0.0f, 1.0f, 0.5f));
         startTimerHz (60);
     }
 

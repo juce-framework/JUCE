@@ -1401,7 +1401,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
             if (! isPowerOn)
                 setPower (true);
 
-            // dodgy hack to force some plugins to initialise the sample rate..
+            // dodgy hack to force some plugins to initialise the sample rate.
             if (! hasEditor())
             {
                 if (auto* firstParam = getParameters()[0])
@@ -1701,7 +1701,7 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
         return 0;
     }
 
-    // handles non plugin-specific callbacks..
+    // handles non plugin-specific callbacks.
     static pointer_sized_int handleGeneralCallback (int32 opcode, int32 /*index*/, pointer_sized_int /*value*/, void* ptr, float /*opt*/)
     {
         switch (opcode)
@@ -2472,13 +2472,13 @@ private:
         }
         else
         {
-            // Not initialised, so just bypass..
+            // Not initialised, so just bypass.
             for (int i = getTotalNumOutputChannels(); --i >= 0;)
                 buffer.clear (i, 0, buffer.getNumSamples());
         }
 
         {
-            // copy any incoming midi..
+            // copy any incoming midi.
             const ScopedLock sl (midiInLock);
 
             midiMessages.swapWith (incomingMidi);
@@ -2593,7 +2593,7 @@ private:
         {
             char nm[256] = { 0 };
 
-            // only do this if the plugin can't use indexed names..
+            // only do this if the plugin can't use indexed names.
             if (dispatch (Vst2::effGetProgramNameIndexed, 0, -1, nm, 0) == 0)
             {
                 auto oldProgram = getCurrentProgram();
@@ -3076,7 +3076,7 @@ private:
     }
 
     // This is an old workaround for some plugins that need a repaint when their
-    // windows are first created, but it breaks some Izotope plugins..
+    // windows are first created, but it breaks some Izotope plugins.
     bool shouldRepaintCarbonWindowWhenCreated()
     {
         return ! plugin.getName().containsIgnoreCase ("izotope");
@@ -3260,7 +3260,7 @@ private:
         if (isOpen)
         {
             // You shouldn't end up hitting this assertion unless the host is trying to do GUI
-            // cleanup on a non-GUI thread.. If it does that, bad things could happen in here..
+            // cleanup on a non-GUI thread. If it does that, bad things could happen in here.
             JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
 
             JUCE_VST_LOG ("Closing VST UI: " + plugin.getName());
@@ -3319,7 +3319,7 @@ private:
             resizeToFit();
     }
 
-    // hooks to get keyboard events from VST windows..
+    // hooks to get keyboard events from VST windows.
     static LRESULT CALLBACK vstHookWndProc (HWND hW, UINT message, WPARAM wParam, LPARAM lParam)
     {
         for (int i = activeVSTWindows.size(); --i >= 0;)

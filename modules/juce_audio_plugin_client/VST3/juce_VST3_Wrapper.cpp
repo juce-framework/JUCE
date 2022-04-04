@@ -545,7 +545,7 @@ private:
         if (bypassParameter == nullptr)
         {
             vst3WrapperProvidedBypassParam = true;
-            ownedBypassParameter.reset (new AudioParameterBool ("byps", "Bypass", false, {}, {}, {}));
+            ownedBypassParameter.reset (new AudioParameterBool ("byps", "Bypass", false));
             bypassParameter = ownedBypassParameter.get();
         }
 
@@ -665,10 +665,12 @@ class JuceVST3EditController : public Vst::EditController,
                                private ComponentRestarter::Listener
 {
 public:
-    JuceVST3EditController (Vst::IHostApplication* host)
+    explicit JuceVST3EditController (Vst::IHostApplication* host)
     {
         if (host != nullptr)
             host->queryInterface (FUnknown::iid, (void**) &hostContext);
+
+        blueCatPatchwork |= isBlueCatHost (host);
     }
 
     //==============================================================================
@@ -706,6 +708,8 @@ public:
     {
         if (hostContext != context)
             hostContext = context;
+
+        blueCatPatchwork |= isBlueCatHost (context);
 
         return kResultTrue;
     }
@@ -1355,6 +1359,27 @@ public:
     static constexpr auto pluginShouldBeMarkedDirtyFlag = 1 << 16;
 
 private:
+    bool isBlueCatHost (FUnknown* context) const
+    {
+        // We can't use the normal PluginHostType mechanism here because that will give us the name
+        // of the host process. However, this plugin instance might be loaded in an instance of
+        // the BlueCat PatchWork host, which might itself be a plugin.
+
+        VSTComSmartPtr<Vst::IHostApplication> host;
+        host.loadFrom (context);
+
+        if (host == nullptr)
+            return false;
+
+        Vst::String128 name;
+
+        if (host->getName (name) != kResultOk)
+            return false;
+
+        const auto hostName = toString (name);
+        return hostName.contains ("Blue Cat's VST3 Host");
+    }
+
     friend class JuceVST3Component;
     friend struct Param;
 
@@ -1430,6 +1455,7 @@ private:
                       inSetupProcessing { false };
 
     int lastLatencySamples = 0;
+    bool blueCatPatchwork = isBlueCatHost (hostContext.get());
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
@@ -1860,7 +1886,20 @@ private:
             {
                 if (auto* editor = component->pluginEditor.get())
                 {
-                    if (auto* constrainer = editor->getConstrainer())
+                    if (canResize() == kResultFalse)
+                    {
+                        // Ableton Live will call checkSizeConstraint even if the view returns false
+                        // from canResize. Set the out param to an appropriate size for the editor
+                        // and return.
+                        auto constrainedRect = component->getLocalArea (editor, editor->getLocalBounds())
+                                                        .getSmallestIntegerContainer();
+
+                        *rectToCheck = convertFromHostBounds (*rectToCheck);
+                        rectToCheck->right  = rectToCheck->left + roundToInt (constrainedRect.getWidth());
+                        rectToCheck->bottom = rectToCheck->top  + roundToInt (constrainedRect.getHeight());
+                        *rectToCheck = convertToHostBounds (*rectToCheck);
+                    }
+                    else if (auto* constrainer = editor->getConstrainer())
                     {
                         *rectToCheck = convertFromHostBounds (*rectToCheck);
 
@@ -2138,9 +2177,9 @@ private:
                         auto host = getHostType();
 
                        #if JUCE_MAC
-                        if (host.isWavelab() || host.isReaper())
+                        if (host.isWavelab() || host.isReaper() || owner.owner->blueCatPatchwork)
                        #else
-                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio())
+                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio() || owner.owner->blueCatPatchwork)
                        #endif
                             setBounds (editorBounds.withPosition (0, 0));
                     }
@@ -2272,6 +2311,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3EditController)
 };
 
+<<<<<<< HEAD
 
 //==============================================================================
 #if JucePlugin_Enable_ARA
@@ -2321,6 +2361,21 @@ namespace
 }
 
 
+||||||| 04a8a44a8
+namespace
+{
+    template <typename FloatType> struct AudioBusPointerHelper {};
+    template <> struct AudioBusPointerHelper<float>  { static float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
+    template <> struct AudioBusPointerHelper<double> { static double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
+
+    template <typename FloatType> struct ChooseBufferHelper {};
+    template <> struct ChooseBufferHelper<float>  { static AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
+    template <> struct ChooseBufferHelper<double> { static AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
+}
+
+
+=======
+>>>>>>> origin/develop
 //==============================================================================
 class JuceVST3Component : public Vst::IComponent,
                           public Vst::IAudioProcessor,
@@ -2465,12 +2520,11 @@ public:
     //==============================================================================
     tresult PLUGIN_API setActive (TBool state) override
     {
+        active = (state != 0);
+
         if (! state)
         {
             getPluginInstance().releaseResources();
-
-            deallocateChannelListAndBuffers (channelListFloat,  emptyBufferFloat);
-            deallocateChannelListAndBuffers (channelListDouble, emptyBufferDouble);
         }
         else
         {
@@ -2484,9 +2538,6 @@ public:
             bufferSize = processSetup.maxSamplesPerBlock > 0
                             ? (int) processSetup.maxSamplesPerBlock
                             : bufferSize;
-
-            allocateChannelListAndBuffers (channelListFloat,  emptyBufferFloat);
-            allocateChannelListAndBuffers (channelListDouble, emptyBufferDouble);
 
             preparePlugin (sampleRate, bufferSize, true);
         }
@@ -2954,6 +3005,7 @@ public:
                 info.mediaType = Vst::kAudio;
                 info.direction = dir;
                 info.channelCount = bus->getLastEnabledLayout().size();
+                jassert (info.channelCount == Steinberg::Vst::SpeakerArr::getChannelCount (getVst3SpeakerArrangement (bus->getLastEnabledLayout())));
                 toString128 (info.name, bus->getName());
 
                 info.busType = [&]
@@ -3035,8 +3087,14 @@ public:
         return kResultFalse;
     }
 
-    tresult PLUGIN_API activateBus (Vst::MediaType type, Vst::BusDirection dir, Steinberg::int32 index, TBool state) override
+    tresult PLUGIN_API activateBus (Vst::MediaType type,
+                                    Vst::BusDirection dir,
+                                    Steinberg::int32 index,
+                                    TBool state) override
     {
+        // The host is misbehaving! The plugin must be deactivated before setting new arrangements.
+        jassert (! active);
+
         if (type == Vst::kEvent)
         {
            #if JucePlugin_WantsMidiInput
@@ -3062,6 +3120,13 @@ public:
         {
             if (index < 0 || index >= getNumAudioBuses (dir == Vst::kInput))
                 return kResultFalse;
+
+            // Some hosts (old cakewalk, bitwig studio) might call this function without
+            // deactivating the plugin, so we update the channel mapping here.
+            if (dir == Vst::BusDirections::kInput)
+                bufferMapper.setInputBusActive ((size_t) index, state != 0);
+            else
+                bufferMapper.setOutputBusActive ((size_t) index, state != 0);
 
             if (auto* bus = pluginInstance->getBus (dir == Vst::kInput, index))
             {
@@ -3112,6 +3177,13 @@ public:
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
                                            Vst::SpeakerArrangement* outputs, Steinberg::int32 numOuts) override
     {
+        if (active)
+        {
+            // The host is misbehaving! The plugin must be deactivated before setting new arrangements.
+            jassertfalse;
+            return kResultFalse;
+        }
+
         auto numInputBuses  = pluginInstance->getBusCount (true);
         auto numOutputBuses = pluginInstance->getBusCount (false);
 
@@ -3300,8 +3372,8 @@ public:
         // If all of these are zero, the host is attempting to flush parameters without processing audio.
         if (data.numSamples != 0 || data.numInputs != 0 || data.numOutputs != 0)
         {
-            if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data, channelListFloat);
-            else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data, channelListDouble);
+            if      (processSetup.symbolicSampleSize == Vst::kSample32) processAudio<float>  (data);
+            else if (processSetup.symbolicSampleSize == Vst::kSample64) processAudio<double> (data);
             else jassertfalse;
         }
 
@@ -3376,131 +3448,11 @@ private:
 
     //==============================================================================
     template <typename FloatType>
-    void processAudio (Vst::ProcessData& data, Array<FloatType*>& channelList)
+    void processAudio (Vst::ProcessData& data)
     {
-        int totalInputChans = 0, totalOutputChans = 0;
-        bool tmpBufferNeedsClearing = false;
-
-        auto plugInInputChannels  = pluginInstance->getTotalNumInputChannels();
-        auto plugInOutputChannels = pluginInstance->getTotalNumOutputChannels();
-
-        // Wavelab workaround: wave-lab lies on the number of inputs/outputs so re-count here
-        const auto countValidChannels = [] (Vst::AudioBusBuffers* buffers, int32 num)
-        {
-            return int (std::distance (buffers, std::find_if (buffers, buffers + num, [] (Vst::AudioBusBuffers& buf)
-            {
-                return getPointerForAudioBus<FloatType> (buf) == nullptr && buf.numChannels > 0;
-            })));
-        };
-
-        const auto vstInputs  = countValidChannels (data.inputs,  data.numInputs);
-        const auto vstOutputs = countValidChannels (data.outputs, data.numOutputs);
-
-        {
-            auto n = jmax (vstOutputs, getNumAudioBuses (false));
-
-            for (int bus = 0; bus < n && totalOutputChans < plugInOutputChannels; ++bus)
-            {
-                if (auto* busObject = pluginInstance->getBus (false, bus))
-                    if (! busObject->isEnabled())
-                        continue;
-
-                if (bus < vstOutputs)
-                {
-                    if (auto** const busChannels = getPointerForAudioBus<FloatType> (data.outputs[bus]))
-                    {
-                        auto numChans = jmin ((int) data.outputs[bus].numChannels, plugInOutputChannels - totalOutputChans);
-
-                        for (int i = 0; i < numChans; ++i)
-                        {
-                            if (auto dst = busChannels[i])
-                            {
-                                if (totalOutputChans >= plugInInputChannels)
-                                    FloatVectorOperations::clear (dst, (int) data.numSamples);
-
-                                channelList.set (totalOutputChans++, busChannels[i]);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    const int numChans = jmin (pluginInstance->getChannelCountOfBus (false, bus), plugInOutputChannels - totalOutputChans);
-
-                    for (int i = 0; i < numChans; ++i)
-                    {
-                        if (auto* tmpBuffer = getTmpBufferForChannel<FloatType> (totalOutputChans, data.numSamples))\
-                        {
-                            tmpBufferNeedsClearing = true;
-                            channelList.set (totalOutputChans++, tmpBuffer);
-                        }
-                        else
-                            return;
-                    }
-                }
-            }
-        }
-
-        {
-            auto n = jmax (vstInputs, getNumAudioBuses (true));
-
-            for (int bus = 0; bus < n && totalInputChans < plugInInputChannels; ++bus)
-            {
-                if (auto* busObject = pluginInstance->getBus (true, bus))
-                    if (! busObject->isEnabled())
-                        continue;
-
-                if (bus < vstInputs)
-                {
-                    if (auto** const busChannels = getPointerForAudioBus<FloatType> (data.inputs[bus]))
-                    {
-                        const int numChans = jmin ((int) data.inputs[bus].numChannels, plugInInputChannels - totalInputChans);
-
-                        for (int i = 0; i < numChans; ++i)
-                        {
-                            if (busChannels[i] != nullptr)
-                            {
-                                if (totalInputChans >= totalOutputChans)
-                                    channelList.set (totalInputChans, busChannels[i]);
-                                else
-                                {
-                                    auto* dst = channelList.getReference (totalInputChans);
-                                    auto* src = busChannels[i];
-
-                                    if (dst != src)
-                                        FloatVectorOperations::copy (dst, src, (int) data.numSamples);
-                                }
-                            }
-
-                            ++totalInputChans;
-                        }
-                    }
-                }
-                else
-                {
-                    auto numChans = jmin (pluginInstance->getChannelCountOfBus (true, bus), plugInInputChannels - totalInputChans);
-
-                    for (int i = 0; i < numChans; ++i)
-                    {
-                        if (auto* tmpBuffer = getTmpBufferForChannel<FloatType> (totalInputChans, data.numSamples))
-                        {
-                            tmpBufferNeedsClearing = true;
-                            channelList.set (totalInputChans++, tmpBuffer);
-                        }
-                        else
-                            return;
-                    }
-                }
-            }
-        }
-
-        if (tmpBufferNeedsClearing)
-            ChooseBufferHelper<FloatType>::impl (emptyBufferFloat, emptyBufferDouble).clear();
-
-        AudioBuffer<FloatType> buffer;
-
-        if (int totalChans = jmax (totalOutputChans, totalInputChans))
-            buffer.setDataToReferTo (channelList.getRawDataPointer(), totalChans, (int) data.numSamples);
+        auto buffer = bufferMapper.getJuceLayoutForVst3Buffer (detail::Tag<FloatType>{}, data);
+        jassert ((int) buffer.getNumChannels() == jmax (pluginInstance->getTotalNumInputChannels(),
+                                                        pluginInstance->getTotalNumOutputChannels()));
 
         {
             const ScopedLock sl (pluginInstance->getCallbackLock());
@@ -3517,16 +3469,12 @@ private:
             }
             else
             {
-                if (totalInputChans == pluginInstance->getTotalNumInputChannels()
-                 && totalOutputChans == pluginInstance->getTotalNumOutputChannels())
-                {
-                    // processBlockBypassed should only ever be called if the AudioProcessor doesn't
-                    // return a valid parameter from getBypassParameter
-                    if (pluginInstance->getBypassParameter() == nullptr && comPluginInstance->getBypassParameter()->getValue() >= 0.5f)
-                        pluginInstance->processBlockBypassed (buffer, midiBuffer);
-                    else
-                        pluginInstance->processBlock (buffer, midiBuffer);
-                }
+                // processBlockBypassed should only ever be called if the AudioProcessor doesn't
+                // return a valid parameter from getBypassParameter
+                if (pluginInstance->getBypassParameter() == nullptr && comPluginInstance->getBypassParameter()->getValue() >= 0.5f)
+                    pluginInstance->processBlockBypassed (buffer, midiBuffer);
+                else
+                    pluginInstance->processBlock (buffer, midiBuffer);
             }
 
            #if JUCE_DEBUG && (! JucePlugin_ProducesMidiOutput)
@@ -3550,44 +3498,6 @@ private:
     }
 
     //==============================================================================
-    template <typename FloatType>
-    void allocateChannelListAndBuffers (Array<FloatType*>& channelList, AudioBuffer<FloatType>& buffer)
-    {
-        channelList.clearQuick();
-        channelList.insertMultiple (0, nullptr, 128);
-
-        auto& p = getPluginInstance();
-        buffer.setSize (jmax (p.getTotalNumInputChannels(), p.getTotalNumOutputChannels()), p.getBlockSize() * 4);
-        buffer.clear();
-    }
-
-    template <typename FloatType>
-    void deallocateChannelListAndBuffers (Array<FloatType*>& channelList, AudioBuffer<FloatType>& buffer)
-    {
-        channelList.clearQuick();
-        channelList.resize (0);
-        buffer.setSize (0, 0);
-    }
-
-    template <typename FloatType>
-    static FloatType** getPointerForAudioBus (Vst::AudioBusBuffers& data) noexcept
-    {
-        return AudioBusPointerHelper<FloatType>::impl (data);
-    }
-
-    template <typename FloatType>
-    FloatType* getTmpBufferForChannel (int channel, int numSamples) noexcept
-    {
-        auto& buffer = ChooseBufferHelper<FloatType>::impl (emptyBufferFloat, emptyBufferDouble);
-
-        // we can't do anything if the host requests to render many more samples than the
-        // block size, we need to bail out
-        if (numSamples > buffer.getNumSamples() || channel >= buffer.getNumChannels())
-            return nullptr;
-
-        return buffer.getWritePointer (channel);
-    }
-
     Steinberg::uint32 PLUGIN_API getProcessContextRequirements() override
     {
         return kNeedSystemTime
@@ -3620,6 +3530,8 @@ private:
 
         midiBuffer.ensureSize (2048);
         midiBuffer.clear();
+
+        bufferMapper.prepare (p, bufferSize);
     }
 
     //==============================================================================
@@ -3660,7 +3572,9 @@ private:
     struct LockedVSTComSmartPtr
     {
         LockedVSTComSmartPtr() = default;
-        LockedVSTComSmartPtr (const VSTComSmartPtr<T>& ptrIn)  : ptr (ptrIn)  {}
+        LockedVSTComSmartPtr (const VSTComSmartPtr<T>& ptrIn) : ptr (ptrIn)  {}
+        LockedVSTComSmartPtr (const LockedVSTComSmartPtr&) = default;
+        LockedVSTComSmartPtr& operator= (const LockedVSTComSmartPtr&) = default;
 
         ~LockedVSTComSmartPtr()
         {
@@ -3696,11 +3610,9 @@ private:
     Vst::ProcessSetup processSetup;
 
     MidiBuffer midiBuffer;
-    Array<float*> channelListFloat;
-    Array<double*> channelListDouble;
+    ClientBufferMapper bufferMapper;
 
-    AudioBuffer<float>  emptyBufferFloat;
-    AudioBuffer<double> emptyBufferDouble;
+    bool active = false;
 
    #if JucePlugin_WantsMidiInput
     std::atomic<bool> isMidiInputBusEnabled { true };

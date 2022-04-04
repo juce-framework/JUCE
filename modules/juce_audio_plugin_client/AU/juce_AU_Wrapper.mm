@@ -1882,9 +1882,12 @@ private:
 
     //==============================================================================
     LegacyAudioParametersWrapper juceParameters;
-    HashMap<int32, AudioProcessorParameter*> paramMap;
+    std::unordered_map<int32, AudioProcessorParameter*> paramMap;
     Array<AudioUnitParameterID> auParamIDs;
     Array<const AudioProcessorParameterGroup*> parameterGroups;
+
+    // Stores the parameter IDs in the order that they will be reported to the host.
+    std::vector<AudioUnitParameterID> cachedParameterList;
 
     //==============================================================================
     // According to the docs, this is the maximum size of a MIDIPacketList.
@@ -2107,6 +2110,40 @@ private:
         return { {}, {}, {}, kAudioUnitErr_InvalidElement };
     }
 
+    OSStatus GetParameterList (AudioUnitScope inScope, AudioUnitParameterID* outParameterList, UInt32& outNumParameters) override
+    {
+        if (forceUseLegacyParamIDs || inScope != kAudioUnitScope_Global)
+            return MusicDeviceBase::GetParameterList (inScope, outParameterList, outNumParameters);
+
+        outNumParameters = (UInt32) juceParameters.size();
+
+        if (outParameterList == nullptr)
+            return noErr;
+
+        if (cachedParameterList.empty())
+        {
+            struct ParamInfo
+            {
+                AudioUnitParameterID identifier;
+                int versionHint;
+            };
+
+            std::vector<ParamInfo> vec;
+            vec.reserve (juceParameters.size());
+
+            for (const auto* param : juceParameters)
+                vec.push_back ({ generateAUParameterID (*param), param->getVersionHint() });
+
+            std::sort        (vec.begin(), vec.end(), [] (auto a, auto b) { return a.identifier  < b.identifier; });
+            std::stable_sort (vec.begin(), vec.end(), [] (auto a, auto b) { return a.versionHint < b.versionHint; });
+            std::transform   (vec.begin(), vec.end(), std::back_inserter (cachedParameterList), [] (auto x) { return x.identifier; });
+        }
+
+        std::copy (cachedParameterList.begin(), cachedParameterList.end(), outParameterList);
+
+        return noErr;
+    }
+
     //==============================================================================
     void addParameters()
     {
@@ -2123,14 +2160,14 @@ private:
         {
             for (auto* param : juceParameters)
             {
-                const AudioUnitParameterID auParamID = generateAUParameterID (param);
+                const AudioUnitParameterID auParamID = generateAUParameterID (*param);
 
                 // Consider yourself very unlucky if you hit this assertion. The hash codes of your
                 // parameter ids are not unique.
-                jassert (! paramMap.contains (static_cast<int32> (auParamID)));
+                jassert (paramMap.find (static_cast<int32> (auParamID)) == paramMap.end());
 
                 auParamIDs.add (auParamID);
-                paramMap.set (static_cast<int32> (auParamID), param);
+                paramMap.emplace (static_cast<int32> (auParamID), param);
                 Globals()->SetParameter (auParamID, param->getValue());
             }
         }
@@ -2189,9 +2226,9 @@ private:
     }
 
     //==============================================================================
-    AudioUnitParameterID generateAUParameterID (AudioProcessorParameter* param) const
+    static AudioUnitParameterID generateAUParameterID (const AudioProcessorParameter& param)
     {
-        const String& juceParamID = LegacyAudioParameter::getParamID (param, forceUseLegacyParamIDs);
+        const String& juceParamID = LegacyAudioParameter::getParamID (&param, forceUseLegacyParamIDs);
         AudioUnitParameterID paramHash = static_cast<AudioUnitParameterID> (juceParamID.hashCode());
 
        #if JUCE_USE_STUDIO_ONE_COMPATIBLE_PARAMETERS
@@ -2211,9 +2248,13 @@ private:
 
     AudioProcessorParameter* getParameterForAUParameterID (AudioUnitParameterID address) const noexcept
     {
-        auto index = static_cast<int32> (address);
-        return forceUseLegacyParamIDs ? juceParameters.getParamForIndex (index)
-                                      : paramMap[index];
+        const auto index = static_cast<int32> (address);
+
+        if (forceUseLegacyParamIDs)
+            return juceParameters.getParamForIndex (index);
+
+        const auto iter = paramMap.find (index);
+        return iter != paramMap.end() ? iter->second : nullptr;
     }
 
     //==============================================================================

@@ -26,6 +26,13 @@
 namespace juce
 {
 
+/** Properties of an AudioParameterInt.
+
+    @see AudioParameterInt(), RangedAudioParameterAttributes()
+*/
+class AudioParameterIntAttributes : public RangedAudioParameterAttributes<AudioParameterIntAttributes, int> {};
+
+//==============================================================================
 /**
     Provides a class of AudioProcessorParameter that can be used as an
     integer value with a given range.
@@ -39,11 +46,37 @@ class JUCE_API  AudioParameterInt  : public RangedAudioParameter
 public:
     /** Creates a AudioParameterInt with the specified parameters.
 
+        Note that the attributes argument is optional and only needs to be
+        supplied if you want to change options from their default values.
+
+        Example usage:
+        @code
+        auto attributes = AudioParameterIntAttributes().withStringFromValueFunction ([] (auto x, auto) { return String (x); })
+                                                       .withLabel ("things");
+        auto param = std::make_unique<AudioParameterInt> ("paramID", "Parameter Name", 0, 100, 50, attributes);
+        @endcode
+
         @param parameterID         The parameter ID to use
         @param parameterName       The parameter name to use
         @param minValue            The minimum parameter value
         @param maxValue            The maximum parameter value
         @param defaultValue        The default value
+        @param attributes          Optional characteristics
+    */
+    AudioParameterInt (const ParameterID& parameterID,
+                       const String& parameterName,
+                       int minValue,
+                       int maxValue,
+                       int defaultValue,
+                       const AudioParameterIntAttributes& attributes = {});
+
+    /** Creates a AudioParameterInt with the specified parameters.
+
+        @param parameterID         The parameter ID to use
+        @param parameterName       The parameter name to use
+        @param minValue            The minimum parameter value
+        @param maxValue            The maximum parameter value
+        @param defaultValueIn      The default value
         @param parameterLabel      An optional label for the parameter's value
         @param stringFromInt       An optional lambda function that converts a int
                                    value to a string with a maximum length. This may
@@ -52,12 +85,25 @@ public:
                                    and converts it into an int. Some hosts use this
                                    to allow users to type in parameter values.
     */
-    AudioParameterInt (const String& parameterID, const String& parameterName,
-                       int minValue, int maxValue,
-                       int defaultValue,
-                       const String& parameterLabel = String(),
+    [[deprecated ("Prefer the signature taking an Attributes argument")]]
+    AudioParameterInt (const ParameterID& parameterID,
+                       const String& parameterName,
+                       int minValue,
+                       int maxValue,
+                       int defaultValueIn,
+                       const String& parameterLabel,
                        std::function<String (int value, int maximumStringLength)> stringFromInt = nullptr,
-                       std::function<int (const String& text)> intFromString = nullptr);
+                       std::function<int (const String& text)> intFromString = nullptr)
+        : AudioParameterInt (parameterID,
+                             parameterName,
+                             minValue,
+                             maxValue,
+                             defaultValueIn,
+                             AudioParameterIntAttributes().withLabel (parameterLabel)
+                                                          .withStringFromValueFunction (std::move (stringFromInt))
+                                                          .withValueFromStringFunction (std::move (intFromString)))
+    {
+    }
 
     /** Destructor. */
     ~AudioParameterInt() override;

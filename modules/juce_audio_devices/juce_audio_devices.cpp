@@ -45,6 +45,8 @@
 
 #include "juce_audio_devices.h"
 
+#include "audio_io/juce_SampleRateHelpers.cpp"
+
 //==============================================================================
 #if JUCE_MAC || JUCE_IOS
  #include <juce_audio_basics/midi/ump/juce_UMP.h>
