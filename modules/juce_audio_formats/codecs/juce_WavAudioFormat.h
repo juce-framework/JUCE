@@ -169,6 +169,94 @@ public:
     static const char* const riffInfoYear;                  /**< Metadata property name used in INFO chunks. */
 
     //==============================================================================
+    // ASWG chunk properties:
+
+    static const char* const aswgContentType;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgProject;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgOriginator;                /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgOriginatorStudio;          /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgNotes;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgSession;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgState;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgEditor;                    /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMixer;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgFxChainName;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgChannelConfig;             /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgAmbisonicFormat;           /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgAmbisonicChnOrder;         /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgAmbisonicNorm;             /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMicType;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMicConfig;                 /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMicDistance;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgRecordingLoc;              /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsDesigned;                /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgRecEngineer;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgRecStudio;                 /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgImpulseLocation;           /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgCategory;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgSubCategory;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgCatId;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgUserCategory;              /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgUserData;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgVendorCategory;            /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgFxName;                    /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgLibrary;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgCreatorId;                 /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgSourceId;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgRmsPower;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgLoudness;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgLoudnessRange;             /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMaxPeak;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgSpecDensity;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgZeroCrossRate;             /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgPapr;                      /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgText;                      /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgEfforts;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgEffortType;                /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgProjection;                /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgLanguage;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgTimingRestriction;         /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgCharacterName;             /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgCharacterGender;           /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgCharacterAge;              /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgCharacterRole;             /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgActorName;                 /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgActorGender;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgDirector;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgDirection;                 /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgFxUsed;                    /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgUsageRights;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsUnion;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgAccent;                    /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgEmotion;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgComposor;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgArtist;                    /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgSongTitle;                 /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgGenre;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgSubGenre;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgProducer;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMusicSup;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgInstrument;                /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMusicPublisher;            /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgRightsOwner;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsSource;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsLoop;                    /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIntensity;                 /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsFinal;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgOrderRef;                  /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsOst;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsCinematic;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsLicensed;                /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsDiegetic;                /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgMusicVersion;              /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgIsrcId;                    /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgTempo;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgTimeSig;                   /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgInKey;                     /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgBillingCode;               /**< Metadata property name used in ASWG/iXML chunks. */
+    static const char* const aswgVersion;                   /**< Metadata property name used in ASWG/iXML chunks. */
+
+    //==============================================================================
     /** Metadata property name used when reading an ISRC code from an AXML chunk. */
     [[deprecated ("This string is identical to riffInfoSource, making it impossible to differentiate between the two")]]
     static const char* const ISRC;
