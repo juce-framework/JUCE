@@ -2311,8 +2311,6 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JuceVST3EditController)
 };
 
-<<<<<<< HEAD
-
 //==============================================================================
 #if JucePlugin_Enable_ARA
 
@@ -2347,35 +2345,6 @@ private:
 
 #endif
 
-//==============================================================================
-
-namespace
-{
-    template <typename FloatType> struct AudioBusPointerHelper {};
-    template <> struct AudioBusPointerHelper<float>  { static float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
-    template <> struct AudioBusPointerHelper<double> { static double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
-
-    template <typename FloatType> struct ChooseBufferHelper {};
-    template <> struct ChooseBufferHelper<float>  { static AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
-    template <> struct ChooseBufferHelper<double> { static AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
-}
-
-
-||||||| 04a8a44a8
-namespace
-{
-    template <typename FloatType> struct AudioBusPointerHelper {};
-    template <> struct AudioBusPointerHelper<float>  { static float**  impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers32; } };
-    template <> struct AudioBusPointerHelper<double> { static double** impl (Vst::AudioBusBuffers& data) noexcept { return data.channelBuffers64; } };
-
-    template <typename FloatType> struct ChooseBufferHelper {};
-    template <> struct ChooseBufferHelper<float>  { static AudioBuffer<float>&  impl (AudioBuffer<float>& f, AudioBuffer<double>&  ) noexcept { return f; } };
-    template <> struct ChooseBufferHelper<double> { static AudioBuffer<double>& impl (AudioBuffer<float>&  , AudioBuffer<double>& d) noexcept { return d; } };
-}
-
-
-=======
->>>>>>> origin/develop
 //==============================================================================
 class JuceVST3Component : public Vst::IComponent,
                           public Vst::IAudioProcessor,
