@@ -965,7 +965,10 @@ struct iOSAudioIODevice::Pimpl      : public AudioPlayHead,
         desc.componentManufacturer = kAudioUnitManufacturer_Apple;
         desc.componentFlags = 0;
         desc.componentFlagsMask = 0;
-
+                
+        bool audioPreprocessingEnabled = isUsingBuiltInSpeaker() ? true : false;
+        setAudioPreprocessingEnabled(audioPreprocessingEnabled);
+        
         AudioComponent comp = AudioComponentFindNext (nullptr, &desc);
         AudioComponentInstanceNew (comp, &audioUnit);
 
