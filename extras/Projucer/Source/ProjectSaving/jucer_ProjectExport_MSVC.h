@@ -555,6 +555,23 @@ public:
             {
                 auto& config = dynamic_cast<const MSVCBuildConfiguration&> (*i);
 
+                enum class EscapeQuotes { no, yes };
+
+                // VS doesn't correctly escape double quotes in preprocessor definitions, so we have
+                // to add our own layer of escapes
+                const auto addIncludePathsAndPreprocessorDefinitions = [this, &config] (XmlElement& xml, EscapeQuotes escapeQuotes)
+                {
+                    auto includePaths = getOwner().getHeaderSearchPaths (config);
+                    includePaths.addArray (getExtraSearchPaths());
+                    includePaths.add ("%(AdditionalIncludeDirectories)");
+                    xml.createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
+
+                    const auto preprocessorDefs = getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)";
+                    const auto preprocessorDefsEscaped = escapeQuotes == EscapeQuotes::yes ? preprocessorDefs.replace ("\"", "\\\"")
+                                                                                           : preprocessorDefs;
+                    xml.createNewChildElement ("PreprocessorDefinitions")->addTextElement (preprocessorDefsEscaped);
+                };
+
                 bool isDebug = config.isDebug();
 
                 auto* group = projectXml.createNewChildElement ("ItemDefinitionGroup");
@@ -584,12 +601,7 @@ public:
                           ->addTextElement (config.getDebugInformationFormatString());
                     }
 
-                    auto includePaths = getOwner().getHeaderSearchPaths (config);
-                    includePaths.addArray (getExtraSearchPaths());
-                    includePaths.add ("%(AdditionalIncludeDirectories)");
-
-                    cl->createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
-                    cl->createNewChildElement ("PreprocessorDefinitions")->addTextElement (getPreprocessorDefs (config, ";") + ";%(PreprocessorDefinitions)");
+                    addIncludePathsAndPreprocessorDefinitions (*cl, EscapeQuotes::no);
 
                     cl->createNewChildElement ("RuntimeLibrary")->addTextElement (config.isUsingRuntimeLibDLL() ? (isDebug ? "MultiThreadedDebugDLL" : "MultiThreadedDLL")
                                                                                                                 : (isDebug ? "MultiThreadedDebug"    : "MultiThreaded"));
@@ -618,8 +630,7 @@ public:
 
                 {
                     auto* res = group->createNewChildElement ("ResourceCompile");
-                    res->createNewChildElement ("PreprocessorDefinitions")->addTextElement (isDebug ? "_DEBUG;%(PreprocessorDefinitions)"
-                                                                                                    : "NDEBUG;%(PreprocessorDefinitions)");
+                    addIncludePathsAndPreprocessorDefinitions (*res, EscapeQuotes::yes);
                 }
 
                 auto externalLibraries = getExternalLibraries (config, getOwner().getExternalLibrariesStringArray());
