@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#pragma once
+
 #ifndef DOXYGEN
 
 namespace juce
@@ -43,7 +45,7 @@ JUCE_BEGIN_NO_SANITIZE ("vptr")
         return Steinberg::kNotImplemented; \
     }
 
-static bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexcept
+inline bool doUIDsMatch (const Steinberg::TUID a, const Steinberg::TUID b) noexcept
 {
     return std::memcmp (a, b, sizeof (Steinberg::TUID)) == 0;
 }
@@ -473,7 +475,7 @@ static Steinberg::Vst::SpeakerArrangement getVst3SpeakerArrangement (const Audio
     return result;
 }
 
-static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
+inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::SpeakerArrangement arr) noexcept
 {
     using namespace Steinberg::Vst::SpeakerArr;
 
@@ -486,17 +488,26 @@ static AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
 }
 
 //==============================================================================
+/*
+    Provides fast remapping of the channels on a single bus, from VST3 order to JUCE order.
+
+    For multi-bus plugins, you'll need several instances of this, one per bus.
+*/
 struct ChannelMapping
 {
     explicit ChannelMapping (const AudioChannelSet& layout)
+        : ChannelMapping (layout, true)
+    {
+    }
+
+    ChannelMapping (const AudioChannelSet& layout, bool activeIn)
         : indices (makeChannelIndices (layout)),
-          active (true)
+          active (activeIn)
     {
     }
 
     explicit ChannelMapping (const AudioProcessor::Bus& juceBus)
-        : indices (makeChannelIndices (juceBus.getLastEnabledLayout())),
-          active (juceBus.isEnabled())
+        : ChannelMapping (juceBus.getLastEnabledLayout(), juceBus.isEnabled())
     {
     }
 
@@ -532,6 +543,270 @@ private:
     bool active = true;
 };
 
+//==============================================================================
+inline auto& getAudioBusPointer (detail::Tag<float>,  Steinberg::Vst::AudioBusBuffers& data) { return data.channelBuffers32; }
+inline auto& getAudioBusPointer (detail::Tag<double>, Steinberg::Vst::AudioBusBuffers& data) { return data.channelBuffers64; }
+
+static inline int countUsedChannels (const std::vector<ChannelMapping>& inputMap,
+                                     const std::vector<ChannelMapping>& outputMap)
+{
+    const auto countUsedChannelsInVector = [] (const std::vector<ChannelMapping>& map)
+    {
+        return std::accumulate (map.begin(), map.end(), 0, [] (auto acc, const auto& item)
+        {
+            return acc + (item.isActive() ? (int) item.size() : 0);
+        });
+    };
+
+    return jmax (countUsedChannelsInVector (inputMap), countUsedChannelsInVector (outputMap));
+}
+
+/*
+    The main purpose of this class is to remap a set of buffers provided by the VST3 host into an
+    equivalent JUCE AudioBuffer using the JUCE channel layout/order.
+
+    An instance of this class handles input and output remapping for a single data type (float or
+    double), matching the FloatType template parameter.
+
+    This is in VST3Common.h, rather than in the VST3_Wrapper.cpp, so that we can test it.
+
+    @see ClientBufferMapper
+*/
+template <typename FloatType>
+class ClientBufferMapperData
+{
+public:
+    void prepare (int numChannels, int blockSize)
+    {
+        emptyBuffer.setSize (numChannels, blockSize);
+        channels.reserve ((size_t) jmin (128, numChannels));
+    }
+
+    AudioBuffer<FloatType> getMappedBuffer (Steinberg::Vst::ProcessData& data,
+                                            const std::vector<ChannelMapping>& inputMap,
+                                            const std::vector<ChannelMapping>& outputMap)
+    {
+        const auto usedChannels = countUsedChannels (inputMap, outputMap);
+
+        // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
+        const auto countValidBuses = [] (Steinberg::Vst::AudioBusBuffers* buffers, int32 num)
+        {
+            return int (std::distance (buffers, std::find_if (buffers, buffers + num, [] (Steinberg::Vst::AudioBusBuffers& buf)
+            {
+                return getAudioBusPointer (detail::Tag<FloatType>{}, buf) == nullptr && buf.numChannels > 0;
+            })));
+        };
+
+        const auto vstInputs  = countValidBuses (data.inputs,  data.numInputs);
+        const auto vstOutputs = countValidBuses (data.outputs, data.numOutputs);
+
+        if (! validateLayouts (data, vstInputs, inputMap, vstOutputs, outputMap))
+            return clearOutputBuffersAndReturnBlankBuffer (data, vstOutputs, usedChannels);
+
+        // If we're here, then we know that the host has given us a usable layout
+        channels.clear();
+
+        // Put the host-supplied output channel pointers into JUCE order
+        for (size_t i = 0; i < (size_t) vstOutputs; ++i)
+        {
+            const auto bus = getMappedOutputBus (data, outputMap, i);
+            channels.insert (channels.end(), bus.begin(), bus.end());
+        }
+
+        // For input channels that are < the total number of outputs channels, copy the input over
+        // the output buffer, at the appropriate JUCE channel index.
+        // For input channels that are >= the total number of output channels, add the input buffer
+        // pointer to the array of channel pointers.
+        for (size_t inputBus = 0, initialBusIndex = 0; inputBus < (size_t) vstInputs; ++inputBus)
+        {
+            const auto& map = inputMap[inputBus];
+
+            if (! map.isActive())
+                continue;
+
+            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.inputs[inputBus]);
+
+            for (auto i = 0; i < (int) map.size(); ++i)
+            {
+                const auto destIndex = initialBusIndex + (size_t) map.getJuceChannelForVst3Channel (i);
+
+                channels.resize (jmax (channels.size(), destIndex + 1), nullptr);
+
+                if (auto* dest = channels[destIndex])
+                    FloatVectorOperations::copy (dest, busPtr[i], (int) data.numSamples);
+                else
+                    channels[destIndex] = busPtr[i];
+            }
+
+            initialBusIndex += map.size();
+        }
+
+        return { channels.data(), (int) channels.size(), (int) data.numSamples };
+    }
+
+private:
+    AudioBuffer<FloatType> clearOutputBuffersAndReturnBlankBuffer (Steinberg::Vst::ProcessData& data, int vstOutputs, int usedChannels)
+    {
+        // The host is ignoring the bus layout we requested, so we can't process sensibly!
+        jassertfalse;
+
+        // Clear all output channels
+        std::for_each (data.outputs, data.outputs + vstOutputs, [&data] (auto& bus)
+        {
+            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
+            std::for_each (busPtr, busPtr + bus.numChannels, [&data] (auto* ptr)
+            {
+                if (ptr != nullptr)
+                    FloatVectorOperations::clear (ptr, (int) data.numSamples);
+            });
+        });
+
+        // Return a silent buffer for the AudioProcessor to process
+        emptyBuffer.clear();
+
+        return { emptyBuffer.getArrayOfWritePointers(),
+                 jmin (emptyBuffer.getNumChannels(), usedChannels),
+                 data.numSamples };
+    }
+
+    std::vector<FloatType*> getMappedOutputBus (Steinberg::Vst::ProcessData& data,
+                                                const std::vector<ChannelMapping>& maps,
+                                                size_t index) const
+    {
+        const auto& map = maps[index];
+
+        if (! map.isActive())
+            return {};
+
+        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.outputs[index]);
+
+        std::vector<FloatType*> result (map.size(), nullptr);
+
+        for (auto i = 0; i < (int) map.size(); ++i)
+            result[(size_t) map.getJuceChannelForVst3Channel (i)] = busPtr[i];
+
+        return result;
+    }
+
+    template <typename Iterator>
+    static bool validateLayouts (Iterator first, Iterator last, const std::vector<ChannelMapping>& map)
+    {
+        if ((size_t) std::distance (first, last) > map.size())
+            return false;
+
+        auto mapIterator = map.begin();
+
+        for (auto it = first; it != last; ++it, ++mapIterator)
+        {
+            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
+            const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
+
+            if (anyChannelIsNull || ((int) mapIterator->size() != it->numChannels))
+                return false;
+        }
+
+        // If the host didn't provide the full complement of buses, it must be because the other
+        // buses are all deactivated.
+        return std::none_of (mapIterator, map.end(), [] (const auto& item) { return item.isActive(); });
+    }
+
+    static bool validateLayouts (Steinberg::Vst::ProcessData& data,
+                                 int numInputs,
+                                 const std::vector<ChannelMapping>& inputMap,
+                                 int numOutputs,
+                                 const std::vector<ChannelMapping>& outputMap)
+    {
+
+        // The plug-in should only process an activated bus.
+        // The host could provide fewer busses in the process call if the last busses are not activated.
+
+        return validateLayouts (data.inputs, data.inputs + numInputs, inputMap)
+               && validateLayouts (data.outputs, data.outputs + numOutputs, outputMap);
+    }
+
+    std::vector<FloatType*> channels;
+    AudioBuffer<FloatType> emptyBuffer;
+};
+
+//==============================================================================
+/*
+    Remaps a set of buffers provided by the VST3 host into an equivalent JUCE AudioBuffer using the
+    JUCE channel layout/order.
+
+    An instance of this class can remap to either a float or double JUCE buffer, as necessary.
+
+    Although the VST3 spec requires that the bus layout does not change while the plugin is
+    activated and processing, some hosts get this wrong and try to enable/disable buses during
+    playback. This class attempts to be resilient, and should cope with buses being switched on and
+    off during processing.
+
+    This is in VST3Common.h, rather than in the VST3_Wrapper.cpp, so that we can test it.
+
+    @see ClientBufferMapper
+*/
+class ClientBufferMapper
+{
+public:
+    void prepare (const AudioProcessor& processor, int blockSize)
+    {
+        struct Pair
+        {
+            std::vector<ChannelMapping>& map;
+            bool isInput;
+        };
+
+        for (const auto& pair : { Pair { inputMap, true }, Pair { outputMap, false } })
+        {
+            pair.map.clear();
+
+            for (auto i = 0; i < processor.getBusCount (pair.isInput); ++i)
+                pair.map.emplace_back (*processor.getBus (pair.isInput, i));
+        }
+
+        const auto findMaxNumChannels = [&] (bool isInput)
+        {
+            auto sum = 0;
+
+            for (auto i = 0; i < processor.getBusCount (isInput); ++i)
+                sum += processor.getBus (isInput, i)->getLastEnabledLayout().size();
+
+            return sum;
+        };
+
+        const auto numChannels = jmax (findMaxNumChannels (true), findMaxNumChannels (false));
+
+        floatData .prepare (numChannels, blockSize);
+        doubleData.prepare (numChannels, blockSize);
+    }
+
+    void setInputBusActive (size_t bus, bool state)
+    {
+        if (bus < inputMap.size())
+            inputMap[bus].setActive (state);
+    }
+
+    void setOutputBusActive (size_t bus, bool state)
+    {
+        if (bus < outputMap.size())
+            outputMap[bus].setActive (state);
+    }
+
+    template <typename FloatType>
+    AudioBuffer<FloatType> getJuceLayoutForVst3Buffer (detail::Tag<FloatType>, Steinberg::Vst::ProcessData& data)
+    {
+        return getData (detail::Tag<FloatType>{}).getMappedBuffer (data, inputMap, outputMap);
+    }
+
+private:
+    auto& getData (detail::Tag<float>)  { return floatData; }
+    auto& getData (detail::Tag<double>) { return doubleData; }
+
+    ClientBufferMapperData<float> floatData;
+    ClientBufferMapperData<double> doubleData;
+
+    std::vector<ChannelMapping> inputMap;
+    std::vector<ChannelMapping> outputMap;
+};
 
 //==============================================================================
 /*
