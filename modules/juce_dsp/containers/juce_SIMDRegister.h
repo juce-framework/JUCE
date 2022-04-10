@@ -116,9 +116,6 @@ struct SIMDRegister
     /** Constructs an object from a scalar type by broadcasting it to all elements. */
     inline SIMDRegister (Type s) noexcept  { *this = s; }
 
-    /** Destructor. */
-    inline ~SIMDRegister() noexcept = default;
-
     //==============================================================================
     /** Returns the number of elements in this vector. */
     static constexpr size_t size() noexcept    { return SIMDNumElements; }

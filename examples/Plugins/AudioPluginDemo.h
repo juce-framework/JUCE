@@ -182,8 +182,8 @@ public:
     JuceDemoPluginAudioProcessor()
         : AudioProcessor (getBusesProperties()),
           state (*this, nullptr, "state",
-                 { std::make_unique<AudioParameterFloat> ("gain",  "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
-                   std::make_unique<AudioParameterFloat> ("delay", "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
+                 { std::make_unique<AudioParameterFloat> (ParameterID { "gain",  1 }, "Gain",           NormalisableRange<float> (0.0f, 1.0f), 0.9f),
+                   std::make_unique<AudioParameterFloat> (ParameterID { "delay", 1 }, "Delay Feedback", NormalisableRange<float> (0.0f, 1.0f), 0.5f) })
     {
         // Add a sub-tree to store the state of our UI
         state.state.addChild ({ "uiState", { { "width",  400 }, { "height", 200 } }, {} }, -1, nullptr);

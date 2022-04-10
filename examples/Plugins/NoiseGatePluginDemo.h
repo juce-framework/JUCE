@@ -59,8 +59,8 @@ public:
                                            .withOutput ("Output",    AudioChannelSet::stereo())
                                            .withInput  ("Sidechain", AudioChannelSet::stereo()))
     {
-        addParameter (threshold = new AudioParameterFloat ("threshold", "Threshold", 0.0f, 1.0f, 0.5f));
-        addParameter (alpha     = new AudioParameterFloat ("alpha",     "Alpha",     0.0f, 1.0f, 0.8f));
+        addParameter (threshold = new AudioParameterFloat ({ "threshold", 1 }, "Threshold", 0.0f, 1.0f, 0.5f));
+        addParameter (alpha     = new AudioParameterFloat ({ "alpha",     1 }, "Alpha",     0.0f, 1.0f, 0.8f));
     }
 
     //==============================================================================

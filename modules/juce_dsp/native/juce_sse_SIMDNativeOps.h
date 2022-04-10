@@ -106,11 +106,13 @@ struct SIMDNativeOps<float>
     static forcedinline float JUCE_VECTOR_CALLTYPE sum (__m128 a) noexcept
     {
        #if defined(__SSE4__)
-        __m128 retval = _mm_dp_ps (a, _mm_loadu_ps (kOne), 0xff);
+        const auto retval = _mm_dp_ps (a, _mm_loadu_ps (kOne), 0xff);
        #elif defined(__SSE3__)
-        __m128 retval = _mm_hadd_ps (_mm_hadd_ps (a, a), a);
+        const auto shuffled = _mm_movehdup_ps (a);
+        const auto sums = _mm_add_ps (a, shuffled);
+        const auto retval = _mm_add_ss (sums, _mm_movehl_ps (shuffled, sums));
        #else
-        __m128 retval = _mm_add_ps (_mm_shuffle_ps (a, a, 0x4e), a);
+        auto retval = _mm_add_ps (_mm_shuffle_ps (a, a, 0x4e), a);
         retval = _mm_add_ps (retval, _mm_shuffle_ps (retval, retval, 0xb1));
        #endif
         return _mm_cvtss_f32 (retval);

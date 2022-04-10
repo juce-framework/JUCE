@@ -270,6 +270,8 @@ private:
 
             AudioBuffer<FloatType> buffer (audioChannels, totalChans, c.numSamples);
 
+            const ScopedLock lock (processor.getCallbackLock());
+
             if (processor.isSuspended())
                 buffer.clear();
             else

@@ -122,7 +122,7 @@ public:
                            .withInput  ("Input",  AudioChannelSet::stereo(), true)
                            .withOutput ("Output", AudioChannelSet::stereo(), true)),
            parameters (*this, nullptr, "InterAppAudioEffect",
-                       { std::make_unique<AudioParameterFloat> ("gain", "Gain", NormalisableRange<float> (0.0f, 1.0f), 1.0f / 3.14f) })
+                       { std::make_unique<AudioParameterFloat> (ParameterID { "gain", 1 }, "Gain", NormalisableRange<float> (0.0f, 1.0f), 1.0f / 3.14f) })
     {
     }
 

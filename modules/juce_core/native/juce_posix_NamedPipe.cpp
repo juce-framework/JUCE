@@ -246,18 +246,23 @@ private:
 
 void NamedPipe::close()
 {
-    ScopedWriteLock sl (lock);
-
-    if (pimpl != nullptr)
     {
-        pimpl->stopReadOperation = true;
+        const ScopedReadLock sl (lock);
 
-        const char buffer[] { 0 };
-        const auto done = ::write (pimpl->pipeIn.get(), buffer, numElementsInArray (buffer));
-        ignoreUnused (done);
+        if (pimpl != nullptr)
+        {
+            pimpl->stopReadOperation = true;
+
+            const char buffer[] { 0 };
+            const auto done = ::write (pimpl->pipeIn.get(), buffer, numElementsInArray (buffer));
+            ignoreUnused (done);
+        }
     }
 
-    pimpl.reset();
+    {
+        const ScopedWriteLock sl (lock);
+        pimpl.reset();
+    }
 }
 
 bool NamedPipe::openInternal (const String& pipeName, bool createPipe, bool mustNotExist)

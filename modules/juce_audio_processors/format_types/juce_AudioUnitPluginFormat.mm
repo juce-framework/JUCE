@@ -823,7 +823,7 @@ public:
                 layoutHasChanged = true;
 
                 err = AudioUnitSetProperty (audioUnit, kAudioUnitProperty_ElementCount, scope, 0, &newCount, sizeof (newCount));
-                jassert (err == noErr);
+                jassertquiet (err == noErr);
             }
 
             for (int i = 0; i < n; ++i)

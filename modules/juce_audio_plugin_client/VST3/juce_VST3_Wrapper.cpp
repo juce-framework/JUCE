@@ -541,7 +541,7 @@ private:
         if (bypassParameter == nullptr)
         {
             vst3WrapperProvidedBypassParam = true;
-            ownedBypassParameter.reset (new AudioParameterBool ("byps", "Bypass", false, {}, {}, {}));
+            ownedBypassParameter.reset (new AudioParameterBool ("byps", "Bypass", false));
             bypassParameter = ownedBypassParameter.get();
         }
 
@@ -2426,6 +2426,8 @@ public:
     //==============================================================================
     tresult PLUGIN_API setActive (TBool state) override
     {
+        active = (state != 0);
+
         if (! state)
         {
             getPluginInstance().releaseResources();
@@ -2992,6 +2994,9 @@ public:
 
     tresult PLUGIN_API activateBus (Vst::MediaType type, Vst::BusDirection dir, Steinberg::int32 index, TBool state) override
     {
+        // The host is misbehaving! The plugin must be deactivated before setting new arrangements.
+        jassert (! active);
+
         if (type == Vst::kEvent)
         {
            #if JucePlugin_WantsMidiInput
@@ -3067,6 +3072,13 @@ public:
     tresult PLUGIN_API setBusArrangements (Vst::SpeakerArrangement* inputs, Steinberg::int32 numIns,
                                            Vst::SpeakerArrangement* outputs, Steinberg::int32 numOuts) override
     {
+        if (active)
+        {
+            // The host is misbehaving! The plugin must be deactivated before setting new arrangements.
+            jassertfalse;
+            return kResultFalse;
+        }
+
         auto numInputBuses  = pluginInstance->getBusCount (true);
         auto numOutputBuses = pluginInstance->getBusCount (false);
 
@@ -3615,7 +3627,9 @@ private:
     struct LockedVSTComSmartPtr
     {
         LockedVSTComSmartPtr() = default;
-        LockedVSTComSmartPtr (const VSTComSmartPtr<T>& ptrIn)  : ptr (ptrIn)  {}
+        LockedVSTComSmartPtr (const VSTComSmartPtr<T>& ptrIn) : ptr (ptrIn)  {}
+        LockedVSTComSmartPtr (const LockedVSTComSmartPtr&) = default;
+        LockedVSTComSmartPtr& operator= (const LockedVSTComSmartPtr&) = default;
 
         ~LockedVSTComSmartPtr()
         {
@@ -3656,6 +3670,8 @@ private:
 
     AudioBuffer<float>  emptyBufferFloat;
     AudioBuffer<double> emptyBufferDouble;
+
+    bool active = false;
 
    #if JucePlugin_WantsMidiInput
     std::atomic<bool> isMidiInputBusEnabled { true };
