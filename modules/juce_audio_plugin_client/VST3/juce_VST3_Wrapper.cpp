@@ -2308,8 +2308,6 @@ private:
 #endif
 
 //==============================================================================
-
-//==============================================================================
 class JuceVST3Component : public Vst::IComponent,
                           public Vst::IAudioProcessor,
                           public Vst::IUnitInfo,
