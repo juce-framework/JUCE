@@ -209,3 +209,7 @@ private:
 #include "utilities/juce_ParameterAttachments.cpp"
 #include "utilities/juce_AudioProcessorValueTreeState.cpp"
 #include "utilities/juce_PluginHostType.cpp"
+
+#if JUCE_UNIT_TESTS
+ #include "format_types/juce_VST3PluginFormat_test.cpp"
+#endif

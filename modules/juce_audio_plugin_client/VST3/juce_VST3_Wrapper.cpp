@@ -660,10 +660,12 @@ class JuceVST3EditController : public Vst::EditController,
                                private ComponentRestarter::Listener
 {
 public:
-    JuceVST3EditController (Vst::IHostApplication* host)
+    explicit JuceVST3EditController (Vst::IHostApplication* host)
     {
         if (host != nullptr)
             host->queryInterface (FUnknown::iid, (void**) &hostContext);
+
+        blueCatPatchwork |= isBlueCatHost (host);
     }
 
     //==============================================================================
@@ -692,6 +694,8 @@ public:
     {
         if (hostContext != context)
             hostContext = context;
+
+        blueCatPatchwork |= isBlueCatHost (context);
 
         return kResultTrue;
     }
@@ -1322,6 +1326,27 @@ public:
     static constexpr auto pluginShouldBeMarkedDirtyFlag = 1 << 16;
 
 private:
+    bool isBlueCatHost (FUnknown* context) const
+    {
+        // We can't use the normal PluginHostType mechanism here because that will give us the name
+        // of the host process. However, this plugin instance might be loaded in an instance of
+        // the BlueCat PatchWork host, which might itself be a plugin.
+
+        VSTComSmartPtr<Vst::IHostApplication> host;
+        host.loadFrom (context);
+
+        if (host == nullptr)
+            return false;
+
+        Vst::String128 name;
+
+        if (host->getName (name) != kResultOk)
+            return false;
+
+        const auto hostName = toString (name);
+        return hostName.contains ("Blue Cat's VST3 Host");
+    }
+
     friend class JuceVST3Component;
     friend struct Param;
 
@@ -1397,6 +1422,7 @@ private:
                       inSetupProcessing { false };
 
     int lastLatencySamples = 0;
+    bool blueCatPatchwork = isBlueCatHost (hostContext.get());
 
    #if ! JUCE_MAC
     float lastScaleFactorReceived = 1.0f;
@@ -1821,7 +1847,20 @@ private:
             {
                 if (auto* editor = component->pluginEditor.get())
                 {
-                    if (auto* constrainer = editor->getConstrainer())
+                    if (canResize() == kResultFalse)
+                    {
+                        // Ableton Live will call checkSizeConstraint even if the view returns false
+                        // from canResize. Set the out param to an appropriate size for the editor
+                        // and return.
+                        auto constrainedRect = component->getLocalArea (editor, editor->getLocalBounds())
+                                                        .getSmallestIntegerContainer();
+
+                        *rectToCheck = convertFromHostBounds (*rectToCheck);
+                        rectToCheck->right  = rectToCheck->left + roundToInt (constrainedRect.getWidth());
+                        rectToCheck->bottom = rectToCheck->top  + roundToInt (constrainedRect.getHeight());
+                        *rectToCheck = convertToHostBounds (*rectToCheck);
+                    }
+                    else if (auto* constrainer = editor->getConstrainer())
                     {
                         *rectToCheck = convertFromHostBounds (*rectToCheck);
 
@@ -2099,9 +2138,9 @@ private:
                         auto host = getHostType();
 
                        #if JUCE_MAC
-                        if (host.isWavelab() || host.isReaper())
+                        if (host.isWavelab() || host.isReaper() || owner.owner->blueCatPatchwork)
                        #else
-                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio())
+                        if (host.isWavelab() || host.isAbletonLive() || host.isBitwigStudio() || owner.owner->blueCatPatchwork)
                        #endif
                             setBounds (editorBounds.withPosition (0, 0));
                     }

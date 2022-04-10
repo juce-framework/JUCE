@@ -96,8 +96,13 @@ public:
     void registerRenderTime (double millisecondsTaken, int numSamples);
 
 private:
-    double cpuUsageProportion = 0, timeToCpuScale = 0, msPerSample = 0;
-    int xruns = 0, samplesPerBlock = 0;
+    void registerRenderTimeLocked (double, int);
+
+    SpinLock mutex;
+    int samplesPerBlock = 0;
+    double msPerSample = 0;
+    std::atomic<double> cpuUsageProportion { 0 };
+    std::atomic<int> xruns { 0 };
 };
 
 

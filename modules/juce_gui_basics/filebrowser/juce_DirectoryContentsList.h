@@ -209,6 +209,7 @@ private:
 
     std::unique_ptr<RangedDirectoryIterator> fileFindHandle;
     std::atomic<bool> shouldStop { true };
+    bool isSearching = false;
 
     bool wasEmpty = true;
 

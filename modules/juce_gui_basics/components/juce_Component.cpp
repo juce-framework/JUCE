@@ -509,7 +509,7 @@ struct Component::ComponentHelpers
         for (auto& ms : Desktop::getInstance().getMouseSources())
             if (auto* c = ms.getComponentUnderMouse())
                 if (modalWouldBlockComponent (*c, &modal))
-                    (c->*function) (ms, ms.getScreenPosition(), Time::getCurrentTime());
+                    (c->*function) (ms, ScalingHelpers::screenPosToLocalPos (*c, ms.getScreenPosition()), Time::getCurrentTime());
     }
 };
 

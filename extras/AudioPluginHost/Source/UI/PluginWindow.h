@@ -159,11 +159,11 @@ public:
     };
 
     PluginWindow (AudioProcessorGraph::Node* n, Type t, OwnedArray<PluginWindow>& windowList)
-       : DocumentWindow (n->getProcessor()->getName() + getFormatSuffix (n->getProcessor()),
-                         LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
-                         DocumentWindow::minimiseButton | DocumentWindow::closeButton),
-         activeWindowList (windowList),
-         node (n), type (t)
+        : DocumentWindow (n->getProcessor()->getName() + getFormatSuffix (n->getProcessor()),
+                          LookAndFeel::getDefaultLookAndFeel().findColour (ResizableWindow::backgroundColourId),
+                          DocumentWindow::minimiseButton | DocumentWindow::closeButton),
+          activeWindowList (windowList),
+          node (n), type (t)
     {
         setSize (400, 300);
 
