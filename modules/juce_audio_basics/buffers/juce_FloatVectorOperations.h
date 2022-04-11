@@ -32,10 +32,24 @@ namespace juce
 #endif
 class ScopedNoDenormals;
 
-#if ! DOXYGEN
-namespace detail
-{
+//==============================================================================
+/**
+    A collection of simple vector operations on arrays of floating point numbers,
+    accelerated with SIMD instructions where possible, usually accessed from
+    the FloatVectorOperations class.
 
+    @code
+    float data[64];
+
+    // The following two function calls are equivalent:
+    FloatVectorOperationsBase<float, int>::clear (data, 64);
+    FloatVectorOperations::clear (data, 64);
+    @endcode
+
+    @see FloatVectorOperations
+
+    @tags{Audio}
+*/
 template <typename FloatType, typename CountType>
 struct FloatVectorOperationsBase
 {
@@ -68,6 +82,10 @@ struct FloatVectorOperationsBase
     static FloatType JUCE_CALLTYPE findMinimum (const FloatType* src, CountType numValues) noexcept;
     static FloatType JUCE_CALLTYPE findMaximum (const FloatType* src, CountType numValues) noexcept;
 };
+
+#if ! DOXYGEN
+namespace detail
+{
 
 template <typename...>
 struct NameForwarder;
@@ -135,15 +153,18 @@ struct NameForwarder<Head, Tail...> : Head, NameForwarder<Tail...>
 
 //==============================================================================
 /**
-    A collection of simple vector operations on arrays of floats, accelerated with
-    SIMD instructions where possible.
+    A collection of simple vector operations on arrays of floating point numbers,
+    accelerated with SIMD instructions where possible and providing all methods
+    from FloatVectorOperationsBase.
+
+    @see FloatVectorOperationsBase
 
     @tags{Audio}
 */
-class JUCE_API  FloatVectorOperations : public detail::NameForwarder<detail::FloatVectorOperationsBase<float, int>,
-                                                                     detail::FloatVectorOperationsBase<float, size_t>,
-                                                                     detail::FloatVectorOperationsBase<double, int>,
-                                                                     detail::FloatVectorOperationsBase<double, size_t>>
+class JUCE_API  FloatVectorOperations : public detail::NameForwarder<FloatVectorOperationsBase<float, int>,
+                                                                     FloatVectorOperationsBase<float, size_t>,
+                                                                     FloatVectorOperationsBase<double, int>,
+                                                                     FloatVectorOperationsBase<double, size_t>>
 {
 public:
     static void JUCE_CALLTYPE convertFixedToFloat (float* dest, const int* src, float multiplier, int num) noexcept;
