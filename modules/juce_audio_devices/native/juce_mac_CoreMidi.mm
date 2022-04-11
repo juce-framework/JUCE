@@ -82,10 +82,8 @@ namespace CoreMidiHelpers
     struct Sender;
 
    #if JUCE_HAS_NEW_COREMIDI_API
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
-
     template <>
-    struct Sender<ImplementationStrategy::onlyNew> : public SenderBase
+    struct API_AVAILABLE (macos (11.0), ios (14.0)) Sender<ImplementationStrategy::onlyNew> : public SenderBase
     {
         explicit Sender (MIDIEndpointRef ep)
             : umpConverter (getProtocolForEndpoint (ep))
@@ -177,8 +175,6 @@ namespace CoreMidiHelpers
             send();
         }
     };
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 
    #if JUCE_HAS_OLD_COREMIDI_API
@@ -829,10 +825,8 @@ namespace CoreMidiHelpers
     struct CreatorFunctions;
 
    #if JUCE_HAS_NEW_COREMIDI_API
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
-
     template <>
-    struct CreatorFunctions<ImplementationStrategy::onlyNew>
+    struct API_AVAILABLE (macos (11.0), ios (14.0)) CreatorFunctions<ImplementationStrategy::onlyNew>
     {
         static OSStatus createInputPort (ump::PacketProtocol protocol,
                                          MIDIClientRef client,
@@ -894,8 +888,6 @@ namespace CoreMidiHelpers
             static_cast<MidiPortAndCallback*> (readProcRefCon)->handlePackets (*list);
         }
     };
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 
    #if JUCE_HAS_OLD_COREMIDI_API

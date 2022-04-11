@@ -28,12 +28,21 @@ namespace juce
 class ScopedLowPowerModeDisabler::Pimpl
 {
 public:
-    Pimpl() = default;
-    ~Pimpl() { [[NSProcessInfo processInfo] endActivity: activity]; }
+    Pimpl()
+    {
+        if (@available (macOS 10.9, *))
+            activity = [[NSProcessInfo processInfo] beginActivityWithOptions: NSActivityUserInitiatedAllowingIdleSystemSleep
+                                                                      reason: @"App must remain in high-power mode"];
+    }
+
+    ~Pimpl()
+    {
+        if (@available (macOS 10.9, *))
+            [[NSProcessInfo processInfo] endActivity: activity];
+    }
 
 private:
-    id activity { [[NSProcessInfo processInfo] beginActivityWithOptions: NSActivityUserInitiatedAllowingIdleSystemSleep
-                                                                 reason: @"App must remain in high-power mode"] };
+    id activity;
 
     JUCE_DECLARE_NON_COPYABLE (Pimpl)
     JUCE_DECLARE_NON_MOVEABLE (Pimpl)

@@ -25,7 +25,7 @@ namespace juce
 
 static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
 {
-    if (@available (macOS 10.9, *))
+    if (@available (macOS 10.10, *))
     {
         const auto parameterNames = url.getParameterNames();
         const auto parameterValues = url.getParameterValues();
@@ -256,7 +256,7 @@ private:
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-struct WebViewDelegateClass  : public ObjCClass<NSObject>
+struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NSObject>
 {
     WebViewDelegateClass()  : ObjCClass<NSObject> ("JUCEWebViewDelegate_")
     {
@@ -332,7 +332,7 @@ private:
     }
 
    #if WKWEBVIEW_OPENPANEL_SUPPORTED
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
+    API_AVAILABLE (macos (10.12))
     static void runOpenPanel (id, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*,
                               void (^completionHandler)(NSArray<NSURL*>*))
     {
@@ -395,7 +395,6 @@ private:
             delete wrapper;
         });
     }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
    #endif
 };
 
@@ -500,7 +499,7 @@ private:
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
-class WKWebViewImpl  : public WebViewBase
+class API_AVAILABLE (macos (10.11)) WKWebViewImpl : public WebViewBase
 {
 public:
     WKWebViewImpl (WebBrowserComponent* owner)
@@ -580,7 +579,7 @@ class WebBrowserComponent::Pimpl
 public:
     Pimpl (WebBrowserComponent* owner)
     {
-        if (@available (macOS 10.10, *))
+        if (@available (macOS 10.11, *))
             webView = std::make_unique<WKWebViewImpl> (owner);
        #if JUCE_MAC
         else

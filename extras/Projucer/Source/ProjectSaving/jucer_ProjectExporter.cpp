@@ -894,6 +894,9 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
     llvmFlags.cpp.addArray ({
         "-Wunused-private-field", "-Winconsistent-missing-destructor-override"
     });
+    llvmFlags.objc.addArray ({
+        "-Wunguarded-availability", "-Wunguarded-availability-new"
+    });
 
     auto& gccFlags = recommendedCompilerWarningFlags[CompilerNames::gcc] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
     gccFlags.common.addArray ({

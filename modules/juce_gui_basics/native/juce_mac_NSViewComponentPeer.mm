@@ -1848,10 +1848,13 @@ private:
 
     void setFullScreenSizeConstraints (const ComponentBoundsConstrainer& c)
     {
-        const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
-                                         0.0f);
-        [window setMinFullScreenContentSize: minSize];
-        [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
+        if (@available (macOS 10.11, *))
+        {
+            const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
+                                             0.0f);
+            [window setMinFullScreenContentSize: minSize];
+            [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
+        }
     }
 
     //==============================================================================
