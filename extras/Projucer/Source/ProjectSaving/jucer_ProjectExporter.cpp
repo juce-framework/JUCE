@@ -856,7 +856,8 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
         "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
         "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
         "-Wextra-semi", "-Wshift-sign-overflow",
-        "-Wshadow-all", "-Wnullable-to-nonnull-conversion"
+        "-Wshadow-all", "-Wnullable-to-nonnull-conversion",
+        "-Wmissing-prototypes"
     });
     llvmFlags.cpp.addArray ({
         "-Wunused-private-field", "-Winconsistent-missing-destructor-override"

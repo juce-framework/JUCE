@@ -790,10 +790,6 @@ std::unique_ptr<InputStream> URL::createInputStream (const InputStreamOptions& o
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 }
 
-#if JUCE_ANDROID
-OutputStream* juce_CreateContentURIOutputStream (const URL&);
-#endif
-
 std::unique_ptr<OutputStream> URL::createOutputStream() const
 {
     if (isLocalFile())

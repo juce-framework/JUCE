@@ -25,7 +25,7 @@ namespace juce
 namespace SampleRateHelpers
 {
 
-const auto& getAllSampleRates()
+static inline const std::vector<double>& getAllSampleRates()
 {
     static auto sampleRates = []
     {

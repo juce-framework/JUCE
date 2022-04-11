@@ -18,5 +18,6 @@
 
 namespace juce
 {
+    Image JUCE_API getIconFromApplication (const String&, int);
     Image JUCE_API getIconFromApplication (const String&, int)  { return {}; }
 }

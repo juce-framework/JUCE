@@ -1287,12 +1287,12 @@ private:
 }
 
 //==============================================================================
-AudioIODeviceType* createAudioIODeviceType_ALSA_Soundcards()
+static inline AudioIODeviceType* createAudioIODeviceType_ALSA_Soundcards()
 {
     return new ALSAAudioIODeviceType (true, "ALSA HW");
 }
 
-AudioIODeviceType* createAudioIODeviceType_ALSA_PCMDevices()
+static inline AudioIODeviceType* createAudioIODeviceType_ALSA_PCMDevices()
 {
     return new ALSAAudioIODeviceType (false, "ALSA");
 }

@@ -479,7 +479,7 @@ struct AndroidContentUriOutputStream :  public OutputStream
     int64 pos = 0;
 };
 
-OutputStream* juce_CreateContentURIOutputStream (const URL& url)
+static OutputStream* juce_CreateContentURIOutputStream (const URL& url)
 {
     auto stream = AndroidContentUriResolver::getStreamForContentUri (url, false);
 

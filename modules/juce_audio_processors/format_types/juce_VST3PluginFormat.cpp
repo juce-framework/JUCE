@@ -137,7 +137,7 @@ private:
 };
 
 //==============================================================================
-std::array<uint32, 4> getNormalisedTUID (const TUID& tuid) noexcept
+static std::array<uint32, 4> getNormalisedTUID (const TUID& tuid) noexcept
 {
     const FUID fuid { tuid };
     return { { fuid.getLong1(), fuid.getLong2(), fuid.getLong3(), fuid.getLong4() } };

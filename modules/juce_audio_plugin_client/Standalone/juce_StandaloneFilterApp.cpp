@@ -132,6 +132,8 @@ protected:
 
 #if JucePlugin_Build_Standalone && JUCE_IOS
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
 using namespace juce;
 
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected()
@@ -155,6 +157,9 @@ Image JUCE_CALLTYPE juce_getIAAHostIcon (int size)
 
     return Image();
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
 #endif
 
 #endif

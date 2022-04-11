@@ -130,7 +130,7 @@ namespace juce
 //==============================================================================
 namespace DSoundLogging
 {
-    String getErrorMessage (HRESULT hr)
+    static String getErrorMessage (HRESULT hr)
     {
         const char* result = nullptr;
 

@@ -2146,6 +2146,8 @@ namespace
  #define JUCE_EXPORTED_FUNCTION extern "C" __attribute__ ((visibility("default")))
 #endif
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
 //==============================================================================
 // Mac startup code..
 #if JUCE_MAC
@@ -2220,6 +2222,8 @@ namespace
         return true;
     }
 #endif
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 JUCE_END_IGNORE_WARNINGS_MSVC
 

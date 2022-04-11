@@ -21,7 +21,7 @@ namespace juce
 
 namespace GraphicsHelpers
 {
-    LocalRef<jobject> createPaint (Graphics::ResamplingQuality quality)
+    static LocalRef<jobject> createPaint (Graphics::ResamplingQuality quality)
     {
         jint constructorFlags = 1 /*ANTI_ALIAS_FLAG*/
                                 | 4 /*DITHER_FLAG*/
@@ -33,7 +33,7 @@ namespace GraphicsHelpers
         return LocalRef<jobject>(getEnv()->NewObject (AndroidPaint, AndroidPaint.constructor, constructorFlags));
     }
 
-    const LocalRef<jobject> createMatrix (JNIEnv* env, const AffineTransform& t)
+    static LocalRef<jobject> createMatrix (JNIEnv* env, const AffineTransform& t)
     {
         auto m = LocalRef<jobject>(env->NewObject (AndroidMatrix, AndroidMatrix.constructor));
 
@@ -49,7 +49,7 @@ namespace GraphicsHelpers
 
         return m;
     }
-}
+} // namespace GraphicsHelpers
 
 ImagePixelData::Ptr NativeImageType::create (Image::PixelFormat format, int width, int height, bool clearImage) const
 {

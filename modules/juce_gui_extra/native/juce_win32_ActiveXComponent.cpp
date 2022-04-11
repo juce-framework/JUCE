@@ -478,6 +478,7 @@ intptr_t ActiveXControlComponent::offerEventToActiveXControlStatic (void* ptr)
     return S_FALSE;
 }
 
+LRESULT juce_offerEventToActiveXControl (::MSG& msg);
 LRESULT juce_offerEventToActiveXControl (::MSG& msg)
 {
     if (msg.message >= WM_KEYFIRST && msg.message <= WM_KEYLAST)

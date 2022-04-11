@@ -277,12 +277,12 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
 //==============================================================================
 namespace WindowsAccessibility
 {
-    long getUiaRootObjectId()
+    static long getUiaRootObjectId()
     {
         return static_cast<long> (UiaRootObjectId);
     }
 
-    bool handleWmGetObject (AccessibilityHandler* handler, WPARAM wParam, LPARAM lParam, LRESULT* res)
+    static bool handleWmGetObject (AccessibilityHandler* handler, WPARAM wParam, LPARAM lParam, LRESULT* res)
     {
         if (isStartingUpOrShuttingDown() || (handler == nullptr || ! isHandlerValid (*handler)))
             return false;
@@ -301,7 +301,7 @@ namespace WindowsAccessibility
         return false;
     }
 
-    void revokeUIAMapEntriesForWindow (HWND hwnd)
+    static void revokeUIAMapEntriesForWindow (HWND hwnd)
     {
         if (auto* uiaWrapper = WindowsUIAWrapper::getInstanceWithoutCreating())
             uiaWrapper->returnRawElementProvider (hwnd, 0, 0, nullptr);

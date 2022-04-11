@@ -18,11 +18,6 @@
 
 #pragma once
 
-/** Somewhere in the codebase of your plugin, you need to implement this function
-    and make it return a new instance of the filter subclass that you're building.
-*/
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
-
 namespace juce
 {
 

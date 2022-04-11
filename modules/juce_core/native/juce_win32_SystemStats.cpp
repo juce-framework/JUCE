@@ -214,6 +214,7 @@ static DebugFlagsInitialiser debugFlagsInitialiser;
      return 0;
  }
 #else
+ RTL_OSVERSIONINFOW getWindowsVersionInfo();
  RTL_OSVERSIONINFOW getWindowsVersionInfo()
  {
      RTL_OSVERSIONINFOW versionInfo = {};

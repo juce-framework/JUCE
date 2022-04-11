@@ -28,6 +28,7 @@ namespace juce
 {
 
 #if JucePlugin_Build_Unity
+ bool juce_isRunningInUnity();
  bool juce_isRunningInUnity()    { return PluginHostType::getPluginLoadedAs() == AudioProcessor::wrapperType_Unity; }
 #endif
 
@@ -124,6 +125,7 @@ namespace juce
 #endif
 
 #if JucePlugin_Build_VST
+ bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float);
  bool JUCE_API handleManufacturerSpecificVST2Opcode (int32 index, pointer_sized_int value, void* ptr, float)
  {
     #if VST3_REPLACEMENT_AVAILABLE

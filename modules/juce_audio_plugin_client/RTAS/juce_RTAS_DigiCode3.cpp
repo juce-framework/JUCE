@@ -60,7 +60,10 @@
 #else
 
  #if _MSC_VER
+  short __stdcall NewPlugIn (void*);
   short __stdcall NewPlugIn (void*)                          { return 0; }
+
+  short __stdcall _PI_GetRoutineDescriptor (long, void*);
   short __stdcall _PI_GetRoutineDescriptor (long, void*)     { return 0; }
  #endif
 

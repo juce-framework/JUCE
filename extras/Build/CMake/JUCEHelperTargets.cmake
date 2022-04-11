@@ -25,7 +25,7 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQU
         -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare
         -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion
         -Wsign-conversion -Wbool-conversion -Wextra-semi -Wunreachable-code
-        -Wcast-align -Wshift-sign-overflow
+        -Wcast-align -Wshift-sign-overflow -Wmissing-prototypes
         -Wnullable-to-nonnull-conversion -Wno-ignored-qualifiers -Wswitch-enum
         -Wpedantic -Wdeprecated
         $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>:

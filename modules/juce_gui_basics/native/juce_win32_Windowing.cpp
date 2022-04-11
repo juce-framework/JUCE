@@ -54,7 +54,7 @@ void* getUser32Function (const char*);
 
 #if JUCE_DEBUG
  int numActiveScopedDpiAwarenessDisablers = 0;
- bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
+ static bool isInScopedDPIAwarenessDisabler() { return numActiveScopedDpiAwarenessDisablers > 0; }
  extern HWND juce_messageWindowHandle;
 #endif
 
@@ -642,6 +642,7 @@ static Point<int> convertLogicalScreenPointToPhysical (Point<int> p, HWND h) noe
     return p;
 }
 
+JUCE_API double getScaleFactorForWindow (HWND h);
 JUCE_API double getScaleFactorForWindow (HWND h)
 {
     // NB. Using a local function here because we need to call this method from the plug-in wrappers
@@ -823,6 +824,7 @@ Desktop::DisplayOrientation Desktop::getCurrentOrientation() const
     return upright;
 }
 
+int64 getMouseEventTime();
 int64 getMouseEventTime()
 {
     static int64 eventTimeOffset = 0;
@@ -1095,7 +1097,7 @@ Image createSnapshotOfNativeWindow (void* nativeWindowHandle)
 //==============================================================================
 namespace IconConverters
 {
-    Image createImageFromHICON (HICON icon)
+    static Image createImageFromHICON (HICON icon)
     {
         if (icon == nullptr)
             return {};
@@ -1203,6 +1205,7 @@ namespace IconConverters
         return {};
     }
 
+    HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY);
     HICON createHICONFromImage (const Image& image, const BOOL isIcon, int hotspotX, int hotspotY)
     {
         auto nativeBitmap = new WindowsBitmapImage (Image::ARGB, image.getWidth(), image.getHeight(), true);
@@ -1226,7 +1229,7 @@ namespace IconConverters
         DeleteObject (mask);
         return hi;
     }
-}
+} // namespace IconConverters
 
 //==============================================================================
 JUCE_IUNKNOWNCLASS (ITipInvocation, "37c994e7-432b-4834-a2f7-dce1f13b834b")
@@ -4403,6 +4406,7 @@ ComponentPeer* Component::createNewPeer (int styleFlags, void* parentHWND)
     return new HWNDComponentPeer (*this, styleFlags, (HWND) parentHWND, false);
 }
 
+JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND);
 JUCE_API ComponentPeer* createNonRepaintingEmbeddedWindowsPeer (Component& component, void* parentHWND)
 {
     return new HWNDComponentPeer (component, ComponentPeer::windowIgnoresMouseClicks,
@@ -4442,6 +4446,7 @@ bool KeyPress::isKeyCurrentlyDown (const int keyCode)
 }
 
 // (This internal function is used by the plugin client module)
+bool offerKeyMessageToJUCEWindow (MSG& m);
 bool offerKeyMessageToJUCEWindow (MSG& m)   { return HWNDComponentPeer::offerKeyMessageToJUCEWindow (m); }
 
 //==============================================================================

@@ -236,13 +236,13 @@ namespace LinuxErrorHandling
 {
     static bool keyboardBreakOccurred = false;
 
-    void keyboardBreakSignalHandler (int sig)
+    static void keyboardBreakSignalHandler (int sig)
     {
         if (sig == SIGINT)
             keyboardBreakOccurred = true;
     }
 
-    void installKeyboardBreakHandler()
+    static void installKeyboardBreakHandler()
     {
         struct sigaction saction;
         sigset_t maskSet;
@@ -324,6 +324,7 @@ void LinuxEventLoop::unregisterFdCallback (int fd)
 
 } // namespace juce
 
+JUCE_API std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks();
 JUCE_API std::vector<std::pair<int, std::function<void (int)>>> getFdReadCallbacks()
 {
     using namespace juce;

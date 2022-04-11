@@ -2046,9 +2046,13 @@ private:
 
 //==============================================================================
 #if JUCE_IOS
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
 bool JUCE_CALLTYPE juce_isInterAppAudioConnected() { return false; }
 void JUCE_CALLTYPE juce_switchToHostApplication()  {}
 Image JUCE_CALLTYPE juce_getIAAHostIcon (int)      { return {}; }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE

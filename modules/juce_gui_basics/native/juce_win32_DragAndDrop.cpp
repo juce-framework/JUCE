@@ -205,7 +205,7 @@ namespace DragAndDropHelpers
     };
 
     //==============================================================================
-    HDROP createHDrop (const StringArray& fileNames)
+    static HDROP createHDrop (const StringArray& fileNames)
     {
         size_t totalBytes = 0;
         for (int i = fileNames.size(); --i >= 0;)

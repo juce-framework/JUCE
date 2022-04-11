@@ -142,3 +142,8 @@
 #include "utilities/juce_ParameterAttachments.h"
 #include "utilities/juce_AudioProcessorValueTreeState.h"
 #include "utilities/juce_PluginHostType.h"
+
+// This is here to avoid missing-prototype warnings in user code.
+// If you're implementing a plugin, you should supply a body for
+// this function in your own code.
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();

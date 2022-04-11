@@ -288,6 +288,7 @@ private:
 //==============================================================================
 File juce_getExecutableFile();
 
+void juce_juceEventsAndroidStartApp();
 void juce_juceEventsAndroidStartApp()
 {
     auto dllPath = juce_getExecutableFile().getFullPathName();

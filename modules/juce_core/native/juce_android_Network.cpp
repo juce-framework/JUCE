@@ -246,6 +246,7 @@ static LocalRef<jobject> getMulticastLock()
     return multicastLock;
 }
 
+JUCE_API void JUCE_CALLTYPE acquireMulticastLock();
 JUCE_API void JUCE_CALLTYPE acquireMulticastLock()
 {
     auto multicastLock = getMulticastLock();
@@ -254,6 +255,7 @@ JUCE_API void JUCE_CALLTYPE acquireMulticastLock()
         getEnv()->CallVoidMethod (multicastLock.get(), AndroidMulticastLock.acquire);
 }
 
+JUCE_API void JUCE_CALLTYPE releaseMulticastLock();
 JUCE_API void JUCE_CALLTYPE releaseMulticastLock()
 {
     auto multicastLock = getMulticastLock();

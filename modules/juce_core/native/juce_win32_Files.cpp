@@ -64,12 +64,12 @@ namespace WindowsFileHelpers
    #endif
 
     //==============================================================================
-    DWORD getAtts (const String& path) noexcept
+    static DWORD getAtts (const String& path) noexcept
     {
         return GetFileAttributes (path.toWideCharPointer());
     }
 
-    bool changeAtts (const String& path, DWORD bitsToSet, DWORD bitsToClear) noexcept
+    static bool changeAtts (const String& path, DWORD bitsToSet, DWORD bitsToClear) noexcept
     {
         auto oldAtts = getAtts (path);
 
@@ -82,7 +82,7 @@ namespace WindowsFileHelpers
                 || SetFileAttributes (path.toWideCharPointer(), newAtts) != FALSE;
     }
 
-    int64 fileTimeToTime (const FILETIME* const ft) noexcept
+    static int64 fileTimeToTime (const FILETIME* const ft) noexcept
     {
         static_assert (sizeof (ULARGE_INTEGER) == sizeof (FILETIME),
                        "ULARGE_INTEGER is too small to hold FILETIME: please report!");
@@ -90,7 +90,7 @@ namespace WindowsFileHelpers
         return (int64) ((reinterpret_cast<const ULARGE_INTEGER*> (ft)->QuadPart - 116444736000000000LL) / 10000);
     }
 
-    FILETIME* timeToFileTime (const int64 time, FILETIME* const ft) noexcept
+    static FILETIME* timeToFileTime (const int64 time, FILETIME* const ft) noexcept
     {
         if (time <= 0)
             return nullptr;
@@ -99,7 +99,7 @@ namespace WindowsFileHelpers
         return ft;
     }
 
-    String getDriveFromPath (String path)
+    static String getDriveFromPath (String path)
     {
         if (path.isNotEmpty() && path[1] == ':' && path[2] == 0)
             path << '\\';
@@ -115,7 +115,7 @@ namespace WindowsFileHelpers
         return path;
     }
 
-    int64 getDiskSpaceInfo (const String& path, const bool total)
+    static int64 getDiskSpaceInfo (const String& path, const bool total)
     {
         ULARGE_INTEGER spc, tot, totFree;
 
@@ -126,12 +126,12 @@ namespace WindowsFileHelpers
         return 0;
     }
 
-    unsigned int getWindowsDriveType (const String& path)
+    static unsigned int getWindowsDriveType (const String& path)
     {
         return GetDriveType (getDriveFromPath (path).toWideCharPointer());
     }
 
-    File getSpecialFolderPath (int type)
+    static File getSpecialFolderPath (int type)
     {
         WCHAR path[MAX_PATH + 256];
 
@@ -141,7 +141,7 @@ namespace WindowsFileHelpers
         return {};
     }
 
-    File getModuleFileName (HINSTANCE moduleHandle)
+    static File getModuleFileName (HINSTANCE moduleHandle)
     {
         WCHAR dest[MAX_PATH + 256];
         dest[0] = 0;
@@ -149,7 +149,7 @@ namespace WindowsFileHelpers
         return File (String (dest));
     }
 
-    Result getResultForLastError()
+    static Result getResultForLastError()
     {
         TCHAR messageBuffer[256] = {};
 
@@ -159,7 +159,7 @@ namespace WindowsFileHelpers
 
         return Result::fail (String (messageBuffer));
     }
-}
+} // namespace WindowsFileHelpers
 
 //==============================================================================
 #if JUCE_ALLOW_STATIC_NULL_VARIABLES

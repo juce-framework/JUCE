@@ -56,7 +56,7 @@ JNIEnv* getEnv() noexcept
     return nullptr;
 }
 
-void JNICALL juce_JavainitialiseJUCE (JNIEnv* env, jobject /*jclass*/, jobject context)
+static void JNICALL juce_JavainitialiseJUCE (JNIEnv* env, jobject /*jclass*/, jobject context)
 {
     Thread::initialiseJUCE (env, context);
 }

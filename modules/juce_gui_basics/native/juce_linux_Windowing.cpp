@@ -892,12 +892,14 @@ Image juce_createIconForFile (const File&)
     return {};
 }
 
+void juce_LinuxAddRepaintListener (ComponentPeer* peer, Component* dummy);
 void juce_LinuxAddRepaintListener (ComponentPeer* peer, Component* dummy)
 {
     if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))
         linuxPeer->addOpenGLRepaintListener (dummy);
 }
 
+void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy);
 void juce_LinuxRemoveRepaintListener (ComponentPeer* peer, Component* dummy)
 {
     if (auto* linuxPeer = dynamic_cast<LinuxComponentPeer*> (peer))

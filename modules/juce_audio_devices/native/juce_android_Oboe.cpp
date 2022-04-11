@@ -1416,6 +1416,7 @@ private:
 };
 
 //==============================================================================
+pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
 pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 {
     auto thread = std::make_unique<OboeRealtimeThread>();

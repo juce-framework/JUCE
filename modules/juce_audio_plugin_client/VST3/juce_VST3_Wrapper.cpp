@@ -285,9 +285,9 @@ static QueryInterfaceResult queryAdditionalInterfaces (AudioProcessor* processor
     return {};
 }
 
-tresult extractResult (const QueryInterfaceResult& userInterface,
-                       const InterfaceResultWithDeferredAddRef& juceInterface,
-                       void** obj)
+static tresult extractResult (const QueryInterfaceResult& userInterface,
+                              const InterfaceResultWithDeferredAddRef& juceInterface,
+                              void** obj)
 {
     if (userInterface.isOk() && juceInterface.isOk())
     {
@@ -3481,8 +3481,12 @@ bool shutdownModule()
 #endif
 
 #if JUCE_WINDOWS
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
  extern "C" __declspec (dllexport) bool InitDll()   { return initModule(); }
  extern "C" __declspec (dllexport) bool ExitDll()   { return shutdownModule(); }
+
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #elif JUCE_LINUX || JUCE_BSD
  void* moduleHandle = nullptr;
  int moduleEntryCounter = 0;
@@ -3859,7 +3863,11 @@ extern "C" SMTG_EXPORT_SYMBOL IPluginFactory* PLUGIN_API GetPluginFactory()
 
 //==============================================================================
 #if JUCE_WINDOWS
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
 extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID) { if (reason == DLL_PROCESS_ATTACH) Process::setCurrentModuleInstanceHandle (instance); return true; }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 JUCE_END_NO_SANITIZE
