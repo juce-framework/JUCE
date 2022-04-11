@@ -393,7 +393,7 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 //==============================================================================
-class URLConnectionState   : public URLConnectionStateBase
+class API_AVAILABLE (macos (10.9)) URLConnectionState : public URLConnectionStateBase
 {
 public:
     URLConnectionState (NSURLRequest* req, const int maxRedirects)

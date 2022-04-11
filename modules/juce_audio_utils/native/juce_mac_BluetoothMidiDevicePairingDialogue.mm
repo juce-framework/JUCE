@@ -27,7 +27,7 @@ namespace juce
 {
 
 //==============================================================================
-class BluetoothMidiPairingWindowClass   : public ObjCClass<NSObject>
+class API_AVAILABLE (macos (10.11)) BluetoothMidiPairingWindowClass : public ObjCClass<NSObject>
 {
 public:
     struct Callbacks
@@ -117,7 +117,7 @@ private:
     }
 };
 
-class BluetoothMidiSelectorWindowHelper   : public DeletedAtShutdown
+class API_AVAILABLE (macos (10.11)) BluetoothMidiSelectorWindowHelper : public DeletedAtShutdown
 {
 public:
     BluetoothMidiSelectorWindowHelper (ModalComponentManager::Callback* exitCallback,
