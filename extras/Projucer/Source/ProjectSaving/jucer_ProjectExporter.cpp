@@ -855,7 +855,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
     llvmFlags.common.addArray ({
         "-Wshorten-64-to-32", "-Wconversion", "-Wint-conversion",
         "-Wconditional-uninitialized", "-Wconstant-conversion", "-Wbool-conversion",
-        "-Wextra-semi", "-Wshift-sign-overflow", "-Wno-missing-field-initializers",
+        "-Wextra-semi", "-Wshift-sign-overflow",
         "-Wshadow-all", "-Wnullable-to-nonnull-conversion"
     });
     llvmFlags.cpp.addArray ({
@@ -865,7 +865,7 @@ ProjectExporter::BuildConfiguration::BuildConfiguration (Project& p, const Value
     auto& gccFlags = recommendedCompilerWarningFlags[CompilerNames::gcc] = BuildConfiguration::CompilerWarningFlags::getRecommendedForGCCAndLLVM();
     gccFlags.common.addArray ({
         "-Wextra", "-Wsign-compare", "-Wno-implicit-fallthrough", "-Wno-maybe-uninitialized",
-        "-Wno-missing-field-initializers", "-Wredundant-decls", "-Wno-strict-overflow",
+        "-Wredundant-decls", "-Wno-strict-overflow",
         "-Wshadow"
     });
 }

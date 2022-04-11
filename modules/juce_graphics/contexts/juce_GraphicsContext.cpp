@@ -86,7 +86,7 @@ namespace
                     return iter;
                 }
 
-                auto result = cache.emplace (std::move (args), CachedGlyphArrangement { configureArrangement (args) }).first;
+                auto result = cache.emplace (std::move (args), CachedGlyphArrangement { configureArrangement (args), {} }).first;
                 cacheOrder.push_front (result);
                 return result;
             }();
@@ -397,7 +397,7 @@ void Graphics::drawMultiLineText (const String& text, const int startX,
         arrangement.addJustifiedText (args.font, args.text,
                                       (float) args.startX, (float) args.baselineY, (float) args.maximumLineWidth,
                                       args.justification, args.leading);
-        return ConfiguredArrangement { std::move (arrangement) };
+        return ConfiguredArrangement { std::move (arrangement), {} };
     };
 
     GlyphArrangementCache<ArrangementArgs>::getInstance()->draw (*this,
@@ -432,7 +432,7 @@ void Graphics::drawText (const String& text, Rectangle<float> area,
         arrangement.justifyGlyphs (0, arrangement.getNumGlyphs(),
                                    args.area.getX(), args.area.getY(), args.area.getWidth(), args.area.getHeight(),
                                    args.justificationType);
-        return ConfiguredArrangement { std::move (arrangement) };
+        return ConfiguredArrangement { std::move (arrangement), {} };
     };
 
     GlyphArrangementCache<ArrangementArgs>::getInstance()->draw (*this,
@@ -482,7 +482,7 @@ void Graphics::drawFittedText (const String& text, Rectangle<int> area,
                                    args.justification,
                                    args.maximumNumberOfLines,
                                    args.minimumHorizontalScale);
-        return ConfiguredArrangement { std::move (arrangement) };
+        return ConfiguredArrangement { std::move (arrangement), {} };
     };
 
     GlyphArrangementCache<ArrangementArgs>::getInstance()->draw (*this,

@@ -25,7 +25,7 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQU
         -Wuninitialized -Wunused-parameter -Wconversion -Wsign-compare
         -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion
         -Wsign-conversion -Wbool-conversion -Wextra-semi -Wunreachable-code
-        -Wcast-align -Wshift-sign-overflow -Wno-missing-field-initializers
+        -Wcast-align -Wshift-sign-overflow
         -Wnullable-to-nonnull-conversion -Wno-ignored-qualifiers -Wswitch-enum
         -Wpedantic -Wdeprecated
         $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>:
@@ -37,7 +37,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         -Wall -Wextra -Wpedantic -Wstrict-aliasing -Wuninitialized
         -Wunused-parameter -Wsign-compare -Wsign-conversion -Wunreachable-code
         -Wcast-align -Wno-implicit-fallthrough -Wno-maybe-uninitialized
-        -Wno-missing-field-initializers -Wno-ignored-qualifiers -Wswitch-enum
+        -Wno-ignored-qualifiers -Wswitch-enum
         -Wredundant-decls -Wno-strict-overflow -Wshadow
         $<$<COMPILE_LANGUAGE:CXX>:
             -Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant>)
