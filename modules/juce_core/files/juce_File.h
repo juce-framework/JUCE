@@ -871,7 +871,6 @@ public:
         userHomeDirectory,
 
         /** The user's default documents folder.
-
             On Windows, this is CSIDL_PERSONAL which maps to
             %USERPROFILE%\Documents, for example "C:\Users\username\Documents".
 
@@ -934,7 +933,6 @@ public:
         tempDirectory,
 
         /** Returns this application's executable file.
-
             If running as a plug-in or DLL, this will (where possible) be the DLL rather than the
             host app.
 
@@ -947,7 +945,6 @@ public:
         currentExecutableFile,
 
         /** Returns this application's location.
-
             If running as a plug-in or DLL, this will (where possible) be the DLL rather than the
             host app.
 
