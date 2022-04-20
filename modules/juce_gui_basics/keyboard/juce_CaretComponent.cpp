@@ -50,7 +50,7 @@ void CaretComponent::timerCallback()
 
 void CaretComponent::setCaretPosition (const Rectangle<int>& characterArea)
 {
-    startTimer (380);
+    startTimer (500);
     setVisible (shouldBeShown());
     setBounds (characterArea.withWidth (2));
 }
