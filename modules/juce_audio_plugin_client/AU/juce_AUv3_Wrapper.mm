@@ -976,7 +976,7 @@ public:
             {
                 const auto value = (newValue != nullptr ? *newValue : juceParam->getValue()) * getMaximumParameterValue (juceParam);
 
-                if (@available (macOS 10.12, *))
+                if (@available (macOS 10.12, iOS 10.0, *))
                 {
                     [param setValue: value
                          originator: editorObserverToken
