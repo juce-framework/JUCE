@@ -148,28 +148,25 @@ public:
         void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*, ProcessingPrecision);
         void unprepare();
 
-        bool hasNoConnections() const noexcept   { return inputs.isEmpty() && outputs.isEmpty(); }
+        template <typename Sample>
+        void callProcessFunction (AudioBuffer<Sample>& audio,
+                                  MidiBuffer& midi,
+                                  void (AudioProcessor::* function) (AudioBuffer<Sample>&, MidiBuffer&))
+        {
+            const ScopedLock lock (processorLock);
+            (processor.get()->*function) (audio, midi);
+        }
 
         template <typename Sample>
         void processBlock (AudioBuffer<Sample>& audio, MidiBuffer& midi)
         {
-            if (hasNoConnections())
-                return;
-
-            const ScopedLock lock (processorLock);
-
-            processor->processBlock (audio, midi);
+            callProcessFunction (audio, midi, &AudioProcessor::processBlock);
         }
 
         template <typename Sample>
         void processBlockBypassed (AudioBuffer<Sample>& audio, MidiBuffer& midi)
         {
-            if (hasNoConnections())
-                return;
-
-            const ScopedLock lock (processorLock);
-
-            processor->processBlockBypassed (audio, midi);
+            callProcessFunction (audio, midi, &AudioProcessor::processBlockBypassed);
         }
 
         CriticalSection processorLock;
