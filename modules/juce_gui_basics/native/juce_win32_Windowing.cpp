@@ -1403,7 +1403,7 @@ struct UWPUIViewSettings
                 return;
 
             LPCWSTR uwpClassName = L"Windows.UI.ViewManagement.UIViewSettings";
-            HSTRING uwpClassId;
+            HSTRING uwpClassId = nullptr;
 
             if (createHString (uwpClassName, (::UINT32) wcslen (uwpClassName), &uwpClassId) != S_OK
                  || uwpClassId == nullptr)
