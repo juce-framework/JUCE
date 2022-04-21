@@ -28,6 +28,11 @@ class PluginScannerSubprocess : private ChildProcessWorker,
                                 private AsyncUpdater
 {
 public:
+    PluginScannerSubprocess()
+    {
+        formatManager.addDefaultFormats();
+    }
+
     using ChildProcessWorker::initialiseFromCommandLine;
 
 private:
@@ -77,9 +82,6 @@ private:
 
     bool doScan (const MemoryBlock& block)
     {
-        AudioPluginFormatManager formatManager;
-        formatManager.addDefaultFormats();
-
         MemoryInputStream stream { block, false };
         const auto formatName = stream.readString();
         const auto identifier = stream.readString();
@@ -123,6 +125,10 @@ private:
 
     std::mutex mutex;
     std::queue<MemoryBlock> pendingBlocks;
+
+    // After construction, this will only be accessed by doScan so there's no need
+    // to worry about synchronisation.
+    AudioPluginFormatManager formatManager;
 };
 
 //==============================================================================
