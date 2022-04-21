@@ -103,7 +103,7 @@ void DirectoryContentsList::refresh()
 
     if (root.isDirectory())
     {
-        fileFindHandle = std::make_unique<RangedDirectoryIterator>(root, false, "*", fileTypeFlags);
+        fileFindHandle = std::make_unique<RangedDirectoryIterator> (root, false, "*", fileTypeFlags);
         shouldStop = false;
         isSearching = true;
         thread.addTimeSliceClient (this);
@@ -215,6 +215,7 @@ bool DirectoryContentsList::checkNextFile (bool& hasChanged)
         }
 
         fileFindHandle = nullptr;
+        isSearching = false;
 
         if (! wasEmpty && files.isEmpty())
             hasChanged = true;
