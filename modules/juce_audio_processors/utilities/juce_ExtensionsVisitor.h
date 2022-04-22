@@ -30,7 +30,7 @@ namespace Steinberg
 #endif
 
 //==============================================================================
-#if (defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) || (defined(AUDIOCOMPONENT_NOCARBONINSTANCES) && AUDIOCOMPONENT_NOCARBONINSTANCES)
+#if TARGET_OS_IPHONE
 struct OpaqueAudioComponentInstance;
 typedef struct OpaqueAudioComponentInstance* AudioComponentInstance;
 #else

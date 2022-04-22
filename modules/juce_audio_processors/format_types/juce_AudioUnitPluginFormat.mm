@@ -28,10 +28,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
 #include <CoreMIDI/MIDIServices.h>
 
-#if JUCE_SUPPORT_CARBON
- #include <AudioUnit/AudioUnitCarbonView.h>
-#endif
-
 #include <CoreAudioKit/AUViewController.h>
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
@@ -427,7 +423,6 @@ namespace AudioUnitFormatHelpers
 }
 
 //==============================================================================
-class AudioUnitPluginWindowCarbon;
 class AudioUnitPluginWindowCocoa;
 
 //==============================================================================
@@ -1615,7 +1610,6 @@ public:
 
 private:
     //==============================================================================
-    friend class AudioUnitPluginWindowCarbon;
     friend class AudioUnitPluginWindowCocoa;
     friend class AudioUnitPluginFormat;
 
@@ -2594,162 +2588,12 @@ private:
     }
 };
 
-#if JUCE_SUPPORT_CARBON
-
-//==============================================================================
-class AudioUnitPluginWindowCarbon   : public AudioProcessorEditor
-{
-public:
-    AudioUnitPluginWindowCarbon (AudioUnitPluginInstance& p)
-        : AudioProcessorEditor (&p),
-          plugin (p),
-          audioComponent (nullptr),
-          viewComponent (nullptr)
-    {
-        innerWrapper.reset (new InnerWrapperComponent (*this));
-        addAndMakeVisible (innerWrapper.get());
-
-        setOpaque (true);
-        setVisible (true);
-        setSize (400, 300);
-
-        UInt32 propertySize;
-        if (AudioUnitGetPropertyInfo (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList,
-                                      kAudioUnitScope_Global, 0, &propertySize, NULL) == noErr
-             && propertySize > 0)
-        {
-            HeapBlock<AudioComponentDescription> views (propertySize / sizeof (AudioComponentDescription));
-
-            if (AudioUnitGetProperty (plugin.audioUnit, kAudioUnitProperty_GetUIComponentList,
-                                      kAudioUnitScope_Global, 0, &views[0], &propertySize) == noErr)
-            {
-                audioComponent = AudioComponentFindNext (nullptr, &views[0]);
-            }
-        }
-    }
-
-    ~AudioUnitPluginWindowCarbon()
-    {
-        innerWrapper = nullptr;
-
-        if (isValid())
-            plugin.editorBeingDeleted (this);
-    }
-
-    bool isValid() const noexcept           { return audioComponent != nullptr; }
-
-    //==============================================================================
-    void paint (Graphics& g) override
-    {
-        g.fillAll (Colours::black);
-    }
-
-    void resized() override
-    {
-        if (innerWrapper != nullptr)
-            innerWrapper->setSize (getWidth(), getHeight());
-    }
-
-    //==============================================================================
-    bool keyStateChanged (bool) override         { return false; }
-    bool keyPressed (const KeyPress&) override   { return false; }
-
-    //==============================================================================
-    AudioUnit getAudioUnit() const      { return plugin.audioUnit; }
-
-    AudioUnitCarbonView getViewComponent()
-    {
-        if (viewComponent == nullptr && audioComponent != nullptr)
-            AudioComponentInstanceNew (audioComponent, &viewComponent);
-
-        return viewComponent;
-    }
-
-    void closeViewComponent()
-    {
-        if (viewComponent != nullptr)
-        {
-            JUCE_AU_LOG ("Closing AU GUI: " + plugin.getName());
-
-            AudioComponentInstanceDispose (viewComponent);
-            viewComponent = nullptr;
-        }
-    }
-
-private:
-    //==============================================================================
-    AudioUnitPluginInstance& plugin;
-    AudioComponent audioComponent;
-    AudioUnitCarbonView viewComponent;
-
-    //==============================================================================
-    class InnerWrapperComponent   : public CarbonViewWrapperComponent
-    {
-    public:
-        InnerWrapperComponent (AudioUnitPluginWindowCarbon& w)  : owner (w)  {}
-
-        ~InnerWrapperComponent()
-        {
-            deleteWindow();
-        }
-
-        HIViewRef attachView (WindowRef windowRef, HIViewRef rootView) override
-        {
-            JUCE_AU_LOG ("Opening AU GUI: " + owner.plugin.getName());
-
-            AudioUnitCarbonView carbonView = owner.getViewComponent();
-
-            if (carbonView == 0)
-                return 0;
-
-            Float32Point pos = { 0, 0 };
-            Float32Point size = { 250, 200 };
-            HIViewRef pluginView = 0;
-
-            AudioUnitCarbonViewCreate (carbonView, owner.getAudioUnit(), windowRef, rootView,
-                                       &pos, &size, (ControlRef*) &pluginView);
-
-            return pluginView;
-        }
-
-        void removeView (HIViewRef) override
-        {
-            owner.closeViewComponent();
-        }
-
-    private:
-        AudioUnitPluginWindowCarbon& owner;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InnerWrapperComponent)
-    };
-
-    friend class InnerWrapperComponent;
-    std::unique_ptr<InnerWrapperComponent> innerWrapper;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioUnitPluginWindowCarbon)
-};
-
-#endif
-
 //==============================================================================
 AudioProcessorEditor* AudioUnitPluginInstance::createEditor()
 {
     std::unique_ptr<AudioProcessorEditor> w (new AudioUnitPluginWindowCocoa (*this, false));
 
     if (! static_cast<AudioUnitPluginWindowCocoa*> (w.get())->isValid())
-        w.reset();
-
-   #if JUCE_SUPPORT_CARBON
-    if (w == nullptr)
-    {
-        w.reset (new AudioUnitPluginWindowCarbon (*this));
-
-        if (! static_cast<AudioUnitPluginWindowCarbon*> (w.get())->isValid())
-            w.reset();
-    }
-   #endif
-
-    if (w == nullptr)
         w.reset (new AudioUnitPluginWindowCocoa (*this, true)); // use AUGenericView as a fallback
 
     return w.release();

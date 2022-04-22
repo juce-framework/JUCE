@@ -577,18 +577,11 @@ private:
         PlayerController (Pimpl& ownerToUse, bool useNativeControlsIfAvailable)
             : PlayerControllerBase (ownerToUse, useNativeControlsIfAvailable)
         {
-           #if JUCE_32BIT
-            // 32-bit builds don't have AVPlayerView, so need to use a layer
-            useNativeControls = false;
-           #endif
-
             wrappedPlayer = [&]() -> std::unique_ptr<WrappedPlayer>
             {
-               #if ! JUCE_32BIT
                 if (@available (macOS 10.9, *))
                     if (useNativeControls)
                         return std::make_unique<WrappedPlayerView>();
-               #endif
 
                 return std::make_unique<WrappedPlayerLayer> ();
             }();
@@ -658,7 +651,6 @@ private:
             NSUniquePtr<AVPlayerLayer> playerLayer      { [[AVPlayerLayer alloc] init] };
         };
 
-       #if ! JUCE_32BIT
         class API_AVAILABLE (macos (10.9)) WrappedPlayerView : public WrappedPlayer
         {
         public:
@@ -670,7 +662,6 @@ private:
         private:
             NSUniquePtr<AVPlayerView> playerView        { [[AVPlayerView alloc] init] };
         };
-       #endif
 
         std::unique_ptr<WrappedPlayer> wrappedPlayer;
     };

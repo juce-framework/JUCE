@@ -1220,10 +1220,6 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
 
         wantsMidiMessages = pluginCanDo ("receiveVstMidiEvent") > 0 || isSynthPlugin();
 
-       #if JUCE_MAC && JUCE_SUPPORT_CARBON
-        usesCocoaNSView = ((unsigned int) pluginCanDo ("hasCockosViewAsConfig") & 0xffff0000ul) == 0xbeef0000ul;
-       #endif
-
         setLatencySamples (vstEffect->initialDelay);
     }
 
@@ -1961,7 +1957,6 @@ struct VSTPluginInstance final   : public AudioPluginInstance,
     ModuleHandle::Ptr vstModule;
 
     std::unique_ptr<VSTPluginFormat::ExtraFunctions> extraFunctions;
-    bool usesCocoaNSView = false;
 
 private:
     //==============================================================================
@@ -2732,18 +2727,8 @@ public:
        #elif JUCE_MAC
         ignoreUnused (recursiveResize, pluginRefusesToResize, alreadyInside);
 
-        #if JUCE_SUPPORT_CARBON
-        if (! plug.usesCocoaNSView)
-        {
-            carbonWrapper.reset (new CarbonWrapperComponent (*this));
-            addAndMakeVisible (carbonWrapper.get());
-        }
-        else
-        #endif
-        {
-            cocoaWrapper.reset (new NSViewComponentWithParent (plugin));
-            addAndMakeVisible (cocoaWrapper.get());
-        }
+        cocoaWrapper.reset (new NSViewComponentWithParent (plugin));
+        addAndMakeVisible (cocoaWrapper.get());
        #endif
 
         activeVSTWindows.add (this);
@@ -2769,9 +2754,6 @@ public:
         closePluginWindow();
 
        #if JUCE_MAC
-        #if JUCE_SUPPORT_CARBON
-        carbonWrapper.reset();
-        #endif
         cocoaWrapper.reset();
        #endif
 
@@ -2800,11 +2782,6 @@ public:
         setSize (correctedBounds.getWidth(), correctedBounds.getHeight());
 
       #if JUCE_MAC
-       #if JUCE_SUPPORT_CARBON
-        if (carbonWrapper != nullptr)
-            carbonWrapper->setSize (correctedBounds.getWidth(), correctedBounds.getHeight());
-       #endif
-
         if (cocoaWrapper != nullptr)
             cocoaWrapper->setSize (correctedBounds.getWidth(), correctedBounds.getHeight());
       #endif
@@ -2820,25 +2797,19 @@ public:
 
     void visibilityChanged() override
     {
-        if (cocoaWrapper != nullptr)
-        {
-            if (isShowing())
-                openPluginWindow ((NSView*) cocoaWrapper->getView());
-            else
-                closePluginWindow();
-        }
+        if (isShowing())
+            openPluginWindow ((NSView*) cocoaWrapper->getView());
+        else
+            closePluginWindow();
     }
 
     void childBoundsChanged (Component*) override
     {
-        if (cocoaWrapper != nullptr)
-        {
-            auto w = cocoaWrapper->getWidth();
-            auto h = cocoaWrapper->getHeight();
+        auto w = cocoaWrapper->getWidth();
+        auto h = cocoaWrapper->getHeight();
 
-            if (w != getWidth() || h != getHeight())
-                setSize (w, h);
-        }
+        if (w != getWidth() || h != getHeight())
+            setSize (w, h);
     }
 
     void parentHierarchyChanged() override { visibilityChanged(); }
@@ -3317,86 +3288,6 @@ private:
 
     //==============================================================================
     #if JUCE_MAC
-     #if JUCE_SUPPORT_CARBON
-      struct CarbonWrapperComponent   : public CarbonViewWrapperComponent
-      {
-          CarbonWrapperComponent (VSTPluginWindow& w)  : owner (w)
-          {
-              keepPluginWindowWhenHidden = w.shouldAvoidDeletingWindow();
-              setRepaintsChildHIViewWhenCreated (w.shouldRepaintCarbonWindowWhenCreated());
-          }
-
-          ~CarbonWrapperComponent()
-          {
-              deleteWindow();
-          }
-
-          HIViewRef attachView (WindowRef windowRef, HIViewRef /*rootView*/) override
-          {
-              owner.openPluginWindow (windowRef);
-              return {};
-          }
-
-          void removeView (HIViewRef) override
-          {
-              if (owner.isOpen)
-              {
-                  owner.isOpen = false;
-                  owner.dispatch (Vst2::effEditClose, 0, 0, 0, 0);
-                  owner.dispatch (Vst2::effEditSleep, 0, 0, 0, 0);
-              }
-          }
-
-          bool getEmbeddedViewSize (int& w, int& h) override
-          {
-              Vst2::ERect* rect = nullptr;
-              owner.dispatch (Vst2::effEditGetRect, 0, 0, &rect, 0);
-              w = rect->right - rect->left;
-              h = rect->bottom - rect->top;
-              return true;
-          }
-
-          void handleMouseDown (int x, int y) override
-          {
-              if (! alreadyInside)
-              {
-                  alreadyInside = true;
-                  getTopLevelComponent()->toFront (true);
-                  owner.dispatch (Vst2::effEditMouse, x, y, 0, 0);
-                  alreadyInside = false;
-              }
-              else
-              {
-                  PostEvent (::mouseDown, 0);
-              }
-          }
-
-          void handlePaint() override
-          {
-              if (auto* peer = getPeer())
-              {
-                  auto pos = peer->globalToLocal (getScreenPosition());
-                  Vst2::ERect r;
-                  r.left   = (int16) pos.getX();
-                  r.top    = (int16) pos.getY();
-                  r.right  = (int16) (r.left + getWidth());
-                  r.bottom = (int16) (r.top + getHeight());
-
-                  owner.dispatch (Vst2::effEditDraw, 0, 0, &r, 0);
-              }
-          }
-
-      private:
-          VSTPluginWindow& owner;
-          bool alreadyInside = false;
-
-          JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CarbonWrapperComponent)
-      };
-
-      friend struct CarbonWrapperComponent;
-      std::unique_ptr<CarbonWrapperComponent> carbonWrapper;
-     #endif
-
       std::unique_ptr<NSViewComponentWithParent> cocoaWrapper;
 
       void resized() override

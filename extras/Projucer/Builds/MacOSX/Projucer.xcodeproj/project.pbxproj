@@ -17,7 +17,6 @@
 		11D42F7EC6E6539D79A7F4B1 /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = E5D6C36496F5BC84D7213BE8; };
 		1321E6C1C6170B6C898AD09D /* Icon.icns */ = {isa = PBXBuildFile; fileRef = 951128CA33CCDEF570436B1C; };
 		1B988E139004D8E2850EB656 /* jucer_PaintRoutine.cpp */ = {isa = PBXBuildFile; fileRef = C187718F7B9EBA88584B43F3; };
-		1E76E36772355E2A43CF4961 /* Carbon.framework */ = {isa = PBXBuildFile; fileRef = D00F311BFC3C2625C457CB9B; };
 		209FCCC2155A1FCB7E11E20D /* jucer_JucerDocument.cpp */ = {isa = PBXBuildFile; fileRef = 269A454F1FF081DA67FFD578; };
 		234B6BA2952CBC7C61EF70EF /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 5867DC4E39DF8539B54C0D59; };
 		241F29FCBB7A17BB44A0B10C /* Cocoa.framework */ = {isa = PBXBuildFile; fileRef = D1F9B0E9F5D54FE48BEB46EA; };
@@ -314,7 +313,6 @@
 		CCD62DB0A19A985A4B9D7F32 /* jucer_ProjectExport_Android.h */ /* jucer_ProjectExport_Android.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_ProjectExport_Android.h; path = ../../Source/ProjectSaving/jucer_ProjectExport_Android.h; sourceTree = SOURCE_ROOT; };
 		CD267A28C16C4E79EB749005 /* gpl_logo.svg */ /* gpl_logo.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = gpl_logo.svg; path = ../../Source/BinaryData/Icons/gpl_logo.svg; sourceTree = SOURCE_ROOT; };
 		CF6C8BD0DA3D8CD4E99EBADA /* WebKit.framework */ /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		D00F311BFC3C2625C457CB9B /* Carbon.framework */ /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		D045BD5943BD38F2720FF5F0 /* jucer_FontPropertyComponent.h */ /* jucer_FontPropertyComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_FontPropertyComponent.h; path = ../../Source/ComponentEditor/Properties/jucer_FontPropertyComponent.h; sourceTree = SOURCE_ROOT; };
 		D05BD91B6105827B010E1C20 /* juce_gui_extra */ /* juce_gui_extra */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_gui_extra; path = ../../../../modules/juce_gui_extra; sourceTree = SOURCE_ROOT; };
 		D1739728A79A2062418B8EF0 /* wizard_StaticLibrary.svg */ /* wizard_StaticLibrary.svg */ = {isa = PBXFileReference; lastKnownFileType = file.svg; name = wizard_StaticLibrary.svg; path = ../../Source/BinaryData/Icons/wizard_StaticLibrary.svg; sourceTree = SOURCE_ROOT; };
@@ -390,7 +388,6 @@
 				A578EAD4BB55680E8097BE0F,
 				C1B9334AE849F93FB3C56B34,
 				A14C2C2725DA3CA7995D2815,
-				1E76E36772355E2A43CF4961,
 				241F29FCBB7A17BB44A0B10C,
 				9359F9401D59B4517F75C39C,
 				091A57B4B9CE623E75E9A756,
@@ -442,7 +439,6 @@
 				80D62B907248523E6943298B,
 				5A75806B34E4EA6598A6024A,
 				210CD22F25F2C22F9CEEB025,
-				D00F311BFC3C2625C457CB9B,
 				D1F9B0E9F5D54FE48BEB46EA,
 				728FE25157E9874D50BBECB2,
 				E983E6DDE3318B872EBE347F,

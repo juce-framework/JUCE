@@ -20,16 +20,12 @@
   ==============================================================================
 */
 
-#if ! defined (DOXYGEN) && (JUCE_MAC || JUCE_IOS)
- #if __LP64__
-  using OSType = unsigned int;
- #else
-  using OSType = unsigned long;
- #endif
-#endif
-
 namespace juce
 {
+
+#if ! DOXYGEN && (JUCE_MAC || JUCE_IOS)
+ using OSType = unsigned int;
+#endif
 
 //==============================================================================
 /**

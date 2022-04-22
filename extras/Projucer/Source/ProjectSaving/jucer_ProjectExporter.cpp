@@ -389,7 +389,7 @@ void ProjectExporter::addCommonAudioPluginSettings()
 {
     if (shouldBuildTargetType (build_tools::ProjectType::Target::AAXPlugIn))
         addAAXFoldersToPath();
- }
+}
 
 void ProjectExporter::addLegacyVSTFolderToPathIfSpecified()
 {

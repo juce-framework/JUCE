@@ -36,13 +36,6 @@
 #include <juce_core/containers/juce_Optional.h>
 
 //==============================================================================
-#if JUCE_MAC
- #if JUCE_SUPPORT_CARBON && (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_AU)
-  #include <Carbon/Carbon.h>
-  #include <juce_gui_extra/native/juce_mac_CarbonViewWrapperComponent.h>
- #endif
-#endif
-
 #if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
  #include <X11/Xlib.h>
  #include <X11/Xutil.h>

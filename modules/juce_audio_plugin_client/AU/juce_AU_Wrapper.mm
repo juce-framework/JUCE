@@ -22,11 +22,6 @@
 
 #if JucePlugin_Build_AU
 
-#if __LP64__
- #undef JUCE_SUPPORT_CARBON
- #define JUCE_SUPPORT_CARBON 0
-#endif
-
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshorten-64-to-32",
                                      "-Wunused-parameter",
                                      "-Wdeprecated-declarations",
@@ -52,29 +47,11 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wshorten-64-to-32",
 #include <QuartzCore/QuartzCore.h>
 #include "CoreAudioUtilityClasses/MusicDeviceBase.h"
 
-/** The BUILD_AU_CARBON_UI flag lets you specify whether old-school carbon hosts are supported as
-    well as ones that can open a cocoa view. If this is enabled, you'll need to also add the AUCarbonBase
-    files to your project.
-*/
-#if ! (defined (BUILD_AU_CARBON_UI) || JUCE_64BIT)
- #define BUILD_AU_CARBON_UI 1
-#endif
-
-#ifdef __LP64__
- #undef BUILD_AU_CARBON_UI  // (not possible in a 64-bit build)
-#endif
-
-#if BUILD_AU_CARBON_UI
- #include "CoreAudioUtilityClasses/AUCarbonViewBase.h"
-#endif
-
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-#define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
 #define JUCE_CORE_INCLUDE_OBJC_HELPERS 1
 
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_CarbonVisibility.h"
 
 #include <juce_audio_basics/native/juce_mac_CoreAudioLayouts.h>
 #include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
@@ -96,13 +73,7 @@ struct AudioProcessorHolder
     AudioProcessorHolder (bool initialiseGUI)
     {
         if (initialiseGUI)
-        {
-           #if BUILD_AU_CARBON_UI
-            NSApplicationLoad();
-           #endif
-
             initialiseJuce_GUI();
-        }
 
         juceFilter.reset (createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnit));
 
@@ -1059,23 +1030,6 @@ public:
         jassert (rate > 0);
         return rate > 0 ? juceFilter->getLatencySamples() / rate : 0;
     }
-
-    //==============================================================================
-   #if BUILD_AU_CARBON_UI
-    int GetNumCustomUIComponents() override
-    {
-        return getHostType().isDigitalPerformer() ? 0 : 1;
-    }
-
-    void GetUIComponentDescs (ComponentDescription* inDescArray) override
-    {
-        inDescArray[0].componentType = kAudioUnitCarbonViewComponentType;
-        inDescArray[0].componentSubType = JucePlugin_AUSubType;
-        inDescArray[0].componentManufacturer = JucePlugin_AUManufacturerCode;
-        inDescArray[0].componentFlags = 0;
-        inDescArray[0].componentFlagsMask = 0;
-    }
-   #endif
 
     //==============================================================================
     bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info) override
@@ -2421,243 +2375,6 @@ private:
 };
 
 //==============================================================================
-#if BUILD_AU_CARBON_UI
-
-class JuceAUView  : public AUCarbonViewBase
-{
-public:
-    JuceAUView (AudioUnitCarbonView auview)
-      : AUCarbonViewBase (auview),
-        juceFilter (nullptr)
-    {
-    }
-
-    ~JuceAUView()
-    {
-        deleteUI();
-    }
-
-    ComponentResult CreateUI (Float32 /*inXOffset*/, Float32 /*inYOffset*/) override
-    {
-        JUCE_AUTORELEASEPOOL
-        {
-            if (juceFilter == nullptr)
-            {
-                void* pointers[2];
-                UInt32 propertySize = sizeof (pointers);
-
-                AudioUnitGetProperty (GetEditAudioUnit(),
-                                      juceFilterObjectPropertyID,
-                                      kAudioUnitScope_Global,
-                                      0,
-                                      pointers,
-                                      &propertySize);
-
-                juceFilter = (AudioProcessor*) pointers[0];
-            }
-
-            if (juceFilter != nullptr)
-            {
-                deleteUI();
-
-                if (AudioProcessorEditor* editorComp = juceFilter->createEditorIfNeeded())
-                {
-                    editorComp->setOpaque (true);
-                    windowComp.reset (new ComponentInHIView (editorComp, mCarbonPane));
-                }
-            }
-            else
-            {
-                jassertfalse; // can't get a pointer to our effect
-            }
-        }
-
-        return noErr;
-    }
-
-    AudioUnitCarbonViewEventListener getEventListener() const   { return mEventListener; }
-    void* getEventListenerUserData() const                      { return mEventListenerUserData; }
-
-private:
-    //==============================================================================
-    AudioProcessor* juceFilter;
-    std::unique_ptr<Component> windowComp;
-
-    void deleteUI()
-    {
-        if (windowComp != nullptr)
-        {
-            PopupMenu::dismissAllActiveMenus();
-
-            /* This assertion is triggered when there's some kind of modal component active, and the
-               host is trying to delete our plugin.
-               If you must use modal components, always use them in a non-blocking way, by never
-               calling runModalLoop(), but instead using enterModalState() with a callback that
-               will be performed on completion. (Note that this assertion could actually trigger
-               a false alarm even if you're doing it correctly, but is here to catch people who
-               aren't so careful) */
-            jassert (Component::getCurrentlyModalComponent() == nullptr);
-
-            if (JuceAU::EditorCompHolder* editorCompHolder = dynamic_cast<JuceAU::EditorCompHolder*> (windowComp->getChildComponent(0)))
-                if (AudioProcessorEditor* audioProcessEditor = dynamic_cast<AudioProcessorEditor*> (editorCompHolder->getChildComponent(0)))
-                    juceFilter->editorBeingDeleted (audioProcessEditor);
-
-            windowComp = nullptr;
-        }
-    }
-
-    //==============================================================================
-    // Uses a child NSWindow to sit in front of a HIView and display our component
-    class ComponentInHIView  : public Component
-    {
-    public:
-        ComponentInHIView (AudioProcessorEditor* ed, HIViewRef parentHIView)
-            : parentView (parentHIView),
-              editor (ed),
-              recursive (false)
-        {
-            JUCE_AUTORELEASEPOOL
-            {
-                jassert (ed != nullptr);
-                addAndMakeVisible (editor);
-                setOpaque (true);
-                setVisible (true);
-                setBroughtToFrontOnMouseClick (true);
-
-                setSize (editor.getWidth(), editor.getHeight());
-                SizeControl (parentHIView, (SInt16) editor.getWidth(), (SInt16) editor.getHeight());
-
-                WindowRef windowRef = HIViewGetWindow (parentHIView);
-                hostWindow = [[NSWindow alloc] initWithWindowRef: windowRef];
-
-                // not really sure why this is needed in older OS X versions
-                // but JUCE plug-ins crash without it
-                if ((SystemStats::getOperatingSystemType() & 0xff) < 12)
-                    [hostWindow retain];
-
-                [hostWindow setCanHide: YES];
-                [hostWindow setReleasedWhenClosed: YES];
-
-                updateWindowPos();
-
-               #if ! JucePlugin_EditorRequiresKeyboardFocus
-                addToDesktop (ComponentPeer::windowIsTemporary | ComponentPeer::windowIgnoresKeyPresses);
-                setWantsKeyboardFocus (false);
-               #else
-                addToDesktop (ComponentPeer::windowIsTemporary);
-                setWantsKeyboardFocus (true);
-               #endif
-
-                setVisible (true);
-                toFront (false);
-
-                addSubWindow();
-
-                NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
-                [pluginWindow setNextResponder: hostWindow];
-
-                attachWindowHidingHooks (this, (WindowRef) windowRef, hostWindow);
-            }
-        }
-
-        ~ComponentInHIView()
-        {
-            JUCE_AUTORELEASEPOOL
-            {
-                removeWindowHidingHooks (this);
-
-                NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
-                [hostWindow removeChildWindow: pluginWindow];
-                removeFromDesktop();
-
-                [hostWindow release];
-                hostWindow = nil;
-            }
-        }
-
-        void updateWindowPos()
-        {
-            HIPoint f;
-            f.x = f.y = 0;
-            HIPointConvert (&f, kHICoordSpaceView, parentView, kHICoordSpaceScreenPixel, 0);
-            setTopLeftPosition ((int) f.x, (int) f.y);
-        }
-
-        void addSubWindow()
-        {
-            NSWindow* pluginWindow = [((NSView*) getWindowHandle()) window];
-            [pluginWindow setExcludedFromWindowsMenu: YES];
-            [pluginWindow setCanHide: YES];
-
-            [hostWindow addChildWindow: pluginWindow
-                               ordered: NSWindowAbove];
-            [hostWindow orderFront: nil];
-            [pluginWindow orderFront: nil];
-        }
-
-        void resized() override
-        {
-            if (Component* const child = getChildComponent (0))
-                child->setBounds (getLocalBounds());
-        }
-
-        void paint (Graphics&) override {}
-
-        void childBoundsChanged (Component*) override
-        {
-            if (! recursive)
-            {
-                recursive = true;
-
-                const int w = jmax (32, editor.getWidth());
-                const int h = jmax (32, editor.getHeight());
-
-                SizeControl (parentView, (SInt16) w, (SInt16) h);
-
-                if (getWidth() != w || getHeight() != h)
-                    setSize (w, h);
-
-                editor.repaint();
-
-                updateWindowPos();
-                addSubWindow(); // (need this for AULab)
-
-                recursive = false;
-            }
-        }
-
-        bool keyPressed (const KeyPress& kp) override
-        {
-            if (! kp.getModifiers().isCommandDown())
-            {
-                // If we have an unused keypress, move the key-focus to a host window
-                // and re-inject the event..
-                static NSTimeInterval lastEventTime = 0; // check we're not recursively sending the same event
-                NSTimeInterval eventTime = [[NSApp currentEvent] timestamp];
-
-                if (lastEventTime != eventTime)
-                {
-                    lastEventTime = eventTime;
-
-                    [[hostWindow parentWindow] makeKeyWindow];
-                    repostCurrentNSEvent();
-                }
-            }
-
-            return false;
-        }
-
-    private:
-        HIViewRef parentView;
-        NSWindow* hostWindow;
-        JuceAU::EditorCompHolder editor;
-        bool recursive;
-    };
-};
-
-#endif
-
-//==============================================================================
 #define JUCE_COMPONENT_ENTRYX(Class, Name, Suffix) \
     extern "C" __attribute__((visibility("default"))) ComponentResult Name ## Suffix (ComponentParameters* params, Class* obj); \
     extern "C" __attribute__((visibility("default"))) ComponentResult Name ## Suffix (ComponentParameters* params, Class* obj) \
@@ -2692,10 +2409,6 @@ JUCE_COMPONENT_ENTRY (JuceAU, JucePlugin_AUExportPrefix, Entry)
 
 #if ! JUCE_DISABLE_AU_FACTORY_ENTRY  // (You might need to disable this for old Xcode 3 builds)
 JUCE_FACTORY_ENTRY   (JuceAU, JucePlugin_AUExportPrefix)
-#endif
-
-#if BUILD_AU_CARBON_UI
- JUCE_COMPONENT_ENTRY (JuceAUView, JucePlugin_AUExportPrefix, ViewEntry)
 #endif
 
 #if ! JUCE_DISABLE_AU_FACTORY_ENTRY

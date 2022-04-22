@@ -24,11 +24,8 @@
 
 #if JucePlugin_Build_VST || JucePlugin_Build_VST3
 
-#define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
-
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_CarbonVisibility.h"
 
 //==============================================================================
 namespace juce
@@ -153,8 +150,6 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
             [hostWindow orderFront: nil];
             [pluginWindow orderFront: nil];
 
-            attachWindowHidingHooks (comp, (WindowRef) parentWindowOrView, hostWindow);
-
             return hostWindow;
         }
        #endif
@@ -191,8 +186,6 @@ void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSVi
             EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
                                         comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
             RemoveEventHandler (ref);
-
-            removeWindowHidingHooks (comp);
 
             CFUniquePtr<HIViewRef> dummyView ((HIViewRef) (void*) (pointer_sized_int)
                                                 comp->getProperties() ["dummyViewRef"].toString().getHexValue64());

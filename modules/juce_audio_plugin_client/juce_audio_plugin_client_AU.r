@@ -41,23 +41,3 @@
 #define ENTRY_POINT     JucePlugin_AUExportPrefixQuoted "Entry"
 
 #include "AUResources.r"
-
-//==============================================================================
-// component resources for Audio Unit Carbon View
-
-#ifndef BUILD_AU_CARBON_UI
- #define BUILD_AU_CARBON_UI 1
-#endif
-
-#if BUILD_AU_CARBON_UI
- #define RES_ID         2000
- #define COMP_TYPE      kAudioUnitCarbonViewComponentType
- #define COMP_SUBTYPE   JucePlugin_AUSubType
- #define COMP_MANUF     JucePlugin_AUManufacturerCode
- #define VERSION        JucePlugin_VersionCode
- #define NAME           JucePlugin_Manufacturer ": " JucePlugin_Name " View"
- #define DESCRIPTION    NAME
- #define ENTRY_POINT    JucePlugin_AUExportPrefixQuoted "ViewEntry"
-
- #include "AUResources.r"
-#endif

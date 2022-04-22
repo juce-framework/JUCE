@@ -29,7 +29,6 @@
 		A1F34D09F4E4338775917ED1 /* include_juce_audio_formats.mm */ = {isa = PBXBuildFile; fileRef = C6E2284D86D93F1D9D5C7666; };
 		B323E5E5FBD5663B21A8E623 /* OpenGL.framework */ = {isa = PBXBuildFile; fileRef = 996E743A20FC78671766BF59; };
 		BB9A9692D99DD0DDB1047B60 /* include_juce_audio_basics.mm */ = {isa = PBXBuildFile; fileRef = 6D1F9E505D20C09647124F0A; };
-		BED88ADEA4DC91AA8C810FA8 /* Carbon.framework */ = {isa = PBXBuildFile; fileRef = 398A945EFD9ED923162982B1; };
 		C4D6C466C41173D6970553D2 /* AudioToolbox.framework */ = {isa = PBXBuildFile; fileRef = 9E8129263CD42C6029FC2CAD; };
 		C5E7BAD864E02CF37F7BD707 /* include_juce_events.mm */ = {isa = PBXBuildFile; fileRef = 33AA348465F512DBA8778DAF; };
 		C6348C6B1D0312580E97EA19 /* include_juce_osc.cpp */ = {isa = PBXBuildFile; fileRef = 3BF06B70407FFDBE9534F942; };
@@ -50,7 +49,6 @@
 		25DEDA8C9F94A6C8DFC8E53E /* SharedCanvas.h */ /* SharedCanvas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SharedCanvas.h; path = ../../Source/SharedCanvas.h; sourceTree = SOURCE_ROOT; };
 		2E13A899F4E3C99054A3656F /* Accelerate.framework */ /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		33AA348465F512DBA8778DAF /* include_juce_events.mm */ /* include_juce_events.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_events.mm; path = ../../JuceLibraryCode/include_juce_events.mm; sourceTree = SOURCE_ROOT; };
-		398A945EFD9ED923162982B1 /* Carbon.framework */ /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		3BF06B70407FFDBE9534F942 /* include_juce_osc.cpp */ /* include_juce_osc.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_osc.cpp; path = ../../JuceLibraryCode/include_juce_osc.cpp; sourceTree = SOURCE_ROOT; };
 		448838BE6E937D450A3C84CE /* CoreMIDI.framework */ /* CoreMIDI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMIDI.framework; path = System/Library/Frameworks/CoreMIDI.framework; sourceTree = SDKROOT; };
 		4D1DB6D77B6F3DE7A569780B /* CoreAudioKit.framework */ /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
@@ -107,7 +105,6 @@
 			files = (
 				80EE2C27B466BAFD83881D3F,
 				C4D6C466C41173D6970553D2,
-				BED88ADEA4DC91AA8C810FA8,
 				3C30D7C28C86F4054257DCD5,
 				67DF295E93E54432043126DF,
 				770AB74B1D3A0108F764DD47,
@@ -151,7 +148,6 @@
 			children = (
 				2E13A899F4E3C99054A3656F,
 				9E8129263CD42C6029FC2CAD,
-				398A945EFD9ED923162982B1,
 				C78806A6727F44EACFDED4A5,
 				6799B056504F9F017998B9E2,
 				4D1DB6D77B6F3DE7A569780B,

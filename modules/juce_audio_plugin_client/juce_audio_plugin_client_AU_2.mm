@@ -55,9 +55,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
 
 #include "AU/CoreAudioUtilityClasses/AUBase.cpp"
 #include "AU/CoreAudioUtilityClasses/AUBuffer.cpp"
-#include "AU/CoreAudioUtilityClasses/AUCarbonViewBase.cpp"
-#include "AU/CoreAudioUtilityClasses/AUCarbonViewControl.cpp"
-#include "AU/CoreAudioUtilityClasses/AUCarbonViewDispatch.cpp"
 #include "AU/CoreAudioUtilityClasses/AUDispatch.cpp"
 #include "AU/CoreAudioUtilityClasses/AUInputElement.cpp"
 #include "AU/CoreAudioUtilityClasses/AUMIDIBase.cpp"
@@ -69,7 +66,6 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wparentheses",
 #include "AU/CoreAudioUtilityClasses/CAMutex.cpp"
 #include "AU/CoreAudioUtilityClasses/CAStreamBasicDescription.cpp"
 #include "AU/CoreAudioUtilityClasses/CAVectorUnit.cpp"
-#include "AU/CoreAudioUtilityClasses/CarbonEventHandler.cpp"
 #include "AU/CoreAudioUtilityClasses/ComponentBase.cpp"
 #include "AU/CoreAudioUtilityClasses/MusicDeviceBase.cpp"
 
