@@ -44,6 +44,19 @@ static AccessibilityActions getListRowAccessibilityActions (RowComponentType& ro
                                  .addAction (AccessibilityActionType::toggle, std::move (onToggle));
 }
 
+void ListBox::checkModelPtrIsValid() const
+{
+   #if ! JUCE_DISABLE_ASSERTIONS
+    // If this is hit, the model was destroyed while the ListBox was still using it.
+    // You should ensure that the model remains alive for as long as the ListBox holds a pointer to it.
+    // If this assertion is hit in the destructor of a ListBox instance, do one of the following:
+    // - Adjust the order in which your destructors run, so that the ListBox destructor runs
+    //   before the destructor of your ListBoxModel, or
+    // - Call ListBox::setModel (nullptr) before destroying your ListBoxModel.
+    jassert ((model == nullptr) == (weakModelPtr.lock() == nullptr));
+   #endif
+}
+
 class ListBox::RowComponent  : public Component,
                                public TooltipClient
 {
@@ -506,7 +519,7 @@ struct ListBoxMouseMoveSelector  : public MouseListener
 
 //==============================================================================
 ListBox::ListBox (const String& name, ListBoxModel* const m)
-    : Component (name), model (m)
+    : Component (name)
 {
     viewport.reset (new ListViewport (*this));
     addAndMakeVisible (viewport.get());
@@ -514,6 +527,8 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
     setWantsKeyboardFocus (true);
     setFocusContainerType (FocusContainerType::focusContainer);
     colourChanged();
+
+    setModel (m);
 }
 
 ListBox::~ListBox()
@@ -527,6 +542,11 @@ void ListBox::setModel (ListBoxModel* const newModel)
     if (model != newModel)
     {
         model = newModel;
+
+       #if ! JUCE_DISABLE_ASSERTIONS
+        weakModelPtr = model != nullptr ? model->sharedState : nullptr;
+       #endif
+
         repaint();
         updateContent();
     }
@@ -590,6 +610,7 @@ Viewport* ListBox::getViewport() const noexcept
 //==============================================================================
 void ListBox::updateContent()
 {
+    checkModelPtrIsValid();
     hasDoneInitialUpdate = true;
     totalItems = (model != nullptr) ? model->getNumRows() : 0;
 
@@ -626,6 +647,8 @@ void ListBox::selectRowInternal (const int row,
                                  bool deselectOthersFirst,
                                  bool isMouseClick)
 {
+    checkModelPtrIsValid();
+
     if (! multipleSelection)
         deselectOthersFirst = true;
 
@@ -661,6 +684,8 @@ void ListBox::selectRowInternal (const int row,
 
 void ListBox::deselectRow (const int row)
 {
+    checkModelPtrIsValid();
+
     if (selected.contains (row))
     {
         selected.removeRange ({ row, row + 1 });
@@ -679,6 +704,8 @@ void ListBox::deselectRow (const int row)
 void ListBox::setSelectedRows (const SparseSet<int>& setOfRowsToBeSelected,
                                const NotificationType sendNotificationEventToModel)
 {
+    checkModelPtrIsValid();
+
     selected = setOfRowsToBeSelected;
     selected.removeRange ({ totalItems, std::numeric_limits<int>::max() });
 
@@ -726,6 +753,8 @@ void ListBox::flipRowSelection (const int row)
 
 void ListBox::deselectAllRows()
 {
+    checkModelPtrIsValid();
+
     if (! selected.isEmpty())
     {
         selected.clear();
@@ -855,6 +884,8 @@ void ListBox::scrollToEnsureRowIsOnscreen (const int row)
 //==============================================================================
 bool ListBox::keyPressed (const KeyPress& key)
 {
+    checkModelPtrIsValid();
+
     const int numVisibleRows = viewport->getHeight() / getRowHeight();
 
     const bool multiple = multipleSelection
@@ -960,6 +991,8 @@ void ListBox::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& whee
 
 void ListBox::mouseUp (const MouseEvent& e)
 {
+    checkModelPtrIsValid();
+
     if (e.mouseWasClicked() && model != nullptr)
         model->backgroundClicked (e);
 }
@@ -1109,6 +1142,8 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
 
         int getNumRows() const override
         {
+            listBox.checkModelPtrIsValid();
+
             if (listBox.model == nullptr)
                 return 0;
 
