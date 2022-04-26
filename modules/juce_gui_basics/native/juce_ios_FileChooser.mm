@@ -47,7 +47,7 @@ public:
         auto* controllerClassInstance = controllerClass.createInstance();
 
         String firstFileExtension;
-        auto utTypeArray = createNSArrayFromStringArray (getUTTypesForWildcards (owner.filters, firstFileExtension));
+        auto utTypeArray = createNSArrayFromStringArray (getUTTypesForWildcards (owner.filters, firstFileExtension, (flags & FileBrowserComponent::canSelectDirectories) != 0));
 
         if ((flags & FileBrowserComponent::saveMode) != 0)
         {
@@ -183,8 +183,10 @@ private:
     }
 
     //==============================================================================
-    static StringArray getUTTypesForWildcards (const String& filterWildcards, String& firstExtension)
+    static StringArray getUTTypesForWildcards (const String& filterWildcards, String& firstExtension, bool selectsDirectories = false)
     {
+        if (selectsDirectories) return StringArray (String::fromCFString (kUTTypeFolder));
+
         auto filters = StringArray::fromTokens (filterWildcards, ";", "");
         StringArray result;
 
