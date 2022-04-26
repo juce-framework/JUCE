@@ -133,7 +133,7 @@ public:
 
     //==============================================================================
     virtual AUAudioUnitPreset* getCurrentPreset()                          = 0;
-    virtual void setCurrentPreset(AUAudioUnitPreset*)                      = 0;
+    virtual void setCurrentPreset (AUAudioUnitPreset*)                     = 0;
     virtual NSArray<AUAudioUnitPreset*>* getFactoryPresets()               = 0;
 
     virtual NSDictionary<NSString*, id>* getFullState()
@@ -517,22 +517,12 @@ public:
     //==============================================================================
     AUAudioUnitPreset* getCurrentPreset() override
     {
-        const int n = static_cast<int> ([factoryPresets.get() count]);
-        const int idx = static_cast<int> (getAudioProcessor().getCurrentProgram());
-
-        if (idx < n)
-            return [factoryPresets.get() objectAtIndex:static_cast<unsigned int> (idx)];
-
-        return nullptr;
+        return factoryPresets.getAtIndex (getAudioProcessor().getCurrentProgram());
     }
 
     void setCurrentPreset (AUAudioUnitPreset* preset) override
     {
-        const int n = static_cast<int> ([factoryPresets.get() count]);
-        const int idx = static_cast<int> ([preset number]);
-
-        if (isPositiveAndBelow (idx, n))
-            getAudioProcessor().setCurrentProgram (idx);
+        getAudioProcessor().setCurrentProgram (static_cast<int> ([preset number]));
     }
 
     NSArray<AUAudioUnitPreset*>* getFactoryPresets() override
@@ -1185,6 +1175,38 @@ private:
         juce::AudioBuffer<float> scratchBuffer;
     };
 
+    class FactoryPresets
+    {
+    public:
+        using Presets = std::unique_ptr<NSMutableArray<AUAudioUnitPreset*>, NSObjectDeleter>;
+
+        void set (Presets newPresets)
+        {
+            std::lock_guard<std::mutex> lock (mutex);
+            std::swap (presets, newPresets);
+        }
+
+        NSArray* get() const
+        {
+            std::lock_guard<std::mutex> lock (mutex);
+            return presets.get();
+        }
+
+        AUAudioUnitPreset* getAtIndex (int index) const
+        {
+            std::lock_guard<std::mutex> lock (mutex);
+
+            if (index < (int) [presets.get() count])
+                return [presets.get() objectAtIndex: (unsigned int) index];
+
+            return nullptr;
+        }
+
+    private:
+        Presets presets;
+        mutable std::mutex mutex;
+    };
+
     //==============================================================================
     void addAudioUnitBusses (bool isInput)
     {
@@ -1428,7 +1450,7 @@ private:
 
     void addPresets()
     {
-        factoryPresets.reset ([[NSMutableArray<AUAudioUnitPreset*> alloc] init]);
+        FactoryPresets::Presets newPresets { [[NSMutableArray<AUAudioUnitPreset*> alloc] init] };
 
         const int n = getAudioProcessor().getNumPrograms();
 
@@ -1440,8 +1462,10 @@ private:
             [preset.get() setName: juceStringToNS (name)];
             [preset.get() setNumber: static_cast<NSInteger> (idx)];
 
-            [factoryPresets.get() addObject: preset.get()];
+            [newPresets.get() addObject: preset.get()];
         }
+
+        factoryPresets.set (std::move (newPresets));
     }
 
     //==============================================================================
@@ -1804,7 +1828,7 @@ private:
     std::unique_ptr<AUParameterTree, NSObjectDeleter> paramTree;
     std::unique_ptr<NSMutableArray<NSNumber*>, NSObjectDeleter> overviewParams, channelCapabilities;
 
-    std::unique_ptr<NSMutableArray<AUAudioUnitPreset*>, NSObjectDeleter> factoryPresets;
+    FactoryPresets factoryPresets;
 
     ObjCBlock<AUInternalRenderBlock> internalRenderBlock;
 
