@@ -32,7 +32,8 @@
 // Wow, those Steinberg guys really don't worry too much about compiler warnings.
 JUCE_BEGIN_IGNORE_WARNINGS_LEVEL_MSVC (0, 4505 4702 6011 6031 6221 6386 6387 6330 6001 28199)
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-copy-dtor",
+                                     "-Wnon-virtual-dtor",
                                      "-Wreorder",
                                      "-Wunsequenced",
                                      "-Wint-to-pointer-cast",
