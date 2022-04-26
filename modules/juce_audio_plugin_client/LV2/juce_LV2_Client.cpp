@@ -825,7 +825,7 @@ private:
               "\n"
               "<" JucePlugin_LV2URI ">\n"
               "\ta lv2:Plugin ;\n"
-              "\tlv2:binary <" << libraryPath.getFileName() << "> ;\n"
+              "\tlv2:binary <" << URL::addEscapeChars (libraryPath.getFileName(), false) << "> ;\n"
               "\trdfs:seeAlso <dsp.ttl> .\n";
 
         if (proc.hasEditor())
@@ -843,7 +843,7 @@ private:
             os << "\n"
                   "<" << JucePluginLV2UriUi << ">\n"
                   "\ta ui:" JUCE_LV2_UI_KIND " ;\n"
-                  "\tlv2:binary <" << libraryPath.getFileName() << "> ;\n"
+                  "\tlv2:binary <" << URL::addEscapeChars (libraryPath.getFileName(), false) << "> ;\n"
                   "\trdfs:seeAlso <ui.ttl> .\n"
                   "\n";
         }
@@ -1303,7 +1303,7 @@ private:
               "\tlv2:optionalFeature\n"
               "\t\t" << resizeFeatureString << " ,\n"
               "\t\topts:interface ,\n"
-              "\t\topts:options .\n\n"
+              "\t\topts:options ;\n\n"
               "\topts:supportedOption\n"
               "\t\tui:scaleFactor ,\n"
               "\t\tparam:sampleRate .\n";
