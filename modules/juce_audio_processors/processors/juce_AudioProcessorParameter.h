@@ -36,7 +36,7 @@ class AudioProcessor;
 
     @tags{Audio}
 */
-class JUCE_API  AudioProcessorParameter
+class JUCE_API  AudioProcessorParameter : public DestructionBroadcaster
 {
 public:
     AudioProcessorParameter() noexcept = default;
@@ -340,11 +340,6 @@ public:
     /** @internal */
     void sendValueChangedMessageToListeners (float newValue);
     
-    juce::ChangeBroadcaster &getDestructionBroadcaster()
-    {
-        return destructionBroadcaster;
-    }
-
 private:
     //==============================================================================
     friend class AudioProcessor;
@@ -356,8 +351,6 @@ private:
     Array<Listener*> listeners;
     mutable StringArray valueStrings;
     
-    ChangeBroadcaster destructionBroadcaster;
-
    #if JUCE_DEBUG
     bool isPerformingGesture = false;
    #endif

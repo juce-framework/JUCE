@@ -22,6 +22,38 @@
 
 namespace juce
 {
+class DestructionListener
+{
+   public:
+    /** Destructor. */
+    virtual ~DestructionListener() = default;
+
+    virtual void callback() = 0;
+};
+class DestructionBroadcaster
+{
+   public:
+    /** Destructor. */
+    ~DestructionBroadcaster()
+    {
+        listeners.call([](DestructionListener &l) { l.callback(); });
+    }
+    /** Registers a listener to receive change callbacks from this broadcaster.
+        Trying to add a listener that's already on the list will have no effect.
+    */
+    void addDestructionListener(DestructionListener *l) { listeners.add(l); }
+
+    /** Unregisters a listener from the list.
+        If the listener isn't on the list, this won't have any effect.
+    */
+    void removeDestructionListener(DestructionListener *l)
+    {
+        listeners.remove(l);
+    }
+
+   private:
+    ListenerList<DestructionListener> listeners;
+};
 
 //==============================================================================
 /**
@@ -31,7 +63,7 @@ namespace juce
 
     @tags{Events}
 */
-class JUCE_API  ChangeBroadcaster
+class JUCE_API  ChangeBroadcaster : public DestructionBroadcaster
 {
 public:
     //==============================================================================
