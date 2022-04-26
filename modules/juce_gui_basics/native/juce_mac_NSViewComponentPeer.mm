@@ -1877,7 +1877,7 @@ private:
 
     void updateCVDisplayLinkScreen()
     {
-        auto viewDisplayID = (CGDirectDisplayID) [window.screen.deviceDescription[@"NSScreenNumber"] unsignedIntegerValue];
+        auto viewDisplayID = (CGDirectDisplayID) [[window.screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue];
         auto result = CVDisplayLinkSetCurrentCGDisplay (displayLink, viewDisplayID);
         jassertquiet (result == kCVReturnSuccess);
     }
