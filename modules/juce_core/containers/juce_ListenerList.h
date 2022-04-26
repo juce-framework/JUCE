@@ -47,10 +47,11 @@ namespace juce
     listeners.call ([] (MyListenerType& l) { l.myCallbackMethod (1234, true); });
     @endcode
 
-    If you add or remove listeners from the list during one of the callbacks - i.e. while
-    it's in the middle of iterating the listeners, then it's guaranteed that no listeners
-    will be mistakenly called after they've been removed, but it may mean that some of the
-    listeners could be called more than once, or not at all, depending on the list's order.
+    It is guaranteed that every Listener is called during an iteration if it's inside the
+    ListenerList before the iteration starts and isn't removed until its end. This guarantee
+    holds even if some Listeners are removed or new ones are added during the iteration.
+
+    Listeners added during an iteration are guaranteed to be not called in that iteration.
 
     Sometimes, there's a chance that invoking one of the callbacks might result in the
     list itself being deleted while it's still iterating - to survive this situation, you can
@@ -73,7 +74,13 @@ public:
     ListenerList() = default;
 
     /** Destructor. */
-    ~ListenerList() = default;
+    ~ListenerList()
+    {
+        WrappedIterator::forEach (activeIterators, [&] (auto& iter)
+        {
+            iter.invalidate();
+        });
+    }
 
     //==============================================================================
     /** Adds a listener to the list.
@@ -95,7 +102,16 @@ public:
     void remove (ListenerClass* listenerToRemove)
     {
         jassert (listenerToRemove != nullptr); // Listeners can't be null pointers!
-        listeners.removeFirstMatchingValue (listenerToRemove);
+
+        typename ArrayType::ScopedLockType lock (listeners.getLock());
+
+        const auto index = listeners.removeFirstMatchingValue (listenerToRemove);
+
+        WrappedIterator::forEach (activeIterators, [&] (auto& iter)
+        {
+            if (0 <= index && index < iter.get().index)
+                --iter.get().index;
+        });
     }
 
     /** Returns the number of registered listeners. */
@@ -120,8 +136,8 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
-            callback (*iter.getListener());
+        for (WrappedIterator iter (*this, activeIterators); iter.get().next();)
+            callback (*iter.get().getListener());
     }
 
     /** Calls a member function with 1 parameter, on all but the specified listener in the list.
@@ -132,9 +148,9 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+        for (WrappedIterator iter (*this, activeIterators); iter.get().next();)
         {
-            auto* l = iter.getListener();
+            auto* l = iter.get().getListener();
 
             if (l != listenerToExclude)
                 callback (*l);
@@ -149,8 +165,10 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
-            callback (*iter.getListener());
+        for (WrappedIterator iter (*this, activeIterators); iter.get().next (bailOutChecker);)
+        {
+            callback (*iter.get().getListener());
+        }
     }
 
     /** Calls a member function, with 1 parameter, on all but the specified listener in the list
@@ -164,9 +182,9 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+        for (WrappedIterator iter (*this, activeIterators); iter.get().next (bailOutChecker);)
         {
-            auto* l = iter.getListener();
+            auto* l = iter.get().getListener();
 
             if (l != listenerToExclude)
                 callback (*l);
@@ -187,14 +205,11 @@ public:
 
     //==============================================================================
     /** Iterates the listeners in a ListenerList. */
-    template <class BailOutCheckerType, class ListType>
     struct Iterator
     {
-        Iterator (const ListType& listToIterate) noexcept
+        explicit Iterator (const ListenerList& listToIterate) noexcept
             : list (listToIterate), index (listToIterate.size())
         {}
-
-        ~Iterator() = default;
 
         //==============================================================================
         bool next() noexcept
@@ -211,20 +226,22 @@ public:
             return index >= 0;
         }
 
+        template <class BailOutCheckerType>
         bool next (const BailOutCheckerType& bailOutChecker) noexcept
         {
             return (! bailOutChecker.shouldBailOut()) && next();
         }
 
-        typename ListType::ListenerType* getListener() const noexcept
+        ListenerClass* getListener() const noexcept
         {
             return list.getListeners().getUnchecked (index);
         }
 
-        //==============================================================================
     private:
-        const ListType& list;
+        const ListenerList& list;
         int index;
+
+        friend ListenerList;
 
         JUCE_DECLARE_NON_COPYABLE (Iterator)
     };
@@ -260,7 +277,7 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+        for (Iterator iter (*this); iter.next();)
             (iter.getListener()->*callbackFunction) (static_cast<typename TypeHelpers::ParameterType<Args>::type> (args)...);
     }
 
@@ -271,7 +288,7 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<DummyBailOutChecker, ThisType> iter (*this); iter.next();)
+        for (Iterator iter (*this); iter.next();)
             if (iter.getListener() != listenerToExclude)
                 (iter.getListener()->*callbackFunction) (static_cast<typename TypeHelpers::ParameterType<Args>::type> (args)...);
     }
@@ -283,7 +300,7 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+        for (Iterator iter (*this); iter.next (bailOutChecker);)
             (iter.getListener()->*callbackFunction) (static_cast<typename TypeHelpers::ParameterType<Args>::type> (args)...);
     }
 
@@ -295,15 +312,49 @@ public:
     {
         typename ArrayType::ScopedLockType lock (listeners.getLock());
 
-        for (Iterator<BailOutCheckerType, ThisType> iter (*this); iter.next (bailOutChecker);)
+        for (Iterator iter (*this); iter.next (bailOutChecker);)
             if (iter.getListener() != listenerToExclude)
                 (iter.getListener()->*callbackFunction) (static_cast<typename TypeHelpers::ParameterType<Args>::type> (args)...);
     }
    #endif
 
 private:
+    class WrappedIterator
+    {
+    public:
+        WrappedIterator (const ListenerList& listToIterate, WrappedIterator*& listHeadIn)
+            : it (listToIterate), listHead (listHeadIn), next (listHead)
+        {
+            listHead = this;
+        }
+
+        ~WrappedIterator()
+        {
+            if (valid)
+                listHead = next;
+        }
+
+        auto& get() noexcept { return it; }
+
+        template <typename Callback>
+        static void forEach (WrappedIterator* wrapped, Callback&& cb)
+        {
+            for (auto* p = wrapped; p != nullptr; p = p->next)
+                cb (*p);
+        }
+
+        void invalidate() noexcept { valid = false; }
+
+    private:
+        Iterator it;
+        WrappedIterator*& listHead;
+        WrappedIterator* next = nullptr;
+        bool valid = true;
+    };
+
     //==============================================================================
     ArrayType listeners;
+    WrappedIterator* activeIterators = nullptr;
 
     JUCE_DECLARE_NON_COPYABLE (ListenerList)
 };

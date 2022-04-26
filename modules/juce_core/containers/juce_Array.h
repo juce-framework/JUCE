@@ -829,9 +829,10 @@ public:
         If the item isn't found, no action is taken.
 
         @param valueToRemove   the object to try to remove
+        @returns               the index of the removed item, or -1 if the item isn't found
         @see remove, removeRange, removeIf
     */
-    void removeFirstMatchingValue (ParameterType valueToRemove)
+    int removeFirstMatchingValue (ParameterType valueToRemove)
     {
         const ScopedLockType lock (getLock());
         auto* e = values.begin();
@@ -841,9 +842,11 @@ public:
             if (valueToRemove == e[i])
             {
                 removeInternal (i);
-                break;
+                return i;
             }
         }
+
+        return -1;
     }
 
     /** Removes items from the array.
