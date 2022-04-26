@@ -346,7 +346,7 @@ private:
 TableListBox::TableListBox (const String& name, TableListBoxModel* const m)
     : ListBox (name, nullptr), model (m)
 {
-    ListBox::model = this;
+    ListBox::setModel (this);
 
     setHeader (std::make_unique<Header> (*this));
 }
