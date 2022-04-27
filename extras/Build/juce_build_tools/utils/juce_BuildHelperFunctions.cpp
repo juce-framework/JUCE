@@ -65,7 +65,6 @@ namespace build_tools
                 return "XPC!";
 
             case Type::AAXPlugIn:
-            case Type::RTASPlugIn:
                 return "TDMw";
 
             case Type::ConsoleApp:
@@ -97,7 +96,6 @@ namespace build_tools
                 return "????";
 
             case Type::AAXPlugIn:
-            case Type::RTASPlugIn:
                 return "PTul";
 
             case Type::ConsoleApp:

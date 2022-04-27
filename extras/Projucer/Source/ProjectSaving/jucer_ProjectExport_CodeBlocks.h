@@ -114,7 +114,6 @@ public:
             case Target::DynamicLibrary:
                 return true;
             case Target::AAXPlugIn:
-            case Target::RTASPlugIn:
             case Target::UnityPlugIn:
             case Target::LV2PlugIn:
             case Target::LV2TurtleProgram:

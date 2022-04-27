@@ -336,7 +336,6 @@ void Project::initialiseAudioPluginValues()
     pluginAUSandboxSafeValue.referTo         (projectRoot, Ids::pluginAUIsSandboxSafe,      getUndoManager(), false);
     pluginVSTCategoryValue.referTo           (projectRoot, Ids::pluginVSTCategory,          getUndoManager(), getDefaultVSTCategories(),  ",");
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
-    pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
 
     pluginVSTNumMidiInputsValue.referTo      (projectRoot, Ids::pluginVSTNumMidiInputs,     getUndoManager(), 16);
@@ -426,7 +425,7 @@ void Project::updateOldModulePaths()
 Array<Identifier> Project::getLegacyPluginFormatIdentifiers() noexcept
 {
     static Array<Identifier> legacyPluginFormatIdentifiers { Ids::buildVST, Ids::buildVST3, Ids::buildAU, Ids::buildAUv3,
-                                                             Ids::buildRTAS, Ids::buildAAX, Ids::buildStandalone, Ids::enableIAA };
+                                                             Ids::buildAAX, Ids::buildStandalone, Ids::enableIAA };
 
     return legacyPluginFormatIdentifiers;
 }
@@ -434,8 +433,8 @@ Array<Identifier> Project::getLegacyPluginFormatIdentifiers() noexcept
 Array<Identifier> Project::getLegacyPluginCharacteristicsIdentifiers() noexcept
 {
     static Array<Identifier> legacyPluginCharacteristicsIdentifiers { Ids::pluginIsSynth, Ids::pluginWantsMidiIn, Ids::pluginProducesMidiOut,
-                                                                      Ids::pluginIsMidiEffectPlugin, Ids::pluginEditorRequiresKeys, Ids::pluginRTASDisableBypass,
-                                                                      Ids::pluginRTASDisableMultiMono, Ids::pluginAAXDisableBypass, Ids::pluginAAXDisableMultiMono };
+                                                                      Ids::pluginIsMidiEffectPlugin, Ids::pluginEditorRequiresKeys,
+                                                                      Ids::pluginAAXDisableBypass, Ids::pluginAAXDisableMultiMono };
 
     return legacyPluginCharacteristicsIdentifiers;
 }
@@ -494,15 +493,6 @@ void Project::updatePluginCategories()
             pluginAAXCategoryValue = aaxCategory;
         else if (getAllAAXCategoryStrings().contains (aaxCategory))
             pluginAAXCategoryValue = Array<var> (getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf (aaxCategory)]);
-    }
-
-    {
-        auto rtasCategory = projectRoot.getProperty (Ids::pluginRTASCategory, {}).toString();
-
-        if (getAllRTASCategoryVars().contains (rtasCategory))
-            pluginRTASCategoryValue = rtasCategory;
-        else if (getAllRTASCategoryStrings().contains (rtasCategory))
-            pluginRTASCategoryValue = Array<var> (getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf (rtasCategory)]);
     }
 
     {
@@ -1090,7 +1080,6 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
             pluginAUMainTypeValue.setDefault   (getDefaultAUMainTypes());
             pluginVSTCategoryValue.setDefault  (getDefaultVSTCategories());
             pluginVST3CategoryValue.setDefault (getDefaultVST3Categories());
-            pluginRTASCategoryValue.setDefault (getDefaultRTASCategories());
             pluginAAXCategoryValue.setDefault  (getDefaultAAXCategories());
 
             if (shouldWriteLegacyPluginCharacteristicsSettings)
@@ -1246,8 +1235,6 @@ bool Project::shouldBuildTargetType (build_tools::ProjectType::Target::Type targ
             return shouldBuildVST3();
         case Target::AAXPlugIn:
             return shouldBuildAAX();
-        case Target::RTASPlugIn:
-            return shouldBuildRTAS();
         case Target::AudioUnitPlugIn:
             return shouldBuildAU();
         case Target::AudioUnitv3PlugIn:
@@ -1306,7 +1293,6 @@ build_tools::ProjectType::Target::Type Project::getTargetTypeFromFilePath (const
     const FormatInfo formatInfo[] { { "AU",         "AU",         Target::AudioUnitPlugIn },
                                     { "AUv3",       "AU",         Target::AudioUnitv3PlugIn },
                                     { "AAX",        "AAX",        Target::AAXPlugIn },
-                                    { "RTAS",       "RTAS",       Target::RTASPlugIn },
                                     { "VST2",       "VST",        Target::VSTPlugIn },
                                     { "VST3",       "VST3",       Target::VST3PlugIn },
                                     { "Standalone", "Standalone", Target::StandalonePlugIn },
@@ -1442,19 +1428,19 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
     props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats",
-                                                 { "VST3", "AU", "AUv3", "RTAS (deprecated)", "AAX", "Standalone", "LV2", "Unity", "Enable IAA", "VST (Legacy)" },
+                                                 { "VST3", "AU", "AUv3", "AAX", "Standalone", "LV2", "Unity", "Enable IAA", "VST (Legacy)" },
                                                  { Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
-                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(),
+                                                   Ids::buildAAX.toString(), Ids::buildStandalone.toString(),
                                                    Ids::buildLV2.toString(), Ids::buildUnity.toString(), Ids::enableIAA.toString(), Ids::buildVST.toString() }),
                "Plugin formats to build. If you have selected \"VST (Legacy)\" then you will need to ensure that you have a VST2 SDK "
                "in your header search paths. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK "
                "or JUCE version 5.3.2. You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
     props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
                                                  { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
-                                                   "Disable RTAS Bypass", "Disable AAX Bypass", "Disable RTAS Multi-Mono", "Disable AAX Multi-Mono" },
+                                                   "Disable AAX Bypass", "Disable AAX Multi-Mono" },
                                                  { Ids::pluginIsSynth.toString(), Ids::pluginWantsMidiIn.toString(), Ids::pluginProducesMidiOut.toString(),
-                                                   Ids::pluginIsMidiEffectPlugin.toString(), Ids::pluginEditorRequiresKeys.toString(), Ids::pluginRTASDisableBypass.toString(),
-                                                   Ids::pluginAAXDisableBypass.toString(), Ids::pluginRTASDisableMultiMono.toString(), Ids::pluginAAXDisableMultiMono.toString() }),
+                                                   Ids::pluginIsMidiEffectPlugin.toString(), Ids::pluginEditorRequiresKeys.toString(),
+                                                   Ids::pluginAAXDisableBypass.toString(), Ids::pluginAAXDisableMultiMono.toString() }),
               "Some characteristics of your plugin such as whether it is a synth, produces MIDI messages, accepts MIDI messages etc.");
     props.add (new TextPropertyComponent (pluginNameValue, "Plugin Name", 128, false),
                "The name of your plugin (keep it short!)");
@@ -1513,8 +1499,6 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
                    "If neither of these are selected, the appropriate one will be automatically added based on the \"Plugin is a synth\" option.");
     }
 
-    props.add (new MultiChoicePropertyComponent (pluginRTASCategoryValue, "Plugin RTAS Category", getAllRTASCategoryStrings(), getAllRTASCategoryVars()),
-               "RTAS category.");
     props.add (new MultiChoicePropertyComponent (pluginAAXCategoryValue, "Plugin AAX Category", getAllAAXCategoryStrings(), getAllAAXCategoryVars()),
                "AAX category.");
 
@@ -2210,21 +2194,6 @@ int Project::getAAXCategory() const noexcept
     return res;
 }
 
-int Project::getRTASCategory() const noexcept
-{
-    int res = 0;
-
-    auto v = pluginRTASCategoryValue.get();
-
-    if (auto* arr = v.getArray())
-    {
-        for (auto c : *arr)
-            res |= static_cast<int> (c);
-    }
-
-    return res;
-}
-
 String Project::getIAATypeCode() const
 {
     String s;
@@ -2361,34 +2330,6 @@ Array<var> Project::getDefaultAAXCategories() const noexcept
         return getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf ("AAX_ePlugInCategory_SWGenerators")];
 
     return getAllAAXCategoryVars()[getAllAAXCategoryStrings().indexOf ("AAX_ePlugInCategory_None")];
-}
-
-StringArray Project::getAllRTASCategoryStrings() noexcept
-{
-    static StringArray rtasCategoryStrings { "ePlugInCategory_None", "ePlugInCategory_EQ", "ePlugInCategory_Dynamics", "ePlugInCategory_PitchShift",
-                                             "ePlugInCategory_Reverb", "ePlugInCategory_Delay", "ePlugInCategory_Modulation", "ePlugInCategory_Harmonic",
-                                             "ePlugInCategory_NoiseReduction", "ePlugInCategory_Dither", "ePlugInCategory_SoundField", "ePlugInCategory_HWGenerators",
-                                             "ePlugInCategory_SWGenerators", "ePlugInCategory_WrappedPlugin", "ePlugInCategory_Effect" };
-
-    return rtasCategoryStrings;
-}
-
-Array<var> Project::getAllRTASCategoryVars() noexcept
-{
-    static Array<var> rtasCategoryVars { 0x00000000, 0x00000001, 0x00000002, 0x00000004,
-                                         0x00000008, 0x00000010, 0x00000020, 0x00000040,
-                                         0x00000080, 0x00000100, 0x00000200, 0x00000400,
-                                         0x00000800, 0x00001000, 0x00002000 };
-
-    return rtasCategoryVars;
-}
-
-Array<var> Project::getDefaultRTASCategories() const noexcept
-{
-    if (isPluginSynth())
-        return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_SWGenerators")];
-
-    return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_None")];
 }
 
 //==============================================================================
@@ -2641,7 +2582,6 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_Build_VST3",                  boolToString (shouldBuildVST3()));
     flags.set ("JucePlugin_Build_AU",                    boolToString (shouldBuildAU()));
     flags.set ("JucePlugin_Build_AUv3",                  boolToString (shouldBuildAUv3()));
-    flags.set ("JucePlugin_Build_RTAS",                  boolToString (shouldBuildRTAS()));
     flags.set ("JucePlugin_Build_AAX",                   boolToString (shouldBuildAAX()));
     flags.set ("JucePlugin_Build_Standalone",            boolToString (shouldBuildStandalonePlugin()));
     flags.set ("JucePlugin_Build_Unity",                 boolToString (shouldBuildUnityPlugin()));
@@ -2671,11 +2611,6 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_AUExportPrefixQuoted",        toStringLiteral (getPluginAUExportPrefixString()));
     flags.set ("JucePlugin_AUManufacturerCode",          "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_CFBundleIdentifier",          getBundleIdentifierString());
-    flags.set ("JucePlugin_RTASCategory",                String (getRTASCategory()));
-    flags.set ("JucePlugin_RTASManufacturerCode",        "JucePlugin_ManufacturerCode");
-    flags.set ("JucePlugin_RTASProductId",               "JucePlugin_PluginCode");
-    flags.set ("JucePlugin_RTASDisableBypass",           boolToString (isPluginRTASBypassDisabled()));
-    flags.set ("JucePlugin_RTASDisableMultiMono",        boolToString (isPluginRTASMultiMonoDisabled()));
     flags.set ("JucePlugin_AAXIdentifier",               getAAXIdentifierString());
     flags.set ("JucePlugin_AAXManufacturerCode",         "JucePlugin_ManufacturerCode");
     flags.set ("JucePlugin_AAXProductId",                "JucePlugin_PluginCode");

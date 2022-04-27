@@ -264,7 +264,6 @@ public:
     bool shouldBuildVST3() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildVST3); }
     bool shouldBuildAU() const                        { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildAU); }
     bool shouldBuildAUv3() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildAUv3); }
-    bool shouldBuildRTAS() const                      { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildRTAS); }
     bool shouldBuildAAX() const                       { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildAAX); }
     bool shouldBuildStandalonePlugin() const          { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildStandalone); }
     bool shouldBuildUnityPlugin() const               { return isAudioPluginProject() && checkMultiChoiceVar (pluginFormatsValue, Ids::buildUnity); }
@@ -276,8 +275,6 @@ public:
     bool pluginProducesMidiOutput() const             { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginProducesMidiOut); }
     bool isPluginMidiEffect() const                   { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginIsMidiEffectPlugin); }
     bool pluginEditorNeedsKeyFocus() const            { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginEditorRequiresKeys); }
-    bool isPluginRTASBypassDisabled() const           { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginRTASDisableBypass); }
-    bool isPluginRTASMultiMonoDisabled() const        { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginRTASDisableMultiMono); }
     bool isPluginAAXBypassDisabled() const            { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableBypass); }
     bool isPluginAAXMultiMonoDisabled() const         { return checkMultiChoiceVar (pluginCharacteristicsValue, Ids::pluginAAXDisableMultiMono); }
 
@@ -295,16 +292,11 @@ public:
     static Array<var> getAllAAXCategoryVars() noexcept;
     Array<var> getDefaultAAXCategories() const noexcept;
 
-    static StringArray getAllRTASCategoryStrings() noexcept;
-    static Array<var> getAllRTASCategoryVars() noexcept;
-    Array<var> getDefaultRTASCategories() const noexcept;
-
     String getAUMainTypeString() const noexcept;
     bool isAUSandBoxSafe() const noexcept;
     String getVSTCategoryString() const noexcept;
     String getVST3CategoryString() const noexcept;
     int getAAXCategory() const noexcept;
-    int getRTASCategory() const noexcept;
 
     String getIAATypeCode() const;
     String getIAAPluginName() const;
@@ -555,7 +547,7 @@ private:
 
     ValueTreePropertyWithDefault pluginFormatsValue, pluginNameValue, pluginDescriptionValue, pluginManufacturerValue, pluginManufacturerCodeValue,
                                  pluginCodeValue, pluginChannelConfigsValue, pluginCharacteristicsValue, pluginAUExportPrefixValue, pluginAAXIdentifierValue,
-                                 pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginRTASCategoryValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
+                                 pluginAUMainTypeValue, pluginAUSandboxSafeValue, pluginVSTCategoryValue, pluginVST3CategoryValue, pluginAAXCategoryValue,
                                  pluginVSTNumMidiInputsValue, pluginVSTNumMidiOutputsValue, pluginLV2URIValue;
 
     //==============================================================================

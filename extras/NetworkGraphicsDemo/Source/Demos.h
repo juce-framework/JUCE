@@ -368,7 +368,7 @@ struct FlockWithText  : public FlockDemo
                       "Visual Studio, Android Studio, GCC and other compilers");
 
         messages.add ("JUCE can be used to build desktop or mobile apps, and also\n"
-                      "audio plug-ins in the VST2, VST3, AudioUnit, AAX and RTAS formats");
+                      "audio plug-ins in the VST2, VST3, AudioUnit and AAX formats");
     }
 
     String getName() const override      { return "Flock with text"; }

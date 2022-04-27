@@ -473,7 +473,6 @@ public:
             case Target::LV2TurtleProgram:
                 return true;
             case Target::AAXPlugIn:
-            case Target::RTASPlugIn:
             case Target::AudioUnitPlugIn:
             case Target::AudioUnitv3PlugIn:
             case Target::unspecified:

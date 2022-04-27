@@ -223,8 +223,6 @@ private:
         {
             builder.add (new FilePathPropertyComponent (aaxPathValue, "AAX SDK", true, isThisOS),
                          "If you are building AAX plug-ins, this should be the path to the AAX SDK folder.");
-            builder.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK (deprecated)", true, isThisOS),
-                         "If you are building RTAS plug-ins, this should be the path to the RTAS SDK folder.");
         }
 
         builder.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS),
@@ -264,7 +262,6 @@ private:
         juceModulePathValue       = settings.getStoredPath (Ids::defaultJuceModulePath, os);
         userModulePathValue       = settings.getStoredPath (Ids::defaultUserModulePath, os);
         vstPathValue              = settings.getStoredPath (Ids::vstLegacyPath, os);
-        rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
         clionExePathValue         = settings.getStoredPath (Ids::clionExePath, os);
@@ -277,7 +274,6 @@ private:
         juceModulePathValue      .resetToDefault();
         userModulePathValue      .resetToDefault();
         vstPathValue             .resetToDefault();
-        rtasPathValue            .resetToDefault();
         aaxPathValue             .resetToDefault();
         androidSDKPathValue      .resetToDefault();
         clionExePathValue        .resetToDefault();
@@ -290,7 +286,7 @@ private:
     Value selectedOSValue;
 
     ValueTreePropertyWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
-                                 vstPathValue, rtasPathValue, aaxPathValue, androidSDKPathValue,
+                                 vstPathValue, aaxPathValue, androidSDKPathValue,
                                  clionExePathValue, androidStudioExePathValue;
 
     Viewport propertyViewport;

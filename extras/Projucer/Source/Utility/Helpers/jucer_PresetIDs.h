@@ -65,10 +65,8 @@ namespace Ids
     DECLARE_ID (defaultUserModulePath);
     DECLARE_ID (vstLegacyFolder);
     DECLARE_ID (vst3Folder);
-    DECLARE_ID (rtasFolder);
     DECLARE_ID (auFolder);
     DECLARE_ID (vstLegacyPath);
-    DECLARE_ID (rtasPath);
     DECLARE_ID (aaxPath);
     DECLARE_ID (flags);
     DECLARE_ID (line);
@@ -116,7 +114,6 @@ namespace Ids
     DECLARE_ID (vstBinaryLocation);
     DECLARE_ID (vst3BinaryLocation);
     DECLARE_ID (auBinaryLocation);
-    DECLARE_ID (rtasBinaryLocation);
     DECLARE_ID (aaxBinaryLocation);
     DECLARE_ID (unityPluginBinaryLocation);
     DECLARE_ID (enablePluginBinaryCopyStep);
@@ -328,7 +325,6 @@ namespace Ids
     DECLARE_ID (buildVST3);
     DECLARE_ID (buildAU);
     DECLARE_ID (buildAUv3);
-    DECLARE_ID (buildRTAS);
     DECLARE_ID (buildAAX);
     DECLARE_ID (buildStandalone);
     DECLARE_ID (buildUnity);
@@ -353,9 +349,6 @@ namespace Ids
     DECLARE_ID (pluginAUExportPrefix);
     DECLARE_ID (pluginAUMainType);
     DECLARE_ID (pluginAUIsSandboxSafe);
-    DECLARE_ID (pluginRTASCategory);
-    DECLARE_ID (pluginRTASDisableBypass);
-    DECLARE_ID (pluginRTASDisableMultiMono);
     DECLARE_ID (pluginAAXCategory);
     DECLARE_ID (pluginAAXDisableBypass);
     DECLARE_ID (pluginAAXDisableMultiMono);

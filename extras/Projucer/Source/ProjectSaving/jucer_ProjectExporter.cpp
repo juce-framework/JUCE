@@ -273,13 +273,6 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                        "If you're building an AAX plug-in, this must be the folder containing the AAX SDK. This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
-        if (shouldBuildTargetType (build_tools::ProjectType::Target::RTASPlugIn) && project.shouldBuildRTAS())
-        {
-            props.add (new FilePathPropertyComponent (rtasPathValueWrapper.getWrappedValueTreePropertyWithDefault(), "RTAS SDK Folder", true,
-                                                      getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
-                       "If you're building an RTAS plug-in, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
-        }
-
         props.add (new TextPropertyComponent (extraPPDefsValue, "Extra Preprocessor Definitions", 32768, true),
                    "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, "
                    "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -396,8 +389,6 @@ void ProjectExporter::addCommonAudioPluginSettings()
 {
     if (shouldBuildTargetType (build_tools::ProjectType::Target::AAXPlugIn))
         addAAXFoldersToPath();
-
-    // Note: RTAS paths are platform-dependent, impl -> addPlatformSpecificSettingsForProjectType
  }
 
 void ProjectExporter::addLegacyVSTFolderToPathIfSpecified()
@@ -460,7 +451,6 @@ void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, 
                                                          { "JucePlugin_Build_VST3",       Target::VST3PlugIn },
                                                          { "JucePlugin_Build_AU",         Target::AudioUnitPlugIn },
                                                          { "JucePlugin_Build_AUv3",       Target::AudioUnitv3PlugIn },
-                                                         { "JucePlugin_Build_RTAS",       Target::RTASPlugIn },
                                                          { "JucePlugin_Build_AAX",        Target::AAXPlugIn },
                                                          { "JucePlugin_Build_Standalone", Target::StandalonePlugIn },
                                                          { "JucePlugin_Build_Unity",      Target::UnityPlugIn },

@@ -131,9 +131,6 @@ public:
 
         aaxPathValueWrapper.init ({ settings, Ids::aaxFolder, nullptr },
                                   getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::windows), TargetOS::windows);
-
-        rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
-                                   getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::windows), TargetOS::windows);
     }
 
     //==============================================================================
@@ -160,7 +157,6 @@ public:
               pluginBinaryCopyStepValue      (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), false),
               vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
-              rtasBinaryLocation             (config, Ids::rtasBinaryLocation,         getUndoManager()),
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
               lv2BinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
               unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
@@ -180,7 +176,6 @@ public:
         String getPostbuildCommandString() const          { return postbuildCommandValue.get(); }
         String getVSTBinaryLocationString() const         { return vstBinaryLocation.get(); }
         String getVST3BinaryLocationString() const        { return vst3BinaryLocation.get(); }
-        String getRTASBinaryLocationString() const        { return rtasBinaryLocation.get();}
         String getAAXBinaryLocationString() const         { return aaxBinaryLocation.get();}
         String getLV2BinaryLocationString() const         { return lv2BinaryLocation.get();}
         String getUnityPluginBinaryLocationString() const { return unityPluginBinaryLocation.get(); }
@@ -326,14 +321,14 @@ public:
                                      intermediatesPathValue, characterSetValue, architectureTypeValue, fastMathValue, debugInformationFormatValue,
                                      pluginBinaryCopyStepValue;
 
-        ValueTreePropertyWithDefault vstBinaryLocation, vst3BinaryLocation, rtasBinaryLocation, aaxBinaryLocation, lv2BinaryLocation, unityPluginBinaryLocation;
+        ValueTreePropertyWithDefault vstBinaryLocation, vst3BinaryLocation, aaxBinaryLocation, lv2BinaryLocation, unityPluginBinaryLocation;
 
         Value architectureValueToListenTo;
 
         //==============================================================================
         void addVisualStudioPluginInstallPathProperties (PropertyListBuilder& props)
         {
-            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildRTAS()
+            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3()
                                           || project.shouldBuildAAX() || project.shouldBuildUnityPlugin());
 
             if (isBuildingAnyPlugins)
@@ -344,11 +339,6 @@ public:
                 props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled VST3 binary should be placed.");
-
-            if (project.shouldBuildRTAS())
-                props.add (new TextPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepValue, "RTAS Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled RTAS binary should be placed.");
 
             if (project.shouldBuildAAX())
                 props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepValue, "AAX Binary Location",
@@ -380,7 +370,6 @@ public:
                                     : "%CommonProgramFiles(x86)%";
 
             vst3BinaryLocation.setDefault (prefix + String ("\\VST3"));
-            rtasBinaryLocation.setDefault (prefix + String ("\\Digidesign\\DAE\\Plug-Ins"));
             aaxBinaryLocation.setDefault  (prefix + String ("\\Avid\\Audio\\Plug-Ins"));
             lv2BinaryLocation.setDefault  ("%APPDATA%\\LV2");
         }
@@ -562,7 +551,6 @@ public:
                 const auto addIncludePathsAndPreprocessorDefinitions = [this, &config] (XmlElement& xml, EscapeQuotes escapeQuotes)
                 {
                     auto includePaths = getOwner().getHeaderSearchPaths (config);
-                    includePaths.addArray (getExtraSearchPaths());
                     includePaths.add ("%(AdditionalIncludeDirectories)");
                     xml.createNewChildElement ("AdditionalIncludeDirectories")->addTextElement (includePaths.joinIntoString (";"));
 
@@ -681,7 +669,7 @@ public:
                         link->createNewChildElement ("AdditionalOptions")->addTextElement (getOwner().replacePreprocessorTokens (config, extraLinkerOptions).trim()
                                                                                            + " %(AdditionalOptions)");
 
-                    auto delayLoadedDLLs = getDelayLoadedDLLs();
+                    auto delayLoadedDLLs = getOwner().msvcDelayLoadedDLLs;
                     if (delayLoadedDLLs.isNotEmpty())
                         link->createNewChildElement ("DelayLoadDLLs")->addTextElement (delayLoadedDLLs);
 
@@ -887,9 +875,6 @@ public:
                 {
                     auto* e = cpps.createNewChildElement ("ClCompile");
                     e->setAttribute ("Include", path.toWindowsStyle());
-
-                    if (shouldUseStdCall (path))
-                        e->createNewChildElement ("CallingConvention")->addTextElement ("StdCall");
 
                     if (projectItem.shouldBeCompiled())
                     {
@@ -1130,7 +1115,6 @@ public:
             {
                 if (type == VST3PlugIn)  return ".vst3";
                 if (type == AAXPlugIn)   return ".aaxdll";
-                if (type == RTASPlugIn)  return ".dpm";
 
                 return ".dll";
             }
@@ -1266,7 +1250,6 @@ public:
 
                 if (type == VSTPlugIn)     return copyScript.replace ("$COPYDIR$", config.getVSTBinaryLocationString());
                 if (type == VST3PlugIn)    return copyScript.replace ("$COPYDIR$", config.getVST3BinaryLocationString());
-                if (type == RTASPlugIn)    return copyScript.replace ("$COPYDIR$", config.getRTASBinaryLocationString());
             }
 
             return {};
@@ -1314,60 +1297,6 @@ public:
                 auto aaxLibsFolder = build_tools::RelativePath (owner.getAAXPathString(), build_tools::RelativePath::projectFolder).getChildFile ("Libs");
                 defines.set ("JucePlugin_AAXLibs_path", createRebasedPath (aaxLibsFolder));
             }
-            else if (type == RTASPlugIn)
-            {
-                build_tools::RelativePath rtasFolder (owner.getRTASPathString(), build_tools::RelativePath::projectFolder);
-                defines.set ("JucePlugin_WinBag_path", createRebasedPath (rtasFolder.getChildFile ("WinBag")));
-            }
-        }
-
-        String getExtraLinkerFlags() const
-        {
-            if (type == RTASPlugIn)
-                return "/FORCE:multiple";
-
-            return {};
-        }
-
-        StringArray getExtraSearchPaths() const
-        {
-            StringArray searchPaths;
-            if (type == RTASPlugIn)
-            {
-                build_tools::RelativePath rtasFolder (owner.getRTASPathString(), build_tools::RelativePath::projectFolder);
-
-                static const char* p[] = { "AlturaPorts/TDMPlugins/PluginLibrary/EffectClasses",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/ProcessClasses/Interfaces",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/Utilities",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/RTASP_Adapt",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/CoreClasses",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/Controls",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/Meters",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/ViewClasses",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/DSPClasses",
-                                           "AlturaPorts/TDMPlugins/PluginLibrary/Interfaces",
-                                           "AlturaPorts/TDMPlugins/common",
-                                           "AlturaPorts/TDMPlugins/common/Platform",
-                                           "AlturaPorts/TDMPlugins/common/Macros",
-                                           "AlturaPorts/TDMPlugins/SignalProcessing/Public",
-                                           "AlturaPorts/TDMPlugIns/DSPManager/Interfaces",
-                                           "AlturaPorts/SADriver/Interfaces",
-                                           "AlturaPorts/DigiPublic/Interfaces",
-                                           "AlturaPorts/DigiPublic",
-                                           "AlturaPorts/Fic/Interfaces/DAEClient",
-                                           "AlturaPorts/NewFileLibs/Cmn",
-                                           "AlturaPorts/NewFileLibs/DOA",
-                                           "AlturaPorts/AlturaSource/PPC_H",
-                                           "AlturaPorts/AlturaSource/AppSupport",
-                                           "AvidCode/AVX2sdk/AVX/avx2/avx2sdk/inc",
-                                           "xplat/AVX/avx2/avx2sdk/inc" };
-
-                for (auto* path : p)
-                    searchPaths.add (createRebasedPath (rtasFolder.getChildFile (path)));
-            }
-
-            return searchPaths;
         }
 
         String getBinaryNameWithSuffix (const MSVCBuildConfiguration& config) const
@@ -1414,36 +1343,12 @@ public:
             return result;
         }
 
-        String getDelayLoadedDLLs() const
-        {
-            auto delayLoadedDLLs = getOwner().msvcDelayLoadedDLLs;
-
-            if (type == RTASPlugIn)
-                delayLoadedDLLs += "DAE.dll; DigiExt.dll; DSI.dll; PluginLib.dll; "
-                    "DSPManager.dll; DSPManager.dll; DSPManagerClientLib.dll; RTASClientLib.dll";
-
-            return delayLoadedDLLs;
-        }
-
         String getModuleDefinitions (const MSVCBuildConfiguration& config) const
         {
             auto moduleDefinitions = config.config [Ids::msvcModuleDefinitionFile].toString();
 
             if (moduleDefinitions.isNotEmpty())
                 return moduleDefinitions;
-
-            if (type == RTASPlugIn)
-            {
-                auto& exp = getOwner();
-
-                auto moduleDefPath
-                    = build_tools::RelativePath (exp.getPathForModuleString ("juce_audio_plugin_client"), build_tools::RelativePath::projectFolder)
-                         .getChildFile ("juce_audio_plugin_client").getChildFile ("RTAS").getChildFile ("juce_RTAS_WinExports.def");
-
-                return prependDot (moduleDefPath.rebased (exp.getProject().getProjectFolder(),
-                                                          exp.getTargetFolder(),
-                                                          build_tools::RelativePath::buildTargetFolder).toWindowsStyle());
-            }
 
             return {};
         }
@@ -1512,7 +1417,6 @@ public:
         case Target::VSTPlugIn:
         case Target::VST3PlugIn:
         case Target::AAXPlugIn:
-        case Target::RTASPlugIn:
         case Target::UnityPlugIn:
         case Target::LV2PlugIn:
         case Target::LV2TurtleProgram:
@@ -1848,11 +1752,6 @@ protected:
     {
         return build_tools::isAbsolutePath (filename) ? filename
                                                       : (".\\" + filename);
-    }
-
-    static bool shouldUseStdCall (const build_tools::RelativePath& path)
-    {
-        return path.getFileNameWithoutExtension().startsWithIgnoreCase ("include_juce_audio_plugin_client_RTAS_");
     }
 
     static bool shouldAddBigobjFlag (const build_tools::RelativePath& path)

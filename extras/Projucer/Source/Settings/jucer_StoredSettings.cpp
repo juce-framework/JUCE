@@ -272,10 +272,6 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
     {
         fileToCheckFor = "pluginterfaces/vst2.x/aeffect.h";
     }
-    else if (key == Ids::rtasPath)
-    {
-        fileToCheckFor = "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses/CEffectProcessMIDI.cpp";
-    }
     else if (key == Ids::aaxPath)
     {
         fileToCheckFor = "Interfaces/AAX_Exports.cpp";
@@ -364,12 +360,6 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
     else if (key == Ids::vstLegacyPath)
     {
         return {};
-    }
-    else if (key == Ids::rtasPath)
-    {
-        if      (os == TargetOS::windows)  return "C:\\SDKs\\PT_90_SDK";
-        else if (os == TargetOS::osx)      return "~/SDKs/PT_90_SDK";
-        else                               return {}; // no RTAS on this OS!
     }
     else if (key == Ids::aaxPath)
     {

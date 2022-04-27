@@ -144,7 +144,6 @@ public:
 
     String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.getCurrentValue(); }
     String getAAXPathString() const                       { return aaxPathValueWrapper.getCurrentValue(); }
-    String getRTASPathString() const                      { return rtasPathValueWrapper.getCurrentValue(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -406,7 +405,7 @@ protected:
     const File projectFolder;
 
     //==============================================================================
-    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
+    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, aaxPathValueWrapper;
 
     ValueTreePropertyWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                                  userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;

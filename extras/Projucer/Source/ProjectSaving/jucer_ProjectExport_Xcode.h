@@ -276,7 +276,6 @@ public:
             case Target::VSTPlugIn:
             case Target::VST3PlugIn:
             case Target::AAXPlugIn:
-            case Target::RTASPlugIn:
             case Target::AudioUnitPlugIn:
             case Target::UnityPlugIn:
             case Target::LV2PlugIn:
@@ -750,7 +749,7 @@ public:
         {
             String alertWindowText = iOS ? "Your Xcode (iOS) Exporter settings use an invalid post-build script. Click 'Update' to remove it."
                                          : "Your Xcode (macOS) Exporter settings use a pre-JUCE 4.2 post-build script to move the plug-in binaries to their plug-in install folders.\n\n"
-                                           "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX/RTAS Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
+                                           "Since JUCE 4.2, this is instead done using \"AU/VST/VST2/AAX Binary Location\" in the Xcode (OS X) configuration settings.\n\n"
                                            "Click 'Update' to remove the script (otherwise your plug-in may not compile correctly).";
 
             if (AlertWindow::showOkCancelBox (MessageBoxIconType::WarningIcon,
@@ -774,9 +773,6 @@ public:
 
         aaxPathValueWrapper.init ({ settings, Ids::aaxFolder, nullptr },
                                   getAppSettings().getStoredPath (Ids::aaxPath,  TargetOS::osx), TargetOS::osx);
-
-        rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
-                                   getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::osx), TargetOS::osx);
     }
 
 protected:
@@ -802,7 +798,6 @@ protected:
               vstBinaryLocation            (config, Ids::vstBinaryLocation,            getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/VST/"),
               vst3BinaryLocation           (config, Ids::vst3BinaryLocation,           getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/VST3/"),
               auBinaryLocation             (config, Ids::auBinaryLocation,             getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/Components/"),
-              rtasBinaryLocation           (config, Ids::rtasBinaryLocation,           getUndoManager(), "/Library/Application Support/Digidesign/Plug-Ins/"),
               aaxBinaryLocation            (config, Ids::aaxBinaryLocation,            getUndoManager(), "/Library/Application Support/Avid/Audio/Plug-Ins/"),
               unityPluginBinaryLocation    (config, Ids::unityPluginBinaryLocation,    getUndoManager()),
               lv2BinaryLocation            (config, Ids::lv2BinaryLocation,            getUndoManager(), "$(HOME)/Library/Audio/Plug-Ins/LV2/")
@@ -898,7 +893,6 @@ protected:
         String getVSTBinaryLocationString() const               { return vstBinaryLocation.get(); }
         String getVST3BinaryLocationString() const              { return vst3BinaryLocation.get(); }
         String getAUBinaryLocationString() const                { return auBinaryLocation.get(); }
-        String getRTASBinaryLocationString() const              { return rtasBinaryLocation.get();}
         String getAAXBinaryLocationString() const               { return aaxBinaryLocation.get();}
         String getUnityPluginBinaryLocationString() const       { return unityPluginBinaryLocation.get(); }
         String getLV2PluginBinaryLocationString() const         { return lv2BinaryLocation.get(); }
@@ -910,7 +904,7 @@ protected:
         ValueTreePropertyWithDefault macOSBaseSDK, macOSDeploymentTarget, macOSArchitecture, iosBaseSDK, iosDeploymentTarget,
                                      customXcodeFlags, plistPreprocessorDefinitions, codeSignIdentity,
                                      fastMathEnabled, stripLocalSymbolsEnabled, pluginBinaryCopyStepEnabled,
-                                     vstBinaryLocation, vst3BinaryLocation, auBinaryLocation, rtasBinaryLocation,
+                                     vstBinaryLocation, vst3BinaryLocation, auBinaryLocation,
                                      aaxBinaryLocation, unityPluginBinaryLocation, lv2BinaryLocation;
 
         //==============================================================================
@@ -937,7 +931,7 @@ protected:
         void addXcodePluginInstallPathProperties (PropertyListBuilder& props)
         {
             auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildAU()
-                                         || project.shouldBuildRTAS() || project.shouldBuildAAX() || project.shouldBuildUnityPlugin());
+                                         || project.shouldBuildAAX() || project.shouldBuildUnityPlugin());
 
             if (isBuildingAnyPlugins)
                 props.add (new ChoicePropertyComponent (pluginBinaryCopyStepEnabled, "Enable Plugin Copy Step"),
@@ -952,11 +946,6 @@ protected:
                 props.add (new TextPropertyComponentWithEnablement (auBinaryLocation, pluginBinaryCopyStepEnabled, "AU Binary Location",
                                                                     1024, false),
                            "The folder in which the compiled AU binary should be placed.");
-
-            if (project.shouldBuildRTAS())
-                props.add (new TextPropertyComponentWithEnablement (rtasBinaryLocation, pluginBinaryCopyStepEnabled, "RTAS Binary Location",
-                                                                    1024, false),
-                           "The folder in which the compiled RTAS binary should be placed.");
 
             if (project.shouldBuildAAX())
                 props.add (new TextPropertyComponentWithEnablement (aaxBinaryLocation, pluginBinaryCopyStepEnabled, "AAX Binary Location",
@@ -984,7 +973,6 @@ protected:
             if (! config ["xcodeVstBinaryLocation"].isVoid())        vstBinaryLocation  = config ["xcodeVstBinaryLocation"];
             if (! config ["xcodeVst3BinaryLocation"].isVoid())       vst3BinaryLocation = config ["xcodeVst3BinaryLocation"];
             if (! config ["xcodeAudioUnitBinaryLocation"].isVoid())  auBinaryLocation   = config ["xcodeAudioUnitBinaryLocation"];
-            if (! config ["xcodeRtasBinaryLocation"].isVoid())       rtasBinaryLocation = config ["xcodeRtasBinaryLocation"];
             if (! config ["xcodeAaxBinaryLocation"].isVoid())        aaxBinaryLocation  = config ["xcodeAaxBinaryLocation"];
         }
 
@@ -1116,13 +1104,6 @@ public:
                 case AAXPlugIn:
                     xcodeFileType = "wrapper.cfbundle";
                     xcodeBundleExtension = ".aaxplugin";
-                    xcodeProductType = "com.apple.product-type.bundle";
-                    xcodeCopyToProductInstallPathAfterBuild = true;
-                    break;
-
-                case RTASPlugIn:
-                    xcodeFileType = "wrapper.cfbundle";
-                    xcodeBundleExtension = ".dpm";
                     xcodeProductType = "com.apple.product-type.bundle";
                     xcodeCopyToProductInstallPathAfterBuild = true;
                     break;
@@ -1795,7 +1776,6 @@ public:
                 case VSTPlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getVSTBinaryLocationString() : String();
                 case VST3PlugIn:        return config.isPluginBinaryCopyStepEnabled() ? config.getVST3BinaryLocationString() : String();
                 case AudioUnitPlugIn:   return config.isPluginBinaryCopyStepEnabled() ? config.getAUBinaryLocationString() : String();
-                case RTASPlugIn:        return config.isPluginBinaryCopyStepEnabled() ? config.getRTASBinaryLocationString() : String();
                 case AAXPlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getAAXBinaryLocationString() : String();
                 case UnityPlugIn:       return config.isPluginBinaryCopyStepEnabled() ? config.getUnityPluginBinaryLocationString() : String();
                 case LV2PlugIn:         return config.isPluginBinaryCopyStepEnabled() ? config.getLV2PluginBinaryLocationString() : String();
@@ -1964,7 +1944,6 @@ public:
         {
             StringArray paths (owner.extraSearchPaths);
             paths.addArray (config.getHeaderSearchPaths());
-            paths.addArray (getTargetExtraHeaderSearchPaths());
 
             if (owner.project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
@@ -2016,61 +1995,6 @@ public:
 
                 extraLibs.add   (aaxLibsFolder.getChildFile (libraryPath));
             }
-            else if (type == RTASPlugIn)
-            {
-                build_tools::RelativePath rtasFolder (owner.getRTASPathString(), build_tools::RelativePath::projectFolder);
-
-                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Debug/libPluginLibrary.a"));
-                extraLibs.add (rtasFolder.getChildFile ("MacBag/Libs/Release/libPluginLibrary.a"));
-            }
-        }
-
-        StringArray getTargetExtraHeaderSearchPaths() const
-        {
-            StringArray targetExtraSearchPaths;
-
-            if (type == RTASPlugIn)
-            {
-                build_tools::RelativePath rtasFolder (owner.getRTASPathString(), build_tools::RelativePath::projectFolder);
-
-                targetExtraSearchPaths.add ("$(DEVELOPER_DIR)/Headers/FlatCarbon");
-                targetExtraSearchPaths.add ("$(SDKROOT)/Developer/Headers/FlatCarbon");
-
-                static const char* p[] = { "AlturaPorts/TDMPlugIns/PlugInLibrary/Controls",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/CoreClasses",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/DSPClasses",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/EffectClasses",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/MacBuild",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/Meters",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/ProcessClasses/Interfaces",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/RTASP_Adapt",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/Utilities",
-                    "AlturaPorts/TDMPlugIns/PlugInLibrary/ViewClasses",
-                    "AlturaPorts/TDMPlugIns/DSPManager/**",
-                    "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/Encryption",
-                    "AlturaPorts/TDMPlugIns/SupplementalPlugInLib/GraphicsExtensions",
-                    "AlturaPorts/TDMPlugIns/common/**",
-                    "AlturaPorts/TDMPlugIns/common/PI_LibInterface",
-                    "AlturaPorts/TDMPlugIns/PACEProtection/**",
-                    "AlturaPorts/TDMPlugIns/SignalProcessing/**",
-                    "AlturaPorts/OMS/Headers",
-                    "AlturaPorts/Fic/Interfaces/**",
-                    "AlturaPorts/Fic/Source/SignalNets",
-                    "AlturaPorts/DSIPublicInterface/PublicHeaders",
-                    "DAEWin/Include",
-                    "AlturaPorts/DigiPublic/Interfaces",
-                    "AlturaPorts/DigiPublic",
-                    "AlturaPorts/NewFileLibs/DOA",
-                    "AlturaPorts/NewFileLibs/Cmn",
-                    "xplat/AVX/avx2/avx2sdk/inc",
-                    "xplat/AVX/avx2/avx2sdk/utils" };
-
-                for (auto* path : p)
-                    owner.addProjectPathToBuildPathList (targetExtraSearchPaths, rtasFolder.getChildFile (path));
-            }
-
-            return targetExtraSearchPaths;
         }
 
         //==============================================================================

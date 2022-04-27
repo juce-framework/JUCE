@@ -20,10 +20,9 @@
 // define all your plugin settings properly..
 
 #if ! (JucePlugin_Build_VST || JucePlugin_Build_VST3 \
-        || JucePlugin_Build_AU || JucePlugin_Build_AUv3 \
-        ||JucePlugin_Build_RTAS || JucePlugin_Build_AAX \
-        || JucePlugin_Build_Standalone || JucePlugin_Build_LV2 \
-        || JucePlugin_Build_Unity)
+        || JucePlugin_Build_AU  || JucePlugin_Build_AUv3 \
+        || JucePlugin_Build_AAX || JucePlugin_Build_Standalone \
+        || JucePlugin_Build_LV2 || JucePlugin_Build_Unity)
  #error "You need to enable at least one plugin format!"
 #endif
 
@@ -58,12 +57,6 @@
 
 #ifndef JucePlugin_EditorRequiresKeyboardFocus
  #error "You need to define the JucePlugin_EditorRequiresKeyboardFocus value!"
-#endif
-
-//==============================================================================
-#if _WIN64 || (__LP64__ && (defined (__APPLE_CPP__) || defined (__APPLE_CC__)))
- #undef JucePlugin_Build_RTAS
- #define JucePlugin_Build_RTAS 0
 #endif
 
 //==============================================================================

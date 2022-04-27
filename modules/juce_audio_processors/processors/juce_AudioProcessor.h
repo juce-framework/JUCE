@@ -24,7 +24,7 @@ namespace juce
     Base class for audio processing classes or plugins.
 
     This is intended to act as a base class of audio processor that is general enough
-    to be wrapped as a VST, AU, RTAS, etc, or used internally.
+    to be wrapped as a VST, AU, AAX, etc, or used internally.
 
     It is also used by the plugin hosting code as the wrapper around an instance
     of a loaded plugin.
@@ -1238,7 +1238,6 @@ public:
         wrapperType_VST3,
         wrapperType_AudioUnit,
         wrapperType_AudioUnitv3,
-        wrapperType_RTAS,
         wrapperType_AAX,
         wrapperType_Standalone,
         wrapperType_Unity,
