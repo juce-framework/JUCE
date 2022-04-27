@@ -1111,7 +1111,6 @@ private:
               "\tlv2:optionalFeature\n"
               "\t\tlv2:hardRTCapable ;\n"
               "\tlv2:extensionData\n"
-              "\t\t<" JUCE_TURTLE_RECALL_URI "> ,\n"
               "\t\tstate:interface ;\n"
               "\tlv2:requiredFeature\n"
               "\t\turid:map ,\n"
