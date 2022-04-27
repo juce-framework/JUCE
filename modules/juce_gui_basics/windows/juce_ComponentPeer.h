@@ -359,7 +359,16 @@ public:
     */
     virtual void textInputRequired (Point<int> position, TextInputTarget&) = 0;
 
-    /** If there's some kind of OS input-method in progress, this should dismiss it. */
+    /** If there's a currently active input-method context - i.e. characters are being
+        composed using multiple keystrokes - this should commit the current state of the
+        context to the text and clear the context.
+    */
+    virtual void closeInputMethodContext();
+
+    /** If there's some kind of OS input-method in progress, this should dismiss it.
+
+        Overrides of this function should call closeInputMethodContext().
+    */
     virtual void dismissPendingTextInput();
 
     /** Returns the currently focused TextInputTarget, or null if none is found. */
