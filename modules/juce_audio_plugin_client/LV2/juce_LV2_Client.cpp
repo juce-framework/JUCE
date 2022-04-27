@@ -1290,7 +1290,8 @@ private:
               "\t\tui:idleInterface ,\n"
              #endif
               "\t\topts:interface ,\n"
-              "\t\t" << resizeFeatureString << " ;\n"
+              "\t\tui:noUserResize ,\n" // resize and noUserResize are always present in the extension data array
+              "\t\tui:resize ;\n"
               "\n"
               "\tlv2:requiredFeature\n"
              #if JUCE_LINUX || JUCE_BSD
