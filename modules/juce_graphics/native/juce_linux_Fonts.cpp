@@ -217,10 +217,13 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 
     Font f (font);
 
-    const auto characteristics = defaultInfo.getRealFontCharacteristics (font.getTypefaceName());
+    const auto name = font.getTypefaceName();
+    const auto characteristics = defaultInfo.getRealFontCharacteristics (name);
     f.setTypefaceName (characteristics.name);
 
-    if (font.getTypefaceStyle() == Font::getDefaultStyle())
+    const auto styles = findAllTypefaceStyles (name);
+
+    if (! styles.contains (font.getTypefaceStyle()))
         f.setTypefaceStyle (characteristics.style);
 
     return Typeface::createSystemTypefaceFor (f);
