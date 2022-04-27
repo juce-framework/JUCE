@@ -114,6 +114,15 @@ struct DefaultFontInfo
 {
     struct Characteristics
     {
+        explicit Characteristics (String nameIn) : name (nameIn) {}
+
+        Characteristics withStyle (String styleIn) const
+        {
+            auto copy = *this;
+            copy.style = std::move (styleIn);
+            return copy;
+        }
+
         String name, style;
     };
 
@@ -130,7 +139,7 @@ struct DefaultFontInfo
         if (faceName == Font::getDefaultSerifFontName())        return defaultSerif;
         if (faceName == Font::getDefaultMonospacedFontName())   return defaultFixed;
 
-        return { faceName };
+        return Characteristics { faceName };
     }
 
     Characteristics defaultSans, defaultSerif, defaultFixed;
@@ -146,14 +155,14 @@ private:
         for (auto& choice : choicesArray)
             for (auto& name : names)
                 if (name.startsWithIgnoreCase (choice.name))
-                    return { name, choice.style };
+                    return Characteristics { name }.withStyle (choice.style);
 
         for (auto& choice : choicesArray)
             for (auto& name : names)
                 if (name.containsIgnoreCase (choice.name))
-                    return { name, choice.style };
+                    return Characteristics { name }.withStyle (choice.style);
 
-        return { *names.begin() };
+        return Characteristics { *names.begin() };
     }
 
     static Characteristics getDefaultSansSerifFontCharacteristics()
@@ -161,12 +170,12 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSansSerifNames (allFonts);
 
-        static const Characteristics targets[] { { "Verdana" },
-                                                 { "Bitstream Vera Sans", "Roman" },
-                                                 { "Luxi Sans" },
-                                                 { "Liberation Sans" },
-                                                 { "DejaVu Sans" },
-                                                 { "Sans" } };
+        static const Characteristics targets[] { Characteristics { "Verdana" },
+                                                 Characteristics { "Bitstream Vera Sans" }.withStyle ("Roman"),
+                                                 Characteristics { "Luxi Sans" },
+                                                 Characteristics { "Liberation Sans" },
+                                                 Characteristics { "DejaVu Sans" },
+                                                 Characteristics { "Sans" } };
         return pickBestFont (allFonts, targets);
     }
 
@@ -175,12 +184,12 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getSerifNames (allFonts);
 
-        static const Characteristics targets[] { { "Bitstream Vera Serif", "Roman" },
-                                                 { "Times" },
-                                                 { "Nimbus Roman" },
-                                                 { "Liberation Serif" },
-                                                 { "DejaVu Serif" },
-                                                 { "Serif" } };
+        static const Characteristics targets[] { Characteristics { "Bitstream Vera Serif" }.withStyle ("Roman"),
+                                                 Characteristics { "Times" },
+                                                 Characteristics { "Nimbus Roman" },
+                                                 Characteristics { "Liberation Serif" },
+                                                 Characteristics { "DejaVu Serif" },
+                                                 Characteristics { "Serif" } };
         return pickBestFont (allFonts, targets);
     }
 
@@ -189,13 +198,13 @@ private:
         StringArray allFonts;
         FTTypefaceList::getInstance()->getMonospacedNames (allFonts);
 
-        static const Characteristics targets[] { { "DejaVu Sans Mono" },
-                                                 { "Bitstream Vera Sans Mono", "Roman" },
-                                                 { "Sans Mono" },
-                                                 { "Liberation Mono" },
-                                                 { "Courier" },
-                                                 { "DejaVu Mono" },
-                                                 { "Mono" } };
+        static const Characteristics targets[] { Characteristics { "DejaVu Sans Mono" },
+                                                 Characteristics { "Bitstream Vera Sans Mono" }.withStyle ("Roman"),
+                                                 Characteristics { "Sans Mono" },
+                                                 Characteristics { "Liberation Mono" },
+                                                 Characteristics { "Courier" },
+                                                 Characteristics { "DejaVu Mono" },
+                                                 Characteristics { "Mono" } };
         return pickBestFont (allFonts, targets);
     }
 
@@ -210,7 +219,9 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
 
     const auto characteristics = defaultInfo.getRealFontCharacteristics (font.getTypefaceName());
     f.setTypefaceName (characteristics.name);
-    f.setTypefaceStyle (characteristics.style);
+
+    if (font.getTypefaceStyle() == Font::getDefaultStyle())
+        f.setTypefaceStyle (characteristics.style);
 
     return Typeface::createSystemTypefaceFor (f);
 }
