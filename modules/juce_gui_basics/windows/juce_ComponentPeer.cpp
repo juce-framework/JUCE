@@ -267,7 +267,12 @@ TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
     return nullptr;
 }
 
-void ComponentPeer::dismissPendingTextInput() {}
+void ComponentPeer::closeInputMethodContext() {}
+
+void ComponentPeer::dismissPendingTextInput()
+{
+    closeInputMethodContext();
+}
 
 //==============================================================================
 void ComponentPeer::handleBroughtToFront()

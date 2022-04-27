@@ -933,7 +933,7 @@ public:
 
         if (! isTimerRunning())
             startTimer (500);
-     }
+    }
 
     //==============================================================================
     void handlePaintCallback (jobject canvas, jobject paint)
