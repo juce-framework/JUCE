@@ -4405,7 +4405,8 @@ public:
                                                            numSamples,
                                                            sampleRate);
 
-        setStateInformation (mb.getData(), (int) mb.getSize());
+        // prepareToPlay is *guaranteed* not to be called concurrently with processBlock
+        setStateInformationImpl (mb.getData(), (int) mb.getSize(), ConcurrentWithAudioCallback::no);
 
         jassert (numSamples == instance->features.getMaxBlockSize());
 
@@ -4490,7 +4491,8 @@ public:
             return;
 
         lastAppliedPreset = newProgram;
-        applyStateWithAppropriateLocking (loadStateWithUri (presetUris[(size_t) newProgram]));
+        applyStateWithAppropriateLocking (loadStateWithUri (presetUris[(size_t) newProgram]),
+                                          ConcurrentWithAudioCallback::yes);
     }
 
     const String getProgramName (int program) override
@@ -4527,16 +4529,7 @@ public:
 
     void setStateInformation (const void* data, int size) override
     {
-        JUCE_ASSERT_MESSAGE_THREAD;
-
-        if (data == nullptr || size == 0)
-            return;
-
-        auto begin = static_cast<const char*> (data);
-        std::vector<char> copy (begin, begin + size);
-        copy.push_back (0);
-        auto mapFeature = instance->symap->getMapFeature();
-        applyStateWithAppropriateLocking (PluginState { lilv_state_new_from_string (world->get(), &mapFeature, copy.data()) });
+        setStateInformationImpl (data, size, ConcurrentWithAudioCallback::yes);
     }
 
     void setNonRealtime (bool newValue) noexcept override
@@ -4576,6 +4569,8 @@ public:
     AudioProcessorParameter* getBypassParameter() const override { return bypassParam; }
 
 private:
+    enum class ConcurrentWithAudioCallback { no, yes };
+
     LV2AudioPluginInstance (std::shared_ptr<World> worldIn,
                             const Plugin& pluginIn,
                             std::unique_ptr<InstanceWithSupports>&& in,
@@ -4596,7 +4591,22 @@ private:
                           std::move (uiDescriptorIn),
                           [this] { postChangedParametersToUi(); })
     {
-        applyStateWithAppropriateLocking (std::move (stateToApply));
+        applyStateWithAppropriateLocking (std::move (stateToApply), ConcurrentWithAudioCallback::no);
+    }
+
+    void setStateInformationImpl (const void* data, int size, ConcurrentWithAudioCallback concurrent)
+    {
+        JUCE_ASSERT_MESSAGE_THREAD;
+
+        if (data == nullptr || size == 0)
+            return;
+
+        auto begin = static_cast<const char*> (data);
+        std::vector<char> copy (begin, begin + size);
+        copy.push_back (0);
+        auto mapFeature = instance->symap->getMapFeature();
+        applyStateWithAppropriateLocking (PluginState { lilv_state_new_from_string (world->get(), &mapFeature, copy.data()) },
+                                          concurrent);
     }
 
     // This does *not* destroy the editor component.
@@ -4694,13 +4704,13 @@ private:
         return instance.get();
     }
 
-    void applyStateWithAppropriateLocking (PluginState&& state)
+    void applyStateWithAppropriateLocking (PluginState&& state, ConcurrentWithAudioCallback concurrent)
     {
         PortMap portStateManager (instance->ports);
 
         // If a plugin supports threadSafeRestore, its restore method is thread-safe
         // and may be called concurrently with audio class functions.
-        if (hasThreadSafeRestore)
+        if (hasThreadSafeRestore || concurrent == ConcurrentWithAudioCallback::no)
         {
             state.restore (*instance, portStateManager);
         }
