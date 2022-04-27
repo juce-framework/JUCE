@@ -30,12 +30,11 @@ namespace juce
 namespace lv2_host
 {
 
-template <typename Struct, typename Member, typename Value>
-auto with (Struct&& s, Member&& member, Value&& value) noexcept
+template <typename Struct, typename Value>
+auto with (Struct s, Value Struct::* member, Value value) noexcept
 {
-    auto copy = std::forward<Struct> (s);
-    copy.*member = std::forward<Value> (value);
-    return copy;
+    s.*member = std::move (value);
+    return s;
 }
 
 /*  Converts a void* to an LV2_Atom* if the buffer looks like it holds a well-formed Atom, or
@@ -2122,6 +2121,8 @@ private:
     JUCE_LEAK_DETECTOR (PortMap)
 };
 
+struct FreeString { void operator() (void* ptr) const noexcept { lilv_free (ptr); } };
+
 class PluginState
 {
 public:
@@ -2140,7 +2141,6 @@ public:
 
     std::string toString (LilvWorld* world, LV2_URID_Map* map, LV2_URID_Unmap* unmap, const char* uri) const
     {
-        struct FreeString { void operator() (void* ptr) const noexcept { lilv_free (ptr); } };
         std::unique_ptr<char, FreeString> result { lilv_state_to_string (world,
                                                                          map,
                                                                          unmap,
@@ -2256,17 +2256,16 @@ struct UiDescriptorLibrary
 class UiDescriptorArgs
 {
 public:
-    const char* libraryPath = nullptr;
-    const char* uiUri       = nullptr;
+    String libraryPath;
+    String uiUri;
 
-    auto withLibraryPath (const char* v) const noexcept { return with (&UiDescriptorArgs::libraryPath, v); }
-    auto withUiUri       (const char* v) const noexcept { return with (&UiDescriptorArgs::uiUri,       v); }
+    auto withLibraryPath (String v) const noexcept { return with (&UiDescriptorArgs::libraryPath, v); }
+    auto withUiUri       (String v) const noexcept { return with (&UiDescriptorArgs::uiUri,       v); }
 
 private:
-    template <typename Member>
-    UiDescriptorArgs with (Member&& member, const char* value) const noexcept
+    UiDescriptorArgs with (String UiDescriptorArgs::* member, String value) const noexcept
     {
-        return juce::lv2_host::with (*this, std::forward<Member> (member), value);
+        return juce::lv2_host::with (*this, member, std::move (value));
     }
 };
 
@@ -2280,7 +2279,7 @@ public:
 
     explicit UiDescriptor (const UiDescriptorArgs& args)
         : library (args.libraryPath),
-          descriptor (extractUiDescriptor (library, args.uiUri))
+          descriptor (extractUiDescriptor (library, args.uiUri.toRawUTF8()))
     {}
 
     void portEvent (LV2UI_Handle ui,
@@ -2564,19 +2563,24 @@ private:
 class UiInstanceArgs
 {
 public:
-    const char* bundlePath = nullptr;
-    const char* pluginUri  = nullptr;
+    File bundlePath;
+    URL pluginUri;
 
-    auto withBundlePath (const char* v) const noexcept { return with (&UiInstanceArgs::bundlePath, v); }
-    auto withPluginUri  (const char* v) const noexcept { return with (&UiInstanceArgs::pluginUri,  v); }
+    auto withBundlePath (File v) const noexcept { return with (&UiInstanceArgs::bundlePath, std::move (v)); }
+    auto withPluginUri  (URL v)  const noexcept { return with (&UiInstanceArgs::pluginUri,  std::move (v)); }
 
 private:
     template <typename Member>
-    UiInstanceArgs with (Member&& member, const char* value) const noexcept
+    UiInstanceArgs with (Member UiInstanceArgs::* member, Member value) const noexcept
     {
-        return juce::lv2_host::with (*this, std::forward<Member> (member), value);
+        return juce::lv2_host::with (*this, member, std::move (value));
     }
 };
+
+static File bundlePathFromUri (const char* uri)
+{
+    return File { std::unique_ptr<char, FreeString> { lilv_file_uri_parse (uri, nullptr) }.get() };
+}
 
 /*
     Creates and holds a UI instance for a plugin with a specific URI, using the provided descriptor.
@@ -2665,14 +2669,14 @@ private:
     using Instance = std::unique_ptr<void, void (*) (LV2UI_Handle)>;
     using Idle = int (*) (LV2UI_Handle);
 
-    Instance makeInstance (const char* pluginUri, const char* bundlePath, const LV2_Feature* const* features)
+    Instance makeInstance (const URL& pluginUri, const File& bundlePath, const LV2_Feature* const* features)
     {
         if (descriptor->get() == nullptr)
             return { nullptr, [] (LV2UI_Handle) {} };
 
         return Instance { descriptor->get()->instantiate (descriptor->get(),
-                                                          pluginUri,
-                                                          bundlePath,
+                                                          pluginUri.toString (false).toRawUTF8(),
+                                                          bundlePath.getFullPathName().toRawUTF8(),
                                                           writeFunction,
                                                           this,
                                                           &widget,
@@ -2752,10 +2756,9 @@ public:
     auto withSampleRate         (float v) const { return with (&UiFeaturesDataOptions::sampleRate,         v); }
 
 private:
-    template <typename Member, typename Value>
-    UiFeaturesDataOptions with (Member&& member, Value&& value) const
+    UiFeaturesDataOptions with (float UiFeaturesDataOptions::* member, float value) const
     {
-        return juce::lv2_host::with (*this, std::forward<Member> (member), std::forward<Value> (value));
+        return juce::lv2_host::with (*this, member, value);
     }
 };
 
@@ -3034,8 +3037,8 @@ public:
                                                   *this,
                                                   touchListener,
                                                   &uiDescriptor,
-                                                  UiInstanceArgs{}.withBundlePath (uiBundleUri.toRawUTF8())
-                                                                  .withPluginUri (instance.instance.getUri()),
+                                                  UiInstanceArgs{}.withBundlePath (bundlePathFromUri (uiBundleUri.toRawUTF8()))
+                                                                  .withPluginUri (URL (instance.instance.getUri())),
                                                   viewComponent.getWidget(),
                                                   instance,
                                                   opts)),
