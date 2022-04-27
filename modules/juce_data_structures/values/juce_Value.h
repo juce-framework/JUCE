@@ -114,7 +114,8 @@ public:
     */
     void referTo (const Value& valueToReferTo);
 
-    /** Returns true if this value and the other one are references to the same value.
+    /** Returns true if this object and the other one use the same underlying
+        ValueSource object.
     */
     bool refersToSameSourceAs (const Value& other) const;
 
