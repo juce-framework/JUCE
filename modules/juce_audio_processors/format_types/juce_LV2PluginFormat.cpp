@@ -2676,7 +2676,7 @@ private:
 
         return Instance { descriptor->get()->instantiate (descriptor->get(),
                                                           pluginUri.toString (false).toRawUTF8(),
-                                                          bundlePath.getFullPathName().toRawUTF8(),
+                                                          File::addTrailingSeparator (bundlePath.getFullPathName()).toRawUTF8(),
                                                           writeFunction,
                                                           this,
                                                           &widget,
