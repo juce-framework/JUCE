@@ -2577,7 +2577,7 @@ int TextEditor::indexAtPosition (const float x, const float y) const
     {
         for (Iterator i (*this); i.next();)
         {
-            if (y < i.lineY + i.lineHeight)
+            if (y < i.lineY + (i.lineHeight * lineSpacing))
             {
                 if (y < i.lineY)
                     return jmax (0, i.indexInText - 1);
