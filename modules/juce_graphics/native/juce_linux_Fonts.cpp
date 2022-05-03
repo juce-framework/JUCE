@@ -162,7 +162,7 @@ private:
                 if (name.containsIgnoreCase (choice.name))
                     return Characteristics { name }.withStyle (choice.style);
 
-        return Characteristics { *names.begin() };
+        return Characteristics { names[0] };
     }
 
     static Characteristics getDefaultSansSerifFontCharacteristics()
