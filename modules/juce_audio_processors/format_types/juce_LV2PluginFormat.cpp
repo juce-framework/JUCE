@@ -2341,8 +2341,7 @@ private:
     JUCE_LEAK_DETECTOR (UiDescriptor)
 };
 
-enum class UpdateUi         { no, yes };
-enum class UpdateProcessor  { no, yes };
+enum class Update { no, yes };
 
 /*  A bit like the FlaggedFloatCache used by the VST3 host/client.
 
@@ -2365,12 +2364,12 @@ public:
 
     size_t size() const noexcept { return values.size(); }
 
-    void set (size_t index, float value, UpdateUi updateUi, UpdateProcessor updateProcessor)
+    void set (size_t index, float value, Update update)
     {
         jassert (index < size());
         values[index].store (value, std::memory_order_relaxed);
-        needsUiUpdate       .set (index, updateUi        == UpdateUi::yes        ? 1 : 0);
-        needsProcessorUpdate.set (index, updateProcessor == UpdateProcessor::yes ? 1 : 0);
+        needsUiUpdate       .set (index, update == Update::yes ? 1 : 0);
+        needsProcessorUpdate.set (index, update == Update::yes ? 1 : 0);
     }
 
     float get (size_t index) const noexcept
@@ -2430,18 +2429,18 @@ public:
 
     void setValue (float f) override
     {
-        cache.set ((size_t) getParameterIndex(), range.convertFrom0to1 (f), UpdateUi::yes, UpdateProcessor::yes);
+        cache.set ((size_t) getParameterIndex(), range.convertFrom0to1 (f), Update::yes);
     }
 
-    void setDenormalisedValueFromUi (float denormalised)
+    void setDenormalisedValue (float denormalised)
     {
-        cache.set ((size_t) getParameterIndex(), denormalised, UpdateUi::no, UpdateProcessor::yes);
+        cache.set ((size_t) getParameterIndex(), denormalised, Update::yes);
         sendValueChangedMessageToListeners (range.convertTo0to1 (denormalised));
     }
 
     void setDenormalisedValueWithoutTriggeringUpdate (float denormalised)
     {
-        cache.set ((size_t) getParameterIndex(), denormalised, UpdateUi::no, UpdateProcessor::no);
+        cache.set ((size_t) getParameterIndex(), denormalised, Update::no);
         sendValueChangedMessageToListeners (range.convertTo0to1 (denormalised));
     }
 
@@ -4846,7 +4845,7 @@ private:
 
             if (auto* param = parameterValues.getParamByPortIndex (header.portIndex))
             {
-                param->setDenormalisedValueFromUi (value);
+                param->setDenormalisedValue (value);
             }
             else if (auto* port = controlPortStructure.getControlPortByIndex (header.portIndex))
             {
