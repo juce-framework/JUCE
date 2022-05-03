@@ -1681,7 +1681,7 @@ private:
 template <size_t Alignment>
 static SingleSizeAlignedStorage<Alignment> grow (SingleSizeAlignedStorage<Alignment> storage, size_t size)
 {
-    if (storage.size() <= size)
+    if (size <= storage.size())
         return storage;
 
     SingleSizeAlignedStorage<Alignment> newStorage { jmax (size, (storage.size() * 3) / 2) };
