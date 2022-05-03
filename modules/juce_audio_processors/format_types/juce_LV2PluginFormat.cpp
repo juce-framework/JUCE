@@ -3171,14 +3171,6 @@ private:
 
     float getEffectiveScale() const     { return nativeScaleFactor * userScaleFactor; }
 
-    float getTopLevelDesktopScale() const
-    {
-        if (auto* comp = getTopLevelComponent())
-            return comp->getDesktopScaleFactor();
-
-        return 1.0f;
-    }
-
     // If possible, try to keep platform-specific handing restricted to the implementation of
     // ViewComponent. Keep the interface of ViewComponent consistent on all platforms.
    #if JUCE_LINUX || JUCE_BSD
