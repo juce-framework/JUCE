@@ -961,6 +961,7 @@ private:
               "@prefix pprop: <http://lv2plug.in/ns/ext/port-props#> .\n"
               "@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .\n"
               "@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n"
+              "@prefix rsz:   <http://lv2plug.in/ns/ext/resize-port#> .\n"
               "@prefix state: <http://lv2plug.in/ns/ext/state#> .\n"
               "@prefix time:  <http://lv2plug.in/ns/ext/time#> .\n"
               "@prefix ui:    <http://lv2plug.in/ns/extensions/ui#> .\n"
@@ -1202,7 +1203,15 @@ private:
             }
         }
 
+        // In the event that the plugin decides to send all of its parameters in one go,
+        // we should ensure that the output buffer is large enough to accommodate, with some
+        // extra room for the sequence header, MIDI messages etc..
+        const auto patchSetSizeBytes = 72;
+        const auto additionalSize = 8192;
+        const auto atomPortMinSize = proc.getParameters().size() * patchSetSizeBytes + additionalSize;
+
         os << "\t\ta lv2:InputPort , atom:AtomPort ;\n"
+              "\t\trsz:minimumSize " << atomPortMinSize << " ;\n"
               "\t\tatom:bufferType atom:Sequence ;\n"
               "\t\tatom:supports\n";
 
@@ -1219,6 +1228,7 @@ private:
               "\t\tlv2:name \"In\" ;\n"
               "\t] , [\n"
               "\t\ta lv2:OutputPort , atom:AtomPort ;\n"
+              "\t\trsz:minimumSize " << atomPortMinSize << " ;\n"
               "\t\tatom:bufferType atom:Sequence ;\n"
               "\t\tatom:supports\n";
 
