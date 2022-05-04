@@ -4101,11 +4101,14 @@ static SupportedParameter getInfoForPatchParameter (World& worldIn,
             jassertfalse; // A ScalePoint must have both a rdfs:label and a rdf:value
     }
 
+    const auto minimum = getValue (LV2_CORE__minimum, 0.0f);
+    const auto maximum = getValue (LV2_CORE__maximum, 1.0f);
+
     return { { std::move (parsedScalePoints),
                "des:" + String::fromUTF8 (property.getTyped()),
-               getValue (LV2_CORE__default, 0.0f),
-               getValue (LV2_CORE__minimum, 0.0f),
-               getValue (LV2_CORE__maximum, 1.0f),
+               getValue (LV2_CORE__default, (minimum + maximum) * 0.5f),
+               minimum,
+               maximum,
                typeUrid == urids.mLV2_ATOM__Bool || hasPortProperty (LV2_CORE__toggled),
                typeUrid == urids.mLV2_ATOM__Int || typeUrid == urids.mLV2_ATOM__Long,
                hasPortProperty (LV2_CORE__enumeration) },
