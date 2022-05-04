@@ -297,12 +297,12 @@ public:
         // Carla always seems to give us an integral 'beat' even though I'd expect
         // it to be a floating-point value
 
-        if (   parser.parseNumericAtom<float>   (atomBeatsPerMinute).andThen ([&] (float value)   { info.bpm = value; })
-            && parser.parseNumericAtom<float>   (atomBeatsPerBar)   .andThen ([&] (float value)   { info.timeSigNumerator = (int) value; })
-            && parser.parseNumericAtom<int32_t> (atomBeatUnit)      .andThen ([&] (int32_t value) { info.timeSigDenominator = value; })
-            && parser.parseNumericAtom<double>  (atomBeat)          .andThen ([&] (double value)  { info.ppqPosition = value; })
-            && parser.parseNumericAtom<float>   (atomSpeed)         .andThen ([&] (float value)   { info.isPlaying = value != 0.0f; })
-            && parser.parseNumericAtom<int64_t> (atomFrame)         .andThen (setTimeInFrames))
+        if (   lv2_shared::withValue (parser.parseNumericAtom<float>   (atomBeatsPerMinute), [&] (float value)   { info.bpm = value; })
+            && lv2_shared::withValue (parser.parseNumericAtom<float>   (atomBeatsPerBar),    [&] (float value)   { info.timeSigNumerator = (int) value; })
+            && lv2_shared::withValue (parser.parseNumericAtom<int32_t> (atomBeatUnit),       [&] (int32_t value) { info.timeSigDenominator = value; })
+            && lv2_shared::withValue (parser.parseNumericAtom<double>  (atomBeat),           [&] (double value)  { info.ppqPosition = value; })
+            && lv2_shared::withValue (parser.parseNumericAtom<float>   (atomSpeed),          [&] (float value)   { info.isPlaying = value != 0.0f; })
+            && lv2_shared::withValue (parser.parseNumericAtom<int64_t> (atomFrame),          setTimeInFrames))
         {
             valid = true;
         }
@@ -1371,14 +1371,14 @@ LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor (uint32_t index)
             const auto blockLengthUrid = mapFeature->map (mapFeature->handle, LV2_BUF_SIZE__maxBlockLength);
             const auto blockSize = parser.parseNumericOption<int64_t> (findMatchingOption (options, blockLengthUrid));
 
-            if (! blockSize.successful)
+            if (! blockSize.hasValue())
             {
                 // The host doesn't specify a maximum block size
                 jassertfalse;
                 return nullptr;
             }
 
-            return new LV2PluginInstance { sampleRate, blockSize.value, pathToBundle, *mapFeature };
+            return new LV2PluginInstance { sampleRate, *blockSize, pathToBundle, *mapFeature };
         },
         [] (LV2_Handle instance, uint32_t port, void* data)
         {
@@ -1434,8 +1434,7 @@ LV2_SYMBOL_EXPORT const LV2_Descriptor* lv2_descriptor (uint32_t index)
     return &descriptor;
 }
 
-static lv2_shared::NumericAtomParser::ParseResult<float> findScaleFactor (const LV2_URID_Map* symap,
-                                                                          const LV2_Options_Option* options)
+static Optional<float> findScaleFactor (const LV2_URID_Map* symap, const LV2_Options_Option* options)
 {
     if (options == nullptr || symap == nullptr)
         return {};
@@ -1459,7 +1458,7 @@ public:
                    LV2UI_Widget parentIn,
                    const LV2_URID_Map* symapIn,
                    const LV2UI_Resize* resizeFeatureIn,
-                   lv2_shared::NumericAtomParser::ParseResult<float> scaleFactorIn)
+                   Optional<float> scaleFactorIn)
         : writeFunction (writeFunctionIn),
           controller (controllerIn),
           plugin (pluginIn),
@@ -1544,11 +1543,11 @@ public:
             if (opt->context != LV2_OPTIONS_INSTANCE || opt->subject != 0 || opt->key != scaleFactorUrid)
                 continue;
 
-            if (scaleFactor.successful)
+            if (scaleFactor.hasValue())
             {
                 opt->type = floatUrid;
                 opt->size = sizeof (float);
-                opt->value = &scaleFactor.value;
+                opt->value = &(*scaleFactor);
             }
         }
 
@@ -1571,8 +1570,7 @@ public:
                 continue;
             }
 
-            scaleFactor.successful = true;
-            scaleFactor.value = *static_cast<const float*> (opt->value);
+            scaleFactor = *static_cast<const float*> (opt->value);
             updateScale();
         }
 
@@ -1596,7 +1594,7 @@ private:
 
     float getScaleFactor() const noexcept
     {
-        return scaleFactor.successful ? scaleFactor.value : 1.0f;
+        return scaleFactor.hasValue() ? *scaleFactor : 1.0f;
     }
 
     void componentMovedOrResized (Component&, bool, bool wasResized) override
@@ -1637,7 +1635,7 @@ private:
     LV2UI_Widget parent;
     const LV2_URID_Map* symap = nullptr;
     const LV2UI_Resize* resizeFeature = nullptr;
-    lv2_shared::NumericAtomParser::ParseResult<float> scaleFactor;
+    Optional<float> scaleFactor;
     std::unique_ptr<AudioProcessorEditor> editor;
     bool hostRequestedResize = false;
 

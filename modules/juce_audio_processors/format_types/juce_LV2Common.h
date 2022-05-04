@@ -19,6 +19,7 @@
 #pragma once
 
 #include "juce_lv2_config.h"
+#include "juce_core/containers/juce_Optional.h"
 
 #ifdef Bool
  #undef Bool // previously defined in X11/Xlib.h
@@ -127,61 +128,61 @@ struct ObjectTraits   { static constexpr auto construct = lv2_atom_forge_object;
 using SequenceFrame = ScopedFrame<SequenceTraits>;
 using ObjectFrame   = ScopedFrame<ObjectTraits>;
 
+template <typename Value, typename Callback>
+bool withValue (const Optional<Value>& opt, Callback&& callback)
+{
+    if (! opt.hasValue())
+        return false;
+
+    callback (*opt);
+    return true;
+}
+
 struct NumericAtomParser
 {
     explicit NumericAtomParser (LV2_URID_Map mapFeatureIn)
         : mapFeature (mapFeatureIn) {}
 
-    template <typename Type>
-    struct ParseResult
+    template <typename T> struct Tag { LV2_URID urid; };
+
+    template <typename Target, typename... Types>
+    static Optional<Target> tryParse (const LV2_Atom&, const void*)
     {
-        ParseResult (Type type) : value (type), successful (true) {}
-        ParseResult() : value(), successful (false) {}
+        return {};
+    }
 
-        template <typename Fn>
-        ParseResult andThen (Fn&& fn) const
-        {
-            if (successful)
-                fn (value);
+    template <typename Target, typename Head, typename... Tail>
+    static Optional<Target> tryParse (const LV2_Atom& atom, const void* data, Tag<Head> head, Tag<Tail>... tail)
+    {
+        if (atom.type == head.urid && atom.size == sizeof (Head))
+            return static_cast<Target> (*reinterpret_cast<const Head*> (data));
 
-            return *this;
-        }
-
-        operator bool() const noexcept { return successful; }
-
-        Type value;
-        bool successful;
-    };
+        return tryParse<Target> (atom, data, tail...);
+    }
 
     template <typename Target>
-    ParseResult<Target> parseNumericAtom (const LV2_Atom* atom, const void* data) const
+    Optional<Target> parseNumericAtom (const LV2_Atom* atom, const void* data) const
     {
         if (atom == nullptr)
             return {};
 
-        if (atom->type == mLV2_ATOM__Int && atom->size == sizeof (int32_t))
-            return { static_cast<Target> (*static_cast<const int32_t*> (data)) };
-
-        if (atom->type == mLV2_ATOM__Long && atom->size == sizeof (int64_t))
-            return { static_cast<Target> (*static_cast<const int64_t*> (data)) };
-
-        if (atom->type == mLV2_ATOM__Float && atom->size == sizeof (float))
-            return { static_cast<Target> (*static_cast<const float*> (data)) };
-
-        if (atom->type == mLV2_ATOM__Double && atom->size == sizeof (double))
-            return { static_cast<Target> (*static_cast<const double*> (data)) };
-
-        return {};
+        return tryParse<Target> (*atom,
+                                 data,
+                                 Tag<int32_t> { mLV2_ATOM__Bool },
+                                 Tag<int32_t> { mLV2_ATOM__Int },
+                                 Tag<int64_t> { mLV2_ATOM__Long },
+                                 Tag<float>   { mLV2_ATOM__Float },
+                                 Tag<double>  { mLV2_ATOM__Double });
     }
 
     template <typename Target>
-    ParseResult<Target> parseNumericAtom (const LV2_Atom* atom) const
+    Optional<Target> parseNumericAtom (const LV2_Atom* atom) const
     {
         return parseNumericAtom<Target> (atom, atom + 1);
     }
 
     template <typename Target>
-    ParseResult<Target> parseNumericOption (const LV2_Options_Option* option) const
+    Optional<Target> parseNumericOption (const LV2_Options_Option* option) const
     {
         if (option != nullptr)
         {
@@ -240,8 +241,10 @@ struct PatchSetHelper
 
         lv2_atom_object_query (object, query);
 
-        if (isPlugin (subject))
-            setPluginProperty (property, value, std::forward<Callback> (callback));
+        if (! isPlugin (subject))
+            return;
+
+        setPluginProperty (property, value, std::forward<Callback> (callback));
     }
 
     template <typename Callback>
@@ -270,14 +273,14 @@ struct PatchSetHelper
 
         const auto parseResult = parser.parseNumericAtom<float> (value);
 
-        if (! parseResult.successful)
+        if (! parseResult.hasValue())
         {
             // Didn't understand the type of this atom.
             jassertfalse;
             return;
         }
 
-        callback.setParameter (reinterpret_cast<const LV2_Atom_URID*> (property)->body, parseResult.value);
+        callback.setParameter (reinterpret_cast<const LV2_Atom_URID*> (property)->body, *parseResult);
     }
 
     NumericAtomParser parser;
