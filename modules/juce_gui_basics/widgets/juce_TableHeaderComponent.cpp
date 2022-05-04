@@ -31,7 +31,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.drawImageAt (image, 0, 0);
+        g.drawImage (image, getLocalBounds().toFloat());
     }
 
     Image image;
@@ -687,7 +687,7 @@ void TableHeaderComponent::beginDrag (const MouseEvent& e)
             auto temp = columnIdBeingDragged;
             columnIdBeingDragged = 0;
 
-            dragOverlayComp.reset (new DragOverlayComp (createComponentSnapshot (columnRect, false)));
+            dragOverlayComp.reset (new DragOverlayComp (createComponentSnapshot (columnRect, false, 2.0f)));
             addAndMakeVisible (dragOverlayComp.get());
             columnIdBeingDragged = temp;
 
