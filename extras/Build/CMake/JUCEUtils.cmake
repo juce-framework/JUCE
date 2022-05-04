@@ -1888,26 +1888,43 @@ function(juce_add_pip header)
     endif()
 
     if(pip_kind STREQUAL "AudioProcessor")
-        set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
+        _juce_get_metadata("${metadata_dict}" documentControllerClass JUCE_PIP_DOCUMENTCONTROLLER_CLASS)
 
-        # We add AAX/VST2 targets too, if the user has set up those SDKs
+        if(JUCE_PIP_DOCUMENTCONTROLLER_CLASS)
+            if(NOT TARGET juce_ara_sdk)
+                message(WARNING
+                    "${header} specifies a documentControllerClass, but the ARA SDK could not be located. "
+                    "Use juce_set_ara_sdk_path to specify the ARA SDK location. "
+                    "This PIP will not be configured.")
+            endif()
 
-        set(extra_formats)
+            set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessorWithARA.cpp.in")
 
-        if(TARGET juce_aax_sdk)
-            list(APPEND extra_formats AAX)
+            juce_add_plugin(${JUCE_PIP_NAME}
+                FORMATS AU VST3
+                IS_ARA_EFFECT TRUE)
+        else()
+            set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
+
+            # We add AAX/VST2 targets too, if the user has set up those SDKs
+
+            set(extra_formats)
+
+            if(TARGET juce_aax_sdk)
+                list(APPEND extra_formats AAX)
+            endif()
+
+            if(TARGET juce_vst2_sdk)
+                list(APPEND extra_formats VST)
+            endif()
+
+            # Standalone plugins might want to access the mic
+            list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
+
+            juce_add_plugin(${JUCE_PIP_NAME}
+                FORMATS AU AUv3 LV2 Standalone Unity VST3 ${extra_formats}
+                ${extra_target_args})
         endif()
-
-        if(TARGET juce_vst2_sdk)
-            list(APPEND extra_formats VST)
-        endif()
-
-        # Standalone plugins might want to access the mic
-        list(APPEND extra_target_args MICROPHONE_PERMISSION_ENABLED TRUE)
-
-        juce_add_plugin(${JUCE_PIP_NAME}
-            FORMATS AU AUv3 LV2 Standalone Unity VST3 ${extra_formats}
-            ${extra_target_args})
     elseif(pip_kind STREQUAL "Component")
         set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPComponent.cpp.in")
         juce_add_gui_app(${JUCE_PIP_NAME} ${extra_target_args})
