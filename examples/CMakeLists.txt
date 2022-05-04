@@ -34,6 +34,12 @@ function(_juce_add_pips)
             "${CMAKE_CURRENT_SOURCE_DIR}/PushNotificationsDemo.h")
     endif()
 
+    if(NOT (TARGET juce_ara_sdk
+            AND (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")))
+        list(REMOVE_ITEM headers
+             "${CMAKE_CURRENT_SOURCE_DIR}/ARAPluginDemo.h")
+    endif()
+
     foreach(header IN ITEMS ${headers})
         juce_add_pip(${header} added_target)
         target_link_libraries(${added_target} PUBLIC
