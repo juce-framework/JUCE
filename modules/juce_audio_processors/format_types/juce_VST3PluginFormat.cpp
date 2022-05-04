@@ -2082,18 +2082,6 @@ public:
         void setValue (float newValue) override
         {
             pluginInstance.cachedParamValues.set (vstParamIndex, newValue);
-            pluginInstance.parameterDispatcher.push (vstParamIndex, newValue);
-        }
-
-        /*  If the editor set the value, there's no need to notify it that the parameter
-            value changed. Instead, we set the cachedValue (which will be read by the
-            processor during the next processBlock) and notify listeners that the parameter
-            has changed.
-        */
-        void setValueFromEditor (float newValue)
-        {
-            pluginInstance.cachedParamValues.set (vstParamIndex, newValue);
-            sendValueChangedMessageToListeners (newValue);
         }
 
         /*  If we're syncing the editor to the processor, the processor won't need to
@@ -2557,6 +2545,11 @@ public:
         cachedParamValues.ifSet ([&] (Steinberg::int32 index, float value)
         {
             inputParameterChanges->set (cachedParamValues.getParamID (index), value);
+        });
+
+        inputParameterChanges->forEach ([&] (Steinberg::int32 index, float value)
+        {
+            parameterDispatcher.push (index, value);
         });
 
         processor->process (data);
@@ -3024,7 +3017,9 @@ private:
         {
             Steinberg::MemoryStream stream;
 
-            if (object->getState (&stream) == kResultTrue)
+            const auto result = object->getState (&stream);
+
+            if (result == kResultTrue)
             {
                 MemoryBlock info (stream.getData(), (size_t) stream.getSize());
                 head.createNewChildElement (identifier)->addTextElement (info.toBase64Encoding());
@@ -3322,8 +3317,12 @@ private:
         {
             MidiEventList::hostToPluginEventList (*midiInputs,
                                                   midiBuffer,
-                                                  destination.inputParameterChanges,
-                                                  storedMidiMapping);
+                                                  storedMidiMapping,
+                                                  [this] (const auto controlID, const auto paramValue)
+                                                  {
+                                                      if (auto* param = this->getParameterForID (controlID))
+                                                          param->setValueNotifyingHost ((float) paramValue);
+                                                  });
         }
 
         destination.inputEvents = midiInputs;
@@ -3468,7 +3467,7 @@ tresult VST3HostContext::performEdit (Vst::ParamID paramID, Vst::ParamValue valu
 
     if (auto* param = plugin->getParameterForID (paramID))
     {
-        param->setValueFromEditor ((float) valueNormalised);
+        param->setValueNotifyingHost ((float) valueNormalised);
 
         // did the plug-in already update the parameter internally
         if (plugin->editController->getParamNormalized (paramID) != (float) valueNormalised)

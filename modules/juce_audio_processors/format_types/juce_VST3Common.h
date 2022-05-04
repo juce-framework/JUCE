@@ -1040,24 +1040,18 @@ public:
         }
     }
 
-    static void hostToPluginEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
-                                       Steinberg::Vst::IParameterChanges* parameterChanges,
-                                       const StoredMidiMapping& midiMapping)
+    template <typename Callback>
+    static void hostToPluginEventList (Steinberg::Vst::IEventList& result,
+                                       MidiBuffer& midiBuffer,
+                                       StoredMidiMapping& mapping,
+                                       Callback&& callback)
     {
-        toEventList (result,
-                     midiBuffer,
-                     parameterChanges,
-                     &midiMapping,
-                     EventConversionKind::hostToPlugin);
+        toEventList (result, midiBuffer, &mapping, callback);
     }
 
     static void pluginToHostEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer)
     {
-        toEventList (result,
-                     midiBuffer,
-                     nullptr,
-                     nullptr,
-                     EventConversionKind::pluginToHost);
+        toEventList (result, midiBuffer, nullptr, [] (auto&&...) {});
     }
 
 private:
@@ -1073,10 +1067,60 @@ private:
         pluginToHost
     };
 
-    static void toEventList (Steinberg::Vst::IEventList& result, MidiBuffer& midiBuffer,
-                             Steinberg::Vst::IParameterChanges* parameterChanges,
-                             const StoredMidiMapping* midiMapping,
-                             EventConversionKind kind)
+    template <typename Callback>
+    static bool sendMappedParameter (const MidiMessage& msg,
+                                     StoredMidiMapping* midiMapping,
+                                     Callback&& callback)
+    {
+        if (midiMapping == nullptr)
+            return false;
+
+        const auto controlEvent = toVst3ControlEvent (msg);
+
+        if (! controlEvent.hasValue())
+            return false;
+
+        const auto controlParamID = midiMapping->getMapping (createSafeChannel (msg.getChannel()),
+                                                             controlEvent->controllerNumber);
+
+        if (controlParamID != Steinberg::Vst::kNoParamId)
+            callback (controlParamID, controlEvent->paramValue);
+
+        return true;
+    }
+
+    template <typename Callback>
+    static void processMidiMessage (Steinberg::Vst::IEventList& result,
+                                    const MidiMessageMetadata metadata,
+                                    StoredMidiMapping* midiMapping,
+                                    Callback&& callback)
+    {
+        const auto msg = metadata.getMessage();
+
+        if (sendMappedParameter (msg, midiMapping, std::forward<Callback> (callback)))
+            return;
+
+        const auto kind = midiMapping != nullptr ? EventConversionKind::hostToPlugin
+                                                 : EventConversionKind::pluginToHost;
+
+        auto maybeEvent = createVstEvent (msg, metadata.data, kind);
+
+        if (! maybeEvent.hasValue())
+            return;
+
+        maybeEvent->busIndex = 0;
+        maybeEvent->sampleOffset = metadata.samplePosition;
+        result.addEvent (*maybeEvent);
+    }
+
+    /*  If mapping is non-null, the conversion is assumed to be host-to-plugin, or otherwise
+        plugin-to-host.
+    */
+    template <typename Callback>
+    static void toEventList (Steinberg::Vst::IEventList& result,
+                             MidiBuffer& midiBuffer,
+                             StoredMidiMapping* midiMapping,
+                             Callback&& callback)
     {
         enum { maxNumEvents = 2048 }; // Steinberg's Host Checker states that no more than 2048 events are allowed at once
         int numEvents = 0;
@@ -1086,35 +1130,7 @@ private:
             if (++numEvents > maxNumEvents)
                 break;
 
-            auto msg = metadata.getMessage();
-
-            if (midiMapping != nullptr && parameterChanges != nullptr)
-            {
-                Vst3MidiControlEvent controlEvent;
-
-                if (toVst3ControlEvent (msg, controlEvent))
-                {
-                    const auto controlParamID = midiMapping->getMapping (createSafeChannel (msg.getChannel()),
-                                                                         controlEvent.controllerNumber);
-
-                    if (controlParamID != Steinberg::Vst::kNoParamId)
-                    {
-                        Steinberg::int32 ignore;
-
-                        if (auto* queue = parameterChanges->addParameterData (controlParamID, ignore))
-                            queue->addPoint (metadata.samplePosition, controlEvent.paramValue, ignore);
-                    }
-
-                    continue;
-                }
-            }
-
-            if (auto maybeEvent = createVstEvent (msg, metadata.data, kind))
-            {
-                maybeEvent->busIndex = 0;
-                maybeEvent->sampleOffset = metadata.samplePosition;
-                result.addEvent (*maybeEvent);
-            }
+            processMidiMessage (result, metadata, midiMapping, std::forward<Callback> (callback));
         }
     }
 
@@ -1361,28 +1377,18 @@ private:
         Steinberg::Vst::ParamValue paramValue;
     };
 
-    static bool toVst3ControlEvent (const MidiMessage& msg, Vst3MidiControlEvent& result)
+    static Optional<Vst3MidiControlEvent> toVst3ControlEvent (const MidiMessage& msg)
     {
         if (msg.isController())
-        {
-            result = { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0};
-            return true;
-        }
+            return Vst3MidiControlEvent { (Steinberg::Vst::CtrlNumber) msg.getControllerNumber(), msg.getControllerValue() / 127.0 };
 
         if (msg.isPitchWheel())
-        {
-            result = { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
-            return true;
-        }
+            return Vst3MidiControlEvent { Steinberg::Vst::kPitchBend, msg.getPitchWheelValue() / 16383.0};
 
         if (msg.isChannelPressure())
-        {
-            result = { Steinberg::Vst::kAfterTouch, msg.getChannelPressureValue() / 127.0};
-            return true;
-        }
+            return Vst3MidiControlEvent { Steinberg::Vst::kAfterTouch, msg.getChannelPressureValue() / 127.0};
 
-        result.controllerNumber = -1;
-        return false;
+        return {};
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiEventList)
