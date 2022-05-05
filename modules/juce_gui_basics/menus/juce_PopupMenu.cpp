@@ -509,10 +509,14 @@ struct MenuWindow  : public Component
             auto resultID = options.hasWatchedComponentBeenDeleted() ? 0 : getResultItemID (item);
 
             exitModalState (resultID);
-            exitingModalState = true;
 
-            if (makeInvisible && deletionChecker != nullptr)
-                setVisible (false);
+            if (deletionChecker != nullptr)
+            {
+                exitingModalState = true;
+
+                if (makeInvisible)
+                    setVisible (false);
+            }
 
             if (resultID != 0
                  && item != nullptr
