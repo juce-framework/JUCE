@@ -367,6 +367,7 @@ namespace Ids
     DECLARE_ID (exporters);
     DECLARE_ID (website);
     DECLARE_ID (mainClass);
+    DECLARE_ID (documentControllerClass);
     DECLARE_ID (moduleFlags);
     DECLARE_ID (projectLineFeed);
     DECLARE_ID (compilerFlagSchemes);

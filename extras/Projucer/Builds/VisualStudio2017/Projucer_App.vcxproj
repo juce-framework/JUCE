@@ -2156,6 +2156,7 @@
     <None Include="..\..\..\Build\CMake\JuceLV2Defines.h.in"/>
     <None Include="..\..\..\Build\CMake\LaunchScreen.storyboard"/>
     <None Include="..\..\..\Build\CMake\PIPAudioProcessor.cpp.in"/>
+    <None Include="..\..\..\Build\CMake\PIPAudioProcessorWithARA.cpp.in"/>
     <None Include="..\..\..\Build\CMake\PIPComponent.cpp.in"/>
     <None Include="..\..\..\Build\CMake\PIPConsole.cpp.in"/>
     <None Include="..\..\..\Build\CMake\RecentFilesMenuTemplate.nib"/>

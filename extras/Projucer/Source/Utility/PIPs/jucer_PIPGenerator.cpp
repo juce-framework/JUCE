@@ -206,6 +206,11 @@ void PIPGenerator::createFiles (ValueTree& jucerTree)
     jucerTree.addChild (mainGroup, 0, nullptr);
 }
 
+String PIPGenerator::getDocumentControllerClass() const
+{
+    return metadata.getProperty (Ids::documentControllerClass, "").toString();
+}
+
 ValueTree PIPGenerator::createModulePathChild (const String& moduleID)
 {
     ValueTree modulePath (Ids::MODULEPATH);
@@ -376,6 +381,9 @@ Result PIPGenerator::setProjectSettings (ValueTree& jucerTree)
         StringArray pluginFormatsToBuild (Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildStandalone.toString());
         pluginFormatsToBuild.addArray (getExtraPluginFormatsToBuild());
 
+        if (getDocumentControllerClass().isNotEmpty())
+            pluginFormatsToBuild.add (Ids::enableARA.toString());
+
         jucerTree.setProperty (Ids::pluginFormats, pluginFormatsToBuild.joinIntoString (","), nullptr);
 
         const auto characteristics = metadata[Ids::pluginCharacteristics].toString();
@@ -414,6 +422,7 @@ void PIPGenerator::setModuleFlags (ValueTree& jucerTree)
 String PIPGenerator::getMainFileTextForType()
 {
     const auto type = metadata[Ids::type].toString();
+    const auto documentControllerClass = getDocumentControllerClass();
 
     const auto mainTemplate = [&]
     {
@@ -427,8 +436,17 @@ String PIPGenerator::getMainFileTextForType()
                    .replace ("${JUCE_PIP_MAIN_CLASS}", metadata[Ids::mainClass].toString());
 
         if (type == "AudioProcessor")
+        {
+            if (documentControllerClass.isNotEmpty())
+            {
+                return String (BinaryData::PIPAudioProcessorWithARA_cpp_in)
+                       .replace ("${JUCE_PIP_MAIN_CLASS}", metadata[Ids::mainClass].toString())
+                       .replace ("${JUCE_PIP_DOCUMENTCONTROLLER_CLASS}", documentControllerClass);
+            }
+
             return String (BinaryData::PIPAudioProcessor_cpp_in)
                    .replace ("${JUCE_PIP_MAIN_CLASS}", metadata[Ids::mainClass].toString());
+        }
 
         return String{};
     }();

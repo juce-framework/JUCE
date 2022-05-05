@@ -3797,6 +3797,9 @@
     <None Include="..\..\..\Build\CMake\PIPAudioProcessor.cpp.in">
       <Filter>Projucer\BinaryData</Filter>
     </None>
+    <None Include="..\..\..\Build\CMake\PIPAudioProcessorWithARA.cpp.in">
+      <Filter>Projucer\BinaryData</Filter>
+    </None>
     <None Include="..\..\..\Build\CMake\PIPComponent.cpp.in">
       <Filter>Projucer\BinaryData</Filter>
     </None>

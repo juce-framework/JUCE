@@ -149,6 +149,7 @@ juce_add_binary_data(ProjucerData SOURCES
     ../Build/CMake/JuceLV2Defines.h.in
     ../Build/CMake/LaunchScreen.storyboard
     ../Build/CMake/PIPAudioProcessor.cpp.in
+    ../Build/CMake/PIPAudioProcessorWithARA.cpp.in
     ../Build/CMake/PIPComponent.cpp.in
     ../Build/CMake/PIPConsole.cpp.in
     ../Build/CMake/RecentFilesMenuTemplate.nib

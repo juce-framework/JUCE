@@ -193,6 +193,8 @@
             file="../Build/CMake/LaunchScreen.storyboard"/>
       <FILE id="QCgjY8" name="PIPAudioProcessor.cpp.in" compile="0" resource="1"
             file="../Build/CMake/PIPAudioProcessor.cpp.in"/>
+      <FILE id="oxq0Fs" name="PIPAudioProcessorWithARA.cpp.in" compile="0"
+            resource="1" file="../Build/CMake/PIPAudioProcessorWithARA.cpp.in"/>
       <FILE id="AwIYFr" name="PIPComponent.cpp.in" compile="0" resource="1"
             file="../Build/CMake/PIPComponent.cpp.in"/>
       <FILE id="SncItz" name="PIPConsole.cpp.in" compile="0" resource="1"

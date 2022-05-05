@@ -17,6 +17,9 @@ namespace BinaryData
     extern const char*   PIPAudioProcessor_cpp_in;
     const int            PIPAudioProcessor_cpp_inSize = 483;
 
+    extern const char*   PIPAudioProcessorWithARA_cpp_in;
+    const int            PIPAudioProcessorWithARA_cpp_inSize = 689;
+
     extern const char*   PIPComponent_cpp_in;
     const int            PIPComponent_cpp_inSize = 2275;
 
@@ -207,7 +210,7 @@ namespace BinaryData
     const int            juce_runtime_arch_detection_cppSize = 2760;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
-    const int namedResourceListSize = 66;
+    const int namedResourceListSize = 67;
 
     // Points to the start of a list of resource names.
     extern const char* namedResourceList[];

@@ -45,6 +45,7 @@ private:
     //==============================================================================
     void addFileToTree (ValueTree& groupTree, const String& name, bool compile, const String& path);
     void createFiles (ValueTree& jucerTree);
+    String getDocumentControllerClass() const;
 
     ValueTree createModulePathChild (const String& moduleID);
     ValueTree createBuildConfigChild (bool isDebug);

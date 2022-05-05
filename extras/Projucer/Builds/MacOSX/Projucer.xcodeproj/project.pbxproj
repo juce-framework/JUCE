@@ -111,6 +111,7 @@
 		133F1E428260C5ADDF496DF9 /* jucer_ComponentLayout.cpp */ /* jucer_ComponentLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ComponentLayout.cpp; path = ../../Source/ComponentEditor/jucer_ComponentLayout.cpp; sourceTree = SOURCE_ROOT; };
 		16751E04B0F3737BDF52CEB4 /* jucer_HeaderComponent.h */ /* jucer_HeaderComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_HeaderComponent.h; path = ../../Source/Project/UI/jucer_HeaderComponent.h; sourceTree = SOURCE_ROOT; };
 		169DD91232C070C4D6470B31 /* jucer_IconButton.h */ /* jucer_IconButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_IconButton.h; path = ../../Source/Utility/UI/jucer_IconButton.h; sourceTree = SOURCE_ROOT; };
+		18C82CBCEE30425A2481755D /* PIPAudioProcessorWithARA.cpp.in */ /* PIPAudioProcessorWithARA.cpp.in */ = {isa = PBXFileReference; lastKnownFileType = file.in; name = PIPAudioProcessorWithARA.cpp.in; path = ../../../Build/CMake/PIPAudioProcessorWithARA.cpp.in; sourceTree = SOURCE_ROOT; };
 		191330B20DAC08B890656EA0 /* jucer_PIPGenerator.cpp */ /* jucer_PIPGenerator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_PIPGenerator.cpp; path = ../../Source/Utility/PIPs/jucer_PIPGenerator.cpp; sourceTree = SOURCE_ROOT; };
 		1B0F18E1D96F727C062B05FA /* jucer_ProjectContentComponent.cpp */ /* jucer_ProjectContentComponent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = jucer_ProjectContentComponent.cpp; path = ../../Source/Project/UI/jucer_ProjectContentComponent.cpp; sourceTree = SOURCE_ROOT; };
 		1B5BCD4899A9E295786EB642 /* jucer_OpenDocumentManager.h */ /* jucer_OpenDocumentManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = jucer_OpenDocumentManager.h; path = ../../Source/CodeEditor/jucer_OpenDocumentManager.h; sourceTree = SOURCE_ROOT; };
@@ -854,6 +855,7 @@
 				921D263A2EAFD96C8D389693,
 				50F89D3827B83B48855B3564,
 				A0ECDAF137029C445910D3ED,
+				18C82CBCEE30425A2481755D,
 				463C8CF42FAA00014198B71B,
 				F84D031B2A6BB1EE6A316C71,
 				233C7FC5157176DB33FE2F27,
