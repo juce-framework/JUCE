@@ -60,6 +60,7 @@
  #include <commctrl.h>
  #include <UIAutomation.h>
  #include <sapi.h>
+ #include <Dxgi.h>
 
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>
@@ -72,6 +73,7 @@
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "comctl32.lib")
+  #pragma comment(lib, "dxgi.lib")
 
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
