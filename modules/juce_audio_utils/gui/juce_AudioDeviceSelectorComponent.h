@@ -31,8 +31,7 @@ namespace juce
     @tags{Audio}
 */
 class JUCE_API  AudioDeviceSelectorComponent  : public Component,
-                                                private ChangeListener,
-                                                private Timer
+                                                private ChangeListener
 {
 public:
     //==============================================================================
@@ -85,7 +84,6 @@ public:
 
 private:
     //==============================================================================
-    void timerCallback() override;
     void handleBluetoothButton();
     void updateDeviceType();
     void updateMidiOutput();

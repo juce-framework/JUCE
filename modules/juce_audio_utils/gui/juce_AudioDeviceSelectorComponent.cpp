@@ -1044,7 +1044,6 @@ AudioDeviceSelectorComponent::AudioDeviceSelectorComponent (AudioDeviceManager& 
 
     deviceManager.addChangeListener (this);
     updateAllControls();
-    startTimer (1000);
 }
 
 AudioDeviceSelectorComponent::~AudioDeviceSelectorComponent()
@@ -1096,16 +1095,6 @@ void AudioDeviceSelectorComponent::resized()
 
     r.removeFromTop (itemHeight);
     setSize (getWidth(), r.getY());
-}
-
-void AudioDeviceSelectorComponent::timerCallback()
-{
-    // TODO
-    // unfortunately, the AudioDeviceManager only gives us changeListenerCallbacks
-    // if an audio device has changed, but not if a MIDI device has changed.
-    // This needs to be implemented properly. Until then, we use a workaround
-    // where we update the whole component once per second on a timer callback.
-    updateAllControls();
 }
 
 void AudioDeviceSelectorComponent::updateDeviceType()

@@ -1088,6 +1088,7 @@ void AudioDeviceManager::setDefaultMidiOutputDevice (const String& identifier)
 {
     if (defaultMidiOutputDeviceInfo.identifier != identifier)
     {
+        std::unique_ptr<MidiOutput> oldMidiPort;
         Array<AudioIODeviceCallback*> oldCallbacks;
 
         {
@@ -1099,7 +1100,7 @@ void AudioDeviceManager::setDefaultMidiOutputDevice (const String& identifier)
             for (int i = oldCallbacks.size(); --i >= 0;)
                 oldCallbacks.getUnchecked (i)->audioDeviceStopped();
 
-        defaultMidiOutput.reset();
+        std::swap (oldMidiPort, defaultMidiOutput);
 
         if (identifier.isNotEmpty())
             defaultMidiOutput = MidiOutput::openDevice (identifier);
@@ -1119,7 +1120,7 @@ void AudioDeviceManager::setDefaultMidiOutputDevice (const String& identifier)
         }
 
         updateXml();
-        sendChangeMessage();
+        sendSynchronousChangeMessage();
     }
 }
 
