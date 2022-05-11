@@ -153,12 +153,13 @@ namespace FlacNamespace
  #include "flac/libFLAC/stream_encoder_framing.c"
  #include "flac/libFLAC/window_flac.c"
  #undef VERSION
-#else
- #include <FLAC/all.h>
-#endif
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  JUCE_END_IGNORE_WARNINGS_MSVC
+
+#else
+ #include <FLAC/all.h>
+#endif
 }
 
 #undef max
