@@ -18,6 +18,7 @@
 		33D24B475EA928745A87EDDB /* include_juce_audio_devices.mm */ = {isa = PBXBuildFile; fileRef = 00CDB93410EA5AECBA5ADA95; };
 		3822F598DA7044E5DB7633A9 /* include_juce_audio_utils.mm */ = {isa = PBXBuildFile; fileRef = 846E187EC2E797B982861CA4; };
 		3866839F4051D104244870B1 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = 336A244E3C6460495F0A424C; };
+		44628795CE784DEE1B98F986 /* include_juce_audio_processors_ara.cpp */ = {isa = PBXBuildFile; fileRef = C7F2704A6676859CCE14A4D1; };
 		4BC57B0D2215621D90C8881C /* WebKit.framework */ = {isa = PBXBuildFile; fileRef = D2EBC6292AE5AFC46EB10DAC; };
 		5CB3596030B0DD3763CAF85C /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = 302A999B2803C0D5C15D237C; };
 		5FE50792EDC7638DE9A824B5 /* RecentFilesMenuTemplate.nib */ = {isa = PBXBuildFile; fileRef = 5C7BDD8DF72F2FC2D44D757A; };
@@ -92,6 +93,7 @@
 		B72A2BF24B6FFD414CD3B1CA /* juce_video */ /* juce_video */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_video; path = ../../../../modules/juce_video; sourceTree = SOURCE_ROOT; };
 		B96EC82EC3D2813B50386198 /* include_juce_product_unlocking.mm */ /* include_juce_product_unlocking.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_product_unlocking.mm; path = ../../JuceLibraryCode/include_juce_product_unlocking.mm; sourceTree = SOURCE_ROOT; };
 		C0531453A002C480280C5F05 /* CoreAudio.framework */ /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		C7F2704A6676859CCE14A4D1 /* include_juce_audio_processors_ara.cpp */ /* include_juce_audio_processors_ara.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_ara.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_ara.cpp; sourceTree = SOURCE_ROOT; };
 		CC27F53A76BFB2675D2683A1 /* juce_opengl */ /* juce_opengl */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_opengl; path = ../../../../modules/juce_opengl; sourceTree = SOURCE_ROOT; };
 		D2EBC6292AE5AFC46EB10DAC /* WebKit.framework */ /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		D3BE73543708D756BDB8AEF7 /* juce_dsp */ /* juce_dsp */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_dsp; path = ../../../../modules/juce_dsp; sourceTree = SOURCE_ROOT; };
@@ -161,6 +163,7 @@
 				00CDB93410EA5AECBA5ADA95,
 				A76DD7182C290A9020C96CA7,
 				3A26A3568F2C301EEED25288,
+				C7F2704A6676859CCE14A4D1,
 				45FB94C047D1ECAACA9462B7,
 				846E187EC2E797B982861CA4,
 				AB19DDC8458D2A420E6D8AC3,
@@ -317,6 +320,7 @@
 				33D24B475EA928745A87EDDB,
 				FDDF955477BE7FEBC364E19B,
 				74EC8AEC296DB2721EB438BF,
+				44628795CE784DEE1B98F986,
 				79FE3F2D2EFAC333283E5D90,
 				3822F598DA7044E5DB7633A9,
 				9B48039CDFD679AD944BAC70,
