@@ -154,6 +154,8 @@
  #include <winsock2.h>
  #include <ws2tcpip.h>
  #include <iphlpapi.h>
+ #include <accctrl.h>
+ #include <aclapi.h>
 
  #if ! JUCE_CXX17_IS_AVAILABLE
   #pragma push_macro ("WIN_NOEXCEPT")
