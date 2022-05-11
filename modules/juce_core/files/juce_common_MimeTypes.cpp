@@ -33,16 +33,33 @@ struct MimeTypeTableEntry
     static MimeTypeTableEntry table[641];
 };
 
-static StringArray getMimeTypesForFileExtension (const String& fileExtension)
+static StringArray getMatches (const String& toMatch,
+                               const char* MimeTypeTableEntry::* matchField,
+                               const char* MimeTypeTableEntry::* returnField)
 {
     StringArray result;
 
     for (auto type : MimeTypeTableEntry::table)
-        if (fileExtension == type.fileExtension)
-            result.add (type.mimeType);
+        if (toMatch == type.*matchField)
+            result.add (type.*returnField);
 
     return result;
 }
+
+namespace MimeTypeTable
+{
+
+StringArray getMimeTypesForFileExtension (const String& fileExtension)
+{
+    return getMatches (fileExtension, &MimeTypeTableEntry::fileExtension, &MimeTypeTableEntry::mimeType);
+}
+
+StringArray getFileExtensionsForMimeType (const String& mimeType)
+{
+    return getMatches (mimeType, &MimeTypeTableEntry::mimeType, &MimeTypeTableEntry::fileExtension);
+}
+
+} // namespace MimeTypeTable
 
 //==============================================================================
 MimeTypeTableEntry MimeTypeTableEntry::table[641] =

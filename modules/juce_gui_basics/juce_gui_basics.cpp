@@ -333,9 +333,9 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID
+ #include "juce_core/files/juce_common_MimeTypes.h"
  #include "native/accessibility/juce_android_Accessibility.cpp"
  #include "native/juce_android_Windowing.cpp"
- #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
 
  #if JUCE_CONTENT_SHARING

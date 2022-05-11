@@ -337,7 +337,7 @@ private:
                 canSpecifyMimeTypes = fileExtension.isNotEmpty();
 
             if (canSpecifyMimeTypes)
-                mimeTypes.addArray (getMimeTypesForFileExtension (fileExtension));
+                mimeTypes.addArray (MimeTypeTable::getMimeTypesForFileExtension (fileExtension));
             else
                 mimeTypes.clear();
 
@@ -597,8 +597,8 @@ public:
         if (extension.isEmpty())
             return nullptr;
 
-        return juceStringArrayToJava (filterMimeTypes (getMimeTypesForFileExtension (extension),
-                                                                  juceString (mimeTypeFilter.get())));
+        return juceStringArrayToJava (filterMimeTypes (MimeTypeTable::getMimeTypesForFileExtension (extension),
+                                                       juceString (mimeTypeFilter.get())));
     }
 
     void sharingFinished (int resultCode)
