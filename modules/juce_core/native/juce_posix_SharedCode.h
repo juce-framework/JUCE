@@ -288,6 +288,12 @@ bool File::hasWriteAccess() const
     return false;
 }
 
+bool File::hasReadAccess() const
+{
+    return fullPath.isNotEmpty()
+           && access (fullPath.toUTF8(), R_OK) == 0;
+}
+
 static bool setFileModeFlags (const String& fullPath, mode_t flags, bool shouldSet) noexcept
 {
     juce_statStruct info;

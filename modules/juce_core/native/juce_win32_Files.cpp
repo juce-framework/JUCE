@@ -159,6 +159,83 @@ namespace WindowsFileHelpers
 
         return Result::fail (String (messageBuffer));
     }
+
+    // The docs for the Windows security API aren't very clear. Some parts of the following
+    // function (the flags passed to GetNamedSecurityInfo, duplicating the primary access token)
+    // were guided by the example at https://blog.aaronballman.com/2011/08/how-to-check-access-rights/
+    static bool hasFileAccess (const File& file, DWORD accessType)
+    {
+        const auto& path = file.getFullPathName();
+
+        if (path.isEmpty())
+            return false;
+
+        struct PsecurityDescriptorGuard
+        {
+            ~PsecurityDescriptorGuard() { if (psecurityDescriptor != nullptr) LocalFree (psecurityDescriptor); }
+            PSECURITY_DESCRIPTOR psecurityDescriptor = nullptr;
+        };
+
+        PsecurityDescriptorGuard descriptorGuard;
+
+        if (GetNamedSecurityInfo (path.toWideCharPointer(),
+                                  SE_FILE_OBJECT,
+                                  OWNER_SECURITY_INFORMATION | GROUP_SECURITY_INFORMATION | DACL_SECURITY_INFORMATION,
+                                  nullptr,
+                                  nullptr,
+                                  nullptr,
+                                  nullptr,
+                                  &descriptorGuard.psecurityDescriptor) != ERROR_SUCCESS)
+        {
+            return false;
+        }
+
+        struct HandleGuard
+        {
+            ~HandleGuard() { if (handle != INVALID_HANDLE_VALUE) CloseHandle (handle); }
+            HANDLE handle = nullptr;
+        };
+
+        HandleGuard primaryTokenGuard;
+
+        if (! OpenProcessToken (GetCurrentProcess(),
+                                TOKEN_IMPERSONATE | TOKEN_DUPLICATE | TOKEN_QUERY | STANDARD_RIGHTS_READ,
+                                &primaryTokenGuard.handle))
+        {
+            return false;
+        }
+
+        HandleGuard duplicatedTokenGuard;
+
+        if (! DuplicateToken (primaryTokenGuard.handle,
+                              SecurityImpersonation,
+                              &duplicatedTokenGuard.handle))
+        {
+            return false;
+        }
+
+        GENERIC_MAPPING mapping { FILE_GENERIC_READ, FILE_GENERIC_WRITE, FILE_GENERIC_EXECUTE, FILE_ALL_ACCESS };
+
+        MapGenericMask (&accessType, &mapping);
+        DWORD allowed = 0;
+        BOOL granted = false;
+        PRIVILEGE_SET set;
+        DWORD setSize = sizeof (set);
+
+        if (! AccessCheck (descriptorGuard.psecurityDescriptor,
+                           duplicatedTokenGuard.handle,
+                           accessType,
+                           &mapping,
+                           &set,
+                           &setSize,
+                           &allowed,
+                           &granted))
+        {
+            return false;
+        }
+
+        return granted != FALSE;
+    }
 } // namespace WindowsFileHelpers
 
 //==============================================================================
@@ -199,17 +276,25 @@ bool File::isDirectory() const
 
 bool File::hasWriteAccess() const
 {
-    if (fullPath.isEmpty())
-        return true;
+    if (exists())
+    {
+        const auto attr = WindowsFileHelpers::getAtts (fullPath);
 
-    auto attr = WindowsFileHelpers::getAtts (fullPath);
+        return WindowsFileHelpers::hasFileAccess (*this, GENERIC_WRITE)
+               && (attr == INVALID_FILE_ATTRIBUTES
+                   || (attr & FILE_ATTRIBUTE_DIRECTORY) != 0
+                   || (attr & FILE_ATTRIBUTE_READONLY) == 0);
+    }
 
-    // NB: According to MS, the FILE_ATTRIBUTE_READONLY attribute doesn't work for
-    // folders, and can be incorrectly set for some special folders, so we'll just say
-    // that folders are always writable.
-    return attr == INVALID_FILE_ATTRIBUTES
-            || (attr & FILE_ATTRIBUTE_DIRECTORY) != 0
-            || (attr & FILE_ATTRIBUTE_READONLY) == 0;
+    if ((! isDirectory()) && fullPath.containsChar (getSeparatorChar()))
+        return getParentDirectory().hasWriteAccess();
+
+    return false;
+}
+
+bool File::hasReadAccess() const
+{
+    return WindowsFileHelpers::hasFileAccess (*this, GENERIC_READ);
 }
 
 bool File::setFileReadOnlyInternal (bool shouldBeReadOnly) const

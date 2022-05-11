@@ -342,6 +342,12 @@ public:
     */
     bool hasWriteAccess() const;
 
+    /** Checks whether a file can be read.
+
+        @returns    true if it's possible to read this file.
+    */
+    bool hasReadAccess() const;
+
     /** Changes the write-permission of a file or directory.
 
         @param shouldBeReadOnly     whether to add or remove write-permission
