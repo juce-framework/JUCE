@@ -519,9 +519,12 @@ private:
 
             if (excludeFromBuild.size() > 0)
             {
-                for (auto& exclude : excludeFromBuild)
-                    mo << "set_source_files_properties(\"" << exclude.toUnixStyle() << "\" PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
+                mo << "set_source_files_properties(" << newLine;
 
+                for (auto& exclude : excludeFromBuild)
+                    mo << "    \"" << exclude.toUnixStyle() << '"' << newLine;
+
+                mo << "    PROPERTIES HEADER_FILE_ONLY TRUE)" << newLine;
                 mo << newLine;
             }
 
@@ -1670,7 +1673,15 @@ private:
         }
 
         for (int i = permissions.size(); --i >= 0;)
-            manifest.createNewChildElement ("uses-permission")->setAttribute ("android:name", permissions[i]);
+        {
+            const auto permission = permissions[i];
+            auto* usesPermission = manifest.createNewChildElement ("uses-permission");
+            usesPermission->setAttribute ("android:name", permission);
+
+            // This permission only has an effect on SDK version 28 and lower
+            if (permission == "android.permission.WRITE_EXTERNAL_STORAGE")
+                usesPermission->setAttribute ("android:maxSdkVersion", "28");
+        }
     }
 
     void createOpenGlFeatureElement (XmlElement& manifest) const
