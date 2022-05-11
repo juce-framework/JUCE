@@ -200,14 +200,6 @@ DECLARE_JNI_CLASS_WITH_BYTECODE (HTTPStream, "com/rmsl/juce/JuceHTTPStream", 16,
 
 //==============================================================================
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (close,     "close",     "()V") \
- METHOD (read,      "read",      "([BII)I") \
-
-DECLARE_JNI_CLASS (AndroidInputStream, "java/io/InputStream")
-#undef JNI_CLASS_MEMBERS
-
-//==============================================================================
-#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (acquire, "acquire", "()V") \
   METHOD (release, "release", "()V") \
 
@@ -320,6 +312,25 @@ String URL::getFileName() const
     return toString (false).fromLastOccurrenceOf ("/", false, true);
 }
 
+struct AndroidStreamHelpers
+{
+    enum class StreamKind { output, input };
+
+    static LocalRef<jobject> createStream (const GlobalRef& uri, StreamKind kind)
+    {
+        auto* env = getEnv();
+        auto contentResolver = AndroidContentUriResolver::getContentResolver();
+
+        if (contentResolver == nullptr)
+            return {};
+
+        return LocalRef<jobject> (env->CallObjectMethod (contentResolver.get(),
+                                                         kind == StreamKind::input ? ContentResolver.openInputStream
+                                                                                   : ContentResolver.openOutputStream,
+                                                         uri.get()));
+    }
+};
+
 //==============================================================================
 class WebInputStream::Pimpl
 {
@@ -365,7 +376,8 @@ public:
 
         if (isContentURL)
         {
-            auto inputStream = AndroidContentUriResolver::getStreamForContentUri (url, true);
+            GlobalRef urlRef { urlToUri (url) };
+            auto inputStream = AndroidStreamHelpers::createStream (urlRef, AndroidStreamHelpers::StreamKind::input);
 
             if (inputStream != nullptr)
             {

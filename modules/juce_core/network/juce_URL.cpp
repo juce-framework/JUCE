@@ -792,6 +792,11 @@ std::unique_ptr<InputStream> URL::createInputStream (const InputStreamOptions& o
 
 std::unique_ptr<OutputStream> URL::createOutputStream() const
 {
+   #if JUCE_ANDROID
+    if (auto stream = AndroidDocument::fromDocument (*this).createOutputStream())
+        return stream;
+   #endif
+
     if (isLocalFile())
     {
        #if JUCE_IOS
@@ -802,11 +807,7 @@ std::unique_ptr<OutputStream> URL::createOutputStream() const
        #endif
     }
 
-   #if JUCE_ANDROID
-    return std::unique_ptr<OutputStream> (juce_CreateContentURIOutputStream (*this));
-   #else
     return nullptr;
-   #endif
 }
 
 //==============================================================================
