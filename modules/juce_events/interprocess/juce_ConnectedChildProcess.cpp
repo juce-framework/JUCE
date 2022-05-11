@@ -61,6 +61,8 @@ struct ChildProcessPingThread  : public Thread,
 
     int timeoutMs;
 
+    using AsyncUpdater::cancelPendingUpdate;
+
 private:
     Atomic<int> countdown;
 
@@ -97,6 +99,7 @@ struct ChildProcessCoordinator::Connection  : public InterprocessConnection,
 
     ~Connection() override
     {
+        cancelPendingUpdate();
         stopThread (10000);
     }
 
@@ -206,6 +209,7 @@ struct ChildProcessWorker::Connection  : public InterprocessConnection,
 
     ~Connection() override
     {
+        cancelPendingUpdate();
         stopThread (10000);
         disconnect();
     }
