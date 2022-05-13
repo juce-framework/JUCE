@@ -537,16 +537,20 @@ ListBox::~ListBox()
     viewport.reset();
 }
 
+void ListBox::assignModelPtr (ListBoxModel* const newModel)
+{
+    model = newModel;
+
+   #if ! JUCE_DISABLE_ASSERTIONS
+    weakModelPtr = model != nullptr ? model->sharedState : nullptr;
+   #endif
+}
+
 void ListBox::setModel (ListBoxModel* const newModel)
 {
     if (model != newModel)
     {
-        model = newModel;
-
-       #if ! JUCE_DISABLE_ASSERTIONS
-        weakModelPtr = model != nullptr ? model->sharedState : nullptr;
-       #endif
-
+        assignModelPtr (newModel);
         repaint();
         updateContent();
     }

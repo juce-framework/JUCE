@@ -613,6 +613,7 @@ private:
     std::weak_ptr<ListBoxModel::Empty> weakModelPtr;
    #endif
 
+    void assignModelPtr (ListBoxModel*);
     void checkModelPtrIsValid() const;
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool hasAccessibleHeaderComponent() const;

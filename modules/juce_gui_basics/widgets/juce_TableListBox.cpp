@@ -339,7 +339,7 @@ private:
 TableListBox::TableListBox (const String& name, TableListBoxModel* const m)
     : ListBox (name, nullptr), model (m)
 {
-    ListBox::setModel (this);
+    ListBox::assignModelPtr (this);
 
     setHeader (std::make_unique<Header> (*this));
 }
