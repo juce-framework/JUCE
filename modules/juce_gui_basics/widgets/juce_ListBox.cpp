@@ -529,11 +529,16 @@ ListBox::~ListBox()
     viewport.reset();
 }
 
+void ListBox::assignModelPtr (ListBoxModel* const newModel)
+{
+    model = newModel;
+}
+
 void ListBox::setModel (ListBoxModel* const newModel)
 {
     if (model != newModel)
     {
-        model = newModel;
+        assignModelPtr (newModel);
         repaint();
         updateContent();
     }
