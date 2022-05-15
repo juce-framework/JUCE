@@ -90,7 +90,7 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         if (e.source == scrollSource
             && ! doesMouseEventComponentBlockViewportDrag (e.eventComponent))
         {
-            auto totalOffset = e.getOffsetFromDragStart().toFloat();
+            auto totalOffset = e.getEventRelativeTo (&viewport).getOffsetFromDragStart().toFloat();
 
             if (! isDragging && totalOffset.getDistanceFromOrigin() > 8.0f && viewportWouldScrollOnEvent (&viewport, e.source))
             {

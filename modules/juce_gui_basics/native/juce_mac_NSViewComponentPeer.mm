@@ -1569,7 +1569,7 @@ public:
 
     void textInputRequired (Point<int>, TextInputTarget&) override {}
 
-    void dismissPendingTextInput() override
+    void closeInputMethodContext() override
     {
         stringBeingComposed.clear();
         const auto* inputContext = [NSTextInputContext currentInputContext];
@@ -1789,10 +1789,13 @@ private:
 
     void setFullScreenSizeConstraints (const ComponentBoundsConstrainer& c)
     {
-        const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
-                                         0.0f);
-        [window setMinFullScreenContentSize: minSize];
-        [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
+        if (@available (macOS 10.11, *))
+        {
+            const auto minSize = NSMakeSize (static_cast<float> (c.getMinimumWidth()),
+                                             0.0f);
+            [window setMinFullScreenContentSize: minSize];
+            [window setMaxFullScreenContentSize: NSMakeSize (100000, 100000)];
+        }
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)

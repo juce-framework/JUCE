@@ -1838,7 +1838,7 @@ void TextEditor::mouseDown (const MouseEvent& e)
                          e.mods.isShiftDown());
 
             if (auto* peer = getPeer())
-                peer->dismissPendingTextInput();
+                peer->closeInputMethodContext();
         }
         else
         {
@@ -1961,7 +1961,7 @@ bool TextEditor::moveCaretWithTransaction (const int newPos, const bool selectin
     moveCaretTo (newPos, selecting);
 
     if (auto* peer = getPeer())
-        peer->dismissPendingTextInput();
+        peer->closeInputMethodContext();
 
     return true;
 }

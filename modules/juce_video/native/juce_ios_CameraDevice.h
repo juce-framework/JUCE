@@ -766,7 +766,7 @@ private:
 
             //==============================================================================
            #if JUCE_USE_NEW_CAMERA_API
-            class PhotoOutputDelegateClass : public ObjCClass<NSObject>
+            class API_AVAILABLE (ios (10.0)) PhotoOutputDelegateClass : public ObjCClass<NSObject>
             {
             public:
                 PhotoOutputDelegateClass() : ObjCClass<NSObject> ("PhotoOutputDelegateClass_")
@@ -820,6 +820,7 @@ private:
                     JUCE_CAMERA_LOG ("didFinishCaptureForSettings(), error = " + errorString);
                 }
 
+                API_AVAILABLE (ios (11.0))
                 static void didFinishProcessingPhoto (id self, SEL, AVCapturePhotoOutput*, AVCapturePhoto* capturePhoto, NSError* error)
                 {
                     getOwner (self).takingPicture = false;

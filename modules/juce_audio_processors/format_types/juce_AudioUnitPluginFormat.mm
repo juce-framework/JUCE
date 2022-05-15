@@ -287,7 +287,7 @@ namespace AudioUnitFormatHelpers
                     NSBundle* bundle = [[NSBundle alloc] initWithPath: (NSString*) fileOrIdentifier.toCFString()];
 
                     NSArray* audioComponents = [bundle objectForInfoDictionaryKey: @"AudioComponents"];
-                    NSDictionary* dict = audioComponents[0];
+                    NSDictionary* dict = [audioComponents objectAtIndex: 0];
 
                     desc.componentManufacturer = stringToOSType (nsStringToJuce ((NSString*) [dict valueForKey: @"manufacturer"]));
                     desc.componentType         = stringToOSType (nsStringToJuce ((NSString*) [dict valueForKey: @"type"]));
@@ -436,6 +436,14 @@ namespace AudioUnitFormatHelpers
         */
         std::vector<size_t> channels;
     };
+
+    static bool isPluginAUv3 (const AudioComponentDescription& desc)
+    {
+        if (@available (macOS 10.11, *))
+            return (desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0;
+
+        return false;
+    }
 }
 
 //==============================================================================
@@ -656,7 +664,7 @@ public:
 
         AudioComponentGetDescription (auComponent, &componentDesc);
 
-        isAUv3 = ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
+        isAUv3 = AudioUnitFormatHelpers::isPluginAUv3 (componentDesc);
 
         wantsMidiMessages = componentDesc.componentType == kAudioUnitType_MusicDevice
                          || componentDesc.componentType == kAudioUnitType_MusicEffect
@@ -2577,7 +2585,10 @@ private:
     {
         const auto viewSize = [&controller]
         {
-            auto size = [controller preferredContentSize];
+            auto size = CGSizeZero;
+
+            if (@available (macOS 10.11, *))
+                size = [controller preferredContentSize];
 
             if (size.width == 0 || size.height == 0)
                 size = controller.view.frame.size;
@@ -2886,12 +2897,15 @@ void AudioUnitPluginFormat::createPluginInstance (const PluginDescription& desc,
 
         auto callbackBlock = new AUAsyncInitializationCallback (rate, blockSize, std::move (callback));
 
-        if ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0)
+        if (AudioUnitFormatHelpers::isPluginAUv3 (componentDesc))
         {
-            AudioComponentInstantiate (auComponent, kAudioComponentInstantiation_LoadOutOfProcess,
-                                       callbackBlock->getBlock());
+            if (@available (macOS 10.11, *))
+            {
+                AudioComponentInstantiate (auComponent, kAudioComponentInstantiation_LoadOutOfProcess,
+                                           callbackBlock->getBlock());
 
-            return;
+                return;
+            }
         }
 
         AudioComponentInstance audioUnit;
@@ -2915,8 +2929,10 @@ bool AudioUnitPluginFormat::requiresUnblockedMessageThreadDuringCreation (const 
                                                                 pluginName, version, manufacturer))
     {
         if (AudioComponent auComp = AudioComponentFindNext (nullptr, &componentDesc))
+        {
             if (AudioComponentGetDescription (auComp, &componentDesc) == noErr)
-                return ((componentDesc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
+                return AudioUnitFormatHelpers::isPluginAUv3 (componentDesc);
+        }
     }
 
     return false;
@@ -2948,11 +2964,7 @@ StringArray AudioUnitPluginFormat::searchPathsForPlugins (const FileSearchPath&,
              || desc.componentType == kAudioUnitType_Mixer
              || desc.componentType == kAudioUnitType_MIDIProcessor)
         {
-            ignoreUnused (allowPluginsWhichRequireAsynchronousInstantiation);
-
-            const auto isAUv3 = ((desc.componentFlags & kAudioComponentFlag_IsV3AudioUnit) != 0);
-
-            if (allowPluginsWhichRequireAsynchronousInstantiation || ! isAUv3)
+            if (allowPluginsWhichRequireAsynchronousInstantiation || ! AudioUnitFormatHelpers::isPluginAUv3 (desc))
                 result.add (AudioUnitFormatHelpers::createPluginIdentifier (desc));
         }
     }

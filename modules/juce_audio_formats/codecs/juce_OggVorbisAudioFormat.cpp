@@ -49,7 +49,8 @@ namespace OggVorbisNamespace
                                       "-Wredundant-decls",
                                       "-Wmisleading-indentation",
                                       "-Wmissing-prototypes",
-                                      "-Wcast-align")
+                                      "-Wcast-align",
+                                      "-Wmaybe-uninitialized")
  JUCE_BEGIN_NO_SANITIZE ("undefined")
 
  #include "oggvorbis/vorbisenc.h"

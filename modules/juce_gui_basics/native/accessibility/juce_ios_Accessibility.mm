@@ -41,31 +41,6 @@ namespace juce
  #define JUCE_IOS_CONTAINER_API_AVAILABLE 1
 #endif
 
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
-
-constexpr auto juceUIAccessibilityContainerTypeNone =
-                   #if JUCE_IOS_CONTAINER_API_AVAILABLE
-                    UIAccessibilityContainerTypeNone;
-                   #else
-                    0;
-                   #endif
-
-constexpr auto juceUIAccessibilityContainerTypeDataTable =
-                   #if JUCE_IOS_CONTAINER_API_AVAILABLE
-                    UIAccessibilityContainerTypeDataTable;
-                   #else
-                    1;
-                   #endif
-
-constexpr auto juceUIAccessibilityContainerTypeList =
-                   #if JUCE_IOS_CONTAINER_API_AVAILABLE
-                    UIAccessibilityContainerTypeList;
-                   #else
-                    2;
-                   #endif
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 //==============================================================================
@@ -164,7 +139,12 @@ private:
             if (auto* handler = getHandler (self))
             {
                 if (handler->getTableInterface() != nullptr)
-                    return juceUIAccessibilityContainerTypeDataTable;
+                {
+                    if (@available (iOS 11.0, *))
+                        return UIAccessibilityContainerTypeDataTable;
+
+                    return 1; // UIAccessibilityContainerTypeDataTable
+                }
 
                 const auto role = handler->getRole();
 
@@ -172,11 +152,17 @@ private:
                     || role == AccessibilityRole::list
                     || role == AccessibilityRole::tree)
                 {
-                    return juceUIAccessibilityContainerTypeList;
+                    if (@available (iOS 11.0, *))
+                        return UIAccessibilityContainerTypeList;
+
+                    return 2; // UIAccessibilityContainerTypeList
                 }
             }
 
-            return juceUIAccessibilityContainerTypeNone;
+            if (@available (iOS 11.0, *))
+                return UIAccessibilityContainerTypeNone;
+
+            return 0; // UIAccessibilityContainerTypeNone
         }
     };
 
