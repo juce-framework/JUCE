@@ -67,7 +67,7 @@ namespace MidiBufferHelpers
         if (byte >= 0x80)
             return jmin (maxBytes, MidiMessage::getMessageLengthFromFirstByte ((uint8) byte));
 
-        return maxBytes;
+        return 0;
     }
 
     static uint8* findEventAfter (uint8* d, uint8* endData, int samplePosition) noexcept
