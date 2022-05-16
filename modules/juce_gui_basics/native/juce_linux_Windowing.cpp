@@ -92,14 +92,8 @@ public:
     }
 
     //==============================================================================
-    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
+    void forceSetBounds (const Rectangle<int>& correctedNewBounds, bool isNowFullScreen)
     {
-        const auto correctedNewBounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
-                                                            jmax (1, newBounds.getHeight()));
-
-        if (bounds == correctedNewBounds && fullScreen == isNowFullScreen)
-            return;
-
         bounds = correctedNewBounds;
 
         updateScaleFactorFromNewBounds (bounds, false);
@@ -118,6 +112,15 @@ public:
             updateBorderSize();
             handleMovedOrResized();
         }
+    }
+
+    void setBounds (const Rectangle<int>& newBounds, bool isNowFullScreen) override
+    {
+        const auto correctedNewBounds = newBounds.withSize (jmax (1, newBounds.getWidth()),
+                                                            jmax (1, newBounds.getHeight()));
+
+        if (bounds != correctedNewBounds || fullScreen != isNowFullScreen)
+            forceSetBounds (correctedNewBounds, isNowFullScreen);
     }
 
     Point<int> getScreenPosition (bool physical) const
@@ -434,12 +437,31 @@ private:
 
             if (! totalArea.isEmpty())
             {
-                if (image.isNull() || image.getWidth() < totalArea.getWidth()
+                const auto wasImageNull = image.isNull();
+
+                if (wasImageNull || image.getWidth() < totalArea.getWidth()
                      || image.getHeight() < totalArea.getHeight())
                 {
                     image = XWindowSystem::getInstance()->createImage (isSemiTransparentWindow,
                                                                        totalArea.getWidth(), totalArea.getHeight(),
                                                                        useARGBImagesForRendering);
+                    if (wasImageNull)
+                    {
+                        // After calling createImage() XWindowSystem::getWindowBounds() will return
+                        // changed coordinates that look like the result of some position
+                        // defaulting mechanism. If we handle a configureNotifyEvent after
+                        // createImage() and before we would issue new, valid coordinates, we will
+                        // apply these default, unwanted coordinates to our window. To avoid that
+                        // we immediately send another positioning message to guarantee that the
+                        // next configureNotifyEvent will read valid values.
+                        //
+                        // This issue only occurs right after peer creation, when the image is
+                        // null. Updating when only the width or height is changed would lead to
+                        // incorrect behaviour.
+                        peer.forceSetBounds (ScalingHelpers::scaledScreenPosToUnscaled (peer.component,
+                                                                                        peer.component.getBoundsInParent()),
+                                             peer.isFullScreen());
+                    }
                 }
 
                 startTimer (repaintTimerPeriod);
