@@ -752,6 +752,16 @@ void Component::addToDesktop (int styleWanted, void* nativeWindowToAttachTo)
             peer->setConstrainer (currentConstrainer);
 
             repaint();
+
+           #if JUCE_LINUX
+            // Creating the peer Image on Linux will change the reported position of the window. If
+            // the Image creation is interleaved with the coming configureNotifyEvents the window
+            // will appear in the wrong position. To avoid this, we force the Image creation here,
+            // before handling any of the configureNotifyEvents. The Linux implementation of
+            // performAnyPendingRepaintsNow() will force update the peer position if necessary.
+            peer->performAnyPendingRepaintsNow();
+           #endif
+
             internalHierarchyChanged();
 
             if (auto* handler = getAccessibilityHandler())
