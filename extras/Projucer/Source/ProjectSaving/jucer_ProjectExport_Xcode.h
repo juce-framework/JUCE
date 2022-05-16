@@ -1602,6 +1602,7 @@ public:
                 s.set ("GCC_FAST_MATH", "YES");
 
             auto recommendedWarnings = config.getRecommendedCompilerWarningFlags();
+            recommendedWarnings.common.addArray (recommendedWarnings.objc);
             recommendedWarnings.cpp.addArray (recommendedWarnings.common);
 
             struct XcodeWarningFlags

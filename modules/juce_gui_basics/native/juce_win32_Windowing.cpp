@@ -1869,9 +1869,14 @@ public:
             OnScreenKeyboard::getInstance()->activate();
     }
 
-    void dismissPendingTextInput() override
+    void closeInputMethodContext() override
     {
         imeHandler.handleSetContext (hwnd, false);
+    }
+
+    void dismissPendingTextInput() override
+    {
+        closeInputMethodContext();
 
         if (uwpViewSettings.isTabletModeActivatedForWindow (hwnd))
             OnScreenKeyboard::getInstance()->deactivate();

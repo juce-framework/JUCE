@@ -38,7 +38,9 @@ elseif((CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR (CMAKE_CXX_COMPILER_ID STREQU
         $<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:OBJCXX>>:
             -Wzero-as-null-pointer-constant -Wunused-private-field
             -Woverloaded-virtual -Wreorder
-            -Winconsistent-missing-destructor-override>)
+            -Winconsistent-missing-destructor-override>
+        $<$<OR:$<COMPILE_LANGUAGE:OBJC>,$<COMPILE_LANGUAGE:OBJCXX>>:
+            -Wunguarded-availability -Wunguarded-availability-new>)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(juce_recommended_warning_flags INTERFACE
         -Wall -Wextra -Wpedantic -Wstrict-aliasing -Wuninitialized

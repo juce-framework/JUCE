@@ -290,8 +290,7 @@ public:
                 return result;
             }
 
-            StringArray common;
-            StringArray cpp;
+            StringArray common, cpp, objc;
         };
 
         CompilerWarningFlags getRecommendedCompilerWarningFlags() const;

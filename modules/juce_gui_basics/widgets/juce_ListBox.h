@@ -594,6 +594,7 @@ private:
     int lastRowSelected = -1;
     bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true;
 
+    void assignModelPtr (ListBoxModel*);
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool hasAccessibleHeaderComponent() const;
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,
