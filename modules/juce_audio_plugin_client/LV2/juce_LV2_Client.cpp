@@ -113,9 +113,18 @@ public:
         processor.removeListener (this);
     }
 
-    static String getUri (const AudioProcessorParameter& param)
+    /*  This is the string that will be used to uniquely identify the parameter.
+
+        This string will be written into the plugin's manifest as an IRI, so it must be
+        syntactically valid.
+
+        We escape this string rather than writing the user-defined parameter ID directly to avoid
+        writing a malformed manifest in the case that user IDs contain spaces or other reserved
+        characters. This should allow users to keep the same param IDs for all plugin formats.
+    */
+    static String getIri (const AudioProcessorParameter& param)
     {
-        return LegacyAudioParameter::getParamID (&param, false);
+        return URL::addEscapeChars (LegacyAudioParameter::getParamID (&param, false), true);
     }
 
     void setValueFromHost (LV2_URID urid, float value) noexcept
@@ -203,7 +212,7 @@ private:
         {
             jassert ((size_t) param->getParameterIndex() == result.size());
 
-            const auto uri  = JucePlugin_LV2URI + String (uriSeparator) + getUri (*param);
+            const auto uri  = JucePlugin_LV2URI + String (uriSeparator) + getIri (*param);
             const auto urid = mapFeature.map (mapFeature.handle, uri.toRawUTF8());
             result.push_back (urid);
         }
@@ -985,7 +994,7 @@ private:
         const auto parameterVisitor = [&] (const String& symbol,
                                            const AudioProcessorParameter& param)
         {
-            os << "plug:" << ParameterStorage::getUri (param) << "\n"
+            os << "plug:" << ParameterStorage::getIri (param) << "\n"
                   "\ta lv2:Parameter ;\n"
                   "\trdfs:label \"" << param.getName (1024) << "\" ;\n";
 
@@ -1143,7 +1152,7 @@ private:
 
                 for (const auto* param : legacyParameters)
                 {
-                    os << (isFirst ? "" : " ,") << "\n\t\tplug:" << ParameterStorage::getUri (*param);
+                    os << (isFirst ? "" : " ,") << "\n\t\tplug:" << ParameterStorage::getIri (*param);
                     isFirst = false;
                 }
 
