@@ -145,6 +145,16 @@ public:
                  other.right  + right };
     }
 
+    /** Multiplies each member of the border by a scalar. */
+    template <typename ScalarType>
+    BorderSize<ValueType> multipliedBy (ScalarType scalar) const noexcept
+    {
+        return { static_cast<ValueType> (scalar * top),
+                 static_cast<ValueType> (scalar * left),
+                 static_cast<ValueType> (scalar * bottom),
+                 static_cast<ValueType> (scalar * right) };
+    }
+
     //==============================================================================
     bool operator== (const BorderSize& other) const noexcept { return tie() == other.tie(); }
     bool operator!= (const BorderSize& other) const noexcept { return tie() != other.tie(); }

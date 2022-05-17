@@ -380,7 +380,13 @@ public:
         else if (! windowBorder
                  || ((*windowBorder).getTopAndBottom() == 0 && (*windowBorder).getLeftAndRight() == 0))
         {
-            windowBorder = XWindowSystem::getInstance()->getBorderSize (windowH);
+            windowBorder = [&]()
+            {
+                if (auto unscaledBorderSize = XWindowSystem::getInstance()->getBorderSize (windowH))
+                    return OptionalBorderSize { (*unscaledBorderSize).multipliedBy (1.0 / currentScaleFactor) };
+
+                return OptionalBorderSize {};
+            }();
         }
     }
 
