@@ -172,6 +172,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_Variant.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_common_MimeTypes.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
@@ -236,6 +239,9 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.cpp">
+      <ExcludedFromBuild>true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_AndroidDocument.cpp">
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Files.cpp">
@@ -475,6 +481,8 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SortedSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_SparseSet.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Variant.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_AndroidDocument.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_common_MimeTypes.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_File.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_FileFilter.h"/>
