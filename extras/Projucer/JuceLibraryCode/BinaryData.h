@@ -207,7 +207,7 @@ namespace BinaryData
     const int            colourscheme_light_xmlSize = 1050;
 
     extern const char*   juce_runtime_arch_detection_cpp;
-    const int            juce_runtime_arch_detection_cppSize = 2760;
+    const int            juce_runtime_arch_detection_cppSize = 3005;
 
     // Number of elements in the namedResourceList and originalFileNames arrays.
     const int namedResourceListSize = 67;

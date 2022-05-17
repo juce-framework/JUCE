@@ -8466,13 +8466,20 @@ static const unsigned char temp_binary_data_66[] =
 "/*\r\n"
 "  ==============================================================================\r\n"
 "\r\n"
-"   This file is part of the JUCE 7 technical preview.\r\n"
+"   This file is part of the JUCE library.\r\n"
 "   Copyright (c) 2022 - Raw Material Software Limited\r\n"
 "\r\n"
-"   You may use this code under the terms of the GPL v3\r\n"
-"   (see www.gnu.org/licenses).\r\n"
+"   JUCE is an open source library subject to commercial or open-source\r\n"
+"   licensing.\r\n"
 "\r\n"
-"   For the technical preview this file cannot be licensed commercially.\r\n"
+"   By using JUCE, you agree to the terms of both the JUCE 7 End-User License\r\n"
+"   Agreement and JUCE Privacy Policy.\r\n"
+"\r\n"
+"   End User License Agreement: www.juce.com/juce-7-licence\r\n"
+"   Privacy Policy: www.juce.com/juce-privacy-policy\r\n"
+"\r\n"
+"   Or: You may also use this code under the terms of the GPL v3 (see\r\n"
+"   www.gnu.org/licenses).\r\n"
 "\r\n"
 "   JUCE IS PROVIDED \"AS IS\" WITHOUT ANY WARRANTY, AND ALL WARRANTIES, WHETHER\r\n"
 "   EXPRESSED OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR PURPOSE, ARE\r\n"
@@ -8621,7 +8628,7 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0x0b16e320:  numBytes = 517; return jucer_PIPTemplate_h;
         case 0x763d39dc:  numBytes = 1050; return colourscheme_dark_xml;
         case 0xe8b08520:  numBytes = 1050; return colourscheme_light_xml;
-        case 0x7c03d519:  numBytes = 2760; return juce_runtime_arch_detection_cpp;
+        case 0x7c03d519:  numBytes = 3005; return juce_runtime_arch_detection_cpp;
         default: break;
     }
 
