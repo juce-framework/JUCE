@@ -658,7 +658,7 @@ public:
 
         const auto index = strings.size();
         indices.insert (it, index);
-        strings.emplace_back (uri);
+        strings.push_back (uriString);
         return static_cast<LV2_URID> (index + 1);
     }
 
