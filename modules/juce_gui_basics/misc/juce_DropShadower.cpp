@@ -82,8 +82,7 @@ public:
     ParentVisibilityChangedListener (Component& r, ComponentListener& l)
         : root (&r), listener (&l)
     {
-        if (auto* firstParent = root->getParentComponent())
-            updateParentHierarchy (firstParent);
+        updateParentHierarchy();
 
         if ((SystemStats::getOperatingSystemType() & SystemStats::Windows) != 0)
         {
@@ -99,16 +98,16 @@ public:
                 comp->removeComponentListener (this);
     }
 
-    void componentVisibilityChanged (Component&) override
+    void componentVisibilityChanged (Component& component) override
     {
-        listener->componentVisibilityChanged (*root);
+        if (root != &component)
+            listener->componentVisibilityChanged (*root);
     }
 
     void componentParentHierarchyChanged (Component& component) override
     {
         if (root == &component)
-            if (auto* firstParent = root->getParentComponent())
-                updateParentHierarchy (firstParent);
+            updateParentHierarchy();
     }
 
     bool isWindowOnVirtualDesktop() const noexcept  { return isOnVirtualDesktop; }
@@ -129,13 +128,13 @@ private:
         WeakReference<Component> ref;
     };
 
-    void updateParentHierarchy (Component* rootComponent)
+    void updateParentHierarchy()
     {
         const auto lastSeenComponents = std::exchange (observedComponents, [&]
         {
             std::set<ComponentWithWeakReference> result;
 
-            for (auto node = rootComponent; node != nullptr; node = node->getParentComponent())
+            for (auto node = root; node != nullptr; node = node->getParentComponent())
                 result.emplace (*node);
 
             return result;
