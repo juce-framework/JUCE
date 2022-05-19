@@ -942,6 +942,8 @@ public:
 
     void dismissPendingTextInput() override
     {
+        closeInputMethodContext();
+
         view.callVoidMethod (ComponentPeerView.showKeyboard, javaString ("").get());
 
         if (! isTimerRunning())

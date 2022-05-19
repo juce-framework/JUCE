@@ -34,12 +34,15 @@ ComponentPeer::ComponentPeer (Component& comp, int flags)
       styleFlags (flags),
       uniqueID (lastUniquePeerID += 2) // increment by 2 so that this can never hit 0
 {
-    Desktop::getInstance().peers.add (this);
+    auto& desktop = Desktop::getInstance();
+    desktop.peers.add (this);
+    desktop.addFocusChangeListener (this);
 }
 
 ComponentPeer::~ComponentPeer()
 {
     auto& desktop = Desktop::getInstance();
+    desktop.removeFocusChangeListener (this);
     desktop.peers.removeFirstMatchingValue (this);
     desktop.triggerFocusCallback();
 }
@@ -260,6 +263,19 @@ void ComponentPeer::handleModifierKeysChange()
         target = &component;
 
     target->internalModifierKeysChanged();
+}
+
+void ComponentPeer::refreshTextInputTarget()
+{
+    const auto* lastTarget = std::exchange (textInputTarget, findCurrentTextInputTarget());
+
+    if (lastTarget == textInputTarget)
+        return;
+
+    if (textInputTarget == nullptr)
+        dismissPendingTextInput();
+    else if (auto* c = Component::getCurrentlyFocusedComponent())
+        textInputRequired (globalToLocal (c->getScreenPosition()), *textInputTarget);
 }
 
 TextInputTarget* ComponentPeer::findCurrentTextInputTarget()
@@ -589,6 +605,11 @@ ModifierKeys ComponentPeer::getCurrentModifiersRealtime() noexcept
 void ComponentPeer::forceDisplayUpdate()
 {
     Desktop::getInstance().displays->refresh();
+}
+
+void ComponentPeer::globalFocusChanged (Component*)
+{
+    refreshTextInputTarget();
 }
 
 } // namespace juce
