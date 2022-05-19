@@ -4107,13 +4107,18 @@ private:
         {
             if (compositionInProgress && ! windowIsActive)
             {
-                compositionInProgress = false;
-
                 if (HIMC hImc = ImmGetContext (hWnd))
                 {
                     ImmNotifyIME (hImc, NI_COMPOSITIONSTR, CPS_COMPLETE, 0);
                     ImmReleaseContext (hWnd, hImc);
                 }
+
+                // If the composition is still in progress, calling ImmNotifyIME may call back
+                // into handleComposition to let us know that the composition has finished.
+                // We need to set compositionInProgress *after* calling handleComposition, so that
+                // the text replaces the current selection, rather than being inserted after the
+                // caret.
+                compositionInProgress = false;
             }
         }
 

@@ -40,7 +40,7 @@ namespace juce
 
     @tags{GUI}
 */
-class JUCE_API  ComponentPeer
+class JUCE_API  ComponentPeer : private FocusChangeListener
 {
 public:
     //==============================================================================
@@ -131,7 +131,7 @@ public:
     ComponentPeer (Component& component, int styleFlags);
 
     /** Destructor. */
-    virtual ~ComponentPeer();
+    ~ComponentPeer() override;
 
     //==============================================================================
     /** Returns the component being represented by this peer. */
@@ -352,25 +352,19 @@ public:
     /** Called whenever a modifier key is pressed or released. */
     void handleModifierKeysChange();
 
-    //==============================================================================
-    /** Tells the window that text input may be required at the given position.
-        This may cause things like a virtual on-screen keyboard to appear, depending
-        on the OS.
-    */
-    virtual void textInputRequired (Point<int> position, TextInputTarget&) = 0;
-
     /** If there's a currently active input-method context - i.e. characters are being
         composed using multiple keystrokes - this should commit the current state of the
-        context to the text and clear the context.
+        context to the text and clear the context. This should not hide the virtual keyboard.
     */
     virtual void closeInputMethodContext();
 
-    /** If there's some kind of OS input-method in progress, this should dismiss it.
+    /** Alerts the peer that the current text input target has changed somehow.
 
-        Overrides of this function should call closeInputMethodContext().
+        The peer may hide or show the virtual keyboard as a result of this call.
     */
-    virtual void dismissPendingTextInput();
+    void refreshTextInputTarget();
 
+    //==============================================================================
     /** Returns the currently focused TextInputTarget, or null if none is found. */
     TextInputTarget* findCurrentTextInputTarget();
 
@@ -532,10 +526,30 @@ private:
     //==============================================================================
     virtual void appStyleChanged() {}
 
+    /** Tells the window that text input may be required at the given position.
+        This may cause things like a virtual on-screen keyboard to appear, depending
+        on the OS.
+
+        This function should not be called directly by Components - use refreshTextInputTarget
+        instead.
+    */
+    virtual void textInputRequired (Point<int>, TextInputTarget&) = 0;
+
+    /** If there's some kind of OS input-method in progress, this should dismiss it.
+
+        Overrides of this function should call closeInputMethodContext().
+
+        This function should not be called directly by Components - use refreshTextInputTarget
+        instead.
+    */
+    virtual void dismissPendingTextInput();
+
+    void globalFocusChanged (Component*) override;
     Component* getTargetForKeyPress();
 
     WeakReference<Component> lastFocusedComponent, dragAndDropTargetComponent;
     Component* lastDragAndDropCompUnderMouse = nullptr;
+    TextInputTarget* textInputTarget = nullptr;
     const uint32 uniqueID;
     bool isWindowMinimised = false;
 

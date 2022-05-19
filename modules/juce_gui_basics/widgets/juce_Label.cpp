@@ -208,9 +208,6 @@ void Label::editorShown (TextEditor* textEditor)
 
 void Label::editorAboutToBeHidden (TextEditor* textEditor)
 {
-    if (auto* peer = getPeer())
-        peer->dismissPendingTextInput();
-
     Component::BailOutChecker checker (this);
     listeners.callChecked (checker, [this, textEditor] (Label::Listener& l) { l.editorHidden (this, *textEditor); });
 
