@@ -411,12 +411,8 @@ ColourSelector::ColourSelector (int sectionsToShow, int edge, int gapAroundColou
 
         sliders[3]->setVisible ((flags & showAlphaChannel) != 0);
 
-        // VS2015 needs some scoping braces around this if statement to
-        // avoid a compiler bug.
         for (auto& slider : sliders)
-        {
             slider->onValueChange = [this] { changeColour(); };
-        }
     }
 
     if ((flags & showColourspace) != 0)
