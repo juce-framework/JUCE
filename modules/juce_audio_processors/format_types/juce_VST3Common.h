@@ -703,7 +703,8 @@ private:
             auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
             const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
 
-            if (anyChannelIsNull || ((int) mapIterator->size() != it->numChannels))
+            // Null channels are allowed if the bus is inactive
+            if ((mapIterator->isActive() && anyChannelIsNull) || ((int) mapIterator->size() != it->numChannels))
                 return false;
         }
 
