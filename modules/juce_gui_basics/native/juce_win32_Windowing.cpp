@@ -1252,93 +1252,6 @@ __CRT_UUID_DECL (juce::ITipInvocation, 0x37c994e7, 0x432b, 0x4834, 0xa2, 0xf7, 0
 namespace juce
 {
 
-struct OnScreenKeyboard   : public DeletedAtShutdown,
-                            private Timer
-{
-    void activate()
-    {
-        shouldBeActive = true;
-        startTimer (10);
-    }
-
-    void deactivate()
-    {
-        shouldBeActive = false;
-        startTimer (10);
-    }
-
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED (OnScreenKeyboard, false)
-
-private:
-    OnScreenKeyboard()
-    {
-        tipInvocation.CoCreateInstance (ITipInvocation::getCLSID(), CLSCTX_INPROC_HANDLER | CLSCTX_LOCAL_SERVER);
-    }
-
-    ~OnScreenKeyboard() override
-    {
-        clearSingletonInstance();
-    }
-
-    void timerCallback() override
-    {
-        stopTimer();
-
-        if (reentrant || tipInvocation == nullptr)
-            return;
-
-        const ScopedValueSetter<bool> setter (reentrant, true, false);
-
-        auto isActive = isKeyboardVisible();
-
-        if (isActive != shouldBeActive)
-        {
-            if (! isActive)
-            {
-                tipInvocation->Toggle (GetDesktopWindow());
-            }
-            else
-            {
-                if (auto hwnd = FindWindow (L"IPTip_Main_Window", nullptr))
-                    PostMessage (hwnd, WM_SYSCOMMAND, (int) SC_CLOSE, 0);
-            }
-        }
-    }
-
-    bool isVisible()
-    {
-        if (auto hwnd = FindWindowEx (nullptr, nullptr, L"ApplicationFrameWindow", nullptr))
-            return FindWindowEx (hwnd, nullptr, L"Windows.UI.Core.CoreWindow", L"Microsoft Text Input Application") != nullptr;
-
-        return false;
-    }
-
-    bool isVisibleLegacy()
-    {
-        if (auto hwnd = FindWindow (L"IPTip_Main_Window", nullptr))
-        {
-            auto style = GetWindowLong (hwnd, GWL_STYLE);
-            return (style & WS_DISABLED) == 0 && (style & WS_VISIBLE) != 0;
-        }
-
-        return false;
-    }
-
-    bool isKeyboardVisible()
-    {
-        if (isVisible())
-            return true;
-
-        // isVisible() may fail on Win10 versions < 1709 so try the old method too
-        return isVisibleLegacy();
-    }
-
-    bool shouldBeActive = false, reentrant = false;
-    ComSmartPtr<ITipInvocation> tipInvocation;
-};
-
-JUCE_IMPLEMENT_SINGLETON (OnScreenKeyboard)
-
 //==============================================================================
 struct HSTRING_PRIVATE;
 typedef HSTRING_PRIVATE* HSTRING;
@@ -1418,30 +1331,6 @@ struct UWPUIViewSettings
         }
     }
 
-    bool isTabletModeActivatedForWindow (::HWND hWnd) const
-    {
-        if (viewSettingsInterop == nullptr)
-            return false;
-
-        ComSmartPtr<IUIViewSettings> viewSettings;
-
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-
-        if (viewSettingsInterop->GetForWindow (hWnd, __uuidof (IUIViewSettings),
-                                               (void**) viewSettings.resetAndGetPointerAddress()) == S_OK
-             && viewSettings != nullptr)
-        {
-            IUIViewSettings::UserInteractionMode mode;
-
-            if (viewSettings->GetUserInteractionMode (&mode) == S_OK)
-                return mode == IUIViewSettings::Touch;
-        }
-
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-        return false;
-    }
-
 private:
     //==============================================================================
     struct ComBaseModule
@@ -1496,8 +1385,6 @@ public:
 
         setTitle (component.getName());
         updateShadower();
-
-        OnScreenKeyboard::getInstance();
 
         getNativeRealtimeModifiers = []
         {
@@ -1857,16 +1744,22 @@ public:
     void textInputRequired (Point<int>, TextInputTarget&) override
     {
         if (! hasCreatedCaret)
+            hasCreatedCaret = CreateCaret (hwnd, (HBITMAP) 1, 0, 0);
+
+        if (hasCreatedCaret)
         {
-            hasCreatedCaret = true;
-            CreateCaret (hwnd, (HBITMAP) 1, 0, 0);
+            SetCaretPos (0, 0);
+            ShowCaret (hwnd);
         }
 
-        ShowCaret (hwnd);
-        SetCaretPos (0, 0);
+        ImmAssociateContext (hwnd, nullptr);
 
-        if (uwpViewSettings.isTabletModeActivatedForWindow (hwnd))
-            OnScreenKeyboard::getInstance()->activate();
+        // MSVC complains about the nullptr argument, but the docs for this
+        // function say that the second argument is ignored when the third
+        // argument is IACE_DEFAULT.
+        JUCE_BEGIN_IGNORE_WARNINGS_MSVC (6387)
+        ImmAssociateContextEx (hwnd, nullptr, IACE_DEFAULT);
+        JUCE_END_IGNORE_WARNINGS_MSVC
     }
 
     void closeInputMethodContext() override
@@ -1878,8 +1771,10 @@ public:
     {
         closeInputMethodContext();
 
-        if (uwpViewSettings.isTabletModeActivatedForWindow (hwnd))
-            OnScreenKeyboard::getInstance()->deactivate();
+        ImmAssociateContext (hwnd, nullptr);
+
+        if (std::exchange (hasCreatedCaret, false))
+            DestroyCaret();
     }
 
     void repaint (const Rectangle<int>& area) override
