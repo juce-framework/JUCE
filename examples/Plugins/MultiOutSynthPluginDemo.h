@@ -123,6 +123,10 @@ public:
             auto midiChannelBuffer = filterMidiMessagesForChannel (midiBuffer, busNr + 1);
             auto audioBusBuffer = getBusBuffer (buffer, false, busNr);
 
+            // Voices add to the contents of the buffer. Make sure the buffer is clear before
+            // rendering, just in case the host left old data in the buffer.
+            audioBusBuffer.clear();
+
             synth [busNr]->renderNextBlock (audioBusBuffer, midiChannelBuffer, 0, audioBusBuffer.getNumSamples());
         }
     }
@@ -146,11 +150,15 @@ public:
 
     bool isBusesLayoutSupported (const BusesLayout& layout) const override
     {
-        for (const auto& bus : layout.outputBuses)
-            if (bus != AudioChannelSet::stereo())
-                return false;
+        const auto& outputs = layout.outputBuses;
 
-        return layout.inputBuses.isEmpty() && 1 <= layout.outputBuses.size();
+        return layout.inputBuses.isEmpty()
+            && 1 <= outputs.size()
+            && outputs.getFirst() != AudioChannelSet::disabled()
+            && std::all_of (outputs.begin(), outputs.end(), [] (const auto& bus)
+               {
+                   return bus == AudioChannelSet::stereo() || bus == AudioChannelSet::disabled();
+               });
     }
 
     //==============================================================================
