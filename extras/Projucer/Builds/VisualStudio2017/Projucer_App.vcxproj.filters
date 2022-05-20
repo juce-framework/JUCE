@@ -2304,9 +2304,6 @@
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CLion.h">
-      <Filter>Projucer\ProjectSaving</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
@@ -3837,9 +3834,6 @@
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_android.svg">
-      <Filter>Projucer\BinaryData\Icons</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\Icons\export_clion.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_codeBlocks.svg">

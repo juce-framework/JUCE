@@ -24,7 +24,6 @@
 */
 
 #include "jucer_ProjectSaver.h"
-#include "jucer_ProjectExport_CLion.h"
 #include "../Application/jucer_Application.h"
 
 static constexpr const char* generatedGroupID = "__jucelibfiles";
@@ -745,7 +744,6 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
     // keep a copy of the basic generated files group, as each exporter may modify it.
     auto originalGeneratedGroup = generatedFilesGroup.state.createCopy();
 
-    CLionProjectExporter* clionExporter = nullptr;
     std::vector<std::unique_ptr<ProjectExporter>> exporters;
 
     try
@@ -764,26 +762,19 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
 
             if (exporter->getTargetFolder().createDirectory())
             {
-                if (exporter->isCLion())
-                {
-                    clionExporter = dynamic_cast<CLionProjectExporter*> (exporter.get());
-                }
-                else
-                {
-                    exporter->copyMainGroupFromProject();
-                    exporter->settings = exporter->settings.createCopy();
+                exporter->copyMainGroupFromProject();
+                exporter->settings = exporter->settings.createCopy();
 
-                    exporter->addToExtraSearchPaths (build_tools::RelativePath ("JuceLibraryCode", build_tools::RelativePath::projectFolder));
+                exporter->addToExtraSearchPaths (build_tools::RelativePath ("JuceLibraryCode", build_tools::RelativePath::projectFolder));
 
-                    generatedFilesGroup.state = originalGeneratedGroup.createCopy();
-                    exporter->addSettingsForProjectType (project.getProjectType());
+                generatedFilesGroup.state = originalGeneratedGroup.createCopy();
+                exporter->addSettingsForProjectType (project.getProjectType());
 
-                    for (auto* module : modules)
-                        module->addSettingsForModuleToExporter (*exporter, *this);
+                for (auto* module : modules)
+                    module->addSettingsForModuleToExporter (*exporter, *this);
 
-                    generatedFilesGroup.sortAlphabetically (true, true);
-                    exporter->getAllGroups().add (generatedFilesGroup);
-                }
+                generatedFilesGroup.sortAlphabetically (true, true);
+                exporter->getAllGroups().add (generatedFilesGroup);
 
                 if (ProjucerApplication::getApp().isRunningCommandLine)
                     saveExporter (*exporter, modules);
@@ -803,14 +794,6 @@ void ProjectSaver::writeProjects (const OwnedArray<LibraryModule>& modules, Proj
 
     while (threadPool.getNumJobs() > 0)
         Thread::sleep (10);
-
-    if (clionExporter != nullptr)
-    {
-        for (auto& exporter : exporters)
-            clionExporter->writeCMakeListsExporterSection (exporter.get());
-
-        std::cout << "Finished saving: " << clionExporter->getUniqueName() << std::endl;
-    }
 }
 
 void ProjectSaver::runPostExportScript()
@@ -859,15 +842,12 @@ void ProjectSaver::saveExporter (ProjectExporter& exporter, const OwnedArray<Lib
     {
         exporter.create (modules);
 
-        if (! exporter.isCLion())
-        {
-            auto outputString = "Finished saving: " + exporter.getUniqueName();
+        auto outputString = "Finished saving: " + exporter.getUniqueName();
 
-            if (MessageManager::getInstance()->isThisTheMessageThread())
-                std::cout <<  outputString << std::endl;
-            else
-                MessageManager::callAsync ([outputString] { std::cout <<  outputString << std::endl; });
-        }
+        if (MessageManager::getInstance()->isThisTheMessageThread())
+            std::cout <<  outputString << std::endl;
+        else
+            MessageManager::callAsync ([outputString] { std::cout <<  outputString << std::endl; });
     }
     catch (build_tools::SaveError& error)
     {

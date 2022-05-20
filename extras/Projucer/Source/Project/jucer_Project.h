@@ -48,7 +48,6 @@ namespace ProjectMessages
         DECLARE_ID (jucerFileModified);
         DECLARE_ID (missingModuleDependencies);
         DECLARE_ID (oldProjucer);
-        DECLARE_ID (cLion);
         DECLARE_ID (newVersionAvailable);
         DECLARE_ID (pluginCodeInvalid);
         DECLARE_ID (manufacturerCodeInvalid);
@@ -65,7 +64,7 @@ namespace ProjectMessages
     {
         static Identifier warnings[] = { Ids::incompatibleLicense, Ids::cppStandard, Ids::moduleNotFound,
                                          Ids::jucePath, Ids::jucerFileModified, Ids::missingModuleDependencies,
-                                         Ids::oldProjucer, Ids::cLion, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid };
+                                         Ids::oldProjucer, Ids::pluginCodeInvalid, Ids::manufacturerCodeInvalid };
 
         if (std::find (std::begin (warnings), std::end (warnings), message) != std::end (warnings))
             return Ids::warning;
@@ -87,7 +86,6 @@ namespace ProjectMessages
         if (message == Ids::missingModuleDependencies)  return "Missing Module Dependencies";
         if (message == Ids::oldProjucer)                return "Projucer Out of Date";
         if (message == Ids::newVersionAvailable)        return "New Version Available";
-        if (message == Ids::cLion)                      return "Deprecated Exporter";
         if (message == Ids::pluginCodeInvalid)          return "Invalid Plugin Code";
         if (message == Ids::manufacturerCodeInvalid)    return "Invalid Manufacturer Code";
 
@@ -105,7 +103,6 @@ namespace ProjectMessages
         if (message == Ids::missingModuleDependencies)  return "Module(s) have missing dependencies.";
         if (message == Ids::oldProjucer)                return "The version of the Projucer you are using is out of date.";
         if (message == Ids::newVersionAvailable)        return "A new version of JUCE is available to download.";
-        if (message == Ids::cLion)                      return "The CLion exporter is deprecated. Use JUCE's CMake support instead.";
         if (message == Ids::pluginCodeInvalid)          return "The plugin code should be exactly four characters in length.";
         if (message == Ids::manufacturerCodeInvalid)    return "The manufacturer code should be exactly four characters in length.";
 
@@ -608,7 +605,6 @@ private:
     std::pair<Time, String> cachedFileState;
 
     //==============================================================================
-    friend class Item;
     StringPairArray parsedPreprocessorDefs;
 
     //==============================================================================
@@ -642,11 +638,9 @@ private:
     void updateJUCEPathWarning();
 
     void updateModuleWarnings();
-    void updateExporterWarnings();
     void updateCppStandardWarning (bool showWarning);
     void updateMissingModuleDependenciesWarning (bool showWarning);
     void updateOldProjucerWarning (bool showWarning);
-    void updateCLionWarning (bool showWarning);
     void updateModuleNotFoundWarning (bool showWarning);
     void updateCodeWarning (Identifier identifier, String value);
 

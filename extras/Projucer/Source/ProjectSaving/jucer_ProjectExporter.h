@@ -80,7 +80,6 @@ public:
     virtual bool isCodeBlocks() const    = 0;
     virtual bool isMakefile() const      = 0;
     virtual bool isAndroidStudio() const = 0;
-    virtual bool isCLion() const         = 0;
 
     // operating system targeted by exporter
     virtual bool isAndroid() const = 0;

@@ -417,6 +417,10 @@ void Project::removeDefunctExporters()
     oldExporters.set ("VS2010",  "Visual Studio 2010");
     oldExporters.set ("VS2012",  "Visual Studio 2012");
     oldExporters.set ("VS2013",  "Visual Studio 2013");
+    oldExporters.set ("VS2015",  "Visual Studio 2015");
+    oldExporters.set ("CLION",   "CLion");
+
+    std::vector<String> removedExporterKeys;
 
     for (auto& key : oldExporters.getAllKeys())
     {
@@ -424,14 +428,34 @@ void Project::removeDefunctExporters()
 
         if (oldExporter.isValid())
         {
-            if (ProjucerApplication::getApp().isRunningCommandLine)
-                std::cout <<  "WARNING! The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project." << std::endl;
-            else
-                AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon,
-                                                  TRANS (oldExporters[key]),
-                                                  TRANS ("The " + oldExporters[key]  + " Exporter is deprecated. The exporter will be removed from this project."));
-
+            removedExporterKeys.push_back (key);
             exporters.removeChild (oldExporter, nullptr);
+        }
+    }
+
+    if (! removedExporterKeys.empty())
+    {
+        if (ProjucerApplication::getApp().isRunningCommandLine)
+        {
+            for (const auto& key : removedExporterKeys)
+                std::cout <<  "WARNING! The " + oldExporters[key]
+                              + " Exporter is deprecated. The exporter will be removed from this project."
+                          << std::endl;
+        }
+        else
+        {
+            const String warningTitle { TRANS ("Unsupported exporters") };
+
+            String warningMessage;
+            warningMessage << TRANS ("The following exporters are no longer supported") << "\n\n";
+
+            for (const auto& key : removedExporterKeys)
+                warningMessage << "    - " + oldExporters[key] + "\n";
+
+            warningMessage << "\n"
+                           << TRANS ("These exporters have been removed from the project. If you save the project they will be also erased from the .jucer file.");
+
+            AlertWindow::showMessageBoxAsync (MessageBoxIconType::WarningIcon, warningTitle, warningMessage);
         }
     }
 }
@@ -692,7 +716,6 @@ Result Project::loadDocument (const File& file)
 
     setChangedFlag (false);
 
-    updateExporterWarnings();
     updateLicenseWarning();
 
     return Result::ok();
@@ -892,20 +915,6 @@ void Project::updateModuleWarnings()
     updateModuleNotFoundWarning (moduleNotFound);
 }
 
-void Project::updateExporterWarnings()
-{
-    auto isClionPresent = [this]()
-    {
-        for (ExporterIterator exporter (*this); exporter.next();)
-            if (exporter->isCLion())
-                return true;
-
-        return false;
-    }();
-
-    updateCLionWarning (isClionPresent);
-}
-
 void Project::updateCppStandardWarning (bool showWarning)
 {
     if (showWarning)
@@ -969,14 +978,6 @@ void Project::updateOldProjucerWarning (bool showWarning)
         addProjectMessage (ProjectMessages::Ids::oldProjucer, {});
     else
         removeProjectMessage (ProjectMessages::Ids::oldProjucer);
-}
-
-void Project::updateCLionWarning (bool showWarning)
-{
-    if (showWarning)
-        addProjectMessage (ProjectMessages::Ids::cLion, {});
-    else
-        removeProjectMessage (ProjectMessages::Ids::cLion);
 }
 
 void Project::updateModuleNotFoundWarning (bool showWarning)
@@ -1153,8 +1154,6 @@ void Project::valueTreeChildAdded (ValueTree& parent, ValueTree& child)
 
     if (child.getType() == Ids::MODULE)
         updateModuleWarnings();
-    else if (parent.getType() == Ids::EXPORTFORMATS)
-        updateExporterWarnings();
 
     changed();
 }
@@ -1165,8 +1164,6 @@ void Project::valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int in
 
     if (child.getType() == Ids::MODULE)
         updateModuleWarnings();
-    else if (parent.getType() == Ids::EXPORTFORMATS)
-        updateExporterWarnings();
 
     changed();
 }

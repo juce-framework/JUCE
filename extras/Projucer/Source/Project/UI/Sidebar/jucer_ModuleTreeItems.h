@@ -165,9 +165,6 @@ private:
 
             for (Project::ExporterIterator exporter (project); exporter.next();)
             {
-                if (exporter->isCLion())
-                    continue;
-
                 auto modulePathValue = exporter->getPathForModuleValue (moduleID);
                 const auto fallbackPath = getAppSettings().getStoredPath (isJUCEModule (moduleID) ? Ids::defaultJuceModulePath
                                                                                                   : Ids::defaultUserModulePath,

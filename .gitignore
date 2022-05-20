@@ -51,8 +51,6 @@ profile
 **/Builds/Android/app/.cxx
 **/Builds/Android/lib/build
 **/Builds/Android/lib/.externalNativeBuild
-**/Builds/CLion/cmake-build-*
-**/Builds/CLion/.idea
 **/Builds/MacOSX/**/Index
 **/Builds/MacOSX/**/Intermediates.noindex
 **/doxygen/doc

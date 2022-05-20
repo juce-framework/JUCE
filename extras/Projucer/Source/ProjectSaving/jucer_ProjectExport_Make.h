@@ -450,7 +450,6 @@ public:
     bool isCodeBlocks() const override                      { return false; }
     bool isMakefile() const override                        { return true; }
     bool isAndroidStudio() const override                   { return false; }
-    bool isCLion() const override                           { return false; }
 
     bool isAndroid() const override                         { return false; }
     bool isWindows() const override                         { return false; }
@@ -1080,8 +1079,6 @@ private:
 
         return phonyTargetLine.toString();
     }
-
-    friend class CLionProjectExporter;
 
     OwnedArray<MakefileTarget> targets;
 

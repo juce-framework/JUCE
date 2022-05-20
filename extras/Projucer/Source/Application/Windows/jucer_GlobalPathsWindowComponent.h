@@ -249,8 +249,6 @@ private:
             String exeLabel ("startup script");
            #endif
 
-            builder.add (new FilePathPropertyComponent (clionExePathValue, "CLion " + exeLabel,          false, isThisOS),
-                         "This path will be used for the \"Save Project and Open in IDE...\" option of the CLion exporter.");
             builder.add (new FilePathPropertyComponent (androidStudioExePathValue, "Android Studio " + exeLabel, false, isThisOS),
                          "This path will be used for the \"Save Project and Open in IDE...\" option of the Android Studio exporter.");
         }
@@ -274,7 +272,6 @@ private:
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
         araPathValue              = settings.getStoredPath (Ids::araPath, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
-        clionExePathValue         = settings.getStoredPath (Ids::clionExePath, os);
         androidStudioExePathValue = settings.getStoredPath (Ids::androidStudioExePath, os);
     }
 
@@ -287,7 +284,6 @@ private:
         aaxPathValue             .resetToDefault();
         araPathValue             .resetToDefault();
         androidSDKPathValue      .resetToDefault();
-        clionExePathValue        .resetToDefault();
         androidStudioExePathValue.resetToDefault();
 
         repaint();
@@ -298,7 +294,7 @@ private:
 
     ValueTreePropertyWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
                                  vstPathValue, aaxPathValue, araPathValue, androidSDKPathValue,
-                                 clionExePathValue, androidStudioExePathValue;
+                                 androidStudioExePathValue;
 
     Viewport propertyViewport;
     PropertyGroupComponent propertyGroup  { "Global Paths", { getIcons().openFolder, Colours::transparentBlack } };

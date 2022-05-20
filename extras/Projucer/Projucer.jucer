@@ -27,25 +27,6 @@
         <MODULEPATH id="juce_build_tools" path="../Build"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2015 targetFolder="Builds/VisualStudio2015" bigIcon="Zrx1Gl" extraCompilerFlags="/bigobj"
-            smallIcon="Zrx1Gl">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" targetName="Projucer" debugInformationFormat="ProgramDatabase"
-                       useRuntimeLibDLL="1"/>
-        <CONFIGURATION name="Release" isDebug="0" targetName="Projucer" useRuntimeLibDLL="0"
-                       debugInformationFormat="None" linkTimeOptimisation="0"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_gui_extra" path="../../modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../modules"/>
-        <MODULEPATH id="juce_graphics" path="../../modules"/>
-        <MODULEPATH id="juce_events" path="../../modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../modules"/>
-        <MODULEPATH id="juce_cryptography" path="../../modules"/>
-        <MODULEPATH id="juce_core" path="../../modules"/>
-        <MODULEPATH id="juce_build_tools" path="../Build"/>
-      </MODULEPATHS>
-    </VS2015>
     <VS2017 targetFolder="Builds/VisualStudio2017" bigIcon="Zrx1Gl" extraCompilerFlags="/w44265 /w45038 /w44062"
             smallIcon="Zrx1Gl">
       <CONFIGURATIONS>
@@ -215,8 +196,6 @@
               file="Source/BinaryData/Icons/background_logo.svg"/>
         <FILE id="qqeJmA" name="export_android.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_android.svg"/>
-        <FILE id="WF3jeY" name="export_clion.svg" compile="0" resource="1"
-              file="Source/BinaryData/Icons/export_clion.svg"/>
         <FILE id="FiwPHz" name="export_codeBlocks.svg" compile="0" resource="1"
               file="Source/BinaryData/Icons/export_codeBlocks.svg"/>
         <FILE id="WBmsi6" name="export_linux.svg" compile="0" resource="1"
@@ -571,8 +550,6 @@
     <GROUP id="{00CEE998-91CD-5001-DE85-4F4895E99A32}" name="ProjectSaving">
       <FILE id="JBLk8Y" name="jucer_ProjectExport_Android.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_Android.h"/>
-      <FILE id="l1SmNV" name="jucer_ProjectExport_CLion.h" compile="0" resource="0"
-            file="Source/ProjectSaving/jucer_ProjectExport_CLion.h"/>
       <FILE id="Kxo6ef" name="jucer_ProjectExport_CodeBlocks.h" compile="0"
             resource="0" file="Source/ProjectSaving/jucer_ProjectExport_CodeBlocks.h"/>
       <FILE id="wLX3RL" name="jucer_ProjectExport_Make.h" compile="0" resource="0"

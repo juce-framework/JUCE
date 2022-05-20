@@ -72,8 +72,8 @@
 // MSVC
 #if JUCE_MSVC
 
- #if _MSC_FULL_VER < 190024210  // VS2015
-   #error "JUCE requires Visual Studio 2015 Update 3 or later"
+ #if _MSC_FULL_VER < 191025017  // VS2017
+   #error "JUCE requires Visual Studio 2017 or later"
  #endif
 
  #ifndef JUCE_EXCEPTIONS_DISABLED

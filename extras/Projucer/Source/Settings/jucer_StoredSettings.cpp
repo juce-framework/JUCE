@@ -303,16 +303,6 @@ static bool isGlobalPathValid (const File& relativeTo, const Identifier& key, co
     {
         fileToCheckFor = {};
     }
-    else if (key == Ids::clionExePath)
-    {
-       #if JUCE_MAC
-        fileToCheckFor = path.trim().endsWith (".app") ? "Contents/MacOS/clion" : "../clion";
-       #elif JUCE_WINDOWS
-        fileToCheckFor = "../clion64.exe";
-       #else
-        fileToCheckFor = "../clion.sh";
-       #endif
-    }
     else if (key == Ids::androidStudioExePath)
     {
        #if JUCE_MAC
@@ -392,29 +382,6 @@ static String getFallbackPathForOS (const Identifier& key, DependencyPathOS os)
 
         jassertfalse;
         return {};
-    }
-    else if (key == Ids::clionExePath)
-    {
-        if (os == TargetOS::windows)
-        {
-          #if JUCE_WINDOWS
-            auto regValue = WindowsRegistry::getValue ("HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\clion64.exe\\shell\\open\\command\\", {}, {});
-            auto openCmd = StringArray::fromTokens (regValue, true);
-
-            if (! openCmd.isEmpty())
-                return openCmd[0].unquoted();
-          #endif
-
-            return "C:\\Program Files\\JetBrains\\CLion YYYY.MM.DD\\bin\\clion64.exe";
-        }
-        else if (os == TargetOS::osx)
-        {
-            return "/Applications/CLion.app";
-        }
-        else
-        {
-            return "${user.home}/clion/bin/clion.sh";
-        }
     }
     else if (key == Ids::androidStudioExePath)
     {
