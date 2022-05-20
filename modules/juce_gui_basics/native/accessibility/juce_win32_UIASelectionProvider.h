@@ -50,7 +50,7 @@ public:
         if (isRadioButton)
         {
             handler.getActions().invoke (AccessibilityActionType::press);
-            sendAccessibilityAutomationEvent (handler, ComTypes::UIA_SelectionItem_ElementSelectedEventId);
+            sendAccessibilityAutomationEvent (handler, UIA_SelectionItem_ElementSelectedEventId);
 
             return S_OK;
         }

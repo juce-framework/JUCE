@@ -57,41 +57,41 @@ static auto roleToControlTypeId (AccessibilityRole roleType)
         case AccessibilityRole::popupMenu:
         case AccessibilityRole::dialogWindow:
         case AccessibilityRole::splashScreen:
-        case AccessibilityRole::window:        return ComTypes::UIA_WindowControlTypeId;
+        case AccessibilityRole::window:        return UIA_WindowControlTypeId;
 
         case AccessibilityRole::label:
-        case AccessibilityRole::staticText:    return ComTypes::UIA_TextControlTypeId;
+        case AccessibilityRole::staticText:    return UIA_TextControlTypeId;
 
         case AccessibilityRole::column:
-        case AccessibilityRole::row:           return ComTypes::UIA_HeaderItemControlTypeId;
+        case AccessibilityRole::row:           return UIA_HeaderItemControlTypeId;
 
-        case AccessibilityRole::button:        return ComTypes::UIA_ButtonControlTypeId;
-        case AccessibilityRole::toggleButton:  return ComTypes::UIA_CheckBoxControlTypeId;
-        case AccessibilityRole::radioButton:   return ComTypes::UIA_RadioButtonControlTypeId;
-        case AccessibilityRole::comboBox:      return ComTypes::UIA_ComboBoxControlTypeId;
-        case AccessibilityRole::image:         return ComTypes::UIA_ImageControlTypeId;
-        case AccessibilityRole::slider:        return ComTypes::UIA_SliderControlTypeId;
-        case AccessibilityRole::editableText:  return ComTypes::UIA_EditControlTypeId;
-        case AccessibilityRole::menuItem:      return ComTypes::UIA_MenuItemControlTypeId;
-        case AccessibilityRole::menuBar:       return ComTypes::UIA_MenuBarControlTypeId;
-        case AccessibilityRole::table:         return ComTypes::UIA_TableControlTypeId;
-        case AccessibilityRole::tableHeader:   return ComTypes::UIA_HeaderControlTypeId;
-        case AccessibilityRole::cell:          return ComTypes::UIA_DataItemControlTypeId;
-        case AccessibilityRole::hyperlink:     return ComTypes::UIA_HyperlinkControlTypeId;
-        case AccessibilityRole::list:          return ComTypes::UIA_ListControlTypeId;
-        case AccessibilityRole::listItem:      return ComTypes::UIA_ListItemControlTypeId;
-        case AccessibilityRole::tree:          return ComTypes::UIA_TreeControlTypeId;
-        case AccessibilityRole::treeItem:      return ComTypes::UIA_TreeItemControlTypeId;
-        case AccessibilityRole::progressBar:   return ComTypes::UIA_ProgressBarControlTypeId;
-        case AccessibilityRole::group:         return ComTypes::UIA_GroupControlTypeId;
-        case AccessibilityRole::scrollBar:     return ComTypes::UIA_ScrollBarControlTypeId;
-        case AccessibilityRole::tooltip:       return ComTypes::UIA_ToolTipControlTypeId;
+        case AccessibilityRole::button:        return UIA_ButtonControlTypeId;
+        case AccessibilityRole::toggleButton:  return UIA_CheckBoxControlTypeId;
+        case AccessibilityRole::radioButton:   return UIA_RadioButtonControlTypeId;
+        case AccessibilityRole::comboBox:      return UIA_ComboBoxControlTypeId;
+        case AccessibilityRole::image:         return UIA_ImageControlTypeId;
+        case AccessibilityRole::slider:        return UIA_SliderControlTypeId;
+        case AccessibilityRole::editableText:  return UIA_EditControlTypeId;
+        case AccessibilityRole::menuItem:      return UIA_MenuItemControlTypeId;
+        case AccessibilityRole::menuBar:       return UIA_MenuBarControlTypeId;
+        case AccessibilityRole::table:         return UIA_TableControlTypeId;
+        case AccessibilityRole::tableHeader:   return UIA_HeaderControlTypeId;
+        case AccessibilityRole::cell:          return UIA_DataItemControlTypeId;
+        case AccessibilityRole::hyperlink:     return UIA_HyperlinkControlTypeId;
+        case AccessibilityRole::list:          return UIA_ListControlTypeId;
+        case AccessibilityRole::listItem:      return UIA_ListItemControlTypeId;
+        case AccessibilityRole::tree:          return UIA_TreeControlTypeId;
+        case AccessibilityRole::treeItem:      return UIA_TreeItemControlTypeId;
+        case AccessibilityRole::progressBar:   return UIA_ProgressBarControlTypeId;
+        case AccessibilityRole::group:         return UIA_GroupControlTypeId;
+        case AccessibilityRole::scrollBar:     return UIA_ScrollBarControlTypeId;
+        case AccessibilityRole::tooltip:       return UIA_ToolTipControlTypeId;
 
         case AccessibilityRole::ignored:
         case AccessibilityRole::unspecified:   break;
     };
 
-    return ComTypes::UIA_CustomControlTypeId;
+    return UIA_CustomControlTypeId;
 }
 
 //==============================================================================
@@ -148,36 +148,36 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
             switch (pId)
             {
-                case ComTypes::UIA_WindowPatternId:
+                case UIA_WindowPatternId:
                 {
                     if (fragmentRoot)
                         return new UIAWindowProvider (this);
 
                     break;
                 }
-                case ComTypes::UIA_TransformPatternId:
+                case UIA_TransformPatternId:
                 {
                     if (fragmentRoot)
                         return new UIATransformProvider (this);
 
                     break;
                 }
-                case ComTypes::UIA_TextPatternId:
-                case ComTypes::UIA_TextPattern2Id:
+                case UIA_TextPatternId:
+                case UIA_TextPattern2Id:
                 {
                     if (accessibilityHandler.getTextInterface() != nullptr)
                         return new UIATextProvider (this);
 
                     break;
                 }
-                case ComTypes::UIA_ValuePatternId:
+                case UIA_ValuePatternId:
                 {
                     if (accessibilityHandler.getValueInterface() != nullptr)
                         return new UIAValueProvider (this);
 
                     break;
                 }
-                case ComTypes::UIA_RangeValuePatternId:
+                case UIA_RangeValuePatternId:
                 {
                     if (accessibilityHandler.getValueInterface() != nullptr
                         && accessibilityHandler.getValueInterface()->getRange().isValid())
@@ -187,7 +187,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                     break;
                 }
-                case ComTypes::UIA_TogglePatternId:
+                case UIA_TogglePatternId:
                 {
                     if (accessibilityHandler.getCurrentState().isCheckable()
                         && (accessibilityHandler.getActions().contains (AccessibilityActionType::toggle)
@@ -198,7 +198,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                     break;
                 }
-                case ComTypes::UIA_SelectionPatternId:
+                case UIA_SelectionPatternId:
                 {
                     if (role == AccessibilityRole::list
                         || role == AccessibilityRole::popupMenu
@@ -209,7 +209,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                     break;
                 }
-                case ComTypes::UIA_SelectionItemPatternId:
+                case UIA_SelectionItemPatternId:
                 {
                     auto state = accessibilityHandler.getCurrentState();
 
@@ -221,28 +221,28 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
 
                     break;
                 }
-                case ComTypes::UIA_GridPatternId:
+                case UIA_GridPatternId:
                 {
                     if (accessibilityHandler.getTableInterface() != nullptr)
                         return new UIAGridProvider (this);
 
                     break;
                 }
-                case ComTypes::UIA_GridItemPatternId:
+                case UIA_GridItemPatternId:
                 {
                     if (accessibilityHandler.getCellInterface() != nullptr)
                         return new UIAGridItemProvider (this);
 
                     break;
                 }
-                case ComTypes::UIA_InvokePatternId:
+                case UIA_InvokePatternId:
                 {
                     if (accessibilityHandler.getActions().contains (AccessibilityActionType::press))
                         return new UIAInvokeProvider (this);
 
                     break;
                 }
-                case ComTypes::UIA_ExpandCollapsePatternId:
+                case UIA_ExpandCollapsePatternId:
                 {
                     if (accessibilityHandler.getActions().contains (AccessibilityActionType::showMenu)
                         && accessibilityHandler.getCurrentState().isExpandable())
@@ -313,7 +313,7 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPropertyValue (PROPERTYID propertyI
                     VariantHelpers::setBool (textInterface->isDisplayingProtectedText(), pRetVal);
 
                 break;
-            case ComTypes::UIA_IsPeripheralPropertyId:
+            case UIA_IsPeripheralPropertyId:
                 VariantHelpers::setBool (role == AccessibilityRole::tooltip
                                          || role == AccessibilityRole::popupMenu
                                          || role == AccessibilityRole::splashScreen,
