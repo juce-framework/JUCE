@@ -388,6 +388,57 @@ public:
             expect (remapped.getReadPointer (17) == testBuffers.get (18));
         }
 
+        beginTest ("Null pointers are allowed on inactive buses provided to clients");
+        {
+            ClientBufferMapperData<float> remapper;
+            remapper.prepare (4, blockSize * 2);
+
+            const std::vector<ChannelMapping> emptyBuses;
+            const std::vector<ChannelMapping> stereoBus { ChannelMapping { AudioChannelSet::stereo() } };
+
+            const Config config { { ChannelMapping { AudioChannelSet::stereo() },
+                                    ChannelMapping { AudioChannelSet::quadraphonic(), false },
+                                    ChannelMapping { AudioChannelSet::stereo() } },
+                                  { ChannelMapping { AudioChannelSet::quadraphonic() },
+                                    ChannelMapping { AudioChannelSet::stereo(), false },
+                                    ChannelMapping { AudioChannelSet::quadraphonic() } } };
+
+            TestBuffers testBuffers { blockSize };
+
+            // The host doesn't need to provide trailing buses that are inactive
+            auto ins  = MultiBusBuffers{}.withBus (testBuffers, 2).withBus (testBuffers, 4).withBus (testBuffers, 2);
+            auto outs = MultiBusBuffers{}.withBus (testBuffers, 4).withBus (testBuffers, 2).withBus (testBuffers, 4);
+
+            auto data = makeProcessData (blockSize, ins, outs);
+
+            for (auto i = 0; i < 4; ++i)
+                data.inputs [1].channelBuffers32[i] = nullptr;
+
+            for (auto i = 0; i < 2; ++i)
+                data.outputs[1].channelBuffers32[i] = nullptr;
+
+            testBuffers.init();
+            const auto remapped = remapper.getMappedBuffer (data, config.ins, config.outs);
+
+            expect (remapped.getNumChannels() == 8);
+
+            expect (allMatch (remapped, 0,   1.0f));
+            expect (allMatch (remapped, 1,   2.0f));
+            // skip 4 inactive channels
+            expect (allMatch (remapped, 2,   7.0f));
+            expect (allMatch (remapped, 3,   8.0f));
+
+            expect (remapped.getReadPointer (0) == testBuffers.get ( 8));
+            expect (remapped.getReadPointer (1) == testBuffers.get ( 9));
+            expect (remapped.getReadPointer (2) == testBuffers.get (10));
+            expect (remapped.getReadPointer (3) == testBuffers.get (11));
+            // skip 2 inactive channels
+            expect (remapped.getReadPointer (4) == testBuffers.get (14));
+            expect (remapped.getReadPointer (5) == testBuffers.get (15));
+            expect (remapped.getReadPointer (6) == testBuffers.get (16));
+            expect (remapped.getReadPointer (7) == testBuffers.get (17));
+        }
+
         beginTest ("HostBufferMapper reorders channels correctly");
         {
             HostBufferMapper mapper;
