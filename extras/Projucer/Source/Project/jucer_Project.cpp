@@ -549,24 +549,6 @@ void Project::updatePluginCategories()
     }
 
     {
-        const auto araAnalyzableContent = projectRoot.getProperty (Ids::pluginARAAnalyzableContent, {}).toString();
-
-        if (getAllARAContentTypeVars().contains (araAnalyzableContent))
-            pluginARAAnalyzableContentValue = araAnalyzableContent;
-        else if (getAllARAContentTypeStrings().contains (araAnalyzableContent))
-            pluginARAAnalyzableContentValue = Array<var> (getAllARAContentTypeVars()[getAllARAContentTypeStrings().indexOf (araAnalyzableContent)]);
-    }
-
-    {
-        const auto araTransformationFlags = projectRoot.getProperty (Ids::pluginARATransformFlags, {}).toString();
-
-        if (getAllARATransformationFlagVars().contains (araTransformationFlags))
-            pluginARATransformFlagsValue = araTransformationFlags;
-        else if (getAllARATransformationFlagStrings().contains (araTransformationFlags))
-            pluginARATransformFlagsValue = Array<var> (getAllARATransformationFlagVars()[getAllARATransformationFlagStrings().indexOf (araTransformationFlags)]);
-    }
-
-    {
         auto auMainType = projectRoot.getProperty (Ids::pluginAUMainType, {}).toString();
 
         if (auMainType.isNotEmpty())
