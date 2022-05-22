@@ -1230,7 +1230,7 @@ private:
 
     static NSString* getDeviceUID (AudioDeviceID deviceID)
     {
-        CFStringRef uid = NULL;
+        CFStringRef uid = nullptr;
         UInt32 uidSize = sizeof (uid);
         AudioObjectPropertyAddress pa {kAudioDevicePropertyDeviceUID, kAudioObjectPropertyScopeGlobal, kAudioObjectPropertyElementMaster};
         AudioObjectGetPropertyData (deviceID, &pa, 0, nullptr, &uidSize, &uid);
