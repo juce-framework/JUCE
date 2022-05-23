@@ -27,6 +27,7 @@ package com.rmsl.juce;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Region;
 import android.view.SurfaceView;
 
 public class JuceOpenGLView extends SurfaceView
@@ -45,6 +46,14 @@ public class JuceOpenGLView extends SurfaceView
     }
 
     //==============================================================================
+    @Override
+    public boolean gatherTransparentRegion (Region unused)
+    {
+        // Returning true indicates that the view is opaque at this point.
+        // Without this, the green TalkBack borders cannot be seen on OpenGL views.
+        return true;
+    }
+
     @Override
     protected void onAttachedToWindow ()
     {
