@@ -730,7 +730,7 @@ public:
         bool hasGRMeter = false;
 
         jassert (audioProcessor != nullptr);
-        for (int id : audioProcessor->metersParamIDs)
+        for (Vst::ParamID id : audioProcessor->metersParamIDs)
         {
             // sum gain reduction meters only
             const auto param = audioProcessor->getParamForVSTParamID (id);
