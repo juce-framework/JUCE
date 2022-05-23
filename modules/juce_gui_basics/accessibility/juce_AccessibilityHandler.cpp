@@ -63,7 +63,6 @@ AccessibilityHandler::AccessibilityHandler (Component& comp,
       interfaces (std::move (interfacesIn)),
       nativeImpl (createNativeImpl (*this))
 {
-    notifyAccessibilityEventInternal (*this, InternalAccessibilityEvent::elementCreated);
 }
 
 AccessibilityHandler::~AccessibilityHandler()
