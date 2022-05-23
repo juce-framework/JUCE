@@ -1191,8 +1191,7 @@ namespace AAXClasses
                     if (data != nullptr && size == sizeof (AAX_EProcessingState))
                     {
                         const auto state = *static_cast<const AAX_EProcessingState*> (data);
-                        const auto nonRealtime = state == AAX_eProcessingState_Start
-                                              || state == AAX_eProcessingState_StartPass
+                        const auto nonRealtime = state == AAX_eProcessingState_StartPass
                                               || state == AAX_eProcessingState_BeginPassGroup;
                         pluginInstance->setNonRealtime (nonRealtime);
                     }

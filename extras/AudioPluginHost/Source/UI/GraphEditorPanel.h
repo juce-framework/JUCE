@@ -118,7 +118,6 @@ public:
     std::unique_ptr<PluginGraph> graph;
 
     void resized() override;
-    void unfocusKeyboardComponent();
     void releaseGraph();
 
     //==============================================================================

@@ -592,7 +592,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
 void MainHostWindow::menuBarActivated (bool isActivated)
 {
     if (isActivated && graphHolder != nullptr)
-        graphHolder->unfocusKeyboardComponent();
+        Component::unfocusAllComponents();
 }
 
 void MainHostWindow::createPlugin (const PluginDescription& desc, Point<int> pos)

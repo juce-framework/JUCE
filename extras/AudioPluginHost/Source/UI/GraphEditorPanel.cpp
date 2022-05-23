@@ -1285,11 +1285,6 @@ void GraphDocumentComponent::createNewPlugin (const PluginDescription& desc, Poi
     graphPanel->createNewPlugin (desc, pos);
 }
 
-void GraphDocumentComponent::unfocusKeyboardComponent()
-{
-    keyboardComp->unfocusAllComponents();
-}
-
 void GraphDocumentComponent::releaseGraph()
 {
     deviceManager.removeAudioCallback (&graphPlayer);
