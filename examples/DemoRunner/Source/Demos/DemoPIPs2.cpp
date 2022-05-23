@@ -30,7 +30,7 @@
 #include "../../../Assets/AudioLiveScrollingDisplay.h"
 
 //==============================================================================
-#if JUCE_MAC || JUCE_WINDOWS
+#if JUCE_MAC || JUCE_WINDOWS || JUCE_IOS || JUCE_ANDROID
  #include "../../../GUI/AccessibilityDemo.h"
 #endif
 #include "../../../GUI/AnimationAppDemo.h"
@@ -70,7 +70,7 @@
 
 void registerDemos_Two() noexcept
 {
-   #if JUCE_MAC || JUCE_WINDOWS
+   #if JUCE_MAC || JUCE_WINDOWS || JUCE_IOS || JUCE_ANDROID
     REGISTER_DEMO (AccessibilityDemo,         GUI, false)
    #endif
     REGISTER_DEMO (AnimationAppDemo,          GUI, false)
