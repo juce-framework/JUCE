@@ -247,7 +247,7 @@ std::unique_ptr<AccessibilityHandler> ToolbarItemComponent::createAccessibilityH
                                       && itemId != ToolbarItemFactory::flexibleSpacerId);
 
     if (! shouldItemBeAccessible)
-        return nullptr;
+        return createIgnoredAccessibilityHandler (*this);
 
     return std::make_unique<ButtonAccessibilityHandler> (*this, AccessibilityRole::button);
 }

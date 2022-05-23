@@ -481,10 +481,15 @@ public:
 
             case ACTION_CLICK:
             {
+                // Invoking the action may delete this handler
+                const WeakReference<AccessibilityNativeHandle> savedHandle { this };
+
                 if ((accessibilityHandler.getCurrentState().isCheckable() && accessibilityHandler.getActions().invoke (AccessibilityActionType::toggle))
                     || accessibilityHandler.getActions().invoke (AccessibilityActionType::press))
                 {
-                    sendAccessibilityEventImpl (accessibilityHandler, TYPE_VIEW_CLICKED, 0);
+                    if (savedHandle != nullptr)
+                        sendAccessibilityEventImpl (accessibilityHandler, TYPE_VIEW_CLICKED, 0);
+
                     return true;
                 }
 
@@ -742,6 +747,8 @@ private:
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibilityNativeHandle)
+
+    JUCE_DECLARE_WEAK_REFERENCEABLE (AccessibilityNativeHandle)
 };
 
 std::unordered_map<int, AccessibilityHandler*> AccessibilityNativeHandle::virtualViewIdMap;

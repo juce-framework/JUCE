@@ -87,7 +87,7 @@ struct HeaderItemComponent  : public PopupMenu::CustomComponent
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
-        return nullptr;
+        return createIgnoredAccessibilityHandler (*this);
     }
 
     const Options& options;
@@ -275,7 +275,8 @@ private:
 
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
-        return item.isSeparator ? nullptr : std::make_unique<ItemAccessibilityHandler> (*this);
+        return item.isSeparator ? createIgnoredAccessibilityHandler (*this)
+                                : std::make_unique<ItemAccessibilityHandler> (*this);
     }
 
     //==============================================================================
