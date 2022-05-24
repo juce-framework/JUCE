@@ -66,6 +66,9 @@ public:
     /** Returns a section of text. */
     virtual String getText (Range<int> range) const = 0;
 
+    /** Returns the full text. */
+    String getAllText() const { return getText ({ 0, getTotalNumCharacters() }); }
+
     /** Replaces the text with a new string. */
     virtual void setText (const String& newText) = 0;
 

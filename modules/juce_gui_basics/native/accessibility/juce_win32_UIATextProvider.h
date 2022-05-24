@@ -246,19 +246,22 @@ private:
 
             if (auto* textInterface = owner->getHandler().getTextInterface())
             {
+                using ATH = AccessibilityTextHelpers;
+
                 const auto boundaryType = getBoundaryType (unit);
+                const auto start = ATH::findTextBoundary (*textInterface,
+                                                          selectionRange.getStart(),
+                                                          boundaryType,
+                                                          ATH::Direction::backwards,
+                                                          ATH::IncludeThisBoundary::yes,
+                                                          ATH::IncludeWhitespaceAfterWords::no);
 
-                const auto start = unit == ComTypes::TextUnit::TextUnit_Character
-                                 ? selectionRange.getStart()
-                                 : AccessibilityTextHelpers::findTextBoundary (*textInterface,
-                                                                               selectionRange.getStart(),
-                                                                               boundaryType,
-                                                                               AccessibilityTextHelpers::Direction::backwards);
-
-                const auto end = AccessibilityTextHelpers::findTextBoundary (*textInterface,
-                                                                             start,
-                                                                             boundaryType,
-                                                                             AccessibilityTextHelpers::Direction::forwards);
+                const auto end = ATH::findTextBoundary (*textInterface,
+                                                        start,
+                                                        boundaryType,
+                                                        ATH::Direction::forwards,
+                                                        ATH::IncludeThisBoundary::no,
+                                                        ATH::IncludeWhitespaceAfterWords::yes);
 
                 selectionRange = Range<int> (start, end);
 
@@ -413,19 +416,39 @@ private:
 
         JUCE_COMRESULT Move (ComTypes::TextUnit unit, int count, int* pRetVal) override
         {
-            return owner->withTextInterface (pRetVal, [&] (const AccessibilityTextInterface&)
+            return owner->withTextInterface (pRetVal, [&] (const AccessibilityTextInterface& textInterface)
             {
-                if (count > 0)
+                using ATH = AccessibilityTextHelpers;
+
+                const auto boundaryType = getBoundaryType (unit);
+                const auto previousUnitBoundary = ATH::findTextBoundary (textInterface,
+                                                                         selectionRange.getStart(),
+                                                                         boundaryType,
+                                                                         ATH::Direction::backwards,
+                                                                         ATH::IncludeThisBoundary::yes,
+                                                                         ATH::IncludeWhitespaceAfterWords::no);
+
+                auto numMoved = 0;
+                auto movedEndpoint = previousUnitBoundary;
+
+                for (; numMoved < std::abs (count); ++numMoved)
                 {
-                    MoveEndpointByUnit (ComTypes::TextPatternRangeEndpoint_End, unit, count, pRetVal);
-                    MoveEndpointByUnit (ComTypes::TextPatternRangeEndpoint_Start, unit, count, pRetVal);
-                }
-                else if (count < 0)
-                {
-                    MoveEndpointByUnit (ComTypes::TextPatternRangeEndpoint_Start, unit, count, pRetVal);
-                    MoveEndpointByUnit (ComTypes::TextPatternRangeEndpoint_End, unit, count, pRetVal);
+                    const auto nextEndpoint = ATH::findTextBoundary (textInterface,
+                                                                     movedEndpoint,
+                                                                     boundaryType,
+                                                                     count > 0 ? ATH::Direction::forwards : ATH::Direction::backwards,
+                                                                     ATH::IncludeThisBoundary::no,
+                                                                     count > 0 ? ATH::IncludeWhitespaceAfterWords::yes : ATH::IncludeWhitespaceAfterWords::no);
+
+                    if (nextEndpoint == movedEndpoint)
+                        break;
+
+                    movedEndpoint = nextEndpoint;
                 }
 
+                *pRetVal = numMoved;
+
+                ExpandToEnclosingUnit (unit);
                 return S_OK;
             });
         }
@@ -463,34 +486,37 @@ private:
                 if (count == 0 || textInterface.getTotalNumCharacters() == 0)
                     return S_OK;
 
-                auto endpointToMove = (endpoint == ComTypes::TextPatternRangeEndpoint_Start ? selectionRange.getStart()
-                                                                                            : selectionRange.getEnd());
+                const auto endpointToMove = (endpoint == ComTypes::TextPatternRangeEndpoint_Start ? selectionRange.getStart()
+                                                                                                  : selectionRange.getEnd());
 
-                const auto direction = (count > 0 ? AccessibilityTextHelpers::Direction::forwards
-                                                  : AccessibilityTextHelpers::Direction::backwards);
+                using ATH = AccessibilityTextHelpers;
+
+                const auto direction = (count > 0 ? ATH::Direction::forwards
+                                                  : ATH::Direction::backwards);
 
                 const auto boundaryType = getBoundaryType (unit);
+                auto movedEndpoint = endpointToMove;
 
-                // handle case where endpoint is on a boundary
-                if (AccessibilityTextHelpers::findTextBoundary (textInterface, endpointToMove, boundaryType, direction) == endpointToMove)
-                    endpointToMove += (direction == AccessibilityTextHelpers::Direction::forwards ? 1 : -1);
-
-                int numMoved;
-                for (numMoved = 0; numMoved < std::abs (count); ++numMoved)
+                int numMoved = 0;
+                for (; numMoved < std::abs (count); ++numMoved)
                 {
-                    auto nextEndpoint = AccessibilityTextHelpers::findTextBoundary (textInterface,
-                                                                                    endpointToMove,
-                                                                                    boundaryType,
-                                                                                    direction);
+                    auto nextEndpoint = ATH::findTextBoundary (textInterface,
+                                                               movedEndpoint,
+                                                               boundaryType,
+                                                               direction,
+                                                               ATH::IncludeThisBoundary::no,
+                                                               direction == ATH::Direction::forwards ? ATH::IncludeWhitespaceAfterWords::yes
+                                                                                                     : ATH::IncludeWhitespaceAfterWords::no);
 
-                    if (nextEndpoint == endpointToMove)
+                    if (nextEndpoint == movedEndpoint)
                         break;
 
-                    endpointToMove = nextEndpoint;
+                    movedEndpoint = nextEndpoint;
                 }
 
                 *pRetVal = numMoved;
-                setEndpointChecked (endpoint, endpointToMove);
+
+                setEndpointChecked (endpoint, movedEndpoint);
 
                 return S_OK;
             });

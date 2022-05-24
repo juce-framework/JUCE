@@ -71,6 +71,9 @@ private:
 
         void setSelection (Range<int> r) override
         {
+            if (r == codeEditorComponent.getHighlightedRegion())
+                return;
+
             if (r.isEmpty())
             {
                 codeEditorComponent.caretPos.setPosition (r.getStart());
@@ -79,8 +82,10 @@ private:
 
             auto& doc = codeEditorComponent.document;
 
-            codeEditorComponent.selectRegion (CodeDocument::Position (doc, r.getStart()),
-                                              CodeDocument::Position (doc, r.getEnd()));
+            const auto cursorAtStart = r.getEnd() == codeEditorComponent.getHighlightedRegion().getStart()
+                                    || r.getEnd() == codeEditorComponent.getHighlightedRegion().getEnd();
+            codeEditorComponent.selectRegion (CodeDocument::Position (doc, cursorAtStart ? r.getEnd() : r.getStart()),
+                                              CodeDocument::Position (doc, cursorAtStart ? r.getStart() : r.getEnd()));
         }
 
         String getText (Range<int> r) const override
@@ -126,7 +131,7 @@ private:
 
                 localRects.add (startPos.x,
                                 startPos.y,
-                                endPos.x - startPos.x,
+                                jmax (1, endPos.x - startPos.x),
                                 codeEditorComponent.getLineHeight());
             }
 

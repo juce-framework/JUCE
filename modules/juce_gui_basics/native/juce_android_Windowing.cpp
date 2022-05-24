@@ -756,11 +756,11 @@ public:
                 {
                     case ACTION_HOVER_ENTER:
                     case ACTION_HOVER_MOVE:
-                        sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_ENTER, 0);
+                        AccessibilityNativeHandle::sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_ENTER, 0);
                         break;
 
                     case ACTION_HOVER_EXIT:
-                        sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_EXIT, 0);
+                        AccessibilityNativeHandle::sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_EXIT, 0);
                         break;
                 }
             }
