@@ -760,6 +760,7 @@ private:
     struct TextEditorViewport;
     struct InsertAction;
     struct RemoveAction;
+    class EditorAccessibilityHandler;
 
     std::unique_ptr<Viewport> viewport;
     TextHolderComponent* textHolder;
