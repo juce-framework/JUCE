@@ -41,6 +41,29 @@ namespace juce
 {
 
 //==============================================================================
+static void resetTrackingArea (NSView* view)
+{
+    const auto trackingAreas = [view trackingAreas];
+
+    jassert ([trackingAreas count] <= 1);
+
+    for (NSTrackingArea* area in trackingAreas)
+        [view removeTrackingArea: area];
+
+    const auto options = NSTrackingMouseEnteredAndExited
+                         | NSTrackingMouseMoved
+                         | NSTrackingEnabledDuringMouseDrag
+                         | NSTrackingActiveAlways
+                         | NSTrackingInVisibleRect;
+
+    const NSUniquePtr<NSTrackingArea> trackingArea { [[NSTrackingArea alloc] initWithRect: [view bounds]
+                                                                                  options: options
+                                                                                    owner: view
+                                                                                 userInfo: nil] };
+
+    [view addTrackingArea: trackingArea.get()];
+}
+
 static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 {
     switch (keyCode)
@@ -121,16 +144,7 @@ public:
 
         [view registerForDraggedTypes: getSupportedDragTypes()];
 
-        const auto options = NSTrackingMouseEnteredAndExited
-                           | NSTrackingMouseMoved
-                           | NSTrackingEnabledDuringMouseDrag
-                           | NSTrackingActiveAlways
-                           | NSTrackingInVisibleRect;
-        const NSUniquePtr<NSTrackingArea> trackingArea { [[NSTrackingArea alloc] initWithRect: r
-                                                                                      options: options
-                                                                                        owner: view
-                                                                                     userInfo: nil] };
-        [view addTrackingArea: trackingArea.get()];
+        resetTrackingArea (view);
 
         notificationCenter = [NSNotificationCenter defaultCenter];
 
@@ -1843,6 +1857,7 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
     {
         addMethod (@selector (isOpaque),                      isOpaque);
         addMethod (@selector (drawRect:),                     drawRect);
+        addMethod (@selector (updateTrackingAreas),           updateTrackingAreas);
         addMethod (@selector (mouseDown:),                    mouseDown);
         addMethod (@selector (mouseUp:),                      mouseUp);
         addMethod (@selector (mouseDragged:),                 mouseDragged);
@@ -1925,6 +1940,13 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
     }
 
 private:
+    static void updateTrackingAreas (id self, SEL)
+    {
+        sendSuperclassMessage<void> (self, @selector (updateTrackingAreas));
+
+        resetTrackingArea (static_cast<NSView*> (self));
+    }
+
     static void mouseDown (id self, SEL s, NSEvent* ev)
     {
         if (JUCEApplicationBase::isStandaloneApp())
