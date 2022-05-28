@@ -1534,7 +1534,7 @@ private:
                                                         (vstParamID == audioProcessor->getBypassParamID())));
 
                     // is this a meter?
-                    if (((juceParam->getCategory() & 0xffff0000) >> 16) == 2)
+                    if ((juceParam->getCategory() & (2 << 16)))
                     {
                         audioProcessor->metersParamIDs.add (vstParamID);
                     }
