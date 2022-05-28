@@ -734,7 +734,7 @@ public:
         {
             // sum gain reduction meters only
             const auto param = audioProcessor->getParamForVSTParamID (id);
-            if (((param->getCategory() & 0xffff0000) >> 16) == 2)
+            if ((param->getCategory() & (2 << 16)))
             {
                 gainReduction *= param->getValue();
                 hasGRMeter = true;
@@ -770,7 +770,7 @@ public:
             jassert (info.defaultNormalizedValue >= 0 && info.defaultNormalizedValue <= 1.0f);
 
             // Is this a meter?
-            if ((((unsigned int) param.getCategory() & 0xffff0000) >> 16) == 2)
+            if ((param.getCategory() & (2 << 16)))
                 info.flags = Vst::ParameterInfo::kIsReadOnly;
             else
                 info.flags = param.isAutomatable() ? Vst::ParameterInfo::kCanAutomate : 0;

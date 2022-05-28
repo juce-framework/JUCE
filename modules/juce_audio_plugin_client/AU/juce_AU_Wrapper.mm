@@ -985,7 +985,7 @@ public:
                 }
 
                 // Is this a meter?
-                if ((((unsigned int) param->getCategory() & 0xffff0000) >> 16) == 2)
+                if ((param->getCategory() & (2 << 16)))
                 {
                     outParameterInfo.flags &= ~kAudioUnitParameterFlag_IsWritable;
                     outParameterInfo.flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;

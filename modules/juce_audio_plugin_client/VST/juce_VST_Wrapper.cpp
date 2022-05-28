@@ -1703,7 +1703,7 @@ private:
     {
         if (auto* param = juceParameters.getParamForIndex (args.index))
         {
-            const bool isMeter = ((((unsigned int) param->getCategory() & 0xffff0000) >> 16) == 2);
+            const bool isMeter = ((param->getCategory() & (2 << 16)));
             return (param->isAutomatable() && (! isMeter) ? 1 : 0);
         }
 

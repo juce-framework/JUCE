@@ -1282,7 +1282,7 @@ private:
         std::unique_ptr<NSMutableArray, NSObjectDeleter> valueStrings;
 
         // Is this a meter?
-        if (((parameter->getCategory() & 0xffff0000) >> 16) == 2)
+        if ((parameter->getCategory() & (2 << 16)))
         {
             flags &= ~kAudioUnitParameterFlag_IsWritable;
             flags |= kAudioUnitParameterFlag_MeterReadOnly | kAudioUnitParameterFlag_DisplayLogarithmic;

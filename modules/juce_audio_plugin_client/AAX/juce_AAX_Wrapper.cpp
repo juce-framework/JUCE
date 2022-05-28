@@ -1943,7 +1943,7 @@ namespace AAXClasses
                 paramMap.set (AAXClasses::getAAXParamHash (aaxParamID), juceParam);
 
                 // is this a meter?
-                if (((category & 0xffff0000) >> 16) == 2)
+                if ((category & (2 << 16)))
                 {
                     aaxMeters.add (juceParam);
                     continue;
@@ -2504,7 +2504,7 @@ namespace AAXClasses
             auto category = param->getCategory();
 
             // is this a meter?
-            if (((category & 0xffff0000) >> 16) == 2)
+            if ((category & (2 << 16)))
             {
                 if (auto* meterProperties = descriptor.NewPropertyMap())
                 {
