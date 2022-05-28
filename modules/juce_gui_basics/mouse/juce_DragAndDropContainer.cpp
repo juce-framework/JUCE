@@ -59,6 +59,7 @@ public:
         startTimer (200);
 
         setInterceptsMouseClicks (false, false);
+        setWantsKeyboardFocus (true);
         setAlwaysOnTop (true);
     }
 
@@ -200,7 +201,12 @@ public:
     {
         if (key == KeyPress::escapeKey)
         {
-            dismissWithAnimation (true);
+            const auto wasVisible = isVisible();
+            setVisible (false);
+
+            if (wasVisible)
+                dismissWithAnimation (true);
+
             deleteSelf();
             return true;
         }
@@ -466,8 +472,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
             dragImageComponent->setOpaque (true);
 
         dragImageComponent->addToDesktop (ComponentPeer::windowIgnoresMouseClicks
-                                          | ComponentPeer::windowIsTemporary
-                                          | ComponentPeer::windowIgnoresKeyPresses);
+                                          | ComponentPeer::windowIsTemporary);
     }
     else
     {
@@ -484,6 +489,7 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
 
     dragImageComponent->sourceDetails.localPosition = sourceComponent->getLocalPoint (nullptr, lastMouseDown);
     dragImageComponent->updateLocation (false, lastMouseDown);
+    dragImageComponent->grabKeyboardFocus();
 
    #if JUCE_WINDOWS
     // Under heavy load, the layered window's paint callback can often be lost by the OS,
