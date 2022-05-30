@@ -337,8 +337,16 @@ protected:
 
 private:
     //==============================================================================
+    class AccessibilityIgnoredComponent : public Component
+    {
+        std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+        {
+            return createIgnoredAccessibilityHandler (*this);
+        }
+    };
+
     std::unique_ptr<ScrollBar> verticalScrollBar, horizontalScrollBar;
-    Component contentHolder;
+    AccessibilityIgnoredComponent contentHolder;
     WeakReference<Component> contentComp;
     Rectangle<int> lastVisibleArea;
     int scrollBarThickness = 0;

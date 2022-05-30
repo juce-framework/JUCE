@@ -868,6 +868,12 @@ struct TextEditor::TextHolderComponent  : public Component,
 
     TextEditor& owner;
 
+private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     JUCE_DECLARE_NON_COPYABLE (TextHolderComponent)
 };
 
@@ -894,6 +900,11 @@ struct TextEditor::TextEditorViewport  : public Viewport
     }
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+    {
+        return createIgnoredAccessibilityHandler (*this);
+    }
+
     TextEditor& owner;
     int lastWordWrapWidth = 0;
     bool reentrant = false;
