@@ -237,6 +237,11 @@ private:
         }
 
     private:
+        std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+        {
+            return createIgnoredAccessibilityHandler (*this);
+        }
+
         GraphicsSettingsGroup graphicsSettings;
         AudioSettingsGroup audioSettings;
     };
