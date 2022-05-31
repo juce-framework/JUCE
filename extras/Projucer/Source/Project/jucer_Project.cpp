@@ -2286,9 +2286,9 @@ Array<var> Project::getDefaultVSTCategories() const noexcept
 
 StringArray Project::getAllVST3CategoryStrings() noexcept
 {
-    static StringArray vst3CategoryStrings { "Fx", "Instrument", "Analyzer", "Delay", "Distortion", "Drum", "Dynamics", "EQ", "External", "Filter",
-                                             "Generator", "Mastering", "Modulation", "Mono", "Network", "NoOfflineProcess", "OnlyOfflineProcess", "OnlyRT",
-                                             "Pitch Shift", "Restoration", "Reverb", "Sampler", "Spatial", "Stereo", "Surround", "Synth", "Tools", "Up-Downmix" };
+    static StringArray vst3CategoryStrings { "Fx", "Instrument", "Analyzer", "Ambisonics", "Delay", "Distortion", "Drum", "Dynamics", "EQ", "External", "Filter",
+                                             "Generator", "Mastering", "Modulation", "Mono", "Network", "NoOfflineProcess", "OnlyARA", "OnlyOfflineProcess", "OnlyRT",
+                                             "Piano", "Pitch Shift", "Restoration", "Reverb", "Sampler", "Spatial", "Stereo", "Surround", "Synth", "Tools", "Up-Downmix" };
 
     return vst3CategoryStrings;
 }
