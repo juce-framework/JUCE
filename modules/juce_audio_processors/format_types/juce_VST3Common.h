@@ -495,27 +495,20 @@ inline AudioChannelSet getChannelSetForSpeakerArrangement (Steinberg::Vst::Speak
 */
 struct ChannelMapping
 {
-    explicit ChannelMapping (const AudioChannelSet& layout)
-        : ChannelMapping (layout, true)
-    {
-    }
-
     ChannelMapping (const AudioChannelSet& layout, bool activeIn)
-        : indices (makeChannelIndices (layout)),
-          active (activeIn)
-    {
-    }
+        : indices (makeChannelIndices (layout)), active (activeIn) {}
 
-    explicit ChannelMapping (const AudioProcessor::Bus& juceBus)
-        : ChannelMapping (juceBus.getLastEnabledLayout(), juceBus.isEnabled())
-    {
-    }
+    explicit ChannelMapping (const AudioChannelSet& layout)
+        : ChannelMapping (layout, true) {}
+
+    explicit ChannelMapping (const AudioProcessor::Bus& bus)
+        : ChannelMapping (bus.getLastEnabledLayout(), bus.isEnabled()) {}
 
     int getJuceChannelForVst3Channel (int vst3Channel) const { return indices[(size_t) vst3Channel]; }
 
     size_t size() const { return indices.size(); }
 
-    void setActive (bool activeIn) { active = activeIn; }
+    void setActive (bool x) { active = x; }
     bool isActive() const { return active; }
 
 private:
@@ -543,22 +536,102 @@ private:
     bool active = true;
 };
 
+class DynamicChannelMapping
+{
+public:
+    DynamicChannelMapping (const AudioChannelSet& channelSet, bool active)
+        : set (channelSet), map (channelSet, active) {}
+
+    explicit DynamicChannelMapping (const AudioChannelSet& channelSet)
+        : DynamicChannelMapping (channelSet, true) {}
+
+    explicit DynamicChannelMapping (const AudioProcessor::Bus& bus)
+        : DynamicChannelMapping (bus.getLastEnabledLayout(), bus.isEnabled()) {}
+
+    AudioChannelSet getAudioChannelSet() const { return set; }
+    int getJuceChannelForVst3Channel (int vst3Channel) const { return map.getJuceChannelForVst3Channel (vst3Channel); }
+    size_t size() const { return map.size(); }
+
+    /*  Returns true if the host has activated this bus. */
+    bool isHostActive()   const { return hostActive; }
+    /*  Returns true if the AudioProcessor expects this bus to be active. */
+    bool isClientActive() const { return map.isActive(); }
+
+    void setHostActive   (bool active)   { hostActive   = active; }
+    void setClientActive (bool active)   { map.setActive (active); }
+
+private:
+    AudioChannelSet set;
+    ChannelMapping map;
+    bool hostActive = false;
+};
+
 //==============================================================================
 inline auto& getAudioBusPointer (detail::Tag<float>,  Steinberg::Vst::AudioBusBuffers& data) { return data.channelBuffers32; }
 inline auto& getAudioBusPointer (detail::Tag<double>, Steinberg::Vst::AudioBusBuffers& data) { return data.channelBuffers64; }
 
-static inline int countUsedChannels (const std::vector<ChannelMapping>& inputMap,
-                                     const std::vector<ChannelMapping>& outputMap)
+static inline int countUsedClientChannels (const std::vector<DynamicChannelMapping>& inputMap,
+                                           const std::vector<DynamicChannelMapping>& outputMap)
 {
-    const auto countUsedChannelsInVector = [] (const std::vector<ChannelMapping>& map)
+    const auto countUsedChannelsInVector = [] (const std::vector<DynamicChannelMapping>& map)
     {
         return std::accumulate (map.begin(), map.end(), 0, [] (auto acc, const auto& item)
         {
-            return acc + (item.isActive() ? (int) item.size() : 0);
+            return acc + (item.isClientActive() ? (int) item.size() : 0);
         });
     };
 
     return jmax (countUsedChannelsInVector (inputMap), countUsedChannelsInVector (outputMap));
+}
+
+template <typename FloatType>
+class ScratchBuffer
+{
+public:
+    void setSize (int numChannels, int blockSize)
+    {
+        buffer.setSize (numChannels, blockSize);
+    }
+
+    void clear() { channelCounter = 0; }
+
+    auto* getNextChannelBuffer() { return buffer.getWritePointer (channelCounter++); }
+
+private:
+    AudioBuffer<FloatType> buffer;
+    int channelCounter = 0;
+};
+
+template <typename FloatType>
+static int countValidBuses (Steinberg::Vst::AudioBusBuffers* buffers, int32 num)
+{
+    return (int) std::distance (buffers, std::find_if (buffers, buffers + num, [] (auto& buf)
+    {
+        return getAudioBusPointer (detail::Tag<FloatType>{}, buf) == nullptr && buf.numChannels > 0;
+    }));
+}
+
+template <typename FloatType, typename Iterator>
+static bool validateLayouts (Iterator first, Iterator last, const std::vector<DynamicChannelMapping>& map)
+{
+    if ((size_t) std::distance (first, last) > map.size())
+        return false;
+
+    auto mapIterator = map.begin();
+
+    for (auto it = first; it != last; ++it, ++mapIterator)
+    {
+        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
+        const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
+
+        // Null channels are allowed if the bus is inactive
+        if ((mapIterator->isHostActive() && anyChannelIsNull) || ((int) mapIterator->size() != it->numChannels))
+            return false;
+    }
+
+    // If the host didn't provide the full complement of buses, it must be because the other
+    // buses are all deactivated.
+    return std::none_of (mapIterator, map.end(), [] (const auto& item) { return item.isHostActive(); });
 }
 
 /*
@@ -578,155 +651,107 @@ class ClientBufferMapperData
 public:
     void prepare (int numChannels, int blockSize)
     {
-        emptyBuffer.setSize (numChannels, blockSize);
+        scratchBuffer.setSize (numChannels, blockSize);
         channels.reserve ((size_t) jmin (128, numChannels));
     }
 
     AudioBuffer<FloatType> getMappedBuffer (Steinberg::Vst::ProcessData& data,
-                                            const std::vector<ChannelMapping>& inputMap,
-                                            const std::vector<ChannelMapping>& outputMap)
+                                            const std::vector<DynamicChannelMapping>& inputMap,
+                                            const std::vector<DynamicChannelMapping>& outputMap)
     {
-        const auto usedChannels = countUsedChannels (inputMap, outputMap);
-
-        // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
-        const auto countValidBuses = [] (Steinberg::Vst::AudioBusBuffers* buffers, int32 num)
-        {
-            return int (std::distance (buffers, std::find_if (buffers, buffers + num, [] (Steinberg::Vst::AudioBusBuffers& buf)
-            {
-                return getAudioBusPointer (detail::Tag<FloatType>{}, buf) == nullptr && buf.numChannels > 0;
-            })));
-        };
-
-        const auto vstInputs  = countValidBuses (data.inputs,  data.numInputs);
-        const auto vstOutputs = countValidBuses (data.outputs, data.numOutputs);
-
-        if (! validateLayouts (data, vstInputs, inputMap, vstOutputs, outputMap))
-            return clearOutputBuffersAndReturnBlankBuffer (data, vstOutputs, usedChannels);
-
-        // If we're here, then we know that the host has given us a usable layout
+        scratchBuffer.clear();
         channels.clear();
 
-        // Put the host-supplied output channel pointers into JUCE order
-        for (size_t i = 0; i < (size_t) vstOutputs; ++i)
-        {
-            const auto bus = getMappedOutputBus (data, outputMap, i);
-            channels.insert (channels.end(), bus.begin(), bus.end());
-        }
+        const auto usedChannels = countUsedClientChannels (inputMap, outputMap);
 
-        // For input channels that are < the total number of outputs channels, copy the input over
-        // the output buffer, at the appropriate JUCE channel index.
-        // For input channels that are >= the total number of output channels, add the input buffer
-        // pointer to the array of channel pointers.
-        for (size_t inputBus = 0, initialBusIndex = 0; inputBus < (size_t) vstInputs; ++inputBus)
-        {
-            const auto& map = inputMap[inputBus];
+        // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
+        const auto vstInputs = countValidBuses<FloatType> (data.inputs, data.numInputs);
 
-            if (! map.isActive())
-                continue;
+        if (! validateLayouts<FloatType> (data.inputs, data.inputs + vstInputs, inputMap))
+            return getBlankBuffer (usedChannels, (int) data.numSamples);
 
-            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.inputs[inputBus]);
-
-            for (auto i = 0; i < (int) map.size(); ++i)
-            {
-                const auto destIndex = initialBusIndex + (size_t) map.getJuceChannelForVst3Channel (i);
-
-                channels.resize (jmax (channels.size(), destIndex + 1), nullptr);
-
-                if (auto* dest = channels[destIndex])
-                    FloatVectorOperations::copy (dest, busPtr[i], (int) data.numSamples);
-                else
-                    channels[destIndex] = busPtr[i];
-            }
-
-            initialBusIndex += map.size();
-        }
+        setUpInputChannels (data, (size_t) vstInputs, scratchBuffer, inputMap,  channels);
+        setUpOutputChannels (scratchBuffer, outputMap, channels);
 
         return { channels.data(), (int) channels.size(), (int) data.numSamples };
     }
 
 private:
-    AudioBuffer<FloatType> clearOutputBuffersAndReturnBlankBuffer (Steinberg::Vst::ProcessData& data, int vstOutputs, int usedChannels)
+    static void setUpInputChannels (Steinberg::Vst::ProcessData& data,
+                                    size_t vstInputs,
+                                    ScratchBuffer<FloatType>& scratchBuffer,
+                                    const std::vector<DynamicChannelMapping>& map,
+                                    std::vector<FloatType*>& channels)
+    {
+        for (size_t busIndex = 0; busIndex < map.size(); ++busIndex)
+        {
+            const auto mapping = map[busIndex];
+
+            if (! mapping.isClientActive())
+                continue;
+
+            const auto originalSize = channels.size();
+
+            for (size_t channelIndex = 0; channelIndex < mapping.size(); ++channelIndex)
+                channels.push_back (scratchBuffer.getNextChannelBuffer());
+
+            if (mapping.isHostActive() && busIndex < vstInputs)
+            {
+                auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.inputs[busIndex]);
+
+                for (size_t channelIndex = 0; channelIndex < mapping.size(); ++channelIndex)
+                {
+                    FloatVectorOperations::copy (channels[(size_t) mapping.getJuceChannelForVst3Channel ((int) channelIndex) + originalSize],
+                                                 busPtr[channelIndex],
+                                                 (size_t) data.numSamples);
+                }
+            }
+            else
+            {
+                for (size_t channelIndex = 0; channelIndex < mapping.size(); ++channelIndex)
+                    FloatVectorOperations::clear (channels[originalSize + channelIndex], (size_t) data.numSamples);
+            }
+        }
+    }
+
+    static void setUpOutputChannels (ScratchBuffer<FloatType>& scratchBuffer,
+                                     const std::vector<DynamicChannelMapping>& map,
+                                     std::vector<FloatType*>& channels)
+    {
+        for (size_t i = 0, initialBusIndex = 0; i < (size_t) map.size(); ++i)
+        {
+            const auto& mapping = map[i];
+
+            if (mapping.isClientActive())
+            {
+                for (size_t j = 0; j < mapping.size(); ++j)
+                {
+                    if (channels.size() <= initialBusIndex + j)
+                        channels.push_back (scratchBuffer.getNextChannelBuffer());
+                }
+
+                initialBusIndex += mapping.size();
+            }
+        }
+    }
+
+    AudioBuffer<FloatType> getBlankBuffer (int usedChannels, int usedSamples)
     {
         // The host is ignoring the bus layout we requested, so we can't process sensibly!
         jassertfalse;
 
-        // Clear all output channels
-        std::for_each (data.outputs, data.outputs + vstOutputs, [&data] (auto& bus)
-        {
-            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
-            std::for_each (busPtr, busPtr + bus.numChannels, [&data] (auto* ptr)
-            {
-                if (ptr != nullptr)
-                    FloatVectorOperations::clear (ptr, (int) data.numSamples);
-            });
-        });
-
         // Return a silent buffer for the AudioProcessor to process
-        emptyBuffer.clear();
-
-        return { emptyBuffer.getArrayOfWritePointers(),
-                 jmin (emptyBuffer.getNumChannels(), usedChannels),
-                 data.numSamples };
-    }
-
-    std::vector<FloatType*> getMappedOutputBus (Steinberg::Vst::ProcessData& data,
-                                                const std::vector<ChannelMapping>& maps,
-                                                size_t index) const
-    {
-        const auto& map = maps[index];
-
-        if (! map.isActive())
-            return {};
-
-        auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, data.outputs[index]);
-
-        std::vector<FloatType*> result (map.size(), nullptr);
-
-        for (auto i = 0; i < (int) map.size(); ++i)
-            result[(size_t) map.getJuceChannelForVst3Channel (i)] = busPtr[i];
-
-        return result;
-    }
-
-    template <typename Iterator>
-    static bool validateLayouts (Iterator first, Iterator last, const std::vector<ChannelMapping>& map)
-    {
-        if ((size_t) std::distance (first, last) > map.size())
-            return false;
-
-        auto mapIterator = map.begin();
-
-        for (auto it = first; it != last; ++it, ++mapIterator)
+        for (auto i = 0; i < usedChannels; ++i)
         {
-            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, *it);
-            const auto anyChannelIsNull = std::any_of (busPtr, busPtr + it->numChannels, [] (auto* ptr) { return ptr == nullptr; });
-
-            // Null channels are allowed if the bus is inactive
-            if ((mapIterator->isActive() && anyChannelIsNull) || ((int) mapIterator->size() != it->numChannels))
-                return false;
+            channels.push_back (scratchBuffer.getNextChannelBuffer());
+            FloatVectorOperations::clear (channels.back(), usedSamples);
         }
 
-        // If the host didn't provide the full complement of buses, it must be because the other
-        // buses are all deactivated.
-        return std::none_of (mapIterator, map.end(), [] (const auto& item) { return item.isActive(); });
-    }
-
-    static bool validateLayouts (Steinberg::Vst::ProcessData& data,
-                                 int numInputs,
-                                 const std::vector<ChannelMapping>& inputMap,
-                                 int numOutputs,
-                                 const std::vector<ChannelMapping>& outputMap)
-    {
-
-        // The plug-in should only process an activated bus.
-        // The host could provide fewer busses in the process call if the last busses are not activated.
-
-        return validateLayouts (data.inputs, data.inputs + numInputs, inputMap)
-               && validateLayouts (data.outputs, data.outputs + numOutputs, outputMap);
+        return { channels.data(), (int) channels.size(), usedSamples };
     }
 
     std::vector<FloatType*> channels;
-    AudioBuffer<FloatType> emptyBuffer;
+    ScratchBuffer<FloatType> scratchBuffer;
 };
 
 //==============================================================================
@@ -748,65 +773,213 @@ private:
 class ClientBufferMapper
 {
 public:
-    void prepare (const AudioProcessor& processor, int blockSize)
+    void updateFromProcessor (const AudioProcessor& processor)
     {
         struct Pair
         {
-            std::vector<ChannelMapping>& map;
+            std::vector<DynamicChannelMapping>& map;
             bool isInput;
         };
 
         for (const auto& pair : { Pair { inputMap, true }, Pair { outputMap, false } })
         {
-            pair.map.clear();
+            if (pair.map.empty())
+            {
+                for (auto i = 0; i < processor.getBusCount (pair.isInput); ++i)
+                    pair.map.emplace_back (*processor.getBus (pair.isInput, i));
+            }
+            else
+            {
+                // The number of buses cannot change after creating a VST3 plugin!
+                jassert ((size_t) processor.getBusCount (pair.isInput) == pair.map.size());
 
-            for (auto i = 0; i < processor.getBusCount (pair.isInput); ++i)
-                pair.map.emplace_back (*processor.getBus (pair.isInput, i));
+                for (size_t i = 0; i < (size_t) processor.getBusCount (pair.isInput); ++i)
+                {
+                    pair.map[i] = [&]
+                    {
+                        DynamicChannelMapping replacement { *processor.getBus (pair.isInput, (int) i) };
+                        replacement.setHostActive (pair.map[i].isHostActive());
+                        return replacement;
+                    }();
+                }
+            }
         }
+    }
 
-        const auto findMaxNumChannels = [&] (bool isInput)
+    void prepare (int blockSize)
+    {
+        const auto findNumChannelsWhenAllBusesEnabled = [] (const auto& map)
         {
-            auto sum = 0;
-
-            for (auto i = 0; i < processor.getBusCount (isInput); ++i)
-                sum += processor.getBus (isInput, i)->getLastEnabledLayout().size();
-
-            return sum;
+            return std::accumulate (map.cbegin(), map.cend(), 0, [] (auto acc, const auto& item)
+            {
+                return acc + (int) item.size();
+            });
         };
 
-        const auto numChannels = jmax (findMaxNumChannels (true), findMaxNumChannels (false));
+        const auto numChannels = jmax (findNumChannelsWhenAllBusesEnabled (inputMap),
+                                       findNumChannelsWhenAllBusesEnabled (outputMap));
 
         floatData .prepare (numChannels, blockSize);
         doubleData.prepare (numChannels, blockSize);
     }
 
-    void setInputBusActive (size_t bus, bool state)
+    void updateActiveClientBuses (const AudioProcessor::BusesLayout& clientBuses)
     {
-        if (bus < inputMap.size())
-            inputMap[bus].setActive (state);
+        if (   (size_t) clientBuses.inputBuses .size() != inputMap .size()
+            || (size_t) clientBuses.outputBuses.size() != outputMap.size())
+        {
+            jassertfalse;
+            return;
+        }
+
+        const auto sync = [] (auto& map, auto& client)
+        {
+            for (size_t i = 0; i < map.size(); ++i)
+            {
+                jassert (client[(int) i] == AudioChannelSet::disabled() || client[(int) i] == map[i].getAudioChannelSet());
+                map[i].setClientActive (client[(int) i] != AudioChannelSet::disabled());
+            }
+        };
+
+        sync (inputMap,  clientBuses.inputBuses);
+        sync (outputMap, clientBuses.outputBuses);
     }
 
-    void setOutputBusActive (size_t bus, bool state)
-    {
-        if (bus < outputMap.size())
-            outputMap[bus].setActive (state);
-    }
+    void setInputBusHostActive  (size_t bus, bool state) { setHostActive (inputMap,  bus, state); }
+    void setOutputBusHostActive (size_t bus, bool state) { setHostActive (outputMap, bus, state); }
 
-    template <typename FloatType>
-    AudioBuffer<FloatType> getJuceLayoutForVst3Buffer (detail::Tag<FloatType>, Steinberg::Vst::ProcessData& data)
-    {
-        return getData (detail::Tag<FloatType>{}).getMappedBuffer (data, inputMap, outputMap);
-    }
-
-private:
     auto& getData (detail::Tag<float>)  { return floatData; }
     auto& getData (detail::Tag<double>) { return doubleData; }
+
+    AudioChannelSet getRequestedLayoutForInputBus (size_t bus) const
+    {
+        return getRequestedLayoutForBus (inputMap, bus);
+    }
+
+    AudioChannelSet getRequestedLayoutForOutputBus (size_t bus) const
+    {
+        return getRequestedLayoutForBus (outputMap, bus);
+    }
+
+    const std::vector<DynamicChannelMapping>& getInputMap()  const { return inputMap; }
+    const std::vector<DynamicChannelMapping>& getOutputMap() const { return outputMap; }
+
+private:
+    static void setHostActive (std::vector<DynamicChannelMapping>& map, size_t bus, bool state)
+    {
+        if (bus < map.size())
+            map[bus].setHostActive (state);
+    }
+
+    static AudioChannelSet getRequestedLayoutForBus (const std::vector<DynamicChannelMapping>& map, size_t bus)
+    {
+        if (bus < map.size() && map[bus].isHostActive())
+            return map[bus].getAudioChannelSet();
+
+        return AudioChannelSet::disabled();
+    }
 
     ClientBufferMapperData<float> floatData;
     ClientBufferMapperData<double> doubleData;
 
-    std::vector<ChannelMapping> inputMap;
-    std::vector<ChannelMapping> outputMap;
+    std::vector<DynamicChannelMapping> inputMap;
+    std::vector<DynamicChannelMapping> outputMap;
+};
+
+//==============================================================================
+/*  Holds a buffer in the JUCE channel layout, and a reference to a Vst ProcessData struct, and
+    copies each JUCE channel to the appropriate host output channel when this object goes
+    out of scope.
+*/
+template <typename FloatType>
+class ClientRemappedBuffer
+{
+public:
+    ClientRemappedBuffer (ClientBufferMapperData<FloatType>& mapperData,
+                          const std::vector<DynamicChannelMapping>* inputMapIn,
+                          const std::vector<DynamicChannelMapping>* outputMapIn,
+                          Steinberg::Vst::ProcessData& hostData)
+        : buffer (mapperData.getMappedBuffer (hostData, *inputMapIn, *outputMapIn)),
+          outputMap (outputMapIn),
+          data (hostData)
+    {}
+
+    ClientRemappedBuffer (ClientBufferMapper& mapperIn, Steinberg::Vst::ProcessData& hostData)
+        : ClientRemappedBuffer (mapperIn.getData (detail::Tag<FloatType>{}),
+                                &mapperIn.getInputMap(),
+                                &mapperIn.getOutputMap(),
+                                hostData)
+    {}
+
+    ~ClientRemappedBuffer()
+    {
+        // WaveLab workaround: This host may report the wrong number of inputs/outputs so re-count here
+        const auto vstOutputs = (size_t) countValidBuses<FloatType> (data.outputs, data.numOutputs);
+
+        if (validateLayouts<FloatType> (data.outputs, data.outputs + vstOutputs, *outputMap))
+            copyToHostOutputBuses (vstOutputs);
+        else
+            clearHostOutputBuses (vstOutputs);
+    }
+
+    AudioBuffer<FloatType> buffer;
+
+private:
+    void copyToHostOutputBuses (size_t vstOutputs) const
+    {
+        for (size_t i = 0, juceBusOffset = 0; i < outputMap->size(); ++i)
+        {
+            const auto& mapping = (*outputMap)[i];
+
+            if (mapping.isHostActive() && i < vstOutputs)
+            {
+                auto& bus = data.outputs[i];
+
+                if (mapping.isClientActive())
+                {
+                    for (size_t j = 0; j < mapping.size(); ++j)
+                    {
+                        auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
+                        const auto juceChannel = juceBusOffset + (size_t) mapping.getJuceChannelForVst3Channel ((int) j);
+                        FloatVectorOperations::copy (hostChannel, buffer.getReadPointer ((int) juceChannel), (size_t) data.numSamples);
+                    }
+                }
+                else
+                {
+                    for (size_t j = 0; j < mapping.size(); ++j)
+                    {
+                        auto* hostChannel = getAudioBusPointer (detail::Tag<FloatType>{}, bus)[j];
+                        FloatVectorOperations::clear (hostChannel, (size_t) data.numSamples);
+                    }
+                }
+            }
+
+            if (mapping.isClientActive())
+                juceBusOffset += mapping.size();
+        }
+    }
+
+    void clearHostOutputBuses (size_t vstOutputs) const
+    {
+        // The host provided us with an unexpected bus layout.
+        jassertfalse;
+
+        std::for_each (data.outputs, data.outputs + vstOutputs, [this] (auto& bus)
+        {
+            auto** busPtr = getAudioBusPointer (detail::Tag<FloatType>{}, bus);
+            std::for_each (busPtr, busPtr + bus.numChannels, [this] (auto* ptr)
+            {
+                if (ptr != nullptr)
+                    FloatVectorOperations::clear (ptr, (int) data.numSamples);
+            });
+        });
+    }
+
+    const std::vector<DynamicChannelMapping>* outputMap = nullptr;
+    Steinberg::Vst::ProcessData& data;
+
+    JUCE_DECLARE_NON_COPYABLE (ClientRemappedBuffer)
+    JUCE_DECLARE_NON_MOVEABLE (ClientRemappedBuffer)
 };
 
 //==============================================================================

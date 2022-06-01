@@ -2957,33 +2957,76 @@ public:
 
         if (type == Vst::kAudio)
         {
-            if (index < 0 || index >= getNumAudioBuses (dir == Vst::kInput))
+            const auto numInputBuses  = getNumAudioBuses (true);
+            const auto numOutputBuses = getNumAudioBuses (false);
+
+            if (! isPositiveAndBelow (index, dir == Vst::kInput ? numInputBuses : numOutputBuses))
                 return kResultFalse;
 
-            // Some hosts (old cakewalk, bitwig studio) might call this function without
-            // deactivating the plugin, so we update the channel mapping here.
-            if (dir == Vst::BusDirections::kInput)
-                bufferMapper.setInputBusActive ((size_t) index, state != 0);
+            // The host is allowed to enable/disable buses as it sees fit, so the plugin needs to be
+            // able to handle any set of enabled/disabled buses, including layouts for which
+            // AudioProcessor::isBusesLayoutSupported would return false.
+            // Our strategy is to keep track of the layout that the host last requested, and to
+            // attempt to apply that layout directly.
+            // If the layout isn't supported by the processor, we'll try enabling all the buses
+            // instead.
+            // If the host enables a bus that the processor refused to enable, then we'll ignore
+            // that bus (and return silence for output buses). If the host disables a bus that the
+            // processor refuses to disable, the wrapper will provide the processor with silence for
+            // input buses, and ignore the contents of output buses.
+            // Note that some hosts (old bitwig and cakewalk) may incorrectly call this function
+            // when the plugin is in an activated state.
+            if (dir == Vst::kInput)
+                bufferMapper.setInputBusHostActive ((size_t) index, state != 0);
             else
-                bufferMapper.setOutputBusActive ((size_t) index, state != 0);
+                bufferMapper.setOutputBusHostActive ((size_t) index, state != 0);
 
-            if (auto* bus = pluginInstance->getBus (dir == Vst::kInput, index))
+            AudioProcessor::BusesLayout desiredLayout;
+
+            for (auto i = 0; i < numInputBuses; ++i)
+                desiredLayout.inputBuses.add (bufferMapper.getRequestedLayoutForInputBus ((size_t) i));
+
+            for (auto i = 0; i < numOutputBuses; ++i)
+                desiredLayout.outputBuses.add (bufferMapper.getRequestedLayoutForOutputBus ((size_t) i));
+
+            const auto prev = pluginInstance->getBusesLayout();
+
+            const auto busesLayoutSupported = [&]
             {
                #ifdef JucePlugin_PreferredChannelConfigurations
-                auto newLayout = pluginInstance->getBusesLayout();
-                auto targetLayout = (state != 0 ? bus->getLastEnabledLayout() : AudioChannelSet::disabled());
+                struct ChannelPair
+                {
+                    short ins, outs;
 
-                (dir == Vst::kInput ? newLayout.inputBuses : newLayout.outputBuses).getReference (index) = targetLayout;
+                    auto tie() const { return std::tie (ins, outs); }
+                    bool operator== (ChannelPair x) const { return tie() == x.tie(); }
+                };
 
-                short configs[][2] = { JucePlugin_PreferredChannelConfigurations };
-                auto compLayout = pluginInstance->getNextBestLayoutInLayoutList (newLayout, configs);
+                const auto countChannels = [] (auto& range)
+                {
+                    return std::accumulate (range.begin(), range.end(), (short) 0, [] (auto acc, auto set)
+                    {
+                        return acc + set.size();
+                    });
+                };
 
-                if ((dir == Vst::kInput ? compLayout.inputBuses : compLayout.outputBuses).getReference (index) != targetLayout)
-                    return kResultFalse;
+                const ChannelPair requested { countChannels (desiredLayout.inputBuses),
+                                              countChannels (desiredLayout.outputBuses) };
+                const ChannelPair configs[] = { JucePlugin_PreferredChannelConfigurations };
+                return std::find (std::begin (configs), std::end (configs), requested) != std::end (configs);
+               #else
+                return pluginInstance->checkBusesLayoutSupported (desiredLayout);
                #endif
+            }();
 
-                return bus->enable (state != 0) ? kResultTrue : kResultFalse;
-            }
+            if (busesLayoutSupported)
+                pluginInstance->setBusesLayout (desiredLayout);
+            else
+                pluginInstance->enableAllBuses();
+
+            bufferMapper.updateActiveClientBuses (pluginInstance->getBusesLayout());
+
+            return kResultTrue;
         }
 
         return kResultFalse;
@@ -3043,7 +3086,11 @@ public:
             return kResultFalse;
        #endif
 
-        return pluginInstance->setBusesLayoutWithoutEnabling (requested) ? kResultTrue : kResultFalse;
+        if (! pluginInstance->setBusesLayoutWithoutEnabling (requested))
+            return kResultFalse;
+
+        bufferMapper.updateFromProcessor (*pluginInstance);
+        return kResultTrue;
     }
 
     tresult PLUGIN_API getBusArrangement (Vst::BusDirection dir, Steinberg::int32 index, Vst::SpeakerArrangement& arr) override
@@ -3285,7 +3332,9 @@ private:
     template <typename FloatType>
     void processAudio (Vst::ProcessData& data)
     {
-        auto buffer = bufferMapper.getJuceLayoutForVst3Buffer (detail::Tag<FloatType>{}, data);
+        ClientRemappedBuffer<FloatType> remappedBuffer { bufferMapper, data };
+        auto& buffer = remappedBuffer.buffer;
+
         jassert ((int) buffer.getNumChannels() == jmax (pluginInstance->getTotalNumInputChannels(),
                                                         pluginInstance->getTotalNumOutputChannels()));
 
@@ -3358,7 +3407,8 @@ private:
         midiBuffer.ensureSize (2048);
         midiBuffer.clear();
 
-        bufferMapper.prepare (p, bufferSize);
+        bufferMapper.updateFromProcessor (p);
+        bufferMapper.prepare (bufferSize);
     }
 
     //==============================================================================
