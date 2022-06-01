@@ -154,10 +154,9 @@ public:
 
         return layout.inputBuses.isEmpty()
             && 1 <= outputs.size()
-            && outputs.getFirst() != AudioChannelSet::disabled()
             && std::all_of (outputs.begin(), outputs.end(), [] (const auto& bus)
                {
-                   return bus == AudioChannelSet::stereo() || bus == AudioChannelSet::disabled();
+                   return bus == AudioChannelSet::stereo();
                });
     }
 
