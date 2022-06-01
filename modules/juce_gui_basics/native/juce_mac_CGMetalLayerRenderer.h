@@ -108,7 +108,9 @@ public:
             CGContextRestoreGState (cgContext);
         }
 
-        auto cpuTexture = resources->getCpuTexture();
+        resources->signalBufferModifiedByCpu();
+
+        auto sharedTexture = resources->getSharedTexture();
 
         memoryBlitCommandBuffer.reset ([commandQueue.get() commandBuffer]);
 
@@ -118,11 +120,11 @@ public:
         [memoryBlitCommandBuffer.get() retain];
 
         auto blitCommandEncoder = [memoryBlitCommandBuffer.get() blitCommandEncoder];
-        [blitCommandEncoder copyFromTexture: cpuTexture
+        [blitCommandEncoder copyFromTexture: sharedTexture
                                 sourceSlice: 0
                                 sourceLevel: 0
                                sourceOrigin: MTLOrigin{}
-                                 sourceSize: MTLSize { cpuTexture.width, cpuTexture.height, 1 }
+                                 sourceSize: MTLSize { sharedTexture.width, sharedTexture.height, 1 }
                                   toTexture: gpuTexture
                            destinationSlice: 0
                            destinationLevel: 0
@@ -227,21 +229,31 @@ private:
 
             const auto allocationSize = cpuRenderMemory.ensureSize (bytesPerRow * (size_t) layer.drawableSize.height);
 
-            ObjCObjectHandle<id<MTLBuffer>> buffer { [metalDevice newBufferWithBytesNoCopy: cpuRenderMemory.get()
-                                                                                    length: allocationSize
-                                                                                   options: MTLResourceStorageModeShared
-                                                                               deallocator: nullptr] };
+            buffer.reset ([metalDevice newBufferWithBytesNoCopy: cpuRenderMemory.get()
+                                                         length: allocationSize
+                                                        options:
+                                                                #if JUCE_MAC
+                                                                 MTLResourceStorageModeManaged
+                                                                #else
+                                                                 MTLResourceStorageModeShared
+                                                                #endif
+                                                    deallocator: nullptr]);
 
             auto* textureDesc = [MTLTextureDescriptor texture2DDescriptorWithPixelFormat: layer.pixelFormat
                                                                                    width: (NSUInteger) layer.drawableSize.width
                                                                                   height: (NSUInteger) layer.drawableSize.height
                                                                                mipmapped: NO];
-            textureDesc.storageMode = buffer.get().storageMode;
+            textureDesc.storageMode =
+                                     #if JUCE_MAC
+                                      MTLStorageModeManaged;
+                                     #else
+                                      MTLStorageModeShared;
+                                     #endif
             textureDesc.usage = MTLTextureUsageShaderRead;
 
-            cpuTexture.reset ([buffer.get() newTextureWithDescriptor: textureDesc
-                                                              offset: 0
-                                                         bytesPerRow: bytesPerRow]);
+            sharedTexture.reset ([buffer.get() newTextureWithDescriptor: textureDesc
+                                                                 offset: 0
+                                                            bytesPerRow: bytesPerRow]);
 
             cgContext.reset (CGBitmapContextCreate (cpuRenderMemory.get(),
                                                     (size_t) layer.drawableSize.width,
@@ -258,9 +270,16 @@ private:
             gpuTexturePool = std::make_unique<GpuTexturePool> (metalDevice, textureDesc);
         }
 
-        CGContextRef getCGContext() const noexcept      { return cgContext.get(); }
-        id<MTLTexture> getCpuTexture() const noexcept   { return cpuTexture.get(); }
-        id<MTLTexture> getGpuTexture() noexcept         { return gpuTexturePool == nullptr ? nullptr : gpuTexturePool->take(); }
+        CGContextRef getCGContext() const noexcept       { return cgContext.get(); }
+        id<MTLTexture> getSharedTexture() const noexcept { return sharedTexture.get(); }
+        id<MTLTexture> getGpuTexture() noexcept          { return gpuTexturePool == nullptr ? nullptr : gpuTexturePool->take(); }
+
+        void signalBufferModifiedByCpu()
+        {
+           #if JUCE_MAC
+            [buffer.get() didModifyRange: { 0, buffer.get().length }];
+           #endif
+        }
 
     private:
         class AlignedMemory
@@ -318,7 +337,8 @@ private:
 
         detail::ContextPtr cgContext;
 
-        TextureUniquePtr cpuTexture;
+        ObjCObjectHandle<id<MTLBuffer>> buffer;
+        TextureUniquePtr sharedTexture;
         std::unique_ptr<GpuTexturePool> gpuTexturePool;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Resources)
