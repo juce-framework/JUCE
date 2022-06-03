@@ -272,7 +272,8 @@ void OnlineUnlockForm::showBubbleMessage (const String& text, Component& target)
 
     AttributedString attString;
     attString.append (text, Font (16.0f));
-
+    attString.setColour(getLookAndFeel().findColour(TooltipWindow::textColourId));
+    
     bubble->showAt (getLocalArea (&target, target.getLocalBounds()),
                     attString, 500,  // numMillisecondsBeforeRemoving
                     true,  // removeWhenMouseClicked
