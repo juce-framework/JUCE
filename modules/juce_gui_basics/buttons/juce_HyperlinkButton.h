@@ -111,6 +111,8 @@ protected:
     void paintButton (Graphics&, bool, bool) override;
 
 private:
+    std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
     //==============================================================================
     using Button::clicked;
     Font getFontToUse() const;
