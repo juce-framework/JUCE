@@ -327,7 +327,7 @@ struct Component::ComponentHelpers
     static bool hitTest (Component& comp, Point<float> localPoint)
     {
         const auto intPoint = localPoint.roundToInt();
-        return Rectangle<int> { comp.getWidth(), comp.getHeight() }.toFloat().contains (localPoint)
+        return Rectangle<int> { comp.getWidth(), comp.getHeight() }.contains (intPoint)
                && comp.hitTest (intPoint.x, intPoint.y);
     }
 
