@@ -29,6 +29,71 @@
 
 constexpr const char* scanModeKey = "pluginScanMode";
 
+//==============================================================================
+class Superprocess  : private ChildProcessCoordinator
+{
+public:
+    Superprocess()
+    {
+        launchWorkerProcess (File::getSpecialLocation (File::currentExecutableFile), processUID, 0, 0);
+    }
+
+    enum class State
+    {
+        timeout,
+        gotResult,
+        connectionLost,
+    };
+
+    struct Response
+    {
+        State state;
+        std::unique_ptr<XmlElement> xml;
+    };
+
+    Response getResponse()
+    {
+        std::unique_lock<std::mutex> lock { mutex };
+
+        if (! condvar.wait_for (lock, std::chrono::milliseconds { 50 }, [&] { return gotResult || connectionLost; }))
+            return { State::timeout, nullptr };
+
+        const auto state = connectionLost ? State::connectionLost : State::gotResult;
+        connectionLost = false;
+        gotResult = false;
+
+        return { state, std::move (pluginDescription) };
+    }
+
+    using ChildProcessCoordinator::sendMessageToWorker;
+
+private:
+    void handleMessageFromWorker (const MemoryBlock& mb) override
+    {
+        const std::lock_guard<std::mutex> lock { mutex };
+        pluginDescription = parseXML (mb.toString());
+        gotResult = true;
+        condvar.notify_one();
+    }
+
+    void handleConnectionLost() override
+    {
+        const std::lock_guard<std::mutex> lock { mutex };
+        connectionLost = true;
+        condvar.notify_one();
+    }
+
+    std::mutex mutex;
+    std::condition_variable condvar;
+
+    std::unique_ptr<XmlElement> pluginDescription;
+    bool connectionLost = false;
+    bool gotResult = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Superprocess)
+};
+
+//==============================================================================
 class CustomPluginScanner  : public KnownPluginList::CustomScanner,
                              private ChangeListener
 {
@@ -58,60 +123,8 @@ public:
             return true;
         }
 
-        if (superprocess == nullptr)
-        {
-            superprocess = std::make_unique<Superprocess> (*this);
-
-            std::unique_lock<std::mutex> lock (mutex);
-            connectionLost = false;
-        }
-
-        MemoryBlock block;
-        MemoryOutputStream stream { block, true };
-        stream.writeString (format.getName());
-        stream.writeString (fileOrIdentifier);
-
-        if (superprocess->sendMessageToWorker (block))
-        {
-            std::unique_lock<std::mutex> lock (mutex);
-            gotResponse = false;
-            pluginDescription = nullptr;
-
-            for (;;)
-            {
-                if (condvar.wait_for (lock,
-                                      std::chrono::milliseconds (50),
-                                      [this] { return gotResponse || shouldExit(); }))
-                {
-                    break;
-                }
-            }
-
-            if (shouldExit())
-            {
-                superprocess = nullptr;
-                return true;
-            }
-
-            if (connectionLost)
-            {
-                superprocess = nullptr;
-                return false;
-            }
-
-            if (pluginDescription != nullptr)
-            {
-                for (const auto* item : pluginDescription->getChildIterator())
-                {
-                    auto desc = std::make_unique<PluginDescription>();
-
-                    if (desc->loadFromXml (*item))
-                        result.add (std::move (desc));
-                }
-            }
-
+        if (addPluginDescriptions (format.getName(), fileOrIdentifier, result))
             return true;
-        }
 
         superprocess = nullptr;
         return false;
@@ -123,41 +136,52 @@ public:
     }
 
 private:
-    class Superprocess  : private ChildProcessCoordinator
+    /*  Scans for a plugin with format 'formatName' and ID 'fileOrIdentifier' using a subprocess,
+        and adds discovered plugin descriptions to 'result'.
+
+        Returns true on success.
+
+        Failure indicates that the subprocess is unrecoverable and should be terminated.
+    */
+    bool addPluginDescriptions (const String& formatName,
+                                const String& fileOrIdentifier,
+                                OwnedArray<PluginDescription>& result)
     {
-    public:
-        explicit Superprocess (CustomPluginScanner& o)
-            : owner (o)
+        if (superprocess == nullptr)
+            superprocess = std::make_unique<Superprocess>();
+
+        MemoryBlock block;
+        MemoryOutputStream stream { block, true };
+        stream.writeString (formatName);
+        stream.writeString (fileOrIdentifier);
+
+        if (! superprocess->sendMessageToWorker (block))
+            return false;
+
+        for (;;)
         {
-            launchWorkerProcess (File::getSpecialLocation (File::currentExecutableFile), processUID, 0, 0);
+            if (shouldExit())
+                return true;
+
+            const auto response = superprocess->getResponse();
+
+            if (response.state == Superprocess::State::timeout)
+                continue;
+
+            if (response.xml != nullptr)
+            {
+                for (const auto* item : response.xml->getChildIterator())
+                {
+                    auto desc = std::make_unique<PluginDescription>();
+
+                    if (desc->loadFromXml (*item))
+                        result.add (std::move (desc));
+                }
+            }
+
+            return (response.state == Superprocess::State::gotResult);
         }
-
-        using ChildProcessCoordinator::sendMessageToWorker;
-
-    private:
-        void handleMessageFromWorker (const MemoryBlock& mb) override
-        {
-            auto xml = parseXML (mb.toString());
-
-            const std::lock_guard<std::mutex> lock (owner.mutex);
-            owner.pluginDescription = std::move (xml);
-            owner.gotResponse = true;
-            owner.condvar.notify_one();
-        }
-
-        void handleConnectionLost() override
-        {
-            const std::lock_guard<std::mutex> lock (owner.mutex);
-            owner.pluginDescription = nullptr;
-            owner.gotResponse = true;
-            owner.connectionLost = true;
-            owner.condvar.notify_one();
-        }
-
-        CustomPluginScanner& owner;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Superprocess)
-    };
+    }
 
     void changeListenerCallback (ChangeBroadcaster*) override
     {
@@ -166,11 +190,6 @@ private:
     }
 
     std::unique_ptr<Superprocess> superprocess;
-    std::mutex mutex;
-    std::condition_variable condvar;
-    std::unique_ptr<XmlElement> pluginDescription;
-    bool gotResponse = false;
-    bool connectionLost = false;
 
     std::atomic<bool> scanInProcess { true };
 
