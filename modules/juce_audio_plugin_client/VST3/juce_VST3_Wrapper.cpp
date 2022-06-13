@@ -2907,6 +2907,10 @@ public:
                                 ? makeOptional ((double) processContext.smpteOffsetSubframes / (80.0 * info.getFrameRate()->getEffectiveRate()))
                                 : nullopt);
 
+        info.setHostTimeNs ((processContext.state & Vst::ProcessContext::kSystemTimeValid) != 0
+                            ? makeOptional ((uint64_t) processContext.systemTime)
+                            : nullopt);
+
         return info;
     }
 
@@ -3346,9 +3350,6 @@ public:
         {
             processContext = *data.processContext;
 
-            if ((processContext.state & Vst::ProcessContext::kSystemTimeValid) != 0)
-                getPluginInstance().setHostTimeNanos ((uint64_t) processContext.systemTime);
-
             if (juceVST3EditController != nullptr)
                 juceVST3EditController->vst3IsPlaying = (processContext.state & Vst::ProcessContext::kPlaying) != 0;
         }
@@ -3359,14 +3360,6 @@ public:
             if (juceVST3EditController != nullptr)
                 juceVST3EditController->vst3IsPlaying = false;
         }
-
-        struct AtEndOfScope
-        {
-            ~AtEndOfScope() { proc.setHostTimeNanos (nullopt); }
-            AudioProcessor& proc;
-        };
-
-        const AtEndOfScope scope { getPluginInstance() };
 
         midiBuffer.clear();
 

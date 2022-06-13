@@ -6,6 +6,28 @@ develop
 
 Change
 ------
+AudioProcessor::getHostTimeNs() and AudioProcessor::setHostTimeNanos() have
+been removed.
+
+Possible Issues
+---------------
+Code that used these functions will no longer compile.
+
+Workaround
+----------
+Set and get the system time corresponding to the current audio callback using
+the new functions AudioPlayHead::PositionInfo::getHostTimeNs() and
+AudioPlayHead::PositionInfo::setHostTimeNs().
+
+Rationale
+---------
+This change consolidates callback-related timing information into the
+PositionInfo type, improving the consistency of the AudioProcessor and
+AudioPlayHead APIs.
+
+
+Change
+------
 AudioPlayHead::getCurrentPosition() has been deprecated and replaced with
 AudioPlayHead::getPosition().
 

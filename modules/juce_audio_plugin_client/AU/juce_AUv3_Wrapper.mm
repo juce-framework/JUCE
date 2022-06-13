@@ -1069,6 +1069,9 @@ public:
             }
         }
 
+        if ((lastTimeStamp.mFlags & kAudioTimeStampHostTimeValid) != 0)
+            info.setHostTimeNs (timeConversions.hostTimeToNanos (lastTimeStamp.mHostTime));
+
         return info;
     }
 
@@ -1540,20 +1543,6 @@ private:
         jassert (static_cast<int> (frameCount) <= getAudioProcessor().getBlockSize());
 
         const auto numProcessorBusesOut = AudioUnitHelpers::getBusCount (processor, false);
-
-        if (timestamp != nullptr)
-        {
-            if ((timestamp->mFlags & kAudioTimeStampHostTimeValid) != 0)
-                getAudioProcessor().setHostTimeNanos (timeConversions.hostTimeToNanos (timestamp->mHostTime));
-        }
-
-        struct AtEndOfScope
-        {
-            ~AtEndOfScope() { proc.setHostTimeNanos (nullopt); }
-            AudioProcessor& proc;
-        };
-
-        const AtEndOfScope scope { getAudioProcessor() };
 
         if (lastTimeStamp.mSampleTime != timestamp->mSampleTime)
         {

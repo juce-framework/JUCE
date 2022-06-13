@@ -2345,7 +2345,7 @@ private:
 
                     setFromOptional (vstHostTime.ppqPos,      position->getPpqPosition(),               Vst2::kVstPpqPosValid);
                     setFromOptional (vstHostTime.barStartPos, position->getPpqPositionOfLastBarStart(), Vst2::kVstBarsValid);
-                    setFromOptional (vstHostTime.nanoSeconds, getHostTimeNs(),                          Vst2::kVstNanosValid);
+                    setFromOptional (vstHostTime.nanoSeconds, position->getHostTimeNs(),                Vst2::kVstNanosValid);
                     setFromOptional (vstHostTime.tempo,       position->getBpm(),                       Vst2::kVstTempoValid);
 
                     int32 newTransportFlags = 0;

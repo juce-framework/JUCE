@@ -386,6 +386,12 @@ public:
         /** @see getEditOriginTime() */
         void setEditOriginTime (Optional<double> editOriginTimeIn)      {        setOptional (flagOriginTime, originTime, editOriginTimeIn); }
 
+        /** Get the host's callback time in nanoseconds, if available. */
+        Optional<uint64_t> getHostTimeNs() const                        { return getOptional (flagHostTimeNs, hostTimeNs); }
+
+        /** @see getHostTimeNs() */
+        void setHostTimeNs (Optional<uint64_t> hostTimeNsIn)            {        setOptional (flagHostTimeNs, hostTimeNs, hostTimeNsIn); }
+
         /** True if the transport is currently playing. */
         bool getIsPlaying() const                                       { return getFlag (flagIsPlaying); }
 
@@ -421,6 +427,7 @@ public:
                                         i.getTimeSignature(),
                                         i.getBpm(),
                                         i.getLoopPoints(),
+                                        i.getHostTimeNs(),
                                         i.getIsPlaying(),
                                         i.getIsRecording(),
                                         i.getIsLooping());
@@ -472,9 +479,10 @@ public:
             flagTempo           = 1 << 7,
             flagTimeSamples     = 1 << 8,
             flagBarCount        = 1 << 9,
-            flagIsPlaying       = 1 << 10,
-            flagIsRecording     = 1 << 11,
-            flagIsLooping       = 1 << 12
+            flagHostTimeNs      = 1 << 10,
+            flagIsPlaying       = 1 << 11,
+            flagIsRecording     = 1 << 12,
+            flagIsLooping       = 1 << 13
         };
 
         TimeSignature timeSignature;
@@ -487,6 +495,7 @@ public:
         double tempoBpm        = 0.0;
         int64_t timeInSamples  = 0;
         int64_t barCount       = 0;
+        uint64_t hostTimeNs    = 0;
         int64_t flags          = 0;
     };
 

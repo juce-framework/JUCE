@@ -1173,6 +1173,10 @@ public:
                 outCurrentSampleInTimeLine = audioUnit.lastTimeStamp.mSampleTime;
             }
 
+            info.setHostTimeNs ((audioUnit.lastTimeStamp.mFlags & kAudioTimeStampHostTimeValid) != 0
+                                ? makeOptional (audioUnit.timeConversions.hostTimeToNanos (audioUnit.lastTimeStamp.mHostTime))
+                                : nullopt);
+
             return info;
         }
 
@@ -1322,19 +1326,6 @@ public:
                             const UInt32 nFrames) override
     {
         lastTimeStamp = inTimeStamp;
-
-        jassert (! juceFilter->getHostTimeNs());
-
-        if ((inTimeStamp.mFlags & kAudioTimeStampHostTimeValid) != 0)
-            juceFilter->setHostTimeNanos (timeConversions.hostTimeToNanos (inTimeStamp.mHostTime));
-
-        struct AtEndOfScope
-        {
-            ~AtEndOfScope() { proc.setHostTimeNanos (nullopt); }
-            AudioProcessor& proc;
-        };
-
-        const AtEndOfScope scope { *juceFilter };
 
         // prepare buffers
         {

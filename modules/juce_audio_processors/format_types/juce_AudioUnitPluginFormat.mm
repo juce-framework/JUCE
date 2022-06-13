@@ -1385,7 +1385,10 @@ public:
 
     void processAudio (AudioBuffer<float>& buffer, MidiBuffer& midiMessages, bool processBlockBypassedCalled)
     {
-        if (const auto hostTimeNs = getHostTimeNs())
+        auto* playhead = getPlayHead();
+        const auto position = playhead != nullptr ? playhead->getPosition() : nullopt;
+
+        if (const auto hostTimeNs = position.hasValue() ? position->getHostTimeNs() : nullopt)
         {
             timeStamp.mHostTime = *hostTimeNs;
             timeStamp.mFlags |= kAudioTimeStampHostTimeValid;

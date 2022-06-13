@@ -171,6 +171,8 @@ void AudioProcessorPlayer::setProcessor (AudioProcessor* const processorToPlay)
     if (processor == processorToPlay)
         return;
 
+    sampleCount = 0;
+
     if (processorToPlay != nullptr && sampleRate > 0 && blockSize > 0)
     {
         defaultProcessorChannels = NumChannels { processorToPlay->getBusesLayout() };
@@ -267,15 +269,48 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float** const
 
         const ScopedLock sl2 (processor->getCallbackLock());
 
-        processor->setHostTimeNanos (context.hostTimeNs != nullptr ? makeOptional (*context.hostTimeNs) : nullopt);
-
-        struct AtEndOfScope
+        class PlayHead : private AudioPlayHead
         {
-            ~AtEndOfScope() { proc.setHostTimeNanos (nullopt); }
-            AudioProcessor& proc;
+        public:
+            PlayHead (AudioProcessor& proc,
+                      Optional<uint64_t> hostTimeIn,
+                      uint64_t sampleCountIn,
+                      double sampleRateIn)
+                : processor (proc),
+                  hostTimeNs (hostTimeIn),
+                  sampleCount (sampleCountIn),
+                  seconds ((double) sampleCountIn / sampleRateIn)
+            {
+                processor.setPlayHead (this);
+            }
+
+            ~PlayHead() override
+            {
+                processor.setPlayHead (nullptr);
+            }
+
+        private:
+            Optional<PositionInfo> getPosition() const override
+            {
+                PositionInfo info;
+                info.setHostTimeNs (hostTimeNs);
+                info.setTimeInSamples ((int64_t) sampleCount);
+                info.setTimeInSeconds (seconds);
+                return info;
+            }
+
+            AudioProcessor& processor;
+            Optional<uint64_t> hostTimeNs;
+            uint64_t sampleCount;
+            double seconds;
         };
 
-        const AtEndOfScope scope { *processor };
+        PlayHead playHead { *processor,
+                            context.hostTimeNs != nullptr ? makeOptional (*context.hostTimeNs) : nullopt,
+                            sampleCount,
+                            sampleRate };
+
+        sampleCount += (uint64_t) numSamples;
 
         if (! processor->isSuspended())
         {

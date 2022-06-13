@@ -398,14 +398,6 @@ public:
             {
                 updateCallbackContextInfo();
 
-                struct AtEndOfScope
-                {
-                    ~AtEndOfScope() { proc.setHostTimeNanos (nullopt); }
-                    AudioProcessor& proc;
-                };
-
-                const AtEndOfScope scope { *processor };
-
                 int i;
                 for (i = 0; i < numOut; ++i)
                 {
@@ -676,7 +668,7 @@ public:
         info.setLoopPoints ((ti->flags & Vst2::kVstCyclePosValid) != 0 ? makeOptional (LoopPoints { ti->cycleStartPos, ti->cycleEndPos })
                                                                        : nullopt);
 
-        processor->setHostTimeNanos ((ti->flags & Vst2::kVstNanosValid) != 0 ? makeOptional ((uint64_t) ti->nanoSeconds) : nullopt);
+        info.setHostTimeNs ((ti->flags & Vst2::kVstNanosValid) != 0 ? makeOptional ((uint64_t) ti->nanoSeconds) : nullopt);
     }
 
     //==============================================================================

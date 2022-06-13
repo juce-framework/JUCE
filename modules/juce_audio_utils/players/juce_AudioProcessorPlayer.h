@@ -137,6 +137,7 @@ private:
     MidiBuffer incomingMidi;
     MidiMessageCollector messageCollector;
     MidiOutput* midiOutput = nullptr;
+    uint64_t sampleCount = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorPlayer)
 };
