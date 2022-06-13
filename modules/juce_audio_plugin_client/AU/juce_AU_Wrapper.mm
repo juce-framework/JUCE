@@ -103,7 +103,6 @@ struct AudioProcessorHolder
 class JuceAU   : public AudioProcessorHolder,
                  public MusicDeviceBase,
                  public AudioProcessorListener,
-                 public AudioPlayHead,
                  public AudioProcessorParameter::Listener
 {
 public:
@@ -140,7 +139,6 @@ public:
         totalInChannels  = juceFilter->getTotalNumInputChannels();
         totalOutChannels = juceFilter->getTotalNumOutputChannels();
 
-        juceFilter->setPlayHead (this);
         juceFilter->addListener (this);
 
         addParameters();
@@ -1089,80 +1087,99 @@ public:
         return rate > 0 ? juceFilter->getLatencySamples() / rate : 0;
     }
 
-    //==============================================================================
-    bool getCurrentPosition (AudioPlayHead::CurrentPositionInfo& info) override
+    class ScopedPlayHead : private AudioPlayHead
     {
-        info.timeSigNumerator = 0;
-        info.timeSigDenominator = 0;
-        info.editOriginTime = 0;
-        info.ppqPositionOfLastBarStart = 0;
-        info.isRecording = false;
-
-        info.frameRate = [this]
+    public:
+        explicit ScopedPlayHead (JuceAU& juceAudioUnit)
+            : audioUnit (juceAudioUnit)
         {
-            switch (lastTimeStamp.mSMPTETime.mType)
+            audioUnit.juceFilter->setPlayHead (this);
+        }
+
+        ~ScopedPlayHead() override
+        {
+            audioUnit.juceFilter->setPlayHead (nullptr);
+        }
+
+    private:
+        Optional<PositionInfo> getPosition() const override
+        {
+            PositionInfo info;
+
+            info.setFrameRate ([this]() -> Optional<FrameRate>
             {
-                case kSMPTETimeType2398:        return FrameRate().withBaseRate (24).withPullDown();
-                case kSMPTETimeType24:          return FrameRate().withBaseRate (24);
-                case kSMPTETimeType25:          return FrameRate().withBaseRate (25);
-                case kSMPTETimeType30Drop:      return FrameRate().withBaseRate (30).withDrop();
-                case kSMPTETimeType30:          return FrameRate().withBaseRate (30);
-                case kSMPTETimeType2997:        return FrameRate().withBaseRate (30).withPullDown();
-                case kSMPTETimeType2997Drop:    return FrameRate().withBaseRate (30).withPullDown().withDrop();
-                case kSMPTETimeType60:          return FrameRate().withBaseRate (60);
-                case kSMPTETimeType60Drop:      return FrameRate().withBaseRate (60).withDrop();
-                case kSMPTETimeType5994:        return FrameRate().withBaseRate (60).withPullDown();
-                case kSMPTETimeType5994Drop:    return FrameRate().withBaseRate (60).withPullDown().withDrop();
-                case kSMPTETimeType50:          return FrameRate().withBaseRate (50);
-                default:                        break;
+                switch (audioUnit.lastTimeStamp.mSMPTETime.mType)
+                {
+                    case kSMPTETimeType2398:        return FrameRate().withBaseRate (24).withPullDown();
+                    case kSMPTETimeType24:          return FrameRate().withBaseRate (24);
+                    case kSMPTETimeType25:          return FrameRate().withBaseRate (25);
+                    case kSMPTETimeType30Drop:      return FrameRate().withBaseRate (30).withDrop();
+                    case kSMPTETimeType30:          return FrameRate().withBaseRate (30);
+                    case kSMPTETimeType2997:        return FrameRate().withBaseRate (30).withPullDown();
+                    case kSMPTETimeType2997Drop:    return FrameRate().withBaseRate (30).withPullDown().withDrop();
+                    case kSMPTETimeType60:          return FrameRate().withBaseRate (60);
+                    case kSMPTETimeType60Drop:      return FrameRate().withBaseRate (60).withDrop();
+                    case kSMPTETimeType5994:        return FrameRate().withBaseRate (60).withPullDown();
+                    case kSMPTETimeType5994Drop:    return FrameRate().withBaseRate (60).withPullDown().withDrop();
+                    case kSMPTETimeType50:          return FrameRate().withBaseRate (50);
+                    default:                        break;
+                }
+
+                return {};
+            }());
+
+            double ppqPosition = 0.0;
+            double bpm = 0.0;
+
+            if (audioUnit.CallHostBeatAndTempo (&ppqPosition, &bpm) == noErr)
+            {
+                info.setPpqPosition (ppqPosition);
+                info.setBpm (bpm);
             }
 
-            return FrameRate();
-        }();
+            UInt32 outDeltaSampleOffsetToNextBeat;
+            double outCurrentMeasureDownBeat;
+            float num;
+            UInt32 den;
 
-        if (CallHostBeatAndTempo (&info.ppqPosition, &info.bpm) != noErr)
-        {
-            info.ppqPosition = 0;
-            info.bpm = 0;
+            if (audioUnit.CallHostMusicalTimeLocation (&outDeltaSampleOffsetToNextBeat,
+                                                       &num,
+                                                       &den,
+                                                       &outCurrentMeasureDownBeat) == noErr)
+            {
+                info.setTimeSignature (TimeSignature { (int) num, (int) den });
+                info.setPpqPositionOfLastBarStart (outCurrentMeasureDownBeat);
+            }
+
+            double outCurrentSampleInTimeLine = 0, outCycleStartBeat = 0, outCycleEndBeat = 0;
+            Boolean playing = false, looping = false, playchanged;
+
+            if (audioUnit.CallHostTransportState (&playing,
+                                                  &playchanged,
+                                                  &outCurrentSampleInTimeLine,
+                                                  &looping,
+                                                  &outCycleStartBeat,
+                                                  &outCycleEndBeat) == noErr)
+            {
+                info.setIsPlaying (playing);
+                info.setTimeInSamples ((int64) (outCurrentSampleInTimeLine + 0.5));
+                info.setTimeInSeconds (*info.getTimeInSamples() / audioUnit.getSampleRate());
+                info.setIsLooping (looping);
+                info.setLoopPoints (LoopPoints { outCycleStartBeat, outCycleEndBeat });
+            }
+            else
+            {
+                // If the host doesn't support this callback, then use the sample time from lastTimeStamp:
+                outCurrentSampleInTimeLine = audioUnit.lastTimeStamp.mSampleTime;
+            }
+
+            return info;
         }
 
-        UInt32 outDeltaSampleOffsetToNextBeat;
-        double outCurrentMeasureDownBeat;
-        float num;
-        UInt32 den;
+        JuceAU& audioUnit;
+    };
 
-        if (CallHostMusicalTimeLocation (&outDeltaSampleOffsetToNextBeat, &num, &den,
-                                         &outCurrentMeasureDownBeat) == noErr)
-        {
-            info.timeSigNumerator   = (int) num;
-            info.timeSigDenominator = (int) den;
-            info.ppqPositionOfLastBarStart = outCurrentMeasureDownBeat;
-        }
-
-        double outCurrentSampleInTimeLine, outCycleStartBeat = 0, outCycleEndBeat = 0;
-        Boolean playing = false, looping = false, playchanged;
-
-        if (CallHostTransportState (&playing,
-                                    &playchanged,
-                                    &outCurrentSampleInTimeLine,
-                                    &looping,
-                                    &outCycleStartBeat,
-                                    &outCycleEndBeat) != noErr)
-        {
-            // If the host doesn't support this callback, then use the sample time from lastTimeStamp:
-            outCurrentSampleInTimeLine = lastTimeStamp.mSampleTime;
-        }
-
-        info.isPlaying = playing;
-        info.timeInSamples = (int64) (outCurrentSampleInTimeLine + 0.5);
-        info.timeInSeconds = info.timeInSamples / getSampleRate();
-        info.isLooping = looping;
-        info.ppqLoopStart = outCycleStartBeat;
-        info.ppqLoopEnd = outCycleEndBeat;
-
-        return true;
-    }
-
+    //==============================================================================
     void sendAUEvent (const AudioUnitEventType type, const int juceParamIndex)
     {
         if (restoringState)
@@ -1309,14 +1326,11 @@ public:
         jassert (! juceFilter->getHostTimeNs());
 
         if ((inTimeStamp.mFlags & kAudioTimeStampHostTimeValid) != 0)
-        {
-            const auto timestamp = timeConversions.hostTimeToNanos (inTimeStamp.mHostTime);
-            juceFilter->setHostTimeNanos (&timestamp);
-        }
+            juceFilter->setHostTimeNanos (timeConversions.hostTimeToNanos (inTimeStamp.mHostTime));
 
         struct AtEndOfScope
         {
-            ~AtEndOfScope() { proc.setHostTimeNanos (nullptr); }
+            ~AtEndOfScope() { proc.setHostTimeNanos (nullopt); }
             AudioProcessor& proc;
         };
 
@@ -1952,6 +1966,7 @@ private:
     void processBlock (juce::AudioBuffer<float>& buffer, MidiBuffer& midiBuffer) noexcept
     {
         const ScopedLock sl (juceFilter->getCallbackLock());
+        const ScopedPlayHead playhead { *this };
 
         if (juceFilter->isSuspended())
         {

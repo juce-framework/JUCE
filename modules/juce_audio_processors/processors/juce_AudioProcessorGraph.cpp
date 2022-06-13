@@ -267,7 +267,7 @@ private:
         void perform (const Context& c) override
         {
             processor.setPlayHead (c.audioPlayHead);
-            processor.setHostTimeNanos (c.hostTimeNs.hasValue() ? &(*c.hostTimeNs) : nullptr);
+            processor.setHostTimeNanos (c.hostTimeNs);
 
             for (int i = 0; i < totalChans; ++i)
                 audioChannels[i] = c.audioBuffers[audioChannelsToUse.getUnchecked (i)];
@@ -290,7 +290,7 @@ private:
             else
                 callProcess (buffer, c.midiBuffers[midiBufferToUse]);
 
-            processor.setHostTimeNanos (nullptr);
+            processor.setHostTimeNanos (nullopt);
         }
 
         void callProcess (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
@@ -1402,14 +1402,6 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
                                    std::unique_ptr<SequenceType>& renderSequence,
                                    std::atomic<bool>& isPrepared)
 {
-    const auto getHostTime = [&]() -> Optional<uint64_t>
-    {
-        if (auto* nanos = graph.getHostTimeNs())
-            return *nanos;
-
-        return nullopt;
-    };
-
     if (graph.isNonRealtime())
     {
         while (! isPrepared)
@@ -1418,7 +1410,7 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
         const ScopedLock sl (graph.getCallbackLock());
 
         if (renderSequence != nullptr)
-            renderSequence->perform (buffer, midiMessages, graph.getPlayHead(), getHostTime());
+            renderSequence->perform (buffer, midiMessages, graph.getPlayHead(), graph.getHostTimeNs());
     }
     else
     {
@@ -1427,7 +1419,7 @@ static void processBlockForBuffer (AudioBuffer<FloatType>& buffer, MidiBuffer& m
         if (isPrepared)
         {
             if (renderSequence != nullptr)
-                renderSequence->perform (buffer, midiMessages, graph.getPlayHead(), getHostTime());
+                renderSequence->perform (buffer, midiMessages, graph.getPlayHead(), graph.getHostTimeNs());
         }
         else
         {

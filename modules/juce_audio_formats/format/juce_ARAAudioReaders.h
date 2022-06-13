@@ -183,7 +183,7 @@ public:
 
 private:
     std::unique_ptr<ARAPlaybackRenderer> playbackRenderer;
-    AudioPlayHead::CurrentPositionInfo positionInfo;
+    AudioPlayHead::PositionInfo positionInfo;
     ReadWriteLock lock;
 
     static constexpr int maximumBlockSize = 4 * 1024;

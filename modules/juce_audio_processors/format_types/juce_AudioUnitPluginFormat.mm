@@ -1385,7 +1385,7 @@ public:
 
     void processAudio (AudioBuffer<float>& buffer, MidiBuffer& midiMessages, bool processBlockBypassedCalled)
     {
-        if (const auto* hostTimeNs = getHostTimeNs())
+        if (const auto hostTimeNs = getHostTimeNs())
         {
             timeStamp.mHostTime = *hostTimeNs;
             timeStamp.mFlags |= kAudioTimeStampHostTimeValid;
@@ -2298,12 +2298,10 @@ private:
     {
         if (auto* ph = getPlayHead())
         {
-            AudioPlayHead::CurrentPositionInfo result;
-
-            if (ph->getCurrentPosition (result))
+            if (const auto pos = ph->getPosition())
             {
-                setIfNotNull (outCurrentBeat, result.ppqPosition);
-                setIfNotNull (outCurrentTempo, result.bpm);
+                setIfNotNull (outCurrentBeat, pos->getPpqPosition().orFallback (0.0));
+                setIfNotNull (outCurrentTempo, pos->getBpm().orFallback (0.0));
                 return noErr;
             }
         }
@@ -2318,14 +2316,13 @@ private:
     {
         if (auto* ph = getPlayHead())
         {
-            AudioPlayHead::CurrentPositionInfo result;
-
-            if (ph->getCurrentPosition (result))
+            if (const auto pos = ph->getPosition())
             {
+                const auto signature = pos->getTimeSignature().orFallback (AudioPlayHead::TimeSignature{});
                 setIfNotNull (outDeltaSampleOffsetToNextBeat, (UInt32) 0); //xxx
-                setIfNotNull (outTimeSig_Numerator,   (UInt32) result.timeSigNumerator);
-                setIfNotNull (outTimeSig_Denominator, (UInt32) result.timeSigDenominator);
-                setIfNotNull (outCurrentMeasureDownBeat, result.ppqPositionOfLastBarStart); //xxx wrong
+                setIfNotNull (outTimeSig_Numerator,   (UInt32) signature.numerator);
+                setIfNotNull (outTimeSig_Denominator, (UInt32) signature.denominator);
+                setIfNotNull (outCurrentMeasureDownBeat, pos->getPpqPositionOfLastBarStart().orFallback (0.0)); //xxx wrong
                 return noErr;
             }
         }

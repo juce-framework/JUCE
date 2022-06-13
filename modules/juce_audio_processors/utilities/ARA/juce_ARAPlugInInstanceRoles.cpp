@@ -30,7 +30,7 @@ namespace juce
 
 bool ARARenderer::processBlock (AudioBuffer<double>& buffer,
                                 AudioProcessor::Realtime realtime,
-                                const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept
+                                const AudioPlayHead::PositionInfo& positionInfo) noexcept
 {
     ignoreUnused (buffer, realtime, positionInfo);
 

@@ -144,7 +144,7 @@ protected:
     */
     bool processBlockForARA (AudioBuffer<float>& buffer,
                              AudioProcessor::Realtime realtime,
-                             const AudioPlayHead::CurrentPositionInfo& positionInfo);
+                             const AudioPlayHead::PositionInfo& positionInfo);
 
     /** Implementation helper for AudioProcessor::processBlock().
 

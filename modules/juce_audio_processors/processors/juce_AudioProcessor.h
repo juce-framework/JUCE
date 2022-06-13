@@ -1171,11 +1171,7 @@ public:
         processor.setHostTimeNanos (nullptr);           // Clear host time
         @endcode
     */
-    void setHostTimeNanos (const uint64_t* hostTimeIn)
-    {
-        hasHostTime = hostTimeIn != nullptr;
-        hostTime = hasHostTime ? *hostTimeIn : 0;
-    }
+    void setHostTimeNanos (Optional<uint64_t> hostTimeIn) { hostTime = hostTimeIn; }
 
     /** The plugin may call this function inside the processBlock function (and only there!)
         to find the timestamp associated with the current audio block.
@@ -1196,7 +1192,7 @@ public:
         }
         @endcode
     */
-    const uint64_t* getHostTimeNs() const             { return hasHostTime ? &hostTime : nullptr; }
+    Optional<uint64_t> getHostTimeNs() const             { return hostTime; }
 
     //==============================================================================
     /** This is called by the processor to specify its details before being played. Use this
@@ -1552,8 +1548,7 @@ private:
     AudioProcessorParameterGroup parameterTree;
     Array<AudioProcessorParameter*> flatParameterList;
 
-    uint64_t hostTime = 0;
-    bool hasHostTime = false;
+    Optional<uint64_t> hostTime;
 
     AudioProcessorParameter* getParamChecked (int) const;
 

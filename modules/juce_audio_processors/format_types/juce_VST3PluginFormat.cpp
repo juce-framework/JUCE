@@ -262,7 +262,7 @@ static void setStateForAllBusesOfType (Vst::IComponent* component,
 static void toProcessContext (Vst::ProcessContext& context,
                               AudioPlayHead* playHead,
                               double sampleRate,
-                              const uint64_t* hostTimeNs)
+                              Optional<uint64_t> hostTimeNs)
 {
     jassert (sampleRate > 0.0); //Must always be valid, as stated by the VST3 SDK
 
@@ -270,55 +270,67 @@ static void toProcessContext (Vst::ProcessContext& context,
 
     zerostruct (context);
     context.sampleRate = sampleRate;
-    auto& fr = context.frameRate;
 
-    if (playHead != nullptr)
+    const auto position = playHead != nullptr ? playHead->getPosition()
+                                              : nullopt;
+
+    if (position.hasValue())
     {
-        AudioPlayHead::CurrentPositionInfo position;
-        playHead->getCurrentPosition (position);
+        if (const auto timeInSamples = position->getTimeInSamples())
+            context.projectTimeSamples = *timeInSamples;
+        else
+            jassertfalse; // The time in samples *must* be valid.
 
-        context.projectTimeSamples  = position.timeInSamples; // Must always be valid, as stated by the VST3 SDK
-        context.projectTimeMusic    = position.ppqPosition;   // Does not always need to be valid...
-        context.tempo               = position.bpm;
-        context.timeSigNumerator    = position.timeSigNumerator;
-        context.timeSigDenominator  = position.timeSigDenominator;
-        context.barPositionMusic    = position.ppqPositionOfLastBarStart;
-        context.cycleStartMusic     = position.ppqLoopStart;
-        context.cycleEndMusic       = position.ppqLoopEnd;
+        if (const auto tempo = position->getBpm())
+        {
+            context.state |= ProcessContext::kTempoValid;
+            context.tempo = *tempo;
+        }
 
-        context.frameRate.framesPerSecond = (Steinberg::uint32) position.frameRate.getBaseRate();
-        context.frameRate.flags = (Steinberg::uint32) ((position.frameRate.isDrop()     ? FrameRate::kDropRate     : 0)
-                                                     | (position.frameRate.isPullDown() ? FrameRate::kPullDownRate : 0));
+        if (const auto loop = position->getLoopPoints())
+        {
+            context.state |= ProcessContext::kCycleValid;
+            context.cycleStartMusic     = loop->ppqStart;
+            context.cycleEndMusic       = loop->ppqEnd;
+        }
 
-        if (position.isPlaying)     context.state |= ProcessContext::kPlaying;
-        if (position.isRecording)   context.state |= ProcessContext::kRecording;
-        if (position.isLooping)     context.state |= ProcessContext::kCycleActive;
+        if (const auto sig = position->getTimeSignature())
+        {
+            context.state |= ProcessContext::kTimeSigValid;
+            context.timeSigNumerator    = sig->numerator;
+            context.timeSigDenominator  = sig->denominator;
+        }
+
+        if (const auto pos = position->getPpqPosition())
+        {
+            context.state |= ProcessContext::kProjectTimeMusicValid;
+            context.projectTimeMusic = *pos;
+        }
+
+        if (const auto barStart = position->getPpqPositionOfLastBarStart())
+        {
+            context.state |= ProcessContext::kBarPositionValid;
+            context.barPositionMusic = *barStart;
+        }
+
+        if (const auto frameRate = position->getFrameRate())
+        {
+            if (const auto offset = position->getEditOriginTime())
+            {
+                context.state |= ProcessContext::kSmpteValid;
+                context.smpteOffsetSubframes = (Steinberg::int32) (80.0 * *offset * frameRate->getEffectiveRate());
+                context.frameRate.framesPerSecond = (Steinberg::uint32) frameRate->getBaseRate();
+                context.frameRate.flags = (Steinberg::uint32) ((frameRate->isDrop()     ? FrameRate::kDropRate     : 0)
+                                                             | (frameRate->isPullDown() ? FrameRate::kPullDownRate : 0));
+            }
+        }
+
+        if (position->getIsPlaying())     context.state |= ProcessContext::kPlaying;
+        if (position->getIsRecording())   context.state |= ProcessContext::kRecording;
+        if (position->getIsLooping())     context.state |= ProcessContext::kCycleActive;
     }
-    else
-    {
-        context.tempo               = 120.0;
-        context.timeSigNumerator    = 4;
-        context.timeSigDenominator  = 4;
-        fr.framesPerSecond          = 30;
-        fr.flags                    = 0;
-    }
 
-    if (context.projectTimeMusic >= 0.0)        context.state |= ProcessContext::kProjectTimeMusicValid;
-    if (context.barPositionMusic >= 0.0)        context.state |= ProcessContext::kBarPositionValid;
-    if (context.tempo > 0.0)                    context.state |= ProcessContext::kTempoValid;
-    if (context.frameRate.framesPerSecond > 0)  context.state |= ProcessContext::kSmpteValid;
-
-    if (context.cycleStartMusic >= 0.0
-         && context.cycleEndMusic > 0.0
-         && context.cycleEndMusic > context.cycleStartMusic)
-    {
-        context.state |= ProcessContext::kCycleValid;
-    }
-
-    if (context.timeSigNumerator > 0 && context.timeSigDenominator > 0)
-        context.state |= ProcessContext::kTimeSigValid;
-
-    if (hostTimeNs != nullptr)
+    if (hostTimeNs.hasValue())
     {
         context.systemTime = (int64_t) *hostTimeNs;
         jassert (context.systemTime >= 0);

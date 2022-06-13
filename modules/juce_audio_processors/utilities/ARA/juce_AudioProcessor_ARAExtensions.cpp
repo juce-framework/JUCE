@@ -84,7 +84,7 @@ bool AudioProcessorARAExtension::releaseResourcesForARA()
 
 bool AudioProcessorARAExtension::processBlockForARA (AudioBuffer<float>& buffer,
                                                      AudioProcessor::Realtime realtime,
-                                                     const AudioPlayHead::CurrentPositionInfo& positionInfo)
+                                                     const AudioPlayHead::PositionInfo& positionInfo)
 {
     // validate that the host has prepared us before processing
     ARA_VALIDATE_API_STATE (isPrepared);
@@ -109,12 +109,10 @@ bool AudioProcessorARAExtension::processBlockForARA (AudioBuffer<float>& buffer,
                                                      juce::AudioProcessor::Realtime realtime,
                                                      AudioPlayHead* playhead)
 {
-    AudioPlayHead::CurrentPositionInfo positionInfo;
-
-    if (! isBoundToARA() || ! playhead || ! playhead->getCurrentPosition (positionInfo))
-        positionInfo.resetToDefault();
-
-    return processBlockForARA (buffer, realtime, positionInfo);
+    return processBlockForARA (buffer,
+                               realtime,
+                               playhead != nullptr ? playhead->getPosition().orFallback (AudioPlayHead::PositionInfo{})
+                                                   : AudioPlayHead::PositionInfo{});
 }
 
 //==============================================================================

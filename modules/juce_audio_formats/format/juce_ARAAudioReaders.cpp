@@ -172,8 +172,7 @@ ARAPlaybackRegionReader::ARAPlaybackRegionReader (double rate, int numChans,
     // We're only providing the minimal set of meaningful values, since the ARA renderer should only
     // look at the time position and the playing state, and read any related tempo or bar signature
     // information from the ARA model directly (MusicalContext).
-    positionInfo.resetToDefault();
-    positionInfo.isPlaying = true;
+    positionInfo.setIsPlaying (true);
 
     sampleRate = rate;
     numChannels = (unsigned int) numChans;
@@ -252,16 +251,17 @@ bool ARAPlaybackRegionReader::readSamples (int** destSamples, int numDestChannel
         {
             success = true;
             needClearSamples = false;
-            positionInfo.timeInSamples = startSampleInFile + startInSamples;
+            positionInfo.setTimeInSamples (startSampleInFile + startInSamples);
+
             while (numSamples > 0)
             {
                 const int numSliceSamples = jmin (numSamples, maximumBlockSize);
                 AudioBuffer<float> buffer ((float **) destSamples, numDestChannels, startOffsetInDestBuffer, numSliceSamples);
-                positionInfo.timeInSeconds = static_cast<double> (positionInfo.timeInSamples) / sampleRate;
+                positionInfo.setTimeInSeconds (static_cast<double> (*positionInfo.getTimeInSamples()) / sampleRate);
                 success &= playbackRenderer->processBlock (buffer, AudioProcessor::Realtime::no, positionInfo);
                 numSamples -= numSliceSamples;
                 startOffsetInDestBuffer += numSliceSamples;
-                positionInfo.timeInSamples += numSliceSamples;
+                positionInfo.setTimeInSamples (*positionInfo.getTimeInSamples() + numSliceSamples);
             }
         }
     }

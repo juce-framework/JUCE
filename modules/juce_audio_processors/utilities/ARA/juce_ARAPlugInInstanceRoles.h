@@ -88,7 +88,7 @@ public:
     */
     virtual bool processBlock (AudioBuffer<float>& buffer,
                                AudioProcessor::Realtime realtime,
-                               const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept = 0;
+                               const AudioPlayHead::PositionInfo& positionInfo) noexcept = 0;
 
     /** Renders the output into the given buffer. Returns true if rendering executed without error,
         false otherwise.
@@ -108,7 +108,7 @@ public:
     */
     virtual bool processBlock (AudioBuffer<double>& buffer,
                                AudioProcessor::Realtime realtime,
-                               const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept;
+                               const AudioPlayHead::PositionInfo& positionInfo) noexcept;
 };
 
 //==============================================================================
@@ -128,7 +128,7 @@ public:
 
     bool processBlock (AudioBuffer<float>& buffer,
                        AudioProcessor::Realtime realtime,
-                       const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override
+                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override
     {
         ignoreUnused (buffer, realtime, positionInfo);
         return false;
@@ -189,7 +189,7 @@ public:
     // isNonRealtime of the process context - typically preview is limited to realtime.
     bool processBlock (AudioBuffer<float>& buffer,
                        AudioProcessor::Realtime isNonRealtime,
-                       const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override
+                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override
     {
         ignoreUnused (buffer, isNonRealtime, positionInfo);
         return true;

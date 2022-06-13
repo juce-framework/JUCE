@@ -6,6 +6,36 @@ develop
 
 Change
 ------
+AudioPlayHead::getCurrentPosition() has been deprecated and replaced with
+AudioPlayHead::getPosition().
+
+Possible Issues
+---------------
+Hosts that implemented custom playhead types may no longer compile. Plugins
+that used host-provided timing information may trigger deprecation warnings
+when building.
+
+Workaround
+----------
+Classes that derive from AudioPlayHead must now override getPosition() instead
+of getCurrentPosition(). Code that used to use the playhead's
+CurrentPositionInfo must switch to using the new PositionInfo type.
+
+Rationale
+---------
+Not all hosts and plugin formats are capable of providing the full complement
+of timing information contained in the old CurrentPositionInfo class.
+Previously, in the case that some information could not be provided, fallback
+values would be used instead, but it was not possible for clients to distinguish
+between "real" values set explicitly by the host, and "fallback" values set by
+a plugin wrapper. The new PositionInfo type keeps track of which members have
+been explicitly set, so clients can implement their own fallback behaviour.
+The new PositionInfo type also includes a new "barCount" member, which is
+currently only used by the LV2 host and client.
+
+
+Change
+------
 The optional JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS preprocessor
 flag will now use a new Metal layer renderer when running on macOS 10.14 or
 later. The minimum requirements for building macOS and iOS software are now

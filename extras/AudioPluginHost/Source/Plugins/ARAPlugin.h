@@ -486,11 +486,12 @@ public:
 
 struct SimplePlayHead  : public juce::AudioPlayHead
 {
-    bool getCurrentPosition (CurrentPositionInfo& result) override
+    Optional<PositionInfo> getPosition() const override
     {
-        result.timeInSamples = timeInSamples.load();
-        result.isPlaying = isPlaying.load();
-        return true;
+        PositionInfo result;
+        result.setTimeInSamples (timeInSamples.load());
+        result.setIsPlaying (isPlaying.load());
+        return result;
     }
 
     std::atomic<int64_t> timeInSamples { 0 };

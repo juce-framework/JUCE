@@ -267,11 +267,11 @@ void AudioProcessorPlayer::audioDeviceIOCallbackWithContext (const float** const
 
         const ScopedLock sl2 (processor->getCallbackLock());
 
-        processor->setHostTimeNanos (context.hostTimeNs);
+        processor->setHostTimeNanos (context.hostTimeNs != nullptr ? makeOptional (*context.hostTimeNs) : nullopt);
 
         struct AtEndOfScope
         {
-            ~AtEndOfScope() { proc.setHostTimeNanos (nullptr); }
+            ~AtEndOfScope() { proc.setHostTimeNanos (nullopt); }
             AudioProcessor& proc;
         };
 

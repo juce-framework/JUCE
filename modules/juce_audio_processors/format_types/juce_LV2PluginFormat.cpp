@@ -4767,9 +4767,9 @@ private:
             return;
 
         // Write timing info to the control port
-        AudioPlayHead::CurrentPositionInfo info;
+        const auto info = playhead->getPosition();
 
-        if (! playhead->getCurrentPosition (info))
+        if (! info.hasValue())
             return;
 
         const auto& urids = instance->urids;
@@ -4778,29 +4778,47 @@ private:
 
         lv2_shared::ObjectFrame object { forge, (uint32_t) 0, urids.mLV2_TIME__Position };
 
-        lv2_atom_forge_key (forge, urids.mLV2_TIME__frame);
-        lv2_atom_forge_long (forge, info.timeInSamples);
-
-        lv2_atom_forge_key (forge, urids.mLV2_TIME__bar);
-        lv2_atom_forge_long (forge, (info.ppqPosition * info.timeSigDenominator) / (4 * info.timeSigNumerator));
-
         lv2_atom_forge_key (forge, urids.mLV2_TIME__speed);
-        lv2_atom_forge_float (forge, info.isPlaying ? 1.0f : 0.0f);
+        lv2_atom_forge_float (forge, info->getIsPlaying() ? 1.0f : 0.0f);
 
-        lv2_atom_forge_key (forge, urids.mLV2_TIME__barBeat);
-        lv2_atom_forge_float (forge, (float) (info.ppqPosition - info.ppqPositionOfLastBarStart));
+        if (const auto samples = info->getTimeInSamples())
+        {
+            lv2_atom_forge_key (forge, urids.mLV2_TIME__frame);
+            lv2_atom_forge_long (forge, *samples);
+        }
 
-        lv2_atom_forge_key (forge, urids.mLV2_TIME__beat);
-        lv2_atom_forge_double (forge, info.ppqPosition);
+        if (const auto bar = info->getBarCount())
+        {
+            lv2_atom_forge_key (forge, urids.mLV2_TIME__bar);
+            lv2_atom_forge_long (forge, *bar);
+        }
 
-        lv2_atom_forge_key (forge, urids.mLV2_TIME__beatUnit);
-        lv2_atom_forge_int (forge, info.timeSigDenominator);
+        if (const auto beat = info->getPpqPosition())
+        {
+            if (const auto barStart = info->getPpqPositionOfLastBarStart())
+            {
+                lv2_atom_forge_key (forge, urids.mLV2_TIME__barBeat);
+                lv2_atom_forge_float (forge, (float) (*beat - *barStart));
+            }
 
-        lv2_atom_forge_key (forge, urids.mLV2_TIME__beatsPerBar);
-        lv2_atom_forge_float (forge, (float) info.timeSigNumerator);
+            lv2_atom_forge_key (forge, urids.mLV2_TIME__beat);
+            lv2_atom_forge_double (forge, *beat);
+        }
 
-        lv2_atom_forge_key (forge, urids.mLV2_TIME__beatsPerMinute);
-        lv2_atom_forge_float (forge, (float) info.bpm);
+        if (const auto sig = info->getTimeSignature())
+        {
+            lv2_atom_forge_key (forge, urids.mLV2_TIME__beatUnit);
+            lv2_atom_forge_int (forge, sig->denominator);
+
+            lv2_atom_forge_key (forge, urids.mLV2_TIME__beatsPerBar);
+            lv2_atom_forge_float (forge, (float) sig->numerator);
+        }
+
+        if (const auto bpm = info->getBpm())
+        {
+            lv2_atom_forge_key (forge, urids.mLV2_TIME__beatsPerMinute);
+            lv2_atom_forge_float (forge, (float) *bpm);
+        }
     }
 
     void preparePortsForRun (AudioBuffer<float>& audio, MidiBuffer& midiBuffer)

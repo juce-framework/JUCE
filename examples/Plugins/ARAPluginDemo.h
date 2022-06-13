@@ -293,14 +293,14 @@ public:
 
     bool processBlock (AudioBuffer<float>& buffer,
                        AudioProcessor::Realtime realtime,
-                       const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override
+                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override
     {
         const auto numSamples = buffer.getNumSamples();
         jassert (numSamples <= maximumSamplesPerBlock);
         jassert (numChannels == buffer.getNumChannels());
         jassert (realtime == AudioProcessor::Realtime::no || useBufferedAudioSourceReader);
-        const auto timeInSamples = positionInfo.timeInSamples;
-        const auto isPlaying = positionInfo.isPlaying;
+        const auto timeInSamples = positionInfo.getTimeInSamples().orFallback (0);
+        const auto isPlaying = positionInfo.getIsPlaying();
 
         bool success = true;
         bool didRenderAnyRegion = false;
@@ -482,7 +482,7 @@ public:
 
     bool processBlock (AudioBuffer<float>& buffer,
                        AudioProcessor::Realtime realtime,
-                       const AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override
+                       const AudioPlayHead::PositionInfo& positionInfo) noexcept override
     {
         ignoreUnused (realtime);
 
@@ -491,7 +491,7 @@ public:
             if (! locked)
                 return true;
 
-            if (positionInfo.isPlaying)
+            if (positionInfo.getIsPlaying())
                 return true;
 
             if (const auto previewedRegion = previewState->previewedRegion.load())
@@ -1075,12 +1075,11 @@ private:
     void doResize()
     {
         auto* aph = getAudioPlayhead();
-        AudioPlayHead::CurrentPositionInfo positionInfo;
-        aph->getCurrentPosition (positionInfo);
+        const auto info = aph->getPosition();
 
-        if (positionInfo.isPlaying)
+        if (info.hasValue() && info->getIsPlaying())
         {
-            const auto markerX = positionInfo.timeInSeconds * pixelPerSecond;
+            const auto markerX = info->getTimeInSeconds().orFallback (0) * pixelPerSecond;
             const auto playheadLine = getLocalBounds().withTrimmedLeft ((int) (markerX - markerWidth / 2.0) - horizontalOffset)
                                                       .removeFromLeft ((int) markerWidth);
             playheadMarker.setVisible (true);
