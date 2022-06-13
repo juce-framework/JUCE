@@ -31,8 +31,6 @@
 
 #include "juce_audio_basics.h"
 
-#include <juce_core/containers/juce_Optional.h>
-
 #if JUCE_MINGW && ! defined (alloca)
  #define alloca __builtin_alloca
 #endif

@@ -26,7 +26,6 @@
 #pragma once
 
 #include "juce_lv2_config.h"
-#include "juce_core/containers/juce_Optional.h"
 
 #ifdef Bool
  #undef Bool // previously defined in X11/Xlib.h

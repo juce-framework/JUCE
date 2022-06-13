@@ -20,10 +20,6 @@
   ==============================================================================
 */
 
-#pragma once
-
-#include <utility>
-
 namespace juce
 {
 
@@ -38,19 +34,33 @@ constexpr auto isNothrowSwappable = noexcept (swap (std::declval<T&>(), std::dec
 } // namespace adlSwap
 } // namespace detail
 
-struct Nullopt {};
+/** A type representing the null state of an Optional.
+    Similar to std::nullopt_t.
+*/
+struct Nullopt
+{
+    explicit constexpr Nullopt (int) {}
+};
 
-constexpr Nullopt nullopt;
+/** An object that can be used when constructing and comparing Optional instances.
+    Similar to std::nullopt.
+*/
+constexpr Nullopt nullopt { 0 };
 
 // Without this, our tests can emit "unreachable code" warnings during
 // link time code generation.
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 
-/*  For internal use only!
-
+/**
     A simple optional type.
 
     Has similar (not necessarily identical!) semantics to std::optional.
+
+    This is intended to stand-in for std::optional while JUCE's minimum
+    supported language standard is lower than C++17. When the minimum language
+    standard moves to C++17, this class will probably be deprecated, in much
+    the same way that juce::ScopedPointer was deprecated in favour of
+    std::unique_ptr after C++11.
 
     This isn't really intended to be used by JUCE clients. Instead, it's to be
     used internally in JUCE code, with an API close-enough to std::optional
@@ -97,26 +107,26 @@ class Optional
                                                            && NotConstructibleFromSimilarType<T, U>::value>;
 
 public:
-    Optional() = default;
+    Optional() : placeholder() {}
 
-    Optional (Nullopt) noexcept {}
+    Optional (Nullopt) noexcept : placeholder() {}
 
     template <typename U = Value,
               typename = std::enable_if_t<std::is_constructible<Value, U&&>::value
                                           && ! std::is_same<std::decay_t<U>, Optional>::value>>
     Optional (U&& value) noexcept (noexcept (Value (std::forward<U> (value))))
-        : valid (true)
+        : storage (std::forward<U> (value)), valid (true)
     {
-        new (&storage) Value (std::forward<U> (value));
     }
 
     Optional (Optional&& other) noexcept (noexcept (std::declval<Optional>().constructFrom (other)))
+        : placeholder()
     {
         constructFrom (other);
     }
 
     Optional (const Optional& other)
-        : valid (other.valid)
+        : placeholder(), valid (other.valid)
     {
         if (valid)
             new (&storage) Value (*other);
@@ -124,13 +134,14 @@ public:
 
     template <typename Other, typename = OptionalMoveConstructorEnabled<Value, Other>>
     Optional (Optional<Other>&& other) noexcept (noexcept (std::declval<Optional>().constructFrom (other)))
+        : placeholder()
     {
         constructFrom (other);
     }
 
     template <typename Other, typename = OptionalCopyConstructorEnabled<Value, Other>>
     Optional (const Optional<Other>& other)
-        : valid (other.hasValue())
+        : placeholder(), valid (other.hasValue())
     {
         if (valid)
             new (&storage) Value (*other);
@@ -167,7 +178,7 @@ public:
         return *this;
     }
 
-    /*  Maintains the strong exception safety guarantee. */
+    /** Maintains the strong exception safety guarantee. */
     Optional& operator= (const Optional& other)
     {
         auto copy = other;
@@ -182,7 +193,7 @@ public:
         return *this;
     }
 
-    /*  Maintains the strong exception safety guarantee. */
+    /** Maintains the strong exception safety guarantee. */
     template <typename Other, typename = OptionalCopyAssignmentEnabled<Value, Other>>
     Optional& operator= (const Optional<Other>& other)
     {
@@ -211,7 +222,7 @@ public:
             operator*().~Value();
     }
 
-    /*  Like std::optional::value_or */
+    /** Like std::optional::value_or */
     template <typename U>
     Value orFallback (U&& fallback) const { return *this ? **this : std::forward<U> (fallback); }
 
@@ -271,11 +282,21 @@ private:
         }
     }
 
-    std::aligned_storage_t<sizeof (Value), alignof (Value)> storage;
+    union
+    {
+        char placeholder;
+        Value storage;
+    };
     bool valid = false;
 };
 
 JUCE_END_IGNORE_WARNINGS_MSVC
+
+template <typename Value>
+Optional<std::decay_t<Value>> makeOptional (Value&& v)
+{
+    return std::forward<Value> (v);
+}
 
 template <class T, class U>
 bool operator== (const Optional<T>& lhs, const Optional<U>& rhs)

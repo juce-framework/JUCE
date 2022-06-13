@@ -27,8 +27,6 @@
 
 #ifndef DOXYGEN
 
-#include <juce_core/containers/juce_Optional.h>
-
 namespace juce
 {
 

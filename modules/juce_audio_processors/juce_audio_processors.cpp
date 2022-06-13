@@ -40,7 +40,6 @@
 
 #include "juce_audio_processors.h"
 #include <juce_gui_extra/juce_gui_extra.h>
-#include <juce_core/containers/juce_Optional.h>
 
 //==============================================================================
 #if (JUCE_PLUGINHOST_VST || JUCE_PLUGINHOST_VST3) && (JUCE_LINUX || JUCE_BSD)
