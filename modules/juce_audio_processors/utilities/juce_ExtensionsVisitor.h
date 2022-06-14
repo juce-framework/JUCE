@@ -120,6 +120,14 @@ struct ExtensionsVisitor
         virtual void createARAFactoryAsync (std::function<void (ARAFactoryWrapper)>) const = 0;
     };
 
+    ExtensionsVisitor() = default;
+
+    ExtensionsVisitor (const ExtensionsVisitor&) = default;
+    ExtensionsVisitor (ExtensionsVisitor&&) = default;
+
+    ExtensionsVisitor& operator= (const ExtensionsVisitor&) = default;
+    ExtensionsVisitor& operator= (ExtensionsVisitor&&) = default;
+
     virtual ~ExtensionsVisitor() = default;
 
     /** Will be called if there is no platform specific information available. */
