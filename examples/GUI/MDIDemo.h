@@ -151,6 +151,12 @@ public:
         }
     }
 
+    void activeDocumentChanged() override
+    {
+        if (auto* activeDoc = getActiveDocument())
+            Logger::outputDebugString ("activeDocumentChanged() to " + activeDoc->getName());
+    }
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DemoMultiDocumentPanel)
 };
@@ -171,8 +177,25 @@ public:
         showInTabsButton.onClick = [this] { updateLayoutMode(); };
         addAndMakeVisible (showInTabsButton);
 
-        addNoteButton.onClick = [this] { addNote ("Note " + String (multiDocumentPanel.getNumDocuments() + 1), "Hello World!"); };
+        oneDocShouldBeFullscreenButton.onClick = [this]
+        {
+            multiDocumentPanel.useFullscreenWhenOneDocument (oneDocShouldBeFullscreenButton.getToggleState());
+        };
+        addAndMakeVisible (oneDocShouldBeFullscreenButton);
+        oneDocShouldBeFullscreenButton.setToggleState (false, juce::sendNotification);
+
+        addNoteButton.onClick = [this]
+        {
+            addNote ("Note " + String (noteCounter), "Hello World! " + String (noteCounter));
+            ++noteCounter;
+        };
         addAndMakeVisible (addNoteButton);
+
+        closeActiveDocumentButton.onClick = [this]
+        {
+            multiDocumentPanel.closeDocumentAsync (multiDocumentPanel.getActiveDocument(), false, [] (auto) {});
+        };
+        addAndMakeVisible (closeActiveDocumentButton);
 
         closeApplicationButton.onClick = [this]
         {
@@ -191,7 +214,7 @@ public:
         addNote ("Notes Demo", "You can drag-and-drop text files onto this page to open them as notes..");
         addExistingNotes();
 
-        setSize (500, 500);
+        setSize (650, 500);
     }
 
     void paint (Graphics& g) override
@@ -203,10 +226,15 @@ public:
     {
         auto area = getLocalBounds();
 
-        auto buttonArea = area.removeFromTop (28).reduced (2);
-        closeApplicationButton.setBounds (buttonArea.removeFromRight (150));
-        addNoteButton         .setBounds (buttonArea.removeFromRight (150));
-        showInTabsButton      .setBounds (buttonArea);
+        auto topButtonRow = area.removeFromTop (28).reduced (2);
+
+        showInTabsButton              .setBounds (topButtonRow.removeFromLeft (150));
+
+        closeApplicationButton        .setBounds (topButtonRow.removeFromRight (150));
+        addNoteButton                 .setBounds (topButtonRow.removeFromRight (150));
+        closeActiveDocumentButton     .setBounds (topButtonRow.removeFromRight (150));
+
+        oneDocShouldBeFullscreenButton.setBounds (area.removeFromTop (28).reduced (2).removeFromLeft (240));
 
         multiDocumentPanel.setBounds (area);
     }
@@ -261,11 +289,14 @@ private:
         createNotesForFiles (files);
     }
 
-    ToggleButton showInTabsButton { "Show with tabs" };
-    TextButton addNoteButton          { "Create a new note" },
-               closeApplicationButton { "Close app" };
+    ToggleButton showInTabsButton               { "Show with tabs" };
+    ToggleButton oneDocShouldBeFullscreenButton { "Fill screen when only one note is open" };
+    TextButton   addNoteButton                  { "Create a new note" },
+                 closeApplicationButton         { "Close app" },
+                 closeActiveDocumentButton      { "Close active document" };
 
     DemoMultiDocumentPanel multiDocumentPanel;
+    int noteCounter = 1;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MDIDemo)
 };

@@ -64,7 +64,7 @@ public:
 
 private:
     //==============================================================================
-    void updateOrder();
+    void updateActiveDocument();
     MultiDocumentPanel* getOwner() const noexcept;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MultiDocumentPanelWindow)
@@ -362,11 +362,15 @@ private:
     friend class MultiDocumentPanelWindow;
 
     Component* getContainerComp (Component*) const;
-    void updateOrder();
+    void updateActiveDocumentFromUIState();
+    void updateActiveDocument (Component*);
     void addWindow (Component*);
+    void recreateLayout();
 
     LayoutMode mode = MaximisedWindowsWithTabs;
     Array<Component*> components;
+    Component* activeComponent = nullptr;
+    bool isLayoutBeingChanged = false;
     std::unique_ptr<TabbedComponent> tabComponent;
     Colour backgroundColour { Colours::lightblue };
     int maximumNumDocuments = 0, numDocsBeforeTabsUsed = 0;
