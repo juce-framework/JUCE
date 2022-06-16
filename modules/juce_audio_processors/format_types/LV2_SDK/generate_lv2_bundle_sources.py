@@ -52,7 +52,7 @@ FUNCTION_TEMPLATE = """/*
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -78,6 +78,8 @@ FUNCTION_TEMPLATE = """/*
 */
 
 #pragma once
+
+#ifndef DOXYGEN
 
 #include <vector>
 
@@ -109,7 +111,8 @@ std::vector<juce::lv2::Bundle> juce::lv2::Bundle::getAllBundles()
 {}
 }};
 }}
-"""
+
+#endif"""
 
 
 def chunks(lst, n):
@@ -149,5 +152,6 @@ args = parser.parse_args()
 
 print(FUNCTION_TEMPLATE.format(", ".join(generate_bundle_source(root, files)
                                          for root, files in filter_ttl_files(args.lv2_dir)
-                                         if len(files) != 0)),
+                                         if len(files) != 0))
+                       .replace("\t", "    "),
       end = "\r\n")

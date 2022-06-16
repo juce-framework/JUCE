@@ -66,6 +66,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
     used internally in JUCE code, with an API close-enough to std::optional
     that the types can be swapped with fairly minor disruption at some point in
     the future, but *without breaking any public APIs*.
+
+    @tags{Core}
 */
 template <typename Value>
 class Optional

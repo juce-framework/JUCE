@@ -23,6 +23,8 @@
   ==============================================================================
 */
 
+#ifndef DOXYGEN
+
 // This macro can be set if you need to override this internal name for some reason..
 #ifndef JUCE_STATE_DICTIONARY_KEY
  #define JUCE_STATE_DICTIONARY_KEY   "jucePluginState"
@@ -30,8 +32,6 @@
 
 namespace juce
 {
-
-#ifndef DOXYGEN
 
 struct AudioUnitHelpers
 {
@@ -560,6 +560,6 @@ struct AudioUnitHelpers
     }
 };
 
-#endif
-
 } // namespace juce
+
+#endif

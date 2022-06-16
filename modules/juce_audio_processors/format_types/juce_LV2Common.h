@@ -25,6 +25,8 @@
 
 #pragma once
 
+#ifndef DOXYGEN
+
 #include "juce_lv2_config.h"
 
 #ifdef Bool
@@ -615,3 +617,5 @@ static inline std::vector<ParsedGroup> findStableBusOrder (const String& mainGro
 
 }
 }
+
+#endif

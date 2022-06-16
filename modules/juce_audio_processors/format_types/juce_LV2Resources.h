@@ -29,6 +29,8 @@
 
 #pragma once
 
+#ifndef DOXYGEN
+
 #include <vector>
 
 namespace juce
@@ -10229,3 +10231,5 @@ to an instance of LV2_Extension_Data_Feature.
 
 };
 }
+
+#endif
