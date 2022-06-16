@@ -26,6 +26,8 @@ namespace juce
 MessageManager::MessageManager() noexcept
   : messageThreadId (Thread::getCurrentThreadId())
 {
+    JUCE_VERSION_ID
+
     if (JUCEApplicationBase::isStandaloneApp())
         Thread::setCurrentThreadName ("JUCE Message Thread");
 }

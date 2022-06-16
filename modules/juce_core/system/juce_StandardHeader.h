@@ -41,6 +41,11 @@
 */
 #define JUCE_VERSION   ((JUCE_MAJOR_VERSION << 16) + (JUCE_MINOR_VERSION << 8) + JUCE_BUILDNUMBER)
 
+#if ! DOXYGEN
+#define JUCE_VERSION_ID \
+    volatile auto juceVersionId = "juce_version_" JUCE_STRINGIFY(JUCE_MAJOR_VERSION) "_" JUCE_STRINGIFY(JUCE_MINOR_VERSION) "_" JUCE_STRINGIFY(JUCE_BUILDNUMBER); \
+    ignoreUnused (juceVersionId);
+#endif
 
 //==============================================================================
 #include <algorithm>
