@@ -102,17 +102,26 @@ struct ConversionFunctions
 };
 
 //==============================================================================
+/** This class is used by the various ARA model object helper classes, such as MusicalContext,
+    AudioSource etc. It helps with deregistering the model objects from the DocumentController
+    when the lifetime of the helper class object ends.
+
+    You shouldn't use this class directly but instead inherit from the helper classes.
+*/
 template <typename Base, typename PtrIn>
 class ManagedARAHandle
 {
 public:
     using Ptr = PtrIn;
 
+    /** Constructor. */
     ManagedARAHandle (ARA::Host::DocumentController& dc, Ptr ptr) noexcept
         : handle (ptr, Deleter { dc }) {}
 
+    /** Returns the host side DocumentController reference. */
     auto& getDocumentController() const { return handle.get_deleter().documentController; }
 
+    /** Returns the plugin side reference to the model object. */
     Ptr getPluginRef() const { return handle.get(); }
 
 private:
@@ -268,12 +277,34 @@ private:
     AudioSource& source;
 };
 
+/** This class is used internally by PlaybackRegionRegistry to be notified when a PlaybackRegion
+    object is deleted.
+*/
 struct DeletionListener
 {
+    /** Destructor. */
     virtual ~DeletionListener() = default;
+
+    /** Removes another DeletionListener object from this DeletionListener. */
     virtual void removeListener (DeletionListener& other) noexcept = 0;
 };
 
+/** Helper class for the host side implementation of the %ARA %PlaybackRegion model object.
+
+    Its intended use is to add a member variable of this type to your host side %PlaybackRegion
+    implementation. Then it provides a RAII approach to managing the lifetime of the corresponding
+    objects created inside the DocumentController. When the host side object is instantiated an ARA
+    model object is also created in the DocumentController. When the host side object is deleted it
+    will be removed from the DocumentController as well.
+
+    The class will automatically put the DocumentController into editable state for operations that
+    mandate this e.g. creation, deletion or updating.
+
+    You can encapsulate multiple such operations into a scope with an ARAEditGuard in order to invoke
+    the editable state of the DocumentController only once.
+
+    @tags{ARA}
+*/
 struct PlaybackRegion
 {
 public:
