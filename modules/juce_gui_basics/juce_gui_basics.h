@@ -54,6 +54,8 @@
 #pragma once
 #define JUCE_GUI_BASICS_H_INCLUDED
 
+#include <utility>
+
 #include <juce_graphics/juce_graphics.h>
 #include <juce_data_structures/juce_data_structures.h>
 
