@@ -32,7 +32,7 @@
 
   ID:                 juce_events
   vendor:             juce
-  version:            6.1.6
+  version:            7.0.0
   name:               JUCE message and event handling classes
   description:        Classes for running an application's main event loop and sending/receiving messages, timers, etc.
   website:            http://www.juce.com/juce
