@@ -202,7 +202,7 @@ public:
    #endif
 
     /** Returns the rectangle for a given key. */
-    Rectangle<float> getRectangleForKey (int midiNoteNumber) const;
+    virtual Rectangle<float> getRectangleForKey (int midiNoteNumber) const;
 
     //==============================================================================
     /** This sets the octave number which is shown as the octave number for middle C.
@@ -264,25 +264,28 @@ public:
     void resized() override;
     /** @internal */
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
-
+protected:
+    //==============================================================================
+    Range<float> getKeyPos (int midiNoteNumber) const;
+    
+    //==============================================================================
+    Orientation orientation;
+    
+    int rangeStart = 0, rangeEnd = 127;
+    float blackNoteLengthRatio = 0.7f, blackNoteWidthRatio = 0.7f;
 private:
     //==============================================================================
     struct UpDownButton;
 
-    Range<float> getKeyPos (int midiNoteNumber) const;
     NoteAndVelocity remappedXYToNote (Point<float>) const;
     void setLowestVisibleKeyFloat (float noteNumber);
 
     //==============================================================================
-    Orientation orientation;
-
-    float blackNoteLengthRatio = 0.7f, blackNoteWidthRatio = 0.7f;
     float xOffset = 0.0f;
     float keyWidth = 16.0f;
     float firstKey = 12 * 4.0f;
 
     int scrollButtonWidth = 12;
-    int rangeStart = 0, rangeEnd = 127;
     int octaveNumForMiddleC = 3;
 
     bool canScroll = true;
