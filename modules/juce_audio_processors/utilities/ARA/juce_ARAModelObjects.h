@@ -458,7 +458,7 @@ public:
     }
 
     /** Called before the musical context is destroyed.
-        @param musicalContext The musical context that will be destoyed.
+        @param musicalContext The musical context that will be destroyed.
     */
     virtual void willDestroyMusicalContext (ARAMusicalContext* musicalContext)
     {
@@ -559,7 +559,7 @@ public:
     }
 
     /** Called before the playback region is destroyed.
-        @param playbackRegion The playback region that will be destoyed.
+        @param playbackRegion The playback region that will be destroyed.
     */
     virtual void willDestroyPlaybackRegion (ARAPlaybackRegion* playbackRegion)
     {
@@ -706,7 +706,7 @@ public:
     }
 
     /** Called before the region sequence is destroyed.
-        @param regionSequence The region sequence that will be destoyed.
+        @param regionSequence The region sequence that will be destroyed.
     */
     virtual void willDestroyRegionSequence (ARARegionSequence* regionSequence)
     {
@@ -898,7 +898,7 @@ public:
     }
 
     /** Called before the audio source is destroyed.
-        @param audioSource The audio source that will be destoyed.
+        @param audioSource The audio source that will be destroyed.
     */
     virtual void willDestroyAudioSource (ARAAudioSource* audioSource)
     {
@@ -1072,7 +1072,7 @@ public:
     }
 
     /** Called before the audio modification is destroyed.
-        @param audioModification The audio modification that will be destoyed.
+        @param audioModification The audio modification that will be destroyed.
     */
     virtual void willDestroyAudioModification (ARAAudioModification* audioModification)
     {
