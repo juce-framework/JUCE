@@ -9,7 +9,7 @@
 #include <windows.h>
 
 VS_VERSION_INFO VERSIONINFO
-FILEVERSION  6,1,6,0
+FILEVERSION  7,0,0,0
 BEGIN
   BLOCK "StringFileInfo"
   BEGIN
@@ -18,9 +18,9 @@ BEGIN
       VALUE "CompanyName",  "Raw Material Software Limited\0"
       VALUE "LegalCopyright",  "Copyright (c) 2020 - Raw Material Software Limited\0"
       VALUE "FileDescription",  "DemoRunner\0"
-      VALUE "FileVersion",  "6.1.6\0"
+      VALUE "FileVersion",  "7.0.0\0"
       VALUE "ProductName",  "DemoRunner\0"
-      VALUE "ProductVersion",  "6.1.6\0"
+      VALUE "ProductVersion",  "7.0.0\0"
     END
   END
 
