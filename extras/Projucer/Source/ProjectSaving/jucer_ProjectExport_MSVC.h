@@ -168,7 +168,7 @@ public:
               vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
-              lv2BinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
+              lv2BinaryLocation              (config, Ids::lv2BinaryLocation,          getUndoManager()),
               unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
         {
             setPluginBinaryCopyLocationDefaults();
