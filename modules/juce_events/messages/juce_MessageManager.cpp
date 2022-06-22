@@ -388,6 +388,10 @@ void MessageManager::Lock::exit() const noexcept
 
         if (blockingMessage != nullptr)
         {
+            {
+              ScopedLock lock(blockingMessage->ownerCriticalSection);
+              blockingMessage->owner.set(nullptr);
+            }
             blockingMessage->releaseEvent.signal();
             blockingMessage = nullptr;
         }
