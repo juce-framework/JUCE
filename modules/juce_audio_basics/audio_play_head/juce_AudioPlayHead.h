@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -152,8 +152,60 @@ public:
         bool drop = false, pulldown = false;
     };
 
+    /** Describes a musical time signature.
+
+        @see PositionInfo::getTimeSignature() PositionInfo::setTimeSignature()
+    */
+    struct JUCE_API TimeSignature
+    {
+        /** Time signature numerator, e.g. the 3 of a 3/4 time sig */
+        int numerator   = 4;
+
+        /** Time signature denominator, e.g. the 4 of a 3/4 time sig */
+        int denominator = 4;
+
+        bool operator== (const TimeSignature& other) const
+        {
+            const auto tie = [] (auto& x) { return std::tie (x.numerator, x.denominator); };
+            return tie (*this) == tie (other);
+        }
+
+        bool operator!= (const TimeSignature& other) const
+        {
+            return ! operator== (other);
+        }
+    };
+
+    /** Holds the begin and end points of a looped region.
+
+        @see PositionInfo::getIsLooping() PositionInfo::setIsLooping() PositionInfo::getLoopPoints() PositionInfo::setLoopPoints()
+    */
+    struct JUCE_API LoopPoints
+    {
+        /** The current cycle start position in units of quarter-notes. */
+        double ppqStart = 0;
+
+        /** The current cycle end position in units of quarter-notes. */
+        double ppqEnd = 0;
+
+        bool operator== (const LoopPoints& other) const
+        {
+            const auto tie = [] (auto& x) { return std::tie (x.ppqStart, x.ppqEnd); };
+            return tie (*this) == tie (other);
+        }
+
+        bool operator!= (const LoopPoints& other) const
+        {
+            return ! operator== (other);
+        }
+    };
+
     //==============================================================================
-    /** This structure is filled-in by the AudioPlayHead::getCurrentPosition() method.
+    /** This type is deprecated; prefer PositionInfo instead.
+
+        Some position info may be unavailable, depending on the host or plugin format.
+        Unfortunately, CurrentPositionInfo doesn't have any way of differentiating between
+        default values and values that have been set explicitly.
     */
     struct JUCE_API  CurrentPositionInfo
     {
@@ -162,6 +214,7 @@ public:
 
         /** Time signature numerator, e.g. the 3 of a 3/4 time sig */
         int timeSigNumerator = 4;
+
         /** Time signature denominator, e.g. the 4 of a 3/4 time sig */
         int timeSigDenominator = 4;
 
@@ -248,7 +301,208 @@ public:
     };
 
     //==============================================================================
-    /** Fills-in the given structure with details about the transport's
+    /**
+        Describes the time at the start of the current audio callback.
+
+        Not all hosts and plugin formats can provide all of the possible time
+        information, so most of the getter functions in this class return
+        an Optional that will only be engaged if the host provides the corresponding
+        information. As a plugin developer, you should code defensively so that
+        the plugin behaves sensibly even when the host fails to provide timing
+        information.
+
+        A default-constructed instance of this class will return nullopt from
+        all functions that return an Optional.
+    */
+    class PositionInfo
+    {
+    public:
+        /** Returns the number of samples that have elapsed. */
+        Optional<int64_t> getTimeInSamples() const                      { return getOptional (flagTimeSamples, timeInSamples); }
+
+        /** @see getTimeInSamples() */
+        void setTimeInSamples (Optional<int64_t> timeInSamplesIn)       {        setOptional (flagTimeSamples, timeInSamples, timeInSamplesIn); }
+
+        /** Returns the number of samples that have elapsed. */
+        Optional<double> getTimeInSeconds() const                       { return getOptional (flagTimeSeconds, timeInSeconds); }
+
+        /** @see getTimeInSamples() */
+        void setTimeInSeconds (Optional<double> timeInSecondsIn)        {        setOptional (flagTimeSeconds, timeInSeconds, timeInSecondsIn); }
+
+        /** Returns the bpm, if available. */
+        Optional<double> getBpm() const                                 { return getOptional (flagTempo, tempoBpm); }
+
+        /** @see getBpm() */
+        void setBpm (Optional<double> bpmIn)                            {        setOptional (flagTempo, tempoBpm, bpmIn); }
+
+        /** Returns the time signature, if available. */
+        Optional<TimeSignature> getTimeSignature() const                { return getOptional (flagTimeSignature, timeSignature); }
+
+        /** @see getTimeSignature() */
+        void setTimeSignature (Optional<TimeSignature> timeSignatureIn) {        setOptional (flagTimeSignature, timeSignature, timeSignatureIn); }
+
+        /** Returns host loop points, if available. */
+        Optional<LoopPoints> getLoopPoints() const                      { return getOptional (flagLoopPoints, loopPoints); }
+
+        /** @see getLoopPoints() */
+        void setLoopPoints (Optional<LoopPoints> loopPointsIn)          {        setOptional (flagLoopPoints, loopPoints, loopPointsIn); }
+
+        /** The number of bars since the beginning of the timeline.
+
+            This value isn't available in all hosts or in all plugin formats.
+        */
+        Optional<int64_t> getBarCount() const                           { return getOptional (flagBarCount, barCount); }
+
+        /** @see getBarCount() */
+        void setBarCount (Optional<int64_t> barCountIn)                 {        setOptional (flagBarCount, barCount, barCountIn); }
+
+        /** The position of the start of the last bar, in units of quarter-notes.
+
+            This is the time from the start of the timeline to the start of the current
+            bar, in ppq units.
+
+            Note - this value may be unavailable on some hosts, e.g. Pro-Tools.
+        */
+        Optional<double> getPpqPositionOfLastBarStart() const           { return getOptional (flagLastBarStartPpq, lastBarStartPpq); }
+
+        /** @see getPpqPositionOfLastBarStart() */
+        void setPpqPositionOfLastBarStart (Optional<double> positionIn) {        setOptional (flagLastBarStartPpq, lastBarStartPpq, positionIn); }
+
+        /** The video frame rate, if available. */
+        Optional<FrameRate> getFrameRate() const                        { return getOptional (flagFrameRate, frame); }
+
+        /** @see getFrameRate() */
+        void setFrameRate (Optional<FrameRate> frameRateIn)             {        setOptional (flagFrameRate, frame, frameRateIn); }
+
+        /** The current play position, in units of quarter-notes. */
+        Optional<double> getPpqPosition() const                         { return getOptional (flagPpqPosition, positionPpq); }
+
+        /** @see getPpqPosition() */
+        void setPpqPosition (Optional<double> ppqPositionIn)            {        setOptional (flagPpqPosition, positionPpq, ppqPositionIn); }
+
+        /** For timecode, the position of the start of the timeline, in seconds from 00:00:00:00. */
+        Optional<double> getEditOriginTime() const                      { return getOptional (flagOriginTime, originTime); }
+
+        /** @see getEditOriginTime() */
+        void setEditOriginTime (Optional<double> editOriginTimeIn)      {        setOptional (flagOriginTime, originTime, editOriginTimeIn); }
+
+        /** Get the host's callback time in nanoseconds, if available. */
+        Optional<uint64_t> getHostTimeNs() const                        { return getOptional (flagHostTimeNs, hostTimeNs); }
+
+        /** @see getHostTimeNs() */
+        void setHostTimeNs (Optional<uint64_t> hostTimeNsIn)            {        setOptional (flagHostTimeNs, hostTimeNs, hostTimeNsIn); }
+
+        /** True if the transport is currently playing. */
+        bool getIsPlaying() const                                       { return getFlag (flagIsPlaying); }
+
+        /** @see getIsPlaying() */
+        void setIsPlaying (bool isPlayingIn)                            {        setFlag (flagIsPlaying, isPlayingIn); }
+
+        /** True if the transport is currently recording.
+
+            (When isRecording is true, then isPlaying will also be true).
+        */
+        bool getIsRecording() const                                     { return getFlag (flagIsRecording); }
+
+        /** @see getIsRecording() */
+        void setIsRecording (bool isRecordingIn)                        {        setFlag (flagIsRecording, isRecordingIn); }
+
+        /** True if the transport is currently looping. */
+        bool getIsLooping() const                                       { return getFlag (flagIsLooping); }
+
+        /** @see getIsLooping() */
+        void setIsLooping (bool isLoopingIn)                            {        setFlag (flagIsLooping, isLoopingIn); }
+
+        bool operator== (const PositionInfo& other) const noexcept
+        {
+            const auto tie = [] (const PositionInfo& i)
+            {
+                return std::make_tuple (i.getTimeInSamples(),
+                                        i.getTimeInSeconds(),
+                                        i.getPpqPosition(),
+                                        i.getEditOriginTime(),
+                                        i.getPpqPositionOfLastBarStart(),
+                                        i.getFrameRate(),
+                                        i.getBarCount(),
+                                        i.getTimeSignature(),
+                                        i.getBpm(),
+                                        i.getLoopPoints(),
+                                        i.getHostTimeNs(),
+                                        i.getIsPlaying(),
+                                        i.getIsRecording(),
+                                        i.getIsLooping());
+            };
+
+            return tie (*this) == tie (other);
+        }
+
+        bool operator!= (const PositionInfo& other) const noexcept
+        {
+            return ! operator== (other);
+        }
+
+    private:
+        bool getFlag (int64_t flagToCheck) const
+        {
+            return (flagToCheck & flags) != 0;
+        }
+
+        void setFlag (int64_t flagToCheck, bool value)
+        {
+            flags = (value ? flags | flagToCheck : flags & ~flagToCheck);
+        }
+
+        template <typename Value>
+        Optional<Value> getOptional (int64_t flagToCheck, Value value) const
+        {
+            return getFlag (flagToCheck) ? makeOptional (std::move (value)) : nullopt;
+        }
+
+        template <typename Value>
+        void setOptional (int64_t flagToCheck, Value& value, Optional<Value> opt)
+        {
+            if (opt.hasValue())
+                value = *opt;
+
+            setFlag (flagToCheck, opt.hasValue());
+        }
+
+        enum
+        {
+            flagTimeSignature   = 1 << 0,
+            flagLoopPoints      = 1 << 1,
+            flagFrameRate       = 1 << 2,
+            flagTimeSeconds     = 1 << 3,
+            flagLastBarStartPpq = 1 << 4,
+            flagPpqPosition     = 1 << 5,
+            flagOriginTime      = 1 << 6,
+            flagTempo           = 1 << 7,
+            flagTimeSamples     = 1 << 8,
+            flagBarCount        = 1 << 9,
+            flagHostTimeNs      = 1 << 10,
+            flagIsPlaying       = 1 << 11,
+            flagIsRecording     = 1 << 12,
+            flagIsLooping       = 1 << 13
+        };
+
+        TimeSignature timeSignature;
+        LoopPoints loopPoints;
+        FrameRate frame        = FrameRateType::fps23976;
+        double timeInSeconds   = 0.0;
+        double lastBarStartPpq = 0.0;
+        double positionPpq     = 0.0;
+        double originTime      = 0.0;
+        double tempoBpm        = 0.0;
+        int64_t timeInSamples  = 0;
+        int64_t barCount       = 0;
+        uint64_t hostTimeNs    = 0;
+        int64_t flags          = 0;
+    };
+
+    //==============================================================================
+    /** Deprecated, use getPosition() instead.
+
+        Fills-in the given structure with details about the transport's
         position at the start of the current processing block. If this method returns
         false then the current play head position is not available and the given
         structure will be undefined.
@@ -258,7 +512,66 @@ public:
         in which a time would make sense, and some hosts will almost certainly have
         multithreading issues if it's not called on the audio thread.
     */
-    virtual bool getCurrentPosition (CurrentPositionInfo& result) = 0;
+    [[deprecated ("Use getPosition instead. Not all hosts are able to provide all time position information; getPosition differentiates clearly between set and unset fields.")]]
+    bool getCurrentPosition (CurrentPositionInfo& result)
+    {
+        if (const auto pos = getPosition())
+        {
+            result.resetToDefault();
+
+            if (const auto sig = pos->getTimeSignature())
+            {
+                result.timeSigNumerator   = sig->numerator;
+                result.timeSigDenominator = sig->denominator;
+            }
+
+            if (const auto loop = pos->getLoopPoints())
+            {
+                result.ppqLoopStart     = loop->ppqStart;
+                result.ppqLoopEnd       = loop->ppqEnd;
+            }
+
+            if (const auto frame = pos->getFrameRate())
+                result.frameRate = *frame;
+
+            if (const auto timeInSeconds = pos->getTimeInSeconds())
+                result.timeInSeconds = *timeInSeconds;
+
+            if (const auto lastBarStartPpq = pos->getPpqPositionOfLastBarStart())
+                result.ppqPositionOfLastBarStart = *lastBarStartPpq;
+
+            if (const auto ppqPosition = pos->getPpqPosition())
+                result.ppqPosition = *ppqPosition;
+
+            if (const auto originTime = pos->getEditOriginTime())
+                result.editOriginTime = *originTime;
+
+            if (const auto bpm = pos->getBpm())
+                result.bpm = *bpm;
+
+            if (const auto timeInSamples = pos->getTimeInSamples())
+                result.timeInSamples = *timeInSamples;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /** Fetches details about the transport's position at the start of the current
+        processing block. If this method returns nullopt then the current play head
+        position is not available.
+
+        A non-null return value just indicates that the host was able to provide
+        *some* relevant timing information. Individual PositionInfo getters may
+        still return nullopt.
+
+        You can ONLY call this from your processBlock() method! Calling it at other
+        times will produce undefined behaviour, as the host may not have any context
+        in which a time would make sense, and some hosts will almost certainly have
+        multithreading issues if it's not called on the audio thread.
+    */
+    virtual Optional<PositionInfo> getPosition() const = 0;
 
     /** Returns true if this object can control the transport. */
     virtual bool canControlTransport()                         { return false; }

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,9 +35,9 @@
 
   ID:                 juce_audio_plugin_client
   vendor:             juce
-  version:            6.1.6
+  version:            7.0.0
   name:               JUCE audio plugin wrapper classes
-  description:        Classes for building VST, VST3, AudioUnit, AAX and RTAS plugins.
+  description:        Classes for building VST, VST3, AU, AUv3 and AAX plugins.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
   minimumCppStandard: 14
@@ -128,3 +128,7 @@
 #endif
 
 #include "utility/juce_CreatePluginFilter.h"
+
+#if JucePlugin_Enable_ARA
+ #include "ARA/juce_ARA_Wrapper.h"
+#endif

@@ -3,6 +3,16 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 7.0.0
+  - Added Audio Random Access (ARA) SDK support
+  - Added support for authoring and hosting LV2 plug-ins
+  - Added a default renderer for macOS and iOS
+  - Added new macOS and iOS rendering options
+  - Added hardware synchronised drawing on Windows, macOS and iOS
+  - Updated the Android billing and file access APIs
+  - Revamped AudioPlayHead functionality
+  - Improved accessibility support
+
 Version 6.1.6
   - Improved the handling of AU multichannel layouts
   - Added JUCE_NODISCARD to builder-patten functions

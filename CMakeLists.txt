@@ -1,15 +1,15 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE library.
-#  Copyright (c) 2020 - Raw Material Software Limited
+#  Copyright (c) 2022 - Raw Material Software Limited
 #
 #  JUCE is an open source library subject to commercial or open-source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+#  Agreement and JUCE Privacy Policy.
 #
-#  End User License Agreement: www.juce.com/juce-6-licence
+#  End User License Agreement: www.juce.com/juce-7-licence
 #  Privacy Policy: www.juce.com/juce-privacy-policy
 #
 #  Or: You may also use this code under the terms of the GPL v3 (see
@@ -23,7 +23,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(JUCE VERSION 6.1.6 LANGUAGES C CXX)
+project(JUCE VERSION 7.0.0 LANGUAGES C CXX)
 
 include(CMakeDependentOption)
 
@@ -62,7 +62,7 @@ include(extras/Build/CMake/JUCEUtils.cmake)
 
 set_directory_properties(PROPERTIES
     JUCE_COMPANY_NAME       "JUCE"
-    JUCE_COMPANY_WEBSITE    "juce.com"
+    JUCE_COMPANY_WEBSITE    "https://juce.com"
     JUCE_COMPANY_EMAIL      "info@juce.com"
     JUCE_COMPANY_COPYRIGHT  "Copyright (c) 2020 - Raw Material Software Limited")
 
@@ -76,10 +76,11 @@ juce_disable_default_flags()
 
 add_subdirectory(extras/Build)
 
-# If you want to build the JUCE examples with VST2/AAX support, you'll need to make the VST2/AAX
-# headers visible to the juce_audio_processors module. You can either set the paths on the command
-# line, (e.g. -DJUCE_GLOBAL_AAX_SDK_PATH=/path/to/sdk) if you're just building the JUCE examples, or
-# you can call the `juce_set_*_sdk_path` functions in your own CMakeLists after importing JUCE.
+# If you want to build the JUCE examples with VST2/AAX/ARA support, you'll need to make the
+# VST2/AAX/ARA headers visible to the juce_audio_processors module. You can either set the paths on
+# the command line, (e.g. -DJUCE_GLOBAL_AAX_SDK_PATH=/path/to/sdk) if you're just building the JUCE
+# examples, or you can call the `juce_set_*_sdk_path` functions in your own CMakeLists after
+# importing JUCE.
 
 if(JUCE_GLOBAL_AAX_SDK_PATH)
     juce_set_aax_sdk_path("${JUCE_GLOBAL_AAX_SDK_PATH}")
@@ -87,6 +88,13 @@ endif()
 
 if(JUCE_GLOBAL_VST2_SDK_PATH)
     juce_set_vst2_sdk_path("${JUCE_GLOBAL_VST2_SDK_PATH}")
+endif()
+
+# The ARA_SDK path should point to the "Umbrella installer" ARA_SDK directory.
+# The directory can be obtained by recursively cloning https://github.com/Celemony/ARA_SDK and
+# checking out the tag releases/2.1.0.
+if(JUCE_GLOBAL_ARA_SDK_PATH)
+    juce_set_ara_sdk_path("${JUCE_GLOBAL_ARA_SDK_PATH}")
 endif()
 
 # We don't build anything other than the juceaide by default, because we want to keep configuration
@@ -145,8 +153,10 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEHelperTargets.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEModuleSupport.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/JUCEUtils.cmake"
+              "${JUCE_CMAKE_UTILS_DIR}/JuceLV2Defines.h.in"
               "${JUCE_CMAKE_UTILS_DIR}/LaunchScreen.storyboard"
               "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in"
+              "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessorWithARA.cpp.in"
               "${JUCE_CMAKE_UTILS_DIR}/PIPComponent.cpp.in"
               "${JUCE_CMAKE_UTILS_DIR}/PIPConsole.cpp.in"
               "${JUCE_CMAKE_UTILS_DIR}/RecentFilesMenuTemplate.nib"
@@ -155,3 +165,5 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/copyDir.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")
+
+install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")

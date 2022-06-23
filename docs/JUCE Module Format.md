@@ -185,11 +185,18 @@ Possible values:
     parent folder, which need to be added to a project's header search path
 
 - OSXFrameworks
-  - (Optional) A list (space or comma-separated) of OSX frameworks that are needed
+  - (Optional) A list (space or comma-separated) of OSX frameworks that are needed by this module
+
+- WeakOSXFrameworks
+  - (Optional) A list (space or comma-separated) of weak linked OSX frameworks that are needed
     by this module
 
 - iOSFrameworks
-  - (Optional) Like OSXFrameworks, but for iOS targets
+  - (Optional) A list (space or comma-separated) of iOS frameworks that are needed by this module
+
+- WeakiOSFrameworks
+  - (Optional) A list (space or comma-separated) of weak linked iOS frameworks that are needed
+    by this module
 
 - linuxPackages
   - (Optional) A list (space or comma-separated) pkg-config packages that should be used to pass

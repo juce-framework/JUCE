@@ -1,0 +1,112 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix time: <http://lv2plug.in/ns/ext/time#> .
+
+<http://lv2plug.in/ns/ext/time>
+	a doap:Project ;
+	doap:name "LV2 Time" ;
+	doap:shortdesc "A vocabulary for describing musical time." ;
+	doap:created "2011-10-05" ;
+	doap:developer <http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "1.6" ;
+		doap:created "2019-02-03" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.16.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Clarify time:beat origin."
+			]
+		]
+	] , [
+		doap:revision "1.4" ;
+		doap:created "2016-07-31" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.14.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Define LV2_TIME_PREFIX."
+			]
+		]
+	] , [
+		doap:revision "1.2" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Use consistent label style."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This is a vocabulary for describing a position in time and the speed of time
+passage, in both real and musical terms.
+
+In addition to real time (based on seconds), two units of time are used:
+_frames_ and _beats_.  A frame is a numbered quantum of time.  Frame time is
+related to real-time by the _frame rate_ or _sample rate_,
+time:framesPerSecond.  A beat is a single pulse of musical time.  Beat time is
+related to real-time by the _tempo_, time:beatsPerMinute.
+
+Musical time additionally has a _meter_ which describes passage of time in
+terms of musical _bars_.  A bar is a higher level grouping of beats.  The meter
+describes how many beats are in one bar.
+
+"""^^lv2:Markdown .
+
+time:Position
+	lv2:documentation """
+
+A point in time and/or the speed at which time is passing.  A position is both
+a point and a speed, which precisely defines a time within a timeline.
+
+"""^^lv2:Markdown .
+
+time:Rate
+	lv2:documentation """
+
+The rate of passage of time in terms of one unit with respect to another.
+
+"""^^lv2:Markdown .
+
+time:beat
+	lv2:documentation """
+
+This is not the beat within a bar like time:barBeat, but relative to the same
+origin as time:bar and monotonically increases unless the transport is
+repositioned.
+
+"""^^lv2:Markdown .
+
+time:beatUnit
+	lv2:documentation """
+
+Beat unit, the note value that counts as one beat.  This is the bottom number
+in a time signature: 2 for half note, 4 for quarter note, and so on.
+
+"""^^lv2:Markdown .
+
+time:speed
+	lv2:documentation """
+
+The rate of the progress of time as a fraction of normal speed.  For example, a
+rate of 0.0 is stopped, 1.0 is rolling at normal speed, 0.5 is rolling at half
+speed, -1.0 is reverse, and so on.
+
+"""^^lv2:Markdown .
+

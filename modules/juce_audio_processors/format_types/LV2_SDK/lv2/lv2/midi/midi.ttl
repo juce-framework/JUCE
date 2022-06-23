@@ -1,0 +1,366 @@
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix ev: <http://lv2plug.in/ns/ext/event#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix midi: <http://lv2plug.in/ns/ext/midi#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/midi>
+	a owl:Ontology ;
+	rdfs:label "LV2 MIDI" ;
+	rdfs:comment "A normalised definition of raw MIDI." ;
+	rdfs:seeAlso <midi.h> ,
+		<midi.meta.ttl> .
+
+midi:ActiveSense
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemRealtime ;
+	rdfs:label "Active Sense" ;
+	rdfs:comment "MIDI active sense message." ;
+	midi:status "FE"^^xsd:hexBinary .
+
+midi:Aftertouch
+	a rdfs:Class ;
+	rdfs:subClassOf midi:VoiceMessage ;
+	rdfs:label "Aftertouch" ;
+	rdfs:comment "MIDI aftertouch message." ;
+	midi:statusMask "A0"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ;
+		midi:property midi:noteNumber
+	] , [
+		midi:byteNumber 1 ;
+		midi:property midi:pressure
+	] .
+
+midi:Bender
+	a rdfs:Class ;
+	rdfs:subClassOf midi:VoiceMessage ;
+	rdfs:label "Bender" ;
+	rdfs:comment "MIDI bender message." ;
+	midi:statusMask "E0"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ,
+			1 ;
+		midi:property midi:benderValue
+	] .
+
+midi:ChannelPressure
+	a rdfs:Class ;
+	rdfs:subClassOf midi:VoiceMessage ;
+	rdfs:label "Channel Pressure" ;
+	rdfs:comment "MIDI channel pressure message." ;
+	midi:statusMask "D0"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ;
+		midi:property midi:pressure
+	] .
+
+midi:Chunk
+	a rdfs:Class ;
+	rdfs:label "Chunk" ;
+	rdfs:comment "A sequence of contiguous bytes in a MIDI message." .
+
+midi:Clock
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemRealtime ;
+	rdfs:label "Clock" ;
+	rdfs:comment "MIDI clock message." ;
+	midi:status "F8"^^xsd:hexBinary .
+
+midi:Continue
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemRealtime ;
+	rdfs:label "Continue" ;
+	rdfs:comment "MIDI continue message." ;
+	midi:status "FB"^^xsd:hexBinary .
+
+midi:Controller
+	a rdfs:Class ;
+	rdfs:subClassOf midi:VoiceMessage ;
+	rdfs:label "Controller" ;
+	rdfs:comment "MIDI controller change message." ;
+	midi:statusMask "B0"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ;
+		midi:property midi:controllerNumber
+	] , [
+		midi:byteNumber 1 ;
+		midi:property midi:controllerValue
+	] .
+
+midi:HexByte
+	a rdfs:Datatype ;
+	owl:onDatatype xsd:hexBinary ;
+	owl:withRestrictions (
+		[
+			xsd:maxInclusive "FF"
+		]
+	) ;
+	rdfs:label "Hex Byte" ;
+	rdfs:comment "A hexadecimal byte, which has a value <= FF." .
+
+midi:MidiEvent
+	a rdfs:Class ,
+		rdfs:Datatype ;
+	rdfs:subClassOf ev:Event ,
+		atom:Atom ;
+	owl:onDatatype xsd:hexBinary ;
+	rdfs:label "MIDI Message" ;
+	rdfs:comment "A single raw MIDI message." .
+
+midi:NoteOff
+	a rdfs:Class ;
+	rdfs:subClassOf midi:VoiceMessage ;
+	rdfs:label "Note Off" ;
+	rdfs:comment "MIDI note off message." ;
+	midi:statusMask "80"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ;
+		midi:property midi:noteNumber
+	] , [
+		midi:byteNumber 1 ;
+		midi:property midi:velocity
+	] .
+
+midi:NoteOn
+	a rdfs:Class ;
+	rdfs:subClassOf midi:VoiceMessage ;
+	rdfs:label "Note On" ;
+	rdfs:comment "MIDI note on message." ;
+	midi:statusMask "90"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ;
+		midi:property midi:noteNumber
+	] , [
+		midi:byteNumber 1 ;
+		midi:property midi:velocity
+	] .
+
+midi:ProgramChange
+	a rdfs:Class ;
+	rdfs:subClassOf midi:VoiceMessage ;
+	rdfs:label "Program Change" ;
+	rdfs:comment "MIDI program change message." ;
+	midi:statusMask "C0"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ;
+		midi:property midi:programNumber
+	] .
+
+midi:QuarterFrame
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemCommon ;
+	rdfs:label "Quarter Frame" ;
+	rdfs:comment "MIDI quarter frame message." ;
+	midi:status "F1"^^xsd:hexBinary .
+
+midi:Reset
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemRealtime ;
+	rdfs:label "Reset" ;
+	rdfs:comment "MIDI reset message." ;
+	midi:status "FF"^^xsd:hexBinary .
+
+midi:SongPosition
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemCommon ;
+	rdfs:label "Song Position" ;
+	rdfs:comment "MIDI song position pointer message." ;
+	midi:status "F2"^^xsd:hexBinary ;
+	midi:chunk [
+		midi:byteNumber 0 ,
+			1 ;
+		midi:property midi:songPosition
+	] .
+
+midi:SongSelect
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemCommon ;
+	rdfs:label "Song Select" ;
+	rdfs:comment "MIDI song select message." ;
+	midi:status "F3"^^xsd:hexBinary .
+
+midi:Start
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemRealtime ;
+	rdfs:label "Start" ;
+	rdfs:comment "MIDI start message." ;
+	midi:status "FA"^^xsd:hexBinary .
+
+midi:Stop
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemRealtime ;
+	rdfs:label "Stop" ;
+	rdfs:comment "MIDI stop message." ;
+	midi:status "FC"^^xsd:hexBinary .
+
+midi:SystemCommon
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemMessage ;
+	rdfs:label "System Common" ;
+	rdfs:comment "MIDI system common message." .
+
+midi:SystemExclusive
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemMessage ;
+	rdfs:label "System Exclusive" ;
+	rdfs:comment "MIDI system exclusive message." ;
+	midi:status "F0"^^xsd:hexBinary .
+
+midi:SystemMessage
+	a rdfs:Class ;
+	rdfs:subClassOf midi:MidiEvent ;
+	rdfs:label "System Message" ;
+	rdfs:comment "MIDI system message." ;
+	midi:statusMask "F0"^^xsd:hexBinary .
+
+midi:SystemRealtime
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemMessage ;
+	rdfs:label "System Realtime" ;
+	rdfs:comment "MIDI system realtime message." .
+
+midi:TuneRequest
+	a rdfs:Class ;
+	rdfs:subClassOf midi:SystemCommon ;
+	rdfs:label "Tune Request" ;
+	rdfs:comment "MIDI tune request message." ;
+	midi:status "F6"^^xsd:hexBinary .
+
+midi:VoiceMessage
+	a rdfs:Class ;
+	rdfs:subClassOf midi:MidiEvent ;
+	rdfs:label "Voice Message" ;
+	rdfs:comment "MIDI voice message." ;
+	midi:statusMask "F0"^^xsd:hexBinary .
+
+midi:benderValue
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "bender value" ;
+	rdfs:range xsd:short ;
+	rdfs:comment "MIDI pitch bender message (-8192 to 8192)." .
+
+midi:binding
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:range midi:MidiEvent ;
+	rdfs:label "binding" ;
+	rdfs:comment "The MIDI event to bind a parameter to." .
+
+midi:byteNumber
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:label "byte number" ;
+	rdfs:domain midi:Chunk ;
+	rdfs:range xsd:unsignedByte ;
+	rdfs:comment "The 0-based index of a byte which is part of this chunk." .
+
+midi:channel
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "MIDI channel" ;
+	rdfs:range xsd:unsignedByte ;
+	rdfs:comment "The channel number of a MIDI message." .
+
+midi:chunk
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:range midi:Chunk ;
+	rdfs:label "MIDI chunk" ;
+	rdfs:comment "A chunk of a MIDI message." .
+
+midi:controllerNumber
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "MIDI controller number" ;
+	rdfs:range xsd:byte ;
+	rdfs:comment "The numeric ID of a controller (0 to 127)." .
+
+midi:controllerValue
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "MIDI controller value" ;
+	rdfs:range xsd:byte ;
+	rdfs:comment "The value of a controller (0 to 127)." .
+
+midi:noteNumber
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "note number" ;
+	rdfs:range xsd:byte ;
+	rdfs:comment "The numeric ID of a note (0 to 127)." .
+
+midi:pressure
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "key pressure" ;
+	rdfs:range xsd:byte ;
+	rdfs:comment "Key pressure (0 to 127)." .
+
+midi:programNumber
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "program number" ;
+	rdfs:range xsd:byte ;
+	rdfs:comment "The numeric ID of a program (0 to 127)." .
+
+midi:property
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "property" ;
+	rdfs:domain midi:Chunk ;
+	rdfs:range rdf:Property ;
+	rdfs:comment "The property this chunk represents." .
+
+midi:songNumber
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "song number" ;
+	rdfs:range xsd:byte ;
+	rdfs:comment "The numeric ID of a song (0 to 127)." .
+
+midi:songPosition
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "song position" ;
+	rdfs:range xsd:short ;
+	rdfs:comment "Song position in MIDI beats (16th notes) (-8192 to 8192)." .
+
+midi:status
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "status byte" ;
+	rdfs:range midi:HexByte ;
+	rdfs:comment "The exact status byte for a message of this type." .
+
+midi:statusMask
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "status mask" ;
+	rdfs:range midi:HexByte ;
+	rdfs:comment "The status byte for a message of this type on channel 1." .
+
+midi:velocity
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "velocity" ;
+	rdfs:range midi:HexByte ;
+	rdfs:comment "The velocity of a note message (0 to 127)." .
+

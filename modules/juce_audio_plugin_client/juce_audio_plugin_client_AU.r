@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -48,23 +48,3 @@
 #define ENTRY_POINT     JucePlugin_AUExportPrefixQuoted "Entry"
 
 #include "AUResources.r"
-
-//==============================================================================
-// component resources for Audio Unit Carbon View
-
-#ifndef BUILD_AU_CARBON_UI
- #define BUILD_AU_CARBON_UI 1
-#endif
-
-#if BUILD_AU_CARBON_UI
- #define RES_ID         2000
- #define COMP_TYPE      kAudioUnitCarbonViewComponentType
- #define COMP_SUBTYPE   JucePlugin_AUSubType
- #define COMP_MANUF     JucePlugin_AUManufacturerCode
- #define VERSION        JucePlugin_VersionCode
- #define NAME           JucePlugin_Manufacturer ": " JucePlugin_Name " View"
- #define DESCRIPTION    NAME
- #define ENTRY_POINT    JucePlugin_AUExportPrefixQuoted "ViewEntry"
-
- #include "AUResources.r"
-#endif

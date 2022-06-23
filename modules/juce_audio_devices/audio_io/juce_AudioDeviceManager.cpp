@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -69,9 +69,14 @@ public:
     CallbackHandler (AudioDeviceManager& adm) noexcept  : owner (adm) {}
 
 private:
-    void audioDeviceIOCallback (const float** ins, int numIns, float** outs, int numOuts, int numSamples) override
+    void audioDeviceIOCallbackWithContext (const float** ins,
+                                           int numIns,
+                                           float** outs,
+                                           int numOuts,
+                                           int numSamples,
+                                           const AudioIODeviceCallbackContext& context) override
     {
-        owner.audioDeviceIOCallbackInt (ins, numIns, outs, numOuts, numSamples);
+        owner.audioDeviceIOCallbackInt (ins, numIns, outs, numOuts, numSamples, context);
     }
 
     void audioDeviceAboutToStart (AudioIODevice* device) override
@@ -900,7 +905,8 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
                                                    int numInputChannels,
                                                    float** outputChannelData,
                                                    int numOutputChannels,
-                                                   int numSamples)
+                                                   int numSamples,
+                                                   const AudioIODeviceCallbackContext& context)
 {
     const ScopedLock sl (audioCallbackLock);
 
@@ -912,15 +918,23 @@ void AudioDeviceManager::audioDeviceIOCallbackInt (const float** inputChannelDat
 
         tempBuffer.setSize (jmax (1, numOutputChannels), jmax (1, numSamples), false, false, true);
 
-        callbacks.getUnchecked(0)->audioDeviceIOCallback (inputChannelData, numInputChannels,
-                                                          outputChannelData, numOutputChannels, numSamples);
+        callbacks.getUnchecked(0)->audioDeviceIOCallbackWithContext (inputChannelData,
+                                                                     numInputChannels,
+                                                                     outputChannelData,
+                                                                     numOutputChannels,
+                                                                     numSamples,
+                                                                     context);
 
         auto** tempChans = tempBuffer.getArrayOfWritePointers();
 
         for (int i = callbacks.size(); --i > 0;)
         {
-            callbacks.getUnchecked(i)->audioDeviceIOCallback (inputChannelData, numInputChannels,
-                                                              tempChans, numOutputChannels, numSamples);
+            callbacks.getUnchecked(i)->audioDeviceIOCallbackWithContext (inputChannelData,
+                                                                         numInputChannels,
+                                                                         tempChans,
+                                                                         numOutputChannels,
+                                                                         numSamples,
+                                                                         context);
 
             for (int chan = 0; chan < numOutputChannels; ++chan)
             {
@@ -1074,6 +1088,7 @@ void AudioDeviceManager::setDefaultMidiOutputDevice (const String& identifier)
 {
     if (defaultMidiOutputDeviceInfo.identifier != identifier)
     {
+        std::unique_ptr<MidiOutput> oldMidiPort;
         Array<AudioIODeviceCallback*> oldCallbacks;
 
         {
@@ -1085,7 +1100,7 @@ void AudioDeviceManager::setDefaultMidiOutputDevice (const String& identifier)
             for (int i = oldCallbacks.size(); --i >= 0;)
                 oldCallbacks.getUnchecked (i)->audioDeviceStopped();
 
-        defaultMidiOutput.reset();
+        std::swap (oldMidiPort, defaultMidiOutput);
 
         if (identifier.isNotEmpty())
             defaultMidiOutput = MidiOutput::openDevice (identifier);
@@ -1105,7 +1120,7 @@ void AudioDeviceManager::setDefaultMidiOutputDevice (const String& identifier)
         }
 
         updateXml();
-        sendChangeMessage();
+        sendSynchronousChangeMessage();
     }
 }
 

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,13 +27,46 @@ namespace juce
 {
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  METHOD (getSku,               "getSku",               "()Ljava/lang/String;") \
-  METHOD (getTitle,             "getTitle",             "()Ljava/lang/String;") \
-  METHOD (getDescription,       "getDescription",       "()Ljava/lang/String;") \
-  METHOD (getPrice,             "getPrice",             "()Ljava/lang/String;") \
-  METHOD (getPriceCurrencyCode, "getPriceCurrencyCode", "()Ljava/lang/String;")
+  METHOD (getProductId,                     "getProductId",                         "()Ljava/lang/String;") \
+  METHOD (getTitle,                         "getTitle",                             "()Ljava/lang/String;") \
+  METHOD (getDescription,                   "getDescription",                       "()Ljava/lang/String;") \
+  METHOD (getOneTimePurchaseOfferDetails,   "getOneTimePurchaseOfferDetails",       "()Lcom/android/billingclient/api/ProductDetails$OneTimePurchaseOfferDetails;") \
+  METHOD (getSubscriptionOfferDetails,      "getSubscriptionOfferDetails",          "()Ljava/util/List;")
 
-DECLARE_JNI_CLASS (SkuDetails, "com/android/billingclient/api/SkuDetails")
+DECLARE_JNI_CLASS (ProductDetails, "com/android/billingclient/api/ProductDetails")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (getFormattedPrice,                "getFormattedPrice",                    "()Ljava/lang/String;") \
+  METHOD (getPriceCurrencyCode,             "getPriceCurrencyCode",                 "()Ljava/lang/String;")
+
+DECLARE_JNI_CLASS (OneTimePurchaseOfferDetails, "com/android/billingclient/api/ProductDetails$OneTimePurchaseOfferDetails")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (getFormattedPrice,                "getFormattedPrice",                    "()Ljava/lang/String;") \
+  METHOD (getPriceCurrencyCode,             "getPriceCurrencyCode",                 "()Ljava/lang/String;")
+
+DECLARE_JNI_CLASS (PricingPhase, "com/android/billingclient/api/ProductDetails$PricingPhase")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (getOfferToken,                "getOfferToken",                    "()Ljava/lang/String;") \
+  METHOD (getPricingPhases,             "getPricingPhases",                 "()Lcom/android/billingclient/api/ProductDetails$PricingPhases;")
+
+DECLARE_JNI_CLASS (SubscriptionOfferDetails, "com/android/billingclient/api/ProductDetails$SubscriptionOfferDetails")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (getPricingPhaseList,             "getPricingPhaseList",                 "()Ljava/util/List;")
+
+DECLARE_JNI_CLASS (PricingPhases, "com/android/billingclient/api/ProductDetails$PricingPhases")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  STATICMETHOD (newBuilder, "newBuilder", "()Lcom/android/billingclient/api/BillingFlowParams$ProductDetailsParams$Builder;")
+
+DECLARE_JNI_CLASS (BillingFlowParamsProductDetailsParams, "com/android/billingclient/api/BillingFlowParams$ProductDetailsParams")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -43,33 +76,81 @@ DECLARE_JNI_CLASS (BillingFlowParams, "com/android/billingclient/api/BillingFlow
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-  METHOD (build,                       "build",                       "()Lcom/android/billingclient/api/BillingFlowParams;")                                             \
-  METHOD (setOldSku,                   "setOldSku",                   "(Ljava/lang/String;Ljava/lang/String;)Lcom/android/billingclient/api/BillingFlowParams$Builder;") \
-  METHOD (setReplaceSkusProrationMode, "setReplaceSkusProrationMode", "(I)Lcom/android/billingclient/api/BillingFlowParams$Builder;")                                    \
-  METHOD (setSkuDetails,               "setSkuDetails",               "(Lcom/android/billingclient/api/SkuDetails;)Lcom/android/billingclient/api/BillingFlowParams$Builder;")
+  STATICMETHOD (newBuilder, "newBuilder", "()Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder;")
+
+DECLARE_JNI_CLASS (BillingFlowParamsSubscriptionUpdateParams, "com/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (build,                       "build",                       "()Lcom/android/billingclient/api/BillingFlowParams;") \
+  METHOD (setSubscriptionUpdateParams, "setSubscriptionUpdateParams", "(Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams;)Lcom/android/billingclient/api/BillingFlowParams$Builder;") \
+  METHOD (setProductDetailsParamsList, "setProductDetailsParamsList", "(Ljava/util/List;)Lcom/android/billingclient/api/BillingFlowParams$Builder;")
 
 DECLARE_JNI_CLASS (BillingFlowParamsBuilder, "com/android/billingclient/api/BillingFlowParams$Builder")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (build,                       "build",                       "()Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams;") \
+  METHOD (setOldPurchaseToken,         "setOldPurchaseToken",         "(Ljava/lang/String;)Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder;") \
+  METHOD (setReplaceProrationMode,     "setReplaceProrationMode",     "(I)Lcom/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder;")
+
+DECLARE_JNI_CLASS (BillingFlowParamsSubscriptionUpdateParamsBuilder, "com/android/billingclient/api/BillingFlowParams$SubscriptionUpdateParams$Builder")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (build,                       "build",                       "()Lcom/android/billingclient/api/BillingFlowParams$ProductDetailsParams;") \
+  METHOD (setOfferToken,               "setOfferToken",               "(Ljava/lang/String;)Lcom/android/billingclient/api/BillingFlowParams$ProductDetailsParams$Builder;") \
+  METHOD (setProductDetails,           "setProductDetails",           "(Lcom/android/billingclient/api/ProductDetails;)Lcom/android/billingclient/api/BillingFlowParams$ProductDetailsParams$Builder;")
+
+DECLARE_JNI_CLASS (BillingFlowParamsProductDetailsParamsBuilder, "com/android/billingclient/api/BillingFlowParams$ProductDetailsParams$Builder")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (getOrderId,       "getOrderId",       "()Ljava/lang/String;") \
-  METHOD (getSku,           "getSku",           "()Ljava/lang/String;") \
+  METHOD (getPurchaseState, "getPurchaseState", "()I") \
+  METHOD (getProducts,      "getProducts",      "()Ljava/util/List;") \
   METHOD (getPackageName,   "getPackageName",   "()Ljava/lang/String;") \
-  METHOD (getPurchaseTime,  "getPurchaseTime",  "()J")                  \
+  METHOD (getPurchaseTime,  "getPurchaseTime",  "()J") \
   METHOD (getPurchaseToken, "getPurchaseToken", "()Ljava/lang/String;")
 
 DECLARE_JNI_CLASS (AndroidPurchase, "com/android/billingclient/api/Purchase")
 #undef JNI_CLASS_MEMBERS
+
+template <typename Fn>
+static void callOnMainThread (Fn&& fn)
+{
+    if (MessageManager::getInstance()->isThisTheMessageThread())
+        fn();
+    else
+        MessageManager::callAsync (std::forward<Fn> (fn));
+}
+
+inline StringArray javaListOfStringToJuceStringArray (const LocalRef<jobject>& javaArray)
+{
+    if (javaArray.get() == nullptr)
+        return {};
+
+    auto* env = getEnv();
+
+    StringArray result;
+
+    const auto size = env->CallIntMethod (javaArray, JavaList.size);
+
+    for (int i = 0; i < size; ++i)
+        result.add (juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (javaArray, JavaList.get, i) }.get()));
+
+    return result;
+}
 
 //==============================================================================
 struct InAppPurchases::Pimpl
 {
     Pimpl (InAppPurchases& parent)
         : owner (parent),
-          billingClient (LocalRef<jobject> (getEnv()->NewObject (JuceBillingClient,
-                                                                 JuceBillingClient.constructor,
-                                                                 getAppContext().get(),
-                                                                 (jlong) this)))
+          billingClient (LocalRef<jobject> { getEnv()->NewObject (JuceBillingClient,
+                                                                  JuceBillingClient.constructor,
+                                                                  getAppContext().get(),
+                                                                  (jlong) this) })
     {
     }
 
@@ -86,46 +167,52 @@ struct InAppPurchases::Pimpl
 
     void getProductsInformation (const StringArray& productIdentifiers)
     {
-        skuDetailsQueryCallbackQueue.emplace ([this] (LocalRef<jobject> skuDetailsList)
+        productDetailsQueryCallbackQueue.emplace ([this] (LocalRef<jobject> productDetailsList)
         {
-            if (skuDetailsList != nullptr)
+            if (productDetailsList != nullptr)
             {
                 auto* env = getEnv();
                 Array<InAppPurchases::Product> products;
 
-                for (int i = 0; i < env->CallIntMethod (skuDetailsList, JavaList.size); ++i)
-                    products.add (buildProduct (LocalRef<jobject> (env->CallObjectMethod (skuDetailsList, JavaList.get, i))));
+                for (int i = 0; i < env->CallIntMethod (productDetailsList, JavaList.size); ++i)
+                    products.add (buildProduct (LocalRef<jobject> { env->CallObjectMethod (productDetailsList, JavaList.get, i) }));
 
-                owner.listeners.call ([&] (Listener& l) { l.productsInfoReturned (products); });
+                callMemberOnMainThread ([this, products]
+                {
+                    owner.listeners.call ([&] (Listener& l) { l.productsInfoReturned (products); });
+                });
             }
         });
 
-        querySkuDetailsAsync (convertToLowerCase (productIdentifiers));
+        queryProductDetailsAsync (convertToLowerCase (productIdentifiers));
     }
 
     void purchaseProduct (const String& productIdentifier,
                           const String& subscriptionIdentifier,
                           bool creditForUnusedSubscription)
     {
-        skuDetailsQueryCallbackQueue.emplace ([=] (LocalRef<jobject> skuDetailsList)
+        productDetailsQueryCallbackQueue.emplace ([=] (LocalRef<jobject> productDetailsList)
         {
-            if (skuDetailsList != nullptr)
+            if (productDetailsList != nullptr)
             {
                 auto* env = getEnv();
 
-                if (env->CallIntMethod (skuDetailsList, JavaList.size) > 0)
+                if (env->CallIntMethod (productDetailsList, JavaList.size) > 0)
                 {
-                    LocalRef<jobject> skuDetails (env->CallObjectMethod (skuDetailsList, JavaList.get, 0));
+                    GlobalRef productDetails (LocalRef<jobject> { env->CallObjectMethod (productDetailsList, JavaList.get, 0) });
 
-                    if (subscriptionIdentifier.isNotEmpty())
-                        changeExistingSubscription (skuDetails, subscriptionIdentifier, creditForUnusedSubscription);
-                    else
-                        purchaseProductWithSkuDetails (skuDetails);
+                    callMemberOnMainThread ([this, productDetails, subscriptionIdentifier, creditForUnusedSubscription]
+                    {
+                        if (subscriptionIdentifier.isNotEmpty())
+                            changeExistingSubscription (productDetails, subscriptionIdentifier, creditForUnusedSubscription);
+                        else
+                            purchaseProductWithProductDetails (productDetails);
+                    });
                 }
             }
         });
 
-        querySkuDetailsAsync (convertToLowerCase ({ productIdentifier }));
+        queryProductDetailsAsync (convertToLowerCase ({ productIdentifier }));
     }
 
     void restoreProductsBoughtList (bool, const juce::String&)
@@ -139,15 +226,21 @@ struct InAppPurchases::Pimpl
 
                 for (int i = 0; i < env->CallIntMethod (purchasesList, JavaArrayList.size); ++i)
                 {
-                    LocalRef<jobject> purchase (env->CallObjectMethod (purchasesList, JavaArrayList.get, i));
+                    const LocalRef<jobject> purchase { env->CallObjectMethod (purchasesList, JavaArrayList.get, i) };
                     purchases.add ({ buildPurchase (purchase), {} });
                 }
 
-                owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success")); });
+                callMemberOnMainThread ([this, purchases]
+                {
+                        owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored (purchases, true, NEEDS_TRANS ("Success")); });
+                });
             }
             else
             {
-                owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Failure")); });
+                callMemberOnMainThread ([this]
+                {
+                    owner.listeners.call ([&] (Listener& l) { l.purchasesListRestored ({}, false, NEEDS_TRANS ("Failure")); });
+                });
             }
         });
 
@@ -158,17 +251,17 @@ struct InAppPurchases::Pimpl
     {
         if (purchaseToken.isEmpty())
         {
-            skuDetailsQueryCallbackQueue.emplace ([=] (LocalRef<jobject> skuDetailsList)
+            productDetailsQueryCallbackQueue.emplace ([=] (LocalRef<jobject> productDetailsList)
             {
-                if (skuDetailsList != nullptr)
+                if (productDetailsList != nullptr)
                 {
                     auto* env = getEnv();
 
-                    if (env->CallIntMethod (skuDetailsList, JavaList.size) > 0)
+                    if (env->CallIntMethod (productDetailsList, JavaList.size) > 0)
                     {
-                        LocalRef<jobject> sku (env->CallObjectMethod (skuDetailsList, JavaList.get, 0));
+                        const LocalRef<jobject> product { env->CallObjectMethod (productDetailsList, JavaList.get, 0) };
 
-                        auto token = juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (sku, AndroidPurchase.getSku)));
+                        auto token = juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (product, ProductDetails.getProductId) });
 
                         if (token.isNotEmpty())
                         {
@@ -178,10 +271,13 @@ struct InAppPurchases::Pimpl
                     }
                 }
 
-                notifyListenersAboutConsume (productIdentifier, false, NEEDS_TRANS ("Item unavailable"));
+                callMemberOnMainThread ([this, productIdentifier]
+                {
+                    notifyListenersAboutConsume (productIdentifier, false, NEEDS_TRANS ("Item unavailable"));
+                });
             });
 
-            querySkuDetailsAsync (convertToLowerCase ({ productIdentifier }));
+            queryProductDetailsAsync (convertToLowerCase ({ productIdentifier }));
         }
 
         consumePurchaseWithToken (productIdentifier, purchaseToken);
@@ -218,27 +314,27 @@ struct InAppPurchases::Pimpl
 
 private:
     #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-      METHOD (constructor,                  "<init>",                     "(Landroid/content/Context;J)V")                                              \
-      METHOD (endConnection,                "endConnection",              "()V")                                                                        \
-      METHOD (isReady,                      "isReady",                    "()Z")                                                                        \
-      METHOD (isBillingSupported,           "isBillingSupported",         "()Z")                                                                        \
-      METHOD (querySkuDetails,              "querySkuDetails",            "([Ljava/lang/String;)V")                                                     \
-      METHOD (launchBillingFlow,            "launchBillingFlow",          "(Landroid/app/Activity;Lcom/android/billingclient/api/BillingFlowParams;)V") \
-      METHOD (queryPurchases,               "queryPurchases",             "()V")                                                                        \
-      METHOD (consumePurchase,              "consumePurchase",            "(Ljava/lang/String;Ljava/lang/String;)V")                                    \
-                                                                                                                                                        \
-      CALLBACK (skuDetailsQueryCallback,    "skuDetailsQueryCallback",    "(JLjava/util/List;)V")                                                       \
-      CALLBACK (purchasesListQueryCallback, "purchasesListQueryCallback", "(JLjava/util/List;)V")                                                       \
-      CALLBACK (purchaseCompletedCallback,  "purchaseCompletedCallback",  "(JLcom/android/billingclient/api/Purchase;I)V")                              \
-      CALLBACK (purchaseConsumedCallback,   "purchaseConsumedCallback",   "(JLjava/lang/String;I)V")
+      METHOD (constructor,                   "<init>",                      "(Landroid/content/Context;J)V")                                              \
+      METHOD (endConnection,                 "endConnection",               "()V")                                                                        \
+      METHOD (isReady,                       "isReady",                     "()Z")                                                                        \
+      METHOD (isBillingSupported,            "isBillingSupported",          "()Z")                                                                        \
+      METHOD (queryProductDetails,           "queryProductDetails",         "([Ljava/lang/String;)V")                                                     \
+      METHOD (launchBillingFlow,             "launchBillingFlow",           "(Landroid/app/Activity;Lcom/android/billingclient/api/BillingFlowParams;)V") \
+      METHOD (queryPurchases,                "queryPurchases",              "()V")                                                                        \
+      METHOD (consumePurchase,               "consumePurchase",             "(Ljava/lang/String;Ljava/lang/String;)V")                                    \
+                                                                                                                                                          \
+      CALLBACK (productDetailsQueryCallback, "productDetailsQueryCallback", "(JLjava/util/List;)V")                                                       \
+      CALLBACK (purchasesListQueryCallback,  "purchasesListQueryCallback",  "(JLjava/util/List;)V")                                                       \
+      CALLBACK (purchaseCompletedCallback,   "purchaseCompletedCallback",   "(JLcom/android/billingclient/api/Purchase;I)V")                              \
+      CALLBACK (purchaseConsumedCallback,    "purchaseConsumedCallback",    "(JLjava/lang/String;I)V")
 
     DECLARE_JNI_CLASS (JuceBillingClient, "com/rmsl/juce/JuceBillingClient")
     #undef JNI_CLASS_MEMBERS
 
-    static void JNICALL skuDetailsQueryCallback (JNIEnv*, jobject, jlong host, jobject skuDetailsList)
+    static void JNICALL productDetailsQueryCallback (JNIEnv*, jobject, jlong host, jobject productDetailsList)
     {
         if (auto* myself = reinterpret_cast<Pimpl*> (host))
-            myself->updateSkuDetails (skuDetailsList);
+            myself->updateProductDetails (productDetailsList);
     }
 
     static void JNICALL purchasesListQueryCallback (JNIEnv*, jobject, jlong host, jobject purchasesList)
@@ -289,7 +385,7 @@ private:
         return lowerCase;
     }
 
-    void querySkuDetailsAsync (const StringArray& productIdentifiers)
+    void queryProductDetailsAsync (const StringArray& productIdentifiers)
     {
         Thread::launch ([=]
         {
@@ -299,7 +395,7 @@ private:
             MessageManager::callAsync ([=]
             {
                 getEnv()->CallVoidMethod (billingClient,
-                                          JuceBillingClient.querySkuDetails,
+                                          JuceBillingClient.queryProductDetails,
                                           juceStringArrayToJava (productIdentifiers).get());
             });
         });
@@ -331,23 +427,15 @@ private:
         owner.listeners.call ([&] (Listener& l) { l.productConsumed (productIdentifier, success, statusDescription); });
     }
 
-    LocalRef<jobject> createBillingFlowParamsBuilder (LocalRef<jobject> skuDetails)
-    {
-        auto* env = getEnv();
-
-        auto builder = LocalRef<jobject> (env->CallStaticObjectMethod (BillingFlowParams, BillingFlowParams.newBuilder));
-
-        return LocalRef<jobject> (env->CallObjectMethod (builder.get(),
-                                  BillingFlowParamsBuilder.setSkuDetails,
-                                  skuDetails.get()));
-    }
-
     void launchBillingFlowWithParameters (LocalRef<jobject> params)
     {
-        LocalRef<jobject> activity (getCurrentActivity());
+        const auto activity = []
+        {
+            if (auto current = getCurrentActivity())
+                return current;
 
-        if (activity == nullptr)
-            activity = getMainActivity();
+            return getMainActivity();
+        }();
 
         getEnv()->CallVoidMethod (billingClient,
                                   JuceBillingClient.launchBillingFlow,
@@ -355,7 +443,7 @@ private:
                                   params.get());
     }
 
-    void changeExistingSubscription (LocalRef<jobject> skuDetails, const String& subscriptionIdentifier, bool creditForUnusedSubscription)
+    void changeExistingSubscription (GlobalRef productDetails, const String& subscriptionIdentifier, bool creditForUnusedSubscription)
     {
         if (! isReady())
         {
@@ -371,35 +459,47 @@ private:
 
                 for (int i = 0; i < env->CallIntMethod (purchasesList, JavaArrayList.size); ++i)
                 {
-                    auto purchase = buildPurchase (LocalRef<jobject> (env->CallObjectMethod (purchasesList.get(), JavaArrayList.get, i)));
+                    auto purchase = buildPurchase (LocalRef<jobject> { env->CallObjectMethod (purchasesList.get(), JavaArrayList.get, i) });
 
-                    if (purchase.productId == subscriptionIdentifier)
+                    if (purchase.productIds.contains (subscriptionIdentifier))
                     {
-                        auto builder = createBillingFlowParamsBuilder (skuDetails);
-
-                        builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(),
-                                                                            BillingFlowParamsBuilder.setOldSku,
-                                                                            javaString (subscriptionIdentifier).get(),
-                                                                            javaString (purchase.purchaseToken).get()));
+                        const LocalRef<jobject> subscriptionBuilder { getEnv()->CallStaticObjectMethod (BillingFlowParamsSubscriptionUpdateParams,
+                                                                                                        BillingFlowParamsSubscriptionUpdateParams.newBuilder) };
+                        env->CallObjectMethod (subscriptionBuilder.get(),
+                                               BillingFlowParamsSubscriptionUpdateParamsBuilder.setOldPurchaseToken,
+                                               javaString (purchase.purchaseToken).get());
 
                         if (! creditForUnusedSubscription)
-                            builder = LocalRef<jobject> (env->CallObjectMethod (builder.get(),
-                                                                                BillingFlowParamsBuilder.setReplaceSkusProrationMode,
-                                                                                3 /*IMMEDIATE_WITHOUT_PRORATION*/));
+                        {
+                            env->CallObjectMethod (subscriptionBuilder.get(),
+                                                   BillingFlowParamsSubscriptionUpdateParamsBuilder.setReplaceProrationMode,
+                                                   3 /*IMMEDIATE_WITHOUT_PRORATION*/);
+                        }
 
-                        launchBillingFlowWithParameters (LocalRef<jobject> (env->CallObjectMethod (builder.get(),
-                                                                                                   BillingFlowParamsBuilder.build)));
+                        const LocalRef<jobject> subscriptionParams { env->CallObjectMethod (subscriptionBuilder.get(),
+                                                                                            BillingFlowParamsSubscriptionUpdateParamsBuilder.build) };
+
+                        const LocalRef<jobject> builder { env->CallStaticObjectMethod (BillingFlowParams, BillingFlowParams.newBuilder) };
+                        env->CallObjectMethod (builder.get(),
+                                               BillingFlowParamsBuilder.setSubscriptionUpdateParams,
+                                               subscriptionParams.get());
+                        const LocalRef<jobject> params { env->CallObjectMethod (builder.get(), BillingFlowParamsBuilder.build) };
+
+                        launchBillingFlowWithParameters (params);
                     }
                 }
             }
 
-            notifyListenersAboutPurchase ({}, false, NEEDS_TRANS ("Unable to get subscription details"));
+            callMemberOnMainThread ([this]
+            {
+                notifyListenersAboutPurchase ({}, false, NEEDS_TRANS ("Unable to get subscription details"));
+            });
         });
 
         getProductsBoughtAsync();
     }
 
-    void purchaseProductWithSkuDetails (LocalRef<jobject> skuDetails)
+    void purchaseProductWithProductDetails (GlobalRef productDetails)
     {
         if (! isReady())
         {
@@ -407,22 +507,48 @@ private:
             return;
         }
 
-        launchBillingFlowWithParameters (LocalRef<jobject> (getEnv()->CallObjectMethod (createBillingFlowParamsBuilder (skuDetails).get(),
-                                                                                        BillingFlowParamsBuilder.build)));
+        auto* env = getEnv();
+        const LocalRef<jobject> billingFlowParamsProductDetailsParamsBuilder { env->CallStaticObjectMethod (BillingFlowParamsProductDetailsParams, BillingFlowParamsProductDetailsParams.newBuilder) };
+        env->CallObjectMethod (billingFlowParamsProductDetailsParamsBuilder, BillingFlowParamsProductDetailsParamsBuilder.setProductDetails, productDetails.get());
+
+        if (const LocalRef<jobject> subscriptionDetailsList { env->CallObjectMethod (productDetails, ProductDetails.getSubscriptionOfferDetails) })
+        {
+            if (env->CallIntMethod (subscriptionDetailsList, JavaList.size) > 0)
+            {
+                const LocalRef<jobject> subscriptionDetails { env->CallObjectMethod (subscriptionDetailsList, JavaList.get, 0) };
+                const LocalRef<jobject> offerToken { env->CallObjectMethod (subscriptionDetails, SubscriptionOfferDetails.getOfferToken) };
+                env->CallObjectMethod (billingFlowParamsProductDetailsParamsBuilder, BillingFlowParamsProductDetailsParamsBuilder.setOfferToken, offerToken.get());
+            }
+        }
+
+        const LocalRef<jobject> billingFlowParamsProductDetailsParams { env->CallObjectMethod (billingFlowParamsProductDetailsParamsBuilder, BillingFlowParamsProductDetailsParamsBuilder.build) };
+
+        const LocalRef<jobject> list { env->NewObject (JavaArrayList, JavaArrayList.constructor, 0) };
+        env->CallBooleanMethod (list, JavaArrayList.add, billingFlowParamsProductDetailsParams.get());
+
+        const LocalRef<jobject> billingFlowParamsBuilder { env->CallStaticObjectMethod (BillingFlowParams, BillingFlowParams.newBuilder) };
+        env->CallObjectMethod (billingFlowParamsBuilder, BillingFlowParamsBuilder.setProductDetailsParamsList, list.get());
+        const LocalRef<jobject> params { env->CallObjectMethod (billingFlowParamsBuilder, BillingFlowParamsBuilder.build) };
+
+        launchBillingFlowWithParameters (params);
     }
 
     void consumePurchaseWithToken (const String& productIdentifier, const String& purchaseToken)
     {
         if (! isReady())
         {
-            notifyListenersAboutConsume (productIdentifier, false, NEEDS_TRANS ("In-App purchases unavailable"));
+            callMemberOnMainThread ([this, productIdentifier]
+            {
+                notifyListenersAboutConsume (productIdentifier, false, NEEDS_TRANS ("In-App purchases unavailable"));
+            });
+
             return;
         }
 
         getEnv()->CallObjectMethod (billingClient,
                                     JuceBillingClient.consumePurchase,
-                                    LocalRef<jstring> (javaString (productIdentifier)).get(),
-                                    LocalRef<jstring> (javaString (purchaseToken)).get());
+                                    LocalRef<jstring> { javaString (productIdentifier) }.get(),
+                                    LocalRef<jstring> { javaString (purchaseToken) }.get());
     }
 
     //==============================================================================
@@ -433,25 +559,59 @@ private:
 
         auto* env = getEnv();
 
-        return { juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (purchase, AndroidPurchase.getOrderId))),
-                 juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (purchase, AndroidPurchase.getSku))),
-                 juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (purchase, AndroidPurchase.getPackageName))),
+        if (env->CallIntMethod(purchase, AndroidPurchase.getPurchaseState) != 1 /* PURCHASED */)
+            return {};
+
+        return { juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (purchase, AndroidPurchase.getOrderId) }),
+                 javaListOfStringToJuceStringArray (LocalRef<jobject> { env->CallObjectMethod (purchase, AndroidPurchase.getProducts) }),
+                 juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (purchase, AndroidPurchase.getPackageName) }),
                  Time (env->CallLongMethod (purchase, AndroidPurchase.getPurchaseTime)).toString (true, true, true, true),
-                 juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (purchase, AndroidPurchase.getPurchaseToken))) };
+                 juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (purchase, AndroidPurchase.getPurchaseToken) }) };
     }
 
-    static InAppPurchases::Product buildProduct (LocalRef<jobject> productSkuDetails)
+    static InAppPurchases::Product buildProduct (LocalRef<jobject> productDetails)
     {
-        if (productSkuDetails == nullptr)
+        if (productDetails == nullptr)
             return {};
 
         auto* env = getEnv();
 
-        return { juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (productSkuDetails, SkuDetails.getSku))),
-                 juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (productSkuDetails, SkuDetails.getTitle))),
-                 juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (productSkuDetails, SkuDetails.getDescription))),
-                 juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (productSkuDetails, SkuDetails.getPrice))),
-                 juceString (LocalRef<jstring> ((jstring) env->CallObjectMethod (productSkuDetails, SkuDetails.getPriceCurrencyCode))) };
+        if (LocalRef<jobject> oneTimePurchase { env->CallObjectMethod (productDetails, ProductDetails.getOneTimePurchaseOfferDetails) })
+        {
+            return { juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (productDetails, ProductDetails.getProductId) }),
+                     juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (productDetails, ProductDetails.getTitle) }),
+                     juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (productDetails, ProductDetails.getDescription) }),
+                     juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (oneTimePurchase, OneTimePurchaseOfferDetails.getFormattedPrice) }),
+                     juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (oneTimePurchase, OneTimePurchaseOfferDetails.getPriceCurrencyCode) }) };
+        }
+
+        LocalRef<jobject> subscription { env->CallObjectMethod (productDetails, ProductDetails.getSubscriptionOfferDetails) };
+
+        if (env->CallIntMethod (subscription, JavaList.size) == 0)
+            return {};
+
+        // We can only return a single subscription price for this subscription,
+        // but the subscription has more than one pricing scheme.
+        jassert (env->CallIntMethod (subscription, JavaList.size) == 1);
+
+        const LocalRef<jobject> offerDetails { env->CallObjectMethod (subscription, JavaList.get, 0) };
+        const LocalRef<jobject> pricingPhases { env->CallObjectMethod (offerDetails, SubscriptionOfferDetails.getPricingPhases) };
+        const LocalRef<jobject> phaseList { env->CallObjectMethod (pricingPhases, PricingPhases.getPricingPhaseList) };
+
+        if (env->CallIntMethod (phaseList, JavaList.size) == 0)
+            return {};
+
+        // We can only return a single subscription price for this subscription,
+        // but the pricing scheme for this subscription has more than one phase.
+        jassert (env->CallIntMethod (phaseList, JavaList.size) == 1);
+
+        const LocalRef<jobject> phase { env->CallObjectMethod (phaseList, JavaList.get, 0) };
+
+        return { juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (productDetails, ProductDetails.getProductId) }),
+                 juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (productDetails, ProductDetails.getTitle) }),
+                 juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (productDetails, ProductDetails.getDescription) }),
+                 juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (phase, PricingPhase.getFormattedPrice) }),
+                 juceString (LocalRef<jstring> { (jstring) env->CallObjectMethod (phase, PricingPhase.getPriceCurrencyCode) }) };
     }
 
     static String getStatusDescriptionFromResponseCode (int responseCode)
@@ -478,29 +638,29 @@ private:
 
     void purchaseCompleted (jobject purchase, int responseCode)
     {
-        notifyListenersAboutPurchase (buildPurchase (LocalRef<jobject> (purchase)),
+        notifyListenersAboutPurchase (buildPurchase (LocalRef<jobject> { purchase }),
                                       wasSuccessful (responseCode),
                                       getStatusDescriptionFromResponseCode (responseCode));
     }
 
     void purchaseConsumed (jstring productIdentifier, int responseCode)
     {
-        notifyListenersAboutConsume (juceString (LocalRef<jstring> (productIdentifier)),
+        notifyListenersAboutConsume (juceString (LocalRef<jstring> { productIdentifier }),
                                      wasSuccessful (responseCode),
                                      getStatusDescriptionFromResponseCode (responseCode));
     }
 
-    void updateSkuDetails (jobject skuDetailsList)
+    void updateProductDetails (jobject productDetailsList)
     {
-        jassert (! skuDetailsQueryCallbackQueue.empty());
-        skuDetailsQueryCallbackQueue.front() (LocalRef<jobject> (skuDetailsList));
-        skuDetailsQueryCallbackQueue.pop();
+        jassert (! productDetailsQueryCallbackQueue.empty());
+        productDetailsQueryCallbackQueue.front() (LocalRef<jobject> { productDetailsList });
+        productDetailsQueryCallbackQueue.pop();
     }
 
     void updatePurchasesList (jobject purchasesList)
     {
         jassert (! purchasesListQueryCallbackQueue.empty());
-        purchasesListQueryCallbackQueue.front() (LocalRef<jobject> (purchasesList));
+        purchasesListQueryCallbackQueue.front() (LocalRef<jobject> { purchasesList });
         purchasesListQueryCallbackQueue.pop();
     }
 
@@ -508,12 +668,31 @@ private:
     InAppPurchases& owner;
     GlobalRef billingClient;
 
-    std::queue<std::function<void (LocalRef<jobject>)>> skuDetailsQueryCallbackQueue,
+    std::queue<std::function<void (LocalRef<jobject>)>> productDetailsQueryCallbackQueue,
                                                         purchasesListQueryCallbackQueue;
 
     //==============================================================================
+    void callMemberOnMainThread (std::function<void()> callback)
+    {
+        callOnMainThread ([ref = WeakReference<Pimpl> (this), callback]
+        {
+            if (ref != nullptr)
+                callback();
+        });
+    }
+
+    //==============================================================================
+    JUCE_DECLARE_WEAK_REFERENCEABLE(Pimpl)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Pimpl)
 };
+
+void juce_handleOnResume()
+{
+    callOnMainThread ([]
+    {
+        InAppPurchases::getInstance()->restoreProductsBoughtList (false);
+    });
+}
 
 
 InAppPurchases::Pimpl::JuceBillingClient_Class InAppPurchases::Pimpl::JuceBillingClient;

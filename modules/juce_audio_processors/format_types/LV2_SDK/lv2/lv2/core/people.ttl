@@ -1,0 +1,51 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix meta: <http://lv2plug.in/ns/meta#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://drobilla.net/drobilla#me>
+	a foaf:Person ;
+	foaf:name "David Robillard" ;
+	foaf:mbox <mailto:d@drobilla.net> ;
+	rdfs:seeAlso <http://drobilla.net/drobilla> .
+
+<http://plugin.org.uk/swh.xrdf#me>
+	a foaf:Person ;
+	foaf:name "Steve Harris" ;
+	foaf:mbox <mailto:steve@plugin.org.uk> ;
+	rdfs:seeAlso <http://plugin.org.uk/swh.xrdf> .
+
+meta:larsl
+	a foaf:Person ;
+	foaf:name "Lars Luthman" ;
+	foaf:mbox <mailto:lars.luthman@gmail.com> .
+
+meta:gabrbedd
+	a foaf:Person ;
+	foaf:name "Gabriel M. Beddingfield" ;
+	foaf:mbox <mailto:gabrbedd@gmail.com> .
+
+meta:daste
+	a foaf:Person ;
+	foaf:name """Stefano D'Angelo""" ;
+	foaf:mbox <mailto:zanga.mail@gmail.com> .
+
+meta:kfoltman
+	a foaf:Person ;
+	foaf:name "Krzysztof Foltman" ;
+	foaf:mbox <mailto:wdev@foltman.com> .
+
+meta:paniq
+	a foaf:Person ;
+	foaf:name "Leonard Ritter" ;
+	foaf:mbox <mailto:paniq@paniq.org> .
+
+meta:harry
+	a foaf:Person ;
+	foaf:name "Harry van Haaren" ;
+	foaf:mbox <harryhaaren@gmail.com> .
+
+meta:bmwiedemann
+	a foaf:Person ;
+	foaf:name "Bernhard M. Wiedemann" ;
+	foaf:mbox <bwiedemann@suse.de> .
+

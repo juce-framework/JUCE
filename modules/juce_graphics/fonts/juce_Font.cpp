@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -243,14 +243,19 @@ public:
     {
     }
 
+    auto tie() const
+    {
+        return std::tie (height, underline, horizontalScale, kerning, typefaceName, typefaceStyle);
+    }
+
     bool operator== (const SharedFontInternal& other) const noexcept
     {
-        return height == other.height
-                && underline == other.underline
-                && horizontalScale == other.horizontalScale
-                && kerning == other.kerning
-                && typefaceName == other.typefaceName
-                && typefaceStyle == other.typefaceStyle;
+        return tie() == other.tie();
+    }
+
+    bool operator< (const SharedFontInternal& other) const noexcept
+    {
+        return tie() < other.tie();
     }
 
     /*  The typeface and ascent data members may be read/set from multiple threads
@@ -416,6 +421,11 @@ bool Font::operator== (const Font& other) const noexcept
 bool Font::operator!= (const Font& other) const noexcept
 {
     return ! operator== (other);
+}
+
+bool Font::compare (const Font& a, const Font& b) noexcept
+{
+    return *a.font < *b.font;
 }
 
 void Font::dupeInternalIfShared()

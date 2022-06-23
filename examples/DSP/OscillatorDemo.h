@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE examples.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    The code included in this file is provided under the terms of the ISC license
    http://www.isc.org/downloads/software-support-policy/isc-license. Permission
@@ -33,7 +33,7 @@
                    juce_audio_processors, juce_audio_utils, juce_core,
                    juce_data_structures, juce_dsp, juce_events, juce_graphics,
                    juce_gui_basics, juce_gui_extra
- exporters:        xcode_mac, vs2019, linux_make
+ exporters:        xcode_mac, vs2022, linux_make
 
  moduleFlags:      JUCE_STRICT_REFCOUNTEDPOINTER=1
 

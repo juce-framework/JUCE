@@ -1,0 +1,36 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rsz: <http://lv2plug.in/ns/ext/resize-port#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/resize-port>
+	a owl:Ontology ;
+	rdfs:label "LV2 Resize Port" ;
+	rdfs:comment "Dynamically sized LV2 port buffers." ;
+	rdfs:seeAlso <resize-port.h> ,
+		<resize-port.meta.ttl> .
+
+rsz:resize
+	a lv2:Feature ;
+	rdfs:label "resize" ;
+	rdfs:comment "A feature for resizing output port buffers." .
+
+rsz:asLargeAs
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:domain lv2:Port ;
+	rdfs:range lv2:Symbol ;
+	rdfs:label "as large as" ;
+	rdfs:comment "Port that this port must have at least as much buffer space as." .
+
+rsz:minimumSize
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain lv2:Port ;
+	rdfs:range xsd:nonNegativeInteger ;
+	rdfs:label "minimum size" ;
+	rdfs:comment "Minimum buffer size required by a port, in bytes." .
+

@@ -1,0 +1,251 @@
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/patch>
+	a owl:Ontology ;
+	rdfs:seeAlso <patch.h> ,
+		<patch.meta.ttl> ;
+	rdfs:label "LV2 Patch" ;
+	rdfs:comment "A protocol for accessing and manipulating properties." .
+
+patch:Ack
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Response ;
+	rdfs:label "Ack" ;
+	rdfs:comment "An acknowledgement that a request was successful." .
+
+patch:Copy
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Request ;
+	rdfs:label "Copy" ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:minCardinality 1 ;
+		owl:onProperty patch:subject
+	] , [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:destination
+	] ;
+	rdfs:comment "A request to copy the patch:subject to the patch:destination." .
+
+patch:Delete
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Request ;
+	rdfs:label "Delete" ;
+	rdfs:comment "Request that the patch:subject or subjects be deleted." .
+
+patch:Error
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Response ;
+	rdfs:label "Error" ;
+	rdfs:comment "A response indicating an error processing a request." .
+
+patch:Get
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Request ;
+	rdfs:label "Get" ;
+	rdfs:comment "A request for a description of the patch:subject." .
+
+patch:Insert
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Request ;
+	rdfs:label "Insert" ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:subject
+	] ;
+	rdfs:comment "A request to insert a patch:body into the patch:subject." .
+
+patch:Message
+	a rdfs:Class ;
+	rdfs:label "Patch Message" ;
+	rdfs:comment "A patch message." .
+
+patch:Move
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Request ;
+	rdfs:label "Move" ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:subject
+	] , [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:destination
+	] ;
+	rdfs:comment "A request to move the patch:subject to the patch:destination." .
+
+patch:Patch
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Request ,
+	[
+		a owl:Restriction ;
+		owl:minCardinality 1 ;
+		owl:onProperty patch:subject
+	] , [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:add
+	] , [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:remove
+	] ;
+	rdfs:label "Patch" ;
+	rdfs:comment "A request to add and/or remove properties of the patch:subject." .
+
+patch:Put
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Request ;
+	rdfs:label "Put" ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:subject
+	] ;
+	rdfs:comment "A request to put the patch:body as the patch:subject." .
+
+patch:Request
+	a rdfs:Class ;
+	rdfs:label "Request" ;
+	rdfs:subClassOf patch:Message ;
+	rdfs:comment "A patch request message." .
+
+patch:Response
+	a rdfs:Class ;
+	rdfs:subClassOf patch:Message ;
+	rdfs:label "Response" ;
+	rdfs:comment "A response to a patch:Request." .
+
+patch:Set
+	a rdfs:Class ;
+	rdfs:label "Set" ;
+	rdfs:subClassOf patch:Request ,
+	[
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:property
+	] , [
+		a owl:Restriction ;
+		owl:cardinality 1 ;
+		owl:onProperty patch:value
+	] ;
+	rdfs:comment "A compact request to set a property to a value." .
+
+patch:accept
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "accept" ;
+	rdfs:domain patch:Request ;
+	rdfs:range rdfs:Class ;
+	rdfs:comment "An accepted type for a response." .
+
+patch:add
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain patch:Patch ;
+	rdfs:range rdfs:Resource ;
+	rdfs:label "add" ;
+	rdfs:comment "The properties to add to the subject." .
+
+patch:body
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain patch:Message ;
+	rdfs:label "body" ;
+	rdfs:comment "The body of a message." .
+
+patch:context
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain patch:Message ;
+	rdfs:label "context" ;
+	rdfs:comment "The context of properties in this message." .
+
+patch:destination
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain patch:Message ;
+	rdfs:label "destination" ;
+	rdfs:comment "The destination to move the patch:subject to." .
+
+patch:property
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "property" ;
+	rdfs:domain patch:Message ;
+	rdfs:range rdf:Property ;
+	rdfs:comment "The property for a patch:Set or patch:Get message." .
+
+patch:readable
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "readable" ;
+	rdfs:range rdf:Property ;
+	rdfs:comment "A property that can be read with a patch:Get message." .
+
+patch:remove
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "remove" ;
+	rdfs:domain patch:Patch ;
+	rdfs:range rdfs:Resource ;
+	rdfs:comment "The properties to remove from the subject." .
+
+patch:request
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "request" ;
+	rdfs:domain patch:Response ;
+	rdfs:range patch:Request ;
+	rdfs:comment "The request this is a response to." .
+
+patch:sequenceNumber
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:label "sequence number" ;
+	rdfs:domain patch:Message ;
+	rdfs:range xsd:int ;
+	rdfs:comment "The sequence number of a request or response." .
+
+patch:subject
+	a rdf:Property ,
+		owl:ObjectProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain patch:Message ;
+	rdfs:label "subject" ;
+	rdfs:comment "The subject this message applies to." .
+
+patch:value
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:label "value" ;
+	rdfs:domain patch:Set ;
+	rdfs:range rdf:Property ;
+	rdfs:comment "The value of a property in a patch:Set message." .
+
+patch:wildcard
+	a rdfs:Resource ;
+	rdfs:label "wildcard" ;
+	rdfs:comment "A wildcard that matches any resource." .
+
+patch:writable
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "writable" ;
+	rdfs:range rdf:Property ;
+	rdfs:comment "A property that can be set with a patch:Set or patch:Patch message." .
+

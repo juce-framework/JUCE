@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -80,7 +80,6 @@ public:
     virtual bool isCodeBlocks() const    = 0;
     virtual bool isMakefile() const      = 0;
     virtual bool isAndroidStudio() const = 0;
-    virtual bool isCLion() const         = 0;
 
     // operating system targeted by exporter
     virtual bool isAndroid() const = 0;
@@ -151,7 +150,7 @@ public:
 
     String getVSTLegacyPathString() const                 { return vstLegacyPathValueWrapper.getCurrentValue(); }
     String getAAXPathString() const                       { return aaxPathValueWrapper.getCurrentValue(); }
-    String getRTASPathString() const                      { return rtasPathValueWrapper.getCurrentValue(); }
+    String getARAPathString() const                       { return araPathValueWrapper.getCurrentValue(); }
 
     // NB: this is the path to the parent "modules" folder that contains the named module, not the
     // module folder itself.
@@ -187,6 +186,13 @@ public:
     // An exception that can be thrown by the create() method.
     void createPropertyEditors (PropertyListBuilder&);
     void addSettingsForProjectType (const build_tools::ProjectType&);
+
+    build_tools::RelativePath getLV2TurtleDumpProgramSource() const
+    {
+        return getModuleFolderRelativeToProject ("juce_audio_plugin_client")
+               .getChildFile ("LV2")
+               .getChildFile ("juce_LV2TurtleDumpProgram.cpp");
+    }
 
     //==============================================================================
     void copyMainGroupFromProject();
@@ -406,7 +412,7 @@ protected:
     const File projectFolder;
 
     //==============================================================================
-    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, rtasPathValueWrapper, aaxPathValueWrapper;
+    ValueTreePropertyWithDefaultWrapper vstLegacyPathValueWrapper, aaxPathValueWrapper, araPathValueWrapper;
 
     ValueTreePropertyWithDefault targetLocationValue, extraCompilerFlagsValue, extraLinkerFlagsValue, externalLibrariesValue,
                                  userNotesValue, gnuExtensionsValue, bigIconValue, smallIconValue, extraPPDefsValue;
@@ -466,13 +472,14 @@ private:
                                                 : name + suffix;
     }
 
-    void createDependencyPathProperties (PropertyListBuilder&);
     void createIconProperties (PropertyListBuilder&);
-    void addVSTPathsIfPluginOrHost();
+    void addExtraIncludePathsIfPluginOrHost();
+    void addARAPathsIfPluginOrHost();
     void addCommonAudioPluginSettings();
     void addLegacyVSTFolderToPathIfSpecified();
     build_tools::RelativePath getInternalVST3SDKPath();
     void addAAXFoldersToPath();
+    void addARAFoldersToPath();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectExporter)
 };

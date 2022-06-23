@@ -1,7 +1,7 @@
 ![alt text](https://assets.juce.com/juce/JUCE_banner_github.png "JUCE")
 
 JUCE is an open-source cross-platform C++ application framework for creating high quality
-desktop and mobile applications, including VST, VST3, AU, AUv3, RTAS and AAX audio plug-ins.
+desktop and mobile applications, including VST, VST3, AU, AUv3 and AAX audio plug-ins.
 JUCE can be easily integrated with existing projects via CMake, or can be used as a project
 generation tool via the [Projucer](https://juce.com/discover/projucer), which supports
 exporting projects for Xcode (macOS and iOS), Visual Studio, Android Studio, Code::Blocks
@@ -56,7 +56,7 @@ of the target you wish to build.
 
 #### Building JUCE Projects
 
-- __macOS/iOS__: Xcode 9.2 (macOS 10.12.6)
+- __macOS/iOS__: Xcode 10.1 (macOS 10.13.6)
 - __Windows__: Windows 8.1 and Visual Studio 2015 Update 3 64-bit
 - __Linux__: g++ 5.0 or Clang 3.4 (for a full list of dependencies, see
 [here](/docs/Linux%20Dependencies.md)).

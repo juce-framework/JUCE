@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,8 +27,9 @@ package com.rmsl.juce;
 
 import com.android.billingclient.api.*;
 
-public class JuceBillingClient implements PurchasesUpdatedListener, BillingClientStateListener {
-    private native void skuDetailsQueryCallback(long host, java.util.List<SkuDetails> skuDetails);
+public class JuceBillingClient implements PurchasesUpdatedListener,
+                                          BillingClientStateListener {
+    private native void productDetailsQueryCallback(long host, java.util.List<ProductDetails> productDetails);
     private native void purchasesListQueryCallback(long host, java.util.List<Purchase> purchases);
     private native void purchaseCompletedCallback(long host, Purchase purchase, int responseCode);
     private native void purchaseConsumedCallback(long host, String productIdentifier, int responseCode);
@@ -57,36 +58,39 @@ public class JuceBillingClient implements PurchasesUpdatedListener, BillingClien
                 == BillingClient.BillingResponseCode.OK;
     }
 
-    public void querySkuDetails(final String[] skusToQuery) {
+    public QueryProductDetailsParams getProductListParams(final String[] productsToQuery, String type) {
+        java.util.ArrayList<QueryProductDetailsParams.Product> productList = new java.util.ArrayList<>();
+
+        for (String product : productsToQuery)
+            productList.add(QueryProductDetailsParams.Product.newBuilder().setProductId(product).setProductType(type).build());
+
+        return QueryProductDetailsParams.newBuilder().setProductList(productList).build();
+    }
+
+    public void queryProductDetailsImpl(final String[] productsToQuery, java.util.List<String> productTypes, java.util.List<ProductDetails> details) {
+        if (productTypes == null || productTypes.isEmpty()) {
+            productDetailsQueryCallback(host, details);
+        } else {
+            billingClient.queryProductDetailsAsync(getProductListParams(productsToQuery, productTypes.get(0)), new ProductDetailsResponseListener() {
+                @Override
+                public void onProductDetailsResponse(BillingResult billingResult, java.util.List<ProductDetails> newDetails) {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        details.addAll(newDetails);
+                        queryProductDetailsImpl(productsToQuery, productTypes.subList(1, productTypes.size()), details);
+                    } else {
+                        queryProductDetailsImpl(productsToQuery, null, details);
+                    }
+                }
+            });
+        }
+    }
+
+    public void queryProductDetails(final String[] productsToQuery) {
         executeOnBillingClientConnection(new Runnable() {
             @Override
             public void run() {
-                final java.util.List<String> skuList = java.util.Arrays.asList(skusToQuery);
-
-                SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder()
-                        .setSkusList(skuList)
-                        .setType(BillingClient.SkuType.INAPP);
-
-                billingClient.querySkuDetailsAsync(params.build(), new SkuDetailsResponseListener() {
-                    @Override
-                    public void onSkuDetailsResponse(BillingResult billingResult, final java.util.List<SkuDetails> inAppSkuDetails) {
-                        if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                            SkuDetailsParams.Builder params = SkuDetailsParams.newBuilder()
-                                    .setSkusList(skuList)
-                                    .setType(BillingClient.SkuType.SUBS);
-
-                            billingClient.querySkuDetailsAsync(params.build(), new SkuDetailsResponseListener() {
-                                @Override
-                                public void onSkuDetailsResponse(BillingResult billingResult, java.util.List<SkuDetails> subsSkuDetails) {
-                                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                                        subsSkuDetails.addAll(inAppSkuDetails);
-                                        skuDetailsQueryCallback(host, subsSkuDetails);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
+                String[] toCheck = {BillingClient.ProductType.INAPP, BillingClient.ProductType.SUBS};
+                queryProductDetailsImpl(productsToQuery, java.util.Arrays.asList(toCheck), new java.util.ArrayList<ProductDetails>());
             }
         });
     }
@@ -100,23 +104,30 @@ public class JuceBillingClient implements PurchasesUpdatedListener, BillingClien
         });
     }
 
+    private void queryPurchasesImpl(java.util.List<String> toCheck, java.util.ArrayList<Purchase> purchases) {
+        if (toCheck == null || toCheck.isEmpty()) {
+            purchasesListQueryCallback(host, purchases);
+        } else {
+            billingClient.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(toCheck.get(0)).build(), new PurchasesResponseListener() {
+                @Override
+                public void onQueryPurchasesResponse(BillingResult billingResult, java.util.List<Purchase> list) {
+                    if (billingResult.getResponseCode() == BillingClient.BillingResponseCode.OK) {
+                        purchases.addAll(list);
+                        queryPurchasesImpl(toCheck.subList(1, toCheck.size()), purchases);
+                    } else {
+                        queryPurchasesImpl(null, purchases);
+                    }
+                }
+            });
+        }
+    }
+
     public void queryPurchases() {
         executeOnBillingClientConnection(new Runnable() {
             @Override
             public void run() {
-                Purchase.PurchasesResult inAppPurchases = billingClient.queryPurchases(BillingClient.SkuType.INAPP);
-                Purchase.PurchasesResult subsPurchases = billingClient.queryPurchases(BillingClient.SkuType.SUBS);
-
-                if (inAppPurchases.getResponseCode() == BillingClient.BillingResponseCode.OK
-                        && subsPurchases.getResponseCode() == BillingClient.BillingResponseCode.OK) {
-                    java.util.List<Purchase> purchaseList = inAppPurchases.getPurchasesList();
-                    purchaseList.addAll(subsPurchases.getPurchasesList());
-
-                    purchasesListQueryCallback(host, purchaseList);
-                    return;
-                }
-
-                purchasesListQueryCallback(host, null);
+                String[] toCheck = {BillingClient.ProductType.INAPP, BillingClient.ProductType.SUBS};
+                queryPurchasesImpl(java.util.Arrays.asList(toCheck), new java.util.ArrayList<Purchase>());
             }
         });
     }
@@ -211,5 +222,5 @@ public class JuceBillingClient implements PurchasesUpdatedListener, BillingClien
     }
 
     private long host = 0;
-    private BillingClient billingClient;
+    private final BillingClient billingClient;
 }

@@ -14,6 +14,9 @@
 /**
 */
 class %%filter_class_name%%  : public juce::AudioProcessor
+                            #if JucePlugin_Enable_ARA
+                             , public juce::AudioProcessorARAExtension
+                            #endif
 {
 public:
     //==============================================================================

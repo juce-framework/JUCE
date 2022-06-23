@@ -1,0 +1,90 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix morph: <http://lv2plug.in/ns/ext/morph#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/morph>
+	a doap:Project ;
+	doap:name "LV2 Morph" ;
+	doap:shortdesc "Ports that can dynamically change type." ;
+	doap:created "2012-05-22" ;
+	doap:developer <http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "1.0" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This extension defines two port types: morph:MorphPort, which has a
+host-configurable type, and morph:AutoMorphPort, which may automatically change
+type when a MorphPort's type is changed.  These ports always have a default
+type and work normally work in hosts that are unaware of this extension.  Thus,
+this extension provides a backwards compatibility mechanism which allows
+plugins to use new port types but gracefully fall back to a default type in
+hosts that do not support them.
+
+This extension only defines port types and properties for describing morph
+ports.  The actual run-time switching is done via the opts:interface API.
+
+"""^^lv2:Markdown .
+
+morph:MorphPort
+	lv2:documentation """
+
+Ports of this type MUST have another type which defines the default buffer
+format (for example lv2:ControlPort) but can be dynamically changed to a
+different type in hosts that support opts:interface.
+
+The host may change the type of a MorphPort by setting its morph:currentType
+with LV2_Options_Interface::set().  If the plugin has any morph:AutoMorphPort
+ports, the host MUST check their types after changing any port type since they
+may have changed.
+
+"""^^lv2:Markdown .
+
+morph:AutoMorphPort
+	lv2:documentation """
+
+Ports of this type MUST have another type which defines the default buffer
+format (for example, lv2:ControlPort) but may dynamically change types based on
+the configured types of any morph:MorphPort ports on the same plugin instance.
+
+The type of a port may only change in response to a host call to
+LV2_Options_Interface::set().  Whenever any port type on the instance changes,
+the host MUST check the type of all morph:AutoMorphPort ports with
+LV2_Options_Interface::get() before calling run() again, since they may have
+changed.  If the type of any port is zero, it means the current configuration
+is invalid and the plugin may not be run (unless that port is
+lv2:connectionOptional and connected to NULL).
+
+This is mainly useful for outputs whose type depends on the type of
+corresponding inputs.
+
+"""^^lv2:Markdown .
+
+morph:supportsType
+	lv2:documentation """
+
+Indicates that a port supports being switched to a certain type.  A MorphPort
+MUST list each type it supports being switched to in the plugin data using this
+property.
+
+"""^^lv2:Markdown .
+
+morph:currentType
+	lv2:documentation """
+
+The currently active type of the port.  This is for dynamic use as an option
+and SHOULD NOT be listed in the static plugin data.
+
+"""^^lv2:Markdown .
+

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -1035,52 +1035,72 @@ namespace AAXClasses
 
         AudioProcessor& getPluginInstance() const noexcept   { return *pluginInstance; }
 
-        bool getCurrentPosition (juce::AudioPlayHead::CurrentPositionInfo& info) override
+        Optional<PositionInfo> getPosition() const override
         {
+            PositionInfo info;
+
             const AAX_ITransport& transport = *Transport();
 
-            info.bpm = 0.0;
-            check (transport.GetCurrentTempo (&info.bpm));
-
-            int32_t num = 4, den = 4;
-            transport.GetCurrentMeter (&num, &den);
-            info.timeSigNumerator   = (int) num;
-            info.timeSigDenominator = (int) den;
-            info.timeInSamples = 0;
-
-            if (transport.IsTransportPlaying (&info.isPlaying) != AAX_SUCCESS)
-                info.isPlaying = false;
-
-            if (info.isPlaying
-                 || transport.GetTimelineSelectionStartPosition (&info.timeInSamples) != AAX_SUCCESS)
-                check (transport.GetCurrentNativeSampleLocation (&info.timeInSamples));
-
-            info.timeInSeconds = (float) info.timeInSamples / sampleRate;
-
-            int64_t ticks = 0;
-
-            if (info.isPlaying)
-                check (transport.GetCustomTickPosition (&ticks, info.timeInSamples));
-            else
-                check (transport.GetCurrentTickPosition (&ticks));
-
-            info.ppqPosition = (double) ticks / 960000.0;
-
-            info.isLooping = false;
-            int64_t loopStartTick = 0, loopEndTick = 0;
-            check (transport.GetCurrentLoopPosition (&info.isLooping, &loopStartTick, &loopEndTick));
-            info.ppqLoopStart = (double) loopStartTick / 960000.0;
-            info.ppqLoopEnd   = (double) loopEndTick   / 960000.0;
-
-            std::tie (info.frameRate, info.editOriginTime) = [&transport]
+            info.setBpm ([&]
             {
-                AAX_EFrameRate frameRate;
-                int32_t offset;
+                double bpm = 0.0;
 
-                if (transport.GetTimeCodeInfo (&frameRate, &offset) != AAX_SUCCESS)
-                    return std::make_tuple (FrameRate(), 0.0);
+                return transport.GetCurrentTempo (&bpm) == AAX_SUCCESS ? makeOptional (bpm) : nullopt;
+            }());
 
-                const auto rate = [&]
+            info.setTimeSignature ([&]
+            {
+                int32_t num = 4, den = 4;
+
+                return transport.GetCurrentMeter (&num, &den) == AAX_SUCCESS
+                       ? makeOptional (TimeSignature { (int) num, (int) den })
+                       : nullopt;
+            }());
+
+            info.setIsPlaying ([&]
+            {
+                bool isPlaying = false;
+
+                return transport.IsTransportPlaying (&isPlaying) == AAX_SUCCESS && isPlaying;
+            }());
+
+            info.setTimeInSamples ([&]
+            {
+                int64_t timeInSamples = 0;
+
+                return ((! info.getIsPlaying() && transport.GetTimelineSelectionStartPosition (&timeInSamples) == AAX_SUCCESS)
+                        || transport.GetCurrentNativeSampleLocation (&timeInSamples) == AAX_SUCCESS)
+                            ? makeOptional (timeInSamples)
+                            : nullopt;
+            }());
+
+            info.setTimeInSeconds ((float) info.getTimeInSamples().orFallback (0) / sampleRate);
+
+            info.setPpqPosition ([&]
+            {
+                int64_t ticks = 0;
+
+                return ((info.getIsPlaying() && transport.GetCustomTickPosition (&ticks, info.getTimeInSamples().orFallback (0))) == AAX_SUCCESS)
+                        || transport.GetCurrentTickPosition (&ticks) == AAX_SUCCESS
+                            ? makeOptional (ticks / 960000.0)
+                            : nullopt;
+            }());
+
+            bool isLooping = false;
+            int64_t loopStartTick = 0, loopEndTick = 0;
+
+            if (transport.GetCurrentLoopPosition (&isLooping, &loopStartTick, &loopEndTick) == AAX_SUCCESS)
+            {
+                info.setIsLooping (isLooping);
+                info.setLoopPoints (LoopPoints { (double) loopStartTick / 960000.0, (double) loopEndTick / 960000.0 });
+            }
+
+            AAX_EFrameRate frameRate;
+            int32_t offset;
+
+            if (transport.GetTimeCodeInfo (&frameRate, &offset) == AAX_SUCCESS)
+            {
+                info.setFrameRate ([&]() -> Optional<FrameRate>
                 {
                     switch ((JUCE_AAX_EFrameRate) frameRate)
                     {
@@ -1114,18 +1134,14 @@ namespace AAXClasses
                         case JUCE_AAX_eFrameRate_Undeclared:      break;
                     }
 
-                    return FrameRate();
-                }();
+                    return {};
+                }());
+            }
 
-                const auto effectiveRate = rate.getEffectiveRate();
-                return std::make_tuple (rate, effectiveRate != 0.0 ? offset / effectiveRate : 0.0);
-            }();
+            const auto effectiveRate = info.getFrameRate().hasValue() ? info.getFrameRate()->getEffectiveRate() : 0.0;
+            info.setEditOriginTime (effectiveRate != 0.0 ? makeOptional (offset / effectiveRate) : nullopt);
 
-            // No way to get these: (?)
-            info.isRecording = false;
-            info.ppqPositionOfLastBarStart = 0;
-
-            return true;
+            return info;
         }
 
         void audioProcessorParameterChanged (AudioProcessor* /*processor*/, int parameterIndex, float newValue) override
@@ -1191,8 +1207,7 @@ namespace AAXClasses
                     if (data != nullptr && size == sizeof (AAX_EProcessingState))
                     {
                         const auto state = *static_cast<const AAX_EProcessingState*> (data);
-                        const auto nonRealtime = state == AAX_eProcessingState_Start
-                                              || state == AAX_eProcessingState_StartPass
+                        const auto nonRealtime = state == AAX_eProcessingState_StartPass
                                               || state == AAX_eProcessingState_BeginPassGroup;
                         pluginInstance->setNonRealtime (nonRealtime);
                     }

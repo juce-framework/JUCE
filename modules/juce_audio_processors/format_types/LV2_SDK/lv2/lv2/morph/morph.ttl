@@ -1,0 +1,46 @@
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix morph: <http://lv2plug.in/ns/ext/morph#> .
+@prefix opts: <http://lv2plug.in/ns/ext/options#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/morph>
+	a owl:Ontology ;
+	rdfs:label "LV2 Morph" ;
+	rdfs:comment "Ports that can dynamically change type." ;
+	rdfs:seeAlso <morph.h> ,
+		<morph.meta.ttl> .
+
+morph:MorphPort
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf lv2:Port ;
+	rdfs:label "Morph Port" ;
+	rdfs:comment "A port which can be switched to another type." .
+
+morph:AutoMorphPort
+	a rdfs:Class ,
+		owl:Class ;
+	rdfs:subClassOf lv2:Port ;
+	rdfs:label "Auto Morph Port" ;
+	rdfs:comment "A port that can change its type based on that of another." .
+
+morph:supportsType
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain morph:MorphPort ;
+	rdfs:label "supports type" ;
+	rdfs:comment "A type that a port supports being switched to." .
+
+morph:currentType
+	a rdf:Property ,
+		opts:Option ,
+		owl:ObjectProperty ;
+	rdfs:domain morph:MorphPort ;
+	rdfs:label "current type" ;
+	rdfs:comment "The currently active type of the port." .
+

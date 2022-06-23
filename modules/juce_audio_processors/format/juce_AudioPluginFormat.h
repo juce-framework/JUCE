@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -139,6 +139,18 @@ public:
 
     /** Returns true if instantiation of this plugin type must be done from a non-message thread. */
     virtual bool requiresUnblockedMessageThreadDuringCreation (const PluginDescription&) const = 0;
+
+    /** A callback lambda that is passed to getARAFactory() */
+    using ARAFactoryCreationCallback = std::function<void (ARAFactoryResult)>;
+
+    /** Tries to create an ::ARAFactoryWrapper for this description.
+
+        The result of the operation will be wrapped into an ARAFactoryResult,
+        which will be passed to a callback object supplied by the caller.
+
+        @see AudioPluginFormatManager::createARAFactoryAsync
+    */
+    virtual void createARAFactoryAsync (const PluginDescription&, ARAFactoryCreationCallback callback) { callback ({}); }
 
 protected:
     //==============================================================================

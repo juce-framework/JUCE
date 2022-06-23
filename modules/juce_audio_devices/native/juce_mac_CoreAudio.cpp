@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -19,6 +19,8 @@
 
   ==============================================================================
 */
+
+#include <juce_audio_basics/native/juce_mac_CoreAudioTimeConversions.h>
 
 namespace juce
 {
@@ -746,7 +748,8 @@ public:
     double getSampleRate() const  { return sampleRate; }
     int getBufferSize() const     { return bufferSize; }
 
-    void audioCallback (const AudioBufferList* inInputData,
+    void audioCallback (const AudioTimeStamp* timeStamp,
+                        const AudioBufferList* inInputData,
                         AudioBufferList* outOutputData)
     {
         const ScopedLock sl (callbackLock);
@@ -778,11 +781,14 @@ public:
                 }
             }
 
-            callback->audioDeviceIOCallback (const_cast<const float**> (tempInputBuffers.get()),
-                                             numInputChans,
-                                             tempOutputBuffers,
-                                             numOutputChans,
-                                             bufferSize);
+            const auto nanos = timeStamp != nullptr ? timeConversions.hostTimeToNanos (timeStamp->mHostTime) : 0;
+
+            callback->audioDeviceIOCallbackWithContext (const_cast<const float**> (tempInputBuffers.get()),
+                                                        numInputChans,
+                                                        tempOutputBuffers,
+                                                        numOutputChans,
+                                                        bufferSize,
+                                                        { timeStamp != nullptr ? &nanos : nullptr });
 
             for (int i = numOutputChans; --i >= 0;)
             {
@@ -838,6 +844,7 @@ public:
     AudioDeviceIOProcID audioProcID = {};
 
 private:
+    CoreAudioTimeConversions timeConversions;
     AudioIODeviceCallback* callback = nullptr;
     CriticalSection callbackLock;
     AudioDeviceID deviceID;
@@ -876,14 +883,14 @@ private:
     }
 
     static OSStatus audioIOProc (AudioDeviceID /*inDevice*/,
-                                 const AudioTimeStamp* /*inNow*/,
+                                 const AudioTimeStamp* inNow,
                                  const AudioBufferList* inInputData,
                                  const AudioTimeStamp* /*inInputTime*/,
                                  AudioBufferList* outOutputData,
                                  const AudioTimeStamp* /*inOutputTime*/,
                                  void* device)
     {
-        static_cast<CoreAudioInternal*> (device)->audioCallback (inInputData, outOutputData);
+        static_cast<CoreAudioInternal*> (device)->audioCallback (inNow, inInputData, outOutputData);
         return noErr;
     }
 
@@ -1624,8 +1631,12 @@ private:
                 const ScopedLock sl (callbackLock);
 
                 if (callback != nullptr)
-                    callback->audioDeviceIOCallback ((const float**) inputChans.getRawDataPointer(), numInputChans,
-                                                     outputChans.getRawDataPointer(), numOutputChans, numSamples);
+                    callback->audioDeviceIOCallbackWithContext ((const float**) inputChans.getRawDataPointer(),
+                                                                numInputChans,
+                                                                outputChans.getRawDataPointer(),
+                                                                numOutputChans,
+                                                                numSamples,
+                                                                {}); // Can't predict when the next output callback will happen
                 else
                     didCallback = false;
             }
@@ -1920,9 +1931,12 @@ private:
             outputFifo.finishedWrite (size1 + size2);
         }
 
-        void audioDeviceIOCallback (const float** inputChannelData, int numInputChannels,
-                                    float** outputChannelData, int numOutputChannels,
-                                    int numSamples) override
+        void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+                                               int numInputChannels,
+                                               float** outputChannelData,
+                                               int numOutputChannels,
+                                               int numSamples,
+                                               const AudioIODeviceCallbackContext&) override
         {
             if (numInputChannels > 0)
             {

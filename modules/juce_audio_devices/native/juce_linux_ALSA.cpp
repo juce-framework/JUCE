@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -711,11 +711,12 @@ public:
 
                 if (callback != nullptr)
                 {
-                    callback->audioDeviceIOCallback (inputChannelDataForCallback.getRawDataPointer(),
-                                                     inputChannelDataForCallback.size(),
-                                                     outputChannelDataForCallback.getRawDataPointer(),
-                                                     outputChannelDataForCallback.size(),
-                                                     bufferSize);
+                    callback->audioDeviceIOCallbackWithContext (inputChannelDataForCallback.getRawDataPointer(),
+                                                                inputChannelDataForCallback.size(),
+                                                                outputChannelDataForCallback.getRawDataPointer(),
+                                                                outputChannelDataForCallback.size(),
+                                                                bufferSize,
+                                                                {});
                 }
                 else
                 {
@@ -1287,12 +1288,12 @@ private:
 }
 
 //==============================================================================
-AudioIODeviceType* createAudioIODeviceType_ALSA_Soundcards()
+static inline AudioIODeviceType* createAudioIODeviceType_ALSA_Soundcards()
 {
     return new ALSAAudioIODeviceType (true, "ALSA HW");
 }
 
-AudioIODeviceType* createAudioIODeviceType_ALSA_PCMDevices()
+static inline AudioIODeviceType* createAudioIODeviceType_ALSA_PCMDevices()
 {
     return new ALSAAudioIODeviceType (false, "ALSA");
 }

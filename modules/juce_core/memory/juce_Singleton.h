@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -184,7 +184,7 @@ struct SingletonHolder  : private MutexType // (inherited so we can use the empt
 #define JUCE_DECLARE_SINGLETON(Classname, doNotRecreateAfterDeletion) \
 \
     static juce::SingletonHolder<Classname, juce::CriticalSection, doNotRecreateAfterDeletion> singletonHolder; \
-    friend decltype (singletonHolder); \
+    friend juce::SingletonHolder<Classname, juce::CriticalSection, doNotRecreateAfterDeletion>; \
 \
     static Classname* JUCE_CALLTYPE getInstance()                           { return singletonHolder.get(); } \
     static Classname* JUCE_CALLTYPE getInstanceWithoutCreating() noexcept   { return singletonHolder.instance; } \

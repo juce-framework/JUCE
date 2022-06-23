@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -25,6 +25,14 @@ namespace juce
 
 class AudioIODevice;
 
+/** Additional information that may be passed to the AudioIODeviceCallback. */
+struct AudioIODeviceCallbackContext
+{
+    /** If the host provides this information, this field will be set to point to
+        an integer holding the current value; otherwise, this will be nullptr.
+    */
+    const uint64_t* hostTimeNs = nullptr;
+};
 
 //==============================================================================
 /**
@@ -87,7 +95,26 @@ public:
                                         int numInputChannels,
                                         float** outputChannelData,
                                         int numOutputChannels,
-                                        int numSamples) = 0;
+                                        int numSamples)
+    {
+        ignoreUnused (inputChannelData, numInputChannels, outputChannelData, numOutputChannels, numSamples);
+    }
+
+    /** The same as audioDeviceIOCallback(), but with an additional context argument.
+
+        The default implementation of this function will call audioDeviceIOCallback(),
+        but you can override this function if you need to make use of the context information.
+    */
+    virtual void audioDeviceIOCallbackWithContext (const float** inputChannelData,
+                                                   int numInputChannels,
+                                                   float** outputChannelData,
+                                                   int numOutputChannels,
+                                                   int numSamples,
+                                                   const AudioIODeviceCallbackContext& context)
+    {
+        audioDeviceIOCallback (inputChannelData, numInputChannels, outputChannelData, numOutputChannels, numSamples);
+        ignoreUnused (context);
+    }
 
     /** Called to indicate that the device is about to start calling back.
 

@@ -1,0 +1,82 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix work: <http://lv2plug.in/ns/ext/worker#> .
+
+<http://lv2plug.in/ns/ext/worker>
+	a doap:Project ;
+	doap:name "LV2 Worker" ;
+	doap:shortdesc "Support for doing non-realtime work in plugins." ;
+	doap:created "2012-03-22" ;
+	doap:developer <http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "1.2" ;
+		doap:created "2020-04-26" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.18.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Improve documentation."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This extension allows plugins to schedule work that must be performed in
+another thread.  Plugins can use this interface to safely perform work that is
+not real-time safe, and receive the result in the run context.  The details of
+threading are managed by the host, allowing plugins to be simple and portable
+while using resources more efficiently.
+
+This interface is designed to gracefully support single-threaded synchronous
+execution, which allows the same code to work with sample accuracy for offline
+rendering.  For example, a sampler plugin may schedule a sample to be loaded
+from disk in another thread.  During live execution, the host will call the
+plugin's work method from another thread, and deliver the result to the audio
+thread when it is finished.  However, during offline export, the
+<q>scheduled</q> load would be executed immediately in the same thread.  This
+enables reproducible offline rendering, where any changes affect the output
+immediately regardless of how long the work takes to execute.
+
+"""^^lv2:Markdown .
+
+work:interface
+	lv2:documentation """
+
+The work interface provided by a plugin, LV2_Worker_Interface.
+
+    :::turtle
+
+    @prefix work: <http://lv2plug.in/ns/ext/worker#> .
+
+    <plugin>
+        a lv2:Plugin ;
+        lv2:extensionData work:interface .
+
+"""^^lv2:Markdown .
+
+work:schedule
+	lv2:documentation """
+
+The work scheduling feature provided by a host, LV2_Worker_Schedule.
+
+If the host passes this feature to LV2_Descriptor::instantiate, the plugin MAY
+use it to schedule work in the audio thread, and MUST NOT call it in any other
+context.  Hosts MAY pass this feature to other functions as well, in which case
+the plugin MAY use it to schedule work in the calling context.  The plugin MUST
+NOT assume any relationship between different schedule features.
+
+"""^^lv2:Markdown .
+

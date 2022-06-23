@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -26,6 +26,19 @@
 namespace juce
 {
 
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (getItemCount, "getItemCount", "()I") \
+  METHOD (getItemAt,    "getItemAt",    "(I)Landroid/content/ClipData$Item;")
+
+DECLARE_JNI_CLASS (ClipData, "android/content/ClipData")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+  METHOD (getUri, "getUri", "()Landroid/net/Uri;")
+
+DECLARE_JNI_CLASS (ClipDataItem, "android/content/ClipData$Item")
+#undef JNI_CLASS_MEMBERS
+
 class FileChooser::Native     : public FileChooser::Pimpl
 {
 public:
@@ -40,6 +53,7 @@ public:
             auto sdkVersion         = getAndroidSDKVersion();
             auto saveMode           = ((flags & FileBrowserComponent::saveMode) != 0);
             auto selectsDirectories = ((flags & FileBrowserComponent::canSelectDirectories) != 0);
+            auto canSelectMultiple  = ((flags & FileBrowserComponent::canSelectMultipleItems) != 0);
 
             // You cannot save a directory
             jassert (! (saveMode && selectsDirectories));
@@ -85,6 +99,13 @@ public:
                                            uri.get());
             }
 
+            if (canSelectMultiple && sdkVersion >= 18)
+            {
+                env->CallObjectMethod (intent.get(),
+                                       AndroidIntent.putExtraBool,
+                                       javaString ("android.intent.extra.ALLOW_MULTIPLE").get(),
+                                       true);
+            }
 
             if (! selectsDirectories)
             {
@@ -169,22 +190,41 @@ public:
         currentFileChooser = nullptr;
         auto* env = getEnv();
 
-        Array<URL> chosenURLs;
-
-        if (resultCode == /*Activity.RESULT_OK*/ -1 && intentData != nullptr)
+        const auto getUrls = [&]() -> Array<URL>
         {
-            LocalRef<jobject> uri (env->CallObjectMethod (intentData.get(), AndroidIntent.getData));
+            if (resultCode != /*Activity.RESULT_OK*/ -1 || intentData == nullptr)
+                return {};
 
-            if (uri != nullptr)
+            Array<URL> chosenURLs;
+
+            const auto addUrl = [env, &chosenURLs] (jobject uri)
             {
-                auto jStr = (jstring) env->CallObjectMethod (uri, JavaObject.toString);
-
-                if (jStr != nullptr)
+                if (auto jStr = (jstring) env->CallObjectMethod (uri, JavaObject.toString))
                     chosenURLs.add (URL (juceString (env, jStr)));
-            }
-        }
+            };
 
-        owner.finished (chosenURLs);
+            if (LocalRef<jobject> clipData { env->CallObjectMethod (intentData.get(), AndroidIntent.getClipData) })
+            {
+                const auto count = env->CallIntMethod (clipData.get(), ClipData.getItemCount);
+
+                for (auto i = 0; i < count; ++i)
+                {
+                    if (LocalRef<jobject> item { env->CallObjectMethod (clipData.get(), ClipData.getItemAt, i) })
+                    {
+                        if (LocalRef<jobject> itemUri { env->CallObjectMethod (item.get(), ClipDataItem.getUri) })
+                            addUrl (itemUri.get());
+                    }
+                }
+            }
+            else if (LocalRef<jobject> uri { env->CallObjectMethod (intentData.get(), AndroidIntent.getData )})
+            {
+                addUrl (uri.get());
+            }
+
+            return chosenURLs;
+        };
+
+        owner.finished (getUrls());
     }
 
     static Native* currentFileChooser;
@@ -200,7 +240,7 @@ public:
             {
                 auto extension = wildcard.fromLastOccurrenceOf (".", false, false);
 
-                result.addArray (getMimeTypesForFileExtension (extension));
+                result.addArray (MimeTypeTable::getMimeTypesForFileExtension (extension));
             }
         }
 

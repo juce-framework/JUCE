@@ -1,0 +1,627 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ui: <http://lv2plug.in/ns/extensions/ui#> .
+
+<http://lv2plug.in/ns/extensions/ui>
+	a doap:Project ;
+	doap:license <http://opensource.org/licenses/isc> ;
+	doap:name "LV2 UI" ;
+	doap:shortdesc "User interfaces for LV2 plugins." ;
+	doap:created "2006-00-00" ;
+	doap:developer <http://lv2plug.in/ns/meta#larsl> ;
+	doap:maintainer <http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "2.22" ;
+		doap:created "2020-04-26" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.18.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add ui:requestValue feature."
+			] , [
+				rdfs:label "Add ui:scaleFactor, ui:foregroundColor, and ui:backgroundColor properties."
+			] , [
+				rdfs:label "Deprecate ui:binary."
+			]
+		]
+	] , [
+		doap:revision "2.20" ;
+		doap:created "2015-07-25" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.14.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Improve documentation."
+			] , [
+				rdfs:label "Add missing property labels."
+			]
+		]
+	] , [
+		doap:revision "2.18" ;
+		doap:created "2014-08-08" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.10.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add show interface so UIs can gracefully degrade to separate windows if hosts can not use their widget directly."
+			] , [
+				rdfs:label "Fix identifier typos in documentation."
+			]
+		]
+	] , [
+		doap:revision "2.16" ;
+		doap:created "2014-01-04" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.8.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Fix LV2_UI_INVALID_PORT_INDEX identifier in documentation."
+			]
+		]
+	] , [
+		doap:revision "2.14" ;
+		doap:created "2013-03-18" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.6.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add idle interface so native UIs and foreign toolkits can drive their event loops."
+			] , [
+				rdfs:label "Add ui:updateRate property."
+			]
+		]
+	] , [
+		doap:revision "2.12" ;
+		doap:created "2012-12-01" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.4.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Fix incorrect linker flag in ui:makeSONameResident documentation."
+			]
+		]
+	] , [
+		doap:revision "2.10" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add types for WindowsUI, CocoaUI, and Gtk3UI."
+			] , [
+				rdfs:label "Use consistent label style."
+			] , [
+				rdfs:label "Add missing LV2_SYMBOL_EXPORT declaration for lv2ui_descriptor prototype."
+			]
+		]
+	] , [
+		doap:revision "2.8" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add ui:parent and ui:resize."
+			] , [
+				rdfs:label "Add support for referring to ports by symbol."
+			] , [
+				rdfs:label "Add ui:portMap for accessing ports by symbol, allowing for UIs to be distributed separately from plugins."
+			] , [
+				rdfs:label "Add port protocols and a dynamic notification subscription mechanism, for more flexible communication, and audio port metering without control port kludges."
+			] , [
+				rdfs:label "Add touch feature to notify the host that the user has grabbed a control."
+			] , [
+				rdfs:label "Merge with unified LV2 package."
+			]
+		]
+	] , [
+		doap:revision "2.4" ;
+		doap:created "2011-11-21" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-ui-2.4.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Deprecate ui:makeSONameResident."
+			] , [
+				rdfs:label "Add Qt4 and X11 widget types."
+			] , [
+				rdfs:label "Install header to URI-based system path."
+			] , [
+				rdfs:label "Add pkg-config file."
+			] , [
+				rdfs:label "Make ui.ttl a valid OWL 2 DL ontology."
+			]
+		]
+	] , [
+		doap:revision "2.2" ;
+		doap:created "2011-05-26" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-ui-2.2.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add build system (for installation)."
+			] , [
+				rdfs:label "Convert documentation to HTML and use lv2:documentation."
+			] , [
+				rdfs:label "Use lv2:Specification to be discovered as an extension."
+			]
+		]
+	] , [
+		doap:revision "2.0" ;
+		doap:created "2010-10-06" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-ui-2.0.tar.gz> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This extension makes it possible to create user interfaces for LV2 plugins.
+
+UIs are implemented as an LV2UI_Descriptor loaded via lv2ui_descriptor() in a
+shared library, and are distributed in bundles just like plugins.
+
+UIs are associated with plugins in data:
+
+    :::turtle
+    @prefix ui: <http://lv2plug.in/ns/extensions/ui#> .
+
+    <http://my.plugin>   ui:ui      <http://my.pluginui> .
+    <http://my.pluginui> a          ui:X11UI ;
+                         lv2:binary <myui.so> .
+
+where `http://my.plugin` is the URI of the plugin, `http://my.pluginui` is the
+URI of the plugin UI and `myui.so` is the relative URI to the shared object
+file.
+
+While it is possible to have the plugin UI and the plugin in the same shared
+object file, it is a good idea to keep them separate so that hosts can avoid
+loading the UI code if they do not need it.  A UI MUST specify its class in the
+RDF data (`ui:X11UI` in the above example).  The class defines what type the UI
+is, for example what graphics toolkit it uses.  Any type of UI class can be
+defined separately from this extension.
+
+It is possible to have multiple UIs for the same plugin, or to have the UI for
+a plugin in a different bundle from the actual plugin.  This allows plugin UIs
+to be written independently.
+
+Note that the process that loads the shared object file containing the UI code
+and the process that loads the shared object file containing the actual plugin
+implementation are not necessarily the same process (and not even necessarily
+on the same machine).  This means that plugin and UI code MUST NOT use
+singletons and global variables and expect them to refer to the same objects in
+the UI and the actual plugin. The function callback interface defined in this
+header is the only method of communication between UIs and plugin instances
+(extensions may define more, though this is discouraged unless absolutely
+necessary since the significant benefits of network transparency and
+serialisability are lost).
+
+UI functionality may be extended via features, much like plugins:
+
+    :::turtle
+    <http://my.pluginui> lv2:requiredFeature <http://my.feature> .
+    <http://my.pluginui> lv2:optionalFeature <http://my.feature> .
+
+The rules for a UI with a required or optional feature are identical to those
+of lv2:Plugin instances: if a UI declares a feature as required, the host is
+NOT allowed to load it unless it supports that feature; and if it does support
+a feature, it MUST pass an appropriate LV2_Feature struct to the UI's
+instantiate() method.  This extension defines several standard features for
+common functionality.
+
+UIs written to this specification do not need to be thread-safe.  All functions
+may only be called in the <q>UI thread</q>.  There is only one UI thread (for
+toolkits, the one the UI main loop runs in).  There is no requirement that a
+<q>UI</q> actually be a graphical widget.
+
+Note that UIs are completely separate from plugins.  From the plugin's
+perspective, control from a UI is indistinguishable from any other control, as
+it all occcurs via ports.
+
+"""^^lv2:Markdown .
+
+ui:GtkUI
+	lv2:documentation """
+
+The host must guarantee that the Gtk+ 2 library has been initialised and the
+Glib main loop is running before the UI is instantiated.  Note that this UI
+type is not suitable for binary distribution since multiple versions of Gtk can
+not be used in the same process.
+
+"""^^lv2:Markdown .
+
+ui:Gtk3UI
+	lv2:documentation """
+
+The host must guarantee that the Gtk+ 3 library has been initialised and the
+Glib main loop is running before the UI is instantiated.  Note that this UI
+type is not suitable for binary distribution since multiple versions of Gtk can
+not be used in the same process.
+
+"""^^lv2:Markdown .
+
+ui:Qt4UI
+	lv2:documentation """
+
+The host must guarantee that the Qt4 library has been initialised and the Qt4
+main loop is running before the UI is instantiated.  Note that this UI type is
+not suitable for binary distribution since multiple versions of Qt can not be
+used in the same process.
+
+"""^^lv2:Markdown .
+
+ui:Qt5UI
+	lv2:documentation """
+
+The host must guarantee that the Qt5 library has been initialised and the Qt5
+main loop is running before the UI is instantiated.  Note that this UI type is
+not suitable for binary distribution since multiple versions of Qt can not be
+used in the same process.
+
+"""^^lv2:Markdown .
+
+ui:X11UI
+	lv2:documentation """
+
+Note that the LV2UI_Widget for this type of UI is not a pointer, but should be
+interpreted directly as an X11 `Window` ID.  This is the native UI type on most
+POSIX systems.
+
+"""^^lv2:Markdown .
+
+ui:WindowsUI
+	lv2:documentation """
+
+Note that the LV2UI_Widget for this type of UI is not a pointer, but should be
+interpreted directly as a `HWND`.  This is the native UI type on Microsoft
+Windows.
+
+"""^^lv2:Markdown .
+
+ui:CocoaUI
+	lv2:documentation """
+
+This is the native UI type on Mac OS X.
+
+"""^^lv2:Markdown .
+
+ui:binary
+	lv2:documentation """
+
+This property is redundant and deprecated: new UIs should use lv2:binary
+instead, however hosts must still support ui:binary.
+
+"""^^lv2:Markdown .
+
+ui:makeSONameResident
+	lv2:documentation """
+
+This feature was intended to support UIs that link against toolkit libraries
+which may not be unloaded during the lifetime of the host.  This is better
+achieved by using the appropriate flags when linking the UI, for example `gcc
+-Wl,-z,nodelete`.
+
+"""^^lv2:Markdown .
+
+ui:noUserResize
+	lv2:documentation """
+
+If a UI has this feature, it indicates that it does not make sense to let the
+user resize the main widget, and the host should prevent that.  This feature
+may not make sense for all UI types.  The data pointer for this feature should
+always be set to NULL.
+
+"""^^lv2:Markdown .
+
+ui:fixedSize
+	lv2:documentation """
+
+If a UI has this feature, it indicates the same thing as ui:noUserResize, and
+additionally that the UI will not resize itself on its own.  That is, the UI
+will always remain the same size.  This feature may not make sense for all UI
+types.  The data pointer for this feature should always be set to NULL.
+
+"""^^lv2:Markdown .
+
+ui:scaleFactor
+	lv2:documentation """
+
+HiDPI (High Dots Per Inch) displays have a high resolution on a relatively
+small form factor.  Many systems use a scale factor to compensate for this, so
+for example, a scale factor of 2 means things are drawn twice as large as
+normal.
+
+Hosts can pass this as an option to UIs to communicate this information, so
+that the UI can draw at an appropriate scale.
+
+"""^^lv2:Markdown .
+
+ui:backgroundColor
+	lv2:documentation """
+
+The background color of the host's UI.  The host can pass this as an option so
+that UIs can integrate nicely with the host window around it.
+
+Hosts should pass this as an option to UIs with an integer RGBA32 color value.
+If the value is a 32-bit integer, it is guaranteed to be in RGBA32 format, but
+the UI must check the value type and not assume this, to allow for other types
+of color in the future.
+
+"""^^lv2:Markdown .
+
+ui:foregroundColor
+	lv2:documentation """
+
+The foreground color of the host's UI.  The host can pass this as an option so
+that UIs can integrate nicely with the host window around it.
+
+Hosts should pass this as an option to UIs with an integer RGBA32 color value.
+If the value is a 32-bit integer, it is guaranteed to be in RGBA32 format, but
+the UI must check the value type and not assume this, to allow for other types
+of color in the future.
+
+"""^^lv2:Markdown .
+
+ui:parent
+	lv2:documentation """
+
+This feature can be used to pass a parent that the UI should be a child of.
+The format of data pointer of this feature is determined by the UI type, and is
+generally the same type as the LV2UI_Widget that the UI would return.  For
+example, for a ui:X11UI, the parent should be a `Window`.  This is particularly
+useful for embedding, where the parent often must be known at construction time
+for embedding to work correctly.
+
+UIs should not _require_ this feature unless it is necessary for them to work
+at all, but hosts should provide it whenever possible.
+
+"""^^lv2:Markdown .
+
+ui:PortNotification
+	lv2:documentation """
+
+This describes which ports the host must send notifications to the UI about.
+The port must be specific either by index, using the ui:portIndex property, or
+symbol, using the lv2:symbol property.  Since port indices are not guaranteed
+to be stable, using the symbol is recommended, and the inde MUST NOT be used
+except by UIs that are shipped in the same bundle as the corresponding plugin.
+
+"""^^lv2:Markdown .
+
+ui:portNotification
+	lv2:documentation """
+
+Specifies that a UI should receive notifications about changes to a particular
+port's value via LV2UI_Descriptor::port_event().
+
+For example:
+
+    :::turtle
+    eg:ui
+        a ui:X11UI ;
+        ui:portNotification [
+            ui:plugin eg:plugin ;
+            lv2:symbol "gain" ;
+            ui:protocol ui:floatProtocol
+        ] .
+
+"""^^lv2:Markdown .
+
+ui:notifyType
+	lv2:documentation """
+
+Specifies a particular type that the UI should be notified of.
+
+This is useful for message-based ports where several types of data can be
+present, but only some are interesting to the UI.  For example, if UI control
+is multiplexed in the same port as MIDI, this property can be used to ensure
+that only the relevant events are forwarded to the UI, and not potentially high
+frequency MIDI data.
+
+"""^^lv2:Markdown .
+
+ui:resize
+	lv2:documentation """
+
+This feature corresponds to the LV2UI_Resize struct, which should be passed
+with the URI LV2_UI__resize.  This struct may also be provided by the UI as
+extension data using the same URI, in which case it is used by the host to
+request that the UI change its size.
+
+"""^^lv2:Markdown .
+
+ui:portMap
+	lv2:documentation """
+
+This makes it possible to implement and distribute UIs separately from the
+plugin binaries they control.
+
+This feature corresponds to the LV2UI_Port_Index struct, which should be passed
+with the URI LV2_UI__portIndex.
+
+"""^^lv2:Markdown .
+
+ui:portSubscribe
+	lv2:documentation """
+
+This makes it possible for a UI to explicitly request a particular style of
+update from a port at run-time, in a more flexible and powerful way than
+listing subscriptions statically allows.
+
+This feature corresponds to the LV2UI_Port_Subscribe struct, which should be
+passed with the URI LV2_UI__portSubscribe.
+
+"""^^lv2:Markdown .
+
+ui:touch
+	lv2:documentation """
+
+This is useful for automation, so the host can allow the user to take control
+of a port, even if that port would otherwise be automated (much like grabbing a
+physical motorised fader).
+
+It can also be used for MIDI learn or in any other situation where the host
+needs to do something with a particular control and it would be convenient for
+the user to select it directly from the plugin UI.
+
+This feature corresponds to the LV2UI_Touch struct, which should be passed with
+the URI LV2_UI__touch.
+
+"""^^lv2:Markdown .
+
+ui:requestValue
+	lv2:documentation """
+
+This allows a plugin UI to request a new parameter value using the host's UI,
+for example by showing a dialog or integrating with the host's built-in content
+browser.  This should only be used for complex parameter types where the plugin
+UI is not capable of showing the expected native platform or host interface to
+choose a value, such as file path parameters.
+
+This feature corresponds to the LV2UI_Request_Value struct, which should be
+passed with the URI LV2_UI__requestValue.
+
+"""^^lv2:Markdown .
+
+ui:idleInterface
+	lv2:documentation """
+
+To support this feature, the UI should list it as a lv2:optionalFeature or
+lv2:requiredFeature in its data, and also as lv2:extensionData.  When the UI's
+extension_data() is called with this URI (LV2_UI__idleInterface), it should
+return a pointer to an LV2UI_Idle_Interface.
+
+To indicate support, the host should pass a feature to instantiate() with this
+URI, with NULL for data.
+
+"""^^lv2:Markdown .
+
+ui:showInterface
+	lv2:documentation """
+
+This allows UIs to gracefully degrade to separate windows when the host is
+unable to embed the UI widget for whatever reason.  When the UI's
+extension_data() is called with this URI (LV2_UI__showInterface), it should
+return a pointer to an LV2UI_Show_Interface.
+
+"""^^lv2:Markdown .
+
+ui:PortProtocol
+	lv2:documentation """
+
+A PortProtocol MUST define:
+
+Port Type
+:   Which plugin port types the buffer type is valid for.
+
+Feature Data
+:   What data (if any) should be passed in the LV2_Feature.
+
+A PortProtocol for an output port MUST define:
+
+Update Frequency
+:   When the host should call port_event().
+
+Update Format
+:   The format of the data in the buffer passed to port_event().
+
+Options
+:   The format of the options passed to subscribe() and unsubscribe().
+
+A PortProtocol for an input port MUST define:
+
+Write Format
+:   The format of the data in the buffer passed to write_port().
+
+Write Effect
+:   What happens when the UI calls write_port().
+
+For an example, see ui:floatProtocol or ui:peakProtocol.
+
+PortProtocol is a subclass of lv2:Feature, so UIs use lv2:optionalFeature and
+lv2:requiredFeature to specify which PortProtocols they want to use.
+
+"""^^lv2:Markdown .
+
+ui:floatProtocol
+	lv2:documentation """
+
+A protocol for transferring single floating point values.  The rules for this
+protocol are:
+
+Port Type
+:   lv2:ControlPort
+
+Feature Data
+:   None.
+
+Update Frequency
+:   The host SHOULD call port_event() as soon as possible when the port value has
+    changed, but there are no timing guarantees.
+
+Update Format
+:   A single <code>float</code>.
+
+Options
+:   None.
+
+Write Format
+:   A single <code>float</code>.
+
+Write Effect
+:   The host SHOULD set the port to the received value as soon as possible, but
+    there is no guarantee that run() actually sees this value.
+
+"""^^lv2:Markdown .
+
+ui:peakProtocol
+	lv2:documentation """
+
+This port protocol defines a way for the host to send continuous peak
+measurements of the audio signal at a certain port to the UI.  The intended use
+is visualisation, for example an animated meter widget that shows the level of
+the audio input or output.
+
+A contiguous sequence of audio samples for which a peak value has been computed
+is called a _measurement period_.
+
+The rules for this protocol are:
+
+Port Type
+:   lv2:AudioPort
+
+Feature Data
+:   None.
+
+Update Frequency
+:   The host SHOULD call port_event() at regular intervals.  The measurement
+    periods used for calls to port_event() for the same port SHOULD be
+    contiguous (i.e. the measurement period for one call should begin right
+    after the end of the measurement period for the previous call ends) unless
+    the UI has removed and re-added the port subscription between those calls.
+    However, UIs MUST NOT depend on either the regularity of the calls or the
+    contiguity of the measurement periods; hosts may change the call rate or
+    skip calls for performance or other reasons.  Measurement periods for
+    different calls to port_event() for the same port MUST NOT overlap.
+
+Update Format
+:   A single LV2UI_Peak_Data object.
+
+Options
+:   None.
+
+Write Format
+:   None.
+
+Write Effect
+:   None.
+
+"""^^lv2:Markdown .
+

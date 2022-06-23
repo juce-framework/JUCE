@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -31,11 +31,11 @@ template <typename JavaType>
 class LocalRef
 {
 public:
-    explicit inline LocalRef() noexcept                 : obj (nullptr) {}
-    explicit inline LocalRef (JavaType o) noexcept      : obj (o) {}
-    inline LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
-    inline LocalRef (LocalRef&& other) noexcept         : obj (nullptr) { std::swap (obj, other.obj); }
-    ~LocalRef()                                         { clear(); }
+    LocalRef() noexcept                          : obj (nullptr) {}
+    explicit LocalRef (JavaType o) noexcept      : obj (o) {}
+    LocalRef (const LocalRef& other) noexcept    : obj (retain (other.obj)) {}
+    LocalRef (LocalRef&& other) noexcept         : obj (nullptr) { std::swap (obj, other.obj); }
+    ~LocalRef()                                  { clear(); }
 
     void clear()
     {
@@ -61,8 +61,8 @@ public:
         return *this;
     }
 
-    inline operator JavaType() const noexcept   { return obj; }
-    inline JavaType get() const noexcept        { return obj; }
+    operator JavaType() const noexcept   { return obj; }
+    JavaType get() const noexcept        { return obj; }
 
 private:
     JavaType obj;
@@ -74,19 +74,19 @@ private:
 };
 
 //==============================================================================
-class GlobalRef
+template <typename JavaType>
+class GlobalRefImpl
 {
 public:
-    inline GlobalRef() noexcept                             : obj (nullptr) {}
-    inline explicit GlobalRef (const LocalRef<jobject>& o)  : obj (retain (o.get(), getEnv())) {}
-    inline explicit GlobalRef (const LocalRef<jobject>& o, JNIEnv* env)  : obj (retain (o.get(), env)) {}
-    inline GlobalRef (const GlobalRef& other)           : obj (retain (other.obj, getEnv())) {}
-    inline GlobalRef (GlobalRef && other) noexcept      : obj (nullptr) { std::swap (other.obj, obj); }
-    ~GlobalRef()                                             { clear(); }
+    GlobalRefImpl() noexcept                                 : obj (nullptr) {}
+    explicit GlobalRefImpl (const LocalRef<JavaType>& o)     : obj (retain (o.get(), getEnv())) {}
+    GlobalRefImpl (const LocalRef<JavaType>& o, JNIEnv* env) : obj (retain (o.get(), env)) {}
+    GlobalRefImpl (const GlobalRefImpl& other)               : obj (retain (other.obj, getEnv())) {}
+    GlobalRefImpl (GlobalRefImpl&& other) noexcept           : obj (nullptr) { std::swap (other.obj, obj); }
+    ~GlobalRefImpl()                                         { clear(); }
 
-
-    inline void clear()                                 { if (obj != nullptr) clear (getEnv()); }
-    inline void clear (JNIEnv* env)
+    void clear()                                         { if (obj != nullptr) clear (getEnv()); }
+    void clear (JNIEnv* env)
     {
         if (obj != nullptr)
         {
@@ -95,15 +95,15 @@ public:
         }
     }
 
-    inline GlobalRef& operator= (const GlobalRef& other)
+    GlobalRefImpl& operator= (const GlobalRefImpl& other)
     {
-        jobject newObj = retain (other.obj, getEnv());
+        JavaType newObj = retain (other.obj, getEnv());
         clear();
         obj = newObj;
         return *this;
     }
 
-    inline GlobalRef& operator= (GlobalRef&& other)
+    GlobalRefImpl& operator= (GlobalRefImpl&& other)
     {
         clear();
         std::swap (obj, other.obj);
@@ -112,8 +112,8 @@ public:
     }
 
     //==============================================================================
-    inline operator jobject() const noexcept    { return obj; }
-    inline jobject get() const noexcept         { return obj; }
+    operator JavaType() const noexcept   { return obj; }
+    JavaType get() const noexcept        { return obj; }
 
     //==============================================================================
     #define DECLARE_CALL_TYPE_METHOD(returnType, typeName) \
@@ -147,14 +147,20 @@ public:
 
 private:
     //==============================================================================
-    jobject obj = nullptr;
+    JavaType obj = nullptr;
 
-    static jobject retain (jobject obj, JNIEnv* env)
+    static JavaType retain (JavaType obj, JNIEnv* env)
     {
-        return obj == nullptr ? nullptr : env->NewGlobalRef (obj);
+        return obj != nullptr ? static_cast<JavaType> (env->NewGlobalRef (obj))
+                              : nullptr;
     }
 };
 
+class GlobalRef : public GlobalRefImpl<jobject>
+{
+public:
+    using GlobalRefImpl::GlobalRefImpl;
+};
 
 //==============================================================================
 extern LocalRef<jobject> getAppContext() noexcept;
@@ -166,15 +172,15 @@ struct SystemJavaClassComparator;
 class JNIClassBase
 {
 public:
-    explicit JNIClassBase (const char* classPath, int minSDK, const void* byteCode, size_t byteCodeSize);
+    JNIClassBase (const char* classPath, int minSDK, const void* byteCode, size_t byteCodeSize);
     virtual ~JNIClassBase();
 
-    inline operator jclass() const noexcept  { return classRef; }
+    operator jclass() const noexcept  { return classRef; }
 
     static void initialiseAllClasses (JNIEnv*);
     static void releaseAllClasses (JNIEnv*);
 
-    inline const char* getClassPath() const noexcept { return classPath; }
+    const char* getClassPath() const noexcept { return classPath; }
 
 protected:
     virtual void initialiseFields (JNIEnv*) = 0;
@@ -252,6 +258,7 @@ private:
  METHOD (getApplicationContext,                "getApplicationContext",           "()Landroid/content/Context;") \
  METHOD (getApplicationInfo,                   "getApplicationInfo",              "()Landroid/content/pm/ApplicationInfo;") \
  METHOD (checkCallingOrSelfPermission,         "checkCallingOrSelfPermission",    "(Ljava/lang/String;)I") \
+ METHOD (checkCallingOrSelfUriPermission,      "checkCallingOrSelfUriPermission", "(Landroid/net/Uri;I)I") \
  METHOD (getCacheDir,                          "getCacheDir",                     "()Ljava/io/File;")
 
 DECLARE_JNI_CLASS (AndroidContext, "android/content/Context")
@@ -392,6 +399,7 @@ DECLARE_JNI_CLASS (AndroidHandlerThread, "android/os/HandlerThread")
   METHOD (getAction,                      "getAction",      "()Ljava/lang/String;") \
   METHOD (getCategories,                  "getCategories",  "()Ljava/util/Set;") \
   METHOD (getData,                        "getData",        "()Landroid/net/Uri;") \
+  METHOD (getClipData,                    "getClipData",    "()Landroid/content/ClipData;") \
   METHOD (getExtras,                      "getExtras",      "()Landroid/os/Bundle;") \
   METHOD (getIntExtra,                    "getIntExtra",    "(Ljava/lang/String;I)I") \
   METHOD (getStringExtra,                 "getStringExtra", "(Ljava/lang/String;)Ljava/lang/String;") \
@@ -400,6 +408,7 @@ DECLARE_JNI_CLASS (AndroidHandlerThread, "android/os/HandlerThread")
   METHOD (putExtraString,                 "putExtra",       "(Ljava/lang/String;Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (putExtraStrings,                "putExtra",       "(Ljava/lang/String;[Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (putExtraParcelable,             "putExtra",       "(Ljava/lang/String;Landroid/os/Parcelable;)Landroid/content/Intent;") \
+  METHOD (putExtraBool,                   "putExtra",       "(Ljava/lang/String;Z)Landroid/content/Intent;") \
   METHOD (putParcelableArrayListExtra,    "putParcelableArrayListExtra", "(Ljava/lang/String;Ljava/util/ArrayList;)Landroid/content/Intent;") \
   METHOD (setAction,                      "setAction",      "(Ljava/lang/String;)Landroid/content/Intent;") \
   METHOD (setFlags,                       "setFlags",       "(I)Landroid/content/Intent;") \
@@ -596,6 +605,9 @@ DECLARE_JNI_CLASS (JavaBoolean, "java/lang/Boolean")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (get,        "get",       "([B)Ljava/nio/ByteBuffer;") \
   METHOD (remaining,  "remaining", "()I") \
+  METHOD (hasArray,   "hasArray",  "()Z") \
+  METHOD (array,      "array",     "()[B") \
+  METHOD (setOrder,   "order",     "(Ljava/nio/ByteOrder;)Ljava/nio/ByteBuffer;") \
   STATICMETHOD (wrap, "wrap",      "([B)Ljava/nio/ByteBuffer;")
 
 DECLARE_JNI_CLASS (JavaByteBuffer, "java/nio/ByteBuffer")
@@ -837,15 +849,12 @@ namespace
     {
         auto* env = getEnv();
 
-        LocalRef<jobject> exception (env->ExceptionOccurred());
-
-        if (exception != nullptr)
-        {
-            env->ExceptionClear();
-            return true;
-        }
-
-        return false;
+        const auto result = env->ExceptionCheck();
+       #if JUCE_DEBUG
+        env->ExceptionDescribe();
+       #endif
+        env->ExceptionClear();
+        return result;
     }
 }
 
@@ -916,6 +925,8 @@ public:
     virtual void onActivityPostSaveInstanceState (jobject /*activity*/, jobject /*bundle*/)  {}
     virtual void onActivityPostStarted           (jobject /*activity*/)                      {}
     virtual void onActivityPostStopped           (jobject /*activity*/)                      {}
+
+    virtual void onActivityConfigurationChanged  (jobject /*activity*/)                      {}
 
 private:
     jobject invoke (jobject, jobject, jobjectArray) override;

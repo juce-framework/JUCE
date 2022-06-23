@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -128,6 +128,7 @@
 //==============================================================================
 #include "containers/juce_AbstractFifo.cpp"
 #include "containers/juce_ArrayBase.cpp"
+#include "containers/juce_ListenerList.cpp"
 #include "containers/juce_NamedValueSet.cpp"
 #include "containers/juce_OwnedArray.cpp"
 #include "containers/juce_PropertySet.cpp"
@@ -248,6 +249,9 @@
 
 #endif
 
+#include "files/juce_common_MimeTypes.h"
+#include "files/juce_common_MimeTypes.cpp"
+#include "native/juce_android_AndroidDocument.cpp"
 #include "threads/juce_HighResolutionTimer.cpp"
 #include "threads/juce_WaitableEvent.cpp"
 #include "network/juce_URL.cpp"
@@ -261,6 +265,8 @@
 //==============================================================================
 #if JUCE_UNIT_TESTS
  #include "containers/juce_HashMap_test.cpp"
+
+ #include "containers/juce_Optional_test.cpp"
 #endif
 
 //==============================================================================

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -306,6 +306,9 @@ public:
     bool operator== (const ObjCObjectHandle& other) const { return item == other.item; }
     bool operator!= (const ObjCObjectHandle& other) const { return ! (*this == other); }
 
+    bool operator== (std::nullptr_t) const { return item == nullptr; }
+    bool operator!= (std::nullptr_t) const { return ! (*this == nullptr); }
+
 private:
     void swap (ObjCObjectHandle& other) noexcept { std::swap (other.item, item); }
 
@@ -499,7 +502,7 @@ public:
     bool operator!= (const void* ptr) const  { return ((const void*) block != ptr); }
     ~ObjCBlock() { if (block != nullptr) [block release]; }
 
-    operator BlockType() { return block; }
+    operator BlockType() const { return block; }
 
 private:
     BlockType block;

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -286,7 +286,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UnityPeer)
 };
 
-ComponentPeer* createUnityPeer (Component& c)    { return new UnityPeer (c); }
+static ComponentPeer* createUnityPeer (Component& c)    { return new UnityPeer (c); }
 
 //==============================================================================
 class AudioProcessorUnityWrapper
@@ -493,7 +493,7 @@ private:
 };
 
 //==============================================================================
-HashMap<int, AudioProcessorUnityWrapper*>& getWrapperMap()
+static HashMap<int, AudioProcessorUnityWrapper*>& getWrapperMap()
 {
     static HashMap<int, AudioProcessorUnityWrapper*> wrapperMap;
     return wrapperMap;
@@ -512,7 +512,7 @@ static void onWrapperDeletion (AudioProcessorUnityWrapper* wrapperToRemove)
 //==============================================================================
 namespace UnityCallbacks
 {
-    int UNITY_INTERFACE_API createCallback (UnityAudioEffectState* state)
+    static int UNITY_INTERFACE_API createCallback (UnityAudioEffectState* state)
     {
         auto* pluginInstance = new AudioProcessorUnityWrapper (false);
         pluginInstance->create (state);
@@ -524,7 +524,7 @@ namespace UnityCallbacks
         return 0;
     }
 
-    int UNITY_INTERFACE_API releaseCallback (UnityAudioEffectState* state)
+    static int UNITY_INTERFACE_API releaseCallback (UnityAudioEffectState* state)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->release();
@@ -538,7 +538,7 @@ namespace UnityCallbacks
         return 0;
     }
 
-    int UNITY_INTERFACE_API resetCallback (UnityAudioEffectState* state)
+    static int UNITY_INTERFACE_API resetCallback (UnityAudioEffectState* state)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->reset();
@@ -546,14 +546,14 @@ namespace UnityCallbacks
         return 0;
     }
 
-    int UNITY_INTERFACE_API setPositionCallback (UnityAudioEffectState* state, unsigned int pos)
+    static int UNITY_INTERFACE_API setPositionCallback (UnityAudioEffectState* state, unsigned int pos)
     {
         ignoreUnused (state, pos);
 
         return 0;
     }
 
-    int UNITY_INTERFACE_API setFloatParameterCallback (UnityAudioEffectState* state, int index, float value)
+    static int UNITY_INTERFACE_API setFloatParameterCallback (UnityAudioEffectState* state, int index, float value)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->setParameter (index, value);
@@ -561,7 +561,7 @@ namespace UnityCallbacks
         return 0;
     }
 
-    int UNITY_INTERFACE_API getFloatParameterCallback (UnityAudioEffectState* state, int index, float* value, char* valueStr)
+    static int UNITY_INTERFACE_API getFloatParameterCallback (UnityAudioEffectState* state, int index, float* value, char* valueStr)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         *value = pluginInstance->getParameter (index);
@@ -571,7 +571,7 @@ namespace UnityCallbacks
         return 0;
     }
 
-    int UNITY_INTERFACE_API getFloatBufferCallback (UnityAudioEffectState* state, const char* name, float* buffer, int numSamples)
+    static int UNITY_INTERFACE_API getFloatBufferCallback (UnityAudioEffectState* state, const char* name, float* buffer, int numSamples)
     {
         ignoreUnused (numSamples);
 
@@ -615,8 +615,8 @@ namespace UnityCallbacks
         return 0;
     }
 
-    int UNITY_INTERFACE_API processCallback (UnityAudioEffectState* state, float* inBuffer, float* outBuffer,
-                                             unsigned int bufferSize, int numInChannels, int numOutChannels)
+    static int UNITY_INTERFACE_API processCallback (UnityAudioEffectState* state, float* inBuffer, float* outBuffer,
+                                                    unsigned int bufferSize, int numInChannels, int numOutChannels)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
 
@@ -776,6 +776,8 @@ UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API unitySetScreenBounds (int id, fl
 
 //==============================================================================
 #if JUCE_WINDOWS
+ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
+
  extern "C" BOOL WINAPI DllMain (HINSTANCE instance, DWORD reason, LPVOID)
  {
      if (reason == DLL_PROCESS_ATTACH)
@@ -783,6 +785,8 @@ UNITY_INTERFACE_EXPORT void UNITY_INTERFACE_API unitySetScreenBounds (int id, fl
 
      return true;
  }
+
+ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #endif
 
 #endif

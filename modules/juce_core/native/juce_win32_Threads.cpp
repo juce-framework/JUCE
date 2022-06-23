@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -197,6 +197,7 @@ static int lastProcessPriority = -1;
 
 // called when the app gains focus because Windows does weird things to process priority
 // when you swap apps, and this forces an update when the app is brought to the front.
+void juce_repeatLastProcessPriority();
 void juce_repeatLastProcessPriority()
 {
     if (lastProcessPriority >= 0) // (avoid changing this if it's not been explicitly set by the app..)
@@ -265,6 +266,7 @@ void JUCE_CALLTYPE Process::terminate()
     ExitProcess (1);
 }
 
+bool juce_isRunningInWine();
 bool juce_isRunningInWine()
 {
     HMODULE ntdll = GetModuleHandleA ("ntdll");

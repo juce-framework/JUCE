@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -155,28 +155,25 @@ public:
         void prepare (double newSampleRate, int newBlockSize, AudioProcessorGraph*, ProcessingPrecision);
         void unprepare();
 
-        bool hasNoConnections() const noexcept   { return inputs.isEmpty() && outputs.isEmpty(); }
+        template <typename Sample>
+        void callProcessFunction (AudioBuffer<Sample>& audio,
+                                  MidiBuffer& midi,
+                                  void (AudioProcessor::* function) (AudioBuffer<Sample>&, MidiBuffer&))
+        {
+            const ScopedLock lock (processorLock);
+            (processor.get()->*function) (audio, midi);
+        }
 
         template <typename Sample>
         void processBlock (AudioBuffer<Sample>& audio, MidiBuffer& midi)
         {
-            if (hasNoConnections())
-                return;
-
-            const ScopedLock lock (processorLock);
-
-            processor->processBlock (audio, midi);
+            callProcessFunction (audio, midi, &AudioProcessor::processBlock);
         }
 
         template <typename Sample>
         void processBlockBypassed (AudioBuffer<Sample>& audio, MidiBuffer& midi)
         {
-            if (hasNoConnections())
-                return;
-
-            const ScopedLock lock (processorLock);
-
-            processor->processBlockBypassed (audio, midi);
+            callProcessFunction (audio, midi, &AudioProcessor::processBlockBypassed);
         }
 
         CriticalSection processorLock;

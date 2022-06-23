@@ -1,0 +1,48 @@
+@prefix log: <http://lv2plug.in/ns/ext/log#> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/log>
+	a owl:Ontology ;
+	rdfs:label "LV2 Log" ;
+	rdfs:comment "A feature for writing log messages." ;
+	rdfs:seeAlso <log.h> ,
+		<log.meta.ttl> .
+
+log:Entry
+	a rdfs:Class ;
+	rdfs:label "Entry" ;
+	rdfs:comment "A log entry." .
+
+log:Error
+	a rdfs:Class ;
+	rdfs:label "Error" ;
+	rdfs:subClassOf log:Entry ;
+	rdfs:comment "An error message." .
+
+log:Note
+	a rdfs:Class ;
+	rdfs:label "Note" ;
+	rdfs:subClassOf log:Entry ;
+	rdfs:comment "An informative message." .
+
+log:Warning
+	a rdfs:Class ;
+	rdfs:label "Warning" ;
+	rdfs:subClassOf log:Entry ;
+	rdfs:comment "A warning message." .
+
+log:Trace
+	a rdfs:Class ;
+	rdfs:label "Trace" ;
+	rdfs:subClassOf log:Entry ;
+	rdfs:comment "A debugging trace message." .
+
+log:log
+	a lv2:Feature ;
+	rdfs:label "log" ;
+	rdfs:comment "Logging feature." .
+

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -27,10 +27,9 @@
 // define all your plugin settings properly..
 
 #if ! (JucePlugin_Build_VST || JucePlugin_Build_VST3 \
-        || JucePlugin_Build_AU || JucePlugin_Build_AUv3 \
-        ||JucePlugin_Build_RTAS || JucePlugin_Build_AAX \
-        || JucePlugin_Build_Standalone || JucePlugin_Build_LV2 \
-        || JucePlugin_Build_Unity)
+        || JucePlugin_Build_AU  || JucePlugin_Build_AUv3 \
+        || JucePlugin_Build_AAX || JucePlugin_Build_Standalone \
+        || JucePlugin_Build_LV2 || JucePlugin_Build_Unity)
  #error "You need to enable at least one plugin format!"
 #endif
 
@@ -68,16 +67,6 @@
 #endif
 
 //==============================================================================
-#if _WIN64 || (__LP64__ && (defined (__APPLE_CPP__) || defined (__APPLE_CC__)))
- #undef JucePlugin_Build_RTAS
- #define JucePlugin_Build_RTAS 0
-#endif
-
-//==============================================================================
-#if JucePlugin_Build_LV2 && ! defined (JucePlugin_LV2URI)
- #error "You need to define the JucePlugin_LV2URI value!"
-#endif
-
 #if JucePlugin_Build_AAX && ! defined (JucePlugin_AAXIdentifier)
  #error "You need to define the JucePlugin_AAXIdentifier value!"
 #endif

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -126,12 +126,18 @@ static const uint8 javaComponentPeerView[] =
 
 //==============================================================================
 #if JUCE_PUSH_NOTIFICATIONS && JUCE_MODULE_AVAILABLE_juce_gui_extra
- extern bool juce_handleNotificationIntent (void*);
- extern void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
- extern void juce_firebaseRemoteNotificationReceived (void*);
- extern void juce_firebaseRemoteMessagesDeleted();
- extern void juce_firebaseRemoteMessageSent(void*);
- extern void juce_firebaseRemoteMessageSendError (void*, void*);
+ bool juce_handleNotificationIntent (void*);
+ void juce_firebaseDeviceNotificationsTokenRefreshed (void*);
+ void juce_firebaseRemoteNotificationReceived (void*);
+ void juce_firebaseRemoteMessagesDeleted();
+ void juce_firebaseRemoteMessageSent(void*);
+ void juce_firebaseRemoteMessageSendError (void*, void*);
+#endif
+
+#if JUCE_IN_APP_PURCHASES && JUCE_MODULE_AVAILABLE_juce_product_unlocking
+ void juce_handleOnResume();
+#else
+ static void juce_handleOnResume() {}
 #endif
 
 //==============================================================================
@@ -750,11 +756,11 @@ public:
                 {
                     case ACTION_HOVER_ENTER:
                     case ACTION_HOVER_MOVE:
-                        sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_ENTER, 0);
+                        AccessibilityNativeHandle::sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_ENTER, 0);
                         break;
 
                     case ACTION_HOVER_EXIT:
-                        sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_EXIT, 0);
+                        AccessibilityNativeHandle::sendAccessibilityEventImpl (*virtualHandler, TYPE_VIEW_HOVER_EXIT, 0);
                         break;
                 }
             }
@@ -936,6 +942,8 @@ public:
 
     void dismissPendingTextInput() override
     {
+        closeInputMethodContext();
+
         view.callVoidMethod (ComponentPeerView.showKeyboard, javaString ("").get());
 
         if (! isTimerRunning())
@@ -2091,7 +2099,8 @@ const int KeyPress::rewindKey               = extendedKeyModifier + 72;
  struct JuceActivityNewIntentListener
  {
      #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
-      CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V")
+      CALLBACK (appNewIntent, "appNewIntent", "(Landroid/content/Intent;)V") \
+      CALLBACK (appOnResume,  "appOnResume",  "()V")
 
       DECLARE_JNI_CLASS (JavaActivity, JUCE_PUSH_NOTIFICATIONS_ACTIVITY)
      #undef JNI_CLASS_MEMBERS
@@ -2099,6 +2108,11 @@ const int KeyPress::rewindKey               = extendedKeyModifier + 72;
      static void JNICALL appNewIntent (JNIEnv*, jobject /*activity*/, jobject intentData)
      {
          juce_handleNotificationIntent (static_cast<void*> (intentData));
+     }
+
+     static void JNICALL appOnResume (JNIEnv*, jobject)
+     {
+         juce_handleOnResume();
      }
  };
 

@@ -349,6 +349,12 @@
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARADocumentControllerTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAPlaybackRendererTemplate.cpp">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginEditorTemplate.cpp">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClCompile>
@@ -556,7 +562,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_Optional_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_OwnedArray.cpp">
@@ -573,6 +585,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_Variant.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_common_MimeTypes.cpp">
+      <Filter>JUCE Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.cpp">
       <Filter>JUCE Modules\juce_core\files</Filter>
@@ -639,6 +654,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_AndroidDocument.cpp">
+      <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Files.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
@@ -1570,6 +1588,9 @@
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\mouse\juce_MouseListener.cpp">
       <Filter>JUCE Modules\juce_gui_basics\mouse</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_AccessibilityTextHelpers_test.cpp">
+      <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\accessibility\juce_android_Accessibility.cpp">
       <Filter>JUCE Modules\juce_gui_basics\native\accessibility</Filter>
     </ClCompile>
@@ -1604,9 +1625,6 @@
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_android_Windowing.cpp">
-      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_common_MimeTypes.cpp">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_gui_basics\native\juce_ios_ContentSharer.cpp">
@@ -1986,6 +2004,12 @@
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioComponentTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARADocumentControllerTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginARAPlaybackRendererTemplate.h">
+      <Filter>Projucer\BinaryData\Templates</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\BinaryData\Templates\jucer_AudioPluginEditorTemplate.h">
       <Filter>Projucer\BinaryData\Templates</Filter>
     </ClInclude>
@@ -2283,9 +2307,6 @@
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_Android.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CLion.h">
-      <Filter>Projucer\ProjectSaving</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\Source\ProjectSaving\jucer_ProjectExport_CodeBlocks.h">
       <Filter>Projucer\ProjectSaving</Filter>
     </ClInclude>
@@ -2436,6 +2457,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Optional.h">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_OwnedArray.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
@@ -2459,6 +2483,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Variant.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_AndroidDocument.h">
+      <Filter>JUCE Modules\juce_core\files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_common_MimeTypes.h">
+      <Filter>JUCE Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.h">
       <Filter>JUCE Modules\juce_core\files</Filter>
@@ -2941,6 +2971,9 @@
       <Filter>JUCE Modules\juce_events\messages</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_linux_EventLoop.h">
+      <Filter>JUCE Modules\juce_events\native</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_linux_EventLoopInternal.h">
       <Filter>JUCE Modules\juce_events\native</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_events\native\juce_osx_MessageQueue.h">
@@ -3537,6 +3570,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\x11\juce_linux_XWindowSystem.h">
       <Filter>JUCE Modules\juce_gui_basics\native\x11</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_mac_CGMetalLayerRenderer.h">
+      <Filter>JUCE Modules\juce_gui_basics\native</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_basics\native\juce_MultiTouchMapper.h">
       <Filter>JUCE Modules\juce_gui_basics\native</Filter>
     </ClInclude>
@@ -3747,9 +3783,6 @@
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\misc\juce_WebBrowserComponent.h">
       <Filter>JUCE Modules\juce_gui_extra\misc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\..\modules\juce_gui_extra\native\juce_mac_CarbonViewWrapperComponent.h">
-      <Filter>JUCE Modules\juce_gui_extra\native</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_gui_extra\native\juce_mac_NSViewFrameWatcher.h">
       <Filter>JUCE Modules\juce_gui_extra\native</Filter>
     </ClInclude>
@@ -3764,10 +3797,16 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\..\Build\CMake\JuceLV2Defines.h.in">
+      <Filter>Projucer\BinaryData</Filter>
+    </None>
     <None Include="..\..\..\Build\CMake\LaunchScreen.storyboard">
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\..\Build\CMake\PIPAudioProcessor.cpp.in">
+      <Filter>Projucer\BinaryData</Filter>
+    </None>
+    <None Include="..\..\..\Build\CMake\PIPAudioProcessorWithARA.cpp.in">
       <Filter>Projucer\BinaryData</Filter>
     </None>
     <None Include="..\..\..\Build\CMake\PIPComponent.cpp.in">
@@ -3798,9 +3837,6 @@
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_android.svg">
-      <Filter>Projucer\BinaryData\Icons</Filter>
-    </None>
-    <None Include="..\..\Source\BinaryData\Icons\export_clion.svg">
       <Filter>Projucer\BinaryData\Icons</Filter>
     </None>
     <None Include="..\..\Source\BinaryData\Icons\export_codeBlocks.svg">

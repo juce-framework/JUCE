@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -566,6 +566,7 @@ enum
  {
      static int trappedErrorCode = 0;
 
+     extern "C" int errorTrapHandler (Display*, XErrorEvent* err);
      extern "C" int errorTrapHandler (Display*, XErrorEvent* err)
      {
          trappedErrorCode = err->error_code;
@@ -1870,7 +1871,9 @@ Rectangle<int> XWindowSystem::getWindowBounds (::Window windowH, ::Window parent
         }
         else
         {
-            parentScreenPosition = Point<int> (rootX, rootY);
+            // XGetGeometry returns wx and wy relative to the parent window's origin.
+            // XTranslateCoordinates returns rootX and rootY relative to the root window.
+            parentScreenPosition = Point<int> (rootX - wx, rootY - wy);
         }
     }
 
@@ -3220,11 +3223,13 @@ void XWindowSystem::destroyXDisplay()
 }
 
 //==============================================================================
+::Window juce_createKeyProxyWindow (ComponentPeer* peer);
 ::Window juce_createKeyProxyWindow (ComponentPeer* peer)
 {
     return XWindowSystem::getInstance()->createKeyProxy ((::Window) peer->getNativeHandle());
 }
 
+void juce_deleteKeyProxyWindow (::Window keyProxy);
 void juce_deleteKeyProxyWindow (::Window keyProxy)
 {
     XWindowSystem::getInstance()->deleteKeyProxy (keyProxy);
