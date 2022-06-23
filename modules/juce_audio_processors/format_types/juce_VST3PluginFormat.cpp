@@ -94,6 +94,12 @@ static int warnOnFailureIfImplemented (int result) noexcept
  #define warnOnFailureIfImplemented(x) x
 #endif
 
+enum class Direction { input, output };
+enum class MediaKind { audio, event };
+
+static Vst::MediaType toVstType (MediaKind x) { return x == MediaKind::audio ? Vst::kAudio : Vst::kEvent; }
+static Vst::BusDirection toVstType (Direction x) { return x == Direction::input ? Vst::kInput : Vst::kOutput; }
+
 static std::vector<Vst::ParamID> getAllParamIDs (Vst::IEditController& controller)
 {
     std::vector<Vst::ParamID> result;
@@ -211,51 +217,47 @@ static void createPluginDescription (PluginDescription& description,
 }
 
 static int getNumSingleDirectionBusesFor (Vst::IComponent* component,
-                                           bool checkInputs,
-                                           bool checkAudioChannels)
+                                          MediaKind kind,
+                                          Direction direction)
 {
     jassert (component != nullptr);
-
-    return (int) component->getBusCount (checkAudioChannels ? Vst::kAudio : Vst::kEvent,
-                                         checkInputs ? Vst::kInput : Vst::kOutput);
+    JUCE_ASSERT_MESSAGE_THREAD
+    return (int) component->getBusCount (toVstType (kind), toVstType (direction));
 }
 
 /** Gives the total number of channels for a particular type of bus direction and media type */
-static int getNumSingleDirectionChannelsFor (Vst::IComponent* component,
-                                             bool checkInputs,
-                                             bool checkAudioChannels)
+static int getNumSingleDirectionChannelsFor (Vst::IComponent* component, Direction busDirection)
 {
     jassert (component != nullptr);
+    JUCE_ASSERT_MESSAGE_THREAD
 
-    const Vst::BusDirections direction  = checkInputs ? Vst::kInput : Vst::kOutput;
-    const Vst::MediaTypes mediaType     = checkAudioChannels ? Vst::kAudio : Vst::kEvent;
-    const Steinberg::int32 numBuses     = component->getBusCount (mediaType, direction);
+    const auto direction = toVstType (busDirection);
+    const Steinberg::int32 numBuses = component->getBusCount (Vst::kAudio, direction);
 
     int numChannels = 0;
 
     for (Steinberg::int32 i = numBuses; --i >= 0;)
     {
         Vst::BusInfo busInfo;
-        warnOnFailure (component->getBusInfo (mediaType, direction, i, busInfo));
+        warnOnFailure (component->getBusInfo (Vst::kAudio, direction, i, busInfo));
         numChannels += ((busInfo.flags & Vst::BusInfo::kDefaultActive) != 0 ? (int) busInfo.channelCount : 0);
     }
 
     return numChannels;
 }
 
-static void setStateForAllBusesOfType (Vst::IComponent* component,
-                                       bool state,
-                                       bool activateInputs,
-                                       bool activateAudioChannels)
+static void setStateForAllEventBuses (Vst::IComponent* component,
+                                      bool state,
+                                      Direction busDirection)
 {
     jassert (component != nullptr);
+    JUCE_ASSERT_MESSAGE_THREAD
 
-    const Vst::BusDirections direction  = activateInputs ? Vst::kInput : Vst::kOutput;
-    const Vst::MediaTypes mediaType     = activateAudioChannels ? Vst::kAudio : Vst::kEvent;
-    const Steinberg::int32 numBuses     = component->getBusCount (mediaType, direction);
+    const auto direction = toVstType (busDirection);
+    const Steinberg::int32 numBuses = component->getBusCount (Vst::kEvent, direction);
 
     for (Steinberg::int32 i = numBuses; --i >= 0;)
-        warnOnFailure (component->activateBus (mediaType, direction, i, state));
+        warnOnFailure (component->activateBus (Vst::kEvent, direction, i, state));
 }
 
 //==============================================================================
@@ -892,8 +894,8 @@ struct DescriptionFactory
                 {
                     if (component->initialize (vst3HostContext->getFUnknown()) == kResultOk)
                     {
-                        auto numInputs  = getNumSingleDirectionChannelsFor (component, true, true);
-                        auto numOutputs = getNumSingleDirectionChannelsFor (component, false, true);
+                        auto numInputs  = getNumSingleDirectionChannelsFor (component, Direction::input);
+                        auto numOutputs = getNumSingleDirectionChannelsFor (component, Direction::output);
 
                         createPluginDescription (desc, file, companyName, name,
                                                  info, info2.get(), infoW.get(), numInputs, numOutputs);
@@ -1920,12 +1922,12 @@ struct VST3ComponentHolder
             Vst::BusInfo bus;
             int totalNumInputChannels = 0, totalNumOutputChannels = 0;
 
-            int n = component->getBusCount(Vst::kAudio, Vst::kInput);
+            int n = component->getBusCount (Vst::kAudio, Vst::kInput);
             for (int i = 0; i < n; ++i)
                 if (component->getBusInfo (Vst::kAudio, Vst::kInput, i, bus) == kResultOk)
                     totalNumInputChannels += ((bus.flags & Vst::BusInfo::kDefaultActive) != 0 ? bus.channelCount : 0);
 
-            n = component->getBusCount(Vst::kAudio, Vst::kOutput);
+            n = component->getBusCount (Vst::kAudio, Vst::kOutput);
             for (int i = 0; i < n; ++i)
                 if (component->getBusInfo (Vst::kAudio, Vst::kOutput, i, bus) == kResultOk)
                     totalNumOutputChannels += ((bus.flags & Vst::BusInfo::kDefaultActive) != 0 ? bus.channelCount : 0);
@@ -2324,9 +2326,7 @@ public:
     //==============================================================================
     VST3PluginInstance (VST3ComponentHolder* componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
-          holder (componentHolder),
-          midiInputs (new MidiEventList()),
-          midiOutputs (new MidiEventList())
+          holder (componentHolder)
     {
         holder->host->setPlugin (this);
     }
@@ -2859,14 +2859,15 @@ public:
     };
 
     //==============================================================================
-    String getChannelName (int channelIndex, bool forInput, bool forAudioChannel) const
+    String getChannelName (int channelIndex, Direction direction) const
     {
-        auto numBuses = getNumSingleDirectionBusesFor (holder->component, forInput, forAudioChannel);
+        auto numBuses = getNumSingleDirectionBusesFor (holder->component, MediaKind::audio, direction);
+
         int numCountedChannels = 0;
 
         for (int i = 0; i < numBuses; ++i)
         {
-            auto busInfo = getBusInfo (forInput, forAudioChannel, i);
+            auto busInfo = getBusInfo (MediaKind::audio, direction, i);
 
             numCountedChannels += busInfo.channelCount;
 
@@ -2877,25 +2878,25 @@ public:
         return {};
     }
 
-    const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, true, true); }
-    const String getOutputChannelName (int channelIndex) const override   { return getChannelName (channelIndex, false, true); }
+    const String getInputChannelName  (int channelIndex) const override   { return getChannelName (channelIndex, Direction::input); }
+    const String getOutputChannelName (int channelIndex) const override   { return getChannelName (channelIndex, Direction::output); }
 
     bool isInputChannelStereoPair (int channelIndex) const override
     {
         int busIdx;
         return getOffsetInBusBufferForAbsoluteChannelIndex (true, channelIndex, busIdx) >= 0
-                 && getBusInfo (true, true, busIdx).channelCount == 2;
+                 && getBusInfo (MediaKind::audio, Direction::input, busIdx).channelCount == 2;
     }
 
     bool isOutputChannelStereoPair (int channelIndex) const override
     {
         int busIdx;
         return getOffsetInBusBufferForAbsoluteChannelIndex (false, channelIndex, busIdx) >= 0
-                 && getBusInfo (false, true, busIdx).channelCount == 2;
+                 && getBusInfo (MediaKind::audio, Direction::output, busIdx).channelCount == 2;
     }
 
-    bool acceptsMidi() const override    { return getNumSingleDirectionBusesFor (holder->component, true,  false) > 0; }
-    bool producesMidi() const override   { return getNumSingleDirectionBusesFor (holder->component, false, false) > 0; }
+    bool acceptsMidi() const override    { return hasMidiInput; }
+    bool producesMidi() const override   { return hasMidiOutput; }
 
     //==============================================================================
     AudioProcessorParameter* getBypassParameter() const override         { return bypassParam; }
@@ -3193,9 +3194,11 @@ private:
     CachedParamValues cachedParamValues;
     VSTComSmartPtr<ParameterChanges> inputParameterChanges  { new ParameterChanges };
     VSTComSmartPtr<ParameterChanges> outputParameterChanges { new ParameterChanges };
-    VSTComSmartPtr<MidiEventList> midiInputs, midiOutputs;
+    VSTComSmartPtr<MidiEventList> midiInputs { new MidiEventList }, midiOutputs { new MidiEventList };
     Vst::ProcessContext timingInfo; //< Only use this in processBlock()!
     bool isControllerInitialised = false, isActive = false, lastProcessBlockCallWasBypass = false;
+    const bool hasMidiInput  = getNumSingleDirectionBusesFor (holder->component, MediaKind::event, Direction::input) > 0,
+               hasMidiOutput = getNumSingleDirectionBusesFor (holder->component, MediaKind::event, Direction::output) > 0;
     VST3Parameter* bypassParam = nullptr;
 
     //==============================================================================
@@ -3330,8 +3333,8 @@ private:
 
     void setStateForAllMidiBuses (bool newState)
     {
-        setStateForAllBusesOfType (holder->component, newState, true, false);   // Activate/deactivate MIDI inputs
-        setStateForAllBusesOfType (holder->component, newState, false, false);  // Activate/deactivate MIDI outputs
+        setStateForAllEventBuses (holder->component, newState, Direction::input);
+        setStateForAllEventBuses (holder->component, newState, Direction::output);
     }
 
     std::vector<ChannelMapping> createChannelMappings (bool isInput) const
@@ -3397,11 +3400,11 @@ private:
     }
 
     //==============================================================================
-    Vst::BusInfo getBusInfo (bool forInput, bool forAudio, int index = 0) const
+    Vst::BusInfo getBusInfo (MediaKind kind, Direction direction, int index = 0) const
     {
         Vst::BusInfo busInfo;
-        busInfo.mediaType = forAudio ? Vst::kAudio : Vst::kEvent;
-        busInfo.direction = forInput ? Vst::kInput : Vst::kOutput;
+        busInfo.mediaType = toVstType (kind);
+        busInfo.direction = toVstType (direction);
         busInfo.channelCount = 0;
 
         holder->component->getBusInfo (busInfo.mediaType, busInfo.direction,
