@@ -323,7 +323,7 @@ public:
         /** @see getTimeInSamples() */
         void setTimeInSamples (Optional<int64_t> timeInSamplesIn)       {        setOptional (flagTimeSamples, timeInSamples, timeInSamplesIn); }
 
-        /** Returns the number of samples that have elapsed. */
+        /** Returns the number of seconds that have elapsed. */
         Optional<double> getTimeInSeconds() const                       { return getOptional (flagTimeSeconds, timeInSeconds); }
 
         /** @see getTimeInSamples() */
