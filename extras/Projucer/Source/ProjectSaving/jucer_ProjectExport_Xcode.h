@@ -780,9 +780,6 @@ public:
 
         rtasPathValueWrapper.init ({ settings, Ids::rtasFolder, nullptr },
                                    getAppSettings().getStoredPath (Ids::rtasPath, TargetOS::osx), TargetOS::osx);
-
-        araPathValueWrapper.init ({ settings, Ids::araFolder, nullptr },
-                                  getAppSettings().getStoredPath (Ids::araPath, TargetOS::osx), TargetOS::osx);
     }
 
 protected:
@@ -1444,27 +1441,6 @@ public:
         {
             StringPairArray s;
 
-            String configurationBuildDir ("$(PROJECT_DIR)/build/$(CONFIGURATION)");
-
-            if (config.getTargetBinaryRelativePathString().isNotEmpty())
-            {
-                // a target's position can either be defined via installPath + xcodeCopyToProductInstallPathAfterBuild
-                // (= for audio plug-ins) or using a custom binary path (for everything else), but not both (= conflict!)
-                jassert (! xcodeCopyToProductInstallPathAfterBuild);
-
-                build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
-                                                      build_tools::RelativePath::projectFolder);
-
-                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
-                                                                        owner.getTargetFolder(),
-                                                                        build_tools::RelativePath::buildTargetFolder)
-                                                              .toUnixStyle());
-            }
-
-            // TODO JUCE_ARA there is no CONFIGURATION_BUILD_DIR setting in Xcode, SYMROOT seems to be intended here?
-            //s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
-            s.set ("SYMROOT", addQuotesIfRequired (configurationBuildDir));
-
             if (type == AggregateTarget && ! owner.isiOS())
             {
                 // the aggregate target needs to have the deployment target set for
@@ -1652,6 +1628,25 @@ public:
 
             if (xcodeOtherRezFlags.isNotEmpty())
                 s.set ("OTHER_REZFLAGS", "\"" + xcodeOtherRezFlags + "\"");
+
+            String configurationBuildDir ("$(PROJECT_DIR)/build/$(CONFIGURATION)");
+
+            if (config.getTargetBinaryRelativePathString().isNotEmpty())
+            {
+                // a target's position can either be defined via installPath + xcodeCopyToProductInstallPathAfterBuild
+                // (= for audio plug-ins) or using a custom binary path (for everything else), but not both (= conflict!)
+                jassert (! xcodeCopyToProductInstallPathAfterBuild);
+
+                build_tools::RelativePath binaryPath (config.getTargetBinaryRelativePathString(),
+                                                      build_tools::RelativePath::projectFolder);
+
+                configurationBuildDir = expandPath (binaryPath.rebased (owner.projectFolder,
+                                                                        owner.getTargetFolder(),
+                                                                        build_tools::RelativePath::buildTargetFolder)
+                                                              .toUnixStyle());
+            }
+
+            s.set ("CONFIGURATION_BUILD_DIR", addQuotesIfRequired (configurationBuildDir));
 
             if (owner.isHardenedRuntimeEnabled())
                 s.set ("ENABLE_HARDENED_RUNTIME", "YES");
@@ -1904,7 +1899,6 @@ public:
             options.isAuSandboxSafe                 = owner.project.isAUSandBoxSafe();
             options.isPluginSynth                   = owner.project.isPluginSynth();
             options.suppressResourceUsage           = owner.getSuppressPlistResourceUsage();
-            options.isPluginARAEffect               = owner.project.shouldEnableARA();
 
             options.write (infoPlistFile);
         }
@@ -1977,7 +1971,7 @@ public:
         //==============================================================================
         void addExtraAudioUnitTargetSettings()
         {
-            xcodeOtherRezFlags = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64"
+            xcodeOtherRezFlags = "-d ppc_$ppc -d i386_$i386 -d ppc64_$ppc64 -d x86_64_$x86_64 -d arm64_$arm64"
                                  " -I /System/Library/Frameworks/CoreServices.framework/Frameworks/CarbonCore.framework/Versions/A/Headers"
                                  " -I \\\"$(DEVELOPER_DIR)/Extras/CoreAudio/AudioUnits/AUPublic/AUBase\\\""
                                  " -I \\\"$(DEVELOPER_DIR)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks/AudioUnit.framework/Headers\\\"";

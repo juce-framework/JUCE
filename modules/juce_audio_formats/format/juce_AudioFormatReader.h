@@ -140,7 +140,7 @@ public:
         cope with mismatches between the number of channels in the reader
         and the buffer.
     */
-    bool read (AudioBuffer<float>* buffer,
+    void read (AudioBuffer<float>* buffer,
                int startSampleInDestBuffer,
                int numSamples,
                int64 readerStartSample,

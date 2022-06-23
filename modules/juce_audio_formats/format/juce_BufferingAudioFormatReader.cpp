@@ -63,8 +63,6 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
     const ScopedLock sl (lock);
     nextReadPosition = startSampleInFile;
 
-    bool success = true;
-
     while (numSamples > 0)
     {
         if (auto block = getBlockContaining (startSampleInFile))
@@ -88,10 +86,6 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
             startOffsetInDestBuffer += numToDo;
             startSampleInFile += numToDo;
             numSamples -= numToDo;
-
-            // TODO JUCE_ARA we want to continue reading but flag failure if any block fails
-            // https://forum.juce.com/t/bufferingaudioreader-readsamples-return-value-seems-buggy/35173
-            success = success && block->success;
         }
         else
         {
@@ -101,9 +95,6 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
                     if (auto* dest = (float*) destSamples[j])
                         FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
 
-                // TODO JUCE_ARA we want to treat a read timeout as a failure
-                // https://forum.juce.com/t/bufferingaudioreader-readsamples-return-value-seems-buggy/35173
-                success = false;
                 break;
             }
             else
@@ -114,14 +105,14 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
         }
     }
 
-    return success;
+    return true;
 }
 
 BufferingAudioReader::BufferedBlock::BufferedBlock (AudioFormatReader& reader, int64 pos, int numSamples)
     : range (pos, pos + numSamples),
       buffer ((int) reader.numChannels, numSamples)
 {
-    success = reader.read (&buffer, 0, numSamples, pos, true, true);
+    reader.read (&buffer, 0, numSamples, pos, true, true);
 }
 
 BufferingAudioReader::BufferedBlock* BufferingAudioReader::getBlockContaining (int64 pos) const noexcept

@@ -162,9 +162,6 @@ void Project::updateTitleDependencies()
     bundleIdentifierValue.    setDefault (getDefaultBundleIdentifierString());
     pluginAUExportPrefixValue.setDefault (build_tools::makeValidIdentifier (projectName, false, true, false) + "AU");
     pluginAAXIdentifierValue. setDefault (getDefaultAAXIdentifierString());
-    pluginARAFactoryIDValue.  setDefault (getDefaultARAFactoryIDString());
-    pluginARAArchiveIDValue.  setDefault (getDefaultARADocumentArchiveID());
-    pluginARACompatibleArchiveIDsValue. setDefault (getDefaultARACompatibleArchiveIDs());
 }
 
 String Project::getDocumentTitle()
@@ -175,10 +172,7 @@ String Project::getDocumentTitle()
 void Project::updateCompanyNameDependencies()
 {
     bundleIdentifierValue.setDefault    (getDefaultBundleIdentifierString());
-    companyWebsiteValue.setDefault      (getDefaultCompanyWebsiteString());
     pluginAAXIdentifierValue.setDefault (getDefaultAAXIdentifierString());
-    pluginARAFactoryIDValue.setDefault  (getDefaultARAFactoryIDString());
-    pluginARAArchiveIDValue.setDefault  (getDefaultARADocumentArchiveID());
     pluginManufacturerValue.setDefault  (getDefaultPluginManufacturerString());
 
     updateLicenseWarning();
@@ -280,7 +274,7 @@ void Project::initialiseProjectValues()
 
     companyNameValue.referTo         (projectRoot, Ids::companyName,         getUndoManager());
     companyCopyrightValue.referTo    (projectRoot, Ids::companyCopyright,    getUndoManager());
-    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,      getUndoManager(), getDefaultCompanyWebsiteString());
+    companyWebsiteValue.referTo      (projectRoot, Ids::companyWebsite,      getUndoManager());
     companyEmailValue.referTo        (projectRoot, Ids::companyEmail,        getUndoManager());
 
     projectTypeValue.referTo         (projectRoot, Ids::projectType,         getUndoManager(), build_tools::ProjectType_GUIApp::getTypeName());
@@ -336,8 +330,6 @@ void Project::initialiseAudioPluginValues()
     pluginCodeValue.referTo                  (projectRoot, Ids::pluginCode,                 getUndoManager(), makeValid4CC (getProjectUIDString() + getProjectUIDString()));
     pluginChannelConfigsValue.referTo        (projectRoot, Ids::pluginChannelConfigs,       getUndoManager());
     pluginAAXIdentifierValue.referTo         (projectRoot, Ids::aaxIdentifier,              getUndoManager(), getDefaultAAXIdentifierString());
-    pluginARAFactoryIDValue.referTo          (projectRoot, Ids::araFactoryID,               getUndoManager(), getDefaultARAFactoryIDString());
-    pluginARAArchiveIDValue.referTo          (projectRoot, Ids::araDocumentArchiveID,       getUndoManager(), getDefaultARADocumentArchiveID());
     pluginAUExportPrefixValue.referTo        (projectRoot, Ids::pluginAUExportPrefix,       getUndoManager(),
                                               build_tools::makeValidIdentifier (getProjectNameString(), false, true, false) + "AU");
 
@@ -347,11 +339,6 @@ void Project::initialiseAudioPluginValues()
     pluginVST3CategoryValue.referTo          (projectRoot, Ids::pluginVST3Category,         getUndoManager(), getDefaultVST3Categories(), ",");
     pluginRTASCategoryValue.referTo          (projectRoot, Ids::pluginRTASCategory,         getUndoManager(), getDefaultRTASCategories(), ",");
     pluginAAXCategoryValue.referTo           (projectRoot, Ids::pluginAAXCategory,          getUndoManager(), getDefaultAAXCategories(),  ",");
-
-    pluginEnableARA.referTo                  (projectRoot, Ids::enableARA,                  getUndoManager(),  shouldEnableARA(), ",");
-    pluginARAAnalyzableContentValue.referTo  (projectRoot, Ids::pluginARAAnalyzableContent, getUndoManager(), getDefaultARAContentTypes(), ",");
-    pluginARATransformFlagsValue.referTo     (projectRoot, Ids::pluginARATransformFlags,    getUndoManager(), getDefaultARATransformationFlags(), ",");
-    pluginARACompatibleArchiveIDsValue.referTo (projectRoot, Ids::araCompatibleArchiveIDs,    getUndoManager(), getDefaultARACompatibleArchiveIDs());
 
     pluginVSTNumMidiInputsValue.referTo      (projectRoot, Ids::pluginVSTNumMidiInputs,     getUndoManager(), 16);
     pluginVSTNumMidiOutputsValue.referTo     (projectRoot, Ids::pluginVSTNumMidiOutputs,    getUndoManager(), 16);
@@ -524,24 +511,6 @@ void Project::updatePluginCategories()
             pluginVSTCategoryValue = Array<var> (vstCategory);
         else
             pluginVSTCategoryValue.resetToDefault();
-    }
-
-    {
-        auto araAnalyzableContent = projectRoot.getProperty (Ids::pluginARAAnalyzableContent, {}).toString();
-
-        if (getAllARAContentTypeVars().contains (araAnalyzableContent))
-            pluginARAAnalyzableContentValue = araAnalyzableContent;
-        else if (getAllARAContentTypeStrings().contains (araAnalyzableContent))
-            pluginARAAnalyzableContentValue = Array<var> (getAllARAContentTypeVars()[getAllARAContentTypeStrings().indexOf (araAnalyzableContent)]);
-    }
-
-    {
-        auto araTransformationFlags = projectRoot.getProperty (Ids::pluginARATransformFlags, {}).toString();
-
-        if (getAllARATransformationFlagVars().contains (araTransformationFlags))
-            pluginARATransformFlagsValue = araTransformationFlags;
-        else if (getAllARATransformationFlagStrings().contains (araTransformationFlags))
-            pluginARATransformFlagsValue = Array<var> (getAllARATransformationFlagVars()[getAllARATransformationFlagStrings().indexOf (araTransformationFlags)]);
     }
 
     {
@@ -1113,14 +1082,11 @@ void Project::valueTreePropertyChanged (ValueTree& tree, const Identifier& prope
         }
         else if (property == Ids::pluginCharacteristicsValue)
         {
-            pluginAUMainTypeValue.setDefault        (getDefaultAUMainTypes());
-            pluginVSTCategoryValue.setDefault       (getDefaultVSTCategories());
-            pluginVST3CategoryValue.setDefault      (getDefaultVST3Categories());
-            pluginRTASCategoryValue.setDefault      (getDefaultRTASCategories());
-            pluginAAXCategoryValue.setDefault       (getDefaultAAXCategories());
-            pluginEnableARA.setDefault              (getDefaultEnableARA());
-            pluginARAAnalyzableContentValue.setDefault    (getDefaultARAContentTypes());
-            pluginARATransformFlagsValue.setDefault (getDefaultARATransformationFlags());
+            pluginAUMainTypeValue.setDefault   (getDefaultAUMainTypes());
+            pluginVSTCategoryValue.setDefault  (getDefaultVSTCategories());
+            pluginVST3CategoryValue.setDefault (getDefaultVST3Categories());
+            pluginRTASCategoryValue.setDefault (getDefaultRTASCategories());
+            pluginAAXCategoryValue.setDefault  (getDefaultAAXCategories());
 
             if (shouldWriteLegacyPluginCharacteristicsSettings)
                 writeLegacyPluginCharacteristicsSettings();
@@ -1451,20 +1417,14 @@ void Project::createPropertyEditors (PropertyListBuilder& props)
 
 void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
 {
-    StringArray pluginFormatChoices{ "VST3", "AU", "AUv3", "RTAS (deprecated)", "AAX", "Standalone", "Unity", "Enable IAA", "VST (Legacy)" };
-    Array<var> pluginFormatChoiceValues{ Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
-        Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
-        Ids::enableIAA.toString(), Ids::buildVST.toString() };
-    if (!getProjectType().isARAAudioPlugin())
-    {
-        pluginFormatChoices.add ("Enable ARA");
-        pluginFormatChoiceValues.add (Ids::enableARA.toString());
-    }
-    props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats", pluginFormatChoices, pluginFormatChoiceValues), 
+    props.add (new MultiChoicePropertyComponent (pluginFormatsValue, "Plugin Formats",
+                                                 { "VST3", "AU", "AUv3", "RTAS (deprecated)", "AAX", "Standalone", "Unity", "Enable IAA", "VST (Legacy)" },
+                                                 { Ids::buildVST3.toString(), Ids::buildAU.toString(), Ids::buildAUv3.toString(),
+                                                   Ids::buildRTAS.toString(), Ids::buildAAX.toString(), Ids::buildStandalone.toString(), Ids::buildUnity.toString(),
+                                                   Ids::enableIAA.toString(), Ids::buildVST.toString() }),
                "Plugin formats to build. If you have selected \"VST (Legacy)\" then you will need to ensure that you have a VST2 SDK "
                "in your header search paths. The VST2 SDK can be obtained from the vstsdk3610_11_06_2018_build_37 (or older) VST3 SDK "
                "or JUCE version 5.3.2. You also need a VST2 license from Steinberg to distribute VST2 plug-ins.");
-
     props.add (new MultiChoicePropertyComponent (pluginCharacteristicsValue, "Plugin Characteristics",
                                                  { "Plugin is a Synth", "Plugin MIDI Input", "Plugin MIDI Output", "MIDI Effect Plugin", "Plugin Editor Requires Keyboard Focus",
                                                    "Disable RTAS Bypass", "Disable AAX Bypass", "Disable RTAS Multi-Mono", "Disable AAX Multi-Mono" },
@@ -1539,27 +1499,8 @@ void Project::createAudioPluginPropertyEditors (PropertyListBuilder& props)
         for (auto s : getAllVSTCategoryStrings())
             vstCategoryVars.add (s);
 
-        props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST (legacy) Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
+        props.add (new MultiChoicePropertyComponent (pluginVSTCategoryValue, "Plugin VST (Legacy) Category", getAllVSTCategoryStrings(), vstCategoryVars, 1),
                    "VST category.");
-    }
-
-   if (shouldEnableARA())
-   {
-        props.add (new MultiChoicePropertyComponent (pluginARAAnalyzableContentValue, "Plugin ARA Analyzeable Content Types", getAllARAContentTypeStrings(), getAllARAContentTypeVars()),
-                 "ARA Analyzeable Content Types.");
-
-        props.add (new MultiChoicePropertyComponent (pluginARATransformFlagsValue, "Plugin ARA Transformation Flags", getAllARATransformationFlagStrings(), getAllARATransformationFlagVars()),
-                   "ARA Transformation Flags.");
-
-        props.add (new TextPropertyComponent (pluginARAFactoryIDValue, "Plugin ARA Factory ID", 256, false),
-                   "ARA Factory ID.");
-
-        props.add (new TextPropertyComponent (pluginARAArchiveIDValue, "Plugin ARA Document Archive ID", 256, false),
-                   "ARA Document Archive ID.");
-
-        props.add (new TextPropertyComponent (pluginARACompatibleArchiveIDsValue, "Plugin ARA Compatible Document Archive IDs", 1024, true),
-            "List of compatible ARA Document Archive IDs - one per line");
-
     }
 }
 
@@ -2156,29 +2097,9 @@ String Project::getDefaultBundleIdentifierString() const
             + "." + build_tools::makeValidIdentifier (getProjectNameString(), false, true, false);
 }
 
-String Project::getDefaultCompanyWebsiteString() const
-{
-    return "www." + build_tools::makeValidIdentifier (getCompanyNameOrDefault (getCompanyNameString ()), false, true, false) + ".com";
-}
-
 String Project::getDefaultPluginManufacturerString() const
 {
     return getCompanyNameOrDefault (getCompanyNameString());
-}
-
-String Project::getDefaultARAFactoryIDString() const
-{ 
-    return getDefaultBundleIdentifierString() + ".factory";
-}
-
-String Project::getDefaultARADocumentArchiveID() const
-{ 
-    return getDefaultBundleIdentifierString() + ".aradocumentarchive." + getVersionString();
-}
-
-String Project::getDefaultARACompatibleArchiveIDs() const
-{
-    return String();
 }
 
 String Project::getAUMainTypeString() const noexcept
@@ -2303,36 +2224,6 @@ String Project::getIAAPluginName() const
     return s;
 }
 
-int Project::getARAContentTypes() const noexcept
-{
-    int res = 0;
-
-    auto v = pluginARAAnalyzableContentValue.get();
-
-    if (auto* arr = v.getArray())
-    {
-        for (auto c : *arr)
-            res |= static_cast<int> (c);
-    }
-
-    return res;
-}
-
-int Project::getARATransformationFlags() const noexcept
-{
-    int res = 0;
-
-    auto v = pluginARATransformFlagsValue.get();
-
-    if (auto* arr = v.getArray())
-    {
-        for (auto c : *arr)
-            res |= static_cast<int> (c);
-    }
-
-    return res;
-}
-
 //==============================================================================
 bool Project::isAUPluginHost()
 {
@@ -2347,16 +2238,6 @@ bool Project::isVSTPluginHost()
 bool Project::isVST3PluginHost()
 {
     return getEnabledModules().isModuleEnabled ("juce_audio_processors") && isConfigFlagEnabled ("JUCE_PLUGINHOST_VST3", false);
-}
-
-bool Project::isARAPluginHost()
-{
-    return isVST3PluginHost() && isConfigFlagEnabled ("JUCE_PLUGINHOST_ARA");
-}
-
-void Project::disableStandaloneForARAPlugIn()
-{
-    pluginFormatsValue.referTo (projectRoot, Ids::pluginFormats, getUndoManager(), Array<var> (Ids::buildVST3.toString(), Ids::buildAU.toString()), ",");
 }
 
 //==============================================================================
@@ -2474,66 +2355,6 @@ Array<var> Project::getDefaultRTASCategories() const noexcept
         return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_SWGenerators")];
 
     return getAllRTASCategoryVars()[getAllRTASCategoryStrings().indexOf ("ePlugInCategory_None")];
-}
-
-bool Project::getDefaultEnableARA() const noexcept
-{
-    return false;
-}
-StringArray Project::getAllARAContentTypeStrings() noexcept
-{
-    static StringArray araContentTypes{
-        "Notes",
-        "Tempo Entries",
-        "Bar Signatures",
-        "Static Tuning",
-        "Dynamic Tuning Offsets",
-        "Key Signatures",
-        "Sheet Chords",
-    };
-    return araContentTypes;
-}
-Array<var> Project::getAllARAContentTypeVars() noexcept
-{
-    static Array<var> araContentVars{
-        /*kARAContentTypeNotes =*/                1 << 0,
-        /*kARAContentTypeTempoEntries =*/         1 << 1,
-        /*kARAContentTypeBarSignatures =*/        1 << 2,
-        /*kARAContentTypeStaticTuning =*/         1 << 3,
-        /*kARAContentTypeDynamicTuningOffsets =*/ 1 << 4,
-        /*kARAContentTypeKeySignatures =*/        1 << 5,
-        /*kARAContentTypeSheetChords =*/          1 << 6,
-    };
-    return araContentVars;
-}
-Array<var> Project::getDefaultARAContentTypes() const noexcept
-{
-    return{};
-}
-
-StringArray Project::getAllARATransformationFlagStrings() noexcept
-{
-    static StringArray araTransformationFlags{
-        "Time Stretch",
-        "Time Stretch (reflecting tempo)",
-        "Content Based Fades At Tail",
-        "Content Based Fades At Head"
-    };
-    return araTransformationFlags;
-}
-Array<var> Project::getAllARATransformationFlagVars() noexcept
-{
-    static Array<var> araContentVars{
-        /*kARAPlaybackTransformationTimestretch =*/                1 << 0,
-        /*kARAPlaybackTransformationTimestretchReflectingTempo =*/ 1 << 1,
-        /*kARAPlaybackTransformationContentBasedFadesAtTail =*/    1 << 2,
-        /*kARAPlaybackTransformationContentBasedFadesAtHead =*/    1 << 3
-    };
-    return araContentVars;
-}
-Array<var> Project::getDefaultARATransformationFlags() const noexcept
-{
-    return{};
 }
 
 //==============================================================================
@@ -2791,7 +2612,6 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_Build_Standalone",            boolToString (shouldBuildStandalonePlugin()));
     flags.set ("JucePlugin_Build_Unity",                 boolToString (shouldBuildUnityPlugin()));
     flags.set ("JucePlugin_Enable_IAA",                  boolToString (shouldEnableIAA()));
-    flags.set ("JucePlugin_Enable_ARA",                  boolToString (shouldEnableARA()));
     flags.set ("JucePlugin_Name",                        toStringLiteral (getPluginNameString()));
     flags.set ("JucePlugin_Desc",                        toStringLiteral (getPluginDescriptionString()));
     flags.set ("JucePlugin_Manufacturer",                toStringLiteral (getPluginManufacturerString()));
@@ -2832,11 +2652,6 @@ StringPairArray Project::getAudioPluginFlags() const
     flags.set ("JucePlugin_IAAName",                     toStringLiteral (getIAAPluginName()));
     flags.set ("JucePlugin_VSTNumMidiInputs",            getVSTNumMIDIInputsString());
     flags.set ("JucePlugin_VSTNumMidiOutputs",           getVSTNumMIDIOutputsString());
-    flags.set ("JucePlugin_ARAContentTypes",             String (getARAContentTypes()));
-    flags.set ("JucePlugin_ARATransformationFlags",      String (getARATransformationFlags()));
-    flags.set ("JucePlugin_ARAFactoryID",                toStringLiteral(getARAFactoryIDString()));
-    flags.set ("JucePlugin_ARADocumentArchiveID",        toStringLiteral(getARADocumentArchiveIDString()));
-    flags.set ("JucePlugin_ARACompatibleArchiveIDs",     toStringLiteral(getARACompatibleArchiveIDStrings()));
 
     {
         String plugInChannelConfig = getPluginChannelConfigsString();

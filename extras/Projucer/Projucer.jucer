@@ -255,14 +255,6 @@
               resource="1" file="Source/BinaryData/Templates/jucer_AudioComponentTemplate.cpp"/>
         <FILE id="i9bm2b" name="jucer_AudioComponentTemplate.h" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AudioComponentTemplate.h"/>
-        <FILE id="VZpjwH" name="jucer_AudioPluginARADocumentControllerTemplate.cpp"
-              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.cpp"/>
-        <FILE id="tpUhjv" name="jucer_AudioPluginARADocumentControllerTemplate.h"
-              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARADocumentControllerTemplate.h"/>
-        <FILE id="jmBqzI" name="jucer_AudioPluginARAPlaybackRendererTemplate.cpp"
-              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.cpp"/>
-        <FILE id="oSTRjF" name="jucer_AudioPluginARAPlaybackRendererTemplate.h"
-              compile="0" resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginARAPlaybackRendererTemplate.h"/>
         <FILE id="BYSiw7" name="jucer_AudioPluginEditorTemplate.cpp" compile="0"
               resource="1" file="Source/BinaryData/Templates/jucer_AudioPluginEditorTemplate.cpp"/>
         <FILE id="wcuIlm" name="jucer_AudioPluginEditorTemplate.h" compile="0"

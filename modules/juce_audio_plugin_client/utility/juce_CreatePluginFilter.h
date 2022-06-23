@@ -30,13 +30,6 @@
 */
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter();
 
-#if JucePlugin_Enable_ARA
- /** Somewhere in the codebase of your plugin, you need to implement this function
-     by simply returning juce::ARADocumentController::createARAFactory<YourCustomSubclassOfARADocumentController>()
- */
- const ARA::ARAFactory* JUCE_CALLTYPE createARAFactory();
-#endif
-
 namespace juce
 {
 
@@ -48,10 +41,6 @@ inline AudioProcessor* JUCE_API JUCE_CALLTYPE createPluginFilterOfType (AudioPro
 
     // your createPluginFilter() method must return an object!
     jassert (pluginInstance != nullptr && pluginInstance->wrapperType == type);
-
-   #if JucePlugin_Enable_ARA
-    jassert (dynamic_cast<juce::AudioProcessorARAExtension*> (pluginInstance) != nullptr);
-   #endif
 
     return pluginInstance;
 }

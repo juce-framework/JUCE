@@ -87,14 +87,6 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 #include <juce_audio_processors/format_types/juce_AU_Shared.h>
 
-#if JucePlugin_Enable_ARA
- #include "../ARA/juce_AudioProcessor_ARAExtensions.h"
- #include <ARA_API/ARAAudioUnit.h>
- #if ARA_SUPPORT_VERSION_1
-  #error "Unsupported ARA version - only ARA version 2 and onward are supported by the current JUCE ARA implementation"
- #endif
-#endif
-
 //==============================================================================
 using namespace juce;
 
@@ -468,17 +460,6 @@ public:
                     outWritable = false;
                     return noErr;
 
-#if JucePlugin_Enable_ARA
-                case ARA::kAudioUnitProperty_ARAFactory:
-                    outWritable = false;
-                    outDataSize = sizeof (ARA::ARAAudioUnitFactory);
-                    return noErr;
-                case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
-                    outWritable = false;
-                    outDataSize = sizeof (ARA::ARAAudioUnitPlugInExtensionBinding);
-                    return noErr;
-#endif
-
                 default: break;
             }
         }
@@ -519,33 +500,6 @@ public:
                     // Failed to find a group corresponding to the clump ID.
                     jassertfalse;
                     break;
-
-                    //==============================================================================
-#if JucePlugin_Enable_ARA
-                case ARA::kAudioUnitProperty_ARAFactory:
-                {
-                    auto auFactory = static_cast<ARA::ARAAudioUnitFactory*> (outData);
-                    if (auFactory->inOutMagicNumber != ARA::kARAAudioUnitMagic)
-                        return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
-
-                    auFactory->outFactory = createARAFactory();
-                    return noErr;
-                }
-
-                case ARA::kAudioUnitProperty_ARAPlugInExtensionBindingWithRoles:
-                {
-                    auto binding = static_cast<ARA::ARAAudioUnitPlugInExtensionBinding*> (outData);
-                    if (binding->inOutMagicNumber != ARA::kARAAudioUnitMagic)
-                        return kAudioUnitErr_InvalidProperty;   // if the magic value isn't found, the property ID is re-used outside the ARA context with different, unsupported sematics
-
-                    AudioProcessorARAExtension* araAudioProcessorExtension = dynamic_cast<AudioProcessorARAExtension*> (juceFilter.get());
-                    binding->outPlugInExtension = araAudioProcessorExtension->bindToARA (binding->inDocumentControllerRef, binding->knownRoles, binding->assignedRoles);
-                    if (binding->outPlugInExtension == nullptr)
-                        return kAudioUnitErr_CannotDoInCurrentContext;  // bindToARA() returns null if binding is already established
-
-                    return noErr;
-                }
-#endif
 
                 case juceFilterObjectPropertyID:
                     ((void**) outData)[0] = (void*) static_cast<AudioProcessor*> (juceFilter.get());
@@ -714,10 +668,7 @@ public:
                             const ScopedLock sl (juceFilter->getCallbackLock());
 
                             juceFilter->setNonRealtime (shouldBeOffline);
-                            // TODO JUCE_ARA added test if prepared since otherwise this may lead to
-                            //               premature preparation (similar issues in VST3_Wrapper)
-                            if (prepared)
-                                juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
+                            juceFilter->prepareToPlay (getSampleRate(), (int) GetMaxFramesPerSlice());
                         }
                     }
 
@@ -1110,9 +1061,6 @@ public:
     {
         const double rate = getSampleRate();
         jassert (rate > 0);
-       #if JucePlugin_Enable_ARA
-        jassert (juceFilter->getLatencySamples() == 0 || ! dynamic_cast<AudioProcessorARAExtension*> (juceFilter.get())->isBoundToARA());
-       #endif
         return rate > 0 ? juceFilter->getLatencySamples() / rate : 0;
     }
 
@@ -1778,14 +1726,7 @@ public:
             {
                 if (AudioProcessor* filter = static_cast<AudioProcessor*> (pointers[0]))
                     if (AudioProcessorEditor* editorComp = filter->createEditorIfNeeded())
-                    {
-                       #if JucePlugin_Enable_ARA
-                        jassert (dynamic_cast<AudioProcessorEditorARAExtension*> (editorComp) != nullptr);
-                        // for proper view embedding, ARA plug-ins must be resizable
-                        jassert (editorComp->isResizable());
-                       #endif
                         return EditorCompHolder::createViewFor (filter, static_cast<JuceAU*> (pointers[1]), editorComp);
-                    }
             }
 
             return nil;

@@ -287,13 +287,6 @@ void ProjectExporter::createPropertyEditors (PropertyListBuilder& props)
                        "If you're building an RTAS plug-in, this must be the folder containing the RTAS SDK. This can be an absolute path, or a path relative to the Projucer project file.");
         }
 
-        if (project.shouldEnableARA() || project.isARAPluginHost())
-        {
-            props.add (new FilePathPropertyComponent (araPathValueWrapper.getWrappedValueTreePropertyWithDefault(), "ARA SDK Folder", true,
-                                                      getTargetOSForExporter() == TargetOS::getThisOS(), "*", project.getProjectFolder()),
-                       "If you're building an ARA enabled plug-in, this must be the folder containing the ARA SDK. This can be an absolute path, or a path relative to the Projucer project file.");
-        }
-
         props.add (new TextPropertyComponent (extraPPDefsValue, "Extra Preprocessor Definitions", 32768, true),
                    "Extra preprocessor definitions. Use the form \"NAME1=value NAME2=value\", using whitespace, commas, "
                    "or new-lines to separate the items - to include a space or comma in a definition, precede it with a backslash.");
@@ -356,8 +349,6 @@ void ProjectExporter::addSettingsForProjectType (const build_tools::ProjectType&
 {
     addVSTPathsIfPluginOrHost();
 
-    addARAPathsIfPluginOrHost();
-
     if (type.isAudioPlugin())
         addCommonAudioPluginSettings();
 
@@ -374,12 +365,6 @@ void ProjectExporter::addVSTPathsIfPluginOrHost()
         if (! project.isConfigFlagEnabled ("JUCE_CUSTOM_VST3_SDK"))
             addToExtraSearchPaths (getInternalVST3SDKPath(), 0);
     }
-}
-
-void ProjectExporter::addARAPathsIfPluginOrHost()
-{
-    if (project.shouldEnableARA() || project.isARAPluginHost())
-        addARAFoldersToPath();
 }
 
 void ProjectExporter::addCommonAudioPluginSettings()
@@ -417,14 +402,6 @@ void ProjectExporter::addAAXFoldersToPath()
         addToExtraSearchPaths (aaxFolderPath.getChildFile ("Interfaces"));
         addToExtraSearchPaths (aaxFolderPath.getChildFile ("Interfaces").getChildFile ("ACF"));
     }
-}
-
-void ProjectExporter::addARAFoldersToPath()
-{
-    auto araFolder = getARAPathString();
-
-    if (araFolder.isNotEmpty())
-        addToExtraSearchPaths (build_tools::RelativePath (araFolder, build_tools::RelativePath::projectFolder));
 }
 
 //==============================================================================
@@ -475,11 +452,6 @@ void ProjectExporter::addTargetSpecificPreprocessorDefs (StringPairArray& defs, 
     {
         for (auto& flag : targetFlags)
             defs.set (flag.first, (targetType == flag.second ? "1" : "0"));
-    }
-
-    if (project.shouldEnableARA())
-    {
-        defs.set("JucePlugin_Enable_ARA", "1");
     }
 }
 

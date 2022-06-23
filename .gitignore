@@ -65,7 +65,3 @@ extras/Projucer/JUCECompileEngine.dylib
 
 .vscode
 /build
-
-# ARAPluginDemo build output
-examples/Plugins/*/Builds*
-examples/Plugins/*/JuceLibraryCode*

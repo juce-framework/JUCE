@@ -326,13 +326,6 @@ namespace build_tools
             addPlistDictionaryKey (*resourceUsageDict, "network.client", true);
             addPlistDictionaryKey (*resourceUsageDict, "temporary-exception.files.all.read-write", true);
         }
-        
-        if (isPluginARAEffect)
-        {
-            dict->createNewChildElement ("key")->addTextElement ("tags");
-            auto* tagsArray = dict->createNewChildElement ("array");
-            tagsArray->createNewChildElement ("string")->addTextElement ("ARA");
-        }
 
         return { plistKey, plistEntry };
     }

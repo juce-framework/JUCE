@@ -129,12 +129,7 @@ struct Atomic  final
         Internally this calls std::atomic_thread_fence with
         memory_order_seq_cst (the strictest std::memory_order).
      */
-     // TODO JUCE_ARA hotfix for include issues when building with Xcode on ARM
-   #if JUCE_ARM
     void memoryBarrier() noexcept          { atomic_thread_fence (std::memory_order_seq_cst); }
-   #else
-    void memoryBarrier() noexcept          { std::atomic_thread_fence (std::memory_order_seq_cst); }
-   #endif
 
     /** The std::atomic object that this class operates on. */
     std::atomic<Type> value;

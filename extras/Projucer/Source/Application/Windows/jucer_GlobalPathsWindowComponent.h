@@ -232,8 +232,6 @@ private:
                          "If you are building AAX plug-ins, this should be the path to the AAX SDK folder.");
             builder.add (new FilePathPropertyComponent (rtasPathValue, "RTAS SDK (deprecated)", true, isThisOS),
                          "If you are building RTAS plug-ins, this should be the path to the RTAS SDK folder.");
-            builder.add (new FilePathPropertyComponent (araPathValue, "ARA SDK", true, isThisOS),
-                         "If you are building ARA enabled plug-ins, this should be the path to the ARA SDK folder.");
         }
 
         builder.add (new FilePathPropertyComponent (androidSDKPathValue, "Android SDK", true, isThisOS),
@@ -275,7 +273,6 @@ private:
         vstPathValue              = settings.getStoredPath (Ids::vstLegacyPath, os);
         rtasPathValue             = settings.getStoredPath (Ids::rtasPath, os);
         aaxPathValue              = settings.getStoredPath (Ids::aaxPath, os);
-        araPathValue              = settings.getStoredPath (Ids::araPath, os);
         androidSDKPathValue       = settings.getStoredPath (Ids::androidSDKPath, os);
         clionExePathValue         = settings.getStoredPath (Ids::clionExePath, os);
         androidStudioExePathValue = settings.getStoredPath (Ids::androidStudioExePath, os);
@@ -289,7 +286,6 @@ private:
         vstPathValue             .resetToDefault();
         rtasPathValue            .resetToDefault();
         aaxPathValue             .resetToDefault();
-        araPathValue             .resetToDefault();
         androidSDKPathValue      .resetToDefault();
         clionExePathValue        .resetToDefault();
         androidStudioExePathValue.resetToDefault();
@@ -301,7 +297,7 @@ private:
     Value selectedOSValue;
 
     ValueTreePropertyWithDefault jucePathValue, juceModulePathValue, userModulePathValue,
-                                 vstPathValue, rtasPathValue, aaxPathValue, araPathValue, androidSDKPathValue,
+                                 vstPathValue, rtasPathValue, aaxPathValue, androidSDKPathValue,
                                  clionExePathValue, androidStudioExePathValue;
 
     Viewport propertyViewport;

@@ -1,18 +1,3 @@
-# About JUCE_ARA
-
-This repository is an experimental fork of the [JUCE develop branch](https://github.com/juce-framework/JUCE) with additions that enable it to generate [ARA plug-ins](https://github.com/Celemony/ARA_SDK) in the VST3 or AudioUnit format.
-It is currently being maintained by [Celemony](https://www.celemony.com) and [SoundRadix](https://www.soundradix.com), with the goal of being picked up eventually for main line [JUCE](https://www.juce.com) once the code is stable.
-
-There are two active branches: develop and condensed. They are intended to be sync code-wise (develop might be slightly ahead at times), but have a different history and a different use case: while develop is constantly progressing and JUCE changes are merged in, condensed is rebased regularly to always show the shortest path from the original JUCE release to the current state of JUCE_ARA. If you are using a custom fork of JUCE already, then you should be able to rebase the condensed branch on top of your custom branch with little to no conflicts. This rebase can be repeated as needed if your custom branch or condensed are updated.
-
-Note that Celemony is not endorsing the use of JUCE by providing this fork. JUCE_ARA is a fairly thin adapter to integrate ARA into JUCE, it does not provide any features that would be relevant when using ARA with a different framework. Consequently, the decision whether or not to use JUCE for any given project should be made independently of JUCE_ARA.
-
-The ARA related changes are described in detail in [JUCE_ARA.md](https://github.com/Celemony/JUCE_ARA/blob/develop/JUCE_ARA.md).
-For feedback and questions, please contact Celemony via [ara@celemony.com](mailto:ara@celemony.com?Subject=JUCE%20ARA%20integration).
-
-
-# Original JUCE documentation
-
 ![alt text](https://assets.juce.com/juce/JUCE_banner_github.png "JUCE")
 
 JUCE is an open-source cross-platform C++ application framework for creating high quality

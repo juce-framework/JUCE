@@ -127,8 +127,4 @@
  #define JUCE_STANDALONE_FILTER_WINDOW_USE_KIOSK_MODE (JUCE_IOS || JUCE_ANDROID)
 #endif
 
-#if JucePlugin_Enable_ARA
- #include "ARA/juce_ARA_Wrapper.h"
-#endif
-
 #include "utility/juce_CreatePluginFilter.h"
