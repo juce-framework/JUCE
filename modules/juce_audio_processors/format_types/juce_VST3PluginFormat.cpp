@@ -1826,9 +1826,6 @@ struct VST3ComponentHolder
         terminate();
     }
 
-    // transfers ownership to the plugin instance!
-    AudioPluginInstance* createPluginInstance();
-
     bool isIComponentAlsoIEditController() const
     {
         if (component == nullptr)
@@ -2324,10 +2321,11 @@ public:
     };
 
     //==============================================================================
-    VST3PluginInstance (VST3ComponentHolder* componentHolder)
+    explicit VST3PluginInstance (std::unique_ptr<VST3ComponentHolder> componentHolder)
         : AudioPluginInstance (getBusProperties (componentHolder->component)),
-          holder (componentHolder)
+          holder (std::move (componentHolder))
     {
+        jassert (holder->isComponentInitialised);
         holder->host->setPlugin (this);
     }
 
@@ -3583,17 +3581,6 @@ private:
 JUCE_END_IGNORE_WARNINGS_MSVC
 
 //==============================================================================
-AudioPluginInstance* VST3ComponentHolder::createPluginInstance()
-{
-    if (! initialise())
-        return nullptr;
-
-    auto* plugin = new VST3PluginInstance (this);
-    host->setPlugin (plugin);
-    return plugin;
-}
-
-//==============================================================================
 tresult VST3HostContext::beginEdit (Vst::ParamID paramID)
 {
     if (plugin == nullptr)
@@ -3833,38 +3820,48 @@ void VST3PluginFormat::createARAFactoryAsync (const PluginDescription& descripti
     callback ({ ARAFactoryWrapper { ::juce::getARAFactory (pluginFactory, pluginName) }, {} });
 }
 
+static std::unique_ptr<AudioPluginInstance> createVST3Instance (VST3PluginFormat& format,
+                                                                const PluginDescription& description)
+{
+    if (! format.fileMightContainThisPluginType (description.fileOrIdentifier))
+        return nullptr;
+
+    const File file { description.fileOrIdentifier };
+
+    struct ScopedWorkingDirectory
+    {
+        ~ScopedWorkingDirectory() { previousWorkingDirectory.setAsCurrentWorkingDirectory(); }
+        File previousWorkingDirectory = File::getCurrentWorkingDirectory();
+    };
+
+    const ScopedWorkingDirectory scope;
+    file.getParentDirectory().setAsCurrentWorkingDirectory();
+
+    const VST3ModuleHandle::Ptr module { VST3ModuleHandle::findOrCreateModule (file, description) };
+
+    if (module == nullptr)
+        return nullptr;
+
+    auto holder = std::make_unique<VST3ComponentHolder> (module);
+
+    if (! holder->initialise())
+        return nullptr;
+
+    auto instance = std::make_unique<VST3PluginInstance> (std::move (holder));
+
+    if (! instance->initialise())
+        return nullptr;
+
+    return instance;
+}
+
 void VST3PluginFormat::createPluginInstance (const PluginDescription& description,
                                              double, int, PluginCreationCallback callback)
 {
-    std::unique_ptr<VST3PluginInstance> result;
+    auto result = createVST3Instance (*this, description);
 
-    if (fileMightContainThisPluginType (description.fileOrIdentifier))
-    {
-        File file (description.fileOrIdentifier);
-
-        auto previousWorkingDirectory = File::getCurrentWorkingDirectory();
-        file.getParentDirectory().setAsCurrentWorkingDirectory();
-
-        if (const VST3ModuleHandle::Ptr module = VST3ModuleHandle::findOrCreateModule (file, description))
-        {
-            std::unique_ptr<VST3ComponentHolder> holder (new VST3ComponentHolder (module));
-
-            if (holder->initialise())
-            {
-                result.reset (new VST3PluginInstance (holder.release()));
-
-                if (! result->initialise())
-                    result.reset();
-            }
-        }
-
-        previousWorkingDirectory.setAsCurrentWorkingDirectory();
-    }
-
-    String errorMsg;
-
-    if (result == nullptr)
-        errorMsg = TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3");
+    const auto errorMsg = result == nullptr ? TRANS ("Unable to load XXX plug-in file").replace ("XXX", "VST-3")
+                                            : String();
 
     callback (std::move (result), errorMsg);
 }
