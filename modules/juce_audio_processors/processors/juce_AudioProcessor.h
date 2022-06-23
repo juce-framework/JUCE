@@ -26,6 +26,8 @@
 namespace juce
 {
 
+class AudioFormatReader;
+
 //==============================================================================
 /**
     Base class for audio processing classes or plugins.

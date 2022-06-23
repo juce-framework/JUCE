@@ -59,10 +59,9 @@
 
 #if JucePlugin_EnhancedAudioSuite
  #define RANDOM_AUDIO_ACCESS_SUPPORTED 1
-#if ! JUCE_MODULE_AVAILABLE_juce_audio_formats
-#error To compile random access support plug-in formats, you need to add the juce_audio_formats module!
-#endif
-#include <juce_audio_formats/juce_audio_formats.h>
+ #if ! JUCE_MODULE_AVAILABLE_juce_audio_formats
+  #error To compile random access support plug-in formats, you need to add the juce_audio_formats module!
+ #endif
 #endif
 
 //==============================================================================
