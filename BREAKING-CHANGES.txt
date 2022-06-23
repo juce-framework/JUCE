@@ -1,8 +1,115 @@
 JUCE breaking changes
 =====================
 
-develop
-=======
+Version 7.0.0
+=============
+
+Change
+------
+AudioProcessor::getHostTimeNs() and AudioProcessor::setHostTimeNanos() have
+been removed.
+
+Possible Issues
+---------------
+Code that used these functions will no longer compile.
+
+Workaround
+----------
+Set and get the system time corresponding to the current audio callback using
+the new functions AudioPlayHead::PositionInfo::getHostTimeNs() and
+AudioPlayHead::PositionInfo::setHostTimeNs().
+
+Rationale
+---------
+This change consolidates callback-related timing information into the
+PositionInfo type, improving the consistency of the AudioProcessor and
+AudioPlayHead APIs.
+
+
+Change
+------
+AudioPlayHead::getCurrentPosition() has been deprecated and replaced with
+AudioPlayHead::getPosition().
+
+Possible Issues
+---------------
+Hosts that implemented custom playhead types may no longer compile. Plugins
+that used host-provided timing information may trigger deprecation warnings
+when building.
+
+Workaround
+----------
+Classes that derive from AudioPlayHead must now override getPosition() instead
+of getCurrentPosition(). Code that used to use the playhead's
+CurrentPositionInfo must switch to using the new PositionInfo type.
+
+Rationale
+---------
+Not all hosts and plugin formats are capable of providing the full complement
+of timing information contained in the old CurrentPositionInfo class.
+Previously, in the case that some information could not be provided, fallback
+values would be used instead, but it was not possible for clients to distinguish
+between "real" values set explicitly by the host, and "fallback" values set by
+a plugin wrapper. The new PositionInfo type keeps track of which members have
+been explicitly set, so clients can implement their own fallback behaviour.
+The new PositionInfo type also includes a new "barCount" member, which is
+currently only used by the LV2 host and client.
+
+
+Change
+------
+The optional JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS preprocessor
+flag will now use a new Metal layer renderer when running on macOS 10.14 or
+later. The minimum requirements for building macOS and iOS software are now
+macOS 10.13.6 and Xcode 10.1.
+
+Possible Issues
+---------------
+Previously enabling JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS had no
+negative effect on performance. Now it may slow rendering down.
+
+Workaround
+----------
+Disable JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS.
+
+Rationale
+---------
+JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS has been ineffective when
+running on macOS 10.13 or later. Enabling this flag, and hence using the new
+Metal layer renderer when running on macOS 10.14, restores the previous
+behaviour and fixes problems where Core Graphics will render much larger
+regions than necessary. However, the new renderer will may be slower than the
+recently introduced default of asynchronous Core Graphics rendering, depending
+on the regions that Core Graphcis is redrawing. Whether
+JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS improves or degrades
+performance is specific to an application.
+
+
+Change
+------
+The optional JUCE_COREGRAPHICS_DRAW_ASYNC preprocessor flag has been removed
+and asynchronous Core Graphics rendering is now the default. The helper
+function setComponentAsyncLayerBackedViewDisabled has also been removed.
+
+Possible Issues
+---------------
+Components that were previously using setComponentAsyncLayerBackedViewDisabled
+to conditionally opt out of asynchronous Core Graphics rendering will no longer
+be able to do so.
+
+Workaround
+----------
+To opt out of asynchronous Core Graphics rendering the
+windowRequiresSynchronousCoreGraphicsRendering ComponentPeer style flag can be
+used when adding a component to the desktop.
+
+Rationale
+---------
+Asynchronous Core Graphics rendering provides a substantial performance
+benefit. Asynchronous rendering is a property of a Peer, rather than a
+Component, so a Peer style flag to conditionally opt out of asynchronous
+rendering is more appropriate.
+
 
 Change
 ------

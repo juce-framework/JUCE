@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -90,7 +90,6 @@ public:
     bool isCodeBlocks() const override               { return true; }
     bool isMakefile() const override                 { return false; }
     bool isAndroidStudio() const override            { return false; }
-    bool isCLion() const override                    { return false; }
 
     bool isAndroid() const override                  { return false; }
     bool isWindows() const override                  { return os == windowsTarget; }
@@ -107,24 +106,27 @@ public:
 
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
+        using Target = build_tools::ProjectType::Target;
+
         switch (type)
         {
-            case build_tools::ProjectType::Target::StandalonePlugIn:
-            case build_tools::ProjectType::Target::GUIApp:
-            case build_tools::ProjectType::Target::ConsoleApp:
-            case build_tools::ProjectType::Target::StaticLibrary:
-            case build_tools::ProjectType::Target::SharedCodeTarget:
-            case build_tools::ProjectType::Target::AggregateTarget:
-            case build_tools::ProjectType::Target::VSTPlugIn:
-            case build_tools::ProjectType::Target::DynamicLibrary:
+            case Target::StandalonePlugIn:
+            case Target::GUIApp:
+            case Target::ConsoleApp:
+            case Target::StaticLibrary:
+            case Target::SharedCodeTarget:
+            case Target::AggregateTarget:
+            case Target::VSTPlugIn:
+            case Target::DynamicLibrary:
                 return true;
-            case build_tools::ProjectType::Target::AAXPlugIn:
-            case build_tools::ProjectType::Target::RTASPlugIn:
-            case build_tools::ProjectType::Target::UnityPlugIn:
-            case build_tools::ProjectType::Target::VST3PlugIn:
-            case build_tools::ProjectType::Target::AudioUnitPlugIn:
-            case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
-            case build_tools::ProjectType::Target::unspecified:
+            case Target::AAXPlugIn:
+            case Target::UnityPlugIn:
+            case Target::LV2PlugIn:
+            case Target::LV2TurtleProgram:
+            case Target::VST3PlugIn:
+            case Target::AudioUnitPlugIn:
+            case Target::AudioUnitv3PlugIn:
+            case Target::unspecified:
             default:
                 break;
         }
@@ -822,8 +824,6 @@ private:
     CodeBlocksOS os;
 
     OwnedArray<CodeBlocksTarget> targets;
-
-    friend class CLionProjectExporter;
 
     JUCE_DECLARE_NON_COPYABLE (CodeBlocksProjectExporter)
 };

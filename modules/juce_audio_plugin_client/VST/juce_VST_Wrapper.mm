@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -31,11 +31,8 @@
 
 #if JucePlugin_Build_VST || JucePlugin_Build_VST3
 
-#define JUCE_MAC_WINDOW_VISIBITY_BODGE 1
-
 #include "../utility/juce_IncludeSystemHeaders.h"
 #include "../utility/juce_IncludeModuleHeaders.h"
-#include "../utility/juce_CarbonVisibility.h"
 
 //==============================================================================
 namespace juce
@@ -160,8 +157,6 @@ void* attachComponentToWindowRefVST (Component* comp, void* parentWindowOrView, 
             [hostWindow orderFront: nil];
             [pluginWindow orderFront: nil];
 
-            attachWindowHidingHooks (comp, (WindowRef) parentWindowOrView, hostWindow);
-
             return hostWindow;
         }
        #endif
@@ -198,8 +193,6 @@ void detachComponentFromWindowRefVST (Component* comp, void* window, bool isNSVi
             EventHandlerRef ref = (EventHandlerRef) (void*) (pointer_sized_int)
                                         comp->getProperties() ["boundsEventRef"].toString().getHexValue64();
             RemoveEventHandler (ref);
-
-            removeWindowHidingHooks (comp);
 
             CFUniquePtr<HIViewRef> dummyView ((HIViewRef) (void*) (pointer_sized_int)
                                                 comp->getProperties() ["dummyViewRef"].toString().getHexValue64());

@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -35,6 +35,11 @@ class PluginScannerSubprocess : private ChildProcessWorker,
                                 private AsyncUpdater
 {
 public:
+    PluginScannerSubprocess()
+    {
+        formatManager.addDefaultFormats();
+    }
+
     using ChildProcessWorker::initialiseFromCommandLine;
 
 private:
@@ -84,9 +89,6 @@ private:
 
     bool doScan (const MemoryBlock& block)
     {
-        AudioPluginFormatManager formatManager;
-        formatManager.addDefaultFormats();
-
         MemoryInputStream stream { block, false };
         const auto formatName = stream.readString();
         const auto identifier = stream.readString();
@@ -130,6 +132,10 @@ private:
 
     std::mutex mutex;
     std::queue<MemoryBlock> pendingBlocks;
+
+    // After construction, this will only be accessed by doScan so there's no need
+    // to worry about synchronisation.
+    AudioPluginFormatManager formatManager;
 };
 
 //==============================================================================
@@ -334,7 +340,8 @@ void setAutoScaleValueForPlugin (const String& identifier, AutoScale s)
 static bool isAutoScaleAvailableForPlugin (const PluginDescription& description)
 {
     return autoScaleOptionAvailable
-          && description.pluginFormatName.containsIgnoreCase ("VST");
+          && (description.pluginFormatName.containsIgnoreCase ("VST")
+              || description.pluginFormatName.containsIgnoreCase ("LV2"));
 }
 
 bool shouldAutoScalePlugin (const PluginDescription& description)

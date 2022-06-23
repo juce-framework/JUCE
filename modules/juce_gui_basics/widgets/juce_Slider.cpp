@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -25,6 +25,14 @@
 
 namespace juce
 {
+
+static double getStepSize (const Slider& slider)
+{
+    const auto interval = slider.getInterval();
+
+    return interval != 0.0 ? interval
+                           : slider.getRange().getLength() * 0.01;
+}
 
 class Slider::Pimpl   : public AsyncUpdater, // this needs to be public otherwise it will cause an
                                              // error when JUCE_DLL_BUILD=1
@@ -991,6 +999,38 @@ public:
         popupDisplay.reset();
     }
 
+    bool keyPressed (const KeyPress& key)
+    {
+        if (key.getModifiers().isAnyModifierKeyDown())
+            return false;
+
+        const auto getInterval = [this]
+        {
+            if (auto* accessibility = owner.getAccessibilityHandler())
+                if (auto* valueInterface = accessibility->getValueInterface())
+                    return valueInterface->getRange().getInterval();
+
+            return getStepSize (owner);
+        };
+
+        const auto valueChange = [&]
+        {
+            if (key == KeyPress::rightKey || key == KeyPress::upKey)
+                return getInterval();
+
+            if (key == KeyPress::leftKey || key == KeyPress::downKey)
+                return -getInterval();
+
+            return 0.0;
+        }();
+
+        if (valueChange == 0.0)
+            return false;
+
+        setValue (getValue() + valueChange, sendNotificationSync);
+        return true;
+    }
+
     void showPopupDisplay()
     {
         if (style == IncDecButtons)
@@ -1661,6 +1701,9 @@ void Slider::mouseExit (const MouseEvent&)      { pimpl->mouseExit(); }
 // it is shown when dragging the mouse over a slider and releasing
 void Slider::mouseEnter (const MouseEvent&)     { pimpl->mouseMove(); }
 
+/** @internal */
+bool Slider::keyPressed (const KeyPress& k)     { return pimpl->keyPressed (k); }
+
 void Slider::modifierKeysChanged (const ModifierKeys& modifiers)
 {
     if (isEnabled())
@@ -1734,18 +1777,10 @@ private:
         AccessibleValueRange getRange() const override
         {
             return { { slider.getMinimum(), slider.getMaximum() },
-                     getStepSize() };
+                     getStepSize (slider) };
         }
 
     private:
-        double getStepSize() const
-        {
-            auto interval = slider.getInterval();
-
-            return interval != 0.0 ? interval
-                                   : slider.getRange().getLength() * 0.01;
-        }
-
         Slider& slider;
         const bool useMaxValue;
 

@@ -1,0 +1,60 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix state: <http://lv2plug.in/ns/ext/state#> .
+
+<http://lv2plug.in/ns/ext/state>
+	a owl:Ontology ;
+	rdfs:label "LV2 State" ;
+	rdfs:comment "An interface for LV2 plugins to save and restore state." ;
+	rdfs:seeAlso <state.h> ,
+		<state.meta.ttl> .
+
+state:interface
+	a lv2:ExtensionData ;
+	rdfs:label "interface" ;
+	rdfs:comment "A plugin interface for saving and restoring state." .
+
+state:State
+	a rdfs:Class ;
+	rdfs:label "State" ;
+	rdfs:comment "LV2 plugin state." .
+
+state:loadDefaultState
+	a lv2:Feature ;
+	rdfs:label "load default state" ;
+	rdfs:comment "A feature indicating that the plugin has default state." .
+
+state:state
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:label "state" ;
+	rdfs:range state:State ;
+	rdfs:comment "The state of an LV2 plugin instance." .
+
+state:mapPath
+	a lv2:Feature ;
+	rdfs:label "map path" ;
+	rdfs:comment "A feature for mapping between absolute and abstract file paths." .
+
+state:makePath
+	a lv2:Feature ;
+	rdfs:label "make path" ;
+	rdfs:comment "A feature for creating new files and directories." .
+
+state:threadSafeRestore
+	a lv2:Feature ;
+	rdfs:label "thread-safe restore" ;
+	rdfs:comment "A feature indicating support for thread-safe state restoration." .
+
+state:freePath
+	a lv2:Feature ;
+	rdfs:label "free path" ;
+	rdfs:comment "A feature for freeing paths allocated by the host." .
+
+state:StateChanged
+	a rdfs:Class ;
+	rdfs:label "State Changed" ;
+	rdfs:comment "A notification that the internal state of the plugin has changed." .
+

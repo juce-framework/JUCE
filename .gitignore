@@ -51,8 +51,6 @@ profile
 **/Builds/Android/app/.cxx
 **/Builds/Android/lib/build
 **/Builds/Android/lib/.externalNativeBuild
-**/Builds/CLion/cmake-build-*
-**/Builds/CLion/.idea
 **/Builds/MacOSX/**/Index
 **/Builds/MacOSX/**/Intermediates.noindex
 **/doxygen/doc
@@ -66,6 +64,4 @@ extras/Projucer/JUCECompileEngine.dylib
 .vscode
 /build
 
-# ARAPluginDemo build output
-examples/Plugins/*/Builds*
-examples/Plugins/*/JuceLibraryCode*
+CMakeUserPresets.json

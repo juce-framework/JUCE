@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -163,8 +163,14 @@ public:
 
     /** You can override this to return a custom mouse cursor for each row. */
     virtual MouseCursor getMouseCursorForRow (int row);
-};
 
+private:
+   #if ! JUCE_DISABLE_ASSERTIONS
+    friend class ListBox;
+    struct Empty {};
+    std::shared_ptr<Empty> sharedState = std::make_shared<Empty>();
+   #endif
+};
 
 //==============================================================================
 /**
@@ -187,6 +193,11 @@ public:
 
         The model pointer passed-in can be null, in which case you can set it later
         with setModel().
+
+        The ListBoxModel instance must stay alive for as long as the ListBox
+        holds a pointer to it. Be careful to destroy the ListBox before the
+        ListBoxModel, or to call ListBox::setModel (nullptr) before destroying
+        the ListBoxModel.
     */
     ListBox (const String& componentName = String(),
              ListBoxModel* model = nullptr);
@@ -194,14 +205,25 @@ public:
     /** Destructor. */
     ~ListBox() override;
 
-
     //==============================================================================
-    /** Changes the current data model to display. */
+    /** Changes the current data model to display.
+
+        The ListBoxModel instance must stay alive for as long as the ListBox
+        holds a pointer to it. Be careful to destroy the ListBox before the
+        ListBoxModel, or to call ListBox::setModel (nullptr) before destroying
+        the ListBoxModel.
+    */
     void setModel (ListBoxModel* newModel);
 
     /** Returns the current list model. */
-    ListBoxModel* getModel() const noexcept                     { return model; }
+    ListBoxModel* getModel() const noexcept
+    {
+       #if ! JUCE_DISABLE_ASSERTIONS
+        checkModelPtrIsValid();
+       #endif
 
+        return model;
+    }
 
     //==============================================================================
     /** Causes the list to refresh its content.
@@ -584,7 +606,7 @@ private:
     JUCE_PUBLIC_IN_DLL_BUILD (class RowComponent)
     friend class ListViewport;
     friend class TableListBox;
-    ListBoxModel* model;
+    ListBoxModel* model = nullptr;
     std::unique_ptr<ListViewport> viewport;
     std::unique_ptr<Component> headerComponent;
     std::unique_ptr<MouseListener> mouseMoveSelector;
@@ -594,7 +616,12 @@ private:
     int lastRowSelected = -1;
     bool multipleSelection = false, alwaysFlipSelection = false, hasDoneInitialUpdate = false, selectOnMouseDown = true;
 
+   #if ! JUCE_DISABLE_ASSERTIONS
+    std::weak_ptr<ListBoxModel::Empty> weakModelPtr;
+   #endif
+
     void assignModelPtr (ListBoxModel*);
+    void checkModelPtrIsValid() const;
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
     bool hasAccessibleHeaderComponent() const;
     void selectRowInternal (int rowNumber, bool dontScrollToShowThisRow,

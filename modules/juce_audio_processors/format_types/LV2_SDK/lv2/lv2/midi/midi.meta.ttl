@@ -1,0 +1,153 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix midi: <http://lv2plug.in/ns/ext/midi#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/midi>
+	a doap:Project ;
+	doap:license <http://opensource.org/licenses/isc> ;
+	doap:name "LV2 MIDI" ;
+	doap:shortdesc "A normalised definition of raw MIDI." ;
+	doap:maintainer <http://drobilla.net/drobilla#me> ;
+	doap:created "2006-00-00" ;
+	doap:developer <http://lv2plug.in/ns/meta#larsl> ,
+		<http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "1.10" ;
+		doap:created "2019-02-03" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.16.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Fix incorrect range of midi:chunk."
+			]
+		]
+	] , [
+		doap:revision "1.8" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Use consistent label style."
+			] , [
+				rdfs:label "Add midi:binding and midi:channel predicates."
+			] , [
+				rdfs:label "Add midi:HexByte datatype for status bytes and masks."
+			] , [
+				rdfs:label "Remove non-standard midi:Tick message type."
+			] , [
+				rdfs:label "Add C definitions for message types and standard controllers."
+			] , [
+				rdfs:label "Fix definition of SystemExclusive status byte."
+			]
+		]
+	] , [
+		doap:revision "1.6" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add class definitions for various message types."
+			] , [
+				rdfs:label "Document how to serialise a MidiEvent to a string."
+			] , [
+				rdfs:label "Merge with unified LV2 package."
+			]
+		]
+	] , [
+		doap:revision "1.4" ;
+		doap:created "2011-11-21" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-midi-1.4.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Update packaging."
+			] , [
+				rdfs:label "Improve documentation."
+			]
+		]
+	] , [
+		doap:revision "1.2" ;
+		doap:created "2011-05-26" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-midi-1.2.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add build system for installation."
+			] , [
+				rdfs:label "Switch to ISC license."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2010-10-04" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-midi-1.0.tar.gz> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This specification defines a data type for a MIDI message, midi:MidiEvent,
+which is normalised for fast and convenient real-time processing.  MIDI is the
+<q>Musical Instrument Digital Interface</q>, a ubiquitous binary standard for
+controlling digital music devices.
+
+For plugins that process MIDI (or other situations where MIDI is sent via a
+generic transport) the main type defined here, midi:MidiEvent, can be mapped to
+an integer and used as the type of an LV2 [Atom](atom.html#Atom) or
+[Event](event.html#Event).
+
+This specification also defines a complete vocabulary for the MIDI standard,
+except for standard controller numbers.  These descriptions are detailed enough
+to express any MIDI message as properties.
+
+"""^^lv2:Markdown .
+
+midi:MidiEvent
+	lv2:documentation """
+
+A single raw MIDI message (a sequence of bytes).
+
+This is equivalent to a standard MIDI messages, except with the following
+restrictions to simplify handling:
+
+  * Running status is not allowed, every message must have its own status byte.
+
+  * Note On messages with velocity 0 are not allowed.  These messages are
+    equivalent to Note Off in standard MIDI streams, but here only proper Note
+    Off messages are allowed.
+
+  * "Realtime messages" (status bytes 0xF8 to 0xFF) are allowed, but may not
+     occur inside other messages like they can in standard MIDI streams.
+
+  * All messages are complete valid MIDI messages.  This means, for example,
+    that only the first byte in each event (the status byte) may have the
+    eighth bit set, that Note On and Note Off events are always 3 bytes long,
+    etc.
+
+Where messages are communicated, the writer is responsible for writing valid
+messages, and the reader may assume that all events are valid.
+
+If a midi:MidiEvent is serialised to a string, the format should be
+xsd:hexBinary, for example:
+
+    :::turtle
+    [] eg:someEvent "901A01"^^midi:MidiEvent .
+
+"""^^lv2:Markdown .
+
+midi:statusMask
+	lv2:documentation """
+
+This is a status byte with the lower nibble set to zero.
+
+"""^^lv2:Markdown .
+

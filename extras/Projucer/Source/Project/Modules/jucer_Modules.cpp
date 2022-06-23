@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -30,7 +30,7 @@
 
 //==============================================================================
 LibraryModule::LibraryModule (const ModuleDescription& d)
-    : moduleInfo (d)
+    : moduleDescription (d)
 {
 }
 
@@ -43,15 +43,15 @@ void LibraryModule::writeIncludes (ProjectSaver& projectSaver, OutputStream& out
 
     if (modules.shouldCopyModuleFilesLocally (moduleID))
     {
-        auto juceModuleFolder = moduleInfo.getFolder();
+        auto juceModuleFolder = moduleDescription.getFolder();
 
         auto localModuleFolder = project.getLocalModuleFolder (moduleID);
         localModuleFolder.createDirectory();
         projectSaver.copyFolder (juceModuleFolder, localModuleFolder);
     }
 
-    out << "#include <" << moduleInfo.getModuleFolder().getFileName() << "/"
-        << moduleInfo.getHeader().getFileName()
+    out << "#include <" << moduleDescription.getModuleFolder().getFileName() << "/"
+        << moduleDescription.getHeader().getFileName()
         << ">" << newLine;
 }
 
@@ -78,7 +78,7 @@ void LibraryModule::addSearchPathsToExporter (ProjectExporter& exporter) const
     if (moduleLibDir.exists())
         exporter.addToModuleLibPaths ({ libSubdirPath, moduleRelativePath.getRoot() });
 
-    auto extraInternalSearchPaths = moduleInfo.getExtraSearchPaths().trim();
+    auto extraInternalSearchPaths = moduleDescription.getExtraSearchPaths().trim();
 
     if (extraInternalSearchPaths.isNotEmpty())
     {
@@ -91,7 +91,7 @@ void LibraryModule::addSearchPathsToExporter (ProjectExporter& exporter) const
 
 void LibraryModule::addDefinesToExporter (ProjectExporter& exporter) const
 {
-    auto extraDefs = moduleInfo.getPreprocessorDefs().trim();
+    auto extraDefs = moduleDescription.getPreprocessorDefs().trim();
 
     if (extraDefs.isNotEmpty())
         exporter.getExporterPreprocessorDefsValue() = exporter.getExporterPreprocessorDefsString() + "\n" + extraDefs;
@@ -105,7 +105,7 @@ void LibraryModule::addCompileUnitsToExporter (ProjectExporter& exporter, Projec
     auto moduleID = getID();
 
     auto localModuleFolder = modules.shouldCopyModuleFilesLocally (moduleID) ? project.getLocalModuleFolder (moduleID)
-                                                                             : moduleInfo.getFolder();
+                                                                             : moduleDescription.getFolder();
 
     Array<File> compiled;
     findAndAddCompiledUnits (exporter, &projectSaver, compiled);
@@ -125,6 +125,8 @@ void LibraryModule::addLibsToExporter (ProjectExporter& exporter) const
 
     auto& project = exporter.getProject();
 
+    auto moduleInfo = moduleDescription.getModuleInfo();
+
     if (exporter.isXcode())
     {
         auto& xcodeExporter = dynamic_cast<XcodeProjectExporter&> (exporter);
@@ -137,26 +139,29 @@ void LibraryModule::addLibsToExporter (ProjectExporter& exporter) const
                 xcodeExporter.xcodeFrameworks.add ("AudioUnit");
         }
 
-        auto frameworks = moduleInfo.getModuleInfo() [xcodeExporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString();
+        auto frameworks = moduleInfo[xcodeExporter.isOSX() ? "OSXFrameworks" : "iOSFrameworks"].toString();
         xcodeExporter.xcodeFrameworks.addTokens (frameworks, ", ", {});
 
-        parseAndAddLibsToList (xcodeExporter.xcodeLibs, moduleInfo.getModuleInfo() [exporter.isOSX() ? "OSXLibs" : "iOSLibs"].toString());
+        auto weakFrameworks = moduleInfo[xcodeExporter.isOSX() ? "WeakOSXFrameworks" : "WeakiOSFrameworks"].toString();
+        xcodeExporter.xcodeWeakFrameworks.addTokens (weakFrameworks, ", ", {});
+
+        parseAndAddLibsToList (xcodeExporter.xcodeLibs, moduleInfo[exporter.isOSX() ? "OSXLibs" : "iOSLibs"].toString());
     }
     else if (exporter.isLinux())
     {
-        parseAndAddLibsToList (exporter.linuxLibs, moduleInfo.getModuleInfo() ["linuxLibs"].toString());
-        parseAndAddLibsToList (exporter.linuxPackages, moduleInfo.getModuleInfo() ["linuxPackages"].toString());
+        parseAndAddLibsToList (exporter.linuxLibs, moduleInfo["linuxLibs"].toString());
+        parseAndAddLibsToList (exporter.linuxPackages, moduleInfo["linuxPackages"].toString());
     }
     else if (exporter.isWindows())
     {
         if (exporter.isCodeBlocks())
-            parseAndAddLibsToList (exporter.mingwLibs, moduleInfo.getModuleInfo() ["mingwLibs"].toString());
+            parseAndAddLibsToList (exporter.mingwLibs, moduleInfo["mingwLibs"].toString());
         else
-            parseAndAddLibsToList (exporter.windowsLibs, moduleInfo.getModuleInfo() ["windowsLibs"].toString());
+            parseAndAddLibsToList (exporter.windowsLibs, moduleInfo["windowsLibs"].toString());
     }
     else if (exporter.isAndroid())
     {
-        parseAndAddLibsToList (exporter.androidLibs, moduleInfo.getModuleInfo() ["androidLibs"].toString());
+        parseAndAddLibsToList (exporter.androidLibs, moduleInfo["androidLibs"].toString());
     }
 }
 
@@ -170,7 +175,7 @@ void LibraryModule::addSettingsForModuleToExporter (ProjectExporter& exporter, P
 
 void LibraryModule::getConfigFlags (Project& project, OwnedArray<Project::ConfigFlag>& flags) const
 {
-    auto header = moduleInfo.getHeader();
+    auto header = moduleDescription.getHeader();
     jassert (header.exists());
 
     StringArray lines;
@@ -355,7 +360,7 @@ void LibraryModule::addBrowseableCode (ProjectExporter& exporter, const Array<Fi
 
     auto sourceGroup       = Project::Item::createGroup (exporter.getProject(), getID(), "__mainsourcegroup" + getID(), false);
     auto moduleFromProject = exporter.getModuleFolderRelativeToProject (getID());
-    auto moduleHeader      = moduleInfo.getHeader();
+    auto moduleHeader      = moduleDescription.getHeader();
 
     auto& project = exporter.getProject();
 

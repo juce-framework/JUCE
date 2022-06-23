@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -462,8 +462,12 @@ private:
         if (callback != nullptr)
         {
             if ((numActiveInChans + numActiveOutChans) > 0)
-                callback->audioDeviceIOCallback (const_cast<const float**> (inChans.getData()), numActiveInChans,
-                                                 outChans, numActiveOutChans, numSamples);
+                callback->audioDeviceIOCallbackWithContext (const_cast<const float**> (inChans.getData()),
+                                                            numActiveInChans,
+                                                            outChans,
+                                                            numActiveOutChans,
+                                                            numSamples,
+                                                            {});
         }
         else
         {

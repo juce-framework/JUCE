@@ -23,6 +23,7 @@
 		50AFD116DCA6EC228EFB322D /* UIKit.framework */ = {isa = PBXBuildFile; fileRef = F9EDC54DFBCF3A63E0AA5D73; };
 		59F4F23BFFDAB414B4801F85 /* Images.xcassets */ = {isa = PBXBuildFile; fileRef = 29E0972229FB44D969035B4E; };
 		5C4D406B924230F83E3580AD /* include_juce_audio_devices.mm */ = {isa = PBXBuildFile; fileRef = 65968EA1B476D71F14DE1D58; };
+		60BBD03840ABDD719FED194F /* include_juce_audio_processors_lv2_libs.cpp */ = {isa = PBXBuildFile; fileRef = 5183A94449F6317518C48B0C; };
 		70580743C3D5695F065FF698 /* CoreAudioKit.framework */ = {isa = PBXBuildFile; fileRef = E68018DE199135B7F738FB17; };
 		73E371F1B912FCCAE0CD7E5D /* Accelerate.framework */ = {isa = PBXBuildFile; fileRef = 86CA337014D3F67E906FFD28; };
 		76A80851698FC773D2479B4E /* include_juce_core.mm */ = {isa = PBXBuildFile; fileRef = 683CEE986A2467C850FE99E6; };
@@ -31,6 +32,7 @@
 		851C1165C9E4ACDD19C56A96 /* AVFoundation.framework */ = {isa = PBXBuildFile; fileRef = 942A0F04EFB8D0B2FF9780BA; };
 		9056B642BEF870098DE344E5 /* Foundation.framework */ = {isa = PBXBuildFile; fileRef = 03FA420AACDD03D50AA16E4A; };
 		92EE84159C7027A137F06204 /* CoreText.framework */ = {isa = PBXBuildFile; fileRef = 66643EDF46AE8C5B7956B91D; };
+		970A893BD34180916C9D01C4 /* ARAPlugin.cpp */ = {isa = PBXBuildFile; fileRef = 6A01D5F304346E0332264056; };
 		A0144A682BF4843C8CF53FE4 /* BinaryData.cpp */ = {isa = PBXBuildFile; fileRef = 6D107D7946DC5976B766345B; };
 		A02C9F4C4B840C27B6CAFEBD /* QuartzCore.framework */ = {isa = PBXBuildFile; fileRef = 89309C0C5F3269BD06BE7F27; };
 		A09E93F1B354E1FF8B3E9ABE /* include_juce_data_structures.mm */ = {isa = PBXBuildFile; fileRef = 5EF1D381F42AA8764597F189; };
@@ -39,6 +41,7 @@
 		B0D5475F716126465FCE1586 /* CoreImage.framework */ = {isa = PBXBuildFile; fileRef = CFFA8E9A7820C5A27B4393C9; };
 		C38D14DC58F1941DD5E4BF60 /* include_juce_gui_extra.mm */ = {isa = PBXBuildFile; fileRef = 2BE6C2DFD6EBB9A89109AEB5; };
 		C81D59C798F9F1F1A549FF07 /* CoreServices.framework */ = {isa = PBXBuildFile; fileRef = 7D924E83DABA5B54205C52F4; };
+		CAC10E4345428CAEE6F0DA1B /* include_juce_audio_processors_ara.cpp */ = {isa = PBXBuildFile; fileRef = A43CE79CB190C2D69E17E1E3; };
 		CAF0DE157C8F7D9F168AA3B6 /* include_juce_audio_processors.mm */ = {isa = PBXBuildFile; fileRef = 5FBD6C402617272052BB4D81; };
 		E092A70431B046BF1F50A482 /* CoreMIDI.framework */ = {isa = PBXBuildFile; fileRef = 5AF0CA7CDFCA90B4DE1F55C3; };
 		E283262A07376A7EDFCEAF6F /* LaunchScreen.storyboard */ = {isa = PBXBuildFile; fileRef = F58EBA72DA53F75945B91321; };
@@ -70,6 +73,7 @@
 		45098BAF7E088D41A4E69E42 /* singing.ogg */ /* singing.ogg */ = {isa = PBXFileReference; lastKnownFileType = file.ogg; name = singing.ogg; path = ../../../../examples/Assets/singing.ogg; sourceTree = SOURCE_ROOT; };
 		46C3C2CD301CD59C51FD02D6 /* PluginGraph.h */ /* PluginGraph.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PluginGraph.h; path = ../../Source/Plugins/PluginGraph.h; sourceTree = SOURCE_ROOT; };
 		4C7D82F9274A4F9DBF11235C /* include_juce_audio_basics.mm */ /* include_juce_audio_basics.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_basics.mm; path = ../../JuceLibraryCode/include_juce_audio_basics.mm; sourceTree = SOURCE_ROOT; };
+		5183A94449F6317518C48B0C /* include_juce_audio_processors_lv2_libs.cpp */ /* include_juce_audio_processors_lv2_libs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_lv2_libs.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_lv2_libs.cpp; sourceTree = SOURCE_ROOT; };
 		5313EB852E41EE58B199B9A2 /* juce_audio_devices */ /* juce_audio_devices */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_devices; path = ../../../../modules/juce_audio_devices; sourceTree = SOURCE_ROOT; };
 		57DF618F1DE781556B7AFC32 /* Info-App.plist */ /* Info-App.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Info-App.plist"; path = "Info-App.plist"; sourceTree = SOURCE_ROOT; };
 		59842A98E5EBBC54B50C04CD /* juce_events */ /* juce_events */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_events; path = ../../../../modules/juce_events; sourceTree = SOURCE_ROOT; };
@@ -81,6 +85,7 @@
 		65968EA1B476D71F14DE1D58 /* include_juce_audio_devices.mm */ /* include_juce_audio_devices.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_audio_devices.mm; path = ../../JuceLibraryCode/include_juce_audio_devices.mm; sourceTree = SOURCE_ROOT; };
 		66643EDF46AE8C5B7956B91D /* CoreText.framework */ /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		683CEE986A2467C850FE99E6 /* include_juce_core.mm */ /* include_juce_core.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_core.mm; path = ../../JuceLibraryCode/include_juce_core.mm; sourceTree = SOURCE_ROOT; };
+		6A01D5F304346E0332264056 /* ARAPlugin.cpp */ /* ARAPlugin.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ARAPlugin.cpp; path = ../../Source/Plugins/ARAPlugin.cpp; sourceTree = SOURCE_ROOT; };
 		6A71B2BCAC4239072BC2BD7E /* juce_audio_basics */ /* juce_audio_basics */ = {isa = PBXFileReference; lastKnownFileType = folder; name = juce_audio_basics; path = ../../../../modules/juce_audio_basics; sourceTree = SOURCE_ROOT; };
 		6D107D7946DC5976B766345B /* BinaryData.cpp */ /* BinaryData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryData.cpp; path = ../../JuceLibraryCode/BinaryData.cpp; sourceTree = SOURCE_ROOT; };
 		7D924E83DABA5B54205C52F4 /* CoreServices.framework */ /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
@@ -99,6 +104,7 @@
 		97918AB43AD460AFA8FA2FFE /* PluginWindow.h */ /* PluginWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PluginWindow.h; path = ../../Source/UI/PluginWindow.h; sourceTree = SOURCE_ROOT; };
 		97E63C295843A1E665E70473 /* cello.wav */ /* cello.wav */ = {isa = PBXFileReference; lastKnownFileType = file.wav; name = cello.wav; path = ../../../../examples/Assets/cello.wav; sourceTree = SOURCE_ROOT; };
 		9F9B445E6755CAA19E4344ED /* CoreAudio.framework */ /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		A43CE79CB190C2D69E17E1E3 /* include_juce_audio_processors_ara.cpp */ /* include_juce_audio_processors_ara.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = include_juce_audio_processors_ara.cpp; path = ../../JuceLibraryCode/include_juce_audio_processors_ara.cpp; sourceTree = SOURCE_ROOT; };
 		A5DFC13E4F09134B0D226A3E /* MainHostWindow.h */ /* MainHostWindow.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MainHostWindow.h; path = ../../Source/UI/MainHostWindow.h; sourceTree = SOURCE_ROOT; };
 		A5E7CA8A71D049BE2BD33861 /* JuceHeader.h */ /* JuceHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = JuceHeader.h; path = ../../JuceLibraryCode/JuceHeader.h; sourceTree = SOURCE_ROOT; };
 		A66EFAC64B1B67B536C73415 /* HostStartup.cpp */ /* HostStartup.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = HostStartup.cpp; path = ../../Source/HostStartup.cpp; sourceTree = SOURCE_ROOT; };
@@ -111,6 +117,7 @@
 		B8E24A5CEE6B7055537725CF /* include_juce_cryptography.mm */ /* include_juce_cryptography.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = include_juce_cryptography.mm; path = ../../JuceLibraryCode/include_juce_cryptography.mm; sourceTree = SOURCE_ROOT; };
 		B95B9D6774059DBB19F2B4E2 /* InternalPlugins.h */ /* InternalPlugins.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InternalPlugins.h; path = ../../Source/Plugins/InternalPlugins.h; sourceTree = SOURCE_ROOT; };
 		C37B2E77AAB6C9E13729BF99 /* IOConfigurationWindow.cpp */ /* IOConfigurationWindow.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = IOConfigurationWindow.cpp; path = ../../Source/Plugins/IOConfigurationWindow.cpp; sourceTree = SOURCE_ROOT; };
+		CA726B9AA0EC87B58D005C8D /* ARAPlugin.h */ /* ARAPlugin.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ARAPlugin.h; path = ../../Source/Plugins/ARAPlugin.h; sourceTree = SOURCE_ROOT; };
 		CFFA8E9A7820C5A27B4393C9 /* CoreImage.framework */ /* CoreImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreImage.framework; path = System/Library/Frameworks/CoreImage.framework; sourceTree = SDKROOT; };
 		D0026F0A29B486D87E92BB8B /* OpenGLES.framework */ /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		D4EBC17BDB7F88CCBC76730B /* AudioToolbox.framework */ /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
@@ -185,6 +192,8 @@
 				65968EA1B476D71F14DE1D58,
 				5D250A57C7DEA80248F30EED,
 				5FBD6C402617272052BB4D81,
+				A43CE79CB190C2D69E17E1E3,
+				5183A94449F6317518C48B0C,
 				B285CAB91AE928C476CA4F9C,
 				683CEE986A2467C850FE99E6,
 				B8E24A5CEE6B7055537725CF,
@@ -233,6 +242,8 @@
 		9F51E92D8C77FA9DDD1F7B10 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				6A01D5F304346E0332264056,
+				CA726B9AA0EC87B58D005C8D,
 				87A7AAB053051C49EAF4EE88,
 				B95B9D6774059DBB19F2B4E2,
 				C37B2E77AAB6C9E13729BF99,
@@ -334,7 +345,7 @@
 		ADE6E539DB98A302483A82D0 = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1320;
+				LastUpgradeCheck = 1340;
 				ORGANIZATIONNAME = "Raw Material Software Limited";
 				TargetAttributes = {
 					DE12B7643D374BFF7E4FEB1C = {
@@ -396,6 +407,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				970A893BD34180916C9D01C4,
 				7FF8A938915488310A7F5921,
 				025B22813EA4E34CE3630B9A,
 				09309BD494A05931864B6730,
@@ -407,6 +419,8 @@
 				5C4D406B924230F83E3580AD,
 				F4DD98B9310B679D50A2C8A6,
 				CAF0DE157C8F7D9F168AA3B6,
+				CAC10E4345428CAEE6F0DA1B,
+				60BBD03840ABDD719FED194F,
 				0F20A4AE04736634F097F5A6,
 				76A80851698FC773D2479B4E,
 				E4A926EF695823F0F13268FF,
@@ -442,7 +456,7 @@
 					"JUCE_CONTENT_SHARING=1",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x60106",
+					"JUCE_PROJUCER_VERSION=0x70000",
 					"JUCE_MODULE_AVAILABLE_juce_audio_basics=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
@@ -466,6 +480,7 @@
 					"JUCE_PLUGINHOST_VST3=1",
 					"JUCE_PLUGINHOST_AU=1",
 					"JUCE_PLUGINHOST_LADSPA=1",
+					"JUCE_PLUGINHOST_LV2=1",
 					"JUCE_USE_CDREADER=0",
 					"JUCE_USE_CDBURNER=0",
 					"JUCE_WEB_BROWSER=0",
@@ -477,13 +492,21 @@
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
 					"JucePlugin_Build_AUv3=0",
-					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv/src",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sratom",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord/src",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/serd",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lv2",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK",
 					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/VST3_SDK",
 					"$(SRCROOT)/../../JuceLibraryCode",
 					"$(SRCROOT)/../../../../modules",
@@ -493,9 +516,10 @@
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LLVM_LTO = YES;
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
-				OTHER_CFLAGS = "-Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wno-missing-field-initializers -Wshadow-all -Wnullable-to-nonnull-conversion -Wunguarded-availability -Wunguarded-availability-new";
-				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wno-missing-field-initializers -Wshadow-all -Wnullable-to-nonnull-conversion -Wunguarded-availability -Wunguarded-availability-new";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_CFLAGS = "-Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wshadow-all -Wnullable-to-nonnull-conversion -Wmissing-prototypes -Wunguarded-availability -Wunguarded-availability-new";
+				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wshadow-all -Wnullable-to-nonnull-conversion -Wmissing-prototypes -Wunguarded-availability -Wunguarded-availability-new";
+				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.pluginhost;
 				PRODUCT_NAME = "Plugin Host";
 				USE_HEADERMAP = NO;
@@ -573,7 +597,7 @@
 					"JUCE_CONTENT_SHARING=1",
 					"JUCE_DISPLAY_SPLASH_SCREEN=0",
 					"JUCE_USE_DARK_SPLASH_SCREEN=1",
-					"JUCE_PROJUCER_VERSION=0x60106",
+					"JUCE_PROJUCER_VERSION=0x70000",
 					"JUCE_MODULE_AVAILABLE_juce_audio_basics=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_devices=1",
 					"JUCE_MODULE_AVAILABLE_juce_audio_formats=1",
@@ -597,6 +621,7 @@
 					"JUCE_PLUGINHOST_VST3=1",
 					"JUCE_PLUGINHOST_AU=1",
 					"JUCE_PLUGINHOST_LADSPA=1",
+					"JUCE_PLUGINHOST_LV2=1",
 					"JUCE_USE_CDREADER=0",
 					"JUCE_USE_CDBURNER=0",
 					"JUCE_WEB_BROWSER=0",
@@ -608,13 +633,21 @@
 					"JucePlugin_Build_VST3=0",
 					"JucePlugin_Build_AU=0",
 					"JucePlugin_Build_AUv3=0",
-					"JucePlugin_Build_RTAS=0",
 					"JucePlugin_Build_AAX=0",
 					"JucePlugin_Build_Standalone=0",
 					"JucePlugin_Build_Unity=0",
+					"JucePlugin_Build_LV2=0",
 				);
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv/src",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sratom",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord/src",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/serd",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lv2",
+					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK",
 					"$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/VST3_SDK",
 					"$(SRCROOT)/../../JuceLibraryCode",
 					"$(SRCROOT)/../../../../modules",
@@ -623,9 +656,10 @@
 				INFOPLIST_FILE = Info-App.plist;
 				INFOPLIST_PREPROCESS = NO;
 				INSTALL_PATH = "$(HOME)/Applications";
-				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
-				OTHER_CFLAGS = "-Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wno-missing-field-initializers -Wshadow-all -Wnullable-to-nonnull-conversion -Wunguarded-availability -Wunguarded-availability-new";
-				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wno-missing-field-initializers -Wshadow-all -Wnullable-to-nonnull-conversion -Wunguarded-availability -Wunguarded-availability-new";
+				MTL_HEADER_SEARCH_PATHS = "$(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv/src $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lilv $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sratom $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord/src $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/sord $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/serd $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK/lv2 $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/LV2_SDK $(SRCROOT)/../../../../modules/juce_audio_processors/format_types/VST3_SDK $(SRCROOT)/../../JuceLibraryCode $(SRCROOT)/../../../../modules";
+				OTHER_CFLAGS = "-Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wshadow-all -Wnullable-to-nonnull-conversion -Wmissing-prototypes -Wunguarded-availability -Wunguarded-availability-new";
+				OTHER_CPLUSPLUSFLAGS = "-Woverloaded-virtual -Wreorder -Wzero-as-null-pointer-constant -Wunused-private-field -Winconsistent-missing-destructor-override -Wall -Wstrict-aliasing -Wuninitialized -Wunused-parameter -Wswitch-enum -Wsign-conversion -Wsign-compare -Wunreachable-code -Wcast-align -Wno-ignored-qualifiers -Wshorten-64-to-32 -Wconversion -Wint-conversion -Wconditional-uninitialized -Wconstant-conversion -Wbool-conversion -Wextra-semi -Wshift-sign-overflow -Wshadow-all -Wnullable-to-nonnull-conversion -Wmissing-prototypes -Wunguarded-availability -Wunguarded-availability-new";
+				OTHER_LDFLAGS = "-weak_framework Metal -weak_framework MetalKit";
 				PRODUCT_BUNDLE_IDENTIFIER = com.juce.pluginhost;
 				PRODUCT_NAME = "Plugin Host";
 				USE_HEADERMAP = NO;

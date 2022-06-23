@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -605,7 +605,7 @@ public:
         {
             if (auto* cb = callback.exchange (nullptr))
             {
-                cb->audioDeviceIOCallback (inputChannelData, inputChannels, outputChannelData, outputChannels, bufferSize);
+                cb->audioDeviceIOCallbackWithContext (inputChannelData, inputChannels, outputChannelData, outputChannels, bufferSize, {});
                 callback.set (cb);
             }
             else
@@ -1273,6 +1273,7 @@ private:
 };
 
 //==============================================================================
+pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr);
 pthread_t juce_createRealtimeAudioThread (void* (*entry) (void*), void* userPtr)
 {
     auto thread = std::make_unique<SLRealtimeThread>();

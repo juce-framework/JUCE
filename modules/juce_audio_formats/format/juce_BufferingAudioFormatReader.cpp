@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -63,7 +63,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
     const ScopedLock sl (lock);
     nextReadPosition = startSampleInFile;
 
-    bool success = true;
+    bool allSamplesRead = true;
 
     while (numSamples > 0)
     {
@@ -89,9 +89,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
             startSampleInFile += numToDo;
             numSamples -= numToDo;
 
-            // TODO JUCE_ARA we want to continue reading but flag failure if any block fails
-            // https://forum.juce.com/t/bufferingaudioreader-readsamples-return-value-seems-buggy/35173
-            success = success && block->success;
+            allSamplesRead = allSamplesRead && block->allSamplesRead;
         }
         else
         {
@@ -101,9 +99,7 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
                     if (auto* dest = (float*) destSamples[j])
                         FloatVectorOperations::clear (dest + startOffsetInDestBuffer, numSamples);
 
-                // TODO JUCE_ARA we want to treat a read timeout as a failure
-                // https://forum.juce.com/t/bufferingaudioreader-readsamples-return-value-seems-buggy/35173
-                success = false;
+                allSamplesRead = false;
                 break;
             }
             else
@@ -114,14 +110,14 @@ bool BufferingAudioReader::readSamples (int** destSamples, int numDestChannels, 
         }
     }
 
-    return success;
+    return allSamplesRead;
 }
 
 BufferingAudioReader::BufferedBlock::BufferedBlock (AudioFormatReader& reader, int64 pos, int numSamples)
     : range (pos, pos + numSamples),
-      buffer ((int) reader.numChannels, numSamples)
+      buffer ((int) reader.numChannels, numSamples),
+      allSamplesRead (reader.read (&buffer, 0, numSamples, pos, true, true))
 {
-    success = reader.read (&buffer, 0, numSamples, pos, true, true);
 }
 
 BufferingAudioReader::BufferedBlock* BufferingAudioReader::getBlockContaining (int64 pos) const noexcept

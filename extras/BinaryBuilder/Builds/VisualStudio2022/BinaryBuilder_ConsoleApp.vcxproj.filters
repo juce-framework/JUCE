@@ -91,7 +91,13 @@
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_HashMap_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_ListenerList.cpp">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.cpp">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_Optional_test.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_OwnedArray.cpp">
@@ -108,6 +114,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\containers\juce_Variant.cpp">
       <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_common_MimeTypes.cpp">
+      <Filter>JUCE Modules\juce_core\files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.cpp">
       <Filter>JUCE Modules\juce_core\files</Filter>
@@ -174,6 +183,9 @@
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\misc\juce_Uuid.cpp">
       <Filter>JUCE Modules\juce_core\misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_AndroidDocument.cpp">
+      <Filter>JUCE Modules\juce_core\native</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\..\modules\juce_core\native\juce_android_Files.cpp">
       <Filter>JUCE Modules\juce_core\native</Filter>
@@ -444,6 +456,9 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_NamedValueSet.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Optional.h">
+      <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_OwnedArray.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
     </ClInclude>
@@ -467,6 +482,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\containers\juce_Variant.h">
       <Filter>JUCE Modules\juce_core\containers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_AndroidDocument.h">
+      <Filter>JUCE Modules\juce_core\files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_common_MimeTypes.h">
+      <Filter>JUCE Modules\juce_core\files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\..\modules\juce_core\files\juce_DirectoryIterator.h">
       <Filter>JUCE Modules\juce_core\files</Filter>

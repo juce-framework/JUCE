@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -33,7 +33,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 namespace WasapiClasses
 {
 
-void logFailure (HRESULT hr)
+static void logFailure (HRESULT hr)
 {
     ignoreUnused (hr);
     jassert (hr != (HRESULT) 0x800401f0); // If you hit this, it means you're trying to call from
@@ -89,7 +89,7 @@ void logFailure (HRESULT hr)
 
 #undef check
 
-bool check (HRESULT hr)
+static bool check (HRESULT hr)
 {
     logFailure (hr);
     return SUCCEEDED (hr);
@@ -361,7 +361,7 @@ namespace juce
 namespace WasapiClasses
 {
 
-String getDeviceID (IMMDevice* device)
+static String getDeviceID (IMMDevice* device)
 {
     String s;
     WCHAR* deviceId = nullptr;
@@ -1515,8 +1515,12 @@ public:
                 const ScopedTryLock sl (startStopLock);
 
                 if (sl.isLocked() && isStarted)
-                    callback->audioDeviceIOCallback (const_cast<const float**> (inputBuffers), numInputBuffers,
-                                                     outputBuffers, numOutputBuffers, bufferSize);
+                    callback->audioDeviceIOCallbackWithContext (const_cast<const float**> (inputBuffers),
+                                                                numInputBuffers,
+                                                                outputBuffers,
+                                                                numOutputBuffers,
+                                                                bufferSize,
+                                                                {});
                 else
                     outs.clear();
             }

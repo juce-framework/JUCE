@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -414,34 +414,51 @@ jobject ActivityLifecycleCallbacks::invoke (jobject proxy, jobject method, jobje
 {
     auto* env = getEnv();
 
-    auto methodName = juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
+    struct Comparator
+    {
+        bool operator() (const char* a, const char* b) const
+        {
+            return CharPointer_ASCII { a }.compare (CharPointer_ASCII { b }) < 0;
+        }
+    };
 
-    auto activity = env->GetArrayLength (args) > 0 ? env->GetObjectArrayElement (args, 0) : (jobject) nullptr;
-    auto bundle   = env->GetArrayLength (args) > 1 ? env->GetObjectArrayElement (args, 1) : (jobject) nullptr;
+    static const std::map<const char*, void (*) (ActivityLifecycleCallbacks&, jobject, jobject), Comparator> entries
+    {
+        { "onActivityConfigurationChanged",   [] (auto& t, auto activity, auto       ) { t.onActivityConfigurationChanged (activity);          } },
+        { "onActivityCreated",                [] (auto& t, auto activity, auto bundle) { t.onActivityCreated (activity, bundle);               } },
+        { "onActivityDestroyed",              [] (auto& t, auto activity, auto       ) { t.onActivityDestroyed (activity);                     } },
+        { "onActivityPaused",                 [] (auto& t, auto activity, auto       ) { t.onActivityPaused (activity);                        } },
+        { "onActivityPostCreated",            [] (auto& t, auto activity, auto bundle) { t.onActivityPostCreated (activity, bundle);           } },
+        { "onActivityPostDestroyed",          [] (auto& t, auto activity, auto       ) { t.onActivityPostDestroyed (activity);                 } },
+        { "onActivityPostPaused",             [] (auto& t, auto activity, auto       ) { t.onActivityPostPaused (activity);                    } },
+        { "onActivityPostResumed",            [] (auto& t, auto activity, auto       ) { t.onActivityPostResumed (activity);                   } },
+        { "onActivityPostSaveInstanceState",  [] (auto& t, auto activity, auto bundle) { t.onActivityPostSaveInstanceState (activity, bundle); } },
+        { "onActivityPostStarted",            [] (auto& t, auto activity, auto       ) { t.onActivityPostStarted (activity);                   } },
+        { "onActivityPostStopped",            [] (auto& t, auto activity, auto       ) { t.onActivityPostStopped (activity);                   } },
+        { "onActivityPreCreated",             [] (auto& t, auto activity, auto bundle) { t.onActivityPreCreated (activity, bundle);            } },
+        { "onActivityPreDestroyed",           [] (auto& t, auto activity, auto       ) { t.onActivityPreDestroyed (activity);                  } },
+        { "onActivityPrePaused",              [] (auto& t, auto activity, auto       ) { t.onActivityPrePaused (activity);                     } },
+        { "onActivityPreResumed",             [] (auto& t, auto activity, auto       ) { t.onActivityPreResumed (activity);                    } },
+        { "onActivityPreSaveInstanceState",   [] (auto& t, auto activity, auto bundle) { t.onActivityPreSaveInstanceState (activity, bundle);  } },
+        { "onActivityPreStarted",             [] (auto& t, auto activity, auto       ) { t.onActivityPreStarted (activity);                    } },
+        { "onActivityPreStopped",             [] (auto& t, auto activity, auto       ) { t.onActivityPreStopped (activity);                    } },
+        { "onActivityResumed",                [] (auto& t, auto activity, auto       ) { t.onActivityResumed (activity);                       } },
+        { "onActivitySaveInstanceState",      [] (auto& t, auto activity, auto bundle) { t.onActivitySaveInstanceState (activity, bundle);     } },
+        { "onActivityStarted",                [] (auto& t, auto activity, auto       ) { t.onActivityStarted (activity);                       } },
+        { "onActivityStopped",                [] (auto& t, auto activity, auto       ) { t.onActivityStopped (activity);                       } },
+    };
 
-    if      (methodName == "onActivityPreCreated")             { onActivityPreCreated (activity, bundle);            return nullptr; }
-    else if (methodName == "onActivityPreDestroyed")           { onActivityPreDestroyed (activity);                  return nullptr; }
-    else if (methodName == "onActivityPrePaused")              { onActivityPrePaused (activity);                     return nullptr; }
-    else if (methodName == "onActivityPreResumed")             { onActivityPreResumed (activity);                    return nullptr; }
-    else if (methodName == "onActivityPreSaveInstanceState")   { onActivityPreSaveInstanceState (activity, bundle);  return nullptr; }
-    else if (methodName == "onActivityPreStarted")             { onActivityPreStarted (activity);                    return nullptr; }
-    else if (methodName == "onActivityPreStopped")             { onActivityPreStopped (activity);                    return nullptr; }
-    else if (methodName == "onActivityCreated")                { onActivityCreated (activity, bundle);               return nullptr; }
-    else if (methodName == "onActivityDestroyed")              { onActivityDestroyed (activity);                     return nullptr; }
-    else if (methodName == "onActivityPaused")                 { onActivityPaused (activity);                        return nullptr; }
-    else if (methodName == "onActivityResumed")                { onActivityResumed (activity);                       return nullptr; }
-    else if (methodName == "onActivitySaveInstanceState")      { onActivitySaveInstanceState (activity, bundle);     return nullptr; }
-    else if (methodName == "onActivityStarted")                { onActivityStarted (activity);                       return nullptr; }
-    else if (methodName == "onActivityStopped")                { onActivityStopped (activity);                       return nullptr; }
-    else if (methodName == "onActivityPostCreated")            { onActivityPostCreated (activity, bundle);           return nullptr; }
-    else if (methodName == "onActivityPostDestroyed")          { onActivityPostDestroyed (activity);                 return nullptr; }
-    else if (methodName == "onActivityPostPaused")             { onActivityPostPaused (activity);                    return nullptr; }
-    else if (methodName == "onActivityPostResumed")            { onActivityPostResumed (activity);                   return nullptr; }
-    else if (methodName == "onActivityPostSaveInstanceState")  { onActivityPostSaveInstanceState (activity, bundle); return nullptr; }
-    else if (methodName == "onActivityPostStarted")            { onActivityPostStarted (activity);                   return nullptr; }
-    else if (methodName == "onActivityPostStopped")            { onActivityPostStopped (activity);                   return nullptr; }
+    const auto methodName = juceString ((jstring) env->CallObjectMethod (method, JavaMethod.getName));
+    const auto iter = entries.find (methodName.toRawUTF8());
 
-    return AndroidInterfaceImplementer::invoke (proxy, method, args);
+    if (iter == entries.end())
+        return AndroidInterfaceImplementer::invoke (proxy, method, args);
+
+    const auto activity = env->GetArrayLength (args) > 0 ? env->GetObjectArrayElement (args, 0) : (jobject) nullptr;
+    const auto bundle   = env->GetArrayLength (args) > 1 ? env->GetObjectArrayElement (args, 1) : (jobject) nullptr;
+    (iter->second) (*this, activity, bundle);
+
+    return nullptr;
 }
 
 //==============================================================================

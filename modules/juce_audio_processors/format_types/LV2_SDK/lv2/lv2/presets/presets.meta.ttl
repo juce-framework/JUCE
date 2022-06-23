@@ -1,0 +1,132 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/presets>
+	a doap:Project ;
+	doap:license <http://opensource.org/licenses/isc> ;
+	doap:name "LV2 Presets" ;
+	doap:shortdesc "Presets for LV2 plugins." ;
+	doap:created "2009-00-00" ;
+	doap:developer <http://drobilla.net/drobilla#me> ;
+	doap:release [
+		doap:revision "2.8" ;
+		doap:created "2012-10-14" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.2.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Use consistent label style."
+			] , [
+				rdfs:label "Add preset banks."
+			]
+		]
+	] , [
+		doap:revision "2.6" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add pset:preset property for describing the preset currently applied to a plugin instance."
+			] , [
+				rdfs:label "Remove pset:appliesTo property, use lv2:appliesTo instead."
+			] , [
+				rdfs:label "Merge with unified LV2 package."
+			]
+		]
+	] , [
+		doap:revision "2.2" ;
+		doap:created "2011-11-21" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-presets-2.2.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Update packaging."
+			] , [
+				rdfs:label "Improve documentation."
+			]
+		]
+	] , [
+		doap:revision "2.0" ;
+		doap:created "2010-10-04" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-presets-2.0.tar.gz> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This is a vocabulary for LV2 plugin presets, that is, named sets of control
+values and possibly other state.  The structure of a pset:Preset is
+deliberately identical to that of an lv2:Plugin, and can be thought of as a
+plugin template or overlay.
+
+Presets may be defined in any bundle, including the plugin's bundle, separate
+third party preset bundles, or user preset bundles saved by hosts.  Since
+preset data tends to be large, it is recommended that plugins describe presets
+in a separate file(s) to avoid slowing down hosts.  The `manifest.ttl` of a
+bundle containing presets should list them like so:
+
+    :::turtle
+    eg:mypreset
+        a             pset:Preset ;
+        lv2:appliesTo eg:myplugin ;
+        rdfs:seeAlso  <mypreset.ttl> .
+
+"""^^lv2:Markdown .
+
+pset:Preset
+	lv2:documentation """
+
+The structure of a Preset deliberately mirrors that of a plugin, so existing
+predicates can be used to describe any data associated with the preset.  For
+example:
+
+    :::turtle
+    @prefix eg: <http://example.org/> .
+
+    eg:mypreset
+        a pset:Preset ;
+        rdfs:label "One louder" ;
+        lv2:appliesTo eg:myplugin ;
+        lv2:port [
+            lv2:symbol "volume1" ;
+            pset:value 11.0
+        ] , [
+            lv2:symbol "volume2" ;
+            pset:value 11.0
+        ] .
+
+A Preset SHOULD have at least one lv2:appliesTo property.  Each Port on a
+Preset MUST have at least a lv2:symbol property and a pset:value property.
+
+Hosts SHOULD save user presets to a bundle in the user-local LV2 directory (for
+example `~/.lv2`) with a name like `<Plugin_Name>_<Preset_Name>.preset.lv2`
+(for example `LV2_Amp_At_Eleven.preset.lv2`), where names are transformed to be
+valid LV2 symbols for maximum compatibility.
+
+"""^^lv2:Markdown .
+
+pset:value
+	lv2:documentation """
+
+This property is used in a similar way to lv2:default.
+
+"""^^lv2:Markdown .
+
+pset:preset
+	lv2:documentation """
+
+Specifies the preset currently applied to a plugin instance.  This property may
+be useful for saving state, or notifying a plugin instance at run-time about a
+preset change.
+
+"""^^lv2:Markdown .
+

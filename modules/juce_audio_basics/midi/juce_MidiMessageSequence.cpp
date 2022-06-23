@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -306,63 +306,56 @@ void MidiMessageSequence::deleteSysExMessages()
 //==============================================================================
 class OptionalPitchWheel
 {
-    int value = 0;
-    bool valid = false;
+    Optional<int> value;
 
 public:
     void emit (int channel, Array<MidiMessage>& out) const
     {
-        if (valid)
-            out.add (MidiMessage::pitchWheel (channel, value));
+        if (value.hasValue())
+            out.add (MidiMessage::pitchWheel (channel, *value));
     }
 
     void set (int v)
     {
         value = v;
-        valid = true;
     }
 };
 
 class OptionalControllerValues
 {
-    int values[128];
+    Optional<char> values[128];
 
 public:
-    OptionalControllerValues()
-    {
-        std::fill (std::begin (values), std::end (values), -1);
-    }
-
     void emit (int channel, Array<MidiMessage>& out) const
     {
         for (auto it = std::begin (values); it != std::end (values); ++it)
-            if (*it != -1)
-                out.add (MidiMessage::controllerEvent (channel, (int) std::distance (std::begin (values), it), *it));
+            if (it->hasValue())
+                out.add (MidiMessage::controllerEvent (channel, (int) std::distance (std::begin (values), it), **it));
     }
 
     void set (int controller, int value)
     {
-        values[controller] = value;
+        values[controller] = (char) value;
     }
 };
 
 class OptionalProgramChange
 {
-    int value = -1, bankLSB = -1, bankMSB = -1;
+    Optional<char> value, bankLSB, bankMSB;
 
 public:
     void emit (int channel, double time, Array<MidiMessage>& out) const
     {
-        if (value == -1)
+        if (! value.hasValue())
             return;
 
-        if (bankLSB != -1 && bankMSB != -1)
+        if (bankLSB.hasValue() && bankMSB.hasValue())
         {
-            out.add (MidiMessage::controllerEvent (channel, 0x00, bankMSB).withTimeStamp (time));
-            out.add (MidiMessage::controllerEvent (channel, 0x20, bankLSB).withTimeStamp (time));
+            out.add (MidiMessage::controllerEvent (channel, 0x00, *bankMSB).withTimeStamp (time));
+            out.add (MidiMessage::controllerEvent (channel, 0x20, *bankLSB).withTimeStamp (time));
         }
 
-        out.add (MidiMessage::programChange (channel, value).withTimeStamp (time));
+        out.add (MidiMessage::programChange (channel, *value).withTimeStamp (time));
     }
 
     // Returns true if this is a bank number change, and false otherwise.
@@ -370,22 +363,21 @@ public:
     {
         switch (controller)
         {
-            case 0x00: bankMSB = v; return true;
-            case 0x20: bankLSB = v; return true;
+            case 0x00: bankMSB = (char) v; return true;
+            case 0x20: bankLSB = (char) v; return true;
         }
 
         return false;
     }
 
-    void setProgram (int v) { value   = v; }
+    void setProgram (int v) { value = (char) v; }
 };
 
 class ParameterNumberState
 {
     enum class Kind { rpn, nrpn };
 
-    int newestRpnLsb = -1, newestRpnMsb = -1, newestNrpnLsb = -1, newestNrpnMsb = -1;
-    int lastSentLsb = -1, lastSentMsb = -1;
+    Optional<char> newestRpnLsb, newestRpnMsb, newestNrpnLsb, newestNrpnMsb, lastSentLsb, lastSentMsb;
     Kind lastSentKind = Kind::rpn, newestKind = Kind::rpn;
 
 public:
@@ -401,11 +393,11 @@ public:
         auto lastSent = std::tie (lastSentKind, lastSentMsb, lastSentLsb);
         const auto newest = std::tie (newestKind, newestMsb, newestLsb);
 
-        if (lastSent == newest || newestMsb == -1 || newestLsb == -1)
+        if (lastSent == newest || ! newestMsb.hasValue() || ! newestLsb.hasValue())
             return;
 
-        out.add (MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x65 : 0x63, newestMsb).withTimeStamp (time));
-        out.add (MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x64 : 0x62, newestLsb).withTimeStamp (time));
+        out.add (MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x65 : 0x63, *newestMsb).withTimeStamp (time));
+        out.add (MidiMessage::controllerEvent (channel, newestKind == Kind::rpn ? 0x64 : 0x62, *newestLsb).withTimeStamp (time));
 
         lastSent = newest;
     }
@@ -415,10 +407,10 @@ public:
     {
         switch (controller)
         {
-            case 0x65: newestRpnMsb  = value; newestKind = Kind::rpn;  return true;
-            case 0x64: newestRpnLsb  = value; newestKind = Kind::rpn;  return true;
-            case 0x63: newestNrpnMsb = value; newestKind = Kind::nrpn; return true;
-            case 0x62: newestNrpnLsb = value; newestKind = Kind::nrpn; return true;
+            case 0x65: newestRpnMsb  = (char) value; newestKind = Kind::rpn;  return true;
+            case 0x64: newestRpnLsb  = (char) value; newestKind = Kind::rpn;  return true;
+            case 0x63: newestNrpnMsb = (char) value; newestKind = Kind::nrpn; return true;
+            case 0x62: newestNrpnLsb = (char) value; newestKind = Kind::nrpn; return true;
         }
 
         return false;

@@ -1,0 +1,60 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/presets>
+	a owl:Ontology ;
+	rdfs:label "LV2 Presets" ;
+	rdfs:comment "Presets for LV2 plugins." ;
+	rdfs:seeAlso <presets.meta.ttl> .
+
+pset:Bank
+	a rdfs:Class ;
+	rdfs:label "Bank" ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty rdfs:label ;
+		owl:someValuesFrom xsd:string ;
+		rdfs:comment "A Bank MUST have at least one string rdfs:label."
+	] ;
+	rdfs:comment "A bank of presets." .
+
+pset:Preset
+	a rdfs:Class ;
+	rdfs:subClassOf lv2:PluginBase ;
+	rdfs:label "Preset" ;
+	rdfs:comment "A preset for an LV2 plugin." ;
+	rdfs:subClassOf [
+		a owl:Restriction ;
+		owl:onProperty rdfs:label ;
+		owl:someValuesFrom xsd:string ;
+		rdfs:comment "A Preset MUST have at least one string rdfs:label."
+	] .
+
+pset:bank
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain pset:Preset ;
+	rdfs:range pset:Bank ;
+	rdfs:label "bank" ;
+	rdfs:comment "The bank this preset belongs to." .
+
+pset:value
+	a rdf:Property ,
+		owl:DatatypeProperty ,
+		owl:FunctionalProperty ;
+	rdfs:domain lv2:PortBase ;
+	rdfs:label "value" ;
+	rdfs:comment "The value of a port in a preset." .
+
+pset:preset
+	a rdf:Property ,
+		owl:ObjectProperty ;
+	rdfs:domain lv2:PluginBase ;
+	rdfs:range pset:Preset ;
+	rdfs:label "preset" ;
+	rdfs:comment "The preset currently applied to a plugin instance." .
+

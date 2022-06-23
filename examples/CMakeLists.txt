@@ -1,15 +1,15 @@
 # ==============================================================================
 #
 #  This file is part of the JUCE library.
-#  Copyright (c) 2020 - Raw Material Software Limited
+#  Copyright (c) 2022 - Raw Material Software Limited
 #
 #  JUCE is an open source library subject to commercial or open-source
 #  licensing.
 #
-#  By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-#  Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+#  By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+#  Agreement and JUCE Privacy Policy.
 #
-#  End User License Agreement: www.juce.com/juce-6-licence
+#  End User License Agreement: www.juce.com/juce-7-licence
 #  Privacy Policy: www.juce.com/juce-privacy-policy
 #
 #  Or: You may also use this code under the terms of the GPL v3 (see
@@ -41,6 +41,12 @@ function(_juce_add_pips)
             "${CMAKE_CURRENT_SOURCE_DIR}/PushNotificationsDemo.h")
     endif()
 
+    if(NOT (TARGET juce_ara_sdk
+            AND (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")))
+        list(REMOVE_ITEM headers
+             "${CMAKE_CURRENT_SOURCE_DIR}/ARAPluginDemo.h")
+    endif()
+
     foreach(header IN ITEMS ${headers})
         juce_add_pip(${header} added_target)
         target_link_libraries(${added_target} PUBLIC
@@ -54,5 +60,4 @@ add_subdirectory(Audio)
 add_subdirectory(DSP)
 add_subdirectory(GUI)
 add_subdirectory(Plugins)
-add_subdirectory(Plugins/ARAPluginDemo)
 add_subdirectory(Utilities)

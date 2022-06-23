@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -29,6 +29,71 @@
 
 constexpr const char* scanModeKey = "pluginScanMode";
 
+//==============================================================================
+class Superprocess  : private ChildProcessCoordinator
+{
+public:
+    Superprocess()
+    {
+        launchWorkerProcess (File::getSpecialLocation (File::currentExecutableFile), processUID, 0, 0);
+    }
+
+    enum class State
+    {
+        timeout,
+        gotResult,
+        connectionLost,
+    };
+
+    struct Response
+    {
+        State state;
+        std::unique_ptr<XmlElement> xml;
+    };
+
+    Response getResponse()
+    {
+        std::unique_lock<std::mutex> lock { mutex };
+
+        if (! condvar.wait_for (lock, std::chrono::milliseconds { 50 }, [&] { return gotResult || connectionLost; }))
+            return { State::timeout, nullptr };
+
+        const auto state = connectionLost ? State::connectionLost : State::gotResult;
+        connectionLost = false;
+        gotResult = false;
+
+        return { state, std::move (pluginDescription) };
+    }
+
+    using ChildProcessCoordinator::sendMessageToWorker;
+
+private:
+    void handleMessageFromWorker (const MemoryBlock& mb) override
+    {
+        const std::lock_guard<std::mutex> lock { mutex };
+        pluginDescription = parseXML (mb.toString());
+        gotResult = true;
+        condvar.notify_one();
+    }
+
+    void handleConnectionLost() override
+    {
+        const std::lock_guard<std::mutex> lock { mutex };
+        connectionLost = true;
+        condvar.notify_one();
+    }
+
+    std::mutex mutex;
+    std::condition_variable condvar;
+
+    std::unique_ptr<XmlElement> pluginDescription;
+    bool connectionLost = false;
+    bool gotResult = false;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Superprocess)
+};
+
+//==============================================================================
 class CustomPluginScanner  : public KnownPluginList::CustomScanner,
                              private ChangeListener
 {
@@ -58,60 +123,8 @@ public:
             return true;
         }
 
-        if (superprocess == nullptr)
-        {
-            superprocess = std::make_unique<Superprocess> (*this);
-
-            std::unique_lock<std::mutex> lock (mutex);
-            connectionLost = false;
-        }
-
-        MemoryBlock block;
-        MemoryOutputStream stream { block, true };
-        stream.writeString (format.getName());
-        stream.writeString (fileOrIdentifier);
-
-        if (superprocess->sendMessageToWorker (block))
-        {
-            std::unique_lock<std::mutex> lock (mutex);
-            gotResponse = false;
-            pluginDescription = nullptr;
-
-            for (;;)
-            {
-                if (condvar.wait_for (lock,
-                                      std::chrono::milliseconds (50),
-                                      [this] { return gotResponse || shouldExit(); }))
-                {
-                    break;
-                }
-            }
-
-            if (shouldExit())
-            {
-                superprocess = nullptr;
-                return true;
-            }
-
-            if (connectionLost)
-            {
-                superprocess = nullptr;
-                return false;
-            }
-
-            if (pluginDescription != nullptr)
-            {
-                for (const auto* item : pluginDescription->getChildIterator())
-                {
-                    auto desc = std::make_unique<PluginDescription>();
-
-                    if (desc->loadFromXml (*item))
-                        result.add (std::move (desc));
-                }
-            }
-
+        if (addPluginDescriptions (format.getName(), fileOrIdentifier, result))
             return true;
-        }
 
         superprocess = nullptr;
         return false;
@@ -123,41 +136,52 @@ public:
     }
 
 private:
-    class Superprocess  : private ChildProcessCoordinator
+    /*  Scans for a plugin with format 'formatName' and ID 'fileOrIdentifier' using a subprocess,
+        and adds discovered plugin descriptions to 'result'.
+
+        Returns true on success.
+
+        Failure indicates that the subprocess is unrecoverable and should be terminated.
+    */
+    bool addPluginDescriptions (const String& formatName,
+                                const String& fileOrIdentifier,
+                                OwnedArray<PluginDescription>& result)
     {
-    public:
-        explicit Superprocess (CustomPluginScanner& o)
-            : owner (o)
+        if (superprocess == nullptr)
+            superprocess = std::make_unique<Superprocess>();
+
+        MemoryBlock block;
+        MemoryOutputStream stream { block, true };
+        stream.writeString (formatName);
+        stream.writeString (fileOrIdentifier);
+
+        if (! superprocess->sendMessageToWorker (block))
+            return false;
+
+        for (;;)
         {
-            launchWorkerProcess (File::getSpecialLocation (File::currentExecutableFile), processUID, 0, 0);
+            if (shouldExit())
+                return true;
+
+            const auto response = superprocess->getResponse();
+
+            if (response.state == Superprocess::State::timeout)
+                continue;
+
+            if (response.xml != nullptr)
+            {
+                for (const auto* item : response.xml->getChildIterator())
+                {
+                    auto desc = std::make_unique<PluginDescription>();
+
+                    if (desc->loadFromXml (*item))
+                        result.add (std::move (desc));
+                }
+            }
+
+            return (response.state == Superprocess::State::gotResult);
         }
-
-        using ChildProcessCoordinator::sendMessageToWorker;
-
-    private:
-        void handleMessageFromWorker (const MemoryBlock& mb) override
-        {
-            auto xml = parseXML (mb.toString());
-
-            const std::lock_guard<std::mutex> lock (owner.mutex);
-            owner.pluginDescription = std::move (xml);
-            owner.gotResponse = true;
-            owner.condvar.notify_one();
-        }
-
-        void handleConnectionLost() override
-        {
-            const std::lock_guard<std::mutex> lock (owner.mutex);
-            owner.pluginDescription = nullptr;
-            owner.gotResponse = true;
-            owner.connectionLost = true;
-            owner.condvar.notify_one();
-        }
-
-        CustomPluginScanner& owner;
-
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Superprocess)
-    };
+    }
 
     void changeListenerCallback (ChangeBroadcaster*) override
     {
@@ -166,11 +190,6 @@ private:
     }
 
     std::unique_ptr<Superprocess> superprocess;
-    std::mutex mutex;
-    std::condition_variable condvar;
-    std::unique_ptr<XmlElement> pluginDescription;
-    bool gotResponse = false;
-    bool connectionLost = false;
 
     std::atomic<bool> scanInProcess { true };
 
@@ -583,7 +602,7 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
     }
     else
     {
-        if (KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuItemID) >= 0)
+        if (getIndexChosenByMenu (menuItemID) >= 0)
             createPlugin (getChosenType (menuItemID), { proportionOfWidth  (0.3f + Random::getSystemRandom().nextFloat() * 0.6f),
                                                         proportionOfHeight (0.3f + Random::getSystemRandom().nextFloat() * 0.6f) });
     }
@@ -592,13 +611,65 @@ void MainHostWindow::menuItemSelected (int menuItemID, int /*topLevelMenuIndex*/
 void MainHostWindow::menuBarActivated (bool isActivated)
 {
     if (isActivated && graphHolder != nullptr)
-        graphHolder->unfocusKeyboardComponent();
+        Component::unfocusAllComponents();
 }
 
-void MainHostWindow::createPlugin (const PluginDescription& desc, Point<int> pos)
+void MainHostWindow::createPlugin (const PluginDescriptionAndPreference& desc, Point<int> pos)
 {
     if (graphHolder != nullptr)
         graphHolder->createNewPlugin (desc, pos);
+}
+
+static bool containsDuplicateNames (const Array<PluginDescription>& plugins, const String& name)
+{
+    int matches = 0;
+
+    for (auto& p : plugins)
+        if (p.name == name && ++matches > 1)
+            return true;
+
+    return false;
+}
+
+static constexpr int menuIDBase = 0x324503f4;
+
+static void addToMenu (const KnownPluginList::PluginTree& tree,
+                       PopupMenu& m,
+                       const Array<PluginDescription>& allPlugins,
+                       Array<PluginDescriptionAndPreference>& addedPlugins)
+{
+    for (auto* sub : tree.subFolders)
+    {
+        PopupMenu subMenu;
+        addToMenu (*sub, subMenu, allPlugins, addedPlugins);
+
+        m.addSubMenu (sub->folder, subMenu, true, nullptr, false, 0);
+    }
+
+    auto addPlugin = [&] (const auto& descriptionAndPreference, const auto& pluginName)
+    {
+        addedPlugins.add (descriptionAndPreference);
+        const auto menuID = addedPlugins.size() - 1 + menuIDBase;
+        m.addItem (menuID, pluginName, true, false);
+    };
+
+    for (auto& plugin : tree.plugins)
+    {
+        auto name = plugin.name;
+
+        if (containsDuplicateNames (tree.plugins, name))
+            name << " (" << plugin.pluginFormatName << ')';
+
+        addPlugin (PluginDescriptionAndPreference { plugin, PluginDescriptionAndPreference::UseARA::no }, name);
+
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+        if (plugin.hasARAExtension)
+        {
+            name << " (ARA)";
+            addPlugin (PluginDescriptionAndPreference { plugin }, name);
+        }
+       #endif
+    }
 }
 
 void MainHostWindow::addPluginsToMenu (PopupMenu& m)
@@ -613,7 +684,7 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
 
     m.addSeparator();
 
-    pluginDescriptions = knownPluginList.getTypes();
+    auto pluginDescriptions = knownPluginList.getTypes();
 
     // This avoids showing the internal types again later on in the list
     pluginDescriptions.removeIf ([] (PluginDescription& desc)
@@ -621,15 +692,23 @@ void MainHostWindow::addPluginsToMenu (PopupMenu& m)
         return desc.pluginFormatName == InternalPluginFormat::getIdentifier();
     });
 
-    KnownPluginList::addToMenu (m, pluginDescriptions, pluginSortMethod);
+    auto tree = KnownPluginList::createTree (pluginDescriptions, pluginSortMethod);
+    pluginDescriptionsAndPreference = {};
+    addToMenu (*tree, m, pluginDescriptions, pluginDescriptionsAndPreference);
 }
 
-PluginDescription MainHostWindow::getChosenType (const int menuID) const
+int MainHostWindow::getIndexChosenByMenu (int menuID) const
+{
+    const auto i = menuID - menuIDBase;
+    return isPositiveAndBelow (i, pluginDescriptionsAndPreference.size()) ? i : -1;
+}
+
+PluginDescriptionAndPreference MainHostWindow::getChosenType (const int menuID) const
 {
     if (menuID >= 1 && menuID < (int) (1 + internalTypes.size()))
-        return internalTypes[(size_t) (menuID - 1)];
+        return PluginDescriptionAndPreference { internalTypes[(size_t) (menuID - 1)] };
 
-    return pluginDescriptions[KnownPluginList::getIndexChosenByMenu (pluginDescriptions, menuID)];
+    return pluginDescriptionsAndPreference[getIndexChosenByMenu (menuID)];
 }
 
 //==============================================================================
@@ -912,7 +991,7 @@ void MainHostWindow::filesDropped (const StringArray& files, int x, int y)
 
             for (int i = 0; i < jmin (5, typesFound.size()); ++i)
                 if (auto* desc = typesFound.getUnchecked(i))
-                    createPlugin (*desc, pos);
+                    createPlugin (PluginDescriptionAndPreference { *desc }, pos);
         }
     }
 }

@@ -3,29 +3,29 @@
 
     This file was auto-generated!
 
-    It contains the basic framework code for an ARA document controller implementation. 
+    It contains the basic framework code for an ARA document controller implementation.
 
   ==============================================================================
 */
 
 #pragma once
 
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
+#include <juce_audio_processors/juce_audio_processors.h>
 
 //==============================================================================
 /**
 */
-class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentController
+class %%aradocumentcontroller_class_name%%  : public juce::ARADocumentControllerSpecialisation
 {
 public:
     //==============================================================================
-    using juce::ARADocumentController::ARADocumentController;
+    using ARADocumentControllerSpecialisation::ARADocumentControllerSpecialisation;
 
 protected:
     //==============================================================================
     // Override document controller customization methods here
 
-    ARA::PlugIn::PlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
+    ARAPlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
 
     bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;
     bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;

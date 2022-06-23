@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -43,7 +43,6 @@ public:
         {
             ChannelMapping map (AudioChannelSet::stereo());
             expect (map.size() == 2);
-            expect (map.isActive() == true);
 
             expect (map.getJuceChannelForVst3Channel (0) == 0); // L -> left
             expect (map.getJuceChannelForVst3Channel (1) == 1); // R -> right
@@ -53,7 +52,6 @@ public:
         {
             ChannelMapping map (AudioChannelSet::create9point1point6());
             expect (map.size() == 16);
-            expect (map.isActive() == true);
 
             // VST3 order is:
             //      L
@@ -115,8 +113,8 @@ public:
             ClientBufferMapperData<float> remapper;
             remapper.prepare (2, blockSize * 2);
 
-            const std::vector<ChannelMapping> emptyBuses;
-            const std::vector<ChannelMapping> stereoBus { ChannelMapping { AudioChannelSet::stereo() } };
+            const std::vector<DynamicChannelMapping> emptyBuses;
+            const std::vector<DynamicChannelMapping> stereoBus { DynamicChannelMapping { AudioChannelSet::stereo() } };
 
             TestBuffers testBuffers { blockSize };
 
@@ -127,12 +125,17 @@ public:
             for (const auto& config : { Config { stereoBus, stereoBus }, Config { emptyBuses, stereoBus }, Config { stereoBus, emptyBuses } })
             {
                 testBuffers.init();
-                const auto remapped = remapper.getMappedBuffer (data, config.ins, config.outs);
-                expect (remapped.getNumChannels() == config.getNumChannels());
-                expect (remapped.getNumSamples() == blockSize);
 
-                for (auto i = 0; i < remapped.getNumChannels(); ++i)
-                    expect (allMatch (remapped, i, 0.0f));
+                {
+                    const ClientRemappedBuffer<float> scopedBuffer { remapper, &config.ins, &config.outs, data };
+                    auto& remapped = scopedBuffer.buffer;
+
+                    expect (remapped.getNumChannels() == config.getNumChannels());
+                    expect (remapped.getNumSamples() == blockSize);
+
+                    for (auto i = 0; i < remapped.getNumChannels(); ++i)
+                        expect (allMatch (remapped, i, 0.0f));
+                }
 
                 expect (! testBuffers.isClear (0));
                 expect (! testBuffers.isClear (1));
@@ -148,10 +151,10 @@ public:
             ClientBufferMapperData<float> remapper;
             remapper.prepare (3, blockSize * 2);
 
-            const std::vector<ChannelMapping> noBus;
-            const std::vector<ChannelMapping> oneBus { ChannelMapping { AudioChannelSet::mono() } };
-            const std::vector<ChannelMapping> twoBuses { ChannelMapping { AudioChannelSet::mono() },
-                                                         ChannelMapping { AudioChannelSet::stereo() } };
+            const std::vector<DynamicChannelMapping> noBus;
+            const std::vector<DynamicChannelMapping> oneBus { DynamicChannelMapping { AudioChannelSet::mono() } };
+            const std::vector<DynamicChannelMapping> twoBuses { DynamicChannelMapping { AudioChannelSet::mono() },
+                                                                DynamicChannelMapping { AudioChannelSet::stereo() } };
 
             TestBuffers testBuffers { blockSize };
 
@@ -166,12 +169,20 @@ public:
                                         Config { twoBuses, twoBuses } })
             {
                 testBuffers.init();
-                const auto remapped = remapper.getMappedBuffer (data, config.ins, config.outs);
-                expect (remapped.getNumChannels() == config.getNumChannels());
-                expect (remapped.getNumSamples() == blockSize);
 
-                for (auto i = 0; i < remapped.getNumChannels(); ++i)
-                    expect (allMatch (remapped, i, 0.0f));
+                {
+                    const ClientRemappedBuffer<float> scopedBuffer { remapper, &config.ins, &config.outs, data };
+                    auto& remapped = scopedBuffer.buffer;
+
+                    expect (remapped.getNumChannels() == config.getNumChannels());
+                    expect (remapped.getNumSamples() == blockSize);
+
+                    // The remapped buffer will only be cleared if the host's input layout does not
+                    // match the client's input layout.
+                    if (config.ins.size() != 1)
+                        for (auto i = 0; i < remapped.getNumChannels(); ++i)
+                            expect (allMatch (remapped, i, 0.0f));
+                }
 
                 expect (! testBuffers.isClear (0));
                 expect (testBuffers.isClear (1));
@@ -183,8 +194,8 @@ public:
             ClientBufferMapperData<float> remapper;
             remapper.prepare (3, blockSize * 2);
 
-            const std::vector<ChannelMapping> monoBus { ChannelMapping { AudioChannelSet::mono() } };
-            const std::vector<ChannelMapping> stereoBus { ChannelMapping { AudioChannelSet::stereo() } };
+            const std::vector<DynamicChannelMapping> monoBus { DynamicChannelMapping { AudioChannelSet::mono() } };
+            const std::vector<DynamicChannelMapping> stereoBus { DynamicChannelMapping { AudioChannelSet::stereo() } };
 
             TestBuffers testBuffers { blockSize };
 
@@ -197,12 +208,20 @@ public:
                                         Config { monoBus, monoBus } })
             {
                 testBuffers.init();
-                const auto remapped = remapper.getMappedBuffer (data, config.ins, config.outs);
-                expect (remapped.getNumChannels() == config.getNumChannels());
-                expect (remapped.getNumSamples() == blockSize);
 
-                for (auto i = 0; i < remapped.getNumChannels(); ++i)
-                    expect (allMatch (remapped, i, 0.0f));
+                {
+                    const ClientRemappedBuffer<float> scopedBuffer { remapper, &config.ins, &config.outs, data };
+                    auto& remapped = scopedBuffer.buffer;
+
+                    expect (remapped.getNumChannels() == config.getNumChannels());
+                    expect (remapped.getNumSamples() == blockSize);
+
+                    // The remapped buffer will only be cleared if the host's input layout does not
+                    // match the client's input layout.
+                    if (config.ins.front().size() != 1)
+                        for (auto i = 0; i < remapped.getNumChannels(); ++i)
+                            expect (allMatch (remapped, i, 0.0f));
+                }
 
                 expect (! testBuffers.isClear (0));
                 expect (testBuffers.isClear (1));
@@ -215,10 +234,10 @@ public:
             ClientBufferMapperData<float> remapper;
             remapper.prepare (20, blockSize * 2);
 
-            const Config config { { ChannelMapping { AudioChannelSet::mono() },
-                                    ChannelMapping { AudioChannelSet::create5point1() } },
-                                  { ChannelMapping { AudioChannelSet::stereo() },
-                                    ChannelMapping { AudioChannelSet::create7point1() } } };
+            const Config config { { DynamicChannelMapping { AudioChannelSet::mono() },
+                                    DynamicChannelMapping { AudioChannelSet::create5point1() } },
+                                  { DynamicChannelMapping { AudioChannelSet::stereo() },
+                                    DynamicChannelMapping { AudioChannelSet::create7point1() } } };
 
             TestBuffers testBuffers { blockSize };
 
@@ -228,45 +247,54 @@ public:
             auto data = makeProcessData (blockSize, ins, outs);
 
             testBuffers.init();
-            const auto remapped = remapper.getMappedBuffer (data, config.ins, config.outs);
 
-            expect (remapped.getNumChannels() == 10);
+            {
+                ClientRemappedBuffer<float> scopedBuffer { remapper, &config.ins, &config.outs, data };
+                auto& remapped = scopedBuffer.buffer;
 
-            // Data from the input channels is copied to the correct channels of the remapped buffer
-            expect (allMatch (remapped, 0, 1.0f));
-            expect (allMatch (remapped, 1, 2.0f));
-            expect (allMatch (remapped, 2, 3.0f));
-            expect (allMatch (remapped, 3, 4.0f));
-            expect (allMatch (remapped, 4, 5.0f));
-            expect (allMatch (remapped, 5, 6.0f));
-            expect (allMatch (remapped, 6, 7.0f));
-            // These channels are output-only, so they keep whatever data was previously on that output channel
-            expect (allMatch (remapped, 7, 17.0f));
-            expect (allMatch (remapped, 8, 14.0f));
-            expect (allMatch (remapped, 9, 15.0f));
+                expect (remapped.getNumChannels() == 10);
 
-            // Channel pointers from the VST3 buffer are used
-            expect (remapped.getReadPointer (0) == testBuffers.get (7));
-            expect (remapped.getReadPointer (1) == testBuffers.get (8));
-            expect (remapped.getReadPointer (2) == testBuffers.get (9));
-            expect (remapped.getReadPointer (3) == testBuffers.get (10));
-            expect (remapped.getReadPointer (4) == testBuffers.get (11));
-            expect (remapped.getReadPointer (5) == testBuffers.get (12));
-            expect (remapped.getReadPointer (6) == testBuffers.get (15)); // JUCE surround side -> VST3 surround side
-            expect (remapped.getReadPointer (7) == testBuffers.get (16)); // JUCE surround side -> VST3 surround side
-            expect (remapped.getReadPointer (8) == testBuffers.get (13)); // JUCE surround rear -> VST3 surround rear
-            expect (remapped.getReadPointer (9) == testBuffers.get (14)); // JUCE surround rear -> VST3 surround rear
+                // Data from the input channels is copied to the correct channels of the remapped buffer
+                expect (allMatch (remapped, 0, 1.0f));
+                expect (allMatch (remapped, 1, 2.0f));
+                expect (allMatch (remapped, 2, 3.0f));
+                expect (allMatch (remapped, 3, 4.0f));
+                expect (allMatch (remapped, 4, 5.0f));
+                expect (allMatch (remapped, 5, 6.0f));
+                expect (allMatch (remapped, 6, 7.0f));
+                // The remaining channels are output-only, so they may contain any data
+
+                // Write some data to the buffer in JUCE layout
+                for (auto i = 0; i < remapped.getNumChannels(); ++i)
+                {
+                    auto* ptr = remapped.getWritePointer (i);
+                    std::fill (ptr, ptr + remapped.getNumSamples(), (float) i);
+                }
+            }
+
+            // Channels are copied back to the correct output buffer
+            expect (channelStartsWithValue (data.outputs[0], 0, 0.0f));
+            expect (channelStartsWithValue (data.outputs[0], 1, 1.0f));
+
+            expect (channelStartsWithValue (data.outputs[1], 0, 2.0f));
+            expect (channelStartsWithValue (data.outputs[1], 1, 3.0f));
+            expect (channelStartsWithValue (data.outputs[1], 2, 4.0f));
+            expect (channelStartsWithValue (data.outputs[1], 3, 5.0f));
+            expect (channelStartsWithValue (data.outputs[1], 4, 8.0f));  // JUCE surround side -> VST3 surround side
+            expect (channelStartsWithValue (data.outputs[1], 5, 9.0f));
+            expect (channelStartsWithValue (data.outputs[1], 6, 6.0f));  // JUCE surround rear -> VST3 surround rear
+            expect (channelStartsWithValue (data.outputs[1], 7, 7.0f));
         }
 
-        beginTest ("A layout with more input channels than output channels uses input channels directly in remapped buffer");
+        beginTest ("A layout with more input channels than output channels doesn't attempt to output any input channels");
         {
             ClientBufferMapperData<float> remapper;
             remapper.prepare (15, blockSize * 2);
 
-            const Config config { { ChannelMapping { AudioChannelSet::create7point1point6() },
-                                    ChannelMapping { AudioChannelSet::mono() } },
-                                  { ChannelMapping { AudioChannelSet::createLCRS() },
-                                    ChannelMapping { AudioChannelSet::stereo() } } };
+            const Config config { { DynamicChannelMapping { AudioChannelSet::create7point1point6() },
+                                    DynamicChannelMapping { AudioChannelSet::mono() } },
+                                  { DynamicChannelMapping { AudioChannelSet::createLCRS() },
+                                    DynamicChannelMapping { AudioChannelSet::stereo() } } };
 
             TestBuffers testBuffers { blockSize };
 
@@ -276,116 +304,190 @@ public:
             auto data = makeProcessData (blockSize, ins, outs);
 
             testBuffers.init();
-            const auto remapped = remapper.getMappedBuffer (data, config.ins, config.outs);
 
-            expect (remapped.getNumChannels() == 15);
+            {
+                ClientRemappedBuffer<float> scopedBuffer { remapper, &config.ins, &config.outs, data };
+                auto& remapped = scopedBuffer.buffer;
 
-            // Data from the input channels is copied to the correct channels of the remapped buffer
-            expect (allMatch (remapped, 0,   1.0f));
-            expect (allMatch (remapped, 1,   2.0f));
-            expect (allMatch (remapped, 2,   3.0f));
-            expect (allMatch (remapped, 3,   4.0f));
-            expect (allMatch (remapped, 4,   7.0f));
-            expect (allMatch (remapped, 5,   8.0f));
-            expect (allMatch (remapped, 6,   9.0f));
-            expect (allMatch (remapped, 7,  10.0f));
-            expect (allMatch (remapped, 8,  11.0f));
-            expect (allMatch (remapped, 9,  12.0f));
-            expect (allMatch (remapped, 10,  5.0f));
-            expect (allMatch (remapped, 11,  6.0f));
-            expect (allMatch (remapped, 12, 13.0f));
-            expect (allMatch (remapped, 13, 14.0f));
-            expect (allMatch (remapped, 14, 15.0f));
+                expect (remapped.getNumChannels() == 15);
 
-            // Use output channel pointers for output channels
-            expect (remapped.getReadPointer (0) == testBuffers.get (15));
-            expect (remapped.getReadPointer (1) == testBuffers.get (16));
-            expect (remapped.getReadPointer (2) == testBuffers.get (17));
-            expect (remapped.getReadPointer (3) == testBuffers.get (18));
-            expect (remapped.getReadPointer (4) == testBuffers.get (19));
-            expect (remapped.getReadPointer (5) == testBuffers.get (20));
+                // Data from the input channels is copied to the correct channels of the remapped buffer
+                expect (allMatch (remapped, 0,   1.0f));
+                expect (allMatch (remapped, 1,   2.0f));
+                expect (allMatch (remapped, 2,   3.0f));
+                expect (allMatch (remapped, 3,   4.0f));
+                expect (allMatch (remapped, 4,   7.0f));
+                expect (allMatch (remapped, 5,   8.0f));
+                expect (allMatch (remapped, 6,   9.0f));
+                expect (allMatch (remapped, 7,  10.0f));
+                expect (allMatch (remapped, 8,  11.0f));
+                expect (allMatch (remapped, 9,  12.0f));
+                expect (allMatch (remapped, 10,  5.0f));
+                expect (allMatch (remapped, 11,  6.0f));
+                expect (allMatch (remapped, 12, 13.0f));
+                expect (allMatch (remapped, 13, 14.0f));
+                expect (allMatch (remapped, 14, 15.0f));
 
-            // Use input channel pointers for channels with no corresponding output
-            expect (remapped.getReadPointer (6)  == testBuffers.get (8));
-            expect (remapped.getReadPointer (7)  == testBuffers.get (9));
-            expect (remapped.getReadPointer (8)  == testBuffers.get (10));
-            expect (remapped.getReadPointer (9)  == testBuffers.get (11));
-            expect (remapped.getReadPointer (10) == testBuffers.get (4));
-            expect (remapped.getReadPointer (11) == testBuffers.get (5));
-            expect (remapped.getReadPointer (12) == testBuffers.get (12));
-            expect (remapped.getReadPointer (13) == testBuffers.get (13));
-            expect (remapped.getReadPointer (14) == testBuffers.get (14));
+                // Write some data to the buffer in JUCE layout
+                for (auto i = 0; i < remapped.getNumChannels(); ++i)
+                {
+                    auto* ptr = remapped.getWritePointer (i);
+                    std::fill (ptr, ptr + remapped.getNumSamples(), (float) i);
+                }
+            }
+
+            // Channels are copied back to the correct output buffer
+            expect (channelStartsWithValue (data.outputs[0], 0, 0.0f));
+            expect (channelStartsWithValue (data.outputs[0], 1, 1.0f));
+            expect (channelStartsWithValue (data.outputs[0], 2, 2.0f));
+            expect (channelStartsWithValue (data.outputs[0], 3, 3.0f));
+
+            expect (channelStartsWithValue (data.outputs[1], 0, 4.0f));
+            expect (channelStartsWithValue (data.outputs[1], 1, 5.0f));
         }
 
         beginTest ("Inactive buses are ignored");
         {
             ClientBufferMapperData<float> remapper;
-            remapper.prepare (15, blockSize * 2);
+            remapper.prepare (18, blockSize * 2);
 
-            const Config config { { ChannelMapping { AudioChannelSet::create7point1point6() },
-                                    ChannelMapping { AudioChannelSet::mono(), false },
-                                    ChannelMapping { AudioChannelSet::quadraphonic() },
-                                    ChannelMapping { AudioChannelSet::mono(), false } },
-                                  { ChannelMapping { AudioChannelSet::create5point0(), false },
-                                    ChannelMapping { AudioChannelSet::createLCRS() },
-                                    ChannelMapping { AudioChannelSet::stereo() } } };
+            Config config { { DynamicChannelMapping { AudioChannelSet::create7point1point6() },
+                              DynamicChannelMapping { AudioChannelSet::mono(), false },
+                              DynamicChannelMapping { AudioChannelSet::quadraphonic() },
+                              DynamicChannelMapping { AudioChannelSet::mono(), false } },
+                            { DynamicChannelMapping { AudioChannelSet::create5point0(), false },
+                              DynamicChannelMapping { AudioChannelSet::createLCRS() },
+                              DynamicChannelMapping { AudioChannelSet::stereo() } } };
+
+            config.ins[1].setHostActive (false);
+            config.ins[3].setHostActive (false);
 
             TestBuffers testBuffers { blockSize };
 
-            // The host doesn't need to provide trailing buses that are inactive
+            // The host doesn't need to provide trailing buses that are inactive, as long as the
+            // client knows those buses are inactive.
             auto ins  = MultiBusBuffers{}.withBus (testBuffers, 14).withBus (testBuffers, 1).withBus (testBuffers, 4);
             auto outs = MultiBusBuffers{}.withBus (testBuffers, 5) .withBus (testBuffers, 4).withBus (testBuffers, 2);
 
             auto data = makeProcessData (blockSize, ins, outs);
 
             testBuffers.init();
-            const auto remapped = remapper.getMappedBuffer (data, config.ins, config.outs);
 
-            expect (remapped.getNumChannels() == 18);
+            {
+                ClientRemappedBuffer<float> scopedBuffer { remapper, &config.ins, &config.outs, data };
+                auto& remapped = scopedBuffer.buffer;
 
-            // Data from the input channels is copied to the correct channels of the remapped buffer
-            expect (allMatch (remapped, 0,   1.0f));
-            expect (allMatch (remapped, 1,   2.0f));
-            expect (allMatch (remapped, 2,   3.0f));
-            expect (allMatch (remapped, 3,   4.0f));
-            expect (allMatch (remapped, 4,   7.0f));
-            expect (allMatch (remapped, 5,   8.0f));
-            expect (allMatch (remapped, 6,   9.0f));
-            expect (allMatch (remapped, 7,  10.0f));
-            expect (allMatch (remapped, 8,  11.0f));
-            expect (allMatch (remapped, 9,  12.0f));
-            expect (allMatch (remapped, 10,  5.0f));
-            expect (allMatch (remapped, 11,  6.0f));
-            expect (allMatch (remapped, 12, 13.0f));
-            expect (allMatch (remapped, 13, 14.0f));
+                expect (remapped.getNumChannels() == 18);
 
-            expect (allMatch (remapped, 14, 16.0f));
-            expect (allMatch (remapped, 15, 17.0f));
-            expect (allMatch (remapped, 16, 18.0f));
-            expect (allMatch (remapped, 17, 19.0f));
+                // Data from the input channels is copied to the correct channels of the remapped buffer
+                expect (allMatch (remapped, 0,   1.0f));
+                expect (allMatch (remapped, 1,   2.0f));
+                expect (allMatch (remapped, 2,   3.0f));
+                expect (allMatch (remapped, 3,   4.0f));
+                expect (allMatch (remapped, 4,   7.0f));
+                expect (allMatch (remapped, 5,   8.0f));
+                expect (allMatch (remapped, 6,   9.0f));
+                expect (allMatch (remapped, 7,  10.0f));
+                expect (allMatch (remapped, 8,  11.0f));
+                expect (allMatch (remapped, 9,  12.0f));
+                expect (allMatch (remapped, 10,  5.0f));
+                expect (allMatch (remapped, 11,  6.0f));
+                expect (allMatch (remapped, 12, 13.0f));
+                expect (allMatch (remapped, 13, 14.0f));
 
-            // Use output channel pointers for output channels
-            expect (remapped.getReadPointer (0) == testBuffers.get (24));
-            expect (remapped.getReadPointer (1) == testBuffers.get (25));
-            expect (remapped.getReadPointer (2) == testBuffers.get (26));
-            expect (remapped.getReadPointer (3) == testBuffers.get (27));
-            expect (remapped.getReadPointer (4) == testBuffers.get (28));
-            expect (remapped.getReadPointer (5) == testBuffers.get (29));
+                expect (allMatch (remapped, 14, 16.0f));
+                expect (allMatch (remapped, 15, 17.0f));
+                expect (allMatch (remapped, 16, 18.0f));
+                expect (allMatch (remapped, 17, 19.0f));
 
-            // Use input channel pointers for channels with no corresponding output
-            expect (remapped.getReadPointer (6)  == testBuffers.get (8));
-            expect (remapped.getReadPointer (7)  == testBuffers.get (9));
-            expect (remapped.getReadPointer (8)  == testBuffers.get (10));
-            expect (remapped.getReadPointer (9)  == testBuffers.get (11));
-            expect (remapped.getReadPointer (10) == testBuffers.get (4));
-            expect (remapped.getReadPointer (11) == testBuffers.get (5));
-            expect (remapped.getReadPointer (12) == testBuffers.get (12));
-            expect (remapped.getReadPointer (13) == testBuffers.get (13));
+                // Write some data to the buffer in JUCE layout
+                for (auto i = 0; i < remapped.getNumChannels(); ++i)
+                {
+                    auto* ptr = remapped.getWritePointer (i);
+                    std::fill (ptr, ptr + remapped.getNumSamples(), (float) i);
+                }
+            }
 
-            expect (remapped.getReadPointer (14) == testBuffers.get (15));
-            expect (remapped.getReadPointer (15) == testBuffers.get (16));
-            expect (remapped.getReadPointer (16) == testBuffers.get (17));
-            expect (remapped.getReadPointer (17) == testBuffers.get (18));
+            // All channels on the first output bus should be cleared, because the plugin
+            // thinks that this bus is inactive.
+            expect (channelStartsWithValue (data.outputs[0], 0, 0.0f));
+            expect (channelStartsWithValue (data.outputs[0], 1, 0.0f));
+            expect (channelStartsWithValue (data.outputs[0], 2, 0.0f));
+            expect (channelStartsWithValue (data.outputs[0], 3, 0.0f));
+            expect (channelStartsWithValue (data.outputs[0], 4, 0.0f));
+
+            // Remaining channels should be copied back as normal
+            expect (channelStartsWithValue (data.outputs[1], 0, 0.0f));
+            expect (channelStartsWithValue (data.outputs[1], 1, 1.0f));
+            expect (channelStartsWithValue (data.outputs[1], 2, 2.0f));
+            expect (channelStartsWithValue (data.outputs[1], 3, 3.0f));
+
+            expect (channelStartsWithValue (data.outputs[2], 0, 4.0f));
+            expect (channelStartsWithValue (data.outputs[2], 1, 5.0f));
+        }
+
+        beginTest ("Null pointers are allowed on inactive buses provided to clients");
+        {
+            ClientBufferMapperData<float> remapper;
+            remapper.prepare (8, blockSize * 2);
+
+            const std::vector<ChannelMapping> emptyBuses;
+            const std::vector<ChannelMapping> stereoBus { ChannelMapping { AudioChannelSet::stereo() } };
+
+            Config config { { DynamicChannelMapping { AudioChannelSet::stereo() },
+                              DynamicChannelMapping { AudioChannelSet::quadraphonic(), false },
+                              DynamicChannelMapping { AudioChannelSet::stereo() } },
+                            { DynamicChannelMapping { AudioChannelSet::quadraphonic() },
+                              DynamicChannelMapping { AudioChannelSet::stereo(), false },
+                              DynamicChannelMapping { AudioChannelSet::quadraphonic() } } };
+
+            config.ins[1].setHostActive (false);
+            config.outs[1].setHostActive (false);
+
+            TestBuffers testBuffers { blockSize };
+
+            auto ins  = MultiBusBuffers{}.withBus (testBuffers, 2).withBus (testBuffers, 4).withBus (testBuffers, 2);
+            auto outs = MultiBusBuffers{}.withBus (testBuffers, 4).withBus (testBuffers, 2).withBus (testBuffers, 4);
+
+            auto data = makeProcessData (blockSize, ins, outs);
+
+            for (auto i = 0; i < 4; ++i)
+                data.inputs [1].channelBuffers32[i] = nullptr;
+
+            for (auto i = 0; i < 2; ++i)
+                data.outputs[1].channelBuffers32[i] = nullptr;
+
+            testBuffers.init();
+
+            {
+                ClientRemappedBuffer<float> scopedBuffer { remapper, &config.ins, &config.outs, data };
+                auto& remapped = scopedBuffer.buffer;
+
+                expect (remapped.getNumChannels() == 8);
+
+                expect (allMatch (remapped, 0,   1.0f));
+                expect (allMatch (remapped, 1,   2.0f));
+                // skip 4 inactive channels
+                expect (allMatch (remapped, 2,   7.0f));
+                expect (allMatch (remapped, 3,   8.0f));
+
+                // Write some data to the buffer in JUCE layout
+                for (auto i = 0; i < remapped.getNumChannels(); ++i)
+                {
+                    auto* ptr = remapped.getWritePointer (i);
+                    std::fill (ptr, ptr + remapped.getNumSamples(), (float) i);
+                }
+            }
+
+            expect (channelStartsWithValue (data.outputs[0], 0, 0.0f));
+            expect (channelStartsWithValue (data.outputs[0], 1, 1.0f));
+            expect (channelStartsWithValue (data.outputs[0], 2, 2.0f));
+            expect (channelStartsWithValue (data.outputs[0], 3, 3.0f));
+
+            expect (channelStartsWithValue (data.outputs[2], 0, 4.0f));
+            expect (channelStartsWithValue (data.outputs[2], 1, 5.0f));
+            expect (channelStartsWithValue (data.outputs[2], 2, 6.0f));
+            expect (channelStartsWithValue (data.outputs[2], 3, 7.0f));
         }
 
         beginTest ("HostBufferMapper reorders channels correctly");
@@ -454,9 +556,17 @@ private:
     //==============================================================================
     struct Config
     {
-        std::vector<ChannelMapping> ins, outs;
+        Config (std::vector<DynamicChannelMapping> i, std::vector<DynamicChannelMapping> o)
+            : ins (std::move (i)), outs (std::move (o))
+        {
+            for (auto container : { &ins, &outs })
+                for (auto& x : *container)
+                    x.setHostActive (true);
+        }
 
-        int getNumChannels() const { return countUsedChannels (ins, outs); }
+        std::vector<DynamicChannelMapping> ins, outs;
+
+        int getNumChannels() const { return countUsedClientChannels (ins, outs); }
     };
 
     struct TestBuffers
@@ -494,6 +604,11 @@ private:
         std::vector<std::vector<float>> buffers;
         int numSamples = 0;
     };
+
+    static bool channelStartsWithValue (Steinberg::Vst::AudioBusBuffers& bus, size_t index, float value)
+    {
+        return bus.channelBuffers32[index][0] == value;
+    }
 
     static bool allMatch (const AudioBuffer<float>& buf, int index, float value)
     {

@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -45,40 +45,40 @@ static CharPointer_wchar_t castToCharPointer_wchar_t (const void* t) noexcept
 }
 
 //==============================================================================
-// (Mirrors the structure of StringHolder, but without the atomic member, so can be statically constructed)
-struct EmptyString
+struct StringHolder
 {
-    int refCount;
-    size_t allocatedBytes;
-    String::CharPointerType::CharType text;
-};
-
-static const EmptyString emptyString { 0x3fffffff, sizeof (String::CharPointerType::CharType), 0 };
-
-//==============================================================================
-class StringHolder
-{
-public:
-    StringHolder() = delete;
-
     using CharPointerType  = String::CharPointerType;
     using CharType         = String::CharPointerType::CharType;
 
-    //==============================================================================
+    std::atomic<int> refCount { 0 };
+    size_t allocatedNumBytes = sizeof (CharType);
+    CharType text[1] { 0 };
+};
+
+constexpr StringHolder emptyString;
+
+//==============================================================================
+class StringHolderUtils
+{
+public:
+    using CharPointerType = StringHolder::CharPointerType;
+    using CharType        = StringHolder::CharType;
+
     static CharPointerType createUninitialisedBytes (size_t numBytes)
     {
         numBytes = (numBytes + 3) & ~(size_t) 3;
-        auto s = unalignedPointerCast<StringHolder*> (new char [sizeof (StringHolder) - sizeof (CharType) + numBytes]);
-        s->refCount.value = 0;
+        auto* bytes = new char [sizeof (StringHolder) - sizeof (CharType) + numBytes];
+        auto s = unalignedPointerCast<StringHolder*> (bytes);
+        s->refCount = 0;
         s->allocatedNumBytes = numBytes;
-        return CharPointerType (s->text);
+        return CharPointerType (unalignedPointerCast<CharType*> (bytes + offsetof (StringHolder, text)));
     }
 
     template <class CharPointer>
     static CharPointerType createFromCharPointer (const CharPointer text)
     {
         if (text.getAddress() == nullptr || text.isEmpty())
-            return CharPointerType (&(emptyString.text));
+            return CharPointerType (emptyString.text);
 
         auto bytesNeeded = sizeof (CharType) + CharPointerType::getBytesRequiredFor (text);
         auto dest = createUninitialisedBytes (bytesNeeded);
@@ -90,7 +90,7 @@ public:
     static CharPointerType createFromCharPointer (const CharPointer text, size_t maxChars)
     {
         if (text.getAddress() == nullptr || text.isEmpty() || maxChars == 0)
-            return CharPointerType (&(emptyString.text));
+            return CharPointerType (emptyString.text);
 
         auto end = text;
         size_t numChars = 0;
@@ -111,7 +111,7 @@ public:
     static CharPointerType createFromCharPointer (const CharPointer start, const CharPointer end)
     {
         if (start.getAddress() == nullptr || start.isEmpty())
-            return CharPointerType (&(emptyString.text));
+            return CharPointerType (emptyString.text);
 
         auto e = start;
         int numChars = 0;
@@ -131,7 +131,7 @@ public:
     static CharPointerType createFromCharPointer (const CharPointerType start, const CharPointerType end)
     {
         if (start.getAddress() == nullptr || start.isEmpty())
-            return CharPointerType (&(emptyString.text));
+            return CharPointerType (emptyString.text);
 
         auto numBytes = (size_t) (reinterpret_cast<const char*> (end.getAddress())
                                    - reinterpret_cast<const char*> (start.getAddress()));
@@ -171,7 +171,7 @@ public:
 
     static int getReferenceCount (const CharPointerType text) noexcept
     {
-        return bufferFromText (text)->refCount.get() + 1;
+        return bufferFromText (text)->refCount + 1;
     }
 
     //==============================================================================
@@ -186,7 +186,7 @@ public:
             return newText;
         }
 
-        if (b->allocatedNumBytes >= numBytes && b->refCount.get() <= 0)
+        if (b->allocatedNumBytes >= numBytes && b->refCount <= 0)
             return text;
 
         auto newText = createUninitialisedBytes (jmax (b->allocatedNumBytes, numBytes));
@@ -201,22 +201,18 @@ public:
         return bufferFromText (text)->allocatedNumBytes;
     }
 
-    //==============================================================================
-    Atomic<int> refCount;
-    size_t allocatedNumBytes;
-    CharType text[1];
-
 private:
-    static StringHolder* bufferFromText (const CharPointerType text) noexcept
+    StringHolderUtils() = delete;
+    ~StringHolderUtils() = delete;
+
+    static StringHolder* bufferFromText (const CharPointerType charPtr) noexcept
     {
-        // (Can't use offsetof() here because of warnings about this not being a POD)
-        return unalignedPointerCast<StringHolder*> (reinterpret_cast<char*> (text.getAddress())
-                    - (reinterpret_cast<size_t> (reinterpret_cast<StringHolder*> (128)->text) - 128));
+        return unalignedPointerCast<StringHolder*> (unalignedPointerCast<char*> (charPtr.getAddress()) - offsetof (StringHolder, text));
     }
 
     static bool isEmptyString (StringHolder* other)
     {
-        return (other->refCount.get() & 0x30000000) != 0;
+        return other == &emptyString;
     }
 
     void compileTimeChecks()
@@ -231,25 +227,22 @@ private:
        #else
         #error "native wchar_t size is unknown"
        #endif
-
-        static_assert (sizeof (EmptyString) == sizeof (StringHolder),
-                       "StringHolder is not large enough to hold an empty String");
     }
 };
 
 //==============================================================================
-String::String() noexcept  : text (&(emptyString.text))
+String::String() noexcept  : text (emptyString.text)
 {
 }
 
 String::~String() noexcept
 {
-    StringHolder::release (text);
+    StringHolderUtils::release (text);
 }
 
 String::String (const String& other) noexcept   : text (other.text)
 {
-    StringHolder::retain (text);
+    StringHolderUtils::retain (text);
 }
 
 void String::swapWith (String& other) noexcept
@@ -259,20 +252,20 @@ void String::swapWith (String& other) noexcept
 
 void String::clear() noexcept
 {
-    StringHolder::release (text);
-    text = &(emptyString.text);
+    StringHolderUtils::release (text);
+    text = emptyString.text;
 }
 
 String& String::operator= (const String& other) noexcept
 {
-    StringHolder::retain (other.text);
-    StringHolder::release (text.atomicSwap (other.text));
+    StringHolderUtils::retain (other.text);
+    StringHolderUtils::release (text.atomicSwap (other.text));
     return *this;
 }
 
 String::String (String&& other) noexcept   : text (other.text)
 {
-    other.text = &(emptyString.text);
+    other.text = emptyString.text;
 }
 
 String& String::operator= (String&& other) noexcept
@@ -284,23 +277,23 @@ String& String::operator= (String&& other) noexcept
 inline String::PreallocationBytes::PreallocationBytes (const size_t num) noexcept : numBytes (num) {}
 
 String::String (const PreallocationBytes& preallocationSize)
-    : text (StringHolder::createUninitialisedBytes (preallocationSize.numBytes + sizeof (CharPointerType::CharType)))
+    : text (StringHolderUtils::createUninitialisedBytes (preallocationSize.numBytes + sizeof (CharPointerType::CharType)))
 {
 }
 
 void String::preallocateBytes (const size_t numBytesNeeded)
 {
-    text = StringHolder::makeUniqueWithByteSize (text, numBytesNeeded + sizeof (CharPointerType::CharType));
+    text = StringHolderUtils::makeUniqueWithByteSize (text, numBytesNeeded + sizeof (CharPointerType::CharType));
 }
 
 int String::getReferenceCount() const noexcept
 {
-    return StringHolder::getReferenceCount (text);
+    return StringHolderUtils::getReferenceCount (text);
 }
 
 //==============================================================================
 String::String (const char* const t)
-    : text (StringHolder::createFromCharPointer (CharPointer_ASCII (t)))
+    : text (StringHolderUtils::createFromCharPointer (CharPointer_ASCII (t)))
 {
     /*  If you get an assertion here, then you're trying to create a string from 8-bit data
         that contains values greater than 127. These can NOT be correctly converted to unicode
@@ -323,7 +316,7 @@ String::String (const char* const t)
 }
 
 String::String (const char* const t, const size_t maxChars)
-    : text (StringHolder::createFromCharPointer (CharPointer_ASCII (t), maxChars))
+    : text (StringHolderUtils::createFromCharPointer (CharPointer_ASCII (t), maxChars))
 {
     /*  If you get an assertion here, then you're trying to create a string from 8-bit data
         that contains values greater than 127. These can NOT be correctly converted to unicode
@@ -345,23 +338,23 @@ String::String (const char* const t, const size_t maxChars)
     jassert (t == nullptr || CharPointer_ASCII::isValidString (t, (int) maxChars));
 }
 
-String::String (const wchar_t* const t)      : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t))) {}
-String::String (const CharPointer_UTF8  t)   : text (StringHolder::createFromCharPointer (t)) {}
-String::String (const CharPointer_UTF16 t)   : text (StringHolder::createFromCharPointer (t)) {}
-String::String (const CharPointer_UTF32 t)   : text (StringHolder::createFromCharPointer (t)) {}
-String::String (const CharPointer_ASCII t)   : text (StringHolder::createFromCharPointer (t)) {}
+String::String (const wchar_t* const t)      : text (StringHolderUtils::createFromCharPointer (castToCharPointer_wchar_t (t))) {}
+String::String (const CharPointer_UTF8  t)   : text (StringHolderUtils::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF16 t)   : text (StringHolderUtils::createFromCharPointer (t)) {}
+String::String (const CharPointer_UTF32 t)   : text (StringHolderUtils::createFromCharPointer (t)) {}
+String::String (const CharPointer_ASCII t)   : text (StringHolderUtils::createFromCharPointer (t)) {}
 
-String::String (CharPointer_UTF8  t, size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (CharPointer_UTF16 t, size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (CharPointer_UTF32 t, size_t maxChars)   : text (StringHolder::createFromCharPointer (t, maxChars)) {}
-String::String (const wchar_t* t, size_t maxChars)      : text (StringHolder::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
+String::String (CharPointer_UTF8  t, size_t maxChars)   : text (StringHolderUtils::createFromCharPointer (t, maxChars)) {}
+String::String (CharPointer_UTF16 t, size_t maxChars)   : text (StringHolderUtils::createFromCharPointer (t, maxChars)) {}
+String::String (CharPointer_UTF32 t, size_t maxChars)   : text (StringHolderUtils::createFromCharPointer (t, maxChars)) {}
+String::String (const wchar_t* t, size_t maxChars)      : text (StringHolderUtils::createFromCharPointer (castToCharPointer_wchar_t (t), maxChars)) {}
 
-String::String (CharPointer_UTF8  start, CharPointer_UTF8  end)  : text (StringHolder::createFromCharPointer (start, end)) {}
-String::String (CharPointer_UTF16 start, CharPointer_UTF16 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
-String::String (CharPointer_UTF32 start, CharPointer_UTF32 end)  : text (StringHolder::createFromCharPointer (start, end)) {}
+String::String (CharPointer_UTF8  start, CharPointer_UTF8  end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
+String::String (CharPointer_UTF16 start, CharPointer_UTF16 end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
+String::String (CharPointer_UTF32 start, CharPointer_UTF32 end)  : text (StringHolderUtils::createFromCharPointer (start, end)) {}
 
-String::String (const std::string& s) : text (StringHolder::createFromFixedLength (s.data(), s.size())) {}
-String::String (StringRef s)          : text (StringHolder::createFromCharPointer (s.text)) {}
+String::String (const std::string& s) : text (StringHolderUtils::createFromFixedLength (s.data(), s.size())) {}
+String::String (StringRef s)          : text (StringHolderUtils::createFromCharPointer (s.text)) {}
 
 String String::charToString (juce_wchar character)
 {
@@ -487,7 +480,7 @@ namespace NumberToStringConverters
         char buffer [charsNeededForInt];
         auto* end = buffer + numElementsInArray (buffer);
         auto* start = numberToString (end, number);
-        return StringHolder::createFromFixedLength (start, (size_t) (end - start - 1));
+        return StringHolderUtils::createFromFixedLength (start, (size_t) (end - start - 1));
     }
 
     static String::CharPointerType createFromDouble (double number, int numberOfDecimalPlaces, bool useScientificNotation)
@@ -495,7 +488,7 @@ namespace NumberToStringConverters
         char buffer [charsNeededForDouble];
         size_t len;
         auto start = doubleToString (buffer, number, numberOfDecimalPlaces, useScientificNotation, len);
-        return StringHolder::createFromFixedLength (start, len);
+        return StringHolderUtils::createFromFixedLength (start, len);
     }
 }
 
@@ -1322,7 +1315,7 @@ struct StringCreationHelper
     }
 
     StringCreationHelper (const String::CharPointerType s)
-        : source (s), allocatedBytes (StringHolder::getAllocatedNumBytes (s))
+        : source (s), allocatedBytes (StringHolderUtils::getAllocatedNumBytes (s))
     {
         result.preallocateBytes (allocatedBytes);
         dest = result.getCharPointer();

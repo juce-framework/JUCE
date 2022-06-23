@@ -1,0 +1,79 @@
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://lv2plug.in/ns/ext/port-props>
+	a owl:Ontology ;
+	rdfs:label "LV2 Port Properties" ;
+	rdfs:comment "Various properties for LV2 plugin ports." ;
+	rdfs:seeAlso <port-props.meta.ttl> .
+
+pprops:trigger
+	a lv2:PortProperty ;
+	rdfs:label "trigger" ;
+	rdfs:comment "Port is a momentary trigger." .
+
+pprops:supportsStrictBounds
+	a lv2:Feature ;
+	rdfs:label "supports strict bounds" ;
+	rdfs:comment "A feature indicating plugin support for strict port bounds." .
+
+pprops:hasStrictBounds
+	a lv2:PortProperty ;
+	rdfs:label "has strict bounds" ;
+	rdfs:comment "Port has strict bounds which are not internally clamped." .
+
+pprops:expensive
+	a lv2:PortProperty ;
+	rdfs:label "changes are expensive" ;
+	rdfs:comment "Input port is expensive to change." .
+
+pprops:causesArtifacts
+	a lv2:PortProperty ;
+	rdfs:label "changes cause artifacts" ;
+	rdfs:comment "Input port causes audible artifacts when changed." .
+
+pprops:continuousCV
+	a lv2:PortProperty ;
+	rdfs:label "smooth modulation signal" ;
+	rdfs:comment "Port carries a smooth modulation signal." .
+
+pprops:discreteCV
+	a lv2:PortProperty ;
+	rdfs:label "discrete modulation signal" ;
+	rdfs:comment "Port carries a discrete modulation signal." .
+
+pprops:logarithmic
+	a lv2:PortProperty ;
+	rdfs:label "logarithmic" ;
+	rdfs:comment "Port value is logarithmic." .
+
+pprops:notAutomatic
+	a lv2:PortProperty ;
+	rdfs:label "not automatic" ;
+	rdfs:comment "Port that is not intended to be fed with a modulation signal." .
+
+pprops:notOnGUI
+	a lv2:PortProperty ;
+	rdfs:label "not on GUI" ;
+	rdfs:comment "Port that should not be displayed on a GUI." .
+
+pprops:displayPriority
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:domain lv2:Port ;
+	rdfs:range xsd:nonNegativeInteger ;
+	rdfs:label "display priority" ;
+	rdfs:comment "A priority ranking this port in importance to its plugin." .
+
+pprops:rangeSteps
+	a rdf:Property ,
+		owl:DatatypeProperty ;
+	rdfs:domain lv2:Port ;
+	rdfs:range xsd:nonNegativeInteger ;
+	rdfs:label "range steps" ;
+	rdfs:comment "The number of even steps the range should be divided into." .
+

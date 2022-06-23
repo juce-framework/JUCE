@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -45,20 +45,20 @@
 
 #include "juce_gui_basics.h"
 
+#include <cctype>
+
 //==============================================================================
 #if JUCE_MAC
  #import <WebKit/WebKit.h>
  #import <IOKit/pwr_mgt/IOPMLib.h>
-
- #if JUCE_SUPPORT_CARBON
-  #import <Carbon/Carbon.h> // still needed for SetSystemUIMode()
- #endif
+ #import <MetalKit/MetalKit.h>
 
 #elif JUCE_IOS
  #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
   #import <UserNotifications/UserNotifications.h>
  #endif
 
+ #import <MetalKit/MetalKit.h>
  #import <UIKit/UIActivityViewController.h>
 
 //==============================================================================
@@ -69,6 +69,7 @@
  #include <commctrl.h>
  #include <UIAutomation.h>
  #include <sapi.h>
+ #include <Dxgi.h>
 
  #if JUCE_WEB_BROWSER
   #include <exdisp.h>
@@ -81,6 +82,7 @@
   #pragma comment(lib, "vfw32.lib")
   #pragma comment(lib, "imm32.lib")
   #pragma comment(lib, "comctl32.lib")
+  #pragma comment(lib, "dxgi.lib")
 
   #if JUCE_OPENGL
    #pragma comment(lib, "OpenGL32.Lib")
@@ -257,32 +259,9 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
-#if JUCE_ANDROID || JUCE_WINDOWS
+#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_UNIT_TESTS
  #include "native/accessibility/juce_AccessibilityTextHelpers.h"
 #endif
-
-namespace juce
-{
-
-static const juce::Identifier disableAsyncLayerBackedViewIdentifier { "disableAsyncLayerBackedView" };
-
-JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-prototypes")
-
-/** Used by the macOS and iOS peers. */
-void setComponentAsyncLayerBackedViewDisabled (juce::Component& comp, bool shouldDisableAsyncLayerBackedView)
-{
-    comp.getProperties().set (disableAsyncLayerBackedViewIdentifier, shouldDisableAsyncLayerBackedView);
-}
-
-/** Used by the macOS and iOS peers. */
-bool getComponentAsyncLayerBackedViewDisabled (juce::Component& comp)
-{
-    return comp.getProperties()[disableAsyncLayerBackedViewIdentifier];
-}
-
-JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-} // namespace juce
 
 #if JUCE_MAC || JUCE_IOS
  #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
@@ -333,9 +312,9 @@ JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  #include "native/juce_linux_FileChooser.cpp"
 
 #elif JUCE_ANDROID
+ #include "juce_core/files/juce_common_MimeTypes.h"
  #include "native/accessibility/juce_android_Accessibility.cpp"
  #include "native/juce_android_Windowing.cpp"
- #include "native/juce_common_MimeTypes.cpp"
  #include "native/juce_android_FileChooser.cpp"
 
  #if JUCE_CONTENT_SHARING
@@ -430,3 +409,7 @@ bool juce::isWindowOnCurrentVirtualDesktop (void* x)
 
 // Depends on types defined in platform-specific windowing files
 #include "mouse/juce_MouseCursor.cpp"
+
+#if JUCE_UNIT_TESTS
+#include "native/accessibility/juce_AccessibilityTextHelpers_test.cpp"
+#endif

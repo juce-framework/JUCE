@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -22,6 +22,13 @@
 
   ==============================================================================
 */
+
+#include "juce_mac_CGMetalLayerRenderer.h"
+
+#if TARGET_OS_SIMULATOR && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+ #warning JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS uses parts of the Metal API that are currently unsupported in the simulator - falling back to JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS=0
+ #undef JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+#endif
 
 #if defined (__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
  #define JUCE_HAS_IOS_POINTER_SUPPORT 1
@@ -112,15 +119,29 @@ enum class MouseEventFlags
 
 using namespace juce;
 
+struct CADisplayLinkDeleter
+{
+    void operator() (CADisplayLink* displayLink) const noexcept
+    {
+        [displayLink invalidate];
+        [displayLink release];
+    }
+};
+
 @interface JuceUIView : UIView <UITextViewDelegate>
 {
 @public
     UIViewComponentPeer* owner;
     UITextView* hiddenTextView;
+    std::unique_ptr<CADisplayLink, CADisplayLinkDeleter> displayLink;
 }
 
 - (JuceUIView*) initWithOwner: (UIViewComponentPeer*) owner withFrame: (CGRect) frame;
 - (void) dealloc;
+
++ (Class) layerClass;
+
+- (void) displayLinkCallback: (CADisplayLink*) dl;
 
 - (void) drawRect: (CGRect) r;
 
@@ -192,8 +213,7 @@ struct UIViewPeerControllerReceiver
 };
 
 class UIViewComponentPeer  : public ComponentPeer,
-                             public FocusChangeListener,
-                             public UIViewPeerControllerReceiver
+                             private UIViewPeerControllerReceiver
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);
@@ -231,7 +251,10 @@ public:
     void setIcon (const Image& newIcon) override;
     StringArray getAvailableRenderingEngines() override       { return StringArray ("CoreGraphics Renderer"); }
 
+    void displayLinkCallback();
+
     void drawRect (CGRect);
+    void drawRectWithContext (CGContextRef, CGRect);
     bool canBecomeKeyWindow();
 
     //==============================================================================
@@ -240,10 +263,10 @@ public:
     bool isFocused() const override;
     void grabFocus() override;
     void textInputRequired (Point<int>, TextInputTarget&) override;
+    void dismissPendingTextInput() override;
 
     BOOL textViewReplaceCharacters (Range<int>, const String&);
-    void updateHiddenTextContent (TextInputTarget*);
-    void globalFocusChanged (Component*) override;
+    void updateHiddenTextContent (TextInputTarget&);
 
     void updateScreenBounds();
 
@@ -307,6 +330,9 @@ private:
                 peer->repaint (rect);
         }
     };
+
+    std::unique_ptr<CoreGraphicsMetalLayerRenderer> metalRenderer;
+    RectangleList<float> deferredRepaints;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIViewComponentPeer)
@@ -460,6 +486,11 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     [super initWithFrame: frame];
     owner = peer;
 
+    displayLink.reset ([CADisplayLink displayLinkWithTarget: self
+                                                   selector: @selector (displayLinkCallback:)]);
+    [displayLink.get() addToRunLoop: [NSRunLoop mainRunLoop]
+                            forMode: NSDefaultRunLoopMode];
+
     hiddenTextView = [[UITextView alloc] initWithFrame: CGRectZero];
     [self addSubview: hiddenTextView];
     hiddenTextView.delegate = self;
@@ -494,7 +525,26 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     [hiddenTextView removeFromSuperview];
     [hiddenTextView release];
 
+    displayLink = nullptr;
+
     [super dealloc];
+}
+
+//==============================================================================
++ (Class) layerClass
+{
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    if (@available (iOS 12, *))
+        return [CAMetalLayer class];
+   #endif
+
+    return [CALayer class];
+}
+
+- (void) displayLinkCallback: (CADisplayLink*) dl
+{
+    if (owner != nullptr)
+        owner->displayLinkCallback();
 }
 
 //==============================================================================
@@ -666,10 +716,13 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
     view.opaque = component.isOpaque();
     view.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent: 0];
 
-   #if JUCE_COREGRAPHICS_DRAW_ASYNC
-    if (! getComponentAsyncLayerBackedViewDisabled (component))
-        [[view layer] setDrawsAsynchronously: YES];
+   #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+    if (@available (iOS 12, *))
+        metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer> ((CAMetalLayer*) view.layer, comp);
    #endif
+
+    if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
+        [[view layer] setDrawsAsynchronously: YES];
 
     if (isSharedWindow)
     {
@@ -700,8 +753,6 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
     setTitle (component.getName());
     setVisible (component.isVisible());
-
-    Desktop::getInstance().addFocusChangeListener (this);
 }
 
 static UIViewComponentPeer* currentlyFocusedPeer = nullptr;
@@ -712,7 +763,6 @@ UIViewComponentPeer::~UIViewComponentPeer()
         currentlyFocusedPeer = nullptr;
 
     currentTouches.deleteAllTouchesForPeer (this);
-    Desktop::getInstance().removeFocusChangeListener (this);
 
     view->owner = nullptr;
     [view removeFromSuperview];
@@ -1076,8 +1126,18 @@ void UIViewComponentPeer::grabFocus()
     }
 }
 
-void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
+void UIViewComponentPeer::textInputRequired (Point<int> pos, TextInputTarget& target)
 {
+    view->hiddenTextView.frame = CGRectMake (pos.x, pos.y, 0, 0);
+
+    updateHiddenTextContent (target);
+    [view->hiddenTextView becomeFirstResponder];
+}
+
+void UIViewComponentPeer::dismissPendingTextInput()
+{
+    closeInputMethodContext();
+    [view->hiddenTextView resignFirstResponder];
 }
 
 static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept
@@ -1096,11 +1156,11 @@ static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType ty
     return UIKeyboardTypeDefault;
 }
 
-void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget* target)
+void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget& target)
 {
-    view->hiddenTextView.keyboardType = getUIKeyboardType (target->getKeyboardType());
-    view->hiddenTextView.text = juceStringToNS (target->getTextInRange (Range<int> (0, target->getHighlightedRegion().getStart())));
-    view->hiddenTextView.selectedRange = NSMakeRange ((NSUInteger) target->getHighlightedRegion().getStart(), 0);
+    view->hiddenTextView.keyboardType = getUIKeyboardType (target.getKeyboardType());
+    view->hiddenTextView.text = juceStringToNS (target.getTextInRange (Range<int> (0, target.getHighlightedRegion().getStart())));
+    view->hiddenTextView.selectedRange = NSMakeRange ((NSUInteger) target.getHighlightedRegion().getStart(), 0);
 }
 
 BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const String& text)
@@ -1121,29 +1181,49 @@ BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const Str
             target->insertTextAtCaret (text);
 
         if (deletionChecker != nullptr)
-            updateHiddenTextContent (target);
+            updateHiddenTextContent (*target);
     }
 
     return NO;
 }
 
-void UIViewComponentPeer::globalFocusChanged (Component*)
+//==============================================================================
+void UIViewComponentPeer::displayLinkCallback()
 {
-    if (auto* target = findCurrentTextInputTarget())
-    {
-        if (auto* comp = dynamic_cast<Component*> (target))
-        {
-            auto pos = component.getLocalPoint (comp, Point<int>());
-            view->hiddenTextView.frame = CGRectMake (pos.x, pos.y, 0, 0);
+    if (deferredRepaints.isEmpty())
+        return;
 
-            updateHiddenTextContent (target);
-            [view->hiddenTextView becomeFirstResponder];
-        }
-    }
-    else
+    auto dispatchRectangles = [this] ()
     {
-        [view->hiddenTextView resignFirstResponder];
-    }
+        // We shouldn't need this preprocessor guard, but when running in the simulator
+        // CAMetalLayer is flagged as requiring iOS 13
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        if (metalRenderer != nullptr)
+        {
+            if (@available (iOS 12, *))
+            {
+                return metalRenderer->drawRectangleList ((CAMetalLayer*) view.layer,
+                                                         (float) view.contentScaleFactor,
+                                                         view.frame,
+                                                         component,
+                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
+                                                         deferredRepaints);
+            }
+
+            // The creation of metalRenderer should already be guarded with @available (iOS 12, *).
+            jassertfalse;
+            return false;
+        }
+       #endif
+
+        for (const auto& r : deferredRepaints)
+            [view setNeedsDisplayInRect: convertToCGRect (r)];
+
+        return true;
+    };
+
+    if (dispatchRectangles())
+        deferredRepaints.clear();
 }
 
 //==============================================================================
@@ -1152,8 +1232,11 @@ void UIViewComponentPeer::drawRect (CGRect r)
     if (r.size.width < 1.0f || r.size.height < 1.0f)
         return;
 
-    CGContextRef cg = UIGraphicsGetCurrentContext();
+    drawRectWithContext (UIGraphicsGetCurrentContext(), r);
+}
 
+void UIViewComponentPeer::drawRectWithContext (CGContextRef cg, CGRect)
+{
     if (! component.isOpaque())
         CGContextClearRect (cg, CGContextGetClipBoundingBox (cg));
 
@@ -1210,9 +1293,12 @@ void Desktop::allowedOrientationsChanged()
 void UIViewComponentPeer::repaint (const Rectangle<int>& area)
 {
     if (insideDrawRect || ! MessageManager::getInstance()->isThisTheMessageThread())
+    {
         (new AsyncRepaintMessage (this, area))->post();
-    else
-        [view setNeedsDisplayInRect: convertToCGRect (area)];
+        return;
+    }
+
+    deferredRepaints.add (area.toFloat());
 }
 
 void UIViewComponentPeer::performAnyPendingRepaintsNow()

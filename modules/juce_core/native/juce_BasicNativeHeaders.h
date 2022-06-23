@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -154,6 +154,8 @@
  #include <winsock2.h>
  #include <ws2tcpip.h>
  #include <iphlpapi.h>
+ #include <accctrl.h>
+ #include <aclapi.h>
 
  #if ! JUCE_CXX17_IS_AVAILABLE
   #pragma push_macro ("WIN_NOEXCEPT")

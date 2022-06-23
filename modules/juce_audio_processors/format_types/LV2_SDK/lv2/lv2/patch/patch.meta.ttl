@@ -1,0 +1,374 @@
+@prefix dcs: <http://ontologi.es/doap-changeset#> .
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2: <http://lv2plug.in/ns/lv2core#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://lv2plug.in/ns/ext/patch>
+	a doap:Project ;
+	doap:created "2012-02-09" ;
+	doap:license <http://opensource.org/licenses/isc> ;
+	doap:developer <http://drobilla.net/drobilla#me> ;
+	doap:name "LV2 Patch" ;
+	doap:shortdesc "A protocol for accessing and manipulating properties." ;
+	doap:release [
+		doap:revision "2.8" ;
+		doap:created "2020-04-26" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.18.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Fix incorrect type of patch:sequenceNumber."
+			]
+		]
+	] , [
+		doap:revision "2.6" ;
+		doap:created "2019-02-03" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.16.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add patch:accept property."
+			] , [
+				rdfs:label "Add patch:context property."
+			]
+		]
+	] , [
+		doap:revision "2.4" ;
+		doap:created "2015-04-07" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.12.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Define patch:Get with no subject to implicitly apply to reciever.  This can be used by UIs to get an initial description of a plugin."
+			] , [
+				rdfs:label "Add patch:Copy method."
+			]
+		]
+	] , [
+		doap:revision "2.2" ;
+		doap:created "2014-08-08" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.10.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Add patch:sequenceNumber for associating replies with requests."
+			]
+		]
+	] , [
+		doap:revision "2.0" ;
+		doap:created "2013-01-10" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.4.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Make patch:Set a compact message for setting one property."
+			] , [
+				rdfs:label "Add patch:readable and patch:writable for describing available properties."
+			]
+		]
+	] , [
+		doap:revision "1.0" ;
+		doap:created "2012-04-17" ;
+		doap:file-release <http://lv2plug.in/spec/lv2-1.0.0.tar.bz2> ;
+		dcs:blame <http://drobilla.net/drobilla#me> ;
+		dcs:changeset [
+			dcs:item [
+				rdfs:label "Initial release."
+			]
+		]
+	] ;
+	lv2:documentation """
+
+This is a vocabulary for messages that access and manipulate properties.
+It can be used as a dynamic control interface for plugins,
+or anything else with a property-based model.
+
+The key underlying concept here is to control things by manipulating arbitrary properties,
+rather than by calling application-specific methods.
+This allows implementations to understand what messages do
+(at least in a mechanical sense),
+which makes things like caching, proxying, or undo relatively straightforward to implement.
+Note, however, that this is only conceptual:
+there is no requirement to implement a general property store.
+Typically, a plugin will understand a fixed set of properties that represent its parameters or other internal state, and ignore everything else.
+
+This protocol is syntax-agnostic,
+and [homoiconic](https://en.wikipedia.org/wiki/Homoiconicity)
+in the sense that the messages use the same format as the data they manipulate.
+In particular, messages can be serialised as a binary [Object](atom.html#Object) for realtime plugin control,
+or as Turtle for saving to a file,
+sending over a network,
+printing for debugging purposes,
+and so on.
+
+This specification only defines a semantic protocol,
+there is no corresponding API.
+It can be used with the [Atom](atom.html) extension to control plugins which support message-based parameters as defined by the [Parameters](parameters.html) extension.
+
+For example, if a plugin defines a `eg:volume` parameter, it can be controlled by the host by sending a patch:Set message to the plugin instance:
+
+    :::turtle
+    [
+        a patch:Set ;
+        patch:property eg:volume ;
+        patch:value 11.0 ;
+    ]
+
+Similarly, the host could get the current value for this parameter by sending a patch:Get message:
+
+    :::turtle
+    [
+        a patch:Get ;
+        patch:property eg:volume ;
+    ]
+
+The plugin would then respond with the same patch:Set message as above.
+In this case, the plugin instance is implicitly the patch:subject,
+but a specific subject can also be given for deeper control.
+
+"""^^lv2:Markdown .
+
+patch:Copy
+	lv2:documentation """
+
+After this, the destination has the same description as the subject,
+and the subject is unchanged.
+
+It is an error if the subject does not exist,
+or if the destination already exists.
+
+Multiple subjects may be given if the destination is a container,
+but the semantics of this case are application-defined.
+
+"""^^lv2:Markdown .
+
+patch:Get
+	lv2:documentation """
+
+If a patch:property is given,
+then the receiver should respond with a patch:Set message that gives only that property.
+
+Otherwise, it should respond with a [concise bounded description](http://www.w3.org/Submission/CBD/) in a patch:Put message,
+that is, a description that recursively includes any blank node values.
+
+If a patch:subject is given, then the response should have the same subject.
+If no subject is given, then the receiver is implicitly the subject.
+
+If a patch:request node or a patch:sequenceNumber is given,
+then the response should be a patch:Response and have the same property.
+If neither is given, then the receiver can respond with a simple patch:Put message.
+For example:
+
+    :::turtle
+    []
+        a patch:Get ;
+        patch:subject eg:something .
+
+Could result in:
+
+    :::turtle
+    []
+        a patch:Put ;
+        patch:subject eg:something ;
+        patch:body [
+            eg:name "Something" ;
+            eg:ratio 1.6180339887 ;
+        ] .
+
+"""^^lv2:Markdown .
+
+patch:Insert
+	lv2:documentation """
+
+If the subject does not exist, it is created.  If the subject does already
+exist, it is added to.
+
+This request only adds properties, it never removes them.  The user must take
+care that multiple values are not set for properties which should only have
+one.
+
+"""^^lv2:Markdown .
+
+patch:Message
+	lv2:documentation """
+
+This is an abstract base class for all patch messages.  Concrete messages are
+either a patch:Request or a patch:Response.
+
+"""^^lv2:Markdown .
+
+patch:Move
+	lv2:documentation """
+
+After this, the destination has the description that the subject had, and the
+subject no longer exists.
+
+It is an error if the subject does not exist, or if the destination already
+exists.
+
+"""^^lv2:Markdown .
+
+patch:Patch
+	lv2:documentation """
+
+This method always has at least one subject, and exactly one patch:add and
+patch:remove property.  The value of patch:add and patch:remove are nodes which
+have the properties to add or remove from the subject(s), respectively.  The
+special value patch:wildcard may be used as the value of a remove property to
+remove all properties with the given predicate.  For example:
+
+    :::turtle
+    []
+        a patch:Patch ;
+        patch:subject <something> ;
+        patch:add [
+            eg:name "New name" ;
+            eg:age 42 ;
+        ] ;
+        patch:remove [
+            eg:name "Old name" ;
+            eg:age patch:wildcard ;  # Remove all old eg:age properties
+        ] .
+
+"""^^lv2:Markdown .
+
+patch:Put
+	lv2:documentation """
+
+If the subject does not already exist, it is created.  If the subject does
+already exist, the patch:body is considered an updated version of it, and the
+previous version is replaced.
+
+    :::turtle
+    []
+        a patch:Put ;
+        patch:subject <something> ;
+        patch:body [
+            eg:name "New name" ;
+            eg:age 42 ;
+        ] .
+
+"""^^lv2:Markdown .
+
+patch:Request
+	a rdfs:Class ;
+	rdfs:label "Request" ;
+	rdfs:subClassOf patch:Message ;
+	lv2:documentation """
+
+A request may have a patch:subject property, which specifies the resource that
+the request applies to.  The subject may be omitted in contexts where it is
+implicit, for example if the recipient is the subject.
+
+"""^^lv2:Markdown .
+
+patch:Set
+	lv2:documentation """
+
+This is equivalent to a patch:Patch which removes _all_ pre-existing values for
+the property before setting the new value.  For example:
+
+    :::turtle
+    []
+        a patch:Set ;
+        patch:subject <something> ;
+        patch:property eg:name ;
+        patch:value "New name" .
+
+Which is equivalent to:
+
+    :::turtle
+    []
+        a patch:Patch ;
+        patch:subject <something> ;
+        patch:add [
+            eg:name "New name" ;
+        ] ;
+        patch:remove [
+            eg:name patch:wildcard ;
+        ] .
+
+"""^^lv2:Markdown .
+
+patch:body
+	lv2:documentation """
+
+The details of this property's value depend on the type of message it is a part
+of.
+
+"""^^lv2:Markdown .
+
+patch:context
+	lv2:documentation """
+
+For example, a plugin may have a special context for ephemeral properties which
+are only relevant during the lifetime of the instance and should not be saved
+in state.
+
+The specific uses for contexts are application specific.  However, the context
+MUST be a URI, and can be interpreted as the ID of a data model where
+properties should be stored.  Implementations MAY have special support for
+contexts, for example by storing in a quad store or serializing to a format
+that supports multiple RDF graphs such as TriG.
+
+"""^^lv2:Markdown .
+
+patch:readable
+	lv2:documentation """
+
+See the similar patch:writable property for details.
+
+"""^^lv2:Markdown .
+
+patch:request
+	lv2:documentation """
+
+This can be used if referring directly to the URI or blank node ID of the
+request is possible.  Otherwise, use patch:sequenceNumber.
+
+"""^^lv2:Markdown .
+
+patch:sequenceNumber
+	lv2:documentation """
+
+This property is used to associate replies with requests when it is not
+feasible to refer to request URIs with patch:request.  A patch:Response with a
+given sequence number is the reply to the previously send patch:Request with
+the same sequence number.
+
+The special sequence number 0 means that no reply is desired.
+
+"""^^lv2:Markdown .
+
+patch:wildcard
+	lv2:documentation """
+
+This makes it possible to describe the removal of all values for a given
+property.
+
+"""^^lv2:Markdown .
+
+patch:writable
+	lv2:documentation """
+
+This is used to list properties that can be changed, for example to allow user
+interfaces to present appropriate controls.  For example:
+
+    :::turtle
+    @prefix eg:   <http://example.org/> .
+    @prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+    @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+    @prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+    eg:title
+        a rdf:Property ;
+        rdfs:label "title" ;
+        rdfs:range xsd:string .
+
+    eg:plugin
+        patch:writable eg:title .
+
+"""^^lv2:Markdown .
+

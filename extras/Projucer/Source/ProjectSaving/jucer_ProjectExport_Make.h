@@ -2,15 +2,15 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
 
-   By using JUCE, you agree to the terms of both the JUCE 6 End-User License
-   Agreement and JUCE Privacy Policy (both effective as of the 16th June 2020).
+   By using JUCE, you agree to the terms of both the JUCE 7 End-User License
+   Agreement and JUCE Privacy Policy.
 
-   End User License Agreement: www.juce.com/juce-6-licence
+   End User License Agreement: www.juce.com/juce-7-licence
    Privacy Policy: www.juce.com/juce-privacy-policy
 
    Or: You may also use this code under the terms of the GPL v3 (see
@@ -40,6 +40,7 @@ protected:
               pluginBinaryCopyStepValue (config, Ids::enablePluginBinaryCopyStep, getUndoManager(), true),
               vstBinaryLocation         (config, Ids::vstBinaryLocation,          getUndoManager(), "$(HOME)/.vst"),
               vst3BinaryLocation        (config, Ids::vst3BinaryLocation,         getUndoManager(), "$(HOME)/.vst3"),
+              lv2BinaryLocation         (config, Ids::lv2BinaryLocation,          getUndoManager(), "$(HOME)/.lv2"),
               unityPluginBinaryLocation (config, Ids::unityPluginBinaryLocation,  getUndoManager(), "$(HOME)/UnityPlugins")
         {
             linkTimeOptimisationValue.setDefault (false);
@@ -57,7 +58,7 @@ protected:
                        "Specifies the 32/64-bit architecture to use. If you don't see the required architecture in this list, you can also specify the desired "
                        "flag on the command-line when invoking make by passing \"TARGET_ARCH=-march=<arch to use>\"");
 
-            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildUnityPlugin());
+            auto isBuildingAnyPlugins = (project.shouldBuildVST() || project.shouldBuildVST3() || project.shouldBuildUnityPlugin() || project.shouldBuildLV2());
 
             if (isBuildingAnyPlugins)
             {
@@ -68,6 +69,11 @@ protected:
                     props.add (new TextPropertyComponentWithEnablement (vst3BinaryLocation, pluginBinaryCopyStepValue, "VST3 Binary Location",
                                                                         1024, false),
                                "The folder in which the compiled VST3 binary should be placed.");
+
+                if (project.shouldBuildLV2())
+                    props.add (new TextPropertyComponentWithEnablement (lv2BinaryLocation, pluginBinaryCopyStepValue, "LV2 Binary Location",
+                                                                        1024, false),
+                               "The folder in which the compiled LV2 binary should be placed.");
 
                 if (project.shouldBuildUnityPlugin())
                     props.add (new TextPropertyComponentWithEnablement (unityPluginBinaryLocation, pluginBinaryCopyStepValue, "Unity Binary Location",
@@ -103,12 +109,13 @@ protected:
         bool isPluginBinaryCopyStepEnabled() const         { return pluginBinaryCopyStepValue.get(); }
         String getVSTBinaryLocationString() const          { return vstBinaryLocation.get(); }
         String getVST3BinaryLocationString() const         { return vst3BinaryLocation.get(); }
+        String getLV2BinaryLocationString() const          { return lv2BinaryLocation.get(); }
         String getUnityPluginBinaryLocationString() const  { return unityPluginBinaryLocation.get(); }
 
     private:
         //==============================================================================
         ValueTreePropertyWithDefault architectureTypeValue, pluginBinaryCopyStepValue,
-                                     vstBinaryLocation, vst3BinaryLocation, unityPluginBinaryLocation;
+                                     vstBinaryLocation, vst3BinaryLocation, lv2BinaryLocation, unityPluginBinaryLocation;
     };
 
     BuildConfiguration::Ptr createBuildConfig (const ValueTree& tree) const override
@@ -209,10 +216,20 @@ public:
                 s.add ("JUCE_UNITYDIR := Unity");
                 targetName = "$(JUCE_UNITYDIR)/" + targetName;
             }
+            else if (type == LV2PlugIn)
+            {
+                s.add ("JUCE_LV2DIR := " + targetName + ".lv2");
+                targetName = "$(JUCE_LV2DIR)/" + targetName + ".so";
+            }
+            else if (type == LV2TurtleProgram)
+            {
+                targetName = Project::getLV2FileWriterName();
+            }
 
             s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeQuotesAndSpaces (targetName));
 
-            if (config.isPluginBinaryCopyStepEnabled() && (type == VST3PlugIn || type == VSTPlugIn || type == UnityPlugIn))
+            if (config.isPluginBinaryCopyStepEnabled()
+                && (type == VST3PlugIn || type == VSTPlugIn || type == UnityPlugIn || type == LV2PlugIn))
             {
                 String copyCmd ("JUCE_COPYCMD_" + getTargetVarName() + String (" := $(JUCE_OUTDIR)/"));
 
@@ -230,6 +247,12 @@ public:
                 {
                     s.add ("JUCE_UNITYDESTDIR := " + config.getUnityPluginBinaryLocationString());
                     s.add (copyCmd + "$(JUCE_UNITYDIR)/. $(JUCE_UNITYDESTDIR)");
+                }
+                else if (type == LV2PlugIn)
+                {
+                    s.add ("JUCE_LV2DESTDIR := " + config.getLV2BinaryLocationString());
+                    s.add ("JUCE_LV2_FULL_PATH := $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_PLUGIN)");
+                    s.add (copyCmd + "$(JUCE_LV2DIR) $(JUCE_LV2DESTDIR)");
                 }
             }
 
@@ -289,6 +312,9 @@ public:
 
         String getPhonyName() const
         {
+            if (type == LV2TurtleProgram)
+                return "LV2_MANIFEST_HELPER";
+
             return String (getName()).upToFirstOccurrenceOf (" ", false, false);
         }
 
@@ -301,6 +327,9 @@ public:
 
             if (type != SharedCodeTarget && owner.shouldBuildTargetType (SharedCodeTarget))
                 out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_SHARED_CODE)";
+
+            if (type == LV2PlugIn)
+                out << " $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER)";
 
             out << newLine;
 
@@ -324,6 +353,8 @@ public:
                 out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_VST3DIR)/$(JUCE_VST3SUBDIR)" << newLine;
             else if (type == UnityPlugIn)
                 out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_UNITYDIR)" << newLine;
+            else if (type == LV2PlugIn)
+                out << "\t-$(V_AT)mkdir -p $(JUCE_OUTDIR)/$(JUCE_LV2DIR)" << newLine;
 
             if (owner.projectType.isStaticLibrary() || type == SharedCodeTarget)
             {
@@ -369,6 +400,13 @@ public:
                     << "\t-$(V_AT)mkdir -p $(JUCE_UNITYDESTDIR)"                                       << newLine
                     << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_UNITY_PLUGIN)"                                  << newLine;
             }
+            else if (type == LV2PlugIn)
+            {
+                out << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER) "
+                       "$(abspath $(JUCE_LV2_FULL_PATH))"                                              << newLine
+                    << "\t-$(V_AT)mkdir -p $(JUCE_LV2DESTDIR)"                                         << newLine
+                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_LV2_PLUGIN)"                                    << newLine;
+            }
 
             out << newLine;
         }
@@ -412,7 +450,6 @@ public:
     bool isCodeBlocks() const override                      { return false; }
     bool isMakefile() const override                        { return true; }
     bool isAndroidStudio() const override                   { return false; }
-    bool isCLion() const override                           { return false; }
 
     bool isAndroid() const override                         { return false; }
     bool isWindows() const override                         { return false; }
@@ -424,24 +461,27 @@ public:
 
     bool supportsTargetType (build_tools::ProjectType::Target::Type type) const override
     {
+        using Target = build_tools::ProjectType::Target;
+
         switch (type)
         {
-            case build_tools::ProjectType::Target::GUIApp:
-            case build_tools::ProjectType::Target::ConsoleApp:
-            case build_tools::ProjectType::Target::StaticLibrary:
-            case build_tools::ProjectType::Target::SharedCodeTarget:
-            case build_tools::ProjectType::Target::AggregateTarget:
-            case build_tools::ProjectType::Target::VSTPlugIn:
-            case build_tools::ProjectType::Target::VST3PlugIn:
-            case build_tools::ProjectType::Target::StandalonePlugIn:
-            case build_tools::ProjectType::Target::DynamicLibrary:
-            case build_tools::ProjectType::Target::UnityPlugIn:
+            case Target::GUIApp:
+            case Target::ConsoleApp:
+            case Target::StaticLibrary:
+            case Target::SharedCodeTarget:
+            case Target::AggregateTarget:
+            case Target::VSTPlugIn:
+            case Target::VST3PlugIn:
+            case Target::StandalonePlugIn:
+            case Target::DynamicLibrary:
+            case Target::UnityPlugIn:
+            case Target::LV2PlugIn:
+            case Target::LV2TurtleProgram:
                 return true;
-            case build_tools::ProjectType::Target::AAXPlugIn:
-            case build_tools::ProjectType::Target::RTASPlugIn:
-            case build_tools::ProjectType::Target::AudioUnitPlugIn:
-            case build_tools::ProjectType::Target::AudioUnitv3PlugIn:
-            case build_tools::ProjectType::Target::unspecified:
+            case Target::AAXPlugIn:
+            case Target::AudioUnitPlugIn:
+            case Target::AudioUnitv3PlugIn:
+            case Target::unspecified:
             default:
                 break;
         }
@@ -968,9 +1008,9 @@ private:
 
         writeCompilerFlagSchemes (out, filesToCompile);
 
-        auto getFilesForTarget = [] (const Array<std::pair<File, String>>& files,
-                                     MakefileTarget* target,
-                                     const Project& p) -> Array<std::pair<File, String>>
+        auto getFilesForTarget = [this] (const Array<std::pair<File, String>>& files,
+                                         MakefileTarget* target,
+                                         const Project& p) -> Array<std::pair<File, String>>
         {
             Array<std::pair<File, String>> targetFiles;
 
@@ -979,6 +1019,9 @@ private:
             for (auto& f : files)
                 if (p.getTargetTypeFromFilePath (f.first, true) == targetType)
                     targetFiles.add (f);
+
+            if (targetType == MakefileTarget::LV2TurtleProgram)
+                targetFiles.add ({ project.resolveFilename (getLV2TurtleDumpProgramSource().toUnixStyle()), {} });
 
             return targetFiles;
         };
@@ -1036,8 +1079,6 @@ private:
 
         return phonyTargetLine.toString();
     }
-
-    friend class CLionProjectExporter;
 
     OwnedArray<MakefileTarget> targets;
 

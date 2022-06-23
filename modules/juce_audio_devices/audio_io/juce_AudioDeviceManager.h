@@ -2,7 +2,7 @@
   ==============================================================================
 
    This file is part of the JUCE library.
-   Copyright (c) 2020 - Raw Material Software Limited
+   Copyright (c) 2022 - Raw Material Software Limited
 
    JUCE is an open source library subject to commercial or open-source
    licensing.
@@ -526,8 +526,12 @@ private:
     class CallbackHandler;
     std::unique_ptr<CallbackHandler> callbackHandler;
 
-    void audioDeviceIOCallbackInt (const float** inputChannelData, int totalNumInputChannels,
-                                   float** outputChannelData, int totalNumOutputChannels, int numSamples);
+    void audioDeviceIOCallbackInt (const float** inputChannelData,
+                                   int totalNumInputChannels,
+                                   float** outputChannelData,
+                                   int totalNumOutputChannels,
+                                   int numSamples,
+                                   const AudioIODeviceCallbackContext& context);
     void audioDeviceAboutToStartInt (AudioIODevice*);
     void audioDeviceStoppedInt();
     void audioDeviceErrorInt (const String&);
