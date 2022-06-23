@@ -753,8 +753,9 @@ public:
 
                 if (type == LV2TurtleProgram)
                 {
-                    cppFiles->createNewChildElement ("ClCompile")
-                            ->setAttribute ("Include", owner.getLV2TurtleDumpProgramSource().toWindowsStyle());
+                    const auto location = owner.rebaseFromProjectFolderToBuildTarget (owner.getLV2TurtleDumpProgramSource())
+                                               .toWindowsStyle();
+                    cppFiles->createNewChildElement ("ClCompile")->setAttribute ("Include", location);
                 }
             }
 
