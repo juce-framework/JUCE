@@ -303,7 +303,7 @@ public:
     child process to launch when the command line parameters indicate that we're
     being asked to run as a child process.
 */
-bool invokeChildProcessDemo (const String& commandLine)
+inline bool invokeChildProcessDemo (const String& commandLine)
 {
     auto worker = std::make_unique<DemoWorkerProcess>();
 
