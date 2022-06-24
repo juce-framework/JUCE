@@ -597,6 +597,11 @@ struct Grid::AutoPlacement
             return referenceCell;
         }
 
+        void updateMaxCrossDimensionFromAutoPlacementItem (int columnSpan, int rowSpan)
+        {
+            highestCrossDimension = jmax (highestCrossDimension, 1 + getCrossDimension ({ columnSpan, rowSpan }));
+        }
+
     private:
         struct SortableCell
         {
@@ -642,9 +647,10 @@ struct Grid::AutoPlacement
 
         bool isOutOfBounds (Cell cell, int columnSpan, int rowSpan) const
         {
-            const auto crossSpan = columnFirst ? rowSpan : columnSpan;
+            const auto highestIndexOfCell = getCrossDimension (cell) + getCrossDimension ({ columnSpan, rowSpan });
+            const auto highestIndexOfGrid = getHighestCrossDimension();
 
-            return (getCrossDimension (cell) + crossSpan) > getHighestCrossDimension();
+            return highestIndexOfGrid < highestIndexOfCell;
         }
 
         int getHighestCrossDimension() const
@@ -806,6 +812,11 @@ struct Grid::AutoPlacement
                 }
             }
         }
+
+        // https://www.w3.org/TR/css-grid-1/#auto-placement-algo step 3.3
+        for (auto* item : sortedItems)
+            if (hasAutoPlacement (*item))
+                plane.updateMaxCrossDimensionFromAutoPlacementItem (getSpanFromAuto (item->column), getSpanFromAuto (item->row));
 
         lastInsertionCell = { 1, 1 };
 
