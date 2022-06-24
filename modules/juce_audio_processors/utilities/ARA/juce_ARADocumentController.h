@@ -335,28 +335,28 @@ protected:
 
     //==============================================================================
     /** Override to return a custom subclass instance of ARADocument. */
-    ARADocument*          doCreateDocument();
+    virtual ARADocument*          doCreateDocument();
 
     /** Override to return a custom subclass instance of ARAMusicalContext. */
-    ARAMusicalContext*    doCreateMusicalContext       (ARADocument* document,
-                                                        ARA::ARAMusicalContextHostRef hostRef);
+    virtual ARAMusicalContext*    doCreateMusicalContext       (ARADocument* document,
+                                                                ARA::ARAMusicalContextHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARARegionSequence. */
-    ARARegionSequence*    doCreateRegionSequence       (ARADocument* document,
-                                                        ARA::ARARegionSequenceHostRef hostRef);
+    virtual ARARegionSequence*    doCreateRegionSequence       (ARADocument* document,
+                                                                ARA::ARARegionSequenceHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARAAudioSource. */
-    ARAAudioSource*       doCreateAudioSource          (ARADocument* document,
-                                                        ARA::ARAAudioSourceHostRef hostRef);
+    virtual ARAAudioSource*       doCreateAudioSource          (ARADocument* document,
+                                                                ARA::ARAAudioSourceHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARAAudioModification. */
-    ARAAudioModification* doCreateAudioModification    (ARAAudioSource* audioSource,
-                                                        ARA::ARAAudioModificationHostRef hostRef,
-                                                        const ARAAudioModification* optionalModificationToClone);
+    virtual ARAAudioModification* doCreateAudioModification    (ARAAudioSource* audioSource,
+                                                                ARA::ARAAudioModificationHostRef hostRef,
+                                                                const ARAAudioModification* optionalModificationToClone);
 
     /** Override to return a custom subclass instance of ARAPlaybackRegion. */
-    ARAPlaybackRegion*    doCreatePlaybackRegion       (ARAAudioModification* modification,
-                                                        ARA::ARAPlaybackRegionHostRef hostRef);
+    virtual ARAPlaybackRegion*    doCreatePlaybackRegion       (ARAAudioModification* modification,
+                                                                ARA::ARAPlaybackRegionHostRef hostRef);
 
 private:
     //==============================================================================
