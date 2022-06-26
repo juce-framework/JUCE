@@ -1573,7 +1573,7 @@ public:
                        threads.end());
     }
 
-    JUCE_DECLARE_SINGLETON_SINGLETHREADED (VBlankDispatcher, true)
+    JUCE_DECLARE_SINGLETON_SINGLETHREADED (VBlankDispatcher, false)
 
 private:
     //==============================================================================

@@ -233,7 +233,7 @@ private:
     std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
     {
         if (hasCustomComponent() && customComponent->getAccessibilityHandler() != nullptr)
-            return nullptr;
+            return createIgnoredAccessibilityHandler (*this);
 
         return std::make_unique<ItemAccessibilityHandler> (*this);
     }

@@ -168,7 +168,7 @@ public:
               vstBinaryLocation              (config, Ids::vstBinaryLocation,          getUndoManager()),
               vst3BinaryLocation             (config, Ids::vst3BinaryLocation,         getUndoManager()),
               aaxBinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
-              lv2BinaryLocation              (config, Ids::aaxBinaryLocation,          getUndoManager()),
+              lv2BinaryLocation              (config, Ids::lv2BinaryLocation,          getUndoManager()),
               unityPluginBinaryLocation      (config, Ids::unityPluginBinaryLocation,  getUndoManager(), {})
         {
             setPluginBinaryCopyLocationDefaults();
@@ -753,8 +753,9 @@ public:
 
                 if (type == LV2TurtleProgram)
                 {
-                    cppFiles->createNewChildElement ("ClCompile")
-                            ->setAttribute ("Include", owner.getLV2TurtleDumpProgramSource().toWindowsStyle());
+                    const auto location = owner.rebaseFromProjectFolderToBuildTarget (owner.getLV2TurtleDumpProgramSource())
+                                               .toWindowsStyle();
+                    cppFiles->createNewChildElement ("ClCompile")->setAttribute ("Include", location);
                 }
             }
 
