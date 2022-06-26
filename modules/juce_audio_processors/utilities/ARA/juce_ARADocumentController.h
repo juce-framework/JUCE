@@ -335,27 +335,27 @@ protected:
 
     //==============================================================================
     /** Override to return a custom subclass instance of ARADocument. */
-    virtual ARADocument*       doCreateDocument();
+    ARADocument*          doCreateDocument();
 
     /** Override to return a custom subclass instance of ARAMusicalContext. */
-    virtual ARAMusicalContext* doCreateMusicalContext  (ARADocument* document,
+    ARAMusicalContext*    doCreateMusicalContext       (ARADocument* document,
                                                         ARA::ARAMusicalContextHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARARegionSequence. */
-    virtual ARARegionSequence* doCreateRegionSequence  (ARADocument* document,
+    ARARegionSequence*    doCreateRegionSequence       (ARADocument* document,
                                                         ARA::ARARegionSequenceHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARAAudioSource. */
-    virtual ARAAudioSource*    doCreateAudioSource     (ARADocument* document,
+    ARAAudioSource*       doCreateAudioSource          (ARADocument* document,
                                                         ARA::ARAAudioSourceHostRef hostRef);
 
     /** Override to return a custom subclass instance of ARAAudioModification. */
-    virtual ARAAudioModification* doCreateAudioModification (ARAAudioSource* audioSource,
+    ARAAudioModification* doCreateAudioModification    (ARAAudioSource* audioSource,
                                                         ARA::ARAAudioModificationHostRef hostRef,
                                                         const ARAAudioModification* optionalModificationToClone);
 
     /** Override to return a custom subclass instance of ARAPlaybackRegion. */
-    virtual ARAPlaybackRegion* doCreatePlaybackRegion  (ARAAudioModification* modification,
+    ARAPlaybackRegion*    doCreatePlaybackRegion       (ARAAudioModification* modification,
                                                         ARA::ARAPlaybackRegionHostRef hostRef);
 
 private:
