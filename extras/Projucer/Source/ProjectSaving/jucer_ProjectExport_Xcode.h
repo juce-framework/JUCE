@@ -2101,7 +2101,7 @@ private:
             if (target->type == XcodeTarget::LV2TurtleProgram
                 && project.getEnabledModules().isModuleEnabled ("juce_audio_plugin_client"))
             {
-                const auto path = getLV2TurtleDumpProgramSource();
+                const auto path = rebaseFromProjectFolderToBuildTarget (getLV2TurtleDumpProgramSource());
                 addFile (FileOptions().withRelativePath ({ expandPath (path.toUnixStyle()), path.getRoot() })
                                       .withSkipPCHEnabled (true)
                                       .withCompilationEnabled (true)
