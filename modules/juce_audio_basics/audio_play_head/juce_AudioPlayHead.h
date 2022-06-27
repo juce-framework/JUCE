@@ -552,6 +552,10 @@ public:
             if (const auto timeInSamples = pos->getTimeInSamples())
                 result.timeInSamples = *timeInSamples;
 
+            result.isPlaying    = pos->getIsPlaying();
+            result.isRecording  = pos->getIsRecording();
+            result.isLooping    = pos->getIsLooping();
+
             return true;
         }
 
