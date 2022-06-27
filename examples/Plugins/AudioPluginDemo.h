@@ -44,6 +44,7 @@
 
  pluginCharacteristics: pluginIsSynth, pluginWantsMidiIn, pluginProducesMidiOut,
                         pluginEditorRequiresKeys
+ defines:               JucePlugin_EnhancedAudioSuite=1
  extraPluginFormats:    AUv3
 
  END_JUCE_PIP_METADATA

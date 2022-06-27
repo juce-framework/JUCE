@@ -34,6 +34,10 @@
 
 #include <juce_audio_processors/format_types/juce_LegacyAudioParameter.cpp>
 
+#if JucePlugin_EnhancedAudioSuite
+ #include <juce_audio_formats/format/juce_AudioFormatReader.h>
+#endif
+
 JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4127 4512 4996)
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wnon-virtual-dtor",
                                      "-Wsign-conversion",
