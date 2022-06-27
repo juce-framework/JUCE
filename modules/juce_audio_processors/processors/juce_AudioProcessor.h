@@ -327,7 +327,7 @@ public:
 
 #if JucePlugin_EnhancedAudioSuite
     /** Allows aborting plug-in load due to license failure instead of crashing. */
-    virtual bool isAuthorized() = 0;
+    virtual bool isAuthorized() { return true; }
 
     /** Called by AudioSuite to add offsets to processed clip.
 
