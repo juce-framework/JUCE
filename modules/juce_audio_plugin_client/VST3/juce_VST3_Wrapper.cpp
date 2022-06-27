@@ -3646,7 +3646,7 @@ DEF_CLASS_IID (JuceAudioProcessor)
  // Defined in PluginUtilities.cpp
  void getUUIDForVST2ID (bool, uint8[16]);
 
- FUID getFUIDForVST2ID (bool forControllerUID)
+ static FUID getFUIDForVST2ID (bool forControllerUID)
  {
      TUID uuid;
      getUUIDForVST2ID (forControllerUID, (uint8*) uuid);
