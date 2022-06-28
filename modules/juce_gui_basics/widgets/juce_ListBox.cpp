@@ -246,12 +246,7 @@ public:
 
             int getRowIndex() const override
             {
-                const auto index = handler.rowComponent.row;
-
-                if (handler.rowComponent.owner.hasAccessibleHeaderComponent())
-                    return index + 1;
-
-                return index;
+                return handler.rowComponent.row;
             }
 
             int getRowSpan() const override          { return 1; }
@@ -300,23 +295,14 @@ public:
         setViewedComponent (content.release());
     }
 
-    RowComponent* getComponentForRow (int row) const noexcept
-    {
-        if (isPositiveAndBelow (row, rows.size()))
-            return rows[row];
-
-        return nullptr;
-    }
-
-    RowComponent* getComponentForRowWrapped (int row) const noexcept
-    {
-        return rows[row % jmax (1, rows.size())];
-    }
+    int getIndexOfFirstVisibleRow() const { return jmax (0, firstIndex - 1); }
 
     RowComponent* getComponentForRowIfOnscreen (int row) const noexcept
     {
-        return (row >= firstIndex && row < firstIndex + rows.size())
-                 ? getComponentForRowWrapped (row) : nullptr;
+        const auto startIndex = getIndexOfFirstVisibleRow();
+
+        return (startIndex <= row && row < startIndex + rows.size())
+                 ? rows[row % jmax (1, rows.size())] : nullptr;
     }
 
     int getRowNumberOfComponent (Component* const rowComponent) const noexcept
@@ -384,16 +370,19 @@ public:
             firstWholeIndex = (y + rowH - 1) / rowH;
             lastWholeIndex = (y + getMaximumVisibleHeight() - 1) / rowH;
 
-            auto startIndex = jmax (0, firstIndex - 1);
+            const auto startIndex = getIndexOfFirstVisibleRow();
+            const auto lastIndex = startIndex + rows.size();
 
-            for (int i = 0; i < numNeeded; ++i)
+            for (auto row = startIndex; row < lastIndex; ++row)
             {
-                const int row = i + startIndex;
-
-                if (auto* rowComp = getComponentForRowWrapped (row))
+                if (auto* rowComp = getComponentForRowIfOnscreen (row))
                 {
                     rowComp->setBounds (0, row * rowH, w, rowH);
                     rowComp->update (row, owner.isRowSelected (row));
+                }
+                else
+                {
+                    jassertfalse;
                 }
             }
         }
@@ -1155,15 +1144,8 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
         {
             listBox.checkModelPtrIsValid();
 
-            if (listBox.model == nullptr)
-                return 0;
-
-            const auto numRows = listBox.model->getNumRows();
-
-            if (listBox.hasAccessibleHeaderComponent())
-                return numRows + 1;
-
-            return numRows;
+            return listBox.model != nullptr ? listBox.model->getNumRows()
+                                            : 0;
         }
 
         int getNumColumns() const override
@@ -1171,24 +1153,7 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
             return 1;
         }
 
-        const AccessibilityHandler* getCellHandler (int row, int) const override
-        {
-            if (auto* headerHandler = getHeaderHandler())
-            {
-                if (row == 0)
-                    return headerHandler;
-
-                --row;
-            }
-
-            if (auto* rowComponent = listBox.viewport->getComponentForRow (row))
-                return rowComponent->getAccessibilityHandler();
-
-            return nullptr;
-        }
-
-    private:
-        const AccessibilityHandler* getHeaderHandler() const
+        const AccessibilityHandler* getHeaderHandler() const override
         {
             if (listBox.hasAccessibleHeaderComponent())
                 return listBox.headerComponent->getAccessibilityHandler();
@@ -1196,6 +1161,20 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
             return nullptr;
         }
 
+        const AccessibilityHandler* getRowHandler (int row) const override
+        {
+            if (auto* rowComponent = listBox.viewport->getComponentForRowIfOnscreen (row))
+                return rowComponent->getAccessibilityHandler();
+
+            return nullptr;
+        }
+
+        const AccessibilityHandler* getCellHandler (int, int) const override
+        {
+            return nullptr;
+        }
+
+    private:
         ListBox& listBox;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TableInterface)

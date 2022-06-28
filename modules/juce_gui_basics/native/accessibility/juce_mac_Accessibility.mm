@@ -116,9 +116,7 @@ private:
             addMethod (@selector (accessibilitySelectedRows),        getAccessibilitySelectedRows);
             addMethod (@selector (setAccessibilitySelectedRows:),    setAccessibilitySelectedRows);
             addMethod (@selector (accessibilityColumnCount),         getAccessibilityColumnCount);
-            addMethod (@selector (accessibilityColumns),             getAccessibilityColumns);
-            addMethod (@selector (accessibilitySelectedColumns),     getAccessibilitySelectedColumns);
-            addMethod (@selector (setAccessibilitySelectedColumns:), setAccessibilitySelectedColumns);
+            addMethod (@selector (accessibilityHeader),              getAccessibilityHeader);
 
             addMethod (@selector (accessibilityRowIndexRange),    getAccessibilityRowIndexRange);
             addMethod (@selector (accessibilityColumnIndexRange), getAccessibilityColumnIndexRange);
@@ -166,26 +164,30 @@ private:
             return selected;
         }
 
+        static void setSelected (id item, bool selected)
+        {
+            auto* handler = getHandler (item);
+
+            if (handler == nullptr)
+                return;
+
+            const auto currentState = handler->getCurrentState();
+
+            if (isSelectable (currentState))
+            {
+                if (currentState.isSelected() != selected)
+                    handler->getActions().invoke (AccessibilityActionType::toggle);
+            }
+            else if (currentState.isFocusable())
+            {
+                [item setAccessibilityFocused: selected];
+            }
+        }
+
         static void setSelectedChildren (NSArray* children, NSArray* selected)
         {
             for (id child in children)
-            {
-                if (auto* handler = getHandler (child))
-                {
-                    const auto currentState = handler->getCurrentState();
-                    const BOOL isSelected = [selected containsObject: child];
-
-                    if (isSelectable (currentState))
-                    {
-                        if (currentState.isSelected() != isSelected)
-                            handler->getActions().invoke (AccessibilityActionType::toggle);
-                    }
-                    else if (currentState.isFocusable())
-                    {
-                        [child setAccessibilityFocused: isSelected];
-                    }
-                }
-            }
+                setSelected (child, [selected containsObject: child]);
         }
 
         //==============================================================================
@@ -218,15 +220,15 @@ private:
                         if (auto* modalHandler = modal->getAccessibilityHandler())
                         {
                             if (auto* focusChild = modalHandler->getChildFocus())
-                                return (id) focusChild->getNativeImplementation();
+                                return static_cast<id> (focusChild->getNativeImplementation());
 
-                            return (id) modalHandler->getNativeImplementation();
+                            return static_cast<id> (modalHandler->getNativeImplementation());
                         }
                     }
                 }
 
                 if (auto* focusChild = handler->getChildFocus())
-                    return (id) focusChild->getNativeImplementation();
+                    return static_cast<id> (focusChild->getNativeImplementation());
             }
 
             return nil;
@@ -237,7 +239,7 @@ private:
             if (auto* handler = getHandler (self))
             {
                 if (auto* child = handler->getChildAt (roundToIntPoint (flippedScreenPoint (point))))
-                    return (id) child->getNativeImplementation();
+                    return static_cast<id> (child->getNativeImplementation());
 
                 return self;
             }
@@ -250,9 +252,9 @@ private:
             if (auto* handler = getHandler (self))
             {
                 if (auto* parentHandler = handler->getParent())
-                    return NSAccessibilityUnignoredAncestor ((id) parentHandler->getNativeImplementation());
+                    return NSAccessibilityUnignoredAncestor (static_cast<id> (parentHandler->getNativeImplementation()));
 
-                return NSAccessibilityUnignoredAncestor ((id) handler->getComponent().getWindowHandle());
+                return NSAccessibilityUnignoredAncestor (static_cast<id> (handler->getComponent().getWindowHandle()));
             }
 
             return nil;
@@ -267,7 +269,7 @@ private:
                 auto* accessibleChildren = [NSMutableArray arrayWithCapacity: (NSUInteger) children.size()];
 
                 for (auto* childHandler : children)
-                    [accessibleChildren addObject: (id) childHandler->getNativeImplementation()];
+                    [accessibleChildren addObject: static_cast<id> (childHandler->getNativeImplementation())];
 
                 return accessibleChildren;
             }
@@ -581,27 +583,29 @@ private:
         //==============================================================================
         static NSArray* getAccessibilityRows (id self, SEL)
         {
-            NSMutableArray* rows = [[NSMutableArray new] autorelease];
-
             if (auto* tableInterface = getTableInterface (self))
             {
-                for (int row = 0; row < tableInterface->getNumRows(); ++row)
+                auto* rows = [[NSMutableArray new] autorelease];
+
+                for (int row = 0, numRows = tableInterface->getNumRows(); row < numRows; ++row)
                 {
-                    if (auto* handler = tableInterface->getCellHandler (row, 0))
+                    if (auto* rowHandler = tableInterface->getRowHandler (row))
                     {
-                        [rows addObject: (id) handler->getNativeImplementation()];
+                        [rows addObject: static_cast<id> (rowHandler->getNativeImplementation())];
                     }
                     else
                     {
                         [rows addObject: [NSAccessibilityElement accessibilityElementWithRole: NSAccessibilityRowRole
-                                                                                         frame: NSZeroRect
-                                                                                         label: @"Offscreen Row"
-                                                                                        parent: self]];
+                                                                                        frame: NSZeroRect
+                                                                                        label: @"Offscreen Row"
+                                                                                       parent: self]];
                     }
                 }
+
+                return rows;
             }
 
-            return rows;
+            return nil;
         }
 
         static NSArray* getAccessibilitySelectedRows (id self, SEL)
@@ -614,39 +618,13 @@ private:
             setSelectedChildren ([self accessibilityRows], selected);
         }
 
-        static NSArray* getAccessibilityColumns (id self, SEL)
+        static id getAccessibilityHeader (id self, SEL)
         {
-            NSMutableArray* columns = [[NSMutableArray new] autorelease];
-
             if (auto* tableInterface = getTableInterface (self))
-            {
-                for (int column = 0; column < tableInterface->getNumColumns(); ++column)
-                {
-                    if (auto* handler = tableInterface->getCellHandler (0, column))
-                    {
-                        [columns addObject: (id) handler->getNativeImplementation()];
-                    }
-                    else
-                    {
-                        [columns addObject: [NSAccessibilityElement accessibilityElementWithRole: NSAccessibilityColumnRole
-                                                                                            frame: NSZeroRect
-                                                                                            label: @"Offscreen Column"
-                                                                                           parent: self]];
-                    }
-                }
-            }
+                if (auto* handler = tableInterface->getHeaderHandler())
+                    return static_cast<id> (handler->getNativeImplementation());
 
-            return columns;
-        }
-
-        static NSArray* getAccessibilitySelectedColumns (id self, SEL)
-        {
-            return getSelectedChildren ([self accessibilityColumns]);
-        }
-
-        static void setAccessibilitySelectedColumns (id self, SEL, NSArray* selected)
-        {
-            setSelectedChildren ([self accessibilityColumns], selected);
+            return nil;
         }
 
         //==============================================================================
@@ -743,8 +721,7 @@ private:
                                             @selector (accessibilityRows),
                                             @selector (accessibilitySelectedRows),
                                             @selector (accessibilityColumnCount),
-                                            @selector (accessibilityColumns),
-                                            @selector (accessibilitySelectedColumns) })
+                                            @selector (accessibilityHeader) })
                 {
                     if (selector == tableSelector)
                         return handler->getTableInterface() != nullptr;
@@ -881,7 +858,7 @@ static void sendHandlerNotification (const AccessibilityHandler& handler,
 
     if (@available (macOS 10.9, *))
     {
-        if (id accessibilityElement = (id) handler.getNativeImplementation())
+        if (id accessibilityElement = static_cast<id> (handler.getNativeImplementation()))
         {
             sendAccessibilityEvent (accessibilityElement, notification,
                                     (notification == NSAccessibilityLayoutChangedNotification
@@ -966,7 +943,7 @@ void AccessibilityHandler::postAnnouncement (const String& announcementString, A
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }();
 
-        sendAccessibilityEvent ((id) [NSApp mainWindow],
+        sendAccessibilityEvent (static_cast<id> ([NSApp mainWindow]),
                                 NSAccessibilityAnnouncementRequestedNotification,
                                 @{ NSAccessibilityAnnouncementKey: juceStringToNS (announcementString),
                                    NSAccessibilityPriorityKey:     @(nsPriority) });

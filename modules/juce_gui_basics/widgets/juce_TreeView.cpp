@@ -1448,11 +1448,21 @@ std::unique_ptr<AccessibilityHandler> TreeView::createAccessibilityHandler()
         int getNumRows() const override     { return treeView.getNumRowsInTree(); }
         int getNumColumns() const override  { return 1; }
 
-        const AccessibilityHandler* getCellHandler (int row, int) const override
+        const AccessibilityHandler* getHeaderHandler() const override
+        {
+            return nullptr;
+        }
+
+        const AccessibilityHandler* getRowHandler (int row) const override
         {
             if (auto* itemComp = treeView.getItemComponent (treeView.getItemOnRow (row)))
                 return itemComp->getAccessibilityHandler();
 
+            return nullptr;
+        }
+
+        const AccessibilityHandler* getCellHandler (int, int) const override
+        {
             return nullptr;
         }
 

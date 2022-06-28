@@ -49,6 +49,21 @@ public:
         nullptr if there is no cell at the specified position.
     */
     virtual const AccessibilityHandler* getCellHandler (int row, int column) const = 0;
+
+    /** Returns the AccessibilityHandler for a row in the table, or nullptr if there is
+        no row at this index.
+
+        The row component should have a child component for each column in the table.
+    */
+    virtual const AccessibilityHandler* getRowHandler (int row) const = 0;
+
+    /** Returns the AccessibilityHandler for the header, or nullptr if there is
+        no header.
+
+        If you supply a header, it must have exactly the same number of children
+        as there are columns in the table.
+    */
+    virtual const AccessibilityHandler* getHeaderHandler() const = 0;
 };
 
 } // namespace juce

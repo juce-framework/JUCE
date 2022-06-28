@@ -46,7 +46,9 @@ public:
     using Holder = std::unique_ptr<Base, AccessibleObjCClassDeleter>;
 
 protected:
-    AccessibleObjCClass()  : ObjCClass<Base> ("JUCEAccessibilityElement_")
+    AccessibleObjCClass() : AccessibleObjCClass ("JUCEAccessibilityElement_") {}
+
+    explicit AccessibleObjCClass (const char* name)  : ObjCClass<Base> (name)
     {
         ObjCClass<Base>::template addIvar<AccessibilityHandler*> ("handler");
     }
