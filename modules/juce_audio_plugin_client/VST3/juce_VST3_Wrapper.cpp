@@ -2950,12 +2950,9 @@ public:
                             ? makeOptional ((uint64_t) processContext.systemTime)
                             : nullopt);
 
-        info.isContinuousValid          = (processContext.state & Vst::ProcessContext::kContTimeValid) != 0;
-
-        if (info.isContinuousValid)
-        {
-            info.continuousTimeInSamples = jmax ((juce::int64) 0, processContext.continousTimeSamples);
-        }
+        info.setContinuousTimeInSamples ((processContext.state & Vst::ProcessContext::kContTimeValid) != 0
+                                         ? makeOptional (jmax ((juce::int64) 0, processContext.continousTimeSamples))
+                                         : nullopt);
 
         return info;
     }

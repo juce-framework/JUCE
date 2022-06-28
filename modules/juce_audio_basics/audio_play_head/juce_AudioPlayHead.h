@@ -226,13 +226,6 @@ public:
         /** For timecode, the position of the start of the timeline, in seconds from 00:00:00:00. */
         double editOriginTime = 0;
 
-        /** The current play position, in samples from the start of processing.
-            Without looping.
-            Note - this value may be unavailable on some hosts.
-            @see isContinuousValid.
-         */
-        int64 continuousTimeInSamples;
-
         /** The current play position, in units of quarter-notes. */
         double ppqPosition = 0;
 
@@ -272,9 +265,6 @@ public:
 
         /** True if the transport is currently looping. */
         bool isLooping = false;
-
-        /** True if the continuous time is valid/supported. */
-        bool isContinuousValid = false;
 
         //==============================================================================
         bool operator== (const CurrentPositionInfo& other) const noexcept
@@ -402,6 +392,12 @@ public:
         /** @see getHostTimeNs() */
         void setHostTimeNs (Optional<uint64_t> hostTimeNsIn)            {        setOptional (flagHostTimeNs, hostTimeNs, hostTimeNsIn); }
 
+        /** The current play position, in samples from the start of processing, without looping, if available. */
+        Optional<int64_t> getContinuousTimeInSamples() const            { return getOptional (flagContinuousTime, continuousTimeInSamples); }
+
+        /** @see getContinuousTimeInSamples() */
+        void setContinuousTimeInSamples (Optional<int64_t> cont)        {        setOptional (flagContinuousTime, continuousTimeInSamples, cont); }
+
         /** True if the transport is currently playing. */
         bool getIsPlaying() const                                       { return getFlag (flagIsPlaying); }
 
@@ -492,7 +488,8 @@ public:
             flagHostTimeNs      = 1 << 10,
             flagIsPlaying       = 1 << 11,
             flagIsRecording     = 1 << 12,
-            flagIsLooping       = 1 << 13
+            flagIsLooping       = 1 << 13,
+            flagContinuousTime  = 1 << 14
         };
 
         TimeSignature timeSignature;
@@ -503,6 +500,8 @@ public:
         double positionPpq     = 0.0;
         double originTime      = 0.0;
         double tempoBpm        = 0.0;
+
+        int64_t continuousTimeInSamples = 0;
         int64_t timeInSamples  = 0;
         int64_t barCount       = 0;
         uint64_t hostTimeNs    = 0;
