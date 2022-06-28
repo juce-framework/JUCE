@@ -45,8 +45,6 @@ public:
         layer.allowsNextDrawableTimeout = NO;
 
         commandQueue.reset ([device.get() newCommandQueue]);
-
-        memoryBlitEvent.reset ([device.get() newSharedEvent]);
     }
 
     ~CoreGraphicsMetalLayerRenderer()
@@ -63,14 +61,21 @@ public:
                             Callback&& drawRectWithContext,
                             const RectangleList<float>& dirtyRegions)
     {
-        if (resources != nullptr)
+        if (memoryBlitCommandBuffer != nullptr)
         {
-            // If we haven't finished blitting the CPU texture to the GPU then
-            // report that we have been unable to draw anything.
-            if (memoryBlitEvent.get().signaledValue != memoryBlitCounter + 1)
-                return false;
-
-            ++memoryBlitCounter;
+            switch ([memoryBlitCommandBuffer.get() status])
+            {
+                case MTLCommandBufferStatusNotEnqueued:
+                case MTLCommandBufferStatusEnqueued:
+                case MTLCommandBufferStatusCommitted:
+                case MTLCommandBufferStatusScheduled:
+                    // If we haven't finished blitting the CPU texture to the GPU then
+                    // report that we have been unable to draw anything.
+                    return false;
+                case MTLCommandBufferStatusCompleted:
+                case MTLCommandBufferStatusError:
+                    break;
+            }
         }
 
         layer.contentsScale = scaleFactor;
@@ -130,10 +135,6 @@ public:
                            destinationLevel: 0
                           destinationOrigin: MTLOrigin{}];
         [blitCommandEncoder endEncoding];
-
-        // Signal that the GPU has finished using the CPU texture
-        [memoryBlitCommandBuffer.get() encodeSignalEvent: memoryBlitEvent.get()
-                                                   value: memoryBlitCounter + 1];
 
         [memoryBlitCommandBuffer.get() addScheduledHandler: ^(id<MTLCommandBuffer>)
         {
@@ -351,9 +352,7 @@ private:
     ObjCObjectHandle<id<MTLDevice>> device;
     ObjCObjectHandle<id<MTLCommandQueue>> commandQueue;
     ObjCObjectHandle<id<MTLCommandBuffer>> memoryBlitCommandBuffer;
-    ObjCObjectHandle<id<MTLSharedEvent>> memoryBlitEvent;
 
-    uint64_t memoryBlitCounter = 0;
     std::atomic<bool> stopGpuCommandSubmission { false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CoreGraphicsMetalLayerRenderer)
