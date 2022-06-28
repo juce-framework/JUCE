@@ -249,7 +249,11 @@ function(_juce_get_platform_plugin_kinds out)
     endif()
 
     if(NOT CMAKE_SYSTEM_NAME STREQUAL "iOS" AND NOT CMAKE_SYSTEM_NAME STREQUAL "Android")
-        list(APPEND result AAX Unity VST VST3 LV2)
+        list(APPEND result Unity VST VST3 LV2)
+    endif()
+
+    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        list(APPEND result AAX)
     endif()
 
     set(${out} ${result} PARENT_SCOPE)

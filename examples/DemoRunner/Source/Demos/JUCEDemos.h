@@ -61,8 +61,6 @@ void registerDemos_One() noexcept;
 void registerDemos_Two() noexcept;
 
 //==============================================================================
-// used by child-process demo
-bool invokeChildProcessDemo (const String& commandLine);
 void registerAllDemos() noexcept;
 
 Component* createIntroDemo();
@@ -76,3 +74,8 @@ extern std::unique_ptr<AudioDeviceManager> sharedAudioDeviceManager;
 
 AudioDeviceManager& getSharedAudioDeviceManager (int numInputChannels = -1, int numOutputChannels = -1);
 ApplicationCommandManager& getGlobalCommandManager();
+
+// A function in this demo is called from the DemoRunner's entry point
+#if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
+ #include "../../../Utilities/ChildProcessDemo.h"
+#endif

@@ -55,9 +55,6 @@
 #include "../../../DSP/WaveShaperTanhDemo.h"
 
 #include "../../../Utilities/Box2DDemo.h"
-#if JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
- #include "../../../Utilities/ChildProcessDemo.h"
-#endif
 #include "../../../Utilities/CryptographyDemo.h"
 #include "../../../Utilities/JavaScriptDemo.h"
 #include "../../../Utilities/LiveConstantDemo.h"

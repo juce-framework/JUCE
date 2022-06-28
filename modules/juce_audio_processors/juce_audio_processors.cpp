@@ -225,6 +225,11 @@ private:
 #include "format_types/juce_LV2PluginFormat.cpp"
 
 #if JUCE_UNIT_TESTS
- #include "format_types/juce_VST3PluginFormat_test.cpp"
- #include "format_types/juce_LV2PluginFormat_test.cpp"
+ #if JUCE_PLUGINHOST_VST3
+  #include "format_types/juce_VST3PluginFormat_test.cpp"
+ #endif
+
+ #if JUCE_PLUGINHOST_LV2
+  #include "format_types/juce_LV2PluginFormat_test.cpp"
+ #endif
 #endif
