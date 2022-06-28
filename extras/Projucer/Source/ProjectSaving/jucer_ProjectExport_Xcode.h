@@ -2297,10 +2297,12 @@ private:
 
                     if (installPath.isNotEmpty())
                     {
-                        script << "if [ \"$CONFIGURATION\" = \"" << config->getName()
-                               << "\" ]; then\n   /bin/ln -sfh \"$CONFIGURATION_BUILD_DIR\" \""
-                               << installPath.replace ("$(HOME)", "$HOME") << '/' << target->getLV2BundleName()
-                               << "\"\nfi\n";
+                        const auto destination = installPath.replace ("$(HOME)", "$HOME");
+
+                        script << "if [ \"$CONFIGURATION\" = \"" << config->getName() << "\" ]; then\n"
+                                  "mkdir -p \"" << destination << "\"\n"
+                                  "/bin/ln -sfh \"$CONFIGURATION_BUILD_DIR\" \"" << destination << "\"\n"
+                                  "fi\n";
                     }
                 }
 
