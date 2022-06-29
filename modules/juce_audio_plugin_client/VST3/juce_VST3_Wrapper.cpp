@@ -3130,14 +3130,20 @@ public:
 
                 const auto countChannels = [] (auto& range)
                 {
-                    return std::accumulate (range.begin(), range.end(), (short) 0, [] (auto acc, auto set)
+                    return std::accumulate (range.begin(), range.end(), 0, [] (auto acc, auto set)
                     {
                         return acc + set.size();
                     });
                 };
 
-                const ChannelPair requested { countChannels (desiredLayout.inputBuses),
-                                              countChannels (desiredLayout.outputBuses) };
+                const auto toShort = [] (int x)
+                {
+                    jassert (0 <= x && x <= std::numeric_limits<short>::max());
+                    return (short) x;
+                };
+
+                const ChannelPair requested { toShort (countChannels (desiredLayout.inputBuses)),
+                                              toShort (countChannels (desiredLayout.outputBuses)) };
                 const ChannelPair configs[] = { JucePlugin_PreferredChannelConfigurations };
                 return std::find (std::begin (configs), std::end (configs), requested) != std::end (configs);
                #else
