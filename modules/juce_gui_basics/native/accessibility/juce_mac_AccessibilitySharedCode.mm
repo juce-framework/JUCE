@@ -107,8 +107,7 @@ protected:
     static BOOL getIsAccessibilityElement (id self, SEL)
     {
         if (auto* handler = getHandler (self))
-            return ! handler->isIgnored()
-                  && handler->getRole() != AccessibilityRole::window;
+            return ! handler->isIgnored() && handler->getRole() != AccessibilityRole::window;
 
         return NO;
     }

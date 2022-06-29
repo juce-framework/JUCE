@@ -58,7 +58,7 @@ static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler
         {
             id native = (id) childHandler->getNativeImplementation();
 
-            if (childHandler->getChildren().size() > 0)
+            if (! childHandler->getChildren().empty())
                 return [native accessibilityContainer];
 
             return native;
@@ -87,7 +87,7 @@ public:
 
 private:
     //==============================================================================
-    class AccessibilityContainer  : public ObjCClass<UIAccessibilityElement>
+    class AccessibilityContainer  : public ObjCClass<NSObject>
     {
     public:
         AccessibilityContainer()
@@ -249,17 +249,19 @@ private:
                 if (handler->getComponent().isOnDesktop())
                     return (id) handler->getComponent().getWindowHandle();
 
-                if (handler->getChildren().size() > 0)
+                if (! handler->getChildren().empty())
                 {
                     if (UIAccessibilityElement* container = getContainer (self))
                         return container;
 
                     static AccessibilityContainer cls;
 
-                    id windowHandle = (id) handler->getComponent().getWindowHandle();
-                    UIAccessibilityElement* container = [cls.createInstance() initWithAccessibilityContainer: windowHandle];
+                    auto* parentWithChildren = handler->getParent();
 
-                    [container retain];
+                    while (parentWithChildren != nullptr && parentWithChildren->getChildren().empty())
+                        parentWithChildren = parentWithChildren->getParent();
+
+                    id container = cls.createInstance();
 
                     object_setInstanceVariable (container, "handler", handler);
                     object_setInstanceVariable (self, "container", container);
