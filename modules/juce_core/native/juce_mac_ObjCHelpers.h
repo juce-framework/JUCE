@@ -394,7 +394,7 @@ struct ObjCClass
         BOOL b = class_addIvar (cls, name, sizeof (Type), (uint8_t) rint (log2 (sizeof (Type))), @encode (Type));
         jassert (b); ignoreUnused (b);
     }
-    
+
     template <typename Fn>
     void addMethod (SEL selector, Fn callbackFn) { addMethod (selector, detail::toFnPtr (callbackFn)); }
 
