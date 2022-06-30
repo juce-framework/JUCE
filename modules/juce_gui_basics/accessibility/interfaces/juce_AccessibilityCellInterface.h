@@ -39,18 +39,6 @@ public:
     /** Destructor. */
     virtual ~AccessibilityCellInterface() = default;
 
-    /** Returns the column index of the cell in the table. */
-    virtual int getColumnIndex() const = 0;
-
-    /** Returns the number of columns occupied by the cell in the table. */
-    virtual int getColumnSpan() const = 0;
-
-    /** Returns the row index of the cell in the table. */
-    virtual int getRowIndex() const = 0;
-
-    /** Returns the number of rows occupied by the cell in the table. */
-    virtual int getRowSpan() const = 0;
-
     /** Returns the indentation level for the cell. */
     virtual int getDisclosureLevel() const = 0;
 

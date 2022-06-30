@@ -64,6 +64,33 @@ public:
         as there are columns in the table.
     */
     virtual const AccessibilityHandler* getHeaderHandler() const = 0;
+
+    struct Span { int begin, num; };
+
+    /** Given the handler of one of the cells in the table, returns the rows covered
+        by that cell, or null if the cell does not exist in the table.
+
+        This function replaces the getRowIndex and getRowSpan
+        functions from AccessibilityCellInterface. Most of the time, it's easier for the
+        table itself to keep track of cell locations, than to delegate to the individual
+        cells.
+    */
+    virtual Optional<Span> getRowSpan (const AccessibilityHandler&) const = 0;
+
+    /** Given the handler of one of the cells in the table, returns the columns covered
+        by that cell, or null if the cell does not exist in the table.
+
+        This function replaces the getColumnIndex and getColumnSpan
+        functions from AccessibilityCellInterface. Most of the time, it's easier for the
+        table itself to keep track of cell locations, than to delegate to the individual
+        cells.
+    */
+    virtual Optional<Span> getColumnSpan (const AccessibilityHandler&) const = 0;
+
+    /** Attempts to scroll the table (if necessary) so that the cell with the given handler
+        is visible.
+    */
+    virtual void showCell (const AccessibilityHandler&) const = 0;
 };
 
 } // namespace juce

@@ -241,16 +241,6 @@ public:
         public:
             explicit RowCellInterface (RowAccessibilityHandler& h)  : handler (h)  {}
 
-            int getColumnIndex() const override      { return 0; }
-            int getColumnSpan() const override       { return 1; }
-
-            int getRowIndex() const override
-            {
-                return handler.rowComponent.row;
-            }
-
-            int getRowSpan() const override          { return 1; }
-
             int getDisclosureLevel() const override  { return 0; }
 
             const AccessibilityHandler* getTableHandler() const override
@@ -289,7 +279,15 @@ public:
     {
         setWantsKeyboardFocus (false);
 
-        auto content = std::make_unique<Component>();
+        struct IgnoredComponent : Component
+        {
+            std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override
+            {
+                return createIgnoredAccessibilityHandler (*this);
+            }
+        };
+
+        auto content = std::make_unique<IgnoredComponent>();
         content->setWantsKeyboardFocus (false);
 
         setViewedComponent (content.release());
@@ -301,20 +299,23 @@ public:
     {
         const auto startIndex = getIndexOfFirstVisibleRow();
 
-        return (startIndex <= row && row < startIndex + rows.size())
-                 ? rows[row % jmax (1, rows.size())] : nullptr;
+        return (startIndex <= row && row < startIndex + (int) rows.size())
+                 ? rows[(size_t) (row % jmax (1, (int) rows.size()))].get()
+                 : nullptr;
     }
 
-    int getRowNumberOfComponent (Component* const rowComponent) const noexcept
+    int getRowNumberOfComponent (const Component* const rowComponent) const noexcept
     {
-        const int index = getViewedComponent()->getIndexOfChildComponent (rowComponent);
-        const int num = rows.size();
+        const auto iter = std::find_if (rows.begin(), rows.end(), [=] (auto& ptr) { return ptr.get() == rowComponent; });
 
-        for (int i = num; --i >= 0;)
-            if (((firstIndex + i) % jmax (1, num)) == index)
-                return firstIndex + i;
+        if (iter == rows.end())
+            return -1;
 
-        return -1;
+        const auto index = (int) std::distance (rows.begin(), iter);
+        const auto mod = jmax (1, (int) rows.size());
+        const auto startIndex = getIndexOfFirstVisibleRow();
+
+        return index + mod * ((startIndex / mod) + (index < (startIndex % mod) ? 1 : 0));
     }
 
     void visibleAreaChanged (const Rectangle<int>&) override
@@ -357,13 +358,13 @@ public:
             auto y = getViewPositionY();
             auto w = content.getWidth();
 
-            const int numNeeded = 4 + getMaximumVisibleHeight() / rowH;
-            rows.removeRange (numNeeded, rows.size());
+            const auto numNeeded = (size_t) (4 + getMaximumVisibleHeight() / rowH);
+            rows.resize (jmin (numNeeded, rows.size()));
 
             while (numNeeded > rows.size())
             {
-                auto* newRow = rows.add (new RowComponent (owner));
-                content.addAndMakeVisible (newRow);
+                rows.emplace_back (new RowComponent (owner));
+                content.addAndMakeVisible (*rows.back());
             }
 
             firstIndex = y / rowH;
@@ -371,7 +372,7 @@ public:
             lastWholeIndex = (y + getMaximumVisibleHeight() - 1) / rowH;
 
             const auto startIndex = getIndexOfFirstVisibleRow();
-            const auto lastIndex = startIndex + rows.size();
+            const auto lastIndex = startIndex + (int) rows.size();
 
             for (auto row = startIndex; row < lastIndex; ++row)
             {
@@ -477,7 +478,7 @@ private:
     }
 
     ListBox& owner;
-    OwnedArray<RowComponent> rows;
+    std::vector<std::unique_ptr<RowComponent>> rows;
     int firstIndex = 0, firstWholeIndex = 0, lastWholeIndex = 0;
     bool hasUpdated = false;
 
@@ -839,7 +840,7 @@ Component* ListBox::getComponentForRowNumber (const int row) const noexcept
     return nullptr;
 }
 
-int ListBox::getRowNumberOfComponent (Component* const rowComponent) const noexcept
+int ListBox::getRowNumberOfComponent (const Component* const rowComponent) const noexcept
 {
     return viewport->getRowNumberOfComponent (rowComponent);
 }
@@ -1172,6 +1173,25 @@ std::unique_ptr<AccessibilityHandler> ListBox::createAccessibilityHandler()
         const AccessibilityHandler* getCellHandler (int, int) const override
         {
             return nullptr;
+        }
+
+        Optional<Span> getRowSpan (const AccessibilityHandler& handler) const override
+        {
+            const auto rowNumber = listBox.getRowNumberOfComponent (&handler.getComponent());
+
+            return rowNumber != -1 ? makeOptional (Span { rowNumber, 1 })
+                                   : nullopt;
+        }
+
+        Optional<Span> getColumnSpan (const AccessibilityHandler&) const override
+        {
+            return Span { 0, 1 };
+        }
+
+        void showCell (const AccessibilityHandler& h) const override
+        {
+            if (const auto row = getRowSpan (h))
+                listBox.scrollToEnsureRowIsOnscreen (row->begin);
         }
 
     private:

@@ -31,6 +31,50 @@ JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
 int AccessibilityNativeHandle::idCounter = 0;
 
 //==============================================================================
+class UIAScrollProvider  : public UIAProviderBase,
+                           public ComBaseClassHelper<ComTypes::IScrollProvider>
+{
+public:
+    using UIAProviderBase::UIAProviderBase;
+
+    JUCE_COMCALL Scroll (ComTypes::ScrollAmount, ComTypes::ScrollAmount) override { return E_FAIL; }
+    JUCE_COMCALL SetScrollPercent (double, double) override { return E_FAIL; }
+    JUCE_COMCALL get_HorizontalScrollPercent (double*) override { return E_FAIL; }
+    JUCE_COMCALL get_VerticalScrollPercent (double*) override { return E_FAIL; }
+    JUCE_COMCALL get_HorizontalViewSize (double*) override { return E_FAIL; }
+    JUCE_COMCALL get_VerticalViewSize (double*) override { return E_FAIL; }
+    JUCE_COMCALL get_HorizontallyScrollable (BOOL*) override { return E_FAIL; }
+    JUCE_COMCALL get_VerticallyScrollable (BOOL*) override { return E_FAIL; }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIAScrollProvider)
+};
+
+class UIAScrollItemProvider  : public UIAProviderBase,
+                               public ComBaseClassHelper<ComTypes::IScrollItemProvider>
+{
+public:
+    using UIAProviderBase::UIAProviderBase;
+
+    JUCE_COMCALL ScrollIntoView() override
+    {
+        if (auto* handler = getEnclosingHandlerWithInterface (&getHandler(), &AccessibilityHandler::getTableInterface))
+        {
+            if (auto* tableInterface = handler->getTableInterface())
+            {
+                tableInterface->showCell (getHandler());
+                return S_OK;
+            }
+        }
+
+        return (HRESULT) UIA_E_NOTSUPPORTED;
+    }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (UIAScrollItemProvider)
+};
+
+//==============================================================================
 static String getAutomationId (const AccessibilityHandler& handler)
 {
     auto result = handler.getTitle();
@@ -63,7 +107,7 @@ static auto roleToControlTypeId (AccessibilityRole roleType)
         case AccessibilityRole::staticText:    return ComTypes::UIA_TextControlTypeId;
 
         case AccessibilityRole::column:
-        case AccessibilityRole::row:           return ComTypes::UIA_HeaderItemControlTypeId;
+        case AccessibilityRole::row:           return ComTypes::UIA_ListItemControlTypeId;
 
         case AccessibilityRole::button:        return ComTypes::UIA_ButtonControlTypeId;
         case AccessibilityRole::toggleButton:  return ComTypes::UIA_CheckBoxControlTypeId;
@@ -146,6 +190,22 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
             const auto role = accessibilityHandler.getRole();
             const auto fragmentRoot = isFragmentRoot();
 
+            const auto isListOrTableCell = [] (auto& handler)
+            {
+                if (auto* tableHandler = getEnclosingHandlerWithInterface (&handler, &AccessibilityHandler::getTableInterface))
+                {
+                    if (auto* tableInterface = tableHandler->getTableInterface())
+                    {
+                        const auto row    = tableInterface->getRowSpan    (handler);
+                        const auto column = tableInterface->getColumnSpan (handler);
+
+                        return row.hasValue() && column.hasValue();
+                    }
+                }
+
+                return false;
+            };
+
             switch (pId)
             {
                 case ComTypes::UIA_WindowPatternId:
@@ -213,25 +273,27 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                 {
                     auto state = accessibilityHandler.getCurrentState();
 
-                    if (state.isSelectable() || state.isMultiSelectable()
-                        || role == AccessibilityRole::radioButton)
+                    if (state.isSelectable() || state.isMultiSelectable() || role == AccessibilityRole::radioButton)
                     {
                         return new UIASelectionItemProvider (this);
                     }
 
                     break;
                 }
+                case ComTypes::UIA_TablePatternId:
                 case ComTypes::UIA_GridPatternId:
                 {
-                    if (accessibilityHandler.getTableInterface() != nullptr)
-                        return new UIAGridProvider (this);
+                    if (accessibilityHandler.getTableInterface() != nullptr
+                        && (pId == ComTypes::UIA_GridPatternId || accessibilityHandler.getRole() == AccessibilityRole::table))
+                        return static_cast<ComTypes::IGridProvider*> (new UIAGridProvider (this));
 
                     break;
                 }
+                case ComTypes::UIA_TableItemPatternId:
                 case ComTypes::UIA_GridItemPatternId:
                 {
-                    if (accessibilityHandler.getCellInterface() != nullptr)
-                        return new UIAGridItemProvider (this);
+                    if (isListOrTableCell (accessibilityHandler))
+                        return static_cast<ComTypes::IGridItemProvider*> (new UIAGridItemProvider (this));
 
                     break;
                 }
@@ -247,6 +309,20 @@ JUCE_COMRESULT AccessibilityNativeHandle::GetPatternProvider (PATTERNID pId, IUn
                     if (accessibilityHandler.getActions().contains (AccessibilityActionType::showMenu)
                         && accessibilityHandler.getCurrentState().isExpandable())
                         return new UIAExpandCollapseProvider (this);
+
+                    break;
+                }
+                case ComTypes::UIA_ScrollPatternId:
+                {
+                    if (accessibilityHandler.getTableInterface() != nullptr)
+                        return new UIAScrollProvider (this);
+
+                    break;
+                }
+                case ComTypes::UIA_ScrollItemPatternId:
+                {
+                    if (isListOrTableCell (accessibilityHandler))
+                        return new UIAScrollItemProvider (this);
 
                     break;
                 }

@@ -127,6 +127,18 @@ namespace juce
         ScaledImage image;
         Point<int> hotspot;
     };
+
+    template <typename MemberFn>
+    static const AccessibilityHandler* getEnclosingHandlerWithInterface (const AccessibilityHandler* handler, MemberFn fn)
+    {
+        if (handler == nullptr)
+            return nullptr;
+
+        if ((handler->*fn)() != nullptr)
+            return handler;
+
+        return getEnclosingHandlerWithInterface (handler->getParent(), fn);
+    }
 } // namespace juce
 
 #include "mouse/juce_PointerState.h"

@@ -28,7 +28,7 @@ namespace juce
 
 //==============================================================================
 class UIAGridItemProvider  : public UIAProviderBase,
-                             public ComBaseClassHelper<ComTypes::IGridItemProvider>
+                             public ComBaseClassHelper<ComTypes::IGridItemProvider, ComTypes::ITableItemProvider>
 {
 public:
     using UIAProviderBase::UIAProviderBase;
@@ -36,62 +36,113 @@ public:
     //==============================================================================
     JUCE_COMRESULT get_Row (int* pRetVal) override
     {
-        return withCellInterface (pRetVal, [&] (const AccessibilityCellInterface& cellInterface)
-        {
-            *pRetVal = cellInterface.getRowIndex();
-        });
+        return withTableSpan (pRetVal,
+                              &AccessibilityTableInterface::getRowSpan,
+                              &AccessibilityTableInterface::Span::begin);
     }
 
     JUCE_COMRESULT get_Column (int* pRetVal) override
     {
-        return withCellInterface (pRetVal, [&] (const AccessibilityCellInterface& cellInterface)
-        {
-            *pRetVal = cellInterface.getColumnIndex();
-        });
+        return withTableSpan (pRetVal,
+                              &AccessibilityTableInterface::getColumnSpan,
+                              &AccessibilityTableInterface::Span::begin);
     }
 
     JUCE_COMRESULT get_RowSpan (int* pRetVal) override
     {
-        return withCellInterface (pRetVal, [&] (const AccessibilityCellInterface& cellInterface)
-        {
-            *pRetVal = cellInterface.getRowSpan();
-        });
+        return withTableSpan (pRetVal,
+                              &AccessibilityTableInterface::getRowSpan,
+                              &AccessibilityTableInterface::Span::num);
     }
 
     JUCE_COMRESULT get_ColumnSpan (int* pRetVal) override
     {
-        return withCellInterface (pRetVal, [&] (const AccessibilityCellInterface& cellInterface)
-        {
-            *pRetVal = cellInterface.getColumnSpan();
-        });
+        return withTableSpan (pRetVal,
+                              &AccessibilityTableInterface::getColumnSpan,
+                              &AccessibilityTableInterface::Span::num);
     }
 
     JUCE_COMRESULT get_ContainingGrid (IRawElementProviderSimple** pRetVal) override
     {
-        return withCellInterface (pRetVal, [&] (const AccessibilityCellInterface& cellInterface)
+        return withTableInterface (pRetVal, [&] (const AccessibilityHandler& tableHandler)
         {
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
-
-            if (auto* handler = cellInterface.getTableHandler())
-                handler->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
-
+            tableHandler.getNativeImplementation()->QueryInterface (IID_PPV_ARGS (pRetVal));
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            return true;
         });
     }
 
+    JUCE_COMRESULT GetRowHeaderItems (SAFEARRAY**) override
+    {
+        return (HRESULT) UIA_E_NOTSUPPORTED;
+    }
+
+    JUCE_COMRESULT GetColumnHeaderItems (SAFEARRAY** pRetVal) override
+    {
+        return withTableInterface (pRetVal, [&] (const AccessibilityHandler& tableHandler)
+        {
+            if (auto* tableInterface = tableHandler.getTableInterface())
+            {
+                if (const auto column = tableInterface->getColumnSpan (getHandler()))
+                {
+                    if (auto* header = tableInterface->getHeaderHandler())
+                    {
+                        const auto children = header->getChildren();
+
+                        if (isPositiveAndBelow (column->begin, children.size()))
+                        {
+                            IRawElementProviderSimple* provider = nullptr;
+
+                            if (auto* child = children[(size_t) column->begin])
+                            {
+                                JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wlanguage-extension-token")
+                                if (child->getNativeImplementation()->QueryInterface (IID_PPV_ARGS (&provider)) == S_OK && provider != nullptr)
+                                {
+                                    *pRetVal = SafeArrayCreateVector (VT_UNKNOWN, 0, 1);
+                                    LONG index = 0;
+                                    const auto hr = SafeArrayPutElement (*pRetVal, &index, provider);
+
+                                    return ! FAILED (hr);
+                                }
+                                JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        });
+    }
 private:
     template <typename Value, typename Callback>
-    JUCE_COMRESULT withCellInterface (Value* pRetVal, Callback&& callback) const
+    JUCE_COMRESULT withTableInterface (Value* pRetVal, Callback&& callback) const
     {
         return withCheckedComArgs (pRetVal, *this, [&]() -> HRESULT
         {
-            if (auto* cellInterface = getHandler().getCellInterface())
-            {
-                callback (*cellInterface);
-                return S_OK;
-            }
+            if (auto* handler = getEnclosingHandlerWithInterface (&getHandler(), &AccessibilityHandler::getTableInterface))
+                if (handler->getTableInterface() != nullptr && callback (*handler))
+                    return S_OK;
 
             return (HRESULT) UIA_E_NOTSUPPORTED;
+        });
+    }
+
+    JUCE_COMRESULT withTableSpan (int* pRetVal,
+                                  Optional<AccessibilityTableInterface::Span> (AccessibilityTableInterface::* getSpan) (const AccessibilityHandler&) const,
+                                  int AccessibilityTableInterface::Span::* spanMember) const
+    {
+        return withTableInterface (pRetVal, [&] (const AccessibilityHandler& handler)
+        {
+            if (const auto span = ((handler.getTableInterface())->*getSpan) (getHandler()))
+            {
+                *pRetVal = (*span).*spanMember;
+                return true;
+            }
+
+            return false;
         });
     }
 

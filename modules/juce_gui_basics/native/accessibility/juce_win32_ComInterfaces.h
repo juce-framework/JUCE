@@ -120,18 +120,38 @@ enum WindowInteractionState
     WindowInteractionState_NotResponding = 4
 };
 
+enum RowOrColumnMajor
+{
+    RowOrColumnMajor_RowMajor = 0,
+    RowOrColumnMajor_ColumnMajor = 1,
+    RowOrColumnMajor_Indeterminate = 2
+};
+
+enum ScrollAmount
+{
+    ScrollAmount_LargeDecrement = 0,
+    ScrollAmount_SmallDecrement = 1,
+    ScrollAmount_NoAmount = 2,
+    ScrollAmount_LargeIncrement = 3,
+    ScrollAmount_SmallIncrement = 4
+};
+
 const long UIA_InvokePatternId = 10000;
 const long UIA_SelectionPatternId = 10001;
 const long UIA_ValuePatternId = 10002;
 const long UIA_RangeValuePatternId = 10003;
+const long UIA_ScrollPatternId = 10004;
 const long UIA_ExpandCollapsePatternId = 10005;
 const long UIA_GridPatternId = 10006;
 const long UIA_GridItemPatternId = 10007;
 const long UIA_WindowPatternId = 10009;
 const long UIA_SelectionItemPatternId = 10010;
+const long UIA_TablePatternId = 10012;
+const long UIA_TableItemPatternId = 10013;
 const long UIA_TextPatternId = 10014;
 const long UIA_TogglePatternId = 10015;
 const long UIA_TransformPatternId = 10016;
+const long UIA_ScrollItemPatternId = 10017;
 const long UIA_TextPattern2Id = 10024;
 const long UIA_StructureChangedEventId = 20002;
 const long UIA_MenuOpenedEventId = 20003;
@@ -218,6 +238,21 @@ public:
     JUCE_COMCALL GetItem (int row, int column, __RPC__deref_out_opt IRawElementProviderSimple** pRetVal) = 0;
     JUCE_COMCALL get_RowCount (__RPC__out int* pRetVal) = 0;
     JUCE_COMCALL get_ColumnCount (__RPC__out int* pRetVal) = 0;
+};
+
+JUCE_COMCLASS (ITableItemProvider, "b9734fa6-771f-4d78-9c90-2517999349cd") : public IUnknown
+{
+public:
+    JUCE_COMCALL GetRowHeaderItems (SAFEARRAY** pRetVal) = 0;
+    JUCE_COMCALL GetColumnHeaderItems (SAFEARRAY** pRetVal) = 0;
+};
+
+JUCE_COMCLASS (ITableProvider, "9c860395-97b3-490a-b52a-858cc22af166") : public IUnknown
+{
+public:
+    JUCE_COMCALL GetRowHeaders (SAFEARRAY** pRetVal) = 0;
+    JUCE_COMCALL GetColumnHeaders (SAFEARRAY** pRetVal) = 0;
+    JUCE_COMCALL get_RowOrColumnMajor (RowOrColumnMajor* pRetVal) = 0;
 };
 
 JUCE_COMCLASS (IInvokeProvider, "54fcb24b-e18e-47a2-b4d3-eccbe77599a2") : public IUnknown
@@ -345,6 +380,25 @@ public:
     JUCE_COMCALL get_IsTopmost (__RPC__out BOOL * pRetVal) = 0;
 };
 
+JUCE_COMCLASS (IScrollProvider, "b38b8077-1fc3-42a5-8cae-d40c2215055a") : public IUnknown
+{
+public:
+    JUCE_COMCALL Scroll (ScrollAmount horizontalAmount, ScrollAmount verticalAmount) = 0;
+    JUCE_COMCALL SetScrollPercent (double horizontalPercent,double verticalPercent) = 0;
+    JUCE_COMCALL get_HorizontalScrollPercent (double* pRetVal) = 0;
+    JUCE_COMCALL get_VerticalScrollPercent (double* pRetVal) = 0;
+    JUCE_COMCALL get_HorizontalViewSize (double* pRetVal) = 0;
+    JUCE_COMCALL get_VerticalViewSize (double* pRetVal) = 0;
+    JUCE_COMCALL get_HorizontallyScrollable (BOOL* pRetVal) = 0;
+    JUCE_COMCALL get_VerticallyScrollable (BOOL* pRetVal) = 0;
+};
+
+JUCE_COMCLASS (IScrollItemProvider, "2360c714-4bf1-4b26-ba65-9b21316127eb")  : public IUnknown
+{
+public:
+    JUCE_COMCALL ScrollIntoView() = 0;
+};
+
 constexpr CLSID CLSID_SpVoice { 0x96749377, 0x3391, 0x11D2, { 0x9E, 0xE3, 0x00, 0xC0, 0x4F, 0x79, 0x73, 0x96 } };
 
 } // namespace ComTypes
@@ -368,4 +422,8 @@ __CRT_UUID_DECL (juce::ComTypes::IToggleProvider,                 0x56d00bd0, 0x
 __CRT_UUID_DECL (juce::ComTypes::ITransformProvider,              0x6829ddc4, 0x4f91, 0x4ffa, 0xb8, 0x6f, 0xbd, 0x3e, 0x29, 0x87, 0xcb, 0x4c)
 __CRT_UUID_DECL (juce::ComTypes::IValueProvider,                  0xc7935180, 0x6fb3, 0x4201, 0xb1, 0x74, 0x7d, 0xf7, 0x3a, 0xdb, 0xf6, 0x4a)
 __CRT_UUID_DECL (juce::ComTypes::IWindowProvider,                 0x987df77b, 0xdb06, 0x4d77, 0x8f, 0x8a, 0x86, 0xa9, 0xc3, 0xbb, 0x90, 0xb9)
+__CRT_UUID_DECL (juce::ComTypes::ITableItemProvider,              0xb9734fa6, 0x771f, 0x4d78, 0x9c, 0x90, 0x25, 0x17, 0x99, 0x93, 0x49, 0xcd)
+__CRT_UUID_DECL (juce::ComTypes::ITableProvider,                  0x9c860395, 0x97b3, 0x490a, 0xb5, 0x2a, 0x85, 0x8c, 0xc2, 0x2a, 0xf1, 0x66)
+__CRT_UUID_DECL (juce::ComTypes::IScrollProvider,                 0xb38b8077, 0x1fc3, 0x42a5, 0x8c, 0xae, 0xd4, 0x0c, 0x22, 0x15, 0x05, 0x5a)
+__CRT_UUID_DECL (juce::ComTypes::IScrollItemProvider,             0x2360c714, 0x4bf1, 0x4b26, 0xba, 0x65, 0x9b, 0x21, 0x31, 0x61, 0x27, 0xeb)
 #endif

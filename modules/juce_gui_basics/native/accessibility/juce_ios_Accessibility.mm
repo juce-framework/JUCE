@@ -54,7 +54,7 @@ static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler
     {
         id accessibleElement = [&childHandler]
         {
-            id native = (id) childHandler->getNativeImplementation();
+            id native = static_cast<id> (childHandler->getNativeImplementation());
 
             if (! childHandler->getChildren().empty())
                 return [native accessibilityContainer];
@@ -66,7 +66,7 @@ static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler
             [accessibleChildren addObject: accessibleElement];
     }
 
-    [accessibleChildren addObject: (id) handler.getNativeImplementation()];
+    [accessibleChildren addObject: static_cast<id> (handler.getNativeImplementation())];
 
     return accessibleChildren;
 }
@@ -87,11 +87,11 @@ public:
 
 private:
     //==============================================================================
-    class AccessibilityContainer  : public ObjCClass<NSObject>
+    class AccessibilityContainer  : public AccessibleObjCClass<NSObject>
     {
     public:
         AccessibilityContainer()
-            : ObjCClass ("JUCEUIAccessibilityElementContainer_")
+            : AccessibleObjCClass ("JUCEUIAccessibilityContainer_")
         {
             addMethod (@selector (isAccessibilityElement), [] (id, SEL) { return false; });
 
@@ -114,6 +114,43 @@ private:
            #if JUCE_IOS_CONTAINER_API_AVAILABLE
             if (@available (iOS 11.0, *))
             {
+                addMethod (@selector (accessibilityDataTableCellElementForRow:column:), [] (id self, SEL, NSUInteger row, NSUInteger column) -> id
+                {
+                    if (auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+                        if (auto* tableInterface = tableHandler->getTableInterface())
+                            if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
+                                if (auto* parent = getAccessibleParent (cellHandler))
+                                    return static_cast<id> (parent->getNativeImplementation());
+
+                    return nil;
+                });
+
+                addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
+                addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
+
+                addMethod (@selector (accessibilityHeaderElementsForColumn:), [] (id self, SEL, NSUInteger column) -> NSArray*
+                {
+                    if (auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+                    {
+                        if (auto* tableInterface = tableHandler->getTableInterface())
+                        {
+                            if (auto* header = tableInterface->getHeaderHandler())
+                            {
+                                if (isPositiveAndBelow (column, header->getChildren().size()))
+                                {
+                                    auto* result = [NSMutableArray new];
+                                    [result addObject: static_cast<id> (header->getChildren()[(size_t) column]->getNativeImplementation())];
+                                    return result;
+                                }
+                            }
+                        }
+                    }
+
+                    return nullptr;
+                });
+
+                addProtocol (@protocol (UIAccessibilityContainerDataTable));
+
                 addMethod (@selector (accessibilityContainerType), [] (id self, SEL) -> NSInteger
                 {
                     if (auto* handler = getHandler (self))
@@ -147,12 +184,21 @@ private:
             }
            #endif
 
-            addIvar<AccessibilityHandler*> ("handler");
-
             registerClass();
         }
 
     private:
+        static const AccessibilityHandler* getAccessibleParent (const AccessibilityHandler* h)
+        {
+            if (h == nullptr)
+                return nullptr;
+
+            if ([static_cast<id> (h->getNativeImplementation()) isAccessibilityElement])
+                return h;
+
+            return getAccessibleParent (h->getParent());
+        }
+
         static AccessibilityHandler* getHandler (id self)
         {
             return getIvar<AccessibilityHandler*> (self, "handler");
@@ -172,7 +218,7 @@ private:
 
             id instance = (hasEditableText (handler) ? textCls : cls).createInstance();
 
-            Holder element ([instance initWithAccessibilityContainer: (id) handler.getComponent().getWindowHandle()]);
+            Holder element ([instance initWithAccessibilityContainer: static_cast<id> (handler.getComponent().getWindowHandle())]);
             object_setInstanceVariable (element.get(), "handler", &handler);
             return element;
         }
@@ -183,15 +229,33 @@ private:
             {
                 auto* handler = getHandler (self);
 
-                if (handler == nullptr)
-                    return false;
+                const auto hasAccessiblePropertiesOrIsTableCell = [] (auto& handlerRef)
+                {
+                    const auto isTableCell = [&]
+                    {
+                        if (auto* tableHandler = getEnclosingHandlerWithInterface (&handlerRef, &AccessibilityHandler::getTableInterface))
+                        {
+                            if (auto* tableInterface = tableHandler->getTableInterface())
+                            {
+                                return tableInterface->getRowSpan    (handlerRef).hasValue()
+                                    && tableInterface->getColumnSpan (handlerRef).hasValue();
+                            }
+                        }
 
-                return ! handler->isIgnored()
-                      && handler->getRole() != AccessibilityRole::window
-                      && (handler->getTitle().isNotEmpty()
-                          || handler->getDescription().isNotEmpty()
-                          || handler->getHelp().isNotEmpty()
-                          || handler->getValueInterface() != nullptr);
+                        return false;
+                    };
+
+                    return handlerRef.getTitle().isNotEmpty()
+                        || handlerRef.getHelp().isNotEmpty()
+                        || handlerRef.getTextInterface()  != nullptr
+                        || handlerRef.getValueInterface() != nullptr
+                        || isTableCell();
+                };
+
+                return handler != nullptr
+                    && ! handler->isIgnored()
+                    && handler->getRole() != AccessibilityRole::window
+                    && hasAccessiblePropertiesOrIsTableCell (*handler);
             });
 
             addMethod (@selector (accessibilityContainer), [] (id self, SEL) -> id
@@ -199,7 +263,7 @@ private:
                 if (auto* handler = getHandler (self))
                 {
                     if (handler->getComponent().isOnDesktop())
-                        return (id) handler->getComponent().getWindowHandle();
+                        return static_cast<id> (handler->getComponent().getWindowHandle());
 
                     if (! handler->getChildren().empty())
                     {
@@ -217,7 +281,7 @@ private:
                     }
 
                     if (auto* parent = handler->getParent())
-                        return [(id) parent->getNativeImplementation() accessibilityContainer];
+                        return [static_cast<id> (parent->getNativeImplementation()) accessibilityContainer];
                 }
 
                 return nil;
@@ -252,9 +316,9 @@ private:
                             case AccessibilityRole::image:         return UIAccessibilityTraitImage;
                             case AccessibilityRole::tableHeader:   return UIAccessibilityTraitHeader;
                             case AccessibilityRole::hyperlink:     return UIAccessibilityTraitLink;
-                            case AccessibilityRole::editableText:  return UIAccessibilityTraitKeyboardKey;
                             case AccessibilityRole::ignored:       return UIAccessibilityTraitNotEnabled;
 
+                            case AccessibilityRole::editableText:
                             case AccessibilityRole::slider:
                             case AccessibilityRole::menuItem:
                             case AccessibilityRole::menuBar:
@@ -348,7 +412,7 @@ private:
                     // which element it thinks has focus and forward the event on to that element if it differs
                     id focusedElement = UIAccessibilityFocusedElement (UIAccessibilityNotificationVoiceOverIdentifier);
 
-                    if (focusedElement != nullptr && ! [(id) handler->getNativeImplementation() isEqual: focusedElement])
+                    if (focusedElement != nullptr && ! [static_cast<id> (handler->getNativeImplementation()) isEqual: focusedElement])
                         return [focusedElement accessibilityActivate];
 
                     if (handler->hasFocus (false))
@@ -380,28 +444,6 @@ private:
 
                 return NO;
             });
-
-           #if JUCE_IOS_CONTAINER_API_AVAILABLE
-            if (@available (iOS 11.0, *))
-            {
-                addMethod (@selector (accessibilityDataTableCellElementForRow:column:), [] (id self, SEL, NSUInteger row, NSUInteger column) -> id
-                {
-                    if (auto* tableInterface = getEnclosingInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
-                        if (auto* cellHandler = tableInterface->getCellHandler ((int) row, (int) column))
-                            return (id) cellHandler->getNativeImplementation();
-
-                    return nil;
-                });
-
-                addMethod (@selector (accessibilityRowCount),                           getAccessibilityRowCount);
-                addMethod (@selector (accessibilityColumnCount),                        getAccessibilityColumnCount);
-                addProtocol (@protocol (UIAccessibilityContainerDataTable));
-
-                addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
-                addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
-                addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
-            }
-           #endif
 
             if (elementType == Type::textElement)
             {
@@ -463,6 +505,15 @@ private:
 
                 addProtocol (@protocol (UIAccessibilityReadingContent));
             }
+
+           #if JUCE_IOS_CONTAINER_API_AVAILABLE
+            if (@available (iOS 11.0, *))
+            {
+                addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
+                addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
+                addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
+            }
+           #endif
 
             addIvar<UIAccessibilityElement*> ("container");
 
@@ -534,9 +585,8 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
         const bool moveToHandler = (eventType == InternalAccessibilityEvent::focusChanged && handler.hasFocus (false));
 
         sendAccessibilityEvent (notification,
-                                moveToHandler ? (id) handler.getNativeImplementation() : nil);
+                                moveToHandler ? static_cast<id> (handler.getNativeImplementation()) : nil);
     }
-
 }
 
 void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventType) const
@@ -558,7 +608,7 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
     }();
 
     if (notification != UIAccessibilityNotifications{})
-        sendAccessibilityEvent (notification, (id) getNativeImplementation());
+        sendAccessibilityEvent (notification, static_cast<id> (getNativeImplementation()));
 }
 
 void AccessibilityHandler::postAnnouncement (const String& announcementString, AnnouncementPriority)

@@ -210,7 +210,7 @@ private:
                         case AccessibilityRole::editableText:  return NSAccessibilityTextAreaRole;
                         case AccessibilityRole::menuItem:      return NSAccessibilityMenuItemRole;
                         case AccessibilityRole::menuBar:       return NSAccessibilityMenuRole;
-                        case AccessibilityRole::table:         return NSAccessibilityListRole;
+                        case AccessibilityRole::table:         return NSAccessibilityOutlineRole;
                         case AccessibilityRole::column:        return NSAccessibilityColumnRole;
                         case AccessibilityRole::row:           return NSAccessibilityRowRole;
                         case AccessibilityRole::cell:          return NSAccessibilityCellRole;
@@ -504,15 +504,20 @@ private:
             {
                 if (auto* handler = getHandler (self))
                 {
-                    if (auto* cellInterface = handler->getCellInterface())
+                    if (auto* tableHandler = getEnclosingHandlerWithInterface (handler, &AccessibilityHandler::getTableInterface))
                     {
-                        NSAccessibilityRole handlerRole = [self accessibilityRole];
+                        if (auto* tableInterface = tableHandler->getTableInterface())
+                        {
+                            NSAccessibilityRole handlerRole = [self accessibilityRole];
 
-                        if ([handlerRole isEqual: NSAccessibilityRowRole])
-                            return cellInterface->getRowIndex();
+                            if ([handlerRole isEqual: NSAccessibilityRowRole])
+                                if (const auto span = tableInterface->getRowSpan (*handler))
+                                    return span->begin;
 
-                        if ([handlerRole isEqual: NSAccessibilityColumnRole])
-                            return cellInterface->getColumnIndex();
+                            if ([handlerRole isEqual: NSAccessibilityColumnRole])
+                                if (const auto span = tableInterface->getColumnSpan (*handler))
+                                    return span->begin;
+                        }
                     }
                 }
 
