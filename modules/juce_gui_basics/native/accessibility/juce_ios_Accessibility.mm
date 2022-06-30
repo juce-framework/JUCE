@@ -50,8 +50,6 @@ static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler
 
     NSMutableArray* accessibleChildren = [NSMutableArray arrayWithCapacity: (NSUInteger) children.size()];
 
-    [accessibleChildren addObject: (id) handler.getNativeImplementation()];
-
     for (auto* childHandler : children)
     {
         id accessibleElement = [&childHandler]
@@ -67,6 +65,8 @@ static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler
         if (accessibleElement != nil)
             [accessibleChildren addObject: accessibleElement];
     }
+
+    [accessibleChildren addObject: (id) handler.getNativeImplementation()];
 
     return accessibleChildren;
 }
@@ -186,7 +186,21 @@ private:
 
         AccessibilityElement (Type elementType)
         {
-            addMethod (@selector (isAccessibilityElement),     getIsAccessibilityElement);
+            addMethodWithReturn<BOOL> (@selector (isAccessibilityElement), [] (id self, SEL)
+            {
+                auto* handler = getHandler (self);
+
+                if (handler == nullptr)
+                    return false;
+
+                return ! handler->isIgnored()
+                      && handler->getRole() != AccessibilityRole::window
+                      && (handler->getTitle().isNotEmpty()
+                          || handler->getDescription().isNotEmpty()
+                          || handler->getHelp().isNotEmpty()
+                          || handler->getValueInterface() != nullptr);
+            });
+
             addMethod (@selector (accessibilityContainer),     getAccessibilityContainer);
             addMethod (@selector (accessibilityFrame),         getAccessibilityFrame);
             addMethod (@selector (accessibilityTraits),        getAccessibilityTraits);
@@ -235,6 +249,9 @@ private:
         }
 
     private:
+        template <typename Return, typename Method>
+        void addMethodWithReturn (SEL selector, Method method) { addMethod (selector, static_cast<Return (*) (id, SEL)> (method)); }
+
         //==============================================================================
         static UIAccessibilityElement* getContainer (id self)
         {
