@@ -30,9 +30,9 @@ public:
     void releaseResources() override;
 
     //==============================================================================
-    bool processBlock (juce::AudioBuffer<float> & buffer,
+    bool processBlock (juce::AudioBuffer<float>& buffer,
                        juce::AudioProcessor::Realtime realtime,
-                       const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override;
+                       const juce::AudioPlayHead::PositionInfo& positionInfo) noexcept override;
 
 private:
     //==============================================================================

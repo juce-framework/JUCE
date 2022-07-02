@@ -25,7 +25,7 @@ protected:
     //==============================================================================
     // Override document controller customization methods here
 
-    ARAPlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
+    juce::ARAPlaybackRenderer* doCreatePlaybackRenderer() noexcept override;
 
     bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;
     bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;
