@@ -153,7 +153,11 @@ public:
 
         [view setPostsFrameChangedNotifications: YES];
 
-       #if USE_COREGRAPHICS_RENDERING
+      #if USE_COREGRAPHICS_RENDERING
+       #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
+        if (@available (macOS 10.14, *))
+            metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<NSView>> (view, getComponent());
+       #endif
         if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
             if (@available (macOS 10.8, *))
@@ -162,7 +166,7 @@ public:
                 [[view layer] setDrawsAsynchronously: YES];
             }
         }
-       #endif
+      #endif
 
         createCVDisplayLink();
 
@@ -362,7 +366,10 @@ public:
         }
 
         if (oldViewSize.width != r.size.width || oldViewSize.height != r.size.height)
+        {
+            numFramesToSkipMetalRenderer = 5;
             [view setNeedsDisplay: true];
+        }
     }
 
     Rectangle<int> getBounds (const bool global) const
@@ -1076,52 +1083,41 @@ public:
         if (msSinceLastRepaint < minimumRepaintInterval && shouldThrottleRepaint())
             return;
 
-       #if USE_COREGRAPHICS_RENDERING && JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
-        // We require macOS 10.14 to use the Metal layer renderer
-        if (@available (macOS 10.14, *))
+        if (metalRenderer != nullptr)
         {
-            const auto& comp = getComponent();
+            const auto compBounds = getComponent().getLocalBounds().toFloat();
 
             // If we are resizing we need to fall back to synchronous drawing to avoid artefacts
-            if (areAnyWindowsInLiveResize())
+            if ([window inLiveResize] || numFramesToSkipMetalRenderer > 0)
             {
-                if (metalRenderer != nullptr)
+                if (metalRenderer->isAttachedToView (view))
                 {
-                    metalRenderer.reset();
-                    view.wantsLayer = NO;
-                    view.layer = nil;
-                    deferredRepaints = comp.getLocalBounds().toFloat();
+                    metalRenderer->detach();
+                    deferredRepaints = compBounds;
                 }
+
+                if (numFramesToSkipMetalRenderer > 0)
+                    --numFramesToSkipMetalRenderer;
             }
             else
             {
-                if (metalRenderer == nullptr)
+                if (! metalRenderer->isAttachedToView (view))
                 {
-                    view.wantsLayer = YES;
-                    view.layerContentsRedrawPolicy = NSViewLayerContentsRedrawDuringViewResize;
-                    view.layerContentsPlacement = NSViewLayerContentsPlacementTopLeft;
-                    view.layer = [CAMetalLayer layer];
-                    metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer> ((CAMetalLayer*) view.layer, getComponent());
-                    deferredRepaints = comp.getLocalBounds().toFloat();
+                    metalRenderer->attach (view, getComponent());
+                    deferredRepaints = compBounds;
                 }
             }
         }
-       #endif
 
-        auto dispatchRectangles = [this] ()
+        auto dispatchRectangles = [this]
         {
-            if (@available (macOS 10.14, *))
-            {
-                if (metalRenderer != nullptr)
-                {
-                    return metalRenderer->drawRectangleList ((CAMetalLayer*) view.layer,
-                                                             (float) [[view window] backingScaleFactor],
-                                                             view.frame,
-                                                             getComponent(),
-                                                             [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
-                                                             deferredRepaints);
-                }
-            }
+           if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
+               return metalRenderer->drawRectangleList (view,
+                                                        (float) [[view window] backingScaleFactor],
+                                                        view.frame,
+                                                        getComponent(),
+                                                        [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
+                                                        deferredRepaints);
 
             for (auto& i : deferredRepaints)
                 [view setNeedsDisplayInRect: makeNSRect (i)];
@@ -1893,7 +1889,8 @@ private:
     CVDisplayLinkRef displayLink = nullptr;
     dispatch_source_t displaySource = nullptr;
 
-    std::unique_ptr<CoreGraphicsMetalLayerRenderer> metalRenderer;
+    int numFramesToSkipMetalRenderer = 0;
+    std::unique_ptr<CoreGraphicsMetalLayerRenderer<NSView>> metalRenderer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };

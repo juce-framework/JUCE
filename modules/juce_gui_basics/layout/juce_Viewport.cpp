@@ -61,6 +61,12 @@ struct Viewport::DragToScrollListener   : private MouseListener,
         Desktop::getInstance().removeGlobalMouseListener (this);
     }
 
+    void stopOngoingAnimation()
+    {
+        offsetX.setPosition (offsetX.getPosition());
+        offsetY.setPosition (offsetY.getPosition());
+    }
+
     void positionChanged (ViewportDragPosition&, double) override
     {
         viewport.setViewPosition (originalViewPos - Point<int> ((int) offsetX.getPosition(),
@@ -119,9 +125,11 @@ struct Viewport::DragToScrollListener   : private MouseListener,
 
     void endDragAndClearGlobalMouseListener()
     {
-        offsetX.endDrag();
-        offsetY.endDrag();
-        isDragging = false;
+        if (std::exchange (isDragging, false) == true)
+        {
+            offsetX.endDrag();
+            offsetY.endDrag();
+        }
 
         viewport.contentHolder.addMouseListener (this, true);
         Desktop::getInstance().removeGlobalMouseListener (this);
@@ -229,6 +237,8 @@ void Viewport::recreateScrollbars()
 
     getVerticalScrollBar().addListener (this);
     getHorizontalScrollBar().addListener (this);
+    getVerticalScrollBar().addMouseListener (this, true);
+    getHorizontalScrollBar().addMouseListener (this, true);
 
     resized();
 }
@@ -531,8 +541,15 @@ void Viewport::scrollBarMoved (ScrollBar* scrollBarThatHasMoved, double newRange
 
 void Viewport::mouseWheelMove (const MouseEvent& e, const MouseWheelDetails& wheel)
 {
-    if (! useMouseWheelMoveIfNeeded (e, wheel))
-        Component::mouseWheelMove (e, wheel);
+    if (e.eventComponent == this)
+        if (! useMouseWheelMoveIfNeeded (e, wheel))
+            Component::mouseWheelMove (e, wheel);
+}
+
+void Viewport::mouseDown (const MouseEvent& e)
+{
+    if (e.eventComponent == horizontalScrollBar.get() || e.eventComponent == verticalScrollBar.get())
+        dragToScrollListener->stopOngoingAnimation();
 }
 
 static int rescaleMouseWheelDistance (float distance, int singleStepSize) noexcept

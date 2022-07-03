@@ -318,6 +318,8 @@ public:
     /** @internal */
     void mouseWheelMove (const MouseEvent&, const MouseWheelDetails&) override;
     /** @internal */
+    void mouseDown (const MouseEvent& e) override;
+    /** @internal */
     bool keyPressed (const KeyPress&) override;
     /** @internal */
     void componentMovedOrResized (Component&, bool wasMoved, bool wasResized) override;
