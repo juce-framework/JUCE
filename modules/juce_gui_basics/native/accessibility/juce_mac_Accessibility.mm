@@ -528,6 +528,33 @@ private:
                 return 0;
             });
 
+            addMethod (@selector (accessibilityDisclosedRows), [] (id self, SEL) -> id
+            {
+                if (auto* handler = getHandler (self))
+                {
+                    if (auto* cellInterface = handler->getCellInterface())
+                    {
+                        const auto rows = cellInterface->getDisclosedRows();
+                        auto* result = [NSMutableArray arrayWithCapacity: rows.size()];
+
+                        for (const auto& row : rows)
+                        {
+                            if (row != nullptr)
+                                [result addObject: static_cast<id> (row->getNativeImplementation())];
+                            else
+                                [result addObject: [NSAccessibilityElement accessibilityElementWithRole: NSAccessibilityRowRole
+                                                                                                  frame: NSZeroRect
+                                                                                                  label: @"Offscreen Row"
+                                                                                                 parent: self]];
+                        }
+
+                        return result;
+                    }
+                }
+
+                return nil;
+            });
+
             addMethod (@selector (isAccessibilityExpanded), [] (id self, SEL) -> BOOL
             {
                 if (auto* handler = getHandler (self))

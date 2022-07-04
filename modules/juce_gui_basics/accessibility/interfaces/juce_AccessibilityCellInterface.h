@@ -56,6 +56,9 @@ public:
 
     /** Returns the AccessibilityHandler of the table which contains the cell. */
     virtual const AccessibilityHandler* getTableHandler() const = 0;
+
+    /** Returns a list of the accessibility elements that are disclosed by this element, if any. */
+    virtual std::vector<const AccessibilityHandler*> getDisclosedRows() const { return {}; }
 };
 
 } // namespace juce

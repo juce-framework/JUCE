@@ -161,6 +161,34 @@ private:
                 return getItemDepth (&itemComponent.getRepresentedItem());
             }
 
+            std::vector<const AccessibilityHandler*> getDisclosedRows() const override
+            {
+                const auto& representedItem = itemComponent.getRepresentedItem();
+                const auto* tree = representedItem.getOwnerView();
+
+                if (tree == nullptr)
+                    return {};
+
+                const auto numSubItems = representedItem.isOpen() ? representedItem.getNumSubItems() : 0;
+
+                std::vector<const AccessibilityHandler*> result;
+                result.reserve ((size_t) numSubItems);
+
+                for (auto i = 0; i < numSubItems; ++i)
+                {
+                    result.push_back ([&]() -> const AccessibilityHandler*
+                    {
+                        if (auto* subItem = representedItem.getSubItem (i))
+                            if (auto* component = tree->getItemComponent (subItem))
+                                return component->getAccessibilityHandler();
+
+                        return nullptr;
+                    }());
+                }
+
+                return result;
+            }
+
             const AccessibilityHandler* getTableHandler() const override
             {
                 if (auto* tree = itemComponent.getRepresentedItem().getOwnerView())
