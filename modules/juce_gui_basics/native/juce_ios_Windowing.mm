@@ -710,22 +710,12 @@ public:
     {
         static DelegateClass delegateClass;
 
-        delegate = [delegateClass.createInstance() init];
-        object_setInstanceVariable (delegate, "owner", this);
+        delegate.reset ([delegateClass.createInstance() init]);
+        object_setInstanceVariable (delegate.get(), "owner", this);
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        [[NSNotificationCenter defaultCenter] addObserver: delegate
-                                                 selector: @selector (darkModeChanged:)
-                                                     name: UIViewComponentPeer::getDarkModeNotificationName()
-                                                   object: nil];
+        observer.emplace (delegate.get(), @selector (darkModeChanged:), UIViewComponentPeer::getDarkModeNotificationName(), nil);
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-    }
-
-    ~NativeDarkModeChangeDetectorImpl()
-    {
-        object_setInstanceVariable (delegate, "owner", nullptr);
-        [[NSNotificationCenter defaultCenter] removeObserver: delegate];
-        [delegate release];
     }
 
     void darkModeChanged()
@@ -741,20 +731,19 @@ private:
             addIvar<NativeDarkModeChangeDetectorImpl*> ("owner");
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (darkModeChanged:), darkModeChanged);
+            addMethod (@selector (darkModeChanged:), [] (id self, SEL, NSNotification*)
+            {
+                if (auto* owner = getIvar<NativeDarkModeChangeDetectorImpl*> (self, "owner"))
+                    owner->darkModeChanged();
+            });
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             registerClass();
         }
-
-        static void darkModeChanged (id self, SEL, NSNotification*)
-        {
-            if (auto* owner = getIvar<NativeDarkModeChangeDetectorImpl*> (self, "owner"))
-                owner->darkModeChanged();
-        }
     };
 
-    id delegate = nil;
+    NSUniquePtr<NSObject> delegate;
+    Optional<ScopedNotificationCenterObserver> observer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
 };

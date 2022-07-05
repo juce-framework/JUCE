@@ -144,12 +144,7 @@ public:
 
         resetTrackingArea (view);
 
-        notificationCenter = [NSNotificationCenter defaultCenter];
-
-        [notificationCenter  addObserver: view
-                                selector: frameChangedSelector
-                                    name: NSViewFrameDidChangeNotification
-                                  object: view];
+        scopedObservers.emplace_back (view, frameChangedSelector, NSViewFrameDidChangeNotification, view);
 
         [view setPostsFrameChangedNotifications: YES];
 
@@ -225,25 +220,10 @@ public:
                 [window setTabbingMode: NSWindowTabbingModeDisallowed];
            #endif
 
-            [notificationCenter  addObserver: view
-                                    selector: frameChangedSelector
-                                        name: NSWindowDidMoveNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: frameChangedSelector
-                                        name: NSWindowDidMiniaturizeNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (windowWillMiniaturize:)
-                                        name: NSWindowWillMiniaturizeNotification
-                                      object: window];
-
-            [notificationCenter  addObserver: view
-                                    selector: @selector (windowDidDeminiaturize:)
-                                        name: NSWindowDidDeminiaturizeNotification
-                                      object: window];
+            scopedObservers.emplace_back (view, frameChangedSelector, NSWindowDidMoveNotification, window);
+            scopedObservers.emplace_back (view, frameChangedSelector, NSWindowDidMiniaturizeNotification, window);
+            scopedObservers.emplace_back (view, @selector (windowWillMiniaturize:), NSWindowWillMiniaturizeNotification, window);
+            scopedObservers.emplace_back (view, @selector (windowDidMiniaturize:), NSWindowDidMiniaturizeNotification, window);
         }
 
         auto alpha = component.getAlpha();
@@ -267,7 +247,8 @@ public:
         CVDisplayLinkStop (displayLink);
         dispatch_source_cancel (displaySource);
 
-        [notificationCenter removeObserver: view];
+        scopedObservers.clear();
+
         setOwner (view, nullptr);
 
         if ([view superview] != nil)
@@ -797,24 +778,7 @@ public:
 
     void redirectWillMoveToWindow (NSWindow* newWindow)
     {
-        if (auto* currentWindow = [view window])
-        {
-            [notificationCenter removeObserver: view
-                                          name: NSWindowDidMoveNotification
-                                        object: currentWindow];
-
-            [notificationCenter removeObserver: view
-                                          name: NSWindowWillMiniaturizeNotification
-                                        object: currentWindow];
-
-            [notificationCenter removeObserver: view
-                                          name: NSWindowDidBecomeKeyNotification
-                                        object: currentWindow];
-
-            [notificationCenter removeObserver: view
-                                          name: NSWindowDidChangeScreenNotification
-                                        object: currentWindow];
-        }
+        windowObservers.clear();
 
         if (isSharedWindow && [view window] == window && newWindow == nullptr)
         {
@@ -1256,30 +1220,11 @@ public:
 
         if (auto* currentWindow = [view window])
         {
-            [notificationCenter addObserver: view
-                                   selector: dismissModalsSelector
-                                       name: NSWindowWillMoveNotification
-                                     object: currentWindow];
-
-            [notificationCenter addObserver: view
-                                   selector: dismissModalsSelector
-                                       name: NSWindowWillMiniaturizeNotification
-                                     object: currentWindow];
-
-            [notificationCenter addObserver: view
-                                   selector: becomeKeySelector
-                                       name: NSWindowDidBecomeKeyNotification
-                                     object: currentWindow];
-
-            [notificationCenter addObserver: view
-                                   selector: resignKeySelector
-                                       name: NSWindowDidResignKeyNotification
-                                     object: currentWindow];
-
-            [notificationCenter addObserver: view
-                                   selector: @selector (windowDidChangeScreen:)
-                                       name: NSWindowDidChangeScreenNotification
-                                     object: currentWindow];
+            windowObservers.emplace_back (view, dismissModalsSelector, NSWindowWillMoveNotification, currentWindow);
+            windowObservers.emplace_back (view, dismissModalsSelector, NSWindowWillMiniaturizeNotification, currentWindow);
+            windowObservers.emplace_back (view, becomeKeySelector, NSWindowDidBecomeKeyNotification, currentWindow);
+            windowObservers.emplace_back (view, resignKeySelector, NSWindowDidResignKeyNotification, currentWindow);
+            windowObservers.emplace_back (view, @selector (windowDidChangeScreen:), NSWindowDidChangeScreenNotification, currentWindow);
 
             updateCVDisplayLinkScreen();
         }
@@ -1659,7 +1604,6 @@ public:
     bool windowRepresentsFile = false;
     bool isAlwaysOnTop = false, wasAlwaysOnTop = false;
     String stringBeingComposed;
-    NSNotificationCenter* notificationCenter = nil;
 
     Rectangle<float> lastSizeBeforeZoom;
     RectangleList<float> deferredRepaints;
@@ -1891,6 +1835,9 @@ private:
 
     int numFramesToSkipMetalRenderer = 0;
     std::unique_ptr<CoreGraphicsMetalLayerRenderer<NSView>> metalRenderer;
+
+    std::vector<ScopedNotificationCenterObserver> scopedObservers;
+    std::vector<ScopedNotificationCenterObserver> windowObservers;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NSViewComponentPeer)
 };
