@@ -39,6 +39,34 @@
 namespace juce
 {
 
+//==============================================================================
+static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler)
+{
+    const auto children = handler.getChildren();
+
+    NSMutableArray* accessibleChildren = [NSMutableArray arrayWithCapacity: (NSUInteger) children.size()];
+
+    for (auto* childHandler : children)
+    {
+        id accessibleElement = [&childHandler]
+        {
+            id native = static_cast<id> (childHandler->getNativeImplementation());
+
+            if (! childHandler->getChildren().empty())
+                return [native accessibilityContainer];
+
+            return native;
+        }();
+
+        if (accessibleElement != nil)
+            [accessibleChildren addObject: accessibleElement];
+    }
+
+    [accessibleChildren addObject: static_cast<id> (handler.getNativeImplementation())];
+
+    return accessibleChildren;
+}
+
 class UIViewComponentPeer;
 
 static UIInterfaceOrientation getWindowOrientation()
@@ -119,6 +147,107 @@ enum class MouseEventFlags
 
 using namespace juce;
 
+@interface JuceUITextPosition : UITextPosition
+{
+@public
+    int index;
+}
+@end
+
+@implementation JuceUITextPosition
+
++ (instancetype) withIndex: (int) indexIn
+{
+    auto* result = [[JuceUITextPosition alloc] init];
+    result->index = indexIn;
+    return [result autorelease];
+}
+
+@end
+
+//==============================================================================
+@interface JuceUITextRange : UITextRange
+{
+@public
+    int from, to;
+}
+@end
+
+@implementation JuceUITextRange
+
++ (instancetype) withRange: (juce::Range<int>) range
+{
+    return [JuceUITextRange from: range.getStart() to: range.getEnd()];
+}
+
++ (instancetype) from: (int) from to: (int) to
+{
+    auto* result = [[JuceUITextRange alloc] init];
+    result->from = from;
+    result->to = to;
+    return [result autorelease];
+}
+
+- (UITextPosition*) start
+{
+    return [JuceUITextPosition withIndex: from];
+}
+
+- (UITextPosition*) end
+{
+    return [JuceUITextPosition withIndex: to];
+}
+
+- (Range<int>) range
+{
+    return Range<int>::between (from, to);
+}
+
+- (BOOL) isEmpty
+{
+    return from == to;
+}
+
+@end
+
+//==============================================================================
+// UITextInputStringTokenizer doesn't handle 'line' granularities correctly by default, hence
+// this subclass.
+@interface JuceTextInputTokenizer : UITextInputStringTokenizer
+{
+    UIViewComponentPeer* peer;
+}
+
+- (instancetype) initWithPeer: (UIViewComponentPeer*) peer;
+
+@end
+
+//==============================================================================
+@interface JuceUITextSelectionRect : UITextSelectionRect
+{
+    CGRect _rect;
+}
+
+@end
+
+@implementation JuceUITextSelectionRect
+
++ (instancetype) withRect: (CGRect) rect
+{
+    auto* result = [[JuceUITextSelectionRect alloc] init];
+    result->_rect = rect;
+    return [result autorelease];
+}
+
+- (CGRect) rect { return _rect; }
+- (NSWritingDirection) writingDirection { return NSWritingDirectionNatural; }
+- (BOOL) containsStart { return NO; }
+- (BOOL) containsEnd   { return NO; }
+- (BOOL) isVertical    { return NO; }
+
+@end
+
+//==============================================================================
 struct CADisplayLinkDeleter
 {
     void operator() (CADisplayLink* displayLink) const noexcept
@@ -128,11 +257,21 @@ struct CADisplayLinkDeleter
     }
 };
 
-@interface JuceUIView : UIView <UITextViewDelegate>
+@interface JuceTextView : UIView <UITextInput>
 {
 @public
     UIViewComponentPeer* owner;
-    UITextView* hiddenTextView;
+    id<UITextInputDelegate> delegate;
+}
+
+- (instancetype) initWithOwner: (UIViewComponentPeer*) owner;
+
+@end
+
+@interface JuceUIView : UIView
+{
+@public
+    UIViewComponentPeer* owner;
     std::unique_ptr<CADisplayLink, CADisplayLinkDeleter> displayLink;
 }
 
@@ -158,8 +297,6 @@ struct CADisplayLinkDeleter
 - (BOOL) becomeFirstResponder;
 - (BOOL) resignFirstResponder;
 - (BOOL) canBecomeFirstResponder;
-
-- (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text;
 
 - (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection;
 
@@ -212,6 +349,7 @@ struct UIViewPeerControllerReceiver
     virtual void setViewController (UIViewController*) = 0;
 };
 
+//==============================================================================
 class UIViewComponentPeer  : public ComponentPeer,
                              private UIViewPeerControllerReceiver
 {
@@ -264,9 +402,9 @@ public:
     void grabFocus() override;
     void textInputRequired (Point<int>, TextInputTarget&) override;
     void dismissPendingTextInput() override;
+    void closeInputMethodContext() override;
 
     BOOL textViewReplaceCharacters (Range<int>, const String&);
-    void updateHiddenTextContent (TextInputTarget&);
 
     void updateScreenBounds();
 
@@ -286,7 +424,10 @@ public:
     JuceUIView* view = nil;
     UIViewController* controller = nil;
     const bool isSharedWindow, isAppex;
+    String stringBeingComposed;
     bool fullScreen = false, insideDrawRect = false;
+    NSUniquePtr<JuceTextView> hiddenTextInput { [[JuceTextView alloc] initWithOwner: this] };
+    NSUniquePtr<JuceTextInputTokenizer> tokenizer { [[JuceTextInputTokenizer alloc] initWithPeer: this] };
 
     static int64 getMouseTime (NSTimeInterval timestamp) noexcept
     {
@@ -305,6 +446,22 @@ public:
     }
 
     static MultiTouchMapper<UITouch*> currentTouches;
+
+    static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept
+    {
+        switch (type)
+        {
+            case TextInputTarget::textKeyboard:          return UIKeyboardTypeDefault;
+            case TextInputTarget::numericKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
+            case TextInputTarget::decimalKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
+            case TextInputTarget::urlKeyboard:           return UIKeyboardTypeURL;
+            case TextInputTarget::emailAddressKeyboard:  return UIKeyboardTypeEmailAddress;
+            case TextInputTarget::phoneNumberKeyboard:   return UIKeyboardTypePhonePad;
+            default:                                     jassertfalse; break;
+        }
+
+        return UIKeyboardTypeDefault;
+    }
 
 private:
     void appStyleChanged() override
@@ -491,14 +648,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     [displayLink.get() addToRunLoop: [NSRunLoop mainRunLoop]
                             forMode: NSDefaultRunLoopMode];
 
-    hiddenTextView = [[UITextView alloc] initWithFrame: CGRectZero];
-    [self addSubview: hiddenTextView];
-    hiddenTextView.delegate = self;
-
-    hiddenTextView.autocapitalizationType = UITextAutocapitalizationTypeNone;
-    hiddenTextView.autocorrectionType = UITextAutocorrectionTypeNo;
-    hiddenTextView.inputAssistantItem.leadingBarButtonGroups = @[];
-    hiddenTextView.inputAssistantItem.trailingBarButtonGroups = @[];
+    [self addSubview: owner->hiddenTextInput.get()];
 
    #if JUCE_HAS_IOS_POINTER_SUPPORT
     if (@available (iOS 13.4, *))
@@ -522,9 +672,7 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
 - (void) dealloc
 {
-    [hiddenTextView removeFromSuperview];
-    [hiddenTextView release];
-
+    [owner->hiddenTextInput.get() removeFromSuperview];
     displayLink = nullptr;
 
     [super dealloc];
@@ -623,13 +771,6 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     return owner != nullptr && owner->canBecomeKeyWindow();
 }
 
-- (BOOL) textView: (UITextView*) textView shouldChangeTextInRange: (NSRange) range replacementText: (NSString*) text
-{
-    ignoreUnused (textView);
-    return owner->textViewReplaceCharacters (Range<int> ((int) range.location, (int) (range.location + range.length)),
-                                             nsStringToJuce (text));
-}
-
 - (void) traitCollectionDidChange: (UITraitCollection*) previousTraitCollection
 {
     [super traitCollectionDidChange: previousTraitCollection];
@@ -685,6 +826,542 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 
     if (owner != nullptr)
         owner->grabFocus();
+}
+
+@end
+
+/** see https://developer.apple.com/library/archive/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/LowerLevelText-HandlingTechnologies/LowerLevelText-HandlingTechnologies.html */
+@implementation JuceTextView
+
+- (TextInputTarget*) getTextInputTarget
+{
+    if (owner != nullptr)
+        return owner->findCurrentTextInputTarget();
+
+    return nullptr;
+}
+
+- (instancetype) initWithOwner: (UIViewComponentPeer*) ownerIn
+{
+    [super init];
+    owner = ownerIn;
+    delegate = nil;
+
+    // The frame must have a finite size, otherwise some accessibility events will be ignored
+    self.frame = CGRectMake (0.0, 0.0, 1.0, 1.0);
+    return self;
+}
+
+- (BOOL) canPerformAction: (SEL) action withSender: (id) sender
+{
+    if (auto* target = [self getTextInputTarget])
+    {
+        if (action == @selector (paste:))
+        {
+            if (@available (iOS 10, *))
+                return [[UIPasteboard generalPasteboard] hasStrings];
+
+            return [[UIPasteboard generalPasteboard] string] != nil;
+        }
+    }
+
+    return [super canPerformAction: action withSender: sender];
+}
+
+- (void) cut: (id) sender
+{
+    [self copy: sender];
+
+    if (auto* target = [self getTextInputTarget])
+    {
+        if (delegate != nil)
+            [delegate textWillChange: self];
+
+        target->insertTextAtCaret ("");
+
+        if (delegate != nil)
+            [delegate textDidChange: self];
+    }
+}
+
+- (void) copy: (id) sender
+{
+    if (auto* target = [self getTextInputTarget])
+        [[UIPasteboard generalPasteboard] setString: juceStringToNS (target->getTextInRange (target->getHighlightedRegion()))];
+}
+
+- (void) paste: (id) sender
+{
+    if (auto* target = [self getTextInputTarget])
+    {
+        if (auto* string = [[UIPasteboard generalPasteboard] string])
+        {
+            if (delegate != nil)
+                [delegate textWillChange: self];
+
+            target->insertTextAtCaret (nsStringToJuce (string));
+
+            if (delegate != nil)
+                [delegate textDidChange: self];
+        }
+    }
+}
+
+- (void) selectAll: (id) sender
+{
+    if (auto* target = [self getTextInputTarget])
+        target->setHighlightedRegion ({ 0, target->getTotalNumChars() });
+}
+
+- (void) deleteBackward
+{
+    auto* target = [self getTextInputTarget];
+
+    if (target == nullptr)
+        return;
+
+    const auto range = target->getHighlightedRegion();
+    const auto rangeToDelete = range.isEmpty() ? range.withStartAndLength (jmax (range.getStart() - 1, 0),
+                                                                           range.getStart() != 0 ? 1 : 0)
+                                               : range;
+
+    target->setHighlightedRegion (rangeToDelete);
+    target->insertTextAtCaret ("");
+}
+
+- (void) insertText: (NSString*) text
+{
+    if (owner == nullptr)
+        return;
+
+    owner->stringBeingComposed.clear();
+
+    if (auto* target = owner->findCurrentTextInputTarget())
+        target->insertTextAtCaret (nsStringToJuce (text));
+}
+
+- (BOOL) hasText
+{
+    if (auto* target = [self getTextInputTarget])
+        return target->getTextInRange ({ 0, 1 }).isNotEmpty();
+
+    return NO;
+}
+
+- (BOOL) accessibilityElementsHidden
+{
+    return NO;
+}
+
+- (UITextRange*) selectedTextRangeForTarget: (TextInputTarget*) target
+{
+    if (target != nullptr)
+        return [JuceUITextRange withRange: target->getHighlightedRegion()];
+
+    return nil;
+}
+
+- (UITextRange*) selectedTextRange
+{
+    return [self selectedTextRangeForTarget: [self getTextInputTarget]];
+}
+
+- (void) setSelectedTextRange: (JuceUITextRange*) range
+{
+    if (auto* target = [self getTextInputTarget])
+        target->setHighlightedRegion (range != nil ? [range range] : Range<int>());
+}
+
+- (UITextRange*) markedTextRange
+{
+    if (owner != nullptr && owner->stringBeingComposed.isNotEmpty())
+        if (auto* target = owner->findCurrentTextInputTarget())
+            return [JuceUITextRange withRange: target->getHighlightedRegion()];
+
+    return nil;
+}
+
+- (void) setMarkedText: (NSString*) markedText
+         selectedRange: (NSRange) selectedRange
+{
+    ignoreUnused (selectedRange);
+
+    if (owner == nullptr)
+        return;
+
+    owner->stringBeingComposed = nsStringToJuce (markedText);
+
+    auto* target = owner->findCurrentTextInputTarget();
+
+    if (target == nullptr)
+        return;
+
+    const auto currentHighlight = target->getHighlightedRegion();
+    target->insertTextAtCaret (owner->stringBeingComposed);
+    target->setHighlightedRegion (currentHighlight.withLength (0));
+    target->setHighlightedRegion (currentHighlight.withLength (owner->stringBeingComposed.length()));
+}
+
+- (void) unmarkText
+{
+    if (owner == nullptr)
+        return;
+
+    auto* target = owner->findCurrentTextInputTarget();
+
+    if (target == nullptr)
+        return;
+
+    target->insertTextAtCaret (owner->stringBeingComposed);
+    owner->stringBeingComposed.clear();
+}
+
+- (NSDictionary<NSAttributedStringKey, id>*) markedTextStyle
+{
+    return nil;
+}
+
+- (void) setMarkedTextStyle: (NSDictionary<NSAttributedStringKey, id>*) dict
+{
+}
+
+- (UITextPosition*) beginningOfDocument
+{
+    return [JuceUITextPosition withIndex: 0];
+}
+
+- (UITextPosition*) endOfDocument
+{
+    if (auto* target = [self getTextInputTarget])
+        return [JuceUITextPosition withIndex: target->getTotalNumChars()];
+
+    return [JuceUITextPosition withIndex: 0];
+}
+
+- (id<UITextInputTokenizer>) tokenizer
+{
+    return owner->tokenizer.get();
+}
+
+- (NSWritingDirection) baseWritingDirectionForPosition: (UITextPosition*) position
+                                           inDirection: (UITextStorageDirection) direction
+{
+    return NSWritingDirectionNatural;
+}
+
+- (CGRect) caretRectForPosition: (JuceUITextPosition*) position
+{
+    if (position == nil)
+        return CGRectZero;
+
+    // Currently we ignore the requested position and just return the text editor's caret position
+    if (auto* target = [self getTextInputTarget])
+    {
+        if (auto* comp = dynamic_cast<Component*> (target))
+        {
+            const auto areaOnDesktop = comp->localAreaToGlobal (target->getCaretRectangle());
+            return convertToCGRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
+        }
+    }
+
+    return CGRectZero;
+}
+
+- (UITextRange*) characterRangeByExtendingPosition: (JuceUITextPosition*) position
+                                       inDirection: (UITextLayoutDirection) direction
+{
+    const auto newPosition = [self indexFromPosition: position inDirection: direction offset: 1];
+    return [JuceUITextRange from: position->index to: newPosition];
+}
+
+- (int) closestIndexToPoint: (CGPoint) point
+{
+    if (auto* target = [self getTextInputTarget])
+    {
+        if (auto* comp = dynamic_cast<Component*> (target))
+        {
+            const auto pointOnDesktop = ScalingHelpers::unscaledScreenPosToScaled (convertToPointFloat (point));
+            return target->getCharIndexForPoint (comp->getLocalPoint (nullptr, pointOnDesktop).roundToInt());
+        }
+    }
+
+    return -1;
+}
+
+- (UITextRange*) characterRangeAtPoint: (CGPoint) point
+{
+    const auto index = [self closestIndexToPoint: point];
+    const auto result = index != -1 ? [JuceUITextRange from: index to: index] : nil;
+    jassert (result != nullptr);
+    return result;
+}
+
+- (UITextPosition*) closestPositionToPoint: (CGPoint) point
+{
+    const auto index = [self closestIndexToPoint: point];
+    const auto result = index != -1 ? [JuceUITextPosition withIndex: index] : nil;
+    jassert (result != nullptr);
+    return result;
+}
+
+- (UITextPosition*) closestPositionToPoint: (CGPoint) point
+                               withinRange: (JuceUITextRange*) range
+{
+    const auto index = [self closestIndexToPoint: point];
+    const auto result = index != -1 ? [JuceUITextPosition withIndex: [range range].clipValue (index)] : nil;
+    jassert (result != nullptr);
+    return result;
+}
+
+- (NSComparisonResult) comparePosition: (JuceUITextPosition*) position
+                            toPosition: (JuceUITextPosition*) other
+{
+    const auto a = position != nil ? makeOptional (position->index) : nullopt;
+    const auto b = other    != nil ? makeOptional (other   ->index) : nullopt;
+
+    if (a < b)
+        return NSOrderedAscending;
+
+    if (b < a)
+        return NSOrderedDescending;
+
+    return NSOrderedSame;
+}
+
+- (NSInteger) offsetFromPosition: (JuceUITextPosition*) from
+                      toPosition: (JuceUITextPosition*) toPosition
+{
+    if (from != nil && toPosition != nil)
+        return toPosition->index - from->index;
+
+    return 0;
+}
+
+- (int) indexFromPosition: (JuceUITextPosition*) position
+              inDirection: (UITextLayoutDirection) direction
+                   offset: (NSInteger) offset
+{
+    switch (direction)
+    {
+        case UITextLayoutDirectionLeft:
+        case UITextLayoutDirectionRight:
+            return position->index + (int) (offset * (direction == UITextLayoutDirectionLeft ? -1 : 1));
+
+        case UITextLayoutDirectionUp:
+        case UITextLayoutDirectionDown:
+        {
+            if (auto* target = [self getTextInputTarget])
+            {
+                const auto originalRectangle = target->getCaretRectangleForCharIndex (position->index);
+
+                auto testIndex = position->index;
+
+                for (auto lineOffset = 0; lineOffset < offset; ++lineOffset)
+                {
+                    const auto caretRect = target->getCaretRectangleForCharIndex (testIndex);
+                    const auto newY = direction == UITextLayoutDirectionUp ? caretRect.getY() - 1
+                                                                           : caretRect.getBottom() + 1;
+                    testIndex = target->getCharIndexForPoint ({ originalRectangle.getX(), newY });
+                }
+
+                return testIndex;
+            }
+        }
+    }
+
+    return position->index;
+}
+
+- (UITextPosition*) positionFromPosition: (JuceUITextPosition*) position
+                             inDirection: (UITextLayoutDirection) direction
+                                  offset: (NSInteger) offset
+{
+    return [JuceUITextPosition withIndex: [self indexFromPosition: position inDirection: direction offset: offset]];
+}
+
+- (UITextPosition*) positionFromPosition: (JuceUITextPosition*) position
+                                  offset: (NSInteger) offset
+{
+    if (position != nil)
+    {
+        if (auto* target = [self getTextInputTarget])
+        {
+            const auto newIndex = position->index + (int) offset;
+
+            if (isPositiveAndBelow (newIndex, target->getTotalNumChars() + 1))
+                return [JuceUITextPosition withIndex: newIndex];
+        }
+    }
+
+   return nil;
+}
+
+- (CGRect) firstRectForRange: (JuceUITextRange*) range
+{
+    if (auto* target = [self getTextInputTarget])
+    {
+        if (auto* comp = dynamic_cast<Component*> (target))
+        {
+            const auto list = target->getTextBounds ([range range]);
+
+            if (! list.isEmpty())
+            {
+                const auto areaOnDesktop = comp->localAreaToGlobal (list.getRectangle (0));
+                return convertToCGRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
+            }
+        }
+    }
+
+    return {};
+}
+
+- (NSArray<UITextSelectionRect*>*) selectionRectsForRange: (JuceUITextRange*) range
+{
+    if (auto* target = [self getTextInputTarget])
+    {
+        if (auto* comp = dynamic_cast<Component*> (target))
+        {
+            const auto list = target->getTextBounds ([range range]);
+
+            auto* result = [NSMutableArray arrayWithCapacity: (NSUInteger) list.getNumRectangles()];
+
+            for (const auto& rect : list)
+            {
+                const auto areaOnDesktop = comp->localAreaToGlobal (rect);
+                const auto nativeArea = convertToCGRect (ScalingHelpers::scaledScreenPosToUnscaled (areaOnDesktop));
+
+                [result addObject: [JuceUITextSelectionRect withRect: nativeArea]];
+            }
+
+            return result;
+        }
+    }
+
+    return nil;
+}
+
+- (UITextPosition*) positionWithinRange: (JuceUITextRange*) range
+                    farthestInDirection: (UITextLayoutDirection) direction
+{
+    return direction == UITextLayoutDirectionUp || direction == UITextLayoutDirectionLeft
+         ? [range start]
+         : [range end];
+}
+
+- (void) replaceRange: (JuceUITextRange*) range
+             withText: (NSString*) text
+{
+    if (owner == nullptr)
+        return;
+
+    owner->stringBeingComposed.clear();
+
+    if (auto* target = owner->findCurrentTextInputTarget())
+    {
+        target->setHighlightedRegion ([range range]);
+        target->insertTextAtCaret (nsStringToJuce (text));
+    }
+}
+
+- (void) setBaseWritingDirection: (NSWritingDirection) writingDirection
+                        forRange: (UITextRange*) range
+{
+}
+
+- (NSString*) textInRange: (JuceUITextRange*) range
+{
+    if (auto* target = [self getTextInputTarget])
+        return juceStringToNS (target->getTextInRange ([range range]));
+
+    return nil;
+}
+
+- (UITextRange*) textRangeFromPosition: (JuceUITextPosition*) fromPosition
+                            toPosition: (JuceUITextPosition*) toPosition
+{
+    const auto from = fromPosition != nil ? fromPosition->index : 0;
+    const auto to   = toPosition   != nil ? toPosition  ->index : 0;
+
+    return [JuceUITextRange withRange: Range<int>::between (from, to)];
+}
+
+- (void) setInputDelegate: (id<UITextInputDelegate>) delegateIn
+{
+    delegate = delegateIn;
+}
+
+- (id<UITextInputDelegate>) inputDelegate
+{
+    return delegate;
+}
+
+- (UIKeyboardType) keyboardType
+{
+    if (auto* target = [self getTextInputTarget])
+        return UIViewComponentPeer::getUIKeyboardType (target->getKeyboardType());
+
+    return UIKeyboardTypeDefault;
+}
+
+- (UITextAutocapitalizationType) autocapitalizationType
+{
+    return UITextAutocapitalizationTypeNone;
+}
+
+- (UITextAutocorrectionType) autocorrectionType
+{
+    return UITextAutocorrectionTypeNo;
+}
+
+- (BOOL) canBecomeFirstResponder
+{
+    return YES;
+}
+
+@end
+
+//==============================================================================
+@implementation JuceTextInputTokenizer
+
+- (instancetype) initWithPeer: (UIViewComponentPeer*) peerIn
+{
+    [super initWithTextInput: peerIn->hiddenTextInput.get()];
+    peer = peerIn;
+    return self;
+}
+
+- (UITextRange*) rangeEnclosingPosition: (JuceUITextPosition*) position
+                        withGranularity: (UITextGranularity) granularity
+                            inDirection: (UITextDirection) direction
+{
+    if (granularity != UITextGranularityLine)
+        return [super rangeEnclosingPosition: position withGranularity: granularity inDirection: direction];
+
+    auto* target = peer->findCurrentTextInputTarget();
+
+    if (target == nullptr)
+        return nullptr;
+
+    const auto numChars = target->getTotalNumChars();
+
+    if (! isPositiveAndBelow (position->index, numChars))
+        return nullptr;
+
+    const auto allText = target->getTextInRange ({ 0, numChars });
+
+    const auto begin = AccessibilityTextHelpers::makeCharPtrIteratorAdapter (allText.begin());
+    const auto end   = AccessibilityTextHelpers::makeCharPtrIteratorAdapter (allText.end());
+    const auto positionIter = begin + position->index;
+
+    const auto nextNewlineIter = std::find (positionIter, end, '\n');
+    const auto lastNewlineIter = std::find (std::make_reverse_iterator (positionIter),
+                                            std::make_reverse_iterator (begin),
+                                            '\n').base();
+
+    const auto from = std::distance (begin, lastNewlineIter);
+    const auto to   = std::distance (begin, nextNewlineIter);
+
+    return [JuceUITextRange from: from to: to];
 }
 
 @end
@@ -975,6 +1652,9 @@ static float getTouchForce (UITouch* touch) noexcept
 
 void UIViewComponentPeer::handleTouches (UIEvent* event, MouseEventFlags mouseEventFlags)
 {
+    if (event == nullptr)
+        return;
+
     NSArray* touches = [[event touchesForView: view] allObjects];
 
     for (unsigned int i = 0; i < [touches count]; ++i)
@@ -1126,41 +1806,27 @@ void UIViewComponentPeer::grabFocus()
     }
 }
 
-void UIViewComponentPeer::textInputRequired (Point<int> pos, TextInputTarget& target)
+void UIViewComponentPeer::textInputRequired (Point<int>, TextInputTarget&)
 {
-    view->hiddenTextView.frame = CGRectMake (pos.x, pos.y, 0, 0);
+    [hiddenTextInput.get() becomeFirstResponder];
+}
 
-    updateHiddenTextContent (target);
-    [view->hiddenTextView becomeFirstResponder];
+void UIViewComponentPeer::closeInputMethodContext()
+{
+    if (auto* input = hiddenTextInput.get())
+    {
+        if (auto* delegate = [input inputDelegate])
+        {
+            [delegate selectionWillChange: input];
+            [delegate selectionDidChange:  input];
+        }
+    }
 }
 
 void UIViewComponentPeer::dismissPendingTextInput()
 {
     closeInputMethodContext();
-    [view->hiddenTextView resignFirstResponder];
-}
-
-static UIKeyboardType getUIKeyboardType (TextInputTarget::VirtualKeyboardType type) noexcept
-{
-    switch (type)
-    {
-        case TextInputTarget::textKeyboard:          return UIKeyboardTypeAlphabet;
-        case TextInputTarget::numericKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
-        case TextInputTarget::decimalKeyboard:       return UIKeyboardTypeNumbersAndPunctuation;
-        case TextInputTarget::urlKeyboard:           return UIKeyboardTypeURL;
-        case TextInputTarget::emailAddressKeyboard:  return UIKeyboardTypeEmailAddress;
-        case TextInputTarget::phoneNumberKeyboard:   return UIKeyboardTypePhonePad;
-        default:                                     jassertfalse; break;
-    }
-
-    return UIKeyboardTypeDefault;
-}
-
-void UIViewComponentPeer::updateHiddenTextContent (TextInputTarget& target)
-{
-    view->hiddenTextView.keyboardType = getUIKeyboardType (target.getKeyboardType());
-    view->hiddenTextView.text = juceStringToNS (target.getTextInRange (Range<int> (0, target.getHighlightedRegion().getStart())));
-    view->hiddenTextView.selectedRange = NSMakeRange ((NSUInteger) target.getHighlightedRegion().getStart(), 0);
+    [hiddenTextInput.get() resignFirstResponder];
 }
 
 BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const String& text)
@@ -1179,9 +1845,6 @@ BOOL UIViewComponentPeer::textViewReplaceCharacters (Range<int> range, const Str
             handleKeyPress (KeyPress::returnKey, text[0]);
         else
             target->insertTextAtCaret (text);
-
-        if (deletionChecker != nullptr)
-            updateHiddenTextContent (*target);
     }
 
     return NO;

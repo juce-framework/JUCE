@@ -1168,7 +1168,7 @@ void TextEditor::updateCaretPosition()
     {
         Iterator i (*this);
         caret->setCaretPosition (getCaretRectangle().translated (leftIndent,
-                                                                 topIndent + roundToInt (i.getYOffset())));
+                                                                 topIndent + roundToInt (i.getYOffset())) - getTextOffset());
 
         if (auto* handler = getAccessibilityHandler())
             handler->notifyAccessibilityEvent (AccessibilityEvent::textSelectionChanged);
@@ -1451,18 +1451,13 @@ void TextEditor::scrollEditorToPositionCaret (const int desiredCaretX,
     viewport->setViewPosition (vx, vy);
 }
 
-Rectangle<int> TextEditor::getCaretRectangle()
-{
-    return getCaretRectangleFloat().getSmallestIntegerContainer();
-}
-
-Rectangle<float> TextEditor::getCaretRectangleFloat() const
+Rectangle<int> TextEditor::getCaretRectangleForCharIndex (int index) const
 {
     Point<float> anchor;
     auto cursorHeight = currentFont.getHeight(); // (in case the text is empty and the call below doesn't set this value)
-    getCharPosition (caretPosition, anchor, cursorHeight);
+    getCharPosition (index, anchor, cursorHeight);
 
-    return { anchor.x, anchor.y, 2.0f, cursorHeight };
+    return Rectangle<float> { anchor.x, anchor.y, 2.0f, cursorHeight }.getSmallestIntegerContainer() + getTextOffset();
 }
 
 Point<int> TextEditor::getTextOffset() const noexcept
@@ -1474,7 +1469,7 @@ Point<int> TextEditor::getTextOffset() const noexcept
              roundToInt ((float) getTopIndent() + (float) borderSize.getTop() + yOffset) - viewport->getViewPositionY() };
 }
 
-RectangleList<int> TextEditor::getTextBounds (Range<int> textRange)
+RectangleList<int> TextEditor::getTextBounds (Range<int> textRange) const
 {
     RectangleList<int> boundingBox;
     Iterator i (*this);
@@ -1564,7 +1559,7 @@ void TextEditor::scrollToMakeSureCursorIsVisible()
     if (keepCaretOnScreen)
     {
         auto viewPos = viewport->getViewPosition();
-        auto caretRect = getCaretRectangle().translated (leftIndent, topIndent);
+        auto caretRect = getCaretRectangle().translated (leftIndent, topIndent) - getTextOffset();
         auto relativeCursor = caretRect.getPosition() - viewPos;
 
         if (relativeCursor.x < jmax (1, proportionOfWidth (0.05f)))
@@ -1647,6 +1642,16 @@ int TextEditor::getTextIndexAt (const int x, const int y) const
                             (float) (y - offset.y));
 }
 
+int TextEditor::getTextIndexAt (const Point<int> pt) const
+{
+    return getTextIndexAt (pt.x, pt.y);
+}
+
+int TextEditor::getCharIndexForPoint (const Point<int> point) const
+{
+    return getTextIndexAt (isMultiLine() ? point : getTextBounds ({ 0, getTotalNumChars() }).getBounds().getConstrainedPoint (point));
+}
+
 void TextEditor::insertTextAtCaret (const String& t)
 {
     String newText (inputFilter != nullptr ? inputFilter->filterNewText (*this, t) : t);
@@ -1670,8 +1675,13 @@ void TextEditor::insertTextAtCaret (const String& t)
 
 void TextEditor::setHighlightedRegion (const Range<int>& newSelection)
 {
-    moveCaretTo (newSelection.getStart(), false);
-    moveCaretTo (newSelection.getEnd(), true);
+    if (newSelection == getHighlightedRegion())
+        return;
+
+    const auto cursorAtStart = newSelection.getEnd() == getHighlightedRegion().getStart()
+                            || newSelection.getEnd() == getHighlightedRegion().getEnd();
+    moveCaretTo (cursorAtStart ? newSelection.getEnd() : newSelection.getStart(), false);
+    moveCaretTo (cursorAtStart ? newSelection.getStart() : newSelection.getEnd(), true);
 }
 
 //==============================================================================
@@ -1853,8 +1863,7 @@ void TextEditor::mouseDown (const MouseEvent& e)
     {
         if (! (popupMenuEnabled && e.mods.isPopupMenu()))
         {
-            moveCaretTo (getTextIndexAt (e.x, e.y),
-                         e.mods.isShiftDown());
+            moveCaretTo (getTextIndexAt (e.getPosition()), e.mods.isShiftDown());
 
             if (auto* peer = getPeer())
                 peer->closeInputMethodContext();
@@ -1889,7 +1898,7 @@ void TextEditor::mouseDrag (const MouseEvent& e)
 
     if (wasFocused || ! selectAllTextWhenFocused)
         if (! (popupMenuEnabled && e.mods.isPopupMenu()))
-            moveCaretTo (getTextIndexAt (e.x, e.y), true);
+            moveCaretTo (getTextIndexAt (e.getPosition()), true);
 }
 
 void TextEditor::mouseUp (const MouseEvent& e)
@@ -1902,7 +1911,7 @@ void TextEditor::mouseUp (const MouseEvent& e)
 
     if (wasFocused || ! selectAllTextWhenFocused)
         if (e.mouseWasClicked() && ! (popupMenuEnabled && e.mods.isPopupMenu()))
-            moveCaret (getTextIndexAt (e.x, e.y));
+            moveCaret (getTextIndexAt (e.getPosition()));
 
     wasFocused = true;
 }
@@ -1912,7 +1921,7 @@ void TextEditor::mouseDoubleClick (const MouseEvent& e)
     if (! mouseDownInEditor)
         return;
 
-    int tokenEnd = getTextIndexAt (e.x, e.y);
+    int tokenEnd = getTextIndexAt (e.getPosition());
     int tokenStart = 0;
 
     if (e.getNumberOfClicks() > 3)
@@ -2026,7 +2035,7 @@ bool TextEditor::moveCaretUp (bool selecting)
     if (! isMultiLine())
         return moveCaretToStartOfLine (selecting);
 
-    auto caretPos = getCaretRectangleFloat();
+    const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - 1.0f), selecting);
 }
 
@@ -2035,7 +2044,7 @@ bool TextEditor::moveCaretDown (bool selecting)
     if (! isMultiLine())
         return moveCaretToEndOfLine (selecting);
 
-    auto caretPos = getCaretRectangleFloat();
+    const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + 1.0f), selecting);
 }
 
@@ -2044,7 +2053,7 @@ bool TextEditor::pageUp (bool selecting)
     if (! isMultiLine())
         return moveCaretToStartOfLine (selecting);
 
-    auto caretPos = getCaretRectangleFloat();
+    const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getY() - (float) viewport->getViewHeight()), selecting);
 }
 
@@ -2053,7 +2062,7 @@ bool TextEditor::pageDown (bool selecting)
     if (! isMultiLine())
         return moveCaretToEndOfLine (selecting);
 
-    auto caretPos = getCaretRectangleFloat();
+    const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
     return moveCaretWithTransaction (indexAtPosition (caretPos.getX(), caretPos.getBottom() + (float) viewport->getViewHeight()), selecting);
 }
 
@@ -2081,7 +2090,7 @@ bool TextEditor::moveCaretToTop (bool selecting)
 
 bool TextEditor::moveCaretToStartOfLine (bool selecting)
 {
-    auto caretPos = getCaretRectangleFloat();
+    const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
     return moveCaretWithTransaction (indexAtPosition (0.0f, caretPos.getY()), selecting);
 }
 
@@ -2092,7 +2101,7 @@ bool TextEditor::moveCaretToEnd (bool selecting)
 
 bool TextEditor::moveCaretToEndOfLine (bool selecting)
 {
-    auto caretPos = getCaretRectangleFloat();
+    const auto caretPos = (getCaretRectangle() - getTextOffset()).toFloat();
     return moveCaretWithTransaction (indexAtPosition ((float) textHolder->getWidth(), caretPos.getY()), selecting);
 }
 
@@ -2727,20 +2736,7 @@ private:
 
         void setSelection (Range<int> r) override
         {
-            if (r == textEditor.getHighlightedRegion())
-                return;
-
-            if (r.isEmpty())
-            {
-                textEditor.setCaretPosition (r.getStart());
-            }
-            else
-            {
-                const auto cursorAtStart = r.getEnd() == textEditor.getHighlightedRegion().getStart()
-                                        || r.getEnd() == textEditor.getHighlightedRegion().getEnd();
-                textEditor.moveCaretTo (cursorAtStart ? r.getEnd() : r.getStart(), false);
-                textEditor.moveCaretTo (cursorAtStart ? r.getStart() : r.getEnd(), true);
-            }
+            textEditor.setHighlightedRegion (r);
         }
 
         String getText (Range<int> r) const override
@@ -2772,8 +2768,7 @@ private:
 
         int getOffsetAtPoint (Point<int> point) const override
         {
-            auto localPoint = textEditor.getLocalPoint (nullptr, point);
-            return textEditor.getTextIndexAt (localPoint.x, localPoint.y);
+            return textEditor.getTextIndexAt (textEditor.getLocalPoint (nullptr, point));
         }
 
     private:

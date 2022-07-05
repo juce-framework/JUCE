@@ -43,33 +43,45 @@ namespace juce
 
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
-//==============================================================================
-static NSArray* getContainerAccessibilityElements (AccessibilityHandler& handler)
-{
-    const auto children = handler.getChildren();
+template <typename> struct Signature;
 
-    NSMutableArray* accessibleChildren = [NSMutableArray arrayWithCapacity: (NSUInteger) children.size()];
+template <typename Result, typename... Args>
+struct Signature<Result (Args...)> {};
 
-    for (auto* childHandler : children)
-    {
-        id accessibleElement = [&childHandler]
-        {
-            id native = static_cast<id> (childHandler->getNativeImplementation());
-
-            if (! childHandler->getChildren().empty())
-                return [native accessibilityContainer];
-
-            return native;
-        }();
-
-        if (accessibleElement != nil)
-            [accessibleChildren addObject: accessibleElement];
-    }
-
-    [accessibleChildren addObject: static_cast<id> (handler.getNativeImplementation())];
-
-    return accessibleChildren;
-}
+// @selector isn't constexpr, so the 'sel' members are functions rather than static constexpr data members
+struct SignatureHasText                         : Signature<BOOL()>                                                              { static auto sel() { return @selector (hasText); } };
+struct SignatureSetSelectedTextRange            : Signature<void (UITextRange*)>                                                 { static auto sel() { return @selector (setSelectedTextRange:); } };
+struct SignatureSelectedTextRange               : Signature<UITextRange*()>                                                      { static auto sel() { return @selector (selectedTextRange); } };
+struct SignatureMarkedTextRange                 : Signature<UITextRange*()>                                                      { static auto sel() { return @selector (markedTextRange); } };
+struct SignatureSetMarkedTextSelectedRange      : Signature<void (NSString*, NSRange)>                                           { static auto sel() { return @selector (setMarkedText:selectedRange:); } };
+struct SignatureUnmarkText                      : Signature<void()>                                                              { static auto sel() { return @selector (unmarkText); } };
+struct SignatureMarkedTextStyle                 : Signature<NSDictionary<NSAttributedStringKey, id>*()>                          { static auto sel() { return @selector (markedTextStyle); } };
+struct SignatureSetMarkedTextStyle              : Signature<void (NSDictionary<NSAttributedStringKey, id>*)>                     { static auto sel() { return @selector (setMarkedTextStyle:); } };
+struct SignatureBeginningOfDocument             : Signature<UITextPosition*()>                                                   { static auto sel() { return @selector (beginningOfDocument); } };
+struct SignatureEndOfDocument                   : Signature<UITextPosition*()>                                                   { static auto sel() { return @selector (endOfDocument); } };
+struct SignatureTokenizer                       : Signature<id<UITextInputTokenizer>()>                                          { static auto sel() { return @selector (tokenizer); } };
+struct SignatureBaseWritingDirection            : Signature<NSWritingDirection (UITextPosition*, UITextStorageDirection)>        { static auto sel() { return @selector (baseWritingDirectionForPosition:inDirection:); } };
+struct SignatureCaretRectForPosition            : Signature<CGRect (UITextPosition*)>                                            { static auto sel() { return @selector (caretRectForPosition:); } };
+struct SignatureCharacterRangeByExtending       : Signature<UITextRange* (UITextPosition*, UITextLayoutDirection)>               { static auto sel() { return @selector (characterRangeByExtendingPosition:inDirection:); } };
+struct SignatureCharacterRangeAtPoint           : Signature<UITextRange* (CGPoint)>                                              { static auto sel() { return @selector (characterRangeAtPoint:); } };
+struct SignatureClosestPositionToPoint          : Signature<UITextPosition* (CGPoint)>                                           { static auto sel() { return @selector (closestPositionToPoint:); } };
+struct SignatureClosestPositionToPointInRange   : Signature<UITextPosition* (CGPoint, UITextRange*)>                             { static auto sel() { return @selector (closestPositionToPoint:withinRange:); } };
+struct SignatureComparePositionToPosition       : Signature<NSComparisonResult (UITextPosition*, UITextPosition*)>               { static auto sel() { return @selector (comparePosition:toPosition:); } };
+struct SignatureOffsetFromPositionToPosition    : Signature<NSInteger (UITextPosition*, UITextPosition*)>                        { static auto sel() { return @selector (offsetFromPosition:toPosition:); } };
+struct SignaturePositionFromPositionInDirection : Signature<UITextPosition* (UITextPosition*, UITextLayoutDirection, NSInteger)> { static auto sel() { return @selector (positionFromPosition:inDirection:offset:); } };
+struct SignaturePositionFromPositionOffset      : Signature<UITextPosition* (UITextPosition*, NSInteger)>                        { static auto sel() { return @selector (positionFromPosition:offset:); } };
+struct SignatureFirstRectForRange               : Signature<CGRect (UITextRange*)>                                               { static auto sel() { return @selector (firstRectForRange:); } };
+struct SignatureSelectionRectsForRange          : Signature<NSArray<UITextSelectionRect*>* (UITextRange*)>                       { static auto sel() { return @selector (selectionRectsForRange:); } };
+struct SignaturePositionWithinRange             : Signature<UITextPosition* (UITextRange*, UITextLayoutDirection)>               { static auto sel() { return @selector (positionWithinRange:farthestInDirection:); } };
+struct SignatureReplaceRangeWithText            : Signature<void (UITextRange*, NSString*)>                                      { static auto sel() { return @selector (replaceRange:withText:); } };
+struct SignatureSetBaseWritingDirection         : Signature<void (NSWritingDirection, UITextRange*)>                             { static auto sel() { return @selector (setBaseWritingDirection:forRange:); } };
+struct SignatureTextInRange                     : Signature<NSString* (UITextRange*)>                                            { static auto sel() { return @selector (textInRange:); } };
+struct SignatureTextRangeFromPosition           : Signature<UITextRange* (UITextPosition*, UITextPosition*)>                     { static auto sel() { return @selector (textRangeFromPosition:toPosition:); } };
+struct SignatureSetInputDelegate                : Signature<void (id)>                                                           { static auto sel() { return @selector (setInputDelegate:); } };
+struct SignatureInputDelegate                   : Signature<id()>                                                                { static auto sel() { return @selector (inputDelegate); } };
+struct SignatureKeyboardType                    : Signature<UIKeyboardType()>                                                    { static auto sel() { return @selector (keyboardType); } };
+struct SignatureAutocapitalizationType          : Signature<UITextAutocapitalizationType()>                                      { static auto sel() { return @selector (autocapitalizationType); } };
+struct SignatureAutocorrectionType              : Signature<UITextAutocorrectionType()>                                          { static auto sel() { return @selector (autocorrectionType); } };
 
 //==============================================================================
 class AccessibilityHandler::AccessibilityNativeImpl
@@ -208,6 +220,12 @@ private:
     //==============================================================================
     class AccessibilityElement  : public AccessibleObjCClass<UIAccessibilityElement>
     {
+        template <typename Func, typename... Items>
+        static constexpr void forEach (Func&& func, Items&&... items)
+        {
+            (void) std::initializer_list<int> { ((void) func (std::forward<Items> (items)), 0)... };
+        }
+
     public:
         enum class Type  { defaultElement, textElement };
 
@@ -318,7 +336,8 @@ private:
                             case AccessibilityRole::hyperlink:     return UIAccessibilityTraitLink;
                             case AccessibilityRole::ignored:       return UIAccessibilityTraitNotEnabled;
 
-                            case AccessibilityRole::editableText:
+                            case AccessibilityRole::editableText:  return UIAccessibilityTraitKeyboardKey;
+
                             case AccessibilityRole::slider:
                             case AccessibilityRole::menuItem:
                             case AccessibilityRole::menuBar:
@@ -394,7 +413,7 @@ private:
                     handler->giveAwayFocus();
             });
 
-            addMethod (@selector (accessibilityElementIsFocused), [] (id self, SEL)
+            addMethod (@selector (accessibilityElementIsFocused), [] (id self, SEL) -> BOOL
             {
                 if (auto* handler = getHandler (self))
                     return handler->hasFocus (false);
@@ -447,63 +466,45 @@ private:
 
             if (elementType == Type::textElement)
             {
-                addMethod (@selector (accessibilityLineNumberForPoint:), [] (id self, SEL, CGPoint point)
-                {
-                    if (auto* handler = getHandler (self))
-                    {
-                        if (auto* textInterface = handler->getTextInterface())
-                        {
-                            auto pointInt = roundToIntPoint (point);
+                addMethod (@selector (deleteBackward), [] (id, SEL) {});
+                addMethod (@selector (insertText:), [] (id, SEL, NSString*) {});
 
-                            if (handler->getComponent().getScreenBounds().contains (pointInt))
-                            {
-                                auto textBounds = textInterface->getTextBounds ({ 0, textInterface->getTotalNumCharacters() });
+                forEach ([this] (auto signature) { addPassthroughMethodWithSignature (signature); },
+                         SignatureHasText{},
+                         SignatureSetSelectedTextRange{},
+                         SignatureSelectedTextRange{},
+                         SignatureMarkedTextRange{},
+                         SignatureSetMarkedTextSelectedRange{},
+                         SignatureUnmarkText{},
+                         SignatureMarkedTextStyle{},
+                         SignatureSetMarkedTextStyle{},
+                         SignatureBeginningOfDocument{},
+                         SignatureEndOfDocument{},
+                         SignatureTokenizer{},
+                         SignatureBaseWritingDirection{},
+                         SignatureCaretRectForPosition{},
+                         SignatureCharacterRangeByExtending{},
+                         SignatureCharacterRangeAtPoint{},
+                         SignatureClosestPositionToPoint{},
+                         SignatureClosestPositionToPointInRange{},
+                         SignatureComparePositionToPosition{},
+                         SignatureOffsetFromPositionToPosition{},
+                         SignaturePositionFromPositionInDirection{},
+                         SignaturePositionFromPositionOffset{},
+                         SignatureFirstRectForRange{},
+                         SignatureSelectionRectsForRange{},
+                         SignaturePositionWithinRange{},
+                         SignatureReplaceRangeWithText{},
+                         SignatureSetBaseWritingDirection{},
+                         SignatureTextInRange{},
+                         SignatureTextRangeFromPosition{},
+                         SignatureSetInputDelegate{},
+                         SignatureInputDelegate{},
+                         SignatureKeyboardType{},
+                         SignatureAutocapitalizationType{},
+                         SignatureAutocorrectionType{});
 
-                                for (int i = 0; i < textBounds.getNumRectangles(); ++i)
-                                    if (textBounds.getRectangle (i).contains (pointInt))
-                                        return (NSInteger) i;
-                            }
-                        }
-                    }
-
-                    return NSNotFound;
-                });
-
-                addMethod (@selector (accessibilityContentForLineNumber:), [] (id self, SEL, NSInteger lineNumber) -> NSString*
-                {
-                    if (auto* textInterface = getTextInterface (self))
-                    {
-                        auto lines = StringArray::fromLines (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
-
-                        if ((int) lineNumber < lines.size())
-                            return juceStringToNS (lines[(int) lineNumber]);
-                    }
-
-                    return nil;
-                });
-
-                addMethod (@selector (accessibilityFrameForLineNumber:), [] (id self, SEL, NSInteger lineNumber)
-                {
-                    if (auto* textInterface = getTextInterface (self))
-                    {
-                        auto textBounds = textInterface->getTextBounds ({ 0, textInterface->getTotalNumCharacters() });
-
-                        if (lineNumber < textBounds.getNumRectangles())
-                            return convertToCGRect (textBounds.getRectangle ((int) lineNumber));
-                    }
-
-                    return CGRectZero;
-                });
-
-                addMethod (@selector (accessibilityPageContent), [] (id self, SEL) -> NSString*
-                {
-                    if (auto* textInterface = getTextInterface (self))
-                        return juceStringToNS (textInterface->getText ({ 0, textInterface->getTotalNumCharacters() }));
-
-                    return nil;
-                });
-
-                addProtocol (@protocol (UIAccessibilityReadingContent));
+                addProtocol (@protocol (UITextInput));
             }
 
            #if JUCE_IOS_CONTAINER_API_AVAILABLE
@@ -521,13 +522,67 @@ private:
         }
 
     private:
-        template <typename Return, typename Method>
-        void addMethodWithReturn (SEL selector, Method method) { addMethod (selector, static_cast<Return (*) (id, SEL)> (method)); }
+        template <typename Result>
+        static auto getResult (NSInvocation* invocation, detail::Tag<Result>)
+        {
+            Result result{};
+            [invocation getReturnValue: &result];
+            return result;
+        }
 
-        //==============================================================================
+        static void getResult (NSInvocation*, detail::Tag<void>) {}
+
+        template <typename HasSelector, typename Result, typename... Args>
+        auto makePassthroughCallback (HasSelector, Signature<Result (Args...)>)
+        {
+            return [] (id self, SEL, Args... args) -> Result
+            {
+                if (auto* input = getPeerTextInput (self))
+                {
+                    const auto s = detail::makeCompileTimeStr (@encode (Result), @encode (id), @encode (SEL), @encode (Args)...);
+                    const auto signature = [NSMethodSignature signatureWithObjCTypes: s.data()];
+                    const auto invocation = [NSInvocation invocationWithMethodSignature: signature];
+                    invocation.selector = HasSelector::sel();
+
+                    // Indices 0 and 1 are 'id self' and 'SEL _cmd' respectively
+                    auto counter = 2;
+                    forEach ([&] (auto& arg) { [invocation setArgument: &arg atIndex: counter++]; }, args...);
+
+                    [invocation invokeWithTarget: input];
+
+                    return getResult (invocation, detail::Tag<Result>{});
+                }
+
+                jassertfalse;
+                return {};
+            };
+        }
+
+        template <typename Signature>
+        void addPassthroughMethodWithSignature (Signature signature)
+        {
+            addMethod (Signature::sel(), makePassthroughCallback (signature, signature));
+        }
+
         static UIAccessibilityElement* getContainer (id self)
         {
             return getIvar<UIAccessibilityElement*> (self, "container");
+        }
+
+        static UIViewComponentPeer* getPeer (id self)
+        {
+            if (auto* handler = getHandler (self))
+                return static_cast<UIViewComponentPeer*> (handler->getComponent().getPeer());
+
+            return nil;
+        }
+
+        static JuceTextView* getPeerTextInput (id self)
+        {
+            if (auto* peer = getPeer (self))
+                return peer->hiddenTextInput.get();
+
+            return nil;
         }
 
         //==============================================================================
