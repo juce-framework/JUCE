@@ -350,6 +350,7 @@ public:
         auto newY = content.getY();
         auto newW = jmax (owner.minimumRowWidth, getMaximumVisibleWidth());
         auto newH = owner.totalItems * owner.getRowHeight();
+        DBG (owner.totalItems);
 
         if (newY + newH < getMaximumVisibleHeight() && newH > getMaximumVisibleHeight())
             newY = getMaximumVisibleHeight() - newH;
