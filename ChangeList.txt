@@ -3,6 +3,11 @@
 This file just lists the more notable headline features. For more detailed info
 about changes and bugfixes please see the git log and BREAKING-CHANGES.txt.
 
+Version 7.0.1
+  - Fixed some Xcode and MSVC compiler warnings
+  - Improved VST3 bus configuration and channel handling
+  - Fixed some Metal layer rendering bugs
+
 Version 7.0.0
   - Added Audio Random Access (ARA) SDK support
   - Added support for authoring and hosting LV2 plug-ins

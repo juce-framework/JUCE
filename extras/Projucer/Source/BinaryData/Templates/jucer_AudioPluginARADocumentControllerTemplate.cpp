@@ -12,7 +12,7 @@
 %%araplaybackrenderer_headers%%
 
 //==============================================================================
-ARA::PlugIn::PlaybackRenderer* %%aradocumentcontroller_class_name%%::doCreatePlaybackRenderer() noexcept
+juce::ARAPlaybackRenderer* %%aradocumentcontroller_class_name%%::doCreatePlaybackRenderer() noexcept
 {
     return new %%araplaybackrenderer_class_name%% (getDocumentController());
 }

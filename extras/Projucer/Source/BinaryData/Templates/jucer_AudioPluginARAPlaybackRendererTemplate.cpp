@@ -24,14 +24,16 @@ void %%araplaybackrenderer_class_name%%::releaseResources()
 }
 
 //==============================================================================
-bool %%araplaybackrenderer_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce::AudioProcessor::Realtime realtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept
+bool %%araplaybackrenderer_class_name%%::processBlock (juce::AudioBuffer<float>& buffer,
+                                                       juce::AudioProcessor::Realtime realtime,
+                                                       const juce::AudioPlayHead::PositionInfo& positionInfo) noexcept
 {
     const auto numSamples = buffer.getNumSamples();
     jassert (numSamples <= maximumSamplesPerBlock);
     jassert (numChannels == buffer.getNumChannels());
     jassert (realtime == juce::AudioProcessor::Realtime::no || useBufferedAudioSourceReader);
-    const auto timeInSamples = positionInfo.timeInSamples;
-    const auto isPlaying = positionInfo.isPlaying;
+    const auto timeInSamples = positionInfo.getTimeInSamples().orFallback (0);
+    const auto isPlaying = positionInfo.getIsPlaying();
 
     bool success = true;
     bool didRenderAnyRegion = false;

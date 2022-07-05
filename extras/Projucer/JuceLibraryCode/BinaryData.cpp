@@ -6802,7 +6802,7 @@ static const unsigned char temp_binary_data_36[] =
 "%%araplaybackrenderer_headers%%\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"ARA::PlugIn::PlaybackRenderer* %%aradocumentcontroller_class_name%%::doCreatePlaybackRenderer() noexcept\r\n"
+"juce::ARAPlaybackRenderer* %%aradocumentcontroller_class_name%%::doCreatePlaybackRenderer() noexcept\r\n"
 "{\r\n"
 "    return new %%araplaybackrenderer_class_name%% (getDocumentController());\r\n"
 "}\r\n"
@@ -6862,7 +6862,7 @@ static const unsigned char temp_binary_data_37[] =
 "    //==============================================================================\r\n"
 "    // Override document controller customization methods here\r\n"
 "\r\n"
-"    ARAPlaybackRenderer* doCreatePlaybackRenderer() noexcept override;\r\n"
+"    juce::ARAPlaybackRenderer* doCreatePlaybackRenderer() noexcept override;\r\n"
 "\r\n"
 "    bool doRestoreObjectsFromStream (juce::ARAInputStream& input, const juce::ARARestoreObjectsFilter* filter) noexcept override;\r\n"
 "    bool doStoreObjectsToStream (juce::ARAOutputStream& output, const juce::ARAStoreObjectsFilter* filter) noexcept override;\r\n"
@@ -6902,14 +6902,16 @@ static const unsigned char temp_binary_data_38[] =
 "}\r\n"
 "\r\n"
 "//==============================================================================\r\n"
-"bool %%araplaybackrenderer_class_name%%::processBlock (juce::AudioBuffer<float>& buffer, juce::AudioProcessor::Realtime realtime, const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept\r\n"
+"bool %%araplaybackrenderer_class_name%%::processBlock (juce::AudioBuffer<float>& buffer,\r\n"
+"                                                       juce::AudioProcessor::Realtime realtime,\r\n"
+"                                                       const juce::AudioPlayHead::PositionInfo& positionInfo) noexcept\r\n"
 "{\r\n"
 "    const auto numSamples = buffer.getNumSamples();\r\n"
 "    jassert (numSamples <= maximumSamplesPerBlock);\r\n"
 "    jassert (numChannels == buffer.getNumChannels());\r\n"
 "    jassert (realtime == juce::AudioProcessor::Realtime::no || useBufferedAudioSourceReader);\r\n"
-"    const auto timeInSamples = positionInfo.timeInSamples;\r\n"
-"    const auto isPlaying = positionInfo.isPlaying;\r\n"
+"    const auto timeInSamples = positionInfo.getTimeInSamples().orFallback (0);\r\n"
+"    const auto isPlaying = positionInfo.getIsPlaying();\r\n"
 "\r\n"
 "    bool success = true;\r\n"
 "    bool didRenderAnyRegion = false;\r\n"
@@ -7025,9 +7027,9 @@ static const unsigned char temp_binary_data_39[] =
 "    void releaseResources() override;\r\n"
 "\r\n"
 "    //==============================================================================\r\n"
-"    bool processBlock (juce::AudioBuffer<float> & buffer,\r\n"
+"    bool processBlock (juce::AudioBuffer<float>& buffer,\r\n"
 "                       juce::AudioProcessor::Realtime realtime,\r\n"
-"                       const juce::AudioPlayHead::CurrentPositionInfo& positionInfo) noexcept override;\r\n"
+"                       const juce::AudioPlayHead::PositionInfo& positionInfo) noexcept override;\r\n"
 "\r\n"
 "private:\r\n"
 "    //==============================================================================\r\n"
@@ -8559,10 +8561,10 @@ const char* getNamedResource (const char* resourceNameUTF8, int& numBytes)
         case 0xfb6f6d96:  numBytes = 3554; return jucer_AudioComponentSimpleTemplate_h;
         case 0xafccbd3f:  numBytes = 2941; return jucer_AudioComponentTemplate_cpp;
         case 0x915d7304:  numBytes = 1187; return jucer_AudioComponentTemplate_h;
-        case 0x744d44d6:  numBytes = 1920; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
-        case 0x3eb8f45b:  numBytes = 1439; return jucer_AudioPluginARADocumentControllerTemplate_h;
-        case 0xea35a37d:  numBytes = 5192; return jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
-        case 0x78a6d0c2:  numBytes = 1765; return jucer_AudioPluginARAPlaybackRendererTemplate_h;
+        case 0x744d44d6:  numBytes = 1916; return jucer_AudioPluginARADocumentControllerTemplate_cpp;
+        case 0x3eb8f45b:  numBytes = 1445; return jucer_AudioPluginARADocumentControllerTemplate_h;
+        case 0xea35a37d:  numBytes = 5322; return jucer_AudioPluginARAPlaybackRendererTemplate_cpp;
+        case 0x78a6d0c2:  numBytes = 1757; return jucer_AudioPluginARAPlaybackRendererTemplate_h;
         case 0x27c5a93a:  numBytes = 1355; return jucer_AudioPluginEditorTemplate_cpp;
         case 0x4d0721bf:  numBytes = 973; return jucer_AudioPluginEditorTemplate_h;
         case 0x51b49ac5:  numBytes = 6218; return jucer_AudioPluginFilterTemplate_cpp;
