@@ -471,34 +471,19 @@ bool Desktop::isDarkModeActive() const
                 isEqualToString: nsStringLiteral ("Dark")];
 }
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+static const auto darkModeSelector = @selector (darkModeChanged:);
+static const auto keyboardVisibilitySelector = @selector (keyboardVisiblityChanged:);
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
 class Desktop::NativeDarkModeChangeDetectorImpl
 {
 public:
     NativeDarkModeChangeDetectorImpl()
     {
         static DelegateClass delegateClass;
-
-        delegate = [delegateClass.createInstance() init];
-        object_setInstanceVariable (delegate, "owner", this);
-
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        [[NSDistributedNotificationCenter defaultCenter] addObserver: delegate
-                                                            selector: @selector (darkModeChanged:)
-                                                                name: @"AppleInterfaceThemeChangedNotification"
-                                                              object: nil];
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-    }
-
-    ~NativeDarkModeChangeDetectorImpl()
-    {
-        object_setInstanceVariable (delegate, "owner", nullptr);
-        [[NSDistributedNotificationCenter defaultCenter] removeObserver: delegate];
-        [delegate release];
-    }
-
-    void darkModeChanged()
-    {
-        Desktop::getInstance().darkModeChanged();
+        delegate.reset ([delegateClass.createInstance() init]);
+        observer.emplace (delegate.get(), darkModeSelector, @"AppleInterfaceThemeChangedNotification", nil);
     }
 
 private:
@@ -506,23 +491,13 @@ private:
     {
         DelegateClass()  : ObjCClass<NSObject> ("JUCEDelegate_")
         {
-            addIvar<NativeDarkModeChangeDetectorImpl*> ("owner");
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (darkModeChanged:), darkModeChanged);
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
+            addMethod (darkModeSelector, [] (id, SEL, NSNotification*) { Desktop::getInstance().darkModeChanged(); });
             registerClass();
-        }
-
-        static void darkModeChanged (id self, SEL, NSNotification*)
-        {
-            if (auto* owner = getIvar<NativeDarkModeChangeDetectorImpl*> (self, "owner"))
-                owner->darkModeChanged();
         }
     };
 
-    id delegate = nil;
+    NSUniquePtr<NSObject> delegate;
+    Optional<ScopedNotificationCenterObserver> observer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NativeDarkModeChangeDetectorImpl)
 };
