@@ -26,7 +26,7 @@
 namespace juce
 {
 
-#if JUCE_PLUGINHOST_LV2 || DOXYGEN
+#if (JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))) || DOXYGEN
 
 /**
     Implements a plugin format for LV2 plugins.
