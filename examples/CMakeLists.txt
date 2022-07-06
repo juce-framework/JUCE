@@ -47,6 +47,10 @@ function(_juce_add_pips)
              "${CMAKE_CURRENT_SOURCE_DIR}/ARAPluginDemo.h")
     endif()
 
+    if(NOT TARGET juce_vst2_sdk)
+        list(REMOVE_ITEM headers "${CMAKE_CURRENT_SOURCE_DIR}/ReaperEmbeddedViewPluginDemo.h")
+    endif()
+
     foreach(header IN ITEMS ${headers})
         juce_add_pip(${header} added_target)
         target_link_libraries(${added_target} PUBLIC
