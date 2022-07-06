@@ -83,8 +83,10 @@ endfunction()
 
 macro(_juce_make_absolute path)
     if(NOT IS_ABSOLUTE "${${path}}")
-        get_filename_component("${path}" "${${path}}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
+        get_filename_component(${path} "${${path}}" ABSOLUTE BASE_DIR "${CMAKE_CURRENT_LIST_DIR}")
     endif()
+
+    string(REGEX REPLACE "\\\\" "/" ${path} "${${path}}")
 endmacro()
 
 macro(_juce_make_absolute_and_check path)
