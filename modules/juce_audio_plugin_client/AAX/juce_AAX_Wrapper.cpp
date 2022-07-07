@@ -818,6 +818,34 @@ namespace AAXClasses
                 jassert (inAudioInCount >= inAudioOutCount);
                 auto emptyMidiBuffer = MidiBuffer();
 
+                Array<const float*> inputChannelList;
+                Array<float*> outputChannelList;
+
+                for (decltype(inAudioInCount) i = 0; i < inAudioInCount; ++i)
+                {
+                    // when sidechain connected, iAudioInCount could be maximum support channels reported + sidechain (mono).
+                    if (inAudioIns[i] != nullptr)
+                    {
+                        inputChannelList.add(inAudioIns[i]);
+                    }
+                }
+
+                for (decltype(inAudioOutCount) i = 0; i < inAudioOutCount; ++i)
+                {
+                    if (inAudioOuts[i] != nullptr)
+                    {
+                        outputChannelList.add(inAudioOuts[i]);
+                    }
+                }
+                if (GetSideChainInputNum() > 0)
+                {
+                    // Pro Tools Output buffer excludes side-chain...
+                    outputChannelList.add(getAAXProcessor().sideChainBuffer.getData());
+                }
+
+                // GetSideChainInputNum would produce 0 when Side-Chain isn't connected (tested with PT 12.8).
+                const auto numOfMainInputs = inputChannelList.size() + (GetSideChainInputNum() > 0 ? -1 : 0);
+
                 // handles internal processor latency (if needed)
                 // for more details see Avid's SDK - DemoDelay_HostProcessor_Comp.h
                 auto latencyOffset = getAAXProcessor().getPluginInstance().getLatencySamples();
@@ -827,13 +855,18 @@ namespace AAXClasses
                     for (decltype(inAudioOutCount) ch = 0; ch < inAudioOutCount; ++ch)
                         tempOutBuffer[ch] = new float[*ioWindowSize];
 
+                    UpdateBusLayout(numOfMainInputs, inAudioOutCount, GetSideChainInputNum() > 0);
+                    initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
+
+                    jassert(getAAXProcessor().getPluginInstance().getMainBusNumInputChannels() == numOfMainInputs);
+
                     int32_t remainingDelaySamplesToPrime = latencyOffset;
                     while (remainingDelaySamplesToPrime > 0)
                     {
                         int32_t numSamplesToPrime = std::min (*ioWindowSize, remainingDelaySamplesToPrime);
                         const int64_t firstSampleLocation = GetLocation() + (latencyOffset - remainingDelaySamplesToPrime);
                         GetAudio (inAudioIns, inAudioInCount, firstSampleLocation, ioWindowSize);
-                        auto firstBuffer = getRenderAudioBuffer (inAudioIns, inAudioInCount, tempOutBuffer, inAudioOutCount, ioWindowSize, true);
+                        auto firstBuffer = getRenderAudioBuffer (inputChannelList, outputChannelList, ioWindowSize);
                         getAAXProcessor().getPluginInstance().processBlock (firstBuffer, emptyMidiBuffer);
                         remainingDelaySamplesToPrime -= numSamplesToPrime;
                     }
@@ -848,7 +881,7 @@ namespace AAXClasses
                 // Look ahead in the input audio by latencyOffset. After this call to GetAudio(),
                 // inAudioIns will be populated with the randomly-accessed lookahead samples.
                 GetAudio (inAudioIns, inAudioInCount, GetLocation()+latencyOffset, ioWindowSize);
-                auto buffer = getRenderAudioBuffer (inAudioIns, inAudioInCount, inAudioOuts, inAudioOutCount, ioWindowSize);
+                auto buffer = getRenderAudioBuffer (inputChannelList, outputChannelList, ioWindowSize);
                 getAAXProcessor().getPluginInstance().processBlock (buffer, emptyMidiBuffer);
 
                 return AAX_SUCCESS;
@@ -953,46 +986,11 @@ namespace AAXClasses
                 getAAXProcessor().getPluginInstance().enhancedAudioSuiteInterface = this;
             }
 
-            AudioSampleBuffer getRenderAudioBuffer (const float * const inAudioIns [], int32_t inAudioInCount, float * const inAudioOuts [], int32_t inAudioOutCount, int32_t * ioWindowSize, const bool isFirstTime = false)
+            AudioSampleBuffer getRenderAudioBuffer (Array<const float*>& inputChannelList, Array<float*>& outputChannelList, int32_t * ioWindowSize)
             {
-                Array<const float*> inputChannelList;
-                Array<float*> outputChannelList;
-
-                for (decltype(inAudioInCount) i = 0; i < inAudioInCount; ++i)
-                {
-                    // when sidechain connected, iAudioInCount could be maximum support channels reported + sidechain (mono).
-                    if (inAudioIns[i] != nullptr)
-                    {
-                        inputChannelList.add(inAudioIns[i]);
-                    }
-                }
-
-                for (decltype(inAudioOutCount) i = 0; i < inAudioOutCount; ++i)
-                {
-                    if (inAudioOuts[i] != nullptr)
-                    {
-                        outputChannelList.add(inAudioOuts[i]);
-                    }
-                }
-                if (GetSideChainInputNum() > 0)
-                {
-                    // Pro Tools Output buffer excludes side-chain...
-                    outputChannelList.add(getAAXProcessor().sideChainBuffer.getData());
-                }
-
-                // GetSideChainInputNum would produce 0 when Side-Chain isn't connected (tested with PT 12.8).
-                const auto numOfMainInputs = inputChannelList.size() + (GetSideChainInputNum() > 0 ? -1 : 0);
-
-                if (isFirstTime)
-                {
-                    UpdateBusLayout(numOfMainInputs, inAudioOutCount, GetSideChainInputNum() > 0);
-                    initRandomAccessReader(inAudioIns, numOfMainInputs, inAudioInCount);
-                }
-                jassert(getAAXProcessor().getPluginInstance().getMainBusNumInputChannels() == numOfMainInputs);
-
                 // clear output buffers
-                for (decltype(inAudioOutCount) i = 0; i < inAudioOutCount; ++i)
-                    FloatVectorOperations::clear (inAudioOuts[i], *ioWindowSize);
+                for (auto i = 0; i < outputChannelList.size(); ++i)
+                    FloatVectorOperations::clear (outputChannelList[i], *ioWindowSize);
                 // copy input buffers
                 for (int i = 0; i < inputChannelList.size(); ++i)
                     FloatVectorOperations::copy (outputChannelList.getRawDataPointer()[i], inputChannelList.getRawDataPointer()[i], *ioWindowSize);
