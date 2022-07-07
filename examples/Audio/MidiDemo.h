@@ -241,16 +241,17 @@ public:
 
 private:
     //==============================================================================
-    struct MidiDeviceListBox : public ListBox,
-                               private ListBoxModel
+    struct MidiDeviceListBox : private ListBoxModel,
+                               public ListBox
     {
         MidiDeviceListBox (const String& name,
                            MidiDemo& contentComponent,
                            bool isInputDeviceList)
-            : ListBox (name, this),
+            : ListBox (name),
               parent (contentComponent),
               isInput (isInputDeviceList)
         {
+            setModel (this);
             setOutlineThickness (1);
             setMultipleSelectionEnabled (true);
             setClickingTogglesRowSelection (true);
