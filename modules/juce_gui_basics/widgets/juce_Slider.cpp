@@ -122,20 +122,34 @@ public:
         return 0.0f;
     }
 
+    void setNumDecimalPlacesToDisplay (int decimalPlacesToDisplay)
+    {
+        fixedNumDecimalPlaces = jmax (0, decimalPlacesToDisplay);
+        numDecimalPlaces = fixedNumDecimalPlaces;
+    }
+
+    int getNumDecimalPlacesToDisplay() const
+    {
+        return fixedNumDecimalPlaces == -1 ? numDecimalPlaces : fixedNumDecimalPlaces;
+    }
+
     void updateRange()
     {
-        // figure out the number of DPs needed to display all values at this
-        // interval setting.
-        numDecimalPlaces = 7;
-
-        if (normRange.interval != 0.0)
+        if (fixedNumDecimalPlaces == -1)
         {
-            int v = std::abs (roundToInt (normRange.interval * 10000000));
+            // figure out the number of DPs needed to display all values at this
+            // interval setting.
+            numDecimalPlaces = 7;
 
-            while ((v % 10) == 0 && numDecimalPlaces > 0)
+            if (normRange.interval != 0.0)
             {
-                --numDecimalPlaces;
-                v /= 10;
+                int v = std::abs (roundToInt (normRange.interval * 10000000));
+
+                while ((v % 10) == 0 && numDecimalPlaces > 0)
+                {
+                    --numDecimalPlaces;
+                    v /= 10;
+                }
             }
         }
 
@@ -1299,6 +1313,7 @@ public:
     TextEntryBoxPosition textBoxPos;
     String textSuffix;
     int numDecimalPlaces = 7;
+    int fixedNumDecimalPlaces = -1;
     int textBoxWidth = 80, textBoxHeight = 20;
     IncDecButtonMode incDecButtonMode = incDecButtonsNotDraggable;
     ModifierKeys::Flags modifierToSwapModes = ModifierKeys::ctrlAltCommandModifiers;
@@ -1658,11 +1673,14 @@ double Slider::snapValue (double attemptedValue, DragMode)
     return attemptedValue;
 }
 
-int Slider::getNumDecimalPlacesToDisplay() const noexcept   { return pimpl->numDecimalPlaces; }
+int Slider::getNumDecimalPlacesToDisplay() const noexcept
+{
+    return pimpl->getNumDecimalPlacesToDisplay();
+}
 
 void Slider::setNumDecimalPlacesToDisplay (int decimalPlacesToDisplay)
 {
-    pimpl->numDecimalPlaces = decimalPlacesToDisplay;
+    pimpl->setNumDecimalPlacesToDisplay (decimalPlacesToDisplay);
     updateText();
 }
 
