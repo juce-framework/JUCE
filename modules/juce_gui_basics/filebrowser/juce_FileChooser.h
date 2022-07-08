@@ -46,7 +46,7 @@ namespace juce
             File mooseFile (chooser.getResult());
 
             loadMoose (mooseFile);
-        }
+        });
     }
     @endcode
 
