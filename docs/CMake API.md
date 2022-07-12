@@ -544,7 +544,7 @@ attributes directly to these creation functions, rather than adding them later.
   `AAX_ePlugInCategory_NoiseReduction`, `AAX_ePlugInCategory_Dither`,
   `AAX_ePlugInCategory_SoundField`, `AAX_ePlugInCategory_HWGenerators`,
   `AAX_ePlugInCategory_SWGenerators`, `AAX_ePlugInCategory_WrappedPlugin`,
-  `AAX_ePlugInCategory_Effect`
+  `AAX_EPlugInCategory_Effect`
 
 `PLUGINHOST_AU`
 - May be either TRUE or FALSE (defaults to FALSE). If TRUE, will add the preprocessor definition
