@@ -92,8 +92,8 @@ For full terms see [LICENSE.md](LICENSE.md).
 
 The JUCE framework contains the following dependencies:
 - [Oboe](modules/juce_audio_devices/native/oboe/) ([Apache 2.0](modules/juce_audio_devices/native/oboe/LICENSE))
-- [FLAC](modules/juce_audio_formats/codecs/flac/) ([BSD](modules/juce_audio_formats/codecs/flac/Flac Licence.txt))
-- [Ogg Vorbis](modules/juce_audio_formats/codecs/oggvorbis/) ([BSD](modules/juce_audio_formats/codecs/oggvorbis/Ogg Vorbis Licence.txt))
+- [FLAC](modules/juce_audio_formats/codecs/flac/) ([BSD](modules/juce_audio_formats/codecs/flac/Flac%20Licence.txt))
+- [Ogg Vorbis](modules/juce_audio_formats/codecs/oggvorbis/) ([BSD](modules/juce_audio_formats/codecs/oggvorbis/Ogg%20Vorbis%20Licence.txt))
 - [CoreAudioUtilityClasses](modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/) ([Apple](modules/juce_audio_plugin_client/AU/CoreAudioUtilityClasses/AUBase.cpp))
 - [AUResources.r](modules/juce_audio_plugin_client/AUResources.r) ([Apple](modules/juce_audio_plugin_client/AUResources.r))
 - [LV2](modules/juce_audio_processors/format_types/LV2_SDK/) ([ISC](modules/juce_audio_processors/format_types/LV2_SDK/lv2/COPYING))
