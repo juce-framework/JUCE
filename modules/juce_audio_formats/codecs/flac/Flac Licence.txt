@@ -5,8 +5,8 @@ I've incorporated FLAC directly into the JUCE codebase because it makes
 things much easier than having to make all your builds link correctly to
 the appropriate libraries on every different platform.
 
-I've made minimal changes to the FLAC code - just tweaked a few include paths 
-to make it build smoothly, added some headers to allow you to turn off FLAC 
+I've made minimal changes to the FLAC code - just tweaked a few include paths
+to make it build smoothly, added some headers to allow you to turn off FLAC
 compilation, and commented-out a couple of unused bits of code.
 
 =====================================================================
