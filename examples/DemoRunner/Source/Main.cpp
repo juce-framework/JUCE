@@ -153,6 +153,13 @@ private:
 
         void closeButtonPressed() override    { JUCEApplication::getInstance()->systemRequestedQuit(); }
 
+       #if JUCE_IOS || JUCE_ANDROID
+        void parentSizeChanged() override
+        {
+            getMainComponent().resized();
+        }
+       #endif
+
         //==============================================================================
         MainComponent& getMainComponent()    { return *dynamic_cast<MainComponent*> (getContentComponent()); }
 
