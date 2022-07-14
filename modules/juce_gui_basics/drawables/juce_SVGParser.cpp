@@ -1093,9 +1093,9 @@ private:
                 dt->setFont (font, true);
 
                 if (additonalTransform != nullptr)
-                    dt->setTransform (transform.followedBy (*additonalTransform));
+                    dt->setDrawableTransform (transform.followedBy (*additonalTransform));
                 else
-                    dt->setTransform (transform);
+                    dt->setDrawableTransform (transform);
 
                 dt->setColour (parseColour (xml, "fill", Colours::black)
                                  .withMultipliedAlpha (parseSafeFloat (getStyleAttribute (xml, "fill-opacity", "1"))));
