@@ -545,10 +545,10 @@ private:
             return;
         }
 
-        getEnv()->CallObjectMethod (billingClient,
-                                    JuceBillingClient.consumePurchase,
-                                    LocalRef<jstring> { javaString (productIdentifier) }.get(),
-                                    LocalRef<jstring> { javaString (purchaseToken) }.get());
+        getEnv()->CallVoidMethod (billingClient,
+                                  JuceBillingClient.consumePurchase,
+                                  LocalRef<jstring> { javaString (productIdentifier) }.get(),
+                                  LocalRef<jstring> { javaString (purchaseToken) }.get());
     }
 
     //==============================================================================
