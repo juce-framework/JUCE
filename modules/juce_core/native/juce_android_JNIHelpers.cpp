@@ -66,7 +66,7 @@ static const uint8 invocationHandleByteCode[] =
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD       (findClass,            "findClass",            "(Ljava/lang/String;)Ljava/lang/Class;") \
+ METHOD       (loadClass,            "loadClass",            "(Ljava/lang/String;Z)Ljava/lang/Class;") \
  STATICMETHOD (getSystemClassLoader, "getSystemClassLoader", "()Ljava/lang/ClassLoader;")
 
  DECLARE_JNI_CLASS (JavaClassLoader, "java/lang/ClassLoader")
@@ -149,7 +149,7 @@ static File getCodeCacheDirectory()
     return File("/data/data/" + bundleId + "/code_cache");
 }
 
-void JNIClassBase::initialise (JNIEnv* env)
+void JNIClassBase::initialise (JNIEnv* env, jobject context)
 {
     auto sdkVersion = getAndroidSDKVersion();
 
@@ -158,9 +158,16 @@ void JNIClassBase::initialise (JNIEnv* env)
         LocalRef<jstring> classNameAndPackage (javaString (String (classPath).replaceCharacter (L'/', L'.')));
         static Array<GlobalRef> byteCodeLoaders;
 
-        if (! SystemJavaClassComparator::isSystemClass(this))
+        if (! SystemJavaClassComparator::isSystemClass (this))
         {
-            LocalRef<jobject> defaultClassLoader (env->CallStaticObjectMethod (JavaClassLoader, JavaClassLoader.getSystemClassLoader));
+            // We use the context's class loader, rather than the 'system' class loader, because we
+            // may need to load classes from our library dependencies (such as the BillingClient
+            // library), and the system class loader is not aware of those libraries.
+            const LocalRef<jobject> defaultClassLoader { env->CallObjectMethod (context,
+                                                                                env->GetMethodID (env->FindClass ("android/content/Context"),
+                                                                                                  "getClassLoader",
+                                                                                                  "()Ljava/lang/ClassLoader;")) };
+
             tryLoadingClassWithClassLoader (env, defaultClassLoader.get());
 
             if (classRef == nullptr)
@@ -229,7 +236,7 @@ void JNIClassBase::initialise (JNIEnv* env)
                     if (byteCodeClassLoader != nullptr)
                     {
                         tryLoadingClassWithClassLoader (env, byteCodeClassLoader.get());
-                        byteCodeLoaders.add (GlobalRef(byteCodeClassLoader));
+                        byteCodeLoaders.add (GlobalRef (byteCodeClassLoader));
                     }
                 }
             }
@@ -249,9 +256,9 @@ void JNIClassBase::tryLoadingClassWithClassLoader (JNIEnv* env, jobject classLoa
 
     // Android SDK <= 19 has a bug where the class loader might throw an exception but still return
     // a non-nullptr. So don't assign the result of this call to a jobject just yet...
-    auto classObj = env->CallObjectMethod (classLoader, JavaClassLoader.findClass, classNameAndPackage.get());
+    auto classObj = env->CallObjectMethod (classLoader, JavaClassLoader.loadClass, classNameAndPackage.get(), (jboolean) true);
 
-    if (jthrowable exception = env->ExceptionOccurred ())
+    if (jthrowable exception = env->ExceptionOccurred())
     {
         env->ExceptionClear();
         classObj = nullptr;
@@ -268,11 +275,11 @@ void JNIClassBase::release (JNIEnv* env)
         env->DeleteGlobalRef (classRef);
 }
 
-void JNIClassBase::initialiseAllClasses (JNIEnv* env)
+void JNIClassBase::initialiseAllClasses (JNIEnv* env, jobject context)
 {
     const Array<JNIClassBase*>& classes = getClasses();
     for (int i = classes.size(); --i >= 0;)
-        classes.getUnchecked(i)->initialise (env);
+        classes.getUnchecked(i)->initialise (env, context);
 }
 
 void JNIClassBase::releaseAllClasses (JNIEnv* env)

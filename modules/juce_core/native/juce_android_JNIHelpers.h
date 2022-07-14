@@ -177,7 +177,7 @@ public:
 
     operator jclass() const noexcept  { return classRef; }
 
-    static void initialiseAllClasses (JNIEnv*);
+    static void initialiseAllClasses (JNIEnv*, jobject context);
     static void releaseAllClasses (JNIEnv*);
 
     const char* getClassPath() const noexcept { return classPath; }
@@ -202,7 +202,7 @@ private:
     jclass classRef = nullptr;
 
     static Array<JNIClassBase*>& getClasses();
-    void initialise (JNIEnv*);
+    void initialise (JNIEnv*, jobject context);
     void release (JNIEnv*);
     void tryLoadingClassWithClassLoader (JNIEnv* env, jobject classLoader);
 

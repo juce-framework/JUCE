@@ -58,6 +58,7 @@ JNIEnv* getEnv() noexcept
 
 static void JNICALL juce_JavainitialiseJUCE (JNIEnv* env, jobject /*jclass*/, jobject context)
 {
+    JNIClassBase::initialiseAllClasses (env, context);
     Thread::initialiseJUCE (env, context);
 }
 
@@ -88,8 +89,6 @@ extern "C" jint JNIEXPORT JNI_OnLoad (JavaVM* vm, void*)
         // call Thread::initialiseJUCE manually
         env->ExceptionClear();
     }
-
-    JNIClassBase::initialiseAllClasses (env);
 
     return JNI_VERSION_1_2;
 }
