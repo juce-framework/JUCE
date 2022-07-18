@@ -615,6 +615,27 @@ protected:
     }
 };
 
+struct PlayHeadState
+{
+    void update (AudioPlayHead* aph)
+    {
+        const auto info = aph->getPosition();
+
+        if (info.hasValue() && info->getIsPlaying())
+        {
+            isPlaying.store (true);
+            timeInSeconds.store (info->getTimeInSeconds().orFallback (0));
+        }
+        else
+        {
+            isPlaying.store (false);
+        }
+    }
+
+    std::atomic<bool>   isPlaying     { false };
+    std::atomic<double> timeInSeconds { 0.0 };
+};
+
 //==============================================================================
 class ARADemoPluginAudioProcessorImpl  : public AudioProcessor,
                                          public AudioProcessorARAExtension
@@ -630,11 +651,13 @@ public:
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
     {
-         prepareToPlayForARA (sampleRate, samplesPerBlock, getMainBusNumOutputChannels(), getProcessingPrecision());
+        playHeadState.isPlaying.store (false);
+        prepareToPlayForARA (sampleRate, samplesPerBlock, getMainBusNumOutputChannels(), getProcessingPrecision());
     }
 
     void releaseResources() override
     {
+        playHeadState.isPlaying.store (false);
         releaseResourcesForARA();
     }
 
@@ -653,7 +676,10 @@ public:
 
         ScopedNoDenormals noDenormals;
 
-        if (! processBlockForARA (buffer, isRealtime(), getPlayHead()))
+        auto* playHead = getPlayHead();
+        playHeadState.update (playHead);
+
+        if (! processBlockForARA (buffer, isRealtime(), playHead))
             processBlockBypassed (buffer, midiMessages);
     }
 
@@ -673,6 +699,8 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock&) override                  {}
     void setStateInformation (const void*, int) override              {}
+
+    PlayHeadState playHeadState;
 
 private:
     //==============================================================================
@@ -1043,8 +1071,8 @@ public:
         void paint (Graphics& g) override { g.fillAll (juce::Colours::yellow.darker (0.2f)); }
     };
 
-    OverlayComponent(std::function<AudioPlayHead*()> getAudioPlayheadIn)
-        : getAudioPlayhead (std::move (getAudioPlayheadIn))
+    OverlayComponent (PlayHeadState& playHeadStateIn)
+        : playHeadState (&playHeadStateIn)
     {
         addChildComponent (playheadMarker);
         setInterceptsMouseClicks (false, false);
@@ -1074,12 +1102,9 @@ public:
 private:
     void doResize()
     {
-        auto* aph = getAudioPlayhead();
-        const auto info = aph->getPosition();
-
-        if (info.hasValue() && info->getIsPlaying())
+        if (playHeadState->isPlaying.load())
         {
-            const auto markerX = info->getTimeInSeconds().orFallback (0) * pixelPerSecond;
+            const auto markerX = playHeadState->timeInSeconds.load() * pixelPerSecond;
             const auto playheadLine = getLocalBounds().withTrimmedLeft ((int) (markerX - markerWidth / 2.0) - horizontalOffset)
                                                       .removeFromLeft ((int) markerWidth);
             playheadMarker.setVisible (true);
@@ -1098,7 +1123,7 @@ private:
 
     static constexpr double markerWidth = 2.0;
 
-    std::function<AudioPlayHead*()> getAudioPlayhead;
+    PlayHeadState* playHeadState;
     double pixelPerSecond = 1.0;
     int horizontalOffset = 0;
     PlayheadMarkerComponent playheadMarker;
@@ -1110,9 +1135,9 @@ class DocumentView  : public Component,
                       private ARAEditorView::Listener
 {
 public:
-    explicit DocumentView (ARADocument& document, std::function<AudioPlayHead*()> getAudioPlayhead)
+    explicit DocumentView (ARADocument& document, PlayHeadState& playHeadState)
         : araDocument (document),
-          overlay (std::move (getAudioPlayhead))
+          overlay (playHeadState)
     {
         addAndMakeVisible (tracksBackground);
 
@@ -1371,8 +1396,7 @@ public:
         if (auto* editorView = getARAEditorView())
         {
             auto* document = ARADocumentControllerSpecialisation::getSpecialisedDocumentController(editorView->getDocumentController())->getDocument();
-            documentView = std::make_unique<DocumentView> (*document,
-                                                           [this]() { return getAudioProcessor()->getPlayHead(); });
+            documentView = std::make_unique<DocumentView> (*document, p.playHeadState );
         }
 
         addAndMakeVisible (documentView.get());
