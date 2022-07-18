@@ -72,6 +72,11 @@
     "~/.lv2"                        LILV_PATH_SEP \
     "/usr/lib/lv2"                  LILV_PATH_SEP \
     "/usr/local/lib/lv2"
+ #elif JUCE_BSD
+  #define LILV_DEFAULT_LV2_PATH \
+    "~/.lv2"                        LILV_PATH_SEP \
+    "/usr/lib/lv2"                  LILV_PATH_SEP \
+    "/usr/local/lib/lv2"
  #else
   #error "Unsupported platform"
  #endif

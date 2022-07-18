@@ -61,7 +61,7 @@
 namespace juce
 {
 
-#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && JUCE_LINUX)
+#if JUCE_PLUGINHOST_VST || (JUCE_PLUGINHOST_LADSPA && (JUCE_LINUX || JUCE_BSD))
 
 static bool arrayContainsPlugin (const OwnedArray<PluginDescription>& list,
                                  const PluginDescription& desc)
