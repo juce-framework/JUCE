@@ -29,7 +29,6 @@ namespace juce
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
- METHOD (constructor,              "<init>",                   "()V") \
  METHOD (setSource,                "setSource",                "(Landroid/view/View;I)V") \
  METHOD (addChild,                 "addChild",                 "(Landroid/view/View;I)V") \
  METHOD (setParent,                "setParent",                "(Landroid/view/View;)V") \

@@ -158,10 +158,15 @@ DECLARE_JNI_CLASS (AndroidViewManager, "android/view/ViewManager")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (create,           "<init>",             "(IIIIIII)V") \
  FIELD  (gravity,          "gravity",            "I") \
- FIELD  (windowAnimations, "windowAnimations",   "I") \
- FIELD  (layoutInDisplayCutoutMode, "layoutInDisplayCutoutMode", "I")
+ FIELD  (windowAnimations, "windowAnimations",   "I")
 
 DECLARE_JNI_CLASS (AndroidWindowManagerLayoutParams, "android/view/WindowManager$LayoutParams")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ FIELD  (layoutInDisplayCutoutMode, "layoutInDisplayCutoutMode", "I")
+
+DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidWindowManagerLayoutParams28, "android/view/WindowManager$LayoutParams", 28)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -503,7 +508,7 @@ public:
 
             if (supportsDisplayCutout())
             {
-                if (const auto fieldID = AndroidWindowManagerLayoutParams.layoutInDisplayCutoutMode)
+                if (const auto fieldID = AndroidWindowManagerLayoutParams28.layoutInDisplayCutoutMode)
                     env->SetIntField (windowLayoutParams, fieldID, LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS);
             }
 

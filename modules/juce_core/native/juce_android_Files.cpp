@@ -45,7 +45,7 @@ DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver")
  METHOD (releasePersistableUriPermission,   "releasePersistableUriPermission",  "(Landroid/net/Uri;I)V") \
  METHOD (getPersistedUriPermissions,        "getPersistedUriPermissions",       "()Ljava/util/List;")
 
-DECLARE_JNI_CLASS (ContentResolver19, "android/content/ContentResolver")
+DECLARE_JNI_CLASS_WITH_MIN_SDK (ContentResolver19, "android/content/ContentResolver", 19)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
