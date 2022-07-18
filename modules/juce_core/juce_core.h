@@ -344,6 +344,7 @@ JUCE_END_IGNORE_WARNINGS_MSVC
 #include "memory/juce_AllocationHooks.h"
 #include "memory/juce_Reservoir.h"
 #include "files/juce_AndroidDocument.h"
+#include "streams/juce_AndroidDocumentInputSource.h"
 
 #if JUCE_CORE_INCLUDE_OBJC_HELPERS && (JUCE_MAC || JUCE_IOS)
  #include "native/juce_mac_ObjCHelpers.h"
