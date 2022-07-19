@@ -33,18 +33,20 @@
 
  BEGIN_JUCE_MODULE_DECLARATION
 
-  ID:                 juce_gui_extra
-  vendor:             juce
-  version:            7.0.1
-  name:               JUCE extended GUI classes
-  description:        Miscellaneous GUI classes for specialised tasks.
-  website:            http://www.juce.com/juce
-  license:            GPL/Commercial
-  minimumCppStandard: 14
+  ID:                     juce_gui_extra
+  vendor:                 juce
+  version:                7.0.1
+  name:                   JUCE extended GUI classes
+  description:            Miscellaneous GUI classes for specialised tasks.
+  website:                http://www.juce.com/juce
+  license:                GPL/Commercial
+  minimumCppStandard:     14
 
-  dependencies:       juce_gui_basics
-  OSXFrameworks:      WebKit
-  iOSFrameworks:      WebKit
+  dependencies:           juce_gui_basics
+  OSXFrameworks:          WebKit
+  iOSFrameworks:          WebKit
+  WeakiOSFrameworks:      UserNotifications
+  WeakMacOSFrameworks:    UserNotifications
 
  END_JUCE_MODULE_DECLARATION
 
