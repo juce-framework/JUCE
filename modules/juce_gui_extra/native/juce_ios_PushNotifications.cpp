@@ -486,19 +486,61 @@ private:
         {
             addIvar<PushNotificationsDelegate*> ("self");
 
-            addMethod (@selector (application:didRegisterUserNotificationSettings:),                                                 didRegisterUserNotificationSettings);
-            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:),                                    registeredForRemoteNotifications);
-            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:),                                    failedToRegisterForRemoteNotifications);
-            addMethod (@selector (application:didReceiveRemoteNotification:),                                                        didReceiveRemoteNotification);
-            addMethod (@selector (application:didReceiveRemoteNotification:fetchCompletionHandler:),                                 didReceiveRemoteNotificationFetchCompletionHandler);
-            addMethod (@selector (application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:), handleActionForRemoteNotificationCompletionHandler);
-            addMethod (@selector (application:didReceiveLocalNotification:),                                                         didReceiveLocalNotification);
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:),                   handleActionForLocalNotificationCompletionHandler);
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:),  handleActionForLocalNotificationWithResponseCompletionHandler);
+            addMethod (@selector (application:didRegisterUserNotificationSettings:), [] (id self, SEL, UIApplication*, UIUserNotificationSettings* settings)
+            {
+                getThis (self).didRegisterUserNotificationSettings (settings);
+            });
+
+            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), [] (id self, SEL, UIApplication*, NSData* deviceToken)
+            {
+                getThis (self).registeredForRemoteNotifications (deviceToken);
+            });
+
+            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), [] (id self, SEL, UIApplication*, NSError* error)
+            {
+                getThis (self).failedToRegisterForRemoteNotifications (error);
+            });
+
+            addMethod (@selector (application:didReceiveRemoteNotification:), [] (id self, SEL, UIApplication*, NSDictionary* userInfo)
+            {
+                getThis (self).didReceiveRemoteNotification (userInfo);
+            });
+
+            addMethod (@selector (application:didReceiveRemoteNotification:fetchCompletionHandler:), [] (id self, SEL, UIApplication*, NSDictionary* userInfo, void (^completionHandler)(UIBackgroundFetchResult result))
+            {
+                getThis (self).didReceiveRemoteNotificationFetchCompletionHandler (userInfo, completionHandler);
+            });
+
+            addMethod (@selector (application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, NSDictionary* userInfo, NSDictionary* responseInfo, void (^completionHandler)())
+            {
+                getThis (self).handleActionForRemoteNotificationCompletionHandler (actionIdentifier, userInfo, responseInfo, completionHandler);
+            });
+
+            addMethod (@selector (application:didReceiveLocalNotification:), [] (id self, SEL, UIApplication*, UILocalNotification* notification)
+            {
+                getThis (self).didReceiveLocalNotification (notification);
+            });
+
+            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, void (^completionHandler)())
+            {
+                getThis (self).handleActionForLocalNotificationCompletionHandler (actionIdentifier, notification, completionHandler);
+            });
+
+            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, NSDictionary* responseInfo, void (^completionHandler)())
+            {
+                getThis (self). handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier, notification, responseInfo, completionHandler);
+            });
 
            #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-            addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:),                            willPresentNotificationWithCompletionHandler);
-            addMethod (@selector (userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:),                     didReceiveNotificationResponseWithCompletionHandler);
+            addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotification* notification, void (^completionHandler)(UNNotificationPresentationOptions options))
+            {
+                getThis (self).willPresentNotificationWithCompletionHandler (notification, completionHandler);
+            });
+
+            addMethod (@selector (userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotificationResponse* response, void (^completionHandler)())
+            {
+                getThis (self).didReceiveNotificationResponseWithCompletionHandler (response, completionHandler);
+            });
            #endif
 
             registerClass();
@@ -507,52 +549,6 @@ private:
         //==============================================================================
         static PushNotificationsDelegate& getThis (id self)         { return *getIvar<PushNotificationsDelegate*> (self, "self"); }
         static void setThis (id self, PushNotificationsDelegate* d) { object_setInstanceVariable (self, "self", d); }
-
-        //==============================================================================
-        static void didRegisterUserNotificationSettings                           (id self, SEL, UIApplication*,
-                                                                                   UIUserNotificationSettings* settings)                        { getThis (self).didRegisterUserNotificationSettings (settings); }
-        static void registeredForRemoteNotifications                              (id self, SEL, UIApplication*,
-                                                                                   NSData* deviceToken)                                         { getThis (self).registeredForRemoteNotifications (deviceToken); }
-
-        static void failedToRegisterForRemoteNotifications                        (id self, SEL, UIApplication*,
-                                                                                   NSError* error)                                              { getThis (self).failedToRegisterForRemoteNotifications (error); }
-
-        static void didReceiveRemoteNotification                                  (id self, SEL, UIApplication*,
-                                                                                   NSDictionary* userInfo)                                      { getThis (self).didReceiveRemoteNotification (userInfo); }
-
-        static void didReceiveRemoteNotificationFetchCompletionHandler            (id self, SEL, UIApplication*,
-                                                                                   NSDictionary* userInfo,
-                                                                                   void (^completionHandler)(UIBackgroundFetchResult result))   { getThis (self).didReceiveRemoteNotificationFetchCompletionHandler (userInfo, completionHandler); }
-
-        static void handleActionForRemoteNotificationCompletionHandler            (id self, SEL, UIApplication*,
-                                                                                   NSString* actionIdentifier,
-                                                                                   NSDictionary* userInfo,
-                                                                                   NSDictionary* responseInfo,
-                                                                                   void (^completionHandler)())                                 { getThis (self).handleActionForRemoteNotificationCompletionHandler (actionIdentifier, userInfo, responseInfo, completionHandler); }
-
-        static void didReceiveLocalNotification                                   (id self, SEL, UIApplication*,
-                                                                                   UILocalNotification* notification)                           { getThis (self).didReceiveLocalNotification (notification); }
-
-        static void handleActionForLocalNotificationCompletionHandler             (id self, SEL, UIApplication*,
-                                                                                   NSString* actionIdentifier,
-                                                                                   UILocalNotification* notification,
-                                                                                   void (^completionHandler)())                                 { getThis (self).handleActionForLocalNotificationCompletionHandler (actionIdentifier, notification, completionHandler); }
-
-        static void handleActionForLocalNotificationWithResponseCompletionHandler (id self, SEL, UIApplication*,
-                                                                                   NSString* actionIdentifier,
-                                                                                   UILocalNotification* notification,
-                                                                                   NSDictionary* responseInfo,
-                                                                                   void (^completionHandler)())                                 { getThis (self). handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier, notification, responseInfo, completionHandler); }
-
-       #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-        static void willPresentNotificationWithCompletionHandler        (id self, SEL, UNUserNotificationCenter*,
-                                                                         UNNotification* notification,
-                                                                         void (^completionHandler)(UNNotificationPresentationOptions options))  { getThis (self).willPresentNotificationWithCompletionHandler (notification, completionHandler); }
-
-        static void didReceiveNotificationResponseWithCompletionHandler (id self, SEL, UNUserNotificationCenter*,
-                                                                         UNNotificationResponse* response,
-                                                                         void (^completionHandler)())                                           { getThis (self).didReceiveNotificationResponseWithCompletionHandler (response, completionHandler); }
-       #endif
     };
 
     //==============================================================================
