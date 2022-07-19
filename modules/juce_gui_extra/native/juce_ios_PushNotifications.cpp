@@ -49,7 +49,8 @@ struct PushNotificationsDelegateDetails
                                                         title: juceStringToNS (a.title)
                                                       options: NSUInteger (a.destructive << 1 | (! a.triggerInBackground) << 2)];
         }
-        
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         auto action = [[UIMutableUserNotificationAction alloc] init];
 
         action.identifier     = juceStringToNS (a.identifier);
@@ -64,6 +65,7 @@ struct PushNotificationsDelegateDetails
         [action autorelease];
 
         return action;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     static void* categoryToNSCategory (const Category& c)
@@ -83,7 +85,8 @@ struct PushNotificationsDelegateDetails
                                                 intentIdentifiers: @[]
                                                           options: c.sendDismissAction ? UNNotificationCategoryOptionCustomDismissAction : 0];
         }
-        
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         auto category = [[UIMutableUserNotificationCategory alloc] init];
         category.identifier = juceStringToNS (c.identifier);
 
@@ -101,9 +104,11 @@ struct PushNotificationsDelegateDetails
         [category autorelease];
 
         return category;
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     //==============================================================================
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     static UILocalNotification* juceNotificationToUILocalNotification (const PushNotifications::Notification& n)
     {
         auto notification = [[UILocalNotification alloc] init];
@@ -126,6 +131,7 @@ struct PushNotificationsDelegateDetails
 
         return notification;
     }
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     static UNNotificationRequest* juceNotificationToUNNotificationRequest (const PushNotifications::Notification& n)
     {
@@ -273,6 +279,7 @@ struct PushNotificationsDelegateDetails
         return unNotificationRequestToJuceNotification (n.request);
     }
 
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     static PushNotifications::Notification uiLocalNotificationToJuceNotification (UILocalNotification* n)
     {
         PushNotifications::Notification notif;
@@ -323,6 +330,7 @@ struct PushNotificationsDelegateDetails
 
         return category;
     }
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     static Action unNotificationActionToAction (UNNotificationAction* a)
     {
@@ -393,7 +401,7 @@ struct PushNotificationsDelegateDetails
 
         return notification;
     }
-    
+
 private:
     ~PushNotificationsDelegateDetails() = delete;
 };
@@ -401,11 +409,11 @@ private:
 //==============================================================================
 struct PushNotificationsDelegate
 {
-    PushNotificationsDelegate() : delegate ([getClass().createInstance() init])
+    PushNotificationsDelegate()
     {
         Class::setThis (delegate.get(), this);
 
-        id<UIApplicationDelegate> appDelegate = [[UIApplication sharedApplication] delegate];
+        auto appDelegate = [[UIApplication sharedApplication] delegate];
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         if ([appDelegate respondsToSelector: @selector (setPushNotificationsDelegateToUse:)])
@@ -413,9 +421,7 @@ struct PushNotificationsDelegate
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
-    virtual ~PushNotificationsDelegate() {}
-
-    virtual void didRegisterUserNotificationSettings (UIUserNotificationSettings* notificationSettings) = 0;
+    virtual ~PushNotificationsDelegate() = default;
 
     virtual void registeredForRemoteNotifications (NSData* deviceToken) = 0;
 
@@ -431,6 +437,10 @@ struct PushNotificationsDelegate
                                                                      NSDictionary* responseInfo,
                                                                      void (^completionHandler)()) = 0;
 
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+    virtual void didRegisterUserNotificationSettings (UIUserNotificationSettings* notificationSettings) = 0;
+
     virtual void didReceiveLocalNotification (UILocalNotification* notification) = 0;
 
     virtual void handleActionForLocalNotificationCompletionHandler (NSString* actionIdentifier,
@@ -442,6 +452,8 @@ struct PushNotificationsDelegate
                                                                                 NSDictionary* responseInfo,
                                                                                 void (^completionHandler)()) = 0;
 
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
     virtual void willPresentNotificationWithCompletionHandler (UNNotification* notification,
                                                                void (^completionHandler)(UNNotificationPresentationOptions options)) = 0;
 
@@ -449,7 +461,7 @@ struct PushNotificationsDelegate
                                                                       void (^completionHandler)()) = 0;
 
 protected:
-    NSUniquePtr<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>> delegate;
+    NSUniquePtr<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>> delegate { [getClass().createInstance() init] };
 
 private:
     //==============================================================================
@@ -458,11 +470,6 @@ private:
         Class() : ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>> ("JucePushNotificationsDelegate_")
         {
             addIvar<PushNotificationsDelegate*> ("self");
-
-            addMethod (@selector (application:didRegisterUserNotificationSettings:), [] (id self, SEL, UIApplication*, UIUserNotificationSettings* settings)
-            {
-                getThis (self).didRegisterUserNotificationSettings (settings);
-            });
 
             addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), [] (id self, SEL, UIApplication*, NSData* deviceToken)
             {
@@ -489,6 +496,13 @@ private:
                 getThis (self).handleActionForRemoteNotificationCompletionHandler (actionIdentifier, userInfo, responseInfo, completionHandler);
             });
 
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+            addMethod (@selector (application:didRegisterUserNotificationSettings:), [] (id self, SEL, UIApplication*, UIUserNotificationSettings* settings)
+            {
+                getThis (self).didRegisterUserNotificationSettings (settings);
+            });
+
             addMethod (@selector (application:didReceiveLocalNotification:), [] (id self, SEL, UIApplication*, UILocalNotification* notification)
             {
                 getThis (self).didReceiveLocalNotification (notification);
@@ -503,6 +517,8 @@ private:
             {
                 getThis (self). handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier, notification, responseInfo, completionHandler);
             });
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
             addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotification* notification, void (^completionHandler)(UNNotificationPresentationOptions options))
             {
@@ -574,6 +590,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
             for (const auto& c : settings.categories)
             {
                 auto* category = (UIUserNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c);
@@ -586,8 +604,10 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
             UIUserNotificationSettings* s = [UIUserNotificationSettings settingsForTypes: type categories: categories];
             [[UIApplication sharedApplication] registerUserNotificationSettings: s];
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
-        
+
         [[UIApplication sharedApplication] registerForRemoteNotifications];
     }
 
@@ -616,6 +636,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
             UIUserNotificationSettings* s = [UIApplication sharedApplication].currentUserNotificationSettings;
 
             settings.allowBadge = s.types & UIUserNotificationTypeBadge;
@@ -626,6 +648,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                 settings.categories.add (PushNotificationsDelegateDetails::uiUserNotificationCategoryToCategory (c));
 
             owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
     }
 
@@ -648,10 +672,14 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
             auto* notification = PushNotificationsDelegateDetails::juceNotificationToUILocalNotification (n);
 
             [[UIApplication sharedApplication] scheduleLocalNotification: notification];
             [notification release];
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
     }
 
@@ -731,12 +759,16 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
             Array<PushNotifications::Notification> notifs;
 
             for (UILocalNotification* n in [UIApplication sharedApplication].scheduledLocalNotifications)
                 notifs.add (PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (n));
 
             owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
     }
 
@@ -763,7 +795,11 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         }
         else
         {
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
             [[UIApplication sharedApplication] cancelAllLocalNotifications];
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
         }
     }
 
@@ -777,11 +813,6 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
     //==============================================================================
     //PushNotificationsDelegate
-    void didRegisterUserNotificationSettings (UIUserNotificationSettings*) override
-    {
-        requestSettingsUsed();
-    }
-
     void registeredForRemoteNotifications (NSData* deviceTokenToUse) override
     {
         deviceToken = [deviceTokenToUse]() -> String
@@ -841,6 +872,13 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         completionHandler();
     }
 
+    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+    void didRegisterUserNotificationSettings (UIUserNotificationSettings*) override
+    {
+        requestSettingsUsed();
+    }
+
     void didReceiveLocalNotification (UILocalNotification* notification) override
     {
         auto n = PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (notification);
@@ -871,6 +909,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
         completionHandler();
     }
+
+    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     void willPresentNotificationWithCompletionHandler (UNNotification* notification,
                                                        void (^completionHandler)(UNNotificationPresentationOptions options)) override

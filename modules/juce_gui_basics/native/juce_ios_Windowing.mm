@@ -59,25 +59,47 @@ namespace juce
    completionHandler: (void (^)(void)) completionHandler;
 - (void) applicationDidReceiveMemoryWarning: (UIApplication *) application;
 #if JUCE_PUSH_NOTIFICATIONS
-- (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
-- (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken;
-- (void) application: (UIApplication*) application didFailToRegisterForRemoteNotificationsWithError: (NSError*) error;
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo;
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
-  fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler;
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forRemoteNotification: (NSDictionary*) userInfo withResponseInfo: (NSDictionary*) responseInfo
-   completionHandler: (void(^)()) completionHandler;
-- (void) application: (UIApplication*) application didReceiveLocalNotification: (UILocalNotification*) notification;
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification completionHandler: (void(^)()) completionHandler;
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
-   completionHandler: (void(^)()) completionHandler;
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
+
+- (void)                                 application: (UIApplication*) application
+    didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken;
+- (void)                                 application: (UIApplication*) application
+    didFailToRegisterForRemoteNotificationsWithError: (NSError*) error;
+- (void)                                 application: (UIApplication*) application
+                        didReceiveRemoteNotification: (NSDictionary*) userInfo;
+- (void)                                 application: (UIApplication*) application
+                        didReceiveRemoteNotification: (NSDictionary*) userInfo
+                              fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler;
+- (void)                                 application: (UIApplication*) application
+                          handleActionWithIdentifier: (NSString*) identifier
+                               forRemoteNotification: (NSDictionary*) userInfo
+                                    withResponseInfo: (NSDictionary*) responseInfo
+                                   completionHandler: (void(^)()) completionHandler;
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+- (void)                    application: (UIApplication*) application
+    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
+- (void)                    application: (UIApplication*) application
+            didReceiveLocalNotification: (UILocalNotification*) notification;
+- (void)                    application: (UIApplication*) application
+             handleActionWithIdentifier: (NSString*) identifier
+                   forLocalNotification: (UILocalNotification*) notification
+                      completionHandler: (void(^)()) completionHandler;
+- (void)                    application: (UIApplication*) application
+             handleActionWithIdentifier: (NSString*) identifier
+                   forLocalNotification: (UILocalNotification*) notification
+                       withResponseInfo: (NSDictionary*) responseInfo
+                      completionHandler: (void(^)()) completionHandler;
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+        willPresentNotification: (UNNotification*) notification
           withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler;
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+ didReceiveNotificationResponse: (UNNotificationResponse*) response
           withCompletionHandler: (void(^)())completionHandler;
+
 #endif
 
 @end
@@ -192,25 +214,9 @@ namespace juce
 }
 
 #if JUCE_PUSH_NOTIFICATIONS
-- (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
-{
-    ignoreUnused (application);
 
-    SEL selector = @selector (application:didRegisterUserNotificationSettings:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application          atIndex:2];
-        [invocation setArgument: &notificationSettings atIndex:3];
-
-        [invocation invoke];
-    }
-}
-
-- (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken
+- (void)                                 application: (UIApplication*) application
+    didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken
 {
     ignoreUnused (application);
 
@@ -228,7 +234,8 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didFailToRegisterForRemoteNotificationsWithError: (NSError*) error
+- (void)                                 application: (UIApplication*) application
+    didFailToRegisterForRemoteNotificationsWithError: (NSError*) error
 {
     ignoreUnused (application);
 
@@ -246,7 +253,8 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
+- (void)             application: (UIApplication*) application
+    didReceiveRemoteNotification: (NSDictionary*) userInfo
 {
     ignoreUnused (application);
 
@@ -264,8 +272,9 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
-  fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler
+- (void)             application: (UIApplication*) application
+    didReceiveRemoteNotification: (NSDictionary*) userInfo
+          fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     ignoreUnused (application);
 
@@ -284,9 +293,11 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forRemoteNotification: (NSDictionary*) userInfo withResponseInfo: (NSDictionary*) responseInfo
-  completionHandler: (void(^)()) completionHandler
+- (void)           application: (UIApplication*) application
+    handleActionWithIdentifier: (NSString*) identifier
+         forRemoteNotification: (NSDictionary*) userInfo
+              withResponseInfo: (NSDictionary*) responseInfo
+             completionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (application);
 
@@ -307,7 +318,29 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didReceiveLocalNotification: (UILocalNotification*) notification
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+- (void)                    application: (UIApplication*) application
+    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
+{
+    ignoreUnused (application);
+
+    SEL selector = @selector (application:didRegisterUserNotificationSettings:);
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector:selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application atIndex: 2];
+        [invocation setArgument: &notificationSettings atIndex: 3];
+
+        [invocation invoke];
+    }
+}
+
+- (void)            application: (UIApplication*) application
+    didReceiveLocalNotification: (UILocalNotification*) notification
 {
     ignoreUnused (application);
 
@@ -318,15 +351,17 @@ namespace juce
         NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
         [invocation setSelector: selector];
         [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application  atIndex:2];
-        [invocation setArgument: &notification atIndex:3];
+        [invocation setArgument: &application  atIndex: 2];
+        [invocation setArgument: &notification atIndex: 3];
 
         [invocation invoke];
     }
 }
 
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification completionHandler: (void(^)()) completionHandler
+- (void)           application: (UIApplication*) application
+    handleActionWithIdentifier: (NSString*) identifier
+          forLocalNotification: (UILocalNotification*) notification
+             completionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (application);
 
@@ -346,9 +381,11 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
-  completionHandler: (void(^)()) completionHandler
+- (void)           application: (UIApplication*) application
+    handleActionWithIdentifier: (NSString*) identifier
+          forLocalNotification: (UILocalNotification*) notification
+              withResponseInfo: (NSDictionary*) responseInfo
+             completionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (application);
 
@@ -369,8 +406,11 @@ namespace juce
     }
 }
 
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
-         withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+        willPresentNotification: (UNNotification*) notification
+          withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
 {
     ignoreUnused (center);
 
@@ -389,8 +429,9 @@ namespace juce
     }
 }
 
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
-         withCompletionHandler: (void(^)()) completionHandler
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+ didReceiveNotificationResponse: (UNNotificationResponse*) response
+          withCompletionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (center);
 
