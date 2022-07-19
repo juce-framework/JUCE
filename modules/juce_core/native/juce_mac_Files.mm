@@ -285,7 +285,6 @@ bool File::moveToTrash() const
 
     JUCE_AUTORELEASEPOOL
     {
-       #if JUCE_MAC || (JUCE_IOS && (defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0))
         if (@available (macOS 10.8, iOS 11.0, *))
         {
             NSError* error = nil;
@@ -293,7 +292,6 @@ bool File::moveToTrash() const
                                                  resultingItemURL: nil
                                                             error: &error];
         }
-       #endif
 
        #if JUCE_IOS
         return deleteFile();
