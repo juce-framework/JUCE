@@ -407,146 +407,6 @@ private:
 };
 
 //==============================================================================
-struct PushNotificationsDelegate
-{
-    PushNotificationsDelegate()
-    {
-        Class::setThis (delegate.get(), this);
-
-        auto appDelegate = [[UIApplication sharedApplication] delegate];
-
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-        if ([appDelegate respondsToSelector: @selector (setPushNotificationsDelegateToUse:)])
-            [appDelegate performSelector: @selector (setPushNotificationsDelegateToUse:) withObject: delegate.get()];
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-    }
-
-    virtual ~PushNotificationsDelegate() = default;
-
-    virtual void registeredForRemoteNotifications (NSData* deviceToken) = 0;
-
-    virtual void failedToRegisterForRemoteNotifications (NSError* error) = 0;
-
-    virtual void didReceiveRemoteNotification (NSDictionary* userInfo) = 0;
-
-    virtual void didReceiveRemoteNotificationFetchCompletionHandler (NSDictionary* userInfo,
-                                                                     void (^completionHandler)(UIBackgroundFetchResult result)) = 0;
-
-    virtual void handleActionForRemoteNotificationCompletionHandler (NSString* actionIdentifier,
-                                                                     NSDictionary* userInfo,
-                                                                     NSDictionary* responseInfo,
-                                                                     void (^completionHandler)()) = 0;
-
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-    virtual void didRegisterUserNotificationSettings (UIUserNotificationSettings* notificationSettings) = 0;
-
-    virtual void didReceiveLocalNotification (UILocalNotification* notification) = 0;
-
-    virtual void handleActionForLocalNotificationCompletionHandler (NSString* actionIdentifier,
-                                                                    UILocalNotification* notification,
-                                                                    void (^completionHandler)()) = 0;
-
-    virtual void handleActionForLocalNotificationWithResponseCompletionHandler (NSString* actionIdentifier,
-                                                                                UILocalNotification* notification,
-                                                                                NSDictionary* responseInfo,
-                                                                                void (^completionHandler)()) = 0;
-
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-    virtual void willPresentNotificationWithCompletionHandler (UNNotification* notification,
-                                                               void (^completionHandler)(UNNotificationPresentationOptions options)) = 0;
-
-    virtual void didReceiveNotificationResponseWithCompletionHandler (UNNotificationResponse* response,
-                                                                      void (^completionHandler)()) = 0;
-
-protected:
-    NSUniquePtr<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>> delegate { [getClass().createInstance() init] };
-
-private:
-    //==============================================================================
-    struct Class    : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
-    {
-        Class() : ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>> ("JucePushNotificationsDelegate_")
-        {
-            addIvar<PushNotificationsDelegate*> ("self");
-
-            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), [] (id self, SEL, UIApplication*, NSData* deviceToken)
-            {
-                getThis (self).registeredForRemoteNotifications (deviceToken);
-            });
-
-            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), [] (id self, SEL, UIApplication*, NSError* error)
-            {
-                getThis (self).failedToRegisterForRemoteNotifications (error);
-            });
-
-            addMethod (@selector (application:didReceiveRemoteNotification:), [] (id self, SEL, UIApplication*, NSDictionary* userInfo)
-            {
-                getThis (self).didReceiveRemoteNotification (userInfo);
-            });
-
-            addMethod (@selector (application:didReceiveRemoteNotification:fetchCompletionHandler:), [] (id self, SEL, UIApplication*, NSDictionary* userInfo, void (^completionHandler)(UIBackgroundFetchResult result))
-            {
-                getThis (self).didReceiveRemoteNotificationFetchCompletionHandler (userInfo, completionHandler);
-            });
-
-            addMethod (@selector (application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, NSDictionary* userInfo, NSDictionary* responseInfo, void (^completionHandler)())
-            {
-                getThis (self).handleActionForRemoteNotificationCompletionHandler (actionIdentifier, userInfo, responseInfo, completionHandler);
-            });
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
-
-            addMethod (@selector (application:didRegisterUserNotificationSettings:), [] (id self, SEL, UIApplication*, UIUserNotificationSettings* settings)
-            {
-                getThis (self).didRegisterUserNotificationSettings (settings);
-            });
-
-            addMethod (@selector (application:didReceiveLocalNotification:), [] (id self, SEL, UIApplication*, UILocalNotification* notification)
-            {
-                getThis (self).didReceiveLocalNotification (notification);
-            });
-
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, void (^completionHandler)())
-            {
-                getThis (self).handleActionForLocalNotificationCompletionHandler (actionIdentifier, notification, completionHandler);
-            });
-
-            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, NSDictionary* responseInfo, void (^completionHandler)())
-            {
-                getThis (self). handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier, notification, responseInfo, completionHandler);
-            });
-
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-            addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotification* notification, void (^completionHandler)(UNNotificationPresentationOptions options))
-            {
-                getThis (self).willPresentNotificationWithCompletionHandler (notification, completionHandler);
-            });
-
-            addMethod (@selector (userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotificationResponse* response, void (^completionHandler)())
-            {
-                getThis (self).didReceiveNotificationResponseWithCompletionHandler (response, completionHandler);
-            });
-
-            registerClass();
-        }
-
-        //==============================================================================
-        static PushNotificationsDelegate& getThis (id self)         { return *getIvar<PushNotificationsDelegate*> (self, "self"); }
-        static void setThis (id self, PushNotificationsDelegate* d) { object_setInstanceVariable (self, "self", d); }
-    };
-
-    //==============================================================================
-    static Class& getClass()
-    {
-        static Class c;
-        return c;
-    }
-};
-
-//==============================================================================
 bool PushNotifications::Notification::isValid() const noexcept
 {
     if (@available (iOS 10, *))
@@ -556,11 +416,19 @@ bool PushNotifications::Notification::isValid() const noexcept
 }
 
 //==============================================================================
-struct PushNotifications::Pimpl : private PushNotificationsDelegate
+struct PushNotifications::Pimpl
 {
     Pimpl (PushNotifications& p)
         : owner (p)
     {
+        Class::setThis (delegate.get(), this);
+
+        auto appDelegate = [[UIApplication sharedApplication] delegate];
+
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        if ([appDelegate respondsToSelector: @selector (setPushNotificationsDelegateToUse:)])
+            [appDelegate performSelector: @selector (setPushNotificationsDelegateToUse:) withObject: delegate.get()];
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     }
 
     void requestPermissionsWithSettings (const PushNotifications::Settings& settingsToUse)
@@ -811,9 +679,23 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         return deviceToken;
     }
 
+    void subscribeToTopic (const String& topic)     { ignoreUnused (topic); }
+    void unsubscribeFromTopic (const String& topic) { ignoreUnused (topic); }
+
+    void sendUpstreamMessage (const String& serverSenderId,
+                              const String& collapseKey,
+                              const String& messageId,
+                              const String& messageType,
+                              int timeToLive,
+                              const StringPairArray& additionalData)
+    {
+        ignoreUnused (serverSenderId, collapseKey, messageId, messageType);
+        ignoreUnused (timeToLive, additionalData);
+    }
+
+private:
     //==============================================================================
-    //PushNotificationsDelegate
-    void registeredForRemoteNotifications (NSData* deviceTokenToUse) override
+    void registeredForRemoteNotifications (NSData* deviceTokenToUse)
     {
         deviceToken = [deviceTokenToUse]() -> String
         {
@@ -837,14 +719,14 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         owner.listeners.call ([&] (Listener& l) { l.deviceTokenRefreshed (deviceToken); });
     }
 
-    void failedToRegisterForRemoteNotifications (NSError* error) override
+    void failedToRegisterForRemoteNotifications (NSError* error)
     {
         ignoreUnused (error);
 
         deviceToken.clear();
     }
 
-    void didReceiveRemoteNotification (NSDictionary* userInfo) override
+    void didReceiveRemoteNotification (NSDictionary* userInfo)
     {
         auto n = PushNotificationsDelegateDetails::nsDictionaryToJuceNotification (userInfo);
 
@@ -852,7 +734,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     }
 
     void didReceiveRemoteNotificationFetchCompletionHandler (NSDictionary* userInfo,
-                                                             void (^completionHandler)(UIBackgroundFetchResult result)) override
+                                                             void (^completionHandler)(UIBackgroundFetchResult result))
     {
         didReceiveRemoteNotification (userInfo);
         completionHandler (UIBackgroundFetchResultNewData);
@@ -861,7 +743,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     void handleActionForRemoteNotificationCompletionHandler (NSString* actionIdentifier,
                                                              NSDictionary* userInfo,
                                                              NSDictionary* responseInfo,
-                                                             void (^completionHandler)()) override
+                                                             void (^completionHandler)())
     {
         auto n = PushNotificationsDelegateDetails::nsDictionaryToJuceNotification (userInfo);
         auto actionString = nsStringToJuce (actionIdentifier);
@@ -874,12 +756,12 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
 
-    void didRegisterUserNotificationSettings (UIUserNotificationSettings*) override
+    void didRegisterUserNotificationSettings (UIUserNotificationSettings*)
     {
         requestSettingsUsed();
     }
 
-    void didReceiveLocalNotification (UILocalNotification* notification) override
+    void didReceiveLocalNotification (UILocalNotification* notification)
     {
         auto n = PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (notification);
 
@@ -888,7 +770,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
     void handleActionForLocalNotificationCompletionHandler (NSString* actionIdentifier,
                                                             UILocalNotification* notification,
-                                                            void (^completionHandler)()) override
+                                                            void (^completionHandler)())
     {
         handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier,
                                                                        notification,
@@ -899,7 +781,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     void handleActionForLocalNotificationWithResponseCompletionHandler (NSString* actionIdentifier,
                                                                         UILocalNotification* notification,
                                                                         NSDictionary* responseInfo,
-                                                                        void (^completionHandler)()) override
+                                                                        void (^completionHandler)())
     {
         auto n = PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (notification);
         auto actionString = nsStringToJuce (actionIdentifier);
@@ -913,7 +795,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
     void willPresentNotificationWithCompletionHandler (UNNotification* notification,
-                                                       void (^completionHandler)(UNNotificationPresentationOptions options)) override
+                                                       void (^completionHandler)(UNNotificationPresentationOptions options))
     {
         NSUInteger options = NSUInteger ((int)settings.allowBadge << 0
                                        | (int)settings.allowSound << 1
@@ -925,7 +807,7 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
     }
 
     void didReceiveNotificationResponseWithCompletionHandler (UNNotificationResponse* response,
-                                                              void (^completionHandler)()) override
+                                                              void (^completionHandler)())
     {
         const bool remote = [response.notification.request.trigger isKindOfClass: [UNPushNotificationTrigger class]];
 
@@ -950,21 +832,90 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
         completionHandler();
     }
 
-    void subscribeToTopic (const String& topic)     { ignoreUnused (topic); }
-    void unsubscribeFromTopic (const String& topic) { ignoreUnused (topic); }
-
-    void sendUpstreamMessage (const String& serverSenderId,
-                              const String& collapseKey,
-                              const String& messageId,
-                              const String& messageType,
-                              int timeToLive,
-                              const StringPairArray& additionalData)
+    //==============================================================================
+    struct Class    : public ObjCClass<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>>
     {
-        ignoreUnused (serverSenderId, collapseKey, messageId, messageType);
-        ignoreUnused (timeToLive, additionalData);
+        Class()
+            : ObjCClass ("JucePushNotificationsDelegate_")
+        {
+            addIvar<Pimpl*> ("self");
+
+            addMethod (@selector (application:didRegisterForRemoteNotificationsWithDeviceToken:), [] (id self, SEL, UIApplication*, NSData* data)
+            {
+                getThis (self).registeredForRemoteNotifications (data);
+            });
+
+            addMethod (@selector (application:didFailToRegisterForRemoteNotificationsWithError:), [] (id self, SEL, UIApplication*, NSError* error)
+            {
+                getThis (self).failedToRegisterForRemoteNotifications (error);
+            });
+
+            addMethod (@selector (application:didReceiveRemoteNotification:), [] (id self, SEL, UIApplication*, NSDictionary* userInfo)
+            {
+                getThis (self).didReceiveRemoteNotification (userInfo);
+            });
+
+            addMethod (@selector (application:didReceiveRemoteNotification:fetchCompletionHandler:), [] (id self, SEL, UIApplication*, NSDictionary* userInfo, void (^completionHandler)(UIBackgroundFetchResult result))
+            {
+                getThis (self).didReceiveRemoteNotificationFetchCompletionHandler (userInfo, completionHandler);
+            });
+
+            addMethod (@selector (application:handleActionWithIdentifier:forRemoteNotification:withResponseInfo:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, NSDictionary* userInfo, NSDictionary* responseInfo, void (^completionHandler)())
+            {
+                getThis (self).handleActionForRemoteNotificationCompletionHandler (actionIdentifier, userInfo, responseInfo, completionHandler);
+            });
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+            addMethod (@selector (application:didRegisterUserNotificationSettings:), [] (id self, SEL, UIApplication*, UIUserNotificationSettings* settingsToUse)
+            {
+                getThis (self).didRegisterUserNotificationSettings (settingsToUse);
+            });
+
+            addMethod (@selector (application:didReceiveLocalNotification:), [] (id self, SEL, UIApplication*, UILocalNotification* notification)
+            {
+                getThis (self).didReceiveLocalNotification (notification);
+            });
+
+            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, void (^completionHandler)())
+            {
+                getThis (self).handleActionForLocalNotificationCompletionHandler (actionIdentifier, notification, completionHandler);
+            });
+
+            addMethod (@selector (application:handleActionWithIdentifier:forLocalNotification:withResponseInfo:completionHandler:), [] (id self, SEL, UIApplication*, NSString* actionIdentifier, UILocalNotification* notification, NSDictionary* responseInfo, void (^completionHandler)())
+            {
+                getThis (self). handleActionForLocalNotificationWithResponseCompletionHandler (actionIdentifier, notification, responseInfo, completionHandler);
+            });
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            addMethod (@selector (userNotificationCenter:willPresentNotification:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotification* notification, void (^completionHandler)(UNNotificationPresentationOptions options))
+            {
+                getThis (self).willPresentNotificationWithCompletionHandler (notification, completionHandler);
+            });
+
+            addMethod (@selector (userNotificationCenter:didReceiveNotificationResponse:withCompletionHandler:), [] (id self, SEL, UNUserNotificationCenter*, UNNotificationResponse* response, void (^completionHandler)())
+            {
+                getThis (self).didReceiveNotificationResponseWithCompletionHandler (response, completionHandler);
+            });
+
+            registerClass();
+        }
+
+        //==============================================================================
+        static Pimpl& getThis (id self)         { return *getIvar<Pimpl*> (self, "self"); }
+        static void setThis (id self, Pimpl* d) { object_setInstanceVariable (self, "self", d); }
+    };
+
+    //==============================================================================
+    static Class& getClass()
+    {
+        static Class c;
+        return c;
     }
 
-private:
+    NSUniquePtr<NSObject<UIApplicationDelegate, UNUserNotificationCenterDelegate>> delegate { [getClass().createInstance() init] };
+
     PushNotifications& owner;
 
     bool initialised = false;
