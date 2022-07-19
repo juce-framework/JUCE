@@ -29,11 +29,6 @@ static void juceFreeAccessibilityPlatformSpecificData (NSAccessibilityElement<NS
 namespace juce
 {
 
-#if ! defined (MAC_OS_X_VERSION_10_13) || MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_13
- using NSAccessibilityRole = NSString*;
- using NSAccessibilityNotificationName = NSString*;
-#endif
-
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 //==============================================================================
@@ -717,9 +712,7 @@ private:
                 return NO;
             });
 
-           #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
             addMethod (@selector (accessibilityChildrenInNavigationOrder), getAccessibilityChildren);
-           #endif
 
             registerClass();
         }

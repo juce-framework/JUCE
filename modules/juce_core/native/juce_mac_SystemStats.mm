@@ -95,14 +95,12 @@ static String getOSXVersion()
         {
             const String systemVersionPlist ("/System/Library/CoreServices/SystemVersion.plist");
 
-           #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
             if (@available (macOS 10.13, *))
             {
                 NSError* error = nullptr;
                 return [NSDictionary dictionaryWithContentsOfURL: createNSURLFromFile (systemVersionPlist)
                                                            error: &error];
             }
-           #endif
 
             return [NSDictionary dictionaryWithContentsOfFile: juceStringToNS (systemVersionPlist)];
         }();
