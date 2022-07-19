@@ -37,7 +37,7 @@ namespace juce
     Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 }
 
-#if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+#if JUCE_PUSH_NOTIFICATIONS
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 #else
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
@@ -74,12 +74,10 @@ namespace juce
 - (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
   forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
    completionHandler: (void(^)()) completionHandler;
-#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
           withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler;
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
           withCompletionHandler: (void(^)())completionHandler;
-#endif
 #endif
 
 @end
@@ -93,7 +91,7 @@ namespace juce
     self = [super init];
     appSuspendTask = UIBackgroundTaskInvalid;
 
-   #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+   #if JUCE_PUSH_NOTIFICATIONS
     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
    #endif
 
@@ -371,7 +369,6 @@ namespace juce
     }
 }
 
-#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
 - (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
          withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
 {
@@ -411,7 +408,6 @@ namespace juce
         [invocation invoke];
     }
 }
-#endif
 #endif
 
 @end

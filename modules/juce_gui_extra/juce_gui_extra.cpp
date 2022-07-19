@@ -67,10 +67,7 @@
  #import <WebKit/WebKit.h>
 
  #if JUCE_PUSH_NOTIFICATIONS
-  #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-   #import <UserNotifications/UserNotifications.h>
-  #endif
-
+  #import <UserNotifications/UserNotifications.h>
   #include "native/juce_ios_PushNotifications.cpp"
  #endif
 

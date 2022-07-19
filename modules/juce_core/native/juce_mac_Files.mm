@@ -410,7 +410,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
       #if JUCE_IOS
         ignoreUnused (parameters);
 
-       #if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
         if (@available (iOS 10.0, *))
         {
             [[UIApplication sharedApplication] openURL: filenameAsURL
@@ -419,7 +418,6 @@ bool JUCE_CALLTYPE Process::openDocument (const String& fileName, const String& 
 
             return true;
         }
-       #endif
 
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
         return [[UIApplication sharedApplication] openURL: filenameAsURL];
