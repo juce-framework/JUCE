@@ -691,10 +691,8 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 bool Desktop::isDarkModeActive() const
 {
-   #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
     if (@available (iOS 12.0, *))
         return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
-   #endif
 
     return false;
 }
