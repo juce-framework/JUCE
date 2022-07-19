@@ -26,13 +26,13 @@
 namespace juce
 {
 
-namespace PushNotificationsDelegateDetails
+struct PushNotificationsDelegateDetails
 {
     //==============================================================================
     using Action   = PushNotifications::Settings::Action;
     using Category = PushNotifications::Settings::Category;
 
-    void* actionToNSAction (const Action& a)
+    static void* actionToNSAction (const Action& a)
     {
         if (@available (iOS 10, *))
         {
@@ -66,7 +66,7 @@ namespace PushNotificationsDelegateDetails
         return action;
     }
 
-    void* categoryToNSCategory (const Category& c)
+    static void* categoryToNSCategory (const Category& c)
     {
         if (@available (iOS 10, *))
         {
@@ -104,7 +104,7 @@ namespace PushNotificationsDelegateDetails
     }
 
     //==============================================================================
-    UILocalNotification* juceNotificationToUILocalNotification (const PushNotifications::Notification& n)
+    static UILocalNotification* juceNotificationToUILocalNotification (const PushNotifications::Notification& n)
     {
         auto notification = [[UILocalNotification alloc] init];
 
@@ -127,7 +127,7 @@ namespace PushNotificationsDelegateDetails
         return notification;
     }
 
-    UNNotificationRequest* juceNotificationToUNNotificationRequest (const PushNotifications::Notification& n)
+    static UNNotificationRequest* juceNotificationToUNNotificationRequest (const PushNotifications::Notification& n)
     {
         // content
         auto content = [[UNMutableNotificationContent alloc] init];
@@ -171,7 +171,7 @@ namespace PushNotificationsDelegateDetails
         return request;
     }
 
-    String getUserResponseFromNSDictionary (NSDictionary* dictionary)
+    static String getUserResponseFromNSDictionary (NSDictionary* dictionary)
     {
         if (dictionary == nil || dictionary.count == 0)
             return {};
@@ -193,7 +193,7 @@ namespace PushNotificationsDelegateDetails
     }
 
     //==============================================================================
-    var getNotificationPropertiesFromDictionaryVar (const var& dictionaryVar)
+    static var getNotificationPropertiesFromDictionaryVar (const var& dictionaryVar)
     {
         DynamicObject* dictionaryVarObject = dictionaryVar.getDynamicObject();
 
@@ -218,7 +218,7 @@ namespace PushNotificationsDelegateDetails
     }
 
     //==============================================================================
-    double getIntervalSecFromUNNotificationTrigger (UNNotificationTrigger* t)
+    static double getIntervalSecFromUNNotificationTrigger (UNNotificationTrigger* t)
     {
         if (t != nil)
         {
@@ -239,7 +239,7 @@ namespace PushNotificationsDelegateDetails
         return 0.;
     }
 
-    PushNotifications::Notification unNotificationRequestToJuceNotification (UNNotificationRequest* r)
+    static PushNotifications::Notification unNotificationRequestToJuceNotification (UNNotificationRequest* r)
     {
         PushNotifications::Notification n;
 
@@ -268,12 +268,12 @@ namespace PushNotificationsDelegateDetails
         return n;
     }
 
-    PushNotifications::Notification unNotificationToJuceNotification (UNNotification* n)
+    static PushNotifications::Notification unNotificationToJuceNotification (UNNotification* n)
     {
         return unNotificationRequestToJuceNotification (n.request);
     }
 
-    PushNotifications::Notification uiLocalNotificationToJuceNotification (UILocalNotification* n)
+    static PushNotifications::Notification uiLocalNotificationToJuceNotification (UILocalNotification* n)
     {
         PushNotifications::Notification notif;
 
@@ -296,7 +296,7 @@ namespace PushNotificationsDelegateDetails
         return notif;
     }
 
-    Action uiUserNotificationActionToAction (UIUserNotificationAction* a)
+    static Action uiUserNotificationActionToAction (UIUserNotificationAction* a)
     {
         Action action;
 
@@ -313,7 +313,7 @@ namespace PushNotificationsDelegateDetails
         return action;
     }
 
-    Category uiUserNotificationCategoryToCategory (UIUserNotificationCategory* c)
+    static Category uiUserNotificationCategoryToCategory (UIUserNotificationCategory* c)
     {
         Category category;
         category.identifier = nsStringToJuce (c.identifier);
@@ -324,7 +324,7 @@ namespace PushNotificationsDelegateDetails
         return category;
     }
 
-    Action unNotificationActionToAction (UNNotificationAction* a)
+    static Action unNotificationActionToAction (UNNotificationAction* a)
     {
         Action action;
 
@@ -349,7 +349,7 @@ namespace PushNotificationsDelegateDetails
         return action;
     }
 
-    Category unNotificationCategoryToCategory (UNNotificationCategory* c)
+    static Category unNotificationCategoryToCategory (UNNotificationCategory* c)
     {
         Category category;
 
@@ -362,7 +362,7 @@ namespace PushNotificationsDelegateDetails
         return category;
     }
 
-    PushNotifications::Notification nsDictionaryToJuceNotification (NSDictionary* dictionary)
+    static PushNotifications::Notification nsDictionaryToJuceNotification (NSDictionary* dictionary)
     {
         const var dictionaryVar = nsDictionaryToVar (dictionary);
 
@@ -393,7 +393,10 @@ namespace PushNotificationsDelegateDetails
 
         return notification;
     }
-}
+    
+private:
+    ~PushNotificationsDelegateDetails() = delete;
+};
 
 //==============================================================================
 struct PushNotificationsDelegate
