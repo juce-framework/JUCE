@@ -41,7 +41,7 @@
   #import <MobileCoreServices/MobileCoreServices.h>
   #include <sys/fcntl.h>
  #else
-  #if JUCE_MODULE_AVAILABLE_juce_opengl && defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
+  #if JUCE_MODULE_AVAILABLE_juce_opengl
    #define GL_SILENCE_DEPRECATION 1
   #endif
 

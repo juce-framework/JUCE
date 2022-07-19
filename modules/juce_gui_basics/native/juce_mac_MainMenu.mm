@@ -455,10 +455,7 @@ private:
             {
                 addMethod (menuItemInvokedSelector,       menuItemInvoked);
                 addMethod (@selector (validateMenuItem:), validateMenuItem);
-
-               #if defined (MAC_OS_X_VERSION_10_14)
                 addProtocol (@protocol (NSMenuItemValidation));
-               #endif
 
                 registerClass();
             }
@@ -552,10 +549,7 @@ private:
             addMethod (@selector (validateMenuItem:), validateMenuItem);
 
             addProtocol (@protocol (NSMenuDelegate));
-
-           #if defined (MAC_OS_X_VERSION_10_14)
             addProtocol (@protocol (NSMenuItemValidation));
-           #endif
 
             registerClass();
         }

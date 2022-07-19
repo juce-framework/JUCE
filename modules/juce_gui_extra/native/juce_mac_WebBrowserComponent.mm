@@ -375,7 +375,7 @@ private:
         auto flags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles
                     | ([parameters allowsMultipleSelection] ? FileBrowserComponent::canSelectMultipleItems : 0);
 
-       #if (defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14)
+       #if JUCE_MAC
         if (@available (macOS 10.14, *))
         {
             if ([parameters allowsDirectories])
