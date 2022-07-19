@@ -32,26 +32,9 @@ namespace PushNotificationsDelegateDetails
     using Action   = PushNotifications::Settings::Action;
     using Category = PushNotifications::Settings::Category;
 
-    void* actionToNSAction (const Action& a, bool iOSEarlierThan10)
+    void* actionToNSAction (const Action& a)
     {
-        if (iOSEarlierThan10)
-        {
-            auto action = [[UIMutableUserNotificationAction alloc] init];
-
-            action.identifier     = juceStringToNS (a.identifier);
-            action.title          = juceStringToNS (a.title);
-            action.behavior       = a.style == Action::text ? UIUserNotificationActionBehaviorTextInput
-                                                            : UIUserNotificationActionBehaviorDefault;
-            action.parameters     = varObjectToNSDictionary (a.parameters);
-            action.activationMode = a.triggerInBackground ? UIUserNotificationActivationModeBackground
-                                                          : UIUserNotificationActivationModeForeground;
-            action.destructive    = (bool) a.destructive;
-
-            [action autorelease];
-
-            return action;
-        }
-        else
+        if (@available (iOS 10, *))
         {
             if (a.style == Action::text)
             {
@@ -66,37 +49,32 @@ namespace PushNotificationsDelegateDetails
                                                         title: juceStringToNS (a.title)
                                                       options: NSUInteger (a.destructive << 1 | (! a.triggerInBackground) << 2)];
         }
+        
+        auto action = [[UIMutableUserNotificationAction alloc] init];
+
+        action.identifier     = juceStringToNS (a.identifier);
+        action.title          = juceStringToNS (a.title);
+        action.behavior       = a.style == Action::text ? UIUserNotificationActionBehaviorTextInput
+                                                        : UIUserNotificationActionBehaviorDefault;
+        action.parameters     = varObjectToNSDictionary (a.parameters);
+        action.activationMode = a.triggerInBackground ? UIUserNotificationActivationModeBackground
+                                                      : UIUserNotificationActivationModeForeground;
+        action.destructive    = (bool) a.destructive;
+
+        [action autorelease];
+
+        return action;
     }
 
-    void* categoryToNSCategory (const Category& c, bool iOSEarlierThan10)
+    void* categoryToNSCategory (const Category& c)
     {
-        if (iOSEarlierThan10)
-        {
-            auto category = [[UIMutableUserNotificationCategory alloc] init];
-            category.identifier = juceStringToNS (c.identifier);
-
-            auto actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
-
-            for (const auto& a : c.actions)
-            {
-                auto* action = (UIUserNotificationAction*) actionToNSAction (a, iOSEarlierThan10);
-                [actions addObject: action];
-            }
-
-            [category setActions: actions forContext: UIUserNotificationActionContextDefault];
-            [category setActions: actions forContext: UIUserNotificationActionContextMinimal];
-
-            [category autorelease];
-
-            return category;
-        }
-        else
+        if (@available (iOS 10, *))
         {
             auto actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
 
             for (const auto& a : c.actions)
             {
-                auto* action = (UNNotificationAction*) actionToNSAction (a, iOSEarlierThan10);
+                auto* action = (UNNotificationAction*) actionToNSAction (a);
                 [actions addObject: action];
             }
 
@@ -105,6 +83,24 @@ namespace PushNotificationsDelegateDetails
                                                 intentIdentifiers: @[]
                                                           options: c.sendDismissAction ? UNNotificationCategoryOptionCustomDismissAction : 0];
         }
+        
+        auto category = [[UIMutableUserNotificationCategory alloc] init];
+        category.identifier = juceStringToNS (c.identifier);
+
+        auto actions = [NSMutableArray arrayWithCapacity: (NSUInteger) c.actions.size()];
+
+        for (const auto& a : c.actions)
+        {
+            auto* action = (UIUserNotificationAction*) actionToNSAction (a);
+            [actions addObject: action];
+        }
+
+        [category setActions: actions forContext: UIUserNotificationActionContextDefault];
+        [category setActions: actions forContext: UIUserNotificationActionContextMinimal];
+
+        [category autorelease];
+
+        return category;
     }
 
     //==============================================================================
@@ -534,12 +530,10 @@ private:
 //==============================================================================
 bool PushNotifications::Notification::isValid() const noexcept
 {
-    const bool iOSEarlierThan10 = std::floor (NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_9_x_Max;
+    if (@available (iOS 10, *))
+        return title.isNotEmpty() && body.isNotEmpty() && identifier.isNotEmpty() && category.isNotEmpty();
 
-    if (iOSEarlierThan10)
-        return title.isNotEmpty() && body.isNotEmpty() && category.isNotEmpty();
-
-    return title.isNotEmpty() && body.isNotEmpty() && identifier.isNotEmpty() && category.isNotEmpty();
+    return title.isNotEmpty() && body.isNotEmpty() && category.isNotEmpty();
 }
 
 //==============================================================================
@@ -556,26 +550,11 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
         auto categories = [NSMutableSet setWithCapacity: (NSUInteger) settings.categories.size()];
 
-        if (iOSEarlierThan10)
+        if (@available (iOS 10, *))
         {
             for (const auto& c : settings.categories)
             {
-                auto* category = (UIUserNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c, iOSEarlierThan10);
-                [categories addObject: category];
-            }
-
-            UIUserNotificationType type = NSUInteger ((bool)settings.allowBadge << 0
-                                                    | (bool)settings.allowSound << 1
-                                                    | (bool)settings.allowAlert << 2);
-
-            UIUserNotificationSettings* s = [UIUserNotificationSettings settingsForTypes: type categories: categories];
-            [[UIApplication sharedApplication] registerUserNotificationSettings: s];
-        }
-        else
-        {
-            for (const auto& c : settings.categories)
-            {
-                auto* category = (UNNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c, iOSEarlierThan10);
+                auto* category = (UNNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c);
                 [categories addObject: category];
             }
 
@@ -590,28 +569,29 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                                                                                                        requestSettingsUsed();
                                                                                                    }];
         }
+        else
+        {
+            for (const auto& c : settings.categories)
+            {
+                auto* category = (UIUserNotificationCategory*) PushNotificationsDelegateDetails::categoryToNSCategory (c);
+                [categories addObject: category];
+            }
 
+            UIUserNotificationType type = NSUInteger ((bool)settings.allowBadge << 0
+                                                    | (bool)settings.allowSound << 1
+                                                    | (bool)settings.allowAlert << 2);
+
+            UIUserNotificationSettings* s = [UIUserNotificationSettings settingsForTypes: type categories: categories];
+            [[UIApplication sharedApplication] registerUserNotificationSettings: s];
+        }
+        
         [[UIApplication sharedApplication] registerForRemoteNotifications];
     }
 
     void requestSettingsUsed()
     {
-        if (iOSEarlierThan10)
+        if (@available (iOS 10, *))
         {
-            UIUserNotificationSettings* s = [UIApplication sharedApplication].currentUserNotificationSettings;
-
-            settings.allowBadge = s.types & UIUserNotificationTypeBadge;
-            settings.allowSound = s.types & UIUserNotificationTypeSound;
-            settings.allowAlert = s.types & UIUserNotificationTypeAlert;
-
-            for (UIUserNotificationCategory *c in s.categories)
-                settings.categories.add (PushNotificationsDelegateDetails::uiUserNotificationCategoryToCategory (c));
-
-            owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
-        }
-        else
-        {
-
             [[UNUserNotificationCenter currentNotificationCenter] getNotificationSettingsWithCompletionHandler:
              ^(UNNotificationSettings* s)
              {
@@ -631,22 +611,27 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
              }];
         }
+        else
+        {
+            UIUserNotificationSettings* s = [UIApplication sharedApplication].currentUserNotificationSettings;
+
+            settings.allowBadge = s.types & UIUserNotificationTypeBadge;
+            settings.allowSound = s.types & UIUserNotificationTypeSound;
+            settings.allowAlert = s.types & UIUserNotificationTypeAlert;
+
+            for (UIUserNotificationCategory *c in s.categories)
+                settings.categories.add (PushNotificationsDelegateDetails::uiUserNotificationCategoryToCategory (c));
+
+            owner.listeners.call ([&] (Listener& l) { l.notificationSettingsReceived (settings); });
+        }
     }
 
     bool areNotificationsEnabled() const { return true; }
 
     void sendLocalNotification (const Notification& n)
     {
-        if (iOSEarlierThan10)
+        if (@available (iOS 10, *))
         {
-            auto* notification = PushNotificationsDelegateDetails::juceNotificationToUILocalNotification (n);
-
-            [[UIApplication sharedApplication] scheduleLocalNotification: notification];
-            [notification release];
-        }
-        else
-        {
-
             UNNotificationRequest* request = PushNotificationsDelegateDetails::juceNotificationToUNNotificationRequest (n);
 
             [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest: request
@@ -658,17 +643,18 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                                                                                                   NSLog (nsStringLiteral ("addNotificationRequest error: %@"), error);
                                                                                           }];
         }
+        else
+        {
+            auto* notification = PushNotificationsDelegateDetails::juceNotificationToUILocalNotification (n);
+
+            [[UIApplication sharedApplication] scheduleLocalNotification: notification];
+            [notification release];
+        }
     }
 
     void getDeliveredNotifications() const
     {
-        if (iOSEarlierThan10)
-        {
-            // Not supported on this platform
-            jassertfalse;
-            owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
-        }
-        else
+        if (@available (iOS 10, *))
         {
             [[UNUserNotificationCenter currentNotificationCenter] getDeliveredNotificationsWithCompletionHandler:
              ^(NSArray<UNNotification*>* notifications)
@@ -681,35 +667,41 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
                 owner.listeners.call ([&] (Listener& l) { l.deliveredNotificationsListReceived (notifs); });
              }];
         }
+        else
+        {
+            // Not supported on this platform
+            jassertfalse;
+            owner.listeners.call ([] (Listener& l) { l.deliveredNotificationsListReceived ({}); });
+        }
     }
 
     void removeAllDeliveredNotifications()
     {
-        if (iOSEarlierThan10)
+        if (@available (iOS 10, *))
         {
-            // Not supported on this platform
-            jassertfalse;
+            [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
         }
         else
         {
-            [[UNUserNotificationCenter currentNotificationCenter] removeAllDeliveredNotifications];
+            // Not supported on this platform
+            jassertfalse;
         }
     }
 
     void removeDeliveredNotification (const String& identifier)
     {
-        if (iOSEarlierThan10)
-        {
-            ignoreUnused (identifier);
-            // Not supported on this platform
-            jassertfalse;
-        }
-        else
+        if (@available (iOS 10, *))
         {
 
             NSArray<NSString*>* identifiers = [NSArray arrayWithObject: juceStringToNS (identifier)];
 
             [[UNUserNotificationCenter currentNotificationCenter] removeDeliveredNotificationsWithIdentifiers: identifiers];
+        }
+        else
+        {
+            ignoreUnused (identifier);
+            // Not supported on this platform
+            jassertfalse;
         }
     }
 
@@ -720,18 +712,8 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
     void getPendingLocalNotifications() const
     {
-        if (iOSEarlierThan10)
+        if (@available (iOS 10, *))
         {
-            Array<PushNotifications::Notification> notifs;
-
-            for (UILocalNotification* n in [UIApplication sharedApplication].scheduledLocalNotifications)
-                notifs.add (PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (n));
-
-            owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
-        }
-        else
-        {
-
             [[UNUserNotificationCenter currentNotificationCenter] getPendingNotificationRequestsWithCompletionHandler:
              ^(NSArray<UNNotificationRequest*>* requests)
              {
@@ -744,32 +726,41 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
              }
             ];
         }
+        else
+        {
+            Array<PushNotifications::Notification> notifs;
+
+            for (UILocalNotification* n in [UIApplication sharedApplication].scheduledLocalNotifications)
+                notifs.add (PushNotificationsDelegateDetails::uiLocalNotificationToJuceNotification (n));
+
+            owner.listeners.call ([&] (Listener& l) { l.pendingLocalNotificationsListReceived (notifs); });
+        }
     }
 
     void removePendingLocalNotification (const String& identifier)
     {
-        if (iOSEarlierThan10)
-        {
-            // Not supported on this platform
-            jassertfalse;
-        }
-        else
+        if (@available (iOS 10, *))
         {
             NSArray<NSString*>* identifiers = [NSArray arrayWithObject: juceStringToNS (identifier)];
 
             [[UNUserNotificationCenter currentNotificationCenter] removePendingNotificationRequestsWithIdentifiers: identifiers];
         }
+        else
+        {
+            // Not supported on this platform
+            jassertfalse;
+        }
     }
 
     void removeAllPendingLocalNotifications()
     {
-        if (iOSEarlierThan10)
+        if (@available (iOS 10, *))
         {
-            [[UIApplication sharedApplication] cancelAllLocalNotifications];
+            [[UNUserNotificationCenter currentNotificationCenter] removeAllPendingNotificationRequests];
         }
         else
         {
-            [[UNUserNotificationCenter currentNotificationCenter] removeAllPendingNotificationRequests];
+            [[UIApplication sharedApplication] cancelAllLocalNotifications];
         }
     }
 
@@ -932,8 +923,6 @@ struct PushNotifications::Pimpl : private PushNotificationsDelegate
 
 private:
     PushNotifications& owner;
-
-    const bool iOSEarlierThan10 = std::floor (NSFoundationVersionNumber) <= NSFoundationVersionNumber_iOS_9_x_Max;
 
     bool initialised = false;
     String deviceToken;
