@@ -246,10 +246,8 @@ public:
 
     static NSOpenGLContextParameter getSwapIntervalParameter()
     {
-        #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
-         if (@available (macOS 10.12, *))
-             return NSOpenGLContextParameterSwapInterval;
-        #endif
+        if (@available (macOS 10.12, *))
+            return NSOpenGLContextParameterSwapInterval;
 
         return NSOpenGLCPSwapInterval;
     }

@@ -26,10 +26,6 @@
 namespace juce
 {
 
-#if JUCE_MAC && defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
- #define WKWEBVIEW_OPENPANEL_SUPPORTED 1
-#endif
-
 static NSURL* appendParametersToFileURL (const URL& url, NSURL* fileUrl)
 {
     if (@available (macOS 10.10, *))
@@ -128,10 +124,8 @@ private:
         {
             const auto modifierFlags = [event modifierFlags];
 
-           #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
             if (@available (macOS 10.12, *))
                 return (modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagCommand;
-           #endif
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             return (modifierFlags & NSDeviceIndependentModifierFlagsMask) == NSCommandKeyMask;
@@ -277,10 +271,10 @@ struct API_AVAILABLE (macos (10.10)) WebViewDelegateClass  : public ObjCClass<NS
         addMethod (@selector (webView:createWebViewWithConfiguration:forNavigationAction:
                               windowFeatures:),                                           createWebView);
 
-       #if WKWEBVIEW_OPENPANEL_SUPPORTED
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
         if (@available (macOS 10.12, *))
             addMethod (@selector (webView:runOpenPanelWithParameters:initiatedByFrame:completionHandler:), runOpenPanel);
-       #endif
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
         registerClass();
     }
@@ -338,7 +332,6 @@ private:
         return nil;
     }
 
-   #if WKWEBVIEW_OPENPANEL_SUPPORTED
     API_AVAILABLE (macos (10.12))
     static void runOpenPanel (id, SEL, WKWebView*, WKOpenPanelParameters* parameters, WKFrameInfo*,
                               void (^completionHandler)(NSArray<NSURL*>*))
@@ -402,7 +395,6 @@ private:
             delete wrapper;
         });
     }
-   #endif
 };
 
 //==============================================================================

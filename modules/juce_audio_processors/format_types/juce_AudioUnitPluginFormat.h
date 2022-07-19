@@ -67,13 +67,4 @@ private:
 
 #endif
 
-//==============================================================================
-#if (! defined (MAC_OS_X_VERSION_10_12)) || (MAC_OS_X_VERSION_MAX_ALLOWED < MAC_OS_X_VERSION_10_12)
-enum
-{
-    /** Custom AudioUnit property used to indicate MPE support */
-    kAudioUnitProperty_SupportsMPE = 58
-};
-#endif
-
 }
