@@ -492,13 +492,31 @@ Class* getJuceClassFromNSObject (NSObject* obj)
     return obj != nullptr ? getIvar<Class*> (obj, "cppObject") : nullptr;
 }
 
-template <typename ReturnT, class Class, typename... Params>
-ReturnT (^CreateObjCBlock(Class* object, ReturnT (Class::*fn)(Params...))) (Params...)
+namespace detail
 {
-    __block Class* _this = object;
-    __block ReturnT (Class::*_fn)(Params...) = fn;
+template <typename> struct Signature;
+template <typename R, typename... A> struct Signature<R (A...)> {};
 
-    return [[^ReturnT (Params... params) { return (_this->*_fn) (params...); } copy] autorelease];
+template <typename Class, typename Result, typename... Args>
+constexpr auto getSignature (Result (Class::*) (Args...))       { return Signature<Result (Args...)>{}; }
+
+template <typename Class, typename Result, typename... Args>
+constexpr auto getSignature (Result (Class::*) (Args...) const) { return Signature<Result (Args...)>{}; }
+
+template <typename Class, typename Fn, typename Result, typename... Params>
+auto createObjCBlockImpl (Class* object, Fn func, Signature<Result (Params...)>)
+{
+    __block auto _this = object;
+    __block auto _func = func;
+
+    return [[^Result (Params... params) { return (_this->*_func) (params...); } copy] autorelease];
+}
+} // namespace detail
+
+template <typename Class, typename MemberFunc>
+auto CreateObjCBlock (Class* object, MemberFunc fn)
+{
+    return detail::createObjCBlockImpl (object, fn, detail::getSignature (fn));
 }
 
 template <typename BlockType>

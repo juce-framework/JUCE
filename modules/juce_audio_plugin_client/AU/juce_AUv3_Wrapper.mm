@@ -78,8 +78,8 @@ using namespace juce;
 
 struct AudioProcessorHolder  : public ReferenceCountedObject
 {
-    AudioProcessorHolder() {}
-    AudioProcessorHolder (AudioProcessor* p) : processor (p) {}
+    AudioProcessorHolder() = default;
+    explicit AudioProcessorHolder (AudioProcessor* p) : processor (p) {}
     AudioProcessor& operator*() noexcept        { return *processor; }
     AudioProcessor* operator->() noexcept       { return processor.get(); }
     AudioProcessor* get() noexcept              { return processor.get(); }
@@ -225,7 +225,7 @@ public:
     }
 
     //==============================================================================
-    AUAudioUnitPreset* getCurrentPreset()
+    AUAudioUnitPreset* getCurrentPreset() const
     {
         return factoryPresets.getAtIndex (getAudioProcessor().getCurrentProgram());
     }
@@ -235,12 +235,12 @@ public:
         getAudioProcessor().setCurrentProgram (static_cast<int> ([preset number]));
     }
 
-    NSArray<AUAudioUnitPreset*>* getFactoryPresets()
+    NSArray<AUAudioUnitPreset*>* getFactoryPresets() const
     {
         return factoryPresets.get();
     }
 
-    NSDictionary<NSString*, id>* getFullState()
+    NSDictionary<NSString*, id>* getFullState() const
     {
         NSMutableDictionary<NSString*, id>* retval = [[NSMutableDictionary<NSString*, id> alloc] init];
 
@@ -316,12 +316,12 @@ public:
         [modifiedState release];
     }
 
-    AUParameterTree* getParameterTree()
+    AUParameterTree* getParameterTree() const
     {
         return paramTree.get();
     }
 
-    NSArray<NSNumber*>* parametersForOverviewWithCount (int count)
+    NSArray<NSNumber*>* parametersForOverviewWithCount (int count) const
     {
         const int n = static_cast<int> ([overviewParams.get() count]);
 
@@ -335,21 +335,21 @@ public:
     }
 
     //==============================================================================
-    NSTimeInterval getLatency()
+    NSTimeInterval getLatency() const
     {
         auto& p = getAudioProcessor();
         return p.getLatencySamples() / p.getSampleRate();
     }
 
-    NSTimeInterval getTailTime()
+    NSTimeInterval getTailTime() const
     {
         return getAudioProcessor().getTailLengthSeconds();
     }
 
     //==============================================================================
-    AUAudioUnitBusArray* getInputBusses()             { return inputBusses.get();  }
-    AUAudioUnitBusArray* getOutputBusses()            { return outputBusses.get(); }
-    NSArray<NSNumber*>* getChannelCapabilities()      { return channelCapabilities.get(); }
+    AUAudioUnitBusArray* getInputBusses()             const { return inputBusses.get();  }
+    AUAudioUnitBusArray* getOutputBusses()            const { return outputBusses.get(); }
+    NSArray<NSNumber*>* getChannelCapabilities()      const { return channelCapabilities.get(); }
 
     bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus)
     {
@@ -396,7 +396,7 @@ public:
     }
 
     //==============================================================================
-    int getVirtualMIDICableCount()
+    int getVirtualMIDICableCount() const
     {
        #if JucePlugin_WantsMidiInput
         return 1;
@@ -405,12 +405,12 @@ public:
        #endif
     }
 
-    bool getSupportsMPE()
+    bool getSupportsMPE() const
     {
         return getAudioProcessor().supportsMPE();
     }
 
-    NSArray<NSString*>* getMIDIOutputNames()
+    NSArray<NSString*>* getMIDIOutputNames() const
     {
        #if JucePlugin_ProducesMidiOutput
         return @[@"MIDI Out"];
@@ -420,8 +420,8 @@ public:
     }
 
     //==============================================================================
-    AUInternalRenderBlock getInternalRenderBlock()    { return internalRenderBlock; }
-    bool getRenderingOffline()                        { return getAudioProcessor().isNonRealtime(); }
+    AUInternalRenderBlock getInternalRenderBlock() const  { return internalRenderBlock; }
+    bool getRenderingOffline()                     const  { return getAudioProcessor().isNonRealtime(); }
     void setRenderingOffline (bool offline)
     {
         auto& processor = getAudioProcessor();
@@ -436,7 +436,7 @@ public:
         }
     }
 
-    bool getShouldBypassEffect()
+    bool getShouldBypassEffect() const
     {
         if (bypassParam != nullptr)
             return (bypassParam->getValue() != 0.0f);
@@ -1084,7 +1084,7 @@ private:
     }
 
     // When parameters are discrete we need to use integer values.
-    float getMaximumParameterValue (AudioProcessorParameter* juceParam)
+    float getMaximumParameterValue (AudioProcessorParameter* juceParam) const
     {
        #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
         ignoreUnused (juceParam);
@@ -1536,7 +1536,7 @@ private:
         }
     }
 
-    AUValue getValue (AUParameter* param)
+    AUValue getValue (AUParameter* param) const
     {
         if (param != nullptr)
         {
