@@ -111,10 +111,10 @@ public:
                          AudioComponentInstantiationOptions options,
                          NSError** error)
         JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
-        : au ([audioUnitObjCClass.createInstance() initWithComponentDescription: descr
-                                                                        options: options
-                                                                          error: error
-                                                                      juceClass: this])
+        : au ([getClass().createInstance() initWithComponentDescription: descr
+                                                                options: options
+                                                                  error: error
+                                                              juceClass: this])
         JUCE_END_IGNORE_WARNINGS_GCC_LIKE
     {}
 
@@ -342,14 +342,15 @@ private:
     static JuceAudioUnitv3Base* create (AUAudioUnit*, AudioComponentDescription, AudioComponentInstantiationOptions, NSError**);
 
     //==============================================================================
-    static Class audioUnitObjCClass;
+    static Class& getClass()
+    {
+        static Class result;
+        return result;
+    }
 
 protected:
     AUAudioUnit* au;
 };
-
-//==============================================================================
-JuceAudioUnitv3Base::Class JuceAudioUnitv3Base::audioUnitObjCClass;
 
 //==============================================================================
 //=========================== The actual AudioUnit =============================
