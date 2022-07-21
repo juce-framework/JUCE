@@ -81,8 +81,8 @@ struct GraphRenderSequence
         {
             const Context context { renderingBuffer.getArrayOfWritePointers(), midiBuffers.begin(), audioPlayHead, numSamples };
 
-            for (auto* op : renderOps)
-                op->perform (context);
+            for (const auto& op : renderOps)
+                op (context);
         }
 
         for (int i = 0; i < buffer.getNumChannels(); ++i)
@@ -95,48 +95,43 @@ struct GraphRenderSequence
 
     void addClearChannelOp (int index)
     {
-        createOp ([=] (const Context& c)    { FloatVectorOperations::clear (c.audioBuffers[index], c.numSamples); });
+        renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::clear (c.audioBuffers[index], c.numSamples); });
     }
 
     void addCopyChannelOp (int srcIndex, int dstIndex)
     {
-        createOp ([=] (const Context& c)    { FloatVectorOperations::copy (c.audioBuffers[dstIndex],
-                                                                           c.audioBuffers[srcIndex],
-                                                                           c.numSamples); });
+        renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::copy (c.audioBuffers[dstIndex], c.audioBuffers[srcIndex], c.numSamples); });
     }
 
     void addAddChannelOp (int srcIndex, int dstIndex)
     {
-        createOp ([=] (const Context& c)    { FloatVectorOperations::add (c.audioBuffers[dstIndex],
-                                                                          c.audioBuffers[srcIndex],
-                                                                          c.numSamples); });
+        renderOps.push_back ([=] (const Context& c)    { FloatVectorOperations::add (c.audioBuffers[dstIndex], c.audioBuffers[srcIndex], c.numSamples); });
     }
 
     void addClearMidiBufferOp (int index)
     {
-        createOp ([=] (const Context& c)    { c.midiBuffers[index].clear(); });
+        renderOps.push_back ([=] (const Context& c)    { c.midiBuffers[index].clear(); });
     }
 
     void addCopyMidiBufferOp (int srcIndex, int dstIndex)
     {
-        createOp ([=] (const Context& c)    { c.midiBuffers[dstIndex] = c.midiBuffers[srcIndex]; });
+        renderOps.push_back ([=] (const Context& c)    { c.midiBuffers[dstIndex] = c.midiBuffers[srcIndex]; });
     }
 
     void addAddMidiBufferOp (int srcIndex, int dstIndex)
     {
-        createOp ([=] (const Context& c)    { c.midiBuffers[dstIndex].addEvents (c.midiBuffers[srcIndex],
-                                                                                 0, c.numSamples, 0); });
+        renderOps.push_back ([=] (const Context& c)    { c.midiBuffers[dstIndex].addEvents (c.midiBuffers[srcIndex], 0, c.numSamples, 0); });
     }
 
     void addDelayChannelOp (int chan, int delaySize)
     {
-        renderOps.add (new DelayChannelOp (chan, delaySize));
+        renderOps.push_back (DelayChannelOp { chan, delaySize });
     }
 
     void addProcessOp (const AudioProcessorGraph::Node::Ptr& node,
                        const Array<int>& audioChannelsUsed, int totalNumChans, int midiBuffer)
     {
-        renderOps.add (new ProcessOp (node, audioChannelsUsed, totalNumChans, midiBuffer));
+        renderOps.push_back (ProcessOp { node, audioChannelsUsed, totalNumChans, midiBuffer });
     }
 
     void prepareBuffers (int blockSize)
@@ -184,67 +179,39 @@ struct GraphRenderSequence
 
 private:
     //==============================================================================
-    struct RenderingOp
-    {
-        RenderingOp() noexcept {}
-        virtual ~RenderingOp() {}
-        virtual void perform (const Context&) = 0;
-
-        JUCE_LEAK_DETECTOR (RenderingOp)
-    };
-
-    OwnedArray<RenderingOp> renderOps;
+    std::vector<std::function<void (const Context&)>> renderOps;
 
     //==============================================================================
-    template <typename LambdaType,
-              std::enable_if_t<std::is_rvalue_reference<LambdaType&&>::value, int> = 0>
-    void createOp (LambdaType&& fn)
-    {
-        struct LambdaOp  : public RenderingOp
-        {
-            LambdaOp (LambdaType&& f) : function (std::forward<LambdaType> (f)) {}
-            void perform (const Context& c) override    { function (c); }
-
-            LambdaType function;
-        };
-
-        renderOps.add (new LambdaOp (std::forward<LambdaType> (fn)));
-    }
-
-    //==============================================================================
-    struct DelayChannelOp  : public RenderingOp
+    struct DelayChannelOp
     {
         DelayChannelOp (int chan, int delaySize)
-            : channel (chan),
-              bufferSize (delaySize + 1),
+            : buffer ((size_t) (delaySize + 1), (FloatType) 0),
+              channel (chan),
               writeIndex (delaySize)
         {
-            buffer.calloc ((size_t) bufferSize);
         }
 
-        void perform (const Context& c) override
+        void operator() (const Context& c)
         {
             auto* data = c.audioBuffers[channel];
 
             for (int i = c.numSamples; --i >= 0;)
             {
-                buffer[writeIndex] = *data;
-                *data++ = buffer[readIndex];
+                buffer[(size_t) writeIndex] = *data;
+                *data++ = buffer[(size_t) readIndex];
 
-                if (++readIndex  >= bufferSize) readIndex = 0;
-                if (++writeIndex >= bufferSize) writeIndex = 0;
+                if (++readIndex  >= (int) buffer.size()) readIndex = 0;
+                if (++writeIndex >= (int) buffer.size()) writeIndex = 0;
             }
         }
 
-        HeapBlock<FloatType> buffer;
-        const int channel, bufferSize;
+        std::vector<FloatType> buffer;
+        const int channel;
         int readIndex = 0, writeIndex;
-
-        JUCE_DECLARE_NON_COPYABLE (DelayChannelOp)
     };
 
     //==============================================================================
-    struct ProcessOp   : public RenderingOp
+    struct ProcessOp
     {
         ProcessOp (const AudioProcessorGraph::Node::Ptr& n,
                    const Array<int>& audioChannelsUsed,
@@ -252,21 +219,19 @@ private:
             : node (n),
               processor (*n->getProcessor()),
               audioChannelsToUse (audioChannelsUsed),
-              totalChans (jmax (1, totalNumChans)),
+              audioChannels ((size_t) jmax (1, totalNumChans), nullptr),
               midiBufferToUse (midiBuffer)
         {
-            audioChannels.calloc ((size_t) totalChans);
-
-            while (audioChannelsToUse.size() < totalChans)
+            while (audioChannelsToUse.size() < (int) audioChannels.size())
                 audioChannelsToUse.add (0);
         }
 
-        void perform (const Context& c) override
+        void operator() (const Context& c)
         {
             processor.setPlayHead (c.audioPlayHead);
 
-            for (int i = 0; i < totalChans; ++i)
-                audioChannels[i] = c.audioBuffers[audioChannelsToUse.getUnchecked (i)];
+            for (size_t i = 0; i < audioChannels.size(); ++i)
+                audioChannels[i] = c.audioBuffers[audioChannelsToUse.getUnchecked ((int) i)];
 
             auto numAudioChannels = [this]
             {
@@ -274,10 +239,10 @@ private:
                     if (proc->getTotalNumInputChannels() == 0 && proc->getTotalNumOutputChannels() == 0)
                         return 0;
 
-                return totalChans;
+                return (int) audioChannels.size();
             }();
 
-            AudioBuffer<FloatType> buffer (audioChannels, numAudioChannels, c.numSamples);
+            AudioBuffer<FloatType> buffer { audioChannels.data(), numAudioChannels, c.numSamples };
 
             const ScopedLock lock (processor.getCallbackLock());
 
@@ -335,11 +300,9 @@ private:
         AudioProcessor& processor;
 
         Array<int> audioChannelsToUse;
-        HeapBlock<FloatType*> audioChannels;
+        std::vector<FloatType*> audioChannels;
         AudioBuffer<float> tempBufferFloat, tempBufferDouble;
-        const int totalChans, midiBufferToUse;
-
-        JUCE_DECLARE_NON_COPYABLE (ProcessOp)
+        const int midiBufferToUse;
     };
 };
 
@@ -839,16 +802,14 @@ bool AudioProcessorGraph::Connection::operator!= (const Connection& c) const noe
 
 bool AudioProcessorGraph::Connection::operator< (const Connection& other) const noexcept
 {
-    if (source.nodeID != other.source.nodeID)
-        return source.nodeID < other.source.nodeID;
-
-    if (destination.nodeID != other.destination.nodeID)
-        return destination.nodeID < other.destination.nodeID;
-
-    if (source.channelIndex != other.source.channelIndex)
-        return source.channelIndex < other.source.channelIndex;
-
-    return destination.channelIndex < other.destination.channelIndex;
+    const auto tie = [] (auto& x)
+    {
+        return std::tie (x.source.nodeID,
+                         x.destination.nodeID,
+                         x.source.channelIndex,
+                         x.destination.channelIndex);
+    };
+    return tie (*this) < tie (other);
 }
 
 //==============================================================================
@@ -884,11 +845,8 @@ void AudioProcessorGraph::Node::unprepare()
 {
     const ScopedLock lock (processorLock);
 
-    if (isPrepared)
-    {
-        isPrepared = false;
+    if (std::exchange (isPrepared, false))
         processor->releaseResources();
-    }
 }
 
 void AudioProcessorGraph::Node::setParentGraph (AudioProcessorGraph* const graph) const
@@ -1273,7 +1231,7 @@ bool AudioProcessorGraph::anyNodesNeedPreparing() const noexcept
     return false;
 }
 
-void AudioProcessorGraph::buildRenderingSequence()
+void AudioProcessorGraph::handleAsyncUpdate()
 {
     auto newSequenceF = std::make_unique<RenderSequenceFloat>();
     auto newSequenceD = std::make_unique<RenderSequenceDouble>();
@@ -1300,11 +1258,6 @@ void AudioProcessorGraph::buildRenderingSequence()
 
     std::swap (renderSequenceFloat,  newSequenceF);
     std::swap (renderSequenceDouble, newSequenceD);
-}
-
-void AudioProcessorGraph::handleAsyncUpdate()
-{
-    buildRenderingSequence();
 }
 
 //==============================================================================
