@@ -1,6 +1,39 @@
 JUCE breaking changes
 =====================
 
+develop
+=======
+
+Change
+------
+Previously, the AudioProcessorGraph would call processBlockBypassed on any
+processor for which setBypassed had previously been called. Now, the
+AudioProcessorGraph will now only call processBlockBypassed if those processors
+do not have dedicated bypass parameters.
+
+Possible Issues
+---------------
+Processors with non-functional bypass parameters may not bypass in the same way
+as before.
+
+Workaround
+----------
+For each AudioProcessor owned by a Graph, ensure that either: the processor has
+a working bypass parameter that correctly affects the output of processBlock();
+or, the processor has no bypass parameter, in which case processBlockBypassed()
+will be called as before.
+
+Rationale
+---------
+The documentation for AudioProcessor::getBypassParameter() states that if this
+function returns non-null, then processBlockBypassed() should never be called,
+but the AudioProcessorGraph was breaking this rule. Calling
+processBlockBypassed() on AudioProcessors with bypass parameters is likely to
+result in incorrect or unexpected output if this function is not overridden.
+The new behaviour obeys the contract set out in the AudioProcessor
+documentation.
+
+
 Version 7.0.2
 =============
 
