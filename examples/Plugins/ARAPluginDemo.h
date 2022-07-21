@@ -676,10 +676,10 @@ public:
 
         ScopedNoDenormals noDenormals;
 
-        auto* playHead = getPlayHead();
-        playHeadState.update (playHead);
+        auto* audioPlayHead = getPlayHead();
+        playHeadState.update (audioPlayHead);
 
-        if (! processBlockForARA (buffer, isRealtime(), playHead))
+        if (! processBlockForARA (buffer, isRealtime(), audioPlayHead))
             processBlockBypassed (buffer, midiMessages);
     }
 
