@@ -133,8 +133,7 @@ public:
         friend class AudioProcessorGraph;
         template <typename Float>
         friend struct GraphRenderSequence;
-        template <typename Float>
-        friend struct RenderSequenceBuilder;
+        friend class RenderSequenceBuilder;
 
         struct Connection
         {

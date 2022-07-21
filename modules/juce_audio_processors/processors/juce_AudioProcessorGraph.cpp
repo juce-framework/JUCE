@@ -308,34 +308,23 @@ private:
 
 //==============================================================================
 //==============================================================================
-template <typename RenderSequence>
-struct RenderSequenceBuilder
+class RenderSequenceBuilder
 {
-    RenderSequenceBuilder (AudioProcessorGraph& g, RenderSequence& s)
-        : graph (g), sequence (s), orderedNodes (createOrderedNodeList (graph))
+public:
+    template <typename RenderSequence>
+    static auto build (AudioProcessorGraph& g)
     {
-        audioBuffers.add (AssignedBuffer::createReadOnlyEmpty()); // first buffer is read-only zeros
-        midiBuffers .add (AssignedBuffer::createReadOnlyEmpty());
-
-        for (int i = 0; i < orderedNodes.size(); ++i)
-        {
-            createRenderingOpsForNode (*orderedNodes.getUnchecked(i), i);
-            markAnyUnusedBuffersAsFree (audioBuffers, i);
-            markAnyUnusedBuffersAsFree (midiBuffers, i);
-        }
-
-        graph.setLatencySamples (totalLatency);
-
-        s.numBuffersNeeded = audioBuffers.size();
-        s.numMidiBuffersNeeded = midiBuffers.size();
+        auto sequence = std::make_unique<RenderSequence>();
+        const RenderSequenceBuilder builder (g, *sequence);
+        return sequence;
     }
 
+private:
     //==============================================================================
     using Node = AudioProcessorGraph::Node;
     using NodeID = AudioProcessorGraph::NodeID;
 
     AudioProcessorGraph& graph;
-    RenderSequence& sequence;
 
     const Array<Node*> orderedNodes;
 
@@ -440,7 +429,8 @@ struct RenderSequenceBuilder
         return result;
     }
 
-    int findBufferForInputAudioChannel (Node& node, const int inputChan,
+    template <typename RenderSequence>
+    int findBufferForInputAudioChannel (RenderSequence& sequence, Node& node, const int inputChan,
                                         const int ourRenderingIndex, const int maxLatency)
     {
         auto& processor = *node.getProcessor();
@@ -572,7 +562,8 @@ struct RenderSequenceBuilder
         return bufIndex;
     }
 
-    int findBufferForInputMidiChannel (Node& node, int ourRenderingIndex)
+    template <typename RenderSequence>
+    int findBufferForInputMidiChannel (RenderSequence& sequence, Node& node, int ourRenderingIndex)
     {
         auto& processor = *node.getProcessor();
         auto sources = getSourcesForChannel (node, AudioProcessorGraph::midiChannelIndex);
@@ -663,7 +654,8 @@ struct RenderSequenceBuilder
         return midiBufferToUse;
     }
 
-    void createRenderingOpsForNode (Node& node, const int ourRenderingIndex)
+    template <typename RenderSequence>
+    void createRenderingOpsForNode (RenderSequence& sequence, Node& node, const int ourRenderingIndex)
     {
         auto& processor = *node.getProcessor();
         auto numIns  = processor.getTotalNumInputChannels();
@@ -676,7 +668,7 @@ struct RenderSequenceBuilder
         for (int inputChan = 0; inputChan < numIns; ++inputChan)
         {
             // get a list of all the inputs to this node
-            auto index = findBufferForInputAudioChannel (node, inputChan, ourRenderingIndex, maxLatency);
+            auto index = findBufferForInputAudioChannel (sequence, node, inputChan, ourRenderingIndex, maxLatency);
             jassert (index >= 0);
 
             audioChannelsToUse.add (index);
@@ -694,7 +686,7 @@ struct RenderSequenceBuilder
             audioBuffers.getReference (index).channel = { node.nodeID, outputChan };
         }
 
-        auto midiBufferToUse = findBufferForInputMidiChannel (node, ourRenderingIndex);
+        auto midiBufferToUse = findBufferForInputMidiChannel (sequence, node, ourRenderingIndex);
 
         if (processor.producesMidi())
             midiBuffers.getReference (midiBufferToUse).channel = { node.nodeID, AudioProcessorGraph::midiChannelIndex };
@@ -781,7 +773,25 @@ struct RenderSequenceBuilder
         return false;
     }
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RenderSequenceBuilder)
+    template <typename RenderSequence>
+    RenderSequenceBuilder (AudioProcessorGraph& g, RenderSequence& sequence)
+        : graph (g), orderedNodes (createOrderedNodeList (graph))
+    {
+        audioBuffers.add (AssignedBuffer::createReadOnlyEmpty()); // first buffer is read-only zeros
+        midiBuffers .add (AssignedBuffer::createReadOnlyEmpty());
+
+        for (int i = 0; i < orderedNodes.size(); ++i)
+        {
+            createRenderingOpsForNode (sequence, *orderedNodes.getUnchecked(i), i);
+            markAnyUnusedBuffersAsFree (audioBuffers, i);
+            markAnyUnusedBuffersAsFree (midiBuffers, i);
+        }
+
+        graph.setLatencySamples (totalLatency);
+
+        sequence.numBuffersNeeded = audioBuffers.size();
+        sequence.numMidiBuffersNeeded = midiBuffers.size();
+    }
 };
 
 //==============================================================================
@@ -1233,11 +1243,8 @@ bool AudioProcessorGraph::anyNodesNeedPreparing() const noexcept
 
 void AudioProcessorGraph::handleAsyncUpdate()
 {
-    auto newSequenceF = std::make_unique<RenderSequenceFloat>();
-    auto newSequenceD = std::make_unique<RenderSequenceDouble>();
-
-    RenderSequenceBuilder<RenderSequenceFloat>  builderF (*this, *newSequenceF);
-    RenderSequenceBuilder<RenderSequenceDouble> builderD (*this, *newSequenceD);
+    auto newSequenceF = RenderSequenceBuilder::build<RenderSequenceFloat>  (*this);
+    auto newSequenceD = RenderSequenceBuilder::build<RenderSequenceDouble> (*this);
 
     const ScopedLock sl (getCallbackLock());
 
