@@ -316,15 +316,20 @@ public:
     {
         auto sequence = std::make_unique<RenderSequence>();
         const RenderSequenceBuilder builder (g, *sequence);
-        return sequence;
+
+        struct SequenceAndLatency
+        {
+            std::unique_ptr<RenderSequence> sequence;
+            int latencySamples = 0;
+        };
+
+        return SequenceAndLatency { std::move (sequence), builder.totalLatency };
     }
 
 private:
     //==============================================================================
     using Node = AudioProcessorGraph::Node;
     using NodeID = AudioProcessorGraph::NodeID;
-
-    AudioProcessorGraph& graph;
 
     const Array<Node*> orderedNodes;
 
@@ -366,7 +371,7 @@ private:
         return delays[nodeID.uid];
     }
 
-    int getInputLatencyForNode (NodeID nodeID) const
+    int getInputLatencyForNode (const AudioProcessorGraph& graph, NodeID nodeID) const
     {
         int maxLatency = 0;
 
@@ -430,13 +435,17 @@ private:
     }
 
     template <typename RenderSequence>
-    int findBufferForInputAudioChannel (RenderSequence& sequence, Node& node, const int inputChan,
-                                        const int ourRenderingIndex, const int maxLatency)
+    int findBufferForInputAudioChannel (const AudioProcessorGraph& graph,
+                                        RenderSequence& sequence,
+                                        Node& node,
+                                        const int inputChan,
+                                        const int ourRenderingIndex,
+                                        const int maxLatency)
     {
         auto& processor = *node.getProcessor();
         auto numOuts = processor.getTotalNumOutputChannels();
 
-        auto sources = getSourcesForChannel (node, inputChan);
+        auto sources = getSourcesForChannel (graph, node, inputChan);
 
         // Handle an unconnected input channel...
         if (sources.isEmpty())
@@ -465,7 +474,7 @@ private:
             }
 
             if (inputChan < numOuts
-                 && isBufferNeededLater (ourRenderingIndex, inputChan, src))
+                 && isBufferNeededLater (graph, ourRenderingIndex, inputChan, src))
             {
                 // can't mess up this channel because it's needed later by another node,
                 // so we need to use a copy of it..
@@ -491,7 +500,7 @@ private:
             auto src = sources.getReference(i);
             auto sourceBufIndex = getBufferContaining (src);
 
-            if (sourceBufIndex >= 0 && ! isBufferNeededLater (ourRenderingIndex, inputChan, src))
+            if (sourceBufIndex >= 0 && ! isBufferNeededLater (graph, ourRenderingIndex, inputChan, src))
             {
                 // we've found one of our input chans that can be re-used..
                 reusableInputIndex = i;
@@ -541,7 +550,7 @@ private:
 
                     if (nodeDelay < maxLatency)
                     {
-                        if (! isBufferNeededLater (ourRenderingIndex, inputChan, src))
+                        if (! isBufferNeededLater (graph, ourRenderingIndex, inputChan, src))
                         {
                             sequence.addDelayChannelOp (srcIndex, maxLatency - nodeDelay);
                         }
@@ -563,10 +572,13 @@ private:
     }
 
     template <typename RenderSequence>
-    int findBufferForInputMidiChannel (RenderSequence& sequence, Node& node, int ourRenderingIndex)
+    int findBufferForInputMidiChannel (const AudioProcessorGraph& graph,
+                                       RenderSequence& sequence,
+                                       Node& node,
+                                       int ourRenderingIndex)
     {
         auto& processor = *node.getProcessor();
-        auto sources = getSourcesForChannel (node, AudioProcessorGraph::midiChannelIndex);
+        auto sources = getSourcesForChannel (graph, node, AudioProcessorGraph::midiChannelIndex);
 
         // No midi inputs..
         if (sources.isEmpty())
@@ -587,7 +599,7 @@ private:
 
             if (midiBufferToUse >= 0)
             {
-                if (isBufferNeededLater (ourRenderingIndex, AudioProcessorGraph::midiChannelIndex, src))
+                if (isBufferNeededLater (graph, ourRenderingIndex, AudioProcessorGraph::midiChannelIndex, src))
                 {
                     // can't mess up this channel because it's needed later by another node, so we
                     // need to use a copy of it..
@@ -615,7 +627,7 @@ private:
             auto sourceBufIndex = getBufferContaining (src);
 
             if (sourceBufIndex >= 0
-                 && ! isBufferNeededLater (ourRenderingIndex, AudioProcessorGraph::midiChannelIndex, src))
+                 && ! isBufferNeededLater (graph, ourRenderingIndex, AudioProcessorGraph::midiChannelIndex, src))
             {
                 // we've found one of our input buffers that can be re-used..
                 reusableInputIndex = i;
@@ -655,7 +667,10 @@ private:
     }
 
     template <typename RenderSequence>
-    void createRenderingOpsForNode (RenderSequence& sequence, Node& node, const int ourRenderingIndex)
+    void createRenderingOpsForNode (const AudioProcessorGraph& graph,
+                                    RenderSequence& sequence,
+                                    Node& node,
+                                    const int ourRenderingIndex)
     {
         auto& processor = *node.getProcessor();
         auto numIns  = processor.getTotalNumInputChannels();
@@ -663,12 +678,17 @@ private:
         auto totalChans = jmax (numIns, numOuts);
 
         Array<int> audioChannelsToUse;
-        auto maxLatency = getInputLatencyForNode (node.nodeID);
+        auto maxLatency = getInputLatencyForNode (graph, node.nodeID);
 
         for (int inputChan = 0; inputChan < numIns; ++inputChan)
         {
             // get a list of all the inputs to this node
-            auto index = findBufferForInputAudioChannel (sequence, node, inputChan, ourRenderingIndex, maxLatency);
+            auto index = findBufferForInputAudioChannel (graph,
+                                                         sequence,
+                                                         node,
+                                                         inputChan,
+                                                         ourRenderingIndex,
+                                                         maxLatency);
             jassert (index >= 0);
 
             audioChannelsToUse.add (index);
@@ -686,7 +706,7 @@ private:
             audioBuffers.getReference (index).channel = { node.nodeID, outputChan };
         }
 
-        auto midiBufferToUse = findBufferForInputMidiChannel (sequence, node, ourRenderingIndex);
+        auto midiBufferToUse = findBufferForInputMidiChannel (graph, sequence, node, ourRenderingIndex);
 
         if (processor.producesMidi())
             midiBuffers.getReference (midiBufferToUse).channel = { node.nodeID, AudioProcessorGraph::midiChannelIndex };
@@ -700,7 +720,9 @@ private:
     }
 
     //==============================================================================
-    Array<AudioProcessorGraph::NodeAndChannel> getSourcesForChannel (Node& node, int inputChannelIndex)
+    Array<AudioProcessorGraph::NodeAndChannel> getSourcesForChannel (const AudioProcessorGraph& graph,
+                                                                     Node& node,
+                                                                     int inputChannelIndex)
     {
         Array<AudioProcessorGraph::NodeAndChannel> results;
         AudioProcessorGraph::NodeAndChannel nc { node.nodeID, inputChannelIndex };
@@ -737,14 +759,17 @@ private:
         return -1;
     }
 
-    void markAnyUnusedBuffersAsFree (Array<AssignedBuffer>& buffers, const int stepIndex)
+    void markAnyUnusedBuffersAsFree (const AudioProcessorGraph& graph,
+                                     Array<AssignedBuffer>& buffers,
+                                     const int stepIndex)
     {
         for (auto& b : buffers)
-            if (b.isAssigned() && ! isBufferNeededLater (stepIndex, -1, b.channel))
+            if (b.isAssigned() && ! isBufferNeededLater (graph, stepIndex, -1, b.channel))
                 b.setFree();
     }
 
-    bool isBufferNeededLater (int stepIndexToSearchFrom,
+    bool isBufferNeededLater (const AudioProcessorGraph& graph,
+                              int stepIndexToSearchFrom,
                               int inputChannelOfIndexToIgnore,
                               AudioProcessorGraph::NodeAndChannel output) const
     {
@@ -774,20 +799,18 @@ private:
     }
 
     template <typename RenderSequence>
-    RenderSequenceBuilder (AudioProcessorGraph& g, RenderSequence& sequence)
-        : graph (g), orderedNodes (createOrderedNodeList (graph))
+    RenderSequenceBuilder (const AudioProcessorGraph& graph, RenderSequence& sequence)
+        : orderedNodes (createOrderedNodeList (graph))
     {
         audioBuffers.add (AssignedBuffer::createReadOnlyEmpty()); // first buffer is read-only zeros
         midiBuffers .add (AssignedBuffer::createReadOnlyEmpty());
 
         for (int i = 0; i < orderedNodes.size(); ++i)
         {
-            createRenderingOpsForNode (sequence, *orderedNodes.getUnchecked(i), i);
-            markAnyUnusedBuffersAsFree (audioBuffers, i);
-            markAnyUnusedBuffersAsFree (midiBuffers, i);
+            createRenderingOpsForNode (graph, sequence, *orderedNodes.getUnchecked(i), i);
+            markAnyUnusedBuffersAsFree (graph, audioBuffers, i);
+            markAnyUnusedBuffersAsFree (graph, midiBuffers, i);
         }
-
-        graph.setLatencySamples (totalLatency);
 
         sequence.numBuffersNeeded = audioBuffers.size();
         sequence.numMidiBuffersNeeded = midiBuffers.size();
@@ -1249,8 +1272,11 @@ void AudioProcessorGraph::handleAsyncUpdate()
     const ScopedLock sl (getCallbackLock());
 
     const auto currentBlockSize = getBlockSize();
-    newSequenceF->prepareBuffers (currentBlockSize);
-    newSequenceD->prepareBuffers (currentBlockSize);
+    newSequenceF.sequence->prepareBuffers (currentBlockSize);
+    newSequenceD.sequence->prepareBuffers (currentBlockSize);
+
+    jassert (newSequenceF.latencySamples == newSequenceD.latencySamples);
+    setLatencySamples (newSequenceF.latencySamples);
 
     if (anyNodesNeedPreparing())
     {
@@ -1263,8 +1289,8 @@ void AudioProcessorGraph::handleAsyncUpdate()
 
     isPrepared = 1;
 
-    std::swap (renderSequenceFloat,  newSequenceF);
-    std::swap (renderSequenceDouble, newSequenceD);
+    renderSequenceFloat  = std::move (newSequenceF.sequence);
+    renderSequenceDouble = std::move (newSequenceD.sequence);
 }
 
 //==============================================================================
