@@ -195,6 +195,9 @@ public:
 
         Using setDrawableTransform() will take this internal offset into account when applying the
         transform to the Component base.
+
+        You can only use Drawable::setDrawableTransform() or Component::setTransform() for a given
+        object. Using both will lead to unpredictable behaviour.
     */
     void setDrawableTransform (const AffineTransform& transform);
 
