@@ -1,6 +1,38 @@
 JUCE breaking changes
 =====================
 
+Develop
+=======
+
+Change
+------
+The Matrix3D (Vector3D<Type> vector) constructor has been replaced with an
+explicit static Matrix3D fromTranslation (Vector3D<Type> vector) function, and a
+bug in the behaviour of the multipication operator that reversed the order of
+operations has been addressed.
+
+Possible Issues
+---------------
+Code using the old constructor will not compile. Code that relied upon the order
+of multiplication operations will return different results.
+
+Workaround
+----------
+Code that was using the old constructor must use the new static function. Code
+that relied on the order of multiplication operations will need to have the
+order of the arguments reversed. With the old code A * B was returning BA rather
+than AB.
+
+Rationale
+---------
+Previously a matrix multipled by a vector would return a matrix, rather than a
+vector, as the multiplied-by vector would be automatically converted into a
+matrix during the operation. Removing the converting constructor makes
+everything much more explicit and there is no confusion about dimensionality.
+The current multiplication routine also included a bug where A * B resulted in
+BA rather than AB, which needed to be addressed.
+
+
 Version 7.0.0
 =============
 

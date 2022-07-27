@@ -88,12 +88,12 @@ public:
     }
 
     /** Creates a matrix from a 3D vector translation. */
-    Matrix3D (Vector3D<Type> vector) noexcept
+    static Matrix3D fromTranslation (Vector3D<Type> vector) noexcept
     {
-        mat[0]  = Type (1); mat[1]  = 0;        mat[2]  = 0;         mat[3]  = 0;
-        mat[4]  = 0;        mat[5]  = Type (1); mat[6]  = 0;         mat[7]  = 0;
-        mat[8]  = 0;        mat[9]  = 0;        mat[10] = Type (1);  mat[11] = 0;
-        mat[12] = vector.x; mat[13] = vector.y; mat[14] = vector.z;  mat[15] = Type (1);
+        return { Type (1), 0,        0,        0,
+                 0,        Type (1), 0,        0,
+                 0,        0,        Type (1), 0,
+                 vector.x, vector.y, vector.z, Type (1) };
     }
 
     /** Returns a new matrix from the given frustum values. */
@@ -129,22 +129,22 @@ public:
     {
         auto&& m2 = other.mat;
 
-        return { mat[0]  * m2[0] + mat[1]  * m2[4] + mat[2]  * m2[8]  + mat[3]  * m2[12],
-                 mat[0]  * m2[1] + mat[1]  * m2[5] + mat[2]  * m2[9]  + mat[3]  * m2[13],
-                 mat[0]  * m2[2] + mat[1]  * m2[6] + mat[2]  * m2[10] + mat[3]  * m2[14],
-                 mat[0]  * m2[3] + mat[1]  * m2[7] + mat[2]  * m2[11] + mat[3]  * m2[15],
-                 mat[4]  * m2[0] + mat[5]  * m2[4] + mat[6]  * m2[8]  + mat[7]  * m2[12],
-                 mat[4]  * m2[1] + mat[5]  * m2[5] + mat[6]  * m2[9]  + mat[7]  * m2[13],
-                 mat[4]  * m2[2] + mat[5]  * m2[6] + mat[6]  * m2[10] + mat[7]  * m2[14],
-                 mat[4]  * m2[3] + mat[5]  * m2[7] + mat[6]  * m2[11] + mat[7]  * m2[15],
-                 mat[8]  * m2[0] + mat[9]  * m2[4] + mat[10] * m2[8]  + mat[11] * m2[12],
-                 mat[8]  * m2[1] + mat[9]  * m2[5] + mat[10] * m2[9]  + mat[11] * m2[13],
-                 mat[8]  * m2[2] + mat[9]  * m2[6] + mat[10] * m2[10] + mat[11] * m2[14],
-                 mat[8]  * m2[3] + mat[9]  * m2[7] + mat[10] * m2[11] + mat[11] * m2[15],
-                 mat[12] * m2[0] + mat[13] * m2[4] + mat[14] * m2[8]  + mat[15] * m2[12],
-                 mat[12] * m2[1] + mat[13] * m2[5] + mat[14] * m2[9]  + mat[15] * m2[13],
-                 mat[12] * m2[2] + mat[13] * m2[6] + mat[14] * m2[10] + mat[15] * m2[14],
-                 mat[12] * m2[3] + mat[13] * m2[7] + mat[14] * m2[11] + mat[15] * m2[15] };
+        return { mat[0] * m2[0]  + mat[4] * m2[1]  + mat[8]  * m2[2]  + mat[12] * m2[3],
+                 mat[1] * m2[0]  + mat[5] * m2[1]  + mat[9]  * m2[2]  + mat[13] * m2[3],
+                 mat[2] * m2[0]  + mat[6] * m2[1]  + mat[10] * m2[2]  + mat[14] * m2[3],
+                 mat[3] * m2[0]  + mat[7] * m2[1]  + mat[11] * m2[2]  + mat[15] * m2[3],
+                 mat[0] * m2[4]  + mat[4] * m2[5]  + mat[8]  * m2[6]  + mat[12] * m2[7],
+                 mat[1] * m2[4]  + mat[5] * m2[5]  + mat[9]  * m2[6]  + mat[13] * m2[7],
+                 mat[2] * m2[4]  + mat[6] * m2[5]  + mat[10] * m2[6]  + mat[14] * m2[7],
+                 mat[3] * m2[4]  + mat[7] * m2[5]  + mat[11] * m2[6]  + mat[15] * m2[7],
+                 mat[0] * m2[8]  + mat[4] * m2[9]  + mat[8]  * m2[10] + mat[12] * m2[11],
+                 mat[1] * m2[8]  + mat[5] * m2[9]  + mat[9]  * m2[10] + mat[13] * m2[11],
+                 mat[2] * m2[8]  + mat[6] * m2[9]  + mat[10] * m2[10] + mat[14] * m2[11],
+                 mat[3] * m2[8]  + mat[7] * m2[9]  + mat[11] * m2[10] + mat[15] * m2[11],
+                 mat[0] * m2[12] + mat[4] * m2[13] + mat[8]  * m2[14] + mat[12] * m2[15],
+                 mat[1] * m2[12] + mat[5] * m2[13] + mat[9]  * m2[14] + mat[13] * m2[15],
+                 mat[2] * m2[12] + mat[6] * m2[13] + mat[10] * m2[14] + mat[14] * m2[15],
+                 mat[3] * m2[12] + mat[7] * m2[13] + mat[11] * m2[14] + mat[15] * m2[15] };
     }
 
     /** The 4x4 matrix values. These are stored in the standard OpenGL order. */
