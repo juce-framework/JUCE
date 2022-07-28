@@ -92,11 +92,29 @@ int main (int argc, char **argv)
     else
         runner.runAllTests (seed);
 
-    Logger::setCurrentLogger (nullptr);
+    std::vector<String> failures;
 
     for (int i = 0; i < runner.getNumResults(); ++i)
-        if (runner.getResult(i)->failures > 0)
-            return 1;
+    {
+        auto* result = runner.getResult (i);
+
+        if (result->failures > 0)
+            failures.push_back (result->unitTestName + " / " + result->subcategoryName + ": " + String (result->failures) + " test failure" + (result->failures > 1 ? "s" : ""));
+    }
+
+    if (! failures.empty())
+    {
+        logger.writeToLog (newLine + "Test failure summary:" + newLine);
+
+        for (const auto& failure : failures)
+            logger.writeToLog (failure);
+
+        Logger::setCurrentLogger (nullptr);
+        return 1;
+    }
+
+    logger.writeToLog (newLine + "All tests completed successfully");
+    Logger::setCurrentLogger (nullptr);
 
     return 0;
 }

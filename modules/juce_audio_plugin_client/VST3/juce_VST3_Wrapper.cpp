@@ -129,6 +129,34 @@ using namespace Steinberg;
 //==============================================================================
 #if JUCE_LINUX || JUCE_BSD
 
+enum class HostMessageThreadAttached { no, yes };
+
+class HostMessageThreadState
+{
+public:
+    template <typename Callback>
+    void setStateWithAction (HostMessageThreadAttached stateIn, Callback&& action)
+    {
+        const std::lock_guard<std::mutex> lock { m };
+        state = stateIn;
+        action();
+    }
+
+    void assertHostMessageThread()
+    {
+        const std::lock_guard<std::mutex> lock { m };
+
+        if (state == HostMessageThreadAttached::no)
+            return;
+
+        JUCE_ASSERT_MESSAGE_THREAD
+    }
+
+private:
+    HostMessageThreadAttached state = HostMessageThreadAttached::no;
+    std::mutex m;
+};
+
 class EventHandler final  : public Steinberg::Linux::IEventHandler,
                             private LinuxEventLoopInternal::Listener
 {
@@ -145,7 +173,8 @@ public:
         LinuxEventLoopInternal::deregisterLinuxEventLoopListener (*this);
 
         if (! messageThread->isRunning())
-            messageThread->start();
+            hostMessageThreadState.setStateWithAction (HostMessageThreadAttached::no,
+                                                       [this]() { messageThread->start(); });
     }
 
     JUCE_DECLARE_VST3_COM_REF_METHODS
@@ -175,6 +204,17 @@ public:
     {
         if (auto* runLoop = getRunLoopFromFrame (plugFrame))
             refreshAttachedEventLoop ([this, runLoop] { hostRunLoops.erase (runLoop); });
+    }
+
+    /* Asserts if it can be established that the calling thread is different from the host's message
+       thread.
+
+       On Linux this can only be determined if the host has already registered its run loop. Until
+       then JUCE messages are serviced by a background thread internal to the plugin.
+    */
+    static void assertHostMessageThread()
+    {
+        hostMessageThreadState.assertHostMessageThread();
     }
 
 private:
@@ -244,7 +284,8 @@ private:
             if (messageThread->isRunning())
                 messageThread->stop();
 
-            MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+            hostMessageThreadState.setStateWithAction (HostMessageThreadAttached::yes,
+                                                       [] { MessageManager::getInstance()->setCurrentThreadAsMessageThread(); });
         }
     }
 
@@ -287,12 +328,25 @@ private:
     std::multiset<Steinberg::Linux::IRunLoop*> hostRunLoops;
     AttachedEventLoop attachedEventLoop;
 
+    static HostMessageThreadState hostMessageThreadState;
+
     //==============================================================================
     JUCE_DECLARE_NON_MOVEABLE (EventHandler)
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (EventHandler)
 };
 
+HostMessageThreadState EventHandler::hostMessageThreadState;
+
 #endif
+
+static void assertHostMessageThread()
+{
+   #if JUCE_LINUX || JUCE_BSD
+    EventHandler::assertHostMessageThread();
+   #else
+    JUCE_ASSERT_MESSAGE_THREAD
+   #endif
+}
 
 //==============================================================================
 class InParameterChangedCallbackSetter
@@ -1002,25 +1056,8 @@ public:
     //==============================================================================
     tresult PLUGIN_API setComponentState (IBStream* stream) override
     {
-        if (! MessageManager::existsAndIsCurrentThread())
-       #if JUCE_LINUX || JUCE_BSD
-        {
-            tresult result = kResultOk;
-            WaitableEvent finishedEvent;
-
-            MessageManager::callAsync ([&]
-            {
-                result = setComponentState (stream);
-                finishedEvent.signal();
-            });
-
-            finishedEvent.wait();
-            return result;
-        }
-       #else
         // As an IEditController member, the host should only call this from the message thread.
-        jassertfalse;
-       #endif
+        assertHostMessageThread();
 
         if (auto* pluginInstance = getPluginInstance())
         {
@@ -2005,7 +2042,12 @@ private:
                     owner->lastScaleFactorReceived = editorScaleFactor;
 
                 if (component != nullptr)
+                {
+                   #if JUCE_LINUX || JUCE_BSD
+                    const MessageManagerLock mmLock;
+                   #endif
                     component->setEditorScaleFactor (editorScaleFactor);
+                }
             }
 
             return kResultTrue;
@@ -2815,7 +2857,7 @@ public:
     {
         // The VST3 spec requires that this function is called from the UI thread.
         // If this assertion fires, your host is misbehaving!
-        JUCE_ASSERT_MESSAGE_THREAD
+        assertHostMessageThread();
 
         if (state == nullptr)
             return kInvalidArgument;

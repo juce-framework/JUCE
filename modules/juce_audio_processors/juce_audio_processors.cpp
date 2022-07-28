@@ -229,7 +229,7 @@ private:
   #include "format_types/juce_VST3PluginFormat_test.cpp"
  #endif
 
- #if JUCE_PLUGINHOST_LV2
+ #if JUCE_PLUGINHOST_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
   #include "format_types/juce_LV2PluginFormat_test.cpp"
  #endif
 #endif

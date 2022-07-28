@@ -48,8 +48,21 @@ static ARA::ARAInterfaceConfiguration createInterfaceConfig (const ARA::ARAFacto
                                &assertFunction);
 }
 
+/*  If the provided ARAFactory is not yet in use it constructs a new shared_ptr that will call the
+    provided onDelete function inside the custom deleter of this new shared_ptr instance.
+
+    The onDelete function is responsible for releasing the resources that guarantee the validity of
+    the wrapped ARAFactory*.
+
+    If however the ARAFactory is already in use the function will just return a copy of the already
+    existing shared_ptr and call the onDelete function immediately. This is to ensure that the
+    ARAFactory is only uninitialised when no plugin instance can be using it.
+
+    On both platforms the onDelete function is used to release resources that ensure that the module
+    providing the ARAFactory* remains loaded.
+*/
 static std::shared_ptr<const ARA::ARAFactory> getOrCreateARAFactory (const ARA::ARAFactory* ptr,
-                                                                     std::function<void (const ARA::ARAFactory*)> onDelete)
+                                                                     std::function<void()> onDelete)
 {
     JUCE_ASSERT_MESSAGE_THREAD
 
@@ -58,14 +71,17 @@ static std::shared_ptr<const ARA::ARAFactory> getOrCreateARAFactory (const ARA::
     auto& cachePtr = cache[ptr];
 
     if (const auto obj = cachePtr.lock())
+    {
+        onDelete();
         return obj;
+    }
 
     const auto interfaceConfig = createInterfaceConfig (ptr);
     ptr->initializeARAWithConfiguration (&interfaceConfig);
     const auto obj = std::shared_ptr<const ARA::ARAFactory> (ptr, [deleter = std::move (onDelete)] (const ARA::ARAFactory* factory)
                                                              {
                                                                  factory->uninitializeARA();
-                                                                 deleter (factory);
+                                                                 deleter();
                                                              });
     cachePtr = obj;
     return obj;

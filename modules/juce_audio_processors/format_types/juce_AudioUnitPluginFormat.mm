@@ -488,7 +488,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory (AudioUnitSharedPtr 
         {
             jassert (audioUnitFactory.outFactory != nullptr);
             return getOrCreateARAFactory (audioUnitFactory.outFactory,
-                                          [owningAuPtr = std::move (audioUnit)] (const ARA::ARAFactory*) {});
+                                          [owningAuPtr = std::move (audioUnit)]() {});
         }
     }
    #else

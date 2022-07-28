@@ -50,7 +50,7 @@ namespace juce
     "goodbye" = "au revoir"
     @endcode
 
-    If the strings need to contain a quote character, they can use '\"' instead, and
+    If the strings need to contain a quote character, they can use `\"` instead, and
     if the first non-whitespace character on a line isn't a quote, then it's ignored,
     (you can use this to add comments).
 

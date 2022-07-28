@@ -23,7 +23,7 @@
   ==============================================================================
 */
 
-#if JucePlugin_Build_LV2
+#if JucePlugin_Build_LV2 && (! (JUCE_ANDROID || JUCE_IOS))
 
 #ifndef _SCL_SECURE_NO_WARNINGS
  #define _SCL_SECURE_NO_WARNINGS

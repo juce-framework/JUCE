@@ -1475,7 +1475,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory (Steinberg::IPluginF
                                    == Steinberg::kResultOk)
                                {
                                    factory = getOrCreateARAFactory (source->getFactory(),
-                                                                    [source] (const ARA::ARAFactory*) { source->release(); });
+                                                                    [source]() { source->release(); });
                                    return false;
                                }
                                jassert (source == nullptr);

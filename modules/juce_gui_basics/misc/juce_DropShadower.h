@@ -77,6 +77,9 @@ private:
     class ParentVisibilityChangedListener;
     std::unique_ptr<ParentVisibilityChangedListener> visibilityChangedListener;
 
+    class VirtualDesktopWatcher;
+    std::unique_ptr<VirtualDesktopWatcher> virtualDesktopWatcher;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DropShadower)
     JUCE_DECLARE_WEAK_REFERENCEABLE (DropShadower)
 };

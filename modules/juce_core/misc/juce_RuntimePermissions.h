@@ -46,7 +46,7 @@ namespace juce
     New code:
 
         RuntimePermissions::request (
-            RuntimePermissions::audioRecording,
+            RuntimePermissions::recordAudio,
             [this] (bool wasGranted)
             {
                  if (! wasGranted)

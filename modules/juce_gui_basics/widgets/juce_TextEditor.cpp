@@ -1229,6 +1229,7 @@ void TextEditor::clear()
     clearInternal (nullptr);
     checkLayout();
     undoManager.clearUndoHistory();
+    repaint();
 }
 
 void TextEditor::setText (const String& newText, bool sendTextChangeMessage)
