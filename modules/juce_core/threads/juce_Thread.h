@@ -381,6 +381,7 @@ public:
    #endif
 
 private:
+    friend class ThreadTargetRunnable; // needs to access threadHandle
     //==============================================================================
     const String threadName;
     Atomic<void*> threadHandle { nullptr };
@@ -396,6 +397,7 @@ private:
 
    #if JUCE_ANDROID
     bool isAndroidRealtimeThread = false;
+    /*GlobalRef*/ void* javaThreadPeer { nullptr };
    #endif
 
    #ifndef DOXYGEN
