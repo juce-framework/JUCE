@@ -781,11 +781,11 @@ private:
 
             argv[4] = nullptr;
 
-           #if JUCE_STANDALONE_APPLICATION
-            execv (arguments[0].toRawUTF8(), (char**) argv.getData());
-           #else
-            juce_gtkWebkitMain (4, (const char**) argv.getData());
-           #endif
+            if (JUCEApplicationBase::isStandaloneApp())
+                execv (arguments[0].toRawUTF8(), (char**) argv.getData());
+            else
+                juce_gtkWebkitMain (4, (const char**) argv.getData());
+
             exit (0);
         }
 
