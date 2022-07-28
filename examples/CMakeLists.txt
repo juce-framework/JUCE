@@ -42,7 +42,9 @@ function(_juce_add_pips)
     endif()
 
     if(NOT (TARGET juce_ara_sdk
-            AND (CMAKE_SYSTEM_NAME STREQUAL "Windows" OR CMAKE_SYSTEM_NAME STREQUAL "Darwin")))
+            AND (CMAKE_SYSTEM_NAME STREQUAL "Windows"
+                 OR CMAKE_SYSTEM_NAME STREQUAL "Darwin"
+                 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")))
         list(REMOVE_ITEM headers
              "${CMAKE_CURRENT_SOURCE_DIR}/ARAPluginDemo.h")
     endif()

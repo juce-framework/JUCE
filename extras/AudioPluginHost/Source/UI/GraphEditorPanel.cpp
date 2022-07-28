@@ -427,7 +427,7 @@ struct GraphEditorPanel::PluginComponent   : public Component,
         menu->addItem ("Show all parameters", [this] { showWindow (PluginWindow::Type::generic); });
         menu->addItem ("Show debug log", [this] { showWindow (PluginWindow::Type::debug); });
 
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
         if (auto* instance = dynamic_cast<AudioPluginInstance*> (getProcessor()))
             if (instance->getPluginDescription().hasARAExtension && isNodeUsingARA())
                 menu->addItem ("Show ARA host controls", [this] { showWindow (PluginWindow::Type::araHost); });

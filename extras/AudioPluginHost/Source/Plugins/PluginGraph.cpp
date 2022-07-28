@@ -106,7 +106,7 @@ void PluginGraph::addPluginCallback (std::unique_ptr<AudioPluginInstance> instan
     }
     else
     {
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
         if (useARA == PluginDescriptionAndPreference::UseARA::yes
             && instance->getPluginDescription().hasARAExtension)
         {
@@ -410,7 +410,7 @@ void PluginGraph::createNodeFromXml (const XmlElement& xml)
                                                                 graph.getBlockSize(),
                                                                 errorMessage);
 
-           #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+           #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
             if (instance
                 && description.useARA == PluginDescriptionAndPreference::UseARA::yes
                 && description.pluginDescription.hasARAExtension)

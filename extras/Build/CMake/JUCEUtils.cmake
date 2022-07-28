@@ -1910,7 +1910,8 @@ function(juce_add_pip header)
 
             juce_add_plugin(${JUCE_PIP_NAME}
                 FORMATS AU VST3
-                IS_ARA_EFFECT TRUE)
+                IS_ARA_EFFECT TRUE
+                ${extra_target_args})
         else()
             set(source_main "${JUCE_CMAKE_UTILS_DIR}/PIPAudioProcessor.cpp.in")
 
