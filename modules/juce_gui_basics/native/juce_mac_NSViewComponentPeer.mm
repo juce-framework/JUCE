@@ -1573,11 +1573,10 @@ public:
 
     void resetWindowPresentation()
     {
+        [window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (getStyleFlags()))];
+
         if (hasNativeTitleBar())
-        {
-            [window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (getStyleFlags()))];
             setTitle (getComponent().getName()); // required to force the OS to update the title
-        }
 
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
         setCollectionBehaviour (isFullScreen());
