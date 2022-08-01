@@ -3766,7 +3766,10 @@ tresult VST3HostContext::ContextMenu::popup (Steinberg::UCoord x, Steinberg::UCo
 tresult VST3HostContext::notifyProgramListChange (Vst::ProgramListID, Steinberg::int32)
 {
     if (plugin != nullptr)
+    {
         plugin->syncProgramNames();
+        plugin->updateHostDisplay(AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+    }
 
     return kResultTrue;
 }
