@@ -377,7 +377,7 @@ public:
         {
             info.id             = Vst::kRootUnitId;
             info.parentUnitId   = Vst::kNoParentUnitId;
-            info.programListId  = Vst::kNoProgramListId;
+            info.programListId  = (audioProcessor->getNumPrograms() > 0) ? programParamID : Vst::kNoProgramListId;
 
             toString128 (info.name, TRANS("Root Unit"));
 
