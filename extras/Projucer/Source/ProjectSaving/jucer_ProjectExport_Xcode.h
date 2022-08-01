@@ -2299,7 +2299,16 @@ private:
 
             if (target->type == XcodeTarget::LV2PlugIn)
             {
-                auto script = "set -e\n\"$CONFIGURATION_BUILD_DIR/../"
+                // When building LV2 plugins on Arm macs, we need to load and run the plugin bundle
+                // during a post-build step in order to generate the plugin's supporting files. Arm
+                // macs will only load shared libraries if they are signed, but Xcode runs its
+                // signing step after any post-build scripts. As a workaround, we check whether the
+                // plugin is signed and generate an adhoc certificate if necessary, before running
+                // the manifest-generator.
+                auto script = "set -e\n"
+                              "xcrun codesign --verify \"$CONFIGURATION_BUILD_DIR/$PRODUCT_NAME\" "
+                              "|| xcrun codesign -s - \"$CONFIGURATION_BUILD_DIR/$PRODUCT_NAME\"\n"
+                              "\"$CONFIGURATION_BUILD_DIR/../"
                             + Project::getLV2FileWriterName()
                             + "\" \"$CONFIGURATION_BUILD_DIR/$PRODUCT_NAME\"\n";
 

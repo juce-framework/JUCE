@@ -23,18 +23,36 @@
   ==============================================================================
 */
 
+#include <cstdint>
+#include <cstdio>
+
 #ifdef _WIN32
  #include <windows.h>
+ #include <tchar.h>
  HMODULE dlopen (const char* filename, int) { return LoadLibrary (filename); }
  FARPROC dlsym (HMODULE handle, const char* name) { return GetProcAddress (handle, name); }
+ void printError()
+ {
+     constexpr DWORD numElements = 256;
+     TCHAR messageBuffer[numElements]{};
+
+     FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                    nullptr,
+                    GetLastError(),
+                    MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                    messageBuffer,
+                    numElements - 1,
+                    nullptr);
+
+     _tprintf ("%s", messageBuffer);
+ }
  enum { RTLD_LAZY = 0 };
 #else
  #include <dlfcn.h>
+ void printError() { printf ("%s\n", dlerror()); }
 #endif
 
-#include <cstdint>
-
-// Replicating some of the LV2 header here so that we don't have to set up any
+// Replicating part of the LV2 header here so that we don't have to set up any
 // custom include paths for this file.
 // Normally this would be a bad idea, but the LV2 API has to keep these definitions
 // in order to remain backwards-compatible.
@@ -67,12 +85,18 @@ int main (int argc, const char** argv)
     };
 
     if (auto* handle = dlopen (libraryPath, RTLD_LAZY))
+    {
         if (auto* getDescriptor = reinterpret_cast<const LV2_Descriptor* (*) (uint32_t)> (dlsym (handle, "lv2_descriptor")))
             if (auto* descriptor = getDescriptor (0))
                 if (auto* extensionData = descriptor->extension_data)
                     if (auto* recallFeature = reinterpret_cast<const RecallFeature*> (extensionData ("https://lv2-extensions.juce.com/turtle_recall")))
                         if (auto* doRecall = recallFeature->doRecall)
                             return doRecall (libraryPath);
+    }
+    else
+    {
+        printError();
+    }
 
     return 1;
 }
