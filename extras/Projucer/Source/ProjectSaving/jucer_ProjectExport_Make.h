@@ -1024,7 +1024,7 @@ private:
                     targetFiles.add (f);
 
             if (targetType == MakefileTarget::LV2TurtleProgram)
-                targetFiles.add ({ project.resolveFilename (getLV2TurtleDumpProgramSource().toUnixStyle()), {} });
+                targetFiles.add ({ rebaseFromProjectFolderToBuildTarget (getLV2TurtleDumpProgramSource()).toUnixStyle(), {} });
 
             return targetFiles;
         };
