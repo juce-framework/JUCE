@@ -1302,6 +1302,13 @@ public:
                         flags |= Vst::kParamValuesChanged;
                     }
                 }
+
+                if (auto* handler = getComponentHandler())
+                {
+                    Steinberg::FUnknownPtr<Vst::IUnitHandler> unitHandler(handler);
+                    if (unitHandler)
+                        unitHandler->notifyProgramListChange(programParameterId, 0);
+                }
             }
 
             auto latencySamples = pluginInstance->getLatencySamples();
