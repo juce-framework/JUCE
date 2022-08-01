@@ -223,41 +223,47 @@ void MenuBarComponent::updateItemUnderMouse (Point<int> p)
 
 void MenuBarComponent::showMenu (int index)
 {
-    if (index != currentPopupIndex)
+    if (index == currentPopupIndex)
+        return;
+
+    const auto needToOpenNewSubMenu = isPositiveAndBelow (index, (int) itemComponents.size());
+
+    if (needToOpenNewSubMenu)
+        ++numActiveMenus;
+
+    PopupMenu::dismissAllActiveMenus();
+    menuBarItemsChanged (nullptr);
+
+    setOpenItem (index);
+    setItemUnderMouse (index);
+
+    if (needToOpenNewSubMenu)
     {
-        PopupMenu::dismissAllActiveMenus();
-        menuBarItemsChanged (nullptr);
+        const auto& itemComponent = itemComponents[(size_t) index];
+        auto m = model->getMenuForIndex (itemUnderMouse, itemComponent->getName());
 
-        setOpenItem (index);
-        setItemUnderMouse (index);
+        if (m.lookAndFeel == nullptr)
+            m.setLookAndFeel (&getLookAndFeel());
 
-        if (isPositiveAndBelow (index, (int) itemComponents.size()))
+        auto itemBounds = itemComponent->getBounds();
+
+        const auto callback = [ref = SafePointer<MenuBarComponent> (this), index] (int result)
         {
-            const auto& itemComponent = itemComponents[(size_t) index];
-            auto m = model->getMenuForIndex (itemUnderMouse, itemComponent->getName());
+            if (ref != nullptr)
+                ref->menuDismissed (index, result);
+        };
 
-            if (m.lookAndFeel == nullptr)
-                m.setLookAndFeel (&getLookAndFeel());
-
-            auto itemBounds = itemComponent->getBounds();
-
-            const auto callback = [ref = SafePointer<MenuBarComponent> (this), index] (int result)
-            {
-                if (ref != nullptr)
-                    ref->menuDismissed (index, result);
-            };
-
-            m.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
-                                                 .withTargetScreenArea (localAreaToGlobal (itemBounds))
-                                                 .withMinimumWidth (itemBounds.getWidth()),
-                             callback);
-        }
+        m.showMenuAsync (PopupMenu::Options().withTargetComponent (this)
+                                             .withTargetScreenArea (localAreaToGlobal (itemBounds))
+                                             .withMinimumWidth (itemBounds.getWidth()),
+                         callback);
     }
 }
 
 void MenuBarComponent::menuDismissed (int topLevelIndex, int itemId)
 {
-    topLevelIndexClicked = topLevelIndex;
+    topLevelIndexDismissed = topLevelIndex;
+    --numActiveMenus;
     postCommandMessage (itemId);
 }
 
@@ -265,11 +271,11 @@ void MenuBarComponent::handleCommandMessage (int commandId)
 {
     updateItemUnderMouse (getMouseXYRelative());
 
-    if (currentPopupIndex == topLevelIndexClicked)
+    if (numActiveMenus == 0)
         setOpenItem (-1);
 
     if (commandId != 0 && model != nullptr)
-        model->menuItemSelected (commandId, topLevelIndexClicked);
+        model->menuItemSelected (commandId, topLevelIndexDismissed);
 }
 
 //==============================================================================
