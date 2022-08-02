@@ -39,23 +39,14 @@ public:
     /** Destructor. */
     virtual ~AccessibilityCellInterface() = default;
 
-    /** Returns the column index of the cell in the table. */
-    virtual int getColumnIndex() const = 0;
-
-    /** Returns the number of columns occupied by the cell in the table. */
-    virtual int getColumnSpan() const = 0;
-
-    /** Returns the row index of the cell in the table. */
-    virtual int getRowIndex() const = 0;
-
-    /** Returns the number of rows occupied by the cell in the table. */
-    virtual int getRowSpan() const = 0;
-
     /** Returns the indentation level for the cell. */
     virtual int getDisclosureLevel() const = 0;
 
     /** Returns the AccessibilityHandler of the table which contains the cell. */
     virtual const AccessibilityHandler* getTableHandler() const = 0;
+
+    /** Returns a list of the accessibility elements that are disclosed by this element, if any. */
+    virtual std::vector<const AccessibilityHandler*> getDisclosedRows() const { return {}; }
 };
 
 } // namespace juce

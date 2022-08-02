@@ -455,7 +455,7 @@ public:
     /** Returns the row number that the given component represents.
         If the component isn't one of the list's rows, this will return -1.
     */
-    int getRowNumberOfComponent (Component* rowComponent) const noexcept;
+    int getRowNumberOfComponent (const Component* rowComponent) const noexcept;
 
     /** Returns the width of a row (which may be less than the width of this component
         if there's a scrollbar).

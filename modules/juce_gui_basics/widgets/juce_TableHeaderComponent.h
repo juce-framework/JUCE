@@ -403,6 +403,8 @@ public:
     /** @internal */
     void paint (Graphics&) override;
     /** @internal */
+    void resized() override;
+    /** @internal */
     void mouseMove (const MouseEvent&) override;
     /** @internal */
     void mouseEnter (const MouseEvent&) override;
@@ -421,13 +423,13 @@ public:
     virtual void showColumnChooserMenu (int columnIdClicked);
 
 private:
-    struct ColumnInfo
+    struct ColumnInfo : public Component
     {
-        String name;
+        ColumnInfo() { setInterceptsMouseClicks (false, false); }
+        std::unique_ptr<AccessibilityHandler> createAccessibilityHandler() override;
+
         int id, propertyFlags, width, minimumWidth, maximumWidth;
         double lastDeliberateWidth;
-
-        bool isVisible() const;
     };
 
     OwnedArray<ColumnInfo> columns;

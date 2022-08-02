@@ -46,7 +46,9 @@ public:
     using Holder = std::unique_ptr<Base, AccessibleObjCClassDeleter>;
 
 protected:
-    AccessibleObjCClass()  : ObjCClass<Base> ("JUCEAccessibilityElement_")
+    AccessibleObjCClass() : AccessibleObjCClass ("JUCEAccessibilityElement_") {}
+
+    explicit AccessibleObjCClass (const char* name)  : ObjCClass<Base> (name)
     {
         ObjCClass<Base>::template addIvar<AccessibilityHandler*> ("handler");
     }
@@ -71,18 +73,6 @@ protected:
     static AccessibilityTableInterface* getTableInterface (id self) noexcept  { return getInterface (self, &AccessibilityHandler::getTableInterface); }
     static AccessibilityCellInterface*  getCellInterface  (id self) noexcept  { return getInterface (self, &AccessibilityHandler::getCellInterface); }
 
-    template <typename MemberFn>
-    static auto getEnclosingInterface (AccessibilityHandler* handler, MemberFn fn) noexcept -> decltype ((std::declval<AccessibilityHandler>().*fn)())
-    {
-        if (handler == nullptr)
-            return nullptr;
-
-        if (auto* interface = (handler->*fn)())
-            return interface;
-
-        return getEnclosingInterface (handler->getParent(), fn);
-    }
-
     static bool hasEditableText (AccessibilityHandler& handler) noexcept
     {
         return handler.getRole() == AccessibilityRole::editableText
@@ -105,8 +95,7 @@ protected:
     static BOOL getIsAccessibilityElement (id self, SEL)
     {
         if (auto* handler = getHandler (self))
-            return ! handler->isIgnored()
-                  && handler->getRole() != AccessibilityRole::window;
+            return ! handler->isIgnored() && handler->getRole() != AccessibilityRole::window;
 
         return NO;
     }
@@ -198,10 +187,8 @@ protected:
 
             NSString* nsString = juceStringToNS (title);
 
-           #if ! JUCE_IOS
             if (nsString != nil && [[self accessibilityValue] isEqual: nsString])
                 return @"";
-           #endif
 
             return nsString;
         }
@@ -227,36 +214,58 @@ protected:
 
     static NSInteger getAccessibilityRowCount (id self, SEL)
     {
-        if (auto* tableInterface = getTableInterface (self))
-            return tableInterface->getNumRows();
+        if (auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+            if (auto* tableInterface = tableHandler->getTableInterface())
+                return tableInterface->getNumRows();
 
         return 0;
     }
 
     static NSInteger getAccessibilityColumnCount (id self, SEL)
     {
-        if (auto* tableInterface = getTableInterface (self))
-            return tableInterface->getNumColumns();
+        if (auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface))
+            if (auto* tableInterface = tableHandler->getTableInterface())
+                return tableInterface->getNumColumns();
 
         return 0;
     }
 
+    template <typename Getter>
+    static NSRange getCellDimensions (id self, Getter getter)
+    {
+        const auto notFound = NSMakeRange (NSNotFound, 0);
+
+        auto* handler = getHandler (self);
+
+        if (handler == nullptr)
+            return notFound;
+
+        auto* tableHandler = getEnclosingHandlerWithInterface (getHandler (self), &AccessibilityHandler::getTableInterface);
+
+        if (tableHandler == nullptr)
+            return notFound;
+
+        auto* tableInterface = tableHandler->getTableInterface();
+
+        if (tableInterface == nullptr)
+            return notFound;
+
+        const auto result = (tableInterface->*getter) (*handler);
+
+        if (! result.hasValue())
+            return notFound;
+
+        return NSMakeRange ((NSUInteger) result->begin, (NSUInteger) result->num);
+    }
+
     static NSRange getAccessibilityRowIndexRange (id self, SEL)
     {
-        if (auto* cellInterface = getCellInterface (self))
-            return NSMakeRange ((NSUInteger) cellInterface->getRowIndex(),
-                                (NSUInteger) cellInterface->getRowSpan());
-
-        return NSMakeRange (0, 0);
+        return getCellDimensions (self, &AccessibilityTableInterface::getRowSpan);
     }
 
     static NSRange getAccessibilityColumnIndexRange (id self, SEL)
     {
-        if (auto* cellInterface = getCellInterface (self))
-            return NSMakeRange ((NSUInteger) cellInterface->getColumnIndex(),
-                                (NSUInteger) cellInterface->getColumnSpan());
-
-        return NSMakeRange (0, 0);
+        return getCellDimensions (self, &AccessibilityTableInterface::getColumnSpan);
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AccessibleObjCClass)

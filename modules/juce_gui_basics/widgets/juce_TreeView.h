@@ -613,7 +613,7 @@ private:
     int getIndentX() const noexcept;
     void setOwnerView (TreeView*) noexcept;
     TreeViewItem* getTopLevelItem() noexcept;
-    TreeViewItem* getDeepestOpenParentItem() noexcept;
+    const TreeViewItem* getDeepestOpenParentItem() const noexcept;
     int getNumRows() const noexcept;
     TreeViewItem* getItemOnRow (int) noexcept;
     void deselectAllRecursively (TreeViewItem*);
@@ -798,7 +798,7 @@ public:
     TreeViewItem* getItemAt (int yPosition) const noexcept;
 
     /** Tries to scroll the tree so that this item is on-screen somewhere. */
-    void scrollToKeepItemVisible (TreeViewItem* item);
+    void scrollToKeepItemVisible (const TreeViewItem* item);
 
     /** Returns the TreeView's Viewport object. */
     Viewport* getViewport() const noexcept;

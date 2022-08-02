@@ -893,10 +893,10 @@ public:
     {
         const ScopedLock lock (mutex);
 
-        auto viewMatrix = draggableOrientation.getRotationMatrix() * Vector3D<float> (0.0f, 1.0f, -10.0f);
+        auto viewMatrix = Matrix3D<float>::fromTranslation ({ 0.0f, 1.0f, -10.0f }) * draggableOrientation.getRotationMatrix();
         auto rotationMatrix = Matrix3D<float>::rotation ({ rotation, rotation, -0.3f });
 
-        return rotationMatrix * viewMatrix;
+        return viewMatrix * rotationMatrix;
     }
 
     void setTexture (OpenGLUtils::DemoTexture* t)

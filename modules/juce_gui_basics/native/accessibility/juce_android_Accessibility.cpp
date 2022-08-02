@@ -57,6 +57,25 @@ namespace juce
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (setCollectionInfo, "setCollectionInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionInfo;)V") \
+ METHOD (setCollectionItemInfo, "setCollectionItemInfo", "(Landroid/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo;)V")
+
+ DECLARE_JNI_CLASS (AndroidAccessibilityNodeInfo19, "android/view/accessibility/AccessibilityNodeInfo")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ STATICMETHOD (obtain, "obtain", "(IIZ)Landroid/view/accessibility/AccessibilityNodeInfo$CollectionInfo;")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidAccessibilityNodeInfoCollectionInfo, "android/view/accessibility/AccessibilityNodeInfo$CollectionInfo", 19)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ STATICMETHOD (obtain, "obtain", "(IIIIZ)Landroid/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo;")
+
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidAccessibilityNodeInfoCollectionItemInfo, "android/view/accessibility/AccessibilityNodeInfo$CollectionItemInfo", 19)
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  STATICMETHOD (obtain, "obtain", "(I)Landroid/view/accessibility/AccessibilityEvent;") \
  METHOD (setPackageName, "setPackageName", "(Ljava/lang/CharSequence;)V") \
  METHOD (setSource, "setSource","(Landroid/view/View;I)V") \
@@ -124,6 +143,18 @@ static jmethodID nodeInfoSetTextSelection                = nullptr;
 static jmethodID nodeInfoSetLiveRegion                   = nullptr;
 static jmethodID accessibilityEventSetContentChangeTypes = nullptr;
 
+template <typename MemberFn>
+static AccessibilityHandler* getEnclosingHandlerWithInterface (AccessibilityHandler* handler, MemberFn fn)
+{
+    if (handler == nullptr)
+        return nullptr;
+
+    if ((handler->*fn)() != nullptr)
+        return handler;
+
+    return getEnclosingHandlerWithInterface (handler->getParent(), fn);
+}
+
 static void loadSDKDependentMethods()
 {
     static bool hasChecked = false;
@@ -160,8 +191,6 @@ static constexpr auto getClassName (AccessibilityRole role)
         case AccessibilityRole::popupMenu:     return "android.widget.PopupMenu";
         case AccessibilityRole::comboBox:      return "android.widget.Spinner";
         case AccessibilityRole::tree:          return "android.widget.ExpandableListView";
-        case AccessibilityRole::list:          return "android.widget.ListView";
-        case AccessibilityRole::table:         return "android.widget.TableLayout";
         case AccessibilityRole::progressBar:   return "android.widget.ProgressBar";
 
         case AccessibilityRole::scrollBar:
@@ -176,6 +205,11 @@ static constexpr auto getClassName (AccessibilityRole role)
         case AccessibilityRole::tooltip:
         case AccessibilityRole::splashScreen:
         case AccessibilityRole::dialogWindow:  return "android.widget.PopupWindow";
+
+        // If we don't supply a custom class type, then TalkBack will use the node's CollectionInfo
+        // to make a sensible decision about how to describe the container
+        case AccessibilityRole::list:
+        case AccessibilityRole::table:
 
         case AccessibilityRole::column:
         case AccessibilityRole::row:
@@ -434,6 +468,63 @@ public:
                     env->CallVoidMethod (info,
                                          AndroidAccessibilityNodeInfo.addAction,
                                          ACTION_SCROLL_BACKWARD);
+                }
+            }
+        }
+
+        if (getAndroidSDKVersion() >= 19)
+        {
+            if (auto* tableInterface = accessibilityHandler.getTableInterface())
+            {
+                const auto rows    = tableInterface->getNumRows();
+                const auto columns = tableInterface->getNumColumns();
+                const LocalRef<jobject> collectionInfo { env->CallStaticObjectMethod (AndroidAccessibilityNodeInfoCollectionInfo,
+                                                                                      AndroidAccessibilityNodeInfoCollectionInfo.obtain,
+                                                                                      (jint) rows,
+                                                                                      (jint) columns,
+                                                                                      (jboolean) false) };
+                env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionInfo, collectionInfo.get());
+            }
+
+            if (auto* enclosingTableHandler = getEnclosingHandlerWithInterface (&accessibilityHandler, &AccessibilityHandler::getTableInterface))
+            {
+                auto* interface = enclosingTableHandler->getTableInterface();
+                jassert (interface != nullptr);
+                const auto rowSpan    = interface->getRowSpan    (accessibilityHandler);
+                const auto columnSpan = interface->getColumnSpan (accessibilityHandler);
+
+                enum class IsHeader { no, yes };
+
+                const auto addCellInfo = [env, &info] (AccessibilityTableInterface::Span rows, AccessibilityTableInterface::Span columns, IsHeader header)
+                {
+                    const LocalRef<jobject> collectionItemInfo { env->CallStaticObjectMethod (AndroidAccessibilityNodeInfoCollectionItemInfo,
+                                                                                              AndroidAccessibilityNodeInfoCollectionItemInfo.obtain,
+                                                                                              (jint) rows.begin,
+                                                                                              (jint) rows.num,
+                                                                                              (jint) columns.begin,
+                                                                                              (jint) columns.num,
+                                                                                              (jboolean) (header == IsHeader::yes)) };
+                    env->CallVoidMethod (info, AndroidAccessibilityNodeInfo19.setCollectionItemInfo, collectionItemInfo.get());
+                };
+
+                if (rowSpan.hasValue() && columnSpan.hasValue())
+                {
+                    addCellInfo (*rowSpan, *columnSpan, IsHeader::no);
+                }
+                else
+                {
+                    if (auto* tableHeader = interface->getHeaderHandler())
+                    {
+                        if (accessibilityHandler.getParent() == tableHeader)
+                        {
+                            const auto children = tableHeader->getChildren();
+                            const auto column = std::distance (children.cbegin(), std::find (children.cbegin(), children.cend(), &accessibilityHandler));
+
+                            // Talkback will only treat a row as a column header if its row index is zero
+                            // https://github.com/google/talkback/blob/acd0bc7631a3dfbcf183789c7557596a45319e1f/utils/src/main/java/CollectionState.java#L853
+                            addCellInfo ({ 0, 1 }, { (int) column, 1 }, IsHeader::yes);
+                        }
+                    }
                 }
             }
         }

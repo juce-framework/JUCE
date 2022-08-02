@@ -358,7 +358,7 @@ void MainComponent::resized()
         auto bounds = getLocalBounds();
 
         if (auto* display = Desktop::getInstance().getDisplays().getDisplayForRect (getScreenBounds()))
-            return display->safeAreaInsets.subtractedFrom (bounds);
+            return display->safeAreaInsets.subtractedFrom (display->keyboardInsets.subtractedFrom (bounds));
 
         return bounds;
     }();

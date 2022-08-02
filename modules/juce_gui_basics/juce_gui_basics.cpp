@@ -127,6 +127,18 @@ namespace juce
         ScaledImage image;
         Point<int> hotspot;
     };
+
+    template <typename MemberFn>
+    static const AccessibilityHandler* getEnclosingHandlerWithInterface (const AccessibilityHandler* handler, MemberFn fn)
+    {
+        if (handler == nullptr)
+            return nullptr;
+
+        if ((handler->*fn)() != nullptr)
+            return handler;
+
+        return getEnclosingHandlerWithInterface (handler->getParent(), fn);
+    }
 } // namespace juce
 
 #include "mouse/juce_PointerState.h"
@@ -259,7 +271,7 @@ namespace juce
  #include "native/juce_MultiTouchMapper.h"
 #endif
 
-#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_UNIT_TESTS
+#if JUCE_ANDROID || JUCE_WINDOWS || JUCE_IOS || JUCE_UNIT_TESTS
  #include "native/accessibility/juce_AccessibilityTextHelpers.h"
 #endif
 
@@ -267,8 +279,8 @@ namespace juce
  #include "native/accessibility/juce_mac_AccessibilitySharedCode.mm"
 
  #if JUCE_IOS
-  #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_UIViewComponentPeer.mm"
+  #include "native/accessibility/juce_ios_Accessibility.mm"
   #include "native/juce_ios_Windowing.mm"
   #include "native/juce_ios_FileChooser.mm"
 

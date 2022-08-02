@@ -163,6 +163,9 @@ void Drawable::setDrawableTransform (const AffineTransform& transform)
 
 void Drawable::updateTransform()
 {
+    if (drawableTransform.isIdentity())
+        return;
+
     const auto transformationOrigin = originRelativeToComponent + getPosition();
     setTransform (AffineTransform::translation (transformationOrigin * (-1))
                       .followedBy (drawableTransform)

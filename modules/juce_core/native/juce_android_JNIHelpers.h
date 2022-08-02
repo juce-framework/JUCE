@@ -177,7 +177,7 @@ public:
 
     operator jclass() const noexcept  { return classRef; }
 
-    static void initialiseAllClasses (JNIEnv*);
+    static void initialiseAllClasses (JNIEnv*, jobject context);
     static void releaseAllClasses (JNIEnv*);
 
     const char* getClassPath() const noexcept { return classPath; }
@@ -202,7 +202,7 @@ private:
     jclass classRef = nullptr;
 
     static Array<JNIClassBase*>& getClasses();
-    void initialise (JNIEnv*);
+    void initialise (JNIEnv*, jobject context);
     void release (JNIEnv*);
     void tryLoadingClassWithClassLoader (JNIEnv* env, jobject classLoader);
 
@@ -358,7 +358,7 @@ DECLARE_JNI_CLASS (AndroidBundle, "android/os/Bundle")
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   STATICMETHOD (dumpReferenceTables, "dumpReferenceTables", "()V")
 
-  DECLARE_JNI_CLASS (AndroidDebug, "android/os/Debug")
+DECLARE_JNI_CLASS (AndroidDebug, "android/os/Debug")
 #undef JNI_CLASS_MEMBERS
 
 #define JUCE_LOG_JNI_REFERENCES_TABLE getEnv()->CallStaticVoidMethod (AndroidDebug, AndroidDebug.dumpReferenceTables);
@@ -369,6 +369,12 @@ DECLARE_JNI_CLASS (AndroidBundle, "android/os/Bundle")
  METHOD (getSize,     "getSize",     "(Landroid/graphics/Point;)V" )
 
 DECLARE_JNI_CLASS (AndroidDisplay, "android/view/Display")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (getRealMetrics, "getRealMetrics", "(Landroid/util/DisplayMetrics;)V")
+
+DECLARE_JNI_CLASS (AndroidDisplay17, "android/view/Display")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -557,9 +563,16 @@ DECLARE_JNI_CLASS (AndroidUri, "android/net/Uri")
  METHOD (findViewById,              "findViewById",              "(I)Landroid/view/View;") \
  METHOD (getRootView,               "getRootView",               "()Landroid/view/View;") \
  METHOD (addOnLayoutChangeListener, "addOnLayoutChangeListener", "(Landroid/view/View$OnLayoutChangeListener;)V") \
- METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V") \
+ METHOD (announceForAccessibility,  "announceForAccessibility",  "(Ljava/lang/CharSequence;)V")  \
 
 DECLARE_JNI_CLASS (AndroidView, "android/view/View")
+#undef JNI_CLASS_MEMBERS
+
+#define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
+ METHOD (setOnApplyWindowInsetsListener, "setOnApplyWindowInsetsListener", "(Landroid/view/View$OnApplyWindowInsetsListener;)V") \
+ METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;")
+
+ DECLARE_JNI_CLASS (AndroidView23, "android/view/View")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -725,7 +738,6 @@ DECLARE_JNI_CLASS (JavaMap, "java/util/Map")
 DECLARE_JNI_CLASS (JavaMethod, "java/lang/reflect/Method")
 #undef JNI_CLASS_MEMBERS
 
-
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
   METHOD (constructor, "<init>", "()V") \
   METHOD (getClass, "getClass", "()Ljava/lang/Class;") \
@@ -761,7 +773,7 @@ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
  METHOD (registerActivityLifecycleCallbacks,   "registerActivityLifecycleCallbacks",   "(Landroid/app/Application$ActivityLifecycleCallbacks;)V") \
  METHOD (unregisterActivityLifecycleCallbacks, "unregisterActivityLifecycleCallbacks", "(Landroid/app/Application$ActivityLifecycleCallbacks;)V")
 
- DECLARE_JNI_CLASS (AndroidApplication, "android/app/Application")
+DECLARE_JNI_CLASS (AndroidApplication, "android/app/Application")
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -769,7 +781,7 @@ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
  METHOD (getHolder,       "getHolder",       "()Landroid/view/SurfaceHolder;") \
  METHOD (getParent,       "getParent",       "()Landroid/view/ViewParent;")
 
- DECLARE_JNI_CLASS (AndroidSurfaceView, "android/view/SurfaceView")
+DECLARE_JNI_CLASS (AndroidSurfaceView, "android/view/SurfaceView")
 #undef JNI_CLASS_MEMBERS
 
 
@@ -778,7 +790,7 @@ DECLARE_JNI_CLASS (AndroidBuildVersion, "android/os/Build$VERSION")
  METHOD (addCallback,    "addCallback",    "(Landroid/view/SurfaceHolder$Callback;)V") \
  METHOD (removeCallback, "removeCallback", "(Landroid/view/SurfaceHolder$Callback;)V")
 
- DECLARE_JNI_CLASS (AndroidSurfaceHolder, "android/view/SurfaceHolder")
+DECLARE_JNI_CLASS (AndroidSurfaceHolder, "android/view/SurfaceHolder")
 #undef JNI_CLASS_MEMBERS
 
 //==============================================================================

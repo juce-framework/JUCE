@@ -26,6 +26,15 @@
 namespace juce
 {
 
+template <typename This>
+auto* getPrimaryDisplayImpl (This& t)
+{
+    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
+
+    const auto iter = std::find_if (t.displays.begin(), t.displays.end(), [] (auto& d) { return d.isMain; });
+    return iter != t.displays.end() ? std::addressof (*iter) : nullptr;
+}
+
 Displays::Displays (Desktop& desktop)
 {
     init (desktop);
@@ -162,13 +171,7 @@ Point<ValueType> Displays::logicalToPhysical (Point<ValueType> point, const Disp
 
 const Displays::Display* Displays::getPrimaryDisplay() const noexcept
 {
-    JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED
-
-    for (auto& d : displays)
-        if (d.isMain)
-            return &d;
-
-    return nullptr;
+    return getPrimaryDisplayImpl (*this);
 }
 
 RectangleList<int> Displays::getRectangleList (bool userAreasOnly) const
@@ -202,19 +205,22 @@ void Displays::refresh()
     }
 }
 
-bool operator== (const Displays::Display& d1, const Displays::Display& d2) noexcept;
-bool operator== (const Displays::Display& d1, const Displays::Display& d2) noexcept
+static auto tie (const Displays::Display& d)
 {
-    return d1.isMain          == d2.isMain
-        && d1.totalArea       == d2.totalArea
-        && d1.userArea        == d2.userArea
-        && d1.topLeftPhysical == d2.topLeftPhysical
-        && d1.scale           == d2.scale
-        && d1.dpi             == d2.dpi;
+    return std::tie (d.dpi,
+                     d.isMain,
+                     d.keyboardInsets,
+                     d.safeAreaInsets,
+                     d.scale,
+                     d.topLeftPhysical,
+                     d.totalArea,
+                     d.userArea);
 }
 
-bool operator!= (const Displays::Display& d1, const Displays::Display& d2) noexcept;
-bool operator!= (const Displays::Display& d1, const Displays::Display& d2) noexcept    { return ! (d1 == d2); }
+static bool operator== (const Displays::Display& d1, const Displays::Display& d2) noexcept
+{
+    return tie (d1) == tie (d2);
+}
 
 //==============================================================================
 // These methods are used for converting the totalArea and userArea Rectangles in Display from physical to logical
