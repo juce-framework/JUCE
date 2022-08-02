@@ -136,8 +136,10 @@ public:
     /** OpenGL versions, used by setOpenGLVersionRequired(). */
     enum OpenGLVersion
     {
-        defaultGLVersion = 0,
-        openGL3_2
+        defaultGLVersion = 0, ///< Whatever the device decides to give us, normally a compatibility profile
+        openGL3_2,            ///< 3.2 Core profile
+        openGL4_1,            ///< 4.1 Core profile, the latest supported by macOS at time of writing
+        openGL4_3             ///< 4.3 Core profile, will enable improved debugging support when building in Debug
     };
 
     /** Sets a preference for the version of GL that this context should use, if possible.

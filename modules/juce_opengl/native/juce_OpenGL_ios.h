@@ -72,24 +72,19 @@ public:
 
                 [((UIView*) peer->getNativeHandle()) addSubview: view];
 
-                if (version == openGL3_2 && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0)
-                {
-                    if (! createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
-                    {
-                        releaseContext();
-                        createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
-                    }
-                }
-                else
-                {
-                    createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
-                }
+                const auto shouldUseES3 = version != defaultGLVersion
+                                       && [[UIDevice currentDevice].systemVersion floatValue] >= 7.0;
+
+                const auto gotContext = (shouldUseES3 && createContext (kEAGLRenderingAPIOpenGLES3, contextToShare))
+                                     || createContext (kEAGLRenderingAPIOpenGLES2, contextToShare);
+
+                jassertquiet (gotContext);
 
                 if (context != nil)
                 {
                     // I'd prefer to put this stuff in the initialiseOnRenderThread() call, but doing
                     // so causes mysterious timing-related failures.
-                    [EAGLContext setCurrentContext: context];
+                    [EAGLContext setCurrentContext: context.get()];
                     gl::loadFunctions();
                     createGLBuffers();
                     deactivateCurrentContext();
@@ -108,7 +103,7 @@ public:
 
     ~NativeContext()
     {
-        releaseContext();
+        context.reset();
         [view removeFromSuperview];
         [view release];
     }
@@ -123,12 +118,12 @@ public:
     }
 
     bool createdOk() const noexcept             { return getRawContext() != nullptr; }
-    void* getRawContext() const noexcept        { return context; }
+    void* getRawContext() const noexcept        { return context.get(); }
     GLuint getFrameBufferID() const noexcept    { return useMSAA ? msaaBufferHandle : frameBufferHandle; }
 
     bool makeActive() const noexcept
     {
-        if (! [EAGLContext setCurrentContext: context])
+        if (! [EAGLContext setCurrentContext: context.get()])
             return false;
 
         glBindFramebuffer (GL_FRAMEBUFFER, useMSAA ? msaaBufferHandle
@@ -138,7 +133,7 @@ public:
 
     bool isActive() const noexcept
     {
-        return [EAGLContext currentContext] == context;
+        return [EAGLContext currentContext] == context.get();
     }
 
     static void deactivateCurrentContext()
@@ -170,7 +165,7 @@ public:
         }
 
         glBindRenderbuffer (GL_RENDERBUFFER, colorBufferHandle);
-        [context presentRenderbuffer: GL_RENDERBUFFER];
+        [context.get() presentRenderbuffer: GL_RENDERBUFFER];
 
         if (needToRebuildBuffers)
         {
@@ -209,7 +204,7 @@ private:
     Component& component;
     JuceGLView* view = nil;
     CAEAGLLayer* glLayer = nil;
-    EAGLContext* context = nil;
+    NSUniquePtr<EAGLContext> context;
     const OpenGLVersion openGLversion;
     const bool useDepthBuffer, useMSAA;
 
@@ -223,19 +218,14 @@ private:
     bool createContext (EAGLRenderingAPI type, void* contextToShare)
     {
         jassert (context == nil);
-        context = [EAGLContext alloc];
+        context.reset ([EAGLContext alloc]);
 
-        context = contextToShare != nullptr
-                    ? [context initWithAPI: type  sharegroup: [(EAGLContext*) contextToShare sharegroup]]
-                    : [context initWithAPI: type];
+        if (contextToShare != nullptr)
+            [context.get() initWithAPI: type  sharegroup: [(EAGLContext*) contextToShare sharegroup]];
+        else
+            [context.get() initWithAPI: type];
 
         return context != nil;
-    }
-
-    void releaseContext()
-    {
-        [context release];
-        context = nil;
     }
 
     //==============================================================================
@@ -249,7 +239,7 @@ private:
 
         glFramebufferRenderbuffer (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorBufferHandle);
 
-        bool ok = [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: glLayer];
+        bool ok = [context.get() renderbufferStorage: GL_RENDERBUFFER fromDrawable: glLayer];
         jassert (ok); ignoreUnused (ok);
 
         GLint width, height;
@@ -289,7 +279,7 @@ private:
     void freeGLBuffers()
     {
         JUCE_CHECK_OPENGL_ERROR
-        [context renderbufferStorage: GL_RENDERBUFFER fromDrawable: nil];
+        [context.get() renderbufferStorage: GL_RENDERBUFFER fromDrawable: nil];
 
         deleteFrameBuffer (frameBufferHandle);
         deleteFrameBuffer (msaaBufferHandle);

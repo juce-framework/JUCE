@@ -461,10 +461,8 @@ public:
 
     void drawComponentBuffer()
     {
-       #if ! JUCE_ANDROID
-        glEnable (GL_TEXTURE_2D);
-        clearGLError();
-       #endif
+        if (contextRequiresTexture2DEnableDisable())
+            glEnable (GL_TEXTURE_2D);
 
        #if JUCE_WINDOWS
         // some stupidly old drivers are missing this function, so try to at least avoid a crash here,
@@ -473,7 +471,9 @@ public:
         jassert (context.extensions.glActiveTexture != nullptr);
         if (context.extensions.glActiveTexture != nullptr)
        #endif
+        {
             context.extensions.glActiveTexture (GL_TEXTURE0);
+        }
 
         glBindTexture (GL_TEXTURE_2D, cachedImageFrameBuffer.getTextureID());
         bindVertexArray();
@@ -621,6 +621,21 @@ public:
             context.extensions.glGenVertexArrays (1, &vertexArrayObject);
             bindVertexArray();
         }
+
+       #if JUCE_DEBUG
+        if (getOpenGLVersion() >= Version { 4, 3 } && glDebugMessageCallback != nullptr)
+        {
+            glEnable (GL_DEBUG_OUTPUT);
+            glDebugMessageCallback ([] (GLenum, GLenum, GLuint, GLenum, GLsizei, const GLchar* message, const void*)
+            {
+                // This may reiterate issues that are also flagged by JUCE_CHECK_OPENGL_ERROR.
+                // The advantage of this callback is that it will catch *all* errors, even if we
+                // forget to check manually.
+                DBG ("OpenGL DBG message: " << message);
+                jassertfalse;
+            }, nullptr);
+        }
+       #endif
 
         const auto currentViewportArea = areaAndScale.get().area;
         glViewport (0, 0, currentViewportArea.getWidth(), currentViewportArea.getHeight());
