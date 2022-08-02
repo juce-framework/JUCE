@@ -1734,9 +1734,6 @@ private:
            #if JUCE_MAC
             if (getHostType().type == PluginHostType::SteinbergCubase10)
                 cubase10Workaround.reset (new Cubase10WindowResizeWorkaround (*this));
-           #else
-            if (! approximatelyEqual (editorScaleFactor, ec.lastScaleFactorReceived))
-                setContentScaleFactor (ec.lastScaleFactorReceived);
            #endif
         }
 
@@ -1784,12 +1781,25 @@ private:
             createContentWrapperComponentIfNeeded();
 
            #if JUCE_WINDOWS || JUCE_LINUX || JUCE_BSD
+            // If the plugin was last opened at a particular scale, try to reapply that scale here.
+            // Note that we do this during attach(), rather than in JuceVST3Editor(). During the
+            // constructor, we don't have a host plugFrame, so
+            // ContentWrapperComponent::resizeHostWindow() won't do anything, and the content
+            // wrapper component will be left at the wrong size.
+            if (! approximatelyEqual (editorScaleFactor, owner->lastScaleFactorReceived))
+                setContentScaleFactor (owner->lastScaleFactorReceived);
+
+            // Check the host scale factor *before* calling addToDesktop, so that the initial
+            // window size during addToDesktop is correct for the current platform scale factor.
+            #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
+             component->checkHostWindowScaleFactor();
+            #endif
+
             component->setOpaque (true);
             component->addToDesktop (0, (void*) systemWindow);
             component->setVisible (true);
 
             #if JUCE_WINDOWS && JUCE_WIN_PER_MONITOR_DPI_AWARE
-             component->checkHostWindowScaleFactor();
              component->startTimer (500);
             #endif
 
