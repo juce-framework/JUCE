@@ -32,7 +32,10 @@
    #define GLES_SILENCE_DEPRECATION 1
   #endif
 
+  #define Component CarbonDummyCompName
   #import <Foundation/Foundation.h>
+  #undef Component
+
   #import <UIKit/UIKit.h>
   #import <CoreData/CoreData.h>
   #import <MobileCoreServices/MobileCoreServices.h>
