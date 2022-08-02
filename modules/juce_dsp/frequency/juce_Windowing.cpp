@@ -166,7 +166,7 @@ void WindowingFunction<FloatType>::fillWindowingTables (FloatType* samples, size
 }
 
 template <typename FloatType>
-void WindowingFunction<FloatType>::multiplyWithWindowingTable (FloatType* samples, size_t size) noexcept
+void WindowingFunction<FloatType>::multiplyWithWindowingTable (FloatType* samples, size_t size) const noexcept
 {
     FloatVectorOperations::multiply (samples, windowTable.getRawDataPointer(), jmin (static_cast<int> (size), windowTable.size()));
 }

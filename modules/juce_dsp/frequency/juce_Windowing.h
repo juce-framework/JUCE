@@ -94,7 +94,7 @@ public:
                                      bool normalise = true, FloatType beta = 0) noexcept;
 
     /** Multiplies the content of a buffer with the given window. */
-    void multiplyWithWindowingTable (FloatType* samples, size_t size) noexcept;
+    void multiplyWithWindowingTable (FloatType* samples, size_t size) const noexcept;
 
     /** Returns the name of a given windowing method. */
     static const char* getWindowingMethodName (WindowingMethod) noexcept;
