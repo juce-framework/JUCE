@@ -68,6 +68,7 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996 4100)
 JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wconversion",
                                      "-Wshadow",
                                      "-Wdeprecated-register",
+                                     "-Wdeprecated-declarations",
                                      "-Wunused-parameter",
                                      "-Wdeprecated-writable-strings",
                                      "-Wnon-virtual-dtor",
