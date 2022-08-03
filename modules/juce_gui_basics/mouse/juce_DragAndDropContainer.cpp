@@ -138,6 +138,8 @@ public:
 
         setVisible (newTarget == nullptr || newTarget->shouldDrawDragImageWhenOver());
 
+        maintainKeyboardFocusWhenPossible();
+
         if (newTargetComp != currentlyOverComp)
         {
             if (auto* lastTarget = getCurrentlyOver())
@@ -233,6 +235,16 @@ private:
     Time lastTimeOverTarget;
     int originalInputSourceIndex;
     MouseInputSource::InputSourceType originalInputSourceType;
+    bool canHaveKeyboardFocus = false;
+
+    void maintainKeyboardFocusWhenPossible()
+    {
+        const auto newCanHaveKeyboardFocus = isVisible();
+
+        if (std::exchange (canHaveKeyboardFocus, newCanHaveKeyboardFocus) != newCanHaveKeyboardFocus)
+            if (canHaveKeyboardFocus)
+                grabKeyboardFocus();
+    }
 
     void updateSize()
     {
@@ -489,7 +501,6 @@ void DragAndDropContainer::startDragging (const var& sourceDescription,
 
     dragImageComponent->sourceDetails.localPosition = sourceComponent->getLocalPoint (nullptr, lastMouseDown);
     dragImageComponent->updateLocation (false, lastMouseDown);
-    dragImageComponent->grabKeyboardFocus();
 
    #if JUCE_WINDOWS
     // Under heavy load, the layered window's paint callback can often be lost by the OS,
