@@ -1364,7 +1364,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
         struct OverlayShaderProgram  : public ReferenceCountedObject
         {
             OverlayShaderProgram (OpenGLContext& context)
-                : program (context), builder (program), params (program)
+                : program (context), params (program)
             {}
 
             static const OverlayShaderProgram& select (OpenGLContext& context)
@@ -1382,11 +1382,12 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                 return *program;
             }
 
-            struct ProgramBuilder
+            struct BuiltProgram : public OpenGLShaderProgram
             {
-                ProgramBuilder (OpenGLShaderProgram& prog)
+                explicit BuiltProgram (OpenGLContext& context)
+                    : OpenGLShaderProgram (context)
                 {
-                    prog.addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (
+                    addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (
                         "attribute " JUCE_HIGHP " vec2 position;"
                         "uniform " JUCE_HIGHP " vec2 screenSize;"
                         "uniform " JUCE_HIGHP " float textureBounds[4];"
@@ -1400,7 +1401,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                           "texturePos = vec2 (texturePos.x, vOffsetAndScale.x + vOffsetAndScale.y * texturePos.y);"
                         "}"));
 
-                    prog.addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (
+                    addFragmentShader (OpenGLHelpers::translateFragmentShaderToV3 (
                         "uniform sampler2D imageTexture;"
                         "varying " JUCE_HIGHP " vec2 texturePos;"
                         "void main()"
@@ -1408,7 +1409,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                           "gl_FragColor = texture2D (imageTexture, texturePos);"
                         "}"));
 
-                    prog.link();
+                    link();
                 }
             };
 
@@ -1437,8 +1438,7 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
                 OpenGLShaderProgram::Uniform screenSize, imageTexture, textureBounds, vOffsetAndScale;
             };
 
-            OpenGLShaderProgram program;
-            ProgramBuilder builder;
+            BuiltProgram program;
             Params params;
         };
 
