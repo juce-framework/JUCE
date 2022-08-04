@@ -1391,7 +1391,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
    #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
     if (@available (iOS 13, *))
-        metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<UIView>> (view, comp);
+        metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<UIView>> (view, comp.isOpaque());
    #endif
 
     if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
@@ -1857,8 +1857,6 @@ void UIViewComponentPeer::displayLinkCallback()
         if (metalRenderer != nullptr)
             return metalRenderer->drawRectangleList (view,
                                                      (float) view.contentScaleFactor,
-                                                     view.frame,
-                                                     component,
                                                      [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
                                                      deferredRepaints);
 

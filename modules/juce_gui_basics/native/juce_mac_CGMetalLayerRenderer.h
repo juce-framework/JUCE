@@ -35,12 +35,12 @@ class CoreGraphicsMetalLayerRenderer
 {
 public:
     //==============================================================================
-    CoreGraphicsMetalLayerRenderer (ViewType* view, const Component& comp)
+    CoreGraphicsMetalLayerRenderer (ViewType* view, bool isOpaque)
     {
         device.reset (MTLCreateSystemDefaultDevice());
         commandQueue.reset ([device.get() newCommandQueue]);
 
-        attach (view, comp);
+        attach (view, isOpaque);
     }
 
     ~CoreGraphicsMetalLayerRenderer()
@@ -52,7 +52,7 @@ public:
         }
     }
 
-    void attach (ViewType* view, const Component& comp)
+    void attach (ViewType* view, bool isOpaque)
     {
        #if JUCE_MAC
         view.wantsLayer = YES;
@@ -65,7 +65,7 @@ public:
         layer.device = device.get();
         layer.framebufferOnly = NO;
         layer.pixelFormat = MTLPixelFormatBGRA8Unorm_sRGB;
-        layer.opaque = comp.isOpaque();
+        layer.opaque = isOpaque;
         layer.allowsNextDrawableTimeout = NO;
 
         attachedView = view;
@@ -90,8 +90,6 @@ public:
     template <typename Callback>
     bool drawRectangleList (ViewType* view,
                             float scaleFactor,
-                            CGRect viewFrame,
-                            const Component& comp,
                             Callback&& drawRectWithContext,
                             const RectangleList<float>& dirtyRegions)
     {
@@ -117,14 +115,12 @@ public:
         layer.contentsScale = scaleFactor;
         const auto drawableSizeTansform = CGAffineTransformMakeScale (layer.contentsScale,
                                                                       layer.contentsScale);
-        const auto transformedFrameSize = CGSizeApplyAffineTransform (viewFrame.size, drawableSizeTansform);
-
-        const auto componentHeight = comp.getHeight();
+        const auto transformedFrameSize = CGSizeApplyAffineTransform (view.frame.size, drawableSizeTansform);
 
         if (resources == nullptr || ! CGSizeEqualToSize (layer.drawableSize, transformedFrameSize))
         {
             layer.drawableSize = transformedFrameSize;
-            resources = std::make_unique<Resources> (device.get(), layer, componentHeight);
+            resources = std::make_unique<Resources> (device.get(), layer);
         }
 
         auto gpuTexture = resources->getGpuTexture();
@@ -261,7 +257,7 @@ private:
     class Resources
     {
     public:
-        Resources (id<MTLDevice> metalDevice, CAMetalLayer* layer, int componentHeight)
+        Resources (id<MTLDevice> metalDevice, CAMetalLayer* layer)
         {
             const auto bytesPerRow = alignTo ((size_t) layer.drawableSize.width * 4, 256);
 
@@ -301,8 +297,8 @@ private:
                                                     CGColorSpaceCreateWithName (kCGColorSpaceSRGB),
                                                     (uint32_t) kCGImageAlphaPremultipliedFirst | (uint32_t) kCGBitmapByteOrder32Host));
 
-            CGContextScaleCTM (cgContext.get(), layer.contentsScale, layer.contentsScale);
-            CGContextConcatCTM (cgContext.get(), CGAffineTransformMake (1, 0, 0, -1, 0, componentHeight));
+            CGContextTranslateCTM (cgContext.get(), 0, layer.drawableSize.height);
+            CGContextScaleCTM (cgContext.get(), layer.contentsScale, -layer.contentsScale);
 
             textureDesc.storageMode = MTLStorageModePrivate;
             gpuTexturePool = std::make_unique<GpuTexturePool> (metalDevice, textureDesc);

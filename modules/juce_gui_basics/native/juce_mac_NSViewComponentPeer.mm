@@ -151,7 +151,7 @@ public:
       #if USE_COREGRAPHICS_RENDERING
        #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         if (@available (macOS 10.14, *))
-            metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<NSView>> (view, getComponent());
+            metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<NSView>> (view, getComponent().isOpaque());
        #endif
         if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
@@ -1047,7 +1047,11 @@ public:
 
         if (metalRenderer != nullptr)
         {
-            const auto compBounds = getComponent().getLocalBounds().toFloat();
+            auto setDeferredRepaintsToWholeFrame = [this]
+            {
+                const auto frameSize = view.frame.size;
+                deferredRepaints = Rectangle<float> { (float) frameSize.width, (float) frameSize.height };
+            };
 
             // If we are resizing we need to fall back to synchronous drawing to avoid artefacts
             if ([window inLiveResize] || numFramesToSkipMetalRenderer > 0)
@@ -1055,7 +1059,7 @@ public:
                 if (metalRenderer->isAttachedToView (view))
                 {
                     metalRenderer->detach();
-                    deferredRepaints = compBounds;
+                    setDeferredRepaintsToWholeFrame();
                 }
 
                 if (numFramesToSkipMetalRenderer > 0)
@@ -1065,8 +1069,8 @@ public:
             {
                 if (! metalRenderer->isAttachedToView (view))
                 {
-                    metalRenderer->attach (view, getComponent());
-                    deferredRepaints = compBounds;
+                    metalRenderer->attach (view, getComponent().isOpaque());
+                    setDeferredRepaintsToWholeFrame();
                 }
             }
         }
@@ -1076,8 +1080,6 @@ public:
            if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
                return metalRenderer->drawRectangleList (view,
                                                         (float) [[view window] backingScaleFactor],
-                                                        view.frame,
-                                                        getComponent(),
                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
                                                         deferredRepaints);
 
