@@ -167,8 +167,21 @@ public:
 
     String getCustomResourceFoldersString() const           { return customXcodeResourceFoldersValue.get().toString().replaceCharacters ("\r\n", "::"); }
     String getCustomXcassetsFolderString() const            { return customXcassetsFolderValue.get(); }
+
+    Optional<build_tools::RelativePath> getCustomXcassetsFolder() const
+    {
+        const auto customXcassetsPath = getCustomXcassetsFolderString();
+
+        if (customXcassetsPath.isEmpty())
+            return {};
+
+        return build_tools::RelativePath { customXcassetsPath, build_tools::RelativePath::projectFolder };
+    }
+
     String getCustomLaunchStoryboardString() const          { return customLaunchStoryboardValue.get(); }
-    bool shouldAddStoryboardToProject() const               { return getCustomLaunchStoryboardString().isNotEmpty() || getCustomXcassetsFolderString().isEmpty(); }
+
+    bool shouldAddStoryboardToProject() const               { return getCustomLaunchStoryboardString().isNotEmpty()
+                                                                  || (! customXcassetsFolderContainsLaunchImage()); }
 
     bool isHardenedRuntimeEnabled() const                   { return hardenedRuntimeValue.get(); }
     Array<var> getHardenedRuntimeOptions() const            { return *hardenedRuntimeOptionsValue.get().getArray(); }
@@ -301,8 +314,8 @@ public:
         {
             props.add (new TextPropertyComponent (customXcassetsFolderValue, "Custom Xcassets Folder", 128, false),
                        "If this field is not empty, your Xcode project will use the custom xcassets folder specified here "
-                       "for the app icons and launchimages, and will ignore the Icon files specified above. This will also prevent "
-                       "a launch storyboard from being used.");
+                       "for the app icons, and will ignore the Icon files specified above. If the provided xcassets folder "
+                       "contains a launchimage it will be used, unless a custom storyboard is specified.");
 
             props.add (new TextPropertyComponent (customLaunchStoryboardValue, "Custom Launch Storyboard", 256, false),
                        "If this field is not empty then the specified launch storyboard file will be added to the project as an Xcode "
@@ -2681,7 +2694,7 @@ private:
         folders.removeEmptyStrings();
 
         for (auto& crf : folders)
-            addCustomResourceFolder (crf);
+            addCustomResourceFolder (build_tools::RelativePath { crf, build_tools::RelativePath::projectFolder });
     }
 
     void addSubprojects() const
@@ -2787,19 +2800,43 @@ private:
 
     void addXcassets() const
     {
-        auto customXcassetsPath = getCustomXcassetsFolderString();
-
-        if (customXcassetsPath.isEmpty())
-            addDefaultXcassetsFolders();
+        if (const auto customXcassetsPath = getCustomXcassetsFolder())
+            addCustomResourceFolder (*customXcassetsPath, "folder.assetcatalog");
         else
-            addCustomResourceFolder (customXcassetsPath, "folder.assetcatalog");
+            addDefaultXcassetsFolders();
     }
 
-    void addCustomResourceFolder (String folderPathRelativeToProjectFolder, const String fileType = "folder") const
+    File makeFile (const build_tools::RelativePath& path) const
     {
-        auto folderPath = build_tools::RelativePath (folderPathRelativeToProjectFolder, build_tools::RelativePath::projectFolder)
-                                       .rebased (projectFolder, getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
-                                       .toUnixStyle();
+        switch (path.getRoot())
+        {
+            case build_tools::RelativePath::projectFolder:
+                return getProject().getProjectFolder().getChildFile (path.toUnixStyle());
+
+            case build_tools::RelativePath::buildTargetFolder:
+                return getTargetFolder().getChildFile (path.toUnixStyle());
+
+            case build_tools::RelativePath::unknown:
+                jassertfalse;
+        }
+
+        return {};
+    }
+
+    bool customXcassetsFolderContainsLaunchImage() const
+    {
+        if (const auto xcassetsFolder = getCustomXcassetsFolder())
+            return makeFile (*xcassetsFolder).getChildFile ("LaunchImage.launchimage").exists();
+
+        return false;
+    }
+
+    void addCustomResourceFolder (const build_tools::RelativePath& path, const String fileType = "folder") const
+    {
+        jassert (path.getRoot() == build_tools::RelativePath::projectFolder);
+
+        auto folderPath = path.rebased (projectFolder, getTargetFolder(), build_tools::RelativePath::buildTargetFolder)
+                              .toUnixStyle();
 
         auto fileRefID = createFileRefID (folderPath);
 
