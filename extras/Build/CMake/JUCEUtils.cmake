@@ -1344,10 +1344,11 @@ function(_juce_set_fallback_properties target)
     _juce_set_property_if_not_set(${target} BUILD_VERSION "${final_version}")
 
     get_target_property(custom_xcassets ${target} JUCE_CUSTOM_XCASSETS_FOLDER)
+    get_target_property(custom_storyboard ${target} JUCE_LAUNCH_STORYBOARD_FILE)
 
     set(needs_storyboard TRUE)
 
-    if(custom_xcassets)
+    if((NOT custom_storyboard) AND custom_xcassets AND (EXISTS "${custom_xcassets}/LaunchImage.launchimage"))
         set(needs_storyboard FALSE)
     endif()
 

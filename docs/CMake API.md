@@ -331,12 +331,14 @@ attributes directly to these creation functions, rather than adding them later.
 
 `LAUNCH_STORYBOARD_FILE`
 - A custom launch storyboard file to use on iOS. If not supplied, a default storyboard will be
-  used.
+  used. If this is specified, then this will take precedence over a LaunchImage inside a custom
+  xcassets directory.
 
 `CUSTOM_XCASSETS_FOLDER`
 - A path to an xcassets directory, containing icons and/or launch images for this target. If this
-  is specified, the ICON_BIG and ICON_SMALL arguments will not have an effect on iOS, and a launch
-  storyboard will not be used.
+  is specified, the ICON_BIG and ICON_SMALL arguments will not have an effect on iOS. LaunchImages
+  have been deprecated from iOS 13 onward, but if your xcassets folder contains a LaunchImage and
+  a custom storyboard hasn't been specified, then it will be used.
 
 `TARGETED_DEVICE_FAMILY`
 - Specifies the device families on which the product must be capable of running. Allowed values
