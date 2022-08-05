@@ -167,6 +167,7 @@
 #include "utilities/juce_ParameterAttachments.h"
 #include "utilities/juce_AudioProcessorValueTreeState.h"
 #include "utilities/juce_PluginHostType.h"
+#include "utilities/ARA/juce_ARADebug.h"
 #include "utilities/ARA/juce_ARA_utils.h"
 
 //==============================================================================

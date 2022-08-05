@@ -41,28 +41,4 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4100)
 JUCE_END_IGNORE_WARNINGS_MSVC
 JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-namespace juce
-{
-
-#if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS) || JUCE_LOG_ASSERTIONS
-JUCE_API void JUCE_CALLTYPE handleARAAssertion (const char* file, const int line, const char* diagnosis) noexcept
-{
-   #if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS)
-    DBG (diagnosis);
-   #endif
-
-    logAssertion (file, line);
-
-   #if (JUCE_DEBUG && ! JUCE_DISABLE_ASSERTIONS)
-    if (juce_isRunningUnderDebugger())
-        JUCE_BREAK_IN_DEBUGGER;
-    JUCE_ANALYZER_NORETURN
-   #endif
-}
-#endif
-
-ARA_SETUP_DEBUG_MESSAGE_PREFIX(JucePlugin_Name);
-
-} // namespace juce
-
 #endif
