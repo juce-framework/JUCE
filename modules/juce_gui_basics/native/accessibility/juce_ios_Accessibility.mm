@@ -37,10 +37,6 @@ static void juceFreeAccessibilityPlatformSpecificData (UIAccessibilityElement* e
 namespace juce
 {
 
-#if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
- #define JUCE_IOS_CONTAINER_API_AVAILABLE 1
-#endif
-
 #define JUCE_NATIVE_ACCESSIBILITY_INCLUDED 1
 
 template <typename> struct Signature;
@@ -123,7 +119,6 @@ private:
                 return nil;
             });
 
-           #if JUCE_IOS_CONTAINER_API_AVAILABLE
             if (@available (iOS 11.0, *))
             {
                 addMethod (@selector (accessibilityDataTableCellElementForRow:column:), [] (id self, SEL, NSUInteger row, NSUInteger column) -> id
@@ -194,7 +189,6 @@ private:
                     return 0; // UIAccessibilityContainerTypeNone
                 });
             }
-           #endif
 
             registerClass();
         }
@@ -507,14 +501,12 @@ private:
                 addProtocol (@protocol (UITextInput));
             }
 
-           #if JUCE_IOS_CONTAINER_API_AVAILABLE
             if (@available (iOS 11.0, *))
             {
                 addMethod (@selector (accessibilityRowRange),                           getAccessibilityRowIndexRange);
                 addMethod (@selector (accessibilityColumnRange),                        getAccessibilityColumnIndexRange);
                 addProtocol (@protocol (UIAccessibilityContainerDataTableCell));
             }
-           #endif
 
             addIvar<UIAccessibilityElement*> ("container");
 

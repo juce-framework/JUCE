@@ -29,7 +29,7 @@
 #include "juce_VST3Common.h"
 #include "juce_ARACommon.h"
 
-#if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+#if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
 #include <ARA_API/ARAVST3.h>
 
 namespace ARA
@@ -890,7 +890,7 @@ struct DescriptionFactory
         // The match is determined by the two classes having the same name.
         std::unordered_set<String> araMainFactoryClassNames;
 
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
         for (Steinberg::int32 i = 0; i < numClasses; ++i)
         {
             PClassInfo info;
@@ -1441,7 +1441,7 @@ static int compareWithString (Type (&charArray)[N], const String& str)
 template <typename Callback>
 static void forEachARAFactory (IPluginFactory* pluginFactory, Callback&& cb)
 {
-   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
     const auto numClasses = pluginFactory->countClasses();
     for (Steinberg::int32 i = 0; i < numClasses; ++i)
     {
@@ -1464,7 +1464,7 @@ static std::shared_ptr<const ARA::ARAFactory> getARAFactory (Steinberg::IPluginF
 {
     std::shared_ptr<const ARA::ARAFactory> factory;
 
-   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+   #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
     forEachARAFactory (pluginFactory,
                        [&pluginFactory, &pluginName, &factory] (const auto& pcClassInfo)
                        {

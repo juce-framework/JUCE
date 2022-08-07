@@ -417,14 +417,18 @@ struct AndroidDocument::Utils
             return false;
         }
 
-        std::unique_ptr<InputStream>  createInputStream()  const override
+        std::unique_ptr<InputStream> createInputStream() const override
         {
-            return makeStream<AndroidContentUriInputStream>  (AndroidStreamHelpers::StreamKind::input);
+            auto result = std::make_unique<AndroidContentUriInputStream> (uri);
+            return result->openedSuccessfully() ? std::move (result) : nullptr;
         }
 
         std::unique_ptr<OutputStream> createOutputStream() const override
         {
-            return makeStream<AndroidContentUriOutputStream> (AndroidStreamHelpers::StreamKind::output);
+            auto stream = AndroidStreamHelpers::createStream (uri, AndroidStreamHelpers::StreamKind::output);
+
+            return stream.get() != nullptr ? std::make_unique<AndroidContentUriOutputStream> (std::move (stream))
+                                           : nullptr;
         }
 
         AndroidDocumentInfo getInfo() const override
@@ -507,15 +511,6 @@ struct AndroidDocument::Utils
         NativeInfo getNativeInfo() const override { return { uri }; }
 
     private:
-        template <typename Stream>
-        std::unique_ptr<Stream> makeStream (AndroidStreamHelpers::StreamKind kind) const
-        {
-            auto stream = AndroidStreamHelpers::createStream (uri, kind);
-
-            return stream.get() != nullptr ? std::make_unique<Stream> (std::move (stream))
-                                           : nullptr;
-        }
-
         GlobalRef uri;
     };
 

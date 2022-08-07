@@ -71,7 +71,8 @@ public:
         Windows7        = Windows | 4,
         Windows8_0      = Windows | 5,
         Windows8_1      = Windows | 6,
-        Windows10       = Windows | 7
+        Windows10       = Windows | 7,
+        Windows11       = Windows | 8
     };
 
     /** Returns the type of operating system we're running on.

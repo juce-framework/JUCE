@@ -27,7 +27,7 @@
 
 #include <juce_core/system/juce_TargetPlatform.h>
 
-#if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+#if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
 
 #include <JuceHeader.h>
 
@@ -179,7 +179,7 @@ class PlaybackRegion
         properties.transformationFlags = ARA::kARAPlaybackTransformationNoChanges;
         properties.startInModificationTime = 0.0;
         const auto& formatReader = audioSource.getFormatReader();
-        properties.durationInModificationTime = formatReader.lengthInSamples / formatReader.sampleRate;
+        properties.durationInModificationTime = (double) formatReader.lengthInSamples / formatReader.sampleRate;
         properties.startInPlaybackTime = 0.0;
         properties.durationInPlaybackTime = properties.durationInModificationTime;
         properties.musicalContextRef = sequence.getMusicalContext().getPluginRef();

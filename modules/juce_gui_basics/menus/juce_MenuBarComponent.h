@@ -119,7 +119,8 @@ private:
     std::vector<std::unique_ptr<AccessibleItemComponent>> itemComponents;
 
     Point<int> lastMousePos;
-    int itemUnderMouse = -1, currentPopupIndex = -1, topLevelIndexClicked = 0;
+    int itemUnderMouse = -1, currentPopupIndex = -1, topLevelIndexDismissed = 0;
+    int numActiveMenus = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MenuBarComponent)
 };

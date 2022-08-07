@@ -45,7 +45,7 @@ DECLARE_JNI_CLASS (ContentResolver, "android/content/ContentResolver")
  METHOD (releasePersistableUriPermission,   "releasePersistableUriPermission",  "(Landroid/net/Uri;I)V") \
  METHOD (getPersistedUriPermissions,        "getPersistedUriPermissions",       "()Ljava/util/List;")
 
-DECLARE_JNI_CLASS (ContentResolver19, "android/content/ContentResolver")
+DECLARE_JNI_CLASS_WITH_MIN_SDK (ContentResolver19, "android/content/ContentResolver", 19)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
@@ -79,7 +79,8 @@ DECLARE_JNI_CLASS (AndroidOutputStream, "java/io/OutputStream")
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
  METHOD (close, "close", "()V") \
- METHOD (read,  "read",  "([B)I")
+ METHOD (read,  "read",  "([B)I") \
+ METHOD (skip,  "skip",  "(J)J")
 
 DECLARE_JNI_CLASS (AndroidInputStream, "java/io/InputStream")
 #undef JNI_CLASS_MEMBERS
@@ -551,14 +552,37 @@ private:
 };
 
 //==============================================================================
+struct AndroidStreamHelpers
+{
+    enum class StreamKind { output, input };
+
+    static LocalRef<jobject> createStream (const GlobalRef& uri, StreamKind kind)
+    {
+        auto* env = getEnv();
+        auto contentResolver = AndroidContentUriResolver::getContentResolver();
+
+        if (contentResolver == nullptr)
+            return {};
+
+        return LocalRef<jobject> (env->CallObjectMethod (contentResolver.get(),
+                                                         kind == StreamKind::input ? ContentResolver.openInputStream
+                                                                                   : ContentResolver.openOutputStream,
+                                                         uri.get()));
+    }
+};
+
+//==============================================================================
 struct AndroidContentUriInputStream :  public InputStream
 {
-    explicit AndroidContentUriInputStream (LocalRef<jobject>&& streamIn)
-        : stream (std::move (streamIn)) {}
+    explicit AndroidContentUriInputStream (const GlobalRef& uriIn)
+        : uri (uriIn),
+          stream (AndroidStreamHelpers::createStream (uri, AndroidStreamHelpers::StreamKind::input))
+    {}
 
     ~AndroidContentUriInputStream() override
     {
         getEnv()->CallVoidMethod (stream.get(), AndroidInputStream.close);
+        jniCheckHasExceptionOccurredAndClear();
     }
 
     int64 getTotalLength() override { return -1; }
@@ -569,30 +593,36 @@ struct AndroidContentUriInputStream :  public InputStream
     {
         auto* env = getEnv();
 
-        if ((jsize) maxBytesToRead > byteArray.getSize())
+        if ((jsize) maxBytesToRead != byteArray.getSize())
             byteArray = CachedByteArray { (jsize) maxBytesToRead };
 
         const auto result = env->CallIntMethod (stream.get(), AndroidInputStream.read, byteArray.getNativeArray());
 
-        if (result != -1)
-        {
-            pos += result;
-
-            auto* rawBytes = env->GetByteArrayElements (byteArray.getNativeArray(), nullptr);
-            std::memcpy (destBuffer, rawBytes, static_cast<size_t> (result));
-            env->ReleaseByteArrayElements (byteArray.getNativeArray(), rawBytes, 0);
-        }
-        else
+        if (jniCheckHasExceptionOccurredAndClear() || result == -1)
         {
             exhausted = true;
+            return -1;
         }
+
+        pos += result;
+
+        auto* rawBytes = env->GetByteArrayElements (byteArray.getNativeArray(), nullptr);
+        std::memcpy (destBuffer, rawBytes, static_cast<size_t> (result));
+        env->ReleaseByteArrayElements (byteArray.getNativeArray(), rawBytes, 0);
 
         return result;
     }
 
     bool setPosition (int64 newPos) override
     {
-        return (newPos == pos);
+        if (newPos == pos)
+            return true;
+
+        if (pos < newPos)
+            return skipImpl (newPos - pos);
+
+        AndroidContentUriInputStream (uri).swap (*this);
+        return skipImpl (newPos);
     }
 
     int64 getPosition() override
@@ -600,6 +630,37 @@ struct AndroidContentUriInputStream :  public InputStream
         return pos;
     }
 
+    bool openedSuccessfully() const { return stream != nullptr; }
+
+    void skipNextBytes (int64 num) override
+    {
+        skipImpl (num);
+    }
+
+private:
+    bool skipImpl (int64 num)
+    {
+        if (stream == nullptr)
+            return false;
+
+        const auto skipped = getEnv()->CallLongMethod (stream, AndroidInputStream.skip, (jlong) num);
+
+        if (jniCheckHasExceptionOccurredAndClear())
+            return false;
+
+        pos += skipped;
+        return skipped == num;
+    }
+
+    auto tie() { return std::tie (uri, byteArray, stream, pos, exhausted); }
+
+    void swap (AndroidContentUriInputStream& other) noexcept
+    {
+        auto toSwap = other.tie();
+        tie().swap (toSwap);
+    }
+
+    GlobalRef uri;
     CachedByteArray byteArray;
     GlobalRef stream;
     int64 pos = 0;

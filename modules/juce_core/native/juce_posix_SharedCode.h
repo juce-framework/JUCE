@@ -167,7 +167,7 @@ int juce_siginterrupt (int sig, int flag)
 //==============================================================================
 namespace
 {
-   #if JUCE_LINUX || (JUCE_IOS && ! __DARWIN_ONLY_64_BIT_INO_T) // (this iOS stuff is to avoid a simulator bug)
+   #if JUCE_LINUX || (JUCE_IOS && (! TARGET_OS_MACCATALYST) && (! __DARWIN_ONLY_64_BIT_INO_T)) // (this iOS stuff is to avoid a simulator bug)
     using juce_statStruct = struct stat64;
     #define JUCE_STAT  stat64
    #else

@@ -105,11 +105,7 @@ struct API_AVAILABLE (macos (10.10)) ButtonBasedStatusItem : public StatusItemCo
         button.image = statusIcon.get();
         button.target = eventForwarder.get();
         button.action = @selector (handleEvent:);
-       #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
         [button sendActionOn: NSEventMaskLeftMouseDown | NSEventMaskRightMouseDown | NSEventMaskScrollWheel];
-       #else
-        [button sendActionOn: NSLeftMouseDownMask | NSRightMouseDownMask | NSScrollWheelMask];
-       #endif
     }
 
     ~ButtonBasedStatusItem() override

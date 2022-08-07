@@ -575,12 +575,10 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
     return [[[NSBundle mainBundle] objectForInfoDictionaryKey: @"UIStatusBarHidden"] boolValue];
 }
 
-#if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
  - (BOOL) prefersHomeIndicatorAutoHidden
  {
      return isKioskModeView (self);
  }
-#endif
 
 - (UIStatusBarStyle) preferredStatusBarStyle
 {
@@ -775,7 +773,6 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
 {
     [super traitCollectionDidChange: previousTraitCollection];
 
-   #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
     if (@available (iOS 12.0, *))
     {
         const auto wasDarkModeActive = ([previousTraitCollection userInterfaceStyle] == UIUserInterfaceStyleDark);
@@ -784,7 +781,6 @@ MultiTouchMapper<UITouch*> UIViewComponentPeer::currentTouches;
             [[NSNotificationCenter defaultCenter] postNotificationName: UIViewComponentPeer::getDarkModeNotificationName()
                                                                 object: nil];
     }
-   #endif
 }
 
 - (BOOL) isAccessibilityElement
@@ -1395,7 +1391,7 @@ UIViewComponentPeer::UIViewComponentPeer (Component& comp, int windowStyleFlags,
 
    #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
     if (@available (iOS 13, *))
-        metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<UIView>> (view, comp);
+        metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<UIView>> (view, comp.isOpaque());
    #endif
 
     if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
@@ -1861,8 +1857,6 @@ void UIViewComponentPeer::displayLinkCallback()
         if (metalRenderer != nullptr)
             return metalRenderer->drawRectangleList (view,
                                                      (float) view.contentScaleFactor,
-                                                     view.frame,
-                                                     component,
                                                      [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
                                                      deferredRepaints);
 

@@ -662,7 +662,7 @@ static void addToMenu (const KnownPluginList::PluginTree& tree,
 
         addPlugin (PluginDescriptionAndPreference { plugin, PluginDescriptionAndPreference::UseARA::no }, name);
 
-       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS)
+       #if JUCE_PLUGINHOST_ARA && (JUCE_MAC || JUCE_WINDOWS || JUCE_LINUX)
         if (plugin.hasARAExtension)
         {
             name << " (ARA)";

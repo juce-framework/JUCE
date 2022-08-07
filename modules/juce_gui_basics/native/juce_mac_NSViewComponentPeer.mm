@@ -151,7 +151,7 @@ public:
       #if USE_COREGRAPHICS_RENDERING
        #if JUCE_COREGRAPHICS_RENDER_WITH_MULTIPLE_PAINT_CALLS
         if (@available (macOS 10.14, *))
-            metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<NSView>> (view, getComponent());
+            metalRenderer = std::make_unique<CoreGraphicsMetalLayerRenderer<NSView>> (view, getComponent().isOpaque());
        #endif
         if ((windowStyleFlags & ComponentPeer::windowRequiresSynchronousCoreGraphicsRendering) == 0)
         {
@@ -215,10 +215,8 @@ public:
 
             [window setRestorable: NO];
 
-           #if defined (MAC_OS_X_VERSION_10_12) && (MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12)
             if (@available (macOS 10.12, *))
                 [window setTabbingMode: NSWindowTabbingModeDisallowed];
-           #endif
 
             scopedObservers.emplace_back (view, frameChangedSelector, NSWindowDidMoveNotification, window);
             scopedObservers.emplace_back (view, frameChangedSelector, NSWindowDidMiniaturizeNotification, window);
@@ -1049,7 +1047,11 @@ public:
 
         if (metalRenderer != nullptr)
         {
-            const auto compBounds = getComponent().getLocalBounds().toFloat();
+            auto setDeferredRepaintsToWholeFrame = [this]
+            {
+                const auto frameSize = view.frame.size;
+                deferredRepaints = Rectangle<float> { (float) frameSize.width, (float) frameSize.height };
+            };
 
             // If we are resizing we need to fall back to synchronous drawing to avoid artefacts
             if ([window inLiveResize] || numFramesToSkipMetalRenderer > 0)
@@ -1057,7 +1059,7 @@ public:
                 if (metalRenderer->isAttachedToView (view))
                 {
                     metalRenderer->detach();
-                    deferredRepaints = compBounds;
+                    setDeferredRepaintsToWholeFrame();
                 }
 
                 if (numFramesToSkipMetalRenderer > 0)
@@ -1067,8 +1069,8 @@ public:
             {
                 if (! metalRenderer->isAttachedToView (view))
                 {
-                    metalRenderer->attach (view, getComponent());
-                    deferredRepaints = compBounds;
+                    metalRenderer->attach (view, getComponent().isOpaque());
+                    setDeferredRepaintsToWholeFrame();
                 }
             }
         }
@@ -1078,8 +1080,6 @@ public:
            if (metalRenderer != nullptr && metalRenderer->isAttachedToView (view))
                return metalRenderer->drawRectangleList (view,
                                                         (float) [[view window] backingScaleFactor],
-                                                        view.frame,
-                                                        getComponent(),
                                                         [this] (CGContextRef ctx, CGRect r) { drawRectWithContext (ctx, r); },
                                                         deferredRepaints);
 
@@ -1438,10 +1438,8 @@ public:
     {
         const auto type = []
         {
-           #if defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13
             if (@available (macOS 10.13, *))
                 return NSPasteboardTypeFileURL;
-           #endif
 
             JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
             return (NSString*) kUTTypeFileURL;
@@ -1573,11 +1571,10 @@ public:
 
     void resetWindowPresentation()
     {
+        [window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (getStyleFlags()))];
+
         if (hasNativeTitleBar())
-        {
-            [window setStyleMask: (NSViewComponentPeer::getNSWindowStyleMask (getStyleFlags()))];
             setTitle (getComponent().getName()); // required to force the OS to update the title
-        }
 
         [NSApp setPresentationOptions: NSApplicationPresentationDefault];
         setCollectionBehaviour (isFullScreen());
@@ -1732,15 +1729,11 @@ private:
            #if JUCE_64BIT
             case NSEventTypeSmartMagnify:
             case NSEventTypePressure:
-           #endif
-          #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
-           #if JUCE_64BIT
             case NSEventTypeDirectTouch:
            #endif
            #if defined (MAC_OS_X_VERSION_10_15) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_15
             case NSEventTypeChangeMode:
            #endif
-          #endif
             default:
                 return false;
         }
@@ -1996,13 +1989,11 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
         {
             // Without setting contentsFormat macOS Big Sur will always set the invalid area
             // to be the entire frame.
-            #if defined (MAC_OS_X_VERSION_10_12) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_12
             if (@available (macOS 10.12, *))
             {
                 CALayer* layer = ((NSView*) self).layer;
                 layer.contentsFormat = kCAContentsFormatRGBA8Uint;
             }
-            #endif
 
             sendSuperclassMessage<void> (self, @selector (viewWillDraw));
         });

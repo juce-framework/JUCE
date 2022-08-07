@@ -145,11 +145,10 @@ File File::getSpecialLocation (const SpecialLocationType type)
 
         case currentExecutableFile:
         case currentApplicationFile:
-           #if ! JUCE_STANDALONE_APPLICATION
-            return juce_getExecutableFile();
-           #endif
-            // deliberate fall-through if this is not a shared-library
-            JUCE_FALLTHROUGH
+        {
+            const auto f = juce_getExecutableFile();
+            return f.isSymbolicLink() ? f.getLinkedTarget() : f;
+        }
 
         case hostApplicationPath:
         {

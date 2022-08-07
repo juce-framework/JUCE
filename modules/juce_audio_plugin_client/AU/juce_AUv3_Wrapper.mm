@@ -37,12 +37,6 @@
  #define JUCE_AUV3_MIDI_EVENT_LIST_SUPPORTED 1
 #endif
 
-#if (JUCE_IOS && defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0) \
-   || (JUCE_MAC && defined (MAC_OS_X_VERSION_10_13) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_13)
- #define JUCE_AUV3_MIDI_OUTPUT_SUPPORTED 1
- #define JUCE_AUV3_VIEW_CONFIG_SUPPORTED 1
-#endif
-
 #ifndef __OBJC2__
  #error AUv3 needs Objective-C 2 support (compile with 64-bit)
 #endif
@@ -202,12 +196,11 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
+    API_AVAILABLE (macos (10.13), ios (11.0))
     virtual NSIndexSet* getSupportedViewConfigurations (NSArray<AUAudioUnitViewConfiguration*>*) = 0;
+
+    API_AVAILABLE (macos (10.13), ios (11.0))
     virtual void selectViewConfiguration (AUAudioUnitViewConfiguration*) = 0;
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-   #endif
 
 private:
     struct Class  : public ObjCClass<AUAudioUnit>
@@ -253,10 +246,8 @@ private:
             addMethod (@selector (supportsMPE),                     getSupportsMPE);
             JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
-           #if JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
             if (@available (macOS 10.13, iOS 11.0, *))
                 addMethod (@selector (MIDIOutputNames), getMIDIOutputNames);
-           #endif
 
             //==============================================================================
             addMethod (@selector (internalRenderBlock),             getInternalRenderBlock);
@@ -273,13 +264,11 @@ private:
             addMethod (@selector (setContextName:),                 setContextName);
 
             //==============================================================================
-           #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
             if (@available (macOS 10.13, iOS 11.0, *))
             {
                 addMethod (@selector (supportedViewConfigurations:),    getSupportedViewConfigurations);
                 addMethod (@selector (selectViewConfiguration:),        selectViewConfiguration);
             }
-           #endif
 
             registerClass();
         }
@@ -388,12 +377,11 @@ private:
         static void setContextName (id self, SEL, NSString* str)                                    { return _this (self)->setContextName (str); }
 
         //==============================================================================
-       #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
+        API_AVAILABLE (macos (10.13), ios (11.0))
         static NSIndexSet* getSupportedViewConfigurations (id self, SEL, NSArray<AUAudioUnitViewConfiguration*>* configs) { return _this (self)->getSupportedViewConfigurations (configs); }
+
+        API_AVAILABLE (macos (10.13), ios (11.0))
         static void selectViewConfiguration (id self, SEL, AUAudioUnitViewConfiguration* config)                          { _this (self)->selectViewConfiguration (config); }
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-       #endif
     };
 
     static JuceAudioUnitv3Base* create (AUAudioUnit*, AudioComponentDescription, AudioComponentInstantiationOptions, NSError**);
@@ -883,8 +871,7 @@ public:
     }
 
     //==============================================================================
-   #if JUCE_AUV3_VIEW_CONFIG_SUPPORTED
-    JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wunguarded-availability", "-Wunguarded-availability-new")
+    API_AVAILABLE (macos (10.13), ios (11.0))
     NSIndexSet* getSupportedViewConfigurations (NSArray<AUAudioUnitViewConfiguration*>* configs) override
     {
         auto supportedViewIndecies = [[NSMutableIndexSet alloc] init];
@@ -917,12 +904,11 @@ public:
         return [supportedViewIndecies autorelease];
     }
 
+    API_AVAILABLE (macos (10.13), ios (11.0))
     void selectViewConfiguration (AUAudioUnitViewConfiguration* config) override
     {
         processorHolder->viewConfiguration.reset (new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES });
     }
-    JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-   #endif
 
     struct ScopedKeyChange
     {
@@ -1640,7 +1626,7 @@ private:
             processBlock (audioBuffer.getBuffer (frameCount), midiMessages);
 
             // send MIDI
-           #if JucePlugin_ProducesMidiOutput && JUCE_AUV3_MIDI_OUTPUT_SUPPORTED
+           #if JucePlugin_ProducesMidiOutput
             if (@available (macOS 10.13, iOS 11.0, *))
             {
                 if (auto midiOut = midiOutputEventBlock)

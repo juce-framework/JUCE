@@ -691,7 +691,6 @@ public:
                     return noErr;
                 }
 
-               #if defined (MAC_OS_X_VERSION_10_12)
                 case kAudioUnitProperty_AUHostIdentifier:
                 {
                     if (inDataSize < sizeof (AUHostVersionIdentifier))
@@ -702,7 +701,6 @@ public:
 
                     return noErr;
                 }
-               #endif
 
                 default: break;
             }

@@ -499,6 +499,9 @@ public:
     {
         vstLegacyPathValueWrapper.init ({ settings, Ids::vstLegacyFolder, nullptr },
                                           getAppSettings().getStoredPath (Ids::vstLegacyPath, TargetOS::linux), TargetOS::linux);
+
+        araPathValueWrapper.init ({ settings, Ids::araFolder, nullptr },
+                                  getAppSettings().getStoredPath (Ids::araPath, TargetOS::linux), TargetOS::linux);
     }
 
     //==============================================================================

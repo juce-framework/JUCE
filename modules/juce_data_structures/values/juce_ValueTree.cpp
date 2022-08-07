@@ -669,6 +669,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to add properties to a null ValueTree will fail!
 
+    if (source == *this)
+        return;
+
     if (source.object == nullptr)
         removeAllProperties (undoManager);
     else if (object != nullptr)
@@ -678,6 +681,9 @@ void ValueTree::copyPropertiesFrom (const ValueTree& source, UndoManager* undoMa
 void ValueTree::copyPropertiesAndChildrenFrom (const ValueTree& source, UndoManager* undoManager)
 {
     jassert (object != nullptr || source.object == nullptr); // Trying to copy to a null ValueTree will fail!
+
+    if (source == *this)
+        return;
 
     copyPropertiesFrom (source, undoManager);
     removeAllChildren (undoManager);

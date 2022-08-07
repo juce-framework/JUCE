@@ -75,11 +75,15 @@ struct ARAFactoryResult
     String errorMessage;
 };
 
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wmissing-field-initializers")
+
 template <typename Obj, typename Member, typename... Ts>
 constexpr Obj makeARASizedStruct (Member Obj::* member, Ts&&... ts)
 {
     return { reinterpret_cast<uintptr_t> (&(static_cast<const Obj*> (nullptr)->*member)) + sizeof (Member),
              std::forward<Ts> (ts)... };
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
 
 } // namespace juce

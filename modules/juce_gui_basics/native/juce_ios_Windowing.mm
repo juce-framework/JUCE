@@ -37,7 +37,7 @@ namespace juce
     Array<AppInactivityCallback*> appBecomingInactiveCallbacks;
 }
 
-#if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+#if JUCE_PUSH_NOTIFICATIONS
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate, UNUserNotificationCenterDelegate>
 #else
 @interface JuceAppStartupDelegate : NSObject <UIApplicationDelegate>
@@ -59,27 +59,47 @@ namespace juce
    completionHandler: (void (^)(void)) completionHandler;
 - (void) applicationDidReceiveMemoryWarning: (UIApplication *) application;
 #if JUCE_PUSH_NOTIFICATIONS
-- (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
-- (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken;
-- (void) application: (UIApplication*) application didFailToRegisterForRemoteNotificationsWithError: (NSError*) error;
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo;
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
-  fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler;
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forRemoteNotification: (NSDictionary*) userInfo withResponseInfo: (NSDictionary*) responseInfo
-   completionHandler: (void(^)()) completionHandler;
-- (void) application: (UIApplication*) application didReceiveLocalNotification: (UILocalNotification*) notification;
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification completionHandler: (void(^)()) completionHandler;
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
-   completionHandler: (void(^)()) completionHandler;
-#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
+
+- (void)                                 application: (UIApplication*) application
+    didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken;
+- (void)                                 application: (UIApplication*) application
+    didFailToRegisterForRemoteNotificationsWithError: (NSError*) error;
+- (void)                                 application: (UIApplication*) application
+                        didReceiveRemoteNotification: (NSDictionary*) userInfo;
+- (void)                                 application: (UIApplication*) application
+                        didReceiveRemoteNotification: (NSDictionary*) userInfo
+                              fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler;
+- (void)                                 application: (UIApplication*) application
+                          handleActionWithIdentifier: (NSString*) identifier
+                               forRemoteNotification: (NSDictionary*) userInfo
+                                    withResponseInfo: (NSDictionary*) responseInfo
+                                   completionHandler: (void(^)()) completionHandler;
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+- (void)                    application: (UIApplication*) application
+    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings;
+- (void)                    application: (UIApplication*) application
+            didReceiveLocalNotification: (UILocalNotification*) notification;
+- (void)                    application: (UIApplication*) application
+             handleActionWithIdentifier: (NSString*) identifier
+                   forLocalNotification: (UILocalNotification*) notification
+                      completionHandler: (void(^)()) completionHandler;
+- (void)                    application: (UIApplication*) application
+             handleActionWithIdentifier: (NSString*) identifier
+                   forLocalNotification: (UILocalNotification*) notification
+                       withResponseInfo: (NSDictionary*) responseInfo
+                      completionHandler: (void(^)()) completionHandler;
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+        willPresentNotification: (UNNotification*) notification
           withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler;
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+ didReceiveNotificationResponse: (UNNotificationResponse*) response
           withCompletionHandler: (void(^)())completionHandler;
-#endif
+
 #endif
 
 @end
@@ -93,7 +113,7 @@ namespace juce
     self = [super init];
     appSuspendTask = UIBackgroundTaskInvalid;
 
-   #if JUCE_PUSH_NOTIFICATIONS && defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
+   #if JUCE_PUSH_NOTIFICATIONS
     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
    #endif
 
@@ -194,25 +214,9 @@ namespace juce
 }
 
 #if JUCE_PUSH_NOTIFICATIONS
-- (void) application: (UIApplication*) application didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
-{
-    ignoreUnused (application);
 
-    SEL selector = @selector (application:didRegisterUserNotificationSettings:);
-
-    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector: selector])
-    {
-        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
-        [invocation setSelector: selector];
-        [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application          atIndex:2];
-        [invocation setArgument: &notificationSettings atIndex:3];
-
-        [invocation invoke];
-    }
-}
-
-- (void) application: (UIApplication*) application didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken
+- (void)                                 application: (UIApplication*) application
+    didRegisterForRemoteNotificationsWithDeviceToken: (NSData*) deviceToken
 {
     ignoreUnused (application);
 
@@ -230,7 +234,8 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didFailToRegisterForRemoteNotificationsWithError: (NSError*) error
+- (void)                                 application: (UIApplication*) application
+    didFailToRegisterForRemoteNotificationsWithError: (NSError*) error
 {
     ignoreUnused (application);
 
@@ -248,7 +253,8 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
+- (void)             application: (UIApplication*) application
+    didReceiveRemoteNotification: (NSDictionary*) userInfo
 {
     ignoreUnused (application);
 
@@ -266,8 +272,9 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didReceiveRemoteNotification: (NSDictionary*) userInfo
-  fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler
+- (void)             application: (UIApplication*) application
+    didReceiveRemoteNotification: (NSDictionary*) userInfo
+          fetchCompletionHandler: (void (^)(UIBackgroundFetchResult result)) completionHandler
 {
     ignoreUnused (application);
 
@@ -286,9 +293,11 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forRemoteNotification: (NSDictionary*) userInfo withResponseInfo: (NSDictionary*) responseInfo
-  completionHandler: (void(^)()) completionHandler
+- (void)           application: (UIApplication*) application
+    handleActionWithIdentifier: (NSString*) identifier
+         forRemoteNotification: (NSDictionary*) userInfo
+              withResponseInfo: (NSDictionary*) responseInfo
+             completionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (application);
 
@@ -309,7 +318,29 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application didReceiveLocalNotification: (UILocalNotification*) notification
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+
+- (void)                    application: (UIApplication*) application
+    didRegisterUserNotificationSettings: (UIUserNotificationSettings*) notificationSettings
+{
+    ignoreUnused (application);
+
+    SEL selector = @selector (application:didRegisterUserNotificationSettings:);
+
+    if (_pushNotificationsDelegate != nil && [_pushNotificationsDelegate respondsToSelector:selector])
+    {
+        NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
+        [invocation setSelector: selector];
+        [invocation setTarget: _pushNotificationsDelegate];
+        [invocation setArgument: &application atIndex: 2];
+        [invocation setArgument: &notificationSettings atIndex: 3];
+
+        [invocation invoke];
+    }
+}
+
+- (void)            application: (UIApplication*) application
+    didReceiveLocalNotification: (UILocalNotification*) notification
 {
     ignoreUnused (application);
 
@@ -320,15 +351,17 @@ namespace juce
         NSInvocation* invocation = [NSInvocation invocationWithMethodSignature: [_pushNotificationsDelegate methodSignatureForSelector: selector]];
         [invocation setSelector: selector];
         [invocation setTarget: _pushNotificationsDelegate];
-        [invocation setArgument: &application  atIndex:2];
-        [invocation setArgument: &notification atIndex:3];
+        [invocation setArgument: &application  atIndex: 2];
+        [invocation setArgument: &notification atIndex: 3];
 
         [invocation invoke];
     }
 }
 
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification completionHandler: (void(^)()) completionHandler
+- (void)           application: (UIApplication*) application
+    handleActionWithIdentifier: (NSString*) identifier
+          forLocalNotification: (UILocalNotification*) notification
+             completionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (application);
 
@@ -348,9 +381,11 @@ namespace juce
     }
 }
 
-- (void) application: (UIApplication*) application handleActionWithIdentifier: (NSString*) identifier
-  forLocalNotification: (UILocalNotification*) notification withResponseInfo: (NSDictionary*) responseInfo
-  completionHandler: (void(^)()) completionHandler
+- (void)           application: (UIApplication*) application
+    handleActionWithIdentifier: (NSString*) identifier
+          forLocalNotification: (UILocalNotification*) notification
+              withResponseInfo: (NSDictionary*) responseInfo
+             completionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (application);
 
@@ -371,9 +406,11 @@ namespace juce
     }
 }
 
-#if defined (__IPHONE_10_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_10_0
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center willPresentNotification: (UNNotification*) notification
-         withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+        willPresentNotification: (UNNotification*) notification
+          withCompletionHandler: (void (^)(UNNotificationPresentationOptions options)) completionHandler
 {
     ignoreUnused (center);
 
@@ -392,8 +429,9 @@ namespace juce
     }
 }
 
-- (void) userNotificationCenter: (UNUserNotificationCenter*) center didReceiveNotificationResponse: (UNNotificationResponse*) response
-         withCompletionHandler: (void(^)()) completionHandler
+- (void) userNotificationCenter: (UNUserNotificationCenter*) center
+ didReceiveNotificationResponse: (UNNotificationResponse*) response
+          withCompletionHandler: (void(^)()) completionHandler
 {
     ignoreUnused (center);
 
@@ -411,7 +449,6 @@ namespace juce
         [invocation invoke];
     }
 }
-#endif
 #endif
 
 @end
@@ -695,10 +732,8 @@ bool Desktop::canUseSemiTransparentWindows() noexcept
 
 bool Desktop::isDarkModeActive() const
 {
-   #if defined (__IPHONE_12_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_12_0
     if (@available (iOS 12.0, *))
         return [[[UIScreen mainScreen] traitCollection] userInterfaceStyle] == UIUserInterfaceStyleDark;
-   #endif
 
     return false;
 }
@@ -795,7 +830,6 @@ static Rectangle<int> getRecommendedWindowBounds()
 
 static BorderSize<int> getSafeAreaInsets (float masterScale)
 {
-   #if defined (__IPHONE_11_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_11_0
     if (@available (iOS 11.0, *))
     {
         UIEdgeInsets safeInsets = TemporaryWindow().window.safeAreaInsets;
@@ -804,7 +838,6 @@ static BorderSize<int> getSafeAreaInsets (float masterScale)
                                                 safeInsets.bottom,
                                                 safeInsets.right } / (double) masterScale);
     }
-   #endif
 
     JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
     auto statusBarSize = [UIApplication sharedApplication].statusBarFrame.size;

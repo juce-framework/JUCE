@@ -41,12 +41,10 @@ public:
 
         auto numComponents = (size_t) lineStride * (size_t) jmax (1, height);
 
-       # if JUCE_MAC && defined (MAC_OS_X_VERSION_10_14) && MAC_OS_X_VERSION_MAX_ALLOWED >= MAC_OS_X_VERSION_10_14
-        // This version of the SDK intermittently requires a bit of extra space
+        // SDK version 10.14+ intermittently requires a bit of extra space
         // at the end of the image data. This feels like something has gone
         // wrong in Apple's code.
         numComponents += (size_t) lineStride;
-       #endif
 
         imageData->data.allocate (numComponents, clearImage);
 
