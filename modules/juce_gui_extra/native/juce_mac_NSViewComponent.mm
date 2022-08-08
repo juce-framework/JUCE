@@ -164,6 +164,12 @@ void NSViewComponent::resizeToFitView()
     }
 }
 
+void NSViewComponent::resizeViewToFit()
+{
+    if (attachment != nullptr)
+        static_cast<NSViewAttachment*> (attachment.get())->componentMovedOrResized (true, true);
+}
+
 void NSViewComponent::paint (Graphics&) {}
 
 void NSViewComponent::alphaChanged()

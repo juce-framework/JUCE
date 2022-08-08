@@ -499,20 +499,24 @@ class API_AVAILABLE (macos (10.11)) WKWebViewImpl : public WebViewBase
 public:
     WKWebViewImpl (WebBrowserComponent* owner)
     {
-        #if JUCE_MAC
-         static WebViewKeyEquivalentResponder<WKWebView> webviewClass;
+       #if JUCE_MAC
+        static WebViewKeyEquivalentResponder<WKWebView> webviewClass;
 
-         webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)]);
-        #else
-         webView.reset ([[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)]);
-        #endif
+        webView.reset ([webviewClass.createInstance() initWithFrame: NSMakeRect (0, 0, 100.0f, 100.0f)]);
+       #else
+        webView.reset ([[WKWebView alloc] initWithFrame: CGRectMake (0, 0, 100.0f, 100.0f)]);
+       #endif
 
-         static WebViewDelegateClass cls;
-         webViewDelegate.reset ([cls.createInstance() init]);
-         WebViewDelegateClass::setOwner (webViewDelegate.get(), owner);
+        static WebViewDelegateClass cls;
+        webViewDelegate.reset ([cls.createInstance() init]);
+        WebViewDelegateClass::setOwner (webViewDelegate.get(), owner);
 
-         [webView.get() setNavigationDelegate: webViewDelegate.get()];
-         [webView.get() setUIDelegate:         webViewDelegate.get()];
+        [webView.get() setNavigationDelegate: webViewDelegate.get()];
+        [webView.get() setUIDelegate:         webViewDelegate.get()];
+
+       #if JUCE_DEBUG
+        [[[webView.get() configuration] preferences] setValue: @(true) forKey: @"developerExtrasEnabled"];
+       #endif
     }
 
     ~WKWebViewImpl() override
@@ -584,7 +588,7 @@ public:
         setView (webView->getWebView());
     }
 
-    ~Pimpl()
+    ~Pimpl() override
     {
         webView = nullptr;
         setView (nil);
