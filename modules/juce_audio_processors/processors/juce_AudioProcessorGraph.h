@@ -43,8 +43,7 @@ namespace juce
     @tags{Audio}
 */
 class JUCE_API  AudioProcessorGraph   : public AudioProcessor,
-                                        public ChangeBroadcaster,
-                                        private AsyncUpdater
+                                        public ChangeBroadcaster
 {
 public:
     //==============================================================================
@@ -222,7 +221,7 @@ public:
     void clear (UpdateKind = UpdateKind::sync);
 
     /** Returns the array of nodes in the graph. */
-    const ReferenceCountedArray<Node>& getNodes() const noexcept    { return nodes.getNodes(); }
+    const ReferenceCountedArray<Node>& getNodes() const noexcept;
 
     /** Returns the number of nodes in the graph. */
     int getNumNodes() const noexcept                                { return getNodes().size(); }
@@ -420,169 +419,8 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
-    class ImplicitNode
-    {
-    public:
-        // Implicit conversions for use with compareNodes in equal_range, lower_bound etc.
-        ImplicitNode (NodeID x) : node (x) {}
-        ImplicitNode (NodeAndChannel x) : ImplicitNode (x.nodeID) {}
-        ImplicitNode (const Node* x) : ImplicitNode (x->nodeID) {}
-        ImplicitNode (const std::pair<const NodeAndChannel, std::set<NodeAndChannel>>& x) : ImplicitNode (x.first) {}
-
-        static bool compare (ImplicitNode a, ImplicitNode b) { return a.node < b.node; }
-
-    private:
-        NodeID node;
-    };
-
-    /*  A copyable type holding all the nodes, and allowing fast lookup by id. */
-    class Nodes
-    {
-    public:
-        const ReferenceCountedArray<Node>& getNodes() const { return array; }
-
-        Node::Ptr getNodeForId (NodeID x) const;
-
-        Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, const NodeID nodeID);
-        Node::Ptr removeNode (NodeID nodeID);
-
-        // If the arrays match, then the maps must also match.
-        bool operator== (const Nodes& other) const { return array == other.array; }
-        bool operator!= (const Nodes& other) const { return array != other.array; }
-
-    private:
-        ReferenceCountedArray<Node> array;
-    };
-
-    /*  A value type holding a full set of graph connections. */
-    class Connections
-    {
-    public:
-        bool addConnection (const Nodes& n, const Connection& c);
-        bool removeConnection (const Connection& c);
-        bool removeIllegalConnections (const Nodes& n);
-        bool disconnectNode (NodeID n);
-
-        static bool isConnectionLegal (const Nodes& n, Connection c);
-        bool canConnect (const Nodes& n, Connection c) const;
-        bool isConnected (Connection c) const;
-        bool isConnected (NodeID srcID, NodeID destID) const;
-        std::set<NodeID> getSourceNodesForDestination (NodeID destID) const;
-        std::set<NodeAndChannel> getSourcesForDestination (const NodeAndChannel& p) const;
-        std::vector<AudioProcessorGraph::Connection> getConnections() const;
-        bool isAnInputTo (NodeID source, NodeID dest) const;
-
-        bool operator== (const Connections& other) const { return sourcesForDestination == other.sourcesForDestination; }
-        bool operator!= (const Connections& other) const { return sourcesForDestination != other.sourcesForDestination; }
-
-    private:
-        struct SearchState
-        {
-            std::set<NodeID> visited;
-            bool found = false;
-        };
-
-        using Map = std::map<NodeAndChannel, std::set<NodeAndChannel>>;
-
-        SearchState getConnectedRecursive (NodeID source, NodeID dest, SearchState state) const;
-        std::set<NodeAndChannel> removeIllegalConnections (const Nodes& n, std::set<NodeAndChannel>, NodeAndChannel);
-        std::pair<Map::const_iterator, Map::const_iterator> getMatchingDestinations (NodeID destID) const;
-
-        Map sourcesForDestination;
-    };
-
-    /*  Settings used to prepare a node for playback. */
-    struct PrepareSettings
-    {
-        ProcessingPrecision precision = ProcessingPrecision::singlePrecision;
-        double sampleRate             = 0.0;
-        int blockSize                 = 0;
-
-        auto tie() const noexcept { return std::tie (precision, sampleRate, blockSize); }
-
-        bool operator== (const PrepareSettings& other) const { return tie() == other.tie(); }
-        bool operator!= (const PrepareSettings& other) const { return tie() != other.tie(); }
-    };
-
-    /*  Keeps track of the PrepareSettings applied to each node. */
-    class NodeStates
-    {
-    public:
-        /*  Called from prepareToPlay and releaseResources with the PrepareSettings that should be
-            used next time the graph is rebuilt.
-        */
-        void setState (Optional<PrepareSettings> newSettings);
-
-        /*  Call from the audio thread only.
-        */
-        Optional<PrepareSettings> getLastRequestedSettings() const { return next; }
-
-        /*  Called after updating the graph topology (on the main thread) to prepare any currently-
-            unprepared nodes.
-
-            To ensure that all nodes are initialised with the same sample rate, buffer size, etc. as
-            the enclosing graph, we must ensure that any operation that uses these details (preparing
-            individual nodes) is synchronized with prepare-to-play and release-resources on the
-            enclosing graph.
-
-            If the new PrepareSettings are different to the last-seen settings, all nodes will
-            be prepared/unprepared as necessary. If the PrepareSettings have not changed, then only
-            new nodes will be prepared/unprepared.
-
-            Returns the settings that were applied to the nodes.
-        */
-        Optional<PrepareSettings> applySettings (const Nodes& nodes);
-
-    private:
-        std::mutex mutex; // protects 'next'
-        std::set<NodeID> preparedNodes;
-        Optional<PrepareSettings> current, next;
-    };
-
-    class RenderSequenceBuilder;
-    class RenderSequence;
-
-    /*  Facilitates wait-free render-sequence updates.
-
-        Topology updates always happen on the main thread (or synchronised with the main thread).
-        After updating the graph, the 'baked' graph is passed to RenderSequenceExchange::set.
-        At the top of the audio callback, RenderSequenceExchange::get will return the render
-        sequence to use for that callback.
-    */
-    class RenderSequenceExchange
-    {
-    public:
-        RenderSequenceExchange();
-        ~RenderSequenceExchange();
-
-        void set (std::unique_ptr<RenderSequence>&&);
-
-        /** Call from the audio thread only. */
-        void updateAudioThreadState();
-
-        /** Call from the audio thread only. */
-        RenderSequence* getAudioThreadState() const;
-
-    private:
-        SpinLock mutex;
-        std::unique_ptr<RenderSequence> mainThreadState, audioThreadState;
-        bool isNew = false;
-    };
-
-    //==============================================================================
-    // These members represent the logical state of the graph, which can be queried and
-    // updated from the main thread. The actual playback state of the graph may lag behind
-    // this state a little.
-    Nodes nodes;
-    Connections connections;
-    NodeID lastNodeID = {};
-    NodeStates nodeStates;
-    RenderSequenceExchange renderSequenceExchange;
-
-    template <typename Value>
-    void processBlockImpl (AudioBuffer<Value>&, MidiBuffer&);
-    void topologyChanged (UpdateKind);
-    void handleAsyncUpdate() override;
+    class Pimpl;
+    std::unique_ptr<Pimpl> pimpl;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioProcessorGraph)
 };
