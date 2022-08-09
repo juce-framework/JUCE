@@ -748,11 +748,27 @@ public:
     double getSampleRate() const  { return sampleRate; }
     int getBufferSize() const     { return bufferSize; }
 
+    void zeroAudioBufferList (AudioBufferList* audioBufferListToZero)
+    {
+        for (UInt32 i = 0; i < audioBufferListToZero->mNumberBuffers; ++i)
+            zeromem (audioBufferListToZero->mBuffers[i].mData,
+                     audioBufferListToZero->mBuffers[i].mDataByteSize);
+    }
+
     void audioCallback (const AudioTimeStamp* timeStamp,
                         const AudioBufferList* inInputData,
                         AudioBufferList* outOutputData)
     {
-        const ScopedLock sl (callbackLock);
+        // Using a ScopedTryLock here is to prevent a deadlock which could happen when using Apple's internal audio devices.
+        const ScopedTryLock sl (callbackLock);
+
+        if (!sl.isLocked())
+        {
+            // Worst case we miss one block of audio, but since callbackLock is only used when starting and stopping
+            // devices it's not a problem.
+            zeroAudioBufferList (outOutputData);
+            return;
+        }
 
         if (audioDeviceStopPending)
         {
@@ -809,9 +825,7 @@ public:
         }
         else
         {
-            for (UInt32 i = 0; i < outOutputData->mNumberBuffers; ++i)
-                zeromem (outOutputData->mBuffers[i].mData,
-                         outOutputData->mBuffers[i].mDataByteSize);
+            zeroAudioBufferList (outOutputData);
         }
     }
 
