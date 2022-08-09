@@ -3353,8 +3353,27 @@ public:
                     auto vstParamID = paramQueue->getParameterId();
 
                    #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
-                    if (juceVST3EditController != nullptr && juceVST3EditController->isMidiControllerParamID (vstParamID))
-                        addParameterChangeToMidiBuffer (offsetSamples, vstParamID, value);
+                    if (juceVST3EditController != nullptr &&
+                        juceVST3EditController->isMidiControllerParamID(vstParamID))
+                    {
+                        // SURGE CHANGE - rather than just adding the last sample, add all the midi
+                        // events (this used to just be the numPoints==1 case)
+                        if (numPoints == 1)
+                        {
+                            // No need to re-query
+                            addParameterChangeToMidiBuffer(offsetSamples, vstParamID, value);
+                        }
+                        else
+                        {
+                            for (auto mp = 0; mp < numPoints; ++mp)
+                            {
+                                Steinberg::int32 losampl;
+                                paramQueue->getPoint(mp, losampl, value);
+                                addParameterChangeToMidiBuffer(losampl, vstParamID, value);
+                            }
+                        }
+                        // END SURGE CHANGE
+                    }
                     else
                    #endif
                     {
