@@ -58,10 +58,50 @@ public:
 
     const ReferenceCountedArray<Node>& getNodes() const { return array; }
 
-    Node::Ptr getNodeForId (NodeID x) const;
+    Node::Ptr getNodeForId (NodeID nodeID) const
+    {
+        const auto iter = std::lower_bound (array.begin(), array.end(), nodeID, ImplicitNode::compare);
+        return iter != array.end() && (*iter)->nodeID == nodeID ? *iter : nullptr;
+    }
 
-    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, const NodeID nodeID);
-    Node::Ptr removeNode (NodeID nodeID);
+    Node::Ptr addNode (std::unique_ptr<AudioProcessor> newProcessor, const NodeID nodeID)
+    {
+        if (newProcessor == nullptr)
+        {
+            // Cannot add a null audio processor!
+            jassertfalse;
+            return {};
+        }
+
+        if (std::any_of (array.begin(),
+                         array.end(),
+                         [&] (auto* n) { return n->getProcessor() == newProcessor.get(); }))
+        {
+            // This audio processor has already been added to the graph!
+            jassertfalse;
+            return {};
+        }
+
+        const auto iter = std::lower_bound (array.begin(), array.end(), nodeID, ImplicitNode::compare);
+
+        if (iter != array.end() && (*iter)->nodeID == nodeID)
+        {
+            // This nodeID has already been used for a node in the graph!
+            jassertfalse;
+            return {};
+        }
+
+        return array.insert ((int) std::distance (array.begin(), iter),
+                             new Node { nodeID, std::move (newProcessor) });
+    }
+
+    Node::Ptr removeNode (NodeID nodeID)
+    {
+        const auto iter = std::lower_bound (array.begin(), array.end(), nodeID, ImplicitNode::compare);
+        return iter != array.end() && (*iter)->nodeID == nodeID
+             ? array.removeAndReturn ((int) std::distance (array.begin(), iter))
+             : nullptr;
+    }
 
     bool operator== (const Nodes& other) const { return array == other.array; }
     bool operator!= (const Nodes& other) const { return array != other.array; }
@@ -80,19 +120,137 @@ public:
     using Connection     = AudioProcessorGraph::Connection;
     using NodeAndChannel = AudioProcessorGraph::NodeAndChannel;
 
-    bool addConnection (const Nodes& n, const Connection& c);
-    bool removeConnection (const Connection& c);
-    bool removeIllegalConnections (const Nodes& n);
-    bool disconnectNode (NodeID n);
+    bool addConnection (const Nodes& n, const Connection& c)
+    {
+        if (! canConnect (n, c))
+            return false;
 
-    static bool isConnectionLegal (const Nodes& n, Connection c);
-    bool canConnect (const Nodes& n, Connection c) const;
-    bool isConnected (Connection c) const;
-    bool isConnected (NodeID srcID, NodeID destID) const;
-    std::set<NodeID> getSourceNodesForDestination (NodeID destID) const;
-    std::set<NodeAndChannel> getSourcesForDestination (const NodeAndChannel& p) const;
-    std::vector<AudioProcessorGraph::Connection> getConnections() const;
-    bool isAnInputTo (NodeID src, NodeID dst) const;
+        sourcesForDestination[c.destination].insert (c.source);
+        jassert (isConnected (c));
+        return true;
+    }
+
+    bool removeConnection (const Connection& c)
+    {
+        const auto iter = sourcesForDestination.find (c.destination);
+        return iter != sourcesForDestination.cend() && iter->second.erase (c.source) == 1;
+    }
+
+    bool removeIllegalConnections (const Nodes& n)
+    {
+        auto anyRemoved = false;
+
+        for (auto& dest : sourcesForDestination)
+        {
+            const auto initialSize = dest.second.size();
+            dest.second = removeIllegalConnections (n, std::move (dest.second), dest.first);
+            anyRemoved |= (dest.second.size() != initialSize);
+        }
+
+        return anyRemoved;
+    }
+
+    bool disconnectNode (NodeID n)
+    {
+        const auto matchingDestinations = getMatchingDestinations (n);
+        auto result = matchingDestinations.first != matchingDestinations.second;
+        sourcesForDestination.erase (matchingDestinations.first, matchingDestinations.second);
+
+        for (auto& pair : sourcesForDestination)
+        {
+            const auto range = std::equal_range (pair.second.cbegin(), pair.second.cend(), n, ImplicitNode::compare);
+            result |= range.first != range.second;
+            pair.second.erase (range.first, range.second);
+        }
+
+        return result;
+    }
+
+    static bool isConnectionLegal (const Nodes& n, Connection c)
+    {
+        const auto source = n.getNodeForId (c.source     .nodeID);
+        const auto dest   = n.getNodeForId (c.destination.nodeID);
+
+        const auto sourceChannel = c.source     .channelIndex;
+        const auto destChannel   = c.destination.channelIndex;
+
+        const auto sourceIsMIDI = AudioProcessorGraph::midiChannelIndex == sourceChannel;
+        const auto destIsMIDI   = AudioProcessorGraph::midiChannelIndex == destChannel;
+
+        return sourceChannel >= 0
+            && destChannel >= 0
+            && source != dest
+            && sourceIsMIDI == destIsMIDI
+            && source != nullptr
+            && (sourceIsMIDI
+                    ? source->getProcessor()->producesMidi()
+                    : sourceChannel < source->getProcessor()->getTotalNumOutputChannels())
+            && dest != nullptr
+            && (destIsMIDI
+                    ? dest->getProcessor()->acceptsMidi()
+                    : destChannel < dest->getProcessor()->getTotalNumInputChannels());
+    }
+
+    bool canConnect (const Nodes& n, Connection c) const
+    {
+        return isConnectionLegal (n, c) && ! isConnected (c);
+    }
+
+    bool isConnected (Connection c) const
+    {
+        const auto iter = sourcesForDestination.find (c.destination);
+
+        return iter != sourcesForDestination.cend()
+               && iter->second.find (c.source) != iter->second.cend();
+    }
+
+    bool isConnected (NodeID srcID, NodeID destID) const
+    {
+        const auto matchingDestinations = getMatchingDestinations (destID);
+
+        return std::any_of (matchingDestinations.first, matchingDestinations.second, [srcID] (const auto& pair)
+        {
+            const auto iter = std::lower_bound (pair.second.cbegin(), pair.second.cend(), srcID, ImplicitNode::compare);
+            return iter != pair.second.cend() && iter->nodeID == srcID;
+        });
+    }
+
+    std::set<NodeID> getSourceNodesForDestination (NodeID destID) const
+    {
+        const auto matchingDestinations = getMatchingDestinations (destID);
+
+        std::set<NodeID> result;
+        std::for_each (matchingDestinations.first, matchingDestinations.second, [&] (const auto& pair)
+        {
+            for (const auto& source : pair.second)
+                result.insert (source.nodeID);
+        });
+        return result;
+    }
+
+    std::set<NodeAndChannel> getSourcesForDestination (const NodeAndChannel& p) const
+    {
+        const auto iter = sourcesForDestination.find (p);
+        return iter != sourcesForDestination.cend() ? iter->second : std::set<NodeAndChannel>{};
+    }
+
+    std::vector<AudioProcessorGraph::Connection> getConnections() const
+    {
+        std::vector<Connection> result;
+
+        for (auto& pair : sourcesForDestination)
+            for (const auto& source : pair.second)
+                result.emplace_back (source, pair.first);
+
+        std::sort (result.begin(), result.end());
+        result.erase (std::unique (result.begin(), result.end()), result.end());
+        return result;
+    }
+
+    bool isAnInputTo (NodeID source, NodeID dest) const
+    {
+        return getConnectedRecursive (source, dest, {}).found;
+    }
 
     bool operator== (const Connections& other) const { return sourcesForDestination == other.sourcesForDestination; }
     bool operator!= (const Connections& other) const { return sourcesForDestination != other.sourcesForDestination; }
@@ -106,11 +264,41 @@ private:
         bool found = false;
     };
 
-    SearchState getConnectedRecursive (NodeID source, NodeID dest, SearchState state) const;
-    static std::set<NodeAndChannel> removeIllegalConnections (const Nodes& n,
+    SearchState getConnectedRecursive (NodeID source, NodeID dest, SearchState state) const
+    {
+        state.visited.insert (dest);
+
+        for (const auto& s : getSourceNodesForDestination (dest))
+        {
+            if (state.found || s == source)
+                return { std::move (state.visited), true };
+
+            if (state.visited.find (s) == state.visited.cend())
+                state = getConnectedRecursive (source, s, std::move (state));
+        }
+
+        return state;
+    }
+
+    static std::set<NodeAndChannel> removeIllegalConnections (const Nodes& nodes,
                                                               std::set<NodeAndChannel> sources,
-                                                              NodeAndChannel destination);
-    std::pair<Map::const_iterator, Map::const_iterator> getMatchingDestinations (NodeID destID) const;
+                                                              NodeAndChannel destination)
+    {
+        for (auto source = sources.cbegin(); source != sources.cend();)
+        {
+            if (! isConnectionLegal (nodes, { *source, destination }))
+                source = sources.erase (source);
+            else
+                ++source;
+        }
+
+        return sources;
+    }
+
+    std::pair<Map::const_iterator, Map::const_iterator> getMatchingDestinations (NodeID destID) const
+    {
+        return std::equal_range (sourcesForDestination.cbegin(), sourcesForDestination.cend(), destID, ImplicitNode::compare);
+    }
 
     Map sourcesForDestination;
 };
@@ -142,7 +330,11 @@ public:
     /*  Called from prepareToPlay and releaseResources with the PrepareSettings that should be
         used next time the graph is rebuilt.
     */
-    void setState (Optional<PrepareSettings> newSettings);
+    void setState (Optional<PrepareSettings> newSettings)
+    {
+        const std::lock_guard<std::mutex> lock (mutex);
+        next = newSettings;
+    }
 
     /*  Call from the audio thread only. */
     Optional<PrepareSettings> getLastRequestedSettings() const { return next; }
@@ -162,74 +354,66 @@ public:
 
         Returns the settings that were applied to the nodes.
     */
-    Optional<PrepareSettings> applySettings (const Nodes& nodes);
+    Optional<PrepareSettings> applySettings (const Nodes& n)
+    {
+        const auto settingsChanged = [this]
+        {
+            const std::lock_guard<std::mutex> lock (mutex);
+            const auto result = current != next;
+            current = next;
+            return result;
+        }();
+
+        // It may look like releaseResources and prepareToPlay could race with calls to processBlock
+        // here, because applySettings is called from the main thread, processBlock is called from
+        // the audio thread (normally), and there's no explicit mutex ensuring that the calls don't
+        // overlap.
+        // However, it is part of the AudioProcessor contract that users shall not call
+        // processBlock, prepareToPlay, and/or releaseResources concurrently. That is, there's an
+        // implied mutex synchronising these functions on each AudioProcessor.
+        //
+        // Inside processBlock, we always ensure that the current RenderSequence's PrepareSettings
+        // match the graph's settings before attempting to call processBlock on any of the graph
+        // nodes; as a result, it's impossible to start calling processBlock on a node on the audio
+        // thread while a render sequence rebuild (including prepareToPlay/releaseResources calls)
+        // is already in progress here.
+        //
+        // Due to the implied mutex between prepareToPlay/releaseResources/processBlock, it's also
+        // impossible to receive new PrepareSettings and to start a new RenderSequence rebuild while
+        // a processBlock call is in progress.
+
+        if (settingsChanged)
+        {
+            for (const auto& node : n.getNodes())
+                node->getProcessor()->releaseResources();
+
+            preparedNodes.clear();
+        }
+
+        if (current.hasValue())
+        {
+            for (const auto& node : n.getNodes())
+            {
+                if (preparedNodes.find (node->nodeID) != preparedNodes.cend())
+                    continue;
+
+                preparedNodes.insert (node->nodeID);
+
+                node->getProcessor()->setProcessingPrecision (node->getProcessor()->supportsDoublePrecisionProcessing() ? current->precision
+                                                                                                                        : AudioProcessor::singlePrecision);
+                node->getProcessor()->setRateAndBufferSizeDetails (current->sampleRate, current->blockSize);
+                node->getProcessor()->prepareToPlay               (current->sampleRate, current->blockSize);
+            }
+        }
+
+        return current;
+    }
 
 private:
-    std::mutex mutex; // Protects 'next'
+    std::mutex mutex;
     std::set<NodeID> preparedNodes;
     Optional<PrepareSettings> current, next;
 };
-
-void NodeStates::setState (Optional<PrepareSettings> newSettings)
-{
-    const std::lock_guard<std::mutex> lock (mutex);
-    next = newSettings;
-}
-
-Optional<PrepareSettings> NodeStates::applySettings (const Nodes& n)
-{
-    const auto settingsChanged = [this]
-    {
-        const std::lock_guard<std::mutex> lock (mutex);
-        const auto result = current != next;
-        current = next;
-        return result;
-    }();
-
-    // It may look like releaseResources and prepareToPlay could race with calls to processBlock
-    // here, because applySettings is called from the main thread, processBlock is called from
-    // the audio thread (normally), and there's no explicit mutex ensuring that the calls don't
-    // overlap.
-    // However, it is part of the AudioProcessor contract that users shall not call
-    // processBlock, prepareToPlay, and/or releaseResources concurrently. That is, there's an
-    // implied mutex synchronising these functions on each AudioProcessor.
-    //
-    // Inside processBlock, we always ensure that the current RenderSequence's PrepareSettings
-    // match the graph's settings before attempting to call processBlock on any of the graph
-    // nodes; as a result, it's impossible to start calling processBlock on a node on the audio
-    // thread while a render sequence rebuild (including prepareToPlay/releaseResources calls)
-    // is already in progress here.
-    //
-    // Due to the implied mutex between prepareToPlay/releaseResources/processBlock, it's also
-    // impossible to receive new PrepareSettings and to start a new RenderSequence rebuild while
-    // a processBlock call is in progress.
-
-    if (settingsChanged)
-    {
-        for (const auto& node : n.getNodes())
-            node->getProcessor()->releaseResources();
-
-        preparedNodes.clear();
-    }
-
-    if (current.hasValue())
-    {
-        for (const auto& node : n.getNodes())
-        {
-            if (preparedNodes.find (node->nodeID) != preparedNodes.cend())
-                continue;
-
-            preparedNodes.insert (node->nodeID);
-
-            node->getProcessor()->setProcessingPrecision (node->getProcessor()->supportsDoublePrecisionProcessing() ? current->precision
-                                                                                                                    : AudioProcessor::singlePrecision);
-            node->getProcessor()->setRateAndBufferSizeDetails (current->sampleRate, current->blockSize);
-            node->getProcessor()->prepareToPlay               (current->sampleRate, current->blockSize);
-        }
-    }
-
-    return current;
-}
 
 //==============================================================================
 template <typename FloatType>
@@ -1123,16 +1307,28 @@ private:
 class RenderSequenceExchange
 {
 public:
-    RenderSequenceExchange();
-    ~RenderSequenceExchange();
-
-    void set (std::unique_ptr<RenderSequence>&&);
+    void set (std::unique_ptr<RenderSequence>&& next)
+    {
+        const SpinLock::ScopedLockType lock (mutex);
+        mainThreadState = std::move (next);
+        isNew = true;
+    }
 
     /** Call from the audio thread only. */
-    void updateAudioThreadState();
+    void updateAudioThreadState()
+    {
+        const SpinLock::ScopedTryLockType lock (mutex);
+
+        if (lock.isLocked() && isNew)
+        {
+            // Swap pointers rather than assigning to avoid calling delete here
+            std::swap (mainThreadState, audioThreadState);
+            isNew = false;
+        }
+    }
 
     /** Call from the audio thread only. */
-    RenderSequence* getAudioThreadState() const;
+    RenderSequence* getAudioThreadState() const { return audioThreadState.get(); }
 
 private:
     SpinLock mutex;
@@ -1140,255 +1336,6 @@ private:
     bool isNew = false;
 };
 
-//==============================================================================
-RenderSequenceExchange::RenderSequenceExchange() = default;
-RenderSequenceExchange::~RenderSequenceExchange() = default;
-
-void RenderSequenceExchange::set (std::unique_ptr<RenderSequence>&& next)
-{
-    const SpinLock::ScopedLockType lock (mutex);
-    mainThreadState = std::move (next);
-    isNew = true;
-}
-
-void RenderSequenceExchange::updateAudioThreadState()
-{
-    const SpinLock::ScopedTryLockType lock (mutex);
-
-    if (lock.isLocked() && isNew)
-    {
-        // Swap pointers rather than assigning to avoid calling delete here
-        std::swap (mainThreadState, audioThreadState);
-        isNew = false;
-    }
-}
-
-RenderSequence* RenderSequenceExchange::getAudioThreadState() const
-{
-    return audioThreadState.get();
-}
-
-//==============================================================================
-AudioProcessorGraph::Node::Ptr Nodes::getNodeForId (NodeID nodeID) const
-{
-    const auto iter = std::lower_bound (array.begin(), array.end(), nodeID, ImplicitNode::compare);
-    return iter != array.end() && (*iter)->nodeID == nodeID ? *iter : nullptr;
-}
-
-AudioProcessorGraph::Node::Ptr Nodes::addNode (std::unique_ptr<AudioProcessor> newProcessor,
-                                               const NodeID nodeID)
-{
-    if (newProcessor == nullptr)
-    {
-        // Cannot add a null audio processor!
-        jassertfalse;
-        return {};
-    }
-
-    if (std::any_of (array.begin(),
-                     array.end(),
-                     [&] (auto* n) { return n->getProcessor() == newProcessor.get(); }))
-    {
-        // This audio processor has already been added to the graph!
-        jassertfalse;
-        return {};
-
-
-    }
-
-    const auto iter = std::lower_bound (array.begin(), array.end(), nodeID, ImplicitNode::compare);
-
-    if (iter != array.end() && (*iter)->nodeID == nodeID)
-    {
-        // This nodeID has already been used for a node in the graph!
-        jassertfalse;
-        return {};
-    }
-
-    return array.insert ((int) std::distance (array.begin(), iter),
-                         new Node { nodeID, std::move (newProcessor) });
-}
-
-AudioProcessorGraph::Node::Ptr Nodes::removeNode (NodeID nodeID)
-{
-    const auto iter = std::lower_bound (array.begin(), array.end(), nodeID, ImplicitNode::compare);
-    return iter != array.end() && (*iter)->nodeID == nodeID
-         ? array.removeAndReturn ((int) std::distance (array.begin(), iter))
-         : nullptr;
-}
-
-//==============================================================================
-bool Connections::addConnection (const Nodes& n, const Connection& c)
-{
-    if (! canConnect (n, c))
-        return false;
-
-    sourcesForDestination[c.destination].insert (c.source);
-    jassert (isConnected (c));
-    return true;
-}
-
-bool Connections::removeConnection (const Connection& c)
-{
-    const auto iter = sourcesForDestination.find (c.destination);
-    return iter != sourcesForDestination.cend() && iter->second.erase (c.source) == 1;
-}
-
-bool Connections::removeIllegalConnections (const Nodes& n)
-{
-    auto anyRemoved = false;
-
-    for (auto& dest : sourcesForDestination)
-    {
-        const auto initialSize = dest.second.size();
-        dest.second = removeIllegalConnections (n, std::move (dest.second), dest.first);
-        anyRemoved |= (dest.second.size() != initialSize);
-    }
-
-    return anyRemoved;
-}
-
-bool Connections::disconnectNode (NodeID n)
-{
-    const auto matchingDestinations = getMatchingDestinations (n);
-    auto result = matchingDestinations.first != matchingDestinations.second;
-    sourcesForDestination.erase (matchingDestinations.first, matchingDestinations.second);
-
-    for (auto& pair : sourcesForDestination)
-    {
-        const auto range = std::equal_range (pair.second.cbegin(), pair.second.cend(), n, ImplicitNode::compare);
-        result |= range.first != range.second;
-        pair.second.erase (range.first, range.second);
-    }
-
-    return result;
-}
-
-bool Connections::isConnectionLegal (const Nodes& n, Connection c)
-{
-    const auto source = n.getNodeForId (c.source     .nodeID);
-    const auto dest   = n.getNodeForId (c.destination.nodeID);
-
-    const auto sourceChannel = c.source     .channelIndex;
-    const auto destChannel   = c.destination.channelIndex;
-
-    const auto sourceIsMIDI = AudioProcessorGraph::midiChannelIndex == sourceChannel;
-    const auto destIsMIDI   = AudioProcessorGraph::midiChannelIndex == destChannel;
-
-    return sourceChannel >= 0
-        && destChannel >= 0
-        && source != dest
-        && sourceIsMIDI == destIsMIDI
-        && source != nullptr
-        && (sourceIsMIDI
-                ? source->getProcessor()->producesMidi()
-                : sourceChannel < source->getProcessor()->getTotalNumOutputChannels())
-        && dest != nullptr
-        && (destIsMIDI
-                ? dest->getProcessor()->acceptsMidi()
-                : destChannel < dest->getProcessor()->getTotalNumInputChannels());
-}
-
-bool Connections::canConnect (const Nodes& n, Connection c) const
-{
-    return isConnectionLegal (n, c) && ! isConnected (c);
-}
-
-bool Connections::isConnected (Connection c) const
-{
-    const auto iter = sourcesForDestination.find (c.destination);
-
-    return iter != sourcesForDestination.cend()
-           && iter->second.find (c.source) != iter->second.cend();
-}
-
-bool Connections::isConnected (NodeID srcID, NodeID destID) const
-{
-    const auto matchingDestinations = getMatchingDestinations (destID);
-
-    return std::any_of (matchingDestinations.first, matchingDestinations.second, [srcID] (const auto& pair)
-    {
-        const auto iter = std::lower_bound (pair.second.cbegin(), pair.second.cend(), srcID, ImplicitNode::compare);
-        return iter != pair.second.cend() && iter->nodeID == srcID;
-    });
-}
-
-std::set<AudioProcessorGraph::NodeID> Connections::getSourceNodesForDestination (NodeID destID) const
-{
-    const auto matchingDestinations = getMatchingDestinations (destID);
-
-    std::set<NodeID> result;
-    std::for_each (matchingDestinations.first, matchingDestinations.second, [&] (const auto& pair)
-    {
-        for (const auto& source : pair.second)
-            result.insert (source.nodeID);
-    });
-    return result;
-}
-
-std::set<AudioProcessorGraph::NodeAndChannel> Connections::getSourcesForDestination (const NodeAndChannel& p) const
-{
-    const auto iter = sourcesForDestination.find (p);
-    return iter != sourcesForDestination.cend() ? iter->second : std::set<NodeAndChannel>{};
-}
-
-std::vector<AudioProcessorGraph::Connection> Connections::getConnections() const
-{
-    std::vector<Connection> result;
-
-    for (auto& pair : sourcesForDestination)
-        for (const auto& source : pair.second)
-            result.emplace_back (source, pair.first);
-
-    std::sort (result.begin(), result.end());
-    result.erase (std::unique (result.begin(), result.end()), result.end());
-    return result;
-}
-
-bool Connections::isAnInputTo (NodeID source, NodeID dest) const
-{
-    return getConnectedRecursive (source, dest, {}).found;
-}
-
-Connections::SearchState Connections::getConnectedRecursive (NodeID source, NodeID dest, SearchState state) const
-{
-    state.visited.insert (dest);
-
-    for (const auto& s : getSourceNodesForDestination (dest))
-    {
-        if (state.found || s == source)
-            return { std::move (state.visited), true };
-
-        if (state.visited.find (s) == state.visited.cend())
-            state = getConnectedRecursive (source, s, std::move (state));
-    }
-
-    return state;
-}
-
-std::set<AudioProcessorGraph::NodeAndChannel> Connections::removeIllegalConnections (const Nodes& n,
-                                                                                     std::set<NodeAndChannel> sources,
-                                                                                     NodeAndChannel destination)
-{
-    for (auto source = sources.cbegin(); source != sources.cend();)
-    {
-        if (! isConnectionLegal (n, { *source, destination }))
-            source = sources.erase (source);
-        else
-            ++source;
-    }
-
-    return sources;
-}
-
-std::pair<Connections::Map::const_iterator,
-          Connections::Map::const_iterator>
-    Connections::getMatchingDestinations (NodeID destID) const
-{
-    return std::equal_range (sourcesForDestination.cbegin(), sourcesForDestination.cend(), destID, ImplicitNode::compare);
-}
-
-//==============================================================================
 //==============================================================================
 AudioProcessorGraph::Connection::Connection (NodeAndChannel src, NodeAndChannel dst) noexcept
     : source (src), destination (dst)
