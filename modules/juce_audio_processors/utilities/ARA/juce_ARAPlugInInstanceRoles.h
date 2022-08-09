@@ -134,6 +134,8 @@ public:
         return false;
     }
 
+    using ARARenderer::processBlock;
+
     // Shadowing templated getters to default to JUCE versions of the returned classes
     /** Returns the PlaybackRegions
      *
@@ -194,6 +196,8 @@ public:
         ignoreUnused (buffer, isNonRealtime, positionInfo);
         return true;
     }
+
+    using ARARenderer::processBlock;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ARAEditorRenderer)

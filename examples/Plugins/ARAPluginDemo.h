@@ -393,6 +393,8 @@ public:
         return success;
     }
 
+    using ARAPlaybackRenderer::processBlock;
+
 private:
     //==============================================================================
     // We're subclassing here only to provide a proper default c'tor for our shared resource
@@ -549,6 +551,8 @@ public:
         });
     }
 
+    using ARAEditorRenderer::processBlock;
+
 private:
     void configure()
     {
@@ -682,6 +686,8 @@ public:
         if (! processBlockForARA (buffer, isRealtime(), audioPlayHead))
             processBlockBypassed (buffer, midiMessages);
     }
+
+    using AudioProcessor::processBlock;
 
     //==============================================================================
     const String getName() const override                             { return "ARAPluginDemo"; }
