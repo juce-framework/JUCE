@@ -572,7 +572,7 @@ DECLARE_JNI_CLASS (AndroidView, "android/view/View")
  METHOD (setOnApplyWindowInsetsListener, "setOnApplyWindowInsetsListener", "(Landroid/view/View$OnApplyWindowInsetsListener;)V") \
  METHOD (getRootWindowInsets, "getRootWindowInsets", "()Landroid/view/WindowInsets;")
 
- DECLARE_JNI_CLASS (AndroidView23, "android/view/View")
+ DECLARE_JNI_CLASS_WITH_MIN_SDK (AndroidView23, "android/view/View", 23)
 #undef JNI_CLASS_MEMBERS
 
 #define JNI_CLASS_MEMBERS(METHOD, STATICMETHOD, FIELD, STATICFIELD, CALLBACK) \
