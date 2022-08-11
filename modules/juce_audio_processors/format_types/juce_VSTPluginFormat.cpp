@@ -3262,10 +3262,9 @@ private:
         if (! isWindowSizeCorrectForPlugin (w, h))
         {
             updateSizeFromEditor (w, h);
+            embeddedComponent.updateHWNDBounds();
             sizeCheckCount = 0;
         }
-
-        embeddedComponent.updateHWNDBounds();
     }
 
     void checkPluginWindowSize()
@@ -3349,6 +3348,7 @@ private:
 
                    #if JUCE_WINDOWS
                     r->resizeToFit();
+                    r->embeddedComponent.updateHWNDBounds();
                    #endif
                     r->componentMovedOrResized (true, true);
                 }
