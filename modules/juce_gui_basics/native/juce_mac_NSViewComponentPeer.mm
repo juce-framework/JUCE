@@ -242,8 +242,8 @@ public:
 
     ~NSViewComponentPeer() override
     {
-        CVDisplayLinkStop (displayLink);
-        dispatch_source_cancel (displaySource);
+        displayLink.reset();
+        dispatchSource.reset();
 
         scopedObservers.clear();
 
@@ -1784,47 +1784,90 @@ private:
     }
 
     //==============================================================================
-    void onDisplaySourceCallback()
-    {
-        setNeedsDisplayRectangles();
-    }
-
-    void onDisplayLinkCallback()
-    {
-        dispatch_source_merge_data (displaySource, 1);
-    }
-
-    static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
-                                         CVOptionFlags, CVOptionFlags*, void* context)
-    {
-        static_cast<NSViewComponentPeer*> (context)->onDisplayLinkCallback();
-        return kCVReturnSuccess;
-    }
-
     void updateCVDisplayLinkScreen()
     {
-        auto viewDisplayID = (CGDirectDisplayID) [[window.screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue];
-        auto result = CVDisplayLinkSetCurrentCGDisplay (displayLink, viewDisplayID);
+        const auto viewDisplayID = (CGDirectDisplayID) [[window.screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue];
+        const auto result = CVDisplayLinkSetCurrentCGDisplay (displayLink->get(), viewDisplayID);
         jassertquiet (result == kCVReturnSuccess);
     }
 
     void createCVDisplayLink()
     {
-        displaySource = dispatch_source_create (DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, dispatch_get_main_queue());
-        dispatch_source_set_event_handler (displaySource, ^(){ onDisplaySourceCallback(); });
-        dispatch_resume (displaySource);
+        dispatchSource.reset (dispatch_source_create (DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, dispatch_get_main_queue()));
+        dispatch_source_set_event_handler (dispatchSource.get(), ^(){ setNeedsDisplayRectangles(); });
 
-        auto cvReturn = CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
-        jassertquiet (cvReturn == kCVReturnSuccess);
+        if (@available (macOS 10.12, *))
+            dispatch_activate (dispatchSource.get());
+        else
+            dispatch_resume (dispatchSource.get());
 
-        cvReturn = CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
-        jassertquiet (cvReturn == kCVReturnSuccess);
-
-        CVDisplayLinkStart (displayLink);
+        displayLink.emplace (this);
     }
 
-    CVDisplayLinkRef displayLink = nullptr;
-    dispatch_source_t displaySource = nullptr;
+    struct DisplayLinkDestructor
+    {
+        void operator() (CVDisplayLinkRef ptr) const
+        {
+            if (ptr != nullptr)
+                CVDisplayLinkRelease (ptr);
+        }
+    };
+
+    class ScopedDisplayLink
+    {
+    public:
+        explicit ScopedDisplayLink (NSViewComponentPeer* owner)
+        {
+            const auto callback = [] (CVDisplayLinkRef,
+                                      const CVTimeStamp*,
+                                      const CVTimeStamp*,
+                                      CVOptionFlags,
+                                      CVOptionFlags*,
+                                      void* context) -> int
+            {
+                dispatch_source_merge_data (static_cast<NSViewComponentPeer*> (context)->dispatchSource.get(), 1);
+                return kCVReturnSuccess;
+            };
+
+            const auto callbackResult = CVDisplayLinkSetOutputCallback (link.get(), callback, owner);
+            jassertquiet (callbackResult == kCVReturnSuccess);
+
+            const auto startResult = CVDisplayLinkStart (link.get());
+            jassertquiet (startResult == kCVReturnSuccess);
+        }
+
+        ~ScopedDisplayLink()
+        {
+            CVDisplayLinkStop (link.get());
+        }
+
+        CVDisplayLinkRef get() const { return link.get(); }
+
+    private:
+        std::unique_ptr<std::remove_pointer_t<CVDisplayLinkRef>, DisplayLinkDestructor> link
+        {
+            []
+            {
+                CVDisplayLinkRef ptr = nullptr;
+                const auto result = CVDisplayLinkCreateWithActiveCGDisplays (&ptr);
+                jassertquiet (result == kCVReturnSuccess);
+                jassertquiet (ptr != nullptr);
+                return ptr;
+            }()
+        };
+    };
+
+    struct DispatchSourceDestructor
+    {
+        void operator() (dispatch_source_t ptr) const
+        {
+            if (ptr != nullptr)
+                dispatch_source_cancel (ptr);
+        }
+    };
+
+    Optional<ScopedDisplayLink> displayLink;
+    std::unique_ptr<std::remove_pointer_t<dispatch_source_t>, DispatchSourceDestructor> dispatchSource;
 
     int numFramesToSkipMetalRenderer = 0;
     std::unique_ptr<CoreGraphicsMetalLayerRenderer<NSView>> metalRenderer;
