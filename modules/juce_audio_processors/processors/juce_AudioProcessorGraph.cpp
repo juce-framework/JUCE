@@ -23,6 +23,25 @@
   ==============================================================================
 */
 
+// Implementation notes:
+// On macOS, calling AudioUnitInitialize will internally call AudioObjectGetPropertyData, which
+// takes a mutex.
+// This same mutex is taken on the audio thread, before calling the audio device's IO callback.
+// This is a property of the CoreAudio implementation - we can't remove or interact directly
+// with these locks in JUCE.
+//
+// AudioProcessor instances expect that their callback lock will be taken before calling
+// processBlock or processBlockBypassed.
+// This means that, to avoid deadlocks, we *always* need to make sure that the CoreAudio mutex
+// is locked before taking the callback lock.
+// Given that we can't interact with the CoreAudio mutex directly, on the main thread we can't
+// call any function that might internally interact with CoreAudio while the callback lock is
+// taken.
+// In particular, be careful not to call `prepareToPlay` on a hosted AudioUnit from the main
+// thread while the callback lock is taken.
+// The graph implementation currently makes sure to call prepareToPlay on the main thread,
+// without taking the graph's callback lock.
+
 namespace juce
 {
 
@@ -119,6 +138,8 @@ public:
     using NodeID         = AudioProcessorGraph::NodeID;
     using Connection     = AudioProcessorGraph::Connection;
     using NodeAndChannel = AudioProcessorGraph::NodeAndChannel;
+
+    static constexpr auto midiChannelIndex = AudioProcessorGraph::midiChannelIndex;
 
     bool addConnection (const Nodes& n, const Connection& c)
     {
@@ -234,7 +255,7 @@ public:
         return iter != sourcesForDestination.cend() ? iter->second : std::set<NodeAndChannel>{};
     }
 
-    std::vector<AudioProcessorGraph::Connection> getConnections() const
+    std::vector<Connection> getConnections() const
     {
         std::vector<Connection> result;
 
@@ -419,6 +440,8 @@ private:
 template <typename FloatType>
 struct GraphRenderSequence
 {
+    using Node = AudioProcessorGraph::Node;
+
     struct Context
     {
         FloatType** audioBuffers;
@@ -510,7 +533,7 @@ struct GraphRenderSequence
         renderOps.push_back (DelayChannelOp { chan, delaySize });
     }
 
-    void addProcessOp (const AudioProcessorGraph::Node::Ptr& node,
+    void addProcessOp (const Node::Ptr& node,
                        const Array<int>& audioChannelsUsed,
                        int totalNumChans,
                        int midiBuffer)
@@ -597,7 +620,7 @@ private:
     //==============================================================================
     struct ProcessOp
     {
-        ProcessOp (const AudioProcessorGraph::Node::Ptr& n,
+        ProcessOp (const Node::Ptr& n,
                    const Array<int>& audioChannelsUsed,
                    int totalNumChans, int midiBuffer)
             : node (n),
@@ -665,7 +688,7 @@ private:
         }
 
         template <typename Value>
-        static void process (const AudioProcessorGraph::Node& node, AudioBuffer<Value>& audio, MidiBuffer& midi)
+        static void process (const Node& node, AudioBuffer<Value>& audio, MidiBuffer& midi)
         {
             if (node.isBypassed() && node.getProcessor()->getBypassParameter() == nullptr)
                 node.getProcessor()->processBlockBypassed (audio, midi);
@@ -673,7 +696,7 @@ private:
                 node.getProcessor()->processBlock (audio, midi);
         }
 
-        const AudioProcessorGraph::Node::Ptr node;
+        const Node::Ptr node;
         AudioProcessor& processor;
 
         Array<int> audioChannelsToUse;
@@ -687,9 +710,12 @@ private:
 class RenderSequenceBuilder
 {
 public:
-    using Node       = AudioProcessorGraph::Node;
-    using NodeID     = AudioProcessorGraph::NodeID;
-    using Connection = AudioProcessorGraph::Connection;
+    using Node           = AudioProcessorGraph::Node;
+    using NodeID         = AudioProcessorGraph::NodeID;
+    using Connection     = AudioProcessorGraph::Connection;
+    using NodeAndChannel = AudioProcessorGraph::NodeAndChannel;
+
+    static constexpr auto midiChannelIndex = AudioProcessorGraph::midiChannelIndex;
 
     template <typename RenderSequence>
     static auto build (const Nodes& n, const Connections& c)
@@ -712,7 +738,7 @@ private:
 
     struct AssignedBuffer
     {
-        AudioProcessorGraph::NodeAndChannel channel;
+        NodeAndChannel channel;
 
         static AssignedBuffer createReadOnlyEmpty() noexcept    { return { { zeroNodeID(), 0 } }; }
         static AssignedBuffer createFree() noexcept             { return { { freeNodeID(), 0 } }; }
@@ -733,12 +759,6 @@ private:
     Array<AssignedBuffer> audioBuffers, midiBuffers;
 
     enum { readOnlyEmptyBufferIndex = 0 };
-
-    struct Delay
-    {
-        NodeID nodeID;
-        int delay;
-    };
 
     HashMap<uint32, int> delays;
     int totalLatency = 0;
@@ -961,7 +981,7 @@ private:
                                        int ourRenderingIndex)
     {
         auto& processor = *node.getProcessor();
-        auto sources = c.getSourcesForDestination ({ node.nodeID, AudioProcessorGraph::midiChannelIndex });
+        auto sources = c.getSourcesForDestination ({ node.nodeID, midiChannelIndex });
 
         // No midi inputs..
         if (sources.empty())
@@ -982,7 +1002,7 @@ private:
 
             if (midiBufferToUse >= 0)
             {
-                if (isBufferNeededLater (c, ourRenderingIndex, AudioProcessorGraph::midiChannelIndex, src))
+                if (isBufferNeededLater (c, ourRenderingIndex, midiChannelIndex, src))
                 {
                     // can't mess up this channel because it's needed later by another node, so we
                     // need to use a copy of it..
@@ -1011,7 +1031,7 @@ private:
                 auto sourceBufIndex = getBufferContaining (src);
 
                 if (sourceBufIndex >= 0
-                    && ! isBufferNeededLater (c, ourRenderingIndex, AudioProcessorGraph::midiChannelIndex, src))
+                    && ! isBufferNeededLater (c, ourRenderingIndex, midiChannelIndex, src))
                 {
                     // we've found one of our input buffers that can be re-used..
                     reusableInputIndex = i;
@@ -1101,7 +1121,7 @@ private:
         auto midiBufferToUse = findBufferForInputMidiChannel (c, sequence, node, ourRenderingIndex);
 
         if (processor.producesMidi())
-            midiBuffers.getReference (midiBufferToUse).channel = { node.nodeID, AudioProcessorGraph::midiChannelIndex };
+            midiBuffers.getReference (midiBufferToUse).channel = { node.nodeID, midiChannelIndex };
 
         delays.set (node.nodeID.uid, maxLatency + processor.getLatencySamples());
 
@@ -1122,7 +1142,7 @@ private:
         return buffers.size() - 1;
     }
 
-    int getBufferContaining (AudioProcessorGraph::NodeAndChannel output) const noexcept
+    int getBufferContaining (NodeAndChannel output) const noexcept
     {
         int i = 0;
 
@@ -1149,7 +1169,7 @@ private:
     bool isBufferNeededLater (const Connections& c,
                               int stepIndexToSearchFrom,
                               int inputChannelOfIndexToIgnore,
-                              AudioProcessorGraph::NodeAndChannel output) const
+                              NodeAndChannel output) const
     {
         while (stepIndexToSearchFrom < orderedNodes.size())
         {
@@ -1157,9 +1177,9 @@ private:
 
             if (output.isMIDI())
             {
-                if (inputChannelOfIndexToIgnore != AudioProcessorGraph::midiChannelIndex
-                    && c.isConnected ({ { output.nodeID, AudioProcessorGraph::midiChannelIndex },
-                                        { node->nodeID,  AudioProcessorGraph::midiChannelIndex } }))
+                if (inputChannelOfIndexToIgnore != midiChannelIndex
+                    && c.isConnected ({ { output.nodeID, midiChannelIndex },
+                                        { node->nodeID,  midiChannelIndex } }))
                     return true;
             }
             else
@@ -1205,6 +1225,8 @@ private:
 class RenderSequence
 {
 public:
+    using AudioGraphIOProcessor = AudioProcessorGraph::AudioGraphIOProcessor;
+
     RenderSequence (PrepareSettings s, const Nodes& n, const Connections& c)
         : RenderSequence (s,
                           RenderSequenceBuilder::build<GraphRenderSequence<float>>  (n, c),
@@ -1222,12 +1244,12 @@ public:
         renderSequenceD.perform (audio, midi, playHead);
     }
 
-    void processIO (AudioProcessorGraph::AudioGraphIOProcessor& io, AudioBuffer<float>& audio, MidiBuffer& midi)
+    void processIO (AudioGraphIOProcessor& io, AudioBuffer<float>& audio, MidiBuffer& midi)
     {
         processIOBlock (io, renderSequenceF, audio, midi);
     }
 
-    void processIO (AudioProcessorGraph::AudioGraphIOProcessor& io, AudioBuffer<double>& audio, MidiBuffer& midi)
+    void processIO (AudioGraphIOProcessor& io, AudioBuffer<double>& audio, MidiBuffer& midi)
     {
         processIOBlock (io, renderSequenceD, audio, midi);
     }
@@ -1237,14 +1259,14 @@ public:
 
 private:
     template <typename FloatType, typename SequenceType>
-    static void processIOBlock (AudioProcessorGraph::AudioGraphIOProcessor& io,
+    static void processIOBlock (AudioGraphIOProcessor& io,
                                 SequenceType& sequence,
                                 AudioBuffer<FloatType>& buffer,
                                 MidiBuffer& midiMessages)
     {
         switch (io.getType())
         {
-            case AudioProcessorGraph::AudioGraphIOProcessor::audioOutputNode:
+            case AudioGraphIOProcessor::audioOutputNode:
             {
                 auto&& currentAudioOutputBuffer = sequence.currentAudioOutputBuffer;
 
@@ -1254,7 +1276,7 @@ private:
                 break;
             }
 
-            case AudioProcessorGraph::AudioGraphIOProcessor::audioInputNode:
+            case AudioGraphIOProcessor::audioInputNode:
             {
                 auto* currentInputBuffer = sequence.currentAudioInputBuffer;
 
@@ -1264,11 +1286,11 @@ private:
                 break;
             }
 
-            case AudioProcessorGraph::AudioGraphIOProcessor::midiOutputNode:
+            case AudioGraphIOProcessor::midiOutputNode:
                 sequence.currentMidiOutputBuffer.addEvents (midiMessages, 0, buffer.getNumSamples(), 0);
                 break;
 
-            case AudioProcessorGraph::AudioGraphIOProcessor::midiInputNode:
+            case AudioGraphIOProcessor::midiInputNode:
                 midiMessages.addEvents (*sequence.currentMidiInputBuffer, 0, buffer.getNumSamples(), 0);
                 break;
 
