@@ -1777,4 +1777,166 @@ void AudioProcessorGraph::AudioGraphIOProcessor::setParentGraph (AudioProcessorG
     }
 }
 
+//==============================================================================
+//==============================================================================
+#if JUCE_UNIT_TESTS
+
+class AudioProcessorGraphTests : public UnitTest
+{
+public:
+    AudioProcessorGraphTests()
+        : UnitTest ("AudioProcessorGraph", UnitTestCategories::audioProcessors) {}
+
+    void runTest() override
+    {
+        const auto midiChannel = AudioProcessorGraph::midiChannelIndex;
+
+        beginTest ("isConnected returns true when two nodes are connected");
+        {
+            AudioProcessorGraph graph;
+            const auto nodeA = graph.addNode (BasicProcessor::make ({}, MidiIn::no, MidiOut::yes))->nodeID;
+            const auto nodeB = graph.addNode (BasicProcessor::make ({}, MidiIn::yes, MidiOut::no))->nodeID;
+
+            expect (graph.canConnect ({ { nodeA, midiChannel }, { nodeB, midiChannel } }));
+            expect (! graph.canConnect ({ { nodeB, midiChannel }, { nodeA, midiChannel } }));
+            expect (! graph.canConnect ({ { nodeA, midiChannel }, { nodeA, midiChannel } }));
+            expect (! graph.canConnect ({ { nodeB, midiChannel }, { nodeB, midiChannel } }));
+
+            expect (graph.getConnections().empty());
+            expect (! graph.isConnected ({ { nodeA, midiChannel }, { nodeB, midiChannel } }));
+            expect (! graph.isConnected (nodeA, nodeB));
+
+            expect (graph.addConnection ({ { nodeA, midiChannel }, { nodeB, midiChannel } }));
+
+            expect (graph.getConnections().size() == 1);
+            expect (graph.isConnected ({ { nodeA, midiChannel }, { nodeB, midiChannel } }));
+            expect (graph.isConnected (nodeA, nodeB));
+
+            expect (graph.disconnectNode (nodeA));
+
+            expect (graph.getConnections().empty());
+            expect (! graph.isConnected ({ { nodeA, midiChannel }, { nodeB, midiChannel } }));
+            expect (! graph.isConnected (nodeA, nodeB));
+        }
+
+        beginTest ("graph lookups work with a large number of connections");
+        {
+            AudioProcessorGraph graph;
+
+            std::vector<AudioProcessorGraph::NodeID> nodeIDs;
+
+            constexpr auto numNodes = 100;
+
+            for (auto i = 0; i < numNodes; ++i)
+            {
+                nodeIDs.push_back (graph.addNode (BasicProcessor::make (BasicProcessor::getStereoProperties(),
+                                                                        MidiIn::yes,
+                                                                        MidiOut::yes))->nodeID);
+            }
+
+            for (auto it = nodeIDs.begin(); it != std::prev (nodeIDs.end()); ++it)
+            {
+                expect (graph.addConnection ({ { it[0], 0 }, { it[1], 0 } }));
+                expect (graph.addConnection ({ { it[0], 1 }, { it[1], 1 } }));
+            }
+
+            // Check whether isConnected reports correct results when called
+            // with both connections and nodes
+            for (auto it = nodeIDs.begin(); it != std::prev (nodeIDs.end()); ++it)
+            {
+                expect (graph.isConnected ({ { it[0], 0 }, { it[1], 0 } }));
+                expect (graph.isConnected ({ { it[0], 1 }, { it[1], 1 } }));
+                expect (graph.isConnected (it[0], it[1]));
+            }
+
+            const auto& nodes = graph.getNodes();
+
+            expect (! graph.isAnInputTo (*nodes[0], *nodes[0]));
+
+            // Check whether isAnInputTo behaves correctly for a non-cyclic graph
+            for (auto it = std::next (nodes.begin()); it != std::prev (nodes.end()); ++it)
+            {
+                expect (! graph.isAnInputTo (**it, **it));
+
+                expect (graph.isAnInputTo (*nodes[0], **it));
+                expect (! graph.isAnInputTo (**it, *nodes[0]));
+
+                expect (graph.isAnInputTo (**it, *nodes[nodes.size() - 1]));
+                expect (! graph.isAnInputTo (*nodes[nodes.size() - 1], **it));
+            }
+
+            // Make the graph cyclic
+            graph.addConnection ({ { nodeIDs.back(), 0 }, { nodeIDs.front(), 0 } });
+            graph.addConnection ({ { nodeIDs.back(), 1 }, { nodeIDs.front(), 1 } });
+
+            // Check whether isAnInputTo behaves correctly for a cyclic graph
+            for (const auto* node : graph.getNodes())
+            {
+                expect (graph.isAnInputTo (*node, *node));
+
+                expect (graph.isAnInputTo (*nodes[0], *node));
+                expect (graph.isAnInputTo (*node, *nodes[0]));
+
+                expect (graph.isAnInputTo (*node, *nodes[nodes.size() - 1]));
+                expect (graph.isAnInputTo (*nodes[nodes.size() - 1], *node));
+            }
+        }
+    }
+
+private:
+    enum class MidiIn  { no, yes };
+    enum class MidiOut { no, yes };
+
+    class BasicProcessor  : public AudioProcessor
+    {
+    public:
+        explicit BasicProcessor (const AudioProcessor::BusesProperties& layout, MidiIn mIn, MidiOut mOut)
+            : AudioProcessor (layout), midiIn (mIn), midiOut (mOut) {}
+
+        const String getName() const override                         { return "Basic Processor"; }
+        double getTailLengthSeconds() const override                  { return {}; }
+        bool acceptsMidi() const override                             { return midiIn  == MidiIn ::yes; }
+        bool producesMidi() const override                            { return midiOut == MidiOut::yes; }
+        AudioProcessorEditor* createEditor() override                 { return {}; }
+        bool hasEditor() const override                               { return {}; }
+        int getNumPrograms() override                                 { return 1; }
+        int getCurrentProgram() override                              { return {}; }
+        void setCurrentProgram (int) override                         {}
+        const String getProgramName (int) override                    { return {}; }
+        void changeProgramName (int, const String&) override          {}
+        void getStateInformation (juce::MemoryBlock&) override        {}
+        void setStateInformation (const void*, int) override          {}
+        void prepareToPlay (double, int) override                     {}
+        void releaseResources() override                              {}
+        void processBlock (AudioBuffer<float>&, MidiBuffer&) override {}
+        bool supportsDoublePrecisionProcessing() const override       { return true; }
+        bool isMidiEffect() const override                            { return {}; }
+        void reset() override                                         {}
+        void setNonRealtime (bool) noexcept override                  {}
+
+        using AudioProcessor::processBlock;
+
+        static std::unique_ptr<AudioProcessor> make (const BusesProperties& layout,
+                                                     MidiIn midiIn,
+                                                     MidiOut midiOut)
+        {
+            return std::make_unique<BasicProcessor> (layout, midiIn, midiOut);
+        }
+
+        static BusesProperties getStereoProperties()
+        {
+            return BusesProperties().withInput ("in", AudioChannelSet::stereo())
+                                    .withOutput ("out", AudioChannelSet::stereo());
+        }
+
+    private:
+        MidiIn midiIn;
+        MidiOut midiOut;
+    };
+};
+
+static AudioProcessorGraphTests audioProcessorGraphTests;
+
+#endif
+
 } // namespace juce
