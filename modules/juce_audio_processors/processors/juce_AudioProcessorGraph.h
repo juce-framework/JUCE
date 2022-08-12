@@ -275,7 +275,12 @@ public:
     /** Does a recursive check to see if there's a direct or indirect series of connections
         between these two nodes.
     */
-    bool isAnInputTo (Node& source, Node& destination) const noexcept;
+    bool isAnInputTo (const Node& source, const Node& destination) const noexcept;
+
+    /** Does a recursive check to see if there's a direct or indirect series of connections
+        between these two nodes.
+    */
+    bool isAnInputTo (NodeID source, NodeID destination) const noexcept;
 
     /** Returns true if it would be legal to connect the specified points. */
     bool canConnect (const Connection&) const;

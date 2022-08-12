@@ -1443,9 +1443,14 @@ public:
         return connections.isConnected (srcID, destID);
     }
 
-    bool isAnInputTo (Node& src, Node& dst) const
+    bool isAnInputTo (const Node& src, const Node& dst) const
     {
-        return connections.isAnInputTo (src.nodeID, dst.nodeID);
+        return isAnInputTo (src.nodeID, dst.nodeID);
+    }
+
+    bool isAnInputTo (NodeID src, NodeID dst) const
+    {
+        return connections.isAnInputTo (src, dst);
     }
 
     bool canConnect (const Connection& c) const
@@ -1622,7 +1627,8 @@ bool AudioProcessorGraph::canConnect (const Connection& c) const                
 bool AudioProcessorGraph::isConnected (const Connection& c) const noexcept                                  { return pimpl->isConnected (c); }
 bool AudioProcessorGraph::isConnected (NodeID a, NodeID b) const noexcept                                   { return pimpl->isConnected (a, b); }
 bool AudioProcessorGraph::isConnectionLegal (const Connection& c) const                                     { return pimpl->isConnectionLegal (c); }
-bool AudioProcessorGraph::isAnInputTo (Node& source, Node& destination) const noexcept                      { return pimpl->isAnInputTo (source, destination); }
+bool AudioProcessorGraph::isAnInputTo (const Node& source, const Node& destination) const noexcept          { return pimpl->isAnInputTo (source, destination); }
+bool AudioProcessorGraph::isAnInputTo (NodeID source, NodeID destination) const noexcept                    { return pimpl->isAnInputTo (source, destination); }
 
 AudioProcessorGraph::Node::Ptr AudioProcessorGraph::addNode (std::unique_ptr<AudioProcessor> newProcessor,
                                                              NodeID nodeId,
