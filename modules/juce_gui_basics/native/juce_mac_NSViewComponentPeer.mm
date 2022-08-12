@@ -123,6 +123,216 @@ static constexpr int translateVirtualToAsciiKeyCode (int keyCode) noexcept
 constexpr int extendedKeyModifier = 0x30000;
 
 //==============================================================================
+struct DisplayLinkDestructor
+{
+    void operator() (CVDisplayLinkRef ptr) const
+    {
+        if (ptr != nullptr)
+            CVDisplayLinkRelease (ptr);
+    }
+};
+
+/*  Manages the lifetime of a CVDisplayLinkRef for a single display, and automatically starts and
+    stops it.
+*/
+class ScopedDisplayLink
+{
+public:
+    ScopedDisplayLink (NSScreen* screen, std::function<void()> callback)
+        : ScopedDisplayLink ((CGDirectDisplayID) [[screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue],
+                             std::move (callback))
+    {}
+
+    ScopedDisplayLink (CGDirectDisplayID display, std::function<void()> onCallbackIn)
+        : link ([display]
+          {
+              CVDisplayLinkRef ptr = nullptr;
+              const auto result = CVDisplayLinkCreateWithCGDisplay (display, &ptr);
+              jassertquiet (result == kCVReturnSuccess);
+              jassertquiet (ptr != nullptr);
+              return ptr;
+          }()),
+          onCallback (std::move (onCallbackIn))
+    {
+        const auto callback = [] (CVDisplayLinkRef,
+                                  const CVTimeStamp*,
+                                  const CVTimeStamp*,
+                                  CVOptionFlags,
+                                  CVOptionFlags*,
+                                  void* context) -> int
+        {
+            static_cast<const ScopedDisplayLink*> (context)->onCallback();
+            return kCVReturnSuccess;
+        };
+
+        const auto callbackResult = CVDisplayLinkSetOutputCallback (link.get(), callback, this);
+        jassertquiet (callbackResult == kCVReturnSuccess);
+
+        const auto startResult = CVDisplayLinkStart (link.get());
+        jassertquiet (startResult == kCVReturnSuccess);
+    }
+
+    ~ScopedDisplayLink()
+    {
+        CVDisplayLinkStop (link.get());
+    }
+
+private:
+    std::unique_ptr<std::remove_pointer_t<CVDisplayLinkRef>, DisplayLinkDestructor> link;
+    std::function<void()> onCallback;
+};
+
+struct DispatchSourceDestructor
+{
+    void operator() (dispatch_source_t ptr) const
+    {
+        if (ptr != nullptr)
+            dispatch_source_cancel (ptr);
+    }
+};
+
+/*  Holds a DisplayLinkRepaintDriver for each screen. When the screen configuration changes, the
+    DisplayLinkRepaintDrivers will be recreated automatically to match the new configuration.
+*/
+class PerScreenDisplayLinks
+{
+public:
+    PerScreenDisplayLinks()
+    {
+        refreshScreens();
+    }
+
+    using RefreshCallback = std::function<void()>;
+    using Factory = std::function<RefreshCallback (NSScreen*)>;
+
+    class Connection
+    {
+    public:
+        Connection() = default;
+        Connection (PerScreenDisplayLinks& linksIn, std::list<Factory>::const_iterator it)
+            : links (&linksIn), iter (it)
+        {}
+
+        ~Connection()
+        {
+            if (links != nullptr)
+            {
+                const ScopedLock lock (links->mutex);
+                links->factories.erase (iter);
+                links->refreshScreens();
+            }
+        }
+
+        Connection (const Connection&) = delete;
+        Connection& operator= (const Connection&) = delete;
+
+        Connection (Connection&& other) noexcept
+            : links (std::exchange (other.links, nullptr)), iter (other.iter)
+        {}
+
+        Connection& operator= (Connection&& other) noexcept
+        {
+            Connection { std::move (other) }.swap (*this);
+            return *this;
+        }
+
+    private:
+        void swap (Connection& other) noexcept
+        {
+            std::swap (other.links, links);
+            std::swap (other.iter, iter);
+        }
+
+        PerScreenDisplayLinks* links = nullptr;
+        std::list<Factory>::const_iterator iter;
+    };
+
+    Connection registerFactory (Factory factory)
+    {
+        const ScopedLock lock (mutex);
+        factories.push_front (std::move (factory));
+        refreshScreens();
+        return { *this, factories.begin() };
+    }
+
+private:
+    /*  Screen configuration changes can be observed via the NotificationCenter, only
+        Objective-C objects can receive notifications.
+
+        This class will be used to create an object that will listen for a screen change
+        notification, and forward it to the PerScreenDisplayLinks instance that owns the
+        ScreenObserverObject.
+    */
+    struct ScreenObserverObject : public ObjCClass<NSObject>
+    {
+        ScreenObserverObject() : ObjCClass ("JUCEScreenObserver_")
+        {
+            addIvar<PerScreenDisplayLinks*> ("owner");
+            addMethod (@selector (screensDidChange:), [] (id self, SEL, NSNotification*) { getOwner (self)->refreshScreens(); });
+            registerClass();
+        }
+
+        static PerScreenDisplayLinks* getOwner (id self)
+        {
+            return getIvar<PerScreenDisplayLinks*> (self, "owner");
+        }
+    };
+
+    void refreshScreens()
+    {
+        const ScopedLock lock (mutex);
+
+        links.clear();
+
+        for (NSScreen* screen in [NSScreen screens])
+        {
+            std::vector<RefreshCallback> callbacks;
+
+            for (auto& factory : factories)
+                callbacks.push_back (factory (screen));
+
+            links.emplace_back (screen, [callbacks = std::move (callbacks)]
+            {
+                for (const auto& callback : callbacks)
+                    callback();
+            });
+        }
+    }
+
+    static SEL getSelector()
+    {
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+        return @selector (screensDidChange:);
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+    }
+
+    static ObjCClass<NSObject>& getClass()
+    {
+        static ScreenObserverObject observer;
+        return observer;
+    }
+
+    CriticalSection mutex;
+    std::list<Factory> factories;
+    std::list<ScopedDisplayLink> links;
+
+    NSUniquePtr<NSObject> observerObject
+    {
+        [this]
+        {
+            auto* result = getClass().createInstance();
+            object_setInstanceVariable (result, "owner", this);
+            return result;
+        }()
+    };
+
+    ScopedNotificationCenterObserver observer { observerObject.get(),
+                                                getSelector(),
+                                                NSApplicationDidChangeScreenParametersNotification,
+                                                nullptr };
+};
+
+//==============================================================================
 class NSViewComponentPeer  : public ComponentPeer
 {
 public:
@@ -162,8 +372,6 @@ public:
             }
         }
       #endif
-
-        createCVDisplayLink();
 
         if (isSharedWindow)
         {
@@ -242,9 +450,6 @@ public:
 
     ~NSViewComponentPeer() override
     {
-        displayLink.reset();
-        dispatchSource.reset();
-
         scopedObservers.clear();
 
         setOwner (view, nullptr);
@@ -1200,11 +1405,6 @@ public:
         setNeedsDisplayRectangles();
     }
 
-    void windowDidChangeScreen()
-    {
-        updateCVDisplayLinkScreen();
-    }
-
     void viewMovedToWindow()
     {
         if (isSharedWindow)
@@ -1224,9 +1424,6 @@ public:
             windowObservers.emplace_back (view, dismissModalsSelector, NSWindowWillMiniaturizeNotification, currentWindow);
             windowObservers.emplace_back (view, becomeKeySelector, NSWindowDidBecomeKeyNotification, currentWindow);
             windowObservers.emplace_back (view, resignKeySelector, NSWindowDidResignKeyNotification, currentWindow);
-            windowObservers.emplace_back (view, @selector (windowDidChangeScreen:), NSWindowDidChangeScreenNotification, currentWindow);
-
-            updateCVDisplayLinkScreen();
         }
     }
 
@@ -1618,6 +1815,54 @@ public:
     static const SEL resignKeySelector;
 
 private:
+    /*  Creates a function object that can be called from an arbitrary thread (probably a CVLink
+        thread). When called, this function object will trigger a call to setNeedsDisplayRectangles
+        as soon as possible on the main thread, for any peers currently on the provided NSScreen.
+    */
+    static std::function<void()> asyncRepaintFactory (NSScreen* screen)
+    {
+        using DispatchSource = std::remove_pointer_t<dispatch_source_t>;
+        std::unique_ptr<DispatchSource, DispatchSourceDestructor> dispatchSource;
+        dispatchSource.reset (dispatch_source_create (DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, dispatch_get_main_queue()));
+        jassert (dispatchSource != nullptr);
+
+        const auto callback = [screen]
+        {
+            const auto num = ComponentPeer::getNumPeers();
+
+            for (auto i = 0; i < num; ++i)
+                if (auto* peer = static_cast<NSViewComponentPeer*> (ComponentPeer::getPeer (i)))
+                    if (auto* peerView = peer->view)
+                        if (auto* peerWindow = [peerView window])
+                            if (screen == [peerWindow screen])
+                                peer->setNeedsDisplayRectangles();
+        };
+
+        dispatch_source_set_event_handler (dispatchSource.get(), ^() { callback(); });
+
+        if (@available (macOS 10.12, *))
+            dispatch_activate (dispatchSource.get());
+        else
+            dispatch_resume (dispatchSource.get());
+
+        return [dispatch = std::shared_ptr<DispatchSource> (std::move (dispatchSource))]
+        {
+            dispatch_source_merge_data (dispatch.get(), 1);
+        };
+    }
+
+    struct ConcreteDisplayLinks
+    {
+        ConcreteDisplayLinks()
+            : connection (links.registerFactory (asyncRepaintFactory))
+        {}
+
+        PerScreenDisplayLinks links;
+        PerScreenDisplayLinks::Connection connection;
+    };
+
+    SharedResourcePointer<ConcreteDisplayLinks> sharedDisplayLinks;
+
     static NSView* createViewInstance();
     static NSWindow* createWindowInstance();
 
@@ -1784,91 +2029,6 @@ private:
     }
 
     //==============================================================================
-    void updateCVDisplayLinkScreen()
-    {
-        const auto viewDisplayID = (CGDirectDisplayID) [[window.screen.deviceDescription objectForKey: @"NSScreenNumber"] unsignedIntegerValue];
-        const auto result = CVDisplayLinkSetCurrentCGDisplay (displayLink->get(), viewDisplayID);
-        jassertquiet (result == kCVReturnSuccess);
-    }
-
-    void createCVDisplayLink()
-    {
-        dispatchSource.reset (dispatch_source_create (DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, dispatch_get_main_queue()));
-        dispatch_source_set_event_handler (dispatchSource.get(), ^(){ setNeedsDisplayRectangles(); });
-
-        if (@available (macOS 10.12, *))
-            dispatch_activate (dispatchSource.get());
-        else
-            dispatch_resume (dispatchSource.get());
-
-        displayLink.emplace (this);
-    }
-
-    struct DisplayLinkDestructor
-    {
-        void operator() (CVDisplayLinkRef ptr) const
-        {
-            if (ptr != nullptr)
-                CVDisplayLinkRelease (ptr);
-        }
-    };
-
-    class ScopedDisplayLink
-    {
-    public:
-        explicit ScopedDisplayLink (NSViewComponentPeer* owner)
-        {
-            const auto callback = [] (CVDisplayLinkRef,
-                                      const CVTimeStamp*,
-                                      const CVTimeStamp*,
-                                      CVOptionFlags,
-                                      CVOptionFlags*,
-                                      void* context) -> int
-            {
-                dispatch_source_merge_data (static_cast<NSViewComponentPeer*> (context)->dispatchSource.get(), 1);
-                return kCVReturnSuccess;
-            };
-
-            const auto callbackResult = CVDisplayLinkSetOutputCallback (link.get(), callback, owner);
-            jassertquiet (callbackResult == kCVReturnSuccess);
-
-            const auto startResult = CVDisplayLinkStart (link.get());
-            jassertquiet (startResult == kCVReturnSuccess);
-        }
-
-        ~ScopedDisplayLink()
-        {
-            CVDisplayLinkStop (link.get());
-        }
-
-        CVDisplayLinkRef get() const { return link.get(); }
-
-    private:
-        std::unique_ptr<std::remove_pointer_t<CVDisplayLinkRef>, DisplayLinkDestructor> link
-        {
-            []
-            {
-                CVDisplayLinkRef ptr = nullptr;
-                const auto result = CVDisplayLinkCreateWithActiveCGDisplays (&ptr);
-                jassertquiet (result == kCVReturnSuccess);
-                jassertquiet (ptr != nullptr);
-                return ptr;
-            }()
-        };
-    };
-
-    struct DispatchSourceDestructor
-    {
-        void operator() (dispatch_source_t ptr) const
-        {
-            if (ptr != nullptr)
-                dispatch_source_cancel (ptr);
-        }
-    };
-
-    Optional<ScopedDisplayLink> displayLink;
-    std::unique_ptr<std::remove_pointer_t<dispatch_source_t>, DispatchSourceDestructor> dispatchSource;
-
     int numFramesToSkipMetalRenderer = 0;
     std::unique_ptr<CoreGraphicsMetalLayerRenderer<NSView>> metalRenderer;
 
@@ -2010,12 +2170,6 @@ struct JuceNSViewClass   : public NSViewComponentPeerWrapper<ObjCClass<NSView>>
 
                 p->redirectMovedOrResized();
             }
-        });
-
-        addMethod (@selector (windowDidChangeScreen:), [] (id self, SEL, NSNotification*)
-        {
-            if (auto* p = getOwner (self))
-                p->windowDidChangeScreen();
         });
 
         addMethod (@selector (wantsDefaultClipping), [] (id, SEL) { return YES; }); // (this is the default, but may want to customise it in future)
