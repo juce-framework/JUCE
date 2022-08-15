@@ -2751,6 +2751,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginDirectoryScanner.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\scanning\juce_PluginListComponent.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\ARA\juce_ARA_utils.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\ARA\juce_ARADebug.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\ARA\juce_ARADocumentController.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\ARA\juce_ARAModelObjects.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_audio_processors\utilities\ARA\juce_ARAPlugInInstanceRoles.h"/>
@@ -2863,6 +2864,7 @@
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_Socket.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_URL.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\network\juce_WebInputStream.h"/>
+    <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_AndroidDocumentInputSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_BufferedInputStream.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_FileInputSource.h"/>
     <ClInclude Include="..\..\..\..\modules\juce_core\streams\juce_InputSource.h"/>
