@@ -799,7 +799,7 @@ bool ARAOutputStream::write (const void* dataToWrite, size_t numberOfBytes)
     if (! archiveWriter->writeBytesToArchive ((ARA::ARASize) position, numberOfBytes, (const ARA::ARAByte*) dataToWrite))
         return false;
 
-    position += numberOfBytes;
+    position += (int64) numberOfBytes;
     return true;
 }
 

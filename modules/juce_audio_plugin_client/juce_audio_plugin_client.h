@@ -35,7 +35,7 @@
 
   ID:                 juce_audio_plugin_client
   vendor:             juce
-  version:            7.0.1
+  version:            7.0.2
   name:               JUCE audio plugin wrapper classes
   description:        Classes for building VST, VST3, AU, AUv3 and AAX plugins.
   website:            http://www.juce.com/juce
@@ -128,7 +128,3 @@
 #endif
 
 #include "utility/juce_CreatePluginFilter.h"
-
-#if JucePlugin_Enable_ARA
- #include "ARA/juce_ARA_Wrapper.h"
-#endif
