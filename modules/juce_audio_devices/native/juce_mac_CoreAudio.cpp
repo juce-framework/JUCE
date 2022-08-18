@@ -1605,11 +1605,17 @@ public:
             stop();
             fifos.clear();
 
-            for (auto* d : devices)
-                d->start();
+            {
+                ScopedErrorForwarder forwarder (*this, newCallback);
 
-            if (newCallback != nullptr)
-                newCallback->audioDeviceAboutToStart (this);
+                for (auto* d : devices)
+                    d->start();
+
+                if (! forwarder.encounteredError() && newCallback != nullptr)
+                    newCallback->audioDeviceAboutToStart (this);
+                else if (lastError.isEmpty())
+                    lastError = TRANS("Failed to initialise all requested devices.");
+            }
 
             const ScopedLock sl (callbackLock);
             previousCallback = callback = newCallback;
@@ -2077,6 +2083,60 @@ private:
         bool done = false;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeviceWrapper)
+    };
+
+    /* If the current AudioIODeviceCombiner::callback is nullptr, it sets itself as the callback
+       and forwards error related callbacks to the provided callback
+    */
+    class ScopedErrorForwarder  : public AudioIODeviceCallback
+    {
+    public:
+        ScopedErrorForwarder (AudioIODeviceCombiner& ownerIn, AudioIODeviceCallback* cb)
+            : owner (ownerIn),
+              target (cb)
+        {
+            const ScopedLock sl (owner.callbackLock);
+
+            if (owner.callback == nullptr)
+                owner.callback = this;
+        }
+
+        ~ScopedErrorForwarder() override
+        {
+            const ScopedLock sl (owner.callbackLock);
+
+            if (owner.callback == this)
+                owner.callback = nullptr;
+        }
+
+        // We only want to be notified about error conditions when the owner's callback is nullptr.
+        // This class shouldn't be relied on for forwarding this call.
+        void audioDeviceAboutToStart (AudioIODevice*) override {}
+
+        void audioDeviceStopped() override
+        {
+            if (target != nullptr)
+                target->audioDeviceStopped();
+
+            error = true;
+        }
+
+        void audioDeviceError (const String& errorMessage) override
+        {
+            owner.lastError = errorMessage;
+
+            if (target != nullptr)
+                target->audioDeviceError (errorMessage);
+
+            error = true;
+        }
+
+        bool encounteredError() const { return error; }
+
+    private:
+        AudioIODeviceCombiner& owner;
+        AudioIODeviceCallback* target;
+        bool error = false;
     };
 
     OwnedArray<DeviceWrapper> devices;

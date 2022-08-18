@@ -720,6 +720,12 @@ String AudioDeviceManager::setAudioDeviceSetup (const AudioDeviceSetup& newSetup
         currentDeviceType = currentAudioDevice->getTypeName();
 
         currentAudioDevice->start (callbackHandler.get());
+
+        error = currentAudioDevice->getLastError();
+    }
+
+    if (error.isEmpty())
+    {
         updateCurrentSetup();
 
         for (int i = 0; i < availableDeviceTypes.size(); ++i)
