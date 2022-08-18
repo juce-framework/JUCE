@@ -1334,9 +1334,9 @@ private:
         return (shouldBeFullScreen && isKioskModeComponent());
     }
 
-    void setNavBarsHidden (bool hidden, bool forced)
+    void setNavBarsHidden (bool hidden, bool force)
     {
-        if (navBarsHidden != hidden || forced)
+        if (navBarsHidden != hidden || force)
         {
             navBarsHidden = hidden;
 
