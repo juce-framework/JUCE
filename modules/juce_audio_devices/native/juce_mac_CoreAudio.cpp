@@ -1290,6 +1290,9 @@ public:
 
         if (currentBufferSize == 0)
             currentBufferSize = devicePtr->getCurrentBufferSizeSamples();
+
+        if (getAvailableSampleRates().isEmpty())
+            lastError = TRANS("The input and output devices don't share a common sample rate!");
     }
 
     Array<AudioIODevice*> getDevices() const
