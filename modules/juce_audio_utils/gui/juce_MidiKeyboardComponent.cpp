@@ -158,7 +158,9 @@ void MidiKeyboardComponent::updateNoteUnderMouse (Point<float> pos, bool isDown,
     const auto newNote = noteInfo.note;
     const auto oldNote = mouseOverNotes.getUnchecked (fingerNum);
     const auto oldNoteDown = mouseDownNotes.getUnchecked (fingerNum);
-    const auto eventVelocity = useMousePositionForVelocity ? noteInfo.velocity * velocity : velocity;
+    // SURGE PATCH: Don't double scale velocity
+    const auto eventVelocity = useMousePositionForVelocity ? noteInfo.velocity /* * velocity */ : velocity;
+    // END SURGE PATCH
 
     if (oldNote != newNote)
     {
