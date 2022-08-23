@@ -60,7 +60,7 @@ namespace juce
         dialogBox->centreWithDefaultSize (nullptr);
         dialogBox->enterModalState (true,
                                     ModalCallbackFunction::create (onFileSelected),
-                                    true);
+                                    false);
     }
     @endcode
 
