@@ -117,10 +117,6 @@ endif()
 # ==================================================================================================
 # Install configuration
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.14")
-    set(extra_version_arg ARCH_INDEPENDENT)
-endif()
-
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
     VERSION ${JUCE_VERSION}
@@ -166,4 +162,10 @@ install(FILES "${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
               "${JUCE_CMAKE_UTILS_DIR}/juce_runtime_arch_detection.cpp"
         DESTINATION "${JUCE_INSTALL_DESTINATION}")
 
-install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+if("${CMAKE_SOURCE_DIR}" STREQUAL "${JUCE_SOURCE_DIR}")
+    install(TARGETS juce_lv2_helper EXPORT LV2_HELPER DESTINATION "bin/JUCE-${JUCE_VERSION}")
+    install(EXPORT LV2_HELPER NAMESPACE juce:: DESTINATION "${JUCE_INSTALL_DESTINATION}")
+else()
+    set_target_properties(juce_lv2_helper PROPERTIES EXCLUDE_FROM_ALL ON)
+endif()
+
