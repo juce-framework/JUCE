@@ -222,7 +222,7 @@ Typeface::Ptr Font::getDefaultTypefaceForFont (const Font& font)
     const auto characteristics = defaultInfo.getRealFontCharacteristics (name);
     f.setTypefaceName (characteristics.name);
 
-    const auto styles = findAllTypefaceStyles (name);
+    const auto styles = findAllTypefaceStyles (characteristics.name);
 
     if (! styles.contains (font.getTypefaceStyle()))
         f.setTypefaceStyle (characteristics.style);
