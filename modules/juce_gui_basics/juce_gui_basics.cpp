@@ -290,6 +290,7 @@ namespace juce
 
  #else
   #include "native/accessibility/juce_mac_Accessibility.mm"
+  #include "native/juce_mac_PerScreenDisplayLinks.h"
   #include "native/juce_mac_NSViewComponentPeer.mm"
   #include "native/juce_mac_Windowing.mm"
   #include "native/juce_mac_MainMenu.mm"

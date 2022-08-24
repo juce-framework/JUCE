@@ -23,6 +23,10 @@
   ==============================================================================
 */
 
+#if JUCE_MAC
+ #include <juce_gui_basics/native/juce_mac_PerScreenDisplayLinks.h>
+#endif
+
 namespace juce
 {
 
@@ -155,11 +159,6 @@ public:
     {
         if (nativeContext != nullptr)
         {
-           #if JUCE_MAC
-            cvDisplayLinkWrapper = std::make_unique<CVDisplayLinkWrapper> (*this);
-            cvDisplayLinkWrapper->updateActiveDisplay();
-           #endif
-
             renderThread = std::make_unique<ThreadPool> (1);
             resume();
         }
@@ -184,10 +183,6 @@ public:
             pause();
             renderThread.reset();
         }
-
-       #if JUCE_MAC
-        cvDisplayLinkWrapper = nullptr;
-       #endif
 
         hasInitialised = false;
     }
@@ -359,12 +354,10 @@ public:
         if (auto* peer = component.getPeer())
         {
            #if JUCE_MAC
+            updateScreen();
+
             const auto displayScale = Desktop::getInstance().getGlobalScaleFactor() * [this]
             {
-                if (auto* wrapper = cvDisplayLinkWrapper.get())
-                    if (wrapper->updateActiveDisplay())
-                        nativeContext->setNominalVideoRefreshPeriodS (wrapper->getNominalVideoRefreshPeriodS());
-
                 if (auto* view = getCurrentView())
                 {
                     if ([view respondsToSelector: @selector (backingScaleFactor)])
@@ -651,11 +644,6 @@ public:
         if (context.renderer != nullptr)
             context.renderer->newOpenGLContextCreated();
 
-       #if JUCE_MAC
-        jassert (cvDisplayLinkWrapper != nullptr);
-        nativeContext->setNominalVideoRefreshPeriodS (cvDisplayLinkWrapper->getNominalVideoRefreshPeriodS());
-       #endif
-
         return true;
     }
 
@@ -811,8 +799,20 @@ public:
    #if JUCE_MAC
     NSView* getCurrentView() const
     {
+        JUCE_ASSERT_MESSAGE_THREAD;
+
         if (auto* peer = component.getPeer())
             return static_cast<NSView*> (peer->getNativeHandle());
+
+        return nullptr;
+    }
+
+    NSWindow* getCurrentWindow() const
+    {
+        JUCE_ASSERT_MESSAGE_THREAD;
+
+        if (auto* view = getCurrentView())
+            return [view window];
 
         return nullptr;
     }
@@ -821,74 +821,45 @@ public:
     {
         JUCE_ASSERT_MESSAGE_THREAD;
 
-        if (auto* view = getCurrentView())
-            if (auto* window = [view window])
-                return [window screen];
+        if (auto* window = getCurrentWindow())
+            return [window screen];
 
         return nullptr;
     }
 
-    struct CVDisplayLinkWrapper
+    void updateScreen()
     {
-        explicit CVDisplayLinkWrapper (CachedImage& cachedImageIn)
-            : cachedImage (cachedImageIn),
-              continuousRepaint (cachedImageIn.context.continuousRepaint.load())
+        const auto screen = getCurrentScreen();
+        lastScreen = screen;
+
+        const auto newRefreshPeriod = sharedDisplayLinks->getNominalVideoRefreshPeriodSForScreen (screen);
+
+        if (newRefreshPeriod != 0.0 && std::exchange (refreshPeriod, newRefreshPeriod) != newRefreshPeriod)
+            nativeContext->setNominalVideoRefreshPeriodS (newRefreshPeriod);
+    }
+
+    std::atomic<NSScreen*> lastScreen { nullptr };
+    double refreshPeriod = 0.0;
+
+    FunctionNotificationCenterObserver observer { NSWindowDidChangeScreenNotification,
+                                                  getCurrentWindow(),
+                                                  [this] { updateScreen(); } };
+
+    // Note: the NSViewComponentPeer also has a SharedResourcePointer<PerScreenDisplayLinks> to
+    // avoid unnecessarily duplicating display-link threads.
+    SharedResourcePointer<PerScreenDisplayLinks> sharedDisplayLinks;
+
+    PerScreenDisplayLinks::Connection connection { sharedDisplayLinks->registerFactory ([this] (auto* screen)
+    {
+        return [this, screen]
         {
-            CVDisplayLinkCreateWithActiveCGDisplays (&displayLink);
-            CVDisplayLinkSetOutputCallback (displayLink, &displayLinkCallback, this);
-            CVDisplayLinkStart (displayLink);
-        }
-
-        double getNominalVideoRefreshPeriodS() const
-        {
-            const auto nominalVideoRefreshPeriod = CVDisplayLinkGetNominalOutputVideoRefreshPeriod (displayLink);
-
-            if ((nominalVideoRefreshPeriod.flags & kCVTimeIsIndefinite) == 0)
-                return (double) nominalVideoRefreshPeriod.timeValue / (double) nominalVideoRefreshPeriod.timeScale;
-
-            return 0.0;
-        }
-
-        /*  Returns true if updated, or false otherwise. */
-        bool updateActiveDisplay()
-        {
-            auto* oldScreen = std::exchange (currentScreen, cachedImage.getCurrentScreen());
-
-            if (oldScreen == currentScreen)
-                return false;
-
-            for (NSScreen* screen in [NSScreen screens])
-                if (screen == currentScreen)
-                    if (NSNumber* number = [[screen deviceDescription] objectForKey: @"NSScreenNumber"])
-                        CVDisplayLinkSetCurrentCGDisplay (displayLink, [number unsignedIntValue]);
-
-            return true;
-        }
-
-        ~CVDisplayLinkWrapper()
-        {
-            CVDisplayLinkStop (displayLink);
-            CVDisplayLinkRelease (displayLink);
-        }
-
-        static CVReturn displayLinkCallback (CVDisplayLinkRef, const CVTimeStamp*, const CVTimeStamp*,
-                                             CVOptionFlags, CVOptionFlags*, void* displayLinkContext)
-        {
-            auto* self = reinterpret_cast<CVDisplayLinkWrapper*> (displayLinkContext);
-
-            if (self->continuousRepaint)
-                self->cachedImage.repaintEvent.signal();
-
-            return kCVReturnSuccess;
-        }
-
-        CachedImage& cachedImage;
-        const bool continuousRepaint;
-        CVDisplayLinkRef displayLink;
-        NSScreen* currentScreen = nullptr;
-    };
-
-    std::unique_ptr<CVDisplayLinkWrapper> cvDisplayLinkWrapper;
+            // Note: check against lastScreen rather than trying to access the component's peer here,
+            // because this function is not called on the main thread.
+            if (context.continuousRepaint)
+                if (screen == lastScreen)
+                    repaintEvent.signal();
+        };
+    }) };
    #endif
 
     std::unique_ptr<ThreadPool> renderThread;
@@ -983,16 +954,6 @@ public:
         ComponentMovementWatcher::componentBeingDeleted (c);
     }
    #endif
-
-    void update()
-    {
-        auto& comp = *getComponent();
-
-        if (canBeAttached (comp))
-            start();
-        else
-            stop();
-    }
 
 private:
     OpenGLContext& context;
