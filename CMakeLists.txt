@@ -117,9 +117,7 @@ endif()
 # ==================================================================================================
 # Install configuration
 
-if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.14")
-    set(extra_version_arg ARCH_INDEPENDENT)
-endif()
+set(extra_version_arg ARCH_INDEPENDENT)
 
 include(CMakePackageConfigHelpers)
 write_basic_package_version_file("${JUCE_BINARY_DIR}/JUCEConfigVersion.cmake"
