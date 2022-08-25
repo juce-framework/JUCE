@@ -27,9 +27,12 @@ namespace juce
                     // than Android, so this file contains a dummy implementation for those.
                     // This may change in the future.
 
-void RuntimePermissions::request (PermissionID, Callback callback)   { callback (true); }
-bool RuntimePermissions::isRequired (PermissionID) { return false; }
-bool RuntimePermissions::isGranted (PermissionID) { return true; }
+void RuntimePermissions::request (PermissionID, Callback callback)          { callback (true); }
+void RuntimePermissions::request (const juce::String&, Callback callback)   { callback (true); }
+bool RuntimePermissions::isRequired (PermissionID)                          { return false; }
+bool RuntimePermissions::isRequired (const juce::String&)                   { return false; }
+bool RuntimePermissions::isGranted (PermissionID)                           { return true; }
+bool RuntimePermissions::isGranted (const juce::String&)                    { return true; }
 
 #endif
 
