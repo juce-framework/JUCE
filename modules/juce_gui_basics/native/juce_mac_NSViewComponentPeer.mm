@@ -429,7 +429,7 @@ public:
             scopedObservers.emplace_back (view, frameChangedSelector, NSWindowDidMoveNotification, window);
             scopedObservers.emplace_back (view, frameChangedSelector, NSWindowDidMiniaturizeNotification, window);
             scopedObservers.emplace_back (view, @selector (windowWillMiniaturize:), NSWindowWillMiniaturizeNotification, window);
-            scopedObservers.emplace_back (view, @selector (windowDidMiniaturize:), NSWindowDidMiniaturizeNotification, window);
+            scopedObservers.emplace_back (view, @selector (windowDidDeminiaturize:), NSWindowDidDeminiaturizeNotification, window);
         }
 
         auto alpha = component.getAlpha();
