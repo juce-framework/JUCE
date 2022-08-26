@@ -280,7 +280,11 @@ public:
             context->triggerRepaint();
     }
 
-    struct Locker { Locker (NativeContext&) {} };
+    struct Locker
+    {
+        explicit Locker (NativeContext& ctx) : lock (ctx.mutex) {}
+        const ScopedLock lock;
+    };
 
 private:
     bool tryChooseVisual (const OpenGLPixelFormat& format, const std::vector<GLint>& optionalAttribs)
@@ -313,6 +317,7 @@ private:
 
     static constexpr int embeddedWindowEventMask = ExposureMask | StructureNotifyMask;
 
+    CriticalSection mutex;
     Component& component;
     GLXContext renderContext = {};
     Window embeddedWindow = {};

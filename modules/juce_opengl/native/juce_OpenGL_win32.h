@@ -146,7 +146,11 @@ public:
             context->triggerRepaint();
     }
 
-    struct Locker { Locker (NativeContext&) {} };
+    struct Locker
+    {
+        explicit Locker (NativeContext& ctx) : lock (ctx.mutex) {}
+        const ScopedLock lock;
+    };
 
     HWND getNativeHandle()
     {
@@ -366,6 +370,7 @@ private:
         HWND hwnd;
     };
 
+    CriticalSection mutex;
     std::unique_ptr<DummyComponent> dummyComponent;
     std::unique_ptr<ComponentPeer> nativeWindow;
     std::unique_ptr<ScopedThreadDPIAwarenessSetter> threadAwarenessSetter;

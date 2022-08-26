@@ -191,6 +191,7 @@ public:
     void pause()
     {
         signalJobShouldExit();
+        contextsWaitingForFlush->cancelFlush (this);
         messageManagerLock.abort();
 
         if (renderThread != nullptr)
@@ -281,8 +282,7 @@ public:
     {
         MessageManager::Lock::ScopedTryLockType mmLock (messageManagerLock, false);
 
-        auto isUpdatingTestValue = true;
-        auto isUpdating = needsUpdate.compare_exchange_strong (isUpdatingTestValue, false);
+        const auto isUpdating = needsUpdate.exchange (false);
 
         if (context.renderComponents && isUpdating)
         {
@@ -305,45 +305,49 @@ public:
         if (! context.makeActive())
             return false;
 
-        NativeContext::Locker locker (*nativeContext);
-
-        JUCE_CHECK_OPENGL_ERROR
-
-        doWorkWhileWaitingForLock (true);
-
-        const auto currentAreaAndScale = areaAndScale.get();
-        const auto viewportArea = currentAreaAndScale.area;
-
-        if (context.renderer != nullptr)
         {
-            glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
-            context.currentRenderScale = currentAreaAndScale.scale;
-            context.renderer->renderOpenGL();
-            clearGLError();
+            NativeContext::Locker locker (*nativeContext);
 
-            bindVertexArray();
-        }
+            JUCE_CHECK_OPENGL_ERROR
 
-        if (context.renderComponents)
-        {
-            if (isUpdating)
+            doWorkWhileWaitingForLock (true);
+
+            const auto currentAreaAndScale = areaAndScale.get();
+            const auto viewportArea = currentAreaAndScale.area;
+
+            if (context.renderer != nullptr)
             {
-                paintComponent (currentAreaAndScale);
+                glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
+                context.currentRenderScale = currentAreaAndScale.scale;
+                context.renderer->renderOpenGL();
+                clearGLError();
 
-                if (! hasInitialised)
-                    return false;
-
-                messageManagerLock.exit();
-                lastMMLockReleaseTime = Time::getMillisecondCounter();
+                bindVertexArray();
             }
 
-            glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
-            drawComponentBuffer();
+            if (context.renderComponents)
+            {
+                if (isUpdating)
+                {
+                    paintComponent (currentAreaAndScale);
+
+                    if (! hasInitialised)
+                        return false;
+
+                    messageManagerLock.exit();
+                    lastMMLockReleaseTime = Time::getMillisecondCounter();
+                }
+
+                glViewport (0, 0, viewportArea.getWidth(), viewportArea.getHeight());
+                drawComponentBuffer();
+            }
+
+            OpenGLContext::deactivateCurrentContext();
         }
 
-        context.swapBuffers();
+        if (! shouldExit())
+            contextsWaitingForFlush->flush (this);
 
-        OpenGLContext::deactivateCurrentContext();
         return true;
     }
 
@@ -768,6 +772,95 @@ public:
     {
         return dynamic_cast<CachedImage*> (c.getCachedComponentImage());
     }
+
+    //==============================================================================
+    class ContextsWaitingForFlush : private AsyncUpdater
+    {
+    public:
+        /*  Ask to swap the CachedImage's buffers on the main thread.
+
+            Will block until the buffers have been swapped, or until the swap has been cancelled.
+        */
+        void flush (CachedImage* ctx)
+        {
+            {
+                const std::lock_guard<std::mutex> lock (mutex);
+
+                if (find (ctx) == contexts.cend())
+                    contexts.push_back (ctx);
+            }
+
+            if (MessageManager::getInstance()->isThisTheMessageThread())
+            {
+                handleAsyncUpdate();
+            }
+            else
+            {
+                triggerAsyncUpdate();
+
+                std::unique_lock<std::mutex> lock { mutex };
+                condvar.wait (lock, [this, ctx] { return find (ctx) == contexts.cend(); });
+            }
+        }
+
+        /*  When a context is destroyed, this function must be called so that flush() can return. */
+        void cancelFlush (CachedImage* ctx)
+        {
+            const std::lock_guard<std::mutex> lock (mutex);
+
+            const auto iter = find (ctx);
+
+            if (iter != contexts.cend())
+            {
+                contexts.erase (iter);
+                condvar.notify_all();
+            }
+        }
+
+        ~ContextsWaitingForFlush() override
+        {
+            cancelPendingUpdate();
+
+            // There definitely shouldn't still be active CachedImages if this object is being destroyed!
+            jassert (contexts.empty());
+        }
+
+    private:
+        std::mutex mutex;
+        std::condition_variable condvar;
+        std::vector<CachedImage*> contexts;
+
+        /*  Precondition: mutex is locked. */
+        std::vector<CachedImage*>::const_iterator find (CachedImage* ctx) const
+        {
+            // Linear search here because the number of OpenGL contexts probably won't
+            // ever be bigger than double/triple digits
+            return std::find (contexts.cbegin(), contexts.cend(), ctx);
+        }
+
+        /*  Swaps the buffers for each of the pending contexts, then notifies all rendering threads
+            that they may continue.
+        */
+        void handleAsyncUpdate() override
+        {
+            std::unique_lock<std::mutex> lock (mutex);
+
+            for (auto* ctx : contexts)
+            {
+                auto& native = *ctx->nativeContext;
+
+                OpenGLContext::NativeContext::Locker nativeContextLocker (native);
+                native.makeActive();
+                native.swapBuffers();
+                native.deactivateCurrentContext();
+            }
+
+            contexts.clear();
+            condvar.notify_all();
+        }
+    };
+
+    SharedResourcePointer<ContextsWaitingForFlush> contextsWaitingForFlush;
 
     //==============================================================================
     friend class NativeContext;
@@ -1345,8 +1438,8 @@ void OpenGLContext::copyTexture (const Rectangle<int>& targetClipArea,
 
             struct BuiltProgram : public OpenGLShaderProgram
             {
-                explicit BuiltProgram (OpenGLContext& context)
-                    : OpenGLShaderProgram (context)
+                explicit BuiltProgram (OpenGLContext& ctx)
+                    : OpenGLShaderProgram (ctx)
                 {
                     addVertexShader (OpenGLHelpers::translateVertexShaderToV3 (
                         "attribute " JUCE_HIGHP " vec2 position;"
