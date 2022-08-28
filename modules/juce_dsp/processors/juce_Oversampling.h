@@ -50,6 +50,73 @@ namespace dsp
     @see FilterDesign.
 
     @tags{DSP}
+ 
+    @code
+    // processor.h
+    juce::dsp::ProcessSpec spec;
+    juce::dsp::Oversampling<float> oversamplingProcessor;
+    bool oversamplingIsOn {false};
+ 
+    // processor.cpp
+    // constructor
+    MyAudioProcessor::MyAudioProcessor()
+          : AudioProcessor (BusesProperties()
+                            .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+                            .withOutput ("Output", juce::AudioChannelSet::stereo(), true)), oversamplingProcessor(2, 2, juce::dsp::Oversampling<float>::FilterType::filterHalfBandPolyphaseIIR)
+ 
+    prepare(double sampleRate, int samplesPerBlock)
+    {
+        oversamplingProcessor.initProcessing(samplesPerBlock);
+        oversamplingProcessor.reset();
+ 
+        if (oversamplingIsOn)
+        {
+            spec.sampleRate = sampleRate * oversamplingProcessor.getOversamplingFactor();
+        }
+ 
+        else
+        {
+            spec.sampleRate = sampleRate;
+        }
+ 
+        spec.maximumBlockSize = samplesPerBlock;
+        spec.numChannels = getTotalNumOutputChannels();
+    }
+ 
+    processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+    {
+        juce::dsp::AudioBlock<float> normalBlock (buffer);
+        juce::dsp::AudioBlock<float> upSampledBlock (buffer);
+ 
+        if (oversamplingIsOn)
+        {
+            upSampledBlock = oversamplingProcessor.processSamplesUp(normalBlock);
+            myOtherAudioProcessors.process(juce::dsp::ProcessContextReplacing<float>(upSampledBlock));
+            oversamplingProcessor.processSamplesDown(normalBlock);
+        }
+        else
+        {
+            myOtherAudioProcessors.process(juce::dsp::ProcessContextReplacing<float>(normalBlock));
+        }
+    }
+ 
+    // Update spec when oversampling is enabled, important for anything that relies on the samplerate
+    // for some kind of internal process such as filters and juce::SmoothedValue<float>
+    parameterChanged(const juce::String &parameterID, float newValue)
+    {
+        oversamplingIsOn = static_cast<bool>(treeState.getRawParameterValue("oversamplingID")->load());
+    
+        if (oversamplingIsOn)
+        {
+            spec.sampleRate = getSampleRate() * oversamplingProcessor.getOversamplingFactor();
+        }
+ 
+        else
+        {
+            spec.sampleRate = getSampleRate();
+        }
+    }
+    @endcode
 */
 template <typename SampleType>
 class JUCE_API  Oversampling
