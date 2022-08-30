@@ -1137,24 +1137,20 @@ public:
             return false;
 
         // did anything actually change
-        if (layoutHasChanged)
-        {
-            bool success = (AudioUnitInitialize (audioUnit) == noErr);
+        if (! layoutHasChanged)
+            return true;
 
-            // Some plug-ins require the LayoutTag to be set after initialization
-            if (success)
-                success = syncBusLayouts (layouts, true, layoutHasChanged);
+        // Some plug-ins require the LayoutTag to be set after initialization
+        const auto success = (AudioUnitInitialize (audioUnit) == noErr)
+                             && syncBusLayouts (layouts, true, layoutHasChanged);
 
-            AudioUnitUninitialize (audioUnit);
+        AudioUnitUninitialize (audioUnit);
 
-            if (! success)
-                // make sure that the layout is back to it's original state
-                syncBusLayouts (getBusesLayout(), false, layoutHasChanged);
+        if (! success)
+            // make sure that the layout is back to its original state
+            syncBusLayouts (getBusesLayout(), false, layoutHasChanged);
 
-            return success;
-        }
-
-        return true;
+        return success;
     }
 
     //==============================================================================

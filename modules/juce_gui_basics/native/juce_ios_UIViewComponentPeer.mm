@@ -351,7 +351,7 @@ struct UIViewPeerControllerReceiver
 
 //==============================================================================
 class UIViewComponentPeer  : public ComponentPeer,
-                             private UIViewPeerControllerReceiver
+                             public UIViewPeerControllerReceiver
 {
 public:
     UIViewComponentPeer (Component&, int windowStyleFlags, UIView* viewToAttachTo);

@@ -692,28 +692,36 @@ public:
             callback->audioDeviceAboutToStart (&owner);
         }
 
-        if (! started)
+        if (scopedProcID.get() == nullptr && deviceID != 0)
         {
-            if (deviceID != 0)
+            scopedProcID = [&self = *this,
+                            &lock = callbackLock,
+                            nextProcID = ScopedAudioDeviceIOProcID { *this, deviceID, audioIOProc },
+                            deviceID = deviceID]() mutable -> ScopedAudioDeviceIOProcID
             {
-                if (OK (AudioDeviceCreateIOProcID (deviceID, audioIOProc, this, &audioProcID)))
+                // It *looks* like AudioDeviceStart may start the audio callback running, and then
+                // immediately lock an internal mutex.
+                // The same mutex is locked before calling the audioIOProc.
+                // If we get very unlucky, then we can end up with thread A taking the callbackLock
+                // and calling AudioDeviceStart, followed by thread B taking the CoreAudio lock
+                // and calling into audioIOProc, which waits on the callbackLock. When thread A
+                // continues it attempts to take the CoreAudio lock, and the program deadlocks.
+
+                if (auto* procID = nextProcID.get())
                 {
-                    if (OK (AudioDeviceStart (deviceID, audioProcID)))
-                    {
-                        started = true;
-                    }
-                    else
-                    {
-                        OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
-                        audioProcID = {};
-                    }
+                    const ScopedUnlock su (lock);
+
+                    if (self.OK (AudioDeviceStart (deviceID, procID)))
+                        return std::move (nextProcID);
                 }
-            }
+
+                return {};
+            }();
         }
 
-        playing = started && callback != nullptr;
+        playing = scopedProcID.get() != nullptr && callback != nullptr;
 
-        return started;
+        return scopedProcID.get() != nullptr;
     }
 
     AudioIODeviceCallback* stop (bool leaveInterruptRunning)
@@ -722,7 +730,7 @@ public:
 
         auto result = std::exchange (callback, nullptr);
 
-        if (started && (deviceID != 0) && ! leaveInterruptRunning)
+        if (scopedProcID.get() != nullptr && (deviceID != 0) && ! leaveInterruptRunning)
         {
             audioDeviceStopPending = true;
 
@@ -736,9 +744,7 @@ public:
                 Thread::sleep (50);
             }
 
-            OK (AudioDeviceDestroyIOProcID (deviceID, audioProcID));
-            audioProcID = {};
-            started = false;
+            scopedProcID = {};
             playing = false;
         }
 
@@ -756,7 +762,7 @@ public:
 
         if (audioDeviceStopPending)
         {
-            if (OK (AudioDeviceStop (deviceID, audioProcID)))
+            if (OK (AudioDeviceStop (deviceID, scopedProcID.get())))
                 audioDeviceStopPending = false;
 
             return;
@@ -841,14 +847,57 @@ public:
     StringArray inChanNames, outChanNames;
     Array<double> sampleRates;
     Array<int> bufferSizes;
-    AudioDeviceIOProcID audioProcID = {};
 
 private:
+    class ScopedAudioDeviceIOProcID
+    {
+    public:
+        ScopedAudioDeviceIOProcID() = default;
+
+        ScopedAudioDeviceIOProcID (CoreAudioInternal& coreAudio, AudioDeviceID d, AudioDeviceIOProc audioIOProc)
+            : deviceID (d)
+        {
+            if (! coreAudio.OK (AudioDeviceCreateIOProcID (deviceID, audioIOProc, &coreAudio, &proc)))
+                proc = {};
+        }
+
+        ~ScopedAudioDeviceIOProcID() noexcept
+        {
+            if (proc != AudioDeviceIOProcID{})
+                AudioDeviceDestroyIOProcID (deviceID, proc);
+        }
+
+        ScopedAudioDeviceIOProcID (ScopedAudioDeviceIOProcID&& other) noexcept
+        {
+            swap (other);
+        }
+
+        ScopedAudioDeviceIOProcID& operator= (ScopedAudioDeviceIOProcID&& other) noexcept
+        {
+            ScopedAudioDeviceIOProcID { std::move (other) }.swap (*this);
+            return *this;
+        }
+
+        AudioDeviceIOProcID get() const { return proc; }
+
+    private:
+        void swap (ScopedAudioDeviceIOProcID& other) noexcept
+        {
+            std::swap (other.deviceID, deviceID);
+            std::swap (other.proc, proc);
+        }
+
+        AudioDeviceID deviceID = {};
+        AudioDeviceIOProcID proc = {};
+    };
+
+    ScopedAudioDeviceIOProcID scopedProcID;
+
     CoreAudioTimeConversions timeConversions;
     AudioIODeviceCallback* callback = nullptr;
     CriticalSection callbackLock;
     AudioDeviceID deviceID;
-    bool started = false, audioDeviceStopPending = false;
+    bool audioDeviceStopPending = false;
     std::atomic<bool> playing { false };
     double sampleRate = 0;
     int bufferSize = 0;
@@ -1281,6 +1330,9 @@ public:
 
         if (currentBufferSize == 0)
             currentBufferSize = devicePtr->getCurrentBufferSizeSamples();
+
+        if (getAvailableSampleRates().isEmpty())
+            lastError = TRANS("The input and output devices don't share a common sample rate!");
     }
 
     Array<AudioIODevice*> getDevices() const
@@ -1596,11 +1648,17 @@ public:
             stop();
             fifos.clear();
 
-            for (auto* d : devices)
-                d->start();
+            {
+                ScopedErrorForwarder forwarder (*this, newCallback);
 
-            if (newCallback != nullptr)
-                newCallback->audioDeviceAboutToStart (this);
+                for (auto* d : devices)
+                    d->start();
+
+                if (! forwarder.encounteredError() && newCallback != nullptr)
+                    newCallback->audioDeviceAboutToStart (this);
+                else if (lastError.isEmpty())
+                    lastError = TRANS("Failed to initialise all requested devices.");
+            }
 
             const ScopedLock sl (callbackLock);
             previousCallback = callback = newCallback;
@@ -2053,6 +2111,60 @@ private:
         bool done = false;
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (DeviceWrapper)
+    };
+
+    /* If the current AudioIODeviceCombiner::callback is nullptr, it sets itself as the callback
+       and forwards error related callbacks to the provided callback
+    */
+    class ScopedErrorForwarder  : public AudioIODeviceCallback
+    {
+    public:
+        ScopedErrorForwarder (AudioIODeviceCombiner& ownerIn, AudioIODeviceCallback* cb)
+            : owner (ownerIn),
+              target (cb)
+        {
+            const ScopedLock sl (owner.callbackLock);
+
+            if (owner.callback == nullptr)
+                owner.callback = this;
+        }
+
+        ~ScopedErrorForwarder() override
+        {
+            const ScopedLock sl (owner.callbackLock);
+
+            if (owner.callback == this)
+                owner.callback = nullptr;
+        }
+
+        // We only want to be notified about error conditions when the owner's callback is nullptr.
+        // This class shouldn't be relied on for forwarding this call.
+        void audioDeviceAboutToStart (AudioIODevice*) override {}
+
+        void audioDeviceStopped() override
+        {
+            if (target != nullptr)
+                target->audioDeviceStopped();
+
+            error = true;
+        }
+
+        void audioDeviceError (const String& errorMessage) override
+        {
+            owner.lastError = errorMessage;
+
+            if (target != nullptr)
+                target->audioDeviceError (errorMessage);
+
+            error = true;
+        }
+
+        bool encounteredError() const { return error; }
+
+    private:
+        AudioIODeviceCombiner& owner;
+        AudioIODeviceCallback* target;
+        bool error = false;
     };
 
     OwnedArray<DeviceWrapper> devices;

@@ -78,8 +78,8 @@ using namespace juce;
 
 struct AudioProcessorHolder  : public ReferenceCountedObject
 {
-    AudioProcessorHolder() {}
-    AudioProcessorHolder (AudioProcessor* p) : processor (p) {}
+    AudioProcessorHolder() = default;
+    explicit AudioProcessorHolder (AudioProcessor* p) : processor (p) {}
     AudioProcessor& operator*() noexcept        { return *processor; }
     AudioProcessor* operator->() noexcept       { return processor.get(); }
     AudioProcessor* get() noexcept              { return processor.get(); }
@@ -104,303 +104,9 @@ private:
 };
 
 //==============================================================================
-class JuceAudioUnitv3Base
-{
-public:
-    JuceAudioUnitv3Base (const AudioComponentDescription& descr,
-                         AudioComponentInstantiationOptions options,
-                         NSError** error)
-        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
-        : au ([audioUnitObjCClass.createInstance() initWithComponentDescription: descr
-                                                                        options: options
-                                                                          error: error
-                                                                      juceClass: this])
-        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-    {}
-
-    JuceAudioUnitv3Base (AUAudioUnit* audioUnit) : au (audioUnit)
-    {
-        jassert (MessageManager::getInstance()->isThisTheMessageThread());
-        initialiseJuce_GUI();
-    }
-
-    virtual ~JuceAudioUnitv3Base() = default;
-
-    //==============================================================================
-    AUAudioUnit* getAudioUnit() noexcept                                   { return au; }
-
-    //==============================================================================
-    virtual void reset()                                                   = 0;
-
-    //==============================================================================
-    virtual AUAudioUnitPreset* getCurrentPreset()                          = 0;
-    virtual void setCurrentPreset (AUAudioUnitPreset*)                     = 0;
-    virtual NSArray<AUAudioUnitPreset*>* getFactoryPresets()               = 0;
-
-    virtual NSDictionary<NSString*, id>* getFullState()
-    {
-        return ObjCMsgSendSuper<AUAudioUnit, NSDictionary<NSString*, id>*> (getAudioUnit(), @selector (fullState));
-    }
-
-    virtual void setFullState (NSDictionary<NSString*, id>* state)
-    {
-        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (setFullState:), state);
-    }
-
-    virtual AUParameterTree* getParameterTree()                            = 0;
-    virtual NSArray<NSNumber*>* parametersForOverviewWithCount (int)       = 0;
-
-    //==============================================================================
-    virtual NSTimeInterval getLatency()                                    = 0;
-    virtual NSTimeInterval getTailTime()                                   = 0;
-
-    //==============================================================================
-    virtual AUAudioUnitBusArray* getInputBusses()                          = 0;
-    virtual AUAudioUnitBusArray* getOutputBusses()                         = 0;
-    virtual NSArray<NSNumber*>* getChannelCapabilities()                   = 0;
-    virtual bool shouldChangeToFormat (AVAudioFormat*, AUAudioUnitBus*)    = 0;
-
-    //==============================================================================
-    virtual int getVirtualMIDICableCount()                                 = 0;
-    virtual bool getSupportsMPE()                                          = 0;
-    virtual NSArray<NSString*>* getMIDIOutputNames()                       = 0;
-
-    //==============================================================================
-    virtual AUInternalRenderBlock getInternalRenderBlock()                 = 0;
-    virtual bool getCanProcessInPlace()                                    { return false; }
-    virtual bool getRenderingOffline()                                     = 0;
-    virtual void setRenderingOffline (bool offline)                        = 0;
-
-    virtual bool getShouldBypassEffect()
-    {
-        return (ObjCMsgSendSuper<AUAudioUnit, BOOL> (getAudioUnit(), @selector (shouldBypassEffect)) == YES);
-    }
-
-    virtual void setShouldBypassEffect (bool shouldBypass)
-    {
-        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (setShouldBypassEffect:), shouldBypass ? YES : NO);
-    }
-
-    //==============================================================================
-    virtual NSString* getContextName()      const                          = 0;
-    virtual void setContextName (NSString*)                                = 0;
-
-    virtual bool allocateRenderResourcesAndReturnError (NSError **outError)
-    {
-        return (ObjCMsgSendSuper<AUAudioUnit, BOOL, NSError**> (getAudioUnit(), @selector (allocateRenderResourcesAndReturnError:), outError) == YES);
-    }
-
-    virtual void deallocateRenderResources()
-    {
-        ObjCMsgSendSuper<AUAudioUnit, void> (getAudioUnit(), @selector (deallocateRenderResources));
-    }
-
-    //==============================================================================
-    API_AVAILABLE (macos (10.13), ios (11.0))
-    virtual NSIndexSet* getSupportedViewConfigurations (NSArray<AUAudioUnitViewConfiguration*>*) = 0;
-
-    API_AVAILABLE (macos (10.13), ios (11.0))
-    virtual void selectViewConfiguration (AUAudioUnitViewConfiguration*) = 0;
-
-private:
-    struct Class  : public ObjCClass<AUAudioUnit>
-    {
-        Class() : ObjCClass<AUAudioUnit> ("AUAudioUnit_")
-        {
-            addIvar<JuceAudioUnitv3Base*> ("cppObject");
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (initWithComponentDescription:options:error:juceClass:), initWithComponentDescriptionAndJuceClass);
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-            addMethod (@selector (initWithComponentDescription:options:error:), initWithComponentDescription);
-
-            addMethod (@selector (dealloc),                         dealloc);
-
-            //==============================================================================
-            addMethod (@selector (reset),                           reset);
-
-            //==============================================================================
-            addMethod (@selector (currentPreset),                   getCurrentPreset);
-            addMethod (@selector (setCurrentPreset:),               setCurrentPreset);
-            addMethod (@selector (factoryPresets),                  getFactoryPresets);
-            addMethod (@selector (fullState),                       getFullState);
-            addMethod (@selector (setFullState:),                   setFullState);
-            addMethod (@selector (parameterTree),                   getParameterTree);
-            addMethod (@selector (parametersForOverviewWithCount:), parametersForOverviewWithCount);
-
-            //==============================================================================
-            addMethod (@selector (latency),                         getLatency);
-            addMethod (@selector (tailTime),                        getTailTime);
-
-            //==============================================================================
-            addMethod (@selector (inputBusses),                     getInputBusses);
-            addMethod (@selector (outputBusses),                    getOutputBusses);
-            addMethod (@selector (channelCapabilities),             getChannelCapabilities);
-            addMethod (@selector (shouldChangeToFormat:forBus:),    shouldChangeToFormat);
-
-            //==============================================================================
-            addMethod (@selector (virtualMIDICableCount),           getVirtualMIDICableCount);
-
-            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
-            addMethod (@selector (supportsMPE),                     getSupportsMPE);
-            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
-
-            if (@available (macOS 10.13, iOS 11.0, *))
-                addMethod (@selector (MIDIOutputNames), getMIDIOutputNames);
-
-            //==============================================================================
-            addMethod (@selector (internalRenderBlock),             getInternalRenderBlock);
-            addMethod (@selector (canProcessInPlace),               getCanProcessInPlace);
-            addMethod (@selector (isRenderingOffline),              getRenderingOffline);
-            addMethod (@selector (setRenderingOffline:),            setRenderingOffline);
-            addMethod (@selector (shouldBypassEffect),              getShouldBypassEffect);
-            addMethod (@selector (setShouldBypassEffect:),          setShouldBypassEffect);
-            addMethod (@selector (allocateRenderResourcesAndReturnError:),  allocateRenderResourcesAndReturnError);
-            addMethod (@selector (deallocateRenderResources),       deallocateRenderResources);
-
-            //==============================================================================
-            addMethod (@selector (contextName),                     getContextName);
-            addMethod (@selector (setContextName:),                 setContextName);
-
-            //==============================================================================
-            if (@available (macOS 10.13, iOS 11.0, *))
-            {
-                addMethod (@selector (supportedViewConfigurations:),    getSupportedViewConfigurations);
-                addMethod (@selector (selectViewConfiguration:),        selectViewConfiguration);
-            }
-
-            registerClass();
-        }
-
-        //==============================================================================
-        static JuceAudioUnitv3Base* _this (id self)                     { return getIvar<JuceAudioUnitv3Base*> (self, "cppObject"); }
-        static void setThis (id self, JuceAudioUnitv3Base* cpp)         { object_setInstanceVariable           (self, "cppObject", cpp); }
-
-        //==============================================================================
-        static id initWithComponentDescription (id _self, SEL, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
-        {
-            AUAudioUnit* self = _self;
-
-            self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
-                                    AudioComponentInstantiationOptions, NSError**> (self, @selector (initWithComponentDescription:options:error:), descr, options, error);
-
-            JuceAudioUnitv3Base* juceAU = JuceAudioUnitv3Base::create (self, descr, options, error);
-
-            setThis (self, juceAU);
-            return self;
-        }
-
-        static id initWithComponentDescriptionAndJuceClass (id _self, SEL, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error, JuceAudioUnitv3Base* juceAU)
-        {
-            AUAudioUnit* self = _self;
-
-            self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
-                                    AudioComponentInstantiationOptions, NSError**> (self, @selector(initWithComponentDescription:options:error:), descr, options, error);
-
-
-            setThis (self, juceAU);
-            return self;
-        }
-
-        static void dealloc (id self, SEL)
-        {
-            if (! MessageManager::getInstance()->isThisTheMessageThread())
-            {
-                WaitableEvent deletionEvent;
-
-                struct AUDeleter  : public CallbackMessage
-                {
-                    AUDeleter (id selfToDelete, WaitableEvent& event)
-                        : parentSelf (selfToDelete), parentDeletionEvent (event)
-                    {
-                    }
-
-                    void messageCallback() override
-                    {
-                        delete _this (parentSelf);
-                        parentDeletionEvent.signal();
-                    }
-
-                    id parentSelf;
-                    WaitableEvent& parentDeletionEvent;
-                };
-
-                (new AUDeleter (self, deletionEvent))->post();
-                deletionEvent.wait (-1);
-            }
-            else
-            {
-                delete _this (self);
-            }
-        }
-
-        //==============================================================================
-        static void reset (id self, SEL)                                                            { _this (self)->reset(); }
-
-        //==============================================================================
-        static AUAudioUnitPreset* getCurrentPreset (id self, SEL)                                   { return _this (self)->getCurrentPreset(); }
-        static void setCurrentPreset (id self, SEL, AUAudioUnitPreset* preset)                      { return _this (self)->setCurrentPreset (preset); }
-        static NSArray<AUAudioUnitPreset*>* getFactoryPresets (id self, SEL)                        { return _this (self)->getFactoryPresets(); }
-        static NSDictionary<NSString*, id>* getFullState (id self, SEL)                             { return _this (self)->getFullState(); }
-        static void setFullState (id self, SEL, NSDictionary<NSString *, id>* state)                { return _this (self)->setFullState (state); }
-        static AUParameterTree*     getParameterTree (id self, SEL)                                 { return _this (self)->getParameterTree(); }
-        static NSArray<NSNumber*>* parametersForOverviewWithCount (id self, SEL, NSInteger count)   { return _this (self)->parametersForOverviewWithCount (static_cast<int> (count)); }
-
-        //==============================================================================
-        static NSTimeInterval getLatency (id self, SEL)                                             { return _this (self)->getLatency(); }
-        static NSTimeInterval getTailTime (id self, SEL)                                            { return _this (self)->getTailTime(); }
-
-        //==============================================================================
-        static AUAudioUnitBusArray* getInputBusses   (id self, SEL)                                 { return _this (self)->getInputBusses(); }
-        static AUAudioUnitBusArray* getOutputBusses  (id self, SEL)                                 { return _this (self)->getOutputBusses(); }
-        static NSArray<NSNumber*>* getChannelCapabilities (id self, SEL)                            { return _this (self)->getChannelCapabilities(); }
-        static BOOL shouldChangeToFormat (id self, SEL, AVAudioFormat* format, AUAudioUnitBus* bus) { return _this (self)->shouldChangeToFormat (format, bus) ? YES : NO; }
-
-        //==============================================================================
-        static NSInteger getVirtualMIDICableCount (id self, SEL)                                    { return _this (self)->getVirtualMIDICableCount(); }
-        static BOOL getSupportsMPE (id self, SEL)                                                   { return _this (self)->getSupportsMPE() ? YES : NO; }
-        static NSArray<NSString*>* getMIDIOutputNames (id self, SEL)                                { return _this (self)->getMIDIOutputNames(); }
-
-        //==============================================================================
-        static AUInternalRenderBlock getInternalRenderBlock (id self, SEL)                          { return _this (self)->getInternalRenderBlock();  }
-        static BOOL getCanProcessInPlace (id self, SEL)                                             { return _this (self)->getCanProcessInPlace() ? YES : NO; }
-        static BOOL getRenderingOffline (id self, SEL)                                              { return _this (self)->getRenderingOffline() ? YES : NO; }
-        static void setRenderingOffline (id self, SEL, BOOL renderingOffline)                       { _this (self)->setRenderingOffline (renderingOffline); }
-        static BOOL allocateRenderResourcesAndReturnError (id self, SEL, NSError** error)           { return _this (self)->allocateRenderResourcesAndReturnError (error) ? YES : NO; }
-        static void deallocateRenderResources (id self, SEL)                                        { _this (self)->deallocateRenderResources(); }
-        static BOOL getShouldBypassEffect (id self, SEL)                                            { return _this (self)->getShouldBypassEffect() ? YES : NO; }
-        static void setShouldBypassEffect (id self, SEL, BOOL shouldBypass)                         { _this (self)->setShouldBypassEffect (shouldBypass); }
-
-        //==============================================================================
-        static NSString* getContextName (id self, SEL)                                              { return _this (self)->getContextName(); }
-        static void setContextName (id self, SEL, NSString* str)                                    { return _this (self)->setContextName (str); }
-
-        //==============================================================================
-        API_AVAILABLE (macos (10.13), ios (11.0))
-        static NSIndexSet* getSupportedViewConfigurations (id self, SEL, NSArray<AUAudioUnitViewConfiguration*>* configs) { return _this (self)->getSupportedViewConfigurations (configs); }
-
-        API_AVAILABLE (macos (10.13), ios (11.0))
-        static void selectViewConfiguration (id self, SEL, AUAudioUnitViewConfiguration* config)                          { _this (self)->selectViewConfiguration (config); }
-    };
-
-    static JuceAudioUnitv3Base* create (AUAudioUnit*, AudioComponentDescription, AudioComponentInstantiationOptions, NSError**);
-
-    //==============================================================================
-    static Class audioUnitObjCClass;
-
-protected:
-    AUAudioUnit* au;
-};
-
-//==============================================================================
-JuceAudioUnitv3Base::Class JuceAudioUnitv3Base::audioUnitObjCClass;
-
-//==============================================================================
 //=========================== The actual AudioUnit =============================
 //==============================================================================
-class JuceAudioUnitv3  : public JuceAudioUnitv3Base,
-                         public AudioProcessorListener,
+class JuceAudioUnitv3  : public AudioProcessorListener,
                          public AudioPlayHead,
                          private AudioProcessorParameter::Listener
 {
@@ -409,16 +115,24 @@ public:
                      const AudioComponentDescription& descr,
                      AudioComponentInstantiationOptions options,
                      NSError** error)
-        : JuceAudioUnitv3Base (descr, options, error),
+        JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wobjc-method-access")
+        : au ([getClass().createInstance() initWithComponentDescription: descr
+                                                                options: options
+                                                                  error: error
+                                                              juceClass: this]),
+        JUCE_END_IGNORE_WARNINGS_GCC_LIKE
           processorHolder (processor)
     {
         init();
     }
 
     JuceAudioUnitv3 (AUAudioUnit* audioUnit, AudioComponentDescription, AudioComponentInstantiationOptions, NSError**)
-        : JuceAudioUnitv3Base (audioUnit),
+        : au (audioUnit),
           processorHolder (new AudioProcessorHolder (createPluginFilterOfType (AudioProcessor::wrapperType_AudioUnitv3)))
     {
+        jassert (MessageManager::getInstance()->isThisTheMessageThread());
+        initialiseJuce_GUI();
+
         init();
     }
 
@@ -445,7 +159,7 @@ public:
         inParameterChangedCallback = false;
 
         AudioProcessor& processor = getAudioProcessor();
-        const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
+        const AUAudioFrameCount maxFrames = [au maximumFramesToRender];
 
        #ifdef JucePlugin_PreferredChannelConfigurations
         short configs[][2] = {JucePlugin_PreferredChannelConfigurations};
@@ -503,7 +217,7 @@ public:
     AudioProcessor& getAudioProcessor() const noexcept        { return **processorHolder; }
 
     //==============================================================================
-    void reset() override
+    void reset()
     {
         midiMessages.clear();
         lastTimeStamp.mSampleTime = std::numeric_limits<Float64>::max();
@@ -511,27 +225,27 @@ public:
     }
 
     //==============================================================================
-    AUAudioUnitPreset* getCurrentPreset() override
+    AUAudioUnitPreset* getCurrentPreset() const
     {
         return factoryPresets.getAtIndex (getAudioProcessor().getCurrentProgram());
     }
 
-    void setCurrentPreset (AUAudioUnitPreset* preset) override
+    void setCurrentPreset (AUAudioUnitPreset* preset)
     {
         getAudioProcessor().setCurrentProgram (static_cast<int> ([preset number]));
     }
 
-    NSArray<AUAudioUnitPreset*>* getFactoryPresets() override
+    NSArray<AUAudioUnitPreset*>* getFactoryPresets() const
     {
         return factoryPresets.get();
     }
 
-    NSDictionary<NSString*, id>* getFullState() override
+    NSDictionary<NSString*, id>* getFullState() const
     {
         NSMutableDictionary<NSString*, id>* retval = [[NSMutableDictionary<NSString*, id> alloc] init];
 
         {
-            NSDictionary<NSString*, id>* superRetval = JuceAudioUnitv3Base::getFullState();
+            auto* superRetval = ObjCMsgSendSuper<AUAudioUnit, NSDictionary<NSString*, id>*> (au, @selector (fullState));
 
             if (superRetval != nullptr)
                 [retval addEntriesFromDictionary:superRetval];
@@ -562,7 +276,7 @@ public:
         return [retval autorelease];
     }
 
-    void setFullState (NSDictionary<NSString*, id>* state) override
+    void setFullState (NSDictionary<NSString*, id>* state)
     {
         if (state == nullptr)
             return;
@@ -574,7 +288,7 @@ public:
         [modifiedState removeObjectForKey: nsPresetKey];
         [nsPresetKey release];
 
-        JuceAudioUnitv3Base::setFullState (modifiedState);
+        ObjCMsgSendSuper<AUAudioUnit, void> (au, @selector (setFullState:), state);
 
         NSString* nsKey = [[NSString alloc] initWithUTF8String: JUCE_STATE_DICTIONARY_KEY];
         NSObject* obj = [modifiedState objectForKey: nsKey];
@@ -602,12 +316,12 @@ public:
         [modifiedState release];
     }
 
-    AUParameterTree* getParameterTree() override
+    AUParameterTree* getParameterTree() const
     {
         return paramTree.get();
     }
 
-    NSArray<NSNumber*>* parametersForOverviewWithCount (int count) override
+    NSArray<NSNumber*>* parametersForOverviewWithCount (int count) const
     {
         const int n = static_cast<int> ([overviewParams.get() count]);
 
@@ -621,23 +335,23 @@ public:
     }
 
     //==============================================================================
-    NSTimeInterval getLatency() override
+    NSTimeInterval getLatency() const
     {
         auto& p = getAudioProcessor();
         return p.getLatencySamples() / p.getSampleRate();
     }
 
-    NSTimeInterval getTailTime() override
+    NSTimeInterval getTailTime() const
     {
         return getAudioProcessor().getTailLengthSeconds();
     }
 
     //==============================================================================
-    AUAudioUnitBusArray* getInputBusses() override            { return inputBusses.get();  }
-    AUAudioUnitBusArray* getOutputBusses() override           { return outputBusses.get(); }
-    NSArray<NSNumber*>* getChannelCapabilities() override     { return channelCapabilities.get(); }
+    AUAudioUnitBusArray* getInputBusses()             const { return inputBusses.get();  }
+    AUAudioUnitBusArray* getOutputBusses()            const { return outputBusses.get(); }
+    NSArray<NSNumber*>* getChannelCapabilities()      const { return channelCapabilities.get(); }
 
-    bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus) override
+    bool shouldChangeToFormat (AVAudioFormat* format, AUAudioUnitBus* auBus)
     {
         const bool isInput = ([auBus busType] == AUAudioUnitBusTypeInput);
         const int busIdx = static_cast<int> ([auBus index]);
@@ -682,7 +396,7 @@ public:
     }
 
     //==============================================================================
-    int getVirtualMIDICableCount() override
+    int getVirtualMIDICableCount() const
     {
        #if JucePlugin_WantsMidiInput
         return 1;
@@ -691,12 +405,12 @@ public:
        #endif
     }
 
-    bool getSupportsMPE() override
+    bool getSupportsMPE() const
     {
         return getAudioProcessor().supportsMPE();
     }
 
-    NSArray<NSString*>* getMIDIOutputNames() override
+    NSArray<NSString*>* getMIDIOutputNames() const
     {
        #if JucePlugin_ProducesMidiOutput
         return @[@"MIDI Out"];
@@ -706,9 +420,9 @@ public:
     }
 
     //==============================================================================
-    AUInternalRenderBlock getInternalRenderBlock() override   { return internalRenderBlock;  }
-    bool getRenderingOffline() override                       { return getAudioProcessor().isNonRealtime(); }
-    void setRenderingOffline (bool offline) override
+    AUInternalRenderBlock getInternalRenderBlock() const  { return internalRenderBlock; }
+    bool getRenderingOffline()                     const  { return getAudioProcessor().isNonRealtime(); }
+    void setRenderingOffline (bool offline)
     {
         auto& processor = getAudioProcessor();
         auto isCurrentlyNonRealtime = processor.isNonRealtime();
@@ -722,25 +436,25 @@ public:
         }
     }
 
-    bool getShouldBypassEffect() override
+    bool getShouldBypassEffect() const
     {
         if (bypassParam != nullptr)
             return (bypassParam->getValue() != 0.0f);
 
-        return JuceAudioUnitv3Base::getShouldBypassEffect();
+        return (ObjCMsgSendSuper<AUAudioUnit, BOOL> (au, @selector (shouldBypassEffect)) == YES);
     }
 
-    void setShouldBypassEffect (bool shouldBypass) override
+    void setShouldBypassEffect (bool shouldBypass)
     {
         if (bypassParam != nullptr)
             bypassParam->setValue (shouldBypass ? 1.0f : 0.0f);
 
-        JuceAudioUnitv3Base::setShouldBypassEffect (shouldBypass);
+        ObjCMsgSendSuper<AUAudioUnit, void> (au, @selector (setShouldBypassEffect:), shouldBypass ? YES : NO);
     }
 
     //==============================================================================
-    NSString* getContextName() const    override              { return juceStringToNS (contextName); }
-    void setContextName (NSString* str) override
+    NSString* getContextName() const                  { return juceStringToNS (contextName); }
+    void setContextName (NSString* str)
     {
         if (str != nullptr)
         {
@@ -752,12 +466,12 @@ public:
     }
 
     //==============================================================================
-    bool allocateRenderResourcesAndReturnError (NSError **outError) override
+    bool allocateRenderResourcesAndReturnError (NSError **outError)
     {
         AudioProcessor& processor = getAudioProcessor();
-        const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
+        const AUAudioFrameCount maxFrames = [au maximumFramesToRender];
 
-        if (! JuceAudioUnitv3Base::allocateRenderResourcesAndReturnError (outError))
+        if (ObjCMsgSendSuper<AUAudioUnit, BOOL, NSError**> (au, @selector (allocateRenderResourcesAndReturnError:), outError) == NO)
             return false;
 
         if (outError != nullptr)
@@ -770,7 +484,7 @@ public:
             const int n = AudioUnitHelpers::getBusCountForWrapper (processor, isInput);
             Array<AudioChannelSet>& channelSets = (isInput ? layouts.inputBuses : layouts.outputBuses);
 
-            AUAudioUnitBusArray* auBuses = (isInput ? [getAudioUnit() inputBusses] : [getAudioUnit() outputBusses]);
+            AUAudioUnitBusArray* auBuses = (isInput ? [au inputBusses] : [au outputBusses]);
             jassert ([auBuses count] == static_cast<NSUInteger> (n));
 
             for (int busIdx = 0; busIdx < n; ++busIdx)
@@ -841,8 +555,8 @@ public:
         midiMessages.ensureSize (2048);
         midiMessages.clear();
 
-        hostMusicalContextCallback = [getAudioUnit() musicalContextBlock];
-        hostTransportStateCallback = [getAudioUnit() transportStateBlock];
+        hostMusicalContextCallback = [au musicalContextBlock];
+        hostTransportStateCallback = [au transportStateBlock];
 
         if (@available (macOS 10.13, iOS 11.0, *))
             midiOutputEventBlock = [au MIDIOutputEventBlock];
@@ -852,7 +566,7 @@ public:
         return true;
     }
 
-    void deallocateRenderResources() override
+    void deallocateRenderResources()
     {
         midiOutputEventBlock = nullptr;
 
@@ -867,49 +581,10 @@ public:
 
         mapper.release();
 
-        JuceAudioUnitv3Base::deallocateRenderResources();
+        ObjCMsgSendSuper<AUAudioUnit, void> (au, @selector (deallocateRenderResources));
     }
 
     //==============================================================================
-    API_AVAILABLE (macos (10.13), ios (11.0))
-    NSIndexSet* getSupportedViewConfigurations (NSArray<AUAudioUnitViewConfiguration*>* configs) override
-    {
-        auto supportedViewIndecies = [[NSMutableIndexSet alloc] init];
-        auto n = [configs count];
-
-        if (auto* editor = getAudioProcessor().createEditorIfNeeded())
-        {
-            // If you hit this assertion then your plug-in's editor is reporting that it doesn't support
-            // any host MIDI controller configurations!
-            jassert (editor->supportsHostMIDIControllerPresence (true) || editor->supportsHostMIDIControllerPresence (false));
-
-            for (auto i = 0u; i < n; ++i)
-            {
-                if (auto viewConfiguration = [configs objectAtIndex: i])
-                {
-                    if (editor->supportsHostMIDIControllerPresence ([viewConfiguration hostHasController] == YES))
-                    {
-                        auto* constrainer = editor->getConstrainer();
-                        auto height = (int) [viewConfiguration height];
-                        auto width  = (int) [viewConfiguration width];
-
-                        if (height <= constrainer->getMaximumHeight() && height >= constrainer->getMinimumHeight()
-                         && width  <= constrainer->getMaximumWidth()  && width  >= constrainer->getMinimumWidth())
-                            [supportedViewIndecies addIndex: i];
-                    }
-                }
-            }
-        }
-
-        return [supportedViewIndecies autorelease];
-    }
-
-    API_AVAILABLE (macos (10.13), ios (11.0))
-    void selectViewConfiguration (AUAudioUnitViewConfiguration* config) override
-    {
-        processorHolder->viewConfiguration.reset (new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES });
-    }
-
     struct ScopedKeyChange
     {
         ScopedKeyChange (AUAudioUnit* a, NSString* k)
@@ -1073,7 +748,195 @@ public:
         }
     }
 
+    AUAudioUnit* getAudioUnit() const { return au; }
+
 private:
+    struct Class  : public ObjCClass<AUAudioUnit>
+    {
+        Class() : ObjCClass<AUAudioUnit> ("AUAudioUnit_")
+        {
+            addIvar<JuceAudioUnitv3*> ("cppObject");
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (initWithComponentDescription:options:error:juceClass:), [] (id _self,
+                                                                                              SEL,
+                                                                                              AudioComponentDescription descr,
+                                                                                              AudioComponentInstantiationOptions options,
+                                                                                              NSError** error,
+                                                                                              JuceAudioUnitv3* juceAU)
+            {
+                AUAudioUnit* self = _self;
+
+                self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
+                                        AudioComponentInstantiationOptions, NSError**> (self, @selector(initWithComponentDescription:options:error:), descr, options, error);
+
+                setThis (self, juceAU);
+                return self;
+            });
+
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            addMethod (@selector (initWithComponentDescription:options:error:), [] (id _self,
+                                                                                    SEL,
+                                                                                    AudioComponentDescription descr,
+                                                                                    AudioComponentInstantiationOptions options,
+                                                                                    NSError** error)
+            {
+                AUAudioUnit* self = _self;
+
+                self = ObjCMsgSendSuper<AUAudioUnit, AUAudioUnit*, AudioComponentDescription,
+                                        AudioComponentInstantiationOptions, NSError**> (self, @selector (initWithComponentDescription:options:error:), descr, options, error);
+
+                auto* juceAU = JuceAudioUnitv3::create (self, descr, options, error);
+
+                setThis (self, juceAU);
+                return self;
+            });
+
+            addMethod (@selector (dealloc), [] (id self, SEL)
+            {
+                if (! MessageManager::getInstance()->isThisTheMessageThread())
+                {
+                    WaitableEvent deletionEvent;
+
+                    struct AUDeleter  : public CallbackMessage
+                    {
+                        AUDeleter (id selfToDelete, WaitableEvent& event)
+                            : parentSelf (selfToDelete), parentDeletionEvent (event)
+                        {
+                        }
+
+                        void messageCallback() override
+                        {
+                            delete _this (parentSelf);
+                            parentDeletionEvent.signal();
+                        }
+
+                        id parentSelf;
+                        WaitableEvent& parentDeletionEvent;
+                    };
+
+                    (new AUDeleter (self, deletionEvent))->post();
+                    deletionEvent.wait (-1);
+                }
+                else
+                {
+                    delete _this (self);
+                }
+            });
+
+            //==============================================================================
+            addMethod (@selector (reset),                                   [] (id self, SEL)                                                   { return _this (self)->reset(); });
+
+            //==============================================================================
+            addMethod (@selector (currentPreset),                           [] (id self, SEL)                                                   { return _this (self)->getCurrentPreset(); });
+            addMethod (@selector (setCurrentPreset:),                       [] (id self, SEL, AUAudioUnitPreset* preset)                        { return _this (self)->setCurrentPreset (preset); });
+            addMethod (@selector (factoryPresets),                          [] (id self, SEL)                                                   { return _this (self)->getFactoryPresets(); });
+            addMethod (@selector (fullState),                               [] (id self, SEL)                                                   { return _this (self)->getFullState(); });
+            addMethod (@selector (setFullState:),                           [] (id self, SEL, NSDictionary<NSString *, id>* state)              { return _this (self)->setFullState (state); });
+            addMethod (@selector (parameterTree),                           [] (id self, SEL)                                                   { return _this (self)->getParameterTree(); });
+            addMethod (@selector (parametersForOverviewWithCount:),         [] (id self, SEL, NSInteger count)                                  { return _this (self)->parametersForOverviewWithCount (static_cast<int> (count)); });
+
+            //==============================================================================
+            addMethod (@selector (latency),                                 [] (id self, SEL)                                                   { return _this (self)->getLatency(); });
+            addMethod (@selector (tailTime),                                [] (id self, SEL)                                                   { return _this (self)->getTailTime(); });
+
+            //==============================================================================
+            addMethod (@selector (inputBusses),                             [] (id self, SEL)                                                   { return _this (self)->getInputBusses(); });
+            addMethod (@selector (outputBusses),                            [] (id self, SEL)                                                   { return _this (self)->getOutputBusses(); });
+            addMethod (@selector (channelCapabilities),                     [] (id self, SEL)                                                   { return _this (self)->getChannelCapabilities(); });
+            addMethod (@selector (shouldChangeToFormat:forBus:),            [] (id self, SEL, AVAudioFormat* format, AUAudioUnitBus* bus)       { return _this (self)->shouldChangeToFormat (format, bus) ? YES : NO; });
+
+            //==============================================================================
+            addMethod (@selector (virtualMIDICableCount),                   [] (id self, SEL)                                                   { return _this (self)->getVirtualMIDICableCount(); });
+
+            JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wundeclared-selector")
+            addMethod (@selector (supportsMPE),                             [] (id self, SEL)                                                   { return _this (self)->getSupportsMPE() ? YES : NO; });
+            JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+
+            if (@available (macOS 10.13, iOS 11.0, *))
+                addMethod (@selector (MIDIOutputNames),                     [] (id self, SEL)                                                   { return _this (self)->getMIDIOutputNames(); });
+
+            //==============================================================================
+            addMethod (@selector (internalRenderBlock),                     [] (id self, SEL)                                                   { return _this (self)->getInternalRenderBlock(); });
+            addMethod (@selector (canProcessInPlace),                       [] (id,      SEL)                                                   { return NO; });
+            addMethod (@selector (isRenderingOffline),                      [] (id self, SEL)                                                   { return _this (self)->getRenderingOffline() ? YES : NO; });
+            addMethod (@selector (setRenderingOffline:),                    [] (id self, SEL, BOOL renderingOffline)                            { return _this (self)->setRenderingOffline (renderingOffline); });
+            addMethod (@selector (shouldBypassEffect),                      [] (id self, SEL)                                                   { return _this (self)->getShouldBypassEffect() ? YES : NO; });
+            addMethod (@selector (setShouldBypassEffect:),                  [] (id self, SEL, BOOL shouldBypass)                                { return _this (self)->setShouldBypassEffect (shouldBypass); });
+            addMethod (@selector (allocateRenderResourcesAndReturnError:),  [] (id self, SEL, NSError** error)                                  { return _this (self)->allocateRenderResourcesAndReturnError (error) ? YES : NO; });
+            addMethod (@selector (deallocateRenderResources),               [] (id self, SEL)                                                   { return _this (self)->deallocateRenderResources(); });
+
+            //==============================================================================
+            addMethod (@selector (contextName),                             [] (id self, SEL)                                                   { return _this (self)->getContextName(); });
+            addMethod (@selector (setContextName:),                         [](id self, SEL, NSString* str)                                     { return _this (self)->setContextName (str); });
+
+            //==============================================================================
+            if (@available (macOS 10.13, iOS 11.0, *))
+            {
+                addMethod (@selector (supportedViewConfigurations:), [] (id self, SEL, NSArray<AUAudioUnitViewConfiguration*>* configs)
+                {
+                    auto supportedViewIndices = [[NSMutableIndexSet alloc] init];
+                    auto n = [configs count];
+
+                    if (auto* editor = _this (self)->getAudioProcessor().createEditorIfNeeded())
+                    {
+                        // If you hit this assertion then your plug-in's editor is reporting that it doesn't support
+                        // any host MIDI controller configurations!
+                        jassert (editor->supportsHostMIDIControllerPresence (true) || editor->supportsHostMIDIControllerPresence (false));
+
+                        for (auto i = 0u; i < n; ++i)
+                        {
+                            if (auto viewConfiguration = [configs objectAtIndex: i])
+                            {
+                                if (editor->supportsHostMIDIControllerPresence ([viewConfiguration hostHasController] == YES))
+                                {
+                                    auto* constrainer = editor->getConstrainer();
+                                    auto height = (int) [viewConfiguration height];
+                                    auto width  = (int) [viewConfiguration width];
+
+                                    const auto maxLimits = std::numeric_limits<int>::max() / 2;
+                                    const Rectangle<int> requestedBounds { width, height };
+                                    auto modifiedBounds = requestedBounds;
+                                    constrainer->checkBounds (modifiedBounds, editor->getBounds().withZeroOrigin(), { maxLimits, maxLimits }, false, false, false, false);
+
+                                    if (modifiedBounds == requestedBounds)
+                                        [supportedViewIndices addIndex: i];
+                                }
+                            }
+                        }
+                    }
+
+                    return [supportedViewIndices autorelease];
+                });
+
+                addMethod (@selector (selectViewConfiguration:), [] (id self, SEL, AUAudioUnitViewConfiguration* config)
+                {
+                    _this (self)->processorHolder->viewConfiguration.reset (new AudioProcessorHolder::ViewConfig { [config width], [config height], [config hostHasController] == YES });
+                });
+            }
+
+            registerClass();
+        }
+
+        //==============================================================================
+        static JuceAudioUnitv3* _this (id self)                     { return getIvar<JuceAudioUnitv3*>     (self, "cppObject"); }
+        static void setThis (id self, JuceAudioUnitv3* cpp)         { object_setInstanceVariable           (self, "cppObject", cpp); }
+    };
+
+    static JuceAudioUnitv3* create (AUAudioUnit* audioUnit, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
+    {
+        PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
+        return new JuceAudioUnitv3 (audioUnit, descr, options, error);
+    }
+
+    //==============================================================================
+    static Class& getClass()
+    {
+        static Class result;
+        return result;
+    }
+
     //==============================================================================
     struct BusBuffer
     {
@@ -1221,7 +1084,7 @@ private:
     }
 
     // When parameters are discrete we need to use integer values.
-    float getMaximumParameterValue (AudioProcessorParameter* juceParam)
+    float getMaximumParameterValue (AudioProcessorParameter* juceParam) const
     {
        #if JUCE_FORCE_LEGACY_PARAMETER_AUTOMATION_TYPE
         ignoreUnused (juceParam);
@@ -1459,7 +1322,7 @@ private:
         busBuffers.clear();
 
         const int n = AudioUnitHelpers::getBusCountForWrapper (getAudioProcessor(), isInput);
-        const AUAudioFrameCount maxFrames = [getAudioUnit() maximumFramesToRender];
+        const AUAudioFrameCount maxFrames = [au maximumFramesToRender];
 
         for (int busIdx = 0; busIdx < n; ++busIdx)
             busBuffers.add (new BusBuffer ([(isInput ? inputBusses.get() : outputBusses.get()) objectAtIndexedSubscript: static_cast<unsigned int> (busIdx)],
@@ -1673,7 +1536,7 @@ private:
         }
     }
 
-    AUValue getValue (AUParameter* param)
+    AUValue getValue (AUParameter* param) const
     {
         if (param != nullptr)
         {
@@ -1729,7 +1592,7 @@ private:
     // this is only ever called for the bypass parameter
     void parameterValueChanged (int, float newValue) override
     {
-        JuceAudioUnitv3Base::setShouldBypassEffect (newValue != 0.0f);
+        JuceAudioUnitv3::setShouldBypassEffect (newValue != 0.0f);
     }
 
     void parameterGestureChanged (int, bool) override {}
@@ -1767,8 +1630,9 @@ private:
     }
 
     //==============================================================================
-    static const double kDefaultSampleRate;
+    static constexpr double kDefaultSampleRate = 44100.0;
 
+    AUAudioUnit* au;
     AudioProcessorHolder::Ptr processorHolder;
 
     int totalInChannels, totalOutChannels;
@@ -1825,14 +1689,6 @@ private:
    #endif
     AudioProcessorParameter* bypassParam = nullptr;
 };
-
-const double JuceAudioUnitv3::kDefaultSampleRate = 44100.0;
-
-JuceAudioUnitv3Base* JuceAudioUnitv3Base::create (AUAudioUnit* audioUnit, AudioComponentDescription descr, AudioComponentInstantiationOptions options, NSError** error)
-{
-    PluginHostType::jucePlugInClientCurrentWrapperType = AudioProcessor::wrapperType_AudioUnitv3;
-    return new JuceAudioUnitv3 (audioUnit, descr, options, error);
-}
 
 #if JUCE_IOS
 namespace juce
