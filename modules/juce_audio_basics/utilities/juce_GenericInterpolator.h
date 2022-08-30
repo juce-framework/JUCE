@@ -404,7 +404,7 @@ private:
                             }
                             else
                             {
-                                numInputSamplesAvailable = true;
+                                exceeded = true;
                             }
                         }
                     }
