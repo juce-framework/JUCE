@@ -689,7 +689,8 @@ private:
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
             mo << "                    arguments "
-               << "\"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\"";
+               << "\"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""
+               << ", \"-DCMAKE_BUILD_TYPE=" << (cfg.isDebug() ? "Debug" : "Release") << "\"";
 
             mo << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
                << "=-O" << cfg.getGCCOptimisationFlag();
