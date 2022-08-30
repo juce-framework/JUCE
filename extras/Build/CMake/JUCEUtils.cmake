@@ -871,6 +871,12 @@ function(juce_enable_copy_plugin_step shared_code_target)
     get_target_property(active_targets "${shared_code_target}" JUCE_ACTIVE_PLUGIN_TARGETS)
 
     foreach(target IN LISTS active_targets)
+        get_target_property(target_kind "${target}" JUCE_TARGET_KIND_STRING)
+
+        if(target_kind STREQUAL "App")
+            continue()
+        endif()
+
         get_target_property(source "${target}" JUCE_PLUGIN_ARTEFACT_FILE)
 
         if(source)
@@ -906,7 +912,15 @@ function(_juce_set_plugin_target_properties shared_code_target kind)
     get_target_property(products_folder ${target_name} LIBRARY_OUTPUT_DIRECTORY)
     set(product_name $<TARGET_PROPERTY:${shared_code_target},JUCE_PRODUCT_NAME>)
 
-    if(kind STREQUAL "VST3")
+    if(kind STREQUAL "Standalone")
+        get_target_property(is_bundle "${target_name}" BUNDLE)
+
+        if(is_bundle)
+            set_target_properties("${target_name}" PROPERTIES JUCE_PLUGIN_ARTEFACT_FILE "$<TARGET_BUNDLE_DIR:${target_name}>")
+        else()
+            set_target_properties("${target_name}" PROPERTIES JUCE_PLUGIN_ARTEFACT_FILE "$<TARGET_FILE:${target_name}>")
+        endif()
+    elseif(kind STREQUAL "VST3")
         set_target_properties(${target_name} PROPERTIES
             BUNDLE_EXTENSION vst3
             PREFIX ""
