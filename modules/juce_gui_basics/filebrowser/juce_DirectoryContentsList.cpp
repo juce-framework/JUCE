@@ -27,7 +27,7 @@ namespace juce
 {
 
 DirectoryContentsList::DirectoryContentsList (const FileFilter* f, TimeSliceThread& t)
-   : fileFilter (f), thread (t)
+    : fileFilter (f), thread (t)
 {
 }
 
