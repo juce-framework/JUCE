@@ -592,4 +592,33 @@ String SystemStats::getDisplayLanguage()
     return languagesBuffer.data();
 }
 
+String SystemStats::getUniqueDeviceID()
+{
+    #define PROVIDER(string) (DWORD) (string[0] << 24 | string[1] << 16 | string[2] << 8 | string[3])
+
+    auto bufLen = GetSystemFirmwareTable (PROVIDER ("RSMB"), PROVIDER ("RSDT"), nullptr, 0);
+
+    if (bufLen > 0)
+    {
+        HeapBlock<uint8_t> buffer { bufLen };
+        GetSystemFirmwareTable (PROVIDER ("RSMB"), PROVIDER ("RSDT"), (void*) buffer.getData(), bufLen);
+
+        return [&]
+        {
+            uint64_t hash = 0;
+            const auto start = buffer.getData();
+            const auto end = start + jmin (1024, (int) bufLen);
+
+            for (auto dataPtr = start; dataPtr != end; ++dataPtr)
+                hash = hash * (uint64_t) 101 + *dataPtr;
+
+            return String (hash);
+        }();
+    }
+
+    // Please tell someone at JUCE if this occurs
+    jassertfalse;
+    return {};
+}
+
 } // namespace juce

@@ -35,7 +35,6 @@ namespace UnitTestCategories
     static const String cryptography               { "Cryptography" };
     static const String dsp                        { "DSP" };
     static const String files                      { "Files" };
-    static const String function                   { "Function" };
     static const String graphics                   { "Graphics" };
     static const String gui                        { "GUI" };
     static const String json                       { "JSON" };

@@ -253,4 +253,25 @@ bool SystemStats::isRunningInAppExtensionSandbox() noexcept
    #endif
 }
 
+#if JUCE_UNIT_TESTS
+
+class UniqueHardwareIDTest  : public UnitTest
+{
+public:
+    //==============================================================================
+    UniqueHardwareIDTest() : UnitTest ("UniqueHardwareID", UnitTestCategories::analytics) {}
+
+    void runTest() override
+    {
+        beginTest ("getUniqueDeviceID returns usable data.");
+        {
+            expect (SystemStats::getUniqueDeviceID().isNotEmpty());
+        }
+    }
+};
+
+static UniqueHardwareIDTest uniqueHardwareIDTest;
+
+#endif
+
 } // namespace juce

@@ -145,7 +145,16 @@ public:
         The first choice for an ID is a filesystem ID for the user's home folder or
         windows directory. If that fails then this function returns the MAC addresses.
     */
+    [[deprecated ("The identifiers produced by this function are not reliable. Use getUniqueDeviceID() instead.")]]
     static StringArray getDeviceIdentifiers();
+
+    /** This method returns a machine unique ID unaffected by storage or peripheral
+        changes.
+
+        This ID will be invalidated by changes to the motherboard and CPU on non-mobile
+        platforms, or resetting an Android device.
+    */
+    static String getUniqueDeviceID();
 
     //==============================================================================
     // CPU and memory information..
