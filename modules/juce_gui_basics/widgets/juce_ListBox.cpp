@@ -525,7 +525,7 @@ ListBox::ListBox (const String& name, ListBoxModel* const m)
     setFocusContainerType (FocusContainerType::focusContainer);
     colourChanged();
 
-    setModel (m);
+    assignModelPtr (m);
 }
 
 ListBox::~ListBox()
