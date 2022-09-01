@@ -3356,7 +3356,7 @@ public:
                     if (juceVST3EditController != nullptr &&
                         juceVST3EditController->isMidiControllerParamID(vstParamID))
                     {
-                        // SURGE CHANGE - rather than just adding the last sample, add all the midi
+                        // SURGE  - rather than just adding the last sample, add all the midi
                         // events (this used to just be the numPoints==1 case)
                         if (numPoints == 1)
                         {
