@@ -31,7 +31,7 @@ namespace juce
     Receives callbacks when keys are pressed.
 
     You can add a key listener to a component to be informed when that component
-    gets key events. See the Component::addListener method for more details.
+    gets key events. See the Component::addKeyListener method for more details.
 
     @see KeyPress, Component::addKeyListener, KeyPressMappingSet
 
