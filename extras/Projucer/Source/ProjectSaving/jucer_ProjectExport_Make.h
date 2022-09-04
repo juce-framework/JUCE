@@ -228,6 +228,9 @@ public:
 
             s.add ("JUCE_TARGET_" + getTargetVarName() + String (" := ") + escapeQuotesAndSpaces (targetName));
 
+            if (type == LV2PlugIn)
+                s.add ("JUCE_LV2_FULL_PATH := $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_PLUGIN)");
+
             if (config.isPluginBinaryCopyStepEnabled()
                 && (type == VST3PlugIn || type == VSTPlugIn || type == UnityPlugIn || type == LV2PlugIn))
             {
@@ -251,7 +254,6 @@ public:
                 else if (type == LV2PlugIn)
                 {
                     s.add ("JUCE_LV2DESTDIR := " + config.getLV2BinaryLocationString());
-                    s.add ("JUCE_LV2_FULL_PATH := $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_PLUGIN)");
                     s.add (copyCmd + "$(JUCE_LV2DIR) $(JUCE_LV2DESTDIR)");
                 }
             }
@@ -380,13 +382,11 @@ public:
 
             if (type == VST3PlugIn)
             {
-                out << "\t-$(V_AT)mkdir -p $(JUCE_VST3DESTDIR)" << newLine
-                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST3)"   << newLine;
+                out << "\t-$(V_AT)[ ! \"$(JUCE_VST3DESTDIR)\" ] || (mkdir -p $(JUCE_VST3DESTDIR) && cp -R $(JUCE_COPYCMD_VST3))" << newLine;
             }
             else if (type == VSTPlugIn)
             {
-                out << "\t-$(V_AT)mkdir -p $(JUCE_VSTDESTDIR)" << newLine
-                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_VST)"   << newLine;
+                out << "\t-$(V_AT)[ ! \"$(JUCE_VSTDESTDIR)\" ]  || (mkdir -p $(JUCE_VSTDESTDIR)  && cp -R $(JUCE_COPYCMD_VST))"  << newLine;
             }
             else if (type == UnityPlugIn)
             {
@@ -397,15 +397,12 @@ public:
                                                       build_tools::RelativePath::projectFolder);
 
                 out << "\t-$(V_AT)cp " + scriptPath.toUnixStyle() + " $(JUCE_OUTDIR)/$(JUCE_UNITYDIR)" << newLine
-                    << "\t-$(V_AT)mkdir -p $(JUCE_UNITYDESTDIR)"                                       << newLine
-                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_UNITY_PLUGIN)"                                  << newLine;
+                    << "\t-$(V_AT)[ ! \"$(JUCE_UNITYDESTDIR)\" ] || (mkdir -p $(JUCE_UNITYDESTDIR) && cp -R $(JUCE_COPYCMD_UNITY_PLUGIN))" << newLine;
             }
             else if (type == LV2PlugIn)
             {
-                out << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER) "
-                       "$(abspath $(JUCE_LV2_FULL_PATH))"                                              << newLine
-                    << "\t-$(V_AT)mkdir -p $(JUCE_LV2DESTDIR)"                                         << newLine
-                    << "\t-$(V_AT)cp -R $(JUCE_COPYCMD_LV2_PLUGIN)"                                    << newLine;
+                out << "\t$(V_AT) $(JUCE_OUTDIR)/$(JUCE_TARGET_LV2_MANIFEST_HELPER) $(abspath $(JUCE_LV2_FULL_PATH))" << newLine
+                    << "\t-$(V_AT)[ ! \"$(JUCE_LV2DESTDIR)\" ] || (mkdir -p $(JUCE_LV2DESTDIR) && cp -R $(JUCE_COPYCMD_LV2_PLUGIN))" << newLine;
             }
 
             out << newLine;
@@ -1024,7 +1021,7 @@ private:
                     targetFiles.add (f);
 
             if (targetType == MakefileTarget::LV2TurtleProgram)
-                targetFiles.add ({ project.resolveFilename (getLV2TurtleDumpProgramSource().toUnixStyle()), {} });
+                targetFiles.add ({ rebaseFromProjectFolderToBuildTarget (getLV2TurtleDumpProgramSource()).toUnixStyle(), {} });
 
             return targetFiles;
         };

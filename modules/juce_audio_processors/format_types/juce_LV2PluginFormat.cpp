@@ -2507,7 +2507,7 @@ public:
             // In this case, we find the closest label by searching the midpoints of the scale
             // point values.
             const auto index = std::distance (midPoints.begin(),
-                                              std::lower_bound (midPoints.begin(), midPoints.end(), normalisedValue));
+                                              std::lower_bound (midPoints.begin(), midPoints.end(), denormalised));
             jassert (isPositiveAndBelow (index, info.scalePoints.size()));
             return info.scalePoints[(size_t) index].label;
         }
@@ -2549,6 +2549,7 @@ private:
             return {};
 
         std::vector<float> result;
+        result.reserve (set.size() - 1);
 
         for (auto it = std::next (set.begin()); it != set.end(); ++it)
             result.push_back ((std::prev (it)->value + it->value) * 0.5f);

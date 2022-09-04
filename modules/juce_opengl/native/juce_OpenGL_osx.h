@@ -85,8 +85,17 @@ public:
         int numAttribs = 0;
 
         attribs[numAttribs++] = NSOpenGLPFAOpenGLProfile;
-        attribs[numAttribs++] = version >= openGL3_2 ? NSOpenGLProfileVersion3_2Core
-                                                     : NSOpenGLProfileVersionLegacy;
+        attribs[numAttribs++] = [version]
+        {
+            if (version == openGL3_2)
+                return NSOpenGLProfileVersion3_2Core;
+
+            if (version != defaultGLVersion)
+                if (@available (macOS 10.10, *))
+                    return NSOpenGLProfileVersion4_1Core;
+
+            return NSOpenGLProfileVersionLegacy;
+        }();
 
         attribs[numAttribs++] = NSOpenGLPFADoubleBuffer;
         attribs[numAttribs++] = NSOpenGLPFAClosestPolicy;

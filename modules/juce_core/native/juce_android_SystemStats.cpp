@@ -47,6 +47,22 @@ namespace AndroidStatsHelpers
                                                                                           javaString (name).get())));
     }
 
+    static String getAndroidID()
+    {
+        auto* env = getEnv();
+
+        if (auto settings = (jclass) env->FindClass ("android/provider/Settings$Secure"))
+        {
+            if (auto fId = env->GetStaticFieldID (settings, "ANDROID_ID", "Ljava/lang/String;"))
+            {
+                auto androidID = (jstring) env->GetStaticObjectField (settings, fId);
+                return juceString (LocalRef<jstring> (androidID));
+            }
+        }
+
+        return "";
+    }
+
     static String getLocaleValue (bool isRegion)
     {
         auto* env = getEnv();
@@ -169,6 +185,15 @@ String SystemStats::getComputerName()
 String SystemStats::getUserLanguage()    { return AndroidStatsHelpers::getLocaleValue (false); }
 String SystemStats::getUserRegion()      { return AndroidStatsHelpers::getLocaleValue (true); }
 String SystemStats::getDisplayLanguage() { return getUserLanguage() + "-" + getUserRegion(); }
+
+String SystemStats::getUniqueDeviceID()
+{
+    auto id = String ((uint64_t) AndroidStatsHelpers::getAndroidID().hashCode64());
+
+    // Please tell someone at JUCE if this occurs
+    jassert (id.isNotEmpty());
+    return id;
+}
 
 //==============================================================================
 void CPUInformation::initialise() noexcept

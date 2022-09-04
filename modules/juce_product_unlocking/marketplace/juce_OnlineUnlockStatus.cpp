@@ -314,6 +314,14 @@ void OnlineUnlockStatus::MachineIDUtilities::addMACAddressesToList (StringArray&
         ids.add (getEncodedIDString (address.toString()));
 }
 
+String OnlineUnlockStatus::MachineIDUtilities::getUniqueMachineID()
+{
+    return getEncodedIDString (SystemStats::getUniqueDeviceID());
+}
+
+JUCE_BEGIN_IGNORE_WARNINGS_GCC_LIKE ("-Wdeprecated-declarations")
+JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4996)
+
 StringArray OnlineUnlockStatus::MachineIDUtilities::getLocalMachineIDs()
 {
     auto identifiers = SystemStats::getDeviceIdentifiers();
@@ -328,6 +336,9 @@ StringArray OnlineUnlockStatus::getLocalMachineIDs()
 {
     return MachineIDUtilities::getLocalMachineIDs();
 }
+
+JUCE_END_IGNORE_WARNINGS_GCC_LIKE
+JUCE_END_IGNORE_WARNINGS_MSVC
 
 void OnlineUnlockStatus::userCancelled()
 {
@@ -378,22 +389,19 @@ bool OnlineUnlockStatus::applyKeyFile (String keyFileContent)
     return false;
 }
 
-static bool canConnectToWebsite (const URL& url)
-{
-    return url.createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
-                                        .withConnectionTimeoutMs (2000)) != nullptr;
-}
-
 static bool areMajorWebsitesAvailable()
 {
-    const char* urlsToTry[] = { "http://google.com",  "http://bing.com",  "http://amazon.com",
-                                "https://google.com", "https://bing.com", "https://amazon.com", nullptr};
+    static constexpr const char* const urlsToTry[] = { "http://google.com",  "http://bing.com",  "http://amazon.com",
+                                                       "https://google.com", "https://bing.com", "https://amazon.com" };
+    const auto canConnectToWebsite = [] (auto url)
+    {
+        return URL (url).createInputStream (URL::InputStreamOptions (URL::ParameterHandling::inAddress)
+                                                .withConnectionTimeoutMs (2000)) != nullptr;
+    };
 
-    for (const char** url = urlsToTry; *url != nullptr; ++url)
-        if (canConnectToWebsite (URL (*url)))
-            return true;
-
-    return false;
+    return std::any_of (std::begin (urlsToTry),
+                        std::end   (urlsToTry),
+                        canConnectToWebsite);
 }
 
 OnlineUnlockStatus::UnlockResult OnlineUnlockStatus::handleXmlReply (XmlElement xml)

@@ -206,13 +206,34 @@ private:
 
     static HGLRC createRenderContext (OpenGLVersion version, HDC dcIn)
     {
-        if (version >= openGL3_2 && wglCreateContextAttribsARB != nullptr)
+        const auto components = [&]() -> Optional<Version>
         {
+            switch (version)
+            {
+                case OpenGLVersion::openGL3_2: return Version { 3, 2 };
+                case OpenGLVersion::openGL4_1: return Version { 4, 1 };
+                case OpenGLVersion::openGL4_3: return Version { 4, 3 };
+
+                case OpenGLVersion::defaultGLVersion: break;
+            }
+
+            return {};
+        }();
+
+        if (components.hasValue() && wglCreateContextAttribsARB != nullptr)
+        {
+           #if JUCE_DEBUG
+            constexpr auto contextFlags = WGL_CONTEXT_DEBUG_BIT_ARB;
+           #else
+            constexpr auto contextFlags = 0;
+           #endif
+
             const int attribs[] =
             {
-                WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-                WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+                WGL_CONTEXT_MAJOR_VERSION_ARB, components->major,
+                WGL_CONTEXT_MINOR_VERSION_ARB, components->minor,
                 WGL_CONTEXT_PROFILE_MASK_ARB,  WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+                WGL_CONTEXT_FLAGS_ARB,         contextFlags,
                 0
             };
 
