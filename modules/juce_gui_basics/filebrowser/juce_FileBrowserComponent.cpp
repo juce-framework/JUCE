@@ -63,6 +63,9 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
         filename = initialFileOrDirectory.getFileName();
     }
 
+    // The thread must be started before the DirectoryContentsList attempts to scan any file
+    thread.startThread (4);
+
     fileList.reset (new DirectoryContentsList (this, thread));
     fileList->setDirectory (currentRoot, true, true);
 
@@ -121,8 +124,6 @@ FileBrowserComponent::FileBrowserComponent (int flags_,
 
     if (filename.isNotEmpty())
         setFileName (filename);
-
-    thread.startThread (4);
 
     startTimer (2000);
 }

@@ -2563,6 +2563,11 @@ public:
 
         using namespace Vst;
 
+        // If the plugin has already been activated (prepareToPlay has been called twice without
+        // a matching releaseResources call) deactivate it so that the speaker layout and bus
+        // activation can be updated safely.
+        deactivate();
+
         ProcessSetup setup;
         setup.symbolicSampleSize    = isUsingDoublePrecision() ? kSample64 : kSample32;
         setup.maxSamplesPerBlock    = estimatedSamplesPerBlock;
@@ -2617,19 +2622,7 @@ public:
     void releaseResources() override
     {
         const SpinLock::ScopedLockType lock (processMutex);
-
-        if (! isActive)
-            return; // Avoids redundantly calling things like setActive
-
-        isActive = false;
-
-        if (processor != nullptr)
-            warnOnFailureIfImplemented (processor->setProcessing (false));
-
-        if (holder->component != nullptr)
-            warnOnFailure (holder->component->setActive (false));
-
-        setStateForAllMidiBuses (false);
+        deactivate();
     }
 
     bool supportsDoublePrecisionProcessing() const override
@@ -3163,6 +3156,22 @@ public:
     }
 
 private:
+    void deactivate()
+    {
+        if (! isActive)
+            return;
+
+        isActive = false;
+
+        if (processor != nullptr)
+            warnOnFailureIfImplemented (processor->setProcessing (false));
+
+        if (holder->component != nullptr)
+            warnOnFailure (holder->component->setActive (false));
+
+        setStateForAllMidiBuses (false);
+    }
+
     //==============================================================================
    #if JUCE_LINUX || JUCE_BSD
     SharedResourcePointer<RunLoop> runLoop;

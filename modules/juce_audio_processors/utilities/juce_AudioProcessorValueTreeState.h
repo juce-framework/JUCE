@@ -498,7 +498,7 @@ public:
                          valueRange,
                          defaultParameterValue,
                          AudioProcessorValueTreeStateParameterAttributes().withLabel (labelText)
-                                                                          .withStringFromValueFunction ([valueToTextFunction] (float v, int) { return valueToTextFunction (v); })
+                                                                          .withStringFromValueFunction (adaptSignature (std::move (valueToTextFunction)))
                                                                           .withValueFromStringFunction (std::move (textToValueFunction))
                                                                           .withMeta (isMetaParameter)
                                                                           .withAutomatable (isAutomatableParameter)
@@ -515,6 +515,14 @@ public:
         bool isBoolean() const override;
 
     private:
+        static std::function<String (float, int)> adaptSignature (std::function<String (float)> func)
+        {
+            if (func == nullptr)
+                return nullptr;
+
+            return [func = std::move (func)] (float v, int) { return func (v); };
+        }
+
         void valueChanged (float) override;
 
         std::function<void()> onValueChanged;

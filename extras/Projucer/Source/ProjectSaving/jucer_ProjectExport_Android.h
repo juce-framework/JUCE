@@ -116,7 +116,7 @@ public:
           androidGradleSettingsContent         (settings, Ids::androidGradleSettingsContent,         getUndoManager()),
           androidVersionCode                   (settings, Ids::androidVersionCode,                   getUndoManager(), "1"),
           androidMinimumSDK                    (settings, Ids::androidMinimumSDK,                    getUndoManager(), "16"),
-          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "30"),
+          androidTargetSDK                     (settings, Ids::androidTargetSDK,                     getUndoManager(), "33"),
           androidTheme                         (settings, Ids::androidTheme,                         getUndoManager()),
           androidExtraAssetsFolder             (settings, Ids::androidExtraAssetsFolder,             getUndoManager()),
           androidOboeRepositoryPath            (settings, Ids::androidOboeRepositoryPath,            getUndoManager()),
@@ -137,9 +137,9 @@ public:
           androidKeyStorePass                  (settings, Ids::androidKeyStorePass,                  getUndoManager(), "android"),
           androidKeyAlias                      (settings, Ids::androidKeyAlias,                      getUndoManager(), "androiddebugkey"),
           androidKeyAliasPass                  (settings, Ids::androidKeyAliasPass,                  getUndoManager(), "android"),
-          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.0.2"),
+          gradleVersion                        (settings, Ids::gradleVersion,                        getUndoManager(), "7.5.1"),
           gradleToolchain                      (settings, Ids::gradleToolchain,                      getUndoManager(), "clang"),
-          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.0.0"),
+          androidPluginVersion                 (settings, Ids::androidPluginVersion,                 getUndoManager(), "7.2.2"),
           AndroidExecutable                    (getAppSettings().getStoredPath (Ids::androidStudioExePath, TargetOS::getThisOS()).get().toString())
     {
         name = getDisplayName();
@@ -348,11 +348,13 @@ private:
         {
             mo.setNewLineString (getNewLineString());
 
-            mo << "# Automatically generated makefile, created by the Projucer" << newLine
+            mo << "# Automatically generated CMakeLists, created by the Projucer" << newLine
                << "# Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!" << newLine
+               << newLine
+               << "cmake_minimum_required(VERSION 3.4.1)" << newLine
+               << newLine
+               << "project(juce_jni_project)" << newLine
                << newLine;
-
-            mo << "cmake_minimum_required(VERSION 3.4.1)" << newLine << newLine;
 
             if (! isLibrary())
                 mo << "set(BINARY_NAME \"juce_jni\")" << newLine << newLine;
@@ -677,32 +679,25 @@ private:
 
             if (cfg.getArchitectures().isNotEmpty())
             {
-                mo << "            ndk {" << newLine;
-                mo << "                abiFilters " << toGradleList (StringArray::fromTokens (cfg.getArchitectures(),  " ", "")) << newLine;
-                mo << "            }" << newLine;
+                mo << "            ndk {" << newLine
+                   << "                abiFilters " << toGradleList (StringArray::fromTokens (cfg.getArchitectures(),  " ", "")) << newLine
+                   << "            }" << newLine;
             }
 
-            mo << "            externalNativeBuild {" << newLine;
-            mo << "                cmake {"           << newLine;
+            mo << "            externalNativeBuild {" << newLine
+               << "                cmake {"           << newLine;
 
             if (getProject().getProjectType().isStaticLibrary())
                 mo << "                    targets \"" << getNativeModuleBinaryName (cfg) << "\"" << newLine;
 
-            mo << "                    arguments "
-               << "\"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\"";
-
-            mo << ", \"-DCMAKE_CXX_FLAGS_" << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-               << "=-O" << cfg.getGCCOptimisationFlag();
-
-            mo << "\""
-               << ", \"-DCMAKE_C_FLAGS_"   << (cfg.isDebug() ? "DEBUG" : "RELEASE")
-               << "=-O" << cfg.getGCCOptimisationFlag()
-               << "\"" << newLine;
-
-            mo << "                }"                   << newLine;
-            mo << "            }"                       << newLine << newLine;
-            mo << "            dimension \"default\""   << newLine;
-            mo << "       }"                            << newLine;
+            mo << "                    cFlags    \"-O" << cfg.getGCCOptimisationFlag() << "\""                                      << newLine
+               << "                    cppFlags  \"-O" << cfg.getGCCOptimisationFlag() << "\""                                      << newLine
+               << "                    arguments \"-DJUCE_BUILD_CONFIGURATION=" << cfg.getProductFlavourCMakeIdentifier() << "\""   << newLine
+               << "                }"                                                                                               << newLine
+               << "            }"                                                                                                   << newLine
+                                                                                                                                    << newLine
+               << "            dimension \"default\""                                                                               << newLine
+               << "        }"                                                                                                       << newLine;
         }
 
         mo << "    }" << newLine;

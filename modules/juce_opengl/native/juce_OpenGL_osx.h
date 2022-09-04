@@ -126,7 +126,7 @@ public:
     void shutdownOnRenderThread()                     { deactivateCurrentContext(); }
 
     bool createdOk() const noexcept                   { return getRawContext() != nullptr; }
-    void* getRawContext() const noexcept              { return static_cast<void*> (renderContext); }
+    NSOpenGLContext* getRawContext() const noexcept   { return renderContext; }
     GLuint getFrameBufferID() const noexcept          { return 0; }
 
     bool makeActive() const noexcept

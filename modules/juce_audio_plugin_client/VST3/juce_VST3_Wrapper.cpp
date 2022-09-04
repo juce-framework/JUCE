@@ -3390,30 +3390,44 @@ public:
     {
         jassert (pluginInstance != nullptr);
 
-        auto numParamsChanged = paramChanges.getParameterCount();
+        struct ParamChangeInfo
+        {
+            Steinberg::int32 offsetSamples = 0;
+            double value = 0.0;
+        };
+
+        const auto getPointFromQueue = [] (Steinberg::Vst::IParamValueQueue* queue, Steinberg::int32 index)
+        {
+            ParamChangeInfo result;
+            return queue->getPoint (index, result.offsetSamples, result.value) == kResultTrue
+                   ? makeOptional (result)
+                   : nullopt;
+        };
+
+        const auto numParamsChanged = paramChanges.getParameterCount();
 
         for (Steinberg::int32 i = 0; i < numParamsChanged; ++i)
         {
             if (auto* paramQueue = paramChanges.getParameterData (i))
             {
-                auto numPoints = paramQueue->getPointCount();
+                const auto vstParamID = paramQueue->getParameterId();
+                const auto numPoints  = paramQueue->getPointCount();
 
-                Steinberg::int32 offsetSamples = 0;
-                double value = 0.0;
-
-                if (paramQueue->getPoint (numPoints - 1, offsetSamples, value) == kResultTrue)
+               #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
+                if (juceVST3EditController != nullptr && juceVST3EditController->isMidiControllerParamID (vstParamID))
                 {
-                    auto vstParamID = paramQueue->getParameterId();
-
-                   #if JUCE_VST3_EMULATE_MIDI_CC_WITH_PARAMETERS
-                    if (juceVST3EditController != nullptr && juceVST3EditController->isMidiControllerParamID (vstParamID))
-                        addParameterChangeToMidiBuffer (offsetSamples, vstParamID, value);
-                    else
-                   #endif
+                    for (Steinberg::int32 point = 0; point < numPoints; ++point)
                     {
-                        if (auto* param = comPluginInstance->getParamForVSTParamID (vstParamID))
-                            setValueAndNotifyIfChanged (*param, (float) value);
+                        if (const auto change = getPointFromQueue (paramQueue, point))
+                            addParameterChangeToMidiBuffer (change->offsetSamples, vstParamID, change->value);
                     }
+                }
+                else
+               #endif
+                if (const auto change = getPointFromQueue (paramQueue, numPoints - 1))
+                {
+                    if (auto* param = comPluginInstance->getParamForVSTParamID (vstParamID))
+                        setValueAndNotifyIfChanged (*param, (float) change->value);
                 }
             }
         }

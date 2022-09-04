@@ -1,7 +1,9 @@
-# Automatically generated makefile, created by the Projucer
+# Automatically generated CMakeLists, created by the Projucer
 # Don't edit this file! Your changes will be overwritten when you re-save the Projucer project!
 
 cmake_minimum_required(VERSION 3.4.1)
+
+project(juce_jni_project)
 
 set(BINARY_NAME "juce_jni")
 
