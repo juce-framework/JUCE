@@ -214,7 +214,7 @@ public:
     //==============================================================================
     void paint (Graphics&) override
     {
-        updateViewportSize (false);
+        updateViewportSize();
 #if JUCE_MAC
         auto* lastColourSpace = nativeContext->getNSColourSpace();
         if (lastColourSpace != nativeContext->updateColourSpace())
@@ -357,7 +357,7 @@ public:
         return true;
     }
 
-    void updateViewportSize (bool canTriggerUpdate)
+    void updateViewportSize()
     {
         JUCE_ASSERT_MESSAGE_THREAD
 
@@ -405,9 +405,7 @@ public:
                                                     (float) newArea.getHeight() / (float) localBounds.getHeight());
 
                 nativeContext->updateWindowPosition (peer->getAreaCoveredBy (component));
-
-                if (canTriggerUpdate)
-                    invalidateAll();
+                invalidateAll();
             });
         }
     }
@@ -425,7 +423,7 @@ public:
 
         if (lastScreenBounds != screenBounds)
         {
-            updateViewportSize (true);
+            updateViewportSize();
             lastScreenBounds = screenBounds;
         }
     }
@@ -528,7 +526,7 @@ public:
 
     void handleResize()
     {
-        updateViewportSize (true);
+        updateViewportSize();
 
        #if JUCE_MAC
         if (hasInitialised)
@@ -1056,7 +1054,7 @@ private:
         if (auto* cachedImage = CachedImage::get (comp))
         {
             cachedImage->start(); // (must wait until this is attached before starting its thread)
-            cachedImage->updateViewportSize (true);
+            cachedImage->updateViewportSize();
 
             startTimer (400);
         }
