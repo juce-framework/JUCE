@@ -136,6 +136,68 @@ enum ScrollAmount
     ScrollAmount_SmallIncrement = 4
 };
 
+namespace Constants
+{
+
+#undef UIA_InvokePatternId
+#undef UIA_SelectionPatternId
+#undef UIA_ValuePatternId
+#undef UIA_RangeValuePatternId
+#undef UIA_ScrollPatternId
+#undef UIA_ExpandCollapsePatternId
+#undef UIA_GridPatternId
+#undef UIA_GridItemPatternId
+#undef UIA_WindowPatternId
+#undef UIA_SelectionItemPatternId
+#undef UIA_TablePatternId
+#undef UIA_TableItemPatternId
+#undef UIA_TextPatternId
+#undef UIA_TogglePatternId
+#undef UIA_TransformPatternId
+#undef UIA_ScrollItemPatternId
+#undef UIA_TextPattern2Id
+#undef UIA_StructureChangedEventId
+#undef UIA_MenuOpenedEventId
+#undef UIA_AutomationFocusChangedEventId
+#undef UIA_MenuClosedEventId
+#undef UIA_LayoutInvalidatedEventId
+#undef UIA_Invoke_InvokedEventId
+#undef UIA_SelectionItem_ElementSelectedEventId
+#undef UIA_Text_TextSelectionChangedEventId
+#undef UIA_Text_TextChangedEventId
+#undef UIA_Window_WindowOpenedEventId
+#undef UIA_Window_WindowClosedEventId
+#undef UIA_IsPeripheralPropertyId
+#undef UIA_FullDescriptionPropertyId
+#undef UIA_IsDialogPropertyId
+#undef UIA_IsReadOnlyAttributeId
+#undef UIA_CaretPositionAttributeId
+#undef UIA_ButtonControlTypeId
+#undef UIA_CheckBoxControlTypeId
+#undef UIA_ComboBoxControlTypeId
+#undef UIA_EditControlTypeId
+#undef UIA_HyperlinkControlTypeId
+#undef UIA_ImageControlTypeId
+#undef UIA_ListItemControlTypeId
+#undef UIA_ListControlTypeId
+#undef UIA_MenuBarControlTypeId
+#undef UIA_MenuItemControlTypeId
+#undef UIA_ProgressBarControlTypeId
+#undef UIA_RadioButtonControlTypeId
+#undef UIA_ScrollBarControlTypeId
+#undef UIA_SliderControlTypeId
+#undef UIA_TextControlTypeId
+#undef UIA_ToolTipControlTypeId
+#undef UIA_TreeControlTypeId
+#undef UIA_TreeItemControlTypeId
+#undef UIA_CustomControlTypeId
+#undef UIA_GroupControlTypeId
+#undef UIA_DataItemControlTypeId
+#undef UIA_WindowControlTypeId
+#undef UIA_HeaderControlTypeId
+#undef UIA_HeaderItemControlTypeId
+#undef UIA_TableControlTypeId
+
 const long UIA_InvokePatternId = 10000;
 const long UIA_SelectionPatternId = 10001;
 const long UIA_ValuePatternId = 10002;
@@ -165,6 +227,8 @@ const long UIA_Text_TextChangedEventId = 20015;
 const long UIA_Window_WindowOpenedEventId = 20016;
 const long UIA_Window_WindowClosedEventId = 20017;
 const long UIA_IsPeripheralPropertyId = 30150;
+const long UIA_FullDescriptionPropertyId = 30159;
+const long UIA_IsDialogPropertyId = 30174;
 const long UIA_IsReadOnlyAttributeId = 40015;
 const long UIA_CaretPositionAttributeId = 40038;
 const long UIA_ButtonControlTypeId = 50000;
@@ -192,6 +256,8 @@ const long UIA_WindowControlTypeId = 50032;
 const long UIA_HeaderControlTypeId = 50034;
 const long UIA_HeaderItemControlTypeId = 50035;
 const long UIA_TableControlTypeId = 50036;
+
+} // namespace Constants
 
 interface IRawElementProviderFragmentRoot;
 interface IRawElementProviderFragment;

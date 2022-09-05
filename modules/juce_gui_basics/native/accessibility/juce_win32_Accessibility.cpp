@@ -155,11 +155,13 @@ void sendAccessibilityPropertyChangedEvent (const AccessibilityHandler& handler,
 
 void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, InternalAccessibilityEvent eventType)
 {
+    using namespace ComTypes::Constants;
+
     if (eventType == InternalAccessibilityEvent::elementCreated
         || eventType == InternalAccessibilityEvent::elementDestroyed)
     {
         if (auto* parent = handler.getParent())
-            sendAccessibilityAutomationEvent (*parent, ComTypes::UIA_LayoutInvalidatedEventId);
+            sendAccessibilityAutomationEvent (*parent, UIA_LayoutInvalidatedEventId);
 
         return;
     }
@@ -176,9 +178,9 @@ void notifyAccessibilityEventInternal (const AccessibilityHandler& handler, Inte
     {
         switch (eventType)
         {
-            case InternalAccessibilityEvent::focusChanged:           return ComTypes::UIA_AutomationFocusChangedEventId;
-            case InternalAccessibilityEvent::windowOpened:           return ComTypes::UIA_Window_WindowOpenedEventId;
-            case InternalAccessibilityEvent::windowClosed:           return ComTypes::UIA_Window_WindowClosedEventId;
+            case InternalAccessibilityEvent::focusChanged:           return UIA_AutomationFocusChangedEventId;
+            case InternalAccessibilityEvent::windowOpened:           return UIA_Window_WindowOpenedEventId;
+            case InternalAccessibilityEvent::windowClosed:           return UIA_Window_WindowClosedEventId;
             case InternalAccessibilityEvent::elementCreated:
             case InternalAccessibilityEvent::elementDestroyed:
             case InternalAccessibilityEvent::elementMovedOrResized:  break;
@@ -221,12 +223,14 @@ void AccessibilityHandler::notifyAccessibilityEvent (AccessibilityEvent eventTyp
 
     auto event = [eventType]() -> EVENTID
     {
+        using namespace ComTypes::Constants;
+
         switch (eventType)
         {
-            case AccessibilityEvent::textSelectionChanged:  return ComTypes::UIA_Text_TextSelectionChangedEventId;
-            case AccessibilityEvent::textChanged:           return ComTypes::UIA_Text_TextChangedEventId;
-            case AccessibilityEvent::structureChanged:      return ComTypes::UIA_StructureChangedEventId;
-            case AccessibilityEvent::rowSelectionChanged:   return ComTypes::UIA_SelectionItem_ElementSelectedEventId;
+            case AccessibilityEvent::textSelectionChanged:  return UIA_Text_TextSelectionChangedEventId;
+            case AccessibilityEvent::textChanged:           return UIA_Text_TextChangedEventId;
+            case AccessibilityEvent::structureChanged:      return UIA_StructureChangedEventId;
+            case AccessibilityEvent::rowSelectionChanged:   return UIA_SelectionItem_ElementSelectedEventId;
             case AccessibilityEvent::titleChanged:
             case AccessibilityEvent::valueChanged:          break;
         }

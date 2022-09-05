@@ -26,9 +26,6 @@
 namespace juce
 {
 
-#define UIA_FullDescriptionPropertyId 30159
-#define UIA_IsDialogPropertyId        30174
-
 class AccessibilityNativeHandle  : public ComBaseClassHelper<IRawElementProviderSimple,
                                                              ComTypes::IRawElementProviderFragment,
                                                              ComTypes::IRawElementProviderFragmentRoot>

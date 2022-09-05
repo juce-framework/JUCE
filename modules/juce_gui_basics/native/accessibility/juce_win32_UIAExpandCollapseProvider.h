@@ -66,9 +66,11 @@ private:
 
         if (handler.getActions().invoke (AccessibilityActionType::showMenu))
         {
+            using namespace ComTypes::Constants;
+
             sendAccessibilityAutomationEvent (handler, handler.getCurrentState().isExpanded()
-                                                           ? ComTypes::UIA_MenuOpenedEventId
-                                                           : ComTypes::UIA_MenuClosedEventId);
+                                                           ? UIA_MenuOpenedEventId
+                                                           : UIA_MenuClosedEventId);
 
             return S_OK;
         }
