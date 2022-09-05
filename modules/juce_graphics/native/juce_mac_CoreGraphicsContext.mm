@@ -428,6 +428,26 @@ void CoreGraphicsContext::setInterpolationQuality (Graphics::ResamplingQuality q
 }
 
 //==============================================================================
+void CoreGraphicsContext::fillAll()
+{
+    // The clip rectangle is expanded in order to avoid having alpha blended pixels at the edges.
+    // The clipping mechanism will take care of cutting off pixels beyond the clip bounds. This is
+    // a hard cutoff and will ensure that no semi-transparent pixels will remain inside the filled
+    // area.
+    const auto clipBounds = getClipBounds();
+
+    const auto clipBoundsOnDevice = CGContextConvertSizeToDeviceSpace (context.get(),
+                                                                       CGSize { (CGFloat) clipBounds.getWidth(),
+                                                                                (CGFloat) clipBounds.getHeight() });
+
+    const auto inverseScale = clipBoundsOnDevice.width > (CGFloat) 0.0
+                            ? (int) (clipBounds.getWidth() / clipBoundsOnDevice.width)
+                            : 0;
+    const auto expansion = jmax (1, inverseScale);
+
+    fillRect (clipBounds.expanded (expansion), false);
+}
+
 void CoreGraphicsContext::fillRect (const Rectangle<int>& r, bool replaceExistingContents)
 {
     fillCGRect (CGRectMake (r.getX(), flipHeight - r.getBottom(), r.getWidth(), r.getHeight()), replaceExistingContents);

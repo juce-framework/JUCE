@@ -95,6 +95,7 @@ public:
     void setInterpolationQuality (Graphics::ResamplingQuality) override;
 
     //==============================================================================
+    void fillAll() override;
     void fillRect (const Rectangle<int>&, bool replaceExistingContents) override;
     void fillRect (const Rectangle<float>&) override;
     void fillRectList (const RectangleList<float>&) override;
