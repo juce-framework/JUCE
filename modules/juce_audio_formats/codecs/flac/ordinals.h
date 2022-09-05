@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -39,12 +39,11 @@
  * the 1999 ISO C Standard header file <stdint.h>.
  */
 
-typedef __int8 FLAC__int8;
+typedef signed __int8 FLAC__int8;
+typedef signed __int16 FLAC__int16;
+typedef signed __int32 FLAC__int32;
+typedef signed __int64 FLAC__int64;
 typedef unsigned __int8 FLAC__uint8;
-
-typedef __int16 FLAC__int16;
-typedef __int32 FLAC__int32;
-typedef __int64 FLAC__int64;
 typedef unsigned __int16 FLAC__uint16;
 typedef unsigned __int32 FLAC__uint32;
 typedef unsigned __int64 FLAC__uint64;
@@ -53,7 +52,7 @@ typedef unsigned __int64 FLAC__uint64;
 
 /* For MSVC 2010 and everything else which provides <stdint.h>. */
 
-#include <stdint.h>
+//#include <stdint.h>
 
 typedef int8_t FLAC__int8;
 typedef uint8_t FLAC__uint8;

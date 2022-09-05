@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2001-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -90,25 +90,25 @@ typedef struct FLAC__StreamEncoderProtected {
 	FLAC__bool do_md5;
 	FLAC__bool do_mid_side_stereo;
 	FLAC__bool loose_mid_side_stereo;
-	unsigned channels;
-	unsigned bits_per_sample;
-	unsigned sample_rate;
-	unsigned blocksize;
+	uint32_t channels;
+	uint32_t bits_per_sample;
+	uint32_t sample_rate;
+	uint32_t blocksize;
 #ifndef FLAC__INTEGER_ONLY_LIBRARY
-	unsigned num_apodizations;
+	uint32_t num_apodizations;
 	FLAC__ApodizationSpecification apodizations[FLAC__MAX_APODIZATION_FUNCTIONS];
 #endif
-	unsigned max_lpc_order;
-	unsigned qlp_coeff_precision;
+	uint32_t max_lpc_order;
+	uint32_t qlp_coeff_precision;
 	FLAC__bool do_qlp_coeff_prec_search;
 	FLAC__bool do_exhaustive_model_search;
 	FLAC__bool do_escape_coding;
-	unsigned min_residual_partition_order;
-	unsigned max_residual_partition_order;
-	unsigned rice_parameter_search_dist;
+	uint32_t min_residual_partition_order;
+	uint32_t max_residual_partition_order;
+	uint32_t rice_parameter_search_dist;
 	FLAC__uint64 total_samples_estimate;
 	FLAC__StreamMetadata **metadata;
-	unsigned num_metadata_blocks;
+	uint32_t num_metadata_blocks;
 	FLAC__uint64 streaminfo_offset, seektable_offset, audio_offset;
 #if FLAC__HAS_OGG
 	FLAC__OggEncoderAspect ogg_encoder_aspect;

@@ -15,11 +15,13 @@ compilation, and commented-out a couple of unused bits of code.
 The following license is the BSD-style license that comes with the
 Flac distribution, and which applies just to the files I've
 included in this directory. For more info, and to get the rest of the
-distribution, visit the Flac homepage: flac.sourceforge.net
+distribution, visit the Flac homepage: https://xiph.org/flac/
 
 =====================================================================
 
-Copyright (C) 2000,2001,2002,2003,2004,2005,2006 Josh Coalson
+libFLAC - Free Lossless Audio Codec library
+Copyright (C) 2001-2009  Josh Coalson
+Copyright (C) 2011-2016  Xiph.Org Foundation
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions

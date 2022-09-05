@@ -1,6 +1,6 @@
 /* libFLAC - Free Lossless Audio Codec library
  * Copyright (C) 2000-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -32,6 +32,10 @@
 
 #ifndef FLAC__ALL_H
 #define FLAC__ALL_H
+
+#ifndef FLAC__HAS_OGG
+ #define FLAC__HAS_OGG 0
+#endif
 
 #include "export.h"
 
@@ -147,7 +151,7 @@
  * library.
  *
  * Also, there are several places in the libFLAC code with comments marked
- * with "OPT:" where a #define can be changed to enable code that might be
+ * with "OPT:" where a \#define can be changed to enable code that might be
  * faster on a specific platform.  Experimenting with these can yield faster
  * binaries.
  */
@@ -159,9 +163,9 @@
  * the libraries to newer versions of FLAC.
  *
  * One simple facility for making porting easier that has been added
- * in FLAC 1.1.3 is a set of \c #defines in \c export.h of each
+ * in FLAC 1.1.3 is a set of \#defines in \c export.h of each
  * library's includes (e.g. \c include/FLAC/export.h).  The
- * \c #defines mirror the libraries'
+ * \#defines mirror the libraries'
  * <A HREF="http://www.gnu.org/software/libtool/manual/libtool.html#Libtool-versioning">libtool version numbers</A>,
  * e.g. in libFLAC there are \c FLAC_API_VERSION_CURRENT,
  * \c FLAC_API_VERSION_REVISION, and \c FLAC_API_VERSION_AGE.
@@ -176,7 +180,7 @@
  * #endif
  * \endcode
  *
- * The the source will work for multiple versions and the legacy code can
+ * The source will work for multiple versions and the legacy code can
  * easily be removed when the transition is complete.
  *
  * Another available symbol is FLAC_API_SUPPORTS_OGG_FLAC (defined in
@@ -321,7 +325,7 @@
  *
  * The \a bytes parameter to FLAC__StreamDecoderReadCallback,
  * FLAC__StreamEncoderReadCallback, and FLAC__StreamEncoderWriteCallback
- * is now \c size_t instead of \c unsigned.
+ * is now \c size_t instead of \c uint32_t.
  */
 
 /** \defgroup porting_1_1_3_to_1_1_4 Porting from FLAC 1.1.3 to 1.1.4
