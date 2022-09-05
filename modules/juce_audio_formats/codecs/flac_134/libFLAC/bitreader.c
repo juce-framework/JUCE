@@ -39,7 +39,6 @@
 #include "include/private/bitmath.h"
 #include "include/private/bitreader.h"
 #include "include/private/crc.h"
-#include "include/private/macros.h"
 #include "../assert.h"
 #include "../compat.h"
 #include "../endswap.h"
@@ -117,7 +116,7 @@ struct FLAC__BitReader {
 
 static inline void crc16_update_word_(FLAC__BitReader *br, brword word)
 {
-	register uint32_t crc = br->read_crc16;
+	uint32_t crc = br->read_crc16;
 
 	for ( ; br->crc16_align < FLAC__BITS_PER_WORD ; br->crc16_align += 8) {
 		uint32_t shift = FLAC__BITS_PER_WORD - 8 - br->crc16_align ;
@@ -235,7 +234,7 @@ static FLAC__bool bitreader_read_from_client_(FLAC__BitReader *br)
 
 FLAC__BitReader *FLAC__bitreader_new(void)
 {
-	FLAC__BitReader *br = calloc(1, sizeof(FLAC__BitReader));
+	FLAC__BitReader *br = (FLAC__BitReader*) calloc(1, sizeof(FLAC__BitReader));
 
 	/* calloc() implies:
 		memset(br, 0, sizeof(FLAC__BitReader));
@@ -270,7 +269,7 @@ FLAC__bool FLAC__bitreader_init(FLAC__BitReader *br, FLAC__BitReaderReadCallback
 	br->words = br->bytes = 0;
 	br->consumed_words = br->consumed_bits = 0;
 	br->capacity = FLAC__BITREADER_DEFAULT_CAPACITY;
-	br->buffer = malloc(sizeof(brword) * br->capacity);
+	br->buffer = (brword*) malloc(sizeof(brword) * br->capacity);
 	if(br->buffer == 0)
 		return false;
 	br->read_callback = rcb;

@@ -41,11 +41,14 @@
  * before #including this file,  otherwise SIZE_MAX might not be defined
  */
 
-#include <limits.h> /* for SIZE_MAX */
-#if HAVE_STDINT_H
-#include <stdint.h> /* for SIZE_MAX in case limits.h didn't get it */
-#endif
-#include <stdlib.h> /* for size_t, malloc(), etc */
+// JUCE: removed as JUCE already includes standard headers and including
+// these in FlacNamespace will cause problems
+
+//#include <limits.h> /* for SIZE_MAX */
+//#if HAVE_STDINT_H
+//#include <stdint.h> /* for SIZE_MAX in case limits.h didn't get it */
+//#endif
+//#include <stdlib.h> /* for size_t, malloc(), etc */
 #include "compat.h"
 
 #ifndef SIZE_MAX

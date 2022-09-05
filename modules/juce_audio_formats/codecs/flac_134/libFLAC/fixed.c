@@ -39,7 +39,6 @@
 #include "../compat.h"
 #include "include/private/bitmath.h"
 #include "include/private/fixed.h"
-#include "include/private/macros.h"
 #include "../assert.h"
 
 #ifdef local_abs

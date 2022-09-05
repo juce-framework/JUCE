@@ -33,6 +33,10 @@
 #ifndef FLAC__ALL_H
 #define FLAC__ALL_H
 
+#ifndef FLAC__HAS_OGG
+ #define FLAC__HAS_OGG 0
+#endif
+
 #include "export.h"
 
 #include "assert.h"

@@ -54,7 +54,7 @@
  */
 static void FLAC__MD5Transform(FLAC__uint32 buf[4], FLAC__uint32 const in[16])
 {
-	register FLAC__uint32 a, b, c, d;
+	FLAC__uint32 a, b, c, d;
 
 	a = buf[0];
 	b = buf[1];
@@ -139,7 +139,7 @@ static void FLAC__MD5Transform(FLAC__uint32 buf[4], FLAC__uint32 const in[16])
 //@@@@@@ OPT: use bswap/intrinsics
 static void byteSwap(FLAC__uint32 *buf, uint32_t words)
 {
-	register FLAC__uint32 x;
+	FLAC__uint32 x;
 	do {
 		x = *buf;
 		x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0x00ff00ff);
@@ -148,7 +148,7 @@ static void byteSwap(FLAC__uint32 *buf, uint32_t words)
 }
 static void byteSwapX16(FLAC__uint32 *buf)
 {
-	register FLAC__uint32 x;
+	FLAC__uint32 x;
 
 	x = *buf; x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0x00ff00ff); *buf++ = (x >> 16) | (x << 16);
 	x = *buf; x = ((x << 8) & 0xff00ff00) | ((x >> 8) & 0x00ff00ff); *buf++ = (x >> 16) | (x << 16);
@@ -500,8 +500,8 @@ FLAC__bool FLAC__MD5Accumulate(FLAC__MD5Context *ctx, const FLAC__int32 * const 
 		return false;
 
 	if (ctx->capacity < bytes_needed) {
-		if (0 == (ctx->internal_buf.p8 = safe_realloc_(ctx->internal_buf.p8, bytes_needed))) {
-			if (0 == (ctx->internal_buf.p8 = safe_malloc_(bytes_needed))) {
+		if (0 == (ctx->internal_buf.p8 = (FLAC__byte*) safe_realloc_(ctx->internal_buf.p8, bytes_needed))) {
+			if (0 == (ctx->internal_buf.p8 = (FLAC__byte*) safe_malloc_(bytes_needed))) {
 				ctx->capacity = 0;
 				return false;
 			}

@@ -41,7 +41,6 @@
 #include "../compat.h"
 #include "include/private/bitmath.h"
 #include "include/private/lpc.h"
-#include "include/private/macros.h"
 #if !defined(NDEBUG) || defined FLAC__OVERFLOW_DETECT || defined FLAC__OVERFLOW_DETECT_VERBOSE
 #include <stdio.h>
 #endif

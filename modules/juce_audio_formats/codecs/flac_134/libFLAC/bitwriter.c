@@ -38,7 +38,6 @@
 #include <string.h>
 #include "include/private/bitwriter.h"
 #include "include/private/crc.h"
-#include "include/private/macros.h"
 #include "../assert.h"
 #include "../alloc.h"
 #include "../compat.h"
@@ -124,7 +123,7 @@ FLAC__bool bitwriter_grow_(FLAC__BitWriter *bw, uint32_t bits_to_add)
 	FLAC__ASSERT(new_capacity > bw->capacity);
 	FLAC__ASSERT(new_capacity >= bw->words + ((bw->bits + bits_to_add + FLAC__BITS_PER_WORD - 1) / FLAC__BITS_PER_WORD));
 
-	new_buffer = safe_realloc_mul_2op_(bw->buffer, sizeof(bwword), /*times*/new_capacity);
+	new_buffer = (bwword*) safe_realloc_mul_2op_(bw->buffer, sizeof(bwword), /*times*/new_capacity);
 	if(new_buffer == 0)
 		return false;
 	bw->buffer = new_buffer;
@@ -141,7 +140,7 @@ FLAC__bool bitwriter_grow_(FLAC__BitWriter *bw, uint32_t bits_to_add)
 
 FLAC__BitWriter *FLAC__bitwriter_new(void)
 {
-	FLAC__BitWriter *bw = calloc(1, sizeof(FLAC__BitWriter));
+	FLAC__BitWriter *bw = (FLAC__BitWriter*) calloc(1, sizeof(FLAC__BitWriter));
 	/* note that calloc() sets all members to 0 for us */
 	return bw;
 }
@@ -166,7 +165,7 @@ FLAC__bool FLAC__bitwriter_init(FLAC__BitWriter *bw)
 
 	bw->words = bw->bits = 0;
 	bw->capacity = FLAC__BITWRITER_DEFAULT_CAPACITY;
-	bw->buffer = malloc(sizeof(bwword) * bw->capacity);
+	bw->buffer = (bwword*) malloc(sizeof(bwword) * bw->capacity);
 	if(bw->buffer == 0)
 		return false;
 
@@ -321,7 +320,7 @@ inline FLAC__bool FLAC__bitwriter_write_zeroes(FLAC__BitWriter *bw, uint32_t bit
 
 static inline FLAC__bool FLAC__bitwriter_write_raw_uint32_nocheck(FLAC__BitWriter *bw, FLAC__uint32 val, uint32_t bits)
 {
-	register uint32_t left;
+	uint32_t left;
 
 	/* WATCHOUT: code does not work with <32bit words; we can make things much faster with this assertion */
 	FLAC__ASSERT(FLAC__BITS_PER_WORD >= 32);
