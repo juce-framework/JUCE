@@ -1605,6 +1605,8 @@ public:
     static const SEL resignKeySelector;
 
 private:
+    JUCE_DECLARE_WEAK_REFERENCEABLE (NSViewComponentPeer)
+
     // Note: the OpenGLContext also has a SharedResourcePointer<PerScreenDisplayLinks> to
     // avoid unnecessarily duplicating display-link threads.
     SharedResourcePointer<PerScreenDisplayLinks> sharedDisplayLinks;
@@ -1617,38 +1619,16 @@ private:
     {
         sharedDisplayLinks->registerFactory ([this] (auto* screen)
         {
-            struct DispatchSourceDestructor
+            return [peerRef = WeakReference<NSViewComponentPeer> { this }, screen]
             {
-                void operator() (dispatch_source_t ptr) const
+                MessageManager::callAsync ([peerRef, screen]
                 {
-                    if (ptr != nullptr)
-                        dispatch_source_cancel (ptr);
-                }
-            };
-
-            using DispatchSource = std::remove_pointer_t<dispatch_source_t>;
-            std::unique_ptr<DispatchSource, DispatchSourceDestructor> dispatchSource;
-            dispatchSource.reset (dispatch_source_create (DISPATCH_SOURCE_TYPE_DATA_ADD, 0, 0, dispatch_get_main_queue()));
-            jassert (dispatchSource != nullptr);
-
-            const auto callback = [this, screen]
-            {
-                if (auto* peerView = this->view)
-                    if (auto* peerWindow = [peerView window])
-                        if (screen == [peerWindow screen])
-                            this->setNeedsDisplayRectangles();
-            };
-
-            dispatch_source_set_event_handler (dispatchSource.get(), ^() { callback(); });
-
-            if (@available (macOS 10.12, *))
-                dispatch_activate (dispatchSource.get());
-            else
-                dispatch_resume (dispatchSource.get());
-
-            return [dispatch = std::shared_ptr<DispatchSource> (std::move (dispatchSource))]
-            {
-                dispatch_source_merge_data (dispatch.get(), 1);
+                    if (auto* peer = peerRef.get())
+                        if (auto* peerView = peer->view)
+                            if (auto* peerWindow = [peerView window])
+                                if (screen == [peerWindow screen])
+                                    peer->setNeedsDisplayRectangles();
+                });
             };
         })
     };
