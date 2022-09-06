@@ -102,13 +102,13 @@ public:
         double getEffectiveRate() const                 { return pulldown ? (double) base / 1.001 : (double) base; }
 
         /** Returns a copy of this object with the specified base rate. */
-        JUCE_NODISCARD FrameRate withBaseRate (int x) const            { return with (&FrameRate::base, x); }
+        [[nodiscard]] FrameRate withBaseRate (int x) const            { return with (&FrameRate::base, x); }
 
         /** Returns a copy of this object with drop frames enabled or disabled, as specified. */
-        JUCE_NODISCARD FrameRate withDrop (bool x = true) const        { return with (&FrameRate::drop, x); }
+        [[nodiscard]] FrameRate withDrop (bool x = true) const        { return with (&FrameRate::drop, x); }
 
         /** Returns a copy of this object with pulldown enabled or disabled, as specified. */
-        JUCE_NODISCARD FrameRate withPullDown (bool x = true) const    { return with (&FrameRate::pulldown, x); }
+        [[nodiscard]] FrameRate withPullDown (bool x = true) const    { return with (&FrameRate::pulldown, x); }
 
         /** Returns true if this instance is equal to other. */
         bool operator== (const FrameRate& other) const

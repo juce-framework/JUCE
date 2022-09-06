@@ -1361,8 +1361,8 @@ protected:
 
         void addBus (bool isInput, const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true);
 
-        JUCE_NODISCARD BusesProperties withInput  (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
-        JUCE_NODISCARD BusesProperties withOutput (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
+        [[nodiscard]] BusesProperties withInput  (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
+        [[nodiscard]] BusesProperties withOutput (const String& name, const AudioChannelSet& defaultLayout, bool isActivatedByDefault = true) const;
     };
 
     /** Callback to query if adding/removing buses currently possible.

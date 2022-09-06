@@ -163,10 +163,10 @@ public:
 
     //==============================================================================
     /** Returns a copy of only the mouse-button flags */
-    JUCE_NODISCARD ModifierKeys withOnlyMouseButtons() const noexcept                  { return ModifierKeys (flags & allMouseButtonModifiers); }
+    [[nodiscard]] ModifierKeys withOnlyMouseButtons() const noexcept                  { return ModifierKeys (flags & allMouseButtonModifiers); }
 
     /** Returns a copy of only the non-mouse flags */
-    JUCE_NODISCARD ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
+    [[nodiscard]] ModifierKeys withoutMouseButtons() const noexcept                   { return ModifierKeys (flags & ~allMouseButtonModifiers); }
 
     bool operator== (const ModifierKeys other) const noexcept                          { return flags == other.flags; }
     bool operator!= (const ModifierKeys other) const noexcept                          { return flags != other.flags; }
@@ -175,8 +175,8 @@ public:
     /** Returns the raw flags for direct testing. */
     inline int getRawFlags() const noexcept                                            { return flags; }
 
-    JUCE_NODISCARD ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept      { return ModifierKeys (flags & ~rawFlagsToClear); }
-    JUCE_NODISCARD ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
+    [[nodiscard]] ModifierKeys withoutFlags (int rawFlagsToClear) const noexcept      { return ModifierKeys (flags & ~rawFlagsToClear); }
+    [[nodiscard]] ModifierKeys withFlags (int rawFlagsToSet) const noexcept           { return ModifierKeys (flags | rawFlagsToSet); }
 
     /** Tests a combination of flags and returns true if any of them are set. */
     bool testFlags (int flagsToTest) const noexcept                                    { return (flags & flagsToTest) != 0; }

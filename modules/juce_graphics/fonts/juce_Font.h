@@ -154,7 +154,7 @@ public:
     /** Returns a copy of this font with a new typeface style.
         @see getAvailableStyles()
     */
-    JUCE_NODISCARD Font withTypefaceStyle (const String& newStyle) const;
+    [[nodiscard]] Font withTypefaceStyle (const String& newStyle) const;
 
     /** Returns a list of the styles that this font can use. */
     StringArray getAvailableStyles() const;
@@ -204,10 +204,10 @@ public:
 
     //==============================================================================
     /** Returns a copy of this font with a new height. */
-    JUCE_NODISCARD Font withHeight (float height) const;
+    [[nodiscard]] Font withHeight (float height) const;
 
     /** Returns a copy of this font with a new height, specified in points. */
-    JUCE_NODISCARD Font withPointHeight (float heightInPoints) const;
+    [[nodiscard]] Font withPointHeight (float heightInPoints) const;
 
     /** Changes the font's height.
         @see getHeight, withHeight, setHeightWithoutChangingWidth
@@ -271,7 +271,7 @@ public:
         @param styleFlags     a bitwise-or'ed combination of values from the FontStyleFlags enum.
         @see FontStyleFlags, getStyleFlags
     */
-    JUCE_NODISCARD Font withStyle (int styleFlags) const;
+    [[nodiscard]] Font withStyle (int styleFlags) const;
 
     /** Changes the font's style.
         @param newFlags     a bitwise-or'ed combination of values from the FontStyleFlags enum.
@@ -286,7 +286,7 @@ public:
     /** Returns a copy of this font with the bold attribute set.
         If the font does not have a bold version, this will return the default font.
      */
-    JUCE_NODISCARD Font boldened() const;
+    [[nodiscard]] Font boldened() const;
 
     /** Returns true if the font is bold. */
     bool isBold() const noexcept;
@@ -294,7 +294,7 @@ public:
     /** Makes the font italic or non-italic. */
     void setItalic (bool shouldBeItalic);
     /** Returns a copy of this font with the italic attribute set. */
-    JUCE_NODISCARD Font italicised() const;
+    [[nodiscard]] Font italicised() const;
     /** Returns true if the font is italic. */
     bool isItalic() const noexcept;
 
@@ -317,7 +317,7 @@ public:
                             narrower, greater than 1.0 will be stretched out.
         @see getHorizontalScale
     */
-    JUCE_NODISCARD Font withHorizontalScale (float scaleFactor) const;
+    [[nodiscard]] Font withHorizontalScale (float scaleFactor) const;
 
     /** Changes the font's horizontal scale factor.
         @param scaleFactor  a value of 1.0 is the normal scale, less than this will be
@@ -353,7 +353,7 @@ public:
                                 normal spacing, positive values spread the letters out,
                                 negative values make them closer together.
     */
-    JUCE_NODISCARD Font withExtraKerningFactor (float extraKerning) const;
+    [[nodiscard]] Font withExtraKerningFactor (float extraKerning) const;
 
     /** Changes the font's kerning.
         @param extraKerning     a multiple of the font's height that will be added
