@@ -38,7 +38,7 @@ namespace detail
     template <typename Fn, typename Tuple, size_t... Ix>
     constexpr void forEachInTuple (Fn&& fn, Tuple&& tuple, std::index_sequence<Ix...>)
     {
-        (void) std::initializer_list<int> { ((void) fn (std::get<Ix> (tuple), std::integral_constant<size_t, Ix>()), 0)... };
+        (fn (std::get<Ix> (tuple), std::integral_constant<size_t, Ix>()), ...);
     }
 
     template <typename T>
@@ -50,12 +50,8 @@ namespace detail
         forEachInTuple (std::forward<Fn> (fn), std::forward<Tuple> (tuple), TupleIndexSequence<Tuple>{});
     }
 
-    // This could be a template variable, but that code causes an internal compiler error in MSVC 19.00.24215
     template <typename Context, size_t Ix>
-    struct UseContextDirectly
-    {
-        static constexpr auto value = ! Context::usesSeparateInputAndOutputBlocks() || Ix == 0;
-    };
+    inline constexpr auto useContextDirectly = ! Context::usesSeparateInputAndOutputBlocks() || Ix == 0;
 }
 #endif
 
@@ -103,7 +99,7 @@ public:
     }
 
 private:
-    template <typename Context, typename Proc, size_t Ix, std::enable_if_t<! detail::UseContextDirectly<Context, Ix>::value, int> = 0>
+    template <typename Context, typename Proc, size_t Ix, std::enable_if_t<! detail::useContextDirectly<Context, Ix>, int> = 0>
     void processOne (const Context& context, Proc& proc, std::integral_constant<size_t, Ix>) noexcept
     {
         jassert (context.getOutputBlock().getNumChannels() == context.getInputBlock().getNumChannels());
@@ -113,7 +109,7 @@ private:
         proc.process (replacingContext);
     }
 
-    template <typename Context, typename Proc, size_t Ix, std::enable_if_t<detail::UseContextDirectly<Context, Ix>::value, int> = 0>
+    template <typename Context, typename Proc, size_t Ix, std::enable_if_t<detail::useContextDirectly<Context, Ix>, int> = 0>
     void processOne (const Context& context, Proc& proc, std::integral_constant<size_t, Ix>) noexcept
     {
         auto contextCopy = context;

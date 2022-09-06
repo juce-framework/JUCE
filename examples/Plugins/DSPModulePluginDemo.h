@@ -120,9 +120,8 @@ namespace ID
 
 template <typename Func, typename... Items>
 constexpr void forEach (Func&& func, Items&&... items)
-    noexcept (noexcept (std::initializer_list<int> { (func (std::forward<Items> (items)), 0)... }))
 {
-    (void) std::initializer_list<int> { ((void) func (std::forward<Items> (items)), 0)... };
+    (func (std::forward<Items> (items)), ...);
 }
 
 template <typename... Components>
