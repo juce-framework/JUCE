@@ -646,11 +646,15 @@ private:
         {
             auto* i = owner.rootItemVisible ? owner.rootItem
                                             : owner.rootItem->subItems.getFirst();
-
+            
+            TreeViewItem* foundItem = i;
             while (i != nullptr && i->y < visibleTop)
+            {
+                foundItem = i;
                 i = getNextVisibleItem (i, true);
+            }
 
-            return i;
+            return foundItem;
         }();
 
         auto addOffscreenItemBuffer = [&visibleItems] (TreeViewItem* i, int num, bool forwards)
