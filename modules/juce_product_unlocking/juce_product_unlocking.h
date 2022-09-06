@@ -40,7 +40,7 @@
   description:        Classes for online product authentication
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_cryptography
 

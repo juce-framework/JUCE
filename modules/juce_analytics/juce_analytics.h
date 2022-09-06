@@ -40,7 +40,7 @@
   description:        Classes to collect analytics and send to destinations
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_gui_basics
 

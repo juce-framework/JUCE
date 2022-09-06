@@ -40,7 +40,7 @@
   description:        Classes for reading and writing various audio file formats.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_audio_basics
   OSXFrameworks:      CoreAudio CoreMIDI QuartzCore AudioToolbox

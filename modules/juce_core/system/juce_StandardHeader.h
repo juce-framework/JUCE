@@ -72,6 +72,7 @@
 #include <utility>
 #include <vector>
 #include <set>
+#include <optional>
 
 //==============================================================================
 #include "juce_CompilerSupport.h"

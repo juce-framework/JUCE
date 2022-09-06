@@ -40,7 +40,7 @@
   description:        Basic user-interface components and related classes.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_graphics juce_data_structures
   OSXFrameworks:      Cocoa QuartzCore

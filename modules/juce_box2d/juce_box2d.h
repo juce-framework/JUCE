@@ -40,7 +40,7 @@
   description:        The Box2D physics engine and some utility classes.
   website:            http://www.juce.com/juce
   license:            GPL/Commercial
-  minimumCppStandard: 14
+  minimumCppStandard: 17
 
   dependencies:       juce_graphics
 
