@@ -510,9 +510,28 @@ static void onWrapperDeletion (AudioProcessorUnityWrapper* wrapperToRemove)
 }
 
 //==============================================================================
-namespace UnityCallbacks
+static UnityAudioEffectDefinition getEffectDefinition()
 {
-    static int UNITY_INTERFACE_API createCallback (UnityAudioEffectState* state)
+    const auto wrapper = std::make_unique<AudioProcessorUnityWrapper> (true);
+    const String originalName { JucePlugin_Name };
+    const auto name = (! originalName.startsWithIgnoreCase ("audioplugin") ? "audioplugin_" : "") + originalName;
+
+    UnityAudioEffectDefinition result{};
+    name.copyToUTF8 (result.name, (size_t) numElementsInArray (result.name));
+
+    result.structSize = sizeof (UnityAudioEffectDefinition);
+    result.parameterStructSize = sizeof (UnityAudioParameterDefinition);
+
+    result.apiVersion = UNITY_AUDIO_PLUGIN_API_VERSION;
+    result.pluginVersion = JucePlugin_VersionCode;
+
+    // effects must set this to 0, generators > 0
+    result.channels = (wrapper->getNumInputChannels() != 0 ? 0
+                                                           : static_cast<uint32> (wrapper->getNumOutputChannels()));
+
+    wrapper->declareParameters (result);
+
+    result.create = [] (UnityAudioEffectState* state)
     {
         auto* pluginInstance = new AudioProcessorUnityWrapper (false);
         pluginInstance->create (state);
@@ -522,9 +541,9 @@ namespace UnityCallbacks
         onWrapperCreation (pluginInstance);
 
         return 0;
-    }
+    };
 
-    static int UNITY_INTERFACE_API releaseCallback (UnityAudioEffectState* state)
+    result.release = [] (UnityAudioEffectState* state)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->release();
@@ -536,87 +555,29 @@ namespace UnityCallbacks
             shutdownJuce_GUI();
 
         return 0;
-    }
+    };
 
-    static int UNITY_INTERFACE_API resetCallback (UnityAudioEffectState* state)
+    result.reset = [] (UnityAudioEffectState* state)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
         pluginInstance->reset();
 
         return 0;
-    }
+    };
 
-    static int UNITY_INTERFACE_API setPositionCallback (UnityAudioEffectState* state, unsigned int pos)
+    result.setPosition = [] (UnityAudioEffectState* state, unsigned int pos)
     {
         ignoreUnused (state, pos);
 
         return 0;
-    }
+    };
 
-    static int UNITY_INTERFACE_API setFloatParameterCallback (UnityAudioEffectState* state, int index, float value)
-    {
-        auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
-        pluginInstance->setParameter (index, value);
-
-        return 0;
-    }
-
-    static int UNITY_INTERFACE_API getFloatParameterCallback (UnityAudioEffectState* state, int index, float* value, char* valueStr)
-    {
-        auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
-        *value = pluginInstance->getParameter (index);
-
-        pluginInstance->getParameterString (index).copyToUTF8 (valueStr, 15);
-
-        return 0;
-    }
-
-    static int UNITY_INTERFACE_API getFloatBufferCallback (UnityAudioEffectState* state, const char* name, float* buffer, int numSamples)
-    {
-        ignoreUnused (numSamples);
-
-        auto nameStr = String (name);
-
-        if (nameStr == "Editor")
-        {
-            auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
-
-            buffer[0] = pluginInstance->hasEditor() ? 1.0f : 0.0f;
-        }
-        else if (nameStr == "ID")
-        {
-            auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
-
-            for (HashMap<int, AudioProcessorUnityWrapper*>::Iterator i (getWrapperMap()); i.next();)
-            {
-                if (i.getValue() == pluginInstance)
-                {
-                    buffer[0] = (float) i.getKey();
-                    break;
-                }
-            }
-
-            return 0;
-        }
-        else if (nameStr == "Size")
-        {
-            auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
-
-            auto& editor = pluginInstance->getEditorPeer().getEditor();
-
-            buffer[0] = (float) editor.getBounds().getWidth();
-            buffer[1] = (float) editor.getBounds().getHeight();
-            buffer[2] = (float) editor.getConstrainer()->getMinimumWidth();
-            buffer[3] = (float) editor.getConstrainer()->getMinimumHeight();
-            buffer[4] = (float) editor.getConstrainer()->getMaximumWidth();
-            buffer[5] = (float) editor.getConstrainer()->getMaximumHeight();
-        }
-
-        return 0;
-    }
-
-    static int UNITY_INTERFACE_API processCallback (UnityAudioEffectState* state, float* inBuffer, float* outBuffer,
-                                                    unsigned int bufferSize, int numInChannels, int numOutChannels)
+    result.process = [] (UnityAudioEffectState* state,
+                         float* inBuffer,
+                         float* outBuffer,
+                         unsigned int bufferSize,
+                         int numInChannels,
+                         int numOutChannels)
     {
         auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
 
@@ -635,65 +596,93 @@ namespace UnityCallbacks
         }
 
         return 0;
-    }
-}
+    };
 
-//==============================================================================
-static void declareEffect (UnityAudioEffectDefinition& definition)
-{
-    memset (&definition, 0, sizeof (definition));
+    result.setFloatParameter = [] (UnityAudioEffectState* state, int index, float value)
+    {
+        auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
+        pluginInstance->setParameter (index, value);
 
-    std::unique_ptr<AudioProcessorUnityWrapper> wrapper = std::make_unique<AudioProcessorUnityWrapper> (true);
+        return 0;
+    };
 
-    String name (JucePlugin_Name);
-    if (! name.startsWithIgnoreCase ("audioplugin"))
-        name = "audioplugin_" + name;
+    result.getFloatParameter = [] (UnityAudioEffectState* state, int index, float* value, char* valueStr)
+    {
+        auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
+        *value = pluginInstance->getParameter (index);
 
-    name.copyToUTF8 (definition.name, (size_t) numElementsInArray (definition.name));
+        pluginInstance->getParameterString (index).copyToUTF8 (valueStr, 15);
 
-    definition.structSize = sizeof (UnityAudioEffectDefinition);
-    definition.parameterStructSize = sizeof (UnityAudioParameterDefinition);
+        return 0;
+    };
 
-    definition.apiVersion = UNITY_AUDIO_PLUGIN_API_VERSION;
-    definition.pluginVersion = JucePlugin_VersionCode;
+    result.getFloatBuffer = [] (UnityAudioEffectState* state, const char* kind, float* buffer, int numSamples)
+    {
+        ignoreUnused (numSamples);
 
-    // effects must set this to 0, generators > 0
-    definition.channels = (wrapper->getNumInputChannels() != 0 ? 0
-                                                               : static_cast<uint32> (wrapper->getNumOutputChannels()));
+        const StringRef kindStr { kind };
 
-    wrapper->declareParameters (definition);
+        if (kindStr == StringRef ("Editor"))
+        {
+            auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
 
-    definition.create            = UnityCallbacks::createCallback;
-    definition.release           = UnityCallbacks::releaseCallback;
-    definition.reset             = UnityCallbacks::resetCallback;
-    definition.setPosition       = UnityCallbacks::setPositionCallback;
-    definition.process           = UnityCallbacks::processCallback;
-    definition.setFloatParameter = UnityCallbacks::setFloatParameterCallback;
-    definition.getFloatParameter = UnityCallbacks::getFloatParameterCallback;
-    definition.getFloatBuffer    = UnityCallbacks::getFloatBufferCallback;
+            buffer[0] = pluginInstance->hasEditor() ? 1.0f : 0.0f;
+        }
+        else if (kindStr == StringRef ("ID"))
+        {
+            auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
+
+            for (HashMap<int, AudioProcessorUnityWrapper*>::Iterator i (getWrapperMap()); i.next();)
+            {
+                if (i.getValue() == pluginInstance)
+                {
+                    buffer[0] = (float) i.getKey();
+                    break;
+                }
+            }
+
+            return 0;
+        }
+        else if (kindStr == StringRef ("Size"))
+        {
+            auto* pluginInstance = state->getEffectData<AudioProcessorUnityWrapper>();
+
+            auto& editor = pluginInstance->getEditorPeer().getEditor();
+
+            buffer[0] = (float) editor.getBounds().getWidth();
+            buffer[1] = (float) editor.getBounds().getHeight();
+            buffer[2] = (float) editor.getConstrainer()->getMinimumWidth();
+            buffer[3] = (float) editor.getConstrainer()->getMinimumHeight();
+            buffer[4] = (float) editor.getConstrainer()->getMaximumWidth();
+            buffer[5] = (float) editor.getConstrainer()->getMaximumHeight();
+        }
+
+        return 0;
+    };
+
+    return result;
 }
 
 } // namespace juce
 
+// From reading the example code, it seems that the triple indirection indicates
+// an out-value of an array of pointers. That is, after calling this function, definitionsPtr
+// should point to a pre-existing/static array of pointer-to-effect-definition.
 UNITY_INTERFACE_EXPORT int UNITY_INTERFACE_API UnityGetAudioEffectDefinitions (UnityAudioEffectDefinition*** definitionsPtr)
 {
     if (juce::getWrapperMap().size() == 0)
         juce::initialiseJuce_GUI();
 
-    static bool hasInitialised = false;
-
-    if (! hasInitialised)
+    static std::once_flag flag;
+    std::call_once (flag, []
     {
         juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Unity;
         juce::juce_createUnityPeerFn = juce::createUnityPeer;
+    });
 
-        hasInitialised = true;
-    }
-
-    auto* definition = new UnityAudioEffectDefinition();
-    juce::declareEffect (*definition);
-
-    *definitionsPtr = &definition;
+    static auto definition = juce::getEffectDefinition();
+    static UnityAudioEffectDefinition* definitions[] { &definition };
+    *definitionsPtr = definitions;
 
     return 1;
 }
