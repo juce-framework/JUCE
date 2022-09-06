@@ -1021,7 +1021,11 @@ private:
                     targetFiles.add (f);
 
             if (targetType == MakefileTarget::LV2TurtleProgram)
-                targetFiles.add ({ rebaseFromProjectFolderToBuildTarget (getLV2TurtleDumpProgramSource()).toUnixStyle(), {} });
+            {
+                const auto path = getLV2TurtleDumpProgramSource().toUnixStyle();
+                const auto prefix = build_tools::isAbsolutePath (path) ? "" : "./";
+                targetFiles.add ({ prefix + path, {} });
+            }
 
             return targetFiles;
         };
