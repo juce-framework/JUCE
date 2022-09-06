@@ -44,5 +44,3 @@ juce_add_modules(
     juce_osc
     juce_product_unlocking
     juce_video)
-
-add_subdirectory(juce_audio_plugin_client)
