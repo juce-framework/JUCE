@@ -92,8 +92,8 @@ namespace FlacNamespace
 {
 #if JUCE_INCLUDE_FLAC_CODE || ! defined (JUCE_INCLUDE_FLAC_CODE)
 
- #undef VERSION
- #define VERSION "1.3.1"
+ #undef PACKAGE_VERSION
+ #define PACKAGE_VERSION "1.3.4"
 
  #define FLAC__NO_DLL 1
 
@@ -131,11 +131,17 @@ namespace FlacNamespace
   #define FLAC__HAS_X86INTRIN 1
  #endif
 
- #undef __STDC_LIMIT_MACROS
- #define __STDC_LIMIT_MACROS 1
  #define flac_max jmax
  #define flac_min jmin
- #undef DEBUG // (some flac code dumps debug trace if the app defines this macro)
+
+ #pragma push_macro ("DEBUG")
+ #pragma push_macro ("NDEBUG")
+ #undef  DEBUG  // (some flac code dumps debug trace if the app defines this macro)
+
+ #ifndef NDEBUG
+  #define NDEBUG // (some flac code prints cpu info if this isn't defined)
+ #endif
+
  #include "flac/all.h"
  #include "flac/libFLAC/bitmath.c"
  #include "flac/libFLAC/bitreader.c"
@@ -152,7 +158,11 @@ namespace FlacNamespace
  #include "flac/libFLAC/stream_encoder.c"
  #include "flac/libFLAC/stream_encoder_framing.c"
  #include "flac/libFLAC/window_flac.c"
- #undef VERSION
+
+ #pragma pop_macro ("DEBUG")
+ #pragma pop_macro ("NDEBUG")
+
+ #undef PACKAGE_VERSION
 
  JUCE_END_IGNORE_WARNINGS_GCC_LIKE
  JUCE_END_IGNORE_WARNINGS_MSVC

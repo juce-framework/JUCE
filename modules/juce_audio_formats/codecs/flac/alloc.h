@@ -1,6 +1,6 @@
 /* alloc - Convenience routines for safely allocating memory
  * Copyright (C) 2007-2009  Josh Coalson
- * Copyright (C) 2011-2014  Xiph.Org Foundation
+ * Copyright (C) 2011-2016  Xiph.Org Foundation
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -55,7 +55,7 @@
 # ifndef SIZE_T_MAX
 #  ifdef _MSC_VER
 #   ifdef _WIN64
-#    define SIZE_T_MAX 0xffffffffffffffffui64
+#    define SIZE_T_MAX FLAC__U64L(0xffffffffffffffff)
 #   else
 #    define SIZE_T_MAX 0xffffffff
 #   endif
@@ -156,11 +156,21 @@ static inline void *safe_malloc_muladd2_(size_t size1, size_t size2, size_t size
 	return malloc(size1*size2);
 }
 
+static inline void *safe_realloc_(void *ptr, size_t size)
+{
+	void *oldptr = ptr;
+	void *newptr = realloc(ptr, size);
+	if(size > 0 && newptr == 0)
+		free(oldptr);
+	return newptr;
+}
 static inline void *safe_realloc_add_2op_(void *ptr, size_t size1, size_t size2)
 {
 	size2 += size1;
-	if(size2 < size1)
+	if(size2 < size1) {
+		free(ptr);
 		return 0;
+	}
 	return realloc(ptr, size2);
 }
 
@@ -195,7 +205,7 @@ static inline void *safe_realloc_mul_2op_(void *ptr, size_t size1, size_t size2)
 		return realloc(ptr, 0); /* preserve POSIX realloc(ptr, 0) semantics */
 	if(size1 > SIZE_MAX / size2)
 		return 0;
-	return realloc(ptr, size1*size2);
+	return safe_realloc_(ptr, size1*size2);
 }
 
 /* size1 * (size2 + size3) */
