@@ -215,7 +215,9 @@ static void checkGLError (const char* file, const int line)
 
 static void clearGLError() noexcept
 {
+   #if JUCE_DEBUG
     while (glGetError() != GL_NO_ERROR) {}
+   #endif
 }
 
 struct OpenGLTargetSaver
