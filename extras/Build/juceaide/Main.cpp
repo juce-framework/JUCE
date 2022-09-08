@@ -530,7 +530,7 @@ int main (int argc, char** argv)
         juce::ArgumentList argumentList { arguments.front(),
                                           juce::StringArray (arguments.data() + 1, (int) arguments.size() - 1) };
 
-        using Fn = std::add_lvalue_reference<decltype (writeBinaryData)>::type;
+        using Fn = int (*) (juce::ArgumentList&&);
 
         const std::unordered_map<juce::String, Fn> commands
         {

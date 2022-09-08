@@ -2811,7 +2811,7 @@ private:
                 CombineRgn (rgn, rgn, clipRgn, RGN_AND);
                 DeleteObject (clipRgn);
 
-                std::aligned_storage<8192, alignof (RGNDATA)>::type rgnData;
+                std::aligned_storage_t<8192, alignof (RGNDATA)> rgnData;
                 const DWORD res = GetRegionData (rgn, sizeof (rgnData), (RGNDATA*) &rgnData);
 
                 if (res > 0 && res <= sizeof (rgnData))

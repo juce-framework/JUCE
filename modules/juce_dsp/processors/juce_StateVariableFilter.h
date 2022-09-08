@@ -110,7 +110,7 @@ namespace StateVariableFilter
         template <typename ProcessContext>
         void process (const ProcessContext& context) noexcept
         {
-            static_assert (std::is_same<typename ProcessContext::SampleType, SampleType>::value,
+            static_assert (std::is_same_v<typename ProcessContext::SampleType, SampleType>,
                            "The sample-type of the filter must match the sample-type supplied to this process callback");
 
             if (context.isBypassed)

@@ -654,11 +654,8 @@ namespace TypeHelpers
 
         @tags{Core}
     */
-    template <typename Type> struct SmallestFloatType               { using type = float; };
-
-   #ifndef DOXYGEN
-    template <>              struct SmallestFloatType <double>      { using type = double; };
-   #endif
+    template <typename Type>
+    using SmallestFloatType = std::conditional_t<std::is_same_v<Type, double>, double, float>;
 
     /** These templates are designed to take an integer type, and return an unsigned int
         version with the same size.

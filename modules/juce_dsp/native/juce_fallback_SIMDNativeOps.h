@@ -42,8 +42,10 @@ namespace SIMDInternal
     template <> struct MaskTypeFor <std::complex<float>>    { using type = uint32_t; };
     template <> struct MaskTypeFor <std::complex<double>>   { using type = uint64_t; };
 
-    template <typename Primitive> struct PrimitiveType                           { using type = typename std::remove_cv<Primitive>::type; };
-    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { using type = typename std::remove_cv<Primitive>::type; };
+    template <typename Primitive> using MaskType = typename MaskTypeFor<Primitive>::type;
+
+    template <typename Primitive> struct PrimitiveType                           { using type = std::remove_cv_t<Primitive>; };
+    template <typename Primitive> struct PrimitiveType<std::complex<Primitive>>  { using type = std::remove_cv_t<Primitive>; };
 
     template <int n>    struct Log2Helper    { enum { value = Log2Helper<n/2>::value + 1 }; };
     template <>         struct Log2Helper<1> { enum { value = 0 }; };
@@ -63,7 +65,7 @@ struct SIMDFallbackOps
     static constexpr size_t bits = SIMDInternal::Log2Helper<(int) n>::value;
 
     // helper types
-    using MaskType = typename SIMDInternal::MaskTypeFor<ScalarType>::type;
+    using MaskType = SIMDInternal::MaskType<ScalarType>;
     union UnionType     { vSIMDType v; ScalarType s[n]; };
     union UnionMaskType { vSIMDType v; MaskType   m[n]; };
 

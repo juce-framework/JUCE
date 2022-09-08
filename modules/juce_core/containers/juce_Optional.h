@@ -53,8 +53,8 @@ JUCE_BEGIN_IGNORE_WARNINGS_MSVC (4702)
 template <typename Value>
 class Optional
 {
-    template <typename> struct IsOptional : std::false_type {};
-    template <typename T> struct IsOptional<Optional<T>> : std::true_type {};
+    template <typename>   struct IsOptional              : std::false_type {};
+    template <typename T> struct IsOptional<Optional<T>> : std::true_type  {};
 
 public:
     Optional() = default;

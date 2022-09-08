@@ -105,9 +105,9 @@ class ArrayBaseTests  : public UnitTest
     using NoncopyableType = ArrayBaseTestsHelpers::NonTriviallyCopyableType;
 
    #if ! (defined(__GNUC__) && __GNUC__ < 5 && ! defined(__clang__))
-    static_assert (std::is_trivially_copyable<CopyableType>::value,
+    static_assert (std::is_trivially_copyable_v<CopyableType>,
                    "Test TriviallyCopyableType is not trivially copyable");
-    static_assert (! std::is_trivially_copyable<NoncopyableType>::value,
+    static_assert (! std::is_trivially_copyable_v<NoncopyableType>,
                    "Test NonTriviallyCopyableType is trivially copyable");
    #endif
 
