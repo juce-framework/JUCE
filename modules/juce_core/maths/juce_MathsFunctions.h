@@ -548,7 +548,7 @@ inline int nextPowerOfTwo (int n) noexcept
 int findHighestSetBit (uint32 n) noexcept;
 
 /** Returns the number of bits in a 32-bit integer. */
-inline int countNumberOfBits (uint32 n) noexcept
+constexpr int countNumberOfBits (uint32 n) noexcept
 {
     n -= ((n >> 1) & 0x55555555);
     n =  (((n >> 2) & 0x33333333) + (n & 0x33333333));
@@ -559,7 +559,7 @@ inline int countNumberOfBits (uint32 n) noexcept
 }
 
 /** Returns the number of bits in a 64-bit integer. */
-inline int countNumberOfBits (uint64 n) noexcept
+constexpr int countNumberOfBits (uint64 n) noexcept
 {
     return countNumberOfBits ((uint32) n) + countNumberOfBits ((uint32) (n >> 32));
 }
