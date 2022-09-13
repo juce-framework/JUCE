@@ -149,7 +149,7 @@ public:
         }
     }
 
-    bool initialiseOnRenderThread (OpenGLContext& c)
+    InitResult initialiseOnRenderThread (OpenGLContext& c)
     {
         XWindowSystemUtilities::ScopedXLock xLock;
 
@@ -196,11 +196,11 @@ public:
             renderContext = glXCreateNewContext (display, *bestConfig, GLX_RGBA_TYPE, (GLXContext) contextToShareWith, GL_TRUE);
 
         if (renderContext == nullptr)
-            return false;
+            return InitResult::fatal;
 
         c.makeActive();
         context = &c;
-        return true;
+        return InitResult::success;
     }
 
     void shutdownOnRenderThread()

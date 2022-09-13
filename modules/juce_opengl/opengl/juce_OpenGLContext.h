@@ -320,6 +320,13 @@ public:
    #endif
 
 private:
+    enum class InitResult
+    {
+        fatal,
+        retry,
+        success
+    };
+
     friend class OpenGLTexture;
 
     class CachedImage;
